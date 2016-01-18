@@ -111,16 +111,28 @@
             <version>${fastjson.version}</version>
         </dependency>
     </dependencies>
-    <distributionManagement>
+    <!--<distributionManagement>-->
+        <!--<repository>-->
+            <!--<id>releases</id>-->
+            <!--<name>Nexus Release Repository</name>-->
+            <!--<url>http://121.199.3.43:8889/nexus/content/repositories/releases/</url>-->
+        <!--</repository>-->
+        <!--<snapshotRepository>-->
+            <!--<id>snapshots</id>-->
+            <!--<name>Nexus Snapshot Repository</name>-->
+            <!--<url>http://121.199.3.43:8889/nexus/content/repositories/snapshots/</url>-->
+        <!--</snapshotRepository>-->
+    <!--</distributionManagement>-->
+    <repositories>
         <repository>
             <id>releases</id>
             <name>Nexus Release Repository</name>
             <url>http://121.199.3.43:8889/nexus/content/repositories/releases/</url>
         </repository>
-        <snapshotRepository>
+        <repository>
             <id>snapshots</id>
             <name>Nexus Snapshot Repository</name>
             <url>http://121.199.3.43:8889/nexus/content/repositories/snapshots/</url>
-        </snapshotRepository>
-    </distributionManagement>
+        </repository>
+    </repositories>
 </project>
