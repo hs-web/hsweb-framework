@@ -2,7 +2,6 @@ package org.hsweb.web.service;
 
 import org.hsweb.web.bean.param.PagerResult;
 import org.hsweb.web.bean.param.QueryParam;
-import org.hsweb.web.dao.GenericMapper;
 
 import java.util.List;
 

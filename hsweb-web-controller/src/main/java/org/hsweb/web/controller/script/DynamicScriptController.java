@@ -1,15 +1,16 @@
 package org.hsweb.web.controller.script;
 
-import com.alibaba.fastjson.JSON;
 import org.hsweb.web.authorize.annotation.AccessLogger;
 import org.hsweb.web.authorize.annotation.Authorize;
 import org.hsweb.web.bean.po.role.Role;
 import org.hsweb.web.bean.po.script.DynamicScript;
 import org.hsweb.web.controller.GenericController;
 import org.hsweb.web.message.ResponseMessage;
-import org.springframework.web.bind.annotation.*;
-import org.webbuilder.utils.script.engine.ExecuteResult;
 import org.hsweb.web.service.script.DynamicScriptService;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 
