@@ -10,7 +10,25 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>hsweb-web-websocket</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>${parent.version}</version>
 
 
+    <dependencies>
+        <dependency>
+            <groupId>org.hsweb</groupId>
+            <artifactId>hsweb-web-bean</artifactId>
+            <version>${parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
+            <version>${spring.boot.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-logging</artifactId>
+            <version>${spring.boot.version}</version>
+        </dependency>
+    </dependencies>
 </project>
