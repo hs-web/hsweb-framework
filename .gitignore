@@ -3,12 +3,11 @@ out/
 log/
 *.class
 # Mobile Tools for Java (J2ME)
-/.*
 .mtj.tmp/
 /nbproject
-/*.ipr
-/*.iws
-/*.iml
+*.ipr
+*.iws
+*.iml
 
 # Package Files #
 *.jar
