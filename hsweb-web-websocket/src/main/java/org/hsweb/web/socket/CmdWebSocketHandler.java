@@ -7,13 +7,12 @@ import org.hsweb.web.socket.cmd.CmdProcessor;
 import org.hsweb.web.socket.cmd.CmdProcessorContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
-
-import javax.annotation.Resource;
 
 /**
  * 基于命令的socket处理器
@@ -24,7 +23,7 @@ public class CmdWebSocketHandler extends TextWebSocketHandler {
 
     protected Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    @Resource
+    @Autowired
     private CmdProcessorContainer processorContainer;
 
     @Override
