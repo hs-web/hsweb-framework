@@ -5,6 +5,7 @@ import org.hsweb.web.socket.cmd.CmdProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 import javax.annotation.PostConstruct;
@@ -25,6 +26,7 @@ public class TestProcessor implements CmdProcessor {
     @Override
     public void exec(CMD cmd) throws Exception {
         logger.info("execute cmd :" + cmd);
+        cmd.getSession().sendMessage(new TextMessage("你好!"));
     }
 
     @Override
