@@ -1,6 +1,5 @@
 package org.hsweb.web.socket;
 
-import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -39,6 +38,8 @@ public class WebSocketTest extends WebSocketConfigurationSupport {
      * 3.执行:ws.onmessage=function(message){console.log(message.data)}
      * 4.执行:ws.send('{"cmd":"test"}'); 按回车
      * 5.如果看到后台日志显示：handleMessage,id:0 msg={"cmd":"test"}，前台有接收到推送消息，则代表成功了
+     * <p/>
+     * 也可以运行：{@link WebSocketClientTest#main} 测试
      *
      * @throws Exception
      */
