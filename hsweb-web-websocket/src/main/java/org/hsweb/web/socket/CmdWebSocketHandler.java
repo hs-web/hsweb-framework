@@ -54,7 +54,7 @@ public class CmdWebSocketHandler extends TextWebSocketHandler {
 //            return;
 //        }
         for (CmdProcessor processor : processorContainer.getAll()) {
-            processor.onSessionClose(session);
+            processor.onSessionConnect(session);
         }
     }
 
