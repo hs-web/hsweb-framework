@@ -46,4 +46,13 @@ public class CMD {
     public void setCmd(String cmd) {
         this.cmd = cmd;
     }
+
+    @Override
+    public String toString() {
+        return "CMD{" +
+                "cmd='" + cmd + '\'' +
+                ", session=" + session +
+                ", params=" + params +
+                '}';
+    }
 }
