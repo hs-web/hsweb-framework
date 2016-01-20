@@ -26,6 +26,7 @@ public class TestProcessor implements CmdProcessor {
     @Override
     public void exec(CMD cmd) throws Exception {
         logger.info("execute cmd :" + cmd);
+        //收到命令后，向客户端推送一条消息
         cmd.getSession().sendMessage(new TextMessage("你好!"));
     }
 
@@ -37,10 +38,12 @@ public class TestProcessor implements CmdProcessor {
 
     @Override
     public void onSessionConnect(WebSocketSession session) throws Exception {
+        logger.info("小伙伴进来了");
+        session.sendMessage(new TextMessage("命令:" + getName() + " , 作用:测试"));
     }
 
     @Override
     public void onSessionClose(WebSocketSession session) throws Exception {
-
+        logger.info("小伙伴离开了");
     }
 }
