@@ -1,4 +1,4 @@
-package org.hsweb.web.bean.param;
+package org.hsweb.web.bean.common;
 
 import java.io.Serializable;
 import java.util.List;
