@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.hsweb.web.dao.role.RoleModuleMapper">
+    <resultMap id="RoleModuleResultMap" type="RoleModule" >
+        <id property="u_id" column="u_id" javaType="string" jdbcType="VARCHAR" />
+        <result property="u_id" column="u_id" javaType="String" jdbcType="VARCHAR" />
+        <result property="module_id" column="module_id" javaType="String" jdbcType="VARCHAR" />
+        <result property="role_id" column="role_id" javaType="String" jdbcType="VARCHAR" />
+        <result property="o_level" column="o_level" javaType="String" jdbcType="VARCHAR" />
+        <collection property="module" column="module_id" ofType="Module" select="org.hsweb.web.dao.module.ModuleMapper.selectByPk"/>
+    </resultMap>
+
+    <!--字段信息绑定-->
+    <sql id="fieldConfig">
+        <bind name="$fieldsType" value="#{'u_id':'string','module_id':'string','role_id':'string','o_level':'string'}"/>
+        <bind name="$fields" value="$fieldsType.keySet()"/>
+    </sql>
+    <!--表名-->
+    <sql id="tableName">
+        <bind name="$tableName" value="'S_ROLE_MODULES'"/>
+    </sql>
+
+    <insert id="insert" parameterType="RoleModule" useGeneratedKeys="true" keyProperty="u_id" keyColumn="U_ID">
+        INSERT INTO S_ROLE_MODULES
+        (u_id,module_id,role_id,o_level)
+        VALUES
+        (#{u_id,jdbcType=VARCHAR},#{module_id,jdbcType=VARCHAR},#{role_id,jdbcType=VARCHAR},#{o_level,jdbcType=VARCHAR})
+    </insert>
+
+    <delete id="delete" parameterType="RoleModule" >
+        DELETE FROM S_ROLE_MODULES WHERE u_id=#{u_id}
+    </delete>
+
+    <delete id="deleteByRoleId" parameterType="string" >
+        DELETE FROM S_ROLE_MODULES WHERE role_id=#{role_id}
+    </delete>
+
+    <delete id="deleteByModuleId" parameterType="string" >
+        DELETE FROM S_ROLE_MODULES WHERE module_id=#{module_id}
+    </delete>
+
+    <update id="update" parameterType="RoleModule" >
+        UPDATE S_ROLE_MODULES
+        <set>
+            <if test="module_id != null">
+                module_id=#{module_id,jdbcType=VARCHAR},
+            </if>
+            <if test="role_id != null">
+                role_id=#{role_id,jdbcType=VARCHAR},
+            </if>
+            <if test="o_level != null">
+                o_level=#{o_level,jdbcType=VARCHAR},
+            </if>
+        </set>
+        WHERE u_id=#{u_id}
+    </update>
+
+    <select id="selectByRoleId" parameterType="string" resultMap="RoleModuleResultMap">
+        SELECT * FROM S_ROLE_MODULES WHERE role_id=#{role_id}
+    </select>
+
+    <select id="selectByPk" parameterType="string" resultMap="RoleModuleResultMap">
+        SELECT * FROM S_ROLE_MODULES WHERE u_id=#{u_id}
+    </select>
+
+    <select id="select" parameterType="org.hsweb.web.bean.common.QueryParam" resultMap="RoleModuleResultMap">
+        <include refid="fieldConfig"/>
+        <include refid="tableName"/>
+        <include refid="BasicMapper.selectSql"/>
+    </select>
+
+    <select id="total" parameterType="org.hsweb.web.bean.common.QueryParam" resultType="int">
+        <include refid="fieldConfig"/>
+        <include refid="tableName"/>
+        <include refid="BasicMapper.totalSql"/>
+    </select>
+</mapper>

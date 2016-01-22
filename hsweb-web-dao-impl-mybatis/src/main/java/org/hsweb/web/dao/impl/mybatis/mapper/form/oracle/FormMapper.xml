@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.hsweb.web.dao.form.FormMapper">
+    <resultMap id="FormResultMap" type="Form">
+        <id property="u_id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
+        <result property="u_id" column="u_id" javaType="String" jdbcType="VARCHAR"/>
+        <result property="name" column="name" javaType="String" jdbcType="VARCHAR"/>
+        <result property="content" column="content" javaType="String" jdbcType="VARCHAR"/>
+        <result property="table_name" column="table_name" javaType="String" jdbcType="VARCHAR"/>
+        <result property="foreigns" column="foreigns" javaType="String" jdbcType="VARCHAR"/>
+        <result property="remark" column="remark" javaType="String" jdbcType="VARCHAR"/>
+        <result property="auto_alter" column="auto_alter" javaType="boolean" jdbcType="INTEGER"/>
+        <result property="create_date" column="create_date" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <result property="update_date" column="update_date" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <result property="db_name" column="db_name" javaType="String" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!--字段信息绑定-->
+    <sql id="fieldConfig">
+        <bind name="$fieldsType"
+              value="#{'u_id':'string','name':'string','content':'string','table_name':'string'
+                        ,'foreigns':'string','remark':'string','auto_alter':'string','create_date':'string'
+                       ,'update_date':'string','db_name':'string'}"/>
+        <bind name="$fields" value="$fieldsType.keySet()"/>
+    </sql>
+    <!--表名-->
+    <sql id="tableName">
+        <bind name="$tableName" value="'S_FORM'"/>
+    </sql>
+
+    <insert id="insert" parameterType="Form" useGeneratedKeys="true" keyProperty="u_id" keyColumn="U_ID">
+        INSERT INTO S_FORM
+        (u_id,name,content,table_name,foreigns,remark,auto_alter,create_date,update_date,db_name)
+        VALUES
+        (#{u_id,jdbcType=VARCHAR},#{name,jdbcType=VARCHAR},#{content,jdbcType=VARCHAR},#{table_name,jdbcType=VARCHAR},#{foreigns,jdbcType=VARCHAR},#{remark,jdbcType=VARCHAR},#{auto_alter,jdbcType=INTEGER},#{create_date,jdbcType=TIMESTAMP},#{update_date,jdbcType=TIMESTAMP},#{db_name,jdbcType=VARCHAR})
+    </insert>
+
+    <delete id="delete" parameterType="Form">
+        DELETE FROM S_FORM WHERE u_id=#{u_id}
+    </delete>
+
+    <update id="update" parameterType="Form">
+        UPDATE S_FORM
+        <set>
+            <if test="name != null">
+                name=#{name,jdbcType=VARCHAR},
+            </if>
+            <if test="content != null">
+                content=#{content,jdbcType=VARCHAR},
+            </if>
+            <if test="table_name != null">
+                table_name=#{table_name,jdbcType=VARCHAR},
+            </if>
+            <if test="foreigns != null">
+                foreigns=#{foreigns,jdbcType=VARCHAR},
+            </if>
+            <if test="remark != null">
+                remark=#{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="auto_alter != null">
+                auto_alter=#{auto_alter,jdbcType=INTEGER},
+            </if>
+            <if test="update_date != null">
+                update_date=#{update_date,jdbcType=TIMESTAMP},
+            </if>
+            <if test="db_name != null">
+                db_name=#{db_name,jdbcType=VARCHAR},
+            </if>
+        </set>
+        WHERE u_id=#{u_id}
+    </update>
+
+    <select id="selectByPk" parameterType="string" resultMap="FormResultMap">
+        SELECT * FROM S_FORM WHERE u_id=#{u_id}
+    </select>
+
+    <select id="select" parameterType="org.hsweb.web.bean.common.QueryParam" resultMap="FormResultMap">
+        <include refid="fieldConfig"/>
+        <include refid="tableName"/>
+        <include refid="BasicMapper.selectSql"/>
+    </select>
+
+    <select id="total" parameterType="org.hsweb.web.bean.common.QueryParam" resultType="int">
+        <include refid="fieldConfig"/>
+        <include refid="tableName"/>
+        <include refid="BasicMapper.totalSql"/>
+    </select>
+</mapper>

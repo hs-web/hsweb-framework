@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.hsweb.web.dao.user.UserMapper">
+    <resultMap id="UserResultMap" type="User">
+        <id property="u_id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
+        <result property="u_id" column="u_id" javaType="String" jdbcType="VARCHAR"/>
+        <result property="username" column="username" javaType="String" jdbcType="VARCHAR"/>
+        <result property="password" column="password" javaType="String" jdbcType="VARCHAR"/>
+        <result property="name" column="name" javaType="String" jdbcType="VARCHAR"/>
+        <result property="email" column="email" javaType="String" jdbcType="VARCHAR"/>
+        <result property="phone" column="phone" javaType="String" jdbcType="VARCHAR"/>
+        <result property="status" column="status" javaType="int" jdbcType="INTEGER"/>
+        <result property="create_date" column="create_date" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <result property="update_date" column="update_date" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <collection property="userRoles" column="u_id" ofType="UserRole"
+                    select="org.hsweb.web.dao.role.UserRoleMapper.selectByUserId"/>
+    </resultMap>
+    <!--字段信息配置-->
+    <sql id="fieldConfig">
+        <bind name="$fieldsInfo"
+              value="#{'u_id':'string','username':'string','name':'string'
+                    ,'email':'string','phone':'string','status':'number'
+                    ,'create_date':'date','update_date':'date'}"/>
+        <bind name="$fields" value="$fieldsInfo.keySet()"/>
+    </sql>
+    <!--表名-->
+    <sql id="tableName">
+        <bind name="$tableName" value="'S_USER'"/>
+    </sql>
+
+    <insert id="insert" parameterType="User" useGeneratedKeys="true" keyProperty="u_id" keyColumn="U_ID">
+        INSERT INTO S_USER
+        (u_id,username,password,name,email,phone,status,create_date,update_date)
+        VALUES
+        (#{u_id,jdbcType=VARCHAR},#{username,jdbcType=VARCHAR},#{password,jdbcType=VARCHAR},#{name,jdbcType=VARCHAR},#{email,jdbcType=VARCHAR},#{phone,jdbcType=VARCHAR},#{status,jdbcType=INTEGER},#{create_date,jdbcType=TIMESTAMP},#{update_date,jdbcType=TIMESTAMP})
+    </insert>
+
+    <delete id="delete" parameterType="User">
+        DELETE FROM S_USER WHERE u_id=#{u_id}
+    </delete>
+
+    <update id="updatePassword" parameterType="User">
+        UPDATE S_USER set password=#{password,jdbcType=VARCHAR} where u_id = #{u_id}
+    </update>
+
+    <update id="update" parameterType="User">
+        UPDATE S_USER
+        <set>
+            <if test="name != null">
+                name=#{name,jdbcType=VARCHAR},
+            </if>
+            <if test="email != null">
+                email=#{email,jdbcType=VARCHAR},
+            </if>
+            <if test="phone != null">
+                phone=#{phone,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null">
+                status=#{status,jdbcType=INTEGER},
+            </if>
+            <if test="update_date != null">
+                update_date=#{update_date,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        WHERE u_id=#{u_id}
+    </update>
+
+    <select id="selectByUserName" parameterType="string" resultMap="UserResultMap">
+        SELECT * FROM S_USER WHERE username=#{username}
+    </select>
+
+    <select id="selectByPk" parameterType="string" resultMap="UserResultMap">
+        SELECT * FROM S_USER WHERE u_id=#{u_id}
+    </select>
+
+    <select id="select" parameterType="org.hsweb.web.bean.common.QueryParam" resultMap="UserResultMap">
+        <include refid="fieldConfig"/>
+        <include refid="tableName"/>
+        <include refid="BasicMapper.selectSql"/>
+    </select>
+
+    <select id="total" parameterType="org.hsweb.web.bean.common.QueryParam" resultType="int">
+        <include refid="fieldConfig"/>
+        <include refid="tableName"/>
+        <include refid="BasicMapper.totalSql"/>
+    </select>
+</mapper>
