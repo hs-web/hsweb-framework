@@ -1,11 +1,15 @@
-package org.hsweb.web.bean.param;
+package org.hsweb.web.bean.common;
 
+import java.io.Serializable;
 import java.util.*;
 
 /**
  * Created by 浩 on 2016-01-16 0016.
  */
-public class QueryParam extends HashMap<String, Object> {
+public class QueryParam implements Serializable {
+
+    private Map<String, Object> term = new HashMap<>();
+
     private static final long serialVersionUID = 7941767360194797891L;
 
     /**
@@ -67,12 +71,32 @@ public class QueryParam extends HashMap<String, Object> {
     }
 
     public QueryParam where(String key, Object value) {
-        this.put(key, value);
+        this.term.put(key, value);
         return this;
     }
 
     public QueryParam where(Map<String, Object> conditions) {
-        this.putAll(conditions);
+        this.term.putAll(conditions);
+        return this;
+    }
+
+    public QueryParam orderBy(String sortField) {
+        orderBy(sortField, true);
+        return this;
+    }
+
+    public QueryParam orderBy(String sortField, boolean asc) {
+        setSortField(sortField);
+        setSortOrder(asc ? "asc" : "desc");
+        return this;
+    }
+
+    public QueryParam rePaging(int total) {
+        // 当前页没有数据后跳转到最后一页
+        if (this.getPageIndex() != 0 && (pageIndex * pageSize) >= total) {
+            int tmp = total / this.getPageSize();
+            pageIndex = total % this.getPageSize() == 0 ? tmp - 1 : tmp;
+        }
         return this;
     }
 
@@ -113,6 +137,8 @@ public class QueryParam extends HashMap<String, Object> {
     }
 
     public void setSortOrder(String sortOrder) {
+        if (!sortOrder.equalsIgnoreCase("asc"))
+            sortOrder = "desc";
         this.sortOrder = sortOrder;
     }
 
@@ -130,5 +156,13 @@ public class QueryParam extends HashMap<String, Object> {
 
     public void setExcludes(Set<String> excludes) {
         this.excludes = excludes;
+    }
+
+    public Map<String, Object> getTerm() {
+        return term;
+    }
+
+    public void setTerm(Map<String, Object> term) {
+        this.term = term;
     }
 }
