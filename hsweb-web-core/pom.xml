@@ -13,5 +13,12 @@
     <packaging>pom</packaging>
     <version>${parent.version}</version>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.hsweb</groupId>
+            <artifactId>hsweb-web-bean</artifactId>
+            <version>${parent.version}</version>
+        </dependency>
+    </dependencies>
 
 </project>
