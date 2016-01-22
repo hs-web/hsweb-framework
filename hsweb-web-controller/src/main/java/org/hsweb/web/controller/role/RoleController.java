@@ -2,7 +2,7 @@ package org.hsweb.web.controller.role;
 
 import org.hsweb.web.authorize.annotation.AccessLogger;
 import org.hsweb.web.authorize.annotation.Authorize;
-import org.hsweb.web.bean.param.QueryParam;
+import org.hsweb.web.bean.common.QueryParam;
 import org.hsweb.web.bean.po.role.Role;
 import org.hsweb.web.controller.GenericController;
 import org.hsweb.web.message.ResponseMessage;

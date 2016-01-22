@@ -2,7 +2,7 @@ package org.hsweb.web.controller.user;
 
 import org.hsweb.web.authorize.annotation.AccessLogger;
 import org.hsweb.web.authorize.annotation.Authorize;
-import org.hsweb.web.bean.param.QueryParam;
+import org.hsweb.web.bean.common.QueryParam;
 import org.hsweb.web.bean.po.user.User;
 import org.hsweb.web.controller.GenericController;
 import org.hsweb.web.message.ResponseMessage;
@@ -52,7 +52,7 @@ public class UserController extends GenericController<User, String> {
             User user = getService().selectByPk(id);
             if (user == null) return new ResponseMessage(false, "该用户不存在!", "404");
             user.setStatus(-1);
-            getService().update(id, user);
+            getService().update(user);
             return new ResponseMessage(true, "删除成功");
         } catch (Exception e) {
             return new ResponseMessage(false, e);
