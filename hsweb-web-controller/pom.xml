@@ -22,29 +22,14 @@
     <dependencies>
         <dependency>
             <groupId>org.hsweb</groupId>
-            <artifactId>hsweb-web-service-impl-common</artifactId>
-            <version>${parent.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.hsweb</groupId>
-            <artifactId>hsweb-web-core</artifactId>
-            <version>${parent.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.hsweb</groupId>
             <artifactId>hsweb-web-service-interface</artifactId>
             <version>${parent.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-            <version>${spring.boot.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-logging</artifactId>
-            <version>${spring.boot.version}</version>
+            <groupId>org.hsweb</groupId>
+            <artifactId>hsweb-web-core</artifactId>
+            <version>${parent.version}</version>
         </dependency>
 
         <dependency>
