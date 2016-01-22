@@ -48,6 +48,12 @@ public @interface Authorize {
     String expressionLanguage() default "spel";
 
     /**
+     * 根据ip地址进行权限控制，支持ip段如:  192.168.1.*; 192.168.2.1-10;192.168.2-5.1-10
+     * @return ip表
+     */
+    String[] ip() default {};
+
+    /**
      * 是否为api接口，为true时，不使用用户登录策略。
      *
      * @return
