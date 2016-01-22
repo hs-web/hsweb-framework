@@ -108,12 +108,12 @@ public class ResponseMessage implements Serializable {
     /**
      * 过滤字段：指定需要序列化的字段
      */
-    private Map<Class<?>, Set<String>> includes;
+    private transient Map<Class<?>, Set<String>> includes;
 
     /**
      * 过滤字段：指定不需要序列化的字段
      */
-    private Map<Class<?>, Set<String>> excludes;
+    private transient Map<Class<?>, Set<String>> excludes;
 
     private transient boolean onlyData;
 
