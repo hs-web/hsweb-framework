@@ -1,6 +1,6 @@
 package org.hsweb.web.dao;
 
-import org.hsweb.web.bean.param.QueryParam;
+import org.hsweb.web.bean.common.QueryParam;
 
 import java.util.List;
 
