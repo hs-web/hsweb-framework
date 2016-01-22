@@ -17,7 +17,7 @@ public interface ConfigService extends GenericService<Config, String> {
      * @return 配置内容
      * @throws Exception 异常信息
      */
-    String getContent(String name);
+    String getContent(String name) throws Exception;
 
     /**
      * 根据配置名称，获取配置内容，并解析为Properties格式
@@ -26,7 +26,7 @@ public interface ConfigService extends GenericService<Config, String> {
      * @return 配置内容
      * @throws Exception 异常信息
      */
-    Properties get(String name);
+    Properties get(String name) throws Exception;
 
     /**
      * 获取配置中指定key的值
@@ -36,7 +36,7 @@ public interface ConfigService extends GenericService<Config, String> {
      * @return 指定的key对应的value
      * @throws Exception
      */
-    String get(String name, String key);
+    String get(String name, String key) throws Exception;
 
     /**
      * 获取配置中指定key的值，并指定一个默认值，如果对应的key未获取到，则返回默认值
