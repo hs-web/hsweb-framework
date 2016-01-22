@@ -3,7 +3,8 @@ package org.hsweb.web.controller;
 import com.alibaba.fastjson.JSON;
 import org.hsweb.web.authorize.annotation.AccessLogger;
 import org.hsweb.web.authorize.annotation.Authorize;
-import org.hsweb.web.bean.param.QueryParam;
+import org.hsweb.web.bean.common.QueryParam;
+import org.hsweb.web.bean.po.GenericPo;
 import org.hsweb.web.message.ResponseMessage;
 import org.hsweb.web.service.GenericService;
 import org.slf4j.Logger;
@@ -11,10 +12,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 import org.webbuilder.utils.common.ClassUtils;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 通用Controller，使用RESTful和json进行数据提交及访问。
@@ -161,7 +160,10 @@ public abstract class GenericController<PO, PK> {
     @Authorize(level = "U")
     public ResponseMessage update(@PathVariable("id") PK id, @RequestBody(required = true) PO object) {
         try {
-            int number = getService().update(id, object);
+            if (object instanceof GenericPo) {
+                ((GenericPo) object).setU_id(id);
+            }
+            int number = getService().update(object);
             return new ResponseMessage(true, number);
         } catch (Exception e) {
             return new ResponseMessage(false, e);
