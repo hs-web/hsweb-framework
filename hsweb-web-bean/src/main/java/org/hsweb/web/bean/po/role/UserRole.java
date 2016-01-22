@@ -12,17 +12,14 @@ import javax.validation.constraints.NotNull;
 public class UserRole extends GenericPo<String> {
     private static final long serialVersionUID = 8910856253780046561L;
     //主键
-    @NotNull
     @NotEmpty
     private String u_id;
 
     //用户主键
-    @NotNull
     @NotEmpty
     private String user_id;
 
     //角色主键
-    @NotNull
     @NotEmpty
     private String role_id;
 
