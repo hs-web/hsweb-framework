@@ -26,7 +26,7 @@ public class FormServiceImpl extends AbstractServiceImpl<Form, String> implement
     private FormMapper formMapper;
 
     @Override
-    protected GenericMapper<Form, String> getMapper() {
+    protected FormMapper getMapper() {
         return formMapper;
     }
 
