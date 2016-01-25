@@ -13,6 +13,13 @@ import java.util.List;
  */
 public interface GenericService<Po, Pk> {
 
+    /**
+     * 分页进行查询数据，查询条件同 {@link GenericService#select}
+     *
+     * @param param 查询参数
+     * @return 分页结果
+     * @throws Exception 查询异常
+     */
     PagerResult<Po> selectPager(QueryParam param) throws Exception;
 
     /**
@@ -72,7 +79,7 @@ public interface GenericService<Po, Pk> {
     List<Po> select(QueryParam param) throws Exception;
 
     /**
-     * 查询记录总数，用于分页等操作。查询条件同 {@link GenericMapper#select}
+     * 查询记录总数，用于分页等操作。查询条件同 {@link GenericService#select}
      *
      * @param param 查询参数
      * @return 查询结果，实现mapper中的sql应指定默认值，否则可能抛出异常
