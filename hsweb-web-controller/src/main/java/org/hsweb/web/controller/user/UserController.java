@@ -1,7 +1,7 @@
 package org.hsweb.web.controller.user;
 
-import org.hsweb.web.authorize.annotation.AccessLogger;
-import org.hsweb.web.authorize.annotation.Authorize;
+import org.hsweb.web.logger.AccessLogger;
+import org.hsweb.web.authorize.Authorize;
 import org.hsweb.web.bean.common.QueryParam;
 import org.hsweb.web.bean.po.user.User;
 import org.hsweb.web.controller.GenericController;
@@ -58,5 +58,6 @@ public class UserController extends GenericController<User, String> {
             return new ResponseMessage(false, e);
         }
     }
+
 
 }
