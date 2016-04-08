@@ -1,6 +1,6 @@
 package org.hsweb.web.controller.module;
 
-import org.hsweb.web.authorize.annotation.AccessLogger;
+import org.hsweb.web.logger.annotation.AccessLogger;
 import org.hsweb.web.authorize.annotation.Authorize;
 import org.hsweb.web.bean.po.module.Module;
 import org.hsweb.web.controller.GenericController;

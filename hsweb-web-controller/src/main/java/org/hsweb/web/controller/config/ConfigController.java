@@ -1,7 +1,7 @@
 package org.hsweb.web.controller.config;
 
 import com.alibaba.fastjson.JSON;
-import org.hsweb.web.authorize.annotation.AccessLogger;
+import org.hsweb.web.logger.annotation.AccessLogger;
 import org.hsweb.web.authorize.annotation.Authorize;
 import org.hsweb.web.bean.po.config.Config;
 import org.hsweb.web.controller.GenericController;

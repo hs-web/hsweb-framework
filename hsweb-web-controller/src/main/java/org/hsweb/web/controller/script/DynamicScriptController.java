@@ -1,6 +1,6 @@
 package org.hsweb.web.controller.script;
 
-import org.hsweb.web.authorize.annotation.AccessLogger;
+import org.hsweb.web.logger.annotation.AccessLogger;
 import org.hsweb.web.authorize.annotation.Authorize;
 import org.hsweb.web.bean.po.role.Role;
 import org.hsweb.web.bean.po.script.DynamicScript;

@@ -1,6 +1,6 @@
 package org.hsweb.web.controller.resource;
 
-import org.hsweb.web.authorize.annotation.AccessLogger;
+import org.hsweb.web.logger.annotation.AccessLogger;
 import org.hsweb.web.authorize.annotation.Authorize;
 import org.hsweb.web.bean.po.resource.Resources;
 import org.hsweb.web.bean.po.role.Role;

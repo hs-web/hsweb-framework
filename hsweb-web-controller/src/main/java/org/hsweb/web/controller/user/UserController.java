@@ -1,13 +1,15 @@
 package org.hsweb.web.controller.user;
 
-import org.hsweb.web.logger.AccessLogger;
-import org.hsweb.web.authorize.Authorize;
+import org.hsweb.web.authorize.annotation.Authorize;
 import org.hsweb.web.bean.common.QueryParam;
 import org.hsweb.web.bean.po.user.User;
 import org.hsweb.web.controller.GenericController;
+import org.hsweb.web.logger.annotation.AccessLogger;
 import org.hsweb.web.message.ResponseMessage;
 import org.hsweb.web.service.user.UserService;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 
