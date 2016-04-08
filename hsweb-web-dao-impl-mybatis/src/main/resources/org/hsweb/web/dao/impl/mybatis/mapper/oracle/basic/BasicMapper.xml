@@ -92,7 +92,7 @@
                 <!--指定不查询的字段-->
                 <when test="(includes==null or includes.size()==0) and excludes!=null and excludes.size()>0">
                     <foreach item="item" index="index" collection="$fields" open=" " separator="," close="">
-                        <if test="!(item in $excludes)">
+                        <if test="!(item in excludes)">
                             ${$tableName}.${item} as "${item}"
                         </if>
                     </foreach>

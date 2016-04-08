@@ -10,62 +10,39 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>hsweb-web-dao-impl-mybatis</artifactId>
-    <version>${parent.version}</version>
+    <version>${project.parent.version}</version>
 
     <properties>
-        <mybatis.version>3.3.0</mybatis.version>
+        <mybatis.version>3.3.2</mybatis.version>
         <mybatis.spring.version>1.2.3</mybatis.spring.version>
         <druid.version>1.0.5</druid.version>
     </properties>
-    <build>
-        <!--配置Maven 对resource文件 过滤 -->
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-                <includes>
-                    <include>**/*.properties</include>
-                    <include>**/*.xml</include>
-                </includes>
-                <filtering>true</filtering>
-            </resource>
-            <resource>
-                <directory>src/main/java</directory>
-                <includes>
-                    <include>**/*.properties</include>
-                    <include>**/*.xml</include>
-                </includes>
-                <filtering>true</filtering>
-            </resource>
-        </resources>
-
-    </build>
 
     <dependencies>
         <dependency>
             <groupId>org.hsweb</groupId>
             <artifactId>hsweb-web-dao-interface</artifactId>
-            <version>${parent.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-jdbc</artifactId>
-            <version>${spring.boot.version}</version>
         </dependency>
 
         <!-- mybatis start-->
         <dependency>
-            <groupId>org.mybatis</groupId>
-            <artifactId>mybatis</artifactId>
-            <version>${mybatis.version}</version>
+            <groupId>org.mybatis.spring.boot</groupId>
+            <artifactId>mybatis-spring-boot-starter</artifactId>
+            <version>1.0.2</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.mybatis</groupId>
-            <artifactId>mybatis-spring</artifactId>
-            <version>${mybatis.spring.version}</version>
-        </dependency>
         <!--mybatis end-->
+        <!-- cglib -->
+        <dependency>
+            <groupId>cglib</groupId>
+            <artifactId>cglib-nodep</artifactId>
+            <version>${cglib.version}</version>
+        </dependency>
 
         <!-- DruidDataSource -->
         <dependency>
