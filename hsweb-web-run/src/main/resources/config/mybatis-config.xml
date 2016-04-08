@@ -48,6 +48,7 @@
 
         <!-- 设置关联对象加载的形态，此处为按需加载字段(加载字段由SQL指 定)，不会加载关联表的所有字段，以提高性能 -->
         <setting name="aggressiveLazyLoading" value="false"/>
-
+        <setting name="proxyFactory" value="CGLIB"/>
     </settings>
+
 </configuration>

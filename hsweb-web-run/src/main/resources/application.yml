@@ -1,0 +1,40 @@
+#LOGGING
+logging:
+    config: classpath:config/logback.xml
+
+server:
+    port: 8088
+spring:
+    application:
+        name: ${app.name}
+        index: index.html
+        version: ${app.version}
+    datasource:
+        name: core
+        url: ${jdbc.url}
+        driverClassName: ${jdbc.driverClassName}
+        username: ${jdbc.username}
+        password: ${jdbc.password}
+        type: com.alibaba.druid.pool.DruidDataSource
+        filters: stat
+        maxActive: 20
+        initialSize: 1
+        maxWait: 60000
+        minIdle: 1
+        timeBetweenEvictionRunsMillis: 60000
+        minEvictableIdleTimeMillis: 300000
+        validationQuery: select 'x'
+        testWhileIdle: true
+        testOnBorrow: false
+        testOnReturn: false
+        poolPreparedStatements: true
+        maxOpenPreparedStatements: 20
+    freemarker :
+                suffix : .ftl
+                request-context-attribute : request
+                expose-request-attributes : true
+# MyBatis
+mybatis:
+    type-aliases-package: org.hsweb.web.bean.po
+    mapper-locations: classpath*:org/hsweb/web/dao/impl/mybatis/mapper/oracle/**/*.xml
+    config: classpath:config/mybatis-config.xml
