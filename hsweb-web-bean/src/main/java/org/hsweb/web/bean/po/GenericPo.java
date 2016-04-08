@@ -9,7 +9,10 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 import java.io.Serializable;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * 通用的PO对象，实现基本的属性和方法。新建的PO都应继承该类
@@ -24,6 +27,17 @@ public class GenericPo<PK> implements Serializable {
 
     public PK getU_id() {
         return u_id;
+    }
+
+    private Map<String, Object> customAttr = new LinkedHashMap<>();
+
+    public <T> T attr(String attr, T value) {
+        customAttr.put(attr, value);
+        return value;
+    }
+
+    public <T> T attr(String attr) {
+        return ((T) customAttr.get(attr));
     }
 
     @Override
@@ -42,12 +56,12 @@ public class GenericPo<PK> implements Serializable {
     }
 
     /**
-     * 创建一个主键，根据当前时戳和随机数的一个MD5值
+     * 创建一个主键
      *
      * @return
      */
     public static String createUID() {
-        return MD5.encode(String.valueOf(System.nanoTime()) + String.valueOf(Math.random()));
+        return MD5.encode(UUID.randomUUID().toString());
     }
 
     /**
@@ -78,4 +92,11 @@ public class GenericPo<PK> implements Serializable {
         return valid(this);
     }
 
+    public Map<String, Object> getCustomAttr() {
+        return customAttr;
+    }
+
+    public void setCustomAttr(Map<String, Object> customAttr) {
+        this.customAttr = customAttr;
+    }
 }

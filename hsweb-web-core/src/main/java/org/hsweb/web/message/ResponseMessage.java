@@ -9,7 +9,6 @@ import org.webbuilder.utils.common.DateTimeUtils;
 
 import java.io.Serializable;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 响应消息。controller中处理后，返回此对象，响应请求结果给客户端。
