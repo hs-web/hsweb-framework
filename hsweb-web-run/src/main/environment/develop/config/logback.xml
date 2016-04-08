@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <include resource="org/springframework/boot/logging/logback/base.xml"/>
     <!-- 控制台输出日志 -->
     <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
@@ -11,7 +10,7 @@
     <logger name="org.springframework.web" level="DEBUG" />
     <logger name="org.apache.tomcat" level="ERROR" />
     <logger name="org.hsweb" level="DEBUG" />
-    <root level="DEBUG">
+    <root level="ERROR">
         <appender-ref ref="Console"/>
     </root>
 </configuration>
