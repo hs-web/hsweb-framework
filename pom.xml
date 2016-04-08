@@ -3,7 +3,6 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <groupId>org.hsweb</groupId>
     <artifactId>hsweb-framework</artifactId>
     <packaging>pom</packaging>
@@ -17,7 +16,7 @@
         <module>hsweb-web-bean</module>
         <module>hsweb-web-core</module>
         <module>hsweb-web-websocket</module>
-        <module>hsweb-web-test</module>
+        <module>hsweb-web-run</module>
     </modules>
 
     <properties>
@@ -30,6 +29,7 @@
         <spring.boot.version>1.3.1.RELEASE</spring.boot.version>
         <fastjson.version>1.2.6</fastjson.version>
 
+        <cglib.version>3.1</cglib.version>
         <aspectj.version>1.6.12</aspectj.version>
         <hibernate.validator.version>5.1.1.Final</hibernate.validator.version>
 
@@ -69,26 +69,14 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>2.4</version>
-                <configuration>
-                    <excludes>
-                        <exclude>config</exclude>
-                        <exclude>config/**/*</exclude>
-                        <exclude>*.xml</exclude>
-                        <exclude>*.properties</exclude>
-                    </excludes>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${spring.boot.version}</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>repackage</goal>
-                        </goals>
-                    </execution>
-                </executions>
+                <configuration>
+                    <fork>true</fork>
+                </configuration>
             </plugin>
         </plugins>
     </build>
@@ -98,13 +86,12 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.webbuilder</groupId>
-            <artifactId>sql-util</artifactId>
+            <artifactId>wb-sql-util</artifactId>
             <version>${webbuilder.version}</version>
             <exclusions>
                 <exclusion>
@@ -122,6 +109,10 @@
             </exclusions>
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>springloaded</artifactId>
+        </dependency>
         <!--json-->
         <dependency>
             <groupId>com.alibaba</groupId>
@@ -132,41 +123,101 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-            <version>${spring.boot.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-tomcat</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jetty</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-logging</artifactId>
-            <version>${spring.boot.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-aop</artifactId>
-            <version>${spring.boot.version}</version>
         </dependency>
 
         <!--开发工具-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
-            <version>${spring.boot.version}</version>
         </dependency>
-
 
     </dependencies>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.oracle</groupId>
+                <artifactId>ojdbc14</artifactId>
+                <version>10.2.0.1.0</version>
+            </dependency>
+            <dependency>
+                <groupId>mysql</groupId>
+                <artifactId>mysql-connector-java</artifactId>
+                <version>5.1.38</version>
+            </dependency>
+            <dependency>
+                <groupId>org.hsweb</groupId>
+                <artifactId>hsweb-web-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.hsweb</groupId>
+                <artifactId>hsweb-web-bean</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.hsweb</groupId>
+                <artifactId>hsweb-web-controller</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.hsweb</groupId>
+                <artifactId>hsweb-web-dao-interface</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.hsweb</groupId>
+                <artifactId>hsweb-web-dao-impl-mybatis</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.hsweb</groupId>
+                <artifactId>hsweb-web-service-interface</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.hsweb</groupId>
+                <artifactId>hsweb-web-service-impl-common</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring.boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+
+    </dependencyManagement>
     <repositories>
         <repository>
             <id>releases</id>
             <name>Nexus Release Repository</name>
-            <url>http://121.199.3.43:8889/nexus/content/repositories/releases/</url>
-        </repository>
-        <repository>
-            <id>snapshots</id>
-            <name>Nexus Snapshot Repository</name>
-            <url>http://121.199.3.43:8889/nexus/content/repositories/snapshots/</url>
+            <url>http://121.199.3.43:8889/nexus/content/repositories/public/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
         </repository>
     </repositories>
 
