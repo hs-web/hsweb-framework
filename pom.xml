@@ -32,7 +32,6 @@
         <cglib.version>3.1</cglib.version>
         <aspectj.version>1.6.12</aspectj.version>
         <hibernate.validator.version>5.1.1.Final</hibernate.validator.version>
-
         <webbuilder.version>1.0-SNAPSHOT</webbuilder.version>
     </properties>
 
