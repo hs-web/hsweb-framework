@@ -1,10 +1,14 @@
 #LOGGING
 logging:
     config: classpath:config/logback.xml
-
 server:
     port: 8088
+
+#spring config
 spring:
+    devtools:
+        remote:
+            secret: hsweb
     application:
         name: ${app.name}
         index: index.html
@@ -30,9 +34,9 @@ spring:
         poolPreparedStatements: true
         maxOpenPreparedStatements: 20
     freemarker :
-                suffix : .ftl
-                request-context-attribute : request
-                expose-request-attributes : true
+        suffix : .ftl
+        request-context-attribute : request
+        expose-request-attributes : true
 # MyBatis
 mybatis:
     type-aliases-package: org.hsweb.web.bean.po

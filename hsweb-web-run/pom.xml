@@ -8,9 +8,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
     <artifactId>hsweb-web-run</artifactId>
-    <version>${parent.version}</version>
 
     <!--配置信息-->
     <properties>
@@ -77,15 +75,45 @@
                         </goals>
                     </execution>
                 </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.springframework</groupId>
+                        <artifactId>springloaded</artifactId>
+                        <version>1.2.5.RELEASE</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+
+            <plugin>
+                <groupId>com.spotify</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>0.4.5</version>
+                <configuration>
+                    <imageName>${project.artifactId}</imageName>
+                    <baseImage>hsweb/java8</baseImage>
+                    <entryPoint>["java", "-jar", "/${project.build.finalName}.jar"]</entryPoint>
+                    <resources>
+                        <resource>
+                            <targetPath>/</targetPath>
+                            <directory>${project.build.directory}</directory>
+                            <include>${project.build.finalName}.jar</include>
+                        </resource>
+                    </resources>
+                </configuration>
             </plugin>
         </plugins>
     </build>
 
     <dependencies>
+
         <dependency>
             <groupId>org.hsweb</groupId>
             <artifactId>hsweb-web-controller</artifactId>
         </dependency>
+        <!--<dependency>-->
+        <!--<groupId>org.springframework.boot</groupId>-->
+        <!--<artifactId>spring-boot-devtools</artifactId>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>org.hsweb</groupId>
             <artifactId>hsweb-web-service-impl-common</artifactId>
@@ -94,6 +122,12 @@
             <groupId>org.hsweb</groupId>
             <artifactId>hsweb-web-dao-impl-mybatis</artifactId>
         </dependency>
+
+        <!--<dependency>-->
+        <!--<groupId>org.springframework</groupId>-->
+        <!--<artifactId>springloaded</artifactId>-->
+        <!--</dependency>-->
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-freemarker</artifactId>

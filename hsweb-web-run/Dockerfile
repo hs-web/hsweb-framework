@@ -1,6 +1,5 @@
-FROM zh.sqy/java7:v1.0
-RUN mkdir -p /apps/hsweb
+FROM hsweb/java8
 
-COPY target/hsweb-web-run-1.0-SNAPSHOT.jar /apps/hsweb/hsweb-run.jar
+COPY target/hsweb-web-run-1.0-SNAPSHOT.jar /app.jar
 EXPOSE 8088
-ENTRYPOINT java -jar /apps/hsweb/hsweb-run.jar
+ENTRYPOINT ["java","-Xdebug","-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005","-jar","/app.jar"]

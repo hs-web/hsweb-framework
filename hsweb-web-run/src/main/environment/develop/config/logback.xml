@@ -7,9 +7,9 @@
         </encoder>
     </appender>
     <logger name="org.springframework" level="ERROR" />
-    <logger name="org.springframework.web" level="DEBUG" />
+    <logger name="org.springframework.web" level="ERROR" />
     <logger name="org.apache.tomcat" level="ERROR" />
-    <logger name="org.hsweb" level="DEBUG" />
+    <logger name="org.hsweb" level="ERROR" />
     <root level="ERROR">
         <appender-ref ref="Console"/>
     </root>
