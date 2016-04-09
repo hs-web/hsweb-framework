@@ -8,6 +8,7 @@ if [ -f "target/hsweb-web-run-1.0-SNAPSHOT.jar" ]; then
         container_id=$(docker ps | grep "${container_name}" | awk '{print $1}')
         if [ "container_id" != "" ];then
             docker stop ${container_name}
+            docker rm ${container_name}
             docker rmi  ${image_name}
         fi
             docker build -t ${image_name} .
