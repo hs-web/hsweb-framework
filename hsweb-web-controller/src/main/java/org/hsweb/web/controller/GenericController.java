@@ -59,7 +59,7 @@ public abstract class GenericController<PO, PK> {
      */
     @RequestMapping(method = RequestMethod.GET)
     @AccessLogger("查询列表")
-    @Authorize(level = "R")
+    @Authorize(action = "R")
     public ResponseMessage list(QueryParam param) {
         // 获取条件查询
         try {
@@ -82,7 +82,7 @@ public abstract class GenericController<PO, PK> {
      */
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     @AccessLogger("查询明细")
-    @Authorize(level = "R")
+    @Authorize(action = "R")
     public ResponseMessage info(@PathVariable("id") PK id) {
         try {
             PO po = getService().selectByPk(id);
@@ -103,7 +103,7 @@ public abstract class GenericController<PO, PK> {
      */
     @RequestMapping(value = "/total", method = RequestMethod.GET)
     @AccessLogger("查询总数")
-    @Authorize(level = "R")
+    @Authorize(action = "R")
     public ResponseMessage total(QueryParam param) {
         try {
             // 获取条件查询
@@ -121,7 +121,7 @@ public abstract class GenericController<PO, PK> {
      */
     @RequestMapping(method = RequestMethod.POST)
     @AccessLogger("新增")
-    @Authorize(level = "C")
+    @Authorize(action = "C")
     public ResponseMessage add(@RequestBody PO object) {
         try {
             PK pk = getService().insert(object);
@@ -139,7 +139,7 @@ public abstract class GenericController<PO, PK> {
      */
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
     @AccessLogger("删除")
-    @Authorize(level = "D")
+    @Authorize(action = "D")
     public ResponseMessage delete(@PathVariable("id") PK id) {
         try {
             int number = getService().delete(id);
@@ -157,7 +157,7 @@ public abstract class GenericController<PO, PK> {
      */
     @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
     @AccessLogger("修改")
-    @Authorize(level = "U")
+    @Authorize(action = "U")
     public ResponseMessage update(@PathVariable("id") PK id, @RequestBody(required = true) PO object) {
         try {
             if (object instanceof GenericPo) {
@@ -178,7 +178,7 @@ public abstract class GenericController<PO, PK> {
      */
     @RequestMapping(method = RequestMethod.PUT)
     @AccessLogger("批量修改")
-    @Authorize(level = "U")
+    @Authorize(action = "U")
     public ResponseMessage update(@RequestBody(required = true) String json) {
         try {
             int number;

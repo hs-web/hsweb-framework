@@ -31,7 +31,7 @@ public @interface Authorize {
      *
      * @return
      */
-    String[] level() default {};
+    String[] action() default {};
 
     /**
      * 表达式验证如
