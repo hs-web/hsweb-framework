@@ -5,7 +5,7 @@ image_name=hsweb/web-run
 link_oracle=oracle11g
 server_port=9888
 if [ -f "target/hsweb-web-run-1.0-SNAPSHOT.jar" ]; then
-        container_id=$(docker ps | grep "hsweb/web-run" | awk '{print $1}')
+        container_id=$(docker ps | grep "${container_name}" | awk '{print $1}')
         if [ "container_id" != "" ];then
             docker stop ${container_name}
             docker rmi  ${image_name}
