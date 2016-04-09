@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-mvn clean package -Pprod
+#mvn clean package -Pprod
 if [ -f "target/hsweb-web-run-1.0-SNAPSHOT.jar" ]; then
         container_id=$(docker ps | grep "hsweb-web-run" | awk '{print $1}')
         if [ "container_id" != "" ];then
