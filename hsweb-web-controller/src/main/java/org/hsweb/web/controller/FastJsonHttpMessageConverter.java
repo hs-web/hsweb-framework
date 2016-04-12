@@ -57,7 +57,7 @@ public class FastJsonHttpMessageConverter extends AbstractHttpMessageConverter<O
     }
 
     @Override
-    protected Object readInternal(Class<? extends Object> clazz, HttpInputMessage inputMessage) throws IOException,
+    protected Object readInternal(Class<?> clazz, HttpInputMessage inputMessage) throws IOException,
             HttpMessageNotReadableException {
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();

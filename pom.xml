@@ -16,7 +16,6 @@
         <module>hsweb-web-bean</module>
         <module>hsweb-web-core</module>
         <module>hsweb-web-websocket</module>
-        <module>hsweb-web-run</module>
     </modules>
 
     <properties>
@@ -87,63 +86,50 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
-
-        <dependency>
-            <groupId>org.webbuilder</groupId>
-            <artifactId>wb-sql-util</artifactId>
-            <version>${webbuilder.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-api</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-log4j12</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>ch.qos.logback</groupId>
-                    <artifactId>logback-classic</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
         <!--json-->
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
             <version>${fastjson.version}</version>
         </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-tomcat</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-jetty</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-logging</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-aop</artifactId>
-        </dependency>
-
     </dependencies>
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.webbuilder</groupId>
+                <artifactId>wb-sql-util</artifactId>
+                <version>${webbuilder.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-log4j12</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>ch.qos.logback</groupId>
+                        <artifactId>logback-classic</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <dependency>
+                <groupId>org.webbuilder</groupId>
+                <artifactId>wb-utils</artifactId>
+                <version>${webbuilder.version}</version>
+            </dependency>
+
+            <!--<dependency>-->
+                <!--<groupId>com.vaadin</groupId>-->
+                <!--<artifactId>vaadin-bom</artifactId>-->
+                <!--<version>7.6.4</version>-->
+                <!--<type>pom</type>-->
+                <!--<scope>import</scope>-->
+            <!--</dependency>-->
+
             <dependency>
                 <groupId>com.oracle</groupId>
                 <artifactId>ojdbc14</artifactId>
@@ -201,7 +187,7 @@
     </dependencyManagement>
     <repositories>
         <repository>
-            <id>releases</id>
+            <id>hsweb-nexus</id>
             <name>Nexus Release Repository</name>
             <url>http://121.199.3.43:8889/nexus/content/repositories/public/</url>
             <snapshots>

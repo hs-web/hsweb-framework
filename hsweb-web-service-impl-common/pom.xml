@@ -12,6 +12,10 @@
     <artifactId>hsweb-web-service-impl-common</artifactId>
     <dependencies>
 
+        <dependency>
+            <groupId>org.webbuilder</groupId>
+            <artifactId>wb-sql-util</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.hsweb</groupId>

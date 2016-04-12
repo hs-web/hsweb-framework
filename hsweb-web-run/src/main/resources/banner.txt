@@ -1,3 +1,0 @@
-${AnsiColor.YELLOW}------------------------------------------------------
-${AnsiColor.YELLOW}:: Running ${AnsiColor.RED}${app.name} ${AnsiColor.YELLOW}(${app.version})
-${AnsiColor.YELLOW}-------------------------------------------------------${AnsiColor.WHITE}
