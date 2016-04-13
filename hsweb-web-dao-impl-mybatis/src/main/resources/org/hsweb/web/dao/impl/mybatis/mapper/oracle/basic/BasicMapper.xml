@@ -83,7 +83,7 @@
             <choose>
                 <!--指定查询的字段-->
                 <when test="includes!=null and includes.size()>0">
-                    <foreach item="item" index="index" collection="$includes" open="" separator="," close="">
+                    <foreach item="item" index="index" collection="includes" open="" separator="," close="">
                         <if test="item in $fields">
                             ${$tableName}.${item} as "${item}"
                         </if>
