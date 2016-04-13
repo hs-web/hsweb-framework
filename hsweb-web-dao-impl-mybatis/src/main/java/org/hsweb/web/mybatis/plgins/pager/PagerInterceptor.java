@@ -22,12 +22,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-//@Intercepts({ @Signature(type = Executor.class, method = "query", args = { MappedStatement.class, Object.class,
-//        RowBounds.class, ResultHandler.class }) })
-//@Component
-//@ConfigurationProperties(
-//        prefix = "spring.datasource"
-//)
+@Intercepts({ @Signature(type = Executor.class, method = "query", args = { MappedStatement.class, Object.class,
+        RowBounds.class, ResultHandler.class }) })
+@Component
+@ConfigurationProperties(
+        prefix = "spring.datasource"
+)
 public class PagerInterceptor implements Interceptor {
     protected Logger logger = LoggerFactory.getLogger(this.getClass());
     protected Map<String, PagerHelper> pagerHelperBase = new HashMap<>();
