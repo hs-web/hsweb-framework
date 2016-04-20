@@ -24,15 +24,17 @@ public class PagerResult<Po> implements Serializable {
         return total;
     }
 
-    public void setTotal(int total) {
+    public PagerResult<Po> setTotal(int total) {
         this.total = total;
+        return this;
     }
 
     public List<Po> getData() {
         return data;
     }
 
-    public void setData(List<Po> data) {
+    public PagerResult<Po> setData(List<Po> data) {
         this.data = data;
+        return this;
     }
 }
