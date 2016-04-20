@@ -1,6 +1,8 @@
 package org.hsweb.web.service.impl.user;
 
+import org.hsweb.web.bean.common.InsertParam;
 import org.hsweb.web.bean.common.QueryParam;
+import org.hsweb.web.bean.common.UpdateParam;
 import org.hsweb.web.bean.po.module.Module;
 import org.hsweb.web.bean.po.role.UserRole;
 import org.hsweb.web.bean.po.user.User;
@@ -12,6 +14,7 @@ import org.hsweb.web.service.module.ModuleService;
 import org.hsweb.web.service.user.UserService;
 import org.hsweb.web.utils.RandomUtil;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 import org.webbuilder.utils.common.MD5;
 
 import javax.annotation.Resource;
@@ -46,20 +49,20 @@ public class UserServiceImpl extends AbstractServiceImpl<User, String> implement
     @Override
     public String insert(User data) throws Exception {
         tryValidPo(data);
-        if (selectByUserName(data.getUsername()) != null) {
-            throw new BusinessException("用户名已存在!");
-        }
+        Assert.isNull(selectByUserName(data.getUsername()), "用户已存在!");
+
         data.setU_id(RandomUtil.randomChar(6));
         data.setCreate_date(new Date());
         data.setUpdate_date(new Date());
         data.setPassword(MD5.encode(data.getPassword()));
-        String id = userMapper.insert(data);
+        userMapper.insert(new InsertParam<>(data));
+        String id = data.getU_id();
         //添加角色关联
         if (data.getUserRoles().size() != 0) {
             for (UserRole userRole : data.getUserRoles()) {
                 userRole.setU_id(RandomUtil.randomChar());
                 userRole.setUser_id(data.getU_id());
-                userRoleMapper.insert(userRole);
+                userRoleMapper.insert(new InsertParam<>(userRole));
             }
         }
         return id;
@@ -77,14 +80,14 @@ public class UserServiceImpl extends AbstractServiceImpl<User, String> implement
             data.setPassword(MD5.encode(data.getPassword()));
             userMapper.updatePassword(data);
         }
-        int i = userMapper.update(data);
+        int i = userMapper.update(new UpdateParam<>(data));
         if (data.getUserRoles().size() != 0) {
             //删除所有
             userRoleMapper.deleteByUserId(data.getU_id());
             for (UserRole userRole : data.getUserRoles()) {
                 userRole.setU_id(RandomUtil.randomChar());
                 userRole.setUser_id(data.getU_id());
-                userRoleMapper.insert(userRole);
+                userRoleMapper.insert(new InsertParam<>(userRole));
             }
         }
         return i;

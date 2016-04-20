@@ -1,7 +1,6 @@
 package org.hsweb.web.service.impl;
 
-import org.hsweb.web.bean.common.PagerResult;
-import org.hsweb.web.bean.common.QueryParam;
+import org.hsweb.web.bean.common.*;
 import org.hsweb.web.bean.po.GenericPo;
 import org.hsweb.web.bean.valid.ValidResults;
 import org.hsweb.web.dao.GenericMapper;
@@ -16,6 +15,7 @@ import java.util.List;
 /**
  * Created by 浩 on 2016-01-22 0022.
  */
+@Transactional(rollbackFor = Throwable.class)
 public abstract class AbstractServiceImpl<Po, PK> implements GenericService<Po, PK> {
     protected Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -25,6 +25,7 @@ public abstract class AbstractServiceImpl<Po, PK> implements GenericService<Po, 
     @Transactional(readOnly = true)
     public PagerResult<Po> selectPager(QueryParam param) throws Exception {
         PagerResult<Po> pagerResult = new PagerResult<>();
+        param.setPaging(false);
         int total = getMapper().total(param);
         pagerResult.setTotal(total);
         //根据实际记录数量重新指定分页参数
@@ -34,9 +35,8 @@ public abstract class AbstractServiceImpl<Po, PK> implements GenericService<Po, 
     }
 
     @Override
-    @Transactional(rollbackFor = Throwable.class)
     public PK insert(Po data) throws Exception {
-        getMapper().insert(data);
+        getMapper().insert(new InsertParam<>(data));
         if (data instanceof GenericPo) {
             return (PK) ((GenericPo) data).getU_id();
         }
@@ -44,23 +44,20 @@ public abstract class AbstractServiceImpl<Po, PK> implements GenericService<Po, 
     }
 
     @Override
-    @Transactional(rollbackFor = Throwable.class)
     public int delete(PK pk) throws Exception {
-        return getMapper().delete(pk);
+        return getMapper().delete(new DeleteParam().where("primaryKey", pk));
     }
 
     @Override
-    @Transactional(rollbackFor = Throwable.class)
     public int update(Po data) throws Exception {
-        return getMapper().update(data);
+        return getMapper().update(new UpdateParam<>(data));
     }
 
     @Override
-    @Transactional(rollbackFor = Throwable.class)
     public int update(List<Po> data) throws Exception {
         int i = 0;
         for (Po po : data) {
-            i += getMapper().update(po);
+            i += getMapper().update(new UpdateParam<>(po));
         }
         return i;
     }

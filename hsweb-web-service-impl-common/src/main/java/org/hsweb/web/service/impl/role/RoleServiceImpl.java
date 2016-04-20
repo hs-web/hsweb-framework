@@ -1,5 +1,6 @@
 package org.hsweb.web.service.impl.role;
 
+import org.hsweb.web.bean.common.InsertParam;
 import org.hsweb.web.bean.po.role.Role;
 import org.hsweb.web.bean.po.role.RoleModule;
 import org.hsweb.web.dao.role.RoleMapper;
@@ -44,7 +45,7 @@ public class RoleServiceImpl extends AbstractServiceImpl<Role, String> implement
             for (RoleModule module : roleModule) {
                 module.setU_id(RandomUtil.randomChar(6));
                 module.setRole_id(data.getU_id());
-                roleModuleMapper.insert(module);
+                roleModuleMapper.insert(new InsertParam<>(module));
             }
         }
         return id;
@@ -61,7 +62,7 @@ public class RoleServiceImpl extends AbstractServiceImpl<Role, String> implement
             for (RoleModule module : roleModule) {
                 module.setU_id(RandomUtil.randomChar(6));
                 module.setRole_id(data.getU_id());
-                roleModuleMapper.insert(module);
+                roleModuleMapper.insert(new InsertParam<>(module));
             }
         }
         return l;

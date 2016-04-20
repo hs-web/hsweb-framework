@@ -7,6 +7,7 @@ import org.hsweb.web.service.impl.AbstractServiceImpl;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 import org.webbuilder.utils.common.StringUtils;
 
 import javax.annotation.Resource;
@@ -162,4 +163,10 @@ public class ConfigServiceImpl extends AbstractServiceImpl<Config, String> imple
     }
 
 
+    @Override
+    public String insert(Config data) throws Exception {
+        Config old = this.selectByPk(data.getU_id());
+        Assert.isNull(old, "配置已存在，请勿重复添加!");
+        return super.insert(data);
+    }
 }

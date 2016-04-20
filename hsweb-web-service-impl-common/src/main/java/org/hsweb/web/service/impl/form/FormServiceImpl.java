@@ -1,17 +1,23 @@
 package org.hsweb.web.service.impl.form;
 
+import org.hsweb.web.bean.common.QueryParam;
+import org.hsweb.web.bean.common.UpdateParam;
 import org.hsweb.web.bean.po.form.Form;
 import org.hsweb.web.dao.GenericMapper;
 import org.hsweb.web.dao.form.FormMapper;
 import org.hsweb.web.exception.BusinessException;
+import org.hsweb.web.service.form.DynamicFormService;
 import org.hsweb.web.service.form.FormService;
 import org.hsweb.web.service.impl.AbstractServiceImpl;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 import javax.annotation.Resource;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 自定义表单服务类
@@ -30,6 +36,9 @@ public class FormServiceImpl extends AbstractServiceImpl<Form, String> implement
         return formMapper;
     }
 
+    @Resource
+    protected DynamicFormService dynamicFormService;
+
     @Override
     @Cacheable(value = CACHE_KEY, key = "#id")
     public Form selectByPk(String id) throws Exception {
@@ -37,11 +46,16 @@ public class FormServiceImpl extends AbstractServiceImpl<Form, String> implement
     }
 
     @Override
+    public String createNewVersion(String oldVersionId) throws Exception {
+        return null;
+    }
+
+    @Override
     public String insert(Form data) throws Exception {
-        Form old = this.selectByPk(data.getU_id());
-        if (old != null)
-            throw new BusinessException("该表单已存在!");
+        List<Form> old = this.select(new QueryParam().where("name", data.getName()));
+        Assert.notEmpty(old, "表单 [" + data.getName() + "] 已存在!");
         data.setCreate_date(new Date());
+        data.setVersion(1);
         super.insert(data);
         return data.getU_id();
     }
@@ -50,16 +64,59 @@ public class FormServiceImpl extends AbstractServiceImpl<Form, String> implement
     @CacheEvict(value = CACHE_KEY, key = "#data.u_id")
     public int update(Form data) throws Exception {
         Form old = this.selectByPk(data.getU_id());
-        if (old == null)
-            throw new BusinessException("该表单不存在!");
+        Assert.isNull(old, "表单不存在!");
         data.setUpdate_date(new Date());
         return super.update(data);
     }
 
     @Override
-    public int delete(String s) throws Exception {
-        throw new BusinessException("此服务已关闭!");
+    @CacheEvict(value = CACHE_KEY, key = "#id")
+    public int delete(String id) throws Exception {
+        Form old = this.selectByPk(id);
+        Assert.isNull(old, "表单不存在!");
+        Assert.isTrue(old.isUsing(), "表单正在使用，无法删除!");
+        return super.delete(id);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<Form> selectLatestList(QueryParam param) throws Exception {
+        return formMapper.selectLatestList(param);
+    }
 
+    @Override
+    @Transactional(readOnly = true)
+    public int countLatestList(QueryParam param) throws Exception {
+        return formMapper.countLatestList(param);
+    }
+
+    @Override
+    public void deploy(String formId) throws Exception {
+        Form old = this.selectByPk(formId);
+        Assert.isNull(old, "表单不存在");
+        //先卸载正在使用的表单
+        Form using = getMapper().selectUsing(old.getName());
+        if (using != null) {
+            this.unDeploy(using.getU_id());
+        }
+        //开始发布
+        old.setUsing(true);
+        dynamicFormService.deploy(old);
+    }
+
+    @Override
+    public void unDeploy(String formId) throws Exception {
+        Form old = this.selectByPk(formId);
+        Assert.isNull(old, "表单不存在");
+        dynamicFormService.unDeploy(old);
+        old.setUsing(false);
+        UpdateParam param = new UpdateParam<>(old);
+        param.includes("using").where("u_id", old.getU_id());
+        getMapper().update(param);
+    }
+
+    @Override
+    public String createHtml(String formId) throws Exception {
+        return null;
+    }
 }
