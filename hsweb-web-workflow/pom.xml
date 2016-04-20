@@ -11,5 +11,8 @@
 
     <artifactId>hsweb-web-workflow</artifactId>
 
+    <properties>
+        <activiti.version>5.19.0</activiti.version>
+    </properties>
 
 </project>
