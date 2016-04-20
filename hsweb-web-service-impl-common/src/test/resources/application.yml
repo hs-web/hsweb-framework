@@ -1,0 +1,27 @@
+logging:
+    config: classpath:logback.xml
+spring:
+    datasource:
+        name: core
+        url: jdbc:h2:mem:hsweb
+        driverClassName: org.h2.Driver
+        username: sa
+        password:
+        type: com.alibaba.druid.pool.DruidDataSource
+        filters: stat
+        maxActive: 20
+        initialSize: 1
+        maxWait: 60000
+        minIdle: 1
+        timeBetweenEvictionRunsMillis: 60000
+        minEvictableIdleTimeMillis: 300000
+        validationQuery: select 'x'
+        testWhileIdle: true
+        testOnBorrow: false
+        testOnReturn: false
+        poolPreparedStatements: true
+        maxOpenPreparedStatements: 20
+mybatis:
+    type-aliases-package: org.hsweb.web.bean.po
+    mapper-locations: classpath*:org/hsweb/web/dao/impl/mybatis/mapper/oracle/**/*.xml
+    config: classpath:mybatis-config.xml
