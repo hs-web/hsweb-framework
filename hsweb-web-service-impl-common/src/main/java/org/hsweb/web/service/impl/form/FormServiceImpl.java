@@ -9,6 +9,7 @@ import org.hsweb.web.exception.BusinessException;
 import org.hsweb.web.service.form.DynamicFormService;
 import org.hsweb.web.service.form.FormService;
 import org.hsweb.web.service.impl.AbstractServiceImpl;
+import org.hsweb.web.utils.RandomUtil;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -47,13 +48,19 @@ public class FormServiceImpl extends AbstractServiceImpl<Form, String> implement
 
     @Override
     public String createNewVersion(String oldVersionId) throws Exception {
-        return null;
+        Form old = this.selectByPk(oldVersionId);
+        Assert.isNull(old, "表单不存在!");
+        old.setU_id(RandomUtil.randomChar());
+        old.setVersion(old.getVersion() + 1);
+        old.setCreate_date(new Date());
+        old.setUpdate_date(null);
+        return old.getU_id();
     }
 
     @Override
     public String insert(Form data) throws Exception {
         List<Form> old = this.select(new QueryParam().where("name", data.getName()));
-        Assert.notEmpty(old, "表单 [" + data.getName() + "] 已存在!");
+        Assert.notNull(old, "表单 [" + data.getName() + "] 已存在!");
         data.setCreate_date(new Date());
         data.setVersion(1);
         super.insert(data);
@@ -91,9 +98,10 @@ public class FormServiceImpl extends AbstractServiceImpl<Form, String> implement
     }
 
     @Override
+    @Transactional(rollbackFor = Throwable.class)
     public void deploy(String formId) throws Exception {
         Form old = this.selectByPk(formId);
-        Assert.isNull(old, "表单不存在");
+        Assert.notNull(old, "表单不存在");
         //先卸载正在使用的表单
         Form using = getMapper().selectUsing(old.getName());
         if (using != null) {
@@ -102,12 +110,14 @@ public class FormServiceImpl extends AbstractServiceImpl<Form, String> implement
         //开始发布
         old.setUsing(true);
         dynamicFormService.deploy(old);
+        getMapper().update(new UpdateParam<>(old).includes("using").where("u_id", old.getU_id()));
     }
 
     @Override
+    @Transactional(rollbackFor = Throwable.class)
     public void unDeploy(String formId) throws Exception {
         Form old = this.selectByPk(formId);
-        Assert.isNull(old, "表单不存在");
+        Assert.notNull(old, "表单不存在");
         dynamicFormService.unDeploy(old);
         old.setUsing(false);
         UpdateParam param = new UpdateParam<>(old);
