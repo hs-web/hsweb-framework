@@ -1,5 +1,7 @@
 package org.hsweb.web.bean.common;
 
+import org.webbuilder.utils.common.StringUtils;
+
 import java.util.*;
 
 /**
@@ -33,16 +35,18 @@ public class SqlParam<R extends SqlParam> {
     }
 
     public R where(String key, Object value) {
-        this.term.put(key, value);
+        this.term.put(key, changeTermValue(key, value));
         return (R) this;
     }
 
     public R where(Map<String, Object> conditions) {
+        changeTerm(conditions);
         this.term.putAll(conditions);
         return (R) this;
     }
 
     public Map<String, Object> getTerm() {
+        changeTerm(this.term);
         return term;
     }
 
@@ -62,7 +66,43 @@ public class SqlParam<R extends SqlParam> {
         this.excludes = excludes;
     }
 
-    public void setTerm(Map<String, Object> term) {
+    public R setTerm(Map<String, Object> term) {
         this.term = term;
+        return (R) this;
     }
+
+    protected void changeTerm(Map<String, Object> term) {
+        if (term != null) {
+            term.entrySet().forEach((e) -> e.setValue(changeTermValue(e.getKey(), e.getValue())));
+        }
+    }
+
+    public Object changeTermValue(String key, Object value) {
+        //将IN条件的值转换为Iterable
+        if (key.endsWith("$IN")) {
+            if (value == null) return new ArrayList<>();
+            if (!(value instanceof Iterable)) {
+                if (value instanceof String) {
+                    String[] arr = ((String) value).split("[, ;]");
+                    Object[] objArr = new Object[arr.length];
+                    for (int i = 0; i < arr.length; i++) {
+                        String str = arr[i];
+                        Object val = str;
+                        if (StringUtils.isInt(str))
+                            val = StringUtils.toInt(str);
+                        else if (StringUtils.isDouble(str))
+                            val = StringUtils.toDouble(str);
+                        objArr[i] = val;
+                    }
+                    return Arrays.asList(objArr);
+                } else if (value.getClass().isArray()) {
+                    return Arrays.asList(((Object[]) value));
+                } else {
+                    return Arrays.asList(value);
+                }
+            }
+        }
+        return value;
+    }
+
 }
