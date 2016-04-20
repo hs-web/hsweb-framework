@@ -1,15 +1,11 @@
 package org.hsweb.web.bean.common;
 
 import java.io.Serializable;
-import java.util.*;
 
 /**
  * Created by 浩 on 2016-01-16 0016.
  */
-public class QueryParam implements Serializable {
-
-    private Map<String, Object> term = new HashMap<>();
-
+public class QueryParam extends SqlParam<QueryParam> implements Serializable {
     private static final long serialVersionUID = 7941767360194797891L;
 
     /**
@@ -37,48 +33,6 @@ public class QueryParam implements Serializable {
      */
     private String sortOrder;
 
-    /**
-     * 指定要查询的字段
-     */
-    private Set<String> includes = new LinkedHashSet<>();
-
-    /**
-     * 指定不查询的字段
-     */
-    private Set<String> excludes = new LinkedHashSet<>();
-
-    /**
-     * 指定查询的字段列表，如传入 username,name，在sql里就只会执行 select username,name from table。
-     *
-     * @param fields 查询的字段列表
-     * @return this 引用
-     */
-    public QueryParam includes(String... fields) {
-        includes.addAll(Arrays.asList(fields));
-        return this;
-    }
-
-    /**
-     * 指定不需要查询的的字段列表
-     *
-     * @param fields 不需要查询的字段列表
-     * @return this 引用
-     */
-    public QueryParam excludes(String... fields) {
-        excludes.addAll(Arrays.asList(fields));
-        includes.removeAll(Arrays.asList(fields));
-        return this;
-    }
-
-    public QueryParam where(String key, Object value) {
-        this.term.put(key, value);
-        return this;
-    }
-
-    public QueryParam where(Map<String, Object> conditions) {
-        this.term.putAll(conditions);
-        return this;
-    }
 
     public QueryParam orderBy(String sortField) {
         orderBy(sortField, true);
@@ -91,7 +45,21 @@ public class QueryParam implements Serializable {
         return this;
     }
 
+    public QueryParam doPaging(int pageIndex) {
+        this.pageIndex = pageIndex;
+        this.paging = true;
+        return this;
+    }
+
+    public QueryParam doPaging(int pageIndex, int pageSize) {
+        this.pageIndex = pageIndex;
+        this.pageSize = pageSize;
+        this.paging = true;
+        return this;
+    }
+
     public QueryParam rePaging(int total) {
+        paging = true;
         // 当前页没有数据后跳转到最后一页
         if (this.getPageIndex() != 0 && (pageIndex * pageSize) >= total) {
             int tmp = total / this.getPageSize();
@@ -142,27 +110,4 @@ public class QueryParam implements Serializable {
         this.sortOrder = sortOrder;
     }
 
-    public Set<String> getIncludes() {
-        return includes;
-    }
-
-    public void setIncludes(Set<String> includes) {
-        this.includes = includes;
-    }
-
-    public Set<String> getExcludes() {
-        return excludes;
-    }
-
-    public void setExcludes(Set<String> excludes) {
-        this.excludes = excludes;
-    }
-
-    public Map<String, Object> getTerm() {
-        return term;
-    }
-
-    public void setTerm(Map<String, Object> term) {
-        this.term = term;
-    }
 }
