@@ -1,5 +1,18 @@
 package org.hsweb.web.controller;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.PropertyPreFilter;
+import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.alibaba.fastjson.serializer.SimplePropertyPreFilter;
+import org.hsweb.web.message.ResponseMessage;
+import org.springframework.http.HttpInputMessage;
+import org.springframework.http.HttpOutputMessage;
+import org.springframework.http.MediaType;
+import org.springframework.http.converter.AbstractHttpMessageConverter;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.webbuilder.utils.common.StringUtils;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,19 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import com.alibaba.fastjson.serializer.PropertyPreFilter;
-import com.alibaba.fastjson.serializer.SimplePropertyPreFilter;
-import org.hsweb.web.message.ResponseMessage;
-import org.springframework.http.HttpInputMessage;
-import org.springframework.http.HttpOutputMessage;
-import org.springframework.http.MediaType;
-import org.springframework.http.converter.AbstractHttpMessageConverter;
-import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.http.converter.HttpMessageNotWritableException;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.SerializerFeature;
 
 public class FastJsonHttpMessageConverter extends AbstractHttpMessageConverter<Object> {
 
@@ -59,11 +59,8 @@ public class FastJsonHttpMessageConverter extends AbstractHttpMessageConverter<O
     @Override
     protected Object readInternal(Class<?> clazz, HttpInputMessage inputMessage) throws IOException,
             HttpMessageNotReadableException {
-
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
         InputStream in = inputMessage.getBody();
-
         byte[] buf = new byte[1024];
         for (; ; ) {
             int len = in.read(buf);
@@ -87,9 +84,15 @@ public class FastJsonHttpMessageConverter extends AbstractHttpMessageConverter<O
         String text;
         if (obj instanceof ResponseMessage) {
             ResponseMessage message = (ResponseMessage) obj;
-            if (message.isOnlyData())
+            if (message.isSuccess() && message.isOnlyData())
                 obj = message.getData();
             text = JSON.toJSONString(obj, parseFilter(message), features);
+            if (!StringUtils.isNullOrEmpty(message.getCallback())) {
+                text = new StringBuilder()
+                        .append(message.getCallback())
+                        .append("(").append(text).append(")")
+                        .toString();
+            }
         } else {
             text = JSON.toJSONString(obj, features);
         }
@@ -107,12 +110,11 @@ public class FastJsonHttpMessageConverter extends AbstractHttpMessageConverter<O
                 filters.add(filter);
             }
         if (responseMessage.getExcludes() != null)
-        for (Map.Entry<Class<?>, Set<String>> classSetEntry : responseMessage.getExcludes().entrySet()) {
-            SimplePropertyPreFilter filter = new SimplePropertyPreFilter(classSetEntry.getKey());
-            filter.getExcludes().addAll(classSetEntry.getValue());
-            filters.add(filter);
-        }
+            for (Map.Entry<Class<?>, Set<String>> classSetEntry : responseMessage.getExcludes().entrySet()) {
+                SimplePropertyPreFilter filter = new SimplePropertyPreFilter(classSetEntry.getKey());
+                filter.getExcludes().addAll(classSetEntry.getValue());
+                filters.add(filter);
+            }
         return filters.toArray(new PropertyPreFilter[filters.size()]);
     }
-
 }

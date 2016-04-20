@@ -14,6 +14,7 @@ import org.webbuilder.utils.common.ClassUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 通用Controller，使用RESTful和json进行数据提交及访问。
@@ -68,7 +69,17 @@ public abstract class GenericController<PO, PK> {
                 data = getService().select(param);
             else
                 data = getService().selectPager(param);
-            return new ResponseMessage(true, data).onlyData();
+            ResponseMessage responseMessage = new ResponseMessage(true, data).onlyData();
+            Set<String> includes = param.getIncludes();
+            Set<String> excludes = param.getIncludes();
+
+            if (includes != null && includes.size() > 0) {
+                responseMessage.include(getPOType(), includes.toArray(new String[includes.size()]));
+            }
+            if (excludes != null && excludes.size() > 0) {
+                responseMessage.exclude(getPOType(), excludes.toArray(new String[excludes.size()]));
+            }
+            return responseMessage;
         } catch (Exception e) {
             return new ResponseMessage(false, e);
         }
@@ -163,6 +174,7 @@ public abstract class GenericController<PO, PK> {
             if (object instanceof GenericPo) {
                 ((GenericPo) object).setU_id(id);
             }
+
             int number = getService().update(object);
             return new ResponseMessage(true, number);
         } catch (Exception e) {

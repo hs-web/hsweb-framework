@@ -7,6 +7,7 @@ import org.hsweb.web.controller.GenericController;
 import org.hsweb.web.service.module.ModuleService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 
@@ -14,7 +15,7 @@ import javax.annotation.Resource;
  * 系统模块控制器，继承自GenericController,使用rest+json
  * Created by generator 2015-8-26 11:22:11
  */
-@Controller
+@RestController
 @RequestMapping(value = "/module")
 @AccessLogger("系统模块管理")
 @Authorize(module = "module")

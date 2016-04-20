@@ -9,10 +9,7 @@ import org.hsweb.web.message.ResponseMessage;
 import org.hsweb.web.service.resource.ResourcesService;
 
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 
@@ -24,7 +21,7 @@ import javax.annotation.Resource;
  * @version 1.0
  * @UpdateRemark 2015年8月31日，重写{@link ResourcesController#delete(String)}方法，删除资源时需要授权认证
  */
-@Controller
+@RestController
 @RequestMapping(value = "/resources")
 @AccessLogger("资源管理")
 public class ResourcesController extends GenericController<Resources, String> {
