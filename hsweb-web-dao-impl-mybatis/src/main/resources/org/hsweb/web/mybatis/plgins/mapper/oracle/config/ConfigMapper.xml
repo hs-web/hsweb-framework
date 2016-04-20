@@ -12,6 +12,7 @@
         <result property="create_date" column="create_date" javaType="java.util.Date" jdbcType="TIMESTAMP" />
         <result property="update_date" column="update_date" javaType="java.util.Date" jdbcType="TIMESTAMP" />
     </resultMap>
+
     <!--字段信息配置-->
     <sql id="fieldConfig">
         <bind name="$fieldsInfo"
@@ -61,12 +62,12 @@
     <select id="select" parameterType="org.hsweb.web.bean.common.QueryParam" resultMap="ConfigResultMap">
         <include refid="fieldConfig"/>
         <include refid="tableName"/>
-        <include refid="BasicMapper.buildSelectSql"/>
+        <include refid="BasicMapper.selectSql"/>
     </select>
 
     <select id="total" parameterType="org.hsweb.web.bean.common.QueryParam" resultType="int">
         <include refid="fieldConfig"/>
         <include refid="tableName"/>
-        <include refid="BasicMapper.buildTotalSql"/>
+        <include refid="BasicMapper.totalSql"/>
     </select>
 </mapper>

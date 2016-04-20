@@ -8,10 +8,20 @@
             <!--动态生成查询条件-->
             <foreach item="item" index="index" collection="$fields">
                 <if test="#this['term.'+item]!=null">
-                    AND ${$tableName}.${item}=#{term.${item}}
+                    <choose>
+                        <when test="$fieldsInfo[item] == 'date' ">
+                            AND ${$tableName}.${item}=to_date(#{term.${item}},'YYYY-MM-DD HH24:MI:SS')
+                        </when>
+                        <otherwise>AND ${$tableName}.${item}=#{term.${item}}</otherwise>
+                    </choose>
                 </if>
                 <if test="#this['term.'+item+'$NOT']!=null">
-                    AND ${$tableName}.${item}!=#{term.${item+'$NOT'}}
+                    <choose>
+                        <when test="$fieldsInfo[item] == 'date' ">
+                            AND ${$tableName}.${item}!=to_date(#{term.${item+'$NOT'}},'YYYY-MM-DD HH24:MI:SS')
+                        </when>
+                        <otherwise>AND ${$tableName}.${item}!=#{term.${item+'$NOT'}}</otherwise>
+                    </choose>
                 </if>
                 <if test="#this['term.'+item+'$LIKE']!=null">
                     AND INSTR(${$tableName}.${item},#{term.${item+'$LIKE'}})>0
@@ -20,10 +30,10 @@
                     AND INSTR(${$tableName}.${item},#{term.${item+'$NOTLIKE'}})&lt;=0
                 </if>
                 <if test="#this['term.'+item+'$START']!=null">
-                    AND ${$tableName}.${item} LIKE CONCAT(#{term.${item+'$START'}},'%')
+                    AND ${$tableName}.${item} LIKE #{term.${item+'$START'}}||'%'
                 </if>
                 <if test="#this['term.'+item+'$END']!=null">
-                    AND ${$tableName}.${item} LIKE CONCAT('%',#{term.${item+'$END'})
+                    AND ${$tableName}.${item} LIKE '%'||#{term.${item+'$END'}}
                 </if>
                 <if test="#this['term.'+item+'$IN']!=null">
                     AND ${$tableName}.${item} IN
@@ -44,10 +54,26 @@
                     AND ${$tableName}.${item} IS NOT NULL
                 </if>
                 <if test="#this['term.'+item+'$GT']!=null">
-                    AND ${$tableName}.${item} &gt;=#{term.${item+'$GT'}}
+                    <choose>
+                        <when test="$fieldsInfo[item] == 'date' ">
+                            AND ${$tableName}.${item} &gt;=to_date(#{term.${item+'$GT'}},'YYYY-MM-DD HH24:MI:SS')
+                        </when>
+                        <when test="$fieldsInfo[item] == 'number' ">
+                            AND ${$tableName}.${item} &gt;=#{term.${item+'$GT'}}
+                        </when>
+                        <otherwise></otherwise>
+                    </choose>
                 </if>
                 <if test="#this['term.'+item+'$LT']!=null">
-                    AND ${$tableName}.${item} &lt;=#{term.${item+'$LT'}}
+                    <choose>
+                        <when test="$fieldsInfo[item] == 'date' ">
+                            AND ${$tableName}.${item} &lt;=to_date(#{term.${item+'$LT'}},'YYYY-MM-DD HH24:MI:SS')
+                        </when>
+                        <when test="$fieldsInfo[item] == 'number' ">
+                            AND ${$tableName}.${item} &lt;=#{term.${item+'$LT'}}
+                        </when>
+                        <otherwise></otherwise>
+                    </choose>
                 </if>
             </foreach>
         <!--动态生成查询条件结束-->
@@ -55,19 +81,19 @@
     <!--生成查询字段-->
     <sql id="selectField">
             <choose>
-                <!--指定查询的字段 -->
-                <when test="#this['includes']!=null and #this['includes'].size()>0">
-                    <foreach item="item" index="index" collection="#this['includes']" open="" separator="," close="">
+                <!--指定查询的字段-->
+                <when test="includes!=null and includes.size()>0">
+                    <foreach item="item" index="index" collection="$includes" open="" separator="," close="">
                         <if test="item in $fields">
-                            ${$tableName}.${item} as `${item}`
+                            ${$tableName}.${item} as "${item}"
                         </if>
                     </foreach>
                 </when>
                 <!--指定不查询的字段-->
-                <when test="(#this['includes']==null or #this['includes'].size()==0) and #this['excludes']!=null and #this['excludes'].size()>0">
+                <when test="(includes==null or includes.size()==0) and excludes!=null and excludes.size()>0">
                     <foreach item="item" index="index" collection="$fields" open=" " separator="," close="">
-                        <if test="!(item in #this['excludes'])">
-                            ${$tableName}.${item} as `${item}`
+                        <if test="!(item in excludes)">
+                            ${$tableName}.${item} as "${item}"
                         </if>
                     </foreach>
                 </when>
@@ -75,8 +101,20 @@
             </choose>
     </sql>
 
+    <select id="select" parameterType="org.hsweb.web.bean.common.QueryParam" resultType="map">
+        <include refid="selectSql"></include>
+    </select>
+
+    <select id="selectSql" parameterType="org.hsweb.web.bean.common.QueryParam" resultType="map">
+        ${$sql}
+    </select>
+
+    <select id="total" parameterType="org.hsweb.web.bean.common.QueryParam" resultType="int">
+        <include refid="totalSql"></include>
+    </select>
+
     <!--生成查询sql-->
-    <sql id="buildSelectSql">
+    <sql id="selectSql">
         SELECT
         <include refid="BasicMapper.selectField"/>
         FROM ${$tableName}

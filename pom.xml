@@ -16,19 +16,22 @@
         <module>hsweb-web-bean</module>
         <module>hsweb-web-core</module>
         <module>hsweb-web-websocket</module>
+        <module>hsweb-web-workflow</module>
     </modules>
 
     <properties>
         <!-- base setting -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.build.locales>zh_CN</project.build.locales>
-        <project.build.jdk>1.7</project.build.jdk>
 
-        <junit.version>4.11</junit.version>
+        <java.version>1.8</java.version>
+        <javassist.version>3.20.0-GA</javassist.version>
+        <project.build.jdk>${java.version}</project.build.jdk>
+
         <spring.boot.version>1.3.1.RELEASE</spring.boot.version>
         <fastjson.version>1.2.6</fastjson.version>
 
-        <cglib.version>3.1</cglib.version>
+        <cglib.version>3.2.2</cglib.version>
         <aspectj.version>1.6.12</aspectj.version>
         <hibernate.validator.version>5.1.1.Final</hibernate.validator.version>
         <webbuilder.version>1.0-SNAPSHOT</webbuilder.version>

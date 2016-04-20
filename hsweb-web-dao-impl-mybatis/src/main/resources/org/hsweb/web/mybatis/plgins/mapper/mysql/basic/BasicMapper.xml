@@ -76,7 +76,7 @@
     </sql>
 
     <!--生成查询sql-->
-    <sql id="buildSelectSql">
+    <sql id="selectSql">
         SELECT
         <include refid="BasicMapper.selectField"/>
         FROM ${$tableName}

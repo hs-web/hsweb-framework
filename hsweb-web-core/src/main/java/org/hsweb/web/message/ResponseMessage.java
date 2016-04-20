@@ -15,6 +15,7 @@ import java.util.*;
  */
 public class ResponseMessage implements Serializable {
     private static final long serialVersionUID = 8992436576262574064L;
+    private transient static final Logger LOGGER = LoggerFactory.getLogger(ResponseMessage.class);
 
     /**
      * message处理类，可以自定义message处理方案
@@ -46,43 +47,28 @@ public class ResponseMessage implements Serializable {
      * 注册默认的消息处理
      */
     static {
-        registerMessageHandler(Object.class, new MessageHandler<Object>() {
-            @Override
-            public Object handle(ResponseMessage message, Object msg) {
-                return msg;
-            }
-        });
+        registerMessageHandler(Object.class, (message, msg) -> msg);
         //默认异常信息处理
-        registerMessageHandler(Throwable.class, new MessageHandler<Throwable>() {
-            @Override
-            public Object handle(ResponseMessage message, Throwable e) {
-                LOGGER.error(e.getMessage(), e);
-                return e.getMessage();
-            }
+        registerMessageHandler(Throwable.class, (message, msg) -> {
+            LOGGER.error("", msg);
+            return msg.getMessage();
         });
         //默认业务异常信息处理
-        registerMessageHandler(BusinessException.class, new MessageHandler<BusinessException>() {
-            @Override
-            public Object handle(ResponseMessage message, BusinessException e) {
-                LOGGER.error(e.getMessage());
-                return e.getMessage();
-            }
+        registerMessageHandler(BusinessException.class, (message, msg) -> {
+            LOGGER.error(msg.getMessage());
+            return msg.getMessage();
         });
         //权限验证异常
-        registerMessageHandler(AuthorizeException.class, new MessageHandler<AuthorizeException>() {
-            @Override
-            public Object handle(ResponseMessage message, AuthorizeException e) {
-                message.setCode("502");
-                return e.getMessage();
-            }
+        registerMessageHandler(AuthorizeException.class, (message, msg) -> {
+            message.setCode("502");
+            return msg.getMessage();
         });
+
     }
 
     private static final <T> MessageHandler<T> getMessageHandler(Class<T> type) {
         return handlers.get(type);
     }
-
-    private transient static final Logger LOGGER = LoggerFactory.getLogger(ResponseMessage.class);
 
     /**
      * 是否成功
@@ -116,6 +102,8 @@ public class ResponseMessage implements Serializable {
 
     private transient boolean onlyData;
 
+    private transient String callback;
+
     public ResponseMessage(boolean success, Object data) {
         this.code = success ? "200" : "500";
         if (data == null)
@@ -146,17 +134,25 @@ public class ResponseMessage implements Serializable {
 
 
     public ResponseMessage include(Class<?> type, String... fileds) {
+        return include(type, Arrays.asList(fileds));
+    }
+
+    public ResponseMessage include(Class<?> type, Collection<String> fileds) {
         if (includes == null)
             includes = new HashMap<>();
-        getStringListFormMap(includes, type).addAll(Arrays.asList(fileds));
+        getStringListFormMap(includes, type).addAll(fileds);
+        return this;
+    }
+
+    public ResponseMessage exclude(Class type, Collection<String> fileds) {
+        if (excludes == null)
+            excludes = new HashMap<>();
+        getStringListFormMap(excludes, type).addAll(fileds);
         return this;
     }
 
     public ResponseMessage exclude(Class type, String... fileds) {
-        if (excludes == null)
-            excludes = new HashMap<>();
-        getStringListFormMap(excludes, type).addAll(Arrays.asList(fileds));
-        return this;
+        return exclude(type, Arrays.asList(fileds));
     }
 
     protected Set<String> getStringListFormMap(Map<Class<?>, Set<String>> map, Class type) {
@@ -228,5 +224,14 @@ public class ResponseMessage implements Serializable {
 
     public boolean isOnlyData() {
         return onlyData;
+    }
+
+    public ResponseMessage callback(String callback) {
+        this.callback = callback;
+        return this;
+    }
+
+    public String getCallback() {
+        return callback;
     }
 }
