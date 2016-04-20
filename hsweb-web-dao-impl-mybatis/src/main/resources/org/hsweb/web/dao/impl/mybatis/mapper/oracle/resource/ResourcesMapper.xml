@@ -6,80 +6,64 @@
 <mapper namespace="org.hsweb.web.dao.resource.ResourcesMapper">
     <resultMap id="ResourcesResultMap" type="Resources" >
         <id property="u_id" column="u_id" javaType="string" jdbcType="VARCHAR" />
-        <result property="u_id" column="u_id" javaType="String" jdbcType="VARCHAR" />
         <result property="name" column="name" javaType="String" jdbcType="VARCHAR" />
         <result property="path" column="path" javaType="String" jdbcType="VARCHAR" />
-        <result property="create_date" column="create_date" javaType="java.util.Date" jdbcType="TIMESTAMP" />
         <result property="creator_id" column="creator_id" javaType="String" jdbcType="VARCHAR" />
         <result property="md5" column="md5" javaType="String" jdbcType="VARCHAR" />
         <result property="type" column="type" javaType="String" jdbcType="VARCHAR" />
         <result property="status" column="status" javaType="int" jdbcType="INTEGER" />
+        <result property="create_date" column="create_date" javaType="java.util.Date" jdbcType="TIMESTAMP" />
     </resultMap>
 
     <!--字段信息绑定-->
     <sql id="fieldConfig">
-        <bind name="$fieldsType"
-              value="#{'u_id':'string','name':'string','path':'string','create_date':'date'
-                    ,'creator_id':'string','md5':'string','type':'string','status':'number'}"/>
-        <bind name="$fields" value="$fieldsType.keySet()"/>
+        <bind name="$fieldsInfo"
+              value="#{
+                    'u_id':#{'jdbcType':'VARCHAR','javaType':'string'}
+                    ,'name':#{'jdbcType':'VARCHAR','javaType':'string'}
+                    ,'path':#{'jdbcType':'VARCHAR','javaType':'string'}
+                    ,'creator_id':#{'jdbcType':'VARCHAR','javaType':'string'}
+                    ,'md5':#{'jdbcType':'VARCHAR','javaType':'string'}
+                    ,'type':#{'jdbcType':'VARCHAR','javaType':'string'}
+                    ,'status':#{'jdbcType':'INTEGER','javaType':'number'}
+                    ,'create_date':#{'jdbcType':'TIMESTAMP','javaType':'date'}
+                    }"/>
+        <bind name="$fields" value="$fieldsInfo.keySet()"/>
     </sql>
     <!--表名-->
     <sql id="tableName">
-        <bind name="$tableName" value="'S_RESOURCES'"/>
+        <bind name="$tableName" value="'s_resources'"/>
     </sql>
 
-    <insert id="insert" parameterType="Resources" useGeneratedKeys="true" keyProperty="u_id" keyColumn="U_ID">
-        INSERT INTO S_RESOURCES
-        (u_id,name,path,create_date,creator_id,md5,type,status)
-        VALUES
-        (#{u_id,jdbcType=VARCHAR},#{name,jdbcType=VARCHAR},#{path,jdbcType=VARCHAR},#{create_date,jdbcType=TIMESTAMP},#{creator_id,jdbcType=VARCHAR},#{md5,jdbcType=VARCHAR},#{type,jdbcType=VARCHAR},#{status,jdbcType=INTEGER})
+    <insert id="insert" parameterType="Resources" useGeneratedKeys="true" keyProperty="data.u_id" keyColumn="U_ID">
+        <include refid="fieldConfig"/>
+        <include refid="tableName"/>
+        <include refid="BasicMapper.buildInsertSql"/>
     </insert>
 
     <delete id="delete" parameterType="Resources" >
-        DELETE FROM S_RESOURCES WHERE u_id=#{u_id}
+        delete from s_resources where u_id=#{term.primaryKey}
     </delete>
 
-    <update id="update" parameterType="Resources" >
-        UPDATE S_RESOURCES
-        <set>
-            <if test="name != null">
-                name=#{name,jdbcType=VARCHAR},
-            </if>
-            <if test="path != null">
-                path=#{path,jdbcType=VARCHAR},
-            </if>
-            <if test="create_date != null">
-                create_date=#{create_date,jdbcType=TIMESTAMP},
-            </if>
-            <if test="creator_id != null">
-                creator_id=#{creator_id,jdbcType=VARCHAR},
-            </if>
-            <if test="md5 != null">
-                md5=#{md5,jdbcType=VARCHAR},
-            </if>
-            <if test="type != null">
-                type=#{type,jdbcType=VARCHAR},
-            </if>
-            <if test="status != null">
-                status=#{status,jdbcType=INTEGER},
-            </if>
-        </set>
-        WHERE u_id=#{u_id}
+    <update id="update" parameterType="org.hsweb.web.bean.common.UpdateParam">
+        <include refid="fieldConfig"/>
+        <include refid="tableName"/>
+        <include refid="BasicMapper.buildUpdateSql"/>
     </update>
 
     <select id="selectByPk" parameterType="string" resultMap="ResourcesResultMap">
-        SELECT * FROM S_RESOURCES WHERE u_id=#{u_id}
+        select * from s_resources WHERE u_id=#{u_id}
     </select>
 
     <select id="select" parameterType="org.hsweb.web.bean.common.QueryParam" resultMap="ResourcesResultMap">
         <include refid="fieldConfig"/>
         <include refid="tableName"/>
-        <include refid="BasicMapper.selectSql"/>
+        <include refid="BasicMapper.buildSelectSql"/>
     </select>
 
     <select id="total" parameterType="org.hsweb.web.bean.common.QueryParam" resultType="int">
         <include refid="fieldConfig"/>
         <include refid="tableName"/>
-        <include refid="BasicMapper.totalSql"/>
+        <include refid="BasicMapper.buildTotalSql"/>
     </select>
 </mapper>

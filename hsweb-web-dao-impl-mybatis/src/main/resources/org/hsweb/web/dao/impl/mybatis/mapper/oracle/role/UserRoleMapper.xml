@@ -6,7 +6,6 @@
 <mapper namespace="org.hsweb.web.dao.role.UserRoleMapper">
     <resultMap id="UserRoleResultMap" type="UserRole">
         <id property="u_id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
-        <result property="u_id" column="u_id" javaType="String" jdbcType="VARCHAR"/>
         <result property="user_id" column="user_id" javaType="String" jdbcType="VARCHAR"/>
         <result property="role_id" column="role_id" javaType="String" jdbcType="VARCHAR"/>
         <collection property="role" column="role_id" jdbcType="VARCHAR" ofType="Role"
@@ -15,7 +14,12 @@
 
     <!--字段信息配置-->
     <sql id="fieldConfig">
-        <bind name="$fieldsInfo" value="#{'u_id':'string','user_id':'string','role_id':'string'}"/>
+        <bind name="$fieldsInfo"
+              value="#{
+                    'u_id':#{'jdbcType':'VARCHAR','javaType':'string'}
+                    ,'user_id':#{'jdbcType':'VARCHAR','javaType':'string'}
+                    ,'role_id':#{'jdbcType':'VARCHAR','javaType':'string'}
+                    }"/>
         <bind name="$fields" value="$fieldsInfo.keySet()"/>
     </sql>
 
@@ -24,51 +28,39 @@
         <bind name="$tableName" value="'S_USER_ROLE'"/>
     </sql>
 
-    <insert id="insert" parameterType="UserRole" useGeneratedKeys="true" keyProperty="u_id" keyColumn="U_ID">
-        INSERT INTO S_USER_ROLE
-        (u_id,user_id,role_id)
-        VALUES
-        (#{u_id,jdbcType=VARCHAR},#{user_id,jdbcType=VARCHAR},#{role_id,jdbcType=VARCHAR})
+    <insert id="insert" parameterType="UserRole" useGeneratedKeys="true" keyProperty="data.u_id" keyColumn="U_ID">
+        <include refid="fieldConfig"/>
+        <include refid="tableName"/>
+        <include refid="BasicMapper.buildInsertSql"/>
     </insert>
 
-    <delete id="delete" parameterType="UserRole">
-        DELETE FROM S_USER_ROLE WHERE u_id=#{u_id}
+    <delete id="delete" parameterType="org.hsweb.web.bean.common.DeleteParam">
+        delete from s_user_role where u_id=#{term.primaryKey}
     </delete>
 
-    <delete id="deleteByUserId" parameterType="string">
-        DELETE FROM S_USER_ROLE WHERE user_id=#{user_id}
-    </delete>
-
-    <update id="update" parameterType="UserRole">
-        UPDATE S_USER_ROLE
-        <set>
-            <if test="user_id != null">
-                user_id=#{user_id,jdbcType=VARCHAR},
-            </if>
-            <if test="role_id != null">
-                role_id=#{role_id,jdbcType=VARCHAR},
-            </if>
-        </set>
-        WHERE u_id=#{u_id}
+    <update id="update" parameterType="org.hsweb.web.bean.common.UpdateParam">
+        <include refid="fieldConfig"/>
+        <include refid="tableName"/>
+        <include refid="BasicMapper.buildUpdateSql"/>
     </update>
 
     <select id="selectByUserId" parameterType="string" resultMap="UserRoleResultMap">
-        SELECT * FROM S_USER_ROLE WHERE user_id=#{user_id}
+        select * from s_user_role where user_id=#{user_id}
     </select>
 
     <select id="selectByPk" parameterType="string" resultMap="UserRoleResultMap">
-        SELECT * FROM S_USER_ROLE WHERE u_id=#{u_id}
+        select * from s_user_role where u_id=#{u_id}
     </select>
 
     <select id="select" parameterType="org.hsweb.web.bean.common.QueryParam" resultMap="UserRoleResultMap">
         <include refid="fieldConfig"/>
         <include refid="tableName"/>
-        <include refid="BasicMapper.selectSql"/>
+        <include refid="BasicMapper.buildSelectSql"/>
     </select>
 
     <select id="total" parameterType="org.hsweb.web.bean.common.QueryParam" resultType="int">
         <include refid="fieldConfig"/>
         <include refid="tableName"/>
-        <include refid="BasicMapper.totalSql"/>
+        <include refid="BasicMapper.buildTotalSql"/>
     </select>
 </mapper>
