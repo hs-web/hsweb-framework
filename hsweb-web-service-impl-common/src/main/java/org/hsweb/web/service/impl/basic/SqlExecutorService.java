@@ -12,7 +12,7 @@ import java.sql.Connection;
  * SQL执行服务类，用于执行原生sql
  * Created by 浩 on 2015-10-09 0009.
  */
-@Service
+@Service(value = "sqlExecutor")
 public class SqlExecutorService extends AbstractJdbcSqlExecutor {
 
     @Resource

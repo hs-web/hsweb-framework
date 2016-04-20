@@ -3,7 +3,7 @@ package org.hsweb.web.bean.common;
 /**
  * Created by zhouhao on 16-4-19.
  */
-public class UpdateParam<T> extends SqlParam<UpdateParam> {
+public class UpdateParam<T> extends SqlParam<UpdateParam<T>> {
     private T data;
 
     public UpdateParam() {
@@ -25,4 +25,5 @@ public class UpdateParam<T> extends SqlParam<UpdateParam> {
     public void setData(T data) {
         this.data = data;
     }
+
 }
