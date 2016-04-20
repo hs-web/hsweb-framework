@@ -10,6 +10,8 @@ import org.webbuilder.sql.TableMetaData;
 import org.webbuilder.utils.common.BeanUtils;
 
 import java.lang.reflect.Field;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -42,15 +44,17 @@ public class CommonFormParser implements FormParser {
                 } else {
                     if (value instanceof String) {
                         try {
-                            if (value.toString().trim().startsWith("[")
-                                    || value.toString().trim().startsWith("{"))
-                                value = castObj2JsonObject(value);
+                            String stringValue = ((String) value).trim();
+                            if (stringValue.startsWith("[")
+                                    || stringValue.startsWith("{"))
+                                value = JSON.parse(stringValue);
                         } catch (Throwable e) {
                         }
                     }
                     fieldMeta.attr(key, value);
                     metaData.addField(fieldMeta);
                 }
+                validField(fieldMeta);
             });
         });
         return metaData;
@@ -68,13 +72,35 @@ public class CommonFormParser implements FormParser {
         return obj;
     }
 
-    public void validField(JSONObject field) {
+    public void validField(FieldMetaData field) {
 
     }
 
-    public Class mapperJavaType(String str) {
+    protected static Map<String, Class> typeMapper = new HashMap() {{
+        put("", String.class);
+        put("null", String.class);
+        put("string", String.class);
+        put("String", String.class);
+        put("str", String.class);
+        put("int", Integer.class);
+        put("double", Double.class);
+        put("boolean", Boolean.class);
+        put("byte", Byte.class);
+        put("char", Character.class);
+        put("float", Double.class);
+        put("date", Date.class);
+        put("Date", Date.class);
+    }};
 
-        return null;
+    public Class mapperJavaType(String str) {
+        Class clazz = typeMapper.get(str);
+        if (clazz == null)
+            try {
+                clazz = Class.forName(str);
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        return clazz;
     }
 
     public static void main(String[] args) {
