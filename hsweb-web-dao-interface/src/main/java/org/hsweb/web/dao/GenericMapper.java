@@ -1,32 +1,35 @@
 package org.hsweb.web.dao;
 
+import org.hsweb.web.bean.common.DeleteParam;
+import org.hsweb.web.bean.common.InsertParam;
 import org.hsweb.web.bean.common.QueryParam;
+import org.hsweb.web.bean.common.UpdateParam;
 
 import java.util.List;
 
 /**
  * 通用dao，定义常用的增删改查操作。其他daoMapper接口继承此接口，则无需再定义这些方法
- * <p/>
+ * <p>
  * Created by zh.sqy@qq.com on 2015-07-20 0020.
  */
 public interface GenericMapper<Po, Pk> {
     /**
-     * 添加一条数据
+     * 根据参数添加一条数据
      *
-     * @param data 要添加的数据
+     * @param param 参数对象
      * @return 添加后生成的主键
      * @throws Exception 异常信息
      */
-    Pk insert(Po data) throws Exception;
+    void insert(InsertParam<Po> param) throws Exception;
 
     /**
-     * 根据主键删除记录
+     * 根据条件删除数据
      *
-     * @param pk 主键
+     * @param param 主键
      * @return 影响记录数
      * @throws Exception 异常信息
      */
-    int delete(Pk pk) throws Exception;
+    int delete(DeleteParam param) throws Exception;
 
     /**
      * 修改记录信息
@@ -35,7 +38,7 @@ public interface GenericMapper<Po, Pk> {
      * @return 影响记录数
      * @throws Exception 异常信息
      */
-    int update(Po data) throws Exception;
+    int update(UpdateParam<Po> data) throws Exception;
 
     /**
      * 根据条件集合查询记录，支持分页，排序。
