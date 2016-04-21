@@ -56,7 +56,26 @@ public class FormServiceImplTest extends AbstractTestCase {
         form = new Form();
         form.setName("test_form");
         form.setCreate_date(new Date());
-        form.setMeta("{\"ehFpAHYTFXZcPBBzyRmSBtmQSWdjMXxM\":[{\"key\":\"name\",\"value\":\"name\",\"describe\":\"名称\",\"_id\":45,\"_uid\":45,\"_state\":\"modified\"},{\"key\":\"comment\",\"value\":\"test\",\"describe\":\"字段描述\",\"_id\":46,\"_uid\":46,\"_state\":\"modified\"},{\"key\":\"javaType\",\"value\":\"string\",\"describe\":\"java类型\",\"_id\":47,\"_uid\":47},{\"key\":\"dataType\",\"value\":\"varchar2(32)\",\"describe\":\"数据库类型\",\"_id\":48,\"_uid\":48},{\"key\":\"_meta\",\"value\":\"textbox\",\"describe\":\"控件类型\",\"_id\":49,\"_uid\":49},{\"key\":\"validator-list\",\"value\":\"[]\",\"describe\":\"验证器\",\"_id\":50,\"_uid\":50},{\"key\":\"domProperty\",\"value\":\"[]\",\"describe\":\"其他控件配置\",\"_id\":51,\"_uid\":51}]}");
+        form.setMeta("{" +
+                "\"id1\":[" +
+                "{\"key\":\"name\",\"value\":\"u_id\",\"describe\":\"名称\"}," +
+                "{\"key\":\"comment\",\"value\":\"ID\",\"describe\":\"字段描述\"}," +
+                "{\"key\":\"javaType\",\"value\":\"string\",\"describe\":\"java类型\"}," +
+                "{\"key\":\"dataType\",\"value\":\"varchar2(32)\",\"describe\":\"数据库类型\"}," +
+                "{\"key\":\"primaryKey\",\"value\":\"true\",\"describe\":\"是否为主键\"}," +
+                "{\"key\":\"notNull\",\"value\":\"true\",\"describe\":\"不能为空\"}," +
+                "{\"key\":\"_meta\",\"value\":\"hidden\",\"describe\":\"控件类型\"}," +
+                "]" +
+                ",\"id2\":[" +
+                "{\"key\":\"name\",\"value\":\"name\",\"describe\":\"名称\"}," +
+                "{\"key\":\"comment\",\"value\":\"test\",\"describe\":\"字段描述\"}," +
+                "{\"key\":\"javaType\",\"value\":\"string\",\"describe\":\"java类型\"}," +
+                "{\"key\":\"dataType\",\"value\":\"varchar2(32)\",\"describe\":\"数据库类型\"}," +
+                "{\"key\":\"_meta\",\"value\":\"textbox\",\"describe\":\"控件类型\"}," +
+                "{\"key\":\"validator-list\",\"value\":\"[]\",\"describe\":\"验证器\"}," +
+                "{\"key\":\"domProperty\",\"value\":\"[]\",\"describe\":\"其他控件配置\"}" +
+                "]" +
+                "}");
         form.setU_id(RandomUtil.randomChar());
         formService.insert(form);
     }
@@ -66,7 +85,7 @@ public class FormServiceImplTest extends AbstractTestCase {
         //部署
         formService.deploy(form.getU_id());
         dataBase.getTable("test_form").createInsert()
-                .insert(new InsertParam().value("name", "张三"));
+                .insert(new InsertParam().value("name", "张三").value("u_id","test"));
 
         Map<String, Object> data = dataBase.getTable("test_form")
                 .createQuery().single(new QueryParam().where("name$LIKE", "张三"));
