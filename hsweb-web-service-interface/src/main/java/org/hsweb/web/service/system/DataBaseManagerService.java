@@ -12,6 +12,8 @@ public interface DataBaseManagerService {
 
     /**
      * 获取当前数据源中所有的表名
+     * 能自动获取数据库类型，并列出对于的表名
+     * 当前版本支持数据库:h2,mysql，oracle
      *
      * @return 表名集合
      */
@@ -19,6 +21,8 @@ public interface DataBaseManagerService {
 
     /**
      * 获取数据库表的字段信息
+     * 能自动获取数据库类型，并列出表对于的字段
+     * 当前版本支持数据库:h2,mysql，oracle
      *
      * @param tableName 数据库表名
      * @return 字段集合
