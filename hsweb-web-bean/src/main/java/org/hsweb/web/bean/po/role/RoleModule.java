@@ -17,10 +17,6 @@ import java.util.List;
  */
 public class RoleModule extends GenericPo<String> {
     private static final long serialVersionUID = 8910856253780046561L;
-    //主键
-    @NotNull
-    @NotEmpty
-    private String u_id;
 
     //模块主键
     @NotNull
@@ -39,23 +35,6 @@ public class RoleModule extends GenericPo<String> {
 
     private List<String> levels;
 
-    /**
-     * 获取 主键
-     *
-     * @return String 主键
-     */
-    public String getU_id() {
-        if (this.u_id == null)
-            return "";
-        return this.u_id;
-    }
-
-    /**
-     * 设置 主键
-     */
-    public void setU_id(String u_id) {
-        this.u_id = u_id;
-    }
 
     /**
      * 获取 模块主键

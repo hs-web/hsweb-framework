@@ -14,10 +14,6 @@ import javax.validation.constraints.Pattern;
  */
 public class DynamicScript extends GenericPo<String> {
     private static final long serialVersionUID = 8910856253780046561L;
-    //主键
-    @NotNull
-    @NotEmpty(message = "id不能为空")
-    private String u_id;
 
     //名称
     @Length(min = 4, message = "名称长度不能少于4")
@@ -40,24 +36,6 @@ public class DynamicScript extends GenericPo<String> {
 
     //状态
     private int status;
-
-    /**
-     * 获取 主键
-     *
-     * @return String 主键
-     */
-    public String getU_id() {
-        if (this.u_id == null)
-            return this.u_id = StringUtils.concat(getPath(), ".", getName(), ".", getType());
-        return this.u_id;
-    }
-
-    /**
-     * 设置 主键
-     */
-    public void setU_id(String u_id) {
-        this.u_id = u_id;
-    }
 
     /**
      * 获取 名称

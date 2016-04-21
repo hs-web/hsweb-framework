@@ -13,8 +13,6 @@ import java.util.Properties;
 public class Config extends GenericPo<String> {
 
     private static final long serialVersionUID = 5328848488856425388L;
-    //主键
-    private String u_id;
 
     //备注
     private String remark;
@@ -27,24 +25,6 @@ public class Config extends GenericPo<String> {
 
     //最后一次修改日期
     private java.util.Date update_date;
-
-    /**
-     * 获取 主键
-     *
-     * @return String 主键
-     */
-    public String getU_id() {
-        if (this.u_id == null)
-            return "";
-        return this.u_id;
-    }
-
-    /**
-     * 设置 主键
-     */
-    public void setU_id(String u_id) {
-        this.u_id = u_id;
-    }
 
     /**
      * 获取 备注

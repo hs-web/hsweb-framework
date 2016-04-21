@@ -10,9 +10,6 @@ public class Form extends GenericPo<String> {
 
     private static final long serialVersionUID = 8910856253780046561L;
 
-    //主键
-    private String u_id;
-
     //名称
     private String name;
 
@@ -40,23 +37,6 @@ public class Form extends GenericPo<String> {
     //最后一次修改时间
     private java.util.Date update_date;
 
-    /**
-     * 获取 主键
-     *
-     * @return String 主键
-     */
-    public String getU_id() {
-        if (this.u_id == null)
-            return "";
-        return this.u_id;
-    }
-
-    /**
-     * 设置 主键
-     */
-    public void setU_id(String u_id) {
-        this.u_id = u_id;
-    }
 
     /**
      * 获取 名称

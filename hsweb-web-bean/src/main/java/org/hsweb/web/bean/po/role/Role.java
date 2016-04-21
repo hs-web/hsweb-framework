@@ -14,10 +14,6 @@ public class Role extends GenericPo<String> {
 
     public static final String SYS_ROLE_ADMIN = "admin";
     private static final long serialVersionUID = 9197157871004374522L;
-    //主键
-    @NotNull
-    @NotEmpty(message = "主键不能为空")
-    private String u_id;
 
     //角色名称
     @NotNull
@@ -41,23 +37,6 @@ public class Role extends GenericPo<String> {
         this.modules = modules;
     }
 
-    /**
-     * 获取 主键
-     *
-     * @return String 主键
-     */
-    public String getU_id() {
-        if (this.u_id == null)
-            return "";
-        return this.u_id;
-    }
-
-    /**
-     * 设置 主键
-     */
-    public void setU_id(String u_id) {
-        this.u_id = u_id;
-    }
 
     /**
      * 获取 角色名称
