@@ -6,7 +6,6 @@
 <mapper namespace="org.hsweb.web.dao.script.DynamicScriptMapper">
     <resultMap id="DynamicScriptResultMap" type="DynamicScript" >
         <id property="u_id" column="u_id" javaType="string" jdbcType="VARCHAR" />
-        <result property="u_id" column="u_id" javaType="String" jdbcType="VARCHAR" />
         <result property="name" column="name" javaType="String" jdbcType="VARCHAR" />
         <result property="type" column="type" javaType="String" jdbcType="VARCHAR" />
         <result property="content" column="content" javaType="String" jdbcType="VARCHAR" />
@@ -18,7 +17,16 @@
     <!--字段配置-->
     <sql id="fieldConfig">
         <bind name="$fieldsInfo"
-              value="#{'u_id':'string','name':'string','type':'string','content':'string','remark':'string','path':'string','status':'number'}"/>
+              value="#{
+                    'u_id':#{'jdbcType':'VARCHAR','javaType':'string'}
+                    ,'name':#{'jdbcType':'VARCHAR','javaType':'string'}
+                    ,'type':#{'jdbcType':'VARCHAR','javaType':'string'}
+                    ,'content':#{'jdbcType':'VARCHAR','javaType':'string'}
+                    ,'remark':#{'jdbcType':'VARCHAR','javaType':'string'}
+                    ,'path':#{'jdbcType':'VARCHAR','javaType':'string'}
+                    ,'status':#{'jdbcType':'INTEGER','javaType':'int'}
+                    }"/>
+
         <bind name="$fields" value="$fieldsInfo.keySet()"/>
     </sql>
 
@@ -27,40 +35,20 @@
         <bind name="$tableName" value="'S_SCRIPT'"/>
     </sql>
 
-    <insert id="insert" parameterType="DynamicScript" useGeneratedKeys="true" keyProperty="u_id" keyColumn="U_ID">
-        INSERT INTO S_SCRIPT
-        (u_id,name,type,content,remark,path,status)
-        VALUES
-        (#{u_id,jdbcType=VARCHAR},#{name,jdbcType=VARCHAR},#{type,jdbcType=VARCHAR},#{content,jdbcType=VARCHAR},#{remark,jdbcType=VARCHAR},#{path,jdbcType=VARCHAR},#{status,jdbcType=INTEGER})
+    <insert id="insert" parameterType="DynamicScript" useGeneratedKeys="true" keyProperty="data.u_id" keyColumn="U_ID">
+        <include refid="fieldConfig"/>
+        <include refid="tableName"/>
+        <include refid="BasicMapper.buildInsertSql"/>
     </insert>
 
-    <delete id="delete" parameterType="DynamicScript" >
-        DELETE FROM S_SCRIPT WHERE u_id=#{u_id}
+    <delete id="delete" parameterType="UserRole">
+        delete from s_user_role where u_id=#{u_id}
     </delete>
 
-    <update id="update" parameterType="DynamicScript" >
-        UPDATE S_SCRIPT
-        <set>
-            <if test="name != null">
-                name=#{name,jdbcType=VARCHAR},
-            </if>
-            <if test="type != null">
-                type=#{type,jdbcType=VARCHAR},
-            </if>
-            <if test="content != null">
-                content=#{content,jdbcType=VARCHAR},
-            </if>
-            <if test="remark != null">
-                remark=#{remark,jdbcType=VARCHAR},
-            </if>
-            <if test="path != null">
-                path=#{path,jdbcType=VARCHAR},
-            </if>
-            <if test="status != null">
-                status=#{status,jdbcType=INTEGER},
-            </if>
-        </set>
-        WHERE u_id=#{u_id}
+    <update id="update" parameterType="org.hsweb.web.bean.common.UpdateParam">
+        <include refid="fieldConfig"/>
+        <include refid="tableName"/>
+        <include refid="BasicMapper.buildUpdateSql"/>
     </update>
 
     <select id="selectByPk" parameterType="string" resultMap="DynamicScriptResultMap">

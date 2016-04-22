@@ -6,7 +6,6 @@
 <mapper namespace="org.hsweb.web.dao.module.ModuleMapper">
     <resultMap id="ModuleResultMap" type="Module">
         <id property="u_id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
-        <result property="u_id" column="u_id" javaType="String" jdbcType="VARCHAR"/>
         <result property="name" column="name" javaType="String" jdbcType="VARCHAR"/>
         <result property="uri" column="uri" javaType="String" jdbcType="VARCHAR"/>
         <result property="icon" column="icon" javaType="String" jdbcType="VARCHAR"/>
@@ -20,7 +19,17 @@
     <!--字段信息绑定-->
     <sql id="fieldConfig">
         <bind name="$fieldsInfo"
-              value="#{'u_id':'string','name':'string','uri':'string','icon':'string','p_id':'string','sort_index':'number','m_option':'string','remark':'string','type':'string','status':'number'}"/>
+              value="#{
+                    'u_id':#{'jdbcType':'VARCHAR','javaType':'string'}
+                    ,'name':#{'jdbcType':'VARCHAR','javaType':'string'}
+                    ,'uri':#{'jdbcType':'VARCHAR','javaType':'string'}
+                    ,'icon':#{'jdbcType':'VARCHAR','javaType':'string'}
+                    ,'p_id':#{'jdbcType':'VARCHAR','javaType':'string'}
+                    ,'remark':#{'jdbcType':'VARCHAR','javaType':'string'}
+                    ,'status':#{'jdbcType':'INTEGER','javaType':'number'}
+                    ,'m_option':#{'jdbcType':'VARCHAR','javaType':'string'}
+                    ,'sort_index':#{'jdbcType':'INTEGER','javaType':'number'}
+                    }"/>
         <bind name="$fields" value="$fieldsInfo.keySet()"/>
     </sql>
     <!--表名-->
@@ -28,51 +37,24 @@
         <bind name="$tableName" value="'S_MODULES'"/>
     </sql>
 
-    <insert id="insert" parameterType="Module" useGeneratedKeys="true" keyProperty="u_id" keyColumn="U_ID">
-        INSERT INTO S_MODULES
-        (u_id,name,uri,icon,p_id,remark,status,m_option,sort_index)
-        VALUES
-        (#{u_id,jdbcType=VARCHAR},#{name,jdbcType=VARCHAR},#{uri,jdbcType=VARCHAR},#{icon,jdbcType=VARCHAR},#{p_id,jdbcType=VARCHAR},#{remark,jdbcType=VARCHAR},#{status,jdbcType=INTEGER},#{m_option,jdbcType=VARCHAR},#{sort_index,jdbcType=INTEGER})
+    <insert id="insert" parameterType="org.hsweb.web.bean.common.InsertParam" useGeneratedKeys="true" keyProperty="data.u_id" keyColumn="U_ID">
+        <include refid="fieldConfig"/>
+        <include refid="tableName"/>
+        <include refid="BasicMapper.buildInsertSql"/>
     </insert>
 
-    <delete id="delete" parameterType="Module">
-        DELETE FROM S_MODULES WHERE u_id=#{u_id}
+    <delete id="delete" parameterType="org.hsweb.web.bean.common.DeleteParam">
+        delete from s_modules where u_id=#{term.primaryKey}
     </delete>
 
-    <update id="update" parameterType="Module">
-        UPDATE S_MODULES
-        <set>
-            <if test="u_id != null">
-                u_id=#{u_id,jdbcType=VARCHAR},
-            </if>
-            <if test="name != null">
-                name=#{name,jdbcType=VARCHAR},
-            </if>
-            <if test="uri != null">
-                uri=#{uri,jdbcType=VARCHAR},
-            </if>
-            <if test="icon != null">
-                icon=#{icon,jdbcType=VARCHAR},
-            </if>
-            <if test="p_id != null">
-                p_id=#{p_id,jdbcType=VARCHAR},
-            </if>
-            <if test="remark != null">
-                remark=#{remark,jdbcType=VARCHAR},
-            </if>
-            <if test="status != null">
-                status=#{status,jdbcType=INTEGER},
-            </if>
-            <if test="m_option != null">
-                m_option=#{m_option,jdbcType=VARCHAR},
-            </if>
-            sort_index=#{sort_index,jdbcType=INTEGER}
-        </set>
-        WHERE u_id=#{old_id}
+    <update id="update" parameterType="org.hsweb.web.bean.common.UpdateParam">
+        <include refid="fieldConfig"/>
+        <include refid="tableName"/>
+        <include refid="BasicMapper.buildUpdateSql"/>
     </update>
 
     <select id="selectByPk" parameterType="string" resultMap="ModuleResultMap">
-        SELECT * FROM S_MODULES WHERE u_id=#{u_id}
+        select * from s_modules WHERE u_id=#{u_id}
     </select>
 
     <select id="select" parameterType="org.hsweb.web.bean.common.QueryParam" resultMap="ModuleResultMap">

@@ -6,12 +6,13 @@
 <mapper namespace="org.hsweb.web.dao.form.FormMapper">
     <resultMap id="FormResultMap" type="Form">
         <id property="u_id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
-        <result property="u_id" column="u_id" javaType="String" jdbcType="VARCHAR"/>
         <result property="name" column="name" javaType="String" jdbcType="VARCHAR"/>
         <result property="html" column="html" javaType="String" jdbcType="VARCHAR"/>
-        <result property="config" column="config" javaType="String" jdbcType="VARCHAR"/>
         <result property="meta" column="meta" javaType="String" jdbcType="VARCHAR"/>
+        <result property="config" column="config" javaType="String" jdbcType="VARCHAR"/>
         <result property="remark" column="remark" javaType="String" jdbcType="VARCHAR"/>
+        <result property="version" column="version" javaType="int" jdbcType="INTEGER"/>
+        <result property="using" column="using" javaType="boolean" jdbcType="INTEGER"/>
         <result property="create_date" column="create_date" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
         <result property="update_date" column="update_date" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
     </resultMap>
@@ -19,54 +20,76 @@
     <!--字段信息绑定-->
     <sql id="fieldConfig">
         <bind name="$fieldsInfo"
-              value="#{'u_id':'string','name':'string','html':'string','meta':'string'
-                        ,'config':'string','remark':'string','create_date':'string'
-                       ,'update_date':'string'}"/>
+              value="#{
+                    'u_id':#{'jdbcType':'VARCHAR','javaType':'string'}
+                    ,'name':#{'jdbcType':'VARCHAR','javaType':'string'}
+                    ,'html':#{'jdbcType':'VARCHAR','javaType':'string'}
+                    ,'meta':#{'jdbcType':'VARCHAR','javaType':'string'}
+                    ,'config':#{'jdbcType':'VARCHAR','javaType':'string'}
+                    ,'remark':#{'jdbcType':'VARCHAR','javaType':'string'}
+                    ,'version':#{'jdbcType':'INTEGER','javaType':'number'}
+                    ,'using':#{'jdbcType':'INTEGER','javaType':'boolean'}
+                    ,'create_date':#{'jdbcType':'VARCHAR','javaType':'date'}
+                    ,'update_date':#{'jdbcType':'VARCHAR','javaType':'date'}
+                    }"/>
+
         <bind name="$fields" value="$fieldsInfo.keySet()"/>
     </sql>
+
     <!--表名-->
     <sql id="tableName">
-        <bind name="$tableName" value="'S_FORM'"/>
+        <bind name="$tableName" value="'s_form'"/>
     </sql>
 
-    <insert id="insert" parameterType="Form" useGeneratedKeys="true" keyProperty="u_id" keyColumn="U_ID">
-        INSERT INTO S_FORM
-        (u_id,name,html,meta,config,remark,create_date,update_date)
-        VALUES
-        (#{u_id,jdbcType=VARCHAR},#{name,jdbcType=VARCHAR},#{html,jdbcType=VARCHAR},#{meta,jdbcType=VARCHAR},#{config,jdbcType=VARCHAR},#{remark,jdbcType=VARCHAR},#{create_date,jdbcType=TIMESTAMP},#{update_date,jdbcType=TIMESTAMP})
+    <insert id="insert" parameterType="org.hsweb.web.bean.common.InsertParam" useGeneratedKeys="true" keyProperty="data.u_id" keyColumn="U_ID">
+        <include refid="fieldConfig"/>
+        <include refid="tableName"/>
+        <include refid="BasicMapper.buildInsertSql"/>
     </insert>
 
-    <delete id="delete" parameterType="Form">
-        DELETE FROM S_FORM WHERE u_id=#{u_id}
+    <delete id="delete" parameterType="org.hsweb.web.bean.common.DeleteParam">
+        delete from s_form where u_id=#{term.primaryKey}
     </delete>
 
-    <update id="update" parameterType="Form">
-        UPDATE S_FORM
-        <set>
-            <if test="name != null">
-                name=#{name,jdbcType=VARCHAR},
-            </if>
-            <if test="html != null">
-                html=#{html,jdbcType=VARCHAR},
-            </if>
-            <if test="meta != null">
-                meta=#{meta,jdbcType=VARCHAR},
-            </if>
-            <if test="config != null">
-                config=#{config,jdbcType=VARCHAR},
-            </if>
-            <if test="remark != null">
-                remark=#{remark,jdbcType=VARCHAR},
-            </if>
-            <if test="update_date != null">
-                update_date=#{update_date,jdbcType=TIMESTAMP},
-            </if>
-        </set>
-        WHERE u_id=#{u_id}
+    <update id="update" parameterType="org.hsweb.web.bean.common.UpdateParam">
+        <include refid="fieldConfig"/>
+        <include refid="tableName"/>
+        <include refid="BasicMapper.buildUpdateSql"/>
     </update>
 
     <select id="selectByPk" parameterType="string" resultMap="FormResultMap">
-        SELECT * FROM S_FORM WHERE u_id=#{u_id}
+        select * from s_form WHERE u_id=#{u_id}
+    </select>
+
+    <select id="selectUsing" parameterType="string" resultMap="FormResultMap">
+        select * from s_form WHERE `using`=1 and `name`=#{name}
+    </select>
+
+    <select id="selectLatestList" parameterType="org.hsweb.web.bean.common.QueryParam" resultMap="FormResultMap">
+        <include refid="fieldConfig"/><!--定义字段配置-->
+        <bind name="$tableName" value="'t2'"/><!--定义表名-->
+        select
+        <include refid="BasicMapper.buildSelectField"/> <!--动态生成要查询的字段-->
+        from (
+        select s_form.name,max(s_form.version) as version from s_form s_form
+        <include refid="tableName"/>
+        <where>
+            <include refid="BasicMapper.buildWhere"/> <!--动态查询条件-->
+        </where>
+        group by name ) t1
+        left join s_form t2 on t1.name=t2.name and t1.version =t2.version
+    </select>
+
+    <select id="countLatestList" parameterType="org.hsweb.web.bean.common.QueryParam" resultType="int">
+        <include refid="fieldConfig"/>
+        <include refid="tableName"/>
+        select count(0) as total from (
+        select s_form.name,max(s_form.version) as version from s_form s_form
+        <where>
+            <include refid="BasicMapper.buildWhere"/>
+        </where>
+        group by name) t1
+        left join s_form t2 on t1.name=t2.name and t1.version =t2.version
     </select>
 
     <select id="select" parameterType="org.hsweb.web.bean.common.QueryParam" resultMap="FormResultMap">
