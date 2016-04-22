@@ -1,6 +1,7 @@
 package org.hsweb.web.service.impl.form;
 
 import org.hsweb.web.bean.po.form.Form;
+import org.hsweb.web.service.form.FormService;
 import org.hsweb.web.service.impl.AbstractTestCase;
 import org.hsweb.web.utils.RandomUtil;
 import org.junit.Assert;
@@ -26,15 +27,52 @@ import java.util.Map;
 public class FormServiceImplTest extends AbstractTestCase {
 
     @Resource
-    private FormServiceImpl formService;
+    protected FormService formService;
 
     @Resource
-    private DataBase dataBase;
+    protected DataBase dataBase;
 
     @Resource
-    private SqlExecutor sqlExecutor;
+    protected SqlExecutor sqlExecutor;
 
-    private Form form;
+    protected Form form;
+
+    private String[] meta = {
+            "{" +
+                    "\"id1\":[" +
+                    "{\"key\":\"name\",\"value\":\"u_id\",\"describe\":\"名称\"}," +
+                    "{\"key\":\"comment\",\"value\":\"ID\",\"describe\":\"字段描述\"}," +
+                    "{\"key\":\"javaType\",\"value\":\"string\",\"describe\":\"java类型\"}," +
+                    "{\"key\":\"dataType\",\"value\":\"varchar2(32)\",\"describe\":\"数据库类型\"}" +
+                    "]" +
+                    ",\"id2\":[" +
+                    "{\"key\":\"name\",\"value\":\"name\",\"describe\":\"名称\"}," +
+                    "{\"key\":\"comment\",\"value\":\"test\",\"describe\":\"字段描述\"}," +
+                    "{\"key\":\"javaType\",\"value\":\"string\",\"describe\":\"java类型\"}," +
+                    "{\"key\":\"dataType\",\"value\":\"varchar2(32)\",\"describe\":\"数据库类型\"}" +
+                    "]" +
+                    "}",
+            "{" +
+                    "\"id1\":[" +
+                    "{\"key\":\"name\",\"value\":\"u_id\",\"describe\":\"名称\"}," +
+                    "{\"key\":\"comment\",\"value\":\"ID\",\"describe\":\"字段描述\"}," +
+                    "{\"key\":\"javaType\",\"value\":\"string\",\"describe\":\"java类型\"}," +
+                    "{\"key\":\"dataType\",\"value\":\"varchar2(32)\",\"describe\":\"数据库类型\"}" +
+                    "]" +
+                    ",\"id2\":[" +
+                    "{\"key\":\"name\",\"value\":\"name\",\"describe\":\"名称\"}," +
+                    "{\"key\":\"comment\",\"value\":\"test\",\"describe\":\"字段描述\"}," +
+                    "{\"key\":\"javaType\",\"value\":\"string\",\"describe\":\"java类型\"}," +
+                    "{\"key\":\"dataType\",\"value\":\"varchar2(32)\",\"describe\":\"数据库类型\"}" +
+                    "]" +
+                    ",\"id3\":[" +
+                    "{\"key\":\"name\",\"value\":\"sex\",\"describe\":\"名称\"}," +
+                    "{\"key\":\"comment\",\"value\":\"test\",\"describe\":\"性别\"}," +
+                    "{\"key\":\"javaType\",\"value\":\"string\",\"describe\":\"java类型\"}," +
+                    "{\"key\":\"dataType\",\"value\":\"varchar2(32)\",\"describe\":\"数据库类型\"}" +
+                    "]" +
+                    "}"
+    };
 
     @Before
     public void setup() throws Exception {
@@ -52,30 +90,24 @@ public class FormServiceImplTest extends AbstractTestCase {
                 "  update_date date,\n" +
                 "  remark      varchar2(200)\n" +
                 ")"));
-
+        sqlExecutor.exec(new CommonSql("drop table if exists s_history"));
+        sqlExecutor.exec(new CommonSql("create table s_history\n" +
+                "(\n" +
+                "  u_id              varchar2(32) not null,\n" +
+                "  type              varchar2(64) not null,\n" +
+                "  describe          varchar2(512),\n" +
+                "  primary_key_name  varchar2(32),\n" +
+                "  primary_key_value varchar2(64),\n" +
+                "  change_before     clob,\n" +
+                "  change_after      clob,\n" +
+                "  create_date       date not null,\n" +
+                "  creator_id        varchar2(32)\n" +
+                ")"));
         form = new Form();
         form.setName("test_form");
         form.setCreate_date(new Date());
-        form.setMeta("{" +
-                "\"id1\":[" +
-                "{\"key\":\"name\",\"value\":\"u_id\",\"describe\":\"名称\"}," +
-                "{\"key\":\"comment\",\"value\":\"ID\",\"describe\":\"字段描述\"}," +
-                "{\"key\":\"javaType\",\"value\":\"string\",\"describe\":\"java类型\"}," +
-                "{\"key\":\"dataType\",\"value\":\"varchar2(32)\",\"describe\":\"数据库类型\"}," +
-                "{\"key\":\"primaryKey\",\"value\":\"true\",\"describe\":\"是否为主键\"}," +
-                "{\"key\":\"notNull\",\"value\":\"true\",\"describe\":\"不能为空\"}," +
-                "{\"key\":\"_meta\",\"value\":\"hidden\",\"describe\":\"控件类型\"}," +
-                "]" +
-                ",\"id2\":[" +
-                "{\"key\":\"name\",\"value\":\"name\",\"describe\":\"名称\"}," +
-                "{\"key\":\"comment\",\"value\":\"test\",\"describe\":\"字段描述\"}," +
-                "{\"key\":\"javaType\",\"value\":\"string\",\"describe\":\"java类型\"}," +
-                "{\"key\":\"dataType\",\"value\":\"varchar2(32)\",\"describe\":\"数据库类型\"}," +
-                "{\"key\":\"_meta\",\"value\":\"textbox\",\"describe\":\"控件类型\"}," +
-                "{\"key\":\"validator-list\",\"value\":\"[]\",\"describe\":\"验证器\"}," +
-                "{\"key\":\"domProperty\",\"value\":\"[]\",\"describe\":\"其他控件配置\"}" +
-                "]" +
-                "}");
+        form.setHtml("<input field-id='id1'/><input field-id='id2'/>");
+        form.setMeta(meta[0]);
         form.setU_id(RandomUtil.randomChar());
         formService.insert(form);
     }
@@ -85,11 +117,13 @@ public class FormServiceImplTest extends AbstractTestCase {
         //部署
         formService.deploy(form.getU_id());
         dataBase.getTable("test_form").createInsert()
-                .insert(new InsertParam().value("name", "张三").value("u_id","test"));
-
+                .insert(new InsertParam().value("name", "张三").value("u_id", "test"));
         Map<String, Object> data = dataBase.getTable("test_form")
                 .createQuery().single(new QueryParam().where("name$LIKE", "张三"));
-
         Assert.assertEquals("张三", data.get("name"));
+//        form.setMeta(meta[1]);
+//        formService.update(form);
+//        formService.deploy(form.getU_id());
     }
+
 }
