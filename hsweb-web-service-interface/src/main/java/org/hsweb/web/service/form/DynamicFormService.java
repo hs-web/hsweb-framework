@@ -1,7 +1,6 @@
 package org.hsweb.web.service.form;
 
-import org.hsweb.web.bean.common.PagerResult;
-import org.hsweb.web.bean.common.QueryParam;
+import org.hsweb.web.bean.common.*;
 import org.hsweb.web.bean.po.form.Form;
 
 import java.util.List;
@@ -22,11 +21,11 @@ public interface DynamicFormService {
 
     int total(String name, QueryParam param) throws Exception;
 
-    int insert(String name, Map<String, Object> data) throws Exception;
+    int insert(String name, InsertParam<Map<String, Object>> data) throws Exception;
 
-    int delete(String name, Map<String, Object> data) throws Exception;
+    int delete(String name,DeleteParam param) throws Exception;
 
-    int update(String name, Map<String, Object> data) throws Exception;
+    int update(String name, UpdateParam<Map<String, Object>> param) throws Exception;
 
     <T> T selectByPk(String name, Object pk) throws Exception;
 }

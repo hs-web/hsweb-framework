@@ -61,11 +61,22 @@ public interface FormService extends GenericService<Form, String> {
     void unDeploy(String formId) throws Exception;
 
     /**
-     * 创建当前已部署表单对应的html，用于前端渲染
+     * 创建当前已部署表单对应的html，用于前端渲染.
+     * 要创建的表单必须已经发布
      *
-     * @param formId 要创建html的表单ID或名称
+     * @param name 要创建html的表单名称
      * @return html字符串
      * @throws Exception
      */
-    String createHtml(String formId) throws Exception;
+    String createDeployHtml(String name) throws Exception;
+
+    /**
+     *  创建表单的html预览。
+     * @param id 表单ID
+     * @return html 字符串
+     * @throws Exception
+     */
+    String createViewHtml(String id) throws Exception;
+
+
 }
