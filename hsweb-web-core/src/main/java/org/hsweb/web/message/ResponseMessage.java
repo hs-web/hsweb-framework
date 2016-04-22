@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webbuilder.utils.common.DateTimeUtils;
 
+import javax.validation.ValidationException;
 import java.io.Serializable;
 import java.util.*;
 
@@ -61,6 +62,11 @@ public class ResponseMessage implements Serializable {
         //权限验证异常
         registerMessageHandler(AuthorizeException.class, (message, msg) -> {
             message.setCode("502");
+            return msg.getMessage();
+        });
+        //权限验证异常
+        registerMessageHandler(ValidationException.class, (message, msg) -> {
+            message.setCode("400");
             return msg.getMessage();
         });
 
