@@ -8,10 +8,7 @@ import org.hsweb.web.bean.po.form.Form;
 import org.hsweb.web.controller.GenericController;
 import org.hsweb.web.message.ResponseMessage;
 import org.hsweb.web.service.form.FormService;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -77,6 +74,24 @@ public class FormController extends GenericController<Form, String> {
         try {
             formService.unDeploy(id);
             return new ResponseMessage(true, "success");
+        } catch (Exception e) {
+            return new ResponseMessage(false, e);
+        }
+    }
+
+    @RequestMapping(value = "/{name}/html", method = RequestMethod.GET)
+    public ResponseMessage html(@PathVariable("name") String name) {
+        try {
+            return new ResponseMessage(true, formService.createDeployHtml(name));
+        } catch (Exception e) {
+            return new ResponseMessage(false, e);
+        }
+    }
+
+    @RequestMapping(value = "/{id}/view", method = RequestMethod.GET)
+    public ResponseMessage view(@PathVariable("id") String id) {
+        try {
+            return new ResponseMessage(true, formService.createViewHtml(id));
         } catch (Exception e) {
             return new ResponseMessage(false, e);
         }
