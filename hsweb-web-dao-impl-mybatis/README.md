@@ -1,5 +1,6 @@
 # mybatis dao实现
-主要功能：
+主要功能： 
+
 1. 实现各个功能dao
 2. 实现通用mapper
 3. 通用mapper 支持自动生成多种查询条件如: LIKE,IN,GT,LT等等,使用方式:查询条件名后追加关键字如: name$LIKE,id$IN
