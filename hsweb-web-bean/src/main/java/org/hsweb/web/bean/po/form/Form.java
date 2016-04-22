@@ -1,6 +1,10 @@
 package org.hsweb.web.bean.po.form;
 
+import org.hibernate.validator.constraints.Length;
 import org.hsweb.web.bean.po.GenericPo;
+
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 
 /**
  * 自定义表单
@@ -11,6 +15,9 @@ public class Form extends GenericPo<String> {
     private static final long serialVersionUID = 8910856253780046561L;
 
     //名称
+    @NotNull(message = "表单名称不能为null")
+    @Length(min = 4, message = "表名长度不能小于4")
+    @Pattern(regexp = "^[a-z][a-z0-9_]*$", message = "表名只能由字母开头,由字母,数字,下划线组成(字母只能为小写)")
     private String name;
 
     //表单
@@ -149,5 +156,9 @@ public class Form extends GenericPo<String> {
 
     public void setUsing(boolean using) {
         this.using = using;
+    }
+
+    public static void main(String[] args) {
+        System.out.println("AA2_2".matches("(^[a-z][a-z0-9_]*$)|(^[A-Z][A-Z0-9_]*$)"));
     }
 }
