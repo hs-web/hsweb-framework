@@ -8,4 +8,6 @@ import org.webbuilder.sql.TableMetaData;
  */
 public interface FormParser {
     TableMetaData parse(Form form);
+
+    String parseHtml(Form form);
 }

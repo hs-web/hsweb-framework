@@ -4,20 +4,28 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.hsweb.web.bean.po.form.Form;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 import org.webbuilder.sql.FieldMetaData;
 import org.webbuilder.sql.TableMetaData;
 import org.webbuilder.utils.common.BeanUtils;
+import org.webbuilder.utils.common.StringUtils;
 
 import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
  * Created by zhouhao on 16-4-20.
  */
 public class CommonFormParser implements FormParser {
+
     @Override
     public TableMetaData parse(Form form) {
         String meta = form.getMeta();
@@ -29,6 +37,7 @@ public class CommonFormParser implements FormParser {
         object.forEach((id, field) -> {
             if ("main".equals(id)) return;
             FieldMetaData fieldMeta = new FieldMetaData();
+            fieldMeta.attr("field-id", id);
             JSONArray obj = ((JSONArray) field);
             obj.forEach((defT) -> {
                 JSONObject def = ((JSONObject) defT);
@@ -52,28 +61,18 @@ public class CommonFormParser implements FormParser {
                         }
                     }
                     fieldMeta.attr(key, value);
-                    metaData.addField(fieldMeta);
                 }
                 validField(fieldMeta);
             });
+            metaData.addField(fieldMeta);
         });
         return metaData;
     }
 
-    protected JSONObject castObj2JsonObject(Object object) {
-        JSONObject obj = null;
-        if (object instanceof JSONObject) {
-            obj = ((JSONObject) object);
-        } else if (object instanceof Map) {
-            obj = new JSONObject(((Map) object));
-        } else if (object instanceof String) {
-            obj = JSON.parseObject(object.toString());
-        }
-        return obj;
-    }
 
     public void validField(FieldMetaData field) {
-
+        Assert.notNull(field.getName(), "字段名称不能为空!");
+        Assert.notNull(field.getJavaType(), "java类型未找到!");
     }
 
     protected static Map<String, Class> typeMapper = new HashMap() {{
@@ -103,7 +102,29 @@ public class CommonFormParser implements FormParser {
         return clazz;
     }
 
-    public static void main(String[] args) {
-
+    @Override
+    public String parseHtml(Form form) {
+        TableMetaData metaData = parse(form);
+        Element html = Jsoup.parse(form.getHtml());
+        metaData.getFields().forEach((field) -> {
+            String field_id = field.attrWrapper("field-id", "").toString();
+            if (!"".equals(field_id)) {
+                Elements elements = html.select("[field-id=\"" + field_id + "\"]");
+                Element input = elements.first();
+                if (null != input) {
+                    List<Map> domProperty = field.attrWrapper("domProperty", "[]").toList();
+                    domProperty.forEach((property) -> {
+                        Object value = property.get("value");
+                        Object key = property.get("key");
+                        if (StringUtils.isNullOrEmpty(value) || StringUtils.isNullOrEmpty(key)) return;
+                        input.attr(String.valueOf(property.get("key")), String.valueOf(value));
+                    });
+                    input.attr("name", field.getName());
+                    input.attr("id", field.getName());
+                    input.attr("class", field.attrWrapper("class").toString());
+                }
+            }
+        });
+        return html.toString();
     }
 }

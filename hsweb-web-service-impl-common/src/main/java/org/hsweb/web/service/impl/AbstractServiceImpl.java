@@ -36,6 +36,7 @@ public abstract class AbstractServiceImpl<Po, PK> implements GenericService<Po, 
 
     @Override
     public PK insert(Po data) throws Exception {
+        tryValidPo(data);
         getMapper().insert(new InsertParam<>(data));
         if (data instanceof GenericPo) {
             return (PK) ((GenericPo) data).getU_id();
