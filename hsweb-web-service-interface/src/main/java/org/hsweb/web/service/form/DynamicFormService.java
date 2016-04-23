@@ -21,11 +21,15 @@ public interface DynamicFormService {
 
     int total(String name, QueryParam param) throws Exception;
 
-    int insert(String name, InsertParam<Map<String, Object>> data) throws Exception;
+    String insert(String name, InsertParam<Map<String, Object>> data) throws Exception;
 
-    int delete(String name,DeleteParam param) throws Exception;
+    int delete(String name, DeleteParam param) throws Exception;
+
+    boolean deleteByPk(String name, String pk) throws Exception;
 
     int update(String name, UpdateParam<Map<String, Object>> param) throws Exception;
+
+    int updateByPk(String name, String pk, UpdateParam<Map<String, Object>> param) throws Exception;
 
     <T> T selectByPk(String name, Object pk) throws Exception;
 }
