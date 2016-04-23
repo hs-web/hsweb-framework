@@ -1,7 +1,9 @@
 package org.hsweb.web.service.impl.form;
 
 import com.alibaba.fastjson.JSON;
+import org.hsweb.web.Install;
 import org.hsweb.web.bean.common.*;
+import org.hsweb.web.bean.po.GenericPo;
 import org.hsweb.web.bean.po.form.Form;
 import org.hsweb.web.bean.po.history.History;
 import org.hsweb.web.service.form.DynamicFormService;
@@ -38,12 +40,34 @@ public class DynamicFormServiceImpl implements DynamicFormService {
     @Resource
     protected HistoryService historyService;
 
+    protected void initDefaultField(TableMetaData metaData) {
+        String dataType;
+        switch (Install.getDatabaseType()) {
+            case "oracle":
+                dataType = "varchar2(32)";
+                break;
+            case "h2":
+                dataType = "varchar2(32)";
+                break;
+            default:
+                dataType = "varchar(32)";
+        }
+        FieldMetaData UID = new FieldMetaData("u_id", String.class, dataType);
+        UID.setPrimaryKey(true);
+        UID.setNotNull(true);
+        UID.setComment("主键");
+        metaData.attr("primaryKey", "u_id");
+        metaData.addField(UID);
+
+    }
+
     @Override
     public void deploy(Form form) throws Exception {
         Lock writeLock = lock.writeLock();
         try {
             writeLock.lock();
             TableMetaData metaData = formParser.parse(form);
+            initDefaultField(metaData);
             History history = historyService.selectLastHistoryByType("form.deploy." + form.getName());
             //首次部署
             if (history == null) {
@@ -51,6 +75,7 @@ public class DynamicFormServiceImpl implements DynamicFormService {
             } else {
                 Form lastDeploy = JSON.parseObject(history.getChange_after(), Form.class);
                 TableMetaData lastDeployMetaData = formParser.parse(lastDeploy);
+                initDefaultField(lastDeployMetaData);
                 //向上发布
                 dataBase.updateTable(lastDeployMetaData);//先放入旧的结构
                 //更新结构
@@ -131,14 +156,32 @@ public class DynamicFormServiceImpl implements DynamicFormService {
     }
 
     @Override
-    public int insert(String name, InsertParam<Map<String, Object>> param) throws Exception {
+    public String insert(String name, InsertParam<Map<String, Object>> param) throws Exception {
         Lock readLock = lock.readLock();
         try {
             readLock.lock();
             Table table = getTableByName(name);
             Insert insert = table.createInsert();
-            boolean success = insert.insert(InsertParamProxy.build(param));
-            return success ? 1 : 0;
+            InsertParamProxy paramProxy = InsertParamProxy.build(param);
+            String primaryKeyName = getPrimaryKeyName(name);
+            String pk = GenericPo.createUID();
+            paramProxy.value(primaryKeyName, pk);
+            insert.insert(paramProxy);
+            return pk;
+        } finally {
+            readLock.unlock();
+        }
+    }
+
+    @Override
+    public boolean deleteByPk(String name, String pk) throws Exception {
+        Lock readLock = lock.readLock();
+        try {
+            readLock.lock();
+            String primaryKeyName = getPrimaryKeyName(name);
+            Table table = getTableByName(name);
+            Delete delete = table.createDelete();
+            return delete.delete(DeleteParamProxy.build(new DeleteParam()).where(primaryKeyName, pk)) == 1;
         } finally {
             readLock.unlock();
         }
@@ -158,6 +201,21 @@ public class DynamicFormServiceImpl implements DynamicFormService {
     }
 
     @Override
+    public int updateByPk(String name, String pk, UpdateParam<Map<String, Object>> param) throws Exception {
+        Lock readLock = lock.readLock();
+        try {
+            readLock.lock();
+            Table table = getTableByName(name);
+            Update update = table.createUpdate();
+            UpdateParamProxy paramProxy = UpdateParamProxy.build(param);
+            paramProxy.where(getPrimaryKeyName(name), pk);
+            return update.update(paramProxy);
+        } finally {
+            readLock.unlock();
+        }
+    }
+
+    @Override
     public int update(String name, UpdateParam<Map<String, Object>> param) throws Exception {
         Lock readLock = lock.readLock();
         try {
@@ -171,19 +229,20 @@ public class DynamicFormServiceImpl implements DynamicFormService {
         }
     }
 
+    public String getPrimaryKeyName(String tableName) throws Exception {
+        Table table = getTableByName(tableName);
+        return table.getMetaData().attrWrapper("primaryKey", "u_id").toString();
+    }
+
     @Override
     public <T> T selectByPk(String name, Object pk) throws Exception {
         Lock readLock = lock.readLock();
         try {
             readLock.lock();
             Table table = getTableByName(name);
-            Object pk_name = table.getMetaData().attr("primaryKey");
-            if (pk_name == null) {
-                pk_name = "u_id";
-            }
             Query query = table.createQuery();
             QueryParamProxy proxy = new QueryParamProxy();
-            proxy.where(String.valueOf(pk_name), pk);
+            proxy.where(getPrimaryKeyName(name), pk);
             return query.single(proxy);
         } finally {
             readLock.unlock();
