@@ -3,15 +3,15 @@
 -- ----------------------------
 
 CREATE TABLE `s_config` (
-  `u_id`    VARCHAR(32) NOT NULL PRIMARY KEY
+  `u_id`        VARCHAR(32) NOT NULL PRIMARY KEY
   COMMENT 'UID',
-  `content` TEXT        NOT NULL
+  `content`     TEXT        NOT NULL
   COMMENT '配置内容',
-  `remark`  VARCHAR(512)
+  `remark`      VARCHAR(512)
   COMMENT '备注',
-  `create_date` datetimeTIME NOT NULL
+  `create_date` DATETIME    NOT NULL
   COMMENT '创建日期',
-  `update_date` datetimeTIME
+  `update_date` DATETIME
   COMMENT '修改日期'
 );
 ALTER TABLE `s_config` COMMENT '系统配置文件表';
@@ -19,19 +19,19 @@ ALTER TABLE `s_config` COMMENT '系统配置文件表';
 -- Table structure for S_FORM
 -- ----------------------------
 CREATE TABLE `s_form` (
-  `u_id`    VARCHAR(32)  NOT NULL PRIMARY KEY
+  `u_id`        VARCHAR(32)  NOT NULL PRIMARY KEY
   COMMENT 'uid',
-  `name`    VARCHAR(256) NOT NULL
+  `name`        VARCHAR(256) NOT NULL
   COMMENT '名称',
-  `html`    TEXT COMMENT 'html内容',
-  `meta`    TEXT COMMENT '结构定义',
-  `config`  TEXT COMMENT '配置',
-  `version` INT COMMENT '版本',
-  `using`   TINYINT COMMENT '是否使用中',
-  `create_date` datetimeTIME NOT NULL
+  `html`        TEXT COMMENT 'html内容',
+  `meta`        TEXT COMMENT '结构定义',
+  `config`      TEXT COMMENT '配置',
+  `version`     INT COMMENT '版本',
+  `using`       TINYINT COMMENT '是否使用中',
+  `create_date` DATETIME     NOT NULL
   COMMENT '创建日期',
-  `update_date` datetimeTIME COMMENT '修改日期',
-  `remark`  VARCHAR(200)
+  `update_date` DATETIME COMMENT '修改日期',
+  `remark`      VARCHAR(200)
 );
 ALTER TABLE `s_form` COMMENT '动态表单';
 
