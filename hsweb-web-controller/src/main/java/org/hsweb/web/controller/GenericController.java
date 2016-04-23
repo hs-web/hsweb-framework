@@ -14,6 +14,7 @@ import org.webbuilder.utils.common.ClassUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -69,17 +70,10 @@ public abstract class GenericController<PO, PK> {
                 data = getService().select(param);
             else
                 data = getService().selectPager(param);
-            ResponseMessage responseMessage = new ResponseMessage(true, data).onlyData();
-            Set<String> includes = param.getIncludes();
-            Set<String> excludes = param.getIncludes();
-
-            if (includes != null && includes.size() > 0) {
-                responseMessage.include(getPOType(), includes.toArray(new String[includes.size()]));
-            }
-            if (excludes != null && excludes.size() > 0) {
-                responseMessage.exclude(getPOType(), excludes.toArray(new String[excludes.size()]));
-            }
-            return responseMessage;
+            return new ResponseMessage(true, data)
+                    .include(getPOType(), param.getIncludes())
+                    .exclude(getPOType(), param.getExcludes())
+                    .onlyData();
         } catch (Exception e) {
             return new ResponseMessage(false, e);
         }
