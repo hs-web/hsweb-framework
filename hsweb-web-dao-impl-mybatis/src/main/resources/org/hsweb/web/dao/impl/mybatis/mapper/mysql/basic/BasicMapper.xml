@@ -59,7 +59,7 @@
             <when test="includes!=null and includes.size()>0">
                 <foreach item="item" index="index" collection="includes" open="" separator="," close="">
                     <if test="item in $fields">
-                        ${$tableName}.${item} as `{item}`
+                        ${$tableName}.${item} as `${item}`
                     </if>
                 </foreach>
             </when>
