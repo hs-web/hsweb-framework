@@ -117,15 +117,15 @@ COMMENT ON COLUMN "S_MODULES"."REMARK" IS '备注';
 COMMENT ON COLUMN "S_MODULES"."STATUS" IS '状态';
 COMMENT ON COLUMN "S_MODULES"."M_OPTION" IS '可选权限';
 COMMENT ON COLUMN "S_MODULES"."SORT_INDEX" IS '排序';
-
 -- ----------------------------
 -- Records of S_MODULES
 -- ----------------------------
-INSERT INTO "S_MODULES" VALUES ('sys', '系统设置', NULL, 'am-icon-cog', '-1', '系统权限', '1', '[]', '10000');
-INSERT INTO "S_MODULES" VALUES ('module', '权限管理', 'page/module/list.html', 'am-icon-th', 'sys', NULL, '1', '[{"id":"C","text":"新增","checked":false},{"id":"R","text":"查询","checked":false},{"id":"U","text":"修改","checked":false},{"id":"D","text":"删除","checked":false},{"id":"M","text":"菜单可见","checked":true}]', '110000');
-INSERT INTO "S_MODULES" VALUES ('role', '角色管理', 'page/role/list.html', 'fa fa-users', 'sys', '初始数据', '1', '[{"id":"M", "text":"菜单可见", "uri":""},{"id":"C", "text":"新增", "uri":""},{"id":"R", "text":"查询", "uri":""},{"id":"U", "text":"修改", "uri":""},{"id":"D", "text":"删除", "uri":""}]            ', '120000');
-INSERT INTO "S_MODULES" VALUES ('user', '用户管理', 'page/user/list.html', 'fa fa-user', 'sys', '初始数据', '1', '[{"id":"M", "text":"菜单可见", "uri":""},{"id":"C", "text":"新增", "uri":""},{"id":"R", "text":"查询", "uri":""},{"id":"U", "text":"修改", "uri":""},{"id":"D", "text":"删除", "uri":""}]            ', '130000');
-INSERT INTO "S_MODULES" VALUES ('s_logger', '日志管理', 'page/logger/list.html', 'fa fa-book', 'sys', NULL, '1', '[{"id":"M","text":"菜单可见","checked":true},{"id":"R","text":"查询","checked":false}]', '140000');
+INSERT INTO "S_MODULES" VALUES ('sys', '系统设置', NULL, 'fa fa-cog', '-1', '系统权限', '1', '[]', '1');
+INSERT INTO "S_MODULES" VALUES ('form', '表单管理', 'admin/form/list.html', 'fa fa-wpforms', 'sys', NULL, '1', '[{"id":"M","text":"菜单可见","checked":true},{"id":"C","text":"新增","checked":false},{"id":"R","text":"查询","checked":false},{"id":"U","text":"修改","checked":false},{"id":"D","text":"删除","checked":false},{"id":"deploy","text":"发布","checked":false}]', '1');
+INSERT INTO "S_MODULES" VALUES ('module', '权限管理', 'admin/module/list.html', 'fa fa-list-alt', 'sys', NULL, '1', '[{"id":"M","text":"菜单可见","checked":true},{"id":"C","text":"新增","checked":false},{"id":"R","text":"查询","checked":false},{"id":"U","text":"修改","checked":false},{"id":"D","text":"删除","checked":false}]', '2');
+INSERT INTO "S_MODULES" VALUES ('role', '角色管理', 'admin/role/list.html', 'fa fa-users', 'sys', '初始数据', '1', '[{"id":"M", "text":"菜单可见", "uri":""},{"id":"C", "text":"新增", "uri":""},{"id":"R", "text":"查询", "uri":""},{"id":"U", "text":"修改", "uri":""},{"id":"D", "text":"删除", "uri":""}]', '3');
+INSERT INTO "S_MODULES" VALUES ('user', '用户管理', 'admin/user/list.html', 'fa fa-user', 'sys', '初始数据', '1', '[{"id":"M", "text":"菜单可见", "uri":""},{"id":"C", "text":"新增", "uri":""},{"id":"R", "text":"查询", "uri":""},{"id":"U", "text":"修改", "uri":""},{"id":"D", "text":"删除", "uri":""}]', '4');
+INSERT INTO "S_MODULES" VALUES ('s_logger', '日志管理', 'admin/logger/list.html', 'fa fa-book', 'sys', NULL, '1', '[{"id":"M","text":"菜单可见","checked":true},{"id":"R","text":"查询","checked":false}]', '140000');
 
 -- ----------------------------
 -- Table structure for S_RESOURCES
@@ -268,3 +268,14 @@ CREATE TABLE "S_HISTORY"
   "CREATE_DATE"       DATETIME     NOT NULL,
   "CREATOR_ID"        VARCHAR2(32)
 );
+
+
+ALTER TABLE "S_CONFIG" ADD PRIMARY KEY ("U_ID");
+ALTER TABLE "S_LOGGER" ADD PRIMARY KEY ("U_ID");
+ALTER TABLE "S_MODULES" ADD PRIMARY KEY ("U_ID");
+ALTER TABLE "S_RESOURCES" ADD PRIMARY KEY ("U_ID");
+ALTER TABLE "S_ROLE" ADD PRIMARY KEY ("U_ID");
+ALTER TABLE "S_ROLE_MODULES" ADD PRIMARY KEY ("U_ID");
+ALTER TABLE "S_SCRIPT" ADD PRIMARY KEY ("U_ID");
+ALTER TABLE "S_USER" ADD PRIMARY KEY ("U_ID");
+ALTER TABLE "S_USER_ROLE" ADD PRIMARY KEY ("U_ID");
