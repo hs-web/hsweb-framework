@@ -31,6 +31,8 @@
         <spring.boot.version>1.3.1.RELEASE</spring.boot.version>
         <fastjson.version>1.2.6</fastjson.version>
 
+        <h2.version>1.4.191</h2.version>
+        <mysql.version>5.1.38</mysql.version>
         <cglib.version>3.2.2</cglib.version>
         <aspectj.version>1.6.12</aspectj.version>
         <hibernate.validator.version>5.1.1.Final</hibernate.validator.version>
@@ -131,17 +133,17 @@
             </dependency>
 
             <!--<dependency>-->
-                <!--<groupId>com.vaadin</groupId>-->
-                <!--<artifactId>vaadin-bom</artifactId>-->
-                <!--<version>7.6.4</version>-->
-                <!--<type>pom</type>-->
-                <!--<scope>import</scope>-->
+            <!--<groupId>com.vaadin</groupId>-->
+            <!--<artifactId>vaadin-bom</artifactId>-->
+            <!--<version>7.6.4</version>-->
+            <!--<type>pom</type>-->
+            <!--<scope>import</scope>-->
             <!--</dependency>-->
 
             <dependency>
                 <groupId>com.h2database</groupId>
                 <artifactId>h2</artifactId>
-                <version>1.4.191</version>
+                <version>${h2.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.oracle</groupId>
@@ -151,7 +153,7 @@
             <dependency>
                 <groupId>mysql</groupId>
                 <artifactId>mysql-connector-java</artifactId>
-                <version>5.1.38</version>
+                <version>${mysql.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.hsweb</groupId>
@@ -202,7 +204,7 @@
         <repository>
             <id>hsweb-nexus</id>
             <name>Nexus Release Repository</name>
-            <url>http://121.199.3.43:8889/nexus/content/repositories/public/</url>
+            <url>http://121.199.3.43/content/groups/public/</url>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
@@ -213,12 +215,12 @@
         <repository>
             <id>releases</id>
             <name>Nexus Release Repository</name>
-            <url>http://121.199.3.43:8889/nexus/content/repositories/releases/</url>
+            <url>http://121.199.3.43/content/repositories/releases/</url>
         </repository>
         <snapshotRepository>
             <id>snapshots</id>
             <name>Nexus Snapshot Repository</name>
-            <url>http://121.199.3.43:8889/nexus/content/repositories/snapshots/</url>
+            <url>http://121.199.3.43/content/repositories/snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
 </project>
