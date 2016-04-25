@@ -17,7 +17,7 @@ public class Module extends GenericPo<String> implements Comparable<Module> {
     private static final long serialVersionUID = 8910856253780046561L;
 
     //模块名称
-    @NotNull
+    @NotNull(message = "名称不能为空")
     @NotEmpty(message = "名称不能为空")
     private String name;
 
@@ -40,7 +40,7 @@ public class Module extends GenericPo<String> implements Comparable<Module> {
     private String m_option;
 
     //排序
-    private int sort_index;
+    private long sort_index;
 
     private String old_id;
 
@@ -150,11 +150,11 @@ public class Module extends GenericPo<String> implements Comparable<Module> {
         this.status = status;
     }
 
-    public int getSort_index() {
+    public long getSort_index() {
         return sort_index;
     }
 
-    public void setSort_index(int sort_index) {
+    public void setSort_index(long sort_index) {
         this.sort_index = sort_index;
     }
 
@@ -186,17 +186,6 @@ public class Module extends GenericPo<String> implements Comparable<Module> {
      */
     public void setM_option(String m_option) {
         this.m_option = m_option;
-    }
-
-    @Override
-    public int hashCode() {
-        return getU_id().hashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) return false;
-        return this.hashCode() == obj.hashCode();
     }
 
     @Override
