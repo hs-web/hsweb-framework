@@ -21,7 +21,10 @@
             <artifactId>spring-boot-starter-web</artifactId>
             <optional>true</optional>
         </dependency>
-
+        <dependency>
+            <groupId>org.webbuilder</groupId>
+            <artifactId>wb-sql-util</artifactId>
+        </dependency>
     </dependencies>
 
 </project>
