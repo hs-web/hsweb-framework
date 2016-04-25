@@ -1,17 +1,11 @@
 package org.hsweb.web.bean.po;
 
 
-import org.hsweb.web.bean.valid.ValidResults;
 import org.webbuilder.utils.common.MD5;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
 import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -62,34 +56,6 @@ public class GenericPo<PK> implements Serializable {
      */
     public static String createUID() {
         return MD5.encode(UUID.randomUUID().toString());
-    }
-
-    /**
-     * 使用hibernate验证器验证一个对象
-     *
-     * @param object 需要验证的对象
-     * @return 验证结果
-     */
-    public static final ValidResults valid(Object object) {
-        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-        Validator validator = factory.getValidator();
-        Set<ConstraintViolation<Object>> set = validator.validate(object);
-        ValidResults results = new ValidResults();
-        if (set.size() != 0) {
-            for (ConstraintViolation<Object> violation : set) {
-                results.addResult(violation.getPropertyPath().toString(), violation.getMessage());
-            }
-        }
-        return results;
-    }
-
-    /**
-     * 验证自生
-     *
-     * @return 验证结果
-     */
-    public ValidResults valid() {
-        return valid(this);
     }
 
     public Map<String, Object> getCustomAttr() {
