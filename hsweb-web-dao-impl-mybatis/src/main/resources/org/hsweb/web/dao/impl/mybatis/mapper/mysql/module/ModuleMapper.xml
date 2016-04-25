@@ -13,7 +13,7 @@
         <result property="remark" column="remark" javaType="String" jdbcType="VARCHAR"/>
         <result property="status" column="status" javaType="int" jdbcType="INTEGER"/>
         <result property="m_option" column="m_option" javaType="String" jdbcType="VARCHAR"/>
-        <result property="sort_index" column="sort_index" javaType="int" jdbcType="INTEGER"/>
+        <result property="sort_index" column="sort_index" javaType="long" jdbcType="INTEGER"/>
     </resultMap>
 
     <!--字段信息绑定-->
