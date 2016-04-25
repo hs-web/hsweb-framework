@@ -7,10 +7,14 @@ import org.hsweb.web.dao.GenericMapper;
 import org.hsweb.web.service.GenericService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.validation.ConstraintViolation;
 import javax.validation.ValidationException;
+import javax.validation.Validator;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by 浩 on 2016-01-22 0022.
@@ -18,6 +22,9 @@ import java.util.List;
 @Transactional(rollbackFor = Throwable.class)
 public abstract class AbstractServiceImpl<Po, PK> implements GenericService<Po, PK> {
     protected Logger logger = LoggerFactory.getLogger(this.getClass());
+
+    @Autowired
+    protected Validator validator;
 
     protected abstract GenericMapper<Po, PK> getMapper();
 
@@ -87,11 +94,12 @@ public abstract class AbstractServiceImpl<Po, PK> implements GenericService<Po, 
     }
 
     protected void tryValidPo(Po data) {
-        ValidResults results;
-        if (data instanceof GenericPo) {
-            results = ((GenericPo) data).valid();
-        } else {
-            results = GenericPo.valid(data);
+        Set<ConstraintViolation<Object>> set = validator.validate(data);
+        ValidResults results = new ValidResults();
+        if (set.size() != 0) {
+            for (ConstraintViolation<Object> violation : set) {
+                results.addResult(violation.getPropertyPath().toString(), violation.getMessage());
+            }
         }
         if (!results.isSuccess())
             throw new ValidationException(results.toString());
