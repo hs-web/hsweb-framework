@@ -54,11 +54,13 @@
     </sql>
     <!--生成查询字段-->
     <sql id="buildSelectField">
+        <bind name="fieldHasLen" value="false"/>
         <choose>
             <!--指定查询的字段-->
             <when test="includes!=null and includes.size()>0">
                 <foreach item="item" index="index" collection="includes" open="" separator="," close="">
                     <if test="item in $fields">
+                        <bind name="fieldHasLen" value="true"/>
                         ${$tableName}.${item} as `${item}`
                     </if>
                 </foreach>
@@ -67,12 +69,14 @@
             <when test="(includes==null or includes.size()==0) and excludes!=null and excludes.size()>0">
                 <foreach item="item" index="index" collection="$fields" open=" " separator="," close="">
                     <if test="!(item in excludes)">
+                        <bind name="fieldHasLen" value="true"/>
                         ${$tableName}.${item} as `${item}`
                     </if>
                 </foreach>
             </when>
-            <otherwise>*</otherwise>
+            <otherwise> <bind name="fieldHasLen" value="true"/>*</otherwise>
         </choose>
+        <if test="!fieldHasLen">*</if>
     </sql>
 
     <!--生成修改字段-->
@@ -151,6 +155,23 @@
         </choose>
     </sql>
 
+    <!--生成排序字段-->
+    <sql id="buildSortField">
+        <bind name="fieldHasLen" value="false"/>
+        <choose>
+            <!--指定排序的字段-->
+            <when test="sortField!=null and sortField.size()>0">
+                <foreach item="item" index="index" collection="sortField" open="" separator="," close="">
+                    <if test="item in $fields">
+                        <if test="!fieldHasLen"> order by </if>${item}
+                        <bind name="fieldHasLen" value="true"/>
+                    </if>
+                </foreach>
+                <if test="fieldHasLen"> ${sortOrder}</if>
+            </when>
+        </choose>
+    </sql>
+
     <!--生成查询sql-->
     <sql id="buildSelectSql">
         select
@@ -159,6 +180,7 @@
         <where>
             <include refid="BasicMapper.buildWhere"/>
         </where>
+        <include refid="BasicMapper.buildSortField"/>
     </sql>
 
     <!--生成InsertSql-->
