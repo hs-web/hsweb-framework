@@ -12,8 +12,7 @@ import org.webbuilder.utils.common.StringUtils;
 public class MysqlPagerHelper implements PagerHelper {
     @Override
     public String doPaging(QueryParam param, String sql) {
-        StringBuilder builder = new StringBuilder();
-        builder.append(buildSortSql(param, sql)); //sql格式化
+        StringBuilder builder = new StringBuilder(sql);
         if (param.isPaging())
             builder.append(" limit ")
                     .append(param.getPageSize() * param.getPageIndex())
@@ -22,16 +21,6 @@ public class MysqlPagerHelper implements PagerHelper {
         return builder.toString();
     }
 
-    protected String buildSortSql(QueryParam param, String sql) {
-        StringBuilder builder = new StringBuilder(sql);
-        if (!StringUtils.isNullOrEmpty(param.getSortField())) {
-            builder.append(" order by ").append(param.getSortField());
-            if (!StringUtils.isNullOrEmpty(param.getSortOrder())) {
-                builder.append(" ").append(param.getSortOrder());
-            }
-        }
-        return builder.toString();
-    }
 
     @Override
     public String getDialect() {
