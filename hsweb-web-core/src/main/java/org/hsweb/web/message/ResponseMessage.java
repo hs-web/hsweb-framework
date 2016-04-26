@@ -110,6 +110,14 @@ public class ResponseMessage implements Serializable {
 
     private transient String callback;
 
+    public Map<String, Object> toMap() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("success", this.success);
+        map.put("data", this.getData());
+        map.put("code", this.getCode());
+        return map;
+    }
+
     public ResponseMessage(boolean success, Object data) {
         this.code = success ? "200" : "500";
         if (data == null)
