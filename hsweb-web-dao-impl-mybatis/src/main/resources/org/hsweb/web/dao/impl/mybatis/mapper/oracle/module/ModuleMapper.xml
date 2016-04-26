@@ -34,7 +34,7 @@
     </sql>
     <!--表名-->
     <sql id="tableName">
-        <bind name="$tableName" value="'S_MODULES'"/>
+        <bind name="$tableName" value="'s_modules'"/>
     </sql>
 
     <insert id="insert" parameterType="org.hsweb.web.bean.common.InsertParam" useGeneratedKeys="true" keyProperty="data.u_id" keyColumn="U_ID">
