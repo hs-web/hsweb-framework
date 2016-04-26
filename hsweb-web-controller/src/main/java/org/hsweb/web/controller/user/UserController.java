@@ -35,7 +35,7 @@ public class UserController extends GenericController<User, String> {
 
     @Override
     @AccessLogger("获取列表")
-    public ResponseMessage list(QueryParam param) {
+    public ResponseMessage list(QueryParam param) throws Exception {
         param.excludes("password");
         return super.list(param)
                 .exclude(User.class, "password", "modules", "userRoles")
@@ -44,22 +44,18 @@ public class UserController extends GenericController<User, String> {
 
     @Override
     @AccessLogger("获取用户详情")
-    public ResponseMessage info(@PathVariable("id") String id) {
+    public ResponseMessage info(@PathVariable("id") String id) throws Exception {
         return super.info(id).exclude(User.class, "password", "modules");
     }
 
     @Override
     @AccessLogger("删除")
-    public ResponseMessage delete(@PathVariable("id") String id) {
-        try {
-            User user = getService().selectByPk(id);
-            if (user == null) return new ResponseMessage(false, "该用户不存在!", "404");
-            user.setStatus(-1);
-            getService().update(user);
-            return new ResponseMessage(true, "删除成功");
-        } catch (Exception e) {
-            return new ResponseMessage(false, e);
-        }
+    public ResponseMessage delete(@PathVariable("id") String id) throws Exception {
+        User user = getService().selectByPk(id);
+        if (user == null) return new ResponseMessage(false, "该用户不存在!", "404");
+        user.setStatus(-1);
+        getService().update(user);
+        return new ResponseMessage(true, "删除成功");
     }
 
 

@@ -33,7 +33,7 @@ public class RoleController extends GenericController<Role, String> {
     }
 
     @Override
-    public ResponseMessage list(QueryParam param) {
+    public ResponseMessage list(QueryParam param)throws Exception {
         return super.list(param).exclude(Role.class, "modules");
     }
 }

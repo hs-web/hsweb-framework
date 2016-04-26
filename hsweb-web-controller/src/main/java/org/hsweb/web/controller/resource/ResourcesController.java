@@ -43,7 +43,7 @@ public class ResourcesController extends GenericController<Resources, String> {
      */
     @Override
     @Authorize(role = Role.SYS_ROLE_ADMIN)
-    public ResponseMessage delete(@PathVariable("id") String id) {
+    public ResponseMessage delete(@PathVariable("id") String id)throws Exception {
         return super.delete(id);
     }
 
@@ -56,25 +56,21 @@ public class ResourcesController extends GenericController<Resources, String> {
     @RequestMapping(value = "/{id:^[0-9a-zA-Z]*$}", method = RequestMethod.GET)
     @ResponseBody
     @AccessLogger("获取资源信息")
-    public ResponseMessage info(@PathVariable("id") String id) {
-        try {
-            Resources resources;
-            //如果id长度为32，则尝试通过md5获取
-            if (id.length() == 32) {
-                resources = getService().selectByMd5(id);
-                if (resources == null)
-                    resources = getService().selectByPk(id);
-            } else
-                resources = resourcesService.selectByPk(id);
-            if (resources == null) {
-                return new ResponseMessage(false, "资源不存在！", "404");
-            } else {
-                if (resources.getStatus() != 1)
-                    return new ResponseMessage(false, "拒绝访问！", "502");
-                return new ResponseMessage(true, resources);
-            }
-        } catch (Exception e) {
-            return new ResponseMessage(false, e);
+    public ResponseMessage info(@PathVariable("id") String id) throws Exception {
+        Resources resources;
+        //如果id长度为32，则尝试通过md5获取
+        if (id.length() == 32) {
+            resources = getService().selectByMd5(id);
+            if (resources == null)
+                resources = getService().selectByPk(id);
+        } else
+            resources = resourcesService.selectByPk(id);
+        if (resources == null) {
+            return new ResponseMessage(false, "资源不存在！", "404");
+        } else {
+            if (resources.getStatus() != 1)
+                return new ResponseMessage(false, "拒绝访问！", "502");
+            return new ResponseMessage(true, resources);
         }
     }
 

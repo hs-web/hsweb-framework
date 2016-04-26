@@ -63,21 +63,17 @@ public abstract class GenericController<PO, PK> {
     @RequestMapping(method = RequestMethod.GET)
     @AccessLogger("查询列表")
     @Authorize(action = "R")
-    public ResponseMessage list(QueryParam param) {
+    public ResponseMessage list(QueryParam param) throws Exception {
         // 获取条件查询
-        try {
-            Object data;
-            if (!param.isPaging())//不分页
-                data = getService().select(param);
-            else
-                data = getService().selectPager(param);
-            return new ResponseMessage(true, data)
-                    .include(getPOType(), param.getIncludes())
-                    .exclude(getPOType(), param.getExcludes())
-                    .onlyData();
-        } catch (Exception e) {
-            return new ResponseMessage(false, e);
-        }
+        Object data;
+        if (!param.isPaging())//不分页
+            data = getService().select(param);
+        else
+            data = getService().selectPager(param);
+        return new ResponseMessage(true, data)
+                .include(getPOType(), param.getIncludes())
+                .exclude(getPOType(), param.getExcludes())
+                .onlyData();
     }
 
     /**
@@ -89,15 +85,11 @@ public abstract class GenericController<PO, PK> {
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     @AccessLogger("查询明细")
     @Authorize(action = "R")
-    public ResponseMessage info(@PathVariable("id") PK id) {
-        try {
-            PO po = getService().selectByPk(id);
-            if (po == null)
-                return new ResponseMessage(false, "data is not found!", "404");
-            return new ResponseMessage(true, po);
-        } catch (Exception e) {
-            return new ResponseMessage(false, e);
-        }
+    public ResponseMessage info(@PathVariable("id") PK id) throws Exception {
+        PO po = getService().selectByPk(id);
+        if (po == null)
+            return new ResponseMessage(false, "data is not found!", "404");
+        return new ResponseMessage(true, po);
     }
 
 
@@ -110,13 +102,9 @@ public abstract class GenericController<PO, PK> {
     @RequestMapping(value = "/total", method = RequestMethod.GET)
     @AccessLogger("查询总数")
     @Authorize(action = "R")
-    public ResponseMessage total(QueryParam param) {
-        try {
-            // 获取条件查询
-            return new ResponseMessage(true, getService().total(param));
-        } catch (Exception e) {
-            return new ResponseMessage(false, e);
-        }
+    public ResponseMessage total(QueryParam param) throws Exception {
+        // 获取条件查询
+        return new ResponseMessage(true, getService().total(param));
     }
 
     /**
@@ -128,7 +116,7 @@ public abstract class GenericController<PO, PK> {
     @RequestMapping(method = RequestMethod.POST)
     @AccessLogger("新增")
     @Authorize(action = "C")
-    public ResponseMessage add(@RequestBody PO object) {
+    public ResponseMessage add(@RequestBody PO object) throws Exception {
         try {
             PK pk = getService().insert(object);
             return new ResponseMessage(true, pk);
@@ -146,13 +134,9 @@ public abstract class GenericController<PO, PK> {
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
     @AccessLogger("删除")
     @Authorize(action = "D")
-    public ResponseMessage delete(@PathVariable("id") PK id) {
-        try {
-            int number = getService().delete(id);
-            return new ResponseMessage(true, number);
-        } catch (Exception e) {
-            return new ResponseMessage(false, e);
-        }
+    public ResponseMessage delete(@PathVariable("id") PK id) throws Exception {
+        int number = getService().delete(id);
+        return new ResponseMessage(true, number);
     }
 
     /**
@@ -164,16 +148,12 @@ public abstract class GenericController<PO, PK> {
     @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
     @AccessLogger("修改")
     @Authorize(action = "U")
-    public ResponseMessage update(@PathVariable("id") PK id, @RequestBody(required = true) PO object) {
-        try {
-            if (object instanceof GenericPo) {
-                ((GenericPo) object).setU_id(id);
-            }
-            int number = getService().update(object);
-            return new ResponseMessage(true, number);
-        } catch (Exception e) {
-            return new ResponseMessage(false, e);
+    public ResponseMessage update(@PathVariable("id") PK id, @RequestBody(required = true) PO object) throws Exception {
+        if (object instanceof GenericPo) {
+            ((GenericPo) object).setU_id(id);
         }
+        int number = getService().update(object);
+        return new ResponseMessage(true, number);
     }
 
     /**
@@ -185,23 +165,19 @@ public abstract class GenericController<PO, PK> {
     @RequestMapping(method = RequestMethod.PUT)
     @AccessLogger("批量修改")
     @Authorize(action = "U")
-    public ResponseMessage update(@RequestBody(required = true) String json) {
-        try {
-            int number;
-            if (json.startsWith("[")) {
-                List<PO> datas = JSON.parseArray(json, getPOType());
-                number = getService().update(datas);
-            } else if (json.startsWith("{")) {
-                PO data = JSON.parseObject(json, getPOType());
-                List<PO> datas = new ArrayList<>();
-                datas.add(data);
-                number = getService().update(datas);
-            } else {
-                return new ResponseMessage(false, "数据错误");
-            }
-            return new ResponseMessage(true, number);
-        } catch (Exception e) {
-            return new ResponseMessage(false, e);
+    public ResponseMessage update(@RequestBody(required = true) String json) throws Exception {
+        int number;
+        if (json.startsWith("[")) {
+            List<PO> datas = JSON.parseArray(json, getPOType());
+            number = getService().update(datas);
+        } else if (json.startsWith("{")) {
+            PO data = JSON.parseObject(json, getPOType());
+            List<PO> datas = new ArrayList<>();
+            datas.add(data);
+            number = getService().update(datas);
+        } else {
+            return new ResponseMessage(false, "数据错误");
         }
+        return new ResponseMessage(true, number);
     }
 }

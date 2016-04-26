@@ -137,19 +137,19 @@ public class ConfigController extends GenericController<Config, String> {
 
     @Override
     @RequestMapping(value = "/{id:.+}", method = RequestMethod.GET)
-    public ResponseMessage info(@PathVariable("id") String id) {
+    public ResponseMessage info(@PathVariable("id") String id)throws Exception {
         return super.info(id);
     }
 
     @Override
     @Authorize(module = "config", action = "C")
-    public ResponseMessage add(@RequestBody Config object) {
+    public ResponseMessage add(@RequestBody Config object)throws Exception {
         return super.add(object);
     }
 
     @Override
     @Authorize(module = "config", action = "U")
-    public ResponseMessage update(@PathVariable("id") String id, @RequestBody Config object) {
+    public ResponseMessage update(@PathVariable("id") String id, @RequestBody Config object)throws Exception {
         return super.update(id, object);
     }
 }
