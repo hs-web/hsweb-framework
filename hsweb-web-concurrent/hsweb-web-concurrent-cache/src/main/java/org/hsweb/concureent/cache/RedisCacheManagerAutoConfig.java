@@ -1,5 +1,6 @@
 package org.hsweb.concureent.cache;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachingConfigurerSupport;
 import org.springframework.cache.annotation.EnableCaching;
@@ -8,9 +9,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.jedis.JedisConnection;
+import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
+import redis.clients.jedis.Jedis;
 
 
 /**
@@ -18,7 +22,13 @@ import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer
  */
 @EnableCaching
 @Configuration
-public class RedisCacheConfig extends CachingConfigurerSupport {
+@ConditionalOnClass({ JedisConnection.class, RedisOperations.class, Jedis.class })
+public class RedisCacheManagerAutoConfig extends CachingConfigurerSupport {
+
+    @Bean
+    public CacheManager cacheManager(RedisTemplate redisTemplate) {
+        return new RedisCacheManager(redisTemplate);
+    }
 
     @Bean
     public KeyGenerator wiselyKeyGenerator() {
@@ -32,11 +42,6 @@ public class RedisCacheConfig extends CachingConfigurerSupport {
             }
             return sb.toString();
         };
-    }
-
-    @Bean
-    public CacheManager cacheManager(RedisTemplate redisTemplate) {
-        return new RedisCacheManager(redisTemplate);
     }
 
     @Bean
