@@ -77,10 +77,7 @@ public class FastJsonHttpMessageConverter extends AbstractHttpMessageConverter<O
         return JSON.parseObject(bytes, 0, bytes.length, charset.newDecoder(), clazz);
     }
 
-    @Override
-    protected void writeInternal(Object obj, HttpOutputMessage outputMessage) throws IOException,
-            HttpMessageNotWritableException {
-        OutputStream out = outputMessage.getBody();
+    public String converter(Object obj) {
         String text;
         if (obj instanceof ResponseMessage) {
             ResponseMessage message = (ResponseMessage) obj;
@@ -96,7 +93,15 @@ public class FastJsonHttpMessageConverter extends AbstractHttpMessageConverter<O
         } else {
             text = JSON.toJSONString(obj, features);
         }
-        byte[] bytes = text.getBytes(charset);
+        return text;
+    }
+
+    @Override
+    protected void writeInternal(Object obj, HttpOutputMessage outputMessage) throws IOException,
+            HttpMessageNotWritableException {
+        OutputStream out = outputMessage.getBody();
+
+        byte[] bytes = converter(obj).getBytes(charset);
         out.write(bytes);
         out.flush();
     }
