@@ -1,5 +1,6 @@
 package org.hsweb.web.bean.po.user;
 
+import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.hsweb.web.bean.po.GenericPo;
 import org.hsweb.web.bean.po.role.Role;
@@ -10,6 +11,7 @@ import org.webbuilder.utils.common.MapUtils;
 
 import javax.validation.constraints.NotNull;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 后台管理用户
@@ -32,6 +34,7 @@ public class User extends GenericPo<String> {
     private String name;
 
     //邮箱
+    @Email(message = "邮箱格式错误")
     private String email;
 
     //联系电话
@@ -54,17 +57,17 @@ public class User extends GenericPo<String> {
     /**
      * 判断此用户是否拥有对指定模块的访问权限
      *
-     * @param mId    模块id
-     * @param levels 访问级别
+     * @param mId     模块id
+     * @param actions 访问级别
      * @return 是否能够访问
      */
-    public boolean hasAccessModuleLevel(String mId, String... levels) {
+    public boolean hasAccessModuleAction(String mId, String... actions) {
         if (!hasAccessModule(mId)) return false;
-        if (levels == null || levels.length == 0) return hasAccessModule(mId);
+        if (actions == null || actions.length == 0) return hasAccessModule(mId);
         Set<String> lv = roleInfo.get(getModule(mId));
         if (lv != null)
-            for (String level : levels) {
-                if (lv.contains(level)) return true;
+            for (String action : actions) {
+                if (lv.contains(action)) return true;
             }
         return false;
     }
@@ -82,22 +85,17 @@ public class User extends GenericPo<String> {
     }
 
     public Set<Module> getModulesByPid(String pid) {
-        Set<Module> modules = new LinkedHashSet<>();
-        for (Module module : getModules()) {
-            if (pid.equals(module.getP_id())) {
-                modules.add(module);
-            }
-        }
+        Set<Module> modules = getModules()
+                .stream()
+                .filter(module -> pid.equals(module.getP_id()))
+                .collect(Collectors.toCollection(() -> new LinkedHashSet<>()));
         return modules;
     }
 
     public Set<Module> getModulesByPid(String pid, String level) {
-        Set<Module> modules = new LinkedHashSet<>();
-        for (Module module : getModules()) {
-            if (module.getP_id().equals(pid) && hasAccessModuleLevel(module.getU_id(), level)) {
-                modules.add(module);
-            }
-        }
+        Set<Module> modules = getModules().stream()
+                .filter(module -> module.getP_id().equals(pid) && hasAccessModuleAction(module.getU_id(), level))
+                .collect(Collectors.toCollection(() -> new LinkedHashSet<>()));
         return modules;
     }
 
