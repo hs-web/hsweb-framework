@@ -4,15 +4,14 @@ import com.alibaba.fastjson.JSON;
 import org.hsweb.web.authorize.annotation.Authorize;
 import org.hsweb.web.bean.common.QueryParam;
 import org.hsweb.web.bean.po.GenericPo;
+import org.hsweb.web.exception.BusinessException;
 import org.hsweb.web.logger.annotation.AccessLogger;
 import org.hsweb.web.message.ResponseMessage;
 import org.hsweb.web.service.GenericService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 import org.webbuilder.utils.common.ClassUtils;
 
 import java.util.ArrayList;
@@ -88,7 +87,7 @@ public abstract class GenericController<PO, PK> {
     public ResponseMessage info(@PathVariable("id") PK id) throws Exception {
         PO po = getService().selectByPk(id);
         if (po == null)
-            return new ResponseMessage(false, "data is not found!", "404");
+            throw new BusinessException("data is not found!", 404);
         return new ResponseMessage(true, po);
     }
 
@@ -116,13 +115,10 @@ public abstract class GenericController<PO, PK> {
     @RequestMapping(method = RequestMethod.POST)
     @AccessLogger("新增")
     @Authorize(action = "C")
+    @ResponseStatus(HttpStatus.CREATED)
     public ResponseMessage add(@RequestBody PO object) throws Exception {
-        try {
-            PK pk = getService().insert(object);
-            return new ResponseMessage(true, pk);
-        } catch (Exception e) {
-            return new ResponseMessage(false, e);
-        }
+        PK pk = getService().insert(object);
+        return new ResponseMessage(true, pk);
     }
 
     /**
@@ -135,6 +131,8 @@ public abstract class GenericController<PO, PK> {
     @AccessLogger("删除")
     @Authorize(action = "D")
     public ResponseMessage delete(@PathVariable("id") PK id) throws Exception {
+        PO old = getService().selectByPk(id);
+        if (old == null) throw new BusinessException("data is not found!", 404);
         int number = getService().delete(id);
         return new ResponseMessage(true, number);
     }
@@ -149,6 +147,8 @@ public abstract class GenericController<PO, PK> {
     @AccessLogger("修改")
     @Authorize(action = "U")
     public ResponseMessage update(@PathVariable("id") PK id, @RequestBody(required = true) PO object) throws Exception {
+        PO old = getService().selectByPk(id);
+        if (old == null) throw new BusinessException("data is not found!", 404);
         if (object instanceof GenericPo) {
             ((GenericPo) object).setU_id(id);
         }
@@ -176,7 +176,7 @@ public abstract class GenericController<PO, PK> {
             datas.add(data);
             number = getService().update(datas);
         } else {
-            return new ResponseMessage(false, "数据错误");
+            throw new BusinessException("请求数据格式错误!");
         }
         return new ResponseMessage(true, number);
     }
