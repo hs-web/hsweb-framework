@@ -13,6 +13,7 @@
     <dependencies>
 
         <!--test-->
+
         <dependency>
             <groupId>org.hsweb</groupId>
             <artifactId>hsweb-web-dao-impl-mybatis</artifactId>
@@ -23,6 +24,7 @@
             <artifactId>spring-boot-starter-web</artifactId>
             <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>com.oracle</groupId>
             <artifactId>ojdbc14</artifactId>
@@ -33,12 +35,24 @@
             <artifactId>h2</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.hsweb</groupId>
+            <artifactId>hsweb-web-concurrent-cache</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.hsweb</groupId>
+            <artifactId>hsweb-web-concurrent-lock</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>javax.el</groupId>
             <artifactId>el-api</artifactId>
             <version>2.2</version>
             <scope>provided</scope>
         </dependency>
+
         <dependency>
             <groupId>org.webbuilder</groupId>
             <artifactId>wb-sql-util</artifactId>

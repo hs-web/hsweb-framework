@@ -1,6 +1,7 @@
 package org.hsweb.web.service.impl.form;
 
 import com.alibaba.fastjson.JSON;
+import org.hsweb.web.authorize.annotation.Authorize;
 import org.hsweb.web.bean.common.QueryParam;
 import org.hsweb.web.bean.common.UpdateParam;
 import org.hsweb.web.bean.po.form.Form;
@@ -51,7 +52,7 @@ public class FormServiceImpl extends AbstractServiceImpl<Form, String> implement
     protected DynamicFormService dynamicFormService;
 
     @Override
-    @Cacheable(value = CACHE_KEY, key = "#id")
+    @Cacheable(value = CACHE_KEY, key = "'form.'+#id")
     public Form selectByPk(String id) throws Exception {
         return super.selectByPk(id);
     }
@@ -80,7 +81,7 @@ public class FormServiceImpl extends AbstractServiceImpl<Form, String> implement
     }
 
     @Override
-    @CacheEvict(value = {CACHE_KEY, CACHE_KEY + "_html_view"}, key = "#data.u_id")
+    @CacheEvict(value = {CACHE_KEY}, key = "'form.'+#data.u_id")
     public int update(Form data) throws Exception {
         Form old = this.selectByPk(data.getU_id());
         Assert.notNull(old, "表单不存在!");
@@ -89,7 +90,7 @@ public class FormServiceImpl extends AbstractServiceImpl<Form, String> implement
     }
 
     @Override
-    @CacheEvict(value = CACHE_KEY, key = "#id")
+    @CacheEvict(value = CACHE_KEY, key = "'form.'+#id")
     public int delete(String id) throws Exception {
         Form old = this.selectByPk(id);
         Assert.notNull(old, "表单不存在!");
@@ -110,8 +111,29 @@ public class FormServiceImpl extends AbstractServiceImpl<Form, String> implement
     }
 
     @Override
+    public Form selectByVersion(String name, int version) throws Exception {
+        QueryParam param = QueryParam.newInstance()
+                .where("name", name).where("version", version);
+        List<Form> formList = formMapper.selectLatestList(param);
+        return formList.size() > 0 ? formList.get(0) : null;
+    }
+
+    @Override
+    public Form selectLatest(String name) throws Exception {
+        QueryParam param = QueryParam.newInstance()
+                .where("name", name).orderBy("version").desc().doPaging(0, 1);
+        List<Form> formList = formMapper.selectLatestList(param);
+        return formList.size() > 0 ? formList.get(0) : null;
+    }
+
+    @Override
     @Transactional(rollbackFor = Throwable.class)
-    @CacheEvict(value = {CACHE_KEY + "_html"}, allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(value = {CACHE_KEY + ".deploy"},
+                    key = "'form.deploy.'+target.selectByPk(#formId).getName()+'.html'"),
+            @CacheEvict(value = {CACHE_KEY},
+                    key = "'form.using.'+target.selectByPk(#formId).getName()")
+    })
     public void deploy(String formId) throws Exception {
         Form old = this.selectByPk(formId);
         Assert.notNull(old, "表单不存在");
@@ -146,7 +168,7 @@ public class FormServiceImpl extends AbstractServiceImpl<Form, String> implement
     }
 
     @Override
-    @Cacheable(value = CACHE_KEY + "_html", key = "#name")
+    @Cacheable(value = CACHE_KEY + ".deploy", key = "'form.deploy.'+#name+'.html'")
     public String createDeployHtml(String name) throws Exception {
         History history = historyService.selectLastHistoryByType("form.deploy." + name);
         Assert.notNull(history, "表单不存在");
@@ -154,10 +176,17 @@ public class FormServiceImpl extends AbstractServiceImpl<Form, String> implement
     }
 
     @Override
-    @Cacheable(value = CACHE_KEY + "_html_view", key = "#name")
     public String createViewHtml(String formId) throws Exception {
         Form form = this.selectByPk(formId);
         Assert.notNull(form, "表单不存在");
         return formParser.parseHtml(form);
     }
+
+    @Override
+    @Cacheable(value = CACHE_KEY, key = "'form.using.'+#name")
+    public Form selectUsing(String name) throws Exception {
+        return formMapper.selectUsing(name);
+    }
+
+
 }

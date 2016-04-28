@@ -1,8 +1,10 @@
 package org.hsweb.web.service.impl.form;
 
 import com.alibaba.fastjson.JSON;
+import org.hsweb.concurrent.lock.LockFactory;
 import org.hsweb.web.Install;
 import org.hsweb.web.bean.common.*;
+import org.hsweb.web.bean.common.QueryParam;
 import org.hsweb.web.bean.po.GenericPo;
 import org.hsweb.web.bean.po.form.Form;
 import org.hsweb.web.bean.po.history.History;
@@ -13,10 +15,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.webbuilder.sql.*;
+import org.webbuilder.sql.param.query.*;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -26,7 +31,11 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 @Service("dynamicFormService")
 public class DynamicFormServiceImpl implements DynamicFormService {
-    protected ReadWriteLock lock = new ReentrantReadWriteLock();
+
+    @Autowired
+    protected LockFactory lockFactory;
+
+    protected Lock writeLock, readLock;
 
     @Autowired(required = false)
     protected FormParser formParser = new CommonFormParser();
@@ -61,9 +70,16 @@ public class DynamicFormServiceImpl implements DynamicFormService {
 
     }
 
+    @PostConstruct
+    public void init() {
+        ReadWriteLock readWriteLock = lockFactory.createReadWriteLock("dynamicForm.lock");
+        writeLock = readWriteLock.writeLock();
+        readLock = readWriteLock.readLock();
+    }
+
     @Override
     public void deploy(Form form) throws Exception {
-        Lock writeLock = lock.writeLock();
+
         try {
             writeLock.lock();
             TableMetaData metaData = formParser.parse(form);
@@ -88,7 +104,6 @@ public class DynamicFormServiceImpl implements DynamicFormService {
 
     @Override
     public void unDeploy(Form form) throws Exception {
-        Lock writeLock = lock.writeLock();
         try {
             writeLock.lock();
             dataBase.removeTable(form.getName());
@@ -107,7 +122,6 @@ public class DynamicFormServiceImpl implements DynamicFormService {
 
     @Override
     public <T> PagerResult<T> selectPager(String name, QueryParam param) throws Exception {
-        Lock readLock = lock.readLock();
         PagerResult<T> result = new PagerResult<>();
         try {
             readLock.lock();
@@ -127,7 +141,6 @@ public class DynamicFormServiceImpl implements DynamicFormService {
 
     @Override
     public <T> List<T> select(String name, QueryParam param) throws Exception {
-        Lock readLock = lock.readLock();
         try {
             readLock.lock();
             Table table = getTableByName(name);
@@ -142,7 +155,6 @@ public class DynamicFormServiceImpl implements DynamicFormService {
 
     @Override
     public int total(String name, QueryParam param) throws Exception {
-        Lock readLock = lock.readLock();
         try {
             readLock.lock();
             Table table = getTableByName(name);
@@ -157,7 +169,6 @@ public class DynamicFormServiceImpl implements DynamicFormService {
 
     @Override
     public String insert(String name, InsertParam<Map<String, Object>> param) throws Exception {
-        Lock readLock = lock.readLock();
         try {
             readLock.lock();
             Table table = getTableByName(name);
@@ -175,7 +186,6 @@ public class DynamicFormServiceImpl implements DynamicFormService {
 
     @Override
     public boolean deleteByPk(String name, String pk) throws Exception {
-        Lock readLock = lock.readLock();
         try {
             readLock.lock();
             String primaryKeyName = getPrimaryKeyName(name);
@@ -189,7 +199,6 @@ public class DynamicFormServiceImpl implements DynamicFormService {
 
     @Override
     public int delete(String name, DeleteParam where) throws Exception {
-        Lock readLock = lock.readLock();
         try {
             readLock.lock();
             Table table = getTableByName(name);
@@ -202,7 +211,6 @@ public class DynamicFormServiceImpl implements DynamicFormService {
 
     @Override
     public int updateByPk(String name, String pk, UpdateParam<Map<String, Object>> param) throws Exception {
-        Lock readLock = lock.readLock();
         try {
             readLock.lock();
             Table table = getTableByName(name);
@@ -217,7 +225,6 @@ public class DynamicFormServiceImpl implements DynamicFormService {
 
     @Override
     public int update(String name, UpdateParam<Map<String, Object>> param) throws Exception {
-        Lock readLock = lock.readLock();
         try {
             readLock.lock();
             Table table = getTableByName(name);
@@ -236,7 +243,6 @@ public class DynamicFormServiceImpl implements DynamicFormService {
 
     @Override
     public <T> T selectByPk(String name, Object pk) throws Exception {
-        Lock readLock = lock.readLock();
         try {
             readLock.lock();
             Table table = getTableByName(name);
@@ -250,12 +256,18 @@ public class DynamicFormServiceImpl implements DynamicFormService {
     }
 
     public static class QueryParamProxy extends org.webbuilder.sql.param.query.QueryParam {
+        public QueryParamProxy orderBy(String mode, Set<String> fields) {
+            addProperty("order_by", fields);
+            addProperty("order_by_mod", mode);
+            return this;
+        }
+
         public static QueryParamProxy build(QueryParam param) {
             QueryParamProxy proxy = new QueryParamProxy();
             proxy.where(param.getTerm());
             proxy.exclude(param.getExcludes());
             proxy.include(param.getIncludes());
-            proxy.orderBy("desc".equals(param.getSortOrder()), param.getSortField());
+            proxy.orderBy(param.getSortOrder(), param.getSortField());
             proxy.doPaging(param.getPageIndex(), param.getPageSize());
             proxy.setPaging(param.isPaging());
             return proxy;

@@ -5,7 +5,6 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.hsweb.web.bean.po.form.Form;
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.util.Assert;
@@ -68,7 +67,6 @@ public class CommonFormParser implements FormParser {
         });
         return metaData;
     }
-
 
     public void validField(FieldMetaData field) {
         Assert.notNull(field.getName(), "字段名称不能为空!");

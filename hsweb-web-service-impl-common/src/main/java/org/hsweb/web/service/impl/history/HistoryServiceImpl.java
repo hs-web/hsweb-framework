@@ -28,7 +28,7 @@ public class HistoryServiceImpl extends AbstractServiceImpl<History, String> imp
         QueryParam queryParam = new QueryParam()
                 .where("type", type)
                 .doPaging(0, 1)
-                .orderBy("create_date", false);
+                .orderBy("create_date").desc();
         List<History> history = historyMapper.select(queryParam);
         if (history.size() == 1) return history.get(0);
         return null;

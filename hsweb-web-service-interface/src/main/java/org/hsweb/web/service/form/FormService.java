@@ -71,12 +71,40 @@ public interface FormService extends GenericService<Form, String> {
     String createDeployHtml(String name) throws Exception;
 
     /**
-     *  创建表单的html预览。
+     * 根据表单名称，获取最新版本的表单
+     *
+     * @param name 表单名称
+     * @return 表单对象，表单不存在将返回null
+     * @throws Exception
+     */
+    Form selectLatest(String name) throws Exception;
+
+    /**
+     * 根据表单名称和版本，获取表单
+     *
+     * @param name    表单名称
+     * @param version 表单版本
+     * @return 表单对象，表单不存在将返回null
+     * @throws Exception
+     */
+    Form selectByVersion(String name, int version) throws Exception;
+
+    /**
+     * 创建表单的html预览。
+     *
      * @param id 表单ID
      * @return html 字符串
      * @throws Exception
      */
     String createViewHtml(String id) throws Exception;
+
+    /**
+     * 查询当前正在使用的表单
+     * @param name 正在使用的表单名称
+     * @return 表单对象。没有则返回null
+     * @throws Exception
+     */
+    Form selectUsing(String name) throws Exception;
 
 
 }
