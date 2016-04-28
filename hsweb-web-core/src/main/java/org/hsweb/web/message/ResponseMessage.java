@@ -57,11 +57,12 @@ public class ResponseMessage implements Serializable {
         //默认业务异常信息处理
         registerMessageHandler(BusinessException.class, (message, msg) -> {
             LOGGER.error(msg.getMessage());
+            message.setCode(String.valueOf(msg.getStatus()));
             return msg.getMessage();
         });
         //权限验证异常
         registerMessageHandler(AuthorizeException.class, (message, msg) -> {
-            message.setCode("502");
+            message.setCode("401");
             return msg.getMessage();
         });
         //权限验证异常
