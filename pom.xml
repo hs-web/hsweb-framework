@@ -17,6 +17,7 @@
         <module>hsweb-web-core</module>
         <module>hsweb-web-websocket</module>
         <module>hsweb-web-workflow</module>
+        <module>hsweb-web-concurrent</module>
     </modules>
 
     <properties>
@@ -139,6 +140,17 @@
             <!--<type>pom</type>-->
             <!--<scope>import</scope>-->
             <!--</dependency>-->
+            <dependency>
+                <groupId>org.hsweb</groupId>
+                <artifactId>hsweb-web-concurrent-cache</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.hsweb</groupId>
+                <artifactId>hsweb-web-concurrent-lock</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>com.h2database</groupId>
@@ -157,12 +169,12 @@
             </dependency>
             <dependency>
                 <groupId>org.hsweb</groupId>
-                <artifactId>hsweb-web-core</artifactId>
+                <artifactId>hsweb-web-bean</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.hsweb</groupId>
-                <artifactId>hsweb-web-bean</artifactId>
+                <artifactId>hsweb-web-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
