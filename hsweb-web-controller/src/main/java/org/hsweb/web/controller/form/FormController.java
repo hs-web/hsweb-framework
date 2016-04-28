@@ -1,14 +1,18 @@
 package org.hsweb.web.controller.form;
 
+import org.hsweb.web.authorize.annotation.Authorize;
 import org.hsweb.web.bean.common.PagerResult;
 import org.hsweb.web.bean.common.QueryParam;
-import org.hsweb.web.logger.annotation.AccessLogger;
-import org.hsweb.web.authorize.annotation.Authorize;
 import org.hsweb.web.bean.po.form.Form;
 import org.hsweb.web.controller.GenericController;
+import org.hsweb.web.exception.BusinessException;
+import org.hsweb.web.logger.annotation.AccessLogger;
 import org.hsweb.web.message.ResponseMessage;
 import org.hsweb.web.service.form.FormService;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -36,64 +40,70 @@ public class FormController extends GenericController<Form, String> {
      * 查询最新版本的表单列表
      */
     @RequestMapping(value = "/~latest", method = RequestMethod.GET)
-    public ResponseMessage latestList(QueryParam param) {
+    public ResponseMessage latestList(QueryParam param) throws Exception {
         ResponseMessage message;
-        try {
-            if (!param.isPaging()) {
-                message = new ResponseMessage(true, formService.selectLatestList(param));
-            } else {
-                param.setPaging(false);
-                int total = formService.countLatestList(param);
-                param.rePaging(total);
-                List<Form> list = formService.selectLatestList(param);
-                PagerResult<Form> result = new PagerResult<>();
-                result.setData(list).setTotal(total);
-                message = new ResponseMessage(true, result);
-            }
-            message.include(Form.class, param.getIncludes())
-                    .exclude(Form.class, param.getExcludes())
-                    .onlyData();
-        } catch (Exception e) {
-            message = new ResponseMessage(false, e);
+        if (!param.isPaging()) {
+            message = new ResponseMessage(true, formService.selectLatestList(param));
+        } else {
+            param.setPaging(false);
+            int total = formService.countLatestList(param);
+            param.rePaging(total);
+            List<Form> list = formService.selectLatestList(param);
+            PagerResult<Form> result = new PagerResult<>();
+            result.setData(list).setTotal(total);
+            message = new ResponseMessage(true, result);
         }
+        message.include(Form.class, param.getIncludes())
+                .exclude(Form.class, param.getExcludes())
+                .onlyData();
         return message;
     }
 
+    @RequestMapping(value = "/{name}/latest", method = RequestMethod.GET)
+    public ResponseMessage latest(@PathVariable(value = "name") String name) throws Exception {
+        Form form = formService.selectLatest(name);
+        if (form == null) throw new BusinessException("表单不存在", 404);
+        return new ResponseMessage(true, form);
+    }
+
+    @RequestMapping(value = "/{name}/{version}", method = RequestMethod.GET)
+    public ResponseMessage latest(@PathVariable(value = "name") String name,
+                                  @PathVariable(value = "version") Integer version) throws Exception {
+        Form form = formService.selectByVersion(name, version);
+        if (form == null) throw new BusinessException("表单不存在", 404);
+        return new ResponseMessage(true, form);
+    }
+
     @RequestMapping(value = "/{id}/deploy", method = RequestMethod.PUT)
-    public ResponseMessage deploy(@PathVariable("id") String id) {
-        try {
-            formService.deploy(id);
-            return new ResponseMessage(true, "success");
-        } catch (Exception e) {
-            return new ResponseMessage(false, e);
-        }
+    @Authorize(action = "deploy")
+    public ResponseMessage deploy(@PathVariable("id") String id) throws Exception {
+        formService.deploy(id);
+        return new ResponseMessage(true, "success");
     }
 
     @RequestMapping(value = "/{id}/unDeploy", method = RequestMethod.PUT)
-    public ResponseMessage unDeploy(@PathVariable("id") String id) {
-        try {
-            formService.unDeploy(id);
-            return new ResponseMessage(true, "success");
-        } catch (Exception e) {
-            return new ResponseMessage(false, e);
-        }
+    @Authorize(action = "deploy")
+    public ResponseMessage unDeploy(@PathVariable("id") String id) throws Exception {
+        formService.unDeploy(id);
+        return new ResponseMessage(true, "success");
     }
 
     @RequestMapping(value = "/{name}/html", method = RequestMethod.GET)
-    public ResponseMessage html(@PathVariable("name") String name) {
-        try {
-            return new ResponseMessage(true, formService.createDeployHtml(name));
-        } catch (Exception e) {
-            return new ResponseMessage(false, e);
+    public ResponseMessage html(@PathVariable("name") String name) throws Exception {
+        return new ResponseMessage(true, formService.createDeployHtml(name));
+    }
+
+    @RequestMapping(value = "/{name}/using", method = RequestMethod.GET)
+    public ResponseMessage using(@PathVariable("name") String name) throws Exception {
+        Form form = formService.selectUsing(name);
+        if (form == null) {
+            throw new BusinessException("表单不存在", 404);
         }
+        return new ResponseMessage(true, form).exclude(Form.class,"html");
     }
 
     @RequestMapping(value = "/{id}/view", method = RequestMethod.GET)
-    public ResponseMessage view(@PathVariable("id") String id) {
-        try {
-            return new ResponseMessage(true, formService.createViewHtml(id));
-        } catch (Exception e) {
-            return new ResponseMessage(false, e);
-        }
+    public ResponseMessage view(@PathVariable("id") String id) throws Exception {
+        return new ResponseMessage(true, formService.createViewHtml(id));
     }
 }
