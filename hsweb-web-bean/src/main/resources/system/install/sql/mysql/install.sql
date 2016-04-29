@@ -184,7 +184,7 @@ ALTER TABLE `s_user` COMMENT '用户表';
 -- ----------------------------
 -- Records of S_USER
 -- ----------------------------
-INSERT INTO `s_user` VALUES ('admin', 'admin', '23ec59e119da971084cbd0ba72d230a0', '超级管理员', NULL, NULL, '0', TO_datetime('2015-11-19 12:10:36', 'YYYY-MM-DD HH24:MI:SS'), NULL, NULL);
+INSERT INTO `s_user` VALUES ('admin', 'admin', '23ec59e119da971084cbd0ba72d230a0', '超级管理员', NULL, NULL, '1', TO_datetime('2015-11-19 12:10:36', 'YYYY-MM-DD HH24:MI:SS'), NULL, NULL);
 -- ----------------------------
 -- Table structure for S_USER_ROLE
 -- ----------------------------
