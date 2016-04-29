@@ -20,9 +20,7 @@ import java.util.*;
  */
 public class SimpleAuthorizeValidator implements AuthorizeValidator {
 
-    @Autowired
-    private ApplicationContext context;
-
+    @Autowired(required = false)
     private Map<String, ExpressionScopeBean> expressionScopeBeanMap;
 
     @Override
@@ -72,7 +70,8 @@ public class SimpleAuthorizeValidator implements AuthorizeValidator {
 
     public Map<String, Object> getExpressionRoot(User user) {
         Map<String, Object> root = new HashMap<>();
-        root.putAll(expressionScopeBeanMap);
+        if (expressionScopeBeanMap != null)
+            root.putAll(expressionScopeBeanMap);
         root.put("user", user);
         return root;
     }
@@ -82,8 +81,4 @@ public class SimpleAuthorizeValidator implements AuthorizeValidator {
         return new SimpleAuthorizeValidatorConfig();
     }
 
-    @PostConstruct
-    public void init() {
-        expressionScopeBeanMap = context.getBeansOfType(ExpressionScopeBean.class);
-    }
 }

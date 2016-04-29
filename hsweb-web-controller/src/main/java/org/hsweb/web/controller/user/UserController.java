@@ -4,6 +4,7 @@ import org.hsweb.web.authorize.annotation.Authorize;
 import org.hsweb.web.bean.common.QueryParam;
 import org.hsweb.web.bean.po.user.User;
 import org.hsweb.web.controller.GenericController;
+import org.hsweb.web.exception.NotFoundException;
 import org.hsweb.web.logger.annotation.AccessLogger;
 import org.hsweb.web.message.ResponseMessage;
 import org.hsweb.web.service.user.UserService;
@@ -49,13 +50,13 @@ public class UserController extends GenericController<User, String> {
     }
 
     @Override
-    @AccessLogger("删除")
+    @AccessLogger("禁用")
     public ResponseMessage delete(@PathVariable("id") String id) throws Exception {
         User user = getService().selectByPk(id);
-        if (user == null) return new ResponseMessage(false, "该用户不存在!", "404");
+        if (user == null) throw new NotFoundException("用户不存在!");
         user.setStatus(-1);
         getService().update(user);
-        return new ResponseMessage(true, "删除成功");
+        return ResponseMessage.ok( "禁用成功");
     }
 
 

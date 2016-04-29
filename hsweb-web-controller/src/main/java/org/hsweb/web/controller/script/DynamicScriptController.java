@@ -35,27 +35,14 @@ public class DynamicScriptController extends GenericController<DynamicScript, St
 
 
     @RequestMapping(value = "/compile", method = {RequestMethod.GET})
-    public ResponseMessage compileAll() {
-        ResponseMessage message;
-        try {
-            dynamicScriptService.compileAll();
-            message = new ResponseMessage(true, "success");
-        } catch (Exception e) {
-            message = new ResponseMessage(false, e);
-        }
-        return message;
+    public ResponseMessage compileAll() throws Exception {
+        dynamicScriptService.compileAll();
+        return ResponseMessage.ok("success");
     }
 
     @RequestMapping(value = "/compile/{id:.+}", method = {RequestMethod.GET})
-    public ResponseMessage compile(@PathVariable("id") String id) {
-        ResponseMessage message;
-        try {
-            dynamicScriptService.compile(id);
-
-            message = new ResponseMessage(true, "success");
-        } catch (Exception e) {
-            message = new ResponseMessage(false, e);
-        }
-        return message;
+    public ResponseMessage compile(@PathVariable("id") String id) throws Exception {
+        dynamicScriptService.compile(id);
+        return ResponseMessage.ok("success");
     }
 }

@@ -8,12 +8,14 @@ import org.hsweb.web.controller.GenericController;
 import org.hsweb.web.message.ResponseMessage;
 import org.hsweb.web.service.config.ConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * 系统配置控制器，继承自GenericController,使用rest+json。
@@ -109,12 +111,8 @@ public class ConfigController extends GenericController<Config, String> {
      */
     @RequestMapping(value = "/info/{name:.+}", method = RequestMethod.GET)
     @AccessLogger("根据配置名获取配置")
-    public Object configInfo(@PathVariable("name") String name) {
-        try {
-            return configService.get(name);
-        } catch (Exception e) {
-            return "";
-        }
+    public Object configInfo(@PathVariable("name") String name) throws Exception {
+        return configService.get(name);
     }
 
 
@@ -127,29 +125,25 @@ public class ConfigController extends GenericController<Config, String> {
      */
     @RequestMapping(value = {"/info/{name:.+}/{key:.+}"}, method = RequestMethod.GET)
     @AccessLogger("根据配置名和键获取配置")
-    public Object configInfo(@PathVariable("name") String name, @PathVariable("key") String key) {
-        try {
-            return configService.get(name, key);
-        } catch (Exception e) {
-            return "";
-        }
+    public Object configInfo(@PathVariable("name") String name, @PathVariable("key") String key) throws Exception {
+        return configService.get(name, key);
     }
 
     @Override
     @RequestMapping(value = "/{id:.+}", method = RequestMethod.GET)
-    public ResponseMessage info(@PathVariable("id") String id)throws Exception {
+    public ResponseMessage info(@PathVariable("id") String id) throws Exception {
         return super.info(id);
     }
 
     @Override
     @Authorize(module = "config", action = "C")
-    public ResponseMessage add(@RequestBody Config object)throws Exception {
+    public ResponseMessage add(@RequestBody Config object) throws Exception {
         return super.add(object);
     }
 
     @Override
     @Authorize(module = "config", action = "U")
-    public ResponseMessage update(@PathVariable("id") String id, @RequestBody Config object)throws Exception {
+    public ResponseMessage update(@PathVariable("id") String id, @RequestBody Config object) throws Exception {
         return super.update(id, object);
     }
 }

@@ -1,5 +1,7 @@
 package org.hsweb.web.controller.resource;
 
+import org.hsweb.web.exception.BusinessException;
+import org.hsweb.web.exception.NotFoundException;
 import org.hsweb.web.logger.annotation.AccessLogger;
 import org.hsweb.web.authorize.annotation.Authorize;
 import org.hsweb.web.bean.po.resource.Resources;
@@ -43,7 +45,7 @@ public class ResourcesController extends GenericController<Resources, String> {
      */
     @Override
     @Authorize(role = Role.SYS_ROLE_ADMIN)
-    public ResponseMessage delete(@PathVariable("id") String id)throws Exception {
+    public ResponseMessage delete(@PathVariable("id") String id) throws Exception {
         return super.delete(id);
     }
 
@@ -66,11 +68,11 @@ public class ResourcesController extends GenericController<Resources, String> {
         } else
             resources = resourcesService.selectByPk(id);
         if (resources == null) {
-            return new ResponseMessage(false, "资源不存在！", "404");
+            throw new NotFoundException("资源不存在");
         } else {
             if (resources.getStatus() != 1)
-                return new ResponseMessage(false, "拒绝访问！", "502");
-            return new ResponseMessage(true, resources);
+                throw new NotFoundException("资源不存在,或不可用！");
+            return ResponseMessage.ok(resources);
         }
     }
 

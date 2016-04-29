@@ -43,7 +43,7 @@ public class FormController extends GenericController<Form, String> {
     public ResponseMessage latestList(QueryParam param) throws Exception {
         ResponseMessage message;
         if (!param.isPaging()) {
-            message = new ResponseMessage(true, formService.selectLatestList(param));
+            message = ResponseMessage.ok(formService.selectLatestList(param));
         } else {
             param.setPaging(false);
             int total = formService.countLatestList(param);
@@ -51,7 +51,7 @@ public class FormController extends GenericController<Form, String> {
             List<Form> list = formService.selectLatestList(param);
             PagerResult<Form> result = new PagerResult<>();
             result.setData(list).setTotal(total);
-            message = new ResponseMessage(true, result);
+            message = ResponseMessage.ok(result);
         }
         message.include(Form.class, param.getIncludes())
                 .exclude(Form.class, param.getExcludes())
@@ -63,7 +63,7 @@ public class FormController extends GenericController<Form, String> {
     public ResponseMessage latest(@PathVariable(value = "name") String name) throws Exception {
         Form form = formService.selectLatest(name);
         if (form == null) throw new BusinessException("表单不存在", 404);
-        return new ResponseMessage(true, form);
+        return ResponseMessage.ok(form);
     }
 
     @RequestMapping(value = "/{name}/{version}", method = RequestMethod.GET)
@@ -71,26 +71,26 @@ public class FormController extends GenericController<Form, String> {
                                   @PathVariable(value = "version") Integer version) throws Exception {
         Form form = formService.selectByVersion(name, version);
         if (form == null) throw new BusinessException("表单不存在", 404);
-        return new ResponseMessage(true, form);
+        return ResponseMessage.ok(form);
     }
 
     @RequestMapping(value = "/{id}/deploy", method = RequestMethod.PUT)
     @Authorize(action = "deploy")
     public ResponseMessage deploy(@PathVariable("id") String id) throws Exception {
         formService.deploy(id);
-        return new ResponseMessage(true, "success");
+        return ResponseMessage.ok();
     }
 
     @RequestMapping(value = "/{id}/unDeploy", method = RequestMethod.PUT)
     @Authorize(action = "deploy")
     public ResponseMessage unDeploy(@PathVariable("id") String id) throws Exception {
         formService.unDeploy(id);
-        return new ResponseMessage(true, "success");
+        return ResponseMessage.ok();
     }
 
     @RequestMapping(value = "/{name}/html", method = RequestMethod.GET)
     public ResponseMessage html(@PathVariable("name") String name) throws Exception {
-        return new ResponseMessage(true, formService.createDeployHtml(name));
+        return ResponseMessage.ok(formService.createDeployHtml(name));
     }
 
     @RequestMapping(value = "/{name}/using", method = RequestMethod.GET)
@@ -99,11 +99,11 @@ public class FormController extends GenericController<Form, String> {
         if (form == null) {
             throw new BusinessException("表单不存在", 404);
         }
-        return new ResponseMessage(true, form).exclude(Form.class,"html");
+        return ResponseMessage.ok(form).exclude(Form.class, "html");
     }
 
     @RequestMapping(value = "/{id}/view", method = RequestMethod.GET)
     public ResponseMessage view(@PathVariable("id") String id) throws Exception {
-        return new ResponseMessage(true, formService.createViewHtml(id));
+        return ResponseMessage.ok(formService.createViewHtml(id));
     }
 }

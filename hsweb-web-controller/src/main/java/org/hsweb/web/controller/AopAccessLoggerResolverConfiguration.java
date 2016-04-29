@@ -40,9 +40,12 @@ public class AopAccessLoggerResolverConfiguration extends AopAccessLoggerResolve
         try {
             result = pjp.proceed();
         } catch (Throwable e) {
-            result = new ResponseMessage(false, e);
-            if (!(e instanceof BusinessException))
+            if (!(e instanceof BusinessException)) {
+                result = ResponseMessage.error(e.getMessage());
                 loggerInfo.setException_info(StringUtils.throwable2String(e));
+            } else {
+                result = ResponseMessage.error(e.getMessage(), ((BusinessException) e).getStatus());
+            }
             throw e;
         } finally {
             long responseTime = System.currentTimeMillis();
@@ -53,7 +56,7 @@ public class AopAccessLoggerResolverConfiguration extends AopAccessLoggerResolve
             if (user != null)
                 loggerInfo.setUser_id(user.getU_id());
             if (result instanceof ResponseMessage)
-                loggerInfo.setResponse_code(((ResponseMessage) result).getCode());
+                loggerInfo.setResponse_code(String.valueOf(((ResponseMessage) result).getCode()));
             if (accessLoggerPersisting != null) {
                 accessLoggerPersisting.forEach(loggerPersisting -> loggerPersisting.save(loggerInfo));
             }
