@@ -66,6 +66,8 @@ public class ExceptionHandlerConfiguration {
                 if (attrs == null) {
                     Integer status = (Integer) this.getAttribute(requestAttributes, "javax.servlet.error.status_code");
                     Object message = this.getAttribute(requestAttributes, "javax.servlet.error.message");
+                    Throwable throwable = getError(requestAttributes);
+                    if (throwable != null) logger.error("", throwable);
                     if (message == null)
                         message = "None";
                     return ResponseMessage.error(String.valueOf(message), status).toMap();
@@ -90,6 +92,7 @@ public class ExceptionHandlerConfiguration {
 
             @Override
             public ResponseMessage handle(Throwable e) {
+                logger.error("", e);
                 return ResponseMessage.error(e.getMessage());
             }
         };
