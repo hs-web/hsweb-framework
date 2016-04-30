@@ -32,7 +32,9 @@ public class FastJsonHttpMessageConverter extends AbstractHttpMessageConverter<O
     private SerializerFeature[] features = new SerializerFeature[0];
 
     public FastJsonHttpMessageConverter() {
-        super(new MediaType("application", "json", UTF8), new MediaType("application", "*+json", UTF8));
+        super(new MediaType("application", "json", UTF8),
+                new MediaType("application", "*+json", UTF8),
+                MediaType.APPLICATION_JSON);
     }
 
     @Override
