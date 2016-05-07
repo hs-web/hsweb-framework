@@ -1,6 +1,6 @@
-package org.hsweb.web.authorize;
+package org.hsweb.web.core.authorize;
 
-import org.hsweb.web.authorize.annotation.Authorize;
+import org.hsweb.web.core.authorize.annotation.Authorize;
 
 import java.util.*;
 
@@ -17,7 +17,7 @@ public interface AuthorizeValidatorConfig {
     AuthorizeValidatorConfig setMod(Authorize.MOD mod);
 
     AuthorizeValidatorConfig addExpression(String expression, String language);
-
+    boolean isEmpty();
     default AuthorizeValidatorConfig addAnnotation(Set<Authorize> authorizes) {
         Set<String> modules = new LinkedHashSet<>();
         Set<String> roles = new LinkedHashSet<>();

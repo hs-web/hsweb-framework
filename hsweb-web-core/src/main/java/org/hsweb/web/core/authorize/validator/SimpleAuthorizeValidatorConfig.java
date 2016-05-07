@@ -1,8 +1,8 @@
-package org.hsweb.web.authorize.validator;
+package org.hsweb.web.core.authorize.validator;
 
-import org.hsweb.web.authorize.AuthorizeValidatorConfig;
-import org.hsweb.web.authorize.annotation.Authorize;
-import org.hsweb.web.exception.AuthorizeException;
+import org.hsweb.web.core.authorize.AuthorizeValidatorConfig;
+import org.hsweb.web.core.authorize.annotation.Authorize;
+import org.hsweb.web.core.exception.AuthorizeException;
 import org.webbuilder.utils.common.StringUtils;
 import org.webbuilder.utils.script.engine.DynamicScriptEngine;
 import org.webbuilder.utils.script.engine.DynamicScriptEngineFactory;
@@ -89,6 +89,11 @@ public class SimpleAuthorizeValidatorConfig implements AuthorizeValidatorConfig 
 
     public Authorize.MOD getMod() {
         return mod;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return getModules().isEmpty() && getRoles().isEmpty() && getActions().isEmpty() && getExpressions().isEmpty();
     }
 
     public static class Expression {
