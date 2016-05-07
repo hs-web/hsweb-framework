@@ -34,4 +34,7 @@ public interface UserService extends GenericService<User, String> {
      */
     void initGuestUser(User user) throws Exception;
 
+    void enableUser(String id) throws Exception;
+
+    void disableUser(String id) throws Exception;
 }
