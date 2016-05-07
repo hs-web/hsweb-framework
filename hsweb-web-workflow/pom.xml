@@ -18,12 +18,25 @@
     </properties>
     <dependencies>
         <dependency>
+            <groupId>org.hsweb</groupId>
+            <artifactId>hsweb-web-core</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.hsweb</groupId>
+            <artifactId>hsweb-web-service-interface</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.activiti</groupId>
             <artifactId>activiti-spring-boot-starter-basic</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.activiti</groupId>
+            <artifactId>activiti-json-converter</artifactId>
         </dependency>
 
         <!--<dependency>-->
@@ -91,5 +104,6 @@
             <artifactId>javaGeom</artifactId>
             <version>0.11.1</version>
         </dependency>
+
     </dependencies>
 </project>
