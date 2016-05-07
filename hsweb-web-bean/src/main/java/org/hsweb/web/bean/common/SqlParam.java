@@ -1,5 +1,6 @@
 package org.hsweb.web.bean.common;
 
+import org.webbuilder.utils.common.MapUtils;
 import org.webbuilder.utils.common.StringUtils;
 
 import java.util.*;
@@ -46,6 +47,7 @@ public class SqlParam<R extends SqlParam> {
     }
 
     public Map<String, Object> getTerm() {
+        this.term = MapUtils.removeEmptyValue(term);
         changeTerm(this.term);
         return term;
     }
