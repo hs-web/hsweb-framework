@@ -1,12 +1,12 @@
-package org.hsweb.web.authorize;
+package org.hsweb.web.core.authorize;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.hsweb.web.authorize.annotation.Authorize;
-import org.hsweb.web.authorize.validator.SimpleAuthorizeValidator;
+import org.hsweb.web.core.authorize.annotation.Authorize;
+import org.hsweb.web.core.authorize.validator.SimpleAuthorizeValidator;
 import org.hsweb.web.bean.po.user.User;
-import org.hsweb.web.exception.AuthorizeException;
-import org.hsweb.web.utils.WebUtil;
+import org.hsweb.web.core.exception.AuthorizeException;
+import org.hsweb.web.core.utils.WebUtil;
 import org.webbuilder.utils.common.ClassUtils;
 import org.webbuilder.utils.common.StringUtils;
 
@@ -52,6 +52,7 @@ public class AopAuthorizeValidator extends SimpleAuthorizeValidator {
         if (config == null) return true;
         User user = WebUtil.getLoginUser();
         if (user == null) throw new AuthorizeException("未登录", 401);
+        if(config.isEmpty())return true;
         Map<String, Object> param = new LinkedHashMap<>();
         MethodSignature signature = (MethodSignature) pjp.getSignature();
         String[] names = signature.getParameterNames();
