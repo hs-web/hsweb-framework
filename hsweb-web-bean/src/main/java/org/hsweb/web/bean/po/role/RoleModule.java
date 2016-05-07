@@ -33,7 +33,7 @@ public class RoleModule extends GenericPo<String> {
 
     private transient Module module;
 
-    private List<String> levels;
+    private List<String> actions;
 
 
     /**
@@ -98,21 +98,21 @@ public class RoleModule extends GenericPo<String> {
         this.module = module;
     }
 
-    public List<String> getLevels() {
+    public List<String> getActions() {
         if (!StringUtils.isNullOrEmpty(getO_level())) {
             try {
-                if (levels == null)
-                    levels = JSON.parseObject(getO_level(), new TypeReference<List<String>>(){});
+                if (actions == null)
+                    actions = JSON.parseObject(getO_level(), new TypeReference<List<String>>(){});
             } catch (Exception e) {
-                levels = new LinkedList<>();
+                actions = new LinkedList<>();
             }
         } else {
-            levels = new LinkedList<>();
+            actions = new LinkedList<>();
         }
-        return levels;
+        return actions;
     }
 
-    public void setLevels(List<String> levels) {
-        this.levels = levels;
+    public void setActions(List<String> actions) {
+        this.actions = actions;
     }
 }

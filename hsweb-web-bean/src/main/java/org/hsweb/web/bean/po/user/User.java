@@ -79,6 +79,13 @@ public class User extends GenericPo<String> {
         return null;
     }
 
+    public Module getModuleByUri(String uri) {
+        for (Module module : getModules()) {
+            if (uri.equals(module.getUri())) return module;
+        }
+        return null;
+    }
+
     public Set<Module> getModules() {
         if (roleInfo == null) initRoleInfo();
         return roleInfo.keySet();
@@ -128,11 +135,11 @@ public class User extends GenericPo<String> {
             for (RoleModule roleModule : roleModules) {
                 Module module = roleModule.getModule();
                 if (module == null || module.getStatus() != 1) continue;
-                Set<String> levels = roleInfo_tmp.get(module);
-                if (levels == null)
-                    roleInfo_tmp.put(module, new HashSet<>(roleModule.getLevels()));
+                Set<String> actions = roleInfo_tmp.get(module);
+                if (actions == null)
+                    roleInfo_tmp.put(module, new HashSet<>(roleModule.getActions()));
                 else {
-                    levels.addAll(roleModule.getLevels());
+                    actions.addAll(roleModule.getActions());
                 }
             }
         }
