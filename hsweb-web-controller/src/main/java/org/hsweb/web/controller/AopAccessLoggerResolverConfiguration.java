@@ -5,11 +5,12 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.hsweb.web.bean.po.logger.LoggerInfo;
 import org.hsweb.web.bean.po.user.User;
-import org.hsweb.web.exception.BusinessException;
-import org.hsweb.web.logger.AccessLoggerPersisting;
-import org.hsweb.web.logger.AopAccessLoggerResolver;
-import org.hsweb.web.message.ResponseMessage;
-import org.hsweb.web.utils.WebUtil;
+import org.hsweb.web.core.exception.BusinessException;
+import org.hsweb.web.core.logger.AccessLoggerPersisting;
+import org.hsweb.web.core.logger.AopAccessLoggerResolver;
+import org.hsweb.web.core.message.FastJsonHttpMessageConverter;
+import org.hsweb.web.core.message.ResponseMessage;
+import org.hsweb.web.core.utils.WebUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -32,7 +33,7 @@ public class AopAccessLoggerResolverConfiguration extends AopAccessLoggerResolve
     @Autowired(required = false)
     private List<AccessLoggerPersisting> accessLoggerPersisting;
 
-    @Around(value = "execution(* org.hsweb.web.controller..*Controller..*(..))")
+    @Around(value = "execution(* org.hsweb.web..controller..*Controller..*(..))||@annotation(org.hsweb.web.core.logger.annotation.AccessLogger)")
     public Object around(ProceedingJoinPoint pjp) throws Throwable {
         LoggerInfo loggerInfo = resolver(pjp);
         long requestTime = System.currentTimeMillis();
