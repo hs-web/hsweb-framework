@@ -15,7 +15,7 @@ import org.springframework.core.annotation.Order;
  */
 @Configuration
 @ConditionalOnProperty(name = "login.enable", havingValue = "true")
-public class AopAuthorizeValidatorAutoConfiguration extends AopAuthorizeValidator {
+public class AopAuthorizeValidatorAutoConfiguration {
 
     @Bean
     public ControllerAuthorizeValidator controllerAuthorizeValidator() {
