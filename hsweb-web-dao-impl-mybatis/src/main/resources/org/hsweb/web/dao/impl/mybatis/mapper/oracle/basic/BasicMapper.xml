@@ -24,16 +24,10 @@
                 </choose>
             </if>
             <if test="#this['term.'+item+'$LIKE']!=null">
-                AND INSTR(${$tableName}.${item},#{term.${item+'$LIKE'}})>0
+                AND ${$tableName}.${item} like #{term.${item+'$LIKE'}}
             </if>
             <if test="#this['term.'+item+'$NOTLIKE']!=null">
-                AND INSTR(${$tableName}.${item},#{term.${item+'$NOTLIKE'}})&lt;=0
-            </if>
-            <if test="#this['term.'+item+'$START']!=null">
-                AND ${$tableName}.${item} LIKE #{term.${item+'$START'}}||'%'
-            </if>
-            <if test="#this['term.'+item+'$END']!=null">
-                AND ${$tableName}.${item} LIKE '%'||#{term.${item+'$END'}}
+                AND ${$tableName}.${item} not like #{term.${item+'$LIKE'}}
             </if>
             <if test="#this['term.'+item+'$IN']!=null">
                 AND ${$tableName}.${item} IN
@@ -100,7 +94,8 @@
                     </if>
                 </foreach>
             </when>
-            <otherwise><bind name="fieldHasLen" value="true"/>*</otherwise>
+            <otherwise><bind name="fieldHasLen" value="true"/>*
+            </otherwise>
         </choose>
         <if test="!fieldHasLen">*</if>
     </sql>
@@ -189,11 +184,11 @@
             <when test="sortField!=null and sortField.size()>0">
                 <foreach item="item" index="index" collection="sortField" open="" separator="," close="">
                     <if test="item in $fields">
-                        <if test="!fieldHasLen"> order by </if>${item}
+                        <if test="!fieldHasLen">order by</if>${item}
                         <bind name="fieldHasLen" value="true"/>
                     </if>
                 </foreach>
-                <if test="fieldHasLen"> ${sortOrder}</if>
+                <if test="fieldHasLen">${sortOrder}</if>
             </when>
         </choose>
     </sql>

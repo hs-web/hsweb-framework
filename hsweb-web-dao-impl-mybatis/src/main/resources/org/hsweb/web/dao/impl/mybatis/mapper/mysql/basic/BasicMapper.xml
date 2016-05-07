@@ -14,16 +14,10 @@
                 AND `${$tableName}`.`${item}`!=#{term.${item+'$NOT'}}
             </if>
             <if test="#this['term.'+item+'$LIKE']!=null">
-                AND INSTR(`${$tableName}`.`${item}`,#{term.${item+'$LIKE'}})>0
+                AND ${$tableName}.${item} like #{term.${item+'$LIKE'}}
             </if>
             <if test="#this['term.'+item+'$NOTLIKE']!=null">
-                AND INSTR(`${$tableName}`.`${item}`,#{term.${item+'$NOTLIKE'}})&lt;=0
-            </if>
-            <if test="#this['term.'+item+'$START']!=null">
-                AND `${$tableName}`.`${item}` LIKE CONCAT(#{term.${item+'$START'}},'%')
-            </if>
-            <if test="#this['term.'+item+'$END']!=null">
-                AND `${$tableName}`.`${item}` LIKE CONCAT('%',#{term.${item+'$END'})
+                AND  ${$tableName}.${item} not like #{term.${item+'$LIKE'}}
             </if>
             <if test="#this['term.'+item+'$IN']!=null">
                 AND `${$tableName}`.`${item}` IN
