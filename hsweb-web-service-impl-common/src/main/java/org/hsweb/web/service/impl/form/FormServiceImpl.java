@@ -1,7 +1,7 @@
 package org.hsweb.web.service.impl.form;
 
 import com.alibaba.fastjson.JSON;
-import org.hsweb.web.authorize.annotation.Authorize;
+import org.hsweb.web.core.authorize.annotation.Authorize;
 import org.hsweb.web.bean.common.QueryParam;
 import org.hsweb.web.bean.common.UpdateParam;
 import org.hsweb.web.bean.po.form.Form;
@@ -11,7 +11,7 @@ import org.hsweb.web.service.form.DynamicFormService;
 import org.hsweb.web.service.form.FormService;
 import org.hsweb.web.service.history.HistoryService;
 import org.hsweb.web.service.impl.AbstractServiceImpl;
-import org.hsweb.web.utils.RandomUtil;
+import org.hsweb.web.core.utils.RandomUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -35,7 +35,7 @@ public class FormServiceImpl extends AbstractServiceImpl<Form, String> implement
     private static final String CACHE_KEY = "form";
 
     @Autowired(required = false)
-    protected FormParser formParser = new CommonFormParser();
+    protected FormParser formParser = new DefaultFormParser();
 
     @Resource
     private FormMapper formMapper;

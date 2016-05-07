@@ -3,7 +3,7 @@ package org.hsweb.web.service.impl.module;
 import org.hsweb.web.bean.common.QueryParam;
 import org.hsweb.web.bean.po.module.Module;
 import org.hsweb.web.dao.module.ModuleMapper;
-import org.hsweb.web.exception.BusinessException;
+import org.hsweb.web.core.exception.BusinessException;
 import org.hsweb.web.service.impl.AbstractServiceImpl;
 import org.hsweb.web.service.module.ModuleService;
 import org.springframework.stereotype.Service;

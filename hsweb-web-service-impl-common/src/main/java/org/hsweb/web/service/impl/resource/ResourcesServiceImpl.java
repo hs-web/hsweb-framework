@@ -6,7 +6,7 @@ import org.hsweb.web.dao.resource.ResourcesMapper;
 import org.hsweb.web.service.config.ConfigService;
 import org.hsweb.web.service.impl.AbstractServiceImpl;
 import org.hsweb.web.service.resource.ResourcesService;
-import org.hsweb.web.utils.RandomUtil;
+import org.hsweb.web.core.utils.RandomUtil;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

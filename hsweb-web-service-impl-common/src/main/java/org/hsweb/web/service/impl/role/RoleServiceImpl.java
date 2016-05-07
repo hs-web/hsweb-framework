@@ -8,7 +8,7 @@ import org.hsweb.web.dao.role.RoleModuleMapper;
 import org.hsweb.web.service.impl.AbstractServiceImpl;
 import org.hsweb.web.service.module.ModuleService;
 import org.hsweb.web.service.role.RoleService;
-import org.hsweb.web.utils.RandomUtil;
+import org.hsweb.web.core.utils.RandomUtil;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;

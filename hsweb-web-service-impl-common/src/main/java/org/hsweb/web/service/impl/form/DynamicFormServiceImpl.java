@@ -2,9 +2,8 @@ package org.hsweb.web.service.impl.form;
 
 import com.alibaba.fastjson.JSON;
 import org.hsweb.concurrent.lock.LockFactory;
-import org.hsweb.web.Install;
+import org.hsweb.web.core.Install;
 import org.hsweb.web.bean.common.*;
-import org.hsweb.web.bean.common.QueryParam;
 import org.hsweb.web.bean.po.GenericPo;
 import org.hsweb.web.bean.po.form.Form;
 import org.hsweb.web.bean.po.history.History;
@@ -15,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.webbuilder.sql.*;
-import org.webbuilder.sql.param.query.*;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -24,7 +22,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Created by zhouhao on 16-4-14.
@@ -38,7 +35,7 @@ public class DynamicFormServiceImpl implements DynamicFormService {
     protected Lock writeLock, readLock;
 
     @Autowired(required = false)
-    protected FormParser formParser = new CommonFormParser();
+    protected FormParser formParser = new DefaultFormParser();
 
     @Autowired
     protected DataBase dataBase;

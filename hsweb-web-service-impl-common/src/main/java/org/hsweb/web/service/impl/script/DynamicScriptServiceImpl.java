@@ -2,7 +2,7 @@ package org.hsweb.web.service.impl.script;
 
 import org.hsweb.web.bean.po.script.DynamicScript;
 import org.hsweb.web.dao.script.DynamicScriptMapper;
-import org.hsweb.web.exception.BusinessException;
+import org.hsweb.web.core.exception.BusinessException;
 import org.hsweb.web.service.impl.AbstractServiceImpl;
 import org.hsweb.web.service.script.DynamicScriptService;
 import org.springframework.cache.annotation.CacheEvict;

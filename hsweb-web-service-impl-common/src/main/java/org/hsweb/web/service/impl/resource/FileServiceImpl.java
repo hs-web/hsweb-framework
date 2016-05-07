@@ -10,7 +10,7 @@ import org.hsweb.web.bean.po.user.User;
 import org.hsweb.web.service.config.ConfigService;
 import org.hsweb.web.service.resource.FileService;
 import org.hsweb.web.service.resource.ResourcesService;
-import org.hsweb.web.utils.WebUtil;
+import org.hsweb.web.core.utils.WebUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.webbuilder.utils.common.DateTimeUtils;

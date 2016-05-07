@@ -23,7 +23,7 @@ import java.util.Map;
 /**
  * Created by zhouhao on 16-4-20.
  */
-public class CommonFormParser implements FormParser {
+public class DefaultFormParser implements FormParser {
 
     @Override
     public TableMetaData parse(Form form) {
@@ -61,16 +61,13 @@ public class CommonFormParser implements FormParser {
                     }
                     fieldMeta.attr(key, value);
                 }
-                validField(fieldMeta);
             });
-            metaData.addField(fieldMeta);
+            //name为空的时候 不保持此字段
+            if (!StringUtils.isNullOrEmpty(fieldMeta.getName())) {
+                metaData.addField(fieldMeta);
+            }
         });
         return metaData;
-    }
-
-    public void validField(FieldMetaData field) {
-        Assert.notNull(field.getName(), "字段名称不能为空!");
-        Assert.notNull(field.getJavaType(), "java类型未找到!");
     }
 
     protected static Map<String, Class> typeMapper = new HashMap() {{

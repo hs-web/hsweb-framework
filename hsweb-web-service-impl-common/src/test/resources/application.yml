@@ -1,6 +1,11 @@
 logging:
     config: classpath:logback.xml
 spring:
+    aop:
+        auto: true
+    redis:
+        host: 127.0.0.1
+        port: 6389
     datasource:
         name: core
         url: jdbc:h2:mem:hsweb
