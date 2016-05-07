@@ -1,13 +1,12 @@
-package org.hsweb.web.exception;
+package org.hsweb.web.core.exception;
 
-import org.hsweb.web.message.ResponseMessage;
+import org.hsweb.web.core.message.ResponseMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.web.DefaultErrorAttributes;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.Order;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.servlet.ModelAndView;
@@ -16,8 +15,6 @@ import org.webbuilder.utils.common.ClassUtils;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 

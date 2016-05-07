@@ -1,11 +1,11 @@
-package org.hsweb.web.logger;
+package org.hsweb.web.core.logger;
 
 import com.alibaba.fastjson.JSON;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.hsweb.web.bean.po.logger.LoggerInfo;
-import org.hsweb.web.logger.annotation.AccessLogger;
-import org.hsweb.web.utils.WebUtil;
+import org.hsweb.web.core.logger.annotation.AccessLogger;
+import org.hsweb.web.core.utils.WebUtil;
 import org.webbuilder.utils.common.ClassUtils;
 import org.webbuilder.utils.common.MD5;
 

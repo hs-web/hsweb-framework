@@ -1,4 +1,4 @@
-package org.hsweb.web.authorize;
+package org.hsweb.web.core.authorize;
 
 import org.hsweb.web.bean.po.user.User;
 

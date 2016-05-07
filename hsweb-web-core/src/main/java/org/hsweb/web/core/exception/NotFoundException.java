@@ -1,4 +1,4 @@
-package org.hsweb.web.exception;
+package org.hsweb.web.core.exception;
 
 /**
  * Created by zhouhao on 16-4-29.

@@ -1,4 +1,4 @@
-package org.hsweb.web.exception;
+package org.hsweb.web.core.exception;
 
 /**
  * 业务异常，用于抛出给前端提示错误信息

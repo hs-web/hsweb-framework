@@ -1,4 +1,4 @@
-package org.hsweb.web.logger;
+package org.hsweb.web.core.logger;
 
 import org.hsweb.web.bean.po.logger.LoggerInfo;
 

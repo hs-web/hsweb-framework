@@ -1,12 +1,12 @@
 package org.hsweb.web.controller;
 
 import com.alibaba.fastjson.JSON;
-import org.hsweb.web.authorize.annotation.Authorize;
+import org.hsweb.web.core.authorize.annotation.Authorize;
 import org.hsweb.web.bean.common.QueryParam;
 import org.hsweb.web.bean.po.GenericPo;
-import org.hsweb.web.exception.BusinessException;
-import org.hsweb.web.logger.annotation.AccessLogger;
-import org.hsweb.web.message.ResponseMessage;
+import org.hsweb.web.core.exception.BusinessException;
+import org.hsweb.web.core.logger.annotation.AccessLogger;
+import org.hsweb.web.core.message.ResponseMessage;
 import org.hsweb.web.service.GenericService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

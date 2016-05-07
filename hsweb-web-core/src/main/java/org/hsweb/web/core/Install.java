@@ -1,4 +1,4 @@
-package org.hsweb.web;
+package org.hsweb.web.core;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,13 +65,19 @@ public class Install {
                 firstInstall = true;
             }
             if (firstInstall) {
+                String username = properties.getUsername();
                 Reader reader = FileUtils.getResourceAsReader("system/install/sql/" + dbType + "/install.sql");
                 BufferedReader bufferedReader = new BufferedReader(reader);
                 List<String> sqlList = new ArrayList<>();
                 SqlAppender tmp = new SqlAppender();
                 bufferedReader.lines().forEach((line) -> {
                     if (line.startsWith("--")) return;
-                    tmp.add(line);
+                    line = line.replace("${jdbc.username}", username);
+                    //去除sql中的;
+                    if (line.endsWith(";"))
+                        tmp.add(line.substring(0, line.length() - 1));
+                    else
+                        tmp.add(line);
                     tmp.add("\n");
                     if (line.endsWith(";")) {
                         sqlList.add(tmp.toString());
@@ -82,7 +88,7 @@ public class Install {
                     try {
                         sqlExecutor.exec(new CommonSql(sql));
                     } catch (Exception e) {
-                        logger.warn("install sql fail", e.getMessage());
+                        logger.warn("install sql fail", e);
                     }
                 });
             }

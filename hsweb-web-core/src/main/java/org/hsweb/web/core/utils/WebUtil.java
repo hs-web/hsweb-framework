@@ -1,4 +1,4 @@
-package org.hsweb.web.utils;
+package org.hsweb.web.core.utils;
 
 import org.hsweb.web.bean.po.user.User;
 import org.springframework.web.context.request.RequestContextHolder;

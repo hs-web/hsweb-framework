@@ -1,4 +1,4 @@
-package org.hsweb.web.utils;
+package org.hsweb.web.core.utils;
 
 import java.util.Random;
 import java.util.UUID;

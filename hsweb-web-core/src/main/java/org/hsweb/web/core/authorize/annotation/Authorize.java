@@ -1,4 +1,4 @@
-package org.hsweb.web.authorize.annotation;
+package org.hsweb.web.core.authorize.annotation;
 
 
 import java.lang.annotation.*;

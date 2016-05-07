@@ -1,17 +1,15 @@
-package org.hsweb.web.authorize.validator;
+package org.hsweb.web.core.authorize.validator;
 
-import org.hsweb.web.authorize.AuthorizeValidator;
-import org.hsweb.web.authorize.AuthorizeValidatorConfig;
-import org.hsweb.web.authorize.ExpressionScopeBean;
-import org.hsweb.web.authorize.annotation.Authorize;
+import org.hsweb.web.core.authorize.AuthorizeValidator;
+import org.hsweb.web.core.authorize.AuthorizeValidatorConfig;
+import org.hsweb.web.core.authorize.ExpressionScopeBean;
+import org.hsweb.web.core.authorize.annotation.Authorize;
 import org.hsweb.web.bean.po.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.webbuilder.utils.common.StringUtils;
 import org.webbuilder.utils.script.engine.DynamicScriptEngine;
 import org.webbuilder.utils.script.engine.DynamicScriptEngineFactory;
 
-import javax.annotation.PostConstruct;
 import java.util.*;
 
 /**

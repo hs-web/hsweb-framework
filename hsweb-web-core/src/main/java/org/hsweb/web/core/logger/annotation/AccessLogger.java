@@ -1,4 +1,4 @@
-package org.hsweb.web.logger.annotation;
+package org.hsweb.web.core.logger.annotation;
 
 import java.lang.annotation.*;
 

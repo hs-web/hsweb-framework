@@ -1,6 +1,6 @@
-package org.hsweb.web.exception;
+package org.hsweb.web.core.exception;
 
-import org.hsweb.web.message.ResponseMessage;
+import org.hsweb.web.core.message.ResponseMessage;
 
 public interface ExceptionHandler {
 

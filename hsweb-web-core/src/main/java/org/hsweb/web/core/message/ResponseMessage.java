@@ -1,13 +1,8 @@
-package org.hsweb.web.message;
+package org.hsweb.web.core.message;
 
 import com.alibaba.fastjson.JSON;
-import org.hsweb.web.exception.AuthorizeException;
-import org.hsweb.web.exception.BusinessException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.webbuilder.utils.common.DateTimeUtils;
 
-import javax.validation.ValidationException;
 import java.io.Serializable;
 import java.util.*;
 

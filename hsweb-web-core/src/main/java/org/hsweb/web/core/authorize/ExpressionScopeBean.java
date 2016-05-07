@@ -1,4 +1,4 @@
-package org.hsweb.web.authorize;
+package org.hsweb.web.core.authorize;
 
 /**
  * 表达式作用域bean。实现该接口。可在权限注解的表达式中调用
