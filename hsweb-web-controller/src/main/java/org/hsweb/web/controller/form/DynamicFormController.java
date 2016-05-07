@@ -1,11 +1,11 @@
 package org.hsweb.web.controller.form;
 
-import org.hsweb.web.authorize.annotation.Authorize;
+import org.hsweb.web.core.authorize.annotation.Authorize;
 import org.hsweb.web.bean.common.InsertMapParam;
 import org.hsweb.web.bean.common.QueryParam;
 import org.hsweb.web.bean.common.UpdateMapParam;
-import org.hsweb.web.logger.annotation.AccessLogger;
-import org.hsweb.web.message.ResponseMessage;
+import org.hsweb.web.core.logger.annotation.AccessLogger;
+import org.hsweb.web.core.message.ResponseMessage;
 import org.hsweb.web.service.form.DynamicFormService;
 import org.springframework.web.bind.annotation.*;
 

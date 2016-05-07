@@ -1,21 +1,19 @@
 package org.hsweb.web.controller.config;
 
 import com.alibaba.fastjson.JSON;
-import org.hsweb.web.logger.annotation.AccessLogger;
-import org.hsweb.web.authorize.annotation.Authorize;
+import org.hsweb.web.core.logger.annotation.AccessLogger;
+import org.hsweb.web.core.authorize.annotation.Authorize;
 import org.hsweb.web.bean.po.config.Config;
 import org.hsweb.web.controller.GenericController;
-import org.hsweb.web.message.ResponseMessage;
+import org.hsweb.web.core.message.ResponseMessage;
 import org.hsweb.web.service.config.ConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 /**
  * 系统配置控制器，继承自GenericController,使用rest+json。

@@ -1,11 +1,11 @@
 package org.hsweb.web.controller.role;
 
-import org.hsweb.web.logger.annotation.AccessLogger;
-import org.hsweb.web.authorize.annotation.Authorize;
+import org.hsweb.web.core.logger.annotation.AccessLogger;
+import org.hsweb.web.core.authorize.annotation.Authorize;
 import org.hsweb.web.bean.common.QueryParam;
 import org.hsweb.web.bean.po.role.Role;
 import org.hsweb.web.controller.GenericController;
-import org.hsweb.web.message.ResponseMessage;
+import org.hsweb.web.core.message.ResponseMessage;
 import org.springframework.web.bind.annotation.RestController;
 import org.hsweb.web.service.role.RoleService;
 

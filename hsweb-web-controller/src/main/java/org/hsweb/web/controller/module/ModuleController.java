@@ -1,11 +1,10 @@
 package org.hsweb.web.controller.module;
 
-import org.hsweb.web.logger.annotation.AccessLogger;
-import org.hsweb.web.authorize.annotation.Authorize;
+import org.hsweb.web.core.logger.annotation.AccessLogger;
+import org.hsweb.web.core.authorize.annotation.Authorize;
 import org.hsweb.web.bean.po.module.Module;
 import org.hsweb.web.controller.GenericController;
 import org.hsweb.web.service.module.ModuleService;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 

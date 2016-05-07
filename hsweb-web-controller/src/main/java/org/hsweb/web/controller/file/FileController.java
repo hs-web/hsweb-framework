@@ -1,10 +1,10 @@
 package org.hsweb.web.controller.file;
 
-import org.hsweb.web.exception.NotFoundException;
-import org.hsweb.web.logger.annotation.AccessLogger;
-import org.hsweb.web.authorize.annotation.Authorize;
+import org.hsweb.web.core.exception.NotFoundException;
+import org.hsweb.web.core.logger.annotation.AccessLogger;
+import org.hsweb.web.core.authorize.annotation.Authorize;
 import org.hsweb.web.bean.po.resource.Resources;
-import org.hsweb.web.message.ResponseMessage;
+import org.hsweb.web.core.message.ResponseMessage;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;

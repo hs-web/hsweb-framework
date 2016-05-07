@@ -1,16 +1,14 @@
 package org.hsweb.web.controller.resource;
 
-import org.hsweb.web.exception.BusinessException;
-import org.hsweb.web.exception.NotFoundException;
-import org.hsweb.web.logger.annotation.AccessLogger;
-import org.hsweb.web.authorize.annotation.Authorize;
+import org.hsweb.web.core.exception.NotFoundException;
+import org.hsweb.web.core.logger.annotation.AccessLogger;
+import org.hsweb.web.core.authorize.annotation.Authorize;
 import org.hsweb.web.bean.po.resource.Resources;
 import org.hsweb.web.bean.po.role.Role;
 import org.hsweb.web.controller.GenericController;
-import org.hsweb.web.message.ResponseMessage;
+import org.hsweb.web.core.message.ResponseMessage;
 import org.hsweb.web.service.resource.ResourcesService;
 
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
