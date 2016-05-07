@@ -19,7 +19,6 @@
                     'u_id':#{'jdbcType':'VARCHAR','javaType':'string'}
                     ,'module_id':#{'jdbcType':'VARCHAR','javaType':'string'}
                     ,'role_id':#{'jdbcType':'VARCHAR','javaType':'string'}
-                    ,'content':#{'jdbcType':'VARCHAR','javaType':'string'}
                     ,'o_level':#{'jdbcType':'VARCHAR','javaType':'string'}
                     }"/>
         <bind name="$fields" value="$fieldsInfo.keySet()"/>

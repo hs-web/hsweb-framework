@@ -38,6 +38,10 @@
         delete from s_user_role where u_id=#{term.primaryKey}
     </delete>
 
+    <delete id="deleteByUserId" parameterType="String">
+        delete from s_user_role where user_id=#{userId}
+    </delete>
+
     <update id="update" parameterType="org.hsweb.web.bean.common.UpdateParam">
         <include refid="fieldConfig"/>
         <include refid="tableName"/>
