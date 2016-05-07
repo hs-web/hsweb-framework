@@ -169,8 +169,6 @@ COMMENT ON COLUMN "S_ROLE"."REMARK" IS '备注';
 -- Records of S_ROLE
 -- ----------------------------
 INSERT INTO "S_ROLE" VALUES ('admin', '超级管理员', NULL, '初始数据');
-INSERT INTO "S_ROLE" VALUES ('ent', '企业用户', NULL, '企业端用户');
-INSERT INTO "S_ROLE" VALUES ('ju', '局端用户', NULL, NULL);
 
 -- ----------------------------
 -- Table structure for S_ROLE_MODULES
