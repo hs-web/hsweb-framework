@@ -18,6 +18,7 @@
         <module>hsweb-web-websocket</module>
         <module>hsweb-web-workflow</module>
         <module>hsweb-web-concurrent</module>
+        <module>hsweb-web-crawler</module>
     </modules>
 
     <properties>
@@ -279,7 +280,7 @@
 
             <dependency>
                 <groupId>org.activiti</groupId>
-                <artifactId>activiti-modeler</artifactId>
+                <artifactId>activiti-json-converter</artifactId>
                 <version>${activiti.version}</version>
             </dependency>
 
