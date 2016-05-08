@@ -3,73 +3,78 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="BasicMapper">
+    <sql id="buildWhereV2">
+        ${@org.hsweb.web.mybatis.builder.DefaultSqlParamBuilder@instance().buildWhere($fieldsInfo,#this['_parameter'].terms)}
+    </sql>
+
     <!--通用查询条件-->
     <sql id="buildWhere">
+        <include refid="BasicMapper.buildWhereV2"/>
         <!--动态生成查询条件-->
-        <foreach item="item" index="index" collection="$fields">
-            <if test="#this['term.'+item]!=null">
-                <choose>
-                    <when test="$fieldsInfo[item]['javaType'] == 'date' ">
-                        AND ${$tableName}.${item}=to_date(#{term.${item}},'YYYY-MM-DD HH24:MI:SS')
-                    </when>
-                    <otherwise>AND ${$tableName}.${item}=#{term.${item}}</otherwise>
-                </choose>
-            </if>
-            <if test="#this['term.'+item+'$NOT']!=null">
-                <choose>
-                    <when test="$fieldsInfo[item]['javaType'] == 'date' ">
-                        AND ${$tableName}.${item}!=to_date(#{term.${item+'$NOT'}},'YYYY-MM-DD HH24:MI:SS')
-                    </when>
-                    <otherwise>AND ${$tableName}.${item}!=#{term.${item+'$NOT'}}</otherwise>
-                </choose>
-            </if>
-            <if test="#this['term.'+item+'$LIKE']!=null">
-                AND ${$tableName}.${item} like #{term.${item+'$LIKE'}}
-            </if>
-            <if test="#this['term.'+item+'$NOTLIKE']!=null">
-                AND ${$tableName}.${item} not like #{term.${item+'$LIKE'}}
-            </if>
-            <if test="#this['term.'+item+'$IN']!=null">
-                AND ${$tableName}.${item} IN
-                <foreach item="it" index="i" collection="#this['term.'+item+'$IN']" open="(" separator="," close=")">
-                    #{it}
-                </foreach>
-            </if>
-            <if test="#this['term.'+item+'$NOTIN']!=null">
-                AND ${$tableName}.${item} NOT IN
-                <foreach item="it" index="i" collection="#this['term.'+item+'$NOTIN']" open="(" separator="," close=")">
-                    #{it}
-                </foreach>
-            </if>
-            <if test="#this['term.'+item+'$ISNULL']!=null">
-                AND ${$tableName}.${item} IS NULL
-            </if>
-            <if test="#this['term.'+item+'$NOTNULL']!=null">
-                AND ${$tableName}.${item} IS NOT NULL
-            </if>
-            <if test="#this['term.'+item+'$GT']!=null">
-                <choose>
-                    <when test="$fieldsInfo[item]['javaType'] == 'date' ">
-                        AND ${$tableName}.${item} &gt;=to_date(#{term.${item+'$GT'}},'YYYY-MM-DD HH24:MI:SS')
-                    </when>
-                    <when test="$fieldsInfo[item]['javaType'] == 'number' ">
-                        AND ${$tableName}.${item} &gt;=#{term.${item+'$GT'}}
-                    </when>
-                    <otherwise></otherwise>
-                </choose>
-            </if>
-            <if test="#this['term.'+item+'$LT']!=null">
-                <choose>
-                    <when test="$fieldsInfo[item]['javaType'] == 'date' ">
-                        AND ${$tableName}.${item} &lt;=to_date(#{term.${item+'$LT'}},'YYYY-MM-DD HH24:MI:SS')
-                    </when>
-                    <when test="$fieldsInfo[item]['javaType'] == 'number' ">
-                        AND ${$tableName}.${item} &lt;=#{term.${item+'$LT'}}
-                    </when>
-                    <otherwise></otherwise>
-                </choose>
-            </if>
-        </foreach>
+        <!--<foreach item="item" index="index" collection="$fields">-->
+            <!--<if test="#this['term.'+item]!=null">-->
+                <!--<choose>-->
+                    <!--<when test="$fieldsInfo[item]['javaType'] == 'date' ">-->
+                        <!--AND ${$tableName}.${item}=to_date(#{term.${item}},'YYYY-MM-DD HH24:MI:SS')-->
+                    <!--</when>-->
+                    <!--<otherwise>AND ${$tableName}.${item}=#{term.${item}}</otherwise>-->
+                <!--</choose>-->
+            <!--</if>-->
+            <!--<if test="#this['term.'+item+'$NOT']!=null">-->
+                <!--<choose>-->
+                    <!--<when test="$fieldsInfo[item]['javaType'] == 'date' ">-->
+                        <!--AND ${$tableName}.${item}!=to_date(#{term.${item+'$NOT'}},'YYYY-MM-DD HH24:MI:SS')-->
+                    <!--</when>-->
+                    <!--<otherwise>AND ${$tableName}.${item}!=#{term.${item+'$NOT'}}</otherwise>-->
+                <!--</choose>-->
+            <!--</if>-->
+            <!--<if test="#this['term.'+item+'$LIKE']!=null">-->
+                <!--AND ${$tableName}.${item} like #{term.${item+'$LIKE'}}-->
+            <!--</if>-->
+            <!--<if test="#this['term.'+item+'$NOTLIKE']!=null">-->
+                <!--AND ${$tableName}.${item} not like #{term.${item+'$LIKE'}}-->
+            <!--</if>-->
+            <!--<if test="#this['term.'+item+'$IN']!=null">-->
+                <!--AND ${$tableName}.${item} IN-->
+                <!--<foreach item="it" index="i" collection="#this['term.'+item+'$IN']" open="(" separator="," close=")">-->
+                    <!--#{it}-->
+                <!--</foreach>-->
+            <!--</if>-->
+            <!--<if test="#this['term.'+item+'$NOTIN']!=null">-->
+                <!--AND ${$tableName}.${item} NOT IN-->
+                <!--<foreach item="it" index="i" collection="#this['term.'+item+'$NOTIN']" open="(" separator="," close=")">-->
+                    <!--#{it}-->
+                <!--</foreach>-->
+            <!--</if>-->
+            <!--<if test="#this['term.'+item+'$ISNULL']!=null">-->
+                <!--AND ${$tableName}.${item} IS NULL-->
+            <!--</if>-->
+            <!--<if test="#this['term.'+item+'$NOTNULL']!=null">-->
+                <!--AND ${$tableName}.${item} IS NOT NULL-->
+            <!--</if>-->
+            <!--<if test="#this['term.'+item+'$GT']!=null">-->
+                <!--<choose>-->
+                    <!--<when test="$fieldsInfo[item]['javaType'] == 'date' ">-->
+                        <!--AND ${$tableName}.${item} &gt;=to_date(#{term.${item+'$GT'}},'YYYY-MM-DD HH24:MI:SS')-->
+                    <!--</when>-->
+                    <!--<when test="$fieldsInfo[item]['javaType'] == 'number' ">-->
+                        <!--AND ${$tableName}.${item} &gt;=#{term.${item+'$GT'}}-->
+                    <!--</when>-->
+                    <!--<otherwise></otherwise>-->
+                <!--</choose>-->
+            <!--</if>-->
+            <!--<if test="#this['term.'+item+'$LT']!=null">-->
+                <!--<choose>-->
+                    <!--<when test="$fieldsInfo[item]['javaType'] == 'date' ">-->
+                        <!--AND ${$tableName}.${item} &lt;=to_date(#{term.${item+'$LT'}},'YYYY-MM-DD HH24:MI:SS')-->
+                    <!--</when>-->
+                    <!--<when test="$fieldsInfo[item]['javaType'] == 'number' ">-->
+                        <!--AND ${$tableName}.${item} &lt;=#{term.${item+'$LT'}}-->
+                    <!--</when>-->
+                    <!--<otherwise></otherwise>-->
+                <!--</choose>-->
+            <!--</if>-->
+        <!--</foreach>-->
         <!--动态生成查询条件结束-->
     </sql>
     <!--生成查询字段-->
@@ -199,7 +204,8 @@
         <include refid="BasicMapper.buildSelectField"/>
         from ${$tableName}
         <where>
-            <include refid="BasicMapper.buildWhere"/>
+            <include refid="BasicMapper.buildWhereV2"/>
+            <!--<include refid="BasicMapper.buildWhere"/>-->
         </where>
         <include refid="BasicMapper.buildSortField"/>
     </sql>
@@ -217,8 +223,9 @@
         update ${$tableName}
         <include refid="BasicMapper.buildUpdateField"/>
         <where>
-            <include refid="BasicMapper.buildWhere"/>
-            <if test="term.size()==0">
+            <include refid="BasicMapper.buildWhereV2"/>
+            <!--<include refid="BasicMapper.buildWhere"/>-->
+            <if test="terms.size()==0">
                 u_id=#{data.u_id}
             </if>
         </where>
@@ -228,7 +235,8 @@
     <sql id="buildTotalSql">
         select count(0) as "total" from ${$tableName}
         <where>
-            <include refid="BasicMapper.buildWhere"/>
+            <include refid="BasicMapper.buildWhereV2"/>
+            <!--<include refid="BasicMapper.buildWhere"/>-->
         </where>
     </sql>
 </mapper>

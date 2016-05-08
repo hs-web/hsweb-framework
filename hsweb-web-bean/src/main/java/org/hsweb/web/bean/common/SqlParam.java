@@ -1,5 +1,6 @@
 package org.hsweb.web.bean.common;
 
+import com.alibaba.fastjson.JSON;
 import org.webbuilder.utils.common.MapUtils;
 import org.webbuilder.utils.common.StringUtils;
 
@@ -9,10 +10,11 @@ import java.util.*;
  * Created by zhouhao on 16-4-19.
  */
 public class SqlParam<R extends SqlParam> {
+
     /**
-     * 执行条件
+     * 条件
      */
-    protected Map<String, Object> term = new HashMap<>();
+    protected List<Term> terms = new LinkedList<>();
 
     /**
      * 指定要处理的字段
@@ -23,6 +25,33 @@ public class SqlParam<R extends SqlParam> {
      * 指定不处理的字段
      */
     protected Set<String> excludes = new LinkedHashSet<>();
+
+    public R or(String termString, Object value) {
+        Term term = new Term();
+        term.setField(termString);
+        term.setValue(value);
+        term.setType(Term.Type.or);
+        terms.add(term);
+        return (R) this;
+    }
+
+    public R and(String termString, Object value) {
+        Term term = new Term();
+        term.setField(termString);
+        term.setValue(value);
+        term.setType(Term.Type.and);
+        terms.add(term);
+        return (R) this;
+    }
+
+    public Term nest(String termString, Object value) {
+        Term term = new Term();
+        term.setField(termString);
+        term.setValue(value);
+        term.setType(Term.Type.and);
+        terms.add(term);
+        return term;
+    }
 
     public R includes(String... fields) {
         includes.addAll(Arrays.asList(fields));
@@ -36,20 +65,13 @@ public class SqlParam<R extends SqlParam> {
     }
 
     public R where(String key, Object value) {
-        this.term.put(key, changeTermValue(key, value));
+        and(key, value);
         return (R) this;
     }
 
     public R where(Map<String, Object> conditions) {
-        changeTerm(conditions);
-        this.term.putAll(conditions);
+        initTermByMap(conditions);
         return (R) this;
-    }
-
-    public Map<String, Object> getTerm() {
-        this.term = MapUtils.removeEmptyValue(term);
-        changeTerm(this.term);
-        return term;
     }
 
     public Set<String> getIncludes() {
@@ -68,43 +90,32 @@ public class SqlParam<R extends SqlParam> {
         this.excludes = excludes;
     }
 
-    public R setTerm(Map<String, Object> term) {
-        this.term = term;
-        return (R) this;
+    public List<Term> getTerms() {
+        return terms;
     }
 
-    protected void changeTerm(Map<String, Object> term) {
-        if (term != null) {
-            term.entrySet().forEach((e) -> e.setValue(changeTermValue(e.getKey(), e.getValue())));
-        }
+    public void setTerms(List<Term> terms) {
+        this.terms = terms;
     }
 
-    public Object changeTermValue(String key, Object value) {
-        //将IN条件的值转换为Iterable
-        if (key.endsWith("$IN")) {
-            if (value == null) return new ArrayList<>();
-            if (!(value instanceof Iterable)) {
-                if (value instanceof String) {
-                    String[] arr = ((String) value).split("[, ;]");
-                    Object[] objArr = new Object[arr.length];
-                    for (int i = 0; i < arr.length; i++) {
-                        String str = arr[i];
-                        Object val = str;
-                        if (StringUtils.isInt(str))
-                            val = StringUtils.toInt(str);
-                        else if (StringUtils.isDouble(str))
-                            val = StringUtils.toDouble(str);
-                        objArr[i] = val;
-                    }
-                    return Arrays.asList(objArr);
-                } else if (value.getClass().isArray()) {
-                    return Arrays.asList(((Object[]) value));
-                } else {
-                    return Arrays.asList(value);
-                }
-            }
-        }
-        return value;
+    @Override
+    public String toString() {
+        return JSON.toJSONString(this);
     }
 
+    protected void initTermByMap(Map<String, Object> param) {
+        param.forEach((k, v) -> {
+            String field = String.valueOf(param.get("field"));
+            Object value = param.get("value");
+            if (StringUtils.isNullOrEmpty(field) || StringUtils.isNullOrEmpty(value)) return;
+            String type = String.valueOf(param.get("type"));
+            String queryType = String.valueOf(param.get("queryType"));
+            Term nest = new Term();
+            nest.setField(field);
+            nest.setValue(value);
+            nest.setType(Term.Type.valueOf(type));
+            nest.setTermType(TermType.valueOf(queryType));
+            terms.add(nest);
+        });
+    }
 }

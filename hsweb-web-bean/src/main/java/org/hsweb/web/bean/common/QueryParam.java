@@ -35,6 +35,9 @@ public class QueryParam extends SqlParam<QueryParam> implements Serializable {
      */
     private String sortOrder = "asc";
 
+    public QueryParam select(String... fields) {
+        return this.includes(fields);
+    }
 
     public QueryParam orderBy(String sortField) {
         this.sortField.add(sortField);
