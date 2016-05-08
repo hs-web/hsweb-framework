@@ -82,6 +82,7 @@ public class ResponseMessage implements Serializable {
     public ResponseMessage include(Class<?> type, Collection<String> fields) {
         if (includes == null)
             includes = new HashMap<>();
+        if (fields == null || fields.isEmpty()) return this;
         getStringListFormMap(includes, type).addAll(fields);
         return this;
     }
@@ -89,6 +90,7 @@ public class ResponseMessage implements Serializable {
     public ResponseMessage exclude(Class type, Collection<String> fields) {
         if (excludes == null)
             excludes = new HashMap<>();
+        if (fields == null || fields.isEmpty()) return this;
         getStringListFormMap(excludes, type).addAll(fields);
         return this;
     }
