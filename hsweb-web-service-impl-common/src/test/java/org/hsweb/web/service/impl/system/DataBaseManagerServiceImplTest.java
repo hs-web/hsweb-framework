@@ -2,6 +2,7 @@ package org.hsweb.web.service.impl.system;
 
 import org.hsweb.web.bean.common.QueryParam;
 import org.hsweb.web.bean.po.module.Module;
+import org.hsweb.web.dao.user.UserMapper;
 import org.hsweb.web.service.impl.AbstractTestCase;
 import org.hsweb.web.service.module.ModuleService;
 import org.hsweb.web.service.system.DataBaseManagerService;
@@ -26,11 +27,19 @@ public class DataBaseManagerServiceImplTest extends AbstractTestCase {
     private SqlExecutor sqlExecutor;
 
     @Resource
-    private ModuleService moduleService;
+    private UserMapper userMapper;
 
     @Test
     public void testGetTableNameList() throws Exception {
-        moduleService.select(new QueryParam().orderBy("sort_index").includes("aaa"));
+        QueryParam queryParam = new QueryParam();
+//        queryParam.nest("name$LIKE", "%admin")
+//                .or("name","1")
+//                .nestOr("name","1")
+//                .and("name","2");
+        queryParam.select("username", "password")
+                .where("create_date$GT", "2015-12-10")
+                .nest("username","admin").or("username", "test");
+        userMapper.select(queryParam);
     }
 
     @Test

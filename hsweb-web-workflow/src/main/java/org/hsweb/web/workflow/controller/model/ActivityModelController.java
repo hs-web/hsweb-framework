@@ -16,9 +16,10 @@ import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.TranscoderOutput;
 import org.apache.batik.transcoder.image.PNGTranscoder;
 import org.apache.commons.lang3.StringUtils;
-import org.hsweb.web.core.authorize.annotation.Authorize;
 import org.hsweb.web.bean.common.PagerResult;
 import org.hsweb.web.bean.common.QueryParam;
+import org.hsweb.web.bean.common.TermType;
+import org.hsweb.web.core.authorize.annotation.Authorize;
 import org.hsweb.web.core.exception.NotFoundException;
 import org.hsweb.web.core.logger.annotation.AccessLogger;
 import org.hsweb.web.core.message.ResponseMessage;
@@ -52,22 +53,39 @@ public class ActivityModelController extends BasicController {
     @Authorize(action = "R")
     public ResponseMessage getModelList(QueryParam param) {
         ModelQuery modelQuery = repositoryService.createModelQuery();
-        param.getTerm().forEach((k, v) -> {
-            ValueWrapper valueWrapper = new SimpleValueWrapper(v);
+        param.getTerms().forEach((term) -> {
+
+            ValueWrapper valueWrapper = new SimpleValueWrapper(term.getValue());
             String stringValue = valueWrapper.toString();
-            if ("name$LIKE".equals(k)) modelQuery.modelNameLike(stringValue);
-            else if ("name".equals(k)) modelQuery.modelName(stringValue);
-            else if ("key".equals(k)) modelQuery.modelKey(stringValue);
-            else if ("category".equals(k)) modelQuery.modelCategory(stringValue);
-            else if ("category$LIKE".equals(k)) modelQuery.modelCategoryLike(stringValue);
-            else if ("category$NOT".equals(k)) modelQuery.modelCategoryNotEquals(stringValue);
-            else if ("tenantId".equals(k)) modelQuery.modelTenantId(stringValue);
-            else if ("tenantId$LIKE".equals(k)) modelQuery.modelTenantIdLike(stringValue);
-            else if ("version".equals(k)) {
-                if ("latest".equals(v))
-                    modelQuery.latestVersion();
-                else
-                    modelQuery.modelVersion(valueWrapper.toInt());
+            switch (term.getField()) {
+                case "name":
+                    if (term.getTermType() == TermType.like)
+                        modelQuery.modelNameLike(stringValue);
+                    else
+                        modelQuery.modelName(stringValue);
+                    break;
+                case "key":
+                    modelQuery.modelKey(stringValue);
+                    break;
+                case "category":
+                    if (term.getTermType() == TermType.like) {
+                        modelQuery.modelCategoryLike(stringValue);
+                    } else if (term.getTermType() == TermType.not) {
+                        modelQuery.modelCategoryNotEquals(stringValue);
+                    } else
+                        modelQuery.modelCategory(stringValue);
+                    break;
+                case "tenantId":
+                    if (term.getTermType() == TermType.like)
+                        modelQuery.modelTenantIdLike(stringValue);
+                    else
+                        modelQuery.modelTenantId(stringValue);
+                    break;
+                case "version":
+                    if ("latest".equals(stringValue))
+                        modelQuery.latestVersion();
+                    else
+                        modelQuery.modelVersion(valueWrapper.toInt());
             }
         });
         modelQuery.orderByCreateTime().desc();

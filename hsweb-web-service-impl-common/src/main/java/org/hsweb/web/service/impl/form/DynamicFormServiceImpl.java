@@ -261,7 +261,7 @@ public class DynamicFormServiceImpl implements DynamicFormService {
 
         public static QueryParamProxy build(QueryParam param) {
             QueryParamProxy proxy = new QueryParamProxy();
-            proxy.where(param.getTerm());
+           // proxy.where(param.getTerm());
             proxy.exclude(param.getExcludes());
             proxy.include(param.getIncludes());
             proxy.orderBy(param.getSortOrder(), param.getSortField());
@@ -274,7 +274,7 @@ public class DynamicFormServiceImpl implements DynamicFormService {
     public static class UpdateParamProxy extends org.webbuilder.sql.param.update.UpdateParam {
         public static UpdateParamProxy build(UpdateParam<Map<String, Object>> param) {
             UpdateParamProxy proxy = new UpdateParamProxy();
-            proxy.where(param.getTerm());
+           // proxy.where(param.getTerm());
             proxy.exclude(param.getExcludes());
             proxy.include(param.getIncludes());
             proxy.set(param.getData());
@@ -293,7 +293,7 @@ public class DynamicFormServiceImpl implements DynamicFormService {
     public static class DeleteParamProxy extends org.webbuilder.sql.param.delete.DeleteParam {
         public static DeleteParamProxy build(DeleteParam param) {
             DeleteParamProxy proxy = new DeleteParamProxy();
-            proxy.where(param.getTerm());
+           // proxy.where(param.getTerm());
             return proxy;
         }
     }
