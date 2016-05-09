@@ -18,6 +18,7 @@ import java.util.Map;
 @RestController
 @RequestMapping(value = "/dyn-form")
 @AccessLogger("动态表单")
+@Authorize
 public class DynamicFormController {
 
     @Resource
@@ -25,9 +26,8 @@ public class DynamicFormController {
 
     @RequestMapping(value = "/{name}", method = RequestMethod.GET)
     @AccessLogger("查看列表")
-    @Authorize(expression = "#user.hasAccessModuleAction(#name,'R')")
     public ResponseMessage list(@PathVariable("name") String name,
-                                @RequestParam(required = false) QueryParam param) throws Exception {
+                                QueryParam param) throws Exception {
         // 获取条件查询
         Object data;
         if (!param.isPaging())//不分页
