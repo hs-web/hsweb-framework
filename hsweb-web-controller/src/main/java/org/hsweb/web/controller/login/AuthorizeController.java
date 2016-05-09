@@ -37,6 +37,13 @@ public class AuthorizeController {
     @Resource
     private ConfigService configService;
 
+    @RequestMapping(value = "/exit", method = RequestMethod.POST)
+    @AccessLogger("登出")
+    public ResponseMessage exit(HttpServletRequest request) throws Exception {
+        request.getSession().removeAttribute("user");
+        return ResponseMessage.ok();
+    }
+
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     @AccessLogger("登录")
     public ResponseMessage login(@RequestParam String username, @RequestParam String password, HttpServletRequest request) throws Exception {

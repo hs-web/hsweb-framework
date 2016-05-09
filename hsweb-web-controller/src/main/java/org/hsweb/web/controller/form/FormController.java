@@ -9,10 +9,8 @@ import org.hsweb.web.core.exception.BusinessException;
 import org.hsweb.web.core.logger.annotation.AccessLogger;
 import org.hsweb.web.core.message.ResponseMessage;
 import org.hsweb.web.service.form.FormService;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -91,6 +89,12 @@ public class FormController extends GenericController<Form, String> {
     @RequestMapping(value = "/{name}/html", method = RequestMethod.GET)
     public ResponseMessage html(@PathVariable("name") String name) throws Exception {
         return ResponseMessage.ok(formService.createDeployHtml(name));
+    }
+
+    @RequestMapping(value = "/{id}/new-version", method = RequestMethod.POST)
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseMessage newVersion(@PathVariable("id") String id) throws Exception {
+        return ResponseMessage.created(formService.createNewVersion(id));
     }
 
     @RequestMapping(value = "/{name}/using", method = RequestMethod.GET)
