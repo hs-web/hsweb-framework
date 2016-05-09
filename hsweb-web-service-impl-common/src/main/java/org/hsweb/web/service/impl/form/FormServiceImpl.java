@@ -1,6 +1,7 @@
 package org.hsweb.web.service.impl.form;
 
 import com.alibaba.fastjson.JSON;
+import org.hsweb.web.bean.common.InsertParam;
 import org.hsweb.web.core.authorize.annotation.Authorize;
 import org.hsweb.web.bean.common.QueryParam;
 import org.hsweb.web.bean.common.UpdateParam;
@@ -60,11 +61,12 @@ public class FormServiceImpl extends AbstractServiceImpl<Form, String> implement
     @Override
     public String createNewVersion(String oldVersionId) throws Exception {
         Form old = this.selectByPk(oldVersionId);
-        Assert.isNull(old, "表单不存在!");
+        Assert.notNull(old, "表单不存在!");
         old.setU_id(RandomUtil.randomChar());
         old.setVersion(old.getVersion() + 1);
         old.setCreate_date(new Date());
         old.setUpdate_date(null);
+        getMapper().insert(new InsertParam<>(old));
         return old.getU_id();
     }
 
@@ -86,7 +88,8 @@ public class FormServiceImpl extends AbstractServiceImpl<Form, String> implement
         Form old = this.selectByPk(data.getU_id());
         Assert.notNull(old, "表单不存在!");
         data.setUpdate_date(new Date());
-        return super.update(data);
+        UpdateParam<Form> param = new UpdateParam<>(data).excludes("create_date", "version", "using");
+        return getMapper().update(param);
     }
 
     @Override
