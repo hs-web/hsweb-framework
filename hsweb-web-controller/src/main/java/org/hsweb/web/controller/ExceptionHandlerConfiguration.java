@@ -1,20 +1,28 @@
-package org.hsweb.web.core.exception;
+package org.hsweb.web.controller;
 
+import org.hsweb.web.core.exception.BusinessException;
+import org.hsweb.web.core.exception.ExceptionHandler;
 import org.hsweb.web.core.message.ResponseMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.web.DefaultErrorAttributes;
+import org.springframework.boot.autoconfigure.web.ErrorAttributes;
+import org.springframework.boot.autoconfigure.web.ErrorController;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.ModelAndView;
 import org.webbuilder.utils.common.ClassUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -47,11 +55,12 @@ public class ExceptionHandlerConfiguration {
                     responseMessage = ResponseMessage.error(ex.getMessage());
                 }
                 request.setAttribute("error.attributes", responseMessage.toMap());
-                try {
-                    response.sendError(responseMessage.getCode());
-                } catch (IOException e) {
-                    logger.error("", e);
-                }
+//                try {
+                request.setAttribute("javax.servlet.error.status_code", responseMessage.getCode());
+//                    response.sendError(responseMessage.getCode());
+//                } catch (IOException e) {
+//                    logger.error("", e);
+//                }
                 return null;
             }
 
@@ -112,4 +121,5 @@ public class ExceptionHandlerConfiguration {
         };
         return handler;
     }
+
 }
