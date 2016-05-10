@@ -55,11 +55,11 @@ public @interface Authorize {
     boolean api() default false;
 
     /**
-     * 验证模式，在使用多个验证条件时有效，当设置为INTERSECTION时，用户只需要通过其中一个验证即可
+     * 验证模式，在使用多个验证条件时有效
      *
      * @return
      */
-    MOD mod() default MOD.AND;
+    MOD mod() default MOD.OR;
 
     enum MOD {
         /**
