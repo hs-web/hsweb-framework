@@ -11,6 +11,7 @@ import org.webbuilder.sql.support.MysqlDataBaseMetaData;
 import org.webbuilder.sql.support.OracleDataBaseMetaData;
 import org.webbuilder.sql.support.common.CommonDataBase;
 import org.webbuilder.sql.support.executor.SqlExecutor;
+import org.webbuilder.sql.validator.ValidatorFactory;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -26,8 +27,12 @@ import java.util.Map;
 public class DataBaseAutoConfiguration {
     @Resource
     private SqlExecutor sqlExecutor;
+
     @Autowired
     private DataSourceProperties properties;
+
+    @Autowired(required = false)
+    private ValidatorFactory validatorFactory;
 
     @PostConstruct
     public void init() {
@@ -48,6 +53,8 @@ public class DataBaseAutoConfiguration {
 
         if (dataBaseMetaData == null)
             dataBaseMetaData = new OracleDataBaseMetaData();
+        if (validatorFactory != null)
+            dataBaseMetaData.setValidatorFactory(validatorFactory);
         DataBase dataBase = new CommonDataBase(dataBaseMetaData, sqlExecutor);
         return dataBase;
     }
