@@ -15,10 +15,7 @@ import org.webbuilder.utils.common.BeanUtils;
 import org.webbuilder.utils.common.StringUtils;
 
 import java.lang.reflect.Field;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by zhouhao on 16-4-20.
@@ -34,7 +31,6 @@ public class DefaultFormParser implements FormParser {
         metaData.setComment(form.getRemark());
         JSONObject object = JSON.parseObject(meta);
         object.forEach((id, field) -> {
-            if ("main".equals(id)) return;
             FieldMetaData fieldMeta = new FieldMetaData();
             fieldMeta.attr("field-id", id);
             JSONArray obj = ((JSONArray) field);
@@ -42,6 +38,23 @@ public class DefaultFormParser implements FormParser {
                 JSONObject def = ((JSONObject) defT);
                 String key = def.getString("key");
                 Object value = def.get("value");
+                if ("main".equals(id)) {
+                    metaData.attr(key,value);
+                    return;
+                }
+                if ("validator-list".equals(key)) {
+                    Set<String> validatorList = new LinkedHashSet<>();
+                    if (value instanceof String) {
+                        List<JSONObject> jsonArray = JSON.parseArray((String) value, JSONObject.class);
+                        jsonArray.forEach(json -> {
+                            String validator = json.getString("validator");
+                            if (validatorSupport(validator))
+                                validatorList.add(validator);
+                        });
+                    }
+                    fieldMeta.setValidator(validatorList);
+                    return;
+                }
                 Field ftmp = ReflectionUtils.findField(FieldMetaData.class, key);
                 if (ftmp != null) {
                     try {
@@ -63,11 +76,15 @@ public class DefaultFormParser implements FormParser {
                 }
             });
             //name为空的时候 不保持此字段
-            if (!StringUtils.isNullOrEmpty(fieldMeta.getName())) {
+            if (!"main".equals(id)&&!StringUtils.isNullOrEmpty(fieldMeta.getName())) {
                 metaData.addField(fieldMeta);
             }
         });
         return metaData;
+    }
+
+    protected boolean validatorSupport(String validator) {
+        return !StringUtils.isNullOrEmpty(validator);
     }
 
     protected static Map<String, Class> typeMapper = new HashMap() {{
