@@ -35,8 +35,6 @@ public class DynamicFormController {
         else
             data = dynamicFormService.selectPager(name, param);
         return ResponseMessage.ok(data)
-                .include(Map.class, param.getIncludes())
-                .exclude(Map.class, param.getExcludes())
                 .onlyData();
     }
 
