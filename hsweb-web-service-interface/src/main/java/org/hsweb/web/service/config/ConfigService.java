@@ -3,6 +3,7 @@ package org.hsweb.web.service.config;
 import org.hsweb.web.bean.po.config.Config;
 import org.hsweb.web.service.GenericService;
 
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -20,13 +21,13 @@ public interface ConfigService extends GenericService<Config, String> {
     String getContent(String name) throws Exception;
 
     /**
-     * 根据配置名称，获取配置内容，并解析为Properties格式
+     * 根据配置名称，获取配置内容，并解析为map格式
      *
      * @param name 配置名称
      * @return 配置内容
      * @throws Exception 异常信息
      */
-    Properties get(String name) throws Exception;
+    Map<Object,Object> get(String name) throws Exception;
 
     /**
      * 获取配置中指定key的值
