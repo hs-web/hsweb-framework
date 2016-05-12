@@ -11,6 +11,8 @@ import org.springframework.util.Assert;
 import org.webbuilder.utils.common.StringUtils;
 
 import javax.annotation.Resource;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -61,9 +63,9 @@ public class ConfigServiceImpl extends AbstractServiceImpl<Config, String> imple
      */
     @Override
     @Cacheable(value = CACHE_KEY, key = "'info.'+#name")
-    public Properties get(String name) throws Exception {
+    public Map<Object, Object> get(String name) throws Exception {
         Config config = getMapper().selectByPk(name);
-        if (config == null) return new Properties();
+        if (config == null) return new HashMap<>();
         return config.toMap();
     }
 
@@ -78,7 +80,9 @@ public class ConfigServiceImpl extends AbstractServiceImpl<Config, String> imple
     @Override
     @Cacheable(value = CACHE_KEY, key = "'info.'+#name+'.key.'+#key")
     public String get(String name, String key) throws Exception {
-        return get(name).getProperty(key);
+        Object val = get(name).get(key);
+        if (val == null) return null;
+        return String.valueOf(val);
     }
 
     /**
@@ -94,7 +98,7 @@ public class ConfigServiceImpl extends AbstractServiceImpl<Config, String> imple
     public String get(String name, String key, String defaultValue) {
         String val;
         try {
-            val = this.get(name).getProperty(key);
+            val = this.get(name, key);
             if (val == null) {
                 logger.error("获取配置:{}.{}失败,defaultValue:{}", name, key, defaultValue);
                 return defaultValue;
