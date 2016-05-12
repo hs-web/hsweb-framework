@@ -1,10 +1,11 @@
 package org.hsweb.web.bean.po.config;
 
+import com.alibaba.fastjson.JSON;
 import org.hsweb.web.bean.po.GenericPo;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * 系统配置
@@ -25,6 +26,9 @@ public class Config extends GenericPo<String> {
 
     //最后一次修改日期
     private java.util.Date update_date;
+
+    //配置类型: properties,json
+    private String type;
 
     /**
      * 获取 备注
@@ -94,13 +98,35 @@ public class Config extends GenericPo<String> {
         this.update_date = update_date;
     }
 
-    public Properties toMap() {
-        Properties properties = new Properties();
-        try {
-            properties.load(new StringReader(getContent()));
-        } catch (IOException e) {
-            e.printStackTrace();
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public Map<Object, Object> toMap() {
+        switch (type) {
+            case "properties":
+                Properties properties = new Properties();
+                try {
+                    properties.load(new StringReader(getContent()));
+                } catch (IOException e) {
+                }
+                return properties;
+            case "json":
+                if (getContent().trim().startsWith("[")) {
+                    Map<Object, Object> map = new LinkedHashMap<>();
+                    List<Map> arr = JSON.parseArray(getContent(), Map.class);
+                    for (int i = 0; i < arr.size(); i++) {
+                        map.put(String.valueOf(i), arr.get(i));
+                    }
+                    return map;
+                }
+                return JSON.parseObject(getContent(), Map.class);
+            default:
+                return new HashMap<>();
         }
-        return properties;
     }
 }

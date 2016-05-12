@@ -61,6 +61,25 @@ CREATE TABLE `s_modules` (
 );
 ALTER TABLE `s_modules` COMMENT '系统模块';
 
+
+CREATE TABLE `s_module_meta` (
+  `u_id`      VARCHAR(256)  NOT NULL PRIMARY KEY
+  COMMENT 'uid',
+  `key`       VARCHAR(256)  NOT NULL
+  COMMENT '标识',
+  `module_id` VARCHAR(1024) NULL
+  COMMENT '模块ID',
+  `remark` VARCHAR(1024) NULL
+  COMMENT '备注',
+  `role_id`   VARCHAR(256)  NULL
+  COMMENT '图标',
+  `status`    INT(4)        NULL
+  COMMENT '状态',
+  `meta`      TEXT          NOT NULL
+  COMMENT '定义内容'
+);
+ALTER TABLE `s_modules` COMMENT '系统模块配置';
+
 -- ----------------------------
 -- Records of S_MODULES
 -- ----------------------------

@@ -1,7 +1,6 @@
 package org.hsweb.web.bean.common;
 
 /**
- *
  * Created by zhouhao on 16-5-9.
  */
 public enum TermType {
@@ -17,6 +16,7 @@ public enum TermType {
      * like
      */
     like,
+    notlike,
     /**
      * >
      */
@@ -34,16 +34,32 @@ public enum TermType {
      */
     notin,
     /**
+     * =''
+     */
+    empty,
+    /**
+     * !=''
+     */
+    notempty,
+    /**
      * is null
      */
     isnull,
     /**
      * not null
      */
-    notnull;
+    notnull,
+    /**
+     * between
+     */
+    btw,
+    /**
+     * not between
+     */
+    notbtw;
 
     public static TermType fromString(String str) {
-        if (!str.contains("$")) {
+        if (str == null || !str.contains("$")) {
             return eq;
         } else {
             try {

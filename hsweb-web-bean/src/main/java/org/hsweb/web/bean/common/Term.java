@@ -34,6 +34,8 @@ public class Term {
      */
     private List<Term> terms = new LinkedList<>();
 
+    private boolean nest = false;
+
     public Term or(String term, Object value) {
         Term queryTerm = new Term();
         queryTerm.setField(term);
@@ -52,20 +54,29 @@ public class Term {
         return this;
     }
 
+    public Term nest() {
+        return nest(null, null);
+    }
+    public Term orNest() {
+        return orNest(null, null);
+    }
+
     public Term nest(String term, Object value) {
         Term queryTerm = new Term();
         queryTerm.setField(term);
         queryTerm.setValue(value);
         queryTerm.setType(Type.and);
+        queryTerm.setNest(true);
         terms.add(queryTerm);
         return queryTerm;
     }
 
-    public Term nestOr(String term, Object value) {
+    public Term orNest(String term, Object value) {
         Term queryTerm = new Term();
         queryTerm.setField(term);
         queryTerm.setValue(value);
         queryTerm.setType(Type.or);
+        queryTerm.setNest(true);
         terms.add(queryTerm);
         return queryTerm;
     }
@@ -75,6 +86,7 @@ public class Term {
     }
 
     public void setField(String field) {
+        if(field==null)return;
         setTermType(TermType.fromString(field));
         if (field.contains("$")) {
             field = field.split("[\\$]")[0];
@@ -114,6 +126,14 @@ public class Term {
         this.terms = terms;
     }
 
+    public void setNest(boolean nest) {
+        this.nest = nest;
+    }
+
+    public boolean isNest() {
+        return nest;
+    }
+
     public enum Type {
         or, and;
 
@@ -125,4 +145,6 @@ public class Term {
             }
         }
     }
+
+
 }
