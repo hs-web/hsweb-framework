@@ -21,7 +21,7 @@ import javax.annotation.Resource;
 @RestController
 @RequestMapping(value = "/script")
 @AccessLogger("动态脚本")
-@Authorize(role = Role.SYS_ROLE_ADMIN)
+@Authorize(module = "script")
 public class DynamicScriptController extends GenericController<DynamicScript, String> {
 
     //默认服务类
@@ -35,12 +35,14 @@ public class DynamicScriptController extends GenericController<DynamicScript, St
 
 
     @RequestMapping(value = "/compile", method = {RequestMethod.GET})
+    @Authorize(action = "compile")
     public ResponseMessage compileAll() throws Exception {
         dynamicScriptService.compileAll();
         return ResponseMessage.ok("success");
     }
 
     @RequestMapping(value = "/compile/{id:.+}", method = {RequestMethod.GET})
+    @Authorize(action = "compile")
     public ResponseMessage compile(@PathVariable("id") String id) throws Exception {
         dynamicScriptService.compile(id);
         return ResponseMessage.ok("success");
