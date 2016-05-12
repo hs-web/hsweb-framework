@@ -10,6 +10,8 @@ import org.hsweb.web.bean.po.history.History;
 import org.hsweb.web.service.form.DynamicFormService;
 import org.hsweb.web.service.form.FormService;
 import org.hsweb.web.service.history.HistoryService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -31,6 +33,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 @Service("dynamicFormService")
 public class DynamicFormServiceImpl implements DynamicFormService {
 
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
     @Autowired
     protected LockFactory lockFactory;
 
@@ -74,11 +77,28 @@ public class DynamicFormServiceImpl implements DynamicFormService {
         ReadWriteLock readWriteLock = lockFactory.createReadWriteLock("dynamicForm.lock");
         writeLock = readWriteLock.writeLock();
         readLock = readWriteLock.readLock();
+        QueryParam param = new QueryParam();
+        param.where("using", 1);
+        try {
+            formService.select(param).forEach(form -> {
+                try {
+                    deploy(form);
+                } catch (Exception e) {
+                    logger.error("", e);
+                }
+            });
+        } catch (Exception e) {
+            logger.error("", e);
+        }
+    }
+
+    @Override
+    public Object parseMeta(Form form) throws Exception {
+        return formParser.parse(form);
     }
 
     @Override
     public void deploy(Form form) throws Exception {
-
         try {
             writeLock.lock();
             TableMetaData metaData = formParser.parse(form);
