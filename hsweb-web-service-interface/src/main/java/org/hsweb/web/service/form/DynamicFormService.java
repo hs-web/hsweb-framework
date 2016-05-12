@@ -11,6 +11,8 @@ import java.util.Map;
  */
 public interface DynamicFormService {
 
+    Object parseMeta(Form form) throws Exception;
+
     void deploy(Form form) throws Exception;
 
     void unDeploy(Form form) throws Exception;

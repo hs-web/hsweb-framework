@@ -11,6 +11,7 @@
         <result property="content" column="content" javaType="String" jdbcType="VARCHAR"/>
         <result property="create_date" column="create_date" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
         <result property="update_date" column="update_date" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <result property="type" column="type" javaType="String" jdbcType="VARCHAR"/>
     </resultMap>
 
     <!--字段信息配置-->
@@ -20,8 +21,9 @@
                     'u_id':#{'jdbcType':'VARCHAR','javaType':'string'}
                     ,'remark':#{'jdbcType':'VARCHAR','javaType':'string'}
                     ,'content':#{'jdbcType':'VARCHAR','javaType':'string'}
-                    ,'create_date':#{'jdbcType':'VARCHAR','javaType':'date'}
-                    ,'update_date':#{'jdbcType':'VARCHAR','javaType':'date'}
+                    ,'create_date':#{'jdbcType':'TIMESTAMP','javaType':'date'}
+                    ,'update_date':#{'jdbcType':'TIMESTAMP','javaType':'date'}
+                     ,'type':#{'jdbcType':'VARCHAR','javaType':'string'}
                     }"/>
 
         <bind name="$fields" value="$fieldsInfo.keySet()"/>

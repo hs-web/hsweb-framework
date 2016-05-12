@@ -28,13 +28,46 @@ public class DefaultSqlParamBuilder {
         mapperMap.put(TermType.like, (paramKey, field, jdbcType) ->
                         new SqlAppender().add(field.getField(), " like ", "#{", paramKey, "}").toString()
         );
-
+        mapperMap.put(TermType.notlike, (paramKey, field, jdbcType) ->
+                        new SqlAppender().add(field.getField(), " not like ", "#{", paramKey, "}").toString()
+        );
         mapperMap.put(TermType.notnull, (paramKey, field, jdbcType) ->
-                        new SqlAppender().add(field.getField(), " not null").toString()
+                        new SqlAppender().add(field.getField(), " is not null").toString()
         );
         mapperMap.put(TermType.isnull, (paramKey, field, jdbcType) ->
                         new SqlAppender().add(field.getField(), " is null").toString()
         );
+        mapperMap.put(TermType.empty, (paramKey, field, jdbcType) ->
+                        new SqlAppender().add(field.getField(), " =''").toString()
+        );
+        mapperMap.put(TermType.notempty, (paramKey, field, jdbcType) ->
+                        new SqlAppender().add(field.getField(), " !=''").toString()
+        );
+        mapperMap.put(TermType.btw, (paramKey, field, jdbcType) ->
+        {
+            SqlAppender sqlAppender = new SqlAppender();
+            List<Object> objects = param2list(field.getValue());
+            if (objects.size() == 1)
+                objects.add(objects.get(0));
+            field.setValue(objects);
+            sqlAppender.addSpc(field.getField(), "between")
+                    .add(" #{", paramKey, "[0]}")
+                    .add(" and ", "#{", paramKey, "[1]}");
+            return sqlAppender.toString();
+        });
+
+        mapperMap.put(TermType.notbtw, (paramKey, field, jdbcType) ->
+        {
+            SqlAppender sqlAppender = new SqlAppender();
+            List<Object> objects = param2list(field.getValue());
+            if (objects.size() == 1)
+                objects.add(objects.get(0));
+            field.setValue(objects);
+            sqlAppender.addSpc(field.getField(), "not between")
+                    .add(" #{", paramKey, "[0]}")
+                    .add(" and ", "#{", paramKey, "[1]}");
+            return sqlAppender.toString();
+        });
 
         mapperMap.put(TermType.gt, (paramKey, field, jdbcType) -> {
             SqlAppender sqlAppender = new SqlAppender();
@@ -99,11 +132,14 @@ public class DefaultSqlParamBuilder {
     }
 
     public String buildWhere(Map<String, Object> fieldConfig, List<Term> terms) {
-        String sql = buildWhere(fieldConfig, "", terms);
-        return sql;
+        SqlAppender sqlAppender = new SqlAppender();
+        buildWhere(fieldConfig, "", terms, sqlAppender);
+        if (sqlAppender.size() > 0) sqlAppender.removeFirst();
+        return sqlAppender.toString();
     }
 
     public JDBCType getFieldJDBCType(String field, Map<String, Object> fieldConfig) {
+        if (field == null) return JDBCType.NULL;
         Object conf = fieldConfig.get(field);
         if (conf instanceof Map) {
             try {
@@ -114,27 +150,49 @@ public class DefaultSqlParamBuilder {
         return JDBCType.VARCHAR;
     }
 
-    public String buildWhere(Map<String, Object> fieldConfig, String prefix, List<Term> terms) {
-        if (terms == null || terms.isEmpty()) return "";
-        SqlAppender appender = new SqlAppender();
+    public void buildWhere(Map<String, Object> fieldConfig, String prefix, List<Term> terms, SqlAppender appender) {
+        if (terms == null || terms.isEmpty()) return;
         int index = 0;
         String prefixTmp = StringUtils.concat(prefix, StringUtils.isNullOrEmpty(prefix) ? "" : ".");
         for (Term term : terms) {
-            if (!fieldConfig.containsKey(term.getField())) continue;
+            boolean nullTerm = StringUtils.isNullOrEmpty(term.getField());
+            //不是空条件 也不是可选字段
+            if (!nullTerm && !fieldConfig.containsKey(term.getField())) continue;
+            //不是空条件，值为空
+            if (!nullTerm && StringUtils.isNullOrEmpty(term.getValue())) continue;
+            //是空条件，但是无嵌套
+            if (nullTerm && term.getTerms().isEmpty()) continue;
+            //用于sql预编译的参数名
             prefix = StringUtils.concat(prefixTmp, "terms[", index++, "]");
+            //JDBC类型
             JDBCType jdbcType = getFieldJDBCType(term.getField(), fieldConfig);
+            //转换参数的值
             term.setValue(transformationValue(jdbcType, term.getValue()));
-            appender.addSpc(" " + term.getType().toString());
-            if (term.getTerms() != null && !term.getTerms().isEmpty()) {
-                appender.add("(", mapperMap.get(term.getTermType()).fieldMapper(prefix + ".value", term, jdbcType));
-                appender.addSpc("", term.getType().toString())
-                        .add(buildWhere(fieldConfig, prefix, term.getTerms()), ")");
+            //添加类型，and 或者 or
+            appender.add(StringUtils.concat(" ", term.getType().toString(), " "));
+            if (!term.getTerms().isEmpty()) {
+                //构建嵌套的条件
+                SqlAppender nest = new SqlAppender();
+                buildWhere(fieldConfig, prefix, term.getTerms(), nest);
+                //如果嵌套结果为空
+                if (nest.isEmpty()) {
+                    appender.removeLast();//删除最后一个（and 或者 or）
+                    continue;
+                }
+                if (nullTerm) {
+                    //删除 第一个（and 或者 or）
+                    nest.removeFirst();
+                }
+                appender.add("(");
+                if (!nullTerm)
+                    appender.add(mapperMap.get(term.getTermType()).fieldMapper(prefix + ".value", term, jdbcType));
+                appender.addAll(nest);
+                appender.add(")");
             } else {
-                appender.add(mapperMap.get(term.getTermType()).fieldMapper("" + prefix + ".value", term, jdbcType));
+                if (!nullTerm)
+                    appender.add(mapperMap.get(term.getTermType()).fieldMapper("" + prefix + ".value", term, jdbcType));
             }
         }
-        appender.removeFirst();
-        return appender.toString();
     }
 
     protected Object transformationValue(JDBCType type, Object value) {

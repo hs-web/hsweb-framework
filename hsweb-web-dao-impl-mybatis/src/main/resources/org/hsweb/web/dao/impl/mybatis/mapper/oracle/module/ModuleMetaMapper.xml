@@ -3,33 +3,34 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="org.hsweb.web.dao.config.ConfigMapper">
-    <resultMap id="ConfigResultMap" type="Config">
+<mapper namespace="org.hsweb.web.dao.module.ModuleMetaMapper">
+    <resultMap id="ModuleMetaResultMap" type="ModuleMeta">
         <id property="u_id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
-        <result property="u_id" column="u_id" javaType="String" jdbcType="VARCHAR"/>
+        <result property="key" column="key" javaType="String" jdbcType="VARCHAR"/>
+        <result property="module_id" column="module_id" javaType="String" jdbcType="VARCHAR"/>
+        <result property="role_id" column="role_id" javaType="String" jdbcType="VARCHAR"/>
+        <result property="meta" column="meta" javaType="String" jdbcType="CLOB"/>
         <result property="remark" column="remark" javaType="String" jdbcType="VARCHAR"/>
-        <result property="content" column="content" javaType="String" jdbcType="VARCHAR"/>
-        <result property="create_date" column="create_date" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
-        <result property="type" column="type" javaType="String" jdbcType="VARCHAR"/>
+        <result property="status" column="status" javaType="int" jdbcType="INTEGER"/>
     </resultMap>
 
-    <!--字段信息配置-->
+    <!--字段信息绑定-->
     <sql id="fieldConfig">
         <bind name="$fieldsInfo"
               value="#{
                     'u_id':#{'jdbcType':'VARCHAR','javaType':'string'}
+                    ,'key':#{'jdbcType':'VARCHAR','javaType':'string'}
+                    ,'module_id':#{'jdbcType':'VARCHAR','javaType':'string'}
+                    ,'role_id':#{'jdbcType':'VARCHAR','javaType':'string'}
+                    ,'meta':#{'jdbcType':'CLOB','javaType':'string'}
                     ,'remark':#{'jdbcType':'VARCHAR','javaType':'string'}
-                    ,'content':#{'jdbcType':'VARCHAR','javaType':'string'}
-                    ,'create_date':#{'jdbcType':'TIMESTAMP','javaType':'date'}
-                    ,'update_date':#{'jdbcType':'TIMESTAMP','javaType':'date'}
-                     ,'type':#{'jdbcType':'VARCHAR','javaType':'string'}
+                    ,'status':#{'jdbcType':'INTEGER','javaType':'number'}
                     }"/>
-
         <bind name="$fields" value="$fieldsInfo.keySet()"/>
     </sql>
     <!--表名-->
     <sql id="tableName">
-        <bind name="$tableName" value="'s_config'"/>
+        <bind name="$tableName" value="'s_module_meta'"/>
     </sql>
 
     <insert id="insert" parameterType="org.hsweb.web.bean.common.InsertParam" useGeneratedKeys="true" keyProperty="data.u_id" keyColumn="U_ID">
@@ -39,7 +40,7 @@
     </insert>
 
     <delete id="delete" parameterType="org.hsweb.web.bean.common.DeleteParam">
-        delete from s_config where u_id=#{term.primaryKey}
+        delete from s_module_meta where u_id=#{term.primaryKey}
     </delete>
 
     <update id="update" parameterType="org.hsweb.web.bean.common.UpdateParam">
@@ -48,11 +49,11 @@
         <include refid="BasicMapper.buildUpdateSql"/>
     </update>
 
-    <select id="selectByPk" parameterType="string" resultMap="ConfigResultMap">
-        select * from s_config where u_id=#{u_id}
+    <select id="selectByPk" parameterType="string" resultMap="ModuleMetaResultMap">
+        select * from s_module_meta WHERE u_id=#{u_id}
     </select>
 
-    <select id="select" parameterType="org.hsweb.web.bean.common.QueryParam" resultMap="ConfigResultMap">
+    <select id="select" parameterType="org.hsweb.web.bean.common.QueryParam" resultMap="ModuleMetaResultMap">
         <include refid="fieldConfig"/>
         <include refid="tableName"/>
         <include refid="BasicMapper.buildSelectSql"/>
