@@ -10,6 +10,7 @@ import org.webbuilder.sql.DataBaseMetaData;
 import org.webbuilder.sql.support.MysqlDataBaseMetaData;
 import org.webbuilder.sql.support.OracleDataBaseMetaData;
 import org.webbuilder.sql.support.common.CommonDataBase;
+import org.webbuilder.sql.support.executor.ObjectWrapperFactory;
 import org.webbuilder.sql.support.executor.SqlExecutor;
 import org.webbuilder.sql.validator.ValidatorFactory;
 
@@ -34,6 +35,9 @@ public class DataBaseAutoConfiguration {
     @Autowired(required = false)
     private ValidatorFactory validatorFactory;
 
+    @Autowired(required = false)
+    private ObjectWrapperFactory objectWrapperFactory;
+
     @PostConstruct
     public void init() {
 
@@ -55,7 +59,9 @@ public class DataBaseAutoConfiguration {
             dataBaseMetaData = new OracleDataBaseMetaData();
         if (validatorFactory != null)
             dataBaseMetaData.setValidatorFactory(validatorFactory);
-        DataBase dataBase = new CommonDataBase(dataBaseMetaData, sqlExecutor);
+        CommonDataBase dataBase = new CommonDataBase(dataBaseMetaData, sqlExecutor);
+        if (objectWrapperFactory != null)
+            dataBase.setWrapperFactory(objectWrapperFactory);
         return dataBase;
     }
 }
