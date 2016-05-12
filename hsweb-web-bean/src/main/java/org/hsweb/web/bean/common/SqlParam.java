@@ -11,6 +11,9 @@ import java.util.*;
  */
 public class SqlParam<R extends SqlParam> {
 
+    @Deprecated
+    protected Map<String, Object> term = new HashMap<>();
+
     /**
      * 条件
      */
@@ -44,14 +47,34 @@ public class SqlParam<R extends SqlParam> {
         return (R) this;
     }
 
+    public Term nest() {
+        return nest(null, null);
+    }
+
+    public Term orNest() {
+        return orNest(null, null);
+    }
+
     public Term nest(String termString, Object value) {
         Term term = new Term();
         term.setField(termString);
         term.setValue(value);
         term.setType(Term.Type.and);
+        term.setNest(true);
         terms.add(term);
         return term;
     }
+
+    public Term orNest(String termString, Object value) {
+        Term term = new Term();
+        term.setField(termString);
+        term.setValue(value);
+        term.setType(Term.Type.or);
+        term.setNest(true);
+        terms.add(term);
+        return term;
+    }
+
 
     public R includes(String... fields) {
         includes.addAll(Arrays.asList(fields));
@@ -96,6 +119,22 @@ public class SqlParam<R extends SqlParam> {
 
     public void setTerms(List<Term> terms) {
         this.terms = terms;
+    }
+
+    @Deprecated
+    public Map<String, Object> getTerm() {
+        if (term.isEmpty() && !terms.isEmpty()) {
+            terms.forEach(term1 -> {
+                if (!StringUtils.isNullOrEmpty(term1.getField()))
+                    term.put(term1.getField(), term1.getValue());
+            });
+        }
+        return term;
+    }
+
+    @Deprecated
+    public void setTerm(Map<String, Object> term) {
+        this.term = term;
     }
 
     @Override
