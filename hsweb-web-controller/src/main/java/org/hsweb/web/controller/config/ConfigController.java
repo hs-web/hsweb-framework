@@ -124,7 +124,7 @@ public class ConfigController extends GenericController<Config, String> {
     @RequestMapping(value = {"/info/{name:.+}/{key:.+}"}, method = RequestMethod.GET)
     @AccessLogger("根据配置名和键获取配置")
     public Object configInfo(@PathVariable("name") String name, @PathVariable("key") String key) throws Exception {
-        return configService.get(name, key);
+        return configService.get(name, key,"");
     }
 
     @Override
