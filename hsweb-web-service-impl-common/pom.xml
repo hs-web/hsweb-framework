@@ -37,6 +37,10 @@
         </dependency>
 
         <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-all</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.hsweb</groupId>
             <artifactId>hsweb-web-concurrent-cache</artifactId>
         </dependency>

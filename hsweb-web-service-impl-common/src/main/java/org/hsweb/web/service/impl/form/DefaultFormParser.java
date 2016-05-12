@@ -3,6 +3,7 @@ package org.hsweb.web.service.impl.form;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.hibernate.validator.constraints.Length;
 import org.hsweb.web.bean.po.form.Form;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
@@ -21,7 +22,6 @@ import java.util.*;
  * Created by zhouhao on 16-4-20.
  */
 public class DefaultFormParser implements FormParser {
-
     @Override
     public TableMetaData parse(Form form) {
         String meta = form.getMeta();

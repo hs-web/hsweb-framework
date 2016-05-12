@@ -33,17 +33,15 @@ public class DynamicScriptServiceImpl extends AbstractServiceImpl<DynamicScript,
     }
 
     @Override
-    @Cacheable(value = CACHE_KEY, key = "#pk")
+    @Cacheable(value = CACHE_KEY, key = "'script.'+#pk")
     public DynamicScript selectByPk(String pk) throws Exception {
         return super.selectByPk(pk);
     }
 
     @Override
-    @CacheEvict(value = CACHE_KEY, key = "#data.u_id")
+    @CacheEvict(value = CACHE_KEY, key = "'script.'+#data.u_id")
     public int update(DynamicScript data) throws Exception {
         int i = super.update(data);
-        DynamicScriptEngine engine = DynamicScriptEngineFactory.getEngine(data.getType());
-        engine.compile(data.getU_id(), data.getContent());
         return i;
     }
 
@@ -51,15 +49,11 @@ public class DynamicScriptServiceImpl extends AbstractServiceImpl<DynamicScript,
     @CacheEvict(value = CACHE_KEY, allEntries = true)
     public int update(List<DynamicScript> datas) throws Exception {
         int i = super.update(datas);
-        for (DynamicScript data : datas) {
-            DynamicScriptEngine engine = DynamicScriptEngineFactory.getEngine(data.getType());
-            engine.compile(data.getU_id(), data.getContent());
-        }
         return i;
     }
 
     @Override
-    @CacheEvict(value = CACHE_KEY, key = "#pk")
+    @CacheEvict(value = CACHE_KEY, key = "'script.'+#pk")
     public int delete(String pk) throws Exception {
         return super.delete(pk);
     }
@@ -69,6 +63,7 @@ public class DynamicScriptServiceImpl extends AbstractServiceImpl<DynamicScript,
         if (script == null) throw new BusinessException(String.format("脚本[%s]不存在", id));
         DynamicScriptEngine engine = DynamicScriptEngineFactory.getEngine(script.getType());
         try {
+            if(engine==null)throw new BusinessException("不支持的脚本语言:"+script.getType());
             engine.compile(script.getU_id(), script.getContent());
         } catch (Exception e) {
             logger.error("compile error!", e);
@@ -79,11 +74,8 @@ public class DynamicScriptServiceImpl extends AbstractServiceImpl<DynamicScript,
         List<DynamicScript> list = this.select();
         for (DynamicScript script : list) {
             DynamicScriptEngine engine = DynamicScriptEngineFactory.getEngine(script.getType());
-            try {
-                engine.compile(script.getU_id(), script.getContent());
-            } catch (Exception e) {
-                logger.error("compile error!", e);
-            }
+            if(engine==null)throw new BusinessException("不支持的脚本语言:"+script.getType());
+            engine.compile(script.getU_id(), script.getContent());
         }
     }
 

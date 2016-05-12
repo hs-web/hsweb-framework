@@ -3,6 +3,8 @@ package org.hsweb.web.service.impl;
 import org.hsweb.web.bean.common.*;
 import org.hsweb.web.bean.po.GenericPo;
 import org.hsweb.web.bean.valid.ValidResults;
+import org.hsweb.web.core.exception.ValidationException;
+import org.hsweb.web.core.utils.RandomUtil;
 import org.hsweb.web.dao.GenericMapper;
 import org.hsweb.web.service.GenericService;
 import org.slf4j.Logger;
@@ -11,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.ConstraintViolation;
-import javax.validation.ValidationException;
 import javax.validation.Validator;
 import java.util.List;
 import java.util.Set;
@@ -43,12 +44,15 @@ public abstract class AbstractServiceImpl<Po, PK> implements GenericService<Po, 
 
     @Override
     public PK insert(Po data) throws Exception {
+        PK primaryKey = null;
+        if (data instanceof GenericPo) {
+            if (((GenericPo) data).getU_id() == null)
+                ((GenericPo) data).setU_id(RandomUtil.randomChar());
+            primaryKey = (PK) ((GenericPo) data).getU_id();
+        }
         tryValidPo(data);
         getMapper().insert(new InsertParam<>(data));
-        if (data instanceof GenericPo) {
-            return (PK) ((GenericPo) data).getU_id();
-        }
-        return null;
+        return primaryKey;
     }
 
     @Override
@@ -102,6 +106,6 @@ public abstract class AbstractServiceImpl<Po, PK> implements GenericService<Po, 
             }
         }
         if (!results.isSuccess())
-            throw new ValidationException(results.toString());
+            throw new ValidationException(results);
     }
 }

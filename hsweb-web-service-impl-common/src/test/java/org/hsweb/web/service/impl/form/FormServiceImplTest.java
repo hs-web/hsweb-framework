@@ -2,6 +2,7 @@ package org.hsweb.web.service.impl.form;
 
 import org.hsweb.web.core.authorize.ExpressionScopeBean;
 import org.hsweb.web.bean.po.form.Form;
+import org.hsweb.web.core.exception.BusinessException;
 import org.hsweb.web.service.form.FormService;
 import org.hsweb.web.service.impl.AbstractTestCase;
 import org.hsweb.web.core.utils.RandomUtil;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.webbuilder.sql.DataBase;
 import org.webbuilder.sql.param.insert.InsertParam;
 import org.webbuilder.sql.param.query.QueryParam;
+import org.webbuilder.sql.param.update.UpdateParam;
 import org.webbuilder.sql.support.executor.SqlExecutor;
 
 import javax.annotation.Resource;
@@ -53,6 +55,7 @@ public class FormServiceImplTest extends AbstractTestCase {
                     "{\"key\":\"name\",\"value\":\"name\",\"describe\":\"名称\"}," +
                     "{\"key\":\"comment\",\"value\":\"test\",\"describe\":\"字段描述\"}," +
                     "{\"key\":\"javaType\",\"value\":\"string\",\"describe\":\"java类型\"}," +
+                    "{\"key\":\"validator-list\",\"value\":\"[{\\\"validator\\\":\\\"NotNull\\\"}]\",,\"describe\":\"java类型\"}," +
                     "{\"key\":\"dataType\",\"value\":\"varchar2(32)\",\"describe\":\"数据库类型\"}" +
                     "]" +
                     "}",
@@ -93,20 +96,22 @@ public class FormServiceImplTest extends AbstractTestCase {
     public void testDeploy() throws Exception {
         //部署
         formService.deploy(form.getU_id());
-        dataBase.getTable("test_form").createInsert()
-                .insert(new InsertParam().value("name", "张三").value("u_id", "test"));
+            dataBase.getTable("test_form").createInsert()
+                    .insert(new InsertParam().value("u_id", "test").value("name","张三"));
+        dataBase.getTable("test_form").createUpdate().update(new UpdateParam().set("u_id","test2").where("u_id","test"));
+
         Map<String, Object> data = dataBase.getTable("test_form")
                 .createQuery().single(new QueryParam().where("name$LIKE", "张三"));
-        Assert.assertEquals("张三", data.get("name"));
 
-        System.out.println(formService.createDeployHtml(form.getName()));
+        Assert.assertEquals("张三", data.get("name"));
+        Assert.assertEquals("test2", data.get("u_id"));
         formService.createDeployHtml(form.getName());
         formService.deploy(form.getU_id());
         formService.createDeployHtml(form.getName());
 
-//        form.setMeta(meta[1]);
-//        formService.update(form);
-//        formService.deploy(form.getU_id());
+        form.setMeta(meta[1]);
+        formService.update(form);
+        formService.deploy(form.getU_id());
     }
 
 

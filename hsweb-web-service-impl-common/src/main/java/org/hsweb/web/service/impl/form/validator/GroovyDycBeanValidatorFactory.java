@@ -56,6 +56,7 @@ public class GroovyDycBeanValidatorFactory implements ValidatorFactory {
         script.append("public class ").append(metaData.getName()).append("{\n");
         boolean hasValidator = false;
         for (FieldMetaData fieldMetaData : metaData.getFields()) {
+            if(fieldMetaData.getValidator().isEmpty())continue;
             for (String ann : fieldMetaData.getValidator()) {
                 hasValidator = true;
                 script.append("\t@").append(ann).append("\n");
@@ -67,6 +68,7 @@ public class GroovyDycBeanValidatorFactory implements ValidatorFactory {
         //没有配置验证器
         if (!hasValidator) return null;
         for (FieldMetaData fieldMetaData : metaData.getFields()) {
+            if(fieldMetaData.getValidator().isEmpty())continue;
             script.append("public ")
                     .append(fieldMetaData.getJavaType().getName()).append(" get")
                     .append(StringUtils.toUpperCaseFirstOne(fieldMetaData.getName()))
@@ -84,7 +86,7 @@ public class GroovyDycBeanValidatorFactory implements ValidatorFactory {
         script.append("}");
         try {
             engine.compile(className, script.toString());
-            engine.compile(className + ".getInstance", "return new " + className + "();");
+            engine.compile(className + ".instance", "return new "+ className + "();");
         } catch (Exception e) {
             throw new BusinessException("创建动态表单验证器失败!", e, 500);
         }
