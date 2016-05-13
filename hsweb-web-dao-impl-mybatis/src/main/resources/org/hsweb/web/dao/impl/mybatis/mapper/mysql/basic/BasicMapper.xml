@@ -161,7 +161,7 @@
             <when test="sortField!=null and sortField.size()>0">
                 <foreach item="item" index="index" collection="sortField" open="" separator="," close="">
                     <if test="item in $fields">
-                        <if test="!fieldHasLen"> order by </if>${item}
+                        <if test="!fieldHasLen"> order by </if>${$tableName}.${item}
                         <bind name="fieldHasLen" value="true"/>
                     </if>
                 </foreach>
