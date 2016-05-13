@@ -51,7 +51,6 @@ public class UserServiceImpl extends AbstractServiceImpl<User, String> implement
     public String insert(User data) throws Exception {
         tryValidPo(data);
         Assert.isNull(selectByUserName(data.getUsername()), "用户已存在!");
-
         data.setU_id(RandomUtil.randomChar(6));
         data.setCreate_date(new Date());
         data.setUpdate_date(new Date());
@@ -82,7 +81,7 @@ public class UserServiceImpl extends AbstractServiceImpl<User, String> implement
             data.setPassword(MD5.encode(data.getPassword()));
             userMapper.updatePassword(data);
         }
-        int i = userMapper.update(new UpdateParam<>(data));
+        int i = userMapper.update(new UpdateParam<>(data).excludes("status","password","create_date"));
         if (data.getUserRoles().size() != 0) {
             //删除所有
             userRoleMapper.deleteByUserId(data.getU_id());

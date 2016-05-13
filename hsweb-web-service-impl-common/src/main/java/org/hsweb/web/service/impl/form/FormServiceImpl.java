@@ -66,6 +66,7 @@ public class FormServiceImpl extends AbstractServiceImpl<Form, String> implement
         old.setVersion(old.getVersion() + 1);
         old.setCreate_date(new Date());
         old.setUpdate_date(null);
+        old.setRevision(1);
         old.setUsing(false);
         getMapper().insert(new InsertParam<>(old));
         return old.getU_id();
@@ -89,7 +90,8 @@ public class FormServiceImpl extends AbstractServiceImpl<Form, String> implement
         Form old = this.selectByPk(data.getU_id());
         Assert.notNull(old, "表单不存在!");
         data.setUpdate_date(new Date());
-        UpdateParam<Form> param = new UpdateParam<>(data).excludes("create_date", "version", "using");
+        data.setRevision(old.getRevision() + 1);
+        UpdateParam<Form> param = new UpdateParam<>(data).excludes("create_date", "release", "version", "using");
         return getMapper().update(param);
     }
 
@@ -149,7 +151,8 @@ public class FormServiceImpl extends AbstractServiceImpl<Form, String> implement
         //开始发布
         old.setUsing(true);
         dynamicFormService.deploy(old);
-        getMapper().update(new UpdateParam<>(old).includes("using").where("u_id", old.getU_id()));
+        old.setRelease(old.getRevision());//发布修订版本
+        getMapper().update(new UpdateParam<>(old).includes("using", "release").where("u_id", old.getU_id()));
         //加入发布历史记录
         History history = History.newInstace("form.deploy." + old.getName());
         history.setPrimary_key_name("u_id");

@@ -86,7 +86,6 @@ public class GroovyDycBeanValidatorFactory implements ValidatorFactory {
         script.append("}");
         try {
             engine.compile(className, script.toString());
-            engine.compile(className + ".instance", "return new "+ className + "();");
         } catch (Exception e) {
             throw new BusinessException("创建动态表单验证器失败!", e, 500);
         }

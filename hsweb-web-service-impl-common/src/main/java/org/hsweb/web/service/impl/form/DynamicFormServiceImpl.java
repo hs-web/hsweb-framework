@@ -2,6 +2,9 @@ package org.hsweb.web.service.impl.form;
 
 import com.alibaba.fastjson.JSON;
 import org.hsweb.concurrent.lock.LockFactory;
+import org.hsweb.concurrent.lock.annotation.LockName;
+import org.hsweb.concurrent.lock.annotation.ReadLock;
+import org.hsweb.concurrent.lock.annotation.WriteLock;
 import org.hsweb.web.core.Install;
 import org.hsweb.web.bean.common.*;
 import org.hsweb.web.bean.po.GenericPo;
@@ -98,6 +101,8 @@ public class DynamicFormServiceImpl implements DynamicFormService {
     }
 
     @Override
+    @WriteLock
+    @LockName(value = "'form.lock.'+#form.name",expression = true)
     public void deploy(Form form) throws Exception {
         try {
             writeLock.lock();
@@ -122,6 +127,7 @@ public class DynamicFormServiceImpl implements DynamicFormService {
     }
 
     @Override
+    @WriteLock
     public void unDeploy(Form form) throws Exception {
         try {
             writeLock.lock();
@@ -140,6 +146,7 @@ public class DynamicFormServiceImpl implements DynamicFormService {
     }
 
     @Override
+    @ReadLock
     public <T> PagerResult<T> selectPager(String name, QueryParam param) throws Exception {
         PagerResult<T> result = new PagerResult<>();
         try {

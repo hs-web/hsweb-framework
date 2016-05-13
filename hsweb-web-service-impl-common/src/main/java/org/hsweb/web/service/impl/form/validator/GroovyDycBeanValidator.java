@@ -37,8 +37,8 @@ public class GroovyDycBeanValidator implements Validator {
             if (!(data instanceof Map)) {
                 throw new ValidationException("数据类型错误!");
             }
-            Object validatorTarget = engine.execute(className + ".instance", new HashMap<>()).getResult();
-            Class validatorTargetClass = validatorTarget.getClass();
+            Class validatorTargetClass = (Class)engine.execute(className, new HashMap<>()).getResult();
+            Object validatorTarget = validatorTargetClass.newInstance();
             Map<String, Object> mapData = ((Map) data);
             Set<ConstraintViolation<Object>> result = new LinkedHashSet<>();
             if (insert) {
