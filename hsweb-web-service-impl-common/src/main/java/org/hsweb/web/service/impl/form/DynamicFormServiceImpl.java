@@ -1,15 +1,14 @@
 package org.hsweb.web.service.impl.form;
 
 import com.alibaba.fastjson.JSON;
-import org.hsweb.concurrent.lock.LockFactory;
 import org.hsweb.concurrent.lock.annotation.LockName;
 import org.hsweb.concurrent.lock.annotation.ReadLock;
 import org.hsweb.concurrent.lock.annotation.WriteLock;
-import org.hsweb.web.core.Install;
 import org.hsweb.web.bean.common.*;
 import org.hsweb.web.bean.po.GenericPo;
 import org.hsweb.web.bean.po.form.Form;
 import org.hsweb.web.bean.po.history.History;
+import org.hsweb.web.core.Install;
 import org.hsweb.web.service.form.DynamicFormService;
 import org.hsweb.web.service.form.FormService;
 import org.hsweb.web.service.history.HistoryService;
@@ -27,8 +26,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
 
 /**
  * Created by zhouhao on 16-4-14.
@@ -37,10 +34,6 @@ import java.util.concurrent.locks.ReadWriteLock;
 public class DynamicFormServiceImpl implements DynamicFormService {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-    @Autowired
-    protected LockFactory lockFactory;
-
-    protected Lock writeLock, readLock;
 
     @Autowired(required = false)
     protected FormParser formParser = new DefaultFormParser();
@@ -77,9 +70,6 @@ public class DynamicFormServiceImpl implements DynamicFormService {
 
     @PostConstruct
     public void init() {
-        ReadWriteLock readWriteLock = lockFactory.createReadWriteLock("dynamicForm.lock");
-        writeLock = readWriteLock.writeLock();
-        readLock = readWriteLock.readLock();
         QueryParam param = new QueryParam();
         param.where("using", 1);
         try {
@@ -102,39 +92,30 @@ public class DynamicFormServiceImpl implements DynamicFormService {
 
     @Override
     @WriteLock
-    @LockName(value = "'form.lock.'+#form.name",expression = true)
+    @LockName(value = "'form.lock.'+#form.name", isExpression = true)
     public void deploy(Form form) throws Exception {
-        try {
-            writeLock.lock();
-            TableMetaData metaData = formParser.parse(form);
-            initDefaultField(metaData);
-            History history = historyService.selectLastHistoryByType("form.deploy." + form.getName());
-            //首次部署
-            if (history == null) {
-                dataBase.createTable(metaData);
-            } else {
-                Form lastDeploy = JSON.parseObject(history.getChange_after(), Form.class);
-                TableMetaData lastDeployMetaData = formParser.parse(lastDeploy);
-                initDefaultField(lastDeployMetaData);
-                //向上发布
-                dataBase.updateTable(lastDeployMetaData);//先放入旧的结构
-                //更新结构
-                dataBase.alterTable(metaData);
-            }
-        } finally {
-            writeLock.unlock();
+        TableMetaData metaData = formParser.parse(form);
+        initDefaultField(metaData);
+        History history = historyService.selectLastHistoryByType("form.deploy." + form.getName());
+        //首次部署
+        if (history == null) {
+            dataBase.createTable(metaData);
+        } else {
+            Form lastDeploy = JSON.parseObject(history.getChange_after(), Form.class);
+            TableMetaData lastDeployMetaData = formParser.parse(lastDeploy);
+            initDefaultField(lastDeployMetaData);
+            //向上发布
+            dataBase.updateTable(lastDeployMetaData);//先放入旧的结构
+            //更新结构
+            dataBase.alterTable(metaData);
         }
     }
 
     @Override
     @WriteLock
+    @LockName(value = "'form.lock.'+#form.name", isExpression = true)
     public void unDeploy(Form form) throws Exception {
-        try {
-            writeLock.lock();
-            dataBase.removeTable(form.getName());
-        } finally {
-            writeLock.unlock();
-        }
+        dataBase.removeTable(form.getName());
     }
 
     public Table getTableByName(String name) throws Exception {
@@ -147,138 +128,112 @@ public class DynamicFormServiceImpl implements DynamicFormService {
 
     @Override
     @ReadLock
+    @LockName(value = "'form.lock.'+#name", isExpression = true)
     public <T> PagerResult<T> selectPager(String name, QueryParam param) throws Exception {
         PagerResult<T> result = new PagerResult<>();
-        try {
-            readLock.lock();
-            Table table = getTableByName(name);
-            Query query = table.createQuery();
-            QueryParamProxy proxy = QueryParamProxy.build(param);
-            int total = query.total(proxy);
-            result.setTotal(total);
-            param.rePaging(total);
-            proxy = QueryParamProxy.build(param);
-            result.setData(query.list(proxy));
-        } finally {
-            readLock.unlock();
-        }
+        Table table = getTableByName(name);
+        Query query = table.createQuery();
+        QueryParamProxy proxy = QueryParamProxy.build(param);
+        int total = query.total(proxy);
+        result.setTotal(total);
+        param.rePaging(total);
+        proxy = QueryParamProxy.build(param);
+        result.setData(query.list(proxy));
         return result;
     }
 
     @Override
+    @ReadLock
+    @LockName(value = "'form.lock.'+#name", isExpression = true)
     public <T> List<T> select(String name, QueryParam param) throws Exception {
-        try {
-            readLock.lock();
-            Table table = getTableByName(name);
-            Query query = table.createQuery();
-            param.setPaging(false);
-            QueryParamProxy proxy = QueryParamProxy.build(param);
-            return query.list(proxy);
-        } finally {
-            readLock.unlock();
-        }
+        Table table = getTableByName(name);
+        Query query = table.createQuery();
+        param.setPaging(false);
+        QueryParamProxy proxy = QueryParamProxy.build(param);
+        return query.list(proxy);
     }
 
     @Override
+    @ReadLock
+    @LockName(value = "'form.lock.'+#name", isExpression = true)
     public int total(String name, QueryParam param) throws Exception {
-        try {
-            readLock.lock();
-            Table table = getTableByName(name);
-            Query query = table.createQuery();
-            param.setPaging(false);
-            QueryParamProxy proxy = QueryParamProxy.build(param);
-            return query.total(proxy);
-        } finally {
-            readLock.unlock();
-        }
+        Table table = getTableByName(name);
+        Query query = table.createQuery();
+        param.setPaging(false);
+        QueryParamProxy proxy = QueryParamProxy.build(param);
+        return query.total(proxy);
     }
 
     @Override
+    @ReadLock
+    @LockName(value = "'form.lock.'+#name", isExpression = true)
     public String insert(String name, InsertParam<Map<String, Object>> param) throws Exception {
-        try {
-            readLock.lock();
-            Table table = getTableByName(name);
-            Insert insert = table.createInsert();
-            InsertParamProxy paramProxy = InsertParamProxy.build(param);
-            String primaryKeyName = getPrimaryKeyName(name);
-            String pk = GenericPo.createUID();
-            paramProxy.value(primaryKeyName, pk);
-            insert.insert(paramProxy);
-            return pk;
-        } finally {
-            readLock.unlock();
-        }
+        Table table = getTableByName(name);
+        Insert insert = table.createInsert();
+        InsertParamProxy paramProxy = InsertParamProxy.build(param);
+        String primaryKeyName = getPrimaryKeyName(name);
+        String pk = GenericPo.createUID();
+        paramProxy.value(primaryKeyName, pk);
+        insert.insert(paramProxy);
+        return pk;
     }
 
     @Override
+    @ReadLock
+    @LockName(value = "'form.lock.'+#name", isExpression = true)
     public boolean deleteByPk(String name, String pk) throws Exception {
-        try {
-            readLock.lock();
-            String primaryKeyName = getPrimaryKeyName(name);
-            Table table = getTableByName(name);
-            Delete delete = table.createDelete();
-            return delete.delete(DeleteParamProxy.build(new DeleteParam()).where(primaryKeyName, pk)) == 1;
-        } finally {
-            readLock.unlock();
-        }
+        String primaryKeyName = getPrimaryKeyName(name);
+        Table table = getTableByName(name);
+        Delete delete = table.createDelete();
+        return delete.delete(DeleteParamProxy.build(new DeleteParam()).where(primaryKeyName, pk)) == 1;
     }
 
     @Override
+    @ReadLock
+    @LockName(value = "'form.lock.'+#name", isExpression = true)
     public int delete(String name, DeleteParam where) throws Exception {
-        try {
-            readLock.lock();
-            Table table = getTableByName(name);
-            Delete delete = table.createDelete();
-            return delete.delete(DeleteParamProxy.build(where));
-        } finally {
-            readLock.unlock();
-        }
+        Table table = getTableByName(name);
+        Delete delete = table.createDelete();
+        return delete.delete(DeleteParamProxy.build(where));
     }
 
     @Override
+    @ReadLock
+    @LockName(value = "'form.lock.'+#name", isExpression = true)
     public int updateByPk(String name, String pk, UpdateParam<Map<String, Object>> param) throws Exception {
-        try {
-            readLock.lock();
-            Table table = getTableByName(name);
-            Update update = table.createUpdate();
-            UpdateParamProxy paramProxy = UpdateParamProxy.build(param);
-            paramProxy.where(getPrimaryKeyName(name), pk);
-            return update.update(paramProxy);
-        } finally {
-            readLock.unlock();
-        }
+        Table table = getTableByName(name);
+        Update update = table.createUpdate();
+        UpdateParamProxy paramProxy = UpdateParamProxy.build(param);
+        paramProxy.where(getPrimaryKeyName(name), pk);
+        return update.update(paramProxy);
     }
 
     @Override
+    @ReadLock
+    @LockName(value = "'form.lock.'+#name", isExpression = true)
     public int update(String name, UpdateParam<Map<String, Object>> param) throws Exception {
-        try {
-            readLock.lock();
-            Table table = getTableByName(name);
-            Update update = table.createUpdate();
-            UpdateParamProxy paramProxy = UpdateParamProxy.build(param);
-            return update.update(paramProxy);
-        } finally {
-            readLock.unlock();
-        }
+        Table table = getTableByName(name);
+        Update update = table.createUpdate();
+        UpdateParamProxy paramProxy = UpdateParamProxy.build(param);
+        return update.update(paramProxy);
     }
 
+    @ReadLock
+    @LockName(value = "'form.lock.'+#tableName", isExpression = true)
     public String getPrimaryKeyName(String tableName) throws Exception {
         Table table = getTableByName(tableName);
         return table.getMetaData().attrWrapper("primaryKey", "u_id").toString();
     }
 
     @Override
+    @ReadLock
+    @LockName(value = "'form.lock.'+#tableName", isExpression = true)
     public <T> T selectByPk(String name, Object pk) throws Exception {
-        try {
-            readLock.lock();
-            Table table = getTableByName(name);
-            Query query = table.createQuery();
-            QueryParamProxy proxy = new QueryParamProxy();
-            proxy.where(getPrimaryKeyName(name), pk);
-            return query.single(proxy);
-        } finally {
-            readLock.unlock();
-        }
+        Table table = getTableByName(name);
+        Query query = table.createQuery();
+        QueryParamProxy proxy = new QueryParamProxy();
+        proxy.where(getPrimaryKeyName(name), pk);
+        return query.single(proxy);
     }
 
     public static class QueryParamProxy extends org.webbuilder.sql.param.query.QueryParam {
