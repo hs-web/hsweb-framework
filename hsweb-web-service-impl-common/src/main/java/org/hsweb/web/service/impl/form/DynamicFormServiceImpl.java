@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.webbuilder.sql.*;
+import org.webbuilder.sql.exception.CreateException;
 import org.webbuilder.sql.param.ExecuteCondition;
 
 import javax.annotation.PostConstruct;
@@ -99,7 +100,11 @@ public class DynamicFormServiceImpl implements DynamicFormService {
         History history = historyService.selectLastHistoryByType("form.deploy." + form.getName());
         //首次部署
         if (history == null) {
-            dataBase.createTable(metaData);
+            try {
+                dataBase.createTable(metaData);
+            } catch (CreateException e) {
+                dataBase.updateTable(metaData);
+            }
         } else {
             Form lastDeploy = JSON.parseObject(history.getChange_after(), Form.class);
             TableMetaData lastDeployMetaData = formParser.parse(lastDeploy);
@@ -227,7 +232,7 @@ public class DynamicFormServiceImpl implements DynamicFormService {
 
     @Override
     @ReadLock
-    @LockName(value = "'form.lock.'+#tableName", isExpression = true)
+    @LockName(value = "'form.lock.'+#name", isExpression = true)
     public <T> T selectByPk(String name, Object pk) throws Exception {
         Table table = getTableByName(name);
         Query query = table.createQuery();

@@ -6,6 +6,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.hsweb.concurrent.lock.LockFactory;
 import org.hsweb.concurrent.lock.annotation.LockName;
+import org.hsweb.concurrent.lock.exception.LockException;
 import org.hsweb.web.core.authorize.ExpressionScopeBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,11 +49,12 @@ public class AnnotationLockAopAdvice {
             }
         }
         try {
-            logger.debug("try lock :" , name);
-            _lock.tryLock(lock.waitTime(), lock.timeUnit());
+            logger.debug("try lock :", name);
+            boolean locked = _lock.tryLock(lock.waitTime(), lock.timeUnit());
+            if (!locked) throw new LockException(name + "error");
             return pjp.proceed();
         } finally {
-            logger.debug("unlock :" , name);
+            logger.debug("unlock :", name);
             unlock(_lock);
         }
     }
@@ -69,11 +71,12 @@ public class AnnotationLockAopAdvice {
         }
         Lock readLock = readWriteLock.readLock();
         try {
-            logger.debug("try lock :{} " , name);
-            readLock.tryLock(lock.waitTime(), lock.timeUnit());
+            logger.debug("try readLock :{} ", name);
+            boolean locked = readLock.tryLock(lock.waitTime(), lock.timeUnit());
+            if (!locked) throw new LockException(name + "error");
             return pjp.proceed();
         } finally {
-            logger.debug("unlock :{} " , name);
+            logger.debug("unlock readLock :{} ", name);
             unlock(readLock);
         }
     }
@@ -90,11 +93,12 @@ public class AnnotationLockAopAdvice {
         }
         Lock writeLock = readWriteLock.writeLock();
         try {
-            logger.debug("try lock :{} " , name);
-            writeLock.tryLock(lock.waitTime(), lock.timeUnit());
+            logger.debug("try writeLock :{} ", name);
+            boolean locked = writeLock.tryLock(lock.waitTime(), lock.timeUnit());
+            if (!locked) throw new LockException(name + "error");
             return pjp.proceed();
         } finally {
-            logger.debug("unlock :{} " , name);
+            logger.debug("unlock writeLock:{} ", name);
             unlock(writeLock);
         }
     }
@@ -134,7 +138,13 @@ public class AnnotationLockAopAdvice {
     }
 
     private void unlock(Lock lock) {
-        if (lock != null) lock.unlock();
+        if (lock != null) {
+            try {
+                lock.unlock();
+            } catch (Throwable e) {
+                logger.error("unlock error",e);
+            }
+        }
     }
 
 }
