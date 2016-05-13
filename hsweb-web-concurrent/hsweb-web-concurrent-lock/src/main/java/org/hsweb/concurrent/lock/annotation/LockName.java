@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 public @interface LockName {
     String value();
 
-    boolean expression() default false;
+    boolean isExpression() default false;
 
     String expressionLanguage() default "spel";
 }

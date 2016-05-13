@@ -14,7 +14,7 @@ public @interface ReadLock {
 
     String condition() default "";
 
-    long waitTime() default Long.MAX_VALUE;
+    long waitTime() default 5;
 
     TimeUnit timeUnit() default TimeUnit.SECONDS;
 }
