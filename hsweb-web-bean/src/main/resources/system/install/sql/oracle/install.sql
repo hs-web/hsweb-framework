@@ -25,6 +25,8 @@ CREATE TABLE ${jdbc.username}."S_FORM" (
 "META" CLOB NULL,
 "CONFIG" CLOB NULL,
 "VERSION" NUMBER(32)    NULL,
+"REVISION" NUMBER(32)    NULL,
+"RELEASE" NUMBER(32)    NULL,
 "USING" NUMBER(4)     NULL,
 "CREATE_DATE" DATE NOT NULL,
 "UPDATE_DATE" DATE NULL,
@@ -36,6 +38,8 @@ COMMENT ON COLUMN ${jdbc.username}."S_FORM"."HTML" IS 'HTML内容';
 COMMENT ON COLUMN ${jdbc.username}."S_FORM"."META" IS '结构定义';
 COMMENT ON COLUMN ${jdbc.username}."S_FORM"."CONFIG" IS '配置';
 COMMENT ON COLUMN ${jdbc.username}."S_FORM"."VERSION" IS '版本';
+COMMENT ON COLUMN ${jdbc.username}."S_FORM"."REVISION" IS '修订版';
+COMMENT ON COLUMN ${jdbc.username}."S_FORM"."RELEASE" IS '当前发布版本';
 COMMENT ON COLUMN ${jdbc.username}."S_FORM"."USING" IS '是否使用中';
 COMMENT ON COLUMN ${jdbc.username}."S_FORM"."CREATE_DATE" IS '创建日期';
 COMMENT ON COLUMN ${jdbc.username}."S_FORM"."UPDATE_DATE" IS '修改日期';

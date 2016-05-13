@@ -27,6 +27,8 @@ CREATE TABLE `s_form` (
   `meta`        TEXT COMMENT '结构定义',
   `config`      TEXT COMMENT '配置',
   `version`     INT COMMENT '版本',
+  `revision`    INT COMMENT '修订版',
+  `release`     INT COMMENT '发布版',
   `using`       TINYINT COMMENT '是否使用中',
   `create_date` DATETIME     NOT NULL
   COMMENT '创建日期',

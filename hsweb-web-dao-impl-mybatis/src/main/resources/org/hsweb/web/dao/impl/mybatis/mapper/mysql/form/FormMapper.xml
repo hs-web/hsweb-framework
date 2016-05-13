@@ -12,6 +12,8 @@
         <result property="config" column="config" javaType="String" jdbcType="VARCHAR"/>
         <result property="remark" column="remark" javaType="String" jdbcType="VARCHAR"/>
         <result property="version" column="version" javaType="int" jdbcType="INTEGER"/>
+        <result property="revision" column="revision" javaType="int" jdbcType="INTEGER"/>
+        <result property="release" column="release" javaType="int" jdbcType="INTEGER"/>
         <result property="using" column="using" javaType="boolean" jdbcType="INTEGER"/>
         <result property="create_date" column="create_date" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
         <result property="update_date" column="update_date" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
@@ -28,6 +30,8 @@
                     ,'config':#{'jdbcType':'VARCHAR','javaType':'string'}
                     ,'remark':#{'jdbcType':'VARCHAR','javaType':'string'}
                     ,'version':#{'jdbcType':'INTEGER','javaType':'number'}
+                    ,'revision':#{'jdbcType':'INTEGER','javaType':'number'}
+                    ,'release':#{'jdbcType':'INTEGER','javaType':'number'}
                     ,'using':#{'jdbcType':'INTEGER','javaType':'boolean'}
                     ,'create_date':#{'jdbcType':'VARCHAR','javaType':'date'}
                     ,'update_date':#{'jdbcType':'VARCHAR','javaType':'date'}
@@ -66,15 +70,19 @@
     </select>
 
     <select id="selectLatestList" parameterType="org.hsweb.web.bean.common.QueryParam" resultMap="FormResultMap">
-        <include refid="fieldConfig"/><!--定义字段配置-->
-        <bind name="$tableName" value="'t2'"/><!--定义表名-->
+        <include refid="fieldConfig"/>
+        <!--定义字段配置-->
+        <bind name="$tableName" value="'t2'"/>
+        <!--定义表名-->
         select
-        <include refid="BasicMapper.buildSelectField"/> <!--动态生成要查询的字段-->
+        <include refid="BasicMapper.buildSelectField"/>
+        <!--动态生成要查询的字段-->
         from (
         select s_form.name,max(s_form.version) as version from s_form s_form
         <include refid="tableName"/>
         <where>
-            <include refid="BasicMapper.buildWhere"/> <!--动态查询条件-->
+            <include refid="BasicMapper.buildWhere"/>
+            <!--动态查询条件-->
         </where>
         group by name ) t1
         left join s_form t2 on t1.name=t2.name and t1.version =t2.version

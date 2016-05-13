@@ -12,6 +12,8 @@
         <result property="config" column="config" javaType="String" jdbcType="VARCHAR"/>
         <result property="remark" column="remark" javaType="String" jdbcType="VARCHAR"/>
         <result property="version" column="version" javaType="int" jdbcType="INTEGER"/>
+        <result property="revision" column="revision" javaType="int" jdbcType="INTEGER"/>
+        <result property="release" column="release" javaType="int" jdbcType="INTEGER"/>
         <result property="using" column="using" javaType="boolean" jdbcType="INTEGER"/>
         <result property="create_date" column="create_date" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
         <result property="update_date" column="update_date" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
@@ -28,6 +30,8 @@
                     ,'config':#{'jdbcType':'VARCHAR','javaType':'string'}
                     ,'remark':#{'jdbcType':'VARCHAR','javaType':'string'}
                     ,'version':#{'jdbcType':'INTEGER','javaType':'number'}
+                    ,'revision':#{'jdbcType':'INTEGER','javaType':'number'}
+                    ,'release':#{'jdbcType':'INTEGER','javaType':'number'}
                     ,'using':#{'jdbcType':'INTEGER','javaType':'boolean'}
                     ,'create_date':#{'jdbcType':'VARCHAR','javaType':'date'}
                     ,'update_date':#{'jdbcType':'VARCHAR','javaType':'date'}

@@ -35,6 +35,12 @@ public class Form extends GenericPo<String> {
     //表单版本
     private int version;
 
+    //修订版本号
+    private int revision;
+
+    //发布版版本号
+    private int release;
+
     //是否正在使用
     private boolean using;
 
@@ -158,7 +164,19 @@ public class Form extends GenericPo<String> {
         this.using = using;
     }
 
-    public static void main(String[] args) {
-        System.out.println("AA2_2".matches("(^[a-z][a-z0-9_]*$)|(^[A-Z][A-Z0-9_]*$)"));
+    public int getRevision() {
+        return revision;
+    }
+
+    public void setRevision(int revision) {
+        this.revision = revision;
+    }
+
+    public int getRelease() {
+        return release;
+    }
+
+    public void setRelease(int release) {
+        this.release = release;
     }
 }
