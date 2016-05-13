@@ -67,15 +67,15 @@ CREATE TABLE `s_module_meta` (
   COMMENT 'uid',
   `key`       VARCHAR(256)  NOT NULL
   COMMENT '标识',
-  `module_id` VARCHAR(1024) NULL
+  `module_id` VARCHAR(1024) NOT NULL
   COMMENT '模块ID',
-  `remark` VARCHAR(1024) NULL
+  `remark`    VARCHAR(1024) NULL
   COMMENT '备注',
   `role_id`   VARCHAR(256)  NULL
   COMMENT '图标',
   `status`    INT(4)        NULL
   COMMENT '状态',
-  `meta`      TEXT          NOT NULL
+  `meta`      TEXT          NULL
   COMMENT '定义内容'
 );
 ALTER TABLE `s_modules` COMMENT '系统模块配置';
