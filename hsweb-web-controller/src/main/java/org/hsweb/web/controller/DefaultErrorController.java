@@ -23,7 +23,7 @@ public class DefaultErrorController implements ErrorController {
     @Autowired
     private ErrorAttributes errorAttributes;
 
-    @RequestMapping(produces = MediaType.TEXT_HTML_VALUE)
+    @RequestMapping
     public ModelAndView errorHtml(HttpServletRequest request, HttpServletResponse response) {
         RequestAttributes requestAttributes = new ServletRequestAttributes(request);
         Map<String, Object> model = errorAttributes.getErrorAttributes(requestAttributes, true);
@@ -32,7 +32,7 @@ public class DefaultErrorController implements ErrorController {
         return new ModelAndView("error/" + response.getStatus(), model);
     }
 
-    @RequestMapping
+    @RequestMapping(produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE})
     @ResponseBody
     public Object error(HttpServletRequest request, HttpServletResponse response) {
         RequestAttributes requestAttributes = new ServletRequestAttributes(request);
