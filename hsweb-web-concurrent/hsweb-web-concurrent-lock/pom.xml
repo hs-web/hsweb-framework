@@ -17,5 +17,17 @@
             <artifactId>spring-boot-starter</artifactId>
             <optional>true</optional>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.webbuilder</groupId>
+            <artifactId>wb-sql-util</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hsweb</groupId>
+            <artifactId>hsweb-web-core</artifactId>
+        </dependency>
     </dependencies>
 </project>

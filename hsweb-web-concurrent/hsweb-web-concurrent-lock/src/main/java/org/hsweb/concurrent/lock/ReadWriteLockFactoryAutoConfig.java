@@ -1,5 +1,6 @@
 package org.hsweb.concurrent.lock;
 
+import org.hsweb.concurrent.lock.support.AnnotationLockAopAdvice;
 import org.hsweb.concurrent.lock.support.DefaultReadWriteLockFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -15,5 +16,10 @@ public class ReadWriteLockFactoryAutoConfig {
     @Bean
     public LockFactory createReadWriteLockFactory() {
         return new DefaultReadWriteLockFactory();
+    }
+
+    @Bean
+    public AnnotationLockAopAdvice annotationLockAopAdvice() {
+        return new AnnotationLockAopAdvice();
     }
 }
