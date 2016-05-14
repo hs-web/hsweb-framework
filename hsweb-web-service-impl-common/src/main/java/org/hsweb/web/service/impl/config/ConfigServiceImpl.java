@@ -169,7 +169,7 @@ public class ConfigServiceImpl extends AbstractServiceImpl<Config, String> imple
 
     @Override
     public String insert(Config data) throws Exception {
-        Config old = this.selectByPk(data.getU_id());
+        Config old = this.selectByPk(data.getUId());
         Assert.isNull(old, "配置已存在，请勿重复添加!");
         return super.insert(data);
     }

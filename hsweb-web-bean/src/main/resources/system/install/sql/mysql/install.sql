@@ -115,6 +115,24 @@ CREATE TABLE `s_resources` (
 );
 ALTER TABLE `s_resources` COMMENT '资源表';
 
+CREATE TABLE `s_classified` (
+  `u_id`       VARCHAR(32)  NOT NULL PRIMARY KEY
+  COMMENT 'uid',
+  `remark`     VARCHAR(1024) NOT NULL
+  COMMENT '备注',
+  `type`       VARCHAR(256) NOT NULL
+  COMMENT '类型',
+  `p_id`       VARCHAR(32) NOT NULL
+  COMMENT '父级分类',
+  `icon`       VARCHAR(256) NULL
+  COMMENT '状态',
+  `config`     TEXT         NOT NULL
+  COMMENT '创建时间',
+  `sort_index` INT          NOT NULL
+  COMMENT '排序'
+);
+ALTER TABLE `s_resources` COMMENT '资源表';
+
 -- ----------------------------
 -- Table structure for S_ROLE
 -- ----------------------------

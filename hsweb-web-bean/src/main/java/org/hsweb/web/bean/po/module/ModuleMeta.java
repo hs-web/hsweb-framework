@@ -12,9 +12,9 @@ public class ModuleMeta extends GenericPo<String> {
 
     private String remark;
 
-    private String module_id;
+    private String moduleId;
 
-    private String role_id;
+    private String roleId;
 
     private String meta;
 
@@ -44,20 +44,20 @@ public class ModuleMeta extends GenericPo<String> {
         this.status = status;
     }
 
-    public String getModule_id() {
-        return module_id;
+    public String getModuleId() {
+        return moduleId;
     }
 
-    public void setModule_id(String module_id) {
-        this.module_id = module_id;
+    public void setModuleId(String moduleId) {
+        this.moduleId = moduleId;
     }
 
-    public String getRole_id() {
-        return role_id;
+    public String getRoleId() {
+        return roleId;
     }
 
-    public void setRole_id(String role_id) {
-        this.role_id = role_id;
+    public void setRoleId(String roleId) {
+        this.roleId = roleId;
     }
 
     public String getMeta() {

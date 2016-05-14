@@ -2,9 +2,6 @@ package org.hsweb.web.bean.po.resource;
 
 import org.hsweb.web.bean.po.GenericPo;
 import org.webbuilder.utils.file.FileUtils;
-import org.hibernate.validator.constraints.NotEmpty;
-
-import javax.validation.constraints.NotNull;
 
 /**
  * 资源
@@ -20,10 +17,10 @@ public class Resources extends GenericPo<String> {
     private String path;
 
     //创建时间
-    private java.util.Date create_date;
+    private java.util.Date createDate;
 
     //创建人主键
-    private String creator_id;
+    private String creatorId;
 
     //MD5校验值
     private String md5;
@@ -31,9 +28,19 @@ public class Resources extends GenericPo<String> {
     //资源类型
     private String type;
 
+    //资源分类
+    private String classified;
+
     //状态
     private int status;
 
+    public String getClassified() {
+        return classified;
+    }
+
+    public void setClassified(String classified) {
+        this.classified = classified;
+    }
 
     /**
      * 获取 资源名称
@@ -76,15 +83,15 @@ public class Resources extends GenericPo<String> {
      *
      * @return java.util.Date 创建时间
      */
-    public java.util.Date getCreate_date() {
-        return this.create_date;
+    public java.util.Date getCreateDate() {
+        return this.createDate;
     }
 
     /**
      * 设置 创建时间
      */
-    public void setCreate_date(java.util.Date create_date) {
-        this.create_date = create_date;
+    public void setCreateDate(java.util.Date createDate) {
+        this.createDate = createDate;
     }
 
     /**
@@ -92,17 +99,17 @@ public class Resources extends GenericPo<String> {
      *
      * @return String 创建人主键
      */
-    public String getCreator_id() {
-        if (this.creator_id == null)
+    public String getCreatorId() {
+        if (this.creatorId == null)
             return "";
-        return this.creator_id;
+        return this.creatorId;
     }
 
     /**
      * 设置 创建人主键
      */
-    public void setCreator_id(String creator_id) {
-        this.creator_id = creator_id;
+    public void setCreatorId(String creatorId) {
+        this.creatorId = creatorId;
     }
 
     /**

@@ -28,7 +28,7 @@ public class Module extends GenericPo<String> implements Comparable<Module> {
     private String icon;
 
     //父级模块主键
-    private String p_id = "-1";
+    private String pId = "-1";
 
     //备注
     private String remark;
@@ -37,12 +37,12 @@ public class Module extends GenericPo<String> implements Comparable<Module> {
     private int status = 1;
 
     //模块操作选项
-    private String m_option;
+    private String mOption;
 
     //排序
-    private long sort_index;
+    private long sortIndex;
 
-    private String old_id;
+    private String oldId;
 
     /**
      * 获取 模块名称
@@ -103,17 +103,17 @@ public class Module extends GenericPo<String> implements Comparable<Module> {
      *
      * @return String 父级模块主键
      */
-    public String getP_id() {
-        if (this.p_id == null)
-            return "-1";
-        return this.p_id;
+    public String getPId() {
+        if (this.pId == null)
+            return "1";
+        return this.pId;
     }
 
     /**
      * 设置 父级模块主键
      */
-    public void setP_id(String p_id) {
-        this.p_id = p_id;
+    public void setPId(String pId) {
+        this.pId = pId;
     }
 
     /**
@@ -150,12 +150,12 @@ public class Module extends GenericPo<String> implements Comparable<Module> {
         this.status = status;
     }
 
-    public long getSort_index() {
-        return sort_index;
+    public long getSortIndex() {
+        return sortIndex;
     }
 
-    public void setSort_index(long sort_index) {
-        this.sort_index = sort_index;
+    public void setSortIndex(long sortIndex) {
+        this.sortIndex = sortIndex;
     }
 
     /**
@@ -163,13 +163,13 @@ public class Module extends GenericPo<String> implements Comparable<Module> {
      *
      * @return String 模块操作选项
      */
-    public String getM_option() {
-        return this.m_option;
+    public String getMOption() {
+        return this.mOption;
     }
 
-    public Map<String, Object> getM_optionMap() {
+    public Map<String, Object> getMOptionMap() {
         try {
-            List<Map<String, Object>> opt = JSON.parseObject(getM_option(),new TypeReference<LinkedList<Map<String, Object>>>(){});
+            List<Map<String, Object>> opt = JSON.parseObject(getMOption(),new TypeReference<LinkedList<Map<String, Object>>>(){});
             if (opt == null) return new HashMap<>();
             Map<String, Object> all = new LinkedHashMap<>();
             for (Map<String, Object> map : opt) {
@@ -184,23 +184,23 @@ public class Module extends GenericPo<String> implements Comparable<Module> {
     /**
      * 设置 模块操作选项
      */
-    public void setM_option(String m_option) {
-        this.m_option = m_option;
+    public void setMOption(String mOption) {
+        this.mOption = mOption;
     }
 
     @Override
     public int compareTo(Module o) {
-        return getSort_index() > o.getSort_index() ? 1 : -1;
+        return getSortIndex() > o.getSortIndex() ? 1 : 1;
     }
 
-    public String getOld_id() {
-        if (old_id == null)
-            old_id = getU_id();
-        return old_id;
+    public String getOldId() {
+        if (oldId == null)
+            oldId = getUId();
+        return oldId;
     }
 
-    public void setOld_id(String old_id) {
-        this.old_id = old_id;
+    public void setOldId(String oldId) {
+        this.oldId = oldId;
     }
 
 }

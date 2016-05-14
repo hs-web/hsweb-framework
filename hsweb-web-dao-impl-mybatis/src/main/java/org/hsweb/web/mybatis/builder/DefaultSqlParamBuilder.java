@@ -1,18 +1,27 @@
 package org.hsweb.web.mybatis.builder;
 
-import org.hsweb.web.bean.common.Term;
-import org.hsweb.web.bean.common.TermType;
+import org.apache.commons.beanutils.BeanUtils;
+import org.hsweb.web.bean.common.*;
 import org.hsweb.web.mybatis.utils.SqlAppender;
 import org.webbuilder.utils.common.DateTimeUtils;
 import org.webbuilder.utils.common.StringUtils;
 
 import java.sql.JDBCType;
+import java.sql.SQLException;
 import java.util.*;
 
 /**
  * Created by zhouhao on 16-5-9.
  */
 public class DefaultSqlParamBuilder {
+
+    public String getQuoteStart() {
+        return "\"";
+    }
+
+    public String getQuoteEnd() {
+        return "\"";
+    }
 
     protected Map<TermType, KeyWordMapper> mapperMap = new HashMap<>();
 
@@ -138,6 +147,92 @@ public class DefaultSqlParamBuilder {
         return sqlAppender.toString();
     }
 
+    public String buildSelectFields(Map<String, Object> fieldConfig, SqlParam param) {
+        if(param==null)return "*";
+        Set<String> includes = param.getIncludes(),
+                excludes = param.getExcludes();
+        boolean includesIsEmpty = includes.isEmpty(),
+                excludesIsEmpty = excludes.isEmpty();
+        if (includesIsEmpty && excludesIsEmpty)
+            return "*";
+        Map<String, String> propertyMapper = getPropertyMapper(fieldConfig, param);
+        SqlAppender appender = new SqlAppender();
+        propertyMapper.forEach((k, v) -> {
+            if (!appender.isEmpty())
+                appender.add(",");
+            appender.add(k, " as ").addEdSpc(getQuoteStart(), k, getQuoteEnd());
+        });
+        if (appender.isEmpty()) return "*";
+        return appender.toString();
+    }
+
+    public String buildUpdateFields(Map<String, Object> fieldConfig, UpdateParam param) throws Exception {
+        Map<String, String> propertyMapper = getPropertyMapper(fieldConfig, param);
+        SqlAppender appender = new SqlAppender();
+        propertyMapper.forEach((k, v) -> {
+            try {
+                Object obj = BeanUtils.getProperty(param.getData(), v);
+                if (obj != null) {
+                    if (!appender.isEmpty())
+                        appender.add(",");
+                    appender.add(k, "=", "#{data.", v, "}");
+                }
+            } catch (Exception e) {
+            }
+        });
+        if (appender.isEmpty()) throw new SQLException("未指定列");
+        return appender.toString();
+    }
+
+    public String buildOrder(Map<String, Object> fieldConfig, String tableName, QueryParam param) throws Exception {
+        QueryParam tmp = new QueryParam();
+        tmp.setSorts(param.getSorts());
+        Map<String, String> propertyMapper = getPropertyMapper(fieldConfig, tmp);
+        if (tmp.getSorts().isEmpty()) return "";
+        Set<Sort> sorts = new LinkedHashSet<>();
+        param.getSorts().forEach(sort -> {
+            String fieldName = sort.getField();
+            if (StringUtils.isNullOrEmpty(fieldName)) return;
+            if (fieldName.contains("."))
+                fieldName = fieldName.split("[.]")[1];
+            if (propertyMapper.containsKey(fieldName) || propertyMapper.containsValue(fieldName)) {
+                sorts.add(sort);
+            }
+        });
+        if (sorts.isEmpty()) return "";
+        String sql = sorts.stream()
+                .map(sort -> {
+                    String fieldName = sort.getField();
+                    if (fieldName.contains("."))
+                        fieldName = fieldName.split("[.]")[1];
+                    return new SqlAppender()
+                            .add(tableName, ".", StringUtils.camelCase2UnderScoreCase(fieldName), " ", sort.getDir()).toString();
+                })
+                .reduce((s, s1) -> new SqlAppender().add(s, ",", s1).toString()).get();
+        return " order by ".concat(sql);
+    }
+
+    public Map<String, String> getPropertyMapper(Map<String, Object> fieldConfig, SqlParam param) {
+        Set<String> includes = param.getIncludes(),
+                excludes = param.getExcludes();
+        boolean includesIsEmpty = includes.isEmpty(),
+                excludesIsEmpty = excludes.isEmpty();
+        Map<String, String> propertyMapper = new HashMap<>();
+        fieldConfig.forEach((k, v) -> {
+            Map<String, Object> config = ((Map) v);
+            String fieldName = (String) config.get("property");
+            if (fieldName == null) fieldName = k;
+            if (includesIsEmpty && excludesIsEmpty) {
+                propertyMapper.put(k, fieldName);
+                return;
+            }
+            if (includes.contains(fieldName) || includes.contains(k)) {
+                propertyMapper.put(k, fieldName);
+            }
+        });
+        return propertyMapper;
+    }
+
     public JDBCType getFieldJDBCType(String field, Map<String, Object> fieldConfig) {
         if (field == null) return JDBCType.NULL;
         Object conf = fieldConfig.get(field);
@@ -150,11 +245,27 @@ public class DefaultSqlParamBuilder {
         return JDBCType.VARCHAR;
     }
 
+    public String getColumn(Map<String, Object> fieldConfig, String name) {
+        if (name == null) return null;
+        Map<String, Object> config = ((Map) fieldConfig.get(name));
+        if (config == null) {
+            for (Map.Entry<String, Object> entry : fieldConfig.entrySet()) {
+                String fieldName = (String) ((Map) entry.getValue()).get("property");
+                if (name.equals(fieldName)) {
+                    return entry.getKey();
+                }
+            }
+        }
+        return name;
+    }
+
     public void buildWhere(Map<String, Object> fieldConfig, String prefix, List<Term> terms, SqlAppender appender) {
         if (terms == null || terms.isEmpty()) return;
         int index = 0;
         String prefixTmp = StringUtils.concat(prefix, StringUtils.isNullOrEmpty(prefix) ? "" : ".");
         for (Term term : terms) {
+            String column = getColumn(fieldConfig, term.getField());
+            if (column != null) term.setField(column);
             boolean nullTerm = StringUtils.isNullOrEmpty(term.getField());
             //不是空条件 也不是可选字段
             if (!nullTerm && !fieldConfig.containsKey(term.getField())) continue;
@@ -237,6 +348,11 @@ public class DefaultSqlParamBuilder {
             }
         }
         return new ArrayList<>();
+    }
+
+    public void test(Object data){
+
+        System.out.println(data);
     }
 
     public interface KeyWordMapper {

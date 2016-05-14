@@ -17,10 +17,10 @@ public class GenericPo<PK> implements Serializable {
     /**
      * 主键
      */
-    private PK u_id;
+    private PK uId;
 
-    public PK getU_id() {
-        return u_id;
+    public PK getUId() {
+        return uId;
     }
 
     private Map<String, Object> customAttr = new LinkedHashMap<>();
@@ -36,8 +36,8 @@ public class GenericPo<PK> implements Serializable {
 
     @Override
     public int hashCode() {
-        if (getU_id() == null) return 0;
-        return getU_id().hashCode();
+        if (getUId() == null) return 0;
+        return getUId().hashCode();
     }
 
     @Override
@@ -46,8 +46,8 @@ public class GenericPo<PK> implements Serializable {
         return this.hashCode() == obj.hashCode();
     }
 
-    public void setU_id(PK u_id) {
-        this.u_id = u_id;
+    public void setUId(PK uId) {
+        this.uId = uId;
     }
 
     /**

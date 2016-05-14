@@ -5,7 +5,7 @@
 
 <mapper namespace="org.hsweb.web.dao.script.DynamicScriptMapper">
     <resultMap id="DynamicScriptResultMap" type="DynamicScript" >
-        <id property="u_id" column="u_id" javaType="string" jdbcType="VARCHAR" />
+        <id property="uId" column="u_id" javaType="string" jdbcType="VARCHAR" />
         <result property="name" column="name" javaType="String" jdbcType="VARCHAR" />
         <result property="type" column="type" javaType="String" jdbcType="VARCHAR" />
         <result property="content" column="content" javaType="String" jdbcType="VARCHAR" />
@@ -18,7 +18,7 @@
     <sql id="fieldConfig">
         <bind name="$fieldsInfo"
               value="#{
-                    'u_id':#{'jdbcType':'VARCHAR','javaType':'string'}
+                    'u_id':#{'property':'uId','jdbcType':'VARCHAR','javaType':'string'}
                     ,'name':#{'jdbcType':'VARCHAR','javaType':'string'}
                     ,'type':#{'jdbcType':'VARCHAR','javaType':'string'}
                     ,'content':#{'jdbcType':'VARCHAR','javaType':'string'}
@@ -32,7 +32,7 @@
 
     <!--表名-->
     <sql id="tableName">
-        <bind name="$tableName" value="'S_SCRIPT'"/>
+        <bind name="$tableName" value="'s_script'"/>
     </sql>
 
     <insert id="insert" parameterType="DynamicScript" useGeneratedKeys="true" keyProperty="data.u_id" keyColumn="U_ID">
@@ -41,9 +41,10 @@
         <include refid="BasicMapper.buildInsertSql"/>
     </insert>
 
-    <delete id="delete" parameterType="UserRole">
-        delete from s_user_role where u_id=#{u_id}
+    <delete id="delete" parameterType="org.hsweb.web.bean.common.DeleteParam">
+        delete from s_script where u_id=#{term.primaryKey}
     </delete>
+
 
     <update id="update" parameterType="org.hsweb.web.bean.common.UpdateParam">
         <include refid="fieldConfig"/>
@@ -52,7 +53,7 @@
     </update>
 
     <select id="selectByPk" parameterType="string" resultMap="DynamicScriptResultMap">
-        SELECT * FROM S_SCRIPT WHERE u_id=#{u_id}
+        select * from s_script where u_id=#{u_id}
     </select>
 
     <select id="select" parameterType="org.hsweb.web.bean.common.QueryParam" resultMap="DynamicScriptResultMap">

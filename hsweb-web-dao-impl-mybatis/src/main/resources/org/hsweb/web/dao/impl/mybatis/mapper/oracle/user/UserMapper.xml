@@ -5,15 +5,15 @@
 
 <mapper namespace="org.hsweb.web.dao.user.UserMapper">
     <resultMap id="UserResultMap" type="User">
-        <id property="u_id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
+        <id property="uId" column="u_id" javaType="string" jdbcType="VARCHAR"/>
         <result property="username" column="username" javaType="String" jdbcType="VARCHAR"/>
         <result property="password" column="password" javaType="String" jdbcType="VARCHAR"/>
         <result property="name" column="name" javaType="String" jdbcType="VARCHAR"/>
         <result property="email" column="email" javaType="String" jdbcType="VARCHAR"/>
         <result property="phone" column="phone" javaType="String" jdbcType="VARCHAR"/>
         <result property="status" column="status" javaType="int" jdbcType="INTEGER"/>
-        <result property="create_date" column="create_date" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
-        <result property="update_date" column="update_date" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <result property="createDate" column="create_date" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <result property="updateDate" column="update_date" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
         <collection property="userRoles" column="u_id" ofType="UserRole"
                     select="org.hsweb.web.dao.role.UserRoleMapper.selectByUserId"/>
     </resultMap>
@@ -21,15 +21,15 @@
     <sql id="fieldConfig">
         <bind name="$fieldsInfo"
               value="#{
-                    'u_id':#{'jdbcType':'VARCHAR','javaType':'string'}
+                    'u_id':#{'property':'uId','jdbcType':'VARCHAR','javaType':'string'}
                     ,'username':#{'jdbcType':'VARCHAR','javaType':'string'}
                     ,'password':#{'jdbcType':'VARCHAR','javaType':'string'}
                     ,'name':#{'jdbcType':'VARCHAR','javaType':'string'}
                     ,'email':#{'jdbcType':'VARCHAR','javaType':'string'}
                     ,'phone':#{'jdbcType':'VARCHAR','javaType':'string'}
                     ,'status':#{'jdbcType':'INTEGER','javaType':'number'}
-                    ,'create_date':#{'jdbcType':'TIMESTAMP','javaType':'date'}
-                    ,'update_date':#{'jdbcType':'TIMESTAMP','javaType':'date'}
+                    ,'create_date':#{'property':'createDate','jdbcType':'TIMESTAMP','javaType':'date'}
+                    ,'update_date':#{'property':'updateDate','jdbcType':'TIMESTAMP','javaType':'date'}
                     }"/>
         <bind name="$fields" value="$fieldsInfo.keySet()"/>
     </sql>
@@ -38,18 +38,18 @@
         <bind name="$tableName" value="'s_user'"/>
     </sql>
 
-    <insert id="insert" parameterType="User" useGeneratedKeys="true" keyProperty="data.u_id" keyColumn="U_ID">
+    <insert id="insert" parameterType="User" useGeneratedKeys="true" keyProperty="data.uId" keyColumn="U_ID">
         <include refid="fieldConfig"/>
         <include refid="tableName"/>
         <include refid="BasicMapper.buildInsertSql"/>
     </insert>
 
-    <delete id="delete" parameterType="UserRole">
-        delete from s_user where u_id=#{u_id}
+    <delete id="delete" parameterType="org.hsweb.web.bean.common.DeleteParam">
+        delete from s_user where u_id=#{term.primaryKey}
     </delete>
 
     <update id="updatePassword" parameterType="User">
-        update s_user set password=#{password,jdbcType=VARCHAR} where u_id = #{u_id}
+        update s_user set password=#{password,jdbcType=VARCHAR} where u_id = #{uId}
     </update>
 
     <update id="update" parameterType="org.hsweb.web.bean.common.UpdateParam">

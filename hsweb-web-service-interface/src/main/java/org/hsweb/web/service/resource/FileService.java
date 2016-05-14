@@ -3,6 +3,7 @@ package org.hsweb.web.service.resource;
 import org.hsweb.web.bean.po.resource.Resources;
 
 import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * 文件服务接口，用于对服务器文件进行操作
@@ -19,5 +20,8 @@ public interface FileService {
      */
     Resources saveFile(InputStream is, String fileName) throws Exception;
 
+    InputStream readResources(Resources resources) throws Exception;
+
+    void writeResources(Resources resources, OutputStream outputStream) throws Exception;
 
 }

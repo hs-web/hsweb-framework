@@ -3,6 +3,7 @@ package org.hsweb.web.service.impl.form;
 import org.hsweb.web.core.authorize.ExpressionScopeBean;
 import org.hsweb.web.bean.po.form.Form;
 import org.hsweb.web.core.exception.BusinessException;
+import org.hsweb.web.service.form.DynamicFormService;
 import org.hsweb.web.service.form.FormService;
 import org.hsweb.web.service.impl.AbstractTestCase;
 import org.hsweb.web.core.utils.RandomUtil;
@@ -31,7 +32,8 @@ public class FormServiceImplTest extends AbstractTestCase {
 
     @Resource
     protected FormService formService;
-
+    @Resource
+    private DynamicFormService dynamicFormService;
     @Resource
     protected DataBase dataBase;
 
@@ -85,20 +87,19 @@ public class FormServiceImplTest extends AbstractTestCase {
     public void setup() throws Exception {
         form = new Form();
         form.setName("test_form");
-        form.setCreate_date(new Date());
-        form.setHtml("<input field-id='id1'/><input field-id='id2'/>");
+        form.setCreateDate(new Date());
+        form.setHtml("<input fieldId='id1'/><input fieldId='id2'/>");
         form.setMeta(meta[0]);
-        form.setU_id(RandomUtil.randomChar());
+        form.setUId(RandomUtil.randomChar());
         formService.insert(form);
     }
 
     @Test
     public void testDeploy() throws Exception {
-        //部署
-        formService.deploy(form.getU_id());
-            dataBase.getTable("test_form").createInsert()
-                    .insert(new InsertParam().value("u_id", "test").value("name","张三"));
-        dataBase.getTable("test_form").createUpdate().update(new UpdateParam().set("u_id","test2").where("u_id","test"));
+        formService.deploy(form.getUId());
+        dataBase.getTable("test_form").createInsert()
+                .insert(new InsertParam().value("u_id", "test").value("name", "张三"));
+        dataBase.getTable("test_form").createUpdate().update(new UpdateParam().set("u_id", "test2").where("u_id", "test"));
 
         Map<String, Object> data = dataBase.getTable("test_form")
                 .createQuery().single(new QueryParam().where("name$LIKE", "张三"));
@@ -106,12 +107,12 @@ public class FormServiceImplTest extends AbstractTestCase {
         Assert.assertEquals("张三", data.get("name"));
         Assert.assertEquals("test2", data.get("u_id"));
         formService.createDeployHtml(form.getName());
-        formService.deploy(form.getU_id());
+        formService.deploy(form.getUId());
         formService.createDeployHtml(form.getName());
 
         form.setMeta(meta[1]);
         formService.update(form);
-        formService.deploy(form.getU_id());
+        formService.deploy(form.getUId());
     }
 
 

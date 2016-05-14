@@ -44,10 +44,10 @@ public class User extends GenericPo<String> {
     private int status;
 
     //创建日期
-    private java.util.Date create_date;
+    private java.util.Date createDate;
 
     //修改日期
-    private java.util.Date update_date;
+    private java.util.Date updateDate;
 
     //用户角色绑定
     private List<UserRole> userRoles;
@@ -74,7 +74,7 @@ public class User extends GenericPo<String> {
 
     public Module getModule(String mId) {
         for (Module module : getModules()) {
-            if (module.getU_id().equals(mId)) return module;
+            if (module.getUId().equals(mId)) return module;
         }
         return null;
     }
@@ -94,14 +94,14 @@ public class User extends GenericPo<String> {
     public Set<Module> getModulesByPid(String pid) {
         Set<Module> modules = getModules()
                 .stream()
-                .filter(module -> pid.equals(module.getP_id()))
+                .filter(module -> pid.equals(module.getPId()))
                 .collect(Collectors.toCollection(() -> new LinkedHashSet<>()));
         return modules;
     }
 
     public Set<Module> getModulesByPid(String pid, String level) {
         Set<Module> modules = getModules().stream()
-                .filter(module -> module.getP_id().equals(pid) && hasAccessModuleAction(module.getU_id(), level))
+                .filter(module -> module.getPId().equals(pid) && hasAccessModuleAction(module.getUId(), level))
                 .collect(Collectors.toCollection(() -> new LinkedHashSet<>()));
         return modules;
     }
@@ -109,7 +109,7 @@ public class User extends GenericPo<String> {
     public boolean hasAccessRole(String rId) {
         if (getUserRoles() != null)
             for (UserRole userRole : getUserRoles()) {
-                if (rId.equals(userRole.getRole_id())) return true;
+                if (rId.equals(userRole.getRoleId())) return true;
             }
         return false;
     }
@@ -117,7 +117,7 @@ public class User extends GenericPo<String> {
     public boolean hasAccessModule(String mId) {
         if (roleInfo == null) initRoleInfo();
         for (Module module : roleInfo.keySet()) {
-            if (module.getU_id().equals(mId)) return true;
+            if (module.getUId().equals(mId)) return true;
         }
         return false;
     }
@@ -259,15 +259,15 @@ public class User extends GenericPo<String> {
      *
      * @return java.util.Date 创建日期
      */
-    public java.util.Date getCreate_date() {
-        return this.create_date;
+    public java.util.Date getCreateDate() {
+        return this.createDate;
     }
 
     /**
      * 设置 创建日期
      */
-    public void setCreate_date(java.util.Date create_date) {
-        this.create_date = create_date;
+    public void setCreateDate(java.util.Date createDate) {
+        this.createDate = createDate;
     }
 
     /**
@@ -275,15 +275,15 @@ public class User extends GenericPo<String> {
      *
      * @return java.util.Date 修改日期
      */
-    public java.util.Date getUpdate_date() {
-        return this.update_date;
+    public java.util.Date getUpdateDate() {
+        return this.updateDate;
     }
 
     /**
      * 设置 修改日期
      */
-    public void setUpdate_date(java.util.Date update_date) {
-        this.update_date = update_date;
+    public void setUpdateDate(java.util.Date updateDate) {
+        this.updateDate = updateDate;
     }
 
     public List<UserRole> getUserRoles() {

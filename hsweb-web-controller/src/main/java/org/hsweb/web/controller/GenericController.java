@@ -5,6 +5,7 @@ import org.hsweb.web.core.authorize.annotation.Authorize;
 import org.hsweb.web.bean.common.QueryParam;
 import org.hsweb.web.bean.po.GenericPo;
 import org.hsweb.web.core.exception.BusinessException;
+import org.hsweb.web.core.exception.NotFoundException;
 import org.hsweb.web.core.logger.annotation.AccessLogger;
 import org.hsweb.web.core.message.ResponseMessage;
 import org.hsweb.web.service.GenericService;
@@ -132,7 +133,7 @@ public abstract class GenericController<PO, PK> {
     @Authorize(action = "D")
     public ResponseMessage delete(@PathVariable("id") PK id) throws Exception {
         PO old = getService().selectByPk(id);
-        if (old == null) throw new BusinessException("data is not found!", 404);
+        if (old == null) throw new NotFoundException("data is not found!");
         int number = getService().delete(id);
         return ResponseMessage.ok(number);
     }
@@ -148,9 +149,9 @@ public abstract class GenericController<PO, PK> {
     @Authorize(action = "U")
     public ResponseMessage update(@PathVariable("id") PK id, @RequestBody(required = true) PO object) throws Exception {
         PO old = getService().selectByPk(id);
-        if (old == null) throw new BusinessException("data is not found!", 404);
+        if (old == null) throw new NotFoundException("data is not found!");
         if (object instanceof GenericPo) {
-            ((GenericPo) object).setU_id(id);
+            ((GenericPo) object).setUId(id);
         }
         int number = getService().update(object);
         return ResponseMessage.ok(number);

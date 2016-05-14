@@ -39,7 +39,7 @@ public class DynamicScriptServiceImpl extends AbstractServiceImpl<DynamicScript,
     }
 
     @Override
-    @CacheEvict(value = CACHE_KEY, key = "'script.'+#data.u_id")
+    @CacheEvict(value = CACHE_KEY, key = "'script.'+#data.uId")
     public int update(DynamicScript data) throws Exception {
         int i = super.update(data);
         return i;
@@ -64,7 +64,7 @@ public class DynamicScriptServiceImpl extends AbstractServiceImpl<DynamicScript,
         DynamicScriptEngine engine = DynamicScriptEngineFactory.getEngine(script.getType());
         try {
             if(engine==null)throw new BusinessException("不支持的脚本语言:"+script.getType());
-            engine.compile(script.getU_id(), script.getContent());
+            engine.compile(script.getUId(), script.getContent());
         } catch (Exception e) {
             logger.error("compile error!", e);
         }
@@ -75,7 +75,7 @@ public class DynamicScriptServiceImpl extends AbstractServiceImpl<DynamicScript,
         for (DynamicScript script : list) {
             DynamicScriptEngine engine = DynamicScriptEngineFactory.getEngine(script.getType());
             if(engine==null)throw new BusinessException("不支持的脚本语言:"+script.getType());
-            engine.compile(script.getU_id(), script.getContent());
+            engine.compile(script.getUId(), script.getContent());
         }
     }
 

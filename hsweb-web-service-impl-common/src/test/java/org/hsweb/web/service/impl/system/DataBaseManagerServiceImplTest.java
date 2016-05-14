@@ -1,8 +1,11 @@
 package org.hsweb.web.service.impl.system;
 
+import org.hsweb.web.bean.common.InsertParam;
 import org.hsweb.web.bean.common.QueryParam;
 import org.hsweb.web.bean.common.Term;
+import org.hsweb.web.bean.common.UpdateParam;
 import org.hsweb.web.bean.po.module.Module;
+import org.hsweb.web.bean.po.user.User;
 import org.hsweb.web.dao.user.UserMapper;
 import org.hsweb.web.service.impl.AbstractTestCase;
 import org.hsweb.web.service.module.ModuleMetaService;
@@ -38,7 +41,7 @@ public class DataBaseManagerServiceImplTest extends AbstractTestCase {
     public void test() throws Exception {
         QueryParam queryParam = new QueryParam();
         Term term = queryParam.select("username", "password")
-                .where("create_date$GT", "2015-12-10")
+                .where("createDate$GT", "2015-12-10")
                 .nest();
         term = term.nest("username", "admin").or("username", "test").nest();
         term = term.nest();
@@ -46,13 +49,17 @@ public class DataBaseManagerServiceImplTest extends AbstractTestCase {
         term.nest("status$IN", "2,3,4").and("status$LT", "1");
         term.and("username$EMPTY", true);
         queryParam.orderBy("create_date").desc();
-        System.out.println(queryParam);
+        queryParam.orderBy("status").asc();
         userMapper.select(queryParam);
+        User user = userMapper.selectByPk("admin");
+        user.setUId("aaaa");
+        userMapper.insert(new InsertParam<>(user));
+        userMapper.update(new UpdateParam<>(user).includes("username"));
     }
 
     @Test
     public void testGetFieldList() throws Exception {
-        moduleMetaService.selectByKeyAndRoleId("test","userRole");
+        moduleMetaService.selectByKeyAndRoleId("test", "userRole");
 
     }
 

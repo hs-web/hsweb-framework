@@ -172,13 +172,13 @@ public class FileController {
             CommonsMultipartFile file = files[i];
             if (!file.isEmpty()) {
                 if (logger.isInfoEnabled())
-                    logger.info(String.format("start write file:%s", file.getOriginalFilename()));
-                String fileName = files[i].getOriginalFilename();
-                Resources resources = fileService.saveFile(files[i].getFileItem().getInputStream(), fileName);
+                    logger.info("start write file:{}", file.getOriginalFilename());
+                String fileName = file.getOriginalFilename();
+                Resources resources = fileService.saveFile(file.getFileItem().getInputStream(), fileName);
                 resourcesList.add(resources);
             }
         }//响应上传成功的资源信息
         return ResponseMessage.ok(resourcesList)
-                .include(Resources.class, "u_id", "name", "md5");
+                .include(Resources.class, "uId", "name", "md5");
     }
 }

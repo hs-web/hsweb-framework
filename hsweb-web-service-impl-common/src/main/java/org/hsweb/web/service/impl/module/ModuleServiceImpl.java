@@ -32,10 +32,10 @@ public class ModuleServiceImpl extends AbstractServiceImpl<Module, String> imple
         int size = 0;
         for (Module module : datas) {
             tryValidPo(module);
-            boolean doUpdate = (this.selectByPk(module.getOld_id()) != null);
-            if (!module.getU_id().equals(module.getOld_id())) {
-                if (doUpdate && this.selectByPk(module.getU_id()) != null) {
-                    throw new BusinessException(String.format("标识:%s已存在", module.getU_id()));
+            boolean doUpdate = (this.selectByPk(module.getOldId()) != null);
+            if (!module.getUId().equals(module.getOldId())) {
+                if (doUpdate && this.selectByPk(module.getUId()) != null) {
+                    throw new BusinessException(String.format("标识:%s已存在", module.getUId()));
                 }
             }
             if (doUpdate) {

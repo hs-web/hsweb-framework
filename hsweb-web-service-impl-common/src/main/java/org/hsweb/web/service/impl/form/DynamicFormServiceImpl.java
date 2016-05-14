@@ -106,7 +106,7 @@ public class DynamicFormServiceImpl implements DynamicFormService {
                 dataBase.updateTable(metaData);
             }
         } else {
-            Form lastDeploy = JSON.parseObject(history.getChange_after(), Form.class);
+            Form lastDeploy = JSON.parseObject(history.getChangeAfter(), Form.class);
             TableMetaData lastDeployMetaData = formParser.parse(lastDeploy);
             initDefaultField(lastDeployMetaData);
             //向上发布

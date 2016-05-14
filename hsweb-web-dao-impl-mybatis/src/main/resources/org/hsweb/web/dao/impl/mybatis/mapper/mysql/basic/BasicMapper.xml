@@ -4,77 +4,18 @@
         "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="BasicMapper">
     <sql id="buildWhereV2">
-        ${@org.hsweb.web.mybatis.builder.DefaultSqlParamBuilder@instance().buildWhere($fieldsInfo,#this['_parameter'].terms)}
+        ${@org.hsweb.web.mybatis.builder.MysqlParamBuilder@instance().buildWhere($fieldsInfo,#this['_parameter'].terms)}
+    </sql>
+    <sql id="buildSelectFieldV2">
+        ${@org.hsweb.web.mybatis.builder.MysqlParamBuilder@instance().buildSelectFields($fieldsInfo,#this['_parameter'])}
     </sql>
     <!--通用查询条件-->
     <sql id="buildWhere">
         <include refid="BasicMapper.buildWhereV2"/>
-        <!--动态生成查询条件-->
-        <!--<foreach item="item" index="index" collection="$fields">-->
-            <!--<if test="#this['term.'+item]!=null">-->
-                <!--AND `${$tableName}`.`${item}`=#{term.${item}}-->
-            <!--</if>-->
-            <!--<if test="#this['term.'+item+'$NOT']!=null">-->
-                <!--AND `${$tableName}`.`${item}`!=#{term.${item+'$NOT'}}-->
-            <!--</if>-->
-            <!--<if test="#this['term.'+item+'$LIKE']!=null">-->
-                <!--AND ${$tableName}.${item} like #{term.${item+'$LIKE'}}-->
-            <!--</if>-->
-            <!--<if test="#this['term.'+item+'$NOTLIKE']!=null">-->
-                <!--AND  ${$tableName}.${item} not like #{term.${item+'$LIKE'}}-->
-            <!--</if>-->
-            <!--<if test="#this['term.'+item+'$IN']!=null">-->
-                <!--AND `${$tableName}`.`${item}` IN-->
-                <!--<foreach item="it" index="i" collection="#this['term.'+item+'$IN']" open="(" separator="," close=")">-->
-                    <!--#{it}-->
-                <!--</foreach>-->
-            <!--</if>-->
-            <!--<if test="#this['term.'+item+'$NOTIN']!=null">-->
-                <!--AND `${$tableName}`.`${item}` NOT IN-->
-                <!--<foreach item="it" index="i" collection="#this['term.'+item+'$NOTIN']" open="(" separator="," close=")">-->
-                    <!--#{it}-->
-                <!--</foreach>-->
-            <!--</if>-->
-            <!--<if test="#this['term.'+item+'$ISNULL']!=null">-->
-                <!--AND `${$tableName}`.`${item}` IS NULL-->
-            <!--</if>-->
-            <!--<if test="#this['term.'+item+'$NOTNULL']!=null">-->
-                <!--AND `${$tableName}`.`${item}` IS NOT NULL-->
-            <!--</if>-->
-            <!--<if test="#this['term.'+item+'$GT']!=null">-->
-                <!--AND `${$tableName}`.`${item}` &gt;=#{term.${item+'$GT'}}-->
-            <!--</if>-->
-            <!--<if test="#this['term.'+item+'$LT']!=null">-->
-                <!--AND `${$tableName}`.`${item}` &lt;=#{term.${item+'$LT'}}-->
-            <!--</if>-->
-        <!--</foreach>-->
-        <!--动态生成查询条件结束-->
     </sql>
     <!--生成查询字段-->
     <sql id="buildSelectField">
-        <bind name="fieldHasLen" value="false"/>
-        <choose>
-            <!--指定查询的字段-->
-            <when test="includes!=null and includes.size()>0">
-                <foreach item="item" index="index" collection="includes" open="" separator="," close="">
-                    <if test="item in $fields">
-                        <bind name="fieldHasLen" value="true"/>
-                        ${$tableName}.${item} as `${item}`
-                    </if>
-                </foreach>
-            </when>
-            <!--指定不查询的字段-->
-            <when test="(includes==null or includes.size()==0) and excludes!=null and excludes.size()>0">
-                <foreach item="item" index="index" collection="$fields" open=" " separator="," close="">
-                    <if test="!(item in excludes)">
-                        <bind name="fieldHasLen" value="true"/>
-                        ${$tableName}.${item} as `${item}`
-                    </if>
-                </foreach>
-            </when>
-            <otherwise> <bind name="fieldHasLen" value="true"/>*</otherwise>
-        </choose>
-        <if test="!fieldHasLen">*</if>
+        <include refid="BasicMapper.buildSelectFieldV2"/>
     </sql>
 
     <!--生成修改字段-->
@@ -85,7 +26,7 @@
                 <when test="includes!=null and includes.size()>0">
                     <foreach item="item" index="index" collection="includes" open="" separator="," close="">
                         <if test="item in $fields">
-                            `${item}`=#{data.${item},jdbcType=${$fieldsInfo[item]['jdbcType']}}
+                            ${item}=#{data.${$fieldsInfo[item].property==null?item:$fieldsInfo[item].property},jdbcType=${$fieldsInfo[item]['jdbcType']}}
                         </if>
                     </foreach>
                 </when>
@@ -93,7 +34,7 @@
                 <when test="(includes==null or includes.size()==0) and excludes!=null and excludes.size()>0">
                     <foreach item="item" index="index" collection="$fields" open=" " separator="," close="">
                         <if test="!(item in excludes)">
-                            `${item}`= #{data.${item},jdbcType=${$fieldsInfo[item]['jdbcType']}}
+                            ${item}= #{data.${$fieldsInfo[item].property==null?item:$fieldsInfo[item].property},jdbcType=${$fieldsInfo[item]['jdbcType']}}
                         </if>
                     </foreach>
                 </when>
@@ -101,7 +42,7 @@
                 <otherwise>
                     <foreach item="item" index="index" collection="$fields" open=" " separator="," close="">
                         <if test="data[item] != null">
-                            `${item}`=#{data.${item},jdbcType=${$fieldsInfo[item]['jdbcType']}}
+                            ${item}=#{data.${$fieldsInfo[item].property==null?item:$fieldsInfo[item].property},jdbcType=${$fieldsInfo[item]['jdbcType']}}
                         </if>
                     </foreach>
                 </otherwise>
@@ -114,16 +55,16 @@
         <choose>
             <when test="includes!=null and includes.size()>0">
                 <foreach item="item" index="index" collection="includes" open="(" separator="," close=")">
-                    <if test="item in $fields">`${item}`</if>
+                    <if test="item in $fields">${item}</if>
                 </foreach>
             </when>
             <when test="(includes==null or includes.size()==0) and excludes!=null and excludes.size()>0">
                 <foreach item="item" index="index" collection="$fields" open="(" separator="," close=")">
-                    <if test="!(item in excludes)">`${item}`</if>
+                    <if test="!(item in excludes)">${item}</if>
                 </foreach>
             </when>
             <otherwise>
-                <foreach item="item" index="index" collection="$fields" open="(" separator="," close=")">`${item}`</foreach>
+                <foreach item="item" index="index" collection="$fields" open="(" separator="," close=")">${item}</foreach>
             </otherwise>
         </choose>
     </sql>
@@ -134,20 +75,20 @@
             <when test="includes!=null and includes.size()>0">
                 <foreach item="item" index="index" collection="includes" open="(" separator="," close=")">
                     <if test="item in $fields">
-                        #{data.${item},jdbcType=${$fieldsInfo[item]['jdbcType']}}
+                        #{data.${$fieldsInfo[item].property==null?item:$fieldsInfo[item].property},jdbcType=${$fieldsInfo[item]['jdbcType']}}
                     </if>
                 </foreach>
             </when>
             <when test="(includes==null or includes.size()==0) and excludes!=null and excludes.size()>0">
                 <foreach item="item" index="index" collection="$fields" open="(" separator="," close=")">
                     <if test="!(item in excludes)">
-                        #{data.${item},jdbcType=${$fieldsInfo[item]['jdbcType']}}
+                        #{data.${$fieldsInfo[item].property==null?item:$fieldsInfo[item].property},jdbcType=${$fieldsInfo[item]['jdbcType']}}
                     </if>
                 </foreach>
             </when>
             <otherwise>
                 <foreach item="item" index="index" collection="$fields" open="(" separator="," close=")">
-                    #{data.${item},jdbcType=${$fieldsInfo[item]['jdbcType']}}
+                    #{data.${$fieldsInfo[item].property==null?item:$fieldsInfo[item].property},jdbcType=${$fieldsInfo[item]['jdbcType']}}
                 </foreach>
             </otherwise>
         </choose>
@@ -155,19 +96,7 @@
 
     <!--生成排序字段-->
     <sql id="buildSortField">
-        <bind name="fieldHasLen" value="false"/>
-        <choose>
-            <!--指定排序的字段-->
-            <when test="sortField!=null and sortField.size()>0">
-                <foreach item="item" index="index" collection="sortField" open="" separator="," close="">
-                    <if test="item in $fields">
-                        <if test="!fieldHasLen"> order by </if>${$tableName}.${item}
-                        <bind name="fieldHasLen" value="true"/>
-                    </if>
-                </foreach>
-                <if test="fieldHasLen"> ${sortOrder}</if>
-            </when>
-        </choose>
+        ${@org.hsweb.web.mybatis.builder.MysqlParamBuilder@instance().buildOrder($fieldsInfo,$tableName,#this['_parameter'])}
     </sql>
 
     <!--生成查询sql-->
@@ -197,8 +126,8 @@
         <where>
             <include refid="BasicMapper.buildWhereV2"/>
             <!--<include refid="BasicMapper.buildWhere"/>-->
-            <if test="term.size()==0">
-                u_id=#{data.u_id}
+            <if test="terms.size()==0">
+                u_id=#{data.uId}
             </if>
         </where>
     </sql>

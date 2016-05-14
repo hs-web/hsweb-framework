@@ -30,15 +30,17 @@ public class UserModuleController {
     @RequestMapping
     public ResponseMessage userModule() throws Exception {
         String[] includes = {
-                "name", "u_id", "p_id", "icon", "uri", "m_option"
+                "name", "uId", "pId", "icon", "uri", "mOption"
         };
         User user = WebUtil.getLoginUser();
         List<Module> modules;
         if (user == null) {
-            modules = moduleService.select(new QueryParam().includes(includes).orderBy("sort_index"));
+            QueryParam queryParam = new QueryParam();
+            queryParam.includes(includes).orderBy("sortIndex");
+            modules = moduleService.select(queryParam);
             modules = modules.stream()
                     .filter(module -> {
-                        Object obj = module.getM_optionMap().get("M");
+                        Object obj = module.getMOptionMap().get("M");
                         if (obj instanceof Map)
                             return StringUtils.isTrue(((Map) obj).get("checked"));
                         return false;
@@ -46,7 +48,7 @@ public class UserModuleController {
                     .collect(Collectors.toCollection(() -> new LinkedList<>()));
         } else {
             modules = user.getModules().stream()
-                    .filter(module -> user.hasAccessModuleAction(module.getU_id(), "M"))
+                    .filter(module -> user.hasAccessModuleAction(module.getUId(), "M"))
                     .collect(Collectors.toCollection(() -> new LinkedList<>()));
         }
 

@@ -10,47 +10,47 @@ public class LoggerInfo extends GenericPo<String> {
     /**
      * 请求者ip
      */
-    private String client_ip;
+    private String clientIp;
 
     /**
      * 请求路径
      */
-    private String request_uri;
+    private String requestUri;
 
     /**
      * 完整路径
      */
-    private String request_url;
+    private String requestUrl;
 
     /**
      * 对应的方法,格式为 HTTP方法+java方法 如:GET.list()
      */
-    private String request_method;
+    private String requestMethod;
 
     /**
      * 响应结果
      */
-    private String response_content;
+    private String responseContent;
 
     /**
      * 用户主键
      */
-    private String user_id;
+    private String userId;
 
     /**
      * 请求时间
      */
-    private long request_time;
+    private long requestTime;
 
     /**
      * 响应时间
      */
-    private long response_time;
+    private long responseTime;
 
     /**
      * 请求耗时
      */
-    private long use_time = -1;
+    private long useTime = 1;
 
     /**
      * referer信息
@@ -60,78 +60,78 @@ public class LoggerInfo extends GenericPo<String> {
     /**
      * 客户端标识
      */
-    private String user_agent;
+    private String userAgent;
 
     /**
      * 响应码
      */
-    private String response_code;
+    private String responseCode;
 
     /**
      * 请求头信息
      */
-    private String request_header;
+    private String requestHeader;
 
     /**
      * 对应类名
      */
-    private String class_name;
+    private String className;
 
     /**
      * 功能摘要
      */
-    private String module_desc;
+    private String moduleDesc;
 
     /**
      * 请求参数
      */
-    private String request_param;
+    private String requestParam;
 
     /**
      * 响应异常
      */
-    private String exception_info;
+    private String exceptionInfo;
 
     /**
      * 命中缓存
      */
-    private String cache_key;
+    private String cacheKey;
 
 
-    public String getUser_id() {
-        if (user_id == null)
-            user_id = "-";
-        return user_id;
+    public String getUserId() {
+        if (userId == null)
+            userId = "";
+        return userId;
     }
 
-    public void setUser_id(String user_id) {
-        this.user_id = user_id;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
-    public long getRequest_time() {
-        return request_time;
+    public long getRequestTime() {
+        return requestTime;
     }
 
-    public void setRequest_time(long request_time) {
-        this.request_time = request_time;
+    public void setRequestTime(long requestTime) {
+        this.requestTime = requestTime;
     }
 
-    public long getResponse_time() {
-        return response_time;
+    public long getResponseTime() {
+        return responseTime;
     }
 
-    public void setResponse_time(long response_time) {
-        this.response_time = response_time;
+    public void setResponseTime(long responseTime) {
+        this.responseTime = responseTime;
     }
 
-    public long getUse_time() {
-        if (use_time == -1)
-            use_time = getResponse_time() - getRequest_time();
-        return use_time;
+    public long getUseTime() {
+        if (useTime == 1)
+            useTime = getResponseTime() - getRequestTime();
+        return useTime;
     }
 
-    public void setUse_time(long use_time) {
-        this.use_time = use_time;
+    public void setUseTime(long useTime) {
+        this.useTime = useTime;
     }
 
     public String getReferer() {
@@ -142,108 +142,108 @@ public class LoggerInfo extends GenericPo<String> {
         this.referer = referer;
     }
 
-    public String getUser_agent() {
-        return user_agent;
+    public String getUserAgent() {
+        return userAgent;
     }
 
-    public void setUser_agent(String user_agent) {
-        this.user_agent = user_agent;
+    public void setUserAgent(String userAgent) {
+        this.userAgent = userAgent;
     }
 
 
-    public String getClass_name() {
-        return class_name;
+    public String getClassName() {
+        return className;
     }
 
-    public void setClass_name(String class_name) {
-        this.class_name = class_name;
+    public void setClassName(String className) {
+        this.className = className;
     }
 
-    public String getClient_ip() {
-        return client_ip;
+    public String getClientIp() {
+        return clientIp;
     }
 
-    public void setClient_ip(String client_ip) {
-        this.client_ip = client_ip;
+    public void setClientIp(String clientIp) {
+        this.clientIp = clientIp;
     }
 
-    public String getRequest_uri() {
-        return request_uri;
+    public String getRequestUri() {
+        return requestUri;
     }
 
-    public void setRequest_uri(String request_uri) {
-        this.request_uri = request_uri;
+    public void setRequestUri(String requestUri) {
+        this.requestUri = requestUri;
     }
 
-    public String getRequest_url() {
-        return request_url;
+    public String getRequestUrl() {
+        return requestUrl;
     }
 
-    public void setRequest_url(String request_url) {
-        this.request_url = request_url;
+    public void setRequestUrl(String requestUrl) {
+        this.requestUrl = requestUrl;
     }
 
-    public String getRequest_method() {
-        return request_method;
+    public String getRequestMethod() {
+        return requestMethod;
     }
 
-    public void setRequest_method(String request_method) {
-        this.request_method = request_method;
+    public void setRequestMethod(String requestMethod) {
+        this.requestMethod = requestMethod;
     }
 
-    public String getResponse_content() {
-        return response_content;
+    public String getResponseContent() {
+        return responseContent;
     }
 
-    public void setResponse_content(String response_content) {
-        this.response_content = response_content;
+    public void setResponseContent(String responseContent) {
+        this.responseContent = responseContent;
     }
 
-    public String getResponse_code() {
-        return response_code;
+    public String getResponseCode() {
+        return responseCode;
     }
 
-    public void setResponse_code(String response_code) {
-        this.response_code = response_code;
+    public void setResponseCode(String responseCode) {
+        this.responseCode = responseCode;
     }
 
-    public String getRequest_header() {
-        return request_header;
+    public String getRequestHeader() {
+        return requestHeader;
     }
 
-    public void setRequest_header(String request_header) {
-        this.request_header = request_header;
+    public void setRequestHeader(String requestHeader) {
+        this.requestHeader = requestHeader;
     }
 
-    public String getModule_desc() {
-        return module_desc;
+    public String getModuleDesc() {
+        return moduleDesc;
     }
 
-    public void setModule_desc(String module_desc) {
-        this.module_desc = module_desc;
+    public void setModuleDesc(String moduleDesc) {
+        this.moduleDesc = moduleDesc;
     }
 
-    public String getRequest_param() {
-        return request_param;
+    public String getRequestParam() {
+        return requestParam;
     }
 
-    public void setRequest_param(String request_param) {
-        this.request_param = request_param;
+    public void setRequestParam(String requestParam) {
+        this.requestParam = requestParam;
     }
 
-    public String getException_info() {
-        return exception_info;
+    public String getExceptionInfo() {
+        return exceptionInfo;
     }
 
-    public void setException_info(String exception_info) {
-        this.exception_info = exception_info;
+    public void setExceptionInfo(String exceptionInfo) {
+        this.exceptionInfo = exceptionInfo;
     }
 
-    public String getCache_key() {
-        return cache_key;
+    public String getCacheKey() {
+        return cacheKey;
     }
 
-    public void setCache_key(String cache_key) {
-        this.cache_key = cache_key;
+    public void setCacheKey(String cacheKey) {
+        this.cacheKey = cacheKey;
     }
 }
