@@ -90,13 +90,13 @@ public class FormServiceImplTest extends AbstractTestCase {
         form.setCreateDate(new Date());
         form.setHtml("<input fieldId='id1'/><input fieldId='id2'/>");
         form.setMeta(meta[0]);
-        form.setUId(RandomUtil.randomChar());
+        form.setId(RandomUtil.randomChar());
         formService.insert(form);
     }
 
     @Test
     public void testDeploy() throws Exception {
-        formService.deploy(form.getUId());
+        formService.deploy(form.getId());
         dataBase.getTable("test_form").createInsert()
                 .insert(new InsertParam().value("u_id", "test").value("name", "张三"));
         dataBase.getTable("test_form").createUpdate().update(new UpdateParam().set("u_id", "test2").where("u_id", "test"));
@@ -107,12 +107,14 @@ public class FormServiceImplTest extends AbstractTestCase {
         Assert.assertEquals("张三", data.get("name"));
         Assert.assertEquals("test2", data.get("u_id"));
         formService.createDeployHtml(form.getName());
-        formService.deploy(form.getUId());
+        formService.deploy(form.getId());
         formService.createDeployHtml(form.getName());
 
         form.setMeta(meta[1]);
         formService.update(form);
-        formService.deploy(form.getUId());
+        formService.deploy(form.getId());
+
+        formService.selectLatestList(new org.hsweb.web.bean.common.QueryParam());
     }
 
 

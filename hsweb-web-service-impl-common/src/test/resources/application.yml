@@ -30,3 +30,4 @@ mybatis:
     type-aliases-package: org.hsweb.web.bean.po
     mapper-locations: classpath*:org/hsweb/web/dao/impl/mybatis/mapper/oracle/**/*.xml
     config: classpath:mybatis-config.xml
+    typeHandlersPackage: org.hsweb.web.mybatis.handler

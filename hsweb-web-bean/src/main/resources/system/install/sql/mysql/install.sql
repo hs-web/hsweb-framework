@@ -50,13 +50,13 @@ CREATE TABLE `s_modules` (
   COMMENT 'uri',
   `icon`       VARCHAR(256)  NULL
   COMMENT '图标',
-  `p_id`       VARCHAR(256)  NOT NULL
+  `parent_id`       VARCHAR(256)  NOT NULL
   COMMENT '上级菜单',
   `remark`     VARCHAR(512)  NULL
   COMMENT '备注',
   `status`     INT(4)        NULL
   COMMENT '状态',
-  `m_option`   TEXT          NOT NULL
+  `optional`   TEXT          NOT NULL
   COMMENT '可选权限',
   `sort_index` INT(32)       NOT NULL
   COMMENT '排序'
@@ -163,7 +163,7 @@ CREATE TABLE `s_role_modules` (
   COMMENT '模块id',
   `role_id`   VARCHAR(256) NOT NULL
   COMMENT '角色id',
-  `o_level`   TEXT         NULL
+  `actions`   TEXT         NULL
   COMMENT '可操作权限'
 );
 ALTER TABLE `s_role_modules` COMMENT '角色模块绑定表';

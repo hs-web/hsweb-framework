@@ -5,7 +5,7 @@
 
 <mapper namespace="org.hsweb.web.dao.role.UserRoleMapper">
     <resultMap id="UserRoleResultMap" type="UserRole">
-        <id property="uId" column="u_id" javaType="string" jdbcType="VARCHAR"/>
+        <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
         <result property="userId" column="user_id" javaType="String" jdbcType="VARCHAR"/>
         <result property="roleId" column="role_id" javaType="String" jdbcType="VARCHAR"/>
         <collection property="role" column="role_id" jdbcType="VARCHAR" ofType="Role"
@@ -16,7 +16,7 @@
     <sql id="fieldConfig">
         <bind name="$fieldsInfo"
               value="#{
-                    'u_id':#{'property':'uId','jdbcType':'VARCHAR','javaType':'string'}
+                    'u_id':#{'property':'id','jdbcType':'VARCHAR','javaType':'string'}
                     ,'user_id':#{'property':'userId','jdbcType':'VARCHAR','javaType':'string'}
                     ,'role_id':#{'property':'roleId','jdbcType':'VARCHAR','javaType':'string'}
                     }"/>

@@ -55,17 +55,17 @@ public class ResourcesServiceImpl extends AbstractServiceImpl<Resources, String>
     @Override
     @Transactional(rollbackFor = Throwable.class)
     public String insert(Resources data) throws Exception {
-        data.setUId(this.newUid(6));//6位随机id
+        data.setId(this.newid(6));//6位随机id
         return super.insert(data);
     }
 
-    public String newUid(int len) throws Exception {
-        String uid = RandomUtil.randomChar(len);
+    public String newid(int len) throws Exception {
+        String id = RandomUtil.randomChar(len);
         for (int i = 0; i < 10; i++) {
-            if (this.selectByPk(uid) == null) {
-                return uid;
+            if (this.selectByPk(id) == null) {
+                return id;
             }
         }  //如果10次存在重复则位数+1
-        return newUid(len + 1);
+        return newid(len + 1);
     }
 }

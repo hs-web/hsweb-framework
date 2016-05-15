@@ -74,7 +74,7 @@ public class User extends GenericPo<String> {
 
     public Module getModule(String mId) {
         for (Module module : getModules()) {
-            if (module.getUId().equals(mId)) return module;
+            if (module.getId().equals(mId)) return module;
         }
         return null;
     }
@@ -94,14 +94,14 @@ public class User extends GenericPo<String> {
     public Set<Module> getModulesByPid(String pid) {
         Set<Module> modules = getModules()
                 .stream()
-                .filter(module -> pid.equals(module.getPId()))
+                .filter(module -> pid.equals(module.getParentId()))
                 .collect(Collectors.toCollection(() -> new LinkedHashSet<>()));
         return modules;
     }
 
     public Set<Module> getModulesByPid(String pid, String level) {
         Set<Module> modules = getModules().stream()
-                .filter(module -> module.getPId().equals(pid) && hasAccessModuleAction(module.getUId(), level))
+                .filter(module -> module.getParentId().equals(pid) && hasAccessModuleAction(module.getId(), level))
                 .collect(Collectors.toCollection(() -> new LinkedHashSet<>()));
         return modules;
     }
@@ -117,7 +117,7 @@ public class User extends GenericPo<String> {
     public boolean hasAccessModule(String mId) {
         if (roleInfo == null) initRoleInfo();
         for (Module module : roleInfo.keySet()) {
-            if (module.getUId().equals(mId)) return true;
+            if (module.getId().equals(mId)) return true;
         }
         return false;
     }

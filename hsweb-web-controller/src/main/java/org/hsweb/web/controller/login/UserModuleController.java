@@ -30,7 +30,7 @@ public class UserModuleController {
     @RequestMapping
     public ResponseMessage userModule() throws Exception {
         String[] includes = {
-                "name", "uId", "pId", "icon", "uri", "mOption"
+                "name", "id", "parentId", "icon", "uri", "optional"
         };
         User user = WebUtil.getLoginUser();
         List<Module> modules;
@@ -40,7 +40,7 @@ public class UserModuleController {
             modules = moduleService.select(queryParam);
             modules = modules.stream()
                     .filter(module -> {
-                        Object obj = module.getMOptionMap().get("M");
+                        Object obj = module.getOptionalMap().get("M");
                         if (obj instanceof Map)
                             return StringUtils.isTrue(((Map) obj).get("checked"));
                         return false;
@@ -48,13 +48,13 @@ public class UserModuleController {
                     .collect(Collectors.toCollection(() -> new LinkedList<>()));
         } else {
             modules = user.getModules().stream()
-                    .filter(module -> user.hasAccessModuleAction(module.getUId(), "M"))
+                    .filter(module -> user.hasAccessModuleAction(module.getId(), "M"))
                     .collect(Collectors.toCollection(() -> new LinkedList<>()));
         }
 
         return ResponseMessage.ok(modules)
                 .include(Module.class, includes)
-                .exclude(Module.class, "m_option")
+                .exclude(Module.class, "optional")
                 .onlyData();
     }
 }

@@ -126,7 +126,7 @@ public class History extends GenericPo<String> {
 
     public static History newInstance(String type) {
         History history = new History(type);
-        history.setUId(MD5.encode(UUID.randomUUID().toString().concat(String.valueOf(Math.random()))));
+        history.setId(MD5.encode(UUID.randomUUID().toString().concat(String.valueOf(Math.random()))));
         history.setCreateDate(new Date());
         history.setCreatorId("Sys");
         return history;

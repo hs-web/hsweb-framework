@@ -101,7 +101,7 @@ public class FileServiceImpl implements FileService {
         try {
             User user = WebUtil.getLoginUser();
             if (user != null) {
-                resources.setCreatorId(user.getUId());
+                resources.setCreatorId(user.getId());
             } else {
                 resources.setCreatorId("1");
             }

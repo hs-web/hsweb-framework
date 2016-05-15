@@ -28,27 +28,6 @@ public class ModuleServiceImpl extends AbstractServiceImpl<Module, String> imple
     }
 
     @Override
-    public int update(List<Module> datas) throws Exception {
-        int size = 0;
-        for (Module module : datas) {
-            tryValidPo(module);
-            boolean doUpdate = (this.selectByPk(module.getOldId()) != null);
-            if (!module.getUId().equals(module.getOldId())) {
-                if (doUpdate && this.selectByPk(module.getUId()) != null) {
-                    throw new BusinessException(String.format("标识:%s已存在", module.getUId()));
-                }
-            }
-            if (doUpdate) {
-                size += this.update(module);
-            } else {
-                this.insert(module);
-                size++;
-            }
-        }
-        return size;
-    }
-
-    @Override
     public List<Module> selectByPid(String pid) throws Exception {
         return this.select(new QueryParam().where("p_id", pid));
     }

@@ -105,10 +105,10 @@ CREATE TABLE ${jdbc.username}."S_MODULES" (
 "NAME" VARCHAR2(256)  NOT NULL,
 "URI" VARCHAR2(1024) NULL,
 "ICON" VARCHAR2(256)  NULL,
-"P_ID" VARCHAR2(256)  NOT NULL,
+"PARENT_ID" VARCHAR2(256)  NOT NULL,
 "REMARK" VARCHAR2(512)  NULL,
 "STATUS" NUMBER(4)      NULL,
-"M_OPTION" CLOB NOT NULL,
+"OPTIONAL" CLOB NOT NULL,
 "SORT_INDEX" NUMBER(32)     NOT NULL
 );
 COMMENT ON TABLE ${jdbc.username}."S_MODULES" IS '系统模块';
@@ -116,10 +116,10 @@ COMMENT ON COLUMN ${jdbc.username}."S_MODULES"."U_ID" IS 'UID';
 COMMENT ON COLUMN ${jdbc.username}."S_MODULES"."NAME" IS '模块名称';
 COMMENT ON COLUMN ${jdbc.username}."S_MODULES"."URI" IS 'URI';
 COMMENT ON COLUMN ${jdbc.username}."S_MODULES"."ICON" IS '图标';
-COMMENT ON COLUMN ${jdbc.username}."S_MODULES"."P_ID" IS '上级菜单';
+COMMENT ON COLUMN ${jdbc.username}."S_MODULES"."PARENT_ID" IS '上级菜单';
 COMMENT ON COLUMN ${jdbc.username}."S_MODULES"."REMARK" IS '备注';
 COMMENT ON COLUMN ${jdbc.username}."S_MODULES"."STATUS" IS '状态';
-COMMENT ON COLUMN ${jdbc.username}."S_MODULES"."M_OPTION" IS '可选权限';
+COMMENT ON COLUMN ${jdbc.username}."S_MODULES"."OPTIONAL" IS '可选权限';
 COMMENT ON COLUMN ${jdbc.username}."S_MODULES"."SORT_INDEX" IS '排序';
 
 CREATE TABLE ${jdbc.username}."S_CLASSIFIED" (
@@ -222,13 +222,13 @@ CREATE TABLE ${jdbc.username}."S_ROLE_MODULES" (
 "U_ID" VARCHAR2(256) NOT NULL,
 "MODULE_ID" VARCHAR2(256) NOT NULL,
 "ROLE_ID" VARCHAR2(256) NOT NULL,
-"O_LEVEL" CLOB NULL
+"ACTIONS" CLOB NULL
 );
 COMMENT ON TABLE ${jdbc.username}."S_ROLE_MODULES" IS '角色模块绑定表';
 COMMENT ON COLUMN ${jdbc.username}."S_ROLE_MODULES"."U_ID" IS 'UID';
 COMMENT ON COLUMN ${jdbc.username}."S_ROLE_MODULES"."MODULE_ID" IS '模块ID';
 COMMENT ON COLUMN ${jdbc.username}."S_ROLE_MODULES"."ROLE_ID" IS '角色ID';
-COMMENT ON COLUMN ${jdbc.username}."S_ROLE_MODULES"."O_LEVEL" IS '可操作权限';
+COMMENT ON COLUMN ${jdbc.username}."S_ROLE_MODULES"."ACTIONS" IS '可操作权限';
 
 -- ----------------------------
 -- Table structure for S_SCRIPT

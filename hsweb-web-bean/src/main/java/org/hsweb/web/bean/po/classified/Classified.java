@@ -12,13 +12,13 @@ public class Classified extends GenericPo<String>{
         //分类类型
         private String type;
         //父级分类
-        private String p_id;
+        private String parentId;
         //显示图标
         private String icon;
         //其他配置
         private String config;
         //排序
-        private int sort_index;
+        private int sortIndex;
 
         /**
         * 获取 分类名称
@@ -72,18 +72,17 @@ public class Classified extends GenericPo<String>{
         * 获取 父级分类
         * @return java.lang.String 父级分类
         */
-        public String getP_id(){
-            if(this.p_id==null)
-            return "";
-        return this.p_id;
+        public String getParentId() {
+                return parentId;
         }
 
         /**
         * 设置 父级分类
         */
-        public void setP_id(String p_id){
-        this.p_id=p_id;
+        public void setParentId(String parentId) {
+                this.parentId = parentId;
         }
+
         /**
         * 获取 显示图标
         * @return java.lang.String 显示图标
@@ -120,14 +119,14 @@ public class Classified extends GenericPo<String>{
         * 获取 排序
         * @return int 排序
         */
-        public int getSort_index(){
-        return this.sort_index;
+        public int getSortIndex() {
+                return sortIndex;
         }
 
         /**
         * 设置 排序
         */
-        public void setSort_index(int sort_index){
-        this.sort_index=sort_index;
+        public void setSortIndex(int sortIndex) {
+                this.sortIndex = sortIndex;
         }
-    }
+}

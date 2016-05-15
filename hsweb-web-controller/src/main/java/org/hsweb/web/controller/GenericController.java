@@ -151,7 +151,7 @@ public abstract class GenericController<PO, PK> {
         PO old = getService().selectByPk(id);
         if (old == null) throw new NotFoundException("data is not found!");
         if (object instanceof GenericPo) {
-            ((GenericPo) object).setUId(id);
+            ((GenericPo) object).setId(id);
         }
         int number = getService().update(object);
         return ResponseMessage.ok(number);

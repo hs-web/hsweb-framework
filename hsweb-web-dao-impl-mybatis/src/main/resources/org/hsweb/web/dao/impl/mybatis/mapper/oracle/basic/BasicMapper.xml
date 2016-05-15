@@ -3,95 +3,32 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="BasicMapper">
-    <sql id="buildWhereV2">
-        ${@org.hsweb.web.mybatis.builder.DefaultSqlParamBuilder@instance().buildWhere($fieldsInfo,#this['_parameter'].terms)}
-    </sql>
-    <sql id="buildSelectFieldV2">
-        ${@org.hsweb.web.mybatis.builder.DefaultSqlParamBuilder@instance().buildSelectFields($fieldsInfo,#this['_parameter'])}
-    </sql>
     <!--通用查询条件-->
     <sql id="buildWhere">
-        <include refid="BasicMapper.buildWhereV2"/>
+        ${@org.hsweb.web.mybatis.builder.DefaultSqlParamBuilder@instance().buildWhere($fieldsInfo,$tableName,#this['_parameter'].terms)}
     </sql>
     <!--生成查询字段-->
     <sql id="buildSelectField">
-        <include refid="BasicMapper.buildSelectFieldV2"/>
+        ${@org.hsweb.web.mybatis.builder.DefaultSqlParamBuilder@instance().buildSelectFields($fieldsInfo,$tableName,#this['_parameter'])}
     </sql>
 
     <!--生成修改字段-->
     <sql id="buildUpdateField">
         <set>
-            <choose>
-                <!--指定要修改的字段-->
-                <when test="includes!=null and includes.size()>0">
-                    <foreach item="item" index="index" collection="includes" open="" separator="," close="">
-                        <if test="item in $fields">
-                            ${item}=#{data.${$fieldsInfo[item].property==null?item:$fieldsInfo[item].property},jdbcType=${$fieldsInfo[item]['jdbcType']}}
-                        </if>
-                    </foreach>
-                </when>
-                <!--指定不修改的字段-->
-                <when test="(includes==null or includes.size()==0) and excludes!=null and excludes.size()>0">
-                    <foreach item="item" index="index" collection="$fields" open=" " separator="," close="">
-                        <if test="!(item in excludes)">
-                            ${item}= #{data.${$fieldsInfo[item].property==null?item:$fieldsInfo[item].property},jdbcType=${$fieldsInfo[item]['jdbcType']}}
-                        </if>
-                    </foreach>
-                </when>
-                <!--修改所有-->
-                <otherwise>
-                    <foreach item="item" index="index" collection="$fields" open=" " separator="," close="">
-                        <if test="data[item] != null">
-                            ${item}=#{data.${$fieldsInfo[item].property==null?item:$fieldsInfo[item].property},jdbcType=${$fieldsInfo[item]['jdbcType']}}
-                        </if>
-                    </foreach>
-                </otherwise>
-            </choose>
+        ${@org.hsweb.web.mybatis.builder.MysqlParamBuilder@instance().buildUpdateFields($fieldsInfo,#this['_parameter'])}
         </set>
     </sql>
 
     <!--生成插入字段-->
     <sql id="buildInsertField">
-        <choose>
-            <when test="includes!=null and includes.size()>0">
-                <foreach item="item" index="index" collection="includes" open="(" separator="," close=")">
-                    <if test="item in $fields">${item}</if>
-                </foreach>
-            </when>
-            <when test="(includes==null or includes.size()==0) and excludes!=null and excludes.size()>0">
-                <foreach item="item" index="index" collection="$fields" open="(" separator="," close=")">
-                    <if test="!(item in excludes)">${item}</if>
-                </foreach>
-            </when>
-            <otherwise>
-                <foreach item="item" index="index" collection="$fields" open="(" separator="," close=")">${item}</foreach>
-            </otherwise>
-        </choose>
+        <foreach item="item" index="index" collection="$fields" open="(" separator="," close=")">${item}</foreach>
     </sql>
 
     <!--生成插入值-->
     <sql id="buildInsertValues">
-        <choose>
-            <when test="includes!=null and includes.size()>0">
-                <foreach item="item" index="index" collection="includes" open="(" separator="," close=")">
-                    <if test="item in $fields">
-                        #{data.${$fieldsInfo[item].property==null?item:$fieldsInfo[item].property},jdbcType=${$fieldsInfo[item]['jdbcType']}}
-                    </if>
-                </foreach>
-            </when>
-            <when test="(includes==null or includes.size()==0) and excludes!=null and excludes.size()>0">
-                <foreach item="item" index="index" collection="$fields" open="(" separator="," close=")">
-                    <if test="!(item in excludes)">
-                        #{data.${$fieldsInfo[item].property==null?item:$fieldsInfo[item].property},jdbcType=${$fieldsInfo[item]['jdbcType']}}
-                    </if>
-                </foreach>
-            </when>
-            <otherwise>
-                <foreach item="item" index="index" collection="$fields" open="(" separator="," close=")">
-                    #{data.${$fieldsInfo[item].property==null?item:$fieldsInfo[item].property},jdbcType=${$fieldsInfo[item]['jdbcType']}}
-                </foreach>
-            </otherwise>
-        </choose>
+        <foreach item="item" index="index" collection="$fields" open="(" separator="," close=")">
+            #{data.${$fieldsInfo[item].property==null?item:$fieldsInfo[item].property},jdbcType=${$fieldsInfo[item]['jdbcType']},javaType=${$fieldsInfo[item]['javaType']}}
+        </foreach>
     </sql>
 
     <!--生成排序字段-->
@@ -105,8 +42,7 @@
         <include refid="BasicMapper.buildSelectField"/>
         from ${$tableName}
         <where>
-            <include refid="BasicMapper.buildWhereV2"/>
-            <!--<include refid="BasicMapper.buildWhere"/>-->
+            <include refid="BasicMapper.buildWhere"/>
         </where>
         <include refid="BasicMapper.buildSortField"/>
     </sql>
@@ -124,10 +60,9 @@
         update ${$tableName}
         <include refid="BasicMapper.buildUpdateField"/>
         <where>
-            <include refid="BasicMapper.buildWhereV2"/>
-            <!--<include refid="BasicMapper.buildWhere"/>-->
+            <include refid="BasicMapper.buildWhere"/>
             <if test="terms.size()==0">
-                u_id=#{data.uId}
+                u_id=#{data.id}
             </if>
         </where>
     </sql>
@@ -136,8 +71,7 @@
     <sql id="buildTotalSql">
         select count(0) as "total" from ${$tableName}
         <where>
-            <include refid="BasicMapper.buildWhereV2"/>
-            <!--<include refid="BasicMapper.buildWhere"/>-->
+            <include refid="BasicMapper.buildWhere"/>
         </where>
     </sql>
 </mapper>

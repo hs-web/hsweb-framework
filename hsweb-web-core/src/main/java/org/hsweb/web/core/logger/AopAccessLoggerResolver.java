@@ -35,7 +35,7 @@ public class AopAccessLoggerResolver {
                 describe.append("-");
             describe.append(methodAnnotation.value());
         }
-        logInfo.setUId(MD5.encode(String.valueOf(System.nanoTime())));
+        logInfo.setId(MD5.encode(String.valueOf(System.nanoTime())));
         logInfo.setModuleDesc(describe.toString());//方法描述
         logInfo.setClassName(target.getName());//当前访问映射到的类名
         logInfo.setClientIp(WebUtil.getIpAddr(request));//ip地址

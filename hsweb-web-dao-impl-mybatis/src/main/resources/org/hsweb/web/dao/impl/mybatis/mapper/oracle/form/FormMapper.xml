@@ -5,7 +5,7 @@
 
 <mapper namespace="org.hsweb.web.dao.form.FormMapper">
     <resultMap id="FormResultMap" type="Form">
-        <id property="uId" column="u_id" javaType="string" jdbcType="VARCHAR"/>
+        <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
         <result property="name" column="name" javaType="String" jdbcType="VARCHAR"/>
         <result property="html" column="html" javaType="String" jdbcType="VARCHAR"/>
         <result property="meta" column="meta" javaType="String" jdbcType="VARCHAR"/>
@@ -23,15 +23,15 @@
     <sql id="fieldConfig">
         <bind name="$fieldsInfo"
               value="#{
-                    'u_id':#{'property':'uId','jdbcType':'VARCHAR','javaType':'string'}
+                    'u_id':#{'property':'id','jdbcType':'VARCHAR','javaType':'string'}
                     ,'name':#{'jdbcType':'VARCHAR','javaType':'string'}
                     ,'html':#{'jdbcType':'VARCHAR','javaType':'string'}
                     ,'meta':#{'jdbcType':'VARCHAR','javaType':'string'}
                     ,'config':#{'jdbcType':'VARCHAR','javaType':'string'}
                     ,'remark':#{'jdbcType':'VARCHAR','javaType':'string'}
-                    ,'version':#{'jdbcType':'INTEGER','javaType':'number'}
-                    ,'revision':#{'jdbcType':'INTEGER','javaType':'number'}
-                    ,'release':#{'jdbcType':'INTEGER','javaType':'number'}
+                    ,'version':#{'jdbcType':'INTEGER','javaType':'int'}
+                    ,'revision':#{'jdbcType':'INTEGER','javaType':'int'}
+                    ,'release':#{'jdbcType':'INTEGER','javaType':'int'}
                     ,'using':#{'jdbcType':'INTEGER','javaType':'boolean'}
                     ,'create_date':#{'property':'createDate','jdbcType':'VARCHAR','javaType':'date'}
                     ,'update_date':#{'property':'updateDate','jdbcType':'VARCHAR','javaType':'date'}
@@ -45,7 +45,7 @@
         <bind name="$tableName" value="'s_form'"/>
     </sql>
 
-    <insert id="insert" parameterType="org.hsweb.web.bean.common.InsertParam" useGeneratedKeys="true" keyProperty="data.uId" keyColumn="U_ID">
+    <insert id="insert" parameterType="org.hsweb.web.bean.common.InsertParam" useGeneratedKeys="true" keyProperty="data.id" keyColumn="U_ID">
         <include refid="fieldConfig"/>
         <include refid="tableName"/>
         <include refid="BasicMapper.buildInsertSql"/>

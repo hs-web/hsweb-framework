@@ -55,7 +55,7 @@ public class AopAccessLoggerResolverConfiguration extends AopAccessLoggerResolve
             loggerInfo.setResponseTime(responseTime);
             loggerInfo.setResponseContent(fastJsonHttpMessageConverter.converter(result));
             if (user != null)
-                loggerInfo.setUserId(user.getUId());
+                loggerInfo.setUserId(user.getId());
             if (result instanceof ResponseMessage)
                 loggerInfo.setResponseCode(String.valueOf(((ResponseMessage) result).getCode()));
             if (accessLoggerPersisting != null) {

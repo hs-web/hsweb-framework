@@ -5,7 +5,7 @@
 
 <mapper namespace="org.hsweb.web.dao.history.HistoryMapper">
     <resultMap id="HistoryResultMap" type="History">
-        <id property="uId" column="u_id" javaType="string" jdbcType="VARCHAR"/>
+        <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
         <result property="type" column="type" javaType="String" jdbcType="VARCHAR"/>
         <result property="describe" column="describe" javaType="String" jdbcType="VARCHAR"/>
         <result property="primaryKeyName" column="primary_key_name" javaType="String" jdbcType="VARCHAR"/>
@@ -20,14 +20,14 @@
     <sql id="fieldConfig">
         <bind name="$fieldsInfo"
               value="#{
-                    'u_id':#{'property':'uId','jdbcType':'VARCHAR','javaType':'string'}
+                    'u_id':#{'property':'id','jdbcType':'VARCHAR','javaType':'string'}
                     ,'type':#{'jdbcType':'VARCHAR','javaType':'string'}
                     ,'describe':#{'jdbcType':'VARCHAR','javaType':'string'}
                     ,'primary_key_name':#{'property':'primaryKeyName','jdbcType':'VARCHAR','javaType':'string'}
                     ,'primary_key_value':#{'property':'primaryKeyValue','jdbcType':'VARCHAR','javaType':'string'}
                     ,'change_before':#{'property':'changeBefore','jdbcType':'VARCHAR','javaType':'string'}
                     ,'change_after':#{'property':'changeAfter','jdbcType':'VARCHAR','javaType':'string'}
-                    ,'creator_id':#{'property':'creatorId','jdbcType':'VARCHAR','javaType':'boolean'}
+                    ,'creator_id':#{'property':'creatorId','jdbcType':'VARCHAR','javaType':'string'}
                     ,'create_date':#{'property':'createDate','jdbcType':'VARCHAR','javaType':'date'}
                     }"/>
 
@@ -39,7 +39,7 @@
         <bind name="$tableName" value="'s_history'"/>
     </sql>
 
-    <insert id="insert" parameterType="org.hsweb.web.bean.common.InsertParam" useGeneratedKeys="true" keyProperty="data.uId" keyColumn="U_ID">
+    <insert id="insert" parameterType="org.hsweb.web.bean.common.InsertParam" useGeneratedKeys="true" keyProperty="data.id" keyColumn="U_ID">
         <include refid="fieldConfig"/>
         <include refid="tableName"/>
         <include refid="BasicMapper.buildInsertSql"/>
@@ -62,7 +62,6 @@
     <select id="select" parameterType="org.hsweb.web.bean.common.QueryParam" resultMap="HistoryResultMap">
         <include refid="fieldConfig"/>
         <include refid="tableName"/>
-        ${@org.hsweb.web.mybatis.builder.DefaultSqlParamBuilder@instance().test(#this)}
         <include refid="BasicMapper.buildSelectSql"/>
     </select>
 

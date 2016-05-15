@@ -5,7 +5,7 @@
 
 <mapper namespace="org.hsweb.web.dao.user.UserMapper">
     <resultMap id="UserResultMap" type="User">
-        <id property="uId" column="u_id" javaType="string" jdbcType="VARCHAR"/>
+        <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
         <result property="username" column="username" javaType="String" jdbcType="VARCHAR"/>
         <result property="password" column="password" javaType="String" jdbcType="VARCHAR"/>
         <result property="name" column="name" javaType="String" jdbcType="VARCHAR"/>
@@ -21,13 +21,13 @@
     <sql id="fieldConfig">
         <bind name="$fieldsInfo"
               value="#{
-                    'u_id':#{'property':'uId','jdbcType':'VARCHAR','javaType':'string'}
+                    'u_id':#{'property':'id','jdbcType':'VARCHAR','javaType':'string'}
                     ,'username':#{'jdbcType':'VARCHAR','javaType':'string'}
                     ,'password':#{'jdbcType':'VARCHAR','javaType':'string'}
                     ,'name':#{'jdbcType':'VARCHAR','javaType':'string'}
                     ,'email':#{'jdbcType':'VARCHAR','javaType':'string'}
                     ,'phone':#{'jdbcType':'VARCHAR','javaType':'string'}
-                    ,'status':#{'jdbcType':'INTEGER','javaType':'number'}
+                    ,'status':#{'jdbcType':'INTEGER','javaType':'int'}
                     ,'create_date':#{'property':'createDate','jdbcType':'TIMESTAMP','javaType':'date'}
                     ,'update_date':#{'property':'updateDate','jdbcType':'TIMESTAMP','javaType':'date'}
                     }"/>
@@ -38,7 +38,7 @@
         <bind name="$tableName" value="'s_user'"/>
     </sql>
 
-    <insert id="insert" parameterType="User" useGeneratedKeys="true" keyProperty="data.uId" keyColumn="U_ID">
+    <insert id="insert" parameterType="User" useGeneratedKeys="true" keyProperty="data.id" keyColumn="U_ID">
         <include refid="fieldConfig"/>
         <include refid="tableName"/>
         <include refid="BasicMapper.buildInsertSql"/>
@@ -49,7 +49,7 @@
     </delete>
 
     <update id="updatePassword" parameterType="User">
-        update s_user set password=#{password,jdbcType=VARCHAR} where u_id = #{uId}
+        update s_user set password=#{password,jdbcType=VARCHAR} where u_id = #{id}
     </update>
 
     <update id="update" parameterType="org.hsweb.web.bean.common.UpdateParam">

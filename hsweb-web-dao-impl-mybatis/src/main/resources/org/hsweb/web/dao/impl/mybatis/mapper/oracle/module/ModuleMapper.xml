@@ -5,14 +5,14 @@
 
 <mapper namespace="org.hsweb.web.dao.module.ModuleMapper">
     <resultMap id="ModuleResultMap" type="Module">
-        <id property="uId" column="u_id" javaType="string" jdbcType="VARCHAR"/>
+        <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
         <result property="name" column="name" javaType="String" jdbcType="VARCHAR"/>
         <result property="uri" column="uri" javaType="String" jdbcType="VARCHAR"/>
         <result property="icon" column="icon" javaType="String" jdbcType="VARCHAR"/>
-        <result property="pId" column="p_id" javaType="String" jdbcType="VARCHAR"/>
+        <result property="parent_id" column="p_id" javaType="String" jdbcType="VARCHAR"/>
         <result property="remark" column="remark" javaType="String" jdbcType="VARCHAR"/>
         <result property="status" column="status" javaType="int" jdbcType="INTEGER"/>
-        <result property="mOption" column="m_option" javaType="String" jdbcType="VARCHAR"/>
+        <result property="optional" column="optional" javaType="String" jdbcType="VARCHAR"/>
         <result property="sortIndex" column="sort_index" javaType="long" jdbcType="INTEGER"/>
     </resultMap>
 
@@ -20,15 +20,15 @@
     <sql id="fieldConfig">
         <bind name="$fieldsInfo"
               value="#{
-                    'u_id':#{'property':'uId','jdbcType':'VARCHAR','javaType':'string'}
+                    'u_id':#{'property':'id','jdbcType':'VARCHAR','javaType':'string'}
                     ,'name':#{'jdbcType':'VARCHAR','javaType':'string'}
                     ,'uri':#{'jdbcType':'VARCHAR','javaType':'string'}
                     ,'icon':#{'jdbcType':'VARCHAR','javaType':'string'}
-                    ,'p_id':#{'property':'pId','jdbcType':'VARCHAR','javaType':'string'}
+                    ,'parent_id':#{'property':'parentId','jdbcType':'VARCHAR','javaType':'string'}
                     ,'remark':#{'jdbcType':'VARCHAR','javaType':'string'}
-                    ,'status':#{'jdbcType':'INTEGER','javaType':'number'}
-                    ,'m_option':#{'property':'mOption','jdbcType':'VARCHAR','javaType':'string'}
-                    ,'sort_index':#{'property':'sortIndex','jdbcType':'INTEGER','javaType':'number'}
+                    ,'status':#{'jdbcType':'INTEGER','javaType':'int'}
+                    ,'optional':#{'property':'optional','jdbcType':'VARCHAR','javaType':'string'}
+                    ,'sort_index':#{'property':'sortIndex','jdbcType':'INTEGER','javaType':'long'}
                     }"/>
         <bind name="$fields" value="$fieldsInfo.keySet()"/>
     </sql>
@@ -37,7 +37,7 @@
         <bind name="$tableName" value="'s_modules'"/>
     </sql>
 
-    <insert id="insert" parameterType="org.hsweb.web.bean.common.InsertParam" useGeneratedKeys="true" keyProperty="data.uId" keyColumn="U_ID">
+    <insert id="insert" parameterType="org.hsweb.web.bean.common.InsertParam" useGeneratedKeys="true" keyProperty="data.id" keyColumn="U_ID">
         <include refid="fieldConfig"/>
         <include refid="tableName"/>
         <include refid="BasicMapper.buildInsertSql"/>

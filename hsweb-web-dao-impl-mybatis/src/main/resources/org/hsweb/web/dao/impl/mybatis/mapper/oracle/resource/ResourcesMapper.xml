@@ -5,7 +5,7 @@
 
 <mapper namespace="org.hsweb.web.dao.resource.ResourcesMapper">
     <resultMap id="ResourcesResultMap" type="Resources" >
-        <id property="uId" column="u_id" javaType="string" jdbcType="VARCHAR" />
+        <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR" />
         <result property="name" column="name" javaType="String" jdbcType="VARCHAR" />
         <result property="path" column="path" javaType="String" jdbcType="VARCHAR" />
         <result property="creatorId" column="creator_id" javaType="String" jdbcType="VARCHAR" />
@@ -19,13 +19,13 @@
     <sql id="fieldConfig">
         <bind name="$fieldsInfo"
               value="#{
-                    'u_id':#{'property':'uId','jdbcType':'VARCHAR','javaType':'string'}
+                    'u_id':#{'property':'id','jdbcType':'VARCHAR','javaType':'string'}
                     ,'name':#{'jdbcType':'VARCHAR','javaType':'string'}
                     ,'path':#{'jdbcType':'VARCHAR','javaType':'string'}
                     ,'creator_id':#{'property':'creatorId','jdbcType':'VARCHAR','javaType':'string'}
                     ,'md5':#{'jdbcType':'VARCHAR','javaType':'string'}
                     ,'type':#{'jdbcType':'VARCHAR','javaType':'string'}
-                    ,'status':#{'jdbcType':'INTEGER','javaType':'number'}
+                    ,'status':#{'jdbcType':'INTEGER','javaType':'int'}
                     ,'create_date':#{'property':'createDate','jdbcType':'TIMESTAMP','javaType':'date'}
                     }"/>
         <bind name="$fields" value="$fieldsInfo.keySet()"/>
@@ -35,7 +35,7 @@
         <bind name="$tableName" value="'s_resources'"/>
     </sql>
 
-    <insert id="insert" parameterType="Resources" useGeneratedKeys="true" keyProperty="data.uId" keyColumn="u_id">
+    <insert id="insert" parameterType="Resources" useGeneratedKeys="true" keyProperty="data.id" keyColumn="u_id">
         <include refid="fieldConfig"/>
         <include refid="tableName"/>
         <include refid="BasicMapper.buildInsertSql"/>

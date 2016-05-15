@@ -43,8 +43,8 @@ public class RoleServiceImpl extends AbstractServiceImpl<Role, String> implement
         if (roleModule != null && roleModule.size() > 0) {
             //保存角色模块关联
             for (RoleModule module : roleModule) {
-                module.setUId(RandomUtil.randomChar(6));
-                module.setRoleId(data.getUId());
+                module.setId(RandomUtil.randomChar(6));
+                module.setRoleId(data.getId());
                 roleModuleMapper.insert(new InsertParam<>(module));
             }
         }
@@ -57,11 +57,11 @@ public class RoleServiceImpl extends AbstractServiceImpl<Role, String> implement
         List<RoleModule> roleModule = data.getModules();
         if (roleModule != null && roleModule.size() > 0) {
             //先删除所有roleModule
-            roleModuleMapper.deleteByRoleId(data.getUId());
+            roleModuleMapper.deleteByRoleId(data.getId());
             //保存角色模块关联
             for (RoleModule module : roleModule) {
-                module.setUId(RandomUtil.randomChar(6));
-                module.setRoleId(data.getUId());
+                module.setId(RandomUtil.randomChar(6));
+                module.setRoleId(data.getId());
                 roleModuleMapper.insert(new InsertParam<>(module));
             }
         }

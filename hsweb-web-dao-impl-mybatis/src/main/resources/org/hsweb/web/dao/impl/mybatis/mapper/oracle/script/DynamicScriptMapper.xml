@@ -5,7 +5,7 @@
 
 <mapper namespace="org.hsweb.web.dao.script.DynamicScriptMapper">
     <resultMap id="DynamicScriptResultMap" type="DynamicScript" >
-        <id property="uId" column="u_id" javaType="string" jdbcType="VARCHAR" />
+        <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR" />
         <result property="name" column="name" javaType="String" jdbcType="VARCHAR" />
         <result property="type" column="type" javaType="String" jdbcType="VARCHAR" />
         <result property="content" column="content" javaType="String" jdbcType="VARCHAR" />
@@ -18,7 +18,7 @@
     <sql id="fieldConfig">
         <bind name="$fieldsInfo"
               value="#{
-                    'u_id':#{'property':'uId','jdbcType':'VARCHAR','javaType':'string'}
+                    'u_id':#{'property':'id','jdbcType':'VARCHAR','javaType':'string'}
                     ,'name':#{'jdbcType':'VARCHAR','javaType':'string'}
                     ,'type':#{'jdbcType':'VARCHAR','javaType':'string'}
                     ,'content':#{'jdbcType':'VARCHAR','javaType':'string'}

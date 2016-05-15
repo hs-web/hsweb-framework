@@ -1,6 +1,8 @@
 package org.hsweb.web.service.impl.form;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import org.hsweb.concurrent.lock.annotation.LockName;
 import org.hsweb.concurrent.lock.annotation.ReadLock;
 import org.hsweb.concurrent.lock.annotation.WriteLock;
@@ -60,12 +62,12 @@ public class DynamicFormServiceImpl implements DynamicFormService {
             default:
                 dataType = "varchar(32)";
         }
-        FieldMetaData UID = new FieldMetaData("u_id", String.class, dataType);
-        UID.setPrimaryKey(true);
-        UID.setNotNull(true);
-        UID.setComment("主键");
+        FieldMetaData id = new FieldMetaData("u_id", String.class, dataType);
+        id.setPrimaryKey(true);
+        id.setNotNull(true);
+        id.setComment("主键");
         metaData.attr("primaryKey", "u_id");
-        metaData.addField(UID);
+        metaData.addField(id);
 
     }
 

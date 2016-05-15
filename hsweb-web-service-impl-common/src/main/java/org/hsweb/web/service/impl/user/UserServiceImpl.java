@@ -51,18 +51,18 @@ public class UserServiceImpl extends AbstractServiceImpl<User, String> implement
     public String insert(User data) throws Exception {
         tryValidPo(data);
         Assert.isNull(selectByUserName(data.getUsername()), "用户已存在!");
-        data.setUId(RandomUtil.randomChar(6));
+        data.setId(RandomUtil.randomChar(6));
         data.setCreateDate(new Date());
         data.setUpdateDate(new Date());
         data.setPassword(MD5.encode(data.getPassword()));
         data.setStatus(1);
         userMapper.insert(new InsertParam<>(data));
-        String id = data.getUId();
+        String id = data.getId();
         //添加角色关联
         if (data.getUserRoles().size() != 0) {
             for (UserRole userRole : data.getUserRoles()) {
-                userRole.setUId(RandomUtil.randomChar());
-                userRole.setUserId(data.getUId());
+                userRole.setId(RandomUtil.randomChar());
+                userRole.setUserId(data.getId());
                 userRoleMapper.insert(new InsertParam<>(userRole));
             }
         }
@@ -73,7 +73,7 @@ public class UserServiceImpl extends AbstractServiceImpl<User, String> implement
     public int update(User data) throws Exception {
         tryValidPo(data);
         User old = this.selectByUserName(data.getUsername());
-        if (old != null && !old.getUId().equals(data.getUId())) {
+        if (old != null && !old.getId().equals(data.getId())) {
             throw new BusinessException("用户名已存在!");
         }
         data.setUpdateDate(new Date());
@@ -84,10 +84,10 @@ public class UserServiceImpl extends AbstractServiceImpl<User, String> implement
         int i = userMapper.update(new UpdateParam<>(data).excludes("status","password","createDate"));
         if (data.getUserRoles().size() != 0) {
             //删除所有
-            userRoleMapper.deleteByUserId(data.getUId());
+            userRoleMapper.deleteByUserId(data.getId());
             for (UserRole userRole : data.getUserRoles()) {
-                userRole.setUId(RandomUtil.randomChar());
-                userRole.setUserId(data.getUId());
+                userRole.setId(RandomUtil.randomChar());
+                userRole.setUserId(data.getId());
                 userRoleMapper.insert(new InsertParam<>(userRole));
             }
         }
@@ -97,18 +97,18 @@ public class UserServiceImpl extends AbstractServiceImpl<User, String> implement
     @Override
     public void initAdminUser(User user) throws Exception {
         QueryParam queryParam = new QueryParam();
-        queryParam.orderBy("sort_index");
+        queryParam.orderBy("sortIndex");
         List<Module> modules = moduleService.select(queryParam);
         Map<Module, Set<String>> roleInfo = new LinkedHashMap<>();
         for (Module module : modules) {
-            roleInfo.put(module, new LinkedHashSet<>(module.getMOptionMap().keySet()));
+            roleInfo.put(module, new LinkedHashSet<>(module.getOptionalMap().keySet()));
         }
         user.setRoleInfo(roleInfo);
     }
 
     @Override
     public void initGuestUser(User user) throws Exception {
-        List<UserRole> userRoles = userRoleMapper.select(new QueryParam().where("role_id", "guest"));
+        List<UserRole> userRoles = userRoleMapper.select(new QueryParam().where("roleId", "guest"));
         user.setUserRoles(userRoles);
         user.initRoleInfo();
     }
@@ -118,7 +118,7 @@ public class UserServiceImpl extends AbstractServiceImpl<User, String> implement
         User user = selectByPk(id);
         if (user == null) throw new NotFoundException("用户不存在!");
         user.setStatus(1);
-        getMapper().update(new UpdateParam<>(user).includes("status").where("uId", id));
+        getMapper().update(new UpdateParam<>(user).includes("status").where("id", id));
     }
 
     @Override
@@ -126,7 +126,7 @@ public class UserServiceImpl extends AbstractServiceImpl<User, String> implement
         User user = selectByPk(id);
         if (user == null) throw new NotFoundException("用户不存在!");
         user.setStatus(-1);
-        getMapper().update(new UpdateParam<>(user).includes("status").where("uId", id));
+        getMapper().update(new UpdateParam<>(user).includes("status").where("id", id));
     }
 
     @Override

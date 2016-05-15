@@ -5,7 +5,7 @@
 
 <mapper namespace="org.hsweb.web.dao.config.ConfigMapper">
     <resultMap id="ConfigResultMap" type="Config">
-        <id property="uId" column="u_id" javaType="string" jdbcType="VARCHAR"/>
+        <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
         <result property="remark" column="remark" javaType="String" jdbcType="VARCHAR"/>
         <result property="content" column="content" javaType="String" jdbcType="VARCHAR"/>
         <result property="createDate" column="create_date" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
@@ -16,7 +16,7 @@
     <sql id="fieldConfig">
         <bind name="$fieldsInfo"
               value="#{
-                    'u_id':#{'property':'uId','jdbcType':'VARCHAR','javaType':'string'}
+                    'u_id':#{'property':'id','jdbcType':'VARCHAR','javaType':'string'}
                     ,'remark':#{'jdbcType':'VARCHAR','javaType':'string'}
                     ,'content':#{'jdbcType':'VARCHAR','javaType':'string'}
                     ,'create_date':#{'property':'createDate','jdbcType':'TIMESTAMP','javaType':'date'}
@@ -31,7 +31,7 @@
         <bind name="$tableName" value="'s_config'"/>
     </sql>
 
-    <insert id="insert" parameterType="org.hsweb.web.bean.common.InsertParam" useGeneratedKeys="true" keyProperty="data.uId" keyColumn="U_ID">
+    <insert id="insert" parameterType="org.hsweb.web.bean.common.InsertParam" useGeneratedKeys="true" keyProperty="data.id" keyColumn="U_ID">
         <include refid="fieldConfig"/>
         <include refid="tableName"/>
         <include refid="BasicMapper.buildInsertSql"/>

@@ -62,7 +62,7 @@ public class FormServiceImpl extends AbstractServiceImpl<Form, String> implement
     public String createNewVersion(String oldVersionId) throws Exception {
         Form old = this.selectByPk(oldVersionId);
         Assert.notNull(old, "表单不存在!");
-        old.setUId(RandomUtil.randomChar());
+        old.setId(RandomUtil.randomChar());
         old.setVersion(old.getVersion() + 1);
         old.setCreateDate(new Date());
         old.setUpdateDate(null);
@@ -70,7 +70,7 @@ public class FormServiceImpl extends AbstractServiceImpl<Form, String> implement
         old.setRelease(0);
         old.setUsing(false);
         getMapper().insert(new InsertParam<>(old));
-        return old.getUId();
+        return old.getId();
     }
 
     @Override
@@ -79,16 +79,16 @@ public class FormServiceImpl extends AbstractServiceImpl<Form, String> implement
         Assert.isTrue(old.isEmpty(), "表单 [" + data.getName() + "] 已存在!");
         data.setCreateDate(new Date());
         data.setVersion(1);
-        if (StringUtils.isNullOrEmpty(data.getUId()))
-            data.setUId(RandomUtil.randomChar());
+        if (StringUtils.isNullOrEmpty(data.getId()))
+            data.setId(RandomUtil.randomChar());
         super.insert(data);
-        return data.getUId();
+        return data.getId();
     }
 
     @Override
-    @CacheEvict(value = {CACHE_KEY}, key = "'form.'+#data.uId")
+    @CacheEvict(value = {CACHE_KEY}, key = "'form.'+#data.id")
     public int update(Form data) throws Exception {
-        Form old = this.selectByPk(data.getUId());
+        Form old = this.selectByPk(data.getId());
         Assert.notNull(old, "表单不存在!");
         data.setUpdateDate(new Date());
         data.setRevision(old.getRevision() + 1);
@@ -147,17 +147,17 @@ public class FormServiceImpl extends AbstractServiceImpl<Form, String> implement
         //先卸载正在使用的表单
         Form using = getMapper().selectUsing(old.getName());
         if (using != null) {
-            this.unDeploy(using.getUId());
+            this.unDeploy(using.getId());
         }
         //开始发布
         old.setUsing(true);
         dynamicFormService.deploy(old);
         old.setRelease(old.getRevision());//发布修订版本
-        getMapper().update(new UpdateParam<>(old).includes("using", "release").where("uId", old.getUId()));
+        getMapper().update(new UpdateParam<>(old).includes("using", "release").where("id", old.getId()));
         //加入发布历史记录
         History history = History.newInstance("form.deploy." + old.getName());
-        history.setPrimaryKeyName("uId");
-        history.setPrimaryKeyValue(old.getUId());
+        history.setPrimaryKeyName("id");
+        history.setPrimaryKeyValue(old.getId());
         history.setChangeBefore("{}");
         history.setChangeAfter(JSON.toJSONString(old));
         historyService.insert(history);
@@ -171,7 +171,7 @@ public class FormServiceImpl extends AbstractServiceImpl<Form, String> implement
         dynamicFormService.unDeploy(old);
         old.setUsing(false);
         UpdateParam param = new UpdateParam<>(old);
-        param.includes("using").where("uId", old.getUId());
+        param.includes("using").where("id", old.getId());
         getMapper().update(param);
     }
 

@@ -36,7 +36,7 @@
                         ,'name':#{'jdbcType':'VARCHAR','javaType':'string'}
                         ,'email':#{'jdbcType':'VARCHAR','javaType':'string'}
                         ,'phone':#{'jdbcType':'VARCHAR','javaType':'string'}
-                        ,'status':#{'jdbcType':'INTEGER','javaType':'number'}
+                        ,'status':#{'jdbcType':'INTEGER','javaType':'int'}
                         ,'create_date':#{'jdbcType':'TIMESTAMP','javaType':'date'}
                         ,'update_date':#{'jdbcType':'TIMESTAMP','javaType':'date'}
                         }"/>

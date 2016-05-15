@@ -87,8 +87,8 @@ public class Term {
 
     public void setField(String field) {
         if(field==null)return;
-        setTermType(TermType.fromString(field));
         if (field.contains("$")) {
+            setTermType(TermType.fromString(field));
             field = field.split("[\\$]")[0];
         }
         this.field = field;
