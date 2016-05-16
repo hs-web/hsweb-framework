@@ -122,7 +122,7 @@ CREATE TABLE `s_classified` (
   COMMENT '备注',
   `type`       VARCHAR(256) NOT NULL
   COMMENT '类型',
-  `p_id`       VARCHAR(32) NOT NULL
+  `parent_id`       VARCHAR(32) NOT NULL
   COMMENT '父级分类',
   `icon`       VARCHAR(256) NULL
   COMMENT '状态',
