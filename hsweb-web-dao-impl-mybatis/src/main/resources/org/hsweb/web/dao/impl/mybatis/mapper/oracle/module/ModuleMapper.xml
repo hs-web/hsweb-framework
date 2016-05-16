@@ -9,7 +9,7 @@
         <result property="name" column="name" javaType="String" jdbcType="VARCHAR"/>
         <result property="uri" column="uri" javaType="String" jdbcType="VARCHAR"/>
         <result property="icon" column="icon" javaType="String" jdbcType="VARCHAR"/>
-        <result property="parent_id" column="p_id" javaType="String" jdbcType="VARCHAR"/>
+        <result property="parentId" column="p_id" javaType="String" jdbcType="VARCHAR"/>
         <result property="remark" column="remark" javaType="String" jdbcType="VARCHAR"/>
         <result property="status" column="status" javaType="int" jdbcType="INTEGER"/>
         <result property="optional" column="optional" javaType="String" jdbcType="VARCHAR"/>
