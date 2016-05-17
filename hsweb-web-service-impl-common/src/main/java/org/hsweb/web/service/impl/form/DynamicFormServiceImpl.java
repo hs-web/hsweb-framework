@@ -11,6 +11,9 @@ import org.hsweb.web.bean.po.GenericPo;
 import org.hsweb.web.bean.po.form.Form;
 import org.hsweb.web.bean.po.history.History;
 import org.hsweb.web.core.Install;
+import org.hsweb.web.core.exception.BusinessException;
+import org.hsweb.web.core.exception.NotFoundException;
+import org.hsweb.web.service.form.DynamicFormDataValidator;
 import org.hsweb.web.service.form.DynamicFormService;
 import org.hsweb.web.service.form.FormService;
 import org.hsweb.web.service.history.HistoryService;
@@ -19,16 +22,22 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+import org.webbuilder.office.excel.ExcelIO;
+import org.webbuilder.office.excel.config.Header;
 import org.webbuilder.sql.*;
 import org.webbuilder.sql.exception.CreateException;
+import org.webbuilder.sql.exception.TriggerException;
 import org.webbuilder.sql.param.ExecuteCondition;
+import org.webbuilder.sql.trigger.TriggerResult;
+import org.webbuilder.utils.script.engine.DynamicScriptEngine;
+import org.webbuilder.utils.script.engine.DynamicScriptEngineFactory;
+import org.webbuilder.utils.script.engine.ExecuteResult;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.*;
 
 /**
  * Created by zhouhao on 16-4-14.
@@ -49,6 +58,9 @@ public class DynamicFormServiceImpl implements DynamicFormService {
 
     @Resource
     protected HistoryService historyService;
+
+    @Autowired(required = false)
+    protected List<DynamicFormDataValidator> dynamicFormDataValidator;
 
     protected void initDefaultField(TableMetaData metaData) {
         String dataType;
@@ -129,7 +141,9 @@ public class DynamicFormServiceImpl implements DynamicFormService {
         Table table = dataBase.getTable(name.toUpperCase());
         if (table == null)
             table = dataBase.getTable(name.toLowerCase());
-        Assert.notNull(table, "表单[" + name + "]不存在");
+        if (table == null) {
+            throw new NotFoundException("表单[" + name + "]不存在");
+        }
         return table;
     }
 
@@ -183,6 +197,29 @@ public class DynamicFormServiceImpl implements DynamicFormService {
         paramProxy.value(primaryKeyName, pk);
         insert.insert(paramProxy);
         return pk;
+    }
+
+    @Override
+    public String saveOrUpdate(String name, Map<String, Object> data) throws Exception {
+        String id = getRepeatDataId(name, data);
+        if (id != null) {
+            update(name, new UpdateMapParam(data).where(getPrimaryKeyName(name), id));
+        } else {
+            id = insert(name, new InsertMapParam(data));
+        }
+        return id;
+    }
+
+    protected String getRepeatDataId(String name, Map<String, Object> data) {
+        if (dynamicFormDataValidator != null) {
+            for (DynamicFormDataValidator validator : dynamicFormDataValidator) {
+                String id = validator.getRepeatDataId(name, data);
+                if (id != null) {
+                    return id;
+                }
+            }
+        }
+        return null;
     }
 
     @Override
@@ -241,6 +278,107 @@ public class DynamicFormServiceImpl implements DynamicFormService {
         QueryParamProxy proxy = new QueryParamProxy();
         proxy.where(getPrimaryKeyName(name), pk);
         return query.single(proxy);
+    }
+
+    @Override
+    @ReadLock
+    @LockName(value = "'form.lock.'+#name", isExpression = true)
+    public void exportExcel(String name, QueryParam param, OutputStream outputStream) throws Exception {
+        List<Object> dataList = select(name, param);
+        Table table = getTableByName(name);
+        TableMetaData metaData = table.getMetaData();
+        List<Header> headers = new LinkedList<>();
+        metaData.getFields().forEach(fieldMetaData -> {
+            ValueWrapper valueWrapper = fieldMetaData.attrWrapper("exportExcel", true);
+            if (valueWrapper.toBoolean()) {
+                String title = fieldMetaData.attrWrapper("excelHeader", fieldMetaData.getComment()).toString();
+                String field = fieldMetaData.getName();
+                headers.add(new Header(title, field));
+            }
+        });
+        if (metaData.triggerSupport("export.excel")) {
+            Map<String, Object> var = new HashMap<>();
+            var.put("dataList", dataList);
+            var.put("headers", headers);
+            metaData.on("export.excel", var);
+        }
+        ExcelIO.write(outputStream, headers, dataList);
+    }
+
+    @Override
+    @ReadLock
+    @LockName(value = "'form.lock.'+#name", isExpression = true)
+    public Map<String, Object> importExcel(String name, InputStream inputStream) throws Exception {
+        Map<String, Object> result = new HashMap<>();
+        long startTime = System.currentTimeMillis();
+        List<Map<String, Object>> excelData;
+        try {
+            excelData = ExcelIO.read2Map(inputStream);
+        } catch (Exception e) {
+            throw new BusinessException("解析excel失败,请确定文件格式正确!", e, 500);
+        }
+        List<Map<String, Object>> dataList = new LinkedList<>();
+        Map<String, String> headerMapper = new HashMap<>();
+        Table table = getTableByName(name);
+        TableMetaData metaData = table.getMetaData();
+        metaData.getFields().forEach(fieldMetaData -> {
+            ValueWrapper valueWrapper = fieldMetaData.attrWrapper("importExcel", true);
+            if (valueWrapper.toBoolean()) {
+                String title = fieldMetaData.attrWrapper("excelHeader", fieldMetaData.getComment()).toString();
+                String field = fieldMetaData.getName();
+                headerMapper.put(title, field);
+            }
+        });
+        if (metaData.triggerSupport("export.import.before")) {
+            Map<String, Object> var = new HashMap<>();
+            var.put("headerMapper", headerMapper);
+            var.put("excelData", excelData);
+            var.put("dataList", dataList);
+            metaData.on("export.excel", var);
+        } else
+            excelData.forEach(data -> {
+                Map<String, Object> newData = new HashMap<>();
+                data.forEach((k, v) -> {
+                    String field = headerMapper.get(k);
+                    if (field != null) {
+                        newData.put(field, v);
+                    } else {
+                        newData.put(k, v);
+                    }
+                });
+                dataList.add(newData);
+            });
+        List<Map<String, Object>> errorMessage = new LinkedList<>();
+        int index = 0, success = 0;
+        for (Map<String, Object> map : dataList) {
+            index++;
+            try {
+                if (metaData.triggerSupport("export.import.each")) {
+                    Map<String, Object> var = new HashMap<>();
+                    var.put("headerMapper", headerMapper);
+                    var.put("excelData", excelData);
+                    var.put("dataList", dataList);
+                    TriggerResult triggerResult = metaData.on("export.excel", var);
+                    if (!triggerResult.isSuccess()) {
+                        throw new TriggerException(triggerResult.getMessage());
+                    }
+                }
+                saveOrUpdate(name, map);
+                success++;
+            } catch (Exception e) {
+                Map<String, Object> errorMsg = new HashMap<>();
+                errorMsg.put("index", index);
+                errorMsg.put("message", e.getMessage());
+                errorMessage.add(errorMsg);
+            }
+        }
+        long endTime = System.currentTimeMillis();
+        result.put("startTime", startTime);
+        result.put("endTime", endTime);
+        result.put("total", dataList.size());
+        result.put("success", success);
+        result.put("errorMessage", errorMessage);
+        return result;
     }
 
     public static class QueryParamProxy extends org.webbuilder.sql.param.query.QueryParam {
