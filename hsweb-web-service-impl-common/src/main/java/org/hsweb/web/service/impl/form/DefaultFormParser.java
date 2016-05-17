@@ -5,13 +5,18 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.hibernate.validator.constraints.Length;
 import org.hsweb.web.bean.po.form.Form;
+import org.hsweb.web.core.authorize.ExpressionScopeBean;
+import org.hsweb.web.service.impl.form.trigger.ScriptTrigger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 import org.webbuilder.sql.FieldMetaData;
 import org.webbuilder.sql.TableMetaData;
+import org.webbuilder.sql.trigger.ScriptTriggerSupport;
 import org.webbuilder.utils.common.BeanUtils;
 import org.webbuilder.utils.common.StringUtils;
 
@@ -21,7 +26,12 @@ import java.util.*;
 /**
  * Created by zhouhao on 16-4-20.
  */
+@Service
 public class DefaultFormParser implements FormParser {
+
+    @Autowired(required = false)
+    private Map<String, ExpressionScopeBean> expressionScopeBeanMap;
+
     @Override
     public TableMetaData parse(Form form) {
         String meta = form.getMeta();
@@ -39,7 +49,7 @@ public class DefaultFormParser implements FormParser {
                 String key = def.getString("key");
                 Object value = def.get("value");
                 if ("main".equals(id)) {
-                    metaData.attr(key,value);
+                    metaData.attr(key, value);
                     return;
                 }
                 if ("validator-list".equals(key)) {
@@ -53,6 +63,21 @@ public class DefaultFormParser implements FormParser {
                         });
                     }
                     fieldMeta.setValidator(validatorList);
+                    return;
+                }
+                if ("trigger".equals(key)) {
+                    List<JSONObject> jsonArray = JSON.parseArray((String) value, JSONObject.class);
+                    jsonArray.forEach(jsonObject -> {
+                        String name = jsonObject.getString("key");
+                        String script = jsonObject.getString("value");
+                        ScriptTrigger scriptTrigger = new ScriptTrigger();
+                        scriptTrigger.setId(String.valueOf(script.hashCode()));
+                        if (expressionScopeBeanMap != null)
+                            scriptTrigger.setDefaultVar(expressionScopeBeanMap);
+                        scriptTrigger.setName(name);
+                        scriptTrigger.setContent(script);
+                        scriptTrigger.setLanguage("groovy");
+                    });
                     return;
                 }
                 Field ftmp = ReflectionUtils.findField(FieldMetaData.class, key);
@@ -76,7 +101,7 @@ public class DefaultFormParser implements FormParser {
                 }
             });
             //name为空的时候 不保持此字段
-            if (!"main".equals(id)&&!StringUtils.isNullOrEmpty(fieldMeta.getName())) {
+            if (!"main".equals(id) && !StringUtils.isNullOrEmpty(fieldMeta.getName())) {
                 metaData.addField(fieldMeta);
             }
         });
