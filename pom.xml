@@ -135,7 +135,11 @@
                 <artifactId>wb-utils</artifactId>
                 <version>${webbuilder.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>org.webbuilder</groupId>
+                <artifactId>wb-office</artifactId>
+                <version>${webbuilder.version}</version>
+            </dependency>
             <!--<dependency>-->
             <!--<groupId>com.vaadin</groupId>-->
             <!--<artifactId>vaadin-bom</artifactId>-->

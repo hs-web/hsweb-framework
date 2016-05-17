@@ -22,6 +22,11 @@ public interface FileService {
 
     InputStream readResources(Resources resources) throws Exception;
 
+    InputStream readResources(String resourceId) throws Exception;
+
     void writeResources(Resources resources, OutputStream outputStream) throws Exception;
+
+    String getFileBasePath();
+
 
 }

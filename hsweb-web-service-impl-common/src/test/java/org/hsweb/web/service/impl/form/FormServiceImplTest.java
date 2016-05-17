@@ -18,6 +18,7 @@ import org.webbuilder.sql.param.insert.InsertParam;
 import org.webbuilder.sql.param.query.QueryParam;
 import org.webbuilder.sql.param.update.UpdateParam;
 import org.webbuilder.sql.support.executor.SqlExecutor;
+import org.webbuilder.utils.file.FileUtils;
 
 import javax.annotation.Resource;
 import java.util.Date;
@@ -49,13 +50,13 @@ public class FormServiceImplTest extends AbstractTestCase {
             "{" +
                     "\"id1\":[" +
                     "{\"key\":\"name\",\"value\":\"u_id\",\"describe\":\"名称\"}," +
-                    "{\"key\":\"comment\",\"value\":\"ID\",\"describe\":\"字段描述\"}," +
+                    "{\"key\":\"comment\",\"value\":\"ID\",\"describe\":\"ID\"}," +
                     "{\"key\":\"javaType\",\"value\":\"string\",\"describe\":\"java类型\"}," +
                     "{\"key\":\"dataType\",\"value\":\"varchar2(32)\",\"describe\":\"数据库类型\"}" +
                     "]" +
                     ",\"id2\":[" +
                     "{\"key\":\"name\",\"value\":\"name\",\"describe\":\"名称\"}," +
-                    "{\"key\":\"comment\",\"value\":\"test\",\"describe\":\"字段描述\"}," +
+                    "{\"key\":\"comment\",\"value\":\"姓名\",\"describe\":\"姓名\"}," +
                     "{\"key\":\"javaType\",\"value\":\"string\",\"describe\":\"java类型\"}," +
                     "{\"key\":\"validator-list\",\"value\":\"[{\\\"validator\\\":\\\"NotNull\\\"}]\",,\"describe\":\"java类型\"}," +
                     "{\"key\":\"dataType\",\"value\":\"varchar2(32)\",\"describe\":\"数据库类型\"}" +
@@ -64,19 +65,19 @@ public class FormServiceImplTest extends AbstractTestCase {
             "{" +
                     "\"id1\":[" +
                     "{\"key\":\"name\",\"value\":\"u_id\",\"describe\":\"名称\"}," +
-                    "{\"key\":\"comment\",\"value\":\"ID\",\"describe\":\"字段描述\"}," +
+                    "{\"key\":\"comment\",\"value\":\"ID\",\"describe\":\"ID\"}," +
                     "{\"key\":\"javaType\",\"value\":\"string\",\"describe\":\"java类型\"}," +
                     "{\"key\":\"dataType\",\"value\":\"varchar2(32)\",\"describe\":\"数据库类型\"}" +
                     "]" +
                     ",\"id2\":[" +
                     "{\"key\":\"name\",\"value\":\"name\",\"describe\":\"名称\"}," +
-                    "{\"key\":\"comment\",\"value\":\"test\",\"describe\":\"字段描述\"}," +
+                    "{\"key\":\"comment\",\"value\":\"姓名\",\"describe\":\"字段描述\"}," +
                     "{\"key\":\"javaType\",\"value\":\"string\",\"describe\":\"java类型\"}," +
                     "{\"key\":\"dataType\",\"value\":\"varchar2(32)\",\"describe\":\"数据库类型\"}" +
                     "]" +
                     ",\"id3\":[" +
                     "{\"key\":\"name\",\"value\":\"sex\",\"describe\":\"名称\"}," +
-                    "{\"key\":\"comment\",\"value\":\"test\",\"describe\":\"性别\"}," +
+                    "{\"key\":\"comment\",\"value\":\"性别\",\"describe\":\"性别\"}," +
                     "{\"key\":\"javaType\",\"value\":\"string\",\"describe\":\"java类型\"}," +
                     "{\"key\":\"dataType\",\"value\":\"varchar2(32)\",\"describe\":\"数据库类型\"}" +
                     "]" +
@@ -115,6 +116,7 @@ public class FormServiceImplTest extends AbstractTestCase {
         formService.deploy(form.getId());
 
         formService.selectLatestList(new org.hsweb.web.bean.common.QueryParam());
+        dynamicFormService.importExcel("test_form", FileUtils.getResourceAsStream("test.xlsx"));
     }
 
 

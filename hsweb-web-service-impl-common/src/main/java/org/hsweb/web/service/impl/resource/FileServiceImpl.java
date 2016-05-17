@@ -29,8 +29,15 @@ public class FileServiceImpl implements FileService {
     @Resource
     protected ResourcesService resourcesService;
 
-    protected String getFileBasePath() {
+    public String getFileBasePath() {
         return configService.get("upload", "basePath", "./upload").trim();
+    }
+
+    @Override
+    public InputStream readResources(String resourceId) throws Exception {
+        Resources resources = resourcesService.selectByPk(resourceId);
+        if (resources == null) throw new NotFoundException("文件不存在");
+        return readResources(resources);
     }
 
     @Override
@@ -45,7 +52,7 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public void writeResources(Resources resources, OutputStream outputStream) throws Exception {
-        try(InputStream inputStream=readResources(resources)){
+        try (InputStream inputStream = readResources(resources)) {
             byte b[] = new byte[2048 * 10];
             while ((inputStream.read(b)) != -1) {
                 outputStream.write(b);
