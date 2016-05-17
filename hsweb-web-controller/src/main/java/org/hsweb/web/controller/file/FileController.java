@@ -8,7 +8,9 @@ import org.hsweb.web.core.message.ResponseMessage;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
+import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
 import org.webbuilder.utils.common.StringUtils;
 import org.hsweb.web.service.config.ConfigService;
 import org.hsweb.web.service.resource.FileService;
@@ -37,22 +39,9 @@ public class FileController {
 
     private org.slf4j.Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    /**
-     * 配置服务类，用于获取文件存放路径等配置信息
-     */
-    @Resource
-    private ConfigService configService;
-
-    /**
-     * 资源服务类，每一个上传的文件都对应一个资源。通过存放到数据库的资源信息，可以实现文件秒传。
-     * 通过资源id进行下载，使系统更安全
-     */
     @Resource
     private ResourcesService resourcesService;
 
-    /**
-     * 文件服务类，用于进行文件保存等操作
-     */
     @Resource
     private FileService fileService;
 
@@ -104,7 +93,7 @@ public class FileController {
         } else {
             if (!"file".equals(resources.getType()))
                 throw new NotFoundException("文件不存在");
-            String fileBasePath = configService.get("upload", "basePath", "/upload/").trim();
+            String fileBasePath = fileService.getFileBasePath();
             File file = new File(fileBasePath.concat(resources.getPath().concat("/".concat(resources.getMd5()))));
             if (!file.canRead()) {
                 throw new NotFoundException("文件不存在");
@@ -164,21 +153,22 @@ public class FileController {
      */
     @RequestMapping(value = "/upload", method = RequestMethod.POST)
     @AccessLogger("上传文件")
-    public Object upload(@RequestParam("file") CommonsMultipartFile[] files) throws Exception {
+    public Object upload(@RequestParam("file") MultipartFile[] files) throws Exception {
         if (logger.isInfoEnabled())
             logger.info(String.format("start upload , file number:%s", files.length));
         List<Resources> resourcesList = new LinkedList<>();
         for (int i = 0; i < files.length; i++) {
-            CommonsMultipartFile file = files[i];
+            MultipartFile file = files[i];
             if (!file.isEmpty()) {
                 if (logger.isInfoEnabled())
                     logger.info("start write file:{}", file.getOriginalFilename());
                 String fileName = file.getOriginalFilename();
-                Resources resources = fileService.saveFile(file.getFileItem().getInputStream(), fileName);
+                Resources resources = fileService.saveFile(file.getInputStream(), fileName);
                 resourcesList.add(resources);
             }
         }//响应上传成功的资源信息
         return ResponseMessage.ok(resourcesList)
-                .include(Resources.class, "uId", "name", "md5");
+                .include(Resources.class, "id", "name", "md5");
     }
+
 }
