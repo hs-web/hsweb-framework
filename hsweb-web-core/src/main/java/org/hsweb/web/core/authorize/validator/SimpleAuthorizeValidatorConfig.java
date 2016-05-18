@@ -93,7 +93,7 @@ public class SimpleAuthorizeValidatorConfig implements AuthorizeValidatorConfig 
 
     @Override
     public boolean isEmpty() {
-        return getModules().isEmpty() && getRoles().isEmpty() && getActions().isEmpty() && getExpressions().isEmpty();
+        return getModules().isEmpty() && getRoles().isEmpty()  && getExpressions().isEmpty();
     }
 
     public static class Expression {
