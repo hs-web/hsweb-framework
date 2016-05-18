@@ -7,6 +7,7 @@ package org.hsweb.web.service.impl.resource;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.hsweb.web.bean.po.resource.Resources;
 import org.hsweb.web.bean.po.user.User;
+import org.hsweb.web.core.exception.NotFoundException;
 import org.hsweb.web.service.config.ConfigService;
 import org.hsweb.web.service.resource.FileService;
 import org.hsweb.web.service.resource.ResourcesService;
@@ -28,10 +29,41 @@ public class FileServiceImpl implements FileService {
     @Resource
     protected ResourcesService resourcesService;
 
+    public String getFileBasePath() {
+        return configService.get("upload", "basePath", "./upload").trim();
+    }
+
+    @Override
+    public InputStream readResources(String resourceId) throws Exception {
+        Resources resources = resourcesService.selectByPk(resourceId);
+        if (resources == null) throw new NotFoundException("文件不存在");
+        return readResources(resources);
+    }
+
+    @Override
+    public InputStream readResources(Resources resources) throws Exception {
+        String fileBasePath = getFileBasePath();
+        File file = new File(fileBasePath.concat(resources.getPath().concat("/".concat(resources.getMd5()))));
+        if (!file.canRead()) {
+            throw new NotFoundException("文件不存在");
+        }
+        return new FileInputStream(file);
+    }
+
+    @Override
+    public void writeResources(Resources resources, OutputStream outputStream) throws Exception {
+        try (InputStream inputStream = readResources(resources)) {
+            byte b[] = new byte[2048 * 10];
+            while ((inputStream.read(b)) != -1) {
+                outputStream.write(b);
+            }
+        }
+    }
+
     @Transactional(rollbackFor = Throwable.class)
     public Resources saveFile(InputStream is, String fileName) throws Exception {
         //配置中的文件上传根路径
-        String fileBasePath = configService.get("upload", "basePath", "/upload").trim();
+        String fileBasePath = getFileBasePath();
         //文件存储的相对路径，以日期分隔，每天创建一个新的目录
         String filePath = "/file/".concat(DateTimeUtils.format(new Date(), DateTimeUtils.YEAR_MONTH_DAY));
         //文件存储绝对路径
@@ -70,18 +102,18 @@ public class FileServiceImpl implements FileService {
         resources.setStatus(1);
         resources.setPath(filePath);
         resources.setMd5(md5);
-        resources.setCreate_date(new Date());
+        resources.setCreateDate(new Date());
         resources.setType("file");
         resources.setName(fileName);
         try {
             User user = WebUtil.getLoginUser();
             if (user != null) {
-                resources.setCreator_id(user.getU_id());
+                resources.setCreatorId(user.getId());
             } else {
-                resources.setCreator_id("-1");
+                resources.setCreatorId("1");
             }
         } catch (Exception e) {
-            resources.setCreator_id("-1");
+            resources.setCreatorId("1");
         }
 
         resourcesService.insert(resources);

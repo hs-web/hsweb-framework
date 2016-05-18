@@ -4,7 +4,7 @@
         "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.hsweb.web.dao.role.RoleMapper">
     <resultMap id="RoleResultMap" type="Role">
-        <id property="u_id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
+        <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
         <result property="name" column="name" javaType="String" jdbcType="VARCHAR"/>
         <result property="remark" column="remark" javaType="String" jdbcType="VARCHAR"/>
         <result property="type" column="type" javaType="String" jdbcType="VARCHAR"/>
@@ -16,7 +16,7 @@
     <sql id="fieldConfig">
         <bind name="$fieldsInfo"
               value="#{
-                    'u_id':#{'jdbcType':'VARCHAR','javaType':'string'}
+                    'u_id':#{'property':'id','jdbcType':'VARCHAR','javaType':'string'}
                     ,'name':#{'jdbcType':'VARCHAR','javaType':'string'}
                     ,'remark':#{'jdbcType':'VARCHAR','javaType':'string'}
                     ,'type':#{'jdbcType':'VARCHAR','javaType':'string'}
@@ -29,7 +29,7 @@
         <bind name="$tableName" value="'s_role'"/>
     </sql>
 
-    <insert id="insert" parameterType="Role" useGeneratedKeys="true" keyProperty="data.u_id" keyColumn="U_ID">
+    <insert id="insert" parameterType="Role" useGeneratedKeys="true" keyProperty="data.id" keyColumn="U_ID">
         <include refid="fieldConfig"/>
         <include refid="tableName"/>
         <include refid="BasicMapper.buildInsertSql"/>
@@ -46,7 +46,7 @@
     </update>
 
     <select id="selectByPk" parameterType="string" resultMap="RoleResultMap">
-        select * from s_role where u_id=#{u_id}
+        select * from s_role where u_id=#{id}
     </select>
 
     <select id="select" parameterType="org.hsweb.web.bean.common.QueryParam" resultMap="RoleResultMap">

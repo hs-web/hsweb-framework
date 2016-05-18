@@ -1,29 +1,20 @@
 package org.hsweb.web.controller.resource;
 
+import org.hsweb.web.bean.po.resource.Resources;
+import org.hsweb.web.controller.GenericController;
+import org.hsweb.web.core.authorize.annotation.Authorize;
 import org.hsweb.web.core.exception.NotFoundException;
 import org.hsweb.web.core.logger.annotation.AccessLogger;
-import org.hsweb.web.core.authorize.annotation.Authorize;
-import org.hsweb.web.bean.po.resource.Resources;
-import org.hsweb.web.bean.po.role.Role;
-import org.hsweb.web.controller.GenericController;
 import org.hsweb.web.core.message.ResponseMessage;
 import org.hsweb.web.service.resource.ResourcesService;
-
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 
-/**
- * 资源控制器，继承自GenericController,使用rest+json
- * Created by generator 2015-8-28 13:01:29
- *
- * @author 浩
- * @version 1.0
- * @UpdateRemark 2015年8月31日，重写{@link ResourcesController#delete(String)}方法，删除资源时需要授权认证
- */
 @RestController
 @RequestMapping(value = "/resources")
 @AccessLogger("资源管理")
+@Authorize(module = "resources")
 public class ResourcesController extends GenericController<Resources, String> {
 
     //默认服务类
@@ -33,18 +24,6 @@ public class ResourcesController extends GenericController<Resources, String> {
     @Override
     public ResourcesService getService() {
         return this.resourcesService;
-    }
-
-    /**
-     * 重写 {@link GenericController#delete(Object)} 新增注解: @Authorize(role = Role.SYS_ROLE_ADMIN),只有拥有系统管理员权限的用户才能执行此操作
-     *
-     * @param id 要删除的id标识
-     * @return
-     */
-    @Override
-    @Authorize(role = Role.SYS_ROLE_ADMIN)
-    public ResponseMessage delete(@PathVariable("id") String id) throws Exception {
-        return super.delete(id);
     }
 
     /**

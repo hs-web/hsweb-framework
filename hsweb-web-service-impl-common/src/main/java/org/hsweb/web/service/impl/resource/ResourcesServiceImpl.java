@@ -2,17 +2,16 @@ package org.hsweb.web.service.impl.resource;
 
 import org.hsweb.web.bean.common.QueryParam;
 import org.hsweb.web.bean.po.resource.Resources;
+import org.hsweb.web.core.utils.RandomUtil;
 import org.hsweb.web.dao.resource.ResourcesMapper;
 import org.hsweb.web.service.config.ConfigService;
 import org.hsweb.web.service.impl.AbstractServiceImpl;
 import org.hsweb.web.service.resource.ResourcesService;
-import org.hsweb.web.core.utils.RandomUtil;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.List;
 
 /**
  * 资源服务类
@@ -50,27 +49,23 @@ public class ResourcesServiceImpl extends AbstractServiceImpl<Resources, String>
     @Cacheable(value = CACHE_KEY, key = "'md5.'+#md5")
     @Transactional(readOnly = true)
     public Resources selectByMd5(String md5) throws Exception {
-        List<Resources> resources = this.select(new QueryParam().where("md5", md5));
-        if (resources != null && resources.size() > 0)
-            return resources.get(0);
-        return null;
+        return this.selectSingle(new QueryParam().where("md5", md5));
     }
-
 
     @Override
     @Transactional(rollbackFor = Throwable.class)
     public String insert(Resources data) throws Exception {
-        data.setU_id(this.newUid(6));//6位随机id
+        data.setId(this.newid(6));//6位随机id
         return super.insert(data);
     }
 
-    public String newUid(int len) throws Exception {
-        String uid = RandomUtil.randomChar(len);
+    public String newid(int len) throws Exception {
+        String id = RandomUtil.randomChar(len);
         for (int i = 0; i < 10; i++) {
-            if (this.selectByPk(uid) == null) {
-                return uid;
+            if (this.selectByPk(id) == null) {
+                return id;
             }
         }  //如果10次存在重复则位数+1
-        return newUid(len + 1);
+        return newid(len + 1);
     }
 }

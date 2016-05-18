@@ -1,12 +1,13 @@
 package org.hsweb.web.mybatis.builder;
 
-import org.hsweb.web.bean.common.Term;
-import org.hsweb.web.bean.common.TermType;
+import org.apache.commons.beanutils.BeanUtils;
+import org.hsweb.web.bean.common.*;
 import org.hsweb.web.mybatis.utils.SqlAppender;
 import org.webbuilder.utils.common.DateTimeUtils;
 import org.webbuilder.utils.common.StringUtils;
 
 import java.sql.JDBCType;
+import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -14,62 +15,70 @@ import java.util.*;
  */
 public class DefaultSqlParamBuilder {
 
+    public String getQuoteStart() {
+        return "\"";
+    }
+
+    public String getQuoteEnd() {
+        return "\"";
+    }
+
     protected Map<TermType, KeyWordMapper> mapperMap = new HashMap<>();
 
     private static DefaultSqlParamBuilder instance = new DefaultSqlParamBuilder();
 
     public DefaultSqlParamBuilder() {
-        mapperMap.put(TermType.eq, (paramKey, field, jdbcType) ->
-                        new SqlAppender().add(field.getField(), " = ", "#{", paramKey, "}").toString()
+        mapperMap.put(TermType.eq, (paramKey, tableName, field, jdbcType) ->
+                        new SqlAppender().add(tableName, ".", field.getField(), " = ", "#{", paramKey, "}").toString()
         );
-        mapperMap.put(TermType.not, (paramKey, field, jdbcType) ->
-                        new SqlAppender().add(field.getField(), " != ", "#{", paramKey, "}").toString()
+        mapperMap.put(TermType.not, (paramKey, tableName, field, jdbcType) ->
+                        new SqlAppender().add(tableName, ".", field.getField(), " != ", "#{", paramKey, "}").toString()
         );
-        mapperMap.put(TermType.like, (paramKey, field, jdbcType) ->
-                        new SqlAppender().add(field.getField(), " like ", "#{", paramKey, "}").toString()
+        mapperMap.put(TermType.like, (paramKey, tableName, field, jdbcType) ->
+                        new SqlAppender().add(tableName, ".", field.getField(), " like ", "#{", paramKey, "}").toString()
         );
-        mapperMap.put(TermType.notlike, (paramKey, field, jdbcType) ->
-                        new SqlAppender().add(field.getField(), " not like ", "#{", paramKey, "}").toString()
+        mapperMap.put(TermType.notlike, (paramKey, tableName, field, jdbcType) ->
+                        new SqlAppender().add(tableName, ".", field.getField(), " not like ", "#{", paramKey, "}").toString()
         );
-        mapperMap.put(TermType.notnull, (paramKey, field, jdbcType) ->
-                        new SqlAppender().add(field.getField(), " is not null").toString()
+        mapperMap.put(TermType.notnull, (paramKey, tableName, field, jdbcType) ->
+                        new SqlAppender().add(tableName, ".", field.getField(), " is not null").toString()
         );
-        mapperMap.put(TermType.isnull, (paramKey, field, jdbcType) ->
-                        new SqlAppender().add(field.getField(), " is null").toString()
+        mapperMap.put(TermType.isnull, (paramKey, tableName, field, jdbcType) ->
+                        new SqlAppender().add(tableName, ".", field.getField(), " is null").toString()
         );
-        mapperMap.put(TermType.empty, (paramKey, field, jdbcType) ->
-                        new SqlAppender().add(field.getField(), " =''").toString()
+        mapperMap.put(TermType.empty, (paramKey, tableName, field, jdbcType) ->
+                        new SqlAppender().add(tableName, ".", field.getField(), " =''").toString()
         );
-        mapperMap.put(TermType.notempty, (paramKey, field, jdbcType) ->
-                        new SqlAppender().add(field.getField(), " !=''").toString()
+        mapperMap.put(TermType.notempty, (paramKey, tableName, field, jdbcType) ->
+                        new SqlAppender().add(tableName, ".", field.getField(), " !=''").toString()
         );
-        mapperMap.put(TermType.btw, (paramKey, field, jdbcType) ->
+        mapperMap.put(TermType.btw, (paramKey, tableName, field, jdbcType) ->
         {
             SqlAppender sqlAppender = new SqlAppender();
             List<Object> objects = param2list(field.getValue());
             if (objects.size() == 1)
                 objects.add(objects.get(0));
             field.setValue(objects);
-            sqlAppender.addSpc(field.getField(), "between")
+            sqlAppender.add(tableName, ".", field.getField()," ").addSpc("between")
                     .add(" #{", paramKey, "[0]}")
                     .add(" and ", "#{", paramKey, "[1]}");
             return sqlAppender.toString();
         });
 
-        mapperMap.put(TermType.notbtw, (paramKey, field, jdbcType) ->
+        mapperMap.put(TermType.notbtw, (paramKey, tableName, field, jdbcType) ->
         {
             SqlAppender sqlAppender = new SqlAppender();
             List<Object> objects = param2list(field.getValue());
             if (objects.size() == 1)
                 objects.add(objects.get(0));
             field.setValue(objects);
-            sqlAppender.addSpc(field.getField(), "not between")
+            sqlAppender.add(tableName, ".", field.getField()," ").addSpc("not between")
                     .add(" #{", paramKey, "[0]}")
                     .add(" and ", "#{", paramKey, "[1]}");
             return sqlAppender.toString();
         });
 
-        mapperMap.put(TermType.gt, (paramKey, field, jdbcType) -> {
+        mapperMap.put(TermType.gt, (paramKey, tableName, field, jdbcType) -> {
             SqlAppender sqlAppender = new SqlAppender();
             if (Arrays.<JDBCType>asList(JDBCType.DATE, JDBCType.TIME, JDBCType.TIMESTAMP).contains(jdbcType)) {
                 if (!(field.getValue() instanceof Date)) {
@@ -78,11 +87,11 @@ public class DefaultSqlParamBuilder {
                     if (date != null) field.setValue(date);
                 }
             }
-            sqlAppender.add(field.getField(), " >= #{", paramKey, "}");
+            sqlAppender.add(tableName, ".", field.getField(), " >= #{", paramKey, "}");
             return sqlAppender.toString();
         });
 
-        mapperMap.put(TermType.lt, (paramKey, field, jdbcType) -> {
+        mapperMap.put(TermType.lt, (paramKey, tableName, field, jdbcType) -> {
             SqlAppender sqlAppender = new SqlAppender();
             if (Arrays.<JDBCType>asList(JDBCType.DATE, JDBCType.TIME, JDBCType.TIMESTAMP).contains(jdbcType)) {
                 if (!(field.getValue() instanceof Date)) {
@@ -91,15 +100,15 @@ public class DefaultSqlParamBuilder {
                     if (date != null) field.setValue(date);
                 }
             }
-            sqlAppender.add(field.getField(), " <= #{", paramKey, "}");
+            sqlAppender.add(tableName, ".",field.getField(), " <= #{", paramKey, "}");
             return sqlAppender.toString();
         });
 
-        mapperMap.put(TermType.in, (paramKey, field, jdbcType) -> {
+        mapperMap.put(TermType.in, (paramKey, tableName, field, jdbcType) -> {
             List<Object> values = param2list(field.getValue());
             field.setValue(values);
             SqlAppender appender = new SqlAppender();
-            appender.addSpc(field.getField(), "in(");
+            appender.add(tableName, ".").addSpc(field.getField(), "in(");
             for (int i = 0; i < values.size(); i++) {
                 appender.add("#{", paramKey, "[", i, "]}", ",");
             }
@@ -108,11 +117,11 @@ public class DefaultSqlParamBuilder {
             return appender.toString();
         });
 
-        mapperMap.put(TermType.notin, (paramKey, field, jdbcType) -> {
+        mapperMap.put(TermType.notin, (paramKey, tableName, field, jdbcType) -> {
             List<Object> values = param2list(field.getValue());
             field.setValue(values);
             SqlAppender appender = new SqlAppender();
-            appender.addSpc(field.getField(), "not in(");
+            appender.add(tableName, ".").addSpc(field.getField(), "not in(");
             for (int i = 0; i < values.size(); i++) {
                 appender.add("#{", paramKey, "[", i, "]}", ",");
             }
@@ -131,11 +140,116 @@ public class DefaultSqlParamBuilder {
         return mapperMap.get(type);
     }
 
-    public String buildWhere(Map<String, Object> fieldConfig, List<Term> terms) {
+    public String buildWhere(Map<String, Object> fieldConfig, String tableName, List<Term> terms) {
         SqlAppender sqlAppender = new SqlAppender();
-        buildWhere(fieldConfig, "", terms, sqlAppender);
+        buildWhere(fieldConfig, "", tableName, terms, sqlAppender);
         if (sqlAppender.size() > 0) sqlAppender.removeFirst();
         return sqlAppender.toString();
+    }
+
+    public String buildSelectFields(Map<String, Object> fieldConfig, String tableName, SqlParam param) {
+        if (param == null) return "*";
+        Set<String> includes = param.getIncludes(),
+                excludes = param.getExcludes();
+        boolean includesIsEmpty = includes.isEmpty(),
+                excludesIsEmpty = excludes.isEmpty();
+        if (includesIsEmpty && excludesIsEmpty)
+            return "*";
+        Map<String, String> propertyMapper = getPropertyMapper(fieldConfig, param);
+        SqlAppender appender = new SqlAppender();
+        propertyMapper.forEach((k, v) -> {
+            if (!appender.isEmpty())
+                appender.add(",");
+            appender.add(tableName, ".", k, " as ").addEdSpc(getQuoteStart(), k, getQuoteEnd());
+        });
+        if (appender.isEmpty()) return "*";
+        return appender.toString();
+    }
+
+    public String buildUpdateFields(Map<String, Object> fieldConfig, UpdateParam param) throws Exception {
+        Map<String, String> propertyMapper = getPropertyMapper(fieldConfig, param);
+        SqlAppender appender = new SqlAppender();
+        propertyMapper.forEach((k, v) -> {
+            try {
+                Object obj = BeanUtils.getProperty(param.getData(), v);
+                if (obj != null) {
+                    if (!appender.isEmpty())
+                        appender.add(",");
+                    Map<String, Object> config = ((Map) fieldConfig.get(k));
+                    appender.add(k, "=", "#{data.", v);
+                    if (config != null) {
+                        Object jdbcType = config.get("jdbcType"),
+                                javaType = config.get("javaType");
+                        if (jdbcType != null) {
+                            appender.add(",jdbcType=", jdbcType);
+                        }
+                        if (javaType != null) {
+                            appender.add(",javaType=", javaType);
+                        }
+                    }
+                    appender.add("}");
+                }
+            } catch (Exception e) {
+            }
+        });
+        if (appender.isEmpty()) throw new SQLException("未指定列");
+        return appender.toString();
+    }
+
+    public String buildOrder(Map<String, Object> fieldConfig, String tableName, QueryParam param) throws Exception {
+        QueryParam tmp = new QueryParam();
+        tmp.setSorts(param.getSorts());
+        Map<String, String> propertyMapper = getPropertyMapper(fieldConfig, tmp);
+        if (tmp.getSorts().isEmpty()) return "";
+        Set<Sort> sorts = new LinkedHashSet<>();
+        param.getSorts().forEach(sort -> {
+            String fieldName = sort.getField();
+            if (StringUtils.isNullOrEmpty(fieldName)) return;
+            if (fieldName.contains("."))
+                fieldName = fieldName.split("[.]")[1];
+            if (propertyMapper.containsKey(fieldName) || propertyMapper.containsValue(fieldName)) {
+                sorts.add(sort);
+            }
+        });
+        if (sorts.isEmpty()) return "";
+        String sql = sorts.stream()
+                .map(sort -> {
+                    String fieldName = sort.getField();
+                    if (fieldName.contains("."))
+                        fieldName = fieldName.split("[.]")[1];
+                    return new SqlAppender()
+                            .add(tableName, ".", StringUtils.camelCase2UnderScoreCase(fieldName), " ", sort.getDir()).toString();
+                })
+                .reduce((s, s1) -> new SqlAppender().add(s, ",", s1).toString()).get();
+        return " order by ".concat(sql);
+    }
+
+    public Map<String, String> getPropertyMapper(Map<String, Object> fieldConfig, SqlParam param) {
+        Set<String> includes = param.getIncludes(),
+                excludes = param.getExcludes();
+        boolean includesIsEmpty = includes.isEmpty(),
+                excludesIsEmpty = excludes.isEmpty();
+        Map<String, String> propertyMapper = new HashMap<>();
+        fieldConfig.forEach((k, v) -> {
+            Map<String, Object> config = ((Map) v);
+            String fieldName = (String) config.get("property");
+            if (fieldName == null) fieldName = k;
+            if (includesIsEmpty && excludesIsEmpty) {
+                propertyMapper.put(k, fieldName);
+                return;
+            }
+            if (excludes.contains(fieldName) || excludes.contains(k)) {
+                return;
+            }
+            if (includesIsEmpty) {
+                propertyMapper.put(k, fieldName);
+            } else if (includes.contains(fieldName) || includes.contains(k)) {
+                propertyMapper.put(k, fieldName);
+            }
+
+
+        });
+        return propertyMapper;
     }
 
     public JDBCType getFieldJDBCType(String field, Map<String, Object> fieldConfig) {
@@ -150,11 +264,27 @@ public class DefaultSqlParamBuilder {
         return JDBCType.VARCHAR;
     }
 
-    public void buildWhere(Map<String, Object> fieldConfig, String prefix, List<Term> terms, SqlAppender appender) {
+    public String getColumn(Map<String, Object> fieldConfig, String name) {
+        if (name == null) return null;
+        Map<String, Object> config = ((Map) fieldConfig.get(name));
+        if (config == null) {
+            for (Map.Entry<String, Object> entry : fieldConfig.entrySet()) {
+                String fieldName = (String) ((Map) entry.getValue()).get("property");
+                if (name.equals(fieldName)) {
+                    return entry.getKey();
+                }
+            }
+        }
+        return name;
+    }
+
+    public void buildWhere(Map<String, Object> fieldConfig, String prefix, String tableName, List<Term> terms, SqlAppender appender) {
         if (terms == null || terms.isEmpty()) return;
         int index = 0;
         String prefixTmp = StringUtils.concat(prefix, StringUtils.isNullOrEmpty(prefix) ? "" : ".");
         for (Term term : terms) {
+            String column = getColumn(fieldConfig, term.getField());
+            if (column != null) term.setField(column);
             boolean nullTerm = StringUtils.isNullOrEmpty(term.getField());
             //不是空条件 也不是可选字段
             if (!nullTerm && !fieldConfig.containsKey(term.getField())) continue;
@@ -173,7 +303,7 @@ public class DefaultSqlParamBuilder {
             if (!term.getTerms().isEmpty()) {
                 //构建嵌套的条件
                 SqlAppender nest = new SqlAppender();
-                buildWhere(fieldConfig, prefix, term.getTerms(), nest);
+                buildWhere(fieldConfig, prefix, tableName, term.getTerms(), nest);
                 //如果嵌套结果为空
                 if (nest.isEmpty()) {
                     appender.removeLast();//删除最后一个（and 或者 or）
@@ -185,12 +315,12 @@ public class DefaultSqlParamBuilder {
                 }
                 appender.add("(");
                 if (!nullTerm)
-                    appender.add(mapperMap.get(term.getTermType()).fieldMapper(prefix + ".value", term, jdbcType));
+                    appender.add(mapperMap.get(term.getTermType()).fieldMapper(prefix + ".value", tableName, term, jdbcType));
                 appender.addAll(nest);
                 appender.add(")");
             } else {
                 if (!nullTerm)
-                    appender.add(mapperMap.get(term.getTermType()).fieldMapper("" + prefix + ".value", term, jdbcType));
+                    appender.add(mapperMap.get(term.getTermType()).fieldMapper("" + prefix + ".value", tableName, term, jdbcType));
             }
         }
     }
@@ -240,6 +370,6 @@ public class DefaultSqlParamBuilder {
     }
 
     public interface KeyWordMapper {
-        String fieldMapper(String paramKey, Term term, JDBCType jdbcType);
+        String fieldMapper(String paramKey, String tableName, Term term, JDBCType jdbcType);
     }
 }

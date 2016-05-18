@@ -27,7 +27,7 @@ public class DefaultFormParser implements FormParser {
         String meta = form.getMeta();
         TableMetaData metaData = new TableMetaData();
         metaData.setName(form.getName());
-        metaData.setLocation(form.getU_id());
+        metaData.setLocation(form.getId());
         metaData.setComment(form.getRemark());
         JSONObject object = JSON.parseObject(meta);
         object.forEach((id, field) -> {

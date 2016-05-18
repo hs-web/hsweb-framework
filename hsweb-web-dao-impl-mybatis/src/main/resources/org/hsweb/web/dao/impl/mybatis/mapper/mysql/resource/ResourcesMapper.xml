@@ -5,28 +5,28 @@
 
 <mapper namespace="org.hsweb.web.dao.resource.ResourcesMapper">
     <resultMap id="ResourcesResultMap" type="Resources" >
-        <id property="u_id" column="u_id" javaType="string" jdbcType="VARCHAR" />
+        <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR" />
         <result property="name" column="name" javaType="String" jdbcType="VARCHAR" />
         <result property="path" column="path" javaType="String" jdbcType="VARCHAR" />
-        <result property="creator_id" column="creator_id" javaType="String" jdbcType="VARCHAR" />
+        <result property="creatorId" column="creator_id" javaType="String" jdbcType="VARCHAR" />
         <result property="md5" column="md5" javaType="String" jdbcType="VARCHAR" />
         <result property="type" column="type" javaType="String" jdbcType="VARCHAR" />
         <result property="status" column="status" javaType="int" jdbcType="INTEGER" />
-        <result property="create_date" column="create_date" javaType="java.util.Date" jdbcType="TIMESTAMP" />
+        <result property="createDate" column="create_date" javaType="java.util.Date" jdbcType="TIMESTAMP" />
     </resultMap>
 
     <!--字段信息绑定-->
     <sql id="fieldConfig">
         <bind name="$fieldsInfo"
               value="#{
-                    'u_id':#{'jdbcType':'VARCHAR','javaType':'string'}
+                    'u_id':#{'property':'id','jdbcType':'VARCHAR','javaType':'string'}
                     ,'name':#{'jdbcType':'VARCHAR','javaType':'string'}
                     ,'path':#{'jdbcType':'VARCHAR','javaType':'string'}
-                    ,'creator_id':#{'jdbcType':'VARCHAR','javaType':'string'}
+                    ,'creator_id':#{'property':'creatorId','jdbcType':'VARCHAR','javaType':'string'}
                     ,'md5':#{'jdbcType':'VARCHAR','javaType':'string'}
                     ,'type':#{'jdbcType':'VARCHAR','javaType':'string'}
-                    ,'status':#{'jdbcType':'INTEGER','javaType':'number'}
-                    ,'create_date':#{'jdbcType':'TIMESTAMP','javaType':'date'}
+                    ,'status':#{'jdbcType':'INTEGER','javaType':'int'}
+                    ,'create_date':#{'property':'createDate','jdbcType':'TIMESTAMP','javaType':'date'}
                     }"/>
         <bind name="$fields" value="$fieldsInfo.keySet()"/>
     </sql>
@@ -35,13 +35,13 @@
         <bind name="$tableName" value="'s_resources'"/>
     </sql>
 
-    <insert id="insert" parameterType="Resources" useGeneratedKeys="true" keyProperty="data.u_id" keyColumn="U_ID">
+    <insert id="insert" parameterType="Resources" useGeneratedKeys="true" keyProperty="data.id" keyColumn="u_id">
         <include refid="fieldConfig"/>
         <include refid="tableName"/>
         <include refid="BasicMapper.buildInsertSql"/>
     </insert>
 
-    <delete id="delete" parameterType="Resources" >
+    <delete id="delete" parameterType="org.hsweb.web.bean.common.DeleteParam">
         delete from s_resources where u_id=#{term.primaryKey}
     </delete>
 
@@ -52,7 +52,7 @@
     </update>
 
     <select id="selectByPk" parameterType="string" resultMap="ResourcesResultMap">
-        select * from s_resources WHERE u_id=#{u_id}
+        select * from s_resources WHERE u_id=#{id}
     </select>
 
     <select id="select" parameterType="org.hsweb.web.bean.common.QueryParam" resultMap="ResourcesResultMap">

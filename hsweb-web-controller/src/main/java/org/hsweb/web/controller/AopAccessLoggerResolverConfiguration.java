@@ -43,7 +43,7 @@ public class AopAccessLoggerResolverConfiguration extends AopAccessLoggerResolve
         } catch (Throwable e) {
             if (!(e instanceof BusinessException)) {
                 result = ResponseMessage.error(e.getMessage());
-                loggerInfo.setException_info(StringUtils.throwable2String(e));
+                loggerInfo.setExceptionInfo(StringUtils.throwable2String(e));
             } else {
                 result = ResponseMessage.error(e.getMessage(), ((BusinessException) e).getStatus());
             }
@@ -51,13 +51,13 @@ public class AopAccessLoggerResolverConfiguration extends AopAccessLoggerResolve
         } finally {
             long responseTime = System.currentTimeMillis();
             User user = WebUtil.getLoginUser();
-            loggerInfo.setRequest_time(requestTime);
-            loggerInfo.setResponse_time(responseTime);
-            loggerInfo.setResponse_content(fastJsonHttpMessageConverter.converter(result));
+            loggerInfo.setRequestTime(requestTime);
+            loggerInfo.setResponseTime(responseTime);
+            loggerInfo.setResponseContent(fastJsonHttpMessageConverter.converter(result));
             if (user != null)
-                loggerInfo.setUser_id(user.getU_id());
+                loggerInfo.setUserId(user.getId());
             if (result instanceof ResponseMessage)
-                loggerInfo.setResponse_code(String.valueOf(((ResponseMessage) result).getCode()));
+                loggerInfo.setResponseCode(String.valueOf(((ResponseMessage) result).getCode()));
             if (accessLoggerPersisting != null) {
                 accessLoggerPersisting.forEach(loggerPersisting -> loggerPersisting.save(loggerInfo));
             }

@@ -5,10 +5,11 @@
 
 <mapper namespace="org.hsweb.web.dao.role.RoleModuleMapper">
     <resultMap id="RoleModuleResultMap" type="RoleModule" >
-        <id property="u_id" column="u_id" javaType="string" jdbcType="VARCHAR" />
-        <result property="module_id" column="module_id" javaType="String" jdbcType="VARCHAR" />
-        <result property="role_id" column="role_id" javaType="String" jdbcType="VARCHAR" />
-        <result property="o_level" column="o_level" javaType="String" jdbcType="VARCHAR" />
+        <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR" />
+        <result property="moduleId" column="module_id" javaType="String" jdbcType="VARCHAR" />
+        <result property="roleId" column="role_id" javaType="String" jdbcType="VARCHAR" />
+        <result property="actions" column="actions" javaType="String" jdbcType="VARCHAR"
+                typeHandler="org.hsweb.web.mybatis.handler.JsonArrayHandler" />
         <collection property="module" column="module_id" ofType="Module" select="org.hsweb.web.dao.module.ModuleMapper.selectByPk"/>
     </resultMap>
 
@@ -16,10 +17,10 @@
     <sql id="fieldConfig">
         <bind name="$fieldsInfo"
               value="#{
-                    'u_id':#{'jdbcType':'VARCHAR','javaType':'string'}
-                    ,'module_id':#{'jdbcType':'VARCHAR','javaType':'string'}
-                    ,'role_id':#{'jdbcType':'VARCHAR','javaType':'string'}
-                    ,'o_level':#{'jdbcType':'VARCHAR','javaType':'string'}
+                    'u_id':#{'property':'id','jdbcType':'VARCHAR','javaType':'string'}
+                    ,'module_id':#{'property':'moduleId','jdbcType':'VARCHAR','javaType':'string'}
+                    ,'role_id':#{'property':'roleId','jdbcType':'VARCHAR','javaType':'string'}
+                    ,'actions':#{'jdbcType':'CLOB','javaType':'java.util.List'}
                     }"/>
         <bind name="$fields" value="$fieldsInfo.keySet()"/>
     </sql>

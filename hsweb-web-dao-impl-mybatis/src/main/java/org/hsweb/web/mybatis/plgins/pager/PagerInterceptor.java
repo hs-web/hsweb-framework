@@ -53,7 +53,7 @@ public class PagerInterceptor implements Interceptor {
             if (obj instanceof QueryParam) {
                 QueryParam param = (QueryParam) obj;
                 PagerHelper helper = pagerHelperBase.get(dialect);
-                if (helper != null && !sql.contains("count(0)")) {
+                if (helper != null && param.isPaging() && !sql.contains("count(0)")) {
                     String newSql = helper.doPaging(param, sql);
                     metaStatementHandler.setValue("delegate.boundSql.sql", newSql);
                 }

@@ -25,32 +25,32 @@ public class History extends GenericPo<String> {
     /**
      * 操作数据的主键名称
      */
-    private String primary_key_name;
+    private String primaryKeyName;
 
     /**
      * 操作数据的主键值
      */
-    private String primary_key_value;
+    private String primaryKeyValue;
 
     /**
      * 操作前记录
      */
-    private String change_before;
+    private String changeBefore;
 
     /**
      * 操作后记录
      */
-    private String change_after;
+    private String changeAfter;
 
     /**
      * 创建日期
      */
-    private Date create_date;
+    private Date createDate;
 
     /**
      * 创建人主键
      */
-    private String creator_id;
+    private String creatorId;
 
     public History() {
     }
@@ -76,59 +76,59 @@ public class History extends GenericPo<String> {
         this.describe = describe;
     }
 
-    public String getPrimary_key_name() {
-        return primary_key_name;
+    public String getPrimaryKeyName() {
+        return primaryKeyName;
     }
 
-    public void setPrimary_key_name(String primary_key_name) {
-        this.primary_key_name = primary_key_name;
+    public void setPrimaryKeyName(String primaryKeyName) {
+        this.primaryKeyName = primaryKeyName;
     }
 
-    public String getPrimary_key_value() {
-        return primary_key_value;
+    public String getPrimaryKeyValue() {
+        return primaryKeyValue;
     }
 
-    public void setPrimary_key_value(String primary_key_value) {
-        this.primary_key_value = primary_key_value;
+    public void setPrimaryKeyValue(String primaryKeyValue) {
+        this.primaryKeyValue = primaryKeyValue;
     }
 
-    public String getChange_before() {
-        return change_before;
+    public String getChangeBefore() {
+        return changeBefore;
     }
 
-    public void setChange_before(String change_before) {
-        this.change_before = change_before;
+    public void setChangeBefore(String changeBefore) {
+        this.changeBefore = changeBefore;
     }
 
-    public String getChange_after() {
-        return change_after;
+    public String getChangeAfter() {
+        return changeAfter;
     }
 
-    public void setChange_after(String change_after) {
-        this.change_after = change_after;
+    public void setChangeAfter(String changeAfter) {
+        this.changeAfter = changeAfter;
     }
 
-    public Date getCreate_date() {
-        return create_date;
+    public Date getCreateDate() {
+        return createDate;
     }
 
-    public void setCreate_date(Date create_date) {
-        this.create_date = create_date;
+    public void setCreateDate(Date createDate) {
+        this.createDate = createDate;
     }
 
-    public String getCreator_id() {
-        return creator_id;
+    public String getCreatorId() {
+        return creatorId;
     }
 
-    public void setCreator_id(String creator_id) {
-        this.creator_id = creator_id;
+    public void setCreatorId(String creatorId) {
+        this.creatorId = creatorId;
     }
 
-    public static History newInstace(String type) {
+    public static History newInstance(String type) {
         History history = new History(type);
-        history.setU_id(MD5.encode(UUID.randomUUID().toString().concat(String.valueOf(Math.random()))));
-        history.setCreate_date(new Date());
-        history.setCreator_id("_sys");
+        history.setId(MD5.encode(UUID.randomUUID().toString().concat(String.valueOf(Math.random()))));
+        history.setCreateDate(new Date());
+        history.setCreatorId("Sys");
         return history;
     }
 }

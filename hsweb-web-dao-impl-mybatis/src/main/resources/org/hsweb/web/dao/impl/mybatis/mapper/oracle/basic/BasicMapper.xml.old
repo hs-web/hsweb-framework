@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="BasicMapper">
+    <sql id="buildWhereV2">
+        ${@org.hsweb.web.mybatis.builder.DefaultSqlParamBuilder@instance().buildWhere($fieldsInfo,#this['_parameter'].terms)}
+    </sql>
+    <sql id="buildSelectFieldV2">
+        ${@org.hsweb.web.mybatis.builder.DefaultSqlParamBuilder@instance().buildSelectFields($fieldsInfo,#this['_parameter'])}
+    </sql>
+    <!--通用查询条件-->
+    <sql id="buildWhere">
+        <include refid="BasicMapper.buildWhereV2"/>
+        <!--动态生成查询条件-->
+        <!--<foreach item="item" index="index" collection="$fields">-->
+        <!--<if test="#this['term.'+item]!=null">-->
+        <!--<choose>-->
+        <!--<when test="$fieldsInfo[item]['javaType'] == 'date' ">-->
+        <!--AND ${$tableName}.${item}=to_date(#{term.${item}},'YYYY-MM-DD HH24:MI:SS')-->
+        <!--</when>-->
+        <!--<otherwise>AND ${$tableName}.${item}=#{term.${item}}</otherwise>-->
+        <!--</choose>-->
+        <!--</if>-->
+        <!--<if test="#this['term.'+item+'$NOT']!=null">-->
+        <!--<choose>-->
+        <!--<when test="$fieldsInfo[item]['javaType'] == 'date' ">-->
+        <!--AND ${$tableName}.${item}!=to_date(#{term.${item+'$NOT'}},'YYYY-MM-DD HH24:MI:SS')-->
+        <!--</when>-->
+        <!--<otherwise>AND ${$tableName}.${item}!=#{term.${item+'$NOT'}}</otherwise>-->
+        <!--</choose>-->
+        <!--</if>-->
+        <!--<if test="#this['term.'+item+'$LIKE']!=null">-->
+        <!--AND ${$tableName}.${item} like #{term.${item+'$LIKE'}}-->
+        <!--</if>-->
+        <!--<if test="#this['term.'+item+'$NOTLIKE']!=null">-->
+        <!--AND ${$tableName}.${item} not like #{term.${item+'$LIKE'}}-->
+        <!--</if>-->
+        <!--<if test="#this['term.'+item+'$IN']!=null">-->
+        <!--AND ${$tableName}.${item} IN-->
+        <!--<foreach item="it" index="i" collection="#this['term.'+item+'$IN']" open="(" separator="," close=")">-->
+        <!--#{it}-->
+        <!--</foreach>-->
+        <!--</if>-->
+        <!--<if test="#this['term.'+item+'$NOTIN']!=null">-->
+        <!--AND ${$tableName}.${item} NOT IN-->
+        <!--<foreach item="it" index="i" collection="#this['term.'+item+'$NOTIN']" open="(" separator="," close=")">-->
+        <!--#{it}-->
+        <!--</foreach>-->
+        <!--</if>-->
+        <!--<if test="#this['term.'+item+'$ISNULL']!=null">-->
+        <!--AND ${$tableName}.${item} IS NULL-->
+        <!--</if>-->
+        <!--<if test="#this['term.'+item+'$NOTNULL']!=null">-->
+        <!--AND ${$tableName}.${item} IS NOT NULL-->
+        <!--</if>-->
+        <!--<if test="#this['term.'+item+'$GT']!=null">-->
+        <!--<choose>-->
+        <!--<when test="$fieldsInfo[item]['javaType'] == 'date' ">-->
+        <!--AND ${$tableName}.${item} &gt;=to_date(#{term.${item+'$GT'}},'YYYY-MM-DD HH24:MI:SS')-->
+        <!--</when>-->
+        <!--<when test="$fieldsInfo[item]['javaType'] == 'number' ">-->
+        <!--AND ${$tableName}.${item} &gt;=#{term.${item+'$GT'}}-->
+        <!--</when>-->
+        <!--<otherwise></otherwise>-->
+        <!--</choose>-->
+        <!--</if>-->
+        <!--<if test="#this['term.'+item+'$LT']!=null">-->
+        <!--<choose>-->
+        <!--<when test="$fieldsInfo[item]['javaType'] == 'date' ">-->
+        <!--AND ${$tableName}.${item} &lt;=to_date(#{term.${item+'$LT'}},'YYYY-MM-DD HH24:MI:SS')-->
+        <!--</when>-->
+        <!--<when test="$fieldsInfo[item]['javaType'] == 'number' ">-->
+        <!--AND ${$tableName}.${item} &lt;=#{term.${item+'$LT'}}-->
+        <!--</when>-->
+        <!--<otherwise></otherwise>-->
+        <!--</choose>-->
+        <!--</if>-->
+        <!--</foreach>-->
+        <!--动态生成查询条件结束-->
+    </sql>
+    <!--生成查询字段-->
+    <sql id="buildSelectField">
+        <include refid="BasicMapper.buildSelectFieldV2"/>
+        <!--<bind name="fieldHasLen" value="false"/>-->
+        <!--<choose>-->
+        <!--&lt;!&ndash;指定查询的字段&ndash;&gt;-->
+        <!--<when test="includes!=null and includes.size()>0">-->
+        <!--<foreach item="item" index="index" collection="includes" open="" separator="," close="">-->
+        <!--<if test="item in $fields">-->
+        <!--<bind name="fieldHasLen" value="true"/>-->
+        <!--${$tableName}.${item} as "${item}"-->
+        <!--</if>-->
+        <!--</foreach>-->
+        <!--</when>-->
+        <!--&lt;!&ndash;指定不查询的字段&ndash;&gt;-->
+        <!--<when test="(includes==null or includes.size()==0) and excludes!=null and excludes.size()>0">-->
+        <!--<foreach item="item" index="index" collection="$fields" open=" " separator="," close="">-->
+        <!--<if test="!(item in excludes)">-->
+        <!--<bind name="fieldHasLen" value="true"/>-->
+        <!--${$tableName}.${item} as "${item}"-->
+        <!--</if>-->
+        <!--</foreach>-->
+        <!--</when>-->
+        <!--<otherwise><bind name="fieldHasLen" value="true"/>*-->
+        <!--</otherwise>-->
+        <!--</choose>-->
+        <!--<if test="!fieldHasLen">*</if>-->
+    </sql>
+
+    <!--生成修改字段-->
+    <sql id="buildUpdateField">
+        <set>
+            <choose>
+                <!--指定要修改的字段-->
+                <when test="includes!=null and includes.size()>0">
+                    <foreach item="item" index="index" collection="includes" open="" separator="," close="">
+                        <if test="item in $fields">
+                            ${item}=#{data.${item},jdbcType=${$fieldsInfo[item]['jdbcType']}}
+                        </if>
+                    </foreach>
+                </when>
+                <!--指定不修改的字段-->
+                <when test="(includes==null or includes.size()==0) and excludes!=null and excludes.size()>0">
+                    <foreach item="item" index="index" collection="$fields" open=" " separator="," close="">
+                        <if test="!(item in excludes)">
+                            ${item}= #{data.${item},jdbcType=${$fieldsInfo[item]['jdbcType']}}
+                        </if>
+                    </foreach>
+                </when>
+                <!--修改所有-->
+                <otherwise>
+                    <foreach item="item" index="index" collection="$fields" open=" " separator="," close="">
+                        <if test="data[item] != null">
+                            ${item}=#{data.${item},jdbcType=${$fieldsInfo[item]['jdbcType']}}
+                        </if>
+                    </foreach>
+                </otherwise>
+            </choose>
+        </set>
+    </sql>
+
+    <!--生成插入字段-->
+    <sql id="buildInsertField">
+        <choose>
+            <when test="includes!=null and includes.size()>0">
+                <foreach item="item" index="index" collection="includes" open="(" separator="," close=")">
+                    <if test="item in $fields">${item}</if>
+                </foreach>
+            </when>
+            <when test="(includes==null or includes.size()==0) and excludes!=null and excludes.size()>0">
+                <foreach item="item" index="index" collection="$fields" open="(" separator="," close=")">
+                    <if test="!(item in excludes)">${item}</if>
+                </foreach>
+            </when>
+            <otherwise>
+                <foreach item="item" index="index" collection="$fields" open="(" separator="," close=")">${item}</foreach>
+            </otherwise>
+        </choose>
+    </sql>
+
+    <!--生成插入值-->
+    <sql id="buildInsertValues">
+        <choose>
+            <when test="includes!=null and includes.size()>0">
+                <foreach item="item" index="index" collection="includes" open="(" separator="," close=")">
+                    <if test="item in $fields">
+                        #{data.${item},jdbcType=${$fieldsInfo[item]['jdbcType']}}
+                    </if>
+                </foreach>
+            </when>
+            <when test="(includes==null or includes.size()==0) and excludes!=null and excludes.size()>0">
+                <foreach item="item" index="index" collection="$fields" open="(" separator="," close=")">
+                    <if test="!(item in excludes)">
+                        #{data.${item},jdbcType=${$fieldsInfo[item]['jdbcType']}}
+                    </if>
+                </foreach>
+            </when>
+            <otherwise>
+                <foreach item="item" index="index" collection="$fields" open="(" separator="," close=")">
+                    #{data.${item},jdbcType=${$fieldsInfo[item]['jdbcType']}}
+                </foreach>
+            </otherwise>
+        </choose>
+    </sql>
+
+    <!--生成排序字段-->
+    <sql id="buildSortField">
+        <bind name="fieldHasLen" value="false"/>
+        <choose>
+            <!--指定排序的字段-->
+            <when test="sortField!=null and sortField.size()>0">
+                <foreach item="item" index="index" collection="sortField" open="" separator="," close="">
+                    <if test="item in $fields">
+                        <if test="!fieldHasLen">order by</if>${$tableName}.${item}
+                        <bind name="fieldHasLen" value="true"/>
+                    </if>
+                </foreach>
+                <if test="fieldHasLen">${sortOrder}</if>
+            </when>
+        </choose>
+    </sql>
+
+    <!--生成查询sql-->
+    <sql id="buildSelectSql">
+        select
+        <include refid="BasicMapper.buildSelectField"/>
+        from ${$tableName}
+        <where>
+            <include refid="BasicMapper.buildWhereV2"/>
+            <!--<include refid="BasicMapper.buildWhere"/>-->
+        </where>
+        <include refid="BasicMapper.buildSortField"/>
+    </sql>
+
+    <!--生成InsertSql-->
+    <sql id="buildInsertSql">
+        insert into ${$tableName}
+        <include refid="BasicMapper.buildInsertField"/>
+        values
+        <include refid="BasicMapper.buildInsertValues"/>
+    </sql>
+
+    <!--生成UpdateSql-->
+    <sql id="buildUpdateSql">
+        update ${$tableName}
+        <include refid="BasicMapper.buildUpdateField"/>
+        <where>
+            <include refid="BasicMapper.buildWhereV2"/>
+            <!--<include refid="BasicMapper.buildWhere"/>-->
+            <if test="terms.size()==0">
+                u_id=#{data.u_id}
+            </if>
+        </where>
+    </sql>
+
+    <!--生成查询数量sql-->
+    <sql id="buildTotalSql">
+        select count(0) as "total" from ${$tableName}
+        <where>
+            <include refid="BasicMapper.buildWhereV2"/>
+            <!--<include refid="BasicMapper.buildWhere"/>-->
+        </where>
+    </sql>
+</mapper>

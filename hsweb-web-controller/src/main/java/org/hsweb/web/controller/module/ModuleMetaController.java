@@ -42,7 +42,7 @@ public class ModuleMetaController extends GenericController<ModuleMeta, String> 
         List<UserRole> roles = user.getUserRoles();
         String[] roleIdList = roles
                 .stream()
-                .map(userRole -> userRole.getRole_id())
+                .map(userRole -> userRole.getRoleId())
                 .collect(Collectors.toList()).toArray(new String[roles.size()]);
         return ResponseMessage.ok(getService().selectByKeyAndRoleId(key, roleIdList));
     }

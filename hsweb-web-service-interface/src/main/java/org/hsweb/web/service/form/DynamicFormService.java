@@ -3,6 +3,8 @@ package org.hsweb.web.service.form;
 import org.hsweb.web.bean.common.*;
 import org.hsweb.web.bean.po.form.Form;
 
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -25,6 +27,8 @@ public interface DynamicFormService {
 
     String insert(String name, InsertParam<Map<String, Object>> data) throws Exception;
 
+    String saveOrUpdate(String name, Map<String, Object> map) throws Exception;
+
     int delete(String name, DeleteParam param) throws Exception;
 
     boolean deleteByPk(String name, String pk) throws Exception;
@@ -34,4 +38,8 @@ public interface DynamicFormService {
     int updateByPk(String name, String pk, UpdateParam<Map<String, Object>> param) throws Exception;
 
     <T> T selectByPk(String name, Object pk) throws Exception;
+
+    void exportExcel(String name, QueryParam param, OutputStream outputStream) throws Exception;
+
+    Map<String, Object> importExcel(String name, InputStream inputStream) throws Exception;
 }

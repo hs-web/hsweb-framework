@@ -2,10 +2,12 @@ package org.hsweb.web.bean.po.module;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
+import org.apache.commons.beanutils.BeanUtils;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.hsweb.web.bean.po.GenericPo;
 
 import javax.validation.constraints.NotNull;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 
@@ -28,7 +30,7 @@ public class Module extends GenericPo<String> implements Comparable<Module> {
     private String icon;
 
     //父级模块主键
-    private String p_id = "-1";
+    private String parentId = "-1";
 
     //备注
     private String remark;
@@ -37,12 +39,10 @@ public class Module extends GenericPo<String> implements Comparable<Module> {
     private int status = 1;
 
     //模块操作选项
-    private String m_option;
+    private String optional;
 
     //排序
-    private long sort_index;
-
-    private String old_id;
+    private long sortIndex;
 
     /**
      * 获取 模块名称
@@ -103,17 +103,17 @@ public class Module extends GenericPo<String> implements Comparable<Module> {
      *
      * @return String 父级模块主键
      */
-    public String getP_id() {
-        if (this.p_id == null)
-            return "-1";
-        return this.p_id;
+    public String getParentId() {
+        if (this.parentId == null)
+            return "1";
+        return this.parentId;
     }
 
     /**
      * 设置 父级模块主键
      */
-    public void setP_id(String p_id) {
-        this.p_id = p_id;
+    public void setParentId(String parentId) {
+        this.parentId = parentId;
     }
 
     /**
@@ -150,12 +150,12 @@ public class Module extends GenericPo<String> implements Comparable<Module> {
         this.status = status;
     }
 
-    public long getSort_index() {
-        return sort_index;
+    public long getSortIndex() {
+        return sortIndex;
     }
 
-    public void setSort_index(long sort_index) {
-        this.sort_index = sort_index;
+    public void setSortIndex(long sortIndex) {
+        this.sortIndex = sortIndex;
     }
 
     /**
@@ -163,13 +163,14 @@ public class Module extends GenericPo<String> implements Comparable<Module> {
      *
      * @return String 模块操作选项
      */
-    public String getM_option() {
-        return this.m_option;
+    public String getOptional() {
+        return this.optional;
     }
 
-    public Map<String, Object> getM_optionMap() {
+    public Map<String, Object> getOptionalMap() {
         try {
-            List<Map<String, Object>> opt = JSON.parseObject(getM_option(),new TypeReference<LinkedList<Map<String, Object>>>(){});
+            List<Map<String, Object>> opt = JSON.parseObject(getOptional(), new TypeReference<LinkedList<Map<String, Object>>>() {
+            });
             if (opt == null) return new HashMap<>();
             Map<String, Object> all = new LinkedHashMap<>();
             for (Map<String, Object> map : opt) {
@@ -181,26 +182,17 @@ public class Module extends GenericPo<String> implements Comparable<Module> {
         }
     }
 
+    public void setOptional(String optional) {
+        this.optional = optional;
+    }
+
     /**
      * 设置 模块操作选项
      */
-    public void setM_option(String m_option) {
-        this.m_option = m_option;
-    }
 
     @Override
     public int compareTo(Module o) {
-        return getSort_index() > o.getSort_index() ? 1 : -1;
-    }
-
-    public String getOld_id() {
-        if (old_id == null)
-            old_id = getU_id();
-        return old_id;
-    }
-
-    public void setOld_id(String old_id) {
-        this.old_id = old_id;
+        return getSortIndex() > o.getSortIndex() ? 1 : 1;
     }
 
 }

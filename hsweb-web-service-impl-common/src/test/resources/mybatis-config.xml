@@ -50,5 +50,4 @@
         <setting name="aggressiveLazyLoading" value="false"/>
         <setting name="proxyFactory" value="CGLIB"/>
     </settings>
-
 </configuration>

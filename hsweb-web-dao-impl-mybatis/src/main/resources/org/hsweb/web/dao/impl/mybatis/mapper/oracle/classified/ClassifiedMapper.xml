@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.hsweb.web.dao.classified.ClassifiedMapper">
+    <resultMap id="ClassifiedResultMap" type="org.hsweb.web.bean.po.classified.Classified">
+        <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
+            <result property="name" column="name" javaType="java.lang.String" jdbcType="VARCHAR"/>
+            <result property="remark" column="remark" javaType="java.lang.String" jdbcType="VARCHAR"/>
+            <result property="type" column="type" javaType="java.lang.String" jdbcType="VARCHAR"/>
+            <result property="parentId" column="parent_id" javaType="java.lang.String" jdbcType="VARCHAR"/>
+            <result property="icon" column="icon" javaType="java.lang.String" jdbcType="VARCHAR"/>
+            <result property="config" column="config" javaType="java.lang.String" jdbcType="CLOB"/>
+            <result property="sortIndex" column="sort_index" javaType="int" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <!--字段配置-->
+    <sql id="fieldConfig">
+        <bind name="$fieldsInfo"
+              value="#{
+                    'id':#{'column':'id','jdbcType':'VARCHAR','javaType':'String'}
+                    ,'name':#{'jdbcType':'VARCHAR','javaType':'String'}
+                    ,'remark':#{'jdbcType':'VARCHAR','javaType':'String'}
+                    ,'type':#{'jdbcType':'VARCHAR','javaType':'String'}
+                    ,'parent_id':#{'property':'parentId','jdbcType':'VARCHAR','javaType':'String'}
+                    ,'icon':#{'jdbcType':'VARCHAR','javaType':'String'}
+                    ,'config':#{'jdbcType':'CLOB','javaType':'String'}
+                    ,'sort_index':#{'jdbcType':'INTEGER','javaType':'int'}
+                    }"/>
+
+        <bind name="$fields" value="$fieldsInfo.keySet()"/>
+    </sql>
+
+    <!--表名-->
+    <sql id="tableName">
+        <bind name="$tableName" value="'s_classified'"/>
+    </sql>
+
+    <insert id="insert" parameterType="org.hsweb.web.bean.common.InsertParam" useGeneratedKeys="true" keyProperty="data.id" keyColumn="u_id">
+        <include refid="fieldConfig"/>
+        <include refid="tableName"/>
+        <include refid="BasicMapper.buildInsertSql"/>
+    </insert>
+
+    <delete id="delete" parameterType="org.hsweb.web.bean.common.DeleteParam">
+        delete from s_classified where u_id=#{term.primaryKey}
+    </delete>
+
+    <update id="update" parameterType="org.hsweb.web.bean.common.UpdateParam">
+        <include refid="fieldConfig"/>
+        <include refid="tableName"/>
+        <include refid="BasicMapper.buildUpdateSql"/>
+    </update>
+
+    <select id="selectByPk" parameterType="string" resultMap="ClassifiedResultMap">
+        select * from s_classified where u_id=#{id}
+    </select>
+
+    <select id="select" parameterType="org.hsweb.web.bean.common.QueryParam" resultMap="ClassifiedResultMap">
+        <include refid="fieldConfig"/>
+        <include refid="tableName"/>
+        <include refid="BasicMapper.buildSelectSql"/>
+    </select>
+
+    <select id="total" parameterType="org.hsweb.web.bean.common.QueryParam" resultType="int">
+        <include refid="fieldConfig"/>
+        <include refid="tableName"/>
+        <include refid="BasicMapper.buildTotalSql"/>
+    </select>
+</mapper>

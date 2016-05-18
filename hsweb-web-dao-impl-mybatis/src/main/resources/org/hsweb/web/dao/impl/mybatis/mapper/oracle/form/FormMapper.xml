@@ -5,7 +5,7 @@
 
 <mapper namespace="org.hsweb.web.dao.form.FormMapper">
     <resultMap id="FormResultMap" type="Form">
-        <id property="u_id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
+        <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
         <result property="name" column="name" javaType="String" jdbcType="VARCHAR"/>
         <result property="html" column="html" javaType="String" jdbcType="VARCHAR"/>
         <result property="meta" column="meta" javaType="String" jdbcType="VARCHAR"/>
@@ -15,26 +15,26 @@
         <result property="revision" column="revision" javaType="int" jdbcType="INTEGER"/>
         <result property="release" column="release" javaType="int" jdbcType="INTEGER"/>
         <result property="using" column="using" javaType="boolean" jdbcType="INTEGER"/>
-        <result property="create_date" column="create_date" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
-        <result property="update_date" column="update_date" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <result property="createDate" column="create_date" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <result property="updateDate" column="update_date" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
     </resultMap>
 
     <!--字段信息绑定-->
     <sql id="fieldConfig">
         <bind name="$fieldsInfo"
               value="#{
-                    'u_id':#{'jdbcType':'VARCHAR','javaType':'string'}
+                    'u_id':#{'property':'id','jdbcType':'VARCHAR','javaType':'string'}
                     ,'name':#{'jdbcType':'VARCHAR','javaType':'string'}
                     ,'html':#{'jdbcType':'VARCHAR','javaType':'string'}
                     ,'meta':#{'jdbcType':'VARCHAR','javaType':'string'}
                     ,'config':#{'jdbcType':'VARCHAR','javaType':'string'}
                     ,'remark':#{'jdbcType':'VARCHAR','javaType':'string'}
-                    ,'version':#{'jdbcType':'INTEGER','javaType':'number'}
-                    ,'revision':#{'jdbcType':'INTEGER','javaType':'number'}
-                    ,'release':#{'jdbcType':'INTEGER','javaType':'number'}
+                    ,'version':#{'jdbcType':'INTEGER','javaType':'int'}
+                    ,'revision':#{'jdbcType':'INTEGER','javaType':'int'}
+                    ,'release':#{'jdbcType':'INTEGER','javaType':'int'}
                     ,'using':#{'jdbcType':'INTEGER','javaType':'boolean'}
-                    ,'create_date':#{'jdbcType':'VARCHAR','javaType':'date'}
-                    ,'update_date':#{'jdbcType':'VARCHAR','javaType':'date'}
+                    ,'create_date':#{'property':'createDate','jdbcType':'VARCHAR','javaType':'date'}
+                    ,'update_date':#{'property':'updateDate','jdbcType':'VARCHAR','javaType':'date'}
                     }"/>
 
         <bind name="$fields" value="$fieldsInfo.keySet()"/>
@@ -45,7 +45,7 @@
         <bind name="$tableName" value="'s_form'"/>
     </sql>
 
-    <insert id="insert" parameterType="org.hsweb.web.bean.common.InsertParam" useGeneratedKeys="true" keyProperty="data.u_id" keyColumn="U_ID">
+    <insert id="insert" parameterType="org.hsweb.web.bean.common.InsertParam" useGeneratedKeys="true" keyProperty="data.id" keyColumn="U_ID">
         <include refid="fieldConfig"/>
         <include refid="tableName"/>
         <include refid="BasicMapper.buildInsertSql"/>
@@ -62,7 +62,7 @@
     </update>
 
     <select id="selectByPk" parameterType="string" resultMap="FormResultMap">
-        select * from s_form WHERE u_id=#{u_id}
+        select * from s_form WHERE u_id=#{id}
     </select>
 
     <select id="selectUsing" parameterType="string" resultMap="FormResultMap">
@@ -70,17 +70,21 @@
     </select>
 
     <select id="selectLatestList" parameterType="org.hsweb.web.bean.common.QueryParam" resultMap="FormResultMap">
-        <include refid="fieldConfig"/><!--定义字段配置-->
-        <bind name="$tableName" value="'t2'"/><!--定义表名-->
+        <include refid="fieldConfig"/>
+        <!--定义字段配置-->
+        <bind name="$tableName" value="'t2'"/>
+        <!--定义表名-->
         select
-        <include refid="BasicMapper.buildSelectField"/> <!--动态生成要查询的字段-->
+        <!--动态生成要查询的字段-->
+        <include refid="BasicMapper.buildSelectField"/>
         from (
         select s_form.name,max(s_form.version) as version from s_form s_form
         <include refid="tableName"/>
         <where>
-            <include refid="BasicMapper.buildWhere"/> <!--动态查询条件-->
+            <!--动态查询条件-->
+            <include refid="BasicMapper.buildWhere"/>
         </where>
-        group by name ) t1
+        group by name) t1
         left join s_form t2 on t1.name=t2.name and t1.version =t2.version
         <bind name="$tableName" value="'t2'"/>
         <include refid="BasicMapper.buildSortField"/>

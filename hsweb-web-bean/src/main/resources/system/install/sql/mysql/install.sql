@@ -50,13 +50,13 @@ CREATE TABLE `s_modules` (
   COMMENT 'uri',
   `icon`       VARCHAR(256)  NULL
   COMMENT '图标',
-  `p_id`       VARCHAR(256)  NOT NULL
+  `parent_id`       VARCHAR(256)  NOT NULL
   COMMENT '上级菜单',
   `remark`     VARCHAR(512)  NULL
   COMMENT '备注',
   `status`     INT(4)        NULL
   COMMENT '状态',
-  `m_option`   TEXT          NOT NULL
+  `optional`   TEXT          NOT NULL
   COMMENT '可选权限',
   `sort_index` INT(32)       NOT NULL
   COMMENT '排序'
@@ -115,6 +115,24 @@ CREATE TABLE `s_resources` (
 );
 ALTER TABLE `s_resources` COMMENT '资源表';
 
+CREATE TABLE `s_classified` (
+  `u_id`       VARCHAR(32)  NOT NULL PRIMARY KEY
+  COMMENT 'uid',
+  `remark`     VARCHAR(1024) NOT NULL
+  COMMENT '备注',
+  `type`       VARCHAR(256) NOT NULL
+  COMMENT '类型',
+  `parent_id`       VARCHAR(32) NOT NULL
+  COMMENT '父级分类',
+  `icon`       VARCHAR(256) NULL
+  COMMENT '状态',
+  `config`     TEXT         NOT NULL
+  COMMENT '创建时间',
+  `sort_index` INT          NOT NULL
+  COMMENT '排序'
+);
+ALTER TABLE `s_resources` COMMENT '资源表';
+
 -- ----------------------------
 -- Table structure for S_ROLE
 -- ----------------------------
@@ -145,7 +163,7 @@ CREATE TABLE `s_role_modules` (
   COMMENT '模块id',
   `role_id`   VARCHAR(256) NOT NULL
   COMMENT '角色id',
-  `o_level`   TEXT         NULL
+  `actions`   TEXT         NULL
   COMMENT '可操作权限'
 );
 ALTER TABLE `s_role_modules` COMMENT '角色模块绑定表';

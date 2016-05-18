@@ -1,6 +1,5 @@
 package org.hsweb.concureent.cache;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -13,6 +12,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.HashSet;
+import java.util.concurrent.ConcurrentHashMap;
 
 @EnableCaching
 @Configuration
@@ -35,10 +35,15 @@ public class ConcurrentMapCacheManagerAutoConfig extends CachingConfigurerSuppor
     @Bean
     public CacheManager cacheManager() {
         SimpleCacheManager cacheManager = new SimpleCacheManager() {
-
             @Override
             protected Cache getMissingCache(String name) {
-                return new ConcurrentMapCache(name);
+                return new ConcurrentMapCache(name, false) {
+                    @Override
+                    public void put(Object key, Object value) {
+                        if (key == null || value == null) return;
+                        super.put(key, value);
+                    }
+                };
             }
         };
         cacheManager.setCaches(new HashSet<>());

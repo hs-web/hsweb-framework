@@ -13,4 +13,14 @@ public class MysqlParamBuilder extends DefaultSqlParamBuilder {
     public static MysqlParamBuilder instance() {
         return instance;
     }
+
+    @Override
+    public String getQuoteStart() {
+        return "`";
+    }
+
+    @Override
+    public String getQuoteEnd() {
+        return "`";
+    }
 }

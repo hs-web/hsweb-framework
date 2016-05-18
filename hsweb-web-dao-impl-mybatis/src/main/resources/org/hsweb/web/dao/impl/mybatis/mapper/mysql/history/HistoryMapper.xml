@@ -5,30 +5,30 @@
 
 <mapper namespace="org.hsweb.web.dao.history.HistoryMapper">
     <resultMap id="HistoryResultMap" type="History">
-        <id property="u_id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
+        <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
         <result property="type" column="type" javaType="String" jdbcType="VARCHAR"/>
         <result property="describe" column="describe" javaType="String" jdbcType="VARCHAR"/>
-        <result property="primary_key_name" column="primary_key_name" javaType="String" jdbcType="VARCHAR"/>
-        <result property="primary_key_value" column="primary_key_value" javaType="String" jdbcType="VARCHAR"/>
-        <result property="change_before" column="change_before" javaType="String" jdbcType="VARCHAR"/>
-        <result property="change_after" column="change_after" javaType="String" jdbcType="INTEGER"/>
-        <result property="creator_id" column="creator_id" javaType="String" jdbcType="VARCHAR"/>
-        <result property="create_date" column="create_date" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <result property="primaryKeyName" column="primary_key_name" javaType="String" jdbcType="VARCHAR"/>
+        <result property="primaryKeyValue" column="primary_key_value" javaType="String" jdbcType="VARCHAR"/>
+        <result property="changeBefore" column="change_before" javaType="String" jdbcType="VARCHAR"/>
+        <result property="changeAfter" column="change_after" javaType="String" jdbcType="INTEGER"/>
+        <result property="creatorId" column="creator_id" javaType="String" jdbcType="VARCHAR"/>
+        <result property="createDate" column="create_date" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
     </resultMap>
 
     <!--字段信息绑定-->
     <sql id="fieldConfig">
         <bind name="$fieldsInfo"
               value="#{
-                    'u_id':#{'jdbcType':'VARCHAR','javaType':'string'}
+                    'u_id':#{'property':'id','jdbcType':'VARCHAR','javaType':'string'}
                     ,'type':#{'jdbcType':'VARCHAR','javaType':'string'}
                     ,'describe':#{'jdbcType':'VARCHAR','javaType':'string'}
-                    ,'primary_key_name':#{'jdbcType':'VARCHAR','javaType':'string'}
-                    ,'primary_key_value':#{'jdbcType':'VARCHAR','javaType':'string'}
-                    ,'change_before':#{'jdbcType':'VARCHAR','javaType':'string'}
-                    ,'change_after':#{'jdbcType':'VARCHAR','javaType':'string'}
-                    ,'creator_id':#{'jdbcType':'VARCHAR','javaType':'boolean'}
-                    ,'create_date':#{'jdbcType':'VARCHAR','javaType':'date'}
+                    ,'primary_key_name':#{'property':'primaryKeyName','jdbcType':'VARCHAR','javaType':'string'}
+                    ,'primary_key_value':#{'property':'primaryKeyValue','jdbcType':'VARCHAR','javaType':'string'}
+                    ,'change_before':#{'property':'changeBefore','jdbcType':'VARCHAR','javaType':'string'}
+                    ,'change_after':#{'property':'changeAfter','jdbcType':'VARCHAR','javaType':'string'}
+                    ,'creator_id':#{'property':'creatorId','jdbcType':'VARCHAR','javaType':'string'}
+                    ,'create_date':#{'property':'createDate','jdbcType':'VARCHAR','javaType':'date'}
                     }"/>
 
         <bind name="$fields" value="$fieldsInfo.keySet()"/>
@@ -39,7 +39,7 @@
         <bind name="$tableName" value="'s_history'"/>
     </sql>
 
-    <insert id="insert" parameterType="org.hsweb.web.bean.common.InsertParam" useGeneratedKeys="true" keyProperty="data.u_id" keyColumn="U_ID">
+    <insert id="insert" parameterType="org.hsweb.web.bean.common.InsertParam" useGeneratedKeys="true" keyProperty="data.id" keyColumn="U_ID">
         <include refid="fieldConfig"/>
         <include refid="tableName"/>
         <include refid="BasicMapper.buildInsertSql"/>
@@ -56,7 +56,7 @@
     </update>
 
     <select id="selectByPk" parameterType="string" resultMap="HistoryResultMap">
-        select * from s_history WHERE u_id=#{u_id}
+        select * from s_history WHERE u_id=#{id}
     </select>
 
     <select id="select" parameterType="org.hsweb.web.bean.common.QueryParam" resultMap="HistoryResultMap">

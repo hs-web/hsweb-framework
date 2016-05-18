@@ -98,10 +98,12 @@ public class SqlParam<R extends SqlParam> {
     }
 
     public Set<String> getIncludes() {
+        if(includes==null)includes=new LinkedHashSet<>();
         return includes;
     }
 
     public Set<String> getExcludes() {
+        if(excludes==null)excludes=new LinkedHashSet<>();
         return excludes;
     }
 

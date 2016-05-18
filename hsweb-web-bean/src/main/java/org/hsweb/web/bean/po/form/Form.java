@@ -45,10 +45,10 @@ public class Form extends GenericPo<String> {
     private boolean using;
 
     //创建时间
-    private java.util.Date create_date;
+    private java.util.Date createDate;
 
     //最后一次修改时间
-    private java.util.Date update_date;
+    private java.util.Date updateDate;
 
 
     /**
@@ -93,15 +93,15 @@ public class Form extends GenericPo<String> {
      *
      * @return java.util.Date 创建时间
      */
-    public java.util.Date getCreate_date() {
-        return this.create_date;
+    public java.util.Date getCreateDate() {
+        return this.createDate;
     }
 
     /**
      * 设置 创建时间
      */
-    public void setCreate_date(java.util.Date create_date) {
-        this.create_date = create_date;
+    public void setCreateDate(java.util.Date createDate) {
+        this.createDate = createDate;
     }
 
     /**
@@ -109,15 +109,15 @@ public class Form extends GenericPo<String> {
      *
      * @return java.util.Date 最后一次修改时间
      */
-    public java.util.Date getUpdate_date() {
-        return this.update_date;
+    public java.util.Date getUpdateDate() {
+        return this.updateDate;
     }
 
     /**
      * 设置 最后一次修改时间
      */
-    public void setUpdate_date(java.util.Date update_date) {
-        this.update_date = update_date;
+    public void setUpdateDate(java.util.Date updateDate) {
+        this.updateDate = updateDate;
     }
 
     public static long getSerialVersionUID() {

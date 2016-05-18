@@ -14,11 +14,11 @@ public class UserRole extends GenericPo<String> {
 
     //用户主键
     @NotEmpty
-    private String user_id;
+    private String userId;
 
     //角色主键
     @NotEmpty
-    private String role_id;
+    private String roleId;
 
     //角色实例
     private transient Role role;
@@ -28,17 +28,17 @@ public class UserRole extends GenericPo<String> {
      *
      * @return String 用户主键
      */
-    public String getUser_id() {
-        if (this.user_id == null)
+    public String getUserId() {
+        if (this.userId == null)
             return "";
-        return this.user_id;
+        return this.userId;
     }
 
     /**
      * 设置 用户主键
      */
-    public void setUser_id(String user_id) {
-        this.user_id = user_id;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     /**
@@ -46,17 +46,17 @@ public class UserRole extends GenericPo<String> {
      *
      * @return String 角色主键
      */
-    public String getRole_id() {
-        if (this.role_id == null)
+    public String getRoleId() {
+        if (this.roleId == null)
             return "";
-        return this.role_id;
+        return this.roleId;
     }
 
     /**
      * 设置 角色主键
      */
-    public void setRole_id(String role_id) {
-        this.role_id = role_id;
+    public void setRoleId(String roleId) {
+        this.roleId = roleId;
     }
 
     public Role getRole() {

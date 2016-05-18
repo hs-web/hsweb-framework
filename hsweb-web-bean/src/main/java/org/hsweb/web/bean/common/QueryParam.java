@@ -28,30 +28,28 @@ public class QueryParam extends SqlParam<QueryParam> implements Serializable {
     /**
      * 排序字段
      */
+    @Deprecated
     private Set<String> sortField = new LinkedHashSet<>();
+
+    /**
+     * 排序字段
+     */
+    private Set<Sort> sorts = new LinkedHashSet<>();
 
     /**
      * 排序方式 DESC 反序 ASC 正序
      */
+    @Deprecated
     private String sortOrder = "asc";
 
     public QueryParam select(String... fields) {
         return this.includes(fields);
     }
 
-    public QueryParam orderBy(String sortField) {
-        this.sortField.add(sortField);
-        return this;
-    }
-
-    public QueryParam asc() {
-        setSortOrder("asc");
-        return this;
-    }
-
-    public QueryParam desc() {
-        setSortOrder("desc");
-        return this;
+    public Sort orderBy(String sortField) {
+        Sort sort = new Sort(this, sortField);
+        sorts.add(sort);
+        return sort;
     }
 
     public QueryParam doPaging(int pageIndex) {
@@ -123,4 +121,11 @@ public class QueryParam extends SqlParam<QueryParam> implements Serializable {
         return new QueryParam();
     }
 
+    public Set<Sort> getSorts() {
+        return sorts;
+    }
+
+    public void setSorts(Set<Sort> sorts) {
+        this.sorts = sorts;
+    }
 }

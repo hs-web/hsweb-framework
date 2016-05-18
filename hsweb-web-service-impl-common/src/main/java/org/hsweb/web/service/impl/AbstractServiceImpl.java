@@ -46,9 +46,9 @@ public abstract class AbstractServiceImpl<Po, PK> implements GenericService<Po, 
     public PK insert(Po data) throws Exception {
         PK primaryKey = null;
         if (data instanceof GenericPo) {
-            if (((GenericPo) data).getU_id() == null)
-                ((GenericPo) data).setU_id(RandomUtil.randomChar());
-            primaryKey = (PK) ((GenericPo) data).getU_id();
+            if (((GenericPo) data).getId() == null)
+                ((GenericPo) data).setId(RandomUtil.randomChar());
+            primaryKey = (PK) ((GenericPo) data).getId();
         }
         tryValidPo(data);
         getMapper().insert(new InsertParam<>(data));
