@@ -19,7 +19,7 @@
     <sql id="fieldConfig">
         <bind name="$fieldsInfo"
               value="#{
-                    'id':#{'column':'id','jdbcType':'VARCHAR','javaType':'String'}
+                    'u_id':#{'property':'id','jdbcType':'VARCHAR','javaType':'String'}
                     ,'name':#{'jdbcType':'VARCHAR','javaType':'String'}
                     ,'remark':#{'jdbcType':'VARCHAR','javaType':'String'}
                     ,'type':#{'jdbcType':'VARCHAR','javaType':'String'}
