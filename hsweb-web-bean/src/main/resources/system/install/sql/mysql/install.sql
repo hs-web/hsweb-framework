@@ -3,15 +3,17 @@
 -- ----------------------------
 
 CREATE TABLE `s_config` (
-  `u_id`        VARCHAR(32) NOT NULL PRIMARY KEY
+  `u_id`          VARCHAR(32) NOT NULL PRIMARY KEY
   COMMENT 'UID',
-  `content`     TEXT        NOT NULL
+  `content`       TEXT        NOT NULL
   COMMENT '配置内容',
-  `remark`      VARCHAR(512)
+  `remark`        VARCHAR(512)
   COMMENT '备注',
-  `create_date` DATETIME    NOT NULL
+  `classified_id` VARCHAR(32)
+  COMMENT '分类ID',
+  `create_date`   DATETIME    NOT NULL
   COMMENT '创建日期',
-  `update_date` DATETIME
+  `update_date`   DATETIME
   COMMENT '修改日期'
 );
 ALTER TABLE `s_config` COMMENT '系统配置文件表';
@@ -50,7 +52,7 @@ CREATE TABLE `s_modules` (
   COMMENT 'uri',
   `icon`       VARCHAR(256)  NULL
   COMMENT '图标',
-  `parent_id`       VARCHAR(256)  NOT NULL
+  `parent_id`  VARCHAR(256)  NOT NULL
   COMMENT '上级菜单',
   `remark`     VARCHAR(512)  NULL
   COMMENT '备注',
@@ -116,19 +118,19 @@ CREATE TABLE `s_resources` (
 ALTER TABLE `s_resources` COMMENT '资源表';
 
 CREATE TABLE `s_classified` (
-  `u_id`       VARCHAR(32)  NOT NULL PRIMARY KEY
+  `u_id`       VARCHAR(32)   NOT NULL PRIMARY KEY
   COMMENT 'uid',
   `remark`     VARCHAR(1024) NOT NULL
   COMMENT '备注',
-  `type`       VARCHAR(256) NOT NULL
+  `type`       VARCHAR(256)  NOT NULL
   COMMENT '类型',
-  `parent_id`       VARCHAR(32) NOT NULL
+  `parent_id`  VARCHAR(32)   NOT NULL
   COMMENT '父级分类',
-  `icon`       VARCHAR(256) NULL
+  `icon`       VARCHAR(256)  NULL
   COMMENT '状态',
-  `config`     TEXT         NOT NULL
+  `config`     TEXT          NOT NULL
   COMMENT '创建时间',
-  `sort_index` INT          NOT NULL
+  `sort_index` INT           NOT NULL
   COMMENT '排序'
 );
 ALTER TABLE `s_resources` COMMENT '资源表';

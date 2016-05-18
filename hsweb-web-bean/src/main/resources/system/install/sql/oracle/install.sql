@@ -2,9 +2,10 @@
 -- Table structure for S_CONFIG
 -- ----------------------------
 CREATE TABLE ${jdbc.username}."S_CONFIG" (
-"U_ID" VARCHAR2(256) NOT NULL,
+"U_ID" VARCHAR2(32) NOT NULL,
 "CONTENT" CLOB NOT NULL,
 "REMARK" VARCHAR2(512) NULL,
+"CLASSIFIED_ID" VARCHAR2(32) NULL,
 "CREATE_DATE" DATE NOT NULL,
 "UPDATE_DATE" DATE NULL
 );
@@ -12,6 +13,7 @@ COMMENT ON TABLE ${jdbc.username}."S_CONFIG" IS '系统配置文件表';
 COMMENT ON COLUMN ${jdbc.username}."S_CONFIG"."U_ID" IS 'UID';
 COMMENT ON COLUMN ${jdbc.username}."S_CONFIG"."CONTENT" IS '配置内容';
 COMMENT ON COLUMN ${jdbc.username}."S_CONFIG"."REMARK" IS '备注';
+COMMENT ON COLUMN ${jdbc.username}."S_CONFIG"."CLASSIFIED_ID" IS '分类ID';
 COMMENT ON COLUMN ${jdbc.username}."S_CONFIG"."CREATE_DATE" IS '创建日期';
 COMMENT ON COLUMN ${jdbc.username}."S_CONFIG"."UPDATE_DATE" IS '修改日期';
 
