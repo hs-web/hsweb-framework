@@ -30,6 +30,9 @@ public class Config extends GenericPo<String> {
     //配置类型: properties,json
     private String type;
 
+    //配置分类ID
+    private String classifiedId;
+
     /**
      * 获取 备注
      *
@@ -104,6 +107,14 @@ public class Config extends GenericPo<String> {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public String getClassifiedId() {
+        return classifiedId;
+    }
+
+    public void setClassifiedId(String classifiedId) {
+        this.classifiedId = classifiedId;
     }
 
     public Map<Object, Object> toMap() {
