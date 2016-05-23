@@ -26,7 +26,7 @@
                     ,'parent_id':#{'property':'parentId','jdbcType':'VARCHAR','javaType':'String'}
                     ,'icon':#{'jdbcType':'VARCHAR','javaType':'String'}
                     ,'config':#{'jdbcType':'CLOB','javaType':'String'}
-                    ,'sort_index':#{'jdbcType':'INTEGER','javaType':'int'}
+                    ,'sort_index':#{'property':'sortIndex','jdbcType':'INTEGER','javaType':'int'}
                     }"/>
 
         <bind name="$fields" value="$fieldsInfo.keySet()"/>

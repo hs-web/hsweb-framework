@@ -1,5 +1,6 @@
 package org.hsweb.web.service.impl.config;
 
+import org.hsweb.web.bean.common.UpdateParam;
 import org.hsweb.web.bean.po.config.Config;
 import org.hsweb.web.dao.config.ConfigMapper;
 import org.hsweb.web.service.config.ConfigService;
@@ -11,6 +12,7 @@ import org.springframework.util.Assert;
 import org.webbuilder.utils.common.StringUtils;
 
 import javax.annotation.Resource;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -36,7 +38,13 @@ public class ConfigServiceImpl extends AbstractServiceImpl<Config, String> imple
     @Override
     @CacheEvict(value = CACHE_KEY, allEntries = true)
     public int update(Config data) throws Exception {
-        return super.update(data);
+        return configMapper.update(new UpdateParam<>(data).excludes("createDate").where("id",data.getId()));
+    }
+
+    @Override
+    @CacheEvict(value = CACHE_KEY, allEntries = true)
+    public int delete(String s) throws Exception {
+        return super.delete(s);
     }
 
     /**
@@ -47,7 +55,7 @@ public class ConfigServiceImpl extends AbstractServiceImpl<Config, String> imple
      * @throws Exception 异常信息
      */
     @Override
-    @Cacheable(value = CACHE_KEY, key = "'info.content_'+#name")
+    @Cacheable(value = CACHE_KEY, key = "'info.content.'+#name")
     public String getContent(String name) throws Exception {
         Config config = getMapper().selectByPk(name);
         if (config == null) return null;
@@ -171,6 +179,7 @@ public class ConfigServiceImpl extends AbstractServiceImpl<Config, String> imple
     public String insert(Config data) throws Exception {
         Config old = this.selectByPk(data.getId());
         Assert.isNull(old, "配置已存在，请勿重复添加!");
+        data.setCreateDate(new Date());
         return super.insert(data);
     }
 }

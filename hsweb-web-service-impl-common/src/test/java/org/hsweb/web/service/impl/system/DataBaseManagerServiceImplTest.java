@@ -46,16 +46,9 @@ public class DataBaseManagerServiceImplTest extends AbstractTestCase {
     @Test
     public void test() throws Exception {
         QueryParam queryParam = new QueryParam();
-        Term term = queryParam.select("username", "password")
-                .where("createDate$GT", "2015-12-10")
-                .nest();
-        term = term.nest("username", "admin").or("username", "test").nest();
-        term = term.nest();
-        term.orNest("status$IN", "1,2,3").and("status$LT", "0");
-        term.nest("status$IN", "2,3,4").and("status$LT", "1");
-        term.and("username$EMPTY", true);
-        queryParam.orderBy("create_date").desc();
-        queryParam.orderBy("status").asc();
+          queryParam.select("username", "password")
+                .where("createDate$GT", "2015-12-10");
+
         userMapper.select(queryParam);
         User user = userMapper.selectByPk("admin");
         user.setId("aaaa");

@@ -27,9 +27,6 @@ public class Config extends GenericPo<String> {
     //最后一次修改日期
     private java.util.Date updateDate;
 
-    //配置类型: properties,json
-    private String type;
-
     //配置分类ID
     private String classifiedId;
 
@@ -101,13 +98,6 @@ public class Config extends GenericPo<String> {
         this.updateDate = updateDate;
     }
 
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
 
     public String getClassifiedId() {
         return classifiedId;
@@ -118,26 +108,16 @@ public class Config extends GenericPo<String> {
     }
 
     public Map<Object, Object> toMap() {
-        switch (type) {
-            case "properties":
-                Properties properties = new Properties();
-                try {
-                    properties.load(new StringReader(getContent()));
-                } catch (IOException e) {
-                }
-                return properties;
-            case "json":
-                if (getContent().trim().startsWith("[")) {
-                    Map<Object, Object> map = new LinkedHashMap<>();
-                    List<Map> arr = JSON.parseArray(getContent(), Map.class);
-                    for (int i = 0; i < arr.size(); i++) {
-                        map.put(String.valueOf(i), arr.get(i));
-                    }
-                    return map;
-                }
-                return JSON.parseObject(getContent(), Map.class);
-            default:
-                return new HashMap<>();
+        if (getContent().trim().startsWith("{")) {
+            return JSON.parseObject(getContent(), Map.class);
         }
+        Map<Object, Object> data = new LinkedHashMap<>();
+        toList().forEach(map -> data.put(map.get("key"), map.get("value")));
+        return data;
+    }
+
+    public List<Map<Object, Object>> toList() {
+        List<Map<Object, Object>> array = (List) JSON.parseArray(getContent(), Map.class);
+        return array;
     }
 }

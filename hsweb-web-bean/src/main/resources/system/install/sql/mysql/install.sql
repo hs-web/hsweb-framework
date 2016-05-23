@@ -39,6 +39,26 @@ CREATE TABLE `s_form` (
 );
 ALTER TABLE `s_form` COMMENT '动态表单';
 
+CREATE TABLE `s_template` (
+  `u_id`          VARCHAR(32)  NOT NULL PRIMARY KEY
+  COMMENT 'uid',
+  `name`          VARCHAR(256) NOT NULL
+  COMMENT '名称',
+  `template`      TEXT COMMENT '模板内容',
+  `classified_id` VARCHAR(32) COMMENT '分类',
+  `type`          VARCHAR(64) COMMENT '类型',
+  `script`        TEXT COMMENT '脚本',
+  `script_links`  TEXT COMMENT '外部脚本',
+  `css`           TEXT COMMENT '样式',
+  `css_links`     TEXT COMMENT '外部样式',
+  `version`       INT COMMENT '版本',
+  `revision`      INT COMMENT '修订版',
+  `release`       INT COMMENT '发布版',
+  `using`         TINYINT COMMENT '是否使用中',
+  `remark`        VARCHAR(200)
+);
+ALTER TABLE `s_template` COMMENT '模板';
+
 
 -- ----------------------------
 -- Table structure for S_MODULES

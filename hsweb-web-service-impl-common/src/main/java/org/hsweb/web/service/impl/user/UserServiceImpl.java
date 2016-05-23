@@ -81,7 +81,7 @@ public class UserServiceImpl extends AbstractServiceImpl<User, String> implement
             data.setPassword(MD5.encode(data.getPassword()));
             userMapper.updatePassword(data);
         }
-        int i = userMapper.update(new UpdateParam<>(data).excludes("status","password","createDate"));
+        int i = userMapper.update(new UpdateParam<>(data).excludes("status", "password", "createDate"));
         if (data.getUserRoles().size() != 0) {
             //删除所有
             userRoleMapper.deleteByUserId(data.getId());
@@ -96,7 +96,7 @@ public class UserServiceImpl extends AbstractServiceImpl<User, String> implement
 
     @Override
     public void initAdminUser(User user) throws Exception {
-        QueryParam queryParam = new QueryParam();
+        QueryParam queryParam = new QueryParam().noPaging();
         queryParam.orderBy("sortIndex");
         List<Module> modules = moduleService.select(queryParam);
         Map<Module, Set<String>> roleInfo = new LinkedHashMap<>();
@@ -108,7 +108,7 @@ public class UserServiceImpl extends AbstractServiceImpl<User, String> implement
 
     @Override
     public void initGuestUser(User user) throws Exception {
-        List<UserRole> userRoles = userRoleMapper.select(new QueryParam().where("roleId", "guest"));
+        List<UserRole> userRoles = userRoleMapper.select(new QueryParam().where("roleId", "guest").noPaging());
         user.setUserRoles(userRoles);
         user.initRoleInfo();
     }

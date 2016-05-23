@@ -327,6 +327,7 @@ public class DefaultSqlParamBuilder {
 
     protected Object transformationValue(JDBCType type, Object value) {
         switch (type) {
+            case INTEGER:
             case NUMERIC:
                 if (StringUtils.isInt(type)) return StringUtils.toInt(value);
                 if (StringUtils.isDouble(type)) return StringUtils.toDouble(value);

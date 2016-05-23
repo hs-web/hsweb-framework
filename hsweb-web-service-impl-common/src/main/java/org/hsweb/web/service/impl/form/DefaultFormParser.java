@@ -49,6 +49,23 @@ public class DefaultFormParser implements FormParser {
                 String key = def.getString("key");
                 Object value = def.get("value");
                 if ("main".equals(id)) {
+                    if ("trigger".equals(key)) {
+                        List<JSONObject> jsonArray = JSON.parseArray((String) value, JSONObject.class);
+                        jsonArray.forEach(jsonObject -> {
+                            String name = jsonObject.getString("key");
+                            String script = jsonObject.getString("value");
+                            ScriptTrigger scriptTrigger = new ScriptTrigger();
+                            scriptTrigger.setId(String.valueOf(script.hashCode()));
+                            if (expressionScopeBeanMap != null)
+                                scriptTrigger.setDefaultVar(expressionScopeBeanMap);
+                            scriptTrigger.setName(name);
+                            scriptTrigger.setContent(script);
+                            scriptTrigger.setLanguage("groovy");
+                            scriptTrigger.init();
+                            metaData.on(scriptTrigger);
+                        });
+                        return;
+                    }
                     metaData.attr(key, value);
                     return;
                 }
@@ -63,21 +80,6 @@ public class DefaultFormParser implements FormParser {
                         });
                     }
                     fieldMeta.setValidator(validatorList);
-                    return;
-                }
-                if ("trigger".equals(key)) {
-                    List<JSONObject> jsonArray = JSON.parseArray((String) value, JSONObject.class);
-                    jsonArray.forEach(jsonObject -> {
-                        String name = jsonObject.getString("key");
-                        String script = jsonObject.getString("value");
-                        ScriptTrigger scriptTrigger = new ScriptTrigger();
-                        scriptTrigger.setId(String.valueOf(script.hashCode()));
-                        if (expressionScopeBeanMap != null)
-                            scriptTrigger.setDefaultVar(expressionScopeBeanMap);
-                        scriptTrigger.setName(name);
-                        scriptTrigger.setContent(script);
-                        scriptTrigger.setLanguage("groovy");
-                    });
                     return;
                 }
                 Field ftmp = ReflectionUtils.findField(FieldMetaData.class, key);

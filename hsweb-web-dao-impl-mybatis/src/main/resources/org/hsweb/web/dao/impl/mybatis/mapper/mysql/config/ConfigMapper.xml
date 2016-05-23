@@ -23,7 +23,7 @@
                     ,'create_date':#{'property':'createDate','jdbcType':'TIMESTAMP','javaType':'date'}
                     ,'update_date':#{'property':'updateDate','jdbcType':'TIMESTAMP','javaType':'date'}
                      ,'type':#{'jdbcType':'VARCHAR','javaType':'string'}
-                     ,classified_id':#{'property':'classifiedId','jdbcType':'VARCHAR','javaType':'string'}
+                     ,'classified_id':#{'property':'classifiedId','jdbcType':'VARCHAR','javaType':'string'}
                     }"/>
 
         <bind name="$fields" value="$fieldsInfo.keySet()"/>

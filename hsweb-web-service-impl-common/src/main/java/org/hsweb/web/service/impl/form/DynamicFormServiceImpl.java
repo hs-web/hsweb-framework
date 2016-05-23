@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.webbuilder.office.excel.ExcelIO;
 import org.webbuilder.office.excel.config.Header;
@@ -43,6 +44,7 @@ import java.util.*;
  * Created by zhouhao on 16-4-14.
  */
 @Service("dynamicFormService")
+@Transactional(rollbackFor = Throwable.class)
 public class DynamicFormServiceImpl implements DynamicFormService {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -150,6 +152,7 @@ public class DynamicFormServiceImpl implements DynamicFormService {
     @Override
     @ReadLock
     @LockName(value = "'form.lock.'+#name", isExpression = true)
+    @Transactional(readOnly = true)
     public <T> PagerResult<T> selectPager(String name, QueryParam param) throws Exception {
         PagerResult<T> result = new PagerResult<>();
         Table table = getTableByName(name);
@@ -166,6 +169,7 @@ public class DynamicFormServiceImpl implements DynamicFormService {
     @Override
     @ReadLock
     @LockName(value = "'form.lock.'+#name", isExpression = true)
+    @Transactional(readOnly = true)
     public <T> List<T> select(String name, QueryParam param) throws Exception {
         Table table = getTableByName(name);
         Query query = table.createQuery();
@@ -177,6 +181,7 @@ public class DynamicFormServiceImpl implements DynamicFormService {
     @Override
     @ReadLock
     @LockName(value = "'form.lock.'+#name", isExpression = true)
+    @Transactional(readOnly = true)
     public int total(String name, QueryParam param) throws Exception {
         Table table = getTableByName(name);
         Query query = table.createQuery();
@@ -283,6 +288,7 @@ public class DynamicFormServiceImpl implements DynamicFormService {
     @Override
     @ReadLock
     @LockName(value = "'form.lock.'+#name", isExpression = true)
+    @Transactional(readOnly = true)
     public void exportExcel(String name, QueryParam param, OutputStream outputStream) throws Exception {
         List<Object> dataList = select(name, param);
         Table table = getTableByName(name);

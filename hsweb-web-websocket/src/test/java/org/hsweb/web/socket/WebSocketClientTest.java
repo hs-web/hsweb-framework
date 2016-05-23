@@ -19,7 +19,7 @@ public class WebSocketClientTest {
 
     public static void main(String[] args) throws Exception {
         WebSocketClient client = new StandardWebSocketClient();
-        String url = "ws://localhost:8080/socket";
+        String url = "ws://localhost:8088/socket";
         client.doHandshake(new AbstractWebSocketHandler() {
             @Override
             public void afterConnectionEstablished(WebSocketSession session) throws Exception {

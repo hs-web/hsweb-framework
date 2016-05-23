@@ -31,6 +31,7 @@ public class CmdWebSocketHandler extends TextWebSocketHandler {
         if (logger.isInfoEnabled())
             logger.info("handleMessage,id:{} msg={}", session.getId(), message.getPayload());
         try {
+
             CMD request = JSON.parseObject(message.getPayload(), CMD.class);
             CmdProcessor processor = processorContainer.getCmdProcessor(request.getCmd());
             if (null != processor) {

@@ -8,7 +8,7 @@
         <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR" />
         <result property="moduleId" column="module_id" javaType="String" jdbcType="VARCHAR" />
         <result property="roleId" column="role_id" javaType="String" jdbcType="VARCHAR" />
-        <result property="actions" column="actions" javaType="String" jdbcType="VARCHAR"
+        <result property="actions" column="actions" javaType="java.util.List" jdbcType="VARCHAR"
                 typeHandler="org.hsweb.web.mybatis.handler.JsonArrayHandler" />
         <collection property="module" column="module_id" ofType="Module" select="org.hsweb.web.dao.module.ModuleMapper.selectByPk"/>
     </resultMap>

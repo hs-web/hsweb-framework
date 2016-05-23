@@ -1,15 +1,9 @@
 package org.hsweb.web.mybatis.handler;
 
 import com.alibaba.fastjson.JSON;
-import org.apache.ibatis.type.Alias;
-import org.apache.ibatis.type.BaseTypeHandler;
-import org.apache.ibatis.type.JdbcType;
-import org.apache.ibatis.type.MappedTypes;
+import org.apache.ibatis.type.*;
 
-import java.sql.CallableStatement;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,6 +12,7 @@ import java.util.List;
  */
 @Alias("jsonArrayHandler")
 @MappedTypes({List.class})
+@MappedJdbcTypes({JdbcType.VARCHAR, JdbcType.CLOB})
 public class JsonArrayHandler extends BaseTypeHandler<List<Object>> {
 
     @Override

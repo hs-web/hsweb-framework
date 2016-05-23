@@ -108,18 +108,20 @@ public class User extends GenericPo<String> {
 
     public boolean hasAccessRole(String rId) {
         if (getUserRoles() != null)
-            for (UserRole userRole : getUserRoles()) {
-                if (rId.equals(userRole.getRoleId())) return true;
-            }
+            return getUserRoles().stream().anyMatch(userRole -> userRole.getRoleId().equals(rId));
+//            for (UserRole userRole : getUserRoles()) {
+//                if (rId.equals(userRole.getRoleId())) return true;
+//            }
         return false;
     }
 
     public boolean hasAccessModule(String mId) {
         if (roleInfo == null) initRoleInfo();
-        for (Module module : roleInfo.keySet()) {
-            if (module.getId().equals(mId)) return true;
-        }
-        return false;
+        return roleInfo.keySet().stream().anyMatch(mdl -> mdl.getId().equals(mId));
+//        for (Module module : roleInfo.keySet()) {
+//            if (module.getId().equals(mId)) return true;
+//        }
+//        return false;
     }
 
     /**

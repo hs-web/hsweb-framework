@@ -46,6 +46,36 @@ COMMENT ON COLUMN ${jdbc.username}."S_FORM"."USING" IS '是否使用中';
 COMMENT ON COLUMN ${jdbc.username}."S_FORM"."CREATE_DATE" IS '创建日期';
 COMMENT ON COLUMN ${jdbc.username}."S_FORM"."UPDATE_DATE" IS '修改日期';
 
+
+CREATE TABLE ${jdbc.username}."S_TEMPLATE" (
+  "U_ID"          VARCHAR2(32)  NOT NULL,
+  "NAME"          VARCHAR2(256) NOT NULL,
+  "TEMPLATE"      CLOB          NULL,
+  "CLASSIFIED_ID" VARCHAR2(32)  NULL,
+  "TYPE"          VARCHAR2(64)  NULL,
+  "SCRIPT"        CLOB          NULL,
+  "CSS"           CLOB          NULL,
+  "CSS_LINKS"     CLOB          NULL,
+  "SCRIPT_LINKS"  CLOB          NULL,
+  "VERSION"       NUMBER(32)    NULL,
+  "REVISION"      NUMBER(32)    NULL,
+  "RELEASE"       NUMBER(32)    NULL,
+  "USING"         NUMBER(4)     NULL,
+  "REMARK"        VARCHAR2(200) NULL
+);
+COMMENT ON COLUMN ${jdbc.username}."S_TEMPLATE"."U_ID" IS 'UID';
+COMMENT ON COLUMN ${jdbc.username}."S_TEMPLATE"."NAME" IS '名称';
+COMMENT ON COLUMN ${jdbc.username}."S_TEMPLATE"."TEMPLATE" IS '模板';
+COMMENT ON COLUMN ${jdbc.username}."S_TEMPLATE"."CLASSIFIED_ID" IS '分类';
+COMMENT ON COLUMN ${jdbc.username}."S_TEMPLATE"."TYPE" IS '类型';
+COMMENT ON COLUMN ${jdbc.username}."S_TEMPLATE"."SCRIPT" IS '脚本';
+COMMENT ON COLUMN ${jdbc.username}."S_TEMPLATE"."CSS" IS '样式';
+COMMENT ON COLUMN ${jdbc.username}."S_TEMPLATE"."CSS_LINKS" IS '样式链接';
+COMMENT ON COLUMN ${jdbc.username}."S_TEMPLATE"."SCRIPT_LINKS" IS '脚本链接';
+COMMENT ON COLUMN ${jdbc.username}."S_TEMPLATE"."VERSION" IS '版本';
+COMMENT ON COLUMN ${jdbc.username}."S_TEMPLATE"."REVISION" IS '修订版';
+COMMENT ON COLUMN ${jdbc.username}."S_TEMPLATE"."RELEASE" IS '当前发布版本';
+COMMENT ON COLUMN ${jdbc.username}."S_TEMPLATE"."USING" IS '是否使用中';
 -- ----------------------------
 -- Table structure for S_LOGGER
 -- ----------------------------

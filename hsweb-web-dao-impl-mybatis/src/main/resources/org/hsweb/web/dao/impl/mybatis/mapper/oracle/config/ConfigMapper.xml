@@ -9,7 +9,6 @@
         <result property="remark" column="remark" javaType="String" jdbcType="VARCHAR"/>
         <result property="content" column="content" javaType="String" jdbcType="VARCHAR"/>
         <result property="createDate" column="create_date" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
-        <result property="type" column="type" javaType="String" jdbcType="VARCHAR"/>
         <result property="classifiedId" column="classified_id" javaType="String" jdbcType="VARCHAR"/>
     </resultMap>
 
@@ -22,8 +21,7 @@
                     ,'content':#{'jdbcType':'VARCHAR','javaType':'string'}
                     ,'create_date':#{'property':'createDate','jdbcType':'TIMESTAMP','javaType':'date'}
                     ,'update_date':#{'property':'updateDate','jdbcType':'TIMESTAMP','javaType':'date'}
-                     ,'type':#{'jdbcType':'VARCHAR','javaType':'string'}
-                     ,classified_id':#{'property':'classifiedId','jdbcType':'VARCHAR','javaType':'string'}
+                    ,'classified_id':#{'property':'classifiedId','jdbcType':'VARCHAR','javaType':'string'}
                     }"/>
         <bind name="$fields" value="$fieldsInfo.keySet()"/>
     </sql>

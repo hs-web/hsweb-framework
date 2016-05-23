@@ -3,6 +3,7 @@ package org.hsweb.web.service.impl;
 import org.hsweb.web.bean.common.*;
 import org.hsweb.web.bean.po.GenericPo;
 import org.hsweb.web.bean.valid.ValidResults;
+import org.hsweb.web.core.exception.NotFoundException;
 import org.hsweb.web.core.exception.ValidationException;
 import org.hsweb.web.core.utils.RandomUtil;
 import org.hsweb.web.dao.GenericMapper;
@@ -47,7 +48,7 @@ public abstract class AbstractServiceImpl<Po, PK> implements GenericService<Po, 
         PK primaryKey = null;
         if (data instanceof GenericPo) {
             if (((GenericPo) data).getId() == null)
-                ((GenericPo) data).setId(RandomUtil.randomChar());
+                ((GenericPo) data).setId(GenericPo.createUID());
             primaryKey = (PK) ((GenericPo) data).getId();
         }
         tryValidPo(data);
@@ -95,6 +96,10 @@ public abstract class AbstractServiceImpl<Po, PK> implements GenericService<Po, 
     @Transactional(readOnly = true)
     public Po selectByPk(PK pk) throws Exception {
         return this.getMapper().selectByPk(pk);
+    }
+
+    protected void assertNotNull(Object po, String message) {
+        if (po == null) throw new NotFoundException(message);
     }
 
     protected void tryValidPo(Po data) {

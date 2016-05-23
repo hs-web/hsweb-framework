@@ -50,4 +50,7 @@
         <setting name="aggressiveLazyLoading" value="false"/>
         <setting name="proxyFactory" value="CGLIB"/>
     </settings>
+    <typeHandlers>
+        <package name="org.hsweb.web.mybatis.handler"></package>
+    </typeHandlers>
 </configuration>

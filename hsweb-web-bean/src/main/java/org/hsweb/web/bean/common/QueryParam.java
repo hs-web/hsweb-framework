@@ -1,8 +1,8 @@
 package org.hsweb.web.bean.common;
 
 import java.io.Serializable;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by 浩 on 2016-01-16 0016.
@@ -34,7 +34,7 @@ public class QueryParam extends SqlParam<QueryParam> implements Serializable {
     /**
      * 排序字段
      */
-    private Set<Sort> sorts = new LinkedHashSet<>();
+    private List<Sort> sorts = new LinkedList<>();
 
     /**
      * 排序方式 DESC 反序 ASC 正序
@@ -55,6 +55,11 @@ public class QueryParam extends SqlParam<QueryParam> implements Serializable {
     public QueryParam doPaging(int pageIndex) {
         this.pageIndex = pageIndex;
         this.paging = true;
+        return this;
+    }
+
+    public QueryParam noPaging() {
+        this.paging = false;
         return this;
     }
 
@@ -121,11 +126,12 @@ public class QueryParam extends SqlParam<QueryParam> implements Serializable {
         return new QueryParam();
     }
 
-    public Set<Sort> getSorts() {
-        return sorts;
+    public List<Sort> getSorts() {
+        return  sorts;
     }
 
-    public void setSorts(Set<Sort> sorts) {
+    public void setSorts(List<Sort> sorts) {
         this.sorts = sorts;
     }
+
 }
