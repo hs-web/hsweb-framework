@@ -85,23 +85,6 @@ public class DynamicFormServiceImpl implements DynamicFormService {
 
     }
 
-    @PostConstruct
-    public void init() {
-        QueryParam param = new QueryParam();
-        param.where("using", 1);
-        try {
-            formService.select(param).forEach(form -> {
-                try {
-                    deploy(form);
-                } catch (Exception e) {
-                    logger.error("", e);
-                }
-            });
-        } catch (Exception e) {
-            logger.error("", e);
-        }
-    }
-
     @Override
     public Object parseMeta(Form form) throws Exception {
         return formParser.parse(form);
