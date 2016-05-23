@@ -15,7 +15,7 @@
     <!--生成修改字段-->
     <sql id="buildUpdateField">
         <set>
-        ${@org.hsweb.web.mybatis.builder.MysqlParamBuilder@instance().buildUpdateFields($fieldsInfo,#this['_parameter'])}
+        ${@org.hsweb.web.mybatis.builder.DefaultSqlParamBuilder@instance().buildUpdateFields($fieldsInfo,#this['_parameter'])}
         </set>
     </sql>
 
