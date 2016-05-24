@@ -66,7 +66,7 @@ public class AuthorizeController {
                 error_time = 0l;
             }
             if (error_number >= maxErrorNumber)
-                throw new AuthorizeException("您的账户已被锁定登录,请" + (waitMinutes - ((now_time - error_time) / 1000 / 60)) + "分钟后再试!");
+                throw new AuthorizeException("您的账户已被锁定登录,请" + (waitMinutes - ((now_time - error_time) / 1000 / 60)) + "分钟后再试!",400);
         }
         User user = userService.selectByUserName(username);
         if (user == null || user.getStatus() != 1) throw new NotFoundException("用户不存在或已注销");
@@ -75,7 +75,7 @@ public class AuthorizeController {
             if (error_number == null) error_number = 0;
             cache.put(timeCacheKey, System.currentTimeMillis());
             cache.put(numberCacheKey, ++error_number);
-            throw new AuthorizeException("密码错误,你还可以重试" + (maxErrorNumber - error_number) + "次");
+            throw new AuthorizeException("密码错误,你还可以重试" + (maxErrorNumber - error_number) + "次", 400);
         }
         cache.evict(timeCacheKey);
         cache.evict(numberCacheKey);
