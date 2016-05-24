@@ -70,6 +70,8 @@ public interface FormService extends GenericService<Form, String> {
      */
     String createDeployHtml(String name) throws Exception;
 
+    Form selectDeployed(String name) throws Exception;
+
     /**
      * 根据表单名称，获取最新版本的表单
      *
@@ -100,6 +102,7 @@ public interface FormService extends GenericService<Form, String> {
 
     /**
      * 查询当前正在使用的表单
+     *
      * @param name 正在使用的表单名称
      * @return 表单对象。没有则返回null
      * @throws Exception

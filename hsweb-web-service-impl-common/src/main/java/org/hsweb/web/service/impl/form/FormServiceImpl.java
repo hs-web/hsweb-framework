@@ -138,6 +138,8 @@ public class FormServiceImpl extends AbstractServiceImpl<Form, String> implement
     @Caching(evict = {
             @CacheEvict(value = {CACHE_KEY + ".deploy"},
                     key = "'form.deploy.'+target.selectByPk(#formId).getName()+'.html'"),
+            @CacheEvict(value = {CACHE_KEY + ".deploy"},
+                    key = "'form.deploy.'+target.selectByPk(#formId).getName()"),
             @CacheEvict(value = {CACHE_KEY},
                     key = "'form.using.'+target.selectByPk(#formId).getName()")
     })
@@ -165,6 +167,14 @@ public class FormServiceImpl extends AbstractServiceImpl<Form, String> implement
 
     @Override
     @Transactional(rollbackFor = Throwable.class)
+    @Caching(evict = {
+            @CacheEvict(value = {CACHE_KEY + ".deploy"},
+                    key = "'form.deploy.'+target.selectByPk(#formId).getName()+'.html'"),
+            @CacheEvict(value = {CACHE_KEY + ".deploy"},
+                    key = "'form.deploy.'+target.selectByPk(#formId).getName()"),
+            @CacheEvict(value = {CACHE_KEY},
+                    key = "'form.using.'+target.selectByPk(#formId).getName()")
+    })
     public void unDeploy(String formId) throws Exception {
         Form old = this.selectByPk(formId);
         Assert.notNull(old, "表单不存在");
@@ -184,9 +194,19 @@ public class FormServiceImpl extends AbstractServiceImpl<Form, String> implement
     }
 
     @Override
+    @Cacheable(value = CACHE_KEY + ".deploy", key = "'form.deploy.'+#name")
+    public Form selectDeployed(String name) throws Exception {
+        Form using = selectUsing(name);
+        assertNotNull(using, "表单不存在或未部署");
+        History history = historyService.selectLastHistoryByType("form.deploy." + name);
+        assertNotNull(history, "表单不存在或未部署");
+        return JSON.parseObject(history.getChangeAfter(), Form.class);
+    }
+
+    @Override
     public String createViewHtml(String formId) throws Exception {
         Form form = this.selectByPk(formId);
-        Assert.notNull(form, "表单不存在");
+        assertNotNull(form, "表单不存在");
         return formParser.parseHtml(form);
     }
 
