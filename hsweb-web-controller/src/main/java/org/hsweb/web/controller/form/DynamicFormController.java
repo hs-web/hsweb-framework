@@ -7,6 +7,7 @@ import org.hsweb.web.core.authorize.annotation.Authorize;
 import org.hsweb.web.core.logger.annotation.AccessLogger;
 import org.hsweb.web.core.message.ResponseMessage;
 import org.hsweb.web.service.form.DynamicFormService;
+import org.hsweb.web.service.form.FormService;
 import org.hsweb.web.service.resource.FileService;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,7 +30,16 @@ public class DynamicFormController {
     private DynamicFormService dynamicFormService;
 
     @Resource
+    private FormService formService;
+
+    @Resource
     private FileService fileService;
+
+    @RequestMapping(value = "/deployed/{name}", method = RequestMethod.GET)
+    @Authorize(expression = "#dynamicFormAuthorizeValidator.validate(#name,#user,'R')")
+    public ResponseMessage deployed(@PathVariable("name") String name) throws Exception {
+        return ResponseMessage.ok(formService.selectDeployed(name));
+    }
 
     @RequestMapping(value = "/{name}", method = RequestMethod.GET)
     @AccessLogger("查看列表")
