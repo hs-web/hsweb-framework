@@ -2,6 +2,7 @@ package org.hsweb.web.service.impl.config;
 
 import org.hsweb.web.bean.common.UpdateParam;
 import org.hsweb.web.bean.po.config.Config;
+import org.hsweb.web.core.authorize.ExpressionScopeBean;
 import org.hsweb.web.dao.config.ConfigMapper;
 import org.hsweb.web.service.config.ConfigService;
 import org.hsweb.web.service.impl.AbstractServiceImpl;
@@ -22,7 +23,7 @@ import java.util.Properties;
  * Created by generator
  */
 @Service("configService")
-public class ConfigServiceImpl extends AbstractServiceImpl<Config, String> implements ConfigService {
+public class ConfigServiceImpl extends AbstractServiceImpl<Config, String> implements ConfigService,ExpressionScopeBean {
 
     public static final String CACHE_KEY = "config";
 
