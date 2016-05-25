@@ -1,11 +1,9 @@
 package org.hsweb.web.controller.user;
 
-import org.hsweb.web.bean.common.UpdateParam;
-import org.hsweb.web.core.authorize.annotation.Authorize;
 import org.hsweb.web.bean.common.QueryParam;
 import org.hsweb.web.bean.po.user.User;
 import org.hsweb.web.controller.GenericController;
-import org.hsweb.web.core.exception.NotFoundException;
+import org.hsweb.web.core.authorize.annotation.Authorize;
 import org.hsweb.web.core.logger.annotation.AccessLogger;
 import org.hsweb.web.core.message.ResponseMessage;
 import org.hsweb.web.service.user.UserService;
