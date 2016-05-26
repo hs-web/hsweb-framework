@@ -78,6 +78,15 @@
                 <version>2.4</version>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <aggregate>true</aggregate>
+                    <encoding>UTF-8</encoding>
+                    <charset>UTF-8</charset>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${spring.boot.version}</version>
@@ -284,18 +293,6 @@
 
             <dependency>
                 <groupId>org.activiti</groupId>
-                <artifactId>activiti-explorer</artifactId>
-                <version>${activiti.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-log4j12</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-
-            <dependency>
-                <groupId>org.activiti</groupId>
                 <artifactId>activiti-modeler</artifactId>
                 <version>${activiti.version}</version>
             </dependency>
@@ -319,7 +316,6 @@
             </snapshots>
         </repository>
     </repositories>
-
     <distributionManagement>
         <repository>
             <id>releases</id>
