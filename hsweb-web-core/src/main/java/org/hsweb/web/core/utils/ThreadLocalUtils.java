@@ -19,6 +19,10 @@ public class ThreadLocalUtils {
         return value;
     }
 
+    public static void remove(String key) {
+        local.get().remove(key);
+    }
+
     public static <T> T get(String key) {
         return ((T) local.get().get(key));
     }
