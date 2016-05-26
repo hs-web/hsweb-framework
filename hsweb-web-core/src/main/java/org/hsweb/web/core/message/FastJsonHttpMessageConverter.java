@@ -87,6 +87,7 @@ public class FastJsonHttpMessageConverter extends AbstractHttpMessageConverter<O
                 obj = message.getData();
             text = JSON.toJSONString(obj, parseFilter(message), features);
             String callback = ThreadLocalUtils.get("jsonp-callback");
+            ThreadLocalUtils.remove("jsonp-callback");
             if (callback == null) message.getCallback();
             if (!StringUtils.isNullOrEmpty(callback)) {
                 text = new StringBuilder()
