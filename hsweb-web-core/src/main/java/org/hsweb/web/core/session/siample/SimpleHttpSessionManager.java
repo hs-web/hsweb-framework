@@ -5,6 +5,7 @@ import org.hsweb.web.core.session.HttpSessionManager;
 import org.hsweb.web.core.utils.WebUtil;
 
 import javax.servlet.http.HttpSession;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -73,14 +74,14 @@ public class SimpleHttpSessionManager implements HttpSessionManager {
 
     @Override
     public void addUser(String userId, HttpSession session) {
-        sessionStorage.put(session.getId(), session);
         removeUser(userId);//踢出已经登陆
+        sessionStorage.put(session.getId(), session);
         userSessionStorage.put(userId, session);
     }
 
     @Override
     public Set<String> getUserIdList() {
-        return userSessionStorage.keySet();
+        return new HashSet<>(userSessionStorage.keySet());
     }
 
     @Override
@@ -90,7 +91,7 @@ public class SimpleHttpSessionManager implements HttpSessionManager {
 
     @Override
     public Set<String> getSessionIdList() {
-        return sessionStorage.keySet();
+        return new HashSet<>(sessionStorage.keySet());
     }
 
     @Override
