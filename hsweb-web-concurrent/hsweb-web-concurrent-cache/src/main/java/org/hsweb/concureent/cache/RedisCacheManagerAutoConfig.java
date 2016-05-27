@@ -22,12 +22,14 @@ import redis.clients.jedis.Jedis;
  */
 @EnableCaching
 @Configuration
-@ConditionalOnClass({ JedisConnection.class, RedisOperations.class, Jedis.class })
+@ConditionalOnClass({JedisConnection.class, RedisOperations.class, Jedis.class})
 public class RedisCacheManagerAutoConfig extends CachingConfigurerSupport {
 
     @Bean
     public CacheManager cacheManager(RedisTemplate redisTemplate) {
-        return new RedisCacheManager(redisTemplate);
+        RedisCacheManager redisCacheManager = new RedisCacheManager(redisTemplate);
+        redisCacheManager.setUsePrefix(true);
+        return redisCacheManager;
     }
 
     @Bean
