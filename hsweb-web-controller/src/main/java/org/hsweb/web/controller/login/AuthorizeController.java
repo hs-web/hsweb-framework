@@ -1,10 +1,14 @@
 package org.hsweb.web.controller.login;
 
+import org.apache.commons.beanutils.BeanUtils;
+import org.hsweb.web.bean.common.QueryParam;
 import org.hsweb.web.bean.po.user.User;
+import org.hsweb.web.core.authorize.annotation.Authorize;
 import org.hsweb.web.core.exception.AuthorizeException;
 import org.hsweb.web.core.exception.NotFoundException;
 import org.hsweb.web.core.logger.annotation.AccessLogger;
 import org.hsweb.web.core.message.ResponseMessage;
+import org.hsweb.web.core.session.HttpSessionManager;
 import org.hsweb.web.core.utils.WebUtil;
 import org.hsweb.web.service.config.ConfigService;
 import org.hsweb.web.service.user.UserService;
@@ -26,7 +30,6 @@ import javax.servlet.http.HttpServletRequest;
  * Created by zhouhao on 16-4-29.
  */
 @RestController
-@AccessLogger("授权")
 public class AuthorizeController {
     @Autowired(required = false)
     private CacheManager cacheManager;
@@ -37,10 +40,41 @@ public class AuthorizeController {
     @Resource
     private ConfigService configService;
 
+    @Autowired
+    private HttpSessionManager httpSessionManager;
+
+    @RequestMapping(value = "/online/total", method = RequestMethod.GET)
+    @AccessLogger("当前在线总人数")
+    @Authorize
+    public ResponseMessage onlineTotal() {
+        return ResponseMessage.ok(httpSessionManager.getUserTotal());
+    }
+
+    @RequestMapping(value = "/online", method = RequestMethod.GET)
+    @AccessLogger("当前在线用户ID")
+    @Authorize
+    public ResponseMessage online() {
+        return ResponseMessage.ok(httpSessionManager.getUserIdList());
+    }
+
+    @RequestMapping(value = "/online/list", method = RequestMethod.GET)
+    @AccessLogger("当前在线用户")
+    @Authorize
+    public ResponseMessage online(QueryParam param) {
+        param.includes("id", "username", "name", "phone", "email");
+        param.excludes("password");
+        return ResponseMessage.ok(httpSessionManager.tryGetAllUser())
+                .include(User.class, param.getIncludes())
+                .exclude(User.class, param.getExcludes());
+    }
+
     @RequestMapping(value = "/exit", method = RequestMethod.POST)
     @AccessLogger("登出")
-    public ResponseMessage exit(HttpServletRequest request) throws Exception {
-        request.getSession().removeAttribute("user");
+    public ResponseMessage exit() throws Exception {
+        User user = WebUtil.getLoginUser();
+        if (user != null) {
+            httpSessionManager.removeUser(user.getId());
+        }
         return ResponseMessage.ok();
     }
 
@@ -66,7 +100,7 @@ public class AuthorizeController {
                 error_time = 0l;
             }
             if (error_number >= maxErrorNumber)
-                throw new AuthorizeException("您的账户已被锁定登录,请" + (waitMinutes - ((now_time - error_time) / 1000 / 60)) + "分钟后再试!",400);
+                throw new AuthorizeException("您的账户已被锁定登录,请" + (waitMinutes - ((now_time - error_time) / 1000 / 60)) + "分钟后再试!", 400);
         }
         User user = userService.selectByUserName(username);
         if (user == null || user.getStatus() != 1) throw new NotFoundException("用户不存在或已注销");
@@ -84,7 +118,8 @@ public class AuthorizeController {
             userService.initAdminUser(user);
         else
             user.initRoleInfo();
-        request.getSession().setAttribute("user", user);
+        request.getSession().setAttribute("user", BeanUtils.cloneBean(user));
+        httpSessionManager.addUser(user.getId(), request.getSession());
         return ResponseMessage.ok();
     }
 
