@@ -13,7 +13,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * 默认的锁工程。用于提供JDK自带锁创建
  * Created by zhouhao on 16-4-27.
  */
-public class DefaultReadWriteLockFactory implements LockFactory {
+public class DefaultLockFactory implements LockFactory {
     protected ConcurrentMap<String, ReadWriteLock> READ_WRITE_LOCK_BASE = new ConcurrentHashMap<>();
     protected ConcurrentMap<String, Lock> LOCK_BASE = new ConcurrentHashMap<>();
 
