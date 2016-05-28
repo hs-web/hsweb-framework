@@ -4,6 +4,7 @@ import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.util.Assert;
 
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -14,13 +15,14 @@ import java.util.concurrent.locks.ReadWriteLock;
  */
 public class RedisReadWriteLock implements ReadWriteLock {
     static final String PREFIX = "lock:";
-    static final byte[] LOCK_VALUE = new byte[0];
-
+    static final long DEFAULT_EXPIRE = 60;
     private ReadLock readLock;
-
     private WriteLock writeLock;
-
     private String key;
+    private long lockKeyExpireTime = DEFAULT_EXPIRE;
+    private long waitTime = 30;
+    protected byte[] lockValue;
+    private byte[] readLockKey, writeLockKey;
 
     private RedisTemplate redisTemplate;
 
@@ -31,6 +33,9 @@ public class RedisReadWriteLock implements ReadWriteLock {
         this.redisTemplate = redisTemplate;
         readLock = new ReadLock();
         writeLock = new WriteLock();
+        readLockKey = (PREFIX + key + ".read.lock").getBytes();
+        writeLockKey = (PREFIX + key + ".write.lock").getBytes();
+        lockValue = (UUID.randomUUID().toString()).getBytes();
     }
 
     @Override
@@ -44,32 +49,44 @@ public class RedisReadWriteLock implements ReadWriteLock {
     }
 
     private byte[] getReadKey() {
-        return (PREFIX + key + ".read.lock").getBytes();
+        return readLockKey;
     }
 
     private byte[] getWriteKey() {
-        return (PREFIX + key + ".write.lock").getBytes();
+        return writeLockKey;
     }
 
     protected void sleep() {
         try {
-            Thread.sleep(10);
+            Thread.sleep(waitTime);
         } catch (InterruptedException e) {
         }
     }
 
+    public void setWaitTime(long waitTime) {
+        this.waitTime = waitTime;
+    }
+
+    public void setLockKeyExpireTime(long lockKeyExpireTime) {
+        this.lockKeyExpireTime = lockKeyExpireTime;
+    }
+
     class ReadLock implements Lock {
+        public byte[] lockValue() {
+            return new String(lockValue).concat(Thread.currentThread().getId() + "").getBytes();
+        }
+
         @Override
         public void lock() {
             redisTemplate.execute((RedisCallback<String>) connection -> {
                 boolean locked = false;
                 do {
-                    locked = connection.exists(getWriteKey());
-                    if (!locked) {
-                        connection.setNX(getReadKey(), LOCK_VALUE);
+                    if (!connection.exists(getWriteKey())) {
+                        connection.setNX(getReadKey(), lockValue());
+                        connection.expire(getReadKey(), lockKeyExpireTime);
                         locked = true;
-                    }
-                    sleep();
+                    } else
+                        sleep();
                 } while (!locked);
                 return null;
             });
@@ -81,7 +98,9 @@ public class RedisReadWriteLock implements ReadWriteLock {
             {
                 boolean writeLocked = connection.exists(getWriteKey());
                 if (!writeLocked) {
-                    connection.setNX(getReadKey(), LOCK_VALUE);
+                    if (connection.setNX(getReadKey(), lockValue)) {
+                        connection.expire(getReadKey(), lockKeyExpireTime);
+                    }
                     writeLocked = true;
                 }
                 return writeLocked;
@@ -92,8 +111,12 @@ public class RedisReadWriteLock implements ReadWriteLock {
         @Override
         public boolean tryLock() {
             return (Boolean) redisTemplate.execute((RedisCallback<Boolean>) connection ->
-                            connection.setNX(getReadKey(), LOCK_VALUE)
-            );
+            {
+                if (connection.setNX(getReadKey(), lockValue)) {
+                    connection.expire(getReadKey(), lockKeyExpireTime);
+                }
+                return false;
+            });
         }
 
         @Override
@@ -103,10 +126,9 @@ public class RedisReadWriteLock implements ReadWriteLock {
                 boolean locked = false;
                 long startWith = System.nanoTime();
                 do {
-                    locked = connection.exists(getWriteKey());
-                    if (!locked) {
-                        connection.setNX(getReadKey(), LOCK_VALUE);
-                        connection.expire(getReadKey(), 30);
+                    if (!connection.exists(getWriteKey())) {
+                        connection.setNX(getReadKey(), lockValue);
+                        connection.expire(getReadKey(), lockKeyExpireTime);
                         return true;
                     }
                     long now = System.nanoTime();
@@ -116,22 +138,30 @@ public class RedisReadWriteLock implements ReadWriteLock {
                     }
                     sleep();
                 } while (!locked);
-                return null;
+                return false;
             });
             if (error[0] == 1) {
-                throw new InterruptedException("lock time out!");
+                throw new InterruptedException("try lock time out!");
             }
             return success;
         }
 
         @Override
         public void unlock() {
-            redisTemplate.execute((RedisCallback) conn -> conn.del(getReadKey()));
+            redisTemplate.execute((RedisCallback) conn -> {
+                byte[] lock = conn.get(getReadKey());
+                if (lock == null) return null;
+                //当前读锁为自己持有 才解锁
+                if (new String(lock).equals(new String(lockValue()))) {
+                    conn.del(getReadKey());
+                }
+                return null;
+            });
         }
 
         @Override
         public Condition newCondition() {
-            return null;
+            throw new UnsupportedOperationException();
         }
     }
 
@@ -143,9 +173,10 @@ public class RedisReadWriteLock implements ReadWriteLock {
                 do {
                     readLocked = connection.exists(getReadKey());
                     if (!readLocked) {
-                        locked = connection.setNX(getWriteKey(), LOCK_VALUE);
-                    }
-                    sleep();
+                        locked = connection.setNX(getWriteKey(), lockValue);
+                        connection.expire(getWriteKey(), lockKeyExpireTime);
+                    } else
+                        sleep();
                 } while (!locked);
                 return null;
             });
@@ -157,7 +188,9 @@ public class RedisReadWriteLock implements ReadWriteLock {
             {
                 boolean readLocked = connection.exists(getReadKey());
                 if (!readLocked) {
-                    return connection.setNX(getWriteKey(), LOCK_VALUE);
+                    boolean _locked = connection.setNX(getWriteKey(), lockValue);
+                    if (_locked) connection.expire(getWriteKey(), lockKeyExpireTime);
+                    return _locked;
                 }
                 return false;
             });
@@ -168,7 +201,10 @@ public class RedisReadWriteLock implements ReadWriteLock {
         public boolean tryLock() {
             return (Boolean) redisTemplate.execute((RedisCallback<Boolean>) connection -> {
                 if (connection.exists(getReadKey())) return false;
-                return connection.setNX(getWriteKey(), LOCK_VALUE);
+                boolean locked = connection.setNX(getWriteKey(), lockValue);
+                if (locked)
+                    connection.expire(getWriteKey(), lockKeyExpireTime);
+                return locked;
             });
         }
 
@@ -179,11 +215,10 @@ public class RedisReadWriteLock implements ReadWriteLock {
                 boolean locked = false;
                 long startWith = System.nanoTime();
                 do {
-                    locked = connection.exists(getReadKey());
-                    if (!locked) {
-                        locked = connection.setNX(getWriteKey(), LOCK_VALUE);
+                    if (!connection.exists(getReadKey())) {
+                        locked = connection.setNX(getWriteKey(), lockValue);
                         if (locked) {
-                            connection.expire(getWriteKey(), 30);
+                            connection.expire(getWriteKey(), lockKeyExpireTime);
                             return true;
                         }
                     }
@@ -209,7 +244,7 @@ public class RedisReadWriteLock implements ReadWriteLock {
 
         @Override
         public Condition newCondition() {
-            return null;
+            throw new UnsupportedOperationException();
         }
     }
 }

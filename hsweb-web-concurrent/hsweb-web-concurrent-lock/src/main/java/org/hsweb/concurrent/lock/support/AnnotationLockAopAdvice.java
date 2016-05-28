@@ -49,12 +49,12 @@ public class AnnotationLockAopAdvice {
             }
         }
         try {
-            logger.debug("try lock :", name);
+            logger.debug("try lock :{}", name);
             boolean locked = _lock.tryLock(lock.waitTime(), lock.timeUnit());
             if (!locked) throw new LockException(name + "error");
             return pjp.proceed();
         } finally {
-            logger.debug("unlock :", name);
+            logger.debug("unlock :{}", name);
             unlock(_lock);
         }
     }
