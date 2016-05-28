@@ -1,18 +1,13 @@
 package org.hsweb.web.core;
 
 import org.hsweb.web.core.session.HttpSessionManager;
-import org.hsweb.web.core.session.redis.RedisHttpSessionManager;
 import org.hsweb.web.core.session.siample.SimpleHttpSessionManager;
 import org.hsweb.web.core.session.siample.UserLoginOutListener;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.core.RedisTemplate;
-
-import javax.servlet.http.HttpSessionListener;
-
 /**
  * Created by zhouhao on 16-5-6.
  */
@@ -21,7 +16,8 @@ import javax.servlet.http.HttpSessionListener;
 public class CoreAutoConfiguration {
 
     @Bean
-    @ConditionalOnMissingBean
+    @ConditionalOnMissingBean(HttpSessionManager.class)
+    @ConditionalOnWebApplication
     public HttpSessionManager simpleHttpSessionManager() {
         SimpleHttpSessionManager httpSessionManager = new SimpleHttpSessionManager();
         return httpSessionManager;
@@ -29,7 +25,8 @@ public class CoreAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(HttpSessionManager.class)
-    public HttpSessionListener sessionListener() {
+    @ConditionalOnWebApplication
+    public UserLoginOutListener sessionListener() {
         UserLoginOutListener loginOutListener = new UserLoginOutListener();
         loginOutListener.setHttpSessionManager(simpleHttpSessionManager());
         return loginOutListener;
