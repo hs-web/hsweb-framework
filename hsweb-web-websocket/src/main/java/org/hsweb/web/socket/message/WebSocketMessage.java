@@ -1,5 +1,7 @@
 package org.hsweb.web.socket.message;
 
+import com.alibaba.fastjson.JSON;
+
 import java.io.Serializable;
 import java.util.Date;
 
@@ -27,13 +29,14 @@ public class WebSocketMessage implements Serializable {
     /**
      * 消息内容
      */
-    private String content;
+    private Object content;
 
     /**
      * 发送日期
      */
     private Date sendTime;
 
+    private String sessionId;
     /**
      * 前端回掉,前端注册了此消息的回掉后，在接收到消息时，会自动触发该回掉
      */
@@ -63,11 +66,11 @@ public class WebSocketMessage implements Serializable {
         this.type = type;
     }
 
-    public String getContent() {
+    public Object getContent() {
         return content;
     }
 
-    public void setContent(String content) {
+    public void setContent(Object content) {
         this.content = content;
     }
 
@@ -85,5 +88,18 @@ public class WebSocketMessage implements Serializable {
 
     public void setCallBack(String callBack) {
         this.callBack = callBack;
+    }
+
+    public String getSessionId() {
+        return sessionId;
+    }
+
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
+    }
+
+    @Override
+    public String toString() {
+        return JSON.toJSONString(this);
     }
 }

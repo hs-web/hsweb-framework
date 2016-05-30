@@ -56,9 +56,7 @@ public class SpringCmdProcessorContainer implements CmdProcessorContainer {
     public void init() {
         Map<String, CmdProcessor> processorMap = applicationContext.getBeansOfType(CmdProcessor.class);
         if (processorMap != null) {
-            for (CmdProcessor cmdProcessor : processorMap.values()) {
-                registerCmdProcessor(cmdProcessor);
-            }
+            processorMap.values().forEach(this::registerCmdProcessor);
         }
     }
 }
