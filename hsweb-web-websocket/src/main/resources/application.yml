@@ -1,4 +1,0 @@
-#LOGGING
-logging:
-  config: classpath:logback.xml
-  path: ~/hsweb/logger/

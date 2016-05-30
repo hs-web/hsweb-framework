@@ -19,12 +19,12 @@ public class WebSocketClientTest {
 
     public static void main(String[] args) throws Exception {
         WebSocketClient client = new StandardWebSocketClient();
-        String url = "ws://localhost:8088/socket";
+        String url = "ws://localhost:8080/socket";
         client.doHandshake(new AbstractWebSocketHandler() {
             @Override
             public void afterConnectionEstablished(WebSocketSession session) throws Exception {
                 //链接成功后发送消息
-                session.sendMessage(new TextMessage("{\"cmd\":\"test\"}"));
+                session.sendMessage(new TextMessage("{\"cmd\":\"system-monitor\",\"params\":{\"type\":\"cpu\"}}"));
             }
 
             @Override

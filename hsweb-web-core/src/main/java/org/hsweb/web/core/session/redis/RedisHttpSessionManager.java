@@ -33,6 +33,16 @@ public class RedisHttpSessionManager implements HttpSessionManager {
     }
 
     @Override
+    public User getUserBySessionId(String sessionId) {
+        if (sessionId == null) return null;
+        ExpiringSession redisSession = redisOperationsSessionRepository.getSession(sessionId);
+        if (redisSession != null) {
+            return (User) redisSession.getAttribute("user");
+        }
+        return null;
+    }
+
+    @Override
     public String getSessionIdByUserId(String userId) {
         return (String) sessionRedisTemplate.execute((RedisCallback<String>) connection -> {
             String key = "http.session.user:" + userId;

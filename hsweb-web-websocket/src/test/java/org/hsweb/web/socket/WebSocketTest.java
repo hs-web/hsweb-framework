@@ -1,34 +1,23 @@
 package org.hsweb.web.socket;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.hsweb.web.socket.cmd.support.SystemMonitorProcessor;
+import org.hsweb.web.socket.message.SimpleWebSocketMessageManager;
+import org.hsweb.web.socket.message.WebSocketMessageManager;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.web.socket.config.annotation.WebSocketConfigurationSupport;
-import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
+import org.springframework.boot.autoconfigure.test.ImportAutoConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.socket.config.annotation.EnableWebSocket;
 
 /**
  * spring-boot websokcet 测试
  * Created by 浩 on 2016-01-19 0019.
  */
-@ComponentScan(basePackages = "org.hsweb.web.socket")
+@Configuration
 @EnableAutoConfiguration
-public class WebSocketTest extends WebSocketConfigurationSupport {
-
-    /**
-     * 基于命令的websocket服务
-     */
-    @Autowired
-    private CmdWebSocketHandler cmdWebSocketHandler;
-
-    /**
-     * 注册WebSocket处理器
-     */
-    @Override
-    protected void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        //绑定到 /socket
-        registry.addHandler(cmdWebSocketHandler, "/socket");
-    }
+public class WebSocketTest {
 
     /**
      * 测试步骤
@@ -38,7 +27,7 @@ public class WebSocketTest extends WebSocketConfigurationSupport {
      * 3.执行:ws.onmessage=function(message){console.log(message.data)}
      * 4.执行:ws.send('{"cmd":"test"}'); 按回车
      * 5.如果看到后台日志显示：handleMessage,id:0 msg={"cmd":"test"}，前台有接收到推送消息，则代表成功了
-     * <p/>
+     * <p>
      * 也可以运行：{@link WebSocketClientTest#main} 测试
      *
      * @throws Exception

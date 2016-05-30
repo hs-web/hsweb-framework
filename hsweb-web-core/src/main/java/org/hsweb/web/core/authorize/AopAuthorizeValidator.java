@@ -6,7 +6,9 @@ import org.hsweb.web.core.authorize.annotation.Authorize;
 import org.hsweb.web.core.authorize.validator.SimpleAuthorizeValidator;
 import org.hsweb.web.bean.po.user.User;
 import org.hsweb.web.core.exception.AuthorizeException;
+import org.hsweb.web.core.session.HttpSessionManager;
 import org.hsweb.web.core.utils.WebUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.webbuilder.utils.common.ClassUtils;
 import org.webbuilder.utils.common.StringUtils;
 
@@ -47,12 +49,19 @@ public class AopAuthorizeValidator extends SimpleAuthorizeValidator {
         return config;
     }
 
+    private HttpSessionManager httpSessionManager;
+
+    @Autowired
+    public void setHttpSessionManager(HttpSessionManager httpSessionManager) {
+        this.httpSessionManager = httpSessionManager;
+    }
+
     public boolean validate(ProceedingJoinPoint pjp) {
         AuthorizeValidatorConfig config = getConfig(pjp);
         if (config == null) return true;
-        User user = WebUtil.getLoginUser();
+        User user = httpSessionManager.getUserBySessionId(WebUtil.getHttpServletRequest().getSession().getId());
         if (user == null) throw new AuthorizeException("未登录", 401);
-        if(config.isEmpty())return true;
+        if (config.isEmpty()) return true;
         Map<String, Object> param = new LinkedHashMap<>();
         MethodSignature signature = (MethodSignature) pjp.getSignature();
         String[] names = signature.getParameterNames();

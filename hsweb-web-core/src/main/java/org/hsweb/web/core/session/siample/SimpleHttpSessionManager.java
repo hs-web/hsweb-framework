@@ -33,6 +33,13 @@ public class SimpleHttpSessionManager implements HttpSessionManager {
     }
 
     @Override
+    public User getUserBySessionId(String sessionId) {
+        if (sessionId == null) return null;
+        HttpSession session = sessionStorage.get(sessionId);
+        return session == null ? null : ((User) session.getAttribute("user"));
+    }
+
+    @Override
     public String getSessionIdByUserId(String userId) {
         HttpSession session = userSessionStorage.get(userId);
         if (session != null) {

@@ -16,6 +16,13 @@ public interface HttpSessionManager {
     String getSessionIdByUserId(String userId) ;
 
     /**
+     * 根据sessionId 获取用户信息
+     * @param sessionId 根据sessionId
+     * @return 用户信息
+     */
+    User getUserBySessionId(String sessionId) ;
+
+    /**
      * 根据用户ID从session中删除一个用户(下线)
      *
      * @param userId 要删除的用户ID

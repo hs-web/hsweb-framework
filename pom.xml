@@ -176,7 +176,11 @@
                 <artifactId>hsweb-web-concurrent-lock</artifactId>
                 <version>${project.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>org.hsweb</groupId>
+                <artifactId>hsweb-web-websocket</artifactId>
+                <version>${project.version}T</version>
+            </dependency>
             <dependency>
                 <groupId>com.oracle</groupId>
                 <artifactId>ojdbc14</artifactId>
