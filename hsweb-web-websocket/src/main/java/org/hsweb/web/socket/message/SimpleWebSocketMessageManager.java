@@ -50,9 +50,9 @@ public class SimpleWebSocketMessageManager implements WebSocketMessageManager {
                     try {
                         if (subscribe.getTopic(session.getId()).contains(message.getType()))
                             session.sendMessage(new TextMessage(message.toString()));
-                        else saveMessage(message);
                     } catch (IOException e) {
                         e.printStackTrace();
+                        saveMessage(message);
                     }
                 });
             else {
@@ -63,8 +63,6 @@ public class SimpleWebSocketMessageManager implements WebSocketMessageManager {
 
             }
             return true;
-        } else {
-            saveMessage(message);
         }
         return false;
     }
