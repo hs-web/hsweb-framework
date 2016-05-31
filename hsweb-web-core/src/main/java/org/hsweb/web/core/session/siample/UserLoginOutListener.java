@@ -17,7 +17,7 @@ public class UserLoginOutListener implements HttpSessionListener {
 
     /* Session创建事件 */
     public void sessionCreated(HttpSessionEvent se) {
-
+        logger.info("session created:" + se.getSession().getId());
     }
 
     /* Session失效事件 */
@@ -28,7 +28,6 @@ public class UserLoginOutListener implements HttpSessionListener {
             if (user != null) {
                 httpSessionManager.removeUser(user.getId());
             }
-            httpSessionManager.removeSession(session.getId());
         } catch (Exception e) {
             logger.error("remove session or user error!", e);
         }

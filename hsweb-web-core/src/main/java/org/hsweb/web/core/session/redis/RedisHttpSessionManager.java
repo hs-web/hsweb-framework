@@ -70,10 +70,10 @@ public class RedisHttpSessionManager implements HttpSessionManager {
     }
 
     @Override
-    public void addUser(String userId, HttpSession session) {
-        removeUser(userId);
+    public void addUser(User user, HttpSession session) {
+        removeUser(user.getId());
         sessionRedisTemplate.execute((RedisCallback) connection -> {
-            String key = "http.session.user:" + userId;
+            String key = "http.session.user:" + user.getId();
             String value = session.getId();
             connection.set(key.getBytes(), value.getBytes());
             return null;

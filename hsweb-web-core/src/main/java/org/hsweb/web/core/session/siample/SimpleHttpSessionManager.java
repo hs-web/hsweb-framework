@@ -57,13 +57,9 @@ public class SimpleHttpSessionManager implements HttpSessionManager {
     public void removeUser(String userId) {
         HttpSession session = userSessionStorage.get(userId);
         if (session != null) {
-            try {
-                session.removeAttribute("user");
-            } catch (Exception e) {
-            } finally {
-                sessionStorage.remove(session.getId());
-                userSessionStorage.remove(userId);
-            }
+            session.removeAttribute("user");
+            sessionStorage.remove(session.getId());
+            userSessionStorage.remove(userId);
         }
     }
 
@@ -80,10 +76,11 @@ public class SimpleHttpSessionManager implements HttpSessionManager {
     }
 
     @Override
-    public void addUser(String userId, HttpSession session) {
-        removeUser(userId);//踢出已经登陆
+    public void addUser(User user, HttpSession session) {
+        removeUser(user.getId());//踢出已经登陆
         sessionStorage.put(session.getId(), session);
-        userSessionStorage.put(userId, session);
+        userSessionStorage.put(user.getId(), session);
+        session.setAttribute("user", user);
     }
 
     @Override
