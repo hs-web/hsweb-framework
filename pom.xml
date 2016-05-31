@@ -179,7 +179,7 @@
             <dependency>
                 <groupId>org.hsweb</groupId>
                 <artifactId>hsweb-web-websocket</artifactId>
-                <version>${project.version}T</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.oracle</groupId>
