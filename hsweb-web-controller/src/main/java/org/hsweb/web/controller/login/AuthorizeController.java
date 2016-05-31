@@ -118,8 +118,7 @@ public class AuthorizeController {
             userService.initAdminUser(user);
         else
             user.initRoleInfo();
-        request.getSession().setAttribute("user", BeanUtils.cloneBean(user));
-        httpSessionManager.addUser(user.getId(), request.getSession());
+        httpSessionManager.addUser((User) BeanUtils.cloneBean(user), request.getSession());
         return ResponseMessage.ok();
     }
 
