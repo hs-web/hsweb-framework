@@ -9,6 +9,7 @@ import org.hsweb.web.bean.po.GenericPo;
 import javax.validation.constraints.NotNull;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 /**
@@ -192,7 +193,7 @@ public class Module extends GenericPo<String> implements Comparable<Module> {
 
     @Override
     public int compareTo(Module o) {
-        return getSortIndex() > o.getSortIndex() ? 1 : 1;
+        return ((Long) getSortIndex()).compareTo(o.getSortIndex());
     }
 
 }
