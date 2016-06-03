@@ -5,35 +5,23 @@
 <mapper namespace="BasicMapper">
     <!--通用查询条件-->
     <sql id="buildWhere">
-        ${@org.hsweb.web.mybatis.builder.MysqlParamBuilder@instance().buildWhere($fieldsInfo,$tableName,#this['_parameter'].terms)}
+        ${@org.hsweb.web.mybatis.builder.MysqlParamBuilder@instance().buildWhere(resultMapId,$tableName,#this['_parameter'].terms)}
     </sql>
     <!--生成查询字段-->
     <sql id="buildSelectField">
-        ${@org.hsweb.web.mybatis.builder.MysqlParamBuilder@instance().buildSelectFields($fieldsInfo,#this['_parameter'])}
+        ${@org.hsweb.web.mybatis.builder.MysqlParamBuilder@instance().buildSelectFields(resultMapId,#this['_parameter'])}
     </sql>
 
     <!--生成修改字段-->
     <sql id="buildUpdateField">
        <set>
-           ${@org.hsweb.web.mybatis.builder.MysqlParamBuilder@instance().buildUpdateFields($fieldsInfo,#this['_parameter'])}
+           ${@org.hsweb.web.mybatis.builder.MysqlParamBuilder@instance().buildUpdateFields(resultMapId,#this['_parameter'])}
        </set>
-    </sql>
-
-    <!--生成插入字段-->
-    <sql id="buildInsertField">
-        <foreach item="item" index="index" collection="$fields" open="(" separator="," close=")">${item}</foreach>
-    </sql>
-
-    <!--生成插入值-->
-    <sql id="buildInsertValues">
-        <foreach item="item" index="index" collection="$fields" open="(" separator="," close=")">
-            #{data.${$fieldsInfo[item].property==null?item:$fieldsInfo[item].property},jdbcType=${$fieldsInfo[item]['jdbcType']},javaType=${$fieldsInfo[item]['javaType']}}
-        </foreach>
     </sql>
 
     <!--生成排序字段-->
     <sql id="buildSortField">
-        ${@org.hsweb.web.mybatis.builder.MysqlParamBuilder@instance().buildOrder($fieldsInfo,$tableName,#this['_parameter'])}
+        ${@org.hsweb.web.mybatis.builder.MysqlParamBuilder@instance().buildOrder(resultMapId,$tableName,#this['_parameter'])}
     </sql>
 
     <!--生成查询sql-->
@@ -49,10 +37,7 @@
 
     <!--生成InsertSql-->
     <sql id="buildInsertSql">
-        insert into ${$tableName}
-        <include refid="BasicMapper.buildInsertField"/>
-        values
-        <include refid="BasicMapper.buildInsertValues"/>
+        insert into ${tableName} ${@org.hsweb.web.mybatis.builder.DefaultSqlParamBuilder@instance().buildInsertSql(resultMapId,#this['_parameter'])}
     </sql>
 
     <!--生成UpdateSql-->

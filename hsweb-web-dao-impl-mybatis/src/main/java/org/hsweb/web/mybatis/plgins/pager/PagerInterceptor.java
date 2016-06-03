@@ -1,6 +1,8 @@
 package org.hsweb.web.mybatis.plgins.pager;
 
 import org.apache.ibatis.executor.Executor;
+import org.apache.ibatis.executor.resultset.ResultSetHandler;
+import org.apache.ibatis.executor.statement.RoutingStatementHandler;
 import org.apache.ibatis.executor.statement.StatementHandler;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.plugin.*;
@@ -25,9 +27,6 @@ import java.util.Properties;
 @Intercepts({@Signature(type = Executor.class, method = "query", args = {MappedStatement.class, Object.class,
         RowBounds.class, ResultHandler.class})})
 @Component
-@ConfigurationProperties(
-        prefix = "spring.datasource"
-)
 public class PagerInterceptor implements Interceptor {
     protected Logger logger = LoggerFactory.getLogger(this.getClass());
     protected Map<String, PagerHelper> pagerHelperBase = new HashMap<>();
@@ -64,7 +63,7 @@ public class PagerInterceptor implements Interceptor {
 
     @Override
     public void setProperties(Properties properties) {
-
+        System.out.println(properties);
     }
 
     @PostConstruct

@@ -15,31 +15,14 @@
             <result property="sortIndex" column="sort_index" javaType="int" jdbcType="INTEGER"/>
     </resultMap>
 
-    <!--字段配置-->
-    <sql id="fieldConfig">
-        <bind name="$fieldsInfo"
-              value="#{
-                     'u_id':#{'property':'id','jdbcType':'VARCHAR','javaType':'String'}
-                    ,'name':#{'jdbcType':'VARCHAR','javaType':'String'}
-                    ,'remark':#{'jdbcType':'VARCHAR','javaType':'String'}
-                    ,'type':#{'jdbcType':'VARCHAR','javaType':'String'}
-                    ,'parent_id':#{'property':'parentId','jdbcType':'VARCHAR','javaType':'String'}
-                    ,'icon':#{'jdbcType':'VARCHAR','javaType':'String'}
-                    ,'config':#{'jdbcType':'CLOB','javaType':'String'}
-                    ,'sort_index':#{'property':'sortIndex','jdbcType':'INTEGER','javaType':'int'}
-                    }"/>
-
-        <bind name="$fields" value="$fieldsInfo.keySet()"/>
-    </sql>
-
-    <!--表名-->
-    <sql id="tableName">
-        <bind name="$tableName" value="'s_classified'"/>
+    <!--用于动态生成sql所需的配置-->
+    <sql id="config">
+        <bind name="resultMapId" value="'ClassifiedResultMap'"/>
+        <bind name="tableName" value="'s_classified'"/>
     </sql>
 
     <insert id="insert" parameterType="org.hsweb.web.bean.common.InsertParam" useGeneratedKeys="true" keyProperty="data.id" keyColumn="u_id">
-        <include refid="fieldConfig"/>
-        <include refid="tableName"/>
+        <include refid="config"/>
         <include refid="BasicMapper.buildInsertSql"/>
     </insert>
 
@@ -48,8 +31,7 @@
     </delete>
 
     <update id="update" parameterType="org.hsweb.web.bean.common.UpdateParam">
-        <include refid="fieldConfig"/>
-        <include refid="tableName"/>
+        <include refid="config"/>
         <include refid="BasicMapper.buildUpdateSql"/>
     </update>
 
@@ -58,14 +40,12 @@
     </select>
 
     <select id="select" parameterType="org.hsweb.web.bean.common.QueryParam" resultMap="ClassifiedResultMap">
-        <include refid="fieldConfig"/>
-        <include refid="tableName"/>
+        <include refid="config"/>
         <include refid="BasicMapper.buildSelectSql"/>
     </select>
 
     <select id="total" parameterType="org.hsweb.web.bean.common.QueryParam" resultType="int">
-        <include refid="fieldConfig"/>
-        <include refid="tableName"/>
+        <include refid="config"/>
         <include refid="BasicMapper.buildTotalSql"/>
     </select>
 </mapper>

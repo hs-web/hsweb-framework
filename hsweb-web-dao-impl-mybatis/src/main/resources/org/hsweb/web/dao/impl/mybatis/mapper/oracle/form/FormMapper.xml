@@ -19,35 +19,14 @@
         <result property="updateDate" column="update_date" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
     </resultMap>
 
-    <!--字段信息绑定-->
-    <sql id="fieldConfig">
-        <bind name="$fieldsInfo"
-              value="#{
-                    'u_id':#{'property':'id','jdbcType':'VARCHAR','javaType':'string'}
-                    ,'name':#{'jdbcType':'VARCHAR','javaType':'string'}
-                    ,'html':#{'jdbcType':'VARCHAR','javaType':'string'}
-                    ,'meta':#{'jdbcType':'VARCHAR','javaType':'string'}
-                    ,'config':#{'jdbcType':'VARCHAR','javaType':'string'}
-                    ,'remark':#{'jdbcType':'VARCHAR','javaType':'string'}
-                    ,'version':#{'jdbcType':'INTEGER','javaType':'int'}
-                    ,'revision':#{'jdbcType':'INTEGER','javaType':'int'}
-                    ,'release':#{'jdbcType':'INTEGER','javaType':'int'}
-                    ,'using':#{'jdbcType':'INTEGER','javaType':'boolean'}
-                    ,'create_date':#{'property':'createDate','jdbcType':'VARCHAR','javaType':'date'}
-                    ,'update_date':#{'property':'updateDate','jdbcType':'VARCHAR','javaType':'date'}
-                    }"/>
-
-        <bind name="$fields" value="$fieldsInfo.keySet()"/>
-    </sql>
-
-    <!--表名-->
-    <sql id="tableName">
-        <bind name="$tableName" value="'s_form'"/>
+    <!--用于动态生成sql所需的配置-->
+    <sql id="config">
+        <bind name="resultMapId" value="'FormResultMap'"/>
+        <bind name="tableName" value="'s_form'"/>
     </sql>
 
     <insert id="insert" parameterType="org.hsweb.web.bean.common.InsertParam" useGeneratedKeys="true" keyProperty="data.id" keyColumn="U_ID">
-        <include refid="fieldConfig"/>
-        <include refid="tableName"/>
+        <include refid="config"/>
         <include refid="BasicMapper.buildInsertSql"/>
     </insert>
 
@@ -56,8 +35,7 @@
     </delete>
 
     <update id="update" parameterType="org.hsweb.web.bean.common.UpdateParam">
-        <include refid="fieldConfig"/>
-        <include refid="tableName"/>
+        <include refid="config"/>
         <include refid="BasicMapper.buildUpdateSql"/>
     </update>
 
@@ -70,16 +48,16 @@
     </select>
 
     <select id="selectLatestList" parameterType="org.hsweb.web.bean.common.QueryParam" resultMap="FormResultMap">
-        <include refid="fieldConfig"/>
+        <include refid="config"/>
         <!--定义字段配置-->
-        <bind name="$tableName" value="'t2'"/>
+        <bind name="tableName" value="'t2'"/>
         <!--定义表名-->
         select
         <!--动态生成要查询的字段-->
         <include refid="BasicMapper.buildSelectField"/>
         from (
         select s_form.name,max(s_form.version) as version from s_form s_form
-        <include refid="tableName"/>
+        <bind name="tableName" value="'s_form'"/>
         <where>
             <!--动态查询条件-->
             <include refid="BasicMapper.buildWhere"/>
@@ -91,8 +69,7 @@
     </select>
 
     <select id="countLatestList" parameterType="org.hsweb.web.bean.common.QueryParam" resultType="int">
-        <include refid="fieldConfig"/>
-        <include refid="tableName"/>
+        <include refid="config"/>
         select count(0) as total from (
         select s_form.name,max(s_form.version) as version from s_form s_form
         <where>
@@ -103,14 +80,12 @@
     </select>
 
     <select id="select" parameterType="org.hsweb.web.bean.common.QueryParam" resultMap="FormResultMap">
-        <include refid="fieldConfig"/>
-        <include refid="tableName"/>
+        <include refid="config"/>
         <include refid="BasicMapper.buildSelectSql"/>
     </select>
 
     <select id="total" parameterType="org.hsweb.web.bean.common.QueryParam" resultType="int">
-        <include refid="fieldConfig"/>
-        <include refid="tableName"/>
+        <include refid="config"/>
         <include refid="BasicMapper.buildTotalSql"/>
     </select>
 </mapper>

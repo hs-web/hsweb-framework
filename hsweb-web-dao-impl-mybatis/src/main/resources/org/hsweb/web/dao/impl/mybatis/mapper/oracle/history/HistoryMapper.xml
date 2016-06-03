@@ -16,32 +16,14 @@
         <result property="createDate" column="create_date" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
     </resultMap>
 
-    <!--字段信息绑定-->
-    <sql id="fieldConfig">
-        <bind name="$fieldsInfo"
-              value="#{
-                    'u_id':#{'property':'id','jdbcType':'VARCHAR','javaType':'string'}
-                    ,'type':#{'jdbcType':'VARCHAR','javaType':'string'}
-                    ,'describe':#{'jdbcType':'VARCHAR','javaType':'string'}
-                    ,'primary_key_name':#{'property':'primaryKeyName','jdbcType':'VARCHAR','javaType':'string'}
-                    ,'primary_key_value':#{'property':'primaryKeyValue','jdbcType':'VARCHAR','javaType':'string'}
-                    ,'change_before':#{'property':'changeBefore','jdbcType':'VARCHAR','javaType':'string'}
-                    ,'change_after':#{'property':'changeAfter','jdbcType':'VARCHAR','javaType':'string'}
-                    ,'creator_id':#{'property':'creatorId','jdbcType':'VARCHAR','javaType':'string'}
-                    ,'create_date':#{'property':'createDate','jdbcType':'VARCHAR','javaType':'date'}
-                    }"/>
-
-        <bind name="$fields" value="$fieldsInfo.keySet()"/>
-    </sql>
-
-    <!--表名-->
-    <sql id="tableName">
-        <bind name="$tableName" value="'s_history'"/>
+    <!--用于动态生成sql所需的配置-->
+    <sql id="config">
+        <bind name="resultMapId" value="'HistoryResultMap'"/>
+        <bind name="tableName" value="'s_history'"/>
     </sql>
 
     <insert id="insert" parameterType="org.hsweb.web.bean.common.InsertParam" useGeneratedKeys="true" keyProperty="data.id" keyColumn="U_ID">
-        <include refid="fieldConfig"/>
-        <include refid="tableName"/>
+        <include refid="config"/>
         <include refid="BasicMapper.buildInsertSql"/>
     </insert>
 
@@ -50,8 +32,7 @@
     </delete>
 
     <update id="update" parameterType="org.hsweb.web.bean.common.UpdateParam">
-        <include refid="fieldConfig"/>
-        <include refid="tableName"/>
+        <include refid="config"/>
         <include refid="BasicMapper.buildUpdateSql"/>
     </update>
 
@@ -60,14 +41,12 @@
     </select>
 
     <select id="select" parameterType="org.hsweb.web.bean.common.QueryParam" resultMap="HistoryResultMap">
-        <include refid="fieldConfig"/>
-        <include refid="tableName"/>
+        <include refid="config"/>
         <include refid="BasicMapper.buildSelectSql"/>
     </select>
 
     <select id="total" parameterType="org.hsweb.web.bean.common.QueryParam" resultType="int">
-        <include refid="fieldConfig"/>
-        <include refid="tableName"/>
+        <include refid="config"/>
         <include refid="BasicMapper.buildTotalSql"/>
     </select>
 </mapper>

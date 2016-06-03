@@ -1,7 +1,10 @@
 package org.hsweb.web.mybatis.builder;
 
 import org.apache.commons.beanutils.BeanUtils;
+import org.apache.ibatis.mapping.ResultMap;
+import org.apache.ibatis.mapping.ResultMapping;
 import org.hsweb.web.bean.common.*;
+import org.hsweb.web.mybatis.utils.ResultMapsUtils;
 import org.hsweb.web.mybatis.utils.SqlAppender;
 import org.webbuilder.utils.common.DateTimeUtils;
 import org.webbuilder.utils.common.StringUtils;
@@ -25,9 +28,28 @@ public class DefaultSqlParamBuilder {
 
     protected Map<TermType, KeyWordMapper> mapperMap = new HashMap<>();
 
+    protected static final Map<Class, String> simpleName = new HashMap<>();
     private static DefaultSqlParamBuilder instance = new DefaultSqlParamBuilder();
 
     public DefaultSqlParamBuilder() {
+        simpleName.put(Integer.class, "int");
+        simpleName.put(Byte.class, "byte");
+        simpleName.put(Double.class, "double");
+        simpleName.put(Float.class, "float");
+        simpleName.put(Boolean.class, "boolean");
+        simpleName.put(Long.class, "long");
+        simpleName.put(Short.class, "short");
+        simpleName.put(Character.class, "char");
+        simpleName.put(String.class, "string");
+        simpleName.put(int.class, "int");
+        simpleName.put(double.class, "double");
+        simpleName.put(float.class, "float");
+        simpleName.put(boolean.class, "boolean");
+        simpleName.put(long.class, "long");
+        simpleName.put(short.class, "short");
+        simpleName.put(char.class, "char");
+        simpleName.put(byte.class, "byte");
+
         mapperMap.put(TermType.eq, (paramKey, tableName, field, jdbcType) ->
                         new SqlAppender().add(tableName, ".", field.getField(), " = ", "#{", paramKey, "}").toString()
         );
@@ -59,7 +81,7 @@ public class DefaultSqlParamBuilder {
             if (objects.size() == 1)
                 objects.add(objects.get(0));
             field.setValue(objects);
-            sqlAppender.add(tableName, ".", field.getField()," ").addSpc("between")
+            sqlAppender.add(tableName, ".", field.getField(), " ").addSpc("between")
                     .add(" #{", paramKey, "[0]}")
                     .add(" and ", "#{", paramKey, "[1]}");
             return sqlAppender.toString();
@@ -72,7 +94,7 @@ public class DefaultSqlParamBuilder {
             if (objects.size() == 1)
                 objects.add(objects.get(0));
             field.setValue(objects);
-            sqlAppender.add(tableName, ".", field.getField()," ").addSpc("not between")
+            sqlAppender.add(tableName, ".", field.getField(), " ").addSpc("not between")
                     .add(" #{", paramKey, "[0]}")
                     .add(" and ", "#{", paramKey, "[1]}");
             return sqlAppender.toString();
@@ -100,7 +122,7 @@ public class DefaultSqlParamBuilder {
                     if (date != null) field.setValue(date);
                 }
             }
-            sqlAppender.add(tableName, ".",field.getField(), " <= #{", paramKey, "}");
+            sqlAppender.add(tableName, ".", field.getField(), " <= #{", paramKey, "}");
             return sqlAppender.toString();
         });
 
@@ -140,14 +162,86 @@ public class DefaultSqlParamBuilder {
         return mapperMap.get(type);
     }
 
-    public String buildWhere(Map<String, Object> fieldConfig, String tableName, List<Term> terms) {
+    protected Map<String, Object> createConfig(String resultMapId) {
+        ResultMap resultMaps = ResultMapsUtils.getResultMap(resultMapId);
+        Map<String, Object> fieldConfig = new HashMap<>();
+        resultMaps.getResultMappings().forEach(resultMapping -> {
+            if (resultMapping.getNestedQueryId() == null) {
+                Map<String, Object> config = new HashMap<>();
+                config.put("jdbcType", resultMapping.getJdbcType());
+                config.put("javaType", getJavaType(resultMapping.getJavaType()));
+                config.put("property", resultMapping.getProperty());
+                fieldConfig.put(resultMapping.getColumn(), config);
+            }
+        });
+        resultMaps.getIdResultMappings().forEach(resultMapping -> {
+            Map<String, Object> config = new HashMap<>();
+            config.put("jdbcType", resultMapping.getJdbcType());
+            config.put("javaType", getJavaType(resultMapping.getJavaType()));
+            config.put("property", resultMapping.getProperty());
+            fieldConfig.put(resultMapping.getColumn(), config);
+        });
+        return fieldConfig;
+    }
+
+    public String buildWhere(String resultMapId, String tableName, List<Term> terms) {
+        Map<String, Object> fieldConfig = createConfig(resultMapId);
         SqlAppender sqlAppender = new SqlAppender();
         buildWhere(fieldConfig, "", tableName, terms, sqlAppender);
         if (sqlAppender.size() > 0) sqlAppender.removeFirst();
         return sqlAppender.toString();
     }
 
-    public String buildSelectFields(Map<String, Object> fieldConfig, String tableName, SqlParam param) {
+    public String buildInsertSql(String resultMapId, InsertParam param) {
+        ResultMap resultMaps = ResultMapsUtils.getResultMap(resultMapId);
+        Map<String, ResultMapping> mappings = new HashMap<>();
+        resultMaps.getResultMappings().forEach(resultMapping -> {
+            if (resultMapping.getNestedQueryId() == null) {
+                mappings.put(resultMapping.getColumn(), resultMapping);
+            }
+        });
+        Object data = param.getData();
+        List<Object> listData;
+        if (data instanceof Collection) {
+            listData = new ArrayList<>(((Collection) data));
+        } else {
+            listData = Arrays.asList(param.getData());
+        }
+        param.setData(listData);
+        String fields = mappings.keySet().stream().reduce((f1, f2) -> f1 + "," + f2).get();
+        //批量
+        int size = listData.size();
+        SqlAppender batchSql = new SqlAppender();
+        batchSql.add("(", fields, ")values");
+        for (int i = 0; i < size; i++) {
+            int index = i;
+            if (i > 0) {
+                batchSql.add(",");
+            }
+            String values = mappings.keySet().stream().map((f1) -> {
+                SqlAppender appender = new SqlAppender();
+                ResultMapping mapping = mappings.get(f1);
+
+                appender.add("#{data[" + index + "].",
+                        mapping.getProperty(),
+                        ",javaType=", getJavaType(mapping.getJavaType()),
+                        ",jdbcType=", mapping.getJdbcType(),
+                        "}");
+                return appender.toString();
+            }).reduce((s1, s2) -> s1 + "," + s2).get();
+            batchSql.add("(", values, ")");
+        }
+        return batchSql.toString();
+    }
+
+    protected String getJavaType(Class type) {
+        String javaType = simpleName.get(type);
+        if (javaType == null) javaType = type.getName();
+        return javaType;
+    }
+
+    public String buildSelectFields(String resultMapId, String tableName, SqlParam param) {
+        Map<String, Object> fieldConfig = createConfig(resultMapId);
         if (param == null) return "*";
         Set<String> includes = param.getIncludes(),
                 excludes = param.getExcludes();
@@ -166,7 +260,8 @@ public class DefaultSqlParamBuilder {
         return appender.toString();
     }
 
-    public String buildUpdateFields(Map<String, Object> fieldConfig, UpdateParam param) throws Exception {
+    public String buildUpdateFields(String resultMapId, UpdateParam param) throws Exception {
+        Map<String, Object> fieldConfig = createConfig(resultMapId);
         Map<String, String> propertyMapper = getPropertyMapper(fieldConfig, param);
         SqlAppender appender = new SqlAppender();
         propertyMapper.forEach((k, v) -> {
@@ -196,7 +291,8 @@ public class DefaultSqlParamBuilder {
         return appender.toString();
     }
 
-    public String buildOrder(Map<String, Object> fieldConfig, String tableName, QueryParam param) throws Exception {
+    public String buildOrder(String resultMapId, String tableName, QueryParam param) throws Exception {
+        Map<String, Object> fieldConfig = createConfig(resultMapId);
         QueryParam tmp = new QueryParam();
         tmp.setSorts(param.getSorts());
         Map<String, String> propertyMapper = getPropertyMapper(fieldConfig, tmp);

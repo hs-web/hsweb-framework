@@ -23,59 +23,55 @@
     
     <mapper namespace="org.hsweb.web.dao.user.UserMapper">
         <resultMap id="UserResultMap" type="User">
-            <id property="u_id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
-            <!--***********-->
+            <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
+            <result property="username" column="username" javaType="String" jdbcType="VARCHAR"/>
+            <result property="password" column="password" javaType="String" jdbcType="VARCHAR"/>
+            <result property="name" column="name" javaType="String" jdbcType="VARCHAR"/>
+            <result property="email" column="email" javaType="String" jdbcType="VARCHAR"/>
+            <result property="phone" column="phone" javaType="String" jdbcType="VARCHAR"/>
+            <result property="status" column="status" javaType="int" jdbcType="INTEGER"/>
+            <result property="createDate" column="create_date" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+            <result property="updateDate" column="update_date" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
         </resultMap>
-        <!--字段信息配置-->
-        <sql id="fieldConfig">
-            <bind name="$fieldsInfo"
-                  value="#{
-                        'u_id':#{'jdbcType':'VARCHAR','javaType':'string'}
-                        ,'username':#{'jdbcType':'VARCHAR','javaType':'string'}
-                        ,'password':#{'jdbcType':'VARCHAR','javaType':'string'}
-                        ,'name':#{'jdbcType':'VARCHAR','javaType':'string'}
-                        ,'email':#{'jdbcType':'VARCHAR','javaType':'string'}
-                        ,'phone':#{'jdbcType':'VARCHAR','javaType':'string'}
-                        ,'status':#{'jdbcType':'INTEGER','javaType':'int'}
-                        ,'create_date':#{'jdbcType':'TIMESTAMP','javaType':'date'}
-                        ,'update_date':#{'jdbcType':'TIMESTAMP','javaType':'date'}
-                        }"/>
-            <bind name="$fields" value="$fieldsInfo.keySet()"/>
-        </sql>
-        <!--表名-->
-        <sql id="tableName">
-            <bind name="$tableName" value="'s_user'"/>
+        <!--用于动态生成sql所需的配置-->
+        <sql id="config">
+            <bind name="resultMapId" value="'UserResultMap'"/>
+            <bind name="tableName" value="'s_user'"/>
         </sql>
     
-        <insert id="insert" parameterType="User" useGeneratedKeys="true" keyProperty="data.u_id" keyColumn="U_ID">
-            <include refid="fieldConfig"/>
-            <include refid="tableName"/>
+        <insert id="insert" parameterType="User" useGeneratedKeys="true" keyProperty="data.id" keyColumn="U_ID">
+            <include refid="config"/>
             <include refid="BasicMapper.buildInsertSql"/>
         </insert>
     
-        <delete id="delete" parameterType="UserRole">
-            delete from s_user where u_id=#{u_id}
+        <delete id="delete" parameterType="org.hsweb.web.bean.common.DeleteParam">
+            delete from s_user where u_id=#{term.primaryKey}
         </delete>
     
+        <update id="updatePassword" parameterType="User">
+            update s_user set password=#{password,jdbcType=VARCHAR} where u_id = #{id}
+        </update>
+    
         <update id="update" parameterType="org.hsweb.web.bean.common.UpdateParam">
-            <include refid="fieldConfig"/>
-            <include refid="tableName"/>
+            <include refid="config"/>
             <include refid="BasicMapper.buildUpdateSql"/>
         </update>
-        
+    
+        <select id="selectByUserName" parameterType="string" resultMap="UserResultMap">
+            select * from s_user where username=#{username}
+        </select>
+    
         <select id="selectByPk" parameterType="string" resultMap="UserResultMap">
             select * from s_user where u_id=#{u_id}
         </select>
     
         <select id="select" parameterType="org.hsweb.web.bean.common.QueryParam" resultMap="UserResultMap">
-            <include refid="fieldConfig"/>
-            <include refid="tableName"/>
+            <include refid="config"/>
             <include refid="BasicMapper.buildSelectSql"/>
         </select>
     
         <select id="total" parameterType="org.hsweb.web.bean.common.QueryParam" resultType="int">
-            <include refid="fieldConfig"/>
-            <include refid="tableName"/>
+            <include refid="config"/>
             <include refid="BasicMapper.buildTotalSql"/>
         </select>
     </mapper>

@@ -5,42 +5,31 @@
 <mapper namespace="BasicMapper">
     <!--通用查询条件-->
     <sql id="buildWhere">
-        ${@org.hsweb.web.mybatis.builder.DefaultSqlParamBuilder@instance().buildWhere($fieldsInfo,$tableName,#this['_parameter'].terms)}
+        ${@org.hsweb.web.mybatis.builder.DefaultSqlParamBuilder@instance().buildWhere(resultMapId,tableName,#this['_parameter'].terms)}
     </sql>
+
     <!--生成查询字段-->
     <sql id="buildSelectField">
-        ${@org.hsweb.web.mybatis.builder.DefaultSqlParamBuilder@instance().buildSelectFields($fieldsInfo,$tableName,#this['_parameter'])}
+        ${@org.hsweb.web.mybatis.builder.DefaultSqlParamBuilder@instance().buildSelectFields(resultMapId,tableName,#this['_parameter'])}
     </sql>
 
     <!--生成修改字段-->
     <sql id="buildUpdateField">
         <set>
-        ${@org.hsweb.web.mybatis.builder.DefaultSqlParamBuilder@instance().buildUpdateFields($fieldsInfo,#this['_parameter'])}
+            ${@org.hsweb.web.mybatis.builder.DefaultSqlParamBuilder@instance().buildUpdateFields(resultMapId,#this['_parameter'])}
         </set>
-    </sql>
-
-    <!--生成插入字段-->
-    <sql id="buildInsertField">
-        <foreach item="item" index="index" collection="$fields" open="(" separator="," close=")">${item}</foreach>
-    </sql>
-
-    <!--生成插入值-->
-    <sql id="buildInsertValues">
-        <foreach item="item" index="index" collection="$fields" open="(" separator="," close=")">
-            #{data.${$fieldsInfo[item].property==null?item:$fieldsInfo[item].property},jdbcType=${$fieldsInfo[item]['jdbcType']},javaType=${$fieldsInfo[item]['javaType']}}
-        </foreach>
     </sql>
 
     <!--生成排序字段-->
     <sql id="buildSortField">
-        ${@org.hsweb.web.mybatis.builder.DefaultSqlParamBuilder@instance().buildOrder($fieldsInfo,$tableName,#this['_parameter'])}
+        ${@org.hsweb.web.mybatis.builder.DefaultSqlParamBuilder@instance().buildOrder(resultMapId,tableName,#this['_parameter'])}
     </sql>
 
     <!--生成查询sql-->
     <sql id="buildSelectSql">
         select
         <include refid="BasicMapper.buildSelectField"/>
-        from ${$tableName}
+        from ${tableName}
         <where>
             <include refid="BasicMapper.buildWhere"/>
         </where>
@@ -49,15 +38,12 @@
 
     <!--生成InsertSql-->
     <sql id="buildInsertSql">
-        insert into ${$tableName}
-        <include refid="BasicMapper.buildInsertField"/>
-        values
-        <include refid="BasicMapper.buildInsertValues"/>
+        insert into ${tableName} ${@org.hsweb.web.mybatis.builder.DefaultSqlParamBuilder@instance().buildInsertSql(resultMapId,#this['_parameter'])}
     </sql>
 
     <!--生成UpdateSql-->
     <sql id="buildUpdateSql">
-        update ${$tableName}
+        update ${tableName}
         <include refid="BasicMapper.buildUpdateField"/>
         <where>
             <include refid="BasicMapper.buildWhere"/>
@@ -69,7 +55,7 @@
 
     <!--生成查询数量sql-->
     <sql id="buildTotalSql">
-        select count(0) as "total" from ${$tableName}
+        select count(0) as "total" from ${tableName}
         <where>
             <include refid="BasicMapper.buildWhere"/>
         </where>

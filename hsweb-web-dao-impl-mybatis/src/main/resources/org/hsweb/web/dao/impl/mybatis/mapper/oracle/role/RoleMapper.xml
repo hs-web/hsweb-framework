@@ -12,26 +12,13 @@
                     select="org.hsweb.web.dao.role.RoleModuleMapper.selectByRoleId"/>
     </resultMap>
 
-    <!--字段信息绑定-->
-    <sql id="fieldConfig">
-        <bind name="$fieldsInfo"
-              value="#{
-                    'u_id':#{'property':'id','jdbcType':'VARCHAR','javaType':'string'}
-                    ,'name':#{'jdbcType':'VARCHAR','javaType':'string'}
-                    ,'remark':#{'jdbcType':'VARCHAR','javaType':'string'}
-                    ,'type':#{'jdbcType':'VARCHAR','javaType':'string'}
-                    }"/>
-        <bind name="$fields" value="$fieldsInfo.keySet()"/>
+    <!--用于动态生成sql所需的配置-->
+    <sql id="config">
+        <bind name="resultMapId" value="'RoleResultMap'"/>
+        <bind name="tableName" value="'s_role'"/>
     </sql>
-
-    <!--表名-->
-    <sql id="tableName">
-        <bind name="$tableName" value="'s_role'"/>
-    </sql>
-
     <insert id="insert" parameterType="Role" useGeneratedKeys="true" keyProperty="data.id" keyColumn="U_ID">
-        <include refid="fieldConfig"/>
-        <include refid="tableName"/>
+        <include refid="config"/>
         <include refid="BasicMapper.buildInsertSql"/>
     </insert>
 
@@ -40,8 +27,7 @@
     </delete>
 
     <update id="update" parameterType="org.hsweb.web.bean.common.UpdateParam">
-        <include refid="fieldConfig"/>
-        <include refid="tableName"/>
+        <include refid="config"/>
         <include refid="BasicMapper.buildUpdateSql"/>
     </update>
 
@@ -50,14 +36,12 @@
     </select>
 
     <select id="select" parameterType="org.hsweb.web.bean.common.QueryParam" resultMap="RoleResultMap">
-        <include refid="fieldConfig"/>
-        <include refid="tableName"/>
+        <include refid="config"/>
         <include refid="BasicMapper.buildSelectSql"/>
     </select>
 
     <select id="total" parameterType="org.hsweb.web.bean.common.QueryParam" resultType="int">
-        <include refid="fieldConfig"/>
-        <include refid="tableName"/>
+        <include refid="config"/>
         <include refid="BasicMapper.buildTotalSql"/>
     </select>
 </mapper>

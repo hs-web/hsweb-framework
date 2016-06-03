@@ -14,30 +14,14 @@
         <result property="status" column="status" javaType="int" jdbcType="INTEGER" />
     </resultMap>
 
-    <!--字段配置-->
-    <sql id="fieldConfig">
-        <bind name="$fieldsInfo"
-              value="#{
-                    'u_id':#{'property':'id','jdbcType':'VARCHAR','javaType':'string'}
-                    ,'name':#{'jdbcType':'VARCHAR','javaType':'string'}
-                    ,'type':#{'jdbcType':'VARCHAR','javaType':'string'}
-                    ,'content':#{'jdbcType':'VARCHAR','javaType':'string'}
-                    ,'remark':#{'jdbcType':'VARCHAR','javaType':'string'}
-                    ,'path':#{'jdbcType':'VARCHAR','javaType':'string'}
-                    ,'status':#{'jdbcType':'INTEGER','javaType':'int'}
-                    }"/>
-
-        <bind name="$fields" value="$fieldsInfo.keySet()"/>
-    </sql>
-
-    <!--表名-->
-    <sql id="tableName">
-        <bind name="$tableName" value="'s_script'"/>
+    <!--用于动态生成sql所需的配置-->
+    <sql id="config">
+        <bind name="resultMapId" value="'DynamicScriptResultMap'"/>
+        <bind name="tableName" value="'s_script'"/>
     </sql>
 
     <insert id="insert" parameterType="DynamicScript" useGeneratedKeys="true" keyProperty="data.u_id" keyColumn="U_ID">
-        <include refid="fieldConfig"/>
-        <include refid="tableName"/>
+        <include refid="config"/>
         <include refid="BasicMapper.buildInsertSql"/>
     </insert>
 
@@ -47,8 +31,7 @@
 
 
     <update id="update" parameterType="org.hsweb.web.bean.common.UpdateParam">
-        <include refid="fieldConfig"/>
-        <include refid="tableName"/>
+        <include refid="config"/>
         <include refid="BasicMapper.buildUpdateSql"/>
     </update>
 
@@ -57,14 +40,12 @@
     </select>
 
     <select id="select" parameterType="org.hsweb.web.bean.common.QueryParam" resultMap="DynamicScriptResultMap">
-        <include refid="fieldConfig"/>
-        <include refid="tableName"/>
+        <include refid="config"/>
         <include refid="BasicMapper.buildSelectSql"/>
     </select>
 
     <select id="total" parameterType="org.hsweb.web.bean.common.QueryParam" resultType="int">
-        <include refid="fieldConfig"/>
-        <include refid="tableName"/>
+        <include refid="config"/>
         <include refid="BasicMapper.buildTotalSql"/>
     </select>
 </mapper>
