@@ -73,4 +73,6 @@ public interface HttpSessionManager {
      * @param userId 用户ID
      */
     boolean isLogin(String userId);
+
+    void addListener(HttpSessionManagerListener listener);
 }

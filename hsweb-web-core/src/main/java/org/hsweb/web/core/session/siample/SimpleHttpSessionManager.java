@@ -1,6 +1,7 @@
 package org.hsweb.web.core.session.siample;
 
 import org.hsweb.web.bean.po.user.User;
+import org.hsweb.web.core.session.AbstractHttpSessionManager;
 import org.hsweb.web.core.session.HttpSessionManager;
 import org.hsweb.web.core.utils.WebUtil;
 
@@ -14,7 +15,7 @@ import java.util.stream.Collectors;
 /**
  * Created by zhouhao on 16-5-27.
  */
-public class SimpleHttpSessionManager implements HttpSessionManager {
+public class SimpleHttpSessionManager extends AbstractHttpSessionManager {
 
     /**
      * httpSession存储器，sessionId:HttpSession
@@ -60,6 +61,7 @@ public class SimpleHttpSessionManager implements HttpSessionManager {
             session.removeAttribute("user");
             sessionStorage.remove(session.getId());
             userSessionStorage.remove(userId);
+            onUserLoginOut(userId,session);
         }
     }
 
@@ -69,6 +71,7 @@ public class SimpleHttpSessionManager implements HttpSessionManager {
         if (session != null) {
             User user = WebUtil.getLoginUser(session);
             if (user != null) {
+                onUserLoginOut(user.getId(),session);
                 userSessionStorage.remove(user.getId());
             }
             sessionStorage.remove(sessionId);
@@ -81,6 +84,7 @@ public class SimpleHttpSessionManager implements HttpSessionManager {
         sessionStorage.put(session.getId(), session);
         userSessionStorage.put(user.getId(), session);
         session.setAttribute("user", user);
+        onUserLogin(user,session);
     }
 
     @Override

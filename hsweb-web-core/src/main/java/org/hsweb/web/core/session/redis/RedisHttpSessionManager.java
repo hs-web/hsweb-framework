@@ -1,20 +1,24 @@
 package org.hsweb.web.core.session.redis;
 
 import org.hsweb.web.bean.po.user.User;
-import org.hsweb.web.core.session.HttpSessionManager;
+import org.hsweb.web.core.session.AbstractHttpSessionManager;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.session.ExpiringSession;
 import org.springframework.session.data.redis.RedisOperationsSessionRepository;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpSessionContext;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
  * Created by zhouhao on 16-5-27.
  */
-public class RedisHttpSessionManager implements HttpSessionManager {
+public class RedisHttpSessionManager extends AbstractHttpSessionManager {
 
     private RedisTemplate sessionRedisTemplate;
 
@@ -57,6 +61,9 @@ public class RedisHttpSessionManager implements HttpSessionManager {
         sessionRedisTemplate.execute((RedisCallback) connection -> {
             String key = "http.session.user:" + userId;
             String sessionId = getSessionIdByUserId(userId);
+            ExpiringSession redisSession = redisOperationsSessionRepository.getSession(sessionId);
+            HttpSession session = new HttpSessionWrapper(redisSession);
+            onUserLoginOut(userId, session);
             removeSession(sessionId);
             return connection.del(key.getBytes());
         });
@@ -76,6 +83,7 @@ public class RedisHttpSessionManager implements HttpSessionManager {
             String key = "http.session.user:" + user.getId();
             String value = session.getId();
             connection.set(key.getBytes(), value.getBytes());
+            onUserLogin(user, session);
             return null;
         });
     }
@@ -126,5 +134,103 @@ public class RedisHttpSessionManager implements HttpSessionManager {
 
     public void setSessionRedisTemplate(RedisTemplate sessionRedisTemplate) {
         this.sessionRedisTemplate = sessionRedisTemplate;
+    }
+
+    private final class HttpSessionWrapper implements HttpSession {
+        private ExpiringSession session;
+        private boolean invalidated;
+        private boolean old;
+
+        public HttpSessionWrapper(ExpiringSession session) {
+            this.session = session;
+        }
+
+        public long getCreationTime() {
+            return session.getCreationTime();
+        }
+
+        public String getId() {
+            return session.getId();
+        }
+
+        public long getLastAccessedTime() {
+            checkState();
+            return session.getLastAccessedTime();
+        }
+
+        public ServletContext getServletContext() {
+            return null;
+        }
+
+        public void setMaxInactiveInterval(int interval) {
+            session.setMaxInactiveIntervalInSeconds(interval);
+        }
+
+        public int getMaxInactiveInterval() {
+            return session.getMaxInactiveIntervalInSeconds();
+        }
+
+        @SuppressWarnings("deprecation")
+        public HttpSessionContext getSessionContext() {
+            return null;
+        }
+
+        public Object getAttribute(String name) {
+            checkState();
+            return session.getAttribute(name);
+        }
+
+        public Object getValue(String name) {
+            return getAttribute(name);
+        }
+
+        public Enumeration<String> getAttributeNames() {
+            checkState();
+            return Collections.enumeration(session.getAttributeNames());
+        }
+
+        public String[] getValueNames() {
+            checkState();
+            Set<String> attrs = session.getAttributeNames();
+            return attrs.toArray(new String[0]);
+        }
+
+        public void setAttribute(String name, Object value) {
+            checkState();
+            session.setAttribute(name, value);
+        }
+
+        public void putValue(String name, Object value) {
+            setAttribute(name, value);
+        }
+
+        public void removeAttribute(String name) {
+            checkState();
+            session.removeAttribute(name);
+        }
+
+        public void removeValue(String name) {
+            removeAttribute(name);
+        }
+
+        public void invalidate() {
+            checkState();
+            invalidated = true;
+        }
+
+        public void setNew(boolean isNew) {
+            this.old = !isNew;
+        }
+
+        public boolean isNew() {
+            checkState();
+            return !old;
+        }
+
+        private void checkState() {
+            if (invalidated) {
+                throw new IllegalStateException("The HttpSession has already be invalidated.");
+            }
+        }
     }
 }

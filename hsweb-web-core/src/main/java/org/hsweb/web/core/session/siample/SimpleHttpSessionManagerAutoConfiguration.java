@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 @ConditionalOnMissingBean(HttpSessionManager.class)
 @ConditionalOnWebApplication
 public class SimpleHttpSessionManagerAutoConfiguration {
+
     @Bean
     public HttpSessionManager simpleHttpSessionManager() {
         SimpleHttpSessionManager httpSessionManager = new SimpleHttpSessionManager();

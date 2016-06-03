@@ -1,4 +1,4 @@
-package org.hsweb.web.core.authorize.annotation;
+package org.hsweb.web.core.jsonp;
 
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
