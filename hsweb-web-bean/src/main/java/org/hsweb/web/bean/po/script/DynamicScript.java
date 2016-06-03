@@ -18,11 +18,11 @@ public class DynamicScript extends GenericPo<String> {
     //名称
     @Length(min = 4, message = "名称长度不能少于4")
     @NotNull
-    @Pattern(regexp = "[a-zA-Z]+", message = "名称只能为大小写字母组成")
+    @Pattern(regexp = "^[a-zA-Z0-9_-]+$", message = "名称只能为大小写字母和下划线组成")
     private String name;
 
     //类型
-    @Pattern(regexp = "(js)|(groovy)|(spel)|(ognl)", message = "类型仅支持js,groovy,spel,ognl")
+    @Pattern(regexp = "(js)|(groovy)|(spel)|(ognl)|(java)", message = "类型仅支持js,groovy,spel,ognl,java")
     private String type;
 
     //内容
