@@ -29,7 +29,6 @@ public class CmdWebSocketHandler extends TextWebSocketHandler {
     @Autowired
     private HttpSessionManager httpSessionManager;
 
-    @Autowired
     private WebSocketMessageManager webSocketMessageManager;
 
     @Autowired
@@ -77,4 +76,7 @@ public class CmdWebSocketHandler extends TextWebSocketHandler {
         }
     }
 
+    public void setWebSocketMessageManager(WebSocketMessageManager webSocketMessageManager) {
+        this.webSocketMessageManager = webSocketMessageManager;
+    }
 }

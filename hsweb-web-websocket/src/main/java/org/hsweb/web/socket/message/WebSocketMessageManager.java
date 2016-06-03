@@ -1,6 +1,5 @@
 package org.hsweb.web.socket.message;
 
-import org.hsweb.web.bean.po.user.User;
 import org.hsweb.web.socket.WebSocketSessionListener;
 import org.springframework.web.socket.WebSocketSession;
 

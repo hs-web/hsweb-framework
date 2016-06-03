@@ -24,6 +24,7 @@ public abstract class AbstractCmdProcessor implements CmdProcessor {
         this.httpSessionManager = httpSessionManager;
     }
 
+    @Autowired
     public void setWebSocketMessageManager(WebSocketMessageManager webSocketMessageManager) {
         this.webSocketMessageManager = webSocketMessageManager;
     }
