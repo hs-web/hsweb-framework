@@ -50,10 +50,10 @@ public class DataBaseManagerServiceImplTest extends AbstractTestCase {
                 .where("createDate$GT", "2015-12-10");
 
         userMapper.select(queryParam);
-        User user = userMapper.selectByPk("admin");
-        user.setId("aaaa");
-        userMapper.insert(new InsertParam<>(user));
-        userMapper.update(new UpdateParam<>(user).includes("username"));
+//        User user = userMapper.selectByPk("admin");
+//        user.setId("aaaa");
+       // userMapper.insert(new InsertParam<>(user));
+       // userMapper.update(new UpdateParam<>(user).includes("username"));
     }
 
     @Test

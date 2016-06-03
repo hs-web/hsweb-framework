@@ -83,7 +83,7 @@ public abstract class AbstractServiceImpl<Po, PK> implements GenericService<Po, 
 
     @Transactional(readOnly = true)
     public List<Po> select() throws Exception {
-        return this.getMapper().select(new QueryParam());
+        return this.getMapper().select(new QueryParam().noPaging());
     }
 
     @Override
