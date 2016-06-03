@@ -1,5 +1,6 @@
 package org.hsweb.web.controller;
 
+import org.hsweb.web.core.exception.BusinessException;
 import org.hsweb.web.core.exception.NotFoundException;
 import org.hsweb.web.core.exception.ValidationException;
 import org.hsweb.web.core.message.ResponseMessage;
@@ -17,6 +18,14 @@ public class ControllerExceptionTranslator {
     @ResponseBody
     ResponseMessage handleException(ValidationException exception) {
         return ResponseMessage.error(exception.getMessage(), 400);
+    }
+
+
+    @ExceptionHandler(BusinessException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseBody
+    ResponseMessage handleException(BusinessException exception) {
+        return ResponseMessage.error(exception.getMessage(), exception.getStatus());
     }
 
 

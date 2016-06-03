@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by zhouhao on 16-5-16.
@@ -16,10 +17,10 @@ public class DynamicFormAuthorizeValidatorConfiguration implements ExpressionSco
     @Autowired(required = false)
     private List<DynamicFormAuthorizeValidator> dynamicFormAuthorizeValidators;
 
-    public boolean validate(String formName, User user, String... actions) {
+    public boolean validate(String formName, User user, Map<String,Object> param, String... actions) {
         if (dynamicFormAuthorizeValidators != null) {
             for (DynamicFormAuthorizeValidator validator : dynamicFormAuthorizeValidators) {
-                if (validator.validate(formName, user, actions)) {
+                if (validator.validate(formName, user, param, actions)) {
                     return true;
                 }
             }
