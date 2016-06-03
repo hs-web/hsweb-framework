@@ -24,7 +24,8 @@
     </insert>
 
     <delete id="delete" parameterType="org.hsweb.web.bean.common.DeleteParam">
-        delete from s_config where u_id=#{term.primaryKey}
+        <include refid="config"/>
+        <include refid="BasicMapper.buildDeleteSql"/>
     </delete>
 
     <update id="update" parameterType="org.hsweb.web.bean.common.UpdateParam">

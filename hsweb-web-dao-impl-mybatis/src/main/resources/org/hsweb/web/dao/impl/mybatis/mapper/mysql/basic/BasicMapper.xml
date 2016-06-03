@@ -51,7 +51,16 @@
             </if>
         </where>
     </sql>
-
+    <!--生成删除sql-->
+    <sql id="buildDeleteSql">
+        delete from ${tableName}
+        <where>
+            <include refid="BasicMapper.buildWhere"/>
+            <if test="terms.size()==0">
+                u_id is null
+            </if>
+        </where>
+    </sql>
     <!--生成查询数量sql-->
     <sql id="buildTotalSql">
         select count(0) as "total" from ${$tableName}
