@@ -25,4 +25,8 @@ public class InsertParam<T> extends SqlParam<InsertParam<T>> {
     public void setData(T data) {
         this.data = data;
     }
+
+    public static <T> InsertParam<T> build(T data) {
+        return new InsertParam<>(data);
+    }
 }

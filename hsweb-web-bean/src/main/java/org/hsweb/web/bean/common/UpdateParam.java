@@ -26,4 +26,7 @@ public class UpdateParam<T> extends SqlParam<UpdateParam<T>> {
         this.data = data;
     }
 
+    public static <T> UpdateParam<T> build(T data) {
+        return new UpdateParam<>(data);
+    }
 }

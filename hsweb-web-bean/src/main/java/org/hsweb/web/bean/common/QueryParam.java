@@ -127,11 +127,14 @@ public class QueryParam extends SqlParam<QueryParam> implements Serializable {
     }
 
     public List<Sort> getSorts() {
-        return  sorts;
+        return sorts;
     }
 
     public void setSorts(List<Sort> sorts) {
         this.sorts = sorts;
     }
 
+    public static QueryParam build() {
+        return new QueryParam();
+    }
 }
