@@ -70,6 +70,11 @@ public class UserServiceImpl extends AbstractServiceImpl<User, String> implement
     }
 
     @Override
+    public List<String> batchInsert(List<User> data, boolean skipFail) throws Exception {
+        throw new UnsupportedOperationException("不支持此操作");
+    }
+
+    @Override
     public int update(User data) throws Exception {
         tryValidPo(data);
         User old = this.selectByUserName(data.getUsername());

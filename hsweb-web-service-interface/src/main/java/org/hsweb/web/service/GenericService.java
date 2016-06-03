@@ -31,6 +31,20 @@ public interface GenericService<Po, Pk> {
      */
     Pk insert(Po data) throws Exception;
 
+    default List<Pk> batchInsert(List<Po> data) throws Exception {
+        return batchInsert(data, false);
+    }
+
+    /**
+     * 批量添加数据
+     *
+     * @param data     数据集合
+     * @param skipFail 是否跳过验证失败的的数据
+     * @return 添加后产生的主键集合
+     * @throws Exception 异常信息
+     */
+    List<Pk> batchInsert(List<Po> data, boolean skipFail) throws Exception;
+
     /**
      * 根据主键删除记录
      *
@@ -98,6 +112,7 @@ public interface GenericService<Po, Pk> {
 
     /**
      * 查询只返回单个结果
+     *
      * @param param 查询条件
      * @return 单个结果
      * @throws Exception

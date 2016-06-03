@@ -20,7 +20,7 @@ public interface GenericMapper<Po, Pk> {
      * @return 添加后生成的主键
      * @throws Exception 异常信息
      */
-    void insert(InsertParam<Po> param) throws Exception;
+    int insert(InsertParam<Po> param) throws Exception;
 
     /**
      * 根据条件删除数据

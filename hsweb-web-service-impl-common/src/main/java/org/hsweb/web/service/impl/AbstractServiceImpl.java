@@ -5,7 +5,6 @@ import org.hsweb.web.bean.po.GenericPo;
 import org.hsweb.web.bean.valid.ValidResults;
 import org.hsweb.web.core.exception.NotFoundException;
 import org.hsweb.web.core.exception.ValidationException;
-import org.hsweb.web.core.utils.RandomUtil;
 import org.hsweb.web.dao.GenericMapper;
 import org.hsweb.web.service.GenericService;
 import org.slf4j.Logger;
@@ -15,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -52,25 +52,51 @@ public abstract class AbstractServiceImpl<Po, PK> implements GenericService<Po, 
             primaryKey = (PK) ((GenericPo) data).getId();
         }
         tryValidPo(data);
-        getMapper().insert(new InsertParam<>(data));
+        getMapper().insert(InsertParam.build(data));
         return primaryKey;
+    }
+
+    public List<PK> batchInsert(List<Po> data, boolean skipFail) throws Exception {
+        List<PK> pkList = new ArrayList<>();
+        List<Po> insertData = new ArrayList<>();
+        //build
+        for (Po po : data) {
+            if (data instanceof GenericPo) {
+                if (((GenericPo) data).getId() == null)
+                    ((GenericPo) data).setId(GenericPo.createUID());
+                PK primaryKey = (PK) ((GenericPo) data).getId();
+                try {
+                    tryValidPo(po);
+                    insertData.add(po);
+                    pkList.add(primaryKey);
+                } catch (ValidationException e) {
+                    if (!skipFail) throw e;
+                    else if (logger.isWarnEnabled()) {
+                        logger.warn("data validate fail:{}", e);
+                    }
+                }
+
+            }
+        }
+        getMapper().insert((InsertParam) InsertParam.build(insertData));
+        return pkList;
     }
 
     @Override
     public int delete(PK pk) throws Exception {
-        return getMapper().delete(new DeleteParam().where("primaryKey", pk));
+        return getMapper().delete(DeleteParam.build().where("id", pk));
     }
 
     @Override
     public int update(Po data) throws Exception {
-        return getMapper().update(new UpdateParam<>(data));
+        return getMapper().update(UpdateParam.build(data));
     }
 
     @Override
     public int update(List<Po> data) throws Exception {
         int i = 0;
         for (Po po : data) {
-            i += getMapper().update(new UpdateParam<>(po));
+            i += getMapper().update(UpdateParam.build(po));
         }
         return i;
     }
@@ -83,7 +109,7 @@ public abstract class AbstractServiceImpl<Po, PK> implements GenericService<Po, 
 
     @Transactional(readOnly = true)
     public List<Po> select() throws Exception {
-        return this.getMapper().select(new QueryParam().noPaging());
+        return this.getMapper().select(QueryParam.build().noPaging());
     }
 
     @Override
