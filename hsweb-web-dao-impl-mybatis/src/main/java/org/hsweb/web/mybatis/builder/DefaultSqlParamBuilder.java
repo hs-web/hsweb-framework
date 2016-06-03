@@ -262,6 +262,7 @@ public class DefaultSqlParamBuilder {
 
     public String buildUpdateFields(String resultMapId, UpdateParam param) throws Exception {
         Map<String, Object> fieldConfig = createConfig(resultMapId);
+        param.excludes("id");
         Map<String, String> propertyMapper = getPropertyMapper(fieldConfig, param);
         SqlAppender appender = new SqlAppender();
         propertyMapper.forEach((k, v) -> {
