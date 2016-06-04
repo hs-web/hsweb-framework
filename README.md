@@ -17,4 +17,4 @@
 
 # 使用
 参照:[hsweb-platform](https://github.com/hs-web/hsweb-platform)
-示例:[hsweb.me](https://hsweb.me/admin/index.html)
+示例:[hsweb.me](http://hsweb.me/admin/index.html)
