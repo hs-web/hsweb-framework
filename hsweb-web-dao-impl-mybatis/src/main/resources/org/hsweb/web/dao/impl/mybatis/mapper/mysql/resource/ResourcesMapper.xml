@@ -21,7 +21,7 @@
         <bind name="tableName" value="'s_resources'"/>
     </sql>
 
-    <insert id="insert" parameterType="Resources" useGeneratedKeys="true" keyProperty="data.id" keyColumn="u_id">
+    <insert id="insert" parameterType="Resources" >
         <include refid="config"/>
         <include refid="BasicMapper.buildInsertSql"/>
     </insert>

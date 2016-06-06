@@ -17,7 +17,7 @@
         <bind name="resultMapId" value="'RoleResultMap'"/>
         <bind name="tableName" value="'s_role'"/>
     </sql>
-    <insert id="insert" parameterType="Role" useGeneratedKeys="true" keyProperty="data.id" keyColumn="U_ID">
+    <insert id="insert" parameterType="Role" >
         <include refid="config"/>
         <include refid="BasicMapper.buildInsertSql"/>
     </insert>

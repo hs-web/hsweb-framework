@@ -1,8 +1,10 @@
 package org.hsweb.web.service.impl.form;
 
+import org.hsweb.ezorm.executor.SqlExecutor;
+import org.hsweb.ezorm.run.Database;
+import org.hsweb.ezorm.run.Table;
 import org.hsweb.web.core.authorize.ExpressionScopeBean;
 import org.hsweb.web.bean.po.form.Form;
-import org.hsweb.web.core.exception.BusinessException;
 import org.hsweb.web.service.form.DynamicFormService;
 import org.hsweb.web.service.form.FormService;
 import org.hsweb.web.service.impl.AbstractTestCase;
@@ -13,15 +15,11 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
-import org.webbuilder.sql.DataBase;
-import org.webbuilder.sql.param.insert.InsertParam;
-import org.webbuilder.sql.param.query.QueryParam;
-import org.webbuilder.sql.param.update.UpdateParam;
-import org.webbuilder.sql.support.executor.SqlExecutor;
 import org.webbuilder.utils.file.FileUtils;
 
 import javax.annotation.Resource;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -36,7 +34,7 @@ public class FormServiceImplTest extends AbstractTestCase {
     @Resource
     private DynamicFormService dynamicFormService;
     @Resource
-    protected DataBase dataBase;
+    protected Database dataBase;
 
     @Resource
     protected SqlExecutor sqlExecutor;
@@ -98,12 +96,16 @@ public class FormServiceImplTest extends AbstractTestCase {
     @Test
     public void testDeploy() throws Exception {
         formService.deploy(form.getId());
-        dataBase.getTable("test_form").createInsert()
-                .insert(new InsertParam().value("u_id", "test").value("name", "张三"));
-        dataBase.getTable("test_form").createUpdate().update(new UpdateParam().set("u_id", "test2").where("u_id", "test"));
+        dataBase.getTable("test_form").createInsert().value(new HashMap<String, Object>() {{
+            put("u_id", "test");
+            put("name", "张三");
+        }}).exec();
 
-        Map<String, Object> data = dataBase.getTable("test_form")
-                .createQuery().single(new QueryParam().where("name$LIKE", "张三"));
+        dataBase.getTable("test_form").createUpdate().set("u_id", "test2").where("u_id", "test").exec();
+
+        Table<Map<String, Object>> table = dataBase.getTable("test_form");
+
+        Map<String, Object> data = table.createQuery().where("name$LIKE", "张三").single();
 
         Assert.assertEquals("张三", data.get("name"));
         Assert.assertEquals("test2", data.get("u_id"));

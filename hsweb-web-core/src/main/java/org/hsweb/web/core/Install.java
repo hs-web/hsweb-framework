@@ -1,5 +1,8 @@
 package org.hsweb.web.core;
 
+import org.hsweb.ezorm.executor.SqlExecutor;
+import org.hsweb.ezorm.render.SqlAppender;
+import org.hsweb.ezorm.render.support.simple.SimpleSQL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,9 +13,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.Assert;
-import org.webbuilder.sql.param.SqlAppender;
-import org.webbuilder.sql.support.common.CommonSql;
-import org.webbuilder.sql.support.executor.SqlExecutor;
 import org.webbuilder.utils.file.FileUtils;
 
 import javax.annotation.PostConstruct;
@@ -60,7 +60,7 @@ public class Install {
         try {
             boolean firstInstall = false;
             try {
-                sqlExecutor.exec(new CommonSql("select * from s_user where 1=2"));
+                sqlExecutor.exec(new SimpleSQL("select * from s_user where 1=2"));
             } catch (Exception e) {
                 firstInstall = true;
             }
@@ -86,7 +86,7 @@ public class Install {
                 });
                 sqlList.forEach((sql) -> {
                     try {
-                        sqlExecutor.exec(new CommonSql(sql));
+                        sqlExecutor.exec(new SimpleSQL(sql));
                     } catch (Exception e) {
                         logger.warn("install sql fail", e);
                     }

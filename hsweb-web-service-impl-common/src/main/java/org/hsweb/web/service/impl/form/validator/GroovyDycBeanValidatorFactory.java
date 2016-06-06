@@ -1,12 +1,12 @@
 package org.hsweb.web.service.impl.form.validator;
 
+import org.hsweb.ezorm.meta.FieldMetaData;
+import org.hsweb.ezorm.meta.TableMetaData;
+import org.hsweb.ezorm.meta.expand.Validator;
+import org.hsweb.ezorm.meta.expand.ValidatorFactory;
 import org.hsweb.web.core.exception.BusinessException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.webbuilder.sql.FieldMetaData;
-import org.webbuilder.sql.TableMetaData;
-import org.webbuilder.sql.validator.Validator;
-import org.webbuilder.sql.validator.ValidatorFactory;
 import org.webbuilder.utils.common.StringUtils;
 import org.webbuilder.utils.script.engine.DynamicScriptEngine;
 import org.webbuilder.utils.script.engine.DynamicScriptEngineFactory;
@@ -24,6 +24,7 @@ public class GroovyDycBeanValidatorFactory implements ValidatorFactory {
     private javax.validation.Validator hibernateValidator;
 
     private Map<String, Validator> base = new HashMap<>();
+
     private static final Map<Class, String> simpleType = new HashMap<>();
 
     protected static DynamicScriptEngine engine = DynamicScriptEngineFactory.getEngine("groovy");
@@ -48,8 +49,12 @@ public class GroovyDycBeanValidatorFactory implements ValidatorFactory {
     }
 
     @Override
-    public Validator getValidator(TableMetaData metaData) {
-        return base.get(metaData.getName());
+    public Validator createValidator(TableMetaData metaData) {
+        Validator validator = base.get(metaData.getName());
+        if (validator == null) {
+            validator = initValidator(metaData);
+        }
+        return validator;
     }
 
     /**
@@ -58,7 +63,6 @@ public class GroovyDycBeanValidatorFactory implements ValidatorFactory {
      * @param metaData 表结构
      * @return 验证器对象
      */
-    @Override
     public Validator initValidator(TableMetaData metaData) {
         StringBuilder script = new StringBuilder();
         String className = StringUtils.concat(basePackage, ".", metaData.getName());
@@ -71,7 +75,7 @@ public class GroovyDycBeanValidatorFactory implements ValidatorFactory {
         for (FieldMetaData fieldMetaData : metaData.getFields()) {
             String typeName = simpleType.get(fieldMetaData.getJavaType());
             if (typeName == null) typeName = fieldMetaData.getJavaType().getName();
-            if (fieldMetaData.getValidator().isEmpty()) continue;
+            if (fieldMetaData.getValidator()==null|| fieldMetaData.getValidator().isEmpty()) continue;
             for (String ann : fieldMetaData.getValidator()) {
                 hasValidator = true;
                 script.append("\t@").append(ann).append("\n");
@@ -85,7 +89,7 @@ public class GroovyDycBeanValidatorFactory implements ValidatorFactory {
         for (FieldMetaData fieldMetaData : metaData.getFields()) {
             String typeName = simpleType.get(fieldMetaData.getJavaType());
             if (typeName == null) typeName = fieldMetaData.getJavaType().getName();
-            if (fieldMetaData.getValidator().isEmpty()) continue;
+            if (fieldMetaData.getValidator()==null||fieldMetaData.getValidator().isEmpty()) continue;
             script.append("public ")
                     .append(typeName).append(" get")
                     .append(StringUtils.toUpperCaseFirstOne(fieldMetaData.getName()))

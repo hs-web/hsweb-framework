@@ -1,5 +1,6 @@
 package org.hsweb.web.controller;
 
+import com.alibaba.fastjson.JSON;
 import org.hsweb.web.core.exception.BusinessException;
 import org.hsweb.web.core.exception.NotFoundException;
 import org.hsweb.web.core.exception.ValidationException;
@@ -18,6 +19,13 @@ public class ControllerExceptionTranslator {
     @ResponseBody
     ResponseMessage handleException(ValidationException exception) {
         return ResponseMessage.error(exception.getMessage(), 400);
+    }
+
+    @ExceptionHandler(org.hsweb.ezorm.exception.ValidationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    ResponseMessage handleException(org.hsweb.ezorm.exception.ValidationException exception) {
+        return ResponseMessage.error(JSON.toJSONString(exception.getValidateResult()), 400);
     }
 
 

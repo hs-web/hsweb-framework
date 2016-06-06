@@ -1,10 +1,10 @@
 package org.hsweb.web.service.impl.system;
 
+import org.hsweb.ezorm.executor.SqlExecutor;
 import org.hsweb.web.bean.common.database.TableField;
 import org.hsweb.web.service.system.DataBaseManagerService;
 import org.hsweb.web.service.system.SqlExecuteProcess;
 import org.springframework.stereotype.Service;
-import org.webbuilder.sql.support.executor.SqlExecutor;
 
 import javax.annotation.Resource;
 import java.util.List;

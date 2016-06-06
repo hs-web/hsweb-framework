@@ -6,7 +6,7 @@
     <groupId>org.hsweb</groupId>
     <artifactId>hsweb-framework</artifactId>
     <packaging>pom</packaging>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.1-SNAPSHOT</version>
     <modules>
         <module>hsweb-web-dao-interface</module>
         <module>hsweb-web-dao-impl-mybatis</module>
@@ -40,6 +40,7 @@
         <cglib.version>3.2.2</cglib.version>
         <aspectj.version>1.6.12</aspectj.version>
         <hibernate.validator.version>5.1.1.Final</hibernate.validator.version>
+        <hsweb.ezorm.version>1.0-SNAPSHOT</hsweb.ezorm.version>
         <webbuilder.version>1.0-SNAPSHOT</webbuilder.version>
     </properties>
 
@@ -111,24 +112,30 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.webbuilder</groupId>
-                <artifactId>wb-sql-util</artifactId>
-                <version>${webbuilder.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-api</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-log4j12</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>ch.qos.logback</groupId>
-                        <artifactId>logback-classic</artifactId>
-                    </exclusion>
-                </exclusions>
+                <groupId>org.hsweb</groupId>
+                <artifactId>hsweb-easy-orm</artifactId>
+                <version>${hsweb.ezorm.version}</version>
             </dependency>
+
+            <!--<dependency>-->
+                <!--<groupId>org.webbuilder</groupId>-->
+                <!--<artifactId>wb-sql-util</artifactId>-->
+                <!--<version>${webbuilder.version}</version>-->
+                <!--<exclusions>-->
+                    <!--<exclusion>-->
+                        <!--<groupId>org.slf4j</groupId>-->
+                        <!--<artifactId>slf4j-api</artifactId>-->
+                    <!--</exclusion>-->
+                    <!--<exclusion>-->
+                        <!--<groupId>org.slf4j</groupId>-->
+                        <!--<artifactId>slf4j-log4j12</artifactId>-->
+                    <!--</exclusion>-->
+                    <!--<exclusion>-->
+                        <!--<groupId>ch.qos.logback</groupId>-->
+                        <!--<artifactId>logback-classic</artifactId>-->
+                    <!--</exclusion>-->
+                <!--</exclusions>-->
+            <!--</dependency>-->
 
             <dependency>
                 <groupId>org.webbuilder</groupId>
@@ -299,7 +306,6 @@
             </dependency>
 
         </dependencies>
-
     </dependencyManagement>
     <repositories>
         <repository>

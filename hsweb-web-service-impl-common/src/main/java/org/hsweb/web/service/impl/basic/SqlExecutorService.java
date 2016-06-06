@@ -1,25 +1,22 @@
 package org.hsweb.web.service.impl.basic;
 
+import org.hsweb.ezorm.executor.AbstractJdbcSqlExecutor;
+import org.hsweb.ezorm.executor.SQL;
+import org.hsweb.ezorm.meta.expand.ObjectWrapper;
+import org.hsweb.ezorm.meta.expand.SimpleMapWrapper;
+import org.hsweb.ezorm.render.support.simple.SimpleSQL;
 import org.hsweb.web.core.authorize.ExpressionScopeBean;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.webbuilder.sql.SQL;
-import org.webbuilder.sql.support.common.CommonSql;
-import org.webbuilder.sql.support.executor.AbstractJdbcSqlExecutor;
-import org.webbuilder.sql.support.executor.HashMapWrapper;
-import org.webbuilder.sql.support.executor.ObjectWrapper;
 
 import javax.annotation.Resource;
 import javax.sql.DataSource;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
-/**
- * SQL执行服务类，用于执行原生sql
- * Created by 浩 on 2015-10-09 0009.
- */
 @Service(value = "sqlExecutor")
 @Transactional(rollbackFor = Throwable.class)
 public class SqlExecutorService extends AbstractJdbcSqlExecutor implements ExpressionScopeBean {
@@ -39,37 +36,37 @@ public class SqlExecutorService extends AbstractJdbcSqlExecutor implements Expre
 
     @Override
     @Transactional(readOnly = true)
-    public <T> List<T> list(SQL sql, ObjectWrapper<T> wrapper) throws Exception {
+    public <T> List<T> list(SQL sql, ObjectWrapper<T> wrapper) throws SQLException {
         return super.list(sql, wrapper);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public <T> T single(SQL sql, ObjectWrapper<T> wrapper) throws Exception {
+    public <T> T single(SQL sql, ObjectWrapper<T> wrapper) throws SQLException {
         return super.single(sql, wrapper);
     }
 
     @Transactional(readOnly = true)
-    public List<Map<String, Object>> list(SQL sql) throws Exception {
-        List<Map<String, Object>> data = list(sql, new HashMapWrapper());
+    public List<Map<String, Object>> list(SQL sql) throws SQLException {
+        List<Map<String, Object>> data = list(sql, new SimpleMapWrapper());
         return data;
     }
 
     @Transactional(readOnly = true)
     public Map<String, Object> single(SQL sql) throws Exception {
-        Map<String, Object> data = single(sql, new HashMapWrapper());
+        Map<String, Object> data = single(sql, new SimpleMapWrapper());
         return data;
     }
 
     @Transactional(readOnly = true)
     public List<Map<String, Object>> list(String sql) throws Exception {
-        List<Map<String, Object>> data = list(create(sql), new HashMapWrapper());
+        List<Map<String, Object>> data = list(create(sql), new SimpleMapWrapper());
         return data;
     }
 
     @Transactional(readOnly = true)
     public List<Map<String, Object>> list(String sql, Map<String, Object> param) throws Exception {
-        List<Map<String, Object>> data = list(create(sql, param), new HashMapWrapper());
+        List<Map<String, Object>> data = list(create(sql, param), new SimpleMapWrapper());
         return data;
     }
 
@@ -86,11 +83,11 @@ public class SqlExecutorService extends AbstractJdbcSqlExecutor implements Expre
     }
 
     public SQL create(String sql) {
-        return new CommonSql(sql);
+        return new SimpleSQL(sql);
     }
 
     public SQL create(String sql, Map<String, Object> param) {
-        CommonSql sql1 = new CommonSql(sql, param);
+        SimpleSQL sql1 = new SimpleSQL(sql, param);
         return sql1;
     }
 }

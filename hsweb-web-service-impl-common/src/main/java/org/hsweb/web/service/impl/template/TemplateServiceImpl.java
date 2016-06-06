@@ -131,7 +131,7 @@ public class TemplateServiceImpl extends AbstractServiceImpl<Template, String> i
     @Override
     @Transactional(readOnly = true)
     public Template selectLatest(String name) throws Exception {
-        QueryParam param = QueryParam.newInstance()
+        QueryParam param = QueryParam.build()
                 .where("name", name).orderBy("version").desc().doPaging(0, 1);
         List<Template> templates = selectLatestList(param);
         return templates.size() > 0 ? templates.get(0) : null;
@@ -140,7 +140,7 @@ public class TemplateServiceImpl extends AbstractServiceImpl<Template, String> i
     @Override
     @Cacheable(value = CACHE_NAME, key = "'template.name.'+#name+':'+#version")
     public Template selectByVersion(String name, int version) throws Exception {
-        QueryParam param = QueryParam.newInstance().where("name", name).and("version", version);
+        QueryParam param = QueryParam.build().where("name", name).and("version", version);
         return this.selectSingle(param);
     }
 
@@ -157,7 +157,7 @@ public class TemplateServiceImpl extends AbstractServiceImpl<Template, String> i
     @Override
     @Cacheable(value = CACHE_NAME, key = "'template.using.name.'+#name")
     public Template selectUsing(String name) throws Exception {
-        QueryParam param = QueryParam.newInstance().where("name", name).and("using", true);
+        QueryParam param = QueryParam.build().where("name", name).and("using", true);
         return this.selectSingle(param);
     }
 }

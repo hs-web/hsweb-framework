@@ -1,5 +1,6 @@
 package org.hsweb.web.controller;
 
+import org.hsweb.ezorm.exception.ValidationException;
 import org.hsweb.web.core.exception.BusinessException;
 import org.hsweb.web.core.exception.ExceptionHandler;
 import org.hsweb.web.core.message.ResponseMessage;
@@ -101,6 +102,23 @@ public class ExceptionHandlerConfiguration {
             public ResponseMessage handle(Throwable e) {
                 logger.error("", e);
                 return ResponseMessage.error(e.getMessage());
+            }
+        };
+        return handler;
+    }
+
+    @Bean
+    @Order(600)
+    public ExceptionHandler validationExceptionHandler() {
+        ExceptionHandler handler = new ExceptionHandler() {
+            @Override
+            public <T extends Throwable> boolean support(Class<T> e) {
+                return ClassUtils.instanceOf(e, ValidationException.class);
+            }
+
+            @Override
+            public ResponseMessage handle(Throwable e) {
+                return ResponseMessage.error(String.valueOf(((ValidationException) e).getValidateResult()), 400);
             }
         };
         return handler;

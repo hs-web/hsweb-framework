@@ -70,7 +70,7 @@ public class DynamicFormController {
     @Authorize(expression = "#dynamicFormAuthorizeValidator.validate(#name,#user,#paramsMap,'C')")
     public ResponseMessage insert(@PathVariable("name") String name,
                                   @RequestBody(required = true) Map<String, Object> data) throws Exception {
-        String pk = dynamicFormService.insert(name, new InsertMapParam(data));
+        String pk = dynamicFormService.insert(name,data);
         return ResponseMessage.ok(pk);
     }
 

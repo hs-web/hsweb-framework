@@ -1,10 +1,16 @@
 package org.hsweb.web.service.impl.form;
 
 import com.alibaba.fastjson.JSON;
+import org.hsweb.ezorm.meta.FieldMetaData;
+import org.hsweb.ezorm.meta.TableMetaData;
+import org.hsweb.ezorm.meta.expand.PropertyWrapper;
+import org.hsweb.ezorm.run.*;
 import org.hsweb.concurrent.lock.annotation.LockName;
 import org.hsweb.concurrent.lock.annotation.ReadLock;
 import org.hsweb.concurrent.lock.annotation.WriteLock;
 import org.hsweb.web.bean.common.*;
+import org.hsweb.web.bean.common.QueryParam;
+import org.hsweb.web.bean.common.UpdateParam;
 import org.hsweb.web.bean.po.GenericPo;
 import org.hsweb.web.bean.po.form.Form;
 import org.hsweb.web.bean.po.history.History;
@@ -14,6 +20,7 @@ import org.hsweb.web.core.exception.BusinessException;
 import org.hsweb.web.core.exception.NotFoundException;
 import org.hsweb.web.service.form.DynamicFormDataValidator;
 import org.hsweb.web.service.form.DynamicFormService;
+import org.hsweb.web.service.form.FormParser;
 import org.hsweb.web.service.form.FormService;
 import org.hsweb.web.service.history.HistoryService;
 import org.slf4j.Logger;
@@ -23,16 +30,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.webbuilder.office.excel.ExcelIO;
 import org.webbuilder.office.excel.config.Header;
-import org.webbuilder.sql.*;
-import org.webbuilder.sql.exception.CreateException;
-import org.webbuilder.sql.exception.TriggerException;
-import org.webbuilder.sql.param.ExecuteCondition;
-import org.webbuilder.sql.trigger.TriggerResult;
 import org.webbuilder.utils.common.StringUtils;
 
 import javax.annotation.Resource;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.sql.JDBCType;
+import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -48,7 +52,7 @@ public class DynamicFormServiceImpl implements DynamicFormService, ExpressionSco
     protected FormParser formParser;
 
     @Autowired
-    protected DataBase dataBase;
+    protected Database database;
 
     @Resource
     protected FormService formService;
@@ -74,17 +78,18 @@ public class DynamicFormServiceImpl implements DynamicFormService, ExpressionSco
             default:
                 dataType = "varchar(32)";
         }
-        FieldMetaData id = new FieldMetaData("u_id", String.class, dataType);
-        id.setPrimaryKey(true);
-        id.setNotNull(true);
+        FieldMetaData id = new FieldMetaData("u_id", String.class, dataType, JDBCType.VARCHAR);
         id.setComment("主键");
-        metaData.attr("primaryKey", "u_id");
+        id.setProperty("read-only", true);
+
+        metaData.setPrimaryKeys(new HashSet<>(Arrays.asList("u_id")));
+        metaData.setProperty("primaryKey", "u_id");
         metaData.addField(id);
 
     }
 
     @Override
-    public Object parseMeta(Form form) throws Exception {
+    public TableMetaData parseMeta(Form form) throws Exception {
         return formParser.parse(form);
     }
 
@@ -98,18 +103,18 @@ public class DynamicFormServiceImpl implements DynamicFormService, ExpressionSco
         //首次部署
         if (history == null) {
             try {
-                dataBase.createTable(metaData);
-            } catch (CreateException e) {
-                dataBase.updateTable(metaData);
+                database.createTable(metaData);
+            } catch (SQLException e) {
+                database.reloadTable(metaData);
             }
         } else {
             Form lastDeploy = JSON.parseObject(history.getChangeAfter(), Form.class);
             TableMetaData lastDeployMetaData = formParser.parse(lastDeploy);
             initDefaultField(lastDeployMetaData);
             //向上发布
-            dataBase.updateTable(lastDeployMetaData);//先放入旧的结构
+            database.reloadTable(lastDeployMetaData);//先放入旧的结构
             //更新结构
-            dataBase.alterTable(metaData);
+            database.alterTable(metaData);
         }
     }
 
@@ -117,17 +122,19 @@ public class DynamicFormServiceImpl implements DynamicFormService, ExpressionSco
     @WriteLock
     @LockName(value = "'form.lock.'+#form.name", isExpression = true)
     public void unDeploy(Form form) throws Exception {
-        dataBase.removeTable(form.getName());
+        database.removeTable(form.getName());
     }
 
     public Table getTableByName(String name) throws Exception {
-        Table table = dataBase.getTable(name.toUpperCase());
-        if (table == null)
-            table = dataBase.getTable(name.toLowerCase());
-        if (table == null) {
+        try {
+            Table table = database.getTable(name);
+            if (table == null) {
+                throw new NotFoundException("表单[" + name + "]不存在");
+            }
+            return table;
+        } catch (Exception e) {
             throw new NotFoundException("表单[" + name + "]不存在");
         }
-        return table;
     }
 
     @Override
@@ -138,12 +145,11 @@ public class DynamicFormServiceImpl implements DynamicFormService, ExpressionSco
         PagerResult<T> result = new PagerResult<>();
         Table table = getTableByName(name);
         Query query = table.createQuery();
-        QueryParamProxy proxy = QueryParamProxy.build(param);
-        int total = query.total(proxy);
+        query.setParam(param);
+        int total = query.total();
         result.setTotal(total);
         param.rePaging(total);
-        proxy = QueryParamProxy.build(param);
-        result.setData(query.list(proxy));
+        result.setData(query.list(param.getPageIndex(), param.getPageSize()));
         return result;
     }
 
@@ -153,10 +159,8 @@ public class DynamicFormServiceImpl implements DynamicFormService, ExpressionSco
     @Transactional(readOnly = true)
     public <T> List<T> select(String name, QueryParam param) throws Exception {
         Table table = getTableByName(name);
-        Query query = table.createQuery();
-        param.setPaging(false);
-        QueryParamProxy proxy = QueryParamProxy.build(param);
-        return query.list(proxy);
+        Query query = table.createQuery().setParam(param);
+        return query.list();
     }
 
     @Override
@@ -165,33 +169,32 @@ public class DynamicFormServiceImpl implements DynamicFormService, ExpressionSco
     @Transactional(readOnly = true)
     public int total(String name, QueryParam param) throws Exception {
         Table table = getTableByName(name);
-        Query query = table.createQuery();
-        param.setPaging(false);
-        QueryParamProxy proxy = QueryParamProxy.build(param);
-        return query.total(proxy);
+        Query query = table.createQuery().setParam(param);
+        return query.total();
     }
 
     @Override
     @ReadLock
     @LockName(value = "'form.lock.'+#name", isExpression = true)
-    public String insert(String name, InsertParam<Map<String, Object>> param) throws Exception {
+    public String insert(String name, Map<String, Object> data) throws Exception {
         Table table = getTableByName(name);
-        Insert insert = table.createInsert();
-        InsertParamProxy paramProxy = InsertParamProxy.build(param);
         String primaryKeyName = getPrimaryKeyName(name);
         String pk = GenericPo.createUID();
-        paramProxy.value(primaryKeyName, pk);
-        insert.insert(paramProxy);
+        data.put(primaryKeyName, pk);
+        Insert insert = table.createInsert().value(data);
+        insert.exec();
         return pk;
     }
 
     @Override
     public String saveOrUpdate(String name, Map<String, Object> data) throws Exception {
-        String id = getRepeatDataId(name, data);
+        String id = (String) data.get(getPrimaryKeyName(name));
+        if (id == null)
+            id = getRepeatDataId(name, data);
         if (id != null) {
-            update(name, new UpdateMapParam(data).where(getPrimaryKeyName(name), id));
+            updateByPk(name, id, UpdateParam.build(data));
         } else {
-            id = insert(name, new InsertMapParam(data));
+            id = insert(name, data);
         }
         return id;
     }
@@ -214,8 +217,8 @@ public class DynamicFormServiceImpl implements DynamicFormService, ExpressionSco
     public boolean deleteByPk(String name, String pk) throws Exception {
         String primaryKeyName = getPrimaryKeyName(name);
         Table table = getTableByName(name);
-        Delete delete = table.createDelete();
-        return delete.delete(DeleteParamProxy.build(new DeleteParam()).where(primaryKeyName, pk)) == 1;
+        Delete delete = table.createDelete().where(primaryKeyName, pk);
+        return delete.exec() == 1;
     }
 
     @Override
@@ -224,7 +227,8 @@ public class DynamicFormServiceImpl implements DynamicFormService, ExpressionSco
     public int delete(String name, DeleteParam where) throws Exception {
         Table table = getTableByName(name);
         Delete delete = table.createDelete();
-        return delete.delete(DeleteParamProxy.build(where));
+        delete.setParam(where);
+        return delete.exec();
     }
 
     @Override
@@ -232,10 +236,9 @@ public class DynamicFormServiceImpl implements DynamicFormService, ExpressionSco
     @LockName(value = "'form.lock.'+#name", isExpression = true)
     public int updateByPk(String name, String pk, UpdateParam<Map<String, Object>> param) throws Exception {
         Table table = getTableByName(name);
-        Update update = table.createUpdate();
-        UpdateParamProxy paramProxy = UpdateParamProxy.build(param);
-        paramProxy.where(getPrimaryKeyName(name), pk);
-        return update.update(paramProxy);
+        Update update = table.createUpdate().setParam(param);
+        update.where(getPrimaryKeyName(name), pk);
+        return update.exec();
     }
 
     @Override
@@ -243,27 +246,24 @@ public class DynamicFormServiceImpl implements DynamicFormService, ExpressionSco
     @LockName(value = "'form.lock.'+#name", isExpression = true)
     public int update(String name, UpdateParam<Map<String, Object>> param) throws Exception {
         Table table = getTableByName(name);
-        Update update = table.createUpdate();
-        UpdateParamProxy paramProxy = UpdateParamProxy.build(param);
-        return update.update(paramProxy);
+        Update update = table.createUpdate().setParam(param);
+        return update.exec();
     }
 
     @ReadLock
     @LockName(value = "'form.lock.'+#tableName", isExpression = true)
     public String getPrimaryKeyName(String tableName) throws Exception {
         Table table = getTableByName(tableName);
-        return table.getMetaData().attrWrapper("primaryKey", "u_id").toString();
+        return table.getMeta().getProperty("primaryKey", "u_id").toString();
     }
 
     @Override
     @ReadLock
     @LockName(value = "'form.lock.'+#name", isExpression = true)
     public <T> T selectByPk(String name, Object pk) throws Exception {
-        Table table = getTableByName(name);
-        Query query = table.createQuery();
-        QueryParamProxy proxy = new QueryParamProxy();
-        proxy.where(getPrimaryKeyName(name), pk);
-        return query.single(proxy);
+        Table<T> table = getTableByName(name);
+        Query<T> query = table.createQuery().where(getPrimaryKeyName(name), pk);
+        return query.single();
     }
 
     @Override
@@ -273,15 +273,15 @@ public class DynamicFormServiceImpl implements DynamicFormService, ExpressionSco
     public void exportExcel(String name, QueryParam param, OutputStream outputStream) throws Exception {
         List<Object> dataList = select(name, param);
         Table table = getTableByName(name);
-        TableMetaData metaData = table.getMetaData();
+        TableMetaData metaData = table.getMeta();
         List<Header> headers = new LinkedList<>();
         Map<String, Object> sample = dataList.isEmpty() ? new HashMap<>() : (Map) dataList.get(0);
         int[] index = new int[1];
         index[0] = 1;
         metaData.getFields().forEach(fieldMetaData -> {
-            ValueWrapper valueWrapper = fieldMetaData.attrWrapper("export-excel", false);
-            if (valueWrapper.toBoolean()) {
-                String title = fieldMetaData.attrWrapper("export-header", fieldMetaData.getComment()).toString();
+            PropertyWrapper valueWrapper = fieldMetaData.getProperty("export-excel", false);
+            if (valueWrapper.isTrue()) {
+                String title = fieldMetaData.getProperty("export-header", fieldMetaData.getComment()).toString();
                 if (StringUtils.isNullOrEmpty(title)) {
                     title = "字段" + index[0]++;
                 }
@@ -299,10 +299,12 @@ public class DynamicFormServiceImpl implements DynamicFormService, ExpressionSco
                 headers.add(new Header(title, field));
             }
         });
-        if (metaData.triggerSupport("export.excel")) {
+        if (metaData.triggerIsSupport("export.excel")) {
             Map<String, Object> var = new HashMap<>();
             if (expressionScopeBeanMap != null)
                 var.putAll(expressionScopeBeanMap);
+            var.put("database", database);
+            var.put("table", table);
             var.put("dataList", dataList);
             var.put("headers", headers);
             metaData.on("export.excel", var);
@@ -325,26 +327,25 @@ public class DynamicFormServiceImpl implements DynamicFormService, ExpressionSco
         List<Map<String, Object>> dataList = new LinkedList<>();
         Map<String, String> headerMapper = new HashMap<>();
         Table table = getTableByName(name);
-        TableMetaData metaData = table.getMetaData();
+        TableMetaData metaData = table.getMeta();
         metaData.getFields().forEach(fieldMetaData -> {
-            ValueWrapper valueWrapper = fieldMetaData.attrWrapper("importExcel", true);
-            if (valueWrapper.toBoolean()) {
-                String title = fieldMetaData.attrWrapper("excelHeader", fieldMetaData.getComment()).toString();
+            PropertyWrapper valueWrapper = fieldMetaData.getProperty("importExcel", true);
+            if (valueWrapper.isTrue()) {
+                String title = fieldMetaData.getProperty("excelHeader", fieldMetaData.getComment()).toString();
                 String field = fieldMetaData.getName();
                 headerMapper.put(title, field);
             }
         });
-        if (metaData.triggerSupport("export.import.before")) {
+        if (metaData.triggerIsSupport("export.import.before")) {
             Map<String, Object> var = new HashMap<>();
             var.put("headerMapper", headerMapper);
             var.put("excelData", excelData);
             var.put("dataList", dataList);
+            var.put("database", database);
+            var.put("table", table);
             if (expressionScopeBeanMap != null)
                 var.putAll(expressionScopeBeanMap);
-            TriggerResult triggerResult = metaData.on("export.import.before", var);
-            if (!triggerResult.isSuccess()) {
-                throw new TriggerException(triggerResult.getMessage());
-            }
+            metaData.on("export.import.before", var);
         }
         excelData.forEach(data -> {
             Map<String, Object> newData = new HashMap<>();
@@ -363,18 +364,17 @@ public class DynamicFormServiceImpl implements DynamicFormService, ExpressionSco
         for (Map<String, Object> map : dataList) {
             index++;
             try {
-                if (metaData.triggerSupport("export.import.each")) {
+                if (metaData.triggerIsSupport("export.import.each")) {
                     Map<String, Object> var = new HashMap<>();
                     var.put("headerMapper", headerMapper);
                     var.put("excelData", excelData);
                     var.put("dataList", dataList);
                     var.put("data", map);
+                    var.put("database", database);
+                    var.put("table", table);
                     if (expressionScopeBeanMap != null)
                         var.putAll(expressionScopeBeanMap);
-                    TriggerResult triggerResult = metaData.on("export.import.each", var);
-                    if (!triggerResult.isSuccess()) {
-                        throw new TriggerException(triggerResult.getMessage());
-                    }
+                    metaData.on("export.import.each", var);
                 }
                 saveOrUpdate(name, map);
                 success++;
@@ -392,67 +392,5 @@ public class DynamicFormServiceImpl implements DynamicFormService, ExpressionSco
         result.put("success", success);
         result.put("errorMessage", errorMessage);
         return result;
-    }
-
-    public static class QueryParamProxy extends org.webbuilder.sql.param.query.QueryParam {
-        public QueryParamProxy orderBy(String mode, Set<String> fields) {
-            addProperty("order_by", fields);
-            addProperty("order_by_mod", mode);
-            return this;
-        }
-
-        public static QueryParamProxy build(QueryParam param) {
-            QueryParamProxy proxy = new QueryParamProxy();
-            proxy.setConditions(term2cdt(param.getTerms()));
-            proxy.exclude(param.getExcludes());
-            proxy.include(param.getIncludes());
-            proxy.orderBy(param.getSortOrder(), param.getSortField());
-            proxy.doPaging(param.getPageIndex(), param.getPageSize());
-            proxy.setPaging(param.isPaging());
-            return proxy;
-        }
-    }
-
-    public static class UpdateParamProxy extends org.webbuilder.sql.param.update.UpdateParam {
-        public static UpdateParamProxy build(UpdateParam<Map<String, Object>> param) {
-            UpdateParamProxy proxy = new UpdateParamProxy();
-            proxy.setConditions(term2cdt(param.getTerms()));
-            proxy.exclude(param.getExcludes());
-            proxy.include(param.getIncludes());
-            proxy.set(param.getData());
-            return proxy;
-        }
-    }
-
-    public static class InsertParamProxy extends org.webbuilder.sql.param.insert.InsertParam {
-        public static InsertParamProxy build(InsertParam<Map<String, Object>> param) {
-            InsertParamProxy proxy = new InsertParamProxy();
-            proxy.values(param.getData());
-            return proxy;
-        }
-    }
-
-    public static class DeleteParamProxy extends org.webbuilder.sql.param.delete.DeleteParam {
-        public static DeleteParamProxy build(DeleteParam param) {
-            DeleteParamProxy proxy = new DeleteParamProxy();
-            proxy.setConditions(term2cdt(param.getTerms()));
-            return proxy;
-        }
-    }
-
-    protected static Set<ExecuteCondition> term2cdt(List<Term> terms) {
-        Set<ExecuteCondition> set = new LinkedHashSet<>();
-        terms.forEach(term -> {
-            ExecuteCondition executeCondition = new ExecuteCondition();
-            executeCondition.setAppendType(term.getType().toString());
-            executeCondition.setField(term.getField());
-            executeCondition.setValue(term.getValue());
-            executeCondition.setQueryType(term.getTermType().toString().toUpperCase());
-            executeCondition.setSql(false);
-            if (!term.getTerms().isEmpty())
-                executeCondition.setNest(term2cdt(term.getTerms()));
-            set.add(executeCondition);
-        });
-        return set;
     }
 }

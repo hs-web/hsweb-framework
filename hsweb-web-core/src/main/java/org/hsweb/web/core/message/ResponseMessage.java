@@ -200,4 +200,5 @@ public class ResponseMessage implements Serializable {
     public static ResponseMessage error(String message, int code) {
         return new ResponseMessage(message).setCode(code);
     }
+
 }

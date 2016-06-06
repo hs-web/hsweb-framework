@@ -16,9 +16,11 @@ import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.TranscoderOutput;
 import org.apache.batik.transcoder.image.PNGTranscoder;
 import org.apache.commons.lang3.StringUtils;
+import org.hsweb.ezorm.meta.expand.PropertyWrapper;
+import org.hsweb.ezorm.meta.expand.SimplePropertyWrapper;
+import org.hsweb.ezorm.param.TermType;
 import org.hsweb.web.bean.common.PagerResult;
 import org.hsweb.web.bean.common.QueryParam;
-import org.hsweb.web.bean.common.TermType;
 import org.hsweb.web.core.authorize.annotation.Authorize;
 import org.hsweb.web.core.exception.NotFoundException;
 import org.hsweb.web.core.logger.annotation.AccessLogger;
@@ -27,8 +29,6 @@ import org.hsweb.web.workflow.controller.BasicController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.webbuilder.sql.SimpleValueWrapper;
-import org.webbuilder.sql.ValueWrapper;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -55,7 +55,7 @@ public class ActivityModelController extends BasicController {
         ModelQuery modelQuery = repositoryService.createModelQuery();
         param.getTerms().forEach((term) -> {
 
-            ValueWrapper valueWrapper = new SimpleValueWrapper(term.getValue());
+            PropertyWrapper valueWrapper = new SimplePropertyWrapper(term.getValue());
             String stringValue = valueWrapper.toString();
             switch (term.getField()) {
                 case "name":

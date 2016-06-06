@@ -1,11 +1,12 @@
 package org.hsweb.web.service.impl.form.validator;
 
+import org.apache.commons.beanutils.BeanMap;
+import org.apache.commons.beanutils.BeanUtils;
+import org.hsweb.ezorm.exception.ValidationException;
+import org.hsweb.ezorm.meta.expand.Validator;
 import org.hsweb.web.bean.valid.ValidResults;
 import org.hsweb.web.core.exception.BusinessException;
-import org.hsweb.web.core.exception.ValidationException;
 import org.springframework.util.ReflectionUtils;
-import org.webbuilder.sql.validator.Validator;
-import org.webbuilder.utils.common.BeanUtils;
 import org.webbuilder.utils.script.engine.DynamicScriptEngine;
 import org.webbuilder.utils.script.engine.DynamicScriptEngineFactory;
 
@@ -31,29 +32,25 @@ public class GroovyDycBeanValidator implements Validator {
         this.hibernateValidator = hibernateValidator;
     }
 
-    public List valid(Object data, boolean insert) {
+    public boolean validateMap(Map<Object, Object> data, Operation operation) {
         ValidResults results = new ValidResults();
         try {
-            if (!(data instanceof Map)) {
-                throw new ValidationException("数据类型错误!");
-            }
-            Class validatorTargetClass = (Class)engine.execute(className, new HashMap<>()).getResult();
+            Class validatorTargetClass = (Class) engine.execute(className, new HashMap<>()).getResult();
             Object validatorTarget = validatorTargetClass.newInstance();
-            Map<String, Object> mapData = ((Map) data);
             Set<ConstraintViolation<Object>> result = new LinkedHashSet<>();
-            if (insert) {
-                mapData.forEach((key, value) -> {
+            if (operation == Operation.INSERT) {
+                data.forEach((key, value) -> {
                     try {
-                        BeanUtils.attr(validatorTarget, key, value);
+                        BeanUtils.setProperty(validatorTarget , (String) key,value );
                     } catch (Exception e) {
                     }
                 });
                 result.addAll(hibernateValidator.validate(validatorTarget));
             } else
-                mapData.forEach((key, value) -> {
-                    Field field = ReflectionUtils.findField(validatorTargetClass, key);
+                data.forEach((key, value) -> {
+                    Field field = ReflectionUtils.findField(validatorTargetClass, (String) key);
                     if (field != null)
-                        result.addAll(hibernateValidator.validateValue(validatorTargetClass, key, value));
+                        result.addAll(hibernateValidator.validateValue(validatorTargetClass, (String) key, value));
                 });
             if (result.size() > 0) {
                 for (ConstraintViolation<Object> violation : result) {
@@ -64,18 +61,24 @@ public class GroovyDycBeanValidator implements Validator {
         } catch (Exception e) {
             throw new BusinessException("验证器异常！", e, 500);
         }
-        if (results.size() > 0) throw new ValidationException(results);
-        return null;
-        //采用异常通知方式
+        if (results.size() > 0) throw new ValidationException(results.get(0).getMessage(), results);
+        return true;
     }
 
     @Override
-    public List insertValid(Object data) {
-        return valid(data, true);
+    public boolean validate(Object data, Operation operation) throws ValidationException {
+        if (data instanceof Map)
+            return validateMap(((Map) data), operation);
+        if (data instanceof Collection) {
+            for (Object o : ((Collection) data)) {
+                validate(o, operation);
+            }
+        } else {
+            BeanMap beanMap = new BeanMap();
+            beanMap.setBean(data);
+            validateMap(beanMap, operation);
+        }
+        return true;
     }
 
-    @Override
-    public List updateValid(Object data) {
-        return valid(data, false);
-    }
 }

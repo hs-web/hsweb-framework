@@ -39,7 +39,7 @@
             <bind name="tableName" value="'s_user'"/>
         </sql>
     
-        <insert id="insert" parameterType="User" useGeneratedKeys="true" keyProperty="data.id" keyColumn="U_ID">
+        <insert id="insert" parameterType="User" >
             <include refid="config"/>
             <include refid="BasicMapper.buildInsertSql"/>
         </insert>

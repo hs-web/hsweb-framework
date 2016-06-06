@@ -1,5 +1,7 @@
 package org.hsweb.web.mybatis.builder;
 
+import org.hsweb.ezorm.param.Term;
+import org.hsweb.ezorm.param.TermType;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.ibatis.mapping.ResultMap;
 import org.apache.ibatis.mapping.ResultMapping;
@@ -240,7 +242,7 @@ public class DefaultSqlParamBuilder {
         return javaType;
     }
 
-    public String buildSelectFields(String resultMapId, String tableName, SqlParam param) {
+    public String buildSelectFields(String resultMapId, String tableName, org.hsweb.ezorm.param.SqlParam param) {
         Map<String, Object> fieldConfig = createConfig(resultMapId);
         if (param == null) return "*";
         Set<String> includes = param.getIncludes(),
@@ -298,7 +300,7 @@ public class DefaultSqlParamBuilder {
         tmp.setSorts(param.getSorts());
         Map<String, String> propertyMapper = getPropertyMapper(fieldConfig, tmp);
         if (tmp.getSorts().isEmpty()) return "";
-        Set<Sort> sorts = new LinkedHashSet<>();
+        Set<org.hsweb.ezorm.param.Sort> sorts = new LinkedHashSet<>();
         param.getSorts().forEach(sort -> {
             String fieldName = sort.getField();
             if (StringUtils.isNullOrEmpty(fieldName)) return;
@@ -321,7 +323,7 @@ public class DefaultSqlParamBuilder {
         return " order by ".concat(sql);
     }
 
-    public Map<String, String> getPropertyMapper(Map<String, Object> fieldConfig, SqlParam param) {
+    public Map<String, String> getPropertyMapper(Map<String, Object> fieldConfig, org.hsweb.ezorm.param.SqlParam param) {
         Set<String> includes = param.getIncludes(),
                 excludes = param.getExcludes();
         boolean includesIsEmpty = includes.isEmpty(),
