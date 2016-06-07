@@ -18,7 +18,7 @@
         <bind name="tableName" value="'s_user_role'"/>
     </sql>
 
-    <insert id="insert" parameterType="UserRole" useGeneratedKeys="true" keyProperty="data.u_id" keyColumn="U_ID">
+    <insert id="insert" parameterType="UserRole">
         <include refid="config"/>
         <include refid="BasicMapper.buildInsertSql"/>
     </insert>

@@ -19,7 +19,7 @@
         <bind name="tableName" value="'s_role_modules'"/>
     </sql>
 
-    <insert id="insert" parameterType="RoleModule" useGeneratedKeys="true" keyProperty="data.u_id" keyColumn="U_ID">
+    <insert id="insert" parameterType="RoleModule">
         <include refid="config"/>
         <include refid="BasicMapper.buildInsertSql"/>
     </insert>
