@@ -36,7 +36,6 @@ public class DefaultFormParser implements FormParser {
     private List<FormParser.Listener> listeners;
 
     public void initField(FieldMetaData fieldMetaData) {
-
         if (fieldMetaData.getComment() == null)
             fieldMetaData.setComment("");
         String db = Install.getDatabaseType();
@@ -122,7 +121,10 @@ public class DefaultFormParser implements FormParser {
                 String key = def.getString("key");
                 Object value = def.get("value");
                 if ("main".equals(id)) {
-                    if ("trigger".equals(key)) {
+                    if ("alias".equals(key)) {
+                        if (!StringUtils.isNullOrEmpty(value))
+                            metaData.setAlias(String.valueOf(value));
+                    } else if ("trigger".equals(key)) {
                         List<JSONObject> jsonArray = JSON.parseArray((String) value, JSONObject.class);
                         jsonArray.forEach(jsonObject -> {
                             String name = jsonObject.getString("key");
@@ -139,8 +141,8 @@ public class DefaultFormParser implements FormParser {
                             metaData.on(name, scriptTrigger);
                         });
                         return;
-                    }
-                    metaData.setProperty(key, value);
+                    } else
+                        metaData.setProperty(key, value);
                     return;
                 }
                 if ("validator-list".equals(key)) {
@@ -179,6 +181,8 @@ public class DefaultFormParser implements FormParser {
             //name为空的时候 不保持此字段
             if (!"main".equals(id) && !StringUtils.isNullOrEmpty(fieldMeta.getName())) {
                 initField(fieldMeta);
+                if(StringUtils.isNullOrEmpty(fieldMeta.getAlias()))
+                    fieldMeta.setAlias(fieldMeta.getName());
                 metaData.addField(fieldMeta);
             }
         });
