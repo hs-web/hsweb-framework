@@ -14,12 +14,11 @@ public class MessageConverterConfiguration {
 
     @Bean
     public HttpMessageConverter<Object> converter() {
-        FastJsonHttpMessageConverter converter =  new FastJsonHttpMessageConverter();
+        FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();
         converter.setFeatures(SerializerFeature.WriteNullListAsEmpty);
         converter.setFeatures(SerializerFeature.WriteNullNumberAsZero);
         converter.setFeatures(SerializerFeature.WriteNullBooleanAsFalse);
         converter.setFeatures(SerializerFeature.WriteDateUseDateFormat);
-
         return converter;
     }
 }

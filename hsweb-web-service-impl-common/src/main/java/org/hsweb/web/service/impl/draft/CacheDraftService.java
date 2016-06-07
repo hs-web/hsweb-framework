@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -37,7 +37,7 @@ public class CacheDraftService implements DraftService {
         Cache.ValueWrapper wrapper = cache.get(key);
         Map<String, Draft> drafts;
         if (wrapper == null) {
-            drafts = new HashMap<>();
+            drafts = new LinkedHashMap<>();
         } else {
             drafts = ((Map) wrapper.get());
         }
@@ -51,7 +51,7 @@ public class CacheDraftService implements DraftService {
         Cache cache = cacheManager.getCache(cacheKey + userId);
         Cache.ValueWrapper wrapper = cache.get(key);
         if (wrapper != null) {
-            return (List) ((Map) wrapper.get()).values();
+            return new ArrayList<>(((Map) wrapper.get()).values());
         }
         return new ArrayList<>();
     }
@@ -75,4 +75,5 @@ public class CacheDraftService implements DraftService {
         cache.evict(key);
         return true;
     }
+
 }

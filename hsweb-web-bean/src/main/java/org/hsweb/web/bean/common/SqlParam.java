@@ -28,22 +28,6 @@ public class SqlParam<R extends SqlParam> extends org.hsweb.ezorm.param.SqlParam
         return JSON.toJSONString(this);
     }
 
-    protected void initTermByMap(Map<String, Object> param) {
-        param.forEach((k, v) -> {
-            String field = String.valueOf(param.get("field"));
-            Object value = param.get("value");
-            if (StringUtils.isNullOrEmpty(field) || StringUtils.isNullOrEmpty(value)) return;
-            String type = String.valueOf(param.get("type"));
-            String queryType = String.valueOf(param.get("queryType"));
-            Term nest = new Term();
-            nest.setField(field);
-            nest.setValue(value);
-            nest.setType(Term.Type.valueOf(type));
-            nest.setTermType(TermType.valueOf(queryType));
-            terms.add(nest);
-        });
-    }
-
     public static SqlParam build() {
         return new SqlParam<>();
     }

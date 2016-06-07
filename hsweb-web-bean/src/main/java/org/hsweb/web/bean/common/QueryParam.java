@@ -31,7 +31,7 @@ public class QueryParam extends org.hsweb.ezorm.param.QueryParam<QueryParam> imp
 
     protected void checkTerm(List<Term> terms) {
         terms.forEach(term -> {
-            if (term.getTermType() == TermType.func) {
+            if (term.getTermType().equals(TermType.func)) {
                 term.setTermType(TermType.eq);
             }
             checkTerm(term.getTerms());

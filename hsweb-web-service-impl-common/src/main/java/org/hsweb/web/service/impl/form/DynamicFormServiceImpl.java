@@ -294,8 +294,8 @@ public class DynamicFormServiceImpl implements DynamicFormService, ExpressionSco
                 if (!excludes.isEmpty()) {
                     if (excludes.contains(field)) return;
                 }
-                if (sample.get(field + "_cn") != null)
-                    field = field + "_cn";
+                if (sample.get(field + "_text") != null)
+                    field = field + "_text";
                 headers.add(new Header(title, field));
             }
         });

@@ -38,7 +38,7 @@ public class DraftController {
         draft.setId(Draft.createUID());
         draft.setCreateDate(new Date());
         draft.setCreatorId(user.getId());
-        return ResponseMessage.ok(draftService.createDraft(key + user.getId(), draft));
+        return ResponseMessage.ok(draftService.createDraft(key, draft));
     }
 
     @RequestMapping(value = "/{key}", method = RequestMethod.GET)
