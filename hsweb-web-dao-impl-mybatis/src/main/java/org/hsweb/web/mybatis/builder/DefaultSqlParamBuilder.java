@@ -214,6 +214,13 @@ public class DefaultSqlParamBuilder {
             if (fieldName.contains("."))
                 fieldName = fieldName.split("[.]")[1];
             if (propertyMapper.containsKey(fieldName) || propertyMapper.containsValue(fieldName)) {
+                if (propertyMapper.get(fieldName) == null) {
+                    for (Map.Entry<String, String> entry : propertyMapper.entrySet()) {
+                        if (entry.getValue().equals(fieldName)) {
+                            sort.setField(entry.getKey());
+                        }
+                    }
+                }
                 sorts.add(sort);
             }
         });
@@ -224,7 +231,7 @@ public class DefaultSqlParamBuilder {
                     if (fieldName.contains("."))
                         fieldName = fieldName.split("[.]")[1];
                     return new SqlAppender()
-                            .add(tableName, ".", StringUtils.camelCase2UnderScoreCase(fieldName), " ", sort.getDir()).toString();
+                            .add(tableName, ".", fieldName, " ", sort.getDir()).toString();
                 })
                 .reduce((s, s1) -> new SqlAppender().add(s, ",", s1).toString()).get();
         return " order by ".concat(sql);
