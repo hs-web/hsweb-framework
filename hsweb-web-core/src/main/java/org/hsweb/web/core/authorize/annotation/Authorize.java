@@ -55,6 +55,11 @@ public @interface Authorize {
     boolean api() default false;
 
     /**
+     * 可匿名访问
+     * @return 是否可匿名访问,匿名访问将不用登录
+     */
+    boolean anonymous() default false;
+    /**
      * 验证模式，在使用多个验证条件时有效
      *
      * @return

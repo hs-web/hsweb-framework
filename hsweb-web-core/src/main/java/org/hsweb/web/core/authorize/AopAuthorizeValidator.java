@@ -38,11 +38,14 @@ public class AopAuthorizeValidator extends SimpleAuthorizeValidator {
                 return null;
             }
             Set<Authorize> authorizes = new LinkedHashSet<>();
-            if (classAuth != null)
+            if (classAuth != null) {
+                if (classAuth.anonymous()) return null;
                 authorizes.add(classAuth);
-            if (methodAuth != null)
+            }
+            if (methodAuth != null) {
+                if (methodAuth.anonymous()) return null;
                 authorizes.add(methodAuth);
-
+            }
             config.addAnnotation(authorizes);
             configCache.put(cacheKey, config);
         }
@@ -65,11 +68,11 @@ public class AopAuthorizeValidator extends SimpleAuthorizeValidator {
         Map<String, Object> param = new LinkedHashMap<>();
         MethodSignature signature = (MethodSignature) pjp.getSignature();
         String[] names = signature.getParameterNames();
-        Object[] args=pjp.getArgs();
+        Object[] args = pjp.getArgs();
         for (int i = 0; i < names.length; i++) {
             param.put(names[i], args[i]);
         }
-        param.put("paramsMap",param);
+        param.put("paramsMap", param);
         return validate(user, param, config);
     }
 
