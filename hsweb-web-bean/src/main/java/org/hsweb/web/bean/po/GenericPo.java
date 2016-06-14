@@ -27,15 +27,20 @@ public class GenericPo<PK> implements Serializable {
         this.id = id;
     }
 
-    private Map<String, Object> customAttr = new LinkedHashMap<>();
+    /**
+     * 自定义属性
+     */
+    private Map<String, Object> properties;
 
-    public <T> T attr(String attr, T value) {
-        customAttr.put(attr, value);
+    public <T> T setProperty(String attr, T value) {
+        if (properties == null) properties = new LinkedHashMap<>();
+        properties.put(attr, value);
         return value;
     }
 
-    public <T> T attr(String attr) {
-        return ((T) customAttr.get(attr));
+    public <T> T getProperty(String attr) {
+        if (properties == null) return null;
+        return ((T) properties.get(attr));
     }
 
     @Override
@@ -60,11 +65,11 @@ public class GenericPo<PK> implements Serializable {
         return MD5.encode(UUID.randomUUID().toString());
     }
 
-    public Map<String, Object> getCustomAttr() {
-        return customAttr;
+    public Map<String, Object> getProperties() {
+        return properties;
     }
 
-    public void setCustomAttr(Map<String, Object> customAttr) {
-        this.customAttr = customAttr;
+    public void setProperties(Map<String, Object> properties) {
+        this.properties = properties;
     }
 }

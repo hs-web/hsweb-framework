@@ -1,12 +1,15 @@
 package org.hsweb.web.mybatis.builder;
 
-import org.hsweb.ezorm.meta.FieldMetaData;
-import org.hsweb.ezorm.param.Term;
-import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.beanutils.BeanUtilsBean;
+import org.apache.commons.beanutils.PropertyUtilsBean;
 import org.apache.ibatis.mapping.ResultMap;
 import org.apache.ibatis.mapping.ResultMapping;
+import org.hsweb.ezorm.meta.FieldMetaData;
+import org.hsweb.ezorm.param.Term;
 import org.hsweb.ezorm.render.Dialect;
-import org.hsweb.web.bean.common.*;
+import org.hsweb.web.bean.common.InsertParam;
+import org.hsweb.web.bean.common.QueryParam;
+import org.hsweb.web.bean.common.UpdateParam;
 import org.hsweb.web.mybatis.utils.ResultMapsUtils;
 import org.hsweb.web.mybatis.utils.SqlAppender;
 import org.webbuilder.utils.common.DateTimeUtils;
@@ -35,7 +38,7 @@ public class DefaultSqlParamBuilder {
 
     protected static final Map<Class, String> simpleName = new HashMap<>();
     private static DefaultSqlParamBuilder instance = new DefaultSqlParamBuilder();
-
+   protected PropertyUtilsBean propertyUtils = BeanUtilsBean.getInstance().getPropertyUtils();
     public DefaultSqlParamBuilder() {
         simpleName.put(Integer.class, "int");
         simpleName.put(Byte.class, "byte");
@@ -54,8 +57,6 @@ public class DefaultSqlParamBuilder {
         simpleName.put(short.class, "short");
         simpleName.put(char.class, "char");
         simpleName.put(byte.class, "byte");
-
-
     }
 
     public static DefaultSqlParamBuilder instance() {
@@ -64,8 +65,14 @@ public class DefaultSqlParamBuilder {
 
     public KeyWordMapper getKeyWordMapper(String type) {
         return (paramKey, tableName, term, jdbcType) -> {
+            String termField = term.getField();
+            if (termField.contains(".")) {
+                String[] tmp = termField.split("[.]");
+                tableName = tmp[0];
+                termField = tmp[1];
+            }
             FieldMetaData field = new FieldMetaData();
-            field.setName(term.getField());
+            field.setName(termField);
             field.setJdbcType(jdbcType);
             return getDialect().wrapperWhere(paramKey, term, field, tableName);
         };
@@ -105,7 +112,7 @@ public class DefaultSqlParamBuilder {
         ResultMap resultMaps = ResultMapsUtils.getResultMap(resultMapId);
         Map<String, ResultMapping> mappings = new HashMap<>();
         resultMaps.getResultMappings().forEach(resultMapping -> {
-            if (resultMapping.getNestedQueryId() == null) {
+            if (resultMapping.getNestedQueryId() == null && !resultMapping.getProperty().contains(".")) {
                 mappings.put(resultMapping.getColumn(), resultMapping);
             }
         });
@@ -130,7 +137,6 @@ public class DefaultSqlParamBuilder {
             String values = mappings.keySet().stream().map((f1) -> {
                 SqlAppender appender = new SqlAppender();
                 ResultMapping mapping = mappings.get(f1);
-
                 appender.add("#{data[" + index + "].",
                         mapping.getProperty(),
                         ",javaType=", getJavaType(mapping.getJavaType()),
@@ -152,18 +158,17 @@ public class DefaultSqlParamBuilder {
     public String buildSelectFields(String resultMapId, String tableName, org.hsweb.ezorm.param.SqlParam param) {
         Map<String, Object> fieldConfig = createConfig(resultMapId);
         if (param == null) return "*";
-        Set<String> includes = param.getIncludes(),
-                excludes = param.getExcludes();
-        boolean includesIsEmpty = includes.isEmpty(),
-                excludesIsEmpty = excludes.isEmpty();
-        if (includesIsEmpty && excludesIsEmpty)
-            return "*";
         Map<String, String> propertyMapper = getPropertyMapper(fieldConfig, param);
         SqlAppender appender = new SqlAppender();
         propertyMapper.forEach((k, v) -> {
             if (!appender.isEmpty())
                 appender.add(",");
-            appender.add(tableName, ".", k, " as ").addEdSpc(getQuoteStart(), k, getQuoteEnd());
+            if (!k.contains(".") || k.split("[.]")[0].equals(tableName)) {
+                appender.add(tableName, ".", k, " as ");
+            } else {
+                appender.add(k, " as ");
+            }
+            appender.addEdSpc(getQuoteStart(), k, getQuoteEnd());
         });
         if (appender.isEmpty()) return "*";
         return appender.toString();
@@ -176,7 +181,8 @@ public class DefaultSqlParamBuilder {
         SqlAppender appender = new SqlAppender();
         propertyMapper.forEach((k, v) -> {
             try {
-                Object obj = BeanUtils.getProperty(param.getData(), v);
+                if (v.contains(".")) return;
+                Object obj = propertyUtils.getProperty(param.getData(), v);
                 if (obj != null) {
                     if (!appender.isEmpty())
                         appender.add(",");
@@ -259,8 +265,6 @@ public class DefaultSqlParamBuilder {
             } else if (includes.contains(fieldName) || includes.contains(k)) {
                 propertyMapper.put(k, fieldName);
             }
-
-
         });
         return propertyMapper;
     }

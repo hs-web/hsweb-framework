@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import org.webbuilder.utils.common.DateTimeUtils;
 
 import java.io.Serializable;
+import java.lang.reflect.Field;
 import java.util.*;
 
 /**
@@ -83,7 +84,20 @@ public class ResponseMessage implements Serializable {
         if (includes == null)
             includes = new HashMap<>();
         if (fields == null || fields.isEmpty()) return this;
-        getStringListFormMap(includes, type).addAll(fields);
+        fields.forEach(field -> {
+            if (field.contains(".")) {
+                String tmp[] = field.split("[.]", 2);
+                try {
+                    Field field1 = type.getDeclaredField(tmp[0]);
+                    if (field1 != null) {
+                        include(field1.getType(), tmp[1]);
+                    }
+                } catch (Throwable e) {
+                }
+            } else {
+                getStringListFormMap(includes, type).add(field);
+            }
+        });
         return this;
     }
 
@@ -91,12 +105,56 @@ public class ResponseMessage implements Serializable {
         if (excludes == null)
             excludes = new HashMap<>();
         if (fields == null || fields.isEmpty()) return this;
-        getStringListFormMap(excludes, type).addAll(fields);
+        fields.forEach(field -> {
+            if (field.contains(".")) {
+                String tmp[] = field.split("[.]", 2);
+                try {
+                    Field field1 = type.getDeclaredField(tmp[0]);
+                    if (field1 != null) {
+                        exclude(field1.getType(), tmp[1]);
+                    }
+                } catch (Throwable e) {
+                }
+            } else {
+                getStringListFormMap(excludes, type).add(field);
+            }
+        });
+        return this;
+    }
+
+    public ResponseMessage exclude(Collection<String> fields) {
+        if (excludes == null)
+            excludes = new HashMap<>();
+        if (fields == null || fields.isEmpty()) return this;
+        Class type;
+        if (data != null) type = data.getClass();
+        else return this;
+        exclude(type, fields);
+        return this;
+    }
+
+    public ResponseMessage include(Collection<String> fields) {
+        if (includes == null)
+            includes = new HashMap<>();
+        if (fields == null || fields.isEmpty()) return this;
+        Class type;
+        if (data != null) type = data.getClass();
+        else return this;
+        include(type, fields);
         return this;
     }
 
     public ResponseMessage exclude(Class type, String... fields) {
         return exclude(type, Arrays.asList(fields));
+    }
+
+
+    public ResponseMessage exclude(String... fields) {
+        return exclude(Arrays.asList(fields));
+    }
+
+    public ResponseMessage include(String... fields) {
+        return include(Arrays.asList(fields));
     }
 
     protected Set<String> getStringListFormMap(Map<Class<?>, Set<String>> map, Class type) {
