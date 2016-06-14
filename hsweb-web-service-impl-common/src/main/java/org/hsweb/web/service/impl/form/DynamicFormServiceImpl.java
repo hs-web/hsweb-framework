@@ -89,6 +89,11 @@ public class DynamicFormServiceImpl implements DynamicFormService, ExpressionSco
     }
 
     @Override
+    public Database getDefaultDatabase() {
+        return database;
+    }
+
+    @Override
     public TableMetaData parseMeta(Form form) throws Exception {
         return formParser.parse(form);
     }

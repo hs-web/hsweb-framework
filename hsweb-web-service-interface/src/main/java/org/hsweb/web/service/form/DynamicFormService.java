@@ -1,6 +1,7 @@
 package org.hsweb.web.service.form;
 
 import org.hsweb.ezorm.meta.TableMetaData;
+import org.hsweb.ezorm.run.Database;
 import org.hsweb.web.bean.common.*;
 import org.hsweb.web.bean.po.form.Form;
 
@@ -13,6 +14,8 @@ import java.util.Map;
  * Created by zhouhao on 16-4-14.
  */
 public interface DynamicFormService {
+
+    Database getDefaultDatabase();
 
     TableMetaData parseMeta(Form form) throws Exception;
 
