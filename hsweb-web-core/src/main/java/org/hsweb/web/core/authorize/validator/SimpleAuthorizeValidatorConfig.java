@@ -3,6 +3,7 @@ package org.hsweb.web.core.authorize.validator;
 import org.hsweb.web.core.authorize.AuthorizeValidatorConfig;
 import org.hsweb.web.core.authorize.annotation.Authorize;
 import org.hsweb.web.core.exception.AuthorizeException;
+import org.hsweb.web.core.exception.AuthorizeForbiddenException;
 import org.webbuilder.utils.common.StringUtils;
 import org.webbuilder.utils.script.engine.DynamicScriptEngine;
 import org.webbuilder.utils.script.engine.DynamicScriptEngineFactory;
@@ -53,7 +54,7 @@ public class SimpleAuthorizeValidatorConfig implements AuthorizeValidatorConfig 
             engine.compile(id, expression);
             expressions.add(new Expression(id, language));
         } catch (Exception e) {
-            throw new AuthorizeException("compile expression error", e, 403);
+            throw new AuthorizeForbiddenException("compile expression error", e, 403);
         }
         return this;
     }
