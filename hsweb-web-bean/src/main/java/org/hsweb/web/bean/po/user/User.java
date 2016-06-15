@@ -8,6 +8,7 @@ import org.hsweb.web.bean.po.module.Module;
 import org.hsweb.web.bean.po.role.RoleModule;
 import org.hsweb.web.bean.po.role.UserRole;
 import org.webbuilder.utils.common.MapUtils;
+import org.webbuilder.utils.common.StringUtils;
 
 import javax.validation.constraints.NotNull;
 import java.util.*;
@@ -67,6 +68,7 @@ public class User extends GenericPo<String> {
         Set<String> lv = roleInfo.get(getModule(mId));
         if (lv != null)
             for (String action : actions) {
+                if (StringUtils.isNullOrEmpty(action)) return true;
                 if (lv.contains(action)) return true;
             }
         return false;
