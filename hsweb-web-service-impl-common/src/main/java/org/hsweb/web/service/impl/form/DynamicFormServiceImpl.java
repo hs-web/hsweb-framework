@@ -1,14 +1,16 @@
 package org.hsweb.web.service.impl.form;
 
 import com.alibaba.fastjson.JSON;
-import org.hsweb.ezorm.meta.FieldMetaData;
-import org.hsweb.ezorm.meta.TableMetaData;
-import org.hsweb.ezorm.meta.expand.PropertyWrapper;
-import org.hsweb.ezorm.run.*;
 import org.hsweb.concurrent.lock.annotation.LockName;
 import org.hsweb.concurrent.lock.annotation.ReadLock;
 import org.hsweb.concurrent.lock.annotation.WriteLock;
-import org.hsweb.web.bean.common.*;
+import org.hsweb.ezorm.meta.FieldMetaData;
+import org.hsweb.ezorm.meta.TableMetaData;
+import org.hsweb.ezorm.meta.expand.OptionConverter;
+import org.hsweb.ezorm.meta.expand.PropertyWrapper;
+import org.hsweb.ezorm.run.*;
+import org.hsweb.web.bean.common.DeleteParam;
+import org.hsweb.web.bean.common.PagerResult;
 import org.hsweb.web.bean.common.QueryParam;
 import org.hsweb.web.bean.common.UpdateParam;
 import org.hsweb.web.bean.po.GenericPo;
@@ -271,6 +273,24 @@ public class DynamicFormServiceImpl implements DynamicFormService, ExpressionSco
         return query.single();
     }
 
+    protected void putExcelHeader(String fieldPrefix, FieldMetaData fieldMetaData, List<Header> headers) {
+        if (fieldMetaData == null) return;
+        PropertyWrapper valueWrapper = fieldMetaData.getProperty("export-excel", false);
+        if (fieldPrefix.length() > 0) fieldPrefix += ".";
+        if (valueWrapper.isTrue()) {
+            String title = fieldMetaData.getProperty("export-header", fieldMetaData.getComment()).toString();
+            if (StringUtils.isNullOrEmpty(title)) {
+                title = fieldMetaData.getName();
+            }
+            String field = fieldMetaData.getName();
+            OptionConverter converter = fieldMetaData.getOptionConverter();
+            if (converter != null) {
+                field = converter.getFieldName();
+            }
+            headers.add(new Header(title, fieldPrefix + field));
+        }
+    }
+
     @Override
     @ReadLock
     @LockName(value = "'form.lock.'+#name", isExpression = true)
@@ -281,27 +301,16 @@ public class DynamicFormServiceImpl implements DynamicFormService, ExpressionSco
         TableMetaData metaData = table.getMeta();
         List<Header> headers = new LinkedList<>();
         Map<String, Object> sample = dataList.isEmpty() ? new HashMap<>() : (Map) dataList.get(0);
-        int[] index = new int[1];
-        index[0] = 1;
-        metaData.getFields().forEach(fieldMetaData -> {
-            PropertyWrapper valueWrapper = fieldMetaData.getProperty("export-excel", false);
-            if (valueWrapper.isTrue()) {
-                String title = fieldMetaData.getProperty("export-header", fieldMetaData.getComment()).toString();
-                if (StringUtils.isNullOrEmpty(title)) {
-                    title = "字段" + index[0]++;
-                }
-                String field = fieldMetaData.getName();
-                Set<String> includes = param.getIncludes();
-                Set<String> excludes = param.getExcludes();
-                if (!includes.isEmpty()) {
-                    if (!includes.contains(field)) return;
-                }
-                if (!excludes.isEmpty()) {
-                    if (excludes.contains(field)) return;
-                }
-                if (sample.get(field + "_text") != null)
-                    field = field + "_text";
-                headers.add(new Header(title, field));
+        sample.forEach((key, value) -> {
+            if (value instanceof Map) {
+                ((Map) value).forEach((k, v) -> {
+                    String fieldName = key + "." + k;
+                    FieldMetaData field = metaData.findFieldByName(fieldName);
+                    putExcelHeader(fieldName,field, headers);
+                });
+            } else {
+                FieldMetaData field = metaData.findFieldByName(key);
+                putExcelHeader("",field, headers);
             }
         });
         if (metaData.triggerIsSupport("export.excel")) {

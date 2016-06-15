@@ -3,7 +3,9 @@ package org.hsweb.web.controller.form;
 import org.hsweb.web.bean.common.InsertMapParam;
 import org.hsweb.web.bean.common.QueryParam;
 import org.hsweb.web.bean.common.UpdateMapParam;
+import org.hsweb.web.bean.po.form.Form;
 import org.hsweb.web.core.authorize.annotation.Authorize;
+import org.hsweb.web.core.exception.BusinessException;
 import org.hsweb.web.core.logger.annotation.AccessLogger;
 import org.hsweb.web.core.message.ResponseMessage;
 import org.hsweb.web.service.form.DynamicFormService;
@@ -41,6 +43,15 @@ public class DynamicFormController {
         return ResponseMessage.ok(formService.selectDeployed(name));
     }
 
+    @RequestMapping(value = "/{name}/v/{version}", method = RequestMethod.GET)
+    @Authorize(expression = "#dynamicFormAuthorizeValidator.validate(#name,#user,#paramsMap,'R')")
+    public ResponseMessage latest(@PathVariable(value = "name") String name,
+                                  @PathVariable(value = "version") Integer version) throws Exception {
+        Form form = formService.selectByVersion(name, version);
+        if (form == null) throw new BusinessException("表单不存在", 404);
+        return ResponseMessage.ok(form);
+    }
+
     @RequestMapping(value = "/{name}", method = RequestMethod.GET)
     @AccessLogger("查看列表")
     @Authorize(expression = "#dynamicFormAuthorizeValidator.validate(#name,#user,#paramsMap,'R')")
@@ -70,7 +81,7 @@ public class DynamicFormController {
     @Authorize(expression = "#dynamicFormAuthorizeValidator.validate(#name,#user,#paramsMap,'C')")
     public ResponseMessage insert(@PathVariable("name") String name,
                                   @RequestBody(required = true) Map<String, Object> data) throws Exception {
-        String pk = dynamicFormService.insert(name,data);
+        String pk = dynamicFormService.insert(name, data);
         return ResponseMessage.ok(pk);
     }
 

@@ -75,7 +75,6 @@ public class FormServiceImpl extends AbstractServiceImpl<Form, String> implement
 
     @Override
     public String insert(Form data) throws Exception {
-
         List<Form> old = this.select(QueryParam.build().where("name", data.getName()));
         Assert.isTrue(old.isEmpty(), "表单 [" + data.getName() + "] 已存在!");
         data.setCreateDate(new Date());
@@ -87,11 +86,17 @@ public class FormServiceImpl extends AbstractServiceImpl<Form, String> implement
     }
 
     @Override
-    @CacheEvict(value = {CACHE_KEY}, key = "#data.id")
+    @Caching(
+            evict = {
+                    @CacheEvict(value = {CACHE_KEY}, key = "#data.id"),
+                    @CacheEvict(value = {CACHE_KEY}, key = "#data.name+':'+#data.version")
+            }
+    )
     public int update(Form data) throws Exception {
         Form old = this.selectByPk(data.getId());
         assertNotNull(old, "表单不存在!");
         data.setUpdateDate(new Date());
+        data.setVersion(old.getVersion());
         data.setRevision(old.getRevision() + 1);
         UpdateParam<Form> param = UpdateParam.build(data).excludes("createDate", "release", "version", "using");
         return getMapper().update(param);
@@ -119,6 +124,7 @@ public class FormServiceImpl extends AbstractServiceImpl<Form, String> implement
     }
 
     @Override
+    @Cacheable(value = CACHE_KEY, key = "#name+':'+#version")
     public Form selectByVersion(String name, int version) throws Exception {
         QueryParam param = QueryParam.build()
                 .where("name", name).where("version", version);
