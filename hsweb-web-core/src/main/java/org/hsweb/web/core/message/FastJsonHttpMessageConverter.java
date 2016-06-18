@@ -79,6 +79,7 @@ public class FastJsonHttpMessageConverter extends AbstractHttpMessageConverter<O
     }
 
     public String converter(Object obj) {
+        if (obj instanceof String) return (String)obj;
         String text;
         if (obj instanceof ResponseMessage) {
             ResponseMessage message = (ResponseMessage) obj;
