@@ -4,9 +4,9 @@ import org.hsweb.web.core.authorize.AuthorizeValidatorConfig;
 import org.hsweb.web.core.authorize.annotation.Authorize;
 import org.hsweb.web.core.exception.AuthorizeException;
 import org.hsweb.web.core.exception.AuthorizeForbiddenException;
-import org.webbuilder.utils.common.StringUtils;
-import org.webbuilder.utils.script.engine.DynamicScriptEngine;
-import org.webbuilder.utils.script.engine.DynamicScriptEngineFactory;
+import org.hsweb.commons.StringUtils;
+import org.hsweb.expands.script.engine.DynamicScriptEngine;
+import org.hsweb.expands.script.engine.DynamicScriptEngineFactory;
 
 import java.util.LinkedHashSet;
 import java.util.Set;

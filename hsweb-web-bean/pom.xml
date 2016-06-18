@@ -21,8 +21,8 @@
             <artifactId>hsweb-easy-orm</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.webbuilder</groupId>
-            <artifactId>wb-utils</artifactId>
+            <groupId>org.hsweb</groupId>
+            <artifactId>hsweb-commons</artifactId>
         </dependency>
     </dependencies>
 </project>

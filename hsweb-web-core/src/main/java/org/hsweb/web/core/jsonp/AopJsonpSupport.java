@@ -7,7 +7,7 @@ import org.hsweb.web.core.utils.ThreadLocalUtils;
 import org.hsweb.web.core.utils.WebUtil;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
-import org.webbuilder.utils.common.StringUtils;
+import org.hsweb.commons.StringUtils;
 
 /**
  * Created by zhouhao on 16-5-26.

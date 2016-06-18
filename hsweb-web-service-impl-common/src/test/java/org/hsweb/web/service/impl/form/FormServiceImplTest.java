@@ -1,5 +1,6 @@
 package org.hsweb.web.service.impl.form;
 
+import org.hsweb.commons.file.FileUtils;
 import org.hsweb.ezorm.executor.SqlExecutor;
 import org.hsweb.ezorm.run.Database;
 import org.hsweb.ezorm.run.Table;
@@ -15,7 +16,6 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
-import org.webbuilder.utils.file.FileUtils;
 
 import javax.annotation.Resource;
 import java.util.Date;

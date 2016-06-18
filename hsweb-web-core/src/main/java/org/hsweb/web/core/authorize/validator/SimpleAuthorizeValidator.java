@@ -6,9 +6,9 @@ import org.hsweb.web.core.authorize.ExpressionScopeBean;
 import org.hsweb.web.core.authorize.annotation.Authorize;
 import org.hsweb.web.bean.po.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.webbuilder.utils.common.StringUtils;
-import org.webbuilder.utils.script.engine.DynamicScriptEngine;
-import org.webbuilder.utils.script.engine.DynamicScriptEngineFactory;
+import org.hsweb.commons.StringUtils;
+import org.hsweb.expands.script.engine.DynamicScriptEngine;
+import org.hsweb.expands.script.engine.DynamicScriptEngineFactory;
 
 import java.util.*;
 

@@ -1,7 +1,7 @@
 package org.hsweb.web.bean.po;
 
 
-import org.webbuilder.utils.common.MD5;
+import org.hsweb.commons.MD5;
 
 import java.io.Serializable;
 import java.util.LinkedHashMap;

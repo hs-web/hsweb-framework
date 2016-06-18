@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
 import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
-import org.webbuilder.utils.common.StringUtils;
+import org.hsweb.commons.StringUtils;
 import org.hsweb.web.service.config.ConfigService;
 import org.hsweb.web.service.resource.FileService;
 import org.hsweb.web.service.resource.ResourcesService;

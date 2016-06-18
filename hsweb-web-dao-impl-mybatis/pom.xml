@@ -41,12 +41,5 @@
             <artifactId>cglib-nodep</artifactId>
             <version>${cglib.version}</version>
         </dependency>
-
-        <!-- DruidDataSource -->
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>druid</artifactId>
-            <version>${druid.version}</version>
-        </dependency>
     </dependencies>
 </project>

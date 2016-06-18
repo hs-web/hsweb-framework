@@ -6,8 +6,8 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.hsweb.web.bean.po.logger.LoggerInfo;
 import org.hsweb.web.core.logger.annotation.AccessLogger;
 import org.hsweb.web.core.utils.WebUtil;
-import org.webbuilder.utils.common.ClassUtils;
-import org.webbuilder.utils.common.MD5;
+import org.hsweb.commons.ClassUtils;
+import org.hsweb.commons.MD5;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;

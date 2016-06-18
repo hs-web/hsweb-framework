@@ -1,9 +1,7 @@
 package org.hsweb.web.bean.po.script;
 
 import org.hibernate.validator.constraints.Length;
-import org.hibernate.validator.constraints.NotEmpty;
 import org.hsweb.web.bean.po.GenericPo;
-import org.webbuilder.utils.common.StringUtils;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;

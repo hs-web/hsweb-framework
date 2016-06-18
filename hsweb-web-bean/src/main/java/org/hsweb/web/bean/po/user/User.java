@@ -2,13 +2,13 @@ package org.hsweb.web.bean.po.user;
 
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
+import org.hsweb.commons.MapUtils;
+import org.hsweb.commons.StringUtils;
 import org.hsweb.web.bean.po.GenericPo;
-import org.hsweb.web.bean.po.role.Role;
 import org.hsweb.web.bean.po.module.Module;
+import org.hsweb.web.bean.po.role.Role;
 import org.hsweb.web.bean.po.role.RoleModule;
 import org.hsweb.web.bean.po.role.UserRole;
-import org.webbuilder.utils.common.MapUtils;
-import org.webbuilder.utils.common.StringUtils;
 
 import javax.validation.constraints.NotNull;
 import java.util.*;

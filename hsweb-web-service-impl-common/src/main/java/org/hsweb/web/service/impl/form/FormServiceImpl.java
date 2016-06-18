@@ -20,7 +20,7 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
-import org.webbuilder.utils.common.StringUtils;
+import org.hsweb.commons.StringUtils;
 
 import javax.annotation.Resource;
 import java.util.Date;

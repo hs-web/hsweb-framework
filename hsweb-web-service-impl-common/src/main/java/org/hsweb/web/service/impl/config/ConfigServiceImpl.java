@@ -1,5 +1,6 @@
 package org.hsweb.web.service.impl.config;
 
+import org.hsweb.commons.StringUtils;
 import org.hsweb.web.bean.common.UpdateParam;
 import org.hsweb.web.bean.po.config.Config;
 import org.hsweb.web.core.authorize.ExpressionScopeBean;
@@ -10,13 +11,11 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
-import org.webbuilder.utils.common.StringUtils;
 
 import javax.annotation.Resource;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 /**
  * 系统配置服务类

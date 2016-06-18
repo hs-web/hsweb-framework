@@ -41,7 +41,8 @@
         <aspectj.version>1.6.12</aspectj.version>
         <hibernate.validator.version>5.1.1.Final</hibernate.validator.version>
         <hsweb.ezorm.version>1.0-SNAPSHOT</hsweb.ezorm.version>
-        <webbuilder.version>1.0-SNAPSHOT</webbuilder.version>
+        <hsweb.commons.version>1.0-SNAPSHOT</hsweb.commons.version>
+        <hsweb.expands.version>1.0-SNAPSHOT</hsweb.expands.version>
     </properties>
 
     <build>
@@ -113,65 +114,24 @@
         <dependencies>
             <dependency>
                 <groupId>org.hsweb</groupId>
+                <artifactId>hsweb-commons</artifactId>
+                <version>${hsweb.commons.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.hsweb</groupId>
+                <artifactId>hsweb-expands-script</artifactId>
+                <version>${hsweb.expands.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.hsweb</groupId>
+                <artifactId>hsweb-expands-office</artifactId>
+                <version>${hsweb.expands.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.hsweb</groupId>
                 <artifactId>hsweb-easy-orm</artifactId>
                 <version>${hsweb.ezorm.version}</version>
             </dependency>
-
-            <!--<dependency>-->
-                <!--<groupId>org.webbuilder</groupId>-->
-                <!--<artifactId>wb-sql-util</artifactId>-->
-                <!--<version>${webbuilder.version}</version>-->
-                <!--<exclusions>-->
-                    <!--<exclusion>-->
-                        <!--<groupId>org.slf4j</groupId>-->
-                        <!--<artifactId>slf4j-api</artifactId>-->
-                    <!--</exclusion>-->
-                    <!--<exclusion>-->
-                        <!--<groupId>org.slf4j</groupId>-->
-                        <!--<artifactId>slf4j-log4j12</artifactId>-->
-                    <!--</exclusion>-->
-                    <!--<exclusion>-->
-                        <!--<groupId>ch.qos.logback</groupId>-->
-                        <!--<artifactId>logback-classic</artifactId>-->
-                    <!--</exclusion>-->
-                <!--</exclusions>-->
-            <!--</dependency>-->
-
-            <dependency>
-                <groupId>org.webbuilder</groupId>
-                <artifactId>wb-utils</artifactId>
-                <version>${webbuilder.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.webbuilder</groupId>
-                <artifactId>wb-office</artifactId>
-                <version>${webbuilder.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-api</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>log4j</groupId>
-                        <artifactId>log4j</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-log4j12</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>ch.qos.logback</groupId>
-                        <artifactId>logback-classic</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <!--<dependency>-->
-            <!--<groupId>com.vaadin</groupId>-->
-            <!--<artifactId>vaadin-bom</artifactId>-->
-            <!--<version>7.6.4</version>-->
-            <!--<type>pom</type>-->
-            <!--<scope>import</scope>-->
-            <!--</dependency>-->
             <dependency>
                 <groupId>org.hsweb</groupId>
                 <artifactId>hsweb-web-concurrent-cache</artifactId>

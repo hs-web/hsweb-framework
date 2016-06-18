@@ -1,7 +1,7 @@
 package org.hsweb.web.bean.po.resource;
 
+import org.hsweb.commons.file.FileUtils;
 import org.hsweb.web.bean.po.GenericPo;
-import org.webbuilder.utils.file.FileUtils;
 
 /**
  * 资源

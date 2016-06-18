@@ -16,7 +16,7 @@ import org.hsweb.web.service.user.UserService;
 import org.hsweb.web.core.utils.RandomUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
-import org.webbuilder.utils.common.MD5;
+import org.hsweb.commons.MD5;
 
 import javax.annotation.Resource;
 import java.util.*;

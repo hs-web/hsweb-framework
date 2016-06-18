@@ -1,12 +1,9 @@
 package org.hsweb.web.bean.common;
 
 import com.alibaba.fastjson.JSON;
-import org.hsweb.ezorm.param.Term;
-import org.hsweb.ezorm.param.TermType;
-import org.webbuilder.utils.common.MapUtils;
-import org.webbuilder.utils.common.StringUtils;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by zhouhao on 16-4-19.

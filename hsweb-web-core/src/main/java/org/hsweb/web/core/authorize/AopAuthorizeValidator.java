@@ -9,8 +9,8 @@ import org.hsweb.web.core.exception.AuthorizeException;
 import org.hsweb.web.core.session.HttpSessionManager;
 import org.hsweb.web.core.utils.WebUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.webbuilder.utils.common.ClassUtils;
-import org.webbuilder.utils.common.StringUtils;
+import org.hsweb.commons.ClassUtils;
+import org.hsweb.commons.StringUtils;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;

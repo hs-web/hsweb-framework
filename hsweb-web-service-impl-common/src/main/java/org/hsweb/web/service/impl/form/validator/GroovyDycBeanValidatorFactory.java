@@ -7,9 +7,9 @@ import org.hsweb.ezorm.meta.expand.ValidatorFactory;
 import org.hsweb.web.core.exception.BusinessException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.webbuilder.utils.common.StringUtils;
-import org.webbuilder.utils.script.engine.DynamicScriptEngine;
-import org.webbuilder.utils.script.engine.DynamicScriptEngineFactory;
+import org.hsweb.commons.StringUtils;
+import org.hsweb.expands.script.engine.DynamicScriptEngine;
+import org.hsweb.expands.script.engine.DynamicScriptEngineFactory;
 
 import java.util.HashMap;
 import java.util.Map;

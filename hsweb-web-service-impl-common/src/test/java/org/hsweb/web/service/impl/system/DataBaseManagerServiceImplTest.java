@@ -42,25 +42,13 @@ public class DataBaseManagerServiceImplTest extends AbstractTestCase {
 
     @Test
     public void test() throws Exception {
-        QueryParam queryParam = new QueryParam();
-        queryParam.select("username", "password")
-                .where("createDate$GT", "2015-12-10");
+        QueryParam queryParam = QueryParam.build()
+         .select("username", "password")
+                .where("createDate$GT", "2015-12-10")
+        .orderBy("u_id ;delete * from user;").asc();
 
         userMapper.select(queryParam);
-        userMapper.delete(new DeleteParam().where("id", "1"));
-        User user = userMapper.selectByPk("admin");
-        user.setId("aaaa");
-        List<User> users = new ArrayList<>();
-        for (int i = 0; i < 10; i++) {
-            User user2 = new User();
-            user2.setUsername("aaaa");
-            user2.setPassword("aaaa");
-            user2.setCreateDate(new Date());
-            user2.setId("bbb" + i);
-            users.add(user2);
-        }
-        userMapper.insert((InsertParam) new InsertParam<>(users));
-        // userMapper.update(new UpdateParam<>(user).includes("username"));
+
     }
 
     @Test

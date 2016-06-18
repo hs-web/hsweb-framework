@@ -3,6 +3,7 @@ package org.hsweb.web.service.impl.form;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.beanutils.BeanUtils;
 import org.hsweb.ezorm.meta.FieldMetaData;
 import org.hsweb.ezorm.meta.TableMetaData;
 import org.hsweb.ezorm.meta.converter.ClobValueConverter;
@@ -17,10 +18,9 @@ import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
-import org.webbuilder.utils.common.BeanUtils;
-import org.webbuilder.utils.common.StringUtils;
-import org.webbuilder.utils.script.engine.DynamicScriptEngine;
-import org.webbuilder.utils.script.engine.DynamicScriptEngineFactory;
+import org.hsweb.commons.StringUtils;
+import org.hsweb.expands.script.engine.DynamicScriptEngine;
+import org.hsweb.expands.script.engine.DynamicScriptEngineFactory;
 
 import java.lang.reflect.Field;
 import java.sql.JDBCType;
@@ -162,7 +162,7 @@ public class DefaultFormParser implements FormParser {
                 if (ftmp != null) {
                     try {
                         if ("javaType".equals(key)) value = mapperJavaType(value.toString());
-                        BeanUtils.attr(fieldMeta, key, value);
+                        BeanUtils.setProperty(fieldMeta, key, value);
                     } catch (Exception e) {
                     }
                 } else {

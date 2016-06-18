@@ -43,10 +43,6 @@
             <!--<groupId>org.activiti</groupId>-->
             <!--<artifactId>activiti-modeler</artifactId>-->
         <!--</dependency>-->
-        <dependency>
-            <groupId>org.webbuilder</groupId>
-            <artifactId>wb-utils</artifactId>
-        </dependency>
 
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>

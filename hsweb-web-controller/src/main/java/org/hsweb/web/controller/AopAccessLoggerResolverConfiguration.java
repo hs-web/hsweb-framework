@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
-import org.webbuilder.utils.common.StringUtils;
+import org.hsweb.commons.StringUtils;
 
 import java.util.List;
 

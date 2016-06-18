@@ -4,6 +4,8 @@ import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.beanutils.PropertyUtilsBean;
 import org.apache.ibatis.mapping.ResultMap;
 import org.apache.ibatis.mapping.ResultMapping;
+import org.hsweb.commons.DateTimeUtils;
+import org.hsweb.commons.StringUtils;
 import org.hsweb.ezorm.meta.FieldMetaData;
 import org.hsweb.ezorm.param.Term;
 import org.hsweb.ezorm.render.Dialect;
@@ -12,8 +14,6 @@ import org.hsweb.web.bean.common.QueryParam;
 import org.hsweb.web.bean.common.UpdateParam;
 import org.hsweb.web.mybatis.utils.ResultMapsUtils;
 import org.hsweb.web.mybatis.utils.SqlAppender;
-import org.webbuilder.utils.common.DateTimeUtils;
-import org.webbuilder.utils.common.StringUtils;
 
 import java.sql.JDBCType;
 import java.sql.SQLException;
@@ -360,31 +360,6 @@ public class DefaultSqlParamBuilder {
                 break;
         }
         return value;
-    }
-
-    protected List<Object> param2list(Object value) {
-        if (value == null) return new ArrayList<>();
-        if (!(value instanceof Iterable)) {
-            if (value instanceof String) {
-                String[] arr = ((String) value).split("[, ;]");
-                Object[] objArr = new Object[arr.length];
-                for (int i = 0; i < arr.length; i++) {
-                    String str = arr[i];
-                    Object val = str;
-                    if (StringUtils.isInt(str))
-                        val = StringUtils.toInt(str);
-                    else if (StringUtils.isDouble(str))
-                        val = StringUtils.toDouble(str);
-                    objArr[i] = val;
-                }
-                return Arrays.asList(objArr);
-            } else if (value.getClass().isArray()) {
-                return Arrays.asList(((Object[]) value));
-            } else {
-                return Arrays.asList(value);
-            }
-        }
-        return new ArrayList<>();
     }
 
     public interface KeyWordMapper {

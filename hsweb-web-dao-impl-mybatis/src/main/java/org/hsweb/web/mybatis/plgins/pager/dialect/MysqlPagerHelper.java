@@ -3,7 +3,7 @@ package org.hsweb.web.mybatis.plgins.pager.dialect;
 import org.hsweb.web.bean.common.QueryParam;
 import org.hsweb.web.mybatis.plgins.pager.PagerHelper;
 import org.springframework.stereotype.Component;
-import org.webbuilder.utils.common.StringUtils;
+import org.hsweb.commons.StringUtils;
 
 /**
  * Created by zhouhao on 16-4-13.

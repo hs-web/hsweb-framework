@@ -14,8 +14,8 @@ import org.hsweb.web.service.resource.ResourcesService;
 import org.hsweb.web.core.utils.WebUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.webbuilder.utils.common.DateTimeUtils;
-import org.webbuilder.utils.common.MD5;
+import org.hsweb.commons.DateTimeUtils;
+import org.hsweb.commons.MD5;
 
 import javax.annotation.Resource;
 import java.io.*;

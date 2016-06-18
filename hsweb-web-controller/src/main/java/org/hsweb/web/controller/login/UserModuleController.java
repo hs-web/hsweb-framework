@@ -9,7 +9,7 @@ import org.hsweb.web.service.module.ModuleService;
 import org.hsweb.web.core.utils.WebUtil;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.webbuilder.utils.common.StringUtils;
+import org.hsweb.commons.StringUtils;
 
 import javax.annotation.Resource;
 import java.util.LinkedList;

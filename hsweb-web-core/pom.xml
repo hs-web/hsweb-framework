@@ -39,7 +39,10 @@
             <groupId>org.hsweb</groupId>
             <artifactId>hsweb-easy-orm</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>org.hsweb</groupId>
+            <artifactId>hsweb-expands-script</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

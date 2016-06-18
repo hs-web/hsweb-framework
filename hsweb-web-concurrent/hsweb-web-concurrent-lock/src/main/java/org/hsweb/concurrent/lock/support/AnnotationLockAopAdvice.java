@@ -11,9 +11,9 @@ import org.hsweb.web.core.authorize.ExpressionScopeBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.webbuilder.utils.script.engine.DynamicScriptEngine;
-import org.webbuilder.utils.script.engine.DynamicScriptEngineFactory;
-import org.webbuilder.utils.script.engine.ExecuteResult;
+import org.hsweb.expands.script.engine.DynamicScriptEngine;
+import org.hsweb.expands.script.engine.DynamicScriptEngineFactory;
+import org.hsweb.expands.script.engine.ExecuteResult;
 
 import java.util.HashMap;
 import java.util.Map;

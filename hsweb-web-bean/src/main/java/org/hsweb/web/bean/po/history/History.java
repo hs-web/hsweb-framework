@@ -1,7 +1,7 @@
 package org.hsweb.web.bean.po.history;
 
+import org.hsweb.commons.MD5;
 import org.hsweb.web.bean.po.GenericPo;
-import org.webbuilder.utils.common.MD5;
 
 import java.util.Date;
 import java.util.UUID;

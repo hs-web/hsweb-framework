@@ -1,6 +1,5 @@
 package org.hsweb.web.controller.form;
 
-import org.hsweb.web.bean.common.InsertMapParam;
 import org.hsweb.web.bean.common.QueryParam;
 import org.hsweb.web.bean.common.UpdateMapParam;
 import org.hsweb.web.bean.po.form.Form;
