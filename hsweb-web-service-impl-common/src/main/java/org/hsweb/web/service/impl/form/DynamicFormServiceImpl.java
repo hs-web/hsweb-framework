@@ -278,7 +278,10 @@ public class DynamicFormServiceImpl implements DynamicFormService, ExpressionSco
         PropertyWrapper valueWrapper = fieldMetaData.getProperty("export-excel", false);
         if (fieldPrefix.length() > 0) fieldPrefix += ".";
         if (valueWrapper.isTrue()) {
-            String title = fieldMetaData.getProperty("export-header", fieldMetaData.getComment()).toString();
+            String title = fieldMetaData.getProperty("excel-header").getValue();
+            if (StringUtils.isNullOrEmpty(title)) {
+                title = fieldMetaData.getComment();
+            }
             if (StringUtils.isNullOrEmpty(title)) {
                 title = fieldMetaData.getName();
             }
@@ -306,11 +309,11 @@ public class DynamicFormServiceImpl implements DynamicFormService, ExpressionSco
                 ((Map) value).forEach((k, v) -> {
                     String fieldName = key + "." + k;
                     FieldMetaData field = metaData.findFieldByName(fieldName);
-                    putExcelHeader(fieldName,field, headers);
+                    putExcelHeader(fieldName, field, headers);
                 });
             } else {
                 FieldMetaData field = metaData.findFieldByName(key);
-                putExcelHeader("",field, headers);
+                putExcelHeader("", field, headers);
             }
         });
         if (metaData.triggerIsSupport("export.excel")) {
@@ -345,7 +348,13 @@ public class DynamicFormServiceImpl implements DynamicFormService, ExpressionSco
         metaData.getFields().forEach(fieldMetaData -> {
             PropertyWrapper valueWrapper = fieldMetaData.getProperty("importExcel", true);
             if (valueWrapper.isTrue()) {
-                String title = fieldMetaData.getProperty("excelHeader", fieldMetaData.getComment()).toString();
+                String title = fieldMetaData.getProperty("excel-header").getValue();
+                if (StringUtils.isNullOrEmpty(title)) {
+                    title = fieldMetaData.getComment();
+                }
+                if (StringUtils.isNullOrEmpty(title)) {
+                    title = fieldMetaData.getName();
+                }
                 String field = fieldMetaData.getName();
                 headerMapper.put(title, field);
             }
