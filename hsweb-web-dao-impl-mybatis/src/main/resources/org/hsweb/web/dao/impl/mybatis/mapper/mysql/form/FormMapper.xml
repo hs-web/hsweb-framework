@@ -45,7 +45,7 @@
     </select>
 
     <select id="selectUsing" parameterType="string" resultMap="FormResultMap">
-        select * from s_form WHERE using=1 and name=#{name}
+        select * from s_form WHERE `using`=1 and `name`=#{name}
     </select>
 
     <select id="selectLatestList" parameterType="org.hsweb.web.bean.common.QueryParam" resultMap="FormResultMap">

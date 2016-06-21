@@ -64,7 +64,7 @@ ALTER TABLE `s_template` COMMENT '模板';
 -- Table structure for S_MODULES
 -- ----------------------------
 CREATE TABLE `s_modules` (
-  `u_id`       VARCHAR(256)  NOT NULL PRIMARY KEY
+  `u_id`       VARCHAR(32)  NOT NULL PRIMARY KEY
   COMMENT 'uid',
   `name`       VARCHAR(256)  NOT NULL
   COMMENT '模块名称',
@@ -87,7 +87,7 @@ ALTER TABLE `s_modules` COMMENT '系统模块';
 
 
 CREATE TABLE `s_module_meta` (
-  `u_id`      VARCHAR(256)  NOT NULL PRIMARY KEY
+  `u_id`      VARCHAR(32)  NOT NULL PRIMARY KEY
   COMMENT 'uid',
   `key`       VARCHAR(256)  NOT NULL
   COMMENT '标识',
@@ -118,7 +118,7 @@ INSERT INTO `s_modules` VALUES ('s_logger', '日志管理', 'admin/logger/list.h
 -- Table structure for S_RESOURCES
 -- ----------------------------
 CREATE TABLE `s_resources` (
-  `u_id`        VARCHAR(256)  NOT NULL PRIMARY KEY
+  `u_id`        VARCHAR(32)  NOT NULL PRIMARY KEY
   COMMENT 'uid',
   `name`        VARCHAR(256)  NOT NULL
   COMMENT '资源名称',
@@ -159,7 +159,7 @@ ALTER TABLE `s_resources` COMMENT '资源表';
 -- Table structure for S_ROLE
 -- ----------------------------
 CREATE TABLE `s_role` (
-  `u_id`   VARCHAR(256) NOT NULL PRIMARY KEY
+  `u_id`   VARCHAR(32) NOT NULL PRIMARY KEY
   COMMENT 'uid',
   `name`   VARCHAR(256) NOT NULL
   COMMENT '角色名称',
@@ -179,7 +179,7 @@ INSERT INTO `s_role` VALUES ('admin', '超级管理员', NULL, '初始数据');
 -- Table structure for S_ROLE_MODULES
 -- ----------------------------
 CREATE TABLE `s_role_modules` (
-  `u_id`      VARCHAR(256) NOT NULL PRIMARY KEY
+  `u_id`      VARCHAR(32) NOT NULL PRIMARY KEY
   COMMENT 'uid',
   `module_id` VARCHAR(256) NOT NULL
   COMMENT '模块id',
@@ -194,7 +194,7 @@ ALTER TABLE `s_role_modules` COMMENT '角色模块绑定表';
 -- Table structure for S_SCRIPT
 -- ----------------------------
 CREATE TABLE `s_script` (
-  `u_id`    VARCHAR(256)  NOT NULL PRIMARY KEY
+  `u_id`    VARCHAR(32)  NOT NULL PRIMARY KEY
   COMMENT 'uid',
   `name`    VARCHAR(256)  NOT NULL
   COMMENT '脚本名称',
@@ -219,7 +219,7 @@ ALTER TABLE `s_script` COMMENT '脚本';
 -- Table structure for S_USER
 -- ----------------------------
 CREATE TABLE `s_user` (
-  `u_id`        VARCHAR(64)  NOT NULL PRIMARY KEY
+  `u_id`        VARCHAR(32)  NOT NULL PRIMARY KEY
   COMMENT 'ID',
   `username`    VARCHAR(64)  NOT NULL
   COMMENT '用户名',
@@ -245,12 +245,12 @@ ALTER TABLE `s_user` COMMENT '用户表';
 -- ----------------------------
 -- Records of S_USER
 -- ----------------------------
-INSERT INTO `s_user` VALUES ('admin', 'admin', '23ec59e119da971084cbd0ba72d230a0', '超级管理员', NULL, NULL, '1', TO_datetime('2015-11-19 12:10:36', 'YYYY-MM-DD HH24:MI:SS'), NULL, NULL);
+INSERT INTO `s_user` VALUES ('admin', 'admin', '23ec59e119da971084cbd0ba72d230a0', '超级管理员', NULL, NULL, '1', '1991-08-11 12:10:36', NULL, NULL);
 -- ----------------------------
 -- Table structure for S_USER_ROLE
 -- ----------------------------
 CREATE TABLE `s_user_role` (
-  `u_id`    VARCHAR(256) NOT NULL PRIMARY KEY
+  `u_id`    VARCHAR(32) NOT NULL PRIMARY KEY
   COMMENT 'UID',
   `user_id` VARCHAR(256) NOT NULL
   COMMENT '用户ID',

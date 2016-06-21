@@ -32,9 +32,6 @@ public class FormController extends GenericController<Form, String> {
     @Resource
     private FormService formService;
 
-    @Resource
-    private HistoryService historyService;
-
     @Override
     public FormService getService() {
         return this.formService;

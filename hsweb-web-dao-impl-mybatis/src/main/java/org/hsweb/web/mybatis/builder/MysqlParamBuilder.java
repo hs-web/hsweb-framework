@@ -12,6 +12,11 @@ public class MysqlParamBuilder extends DefaultSqlParamBuilder {
     }
 
     @Override
+    public boolean filedToUpperCase() {
+        return false;
+    }
+
+    @Override
     public Dialect getDialect() {
         return Dialect.MYSQL;
     }
@@ -20,13 +25,4 @@ public class MysqlParamBuilder extends DefaultSqlParamBuilder {
         return instance;
     }
 
-    @Override
-    public String getQuoteStart() {
-        return "`";
-    }
-
-    @Override
-    public String getQuoteEnd() {
-        return "`";
-    }
 }

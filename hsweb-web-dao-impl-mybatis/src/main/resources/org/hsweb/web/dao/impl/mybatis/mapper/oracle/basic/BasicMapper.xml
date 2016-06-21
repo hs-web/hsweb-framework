@@ -42,7 +42,7 @@
         <where>
             <include refid="BasicMapper.buildWhere"/>
             <if test="terms.size()==0">
-                u_id is null
+               1=2
             </if>
         </where>
     </sql>

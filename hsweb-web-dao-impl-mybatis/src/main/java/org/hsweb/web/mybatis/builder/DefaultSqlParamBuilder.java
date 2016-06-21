@@ -24,21 +24,20 @@ import java.util.*;
  */
 public class DefaultSqlParamBuilder {
 
-    public String getQuoteStart() {
-        return "\"";
-    }
-
-    public String getQuoteEnd() {
-        return "\"";
-    }
-
     public Dialect getDialect() {
         return Dialect.ORACLE;
     }
 
+    public boolean filedToUpperCase() {
+        return true;
+    }
+
     protected static final Map<Class, String> simpleName = new HashMap<>();
+
     private static DefaultSqlParamBuilder instance = new DefaultSqlParamBuilder();
-   protected PropertyUtilsBean propertyUtils = BeanUtilsBean.getInstance().getPropertyUtils();
+
+    protected PropertyUtilsBean propertyUtils = BeanUtilsBean.getInstance().getPropertyUtils();
+
     public DefaultSqlParamBuilder() {
         simpleName.put(Integer.class, "int");
         simpleName.put(Byte.class, "byte");
@@ -124,7 +123,10 @@ public class DefaultSqlParamBuilder {
             listData = Arrays.asList(param.getData());
         }
         param.setData(listData);
-        String fields = mappings.keySet().stream().reduce((f1, f2) -> f1 + "," + f2).get();
+        String fields = mappings.keySet().stream()
+                .map(str -> new SqlAppender().add(getDialect().getQuoteStart(), filedToUpperCase() ? str.toUpperCase() : str, getDialect().getQuoteEnd()).toString())
+                .reduce((f1, f2) -> new SqlAppender().add(f1, ",", f2)
+                        .toString()).get();
         //批量
         int size = listData.size();
         SqlAppender batchSql = new SqlAppender();
@@ -164,11 +166,11 @@ public class DefaultSqlParamBuilder {
             if (!appender.isEmpty())
                 appender.add(",");
             if (!k.contains(".") || k.split("[.]")[0].equals(tableName)) {
-                appender.add(tableName, ".", k, " as ");
+                appender.add(tableName, ".", getDialect().getQuoteStart(), filedToUpperCase() ? k.toUpperCase() : k, getDialect().getQuoteEnd(), " as ");
             } else {
-                appender.add(k, " as ");
+                appender.add(getDialect().getQuoteStart(),  filedToUpperCase() ? k.toUpperCase() : k, getDialect().getQuoteEnd(), " as ");
             }
-            appender.addEdSpc(getQuoteStart(), k, getQuoteEnd());
+            appender.addEdSpc(getDialect().getQuoteStart(), k, getDialect().getQuoteEnd());
         });
         if (appender.isEmpty()) return "*";
         return appender.toString();
@@ -187,7 +189,7 @@ public class DefaultSqlParamBuilder {
                     if (!appender.isEmpty())
                         appender.add(",");
                     Map<String, Object> config = ((Map) fieldConfig.get(k));
-                    appender.add(k, "=", "#{data.", v);
+                    appender.add(getDialect().getQuoteStart(), filedToUpperCase() ? k.toUpperCase() : k, getDialect().getQuoteEnd(), "=", "#{data.", v);
                     if (config != null) {
                         Object jdbcType = config.get("jdbcType"),
                                 javaType = config.get("javaType");
