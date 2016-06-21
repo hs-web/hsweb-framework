@@ -57,4 +57,11 @@ public class RestControllerExceptionTranslator {
         return ResponseMessage.error(exception.getMessage(), 404);
     }
 
+    @ExceptionHandler(Throwable.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseBody
+    ResponseMessage handleException(Throwable exception) {
+        return ResponseMessage.error(exception.getMessage(), 500);
+    }
+
 }
