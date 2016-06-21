@@ -41,7 +41,12 @@
             <artifactId>h2</artifactId>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>druid</artifactId>
+            <version>1.0.5</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.hsweb</groupId>
             <artifactId>hsweb-expands-office</artifactId>
