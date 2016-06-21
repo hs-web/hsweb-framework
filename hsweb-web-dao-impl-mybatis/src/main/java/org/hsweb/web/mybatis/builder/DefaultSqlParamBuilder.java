@@ -62,6 +62,15 @@ public class DefaultSqlParamBuilder {
         return instance;
     }
 
+    public String encodeFiled(String field) {
+        if (field.contains(".")) {
+            String[] tmp = field.split("[.]");
+            return tmp[0] + "." + getDialect().getQuoteStart() + (filedToUpperCase() ? (tmp[1].toUpperCase()) : tmp[1]) + getDialect().getQuoteEnd();
+        } else {
+            return getDialect().getQuoteStart() + (filedToUpperCase() ? (field.toUpperCase()) : field) + getDialect().getQuoteEnd();
+        }
+    }
+
     public KeyWordMapper getKeyWordMapper(String type) {
         return (paramKey, tableName, term, jdbcType) -> {
             String termField = term.getField();
@@ -124,7 +133,7 @@ public class DefaultSqlParamBuilder {
         }
         param.setData(listData);
         String fields = mappings.keySet().stream()
-                .map(str -> new SqlAppender().add(getDialect().getQuoteStart(), filedToUpperCase() ? str.toUpperCase() : str, getDialect().getQuoteEnd()).toString())
+                .map(str -> new SqlAppender().add(encodeFiled(str), "").toString())
                 .reduce((f1, f2) -> new SqlAppender().add(f1, ",", f2)
                         .toString()).get();
         //批量
@@ -166,9 +175,9 @@ public class DefaultSqlParamBuilder {
             if (!appender.isEmpty())
                 appender.add(",");
             if (!k.contains(".") || k.split("[.]")[0].equals(tableName)) {
-                appender.add(tableName, ".", getDialect().getQuoteStart(), filedToUpperCase() ? k.toUpperCase() : k, getDialect().getQuoteEnd(), " as ");
+                appender.add(tableName, ".", encodeFiled(k), " as ");
             } else {
-                appender.add(getDialect().getQuoteStart(),  filedToUpperCase() ? k.toUpperCase() : k, getDialect().getQuoteEnd(), " as ");
+                appender.add(encodeFiled(k), " as ");
             }
             appender.addEdSpc(getDialect().getQuoteStart(), k, getDialect().getQuoteEnd());
         });
@@ -189,7 +198,7 @@ public class DefaultSqlParamBuilder {
                     if (!appender.isEmpty())
                         appender.add(",");
                     Map<String, Object> config = ((Map) fieldConfig.get(k));
-                    appender.add(getDialect().getQuoteStart(), filedToUpperCase() ? k.toUpperCase() : k, getDialect().getQuoteEnd(), "=", "#{data.", v);
+                    appender.add(encodeFiled(k), "=", "#{data.", v);
                     if (config != null) {
                         Object jdbcType = config.get("jdbcType"),
                                 javaType = config.get("javaType");
