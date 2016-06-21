@@ -10,6 +10,7 @@ import org.hsweb.ezorm.meta.FieldMetaData;
 import org.hsweb.ezorm.meta.TableMetaData;
 import org.hsweb.ezorm.meta.expand.OptionConverter;
 import org.hsweb.ezorm.meta.expand.PropertyWrapper;
+import org.hsweb.ezorm.meta.parser.TableMetaParser;
 import org.hsweb.ezorm.run.*;
 import org.hsweb.web.bean.common.DeleteParam;
 import org.hsweb.web.bean.common.PagerResult;
@@ -68,6 +69,9 @@ public class DynamicFormServiceImpl implements DynamicFormService, ExpressionSco
     @Autowired(required = false)
     protected Map<String, ExpressionScopeBean> expressionScopeBeanMap;
 
+    @Autowired(required = false)
+    protected TableMetaParser tableMetaParser;
+
     protected void initDefaultField(TableMetaData metaData) {
         String dataType;
         switch (Install.getDatabaseType()) {
@@ -106,18 +110,23 @@ public class DynamicFormServiceImpl implements DynamicFormService, ExpressionSco
     public void deploy(Form form) throws Exception {
         TableMetaData metaData = formParser.parse(form);
         initDefaultField(metaData);
-        History history = historyService.selectLastHistoryByType("form.deploy." + form.getName());
+        TableMetaData lastDeployMetaData = null;
+        if (tableMetaParser == null) {
+            History history = historyService.selectLastHistoryByType("form.deploy." + form.getName());
+            Form lastDeploy = JSON.parseObject(history.getChangeAfter(), Form.class);
+            formParser.parse(lastDeploy);
+            initDefaultField(lastDeployMetaData);
+        } else {
+            lastDeployMetaData = tableMetaParser.parse(form.getName());
+        }
         //首次部署
-        if (history == null) {
+        if (lastDeployMetaData == null || lastDeployMetaData.getFields().isEmpty()) {
             try {
                 database.createTable(metaData);
-            } catch (SQLException e) {
-                database.reloadTable(metaData);
+            } catch (Exception e) {
+                throw new BusinessException("发布失败:" + e.getMessage());
             }
         } else {
-            Form lastDeploy = JSON.parseObject(history.getChangeAfter(), Form.class);
-            TableMetaData lastDeployMetaData = formParser.parse(lastDeploy);
-            initDefaultField(lastDeployMetaData);
             //向上发布
             database.reloadTable(lastDeployMetaData);//先放入旧的结构
             //更新结构
