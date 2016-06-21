@@ -1,20 +1,17 @@
 package org.hsweb.web.controller.file;
 
+import org.hsweb.commons.StringUtils;
+import org.hsweb.web.bean.po.resource.Resources;
+import org.hsweb.web.core.authorize.annotation.Authorize;
 import org.hsweb.web.core.exception.NotFoundException;
 import org.hsweb.web.core.logger.annotation.AccessLogger;
-import org.hsweb.web.core.authorize.annotation.Authorize;
-import org.hsweb.web.bean.po.resource.Resources;
 import org.hsweb.web.core.message.ResponseMessage;
+import org.hsweb.web.service.resource.FileService;
+import org.hsweb.web.service.resource.ResourcesService;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.commons.CommonsMultipartFile;
-import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
-import org.hsweb.commons.StringUtils;
-import org.hsweb.web.service.config.ConfigService;
-import org.hsweb.web.service.resource.FileService;
-import org.hsweb.web.service.resource.ResourcesService;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -24,7 +21,10 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.net.URLEncoder;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -62,6 +62,19 @@ public class FileController {
         mediaTypeMapper.put(".js", "application/javascript");
         mediaTypeMapper.put(".html", MediaType.TEXT_HTML_VALUE);
         mediaTypeMapper.put(".xml", MediaType.TEXT_XML_VALUE);
+    }
+
+    /**
+     * 下载文本
+     */
+    @RequestMapping(value = "/download-text/{name:.+}", method = {RequestMethod.GET, RequestMethod.POST})
+    public ResponseMessage downloadTxt(@PathVariable("name") String name,
+                                       @RequestParam("text") String text,
+                                       HttpServletResponse response) throws Exception {
+        response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
+        response.setHeader("Content-disposition", "attachment;filename=" + URLEncoder.encode(name, "utf-8"));
+        response.getWriter().write(text);
+        return null;
     }
 
     /**
