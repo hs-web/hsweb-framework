@@ -73,13 +73,13 @@ public class FastJsonHttpMessageConverter extends AbstractHttpMessageConverter<O
                 baos.write(buf, 0, len);
             }
         }
-
         byte[] bytes = baos.toByteArray();
+        if (clazz == String.class) return new String(bytes);
         return JSON.parseObject(bytes, 0, bytes.length, charset.newDecoder(), clazz);
     }
 
     public String converter(Object obj) {
-        if (obj instanceof String) return (String)obj;
+        if (obj instanceof String) return (String) obj;
         String text;
         if (obj instanceof ResponseMessage) {
             ResponseMessage message = (ResponseMessage) obj;
