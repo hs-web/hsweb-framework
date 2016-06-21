@@ -4,6 +4,9 @@ import org.hsweb.ezorm.executor.SqlExecutor;
 import org.hsweb.ezorm.meta.DatabaseMetaData;
 import org.hsweb.ezorm.meta.expand.ObjectWrapperFactory;
 import org.hsweb.ezorm.meta.expand.ValidatorFactory;
+import org.hsweb.ezorm.meta.parser.MysqlTableMetaParser;
+import org.hsweb.ezorm.meta.parser.OracleTableMetaParser;
+import org.hsweb.ezorm.meta.parser.TableMetaParser;
 import org.hsweb.ezorm.render.dialect.H2DatabaseMeta;
 import org.hsweb.ezorm.render.dialect.MysqlDatabaseMeta;
 import org.hsweb.ezorm.render.dialect.OracleDatabaseMeta;
@@ -11,6 +14,8 @@ import org.hsweb.ezorm.run.Database;
 import org.hsweb.ezorm.run.simple.SimpleDatabase;
 import org.hsweb.web.core.authorize.ExpressionScopeBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -43,6 +48,19 @@ public class DataBaseAutoConfiguration {
 
     @Autowired(required = false)
     private Map<String, ExpressionScopeBean> expressionScopeBeanMap;
+
+
+    @Bean
+    @ConditionalOnMissingBean(TableMetaParser.class)
+    public TableMetaParser tableMetaParser() {
+        String driverClassName = properties.getDriverClassName();
+        if (driverClassName.contains("mysql")) {
+            return new MysqlTableMetaParser(sqlExecutor);
+        } else if (driverClassName.contains("oracle")) {
+            return new OracleTableMetaParser(sqlExecutor);
+        }
+        return null;
+    }
 
     @Bean
     public Database database() {
