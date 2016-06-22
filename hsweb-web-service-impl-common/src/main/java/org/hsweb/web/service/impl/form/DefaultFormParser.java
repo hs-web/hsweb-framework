@@ -208,6 +208,8 @@ public class DefaultFormParser implements FormParser {
         put("byte", Byte.class);
         put("char", Character.class);
         put("float", Double.class);
+        put("long", Long.class);
+        put("short", Short.class);
         put("date", Date.class);
         put("Date", Date.class);
     }};
