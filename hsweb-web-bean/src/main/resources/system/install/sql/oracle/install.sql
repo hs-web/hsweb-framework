@@ -268,7 +268,7 @@ COMMENT ON COLUMN ${jdbc.username}."S_ROLE_MODULES"."ACTIONS" IS '可操作权�
 CREATE TABLE ${jdbc.username}."S_SCRIPT" (
 "U_ID" VARCHAR2(256)  NOT NULL,
 "NAME" VARCHAR2(256)  NOT NULL,
-"PATH" VARCHAR2(1024) NOT NULL,
+"CLASSIFIED_ID" VARCHAR2(1024) NOT NULL,
 "TYPE" VARCHAR2(256)  NOT NULL,
 "CONTENT" CLOB NOT NULL,
 "REMARK" VARCHAR2(512)  NULL,
@@ -277,7 +277,7 @@ CREATE TABLE ${jdbc.username}."S_SCRIPT" (
 COMMENT ON TABLE ${jdbc.username}."S_SCRIPT" IS '脚本';
 COMMENT ON COLUMN ${jdbc.username}."S_SCRIPT"."U_ID" IS 'UID';
 COMMENT ON COLUMN ${jdbc.username}."S_SCRIPT"."NAME" IS '脚本名称';
-COMMENT ON COLUMN ${jdbc.username}."S_SCRIPT"."PATH" IS '路径';
+COMMENT ON COLUMN ${jdbc.username}."S_SCRIPT"."CLASSIFIED_ID" IS '路径';
 COMMENT ON COLUMN ${jdbc.username}."S_SCRIPT"."TYPE" IS '类型';
 COMMENT ON COLUMN ${jdbc.username}."S_SCRIPT"."CONTENT" IS '内容';
 COMMENT ON COLUMN ${jdbc.username}."S_SCRIPT"."REMARK" IS '备注';

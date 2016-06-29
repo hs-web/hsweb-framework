@@ -10,7 +10,7 @@
         <result property="type" column="type" javaType="String" jdbcType="VARCHAR" />
         <result property="content" column="content" javaType="String" jdbcType="VARCHAR" />
         <result property="remark" column="remark" javaType="String" jdbcType="VARCHAR" />
-        <result property="path" column="path" javaType="String" jdbcType="VARCHAR" />
+        <result property="classifiedId" column="classified_id" javaType="String" jdbcType="VARCHAR" />
         <result property="status" column="status" javaType="int" jdbcType="INTEGER" />
     </resultMap>
 

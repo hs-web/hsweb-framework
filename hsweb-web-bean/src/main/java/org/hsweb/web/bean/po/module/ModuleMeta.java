@@ -1,5 +1,6 @@
 package org.hsweb.web.bean.po.module;
 
+import org.hibernate.validator.constraints.NotBlank;
 import org.hsweb.web.bean.po.GenericPo;
 
 /**
@@ -8,10 +9,12 @@ import org.hsweb.web.bean.po.GenericPo;
  */
 public class ModuleMeta extends GenericPo<String> {
 
+    @NotBlank(message = "key不能为空")
     private String key;
 
     private String remark;
 
+    @NotBlank(message = "模块不能为空")
     private String moduleId;
 
     private String roleId;

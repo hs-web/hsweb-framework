@@ -198,7 +198,7 @@ CREATE TABLE `s_script` (
   COMMENT 'uid',
   `name`    VARCHAR(256)  NOT NULL
   COMMENT '脚本名称',
-  `path`    VARCHAR(1024) NOT NULL
+  `classified_id`    VARCHAR(1024) NOT NULL
   COMMENT '路径',
   `type`    VARCHAR(256)  NOT NULL
   COMMENT '类型',

@@ -4,6 +4,7 @@ import org.hsweb.ezorm.executor.SqlExecutor;
 import org.hsweb.ezorm.meta.DatabaseMetaData;
 import org.hsweb.ezorm.meta.expand.ObjectWrapperFactory;
 import org.hsweb.ezorm.meta.expand.ValidatorFactory;
+import org.hsweb.ezorm.meta.parser.H2TableMetaParser;
 import org.hsweb.ezorm.meta.parser.MysqlTableMetaParser;
 import org.hsweb.ezorm.meta.parser.OracleTableMetaParser;
 import org.hsweb.ezorm.meta.parser.TableMetaParser;
@@ -58,6 +59,8 @@ public class DataBaseAutoConfiguration {
             return new MysqlTableMetaParser(sqlExecutor);
         } else if (driverClassName.contains("oracle")) {
             return new OracleTableMetaParser(sqlExecutor);
+        }else if (driverClassName.contains("h2")) {
+            return new H2TableMetaParser(sqlExecutor);
         }
         return null;
     }

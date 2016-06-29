@@ -14,13 +14,13 @@ public class DynamicScript extends GenericPo<String> {
     private static final long serialVersionUID = 8910856253780046561L;
 
     //名称
-    @Length(min = 4, message = "名称长度不能少于4")
     @NotNull
-    @Pattern(regexp = "^[a-zA-Z0-9_-]+$", message = "名称只能为大小写字母和下划线组成")
+    @Length(min = 4, message = "名称长度不能少于4")
+    @Pattern(regexp = "^[a-zA-Z0-9_-]+$", message = "名称只能为大小写字母,数字,下划线和-组成")
     private String name;
 
     //类型
-    @Pattern(regexp = "(js)|(groovy)|(spel)|(ognl)|(java)", message = "类型仅支持js,groovy,spel,ognl,java")
+    @Pattern(regexp = "(js)|(groovy)|(java)", message = "类型仅支持js,groovy,java")
     private String type;
 
     //内容
@@ -29,8 +29,8 @@ public class DynamicScript extends GenericPo<String> {
     //备注
     private String remark;
 
-    //路径
-    private String path;
+    //分类
+    private String classifiedId;
 
     //状态
     private int status;
@@ -105,22 +105,12 @@ public class DynamicScript extends GenericPo<String> {
         this.remark = remark;
     }
 
-    /**
-     * 获取 路径
-     *
-     * @return String 路径
-     */
-    public String getPath() {
-        if (this.path == null)
-            return "root";
-        return this.path;
+    public void setClassifiedId(String classifiedId) {
+        this.classifiedId = classifiedId;
     }
 
-    /**
-     * 设置 路径
-     */
-    public void setPath(String path) {
-        this.path = path;
+    public String getClassifiedId() {
+        return classifiedId;
     }
 
     /**
