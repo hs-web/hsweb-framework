@@ -11,6 +11,12 @@ public class ResultMapsUtils {
     private static SqlSession sqlSession;
 
     public static ResultMap getResultMap(String id) {
+        while (sqlSession == null) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+            }
+        }
         return sqlSession.getConfiguration().getResultMap(id);
     }
 
