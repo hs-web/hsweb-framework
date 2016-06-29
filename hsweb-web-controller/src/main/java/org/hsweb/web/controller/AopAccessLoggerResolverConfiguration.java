@@ -12,11 +12,13 @@ import org.hsweb.web.core.message.FastJsonHttpMessageConverter;
 import org.hsweb.web.core.message.ResponseMessage;
 import org.hsweb.web.core.utils.WebUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.hsweb.commons.StringUtils;
 
+import javax.annotation.PostConstruct;
 import java.util.List;
 
 /**
@@ -25,13 +27,20 @@ import java.util.List;
 @Aspect
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
+@ConditionalOnProperty(prefix = "logger.access", value = "on")
 public class AopAccessLoggerResolverConfiguration extends AopAccessLoggerResolver {
 
-    @Autowired
+    @Autowired(required = false)
     private FastJsonHttpMessageConverter fastJsonHttpMessageConverter;
 
     @Autowired(required = false)
     private List<AccessLoggerPersisting> accessLoggerPersisting;
+
+    @PostConstruct
+    private void init() {
+        if (fastJsonHttpMessageConverter == null)
+            fastJsonHttpMessageConverter = new FastJsonHttpMessageConverter();
+    }
 
     @Around(value = "execution(* org.hsweb.web..controller..*Controller..*(..))||@annotation(org.hsweb.web.core.logger.annotation.AccessLogger)")
     public Object around(ProceedingJoinPoint pjp) throws Throwable {
