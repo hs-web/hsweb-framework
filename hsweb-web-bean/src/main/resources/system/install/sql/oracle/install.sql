@@ -299,8 +299,7 @@ CREATE TABLE ${jdbc.username}."S_USER" (
 "PHONE" VARCHAR2(64)  NULL,
 "STATUS" NUMBER(4)     NULL,
 "CREATE_DATE" DATE NOT NULL,
-"UPDATE_DATE" DATE NULL,
-"ENT_ID" VARCHAR2(64)  NULL
+"UPDATE_DATE" DATE NULL
 );
 COMMENT ON TABLE ${jdbc.username}."S_USER" IS '用户表';
 COMMENT ON COLUMN ${jdbc.username}."S_USER"."U_ID" IS 'ID';
@@ -312,7 +311,6 @@ COMMENT ON COLUMN ${jdbc.username}."S_USER"."PHONE" IS '联系电话';
 COMMENT ON COLUMN ${jdbc.username}."S_USER"."STATUS" IS '状态';
 COMMENT ON COLUMN ${jdbc.username}."S_USER"."CREATE_DATE" IS '创建日期';
 COMMENT ON COLUMN ${jdbc.username}."S_USER"."UPDATE_DATE" IS '修改日期';
-COMMENT ON COLUMN ${jdbc.username}."S_USER"."ENT_ID" IS '企业ID';
 
 -- ----------------------------
 -- Records of S_USER
