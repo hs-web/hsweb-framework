@@ -67,7 +67,7 @@
             <include refid="BasicMapper.buildWhere"/>
         </where>
         group by name) t1
-        left join s_form t2 on t1.name=t2.name and t1.version =t2.version
+        left join s_template t2 on t1.name=t2.name and t1.version =t2.version
         <bind name="tableName" value="'t2'"/>
         <include refid="BasicMapper.buildSortField"/>
     </select>
