@@ -28,43 +28,11 @@ public class DataBaseManagerServiceImplTest extends AbstractTestCase {
 
     @Resource
     private DataBaseManagerService dataBaseManagerService;
-    @Resource
-    private SqlExecutor sqlExecutor;
-
-    @Resource
-    private ModuleMetaService moduleMetaService;
-
-    @Resource
-    private UserMapper userMapper;
-
-    @Resource
-    private RoleModuleMapper roleModuleMapper;
-
-    @Test
-    public void test() throws Exception {
-        QueryParam queryParam = QueryParam.build()
-         .select("username", "password")
-                .where("createDate$GT", "2015-12-10")
-        .orderBy("u_id ;delete * from user;").asc();
-
-        userMapper.select(queryParam);
-
-    }
 
     @Test
     public void testGetFieldList() throws Exception {
-        RoleModule roleModule = new RoleModule();
-        roleModule.setId("aaa");
-        roleModule.setActions(Arrays.asList("A", "B"));
-        roleModule.setModuleId("aaa");
-        roleModuleMapper.insert(new InsertParam<>(roleModule));
-        roleModuleMapper.update(new UpdateParam<>(roleModule).includes("actions"));
-        System.out.println(JSON.toJSONString(roleModuleMapper.select(new QueryParam())));
+        dataBaseManagerService.getTableList();
     }
 
-    @Test
-    public void testExecuteSQL() throws Exception {
-
-    }
 
 }

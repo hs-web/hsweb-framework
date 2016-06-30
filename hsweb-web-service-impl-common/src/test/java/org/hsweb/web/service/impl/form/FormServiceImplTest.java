@@ -98,27 +98,13 @@ public class FormServiceImplTest extends AbstractTestCase {
         formService.deploy(form.getId());
         dataBase.getTable("test_form").createInsert().value(new HashMap<String, Object>() {{
             put("u_id", "test");
-            put("name", "张三");
+            put("name", "张三2");
         }}).exec();
 
-        dataBase.getTable("test_form").createUpdate().set("u_id", "test2").where("u_id", "test").exec();
-
         Table<Map<String, Object>> table = dataBase.getTable("test_form");
-
+        table.createUpdate().set("name", "张三").where("u_id", "test").exec();
         Map<String, Object> data = table.createQuery().where("name$LIKE", "张三").single();
-
         Assert.assertEquals("张三", data.get("name"));
-        Assert.assertEquals("test2", data.get("u_id"));
-        formService.createDeployHtml(form.getName());
-        formService.deploy(form.getId());
-        formService.createDeployHtml(form.getName());
-
-        form.setMeta(meta[1]);
-        formService.update(form);
-        formService.deploy(form.getId());
-
-        formService.selectLatestList(new org.hsweb.web.bean.common.QueryParam());
-        dynamicFormService.importExcel("test_form", FileUtils.getResourceAsStream("test.xlsx"));
     }
 
 

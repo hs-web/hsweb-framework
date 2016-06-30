@@ -13,6 +13,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableAutoConfiguration
 @ComponentScan(basePackages = {"org.hsweb.web"})
 @EnableTransactionManagement(proxyTargetClass = true)
-@MapperScan(basePackages = {"org.hsweb.web.dao"})
+@MapperScan("org.hsweb.web.dao")
 public class SpringApplication {
 }
