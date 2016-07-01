@@ -4,6 +4,7 @@ import org.hsweb.ezorm.meta.TableMetaData;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 数据库管理服务,用于获取数据库中的表结构等操作
@@ -20,12 +21,9 @@ public interface DataBaseManagerService {
      */
     List<TableMetaData> getTableList() throws SQLException;
 
+    List<Map<String,Object>> execSql(List<String> sqlList) throws SQLException;
 
-    /**
-     * 执行sql语句，多条sql语句使用[;\n]分割
-     *
-     * @param sql     sql语句
-     * @param process 执行过程回调，每执行一个sql都应该调用对应的回调方法
-     */
-   void executeSQL(String sql, SqlExecuteProcess process) throws SQLException;
+    String createAlterSql(TableMetaData newTable)throws Exception;
+
+    String createCreateSql(TableMetaData newTable)throws Exception;
 }
