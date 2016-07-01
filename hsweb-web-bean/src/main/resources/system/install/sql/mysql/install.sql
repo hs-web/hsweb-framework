@@ -1,7 +1,3 @@
--- ----------------------------
--- Table structure for S_CONFIG
--- ----------------------------
-
 CREATE TABLE `s_config` (
   `u_id`          VARCHAR(32) NOT NULL PRIMARY KEY
   COMMENT 'UID',
@@ -17,9 +13,6 @@ CREATE TABLE `s_config` (
   COMMENT '修改日期'
 );
 ALTER TABLE `s_config` COMMENT '系统配置文件表';
--- ----------------------------
--- Table structure for S_FORM
--- ----------------------------
 CREATE TABLE `s_form` (
   `u_id`        VARCHAR(32)  NOT NULL PRIMARY KEY
   COMMENT 'uid',
@@ -38,7 +31,6 @@ CREATE TABLE `s_form` (
   `remark`      VARCHAR(200)
 );
 ALTER TABLE `s_form` COMMENT '动态表单';
-
 CREATE TABLE `s_template` (
   `u_id`          VARCHAR(32)  NOT NULL PRIMARY KEY
   COMMENT 'uid',
@@ -58,11 +50,6 @@ CREATE TABLE `s_template` (
   `remark`        VARCHAR(200)
 );
 ALTER TABLE `s_template` COMMENT '模板';
-
-
--- ----------------------------
--- Table structure for S_MODULES
--- ----------------------------
 CREATE TABLE `s_modules` (
   `u_id`       VARCHAR(32)   NOT NULL PRIMARY KEY
   COMMENT 'uid',
@@ -84,8 +71,6 @@ CREATE TABLE `s_modules` (
   COMMENT '排序'
 );
 ALTER TABLE `s_modules` COMMENT '系统模块';
-
-
 CREATE TABLE `s_module_meta` (
   `u_id`      VARCHAR(32)   NOT NULL PRIMARY KEY
   COMMENT 'uid',
@@ -103,20 +88,6 @@ CREATE TABLE `s_module_meta` (
   COMMENT '定义内容'
 );
 ALTER TABLE `s_modules` COMMENT '系统模块配置';
-
--- ----------------------------
--- Records of S_MODULES
--- ----------------------------
-INSERT INTO `s_modules` VALUES ('sys', '系统设置', NULL, 'fa fa-cog', '-1', '系统权限', '101', '[]', '1');
-INSERT INTO `s_modules` VALUES ('form', '表单管理', 'admin/form/list.html', 'fa fa-wpforms', 'sys', NULL, '1', '[{"id":"M","text":"菜单可见","checked":true},{"id":"C","text":"新增","checked":false},{"id":"R","text":"查询","checked":false},{"id":"U","text":"修改","checked":false},{"id":"D","text":"删除","checked":false},{"id":"deploy","text":"发布","checked":false}]', '10101');
-INSERT INTO `s_modules` VALUES ('module', '权限管理', 'admin/module/list.html', 'fa fa-list-alt', 'sys', NULL, '1', '[{"id":"M","text":"菜单可见","checked":true},{"id":"C","text":"新增","checked":false},{"id":"R","text":"查询","checked":false},{"id":"U","text":"修改","checked":false},{"id":"D","text":"删除","checked":false}]', '10102');
-INSERT INTO `s_modules` VALUES ('role', '角色管理', 'admin/role/list.html', 'fa fa-users', 'sys', '初始数据', '1', '[{"id":"M", "text":"菜单可见", "uri":""},{"id":"C", "text":"新增", "uri":""},{"id":"R", "text":"查询", "uri":""},{"id":"U", "text":"修改", "uri":""},{"id":"D", "text":"删除", "uri":""}]', '10103');
-INSERT INTO `s_modules` VALUES ('user', '用户管理', 'admin/user/list.html', 'fa fa-user', 'sys', '初始数据', '1', '[{"id":"M", "text":"菜单可见", "uri":""},{"id":"C", "text":"新增", "uri":""},{"id":"R", "text":"查询", "uri":""},{"id":"U", "text":"修改", "uri":""},{"id":"D", "text":"删除", "uri":""}]', '10104');
-INSERT INTO `s_modules` VALUES ('s_logger', '日志管理', 'admin/logger/list.html', 'fa fa-book', 'sys', NULL, '1', '[{"id":"M","text":"菜单可见","checked":true},{"id":"R","text":"查询","checked":false}]', '10105');
-
--- ----------------------------
--- Table structure for S_RESOURCES
--- ----------------------------
 CREATE TABLE `s_resources` (
   `u_id`        VARCHAR(32)   NOT NULL PRIMARY KEY
   COMMENT 'uid',
@@ -136,7 +107,6 @@ CREATE TABLE `s_resources` (
   COMMENT '创建人'
 );
 ALTER TABLE `s_resources` COMMENT '资源表';
-
 CREATE TABLE `s_classified` (
   `u_id`       VARCHAR(32)   NOT NULL PRIMARY KEY
   COMMENT 'uid',
@@ -154,10 +124,6 @@ CREATE TABLE `s_classified` (
   COMMENT '排序'
 );
 ALTER TABLE `s_resources` COMMENT '资源表';
-
--- ----------------------------
--- Table structure for S_ROLE
--- ----------------------------
 CREATE TABLE `s_role` (
   `u_id`   VARCHAR(32)  NOT NULL PRIMARY KEY
   COMMENT 'uid',
@@ -169,15 +135,6 @@ CREATE TABLE `s_role` (
   COMMENT '备注'
 );
 ALTER TABLE `s_role` COMMENT '角色表';
-
--- ----------------------------
--- Records of S_ROLE
--- ----------------------------
-INSERT INTO `s_role` VALUES ('admin', '超级管理员', NULL, '初始数据');
-
--- ----------------------------
--- Table structure for S_ROLE_MODULES
--- ----------------------------
 CREATE TABLE `s_role_modules` (
   `u_id`      VARCHAR(32)  NOT NULL PRIMARY KEY
   COMMENT 'uid',
@@ -189,10 +146,6 @@ CREATE TABLE `s_role_modules` (
   COMMENT '可操作权限'
 );
 ALTER TABLE `s_role_modules` COMMENT '角色模块绑定表';
-
--- ----------------------------
--- Table structure for S_SCRIPT
--- ----------------------------
 CREATE TABLE `s_script` (
   `u_id`          VARCHAR(32)   NOT NULL PRIMARY KEY
   COMMENT 'uid',
@@ -210,14 +163,6 @@ CREATE TABLE `s_script` (
   COMMENT '状态'
 );
 ALTER TABLE `s_script` COMMENT '脚本';
-
--- ----------------------------
--- Records of S_TEST_2
--- ----------------------------
-
--- ----------------------------
--- Table structure for S_USER
--- ----------------------------
 CREATE TABLE `s_user` (
   `u_id`        VARCHAR(32)  NOT NULL PRIMARY KEY
   COMMENT 'ID',
@@ -239,14 +184,6 @@ CREATE TABLE `s_user` (
   COMMENT '修改日期'
 );
 ALTER TABLE `s_user` COMMENT '用户表';
-
--- ----------------------------
--- Records of S_USER
--- ----------------------------
-INSERT INTO `s_user` VALUES ('admin', 'admin', '23ec59e119da971084cbd0ba72d230a0', '超级管理员', NULL, NULL, '1', '1991-08-11 12:10:36', NULL);
--- ----------------------------
--- Table structure for S_USER_ROLE
--- ----------------------------
 CREATE TABLE `s_user_role` (
   `u_id`    VARCHAR(32)  NOT NULL PRIMARY KEY
   COMMENT 'UID',
@@ -256,7 +193,6 @@ CREATE TABLE `s_user_role` (
   COMMENT '角色ID'
 );
 ALTER TABLE `s_user_role` COMMENT '用户角色关联表';
-
 CREATE TABLE s_history
 (
   `u_id`              VARCHAR(32) NOT NULL

@@ -1,6 +1,3 @@
--- ----------------------------
--- Table structure for S_CONFIG
--- ----------------------------
 CREATE TABLE ${jdbc.username}."S_CONFIG" (
 "U_ID" VARCHAR2(32) NOT NULL,
 "CONTENT" CLOB NOT NULL,
@@ -16,10 +13,6 @@ COMMENT ON COLUMN ${jdbc.username}."S_CONFIG"."REMARK" IS '备注';
 COMMENT ON COLUMN ${jdbc.username}."S_CONFIG"."CLASSIFIED_ID" IS '分类ID';
 COMMENT ON COLUMN ${jdbc.username}."S_CONFIG"."CREATE_DATE" IS '创建日期';
 COMMENT ON COLUMN ${jdbc.username}."S_CONFIG"."UPDATE_DATE" IS '修改日期';
-
--- ----------------------------
--- Table structure for S_FORM
--- ----------------------------
 CREATE TABLE ${jdbc.username}."S_FORM" (
 "U_ID" VARCHAR2(256) NOT NULL,
 "NAME" VARCHAR2(256) NOT NULL,
@@ -45,23 +38,21 @@ COMMENT ON COLUMN ${jdbc.username}."S_FORM"."RELEASE" IS '当前发布版本';
 COMMENT ON COLUMN ${jdbc.username}."S_FORM"."USING" IS '是否使用中';
 COMMENT ON COLUMN ${jdbc.username}."S_FORM"."CREATE_DATE" IS '创建日期';
 COMMENT ON COLUMN ${jdbc.username}."S_FORM"."UPDATE_DATE" IS '修改日期';
-
-
 CREATE TABLE ${jdbc.username}."S_TEMPLATE" (
-  "U_ID"          VARCHAR2(32)  NOT NULL,
-  "NAME"          VARCHAR2(256) NOT NULL,
-  "TEMPLATE"      CLOB          NULL,
-  "CLASSIFIED_ID" VARCHAR2(32)  NULL,
-  "TYPE"          VARCHAR2(64)  NULL,
-  "SCRIPT"        CLOB          NULL,
-  "CSS"           CLOB          NULL,
-  "CSS_LINKS"     CLOB          NULL,
-  "SCRIPT_LINKS"  CLOB          NULL,
-  "VERSION"       NUMBER(32)    NULL,
-  "REVISION"      NUMBER(32)    NULL,
-  "RELEASE"       NUMBER(32)    NULL,
-  "USING"         NUMBER(4)     NULL,
-  "REMARK"        VARCHAR2(200) NULL
+"U_ID" VARCHAR2(32)  NOT NULL,
+"NAME" VARCHAR2(256) NOT NULL,
+"TEMPLATE" CLOB NULL,
+"CLASSIFIED_ID" VARCHAR2(32)  NULL,
+"TYPE" VARCHAR2(64)  NULL,
+"SCRIPT" CLOB NULL,
+"CSS" CLOB NULL,
+"CSS_LINKS" CLOB NULL,
+"SCRIPT_LINKS" CLOB NULL,
+"VERSION" NUMBER(32)    NULL,
+"REVISION" NUMBER(32)    NULL,
+"RELEASE" NUMBER(32)    NULL,
+"USING" NUMBER(4)     NULL,
+"REMARK" VARCHAR2(200) NULL
 );
 COMMENT ON COLUMN ${jdbc.username}."S_TEMPLATE"."U_ID" IS 'UID';
 COMMENT ON COLUMN ${jdbc.username}."S_TEMPLATE"."NAME" IS '名称';
@@ -76,9 +67,6 @@ COMMENT ON COLUMN ${jdbc.username}."S_TEMPLATE"."VERSION" IS '版本';
 COMMENT ON COLUMN ${jdbc.username}."S_TEMPLATE"."REVISION" IS '修订版';
 COMMENT ON COLUMN ${jdbc.username}."S_TEMPLATE"."RELEASE" IS '当前发布版本';
 COMMENT ON COLUMN ${jdbc.username}."S_TEMPLATE"."USING" IS '是否使用中';
--- ----------------------------
--- Table structure for S_LOGGER
--- ----------------------------
 CREATE TABLE ${jdbc.username}."S_LOGGER" (
 "U_ID" VARCHAR2(256)  NOT NULL,
 "CLIENT_IP" VARCHAR2(256)  NULL,
@@ -124,14 +112,6 @@ COMMENT ON COLUMN ${jdbc.username}."S_LOGGER"."CACHE_KEY" IS '缓存';
 COMMENT ON COLUMN ${jdbc.username}."S_LOGGER"."SERVER_IP" IS '服务器ID';
 COMMENT ON COLUMN ${jdbc.username}."S_LOGGER"."APP_NAME" IS '应用名称';
 COMMENT ON COLUMN ${jdbc.username}."S_LOGGER"."USE_TIME" IS '请求耗时';
-
--- ----------------------------
--- Records of S_LOGGER
--- ----------------------------
-
--- ----------------------------
--- Table structure for S_MODULES
--- ----------------------------
 CREATE TABLE ${jdbc.username}."S_MODULES" (
 "U_ID" VARCHAR2(256)  NOT NULL,
 "NAME" VARCHAR2(256)  NOT NULL,
@@ -153,7 +133,6 @@ COMMENT ON COLUMN ${jdbc.username}."S_MODULES"."REMARK" IS '备注';
 COMMENT ON COLUMN ${jdbc.username}."S_MODULES"."STATUS" IS '状态';
 COMMENT ON COLUMN ${jdbc.username}."S_MODULES"."OPTIONAL" IS '可选权限';
 COMMENT ON COLUMN ${jdbc.username}."S_MODULES"."SORT_INDEX" IS '排序';
-
 CREATE TABLE ${jdbc.username}."S_CLASSIFIED" (
 "U_ID" VARCHAR2(32)   NOT NULL,
 "NAME" VARCHAR2(256)  NOT NULL,
@@ -173,8 +152,6 @@ COMMENT ON COLUMN ${jdbc.username}."S_CLASSIFIED"."PARENT_ID" IS '父级分类';
 COMMENT ON COLUMN ${jdbc.username}."S_CLASSIFIED"."ICON" IS '图标';
 COMMENT ON COLUMN ${jdbc.username}."S_CLASSIFIED"."CONFIG" IS '分类配置';
 COMMENT ON COLUMN ${jdbc.username}."S_CLASSIFIED"."SORT_INDEX" IS '排序';
-
-
 CREATE TABLE ${jdbc.username}."S_MODULE_META" (
 "U_ID" VARCHAR2(32)  NOT NULL,
 "KEY" VARCHAR2(256) NOT NULL,
@@ -192,25 +169,12 @@ COMMENT ON COLUMN ${jdbc.username}."S_MODULE_META"."ROLE_ID" IS '角色ID';
 COMMENT ON COLUMN ${jdbc.username}."S_MODULE_META"."META" IS '定义内容';
 COMMENT ON COLUMN ${jdbc.username}."S_MODULE_META"."REMARK" IS '备注';
 COMMENT ON COLUMN ${jdbc.username}."S_MODULE_META"."STATUS" IS '状态';
--- ----------------------------
--- Records of S_MODULES
--- ----------------------------
-INSERT INTO "S_MODULES" VALUES ('sys', '系统设置', NULL, 'fa fa-cog', '-1', '系统权限', '101', '[]', '1');
-INSERT INTO "S_MODULES" VALUES ('form', '表单管理', 'admin/form/list.html', 'fa fa-wpforms', 'sys', NULL, '1', '[{"id":"M","text":"菜单可见","checked":true},{"id":"C","text":"新增","checked":false},{"id":"R","text":"查询","checked":false},{"id":"U","text":"修改","checked":false},{"id":"D","text":"删除","checked":false},{"id":"deploy","text":"发布","checked":false}]', '10101');
-INSERT INTO "S_MODULES" VALUES ('module', '权限管理', 'admin/module/list.html', 'fa fa-list-alt', 'sys', NULL, '1', '[{"id":"M","text":"菜单可见","checked":true},{"id":"C","text":"新增","checked":false},{"id":"R","text":"查询","checked":false},{"id":"U","text":"修改","checked":false},{"id":"D","text":"删除","checked":false}]', '10102');
-INSERT INTO "S_MODULES" VALUES ('role', '角色管理', 'admin/role/list.html', 'fa fa-users', 'sys', '初始数据', '1', '[{"id":"M", "text":"菜单可见", "uri":""},{"id":"C", "text":"新增", "uri":""},{"id":"R", "text":"查询", "uri":""},{"id":"U", "text":"修改", "uri":""},{"id":"D", "text":"删除", "uri":""}]', '10103');
-INSERT INTO "S_MODULES" VALUES ('user', '用户管理', 'admin/user/list.html', 'fa fa-user', 'sys', '初始数据', '1', '[{"id":"M", "text":"菜单可见", "uri":""},{"id":"C", "text":"新增", "uri":""},{"id":"R", "text":"查询", "uri":""},{"id":"U", "text":"修改", "uri":""},{"id":"D", "text":"删除", "uri":""}]', '10104');
-INSERT INTO "S_MODULES" VALUES ('s_logger', '日志管理', 'admin/logger/list.html', 'fa fa-book', 'sys', NULL, '1', '[{"id":"M","text":"菜单可见","checked":true},{"id":"R","text":"查询","checked":false}]', '10105');
-
--- ----------------------------
--- Table structure for S_RESOURCES
--- ----------------------------
 CREATE TABLE ${jdbc.username}."S_RESOURCES" (
 "U_ID" VARCHAR2(256)  NOT NULL,
 "NAME" VARCHAR2(256)  NOT NULL,
 "PATH" VARCHAR2(1024) NOT NULL,
 "TYPE" VARCHAR2(256)  NOT NULL,
-"CLASSIFIED"  VARCHAR2(32)   NULL,
+"CLASSIFIED" VARCHAR2(32)   NULL,
 "MD5" VARCHAR2(256)  NOT NULL,
 "STATUS" NUMBER(4)      NULL,
 "CREATE_DATE" DATE NOT NULL,
@@ -226,10 +190,6 @@ COMMENT ON COLUMN ${jdbc.username}."S_RESOURCES"."MD5" IS 'MD5校验值';
 COMMENT ON COLUMN ${jdbc.username}."S_RESOURCES"."STATUS" IS '状态';
 COMMENT ON COLUMN ${jdbc.username}."S_RESOURCES"."CREATE_DATE" IS '创建时间';
 COMMENT ON COLUMN ${jdbc.username}."S_RESOURCES"."CREATOR_ID" IS '创建人';
-
--- ----------------------------
--- Table structure for S_ROLE
--- ----------------------------
 CREATE TABLE ${jdbc.username}."S_ROLE" (
 "U_ID" VARCHAR2(256) NOT NULL,
 "NAME" VARCHAR2(256) NOT NULL,
@@ -241,15 +201,6 @@ COMMENT ON COLUMN ${jdbc.username}."S_ROLE"."U_ID" IS 'UID';
 COMMENT ON COLUMN ${jdbc.username}."S_ROLE"."NAME" IS '角色名称';
 COMMENT ON COLUMN ${jdbc.username}."S_ROLE"."TYPE" IS '类型';
 COMMENT ON COLUMN ${jdbc.username}."S_ROLE"."REMARK" IS '备注';
-
--- ----------------------------
--- Records of S_ROLE
--- ----------------------------
-INSERT INTO "S_ROLE" VALUES ('admin', '超级管理员', NULL, '初始数据');
-
--- ----------------------------
--- Table structure for S_ROLE_MODULES
--- ----------------------------
 CREATE TABLE ${jdbc.username}."S_ROLE_MODULES" (
 "U_ID" VARCHAR2(256) NOT NULL,
 "MODULE_ID" VARCHAR2(256) NOT NULL,
@@ -261,10 +212,6 @@ COMMENT ON COLUMN ${jdbc.username}."S_ROLE_MODULES"."U_ID" IS 'UID';
 COMMENT ON COLUMN ${jdbc.username}."S_ROLE_MODULES"."MODULE_ID" IS '模块ID';
 COMMENT ON COLUMN ${jdbc.username}."S_ROLE_MODULES"."ROLE_ID" IS '角色ID';
 COMMENT ON COLUMN ${jdbc.username}."S_ROLE_MODULES"."ACTIONS" IS '可操作权限';
-
--- ----------------------------
--- Table structure for S_SCRIPT
--- ----------------------------
 CREATE TABLE ${jdbc.username}."S_SCRIPT" (
 "U_ID" VARCHAR2(256)  NOT NULL,
 "NAME" VARCHAR2(256)  NOT NULL,
@@ -282,14 +229,6 @@ COMMENT ON COLUMN ${jdbc.username}."S_SCRIPT"."TYPE" IS '类型';
 COMMENT ON COLUMN ${jdbc.username}."S_SCRIPT"."CONTENT" IS '内容';
 COMMENT ON COLUMN ${jdbc.username}."S_SCRIPT"."REMARK" IS '备注';
 COMMENT ON COLUMN ${jdbc.username}."S_SCRIPT"."STATUS" IS '状态';
-
--- ----------------------------
--- Records of S_TEST_2
--- ----------------------------
-
--- ----------------------------
--- Table structure for S_USER
--- ----------------------------
 CREATE TABLE ${jdbc.username}."S_USER" (
 "U_ID" VARCHAR2(64)  NOT NULL,
 "USERNAME" VARCHAR2(64)  NOT NULL,
@@ -311,20 +250,11 @@ COMMENT ON COLUMN ${jdbc.username}."S_USER"."PHONE" IS '联系电话';
 COMMENT ON COLUMN ${jdbc.username}."S_USER"."STATUS" IS '状态';
 COMMENT ON COLUMN ${jdbc.username}."S_USER"."CREATE_DATE" IS '创建日期';
 COMMENT ON COLUMN ${jdbc.username}."S_USER"."UPDATE_DATE" IS '修改日期';
-
--- ----------------------------
--- Records of S_USER
--- ----------------------------
-INSERT INTO "S_USER" VALUES ('admin', 'admin', '23ec59e119da971084cbd0ba72d230a0', '超级管理员', NULL, NULL, '1', TO_DATE('2015-11-19 12:10:36', 'YYYY-MM-DD HH24:MI:SS'), NULL);
--- ----------------------------
--- Table structure for S_USER_ROLE
--- ----------------------------
 CREATE TABLE ${jdbc.username}."S_USER_ROLE" (
 "U_ID" VARCHAR2(256) NOT NULL,
 "USER_ID" VARCHAR2(256) NOT NULL,
 "ROLE_ID" VARCHAR2(256) NOT NULL
 );
--- CREATE TABLE
 CREATE TABLE ${jdbc.username}."S_HISTORY"
 (
 "U_ID" VARCHAR2(32) NOT NULL,
@@ -337,11 +267,9 @@ CREATE TABLE ${jdbc.username}."S_HISTORY"
 "CREATE_DATE" DATE NOT NULL,
 "CREATOR_ID" VARCHAR2(32)
 );
-
 COMMENT ON COLUMN ${jdbc.username}."S_USER_ROLE"."U_ID" IS 'UID';
 COMMENT ON COLUMN ${jdbc.username}."S_USER_ROLE"."USER_ID" IS '用户ID';
 COMMENT ON COLUMN ${jdbc.username}."S_USER_ROLE"."ROLE_ID" IS '角色ID';
-
 ALTER TABLE ${jdbc.username}."S_CLASSIFIED" ADD PRIMARY KEY ("U_ID");
 ALTER TABLE ${jdbc.username}."S_CONFIG" ADD PRIMARY KEY ("U_ID");
 ALTER TABLE ${jdbc.username}."S_LOGGER" ADD PRIMARY KEY ("U_ID");
