@@ -72,10 +72,19 @@ public class DynamicScriptController extends GenericController<DynamicScript, St
 
     @RequestMapping(value = "/exec/{id:.+}", method = {RequestMethod.POST, RequestMethod.PUT})
     @Authorize(action = "exec")
-    public ResponseMessage execPost(@PathVariable("id") String id,
-                                    @RequestBody Map<String, Object> param) throws Throwable {
+    public ResponseMessage execPostOrPut(@PathVariable("id") String id,
+                                         @RequestBody(required = false) Map<String, Object> param) throws Throwable {
         if (param == null)
             param = new HashMap<>();
+        param.put("user", WebUtil.getLoginUser());
+        Object data = dynamicScriptExecuteService.exec(id, param);
+        return ResponseMessage.ok(data);
+    }
+
+    @RequestMapping(value = "/exec/{id:.+}", method = RequestMethod.DELETE)
+    @Authorize(action = "exec")
+    public ResponseMessage execDelete(@PathVariable("id") String id) throws Throwable {
+        Map<String, Object> param = new HashMap<>();
         param.put("user", WebUtil.getLoginUser());
         Object data = dynamicScriptExecuteService.exec(id, param);
         return ResponseMessage.ok(data);
