@@ -20,7 +20,7 @@
         <bind name="tableName" value="'s_script'"/>
     </sql>
 
-    <insert id="insert" parameterType="DynamicScript" useGeneratedKeys="true" keyProperty="data.u_id" keyColumn="U_ID">
+    <insert id="insert" parameterType="DynamicScript">
         <include refid="config"/>
         <include refid="BasicMapper.buildInsertSql"/>
     </insert>
