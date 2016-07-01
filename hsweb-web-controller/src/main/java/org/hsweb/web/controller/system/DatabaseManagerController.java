@@ -11,6 +11,7 @@ import org.hsweb.web.bean.po.user.User;
 import org.hsweb.web.core.authorize.annotation.Authorize;
 import org.hsweb.web.core.exception.AuthorizeException;
 import org.hsweb.web.core.exception.AuthorizeForbiddenException;
+import org.hsweb.web.core.logger.annotation.AccessLogger;
 import org.hsweb.web.core.message.ResponseMessage;
 import org.hsweb.web.core.utils.WebUtil;
 import org.hsweb.web.service.form.DynamicFormService;
@@ -33,12 +34,14 @@ import java.util.List;
 @RestController
 @RequestMapping("/database")
 @Authorize(module = "database")
+@AccessLogger("数据库管理")
 public class DatabaseManagerController {
     @Resource
     private DataBaseManagerService dataBaseManagerService;
 
     @RequestMapping(value = "/tables", method = RequestMethod.GET)
     @Authorize(action = "R")
+    @AccessLogger("获取所有表结构")
     public ResponseMessage showTables() throws SQLException {
         return ResponseMessage.ok(dataBaseManagerService.getTableList())
                 .include(TableMetaData.class, "name", "alias", "comment", "fields")
@@ -47,6 +50,7 @@ public class DatabaseManagerController {
     }
 
     @RequestMapping(value = "/exec", method = RequestMethod.POST)
+    @AccessLogger("执行SQL")
     public ResponseMessage exec(@RequestBody String sql) throws Exception {
         String[] list = sql.split("[\n]");
         List<SqlAppender> sqlList = new LinkedList<>();
@@ -77,11 +81,13 @@ public class DatabaseManagerController {
     }
 
     @RequestMapping(value = "/sql/alter", method = RequestMethod.POST)
+    @AccessLogger("查询修改表结构SQL")
     public ResponseMessage showAlterSql(@RequestBody JSONObject jsonObject) throws Exception {
         return ResponseMessage.ok(dataBaseManagerService.createAlterSql(createTableMetaDataByJson(jsonObject)));
     }
 
     @RequestMapping(value = "/sql/create", method = RequestMethod.POST)
+    @AccessLogger("查询创建表结构SQL")
     public ResponseMessage showCreateSql(@RequestBody JSONObject jsonObject) throws Exception {
         return ResponseMessage.ok(dataBaseManagerService.createCreateSql(createTableMetaDataByJson(jsonObject)));
     }

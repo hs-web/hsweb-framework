@@ -44,6 +44,7 @@ public class DynamicScriptController extends GenericController<DynamicScript, St
 
     @RequestMapping(value = "/compile", method = {RequestMethod.GET})
     @Authorize(action = "compile")
+    @AccessLogger("编译所有脚本")
     public ResponseMessage compileAll() throws Exception {
         dynamicScriptService.compileAll();
         return ResponseMessage.ok("success");
@@ -51,6 +52,7 @@ public class DynamicScriptController extends GenericController<DynamicScript, St
 
     @RequestMapping(value = "/compile/{id:.+}", method = {RequestMethod.GET})
     @Authorize(action = "compile")
+    @AccessLogger("编译脚本")
     public ResponseMessage compile(@PathVariable("id") String id) throws Exception {
         dynamicScriptService.compile(id);
         return ResponseMessage.ok("success");
@@ -58,6 +60,7 @@ public class DynamicScriptController extends GenericController<DynamicScript, St
 
     @RequestMapping(value = "/exec/{id:.+}", method = {RequestMethod.GET})
     @Authorize(action = "exec")
+    @AccessLogger("执行脚本")
     public ResponseMessage execGet(@PathVariable("id") String id,
                                    QueryParam queryParam,
                                    @RequestParam(required = false) Map<String, Object> param) throws Throwable {
@@ -72,6 +75,7 @@ public class DynamicScriptController extends GenericController<DynamicScript, St
 
     @RequestMapping(value = "/exec/{id:.+}", method = {RequestMethod.POST, RequestMethod.PUT})
     @Authorize(action = "exec")
+    @AccessLogger("执行脚本")
     public ResponseMessage execPostOrPut(@PathVariable("id") String id,
                                          @RequestBody(required = false) Map<String, Object> param) throws Throwable {
         if (param == null)
@@ -83,6 +87,7 @@ public class DynamicScriptController extends GenericController<DynamicScript, St
 
     @RequestMapping(value = "/exec/{id:.+}", method = RequestMethod.DELETE)
     @Authorize(action = "exec")
+    @AccessLogger("执行脚本")
     public ResponseMessage execDelete(@PathVariable("id") String id) throws Throwable {
         Map<String, Object> param = new HashMap<>();
         param.put("user", WebUtil.getLoginUser());
@@ -92,6 +97,7 @@ public class DynamicScriptController extends GenericController<DynamicScript, St
 
     @RequestMapping(value = "/exec/runtime/{type}", method = RequestMethod.POST)
     @Authorize(action = "runtime")
+    @AccessLogger("执行脚本-runtime")
     public ResponseMessage runtime(@PathVariable("type") String type,
                                    @RequestBody String script) throws Throwable {
         DynamicScriptEngine engine = DynamicScriptEngineFactory.getEngine(type);
