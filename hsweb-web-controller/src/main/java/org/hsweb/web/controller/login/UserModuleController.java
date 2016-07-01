@@ -49,6 +49,7 @@ public class UserModuleController {
         } else {
             modules = user.getModules().stream()
                     .filter(module -> user.hasAccessModuleAction(module.getId(), "M"))
+                    .sorted()
                     .collect(Collectors.toCollection(() -> new LinkedList<>()));
         }
 
