@@ -243,7 +243,7 @@ ALTER TABLE `s_user` COMMENT '用户表';
 -- ----------------------------
 -- Records of S_USER
 -- ----------------------------
-INSERT INTO `s_user` VALUES ('admin', 'admin', '23ec59e119da971084cbd0ba72d230a0', '超级管理员', NULL, NULL, '1', '1991-08-11 12:10:36', NULL, NULL);
+INSERT INTO `s_user` VALUES ('admin', 'admin', '23ec59e119da971084cbd0ba72d230a0', '超级管理员', NULL, NULL, '1', '1991-08-11 12:10:36', NULL);
 -- ----------------------------
 -- Table structure for S_USER_ROLE
 -- ----------------------------
