@@ -50,6 +50,8 @@ public class Form extends GenericPo<String> {
     //最后一次修改时间
     private java.util.Date updateDate;
 
+    //分类ID
+    private String classifiedId;
 
     /**
      * 获取 名称
@@ -178,5 +180,13 @@ public class Form extends GenericPo<String> {
 
     public void setRelease(int release) {
         this.release = release;
+    }
+
+    public String getClassifiedId() {
+        return classifiedId;
+    }
+
+    public void setClassifiedId(String classifiedId) {
+        this.classifiedId = classifiedId;
     }
 }

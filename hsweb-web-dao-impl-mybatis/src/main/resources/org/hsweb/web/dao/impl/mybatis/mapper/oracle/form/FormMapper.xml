@@ -17,6 +17,7 @@
         <result property="using" column="using" javaType="boolean" jdbcType="INTEGER"/>
         <result property="createDate" column="create_date" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
         <result property="updateDate" column="update_date" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <result property="classifiedId" column="classified_id" javaType="java.lang.String" jdbcType="VARCHAR"/>
     </resultMap>
 
     <!--用于动态生成sql所需的配置-->

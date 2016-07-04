@@ -16,6 +16,7 @@ ALTER TABLE `s_config` COMMENT '系统配置文件表';
 CREATE TABLE `s_form` (
   `u_id`        VARCHAR(32)  NOT NULL PRIMARY KEY
   COMMENT 'uid',
+  "classified_id" VARCHAR(32) COMMENT '分类ID',
   `name`        VARCHAR(256) NOT NULL
   COMMENT '名称',
   `html`        TEXT COMMENT 'html内容',
