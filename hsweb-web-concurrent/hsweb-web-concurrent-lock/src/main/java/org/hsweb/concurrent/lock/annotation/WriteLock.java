@@ -17,4 +17,6 @@ public @interface WriteLock {
     long waitTime() default 5;
 
     TimeUnit timeUnit() default TimeUnit.SECONDS;
+
+    boolean autoUnLock() default true;
 }

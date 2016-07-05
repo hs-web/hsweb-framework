@@ -9,14 +9,6 @@ import java.util.concurrent.TimeUnit;
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface Lock {
-    String value() default "";
+public @interface UnLock {
 
-    String condition() default "";
-
-    long waitTime() default 5;
-
-    TimeUnit timeUnit() default TimeUnit.SECONDS;
-
-    boolean autoUnLock() default true;
 }
