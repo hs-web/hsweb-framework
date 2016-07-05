@@ -59,7 +59,7 @@ public class ActivityModelController extends BasicController {
             String stringValue = valueWrapper.toString();
             switch (term.getField()) {
                 case "name":
-                    if (term.getTermType() == TermType.like)
+                    if (term.getTermType().equals(TermType.like))
                         modelQuery.modelNameLike(stringValue);
                     else
                         modelQuery.modelName(stringValue);
@@ -68,7 +68,7 @@ public class ActivityModelController extends BasicController {
                     modelQuery.modelKey(stringValue);
                     break;
                 case "category":
-                    if (term.getTermType() == TermType.like) {
+                    if (term.getTermType().equals(TermType.like)) {
                         modelQuery.modelCategoryLike(stringValue);
                     } else if (term.getTermType() == TermType.not) {
                         modelQuery.modelCategoryNotEquals(stringValue);
@@ -76,7 +76,7 @@ public class ActivityModelController extends BasicController {
                         modelQuery.modelCategory(stringValue);
                     break;
                 case "tenantId":
-                    if (term.getTermType() == TermType.like)
+                    if (term.getTermType().equals(TermType.like))
                         modelQuery.modelTenantIdLike(stringValue);
                     else
                         modelQuery.modelTenantId(stringValue);
