@@ -4,7 +4,7 @@
         "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="org.hsweb.web.dao.user.UserMapper">
-    <resultMap id="UserResultMap" type="User">
+    <resultMap id="UserResultMap" type="org.hsweb.web.bean.po.user.User">
         <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
         <result property="username" column="username" javaType="String" jdbcType="VARCHAR"/>
         <result property="password" column="password" javaType="String" jdbcType="VARCHAR"/>

@@ -4,7 +4,7 @@
         "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="org.hsweb.web.dao.form.FormMapper">
-    <resultMap id="FormResultMap" type="Form">
+    <resultMap id="FormResultMap" type="org.hsweb.web.bean.po.form.Form">
         <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
         <result property="name" column="name" javaType="String" jdbcType="VARCHAR"/>
         <result property="html" column="html" javaType="String" jdbcType="VARCHAR"/>

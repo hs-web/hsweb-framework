@@ -4,7 +4,7 @@
         "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="org.hsweb.web.dao.config.ConfigMapper">
-    <resultMap id="ConfigResultMap" type="Config">
+    <resultMap id="ConfigResultMap" type="org.hsweb.web.bean.po.config.Config">
         <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
         <result property="remark" column="remark" javaType="String" jdbcType="VARCHAR"/>
         <result property="content" column="content" javaType="String" jdbcType="VARCHAR"/>

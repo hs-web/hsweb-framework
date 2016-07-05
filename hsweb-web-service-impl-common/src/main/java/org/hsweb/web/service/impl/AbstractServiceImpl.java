@@ -126,7 +126,16 @@ public abstract class AbstractServiceImpl<Po, PK> implements GenericService<Po, 
 
     @Override
     public int saveOrUpdate(Po po) {
-        return 0;
+        if (po instanceof GenericPo) {
+            Po old = selectByPk((PK) ((GenericPo) po).getId());
+            if (old != null)
+                return update(po);
+            else
+                insert(po);
+        } else {
+            throw new UnsupportedOperationException("不支持此操作");
+        }
+        return 1;
     }
 
     protected void assertNotNull(Object po, String message) {

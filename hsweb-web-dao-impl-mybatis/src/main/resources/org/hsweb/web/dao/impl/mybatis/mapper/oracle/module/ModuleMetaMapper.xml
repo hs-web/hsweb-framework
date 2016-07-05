@@ -4,7 +4,7 @@
         "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="org.hsweb.web.dao.module.ModuleMetaMapper">
-    <resultMap id="ModuleMetaResultMap" type="ModuleMeta">
+    <resultMap id="ModuleMetaResultMap" type="org.hsweb.web.bean.po.module.ModuleMeta">
         <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
         <result property="key" column="key" javaType="String" jdbcType="VARCHAR"/>
         <result property="moduleId" column="module_id" javaType="String" jdbcType="VARCHAR"/>

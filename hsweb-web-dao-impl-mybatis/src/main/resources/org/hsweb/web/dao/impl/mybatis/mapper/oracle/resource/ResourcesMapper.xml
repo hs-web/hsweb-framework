@@ -4,7 +4,7 @@
         "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="org.hsweb.web.dao.resource.ResourcesMapper">
-    <resultMap id="ResourcesResultMap" type="Resources" >
+    <resultMap id="ResourcesResultMap" type="org.hsweb.web.bean.po.resource.Resources" >
         <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR" />
         <result property="name" column="name" javaType="String" jdbcType="VARCHAR" />
         <result property="path" column="path" javaType="String" jdbcType="VARCHAR" />
