@@ -8,7 +8,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-@ControllerAdvice(annotations = RestController.class)
+import javax.servlet.http.HttpServletResponse;
+
+@ControllerAdvice(annotations = {RestController.class, ResponseBody.class})
 @Order(1)
 public class RestControllerExceptionTranslator {
 
@@ -28,9 +30,9 @@ public class RestControllerExceptionTranslator {
 
 
     @ExceptionHandler(BusinessException.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ResponseBody
-    ResponseMessage handleException(BusinessException exception) {
+    ResponseMessage handleException(BusinessException exception, HttpServletResponse response) {
+        response.setStatus(exception.getStatus());
         return ResponseMessage.error(exception.getMessage(), exception.getStatus());
     }
 
