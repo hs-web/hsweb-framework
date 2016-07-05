@@ -37,7 +37,7 @@ public class RoleServiceImpl extends AbstractServiceImpl<Role, String> implement
     }
 
     @Override
-    public String insert(Role data) throws Exception {
+    public String insert(Role data) {
         String id = super.insert(data);
         List<RoleModule> roleModule = data.getModules();
         if (roleModule != null && roleModule.size() > 0) {
@@ -52,7 +52,7 @@ public class RoleServiceImpl extends AbstractServiceImpl<Role, String> implement
     }
 
     @Override
-    public int update(Role data) throws Exception {
+    public int update(Role data){
         int l = super.update(data);
         List<RoleModule> roleModule = data.getModules();
         if (roleModule != null && roleModule.size() > 0) {

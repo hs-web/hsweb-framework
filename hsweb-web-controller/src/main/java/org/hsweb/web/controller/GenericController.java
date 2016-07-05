@@ -63,7 +63,7 @@ public abstract class GenericController<PO, PK> {
     @RequestMapping(method = RequestMethod.GET)
     @AccessLogger("查询列表")
     @Authorize(action = "R")
-    public ResponseMessage list(QueryParam param) throws Exception {
+    public ResponseMessage list(QueryParam param) {
         // 获取条件查询
         Object data;
         if (!param.isPaging())//不分页
@@ -85,7 +85,7 @@ public abstract class GenericController<PO, PK> {
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     @AccessLogger("查询明细")
     @Authorize(action = "R")
-    public ResponseMessage info(@PathVariable("id") PK id) throws Exception {
+    public ResponseMessage info(@PathVariable("id") PK id) {
         PO po = getService().selectByPk(id);
         if (po == null)
             throw new BusinessException("data is not found!", 404);
@@ -102,7 +102,7 @@ public abstract class GenericController<PO, PK> {
     @RequestMapping(value = "/total", method = RequestMethod.GET)
     @AccessLogger("查询总数")
     @Authorize(action = "R")
-    public ResponseMessage total(QueryParam param) throws Exception {
+    public ResponseMessage total(QueryParam param) {
         // 获取条件查询
         return ResponseMessage.ok(getService().total(param));
     }
@@ -117,7 +117,7 @@ public abstract class GenericController<PO, PK> {
     @AccessLogger("新增")
     @Authorize(action = "C")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseMessage add(@RequestBody PO object) throws Exception {
+    public ResponseMessage add(@RequestBody PO object) {
         PK pk = getService().insert(object);
         return ResponseMessage.created(pk);
     }
@@ -131,7 +131,7 @@ public abstract class GenericController<PO, PK> {
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
     @AccessLogger("删除")
     @Authorize(action = "D")
-    public ResponseMessage delete(@PathVariable("id") PK id) throws Exception {
+    public ResponseMessage delete(@PathVariable("id") PK id) {
         PO old = getService().selectByPk(id);
         if (old == null) throw new NotFoundException("data is not found!");
         int number = getService().delete(id);
@@ -147,7 +147,7 @@ public abstract class GenericController<PO, PK> {
     @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
     @AccessLogger("修改")
     @Authorize(action = "U")
-    public ResponseMessage update(@PathVariable("id") PK id, @RequestBody(required = true) PO object) throws Exception {
+    public ResponseMessage update(@PathVariable("id") PK id, @RequestBody(required = true) PO object) {
         PO old = getService().selectByPk(id);
         if (old == null) throw new NotFoundException("data is not found!");
         if (object instanceof GenericPo) {
@@ -166,7 +166,7 @@ public abstract class GenericController<PO, PK> {
     @RequestMapping(method = RequestMethod.PUT)
     @AccessLogger("批量修改")
     @Authorize(action = "U")
-    public ResponseMessage update(@RequestBody(required = true) String json) throws Exception {
+    public ResponseMessage update(@RequestBody(required = true) String json) {
         int number;
         if (json.startsWith("[")) {
             List<PO> datas = JSON.parseArray(json, getPOType());

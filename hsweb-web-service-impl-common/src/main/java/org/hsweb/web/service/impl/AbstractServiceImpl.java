@@ -32,7 +32,7 @@ public abstract class AbstractServiceImpl<Po, PK> implements GenericService<Po, 
 
     @Override
     @Transactional(readOnly = true)
-    public PagerResult<Po> selectPager(QueryParam param) throws Exception {
+    public PagerResult<Po> selectPager(QueryParam param) {
         PagerResult<Po> pagerResult = new PagerResult<>();
         param.setPaging(false);
         int total = getMapper().total(param);
@@ -44,7 +44,7 @@ public abstract class AbstractServiceImpl<Po, PK> implements GenericService<Po, 
     }
 
     @Override
-    public PK insert(Po data) throws Exception {
+    public PK insert(Po data) {
         PK primaryKey = null;
         if (data instanceof GenericPo) {
             if (((GenericPo) data).getId() == null)
@@ -56,7 +56,7 @@ public abstract class AbstractServiceImpl<Po, PK> implements GenericService<Po, 
         return primaryKey;
     }
 
-    public List<PK> batchInsert(List<Po> data, boolean skipFail) throws Exception {
+    public List<PK> batchInsert(List<Po> data, boolean skipFail) {
         List<PK> pkList = new ArrayList<>();
         List<Po> insertData = new ArrayList<>();
         //build
@@ -83,17 +83,17 @@ public abstract class AbstractServiceImpl<Po, PK> implements GenericService<Po, 
     }
 
     @Override
-    public int delete(PK pk) throws Exception {
+    public int delete(PK pk) {
         return getMapper().delete(DeleteParam.build().where("id", pk));
     }
 
     @Override
-    public int update(Po data) throws Exception {
+    public int update(Po data) {
         return getMapper().update(UpdateParam.build(data));
     }
 
     @Override
-    public int update(List<Po> data) throws Exception {
+    public int update(List<Po> data) {
         int i = 0;
         for (Po po : data) {
             i += getMapper().update(UpdateParam.build(po));
@@ -103,25 +103,30 @@ public abstract class AbstractServiceImpl<Po, PK> implements GenericService<Po, 
 
     @Override
     @Transactional(readOnly = true)
-    public List<Po> select(QueryParam param) throws Exception {
+    public List<Po> select(QueryParam param) {
         return this.getMapper().select(param);
     }
 
     @Transactional(readOnly = true)
-    public List<Po> select() throws Exception {
+    public List<Po> select() {
         return this.getMapper().select(QueryParam.build().noPaging());
     }
 
     @Override
     @Transactional(readOnly = true)
-    public int total(QueryParam param) throws Exception {
+    public int total(QueryParam param) {
         return this.getMapper().total(param);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Po selectByPk(PK pk) throws Exception {
+    public Po selectByPk(PK pk) {
         return this.getMapper().selectByPk(pk);
+    }
+
+    @Override
+    public int saveOrUpdate(Po po) {
+        return 0;
     }
 
     protected void assertNotNull(Object po, String message) {

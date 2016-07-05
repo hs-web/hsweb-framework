@@ -37,13 +37,13 @@ public class ConfigServiceImpl extends AbstractServiceImpl<Config, String> imple
 
     @Override
     @CacheEvict(value = CACHE_KEY, allEntries = true)
-    public int update(Config data) throws Exception {
+    public int update(Config data) {
         return configMapper.update(new UpdateParam<>(data).excludes("createDate").where("id",data.getId()));
     }
 
     @Override
     @CacheEvict(value = CACHE_KEY, allEntries = true)
-    public int delete(String s) throws Exception {
+    public int delete(String s) {
         return super.delete(s);
     }
 
@@ -52,11 +52,11 @@ public class ConfigServiceImpl extends AbstractServiceImpl<Config, String> imple
      *
      * @param name 配置名称
      * @return 配置内容
-     * @throws Exception 异常信息
+     * @异常信息
      */
     @Override
     @Cacheable(value = CACHE_KEY, key = "'info.content.'+#name")
-    public String getContent(String name) throws Exception {
+    public String getContent(String name) {
         Config config = getMapper().selectByPk(name);
         if (config == null) return null;
         return config.getContent();
@@ -67,11 +67,11 @@ public class ConfigServiceImpl extends AbstractServiceImpl<Config, String> imple
      *
      * @param name 配置名称
      * @return 配置内容
-     * @throws Exception 异常信息
+     * @异常信息
      */
     @Override
     @Cacheable(value = CACHE_KEY, key = "'info.'+#name")
-    public Map<Object, Object> get(String name) throws Exception {
+    public Map<Object, Object> get(String name) {
         Config config = getMapper().selectByPk(name);
         if (config == null) return new HashMap<>();
         return config.toMap();
@@ -87,7 +87,7 @@ public class ConfigServiceImpl extends AbstractServiceImpl<Config, String> imple
      */
     @Override
     @Cacheable(value = CACHE_KEY, key = "'info.'+#name+'.key.'+#key")
-    public String get(String name, String key) throws Exception {
+    public String get(String name, String key) {
         Object val = get(name).get(key);
         if (val == null) return null;
         return String.valueOf(val);
@@ -124,7 +124,7 @@ public class ConfigServiceImpl extends AbstractServiceImpl<Config, String> imple
      */
     @Override
     @Cacheable(value = CACHE_KEY, key = "'info.'+#name+'.key.'+#key+'.int'")
-    public int getInt(String name, String key) throws Exception {
+    public int getInt(String name, String key) {
         return StringUtils.toInt(get(name, key));
     }
 
@@ -133,7 +133,7 @@ public class ConfigServiceImpl extends AbstractServiceImpl<Config, String> imple
      */
     @Override
     @Cacheable(value = CACHE_KEY, key = "'info.'+#name+'.key.'+#key+'.double'")
-    public double getDouble(String name, String key) throws Exception {
+    public double getDouble(String name, String key) {
         return StringUtils.toDouble(get(name, key));
     }
 
@@ -142,7 +142,7 @@ public class ConfigServiceImpl extends AbstractServiceImpl<Config, String> imple
      */
     @Override
     @Cacheable(value = CACHE_KEY, key = "'info.'+#name+'.key.'+#key+'.long'")
-    public long getLong(String name, String key) throws Exception {
+    public long getLong(String name, String key) {
         return StringUtils.toLong(get(name, key));
     }
 
@@ -176,7 +176,7 @@ public class ConfigServiceImpl extends AbstractServiceImpl<Config, String> imple
 
 
     @Override
-    public String insert(Config data) throws Exception {
+    public String insert(Config data) {
         Config old = this.selectByPk(data.getId());
         Assert.isNull(old, "配置已存在，请勿重复添加!");
         data.setCreateDate(new Date());

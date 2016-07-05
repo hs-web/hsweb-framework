@@ -19,7 +19,7 @@ public interface FormMapper extends GenericMapper<Form, String> {
      * @return 表单对象
      * @throws Exception
      */
-    Form selectUsing(String name) throws Exception;
+    Form selectUsing(String name);
 
     /**
      * 查询最新版本的表单列表
@@ -27,7 +27,7 @@ public interface FormMapper extends GenericMapper<Form, String> {
      * @param param 查询参数
      * @return 表单列表
      */
-    List<Form> selectLatestList(QueryParam param) throws Exception;
+    List<Form> selectLatestList(QueryParam param);
 
     /**
      * 查询最新版本的表单数量
@@ -35,6 +35,6 @@ public interface FormMapper extends GenericMapper<Form, String> {
      * @param param 查询参数
      * @return 表单数量
      */
-    int countLatestList(QueryParam param) throws Exception;
+    int countLatestList(QueryParam param);
 
 }

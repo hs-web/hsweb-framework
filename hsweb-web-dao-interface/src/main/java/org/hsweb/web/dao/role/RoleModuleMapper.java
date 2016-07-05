@@ -15,11 +15,10 @@ public interface RoleModuleMapper extends GenericMapper<RoleModule, String> {
      *
      * @param roleId 角色id
      * @return
-     * @throws Exception
      */
-    List<RoleModule> selectByRoleId(String roleId) throws Exception;
+    List<RoleModule> selectByRoleId(String roleId) ;
 
-    int deleteByRoleId(String roleId) throws Exception;
+    int deleteByRoleId(String roleId) ;
 
-    int deleteByModuleId(String moduleId) throws Exception;
+    int deleteByModuleId(String moduleId) ;
 }

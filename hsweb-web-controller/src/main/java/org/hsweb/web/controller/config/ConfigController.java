@@ -104,13 +104,13 @@ public class ConfigController extends GenericController<Config, String> {
      */
     @RequestMapping(value = "/{name:.+}.map", method = RequestMethod.GET)
     @AccessLogger("根据配置名获取配置（map格式）")
-    public Object configInfo(@PathVariable("name") String name) throws Exception {
+    public Object configInfo(@PathVariable("name") String name)  {
         return configService.get(name);
     }
 
     @RequestMapping(value = "/{name:.+}.array", method = RequestMethod.GET)
     @AccessLogger("根据配置名获取配置(list格式)")
-    public Object listInfo(@PathVariable("name") String name) throws Exception {
+    public Object listInfo(@PathVariable("name") String name)  {
         String content = configService.getContent(name);
         if (content == null) content = "[]";
         return content;
@@ -125,33 +125,33 @@ public class ConfigController extends GenericController<Config, String> {
      */
     @RequestMapping(value = {"/{name:.+}/{key:.+}"}, method = RequestMethod.GET)
     @AccessLogger("根据配置名和键获取配置")
-    public Object configInfo(@PathVariable("name") String name, @PathVariable("key") String key) throws Exception {
+    public Object configInfo(@PathVariable("name") String name, @PathVariable("key") String key)  {
         return configService.get(name, key, "");
     }
 
     @Override
     @RequestMapping(value = "/{id:.+}", method = RequestMethod.GET)
-    public ResponseMessage info(@PathVariable("id") String id) throws Exception {
+    public ResponseMessage info(@PathVariable("id") String id)  {
         return super.info(id);
     }
 
     @Override
     @Authorize(module = "config", action = "C")
-    public ResponseMessage add(@RequestBody Config object) throws Exception {
+    public ResponseMessage add(@RequestBody Config object)  {
         return super.add(object);
     }
 
     @Override
     @Authorize(module = "config", action = "D")
     @RequestMapping(value = "/{id:.+}", method = RequestMethod.DELETE)
-    public ResponseMessage delete(@PathVariable("id") String id) throws Exception {
+    public ResponseMessage delete(@PathVariable("id") String id)  {
         return super.delete(id);
     }
 
     @Override
     @Authorize(module = "config", action = "U")
     @RequestMapping(value = "/{id:.+}", method = RequestMethod.PUT)
-    public ResponseMessage update(@PathVariable("id") String id, @RequestBody Config object) throws Exception {
+    public ResponseMessage update(@PathVariable("id") String id, @RequestBody Config object)  {
         return super.update(id, object);
     }
 }

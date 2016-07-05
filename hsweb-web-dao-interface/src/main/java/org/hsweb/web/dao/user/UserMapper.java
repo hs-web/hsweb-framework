@@ -8,7 +8,7 @@ import org.hsweb.web.bean.po.user.User;
  * Created by generator
  */
 public interface UserMapper extends GenericMapper<User, String> {
-    User selectByUserName(String userName) throws Exception;
+    User selectByUserName(String userName);
 
     void updatePassword(User user);
 }

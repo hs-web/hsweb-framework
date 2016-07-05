@@ -40,7 +40,7 @@ public class TemplateServiceImpl extends AbstractServiceImpl<Template, String> i
     }
 
     @Override
-    public String insert(Template data) throws Exception {
+    public String insert(Template data)  {
         data.setVersion(1);
         data.setUsing(false);
         data.setRelease(0);
@@ -49,7 +49,7 @@ public class TemplateServiceImpl extends AbstractServiceImpl<Template, String> i
     }
 
     @Override
-    public String createNewVersion(String oldVersionId) throws Exception {
+    public String createNewVersion(String oldVersionId) {
         Template old = templateMapper.selectByPk(oldVersionId);
         assertNotNull(old, "模板不存在");
         old.setId(null);
@@ -63,13 +63,13 @@ public class TemplateServiceImpl extends AbstractServiceImpl<Template, String> i
 
     @Override
     @Transactional(readOnly = true)
-    public List<Template> selectLatestList(QueryParam param) throws Exception {
+    public List<Template> selectLatestList(QueryParam param) {
         return templateMapper.selectLatestList(param);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public int countLatestList(QueryParam param) throws Exception {
+    public int countLatestList(QueryParam param) {
         return templateMapper.countLatestList(param);
     }
 
@@ -77,7 +77,7 @@ public class TemplateServiceImpl extends AbstractServiceImpl<Template, String> i
     @CacheEvict(value = CACHE_NAME,
             key = "'template.name.using'+target.selectByPk(#id).getName()",
             condition = "target.selectByPk(#id).isUsing()")
-    public int update(Template data) throws Exception {
+    public int update(Template data) {
         Template old = selectByPk(data.getId());
         assertNotNull(old, "模板不存在");
         data.setRevision(old.getRevision() + 1);
@@ -94,7 +94,7 @@ public class TemplateServiceImpl extends AbstractServiceImpl<Template, String> i
                     @CacheEvict(value = CACHE_NAME, key = "'template.deploy.name.'+target.selectByPk(#id).getName()")
             }
     )
-    public void deploy(String id) throws Exception {
+    public void deploy(String id) {
         Template old = templateMapper.selectByPk(id);
         assertNotNull(old, "模板不存在");
         Template usingTemplate = selectUsing(old.getName());
@@ -121,7 +121,7 @@ public class TemplateServiceImpl extends AbstractServiceImpl<Template, String> i
                     , @CacheEvict(value = CACHE_NAME, key = "'template.deploy.name'+target.selectByPk(#id).getName()")
             }
     )
-    public void unDeploy(String id) throws Exception {
+    public void unDeploy(String id) {
         Template old = templateMapper.selectByPk(id);
         assertNotNull(old, "模板不存在");
         old.setUsing(false);
@@ -130,7 +130,7 @@ public class TemplateServiceImpl extends AbstractServiceImpl<Template, String> i
 
     @Override
     @Transactional(readOnly = true)
-    public Template selectLatest(String name) throws Exception {
+    public Template selectLatest(String name) {
         QueryParam param = QueryParam.build()
                 .where("name", name).orderBy("version").desc().doPaging(0, 1);
         List<Template> templates = selectLatestList(param);
@@ -139,14 +139,14 @@ public class TemplateServiceImpl extends AbstractServiceImpl<Template, String> i
 
     @Override
     @Cacheable(value = CACHE_NAME, key = "'template.name.'+#name+':'+#version")
-    public Template selectByVersion(String name, int version) throws Exception {
+    public Template selectByVersion(String name, int version) {
         QueryParam param = QueryParam.build().where("name", name).and("version", version);
         return this.selectSingle(param);
     }
 
     @Override
     @Cacheable(value = CACHE_NAME, key = "'template.deploy.name.'+#name")
-    public Template selectDeploy(String name) throws Exception {
+    public Template selectDeploy(String name) {
         Template deployed = selectUsing(name);
         assertNotNull(deployed, "模板不存在或未部署");
         History history = historyService.selectLastHistoryByType("template.deploy." + name);
@@ -156,7 +156,7 @@ public class TemplateServiceImpl extends AbstractServiceImpl<Template, String> i
 
     @Override
     @Cacheable(value = CACHE_NAME, key = "'template.using.name.'+#name")
-    public Template selectUsing(String name) throws Exception {
+    public Template selectUsing(String name) {
         QueryParam param = QueryParam.build().where("name", name).and("using", true);
         return this.selectSingle(param);
     }

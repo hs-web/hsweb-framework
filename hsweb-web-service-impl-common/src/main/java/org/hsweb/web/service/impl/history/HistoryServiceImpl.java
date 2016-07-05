@@ -24,7 +24,7 @@ public class HistoryServiceImpl extends AbstractServiceImpl<History, String> imp
     }
 
     @Override
-    public History selectLastHistoryByType(String type) throws Exception {
+    public History selectLastHistoryByType(String type) {
         QueryParam queryParam = new QueryParam()
                 .where("type", type)
                 .doPaging(0, 1)

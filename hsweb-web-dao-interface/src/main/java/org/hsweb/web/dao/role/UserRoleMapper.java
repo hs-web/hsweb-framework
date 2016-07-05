@@ -15,9 +15,8 @@ public interface UserRoleMapper extends GenericMapper<UserRole, String> {
      *
      * @param userId 用户id
      * @return 角色列表
-     * @throws Exception 异常信息
      */
-    List<UserRole> selectByUserId(String userId) throws Exception;
+    List<UserRole> selectByUserId(String userId);
 
-    int deleteByUserId(String userId) throws Exception;
+    int deleteByUserId(String userId);
 }

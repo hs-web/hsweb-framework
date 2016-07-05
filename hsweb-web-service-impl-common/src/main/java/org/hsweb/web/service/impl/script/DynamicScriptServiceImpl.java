@@ -41,7 +41,7 @@ public class DynamicScriptServiceImpl extends AbstractServiceImpl<DynamicScript,
     }
 
     @Override
-    public String insert(DynamicScript data) throws Exception {
+    public String insert(DynamicScript data) {
         DynamicScript old = selectSingle(QueryParam.build().where("name", data.getName()).and("type", data.getType()));
         if (old != null) throw new BusinessException("已存在相同名称和类型的脚本!", 400);
         data.setStatus(1);
@@ -50,13 +50,13 @@ public class DynamicScriptServiceImpl extends AbstractServiceImpl<DynamicScript,
 
     @Override
     @Cacheable(value = CACHE_KEY, key = "'script.'+#pk")
-    public DynamicScript selectByPk(String pk) throws Exception {
+    public DynamicScript selectByPk(String pk) {
         return super.selectByPk(pk);
     }
 
     @Override
     @Cacheable(value = CACHE_KEY, key = "'script.md5.'+#pk")
-    public String getScriptMd5(String scriptId) throws Exception {
+    public String getScriptMd5(String scriptId) {
         DynamicScript script = selectByPk(scriptId);
         assertNotNull(script, "脚本不存在");
         return MD5.defaultEncode(script.getContent());
@@ -70,7 +70,7 @@ public class DynamicScriptServiceImpl extends AbstractServiceImpl<DynamicScript,
 
     @Override
     @CacheEvict(value = CACHE_KEY, allEntries = true)
-    public int update(DynamicScript data) throws Exception {
+    public int update(DynamicScript data) {
         DynamicScript old = selectSingle(QueryParam.build()
                 .where("name", data.getName())
                 .and("type", data.getType())
@@ -82,14 +82,13 @@ public class DynamicScriptServiceImpl extends AbstractServiceImpl<DynamicScript,
 
     @Override
     @CacheEvict(value = CACHE_KEY, allEntries = true)
-    public int update(List<DynamicScript> datas) throws Exception {
-        int i = super.update(datas);
-        return i;
+    public int update(List<DynamicScript> datas) {
+        return super.update(datas);
     }
 
     @Override
     @CacheEvict(value = CACHE_KEY, allEntries = true)
-    public int delete(String pk) throws Exception {
+    public int delete(String pk) {
         return super.delete(pk);
     }
 

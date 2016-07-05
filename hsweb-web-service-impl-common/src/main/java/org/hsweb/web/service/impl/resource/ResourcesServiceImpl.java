@@ -35,7 +35,7 @@ public class ResourcesServiceImpl extends AbstractServiceImpl<Resources, String>
     @Override
     @Cacheable(value = CACHE_KEY, key = "'id.'+#id")
     @Transactional(readOnly = true)
-    public Resources selectByPk(String id) throws Exception {
+    public Resources selectByPk(String id) {
         return super.selectByPk(id);
     }
 
@@ -48,18 +48,18 @@ public class ResourcesServiceImpl extends AbstractServiceImpl<Resources, String>
      */
     @Cacheable(value = CACHE_KEY, key = "'md5.'+#md5")
     @Transactional(readOnly = true)
-    public Resources selectByMd5(String md5) throws Exception {
+    public Resources selectByMd5(String md5)  {
         return this.selectSingle(new QueryParam().where("md5", md5));
     }
 
     @Override
     @Transactional(rollbackFor = Throwable.class)
-    public String insert(Resources data) throws Exception {
+    public String insert(Resources data) {
         data.setId(this.newid(6));//6位随机id
         return super.insert(data);
     }
 
-    public String newid(int len) throws Exception {
+    public String newid(int len) {
         String id = RandomUtil.randomChar(len);
         for (int i = 0; i < 10; i++) {
             if (this.selectByPk(id) == null) {

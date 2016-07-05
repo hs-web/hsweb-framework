@@ -15,9 +15,8 @@ public interface TemplateMapper extends GenericMapper<Template, String> {
      *
      * @param name 模板名字
      * @return 模板对象
-     * @throws Exception
      */
-    Template selectUsing(String name) throws Exception;
+    Template selectUsing(String name) ;
 
     /**
      * 查询最新版本的模板列表
@@ -25,7 +24,7 @@ public interface TemplateMapper extends GenericMapper<Template, String> {
      * @param param 查询参数
      * @return 模板列表
      */
-    List<Template> selectLatestList(QueryParam param) throws Exception;
+    List<Template> selectLatestList(QueryParam param) ;
 
     /**
      * 查询最新版本的模板数量
@@ -33,6 +32,6 @@ public interface TemplateMapper extends GenericMapper<Template, String> {
      * @param param 查询参数
      * @return 模板数量
      */
-    int countLatestList(QueryParam param) throws Exception;
+    int countLatestList(QueryParam param) ;
 
 }

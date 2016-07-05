@@ -43,12 +43,12 @@ public class UserServiceImpl extends AbstractServiceImpl<User, String> implement
         return this.userMapper;
     }
 
-    public User selectByUserName(String username) throws Exception {
+    public User selectByUserName(String username)  {
         return this.getMapper().selectByUserName(username);
     }
 
     @Override
-    public String insert(User data) throws Exception {
+    public String insert(User data)  {
         tryValidPo(data);
         Assert.isNull(selectByUserName(data.getUsername()), "用户已存在!");
         data.setId(RandomUtil.randomChar(6));
@@ -70,12 +70,12 @@ public class UserServiceImpl extends AbstractServiceImpl<User, String> implement
     }
 
     @Override
-    public List<String> batchInsert(List<User> data, boolean skipFail) throws Exception {
+    public List<String> batchInsert(List<User> data, boolean skipFail)  {
         throw new UnsupportedOperationException("不支持此操作");
     }
 
     @Override
-    public int update(User data) throws Exception {
+    public int update(User data)  {
         tryValidPo(data);
         User old = this.selectByUserName(data.getUsername());
         if (old != null && !old.getId().equals(data.getId())) {
@@ -100,7 +100,7 @@ public class UserServiceImpl extends AbstractServiceImpl<User, String> implement
     }
 
     @Override
-    public void initAdminUser(User user) throws Exception {
+    public void initAdminUser(User user)  {
         QueryParam queryParam = new QueryParam().noPaging();
         queryParam.orderBy("sortIndex");
         List<Module> modules = moduleService.select(queryParam);
@@ -112,14 +112,14 @@ public class UserServiceImpl extends AbstractServiceImpl<User, String> implement
     }
 
     @Override
-    public void initGuestUser(User user) throws Exception {
+    public void initGuestUser(User user)  {
         List<UserRole> userRoles = userRoleMapper.select(new QueryParam().where("roleId", "guest").noPaging());
         user.setUserRoles(userRoles);
         user.initRoleInfo();
     }
 
     @Override
-    public void enableUser(String id) throws Exception {
+    public void enableUser(String id)  {
         User user = selectByPk(id);
         if (user == null) throw new NotFoundException("用户不存在!");
         user.setStatus(1);
@@ -127,7 +127,7 @@ public class UserServiceImpl extends AbstractServiceImpl<User, String> implement
     }
 
     @Override
-    public void disableUser(String id) throws Exception {
+    public void disableUser(String id)  {
         User user = selectByPk(id);
         if (user == null) throw new NotFoundException("用户不存在!");
         user.setStatus(-1);
@@ -135,7 +135,7 @@ public class UserServiceImpl extends AbstractServiceImpl<User, String> implement
     }
 
     @Override
-    public int delete(String s) throws Exception {
+    public int delete(String s)  {
         throw new BusinessException("服务不支持", 500);
     }
 }

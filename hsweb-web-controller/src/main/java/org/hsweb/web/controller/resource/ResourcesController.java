@@ -35,7 +35,7 @@ public class ResourcesController extends GenericController<Resources, String> {
     @RequestMapping(value = "/{id:^[0-9a-zA-Z]*$}", method = RequestMethod.GET)
     @ResponseBody
     @AccessLogger("获取资源信息")
-    public ResponseMessage info(@PathVariable("id") String id) throws Exception {
+    public ResponseMessage info(@PathVariable("id") String id) {
         Resources resources;
         //如果id长度为32，则尝试通过md5获取
         if (id.length() == 32) {

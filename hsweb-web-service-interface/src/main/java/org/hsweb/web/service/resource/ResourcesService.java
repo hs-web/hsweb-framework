@@ -13,8 +13,7 @@ public interface ResourcesService extends GenericService<Resources, String> {
      *
      * @param md5 md5值
      * @return 资源对象
-     * @throws Exception
      */
-    Resources selectByMd5(String md5) throws Exception;
+    Resources selectByMd5(String md5);
 
 }

@@ -27,7 +27,7 @@ public class ModuleMetaServiceImpl extends AbstractServiceImpl<ModuleMeta, Strin
 
     @Override
     @CacheEvict(value = CACHE_NAME, allEntries = true)
-    public int update(ModuleMeta data) throws Exception {
+    public int update(ModuleMeta data)  {
         return super.update(data);
     }
 

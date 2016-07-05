@@ -13,5 +13,5 @@ public interface HistoryService extends GenericService<History, String> {
      * @param type 类型
      * @return 查询结果
      */
-    History selectLastHistoryByType(String type) throws Exception;
+    History selectLastHistoryByType(String type);
 }

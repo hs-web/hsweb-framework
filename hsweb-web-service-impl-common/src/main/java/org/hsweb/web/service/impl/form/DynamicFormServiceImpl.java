@@ -78,9 +78,6 @@ public class DynamicFormServiceImpl implements DynamicFormService, ExpressionSco
             case "oracle":
                 dataType = "varchar2(32)";
                 break;
-            case "h2":
-                dataType = "varchar2(32)";
-                break;
             default:
                 dataType = "varchar(32)";
         }
@@ -100,15 +97,16 @@ public class DynamicFormServiceImpl implements DynamicFormService, ExpressionSco
     }
 
     @Override
-    public TableMetaData parseMeta(Form form) throws Exception {
+    public TableMetaData parseMeta(Form form){
         return formParser.parse(form);
     }
 
     @Override
     @WriteLock
     @LockName(value = "'form.lock.'+#form.name", isExpression = true)
-    public void deploy(Form form) throws Exception {
+    public void deploy(Form form) throws SQLException {
         TableMetaData metaData = formParser.parse(form);
+        metaData.setProperty("version", form.getRevision());
         initDefaultField(metaData);
         TableMetaData lastDeployMetaData;
         if (tableMetaParser == null) {
@@ -132,16 +130,17 @@ public class DynamicFormServiceImpl implements DynamicFormService, ExpressionSco
             //更新结构
             database.alterTable(metaData);
         }
+
     }
 
     @Override
     @WriteLock
     @LockName(value = "'form.lock.'+#form.name", isExpression = true)
-    public void unDeploy(Form form) throws Exception {
+    public void unDeploy(Form form){
         database.removeTable(form.getName());
     }
 
-    public Table getTableByName(String name) throws Exception {
+    public Table getTableByName(String name){
         try {
             Table table = database.getTable(name);
             if (table == null) {
@@ -157,7 +156,7 @@ public class DynamicFormServiceImpl implements DynamicFormService, ExpressionSco
     @ReadLock
     @LockName(value = "'form.lock.'+#name", isExpression = true)
     @Transactional(readOnly = true)
-    public <T> PagerResult<T> selectPager(String name, QueryParam param) throws Exception {
+    public <T> PagerResult<T> selectPager(String name, QueryParam param) throws SQLException {
         PagerResult<T> result = new PagerResult<>();
         Table table = getTableByName(name);
         Query query = table.createQuery();
@@ -173,7 +172,7 @@ public class DynamicFormServiceImpl implements DynamicFormService, ExpressionSco
     @ReadLock
     @LockName(value = "'form.lock.'+#name", isExpression = true)
     @Transactional(readOnly = true)
-    public <T> List<T> select(String name, QueryParam param) throws Exception {
+    public <T> List<T> select(String name, QueryParam param) throws SQLException {
         Table table = getTableByName(name);
         Query query = table.createQuery().setParam(param);
         return query.list();
@@ -183,7 +182,7 @@ public class DynamicFormServiceImpl implements DynamicFormService, ExpressionSco
     @ReadLock
     @LockName(value = "'form.lock.'+#name", isExpression = true)
     @Transactional(readOnly = true)
-    public int total(String name, QueryParam param) throws Exception {
+    public int total(String name, QueryParam param) throws SQLException {
         Table table = getTableByName(name);
         Query query = table.createQuery().setParam(param);
         return query.total();
@@ -192,7 +191,7 @@ public class DynamicFormServiceImpl implements DynamicFormService, ExpressionSco
     @Override
     @ReadLock
     @LockName(value = "'form.lock.'+#name", isExpression = true)
-    public String insert(String name, Map<String, Object> data) throws Exception {
+    public String insert(String name, Map<String, Object> data) throws SQLException {
         Table table = getTableByName(name);
         String primaryKeyName = getPrimaryKeyName(name);
         String pk = GenericPo.createUID();
@@ -203,7 +202,7 @@ public class DynamicFormServiceImpl implements DynamicFormService, ExpressionSco
     }
 
     @Override
-    public String saveOrUpdate(String name, Map<String, Object> data) throws Exception {
+    public String saveOrUpdate(String name, Map<String, Object> data) throws SQLException {
         String id = (String) data.get(getPrimaryKeyName(name));
         if (id == null)
             id = getRepeatDataId(name, data);
@@ -230,7 +229,7 @@ public class DynamicFormServiceImpl implements DynamicFormService, ExpressionSco
     @Override
     @ReadLock
     @LockName(value = "'form.lock.'+#name", isExpression = true)
-    public boolean deleteByPk(String name, String pk) throws Exception {
+    public boolean deleteByPk(String name, String pk) throws SQLException {
         String primaryKeyName = getPrimaryKeyName(name);
         Table table = getTableByName(name);
         Delete delete = table.createDelete().where(primaryKeyName, pk);
@@ -240,7 +239,7 @@ public class DynamicFormServiceImpl implements DynamicFormService, ExpressionSco
     @Override
     @ReadLock
     @LockName(value = "'form.lock.'+#name", isExpression = true)
-    public int delete(String name, DeleteParam where) throws Exception {
+    public int delete(String name, DeleteParam where) throws SQLException {
         Table table = getTableByName(name);
         Delete delete = table.createDelete();
         delete.setParam(where);
@@ -250,7 +249,7 @@ public class DynamicFormServiceImpl implements DynamicFormService, ExpressionSco
     @Override
     @ReadLock
     @LockName(value = "'form.lock.'+#name", isExpression = true)
-    public int updateByPk(String name, String pk, UpdateParam<Map<String, Object>> param) throws Exception {
+    public int updateByPk(String name, String pk, UpdateParam<Map<String, Object>> param) throws SQLException {
         Table table = getTableByName(name);
         Update update = table.createUpdate().setParam(param);
         update.where(getPrimaryKeyName(name), pk);
@@ -260,7 +259,7 @@ public class DynamicFormServiceImpl implements DynamicFormService, ExpressionSco
     @Override
     @ReadLock
     @LockName(value = "'form.lock.'+#name", isExpression = true)
-    public int update(String name, UpdateParam<Map<String, Object>> param) throws Exception {
+    public int update(String name, UpdateParam<Map<String, Object>> param) throws SQLException {
         Table table = getTableByName(name);
         Update update = table.createUpdate().setParam(param);
         return update.exec();
@@ -268,7 +267,7 @@ public class DynamicFormServiceImpl implements DynamicFormService, ExpressionSco
 
     @ReadLock
     @LockName(value = "'form.lock.'+#tableName", isExpression = true)
-    public String getPrimaryKeyName(String tableName) throws Exception {
+    public String getPrimaryKeyName(String tableName){
         Table table = getTableByName(tableName);
         return table.getMeta().getProperty("primaryKey", "u_id").toString();
     }
@@ -276,7 +275,7 @@ public class DynamicFormServiceImpl implements DynamicFormService, ExpressionSco
     @Override
     @ReadLock
     @LockName(value = "'form.lock.'+#name", isExpression = true)
-    public <T> T selectByPk(String name, Object pk) throws Exception {
+    public <T> T selectByPk(String name, Object pk) throws SQLException {
         Table<T> table = getTableByName(name);
         Query<T> query = table.createQuery().where(getPrimaryKeyName(name), pk);
         return query.single();
@@ -341,7 +340,7 @@ public class DynamicFormServiceImpl implements DynamicFormService, ExpressionSco
     @Override
     @ReadLock
     @LockName(value = "'form.lock.'+#name", isExpression = true)
-    public Map<String, Object> importExcel(String name, InputStream inputStream) throws Exception {
+    public Map<String, Object> importExcel(String name, InputStream inputStream){
         Map<String, Object> result = new HashMap<>();
         long startTime = System.currentTimeMillis();
         List<Map<String, Object>> excelData;
