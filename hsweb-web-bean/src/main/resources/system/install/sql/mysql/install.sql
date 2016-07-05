@@ -1,3 +1,14 @@
+CREATE TABLE `s_user_profile` (
+  `u_id`    VARCHAR(32) NOT NULL PRIMARY KEY
+  COMMENT 'UID',
+  `content` TEXT        NOT NULL
+  COMMENT '配置内容',
+  `type`    VARCHAR(512)
+  COMMENT '类型',
+  `user_id` VARCHAR(32)
+  COMMENT '用户ID'
+);
+
 CREATE TABLE `s_config` (
   `u_id`          VARCHAR(32) NOT NULL PRIMARY KEY
   COMMENT 'UID',
@@ -14,22 +25,22 @@ CREATE TABLE `s_config` (
 );
 ALTER TABLE `s_config` COMMENT '系统配置文件表';
 CREATE TABLE `s_form` (
-  `u_id`        VARCHAR(32)  NOT NULL PRIMARY KEY
+  `u_id`          VARCHAR(32)  NOT NULL PRIMARY KEY
   COMMENT 'uid',
   "classified_id" VARCHAR(32) COMMENT '分类ID',
-  `name`        VARCHAR(256) NOT NULL
+  `name`          VARCHAR(256) NOT NULL
   COMMENT '名称',
-  `html`        TEXT COMMENT 'html内容',
-  `meta`        TEXT COMMENT '结构定义',
-  `config`      TEXT COMMENT '配置',
-  `version`     INT COMMENT '版本',
-  `revision`    INT COMMENT '修订版',
-  `release`     INT COMMENT '发布版',
-  `using`       TINYINT COMMENT '是否使用中',
-  `create_date` DATETIME     NOT NULL
+  `html`          TEXT COMMENT 'html内容',
+  `meta`          TEXT COMMENT '结构定义',
+  `config`        TEXT COMMENT '配置',
+  `version`       INT COMMENT '版本',
+  `revision`      INT COMMENT '修订版',
+  `release`       INT COMMENT '发布版',
+  `using`         TINYINT COMMENT '是否使用中',
+  `create_date`   DATETIME     NOT NULL
   COMMENT '创建日期',
-  `update_date` DATETIME COMMENT '修改日期',
-  `remark`      VARCHAR(200)
+  `update_date`   DATETIME COMMENT '修改日期',
+  `remark`        VARCHAR(200)
 );
 ALTER TABLE `s_form` COMMENT '动态表单';
 CREATE TABLE `s_template` (
