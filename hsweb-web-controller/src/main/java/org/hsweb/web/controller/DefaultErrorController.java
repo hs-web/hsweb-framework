@@ -1,5 +1,6 @@
 package org.hsweb.web.controller;
 
+import org.hsweb.web.core.logger.annotation.AccessLogger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.web.ErrorAttributes;
 import org.springframework.boot.autoconfigure.web.ErrorController;
@@ -18,12 +19,14 @@ import java.util.Map;
 
 @Controller
 @RequestMapping("/error")
+@AccessLogger("错误请求")
 public class DefaultErrorController implements ErrorController {
 
     @Autowired
     private ErrorAttributes errorAttributes;
 
     @RequestMapping
+    @AccessLogger("html")
     public ModelAndView errorHtml(HttpServletRequest request, HttpServletResponse response) {
         RequestAttributes requestAttributes = new ServletRequestAttributes(request);
         Map<String, Object> model = errorAttributes.getErrorAttributes(requestAttributes, true);
@@ -34,6 +37,7 @@ public class DefaultErrorController implements ErrorController {
 
     @RequestMapping(produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE})
     @ResponseBody
+    @AccessLogger("json")
     public Object error(HttpServletRequest request, HttpServletResponse response) {
         RequestAttributes requestAttributes = new ServletRequestAttributes(request);
         Map<String, Object> model = errorAttributes.getErrorAttributes(requestAttributes, true);
