@@ -15,4 +15,5 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement(proxyTargetClass = true)
 @MapperScan("org.hsweb.web.dao")
 public class SpringApplication {
+
 }

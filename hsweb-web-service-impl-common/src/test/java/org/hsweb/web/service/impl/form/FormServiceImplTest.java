@@ -50,14 +50,14 @@ public class FormServiceImplTest extends AbstractTestCase {
                     "{\"key\":\"name\",\"value\":\"u_id\",\"describe\":\"名称\"}," +
                     "{\"key\":\"comment\",\"value\":\"ID\",\"describe\":\"ID\"}," +
                     "{\"key\":\"javaType\",\"value\":\"string\",\"describe\":\"java类型\"}," +
-                    "{\"key\":\"dataType\",\"value\":\"varchar2(32)\",\"describe\":\"数据库类型\"}" +
+                    "{\"key\":\"dataType\",\"value\":\"varchar(32)\",\"describe\":\"数据库类型\"}" +
                     "]" +
                     ",\"id2\":[" +
                     "{\"key\":\"name\",\"value\":\"name\",\"describe\":\"名称\"}," +
                     "{\"key\":\"comment\",\"value\":\"姓名\",\"describe\":\"姓名\"}," +
                     "{\"key\":\"javaType\",\"value\":\"string\",\"describe\":\"java类型\"}," +
                     "{\"key\":\"validator-list\",\"value\":\"[{\\\"validator\\\":\\\"NotNull\\\"}]\",,\"describe\":\"java类型\"}," +
-                    "{\"key\":\"dataType\",\"value\":\"varchar2(32)\",\"describe\":\"数据库类型\"}" +
+                    "{\"key\":\"dataType\",\"value\":\"varchar(32)\",\"describe\":\"数据库类型\"}" +
                     "]" +
                     "}",
             "{" +
@@ -65,19 +65,19 @@ public class FormServiceImplTest extends AbstractTestCase {
                     "{\"key\":\"name\",\"value\":\"u_id\",\"describe\":\"名称\"}," +
                     "{\"key\":\"comment\",\"value\":\"ID\",\"describe\":\"ID\"}," +
                     "{\"key\":\"javaType\",\"value\":\"string\",\"describe\":\"java类型\"}," +
-                    "{\"key\":\"dataType\",\"value\":\"varchar2(32)\",\"describe\":\"数据库类型\"}" +
+                    "{\"key\":\"dataType\",\"value\":\"varchar(32)\",\"describe\":\"数据库类型\"}" +
                     "]" +
                     ",\"id2\":[" +
                     "{\"key\":\"name\",\"value\":\"name\",\"describe\":\"名称\"}," +
                     "{\"key\":\"comment\",\"value\":\"姓名\",\"describe\":\"字段描述\"}," +
                     "{\"key\":\"javaType\",\"value\":\"string\",\"describe\":\"java类型\"}," +
-                    "{\"key\":\"dataType\",\"value\":\"varchar2(32)\",\"describe\":\"数据库类型\"}" +
+                    "{\"key\":\"dataType\",\"value\":\"varchar(32)\",\"describe\":\"数据库类型\"}" +
                     "]" +
                     ",\"id3\":[" +
                     "{\"key\":\"name\",\"value\":\"sex\",\"describe\":\"名称\"}," +
                     "{\"key\":\"comment\",\"value\":\"性别\",\"describe\":\"性别\"}," +
                     "{\"key\":\"javaType\",\"value\":\"string\",\"describe\":\"java类型\"}," +
-                    "{\"key\":\"dataType\",\"value\":\"varchar2(32)\",\"describe\":\"数据库类型\"}" +
+                    "{\"key\":\"dataType\",\"value\":\"varchar(32)\",\"describe\":\"数据库类型\"}" +
                     "]" +
                     "}"
     };
