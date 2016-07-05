@@ -13,6 +13,7 @@ import org.hsweb.web.core.message.ResponseMessage;
 import org.hsweb.web.core.utils.WebUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
@@ -28,13 +29,13 @@ import java.util.List;
  */
 @Configuration
 @ConditionalOnProperty(name = "logger.access", havingValue = "true")
-public class AopAccessLoggerResolverAutoConfiguration extends AopAccessLoggerResolver {
+public class AopAccessLoggerResolverAutoConfiguration{
     @Bean
     public AopAccessLoggerResolverConfiguration aopAccessLoggerResolverConfiguration() {
         return new AopAccessLoggerResolverConfiguration();
     }
+
     @Aspect
-    @Component
     @Order(Ordered.HIGHEST_PRECEDENCE)
     static class AopAccessLoggerResolverConfiguration extends org.hsweb.web.core.logger.AopAccessLoggerResolver {
         @Autowired(required = false)
