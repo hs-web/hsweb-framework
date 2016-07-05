@@ -1,6 +1,7 @@
 package org.hsweb.web.bean.po.script;
 
 import org.hibernate.validator.constraints.Length;
+import org.hibernate.validator.constraints.NotBlank;
 import org.hsweb.web.bean.po.GenericPo;
 
 import javax.validation.constraints.NotNull;
@@ -20,10 +21,11 @@ public class DynamicScript extends GenericPo<String> {
     private String name;
 
     //类型
-    @Pattern(regexp = "(js)|(groovy)|(java)", message = "类型仅支持js,groovy,java")
+    @Pattern(regexp = "(js)|(groovy)|(java)|(javascript)", message = "类型仅支持js(javascript),groovy,java")
     private String type;
 
     //内容
+    @NotBlank(message = "脚本内容不能为空")
     private String content;
 
     //备注
