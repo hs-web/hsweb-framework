@@ -1,5 +1,7 @@
 package org.hsweb.web.service.impl.profile;
 
+import org.hsweb.commons.MD5;
+import org.hsweb.web.bean.common.UpdateParam;
 import org.hsweb.web.bean.po.profile.UserProfile;
 import org.hsweb.web.dao.profile.UserProfileMapper;
 import org.hsweb.web.service.impl.AbstractServiceImpl;
@@ -22,5 +24,18 @@ public class UserProfileServiceImpl extends AbstractServiceImpl<UserProfile, Str
         return userProfileMapper;
     }
 
+    @Override
+    public int saveOrUpdate(UserProfile userProfile) {
+        UserProfile old = selectByUserIdAndType(userProfile.getUserId(), userProfile.getType());
+        if (null != old) {
+            return getMapper().update(UpdateParam.build(userProfile)
+                    .includes("content")
+                    .where("userId", userProfile.getUserId())
+                    .and("type", userProfile.getType()));
+        } else {
+            insert(userProfile);
+        }
+        return 1;
+    }
 
 }

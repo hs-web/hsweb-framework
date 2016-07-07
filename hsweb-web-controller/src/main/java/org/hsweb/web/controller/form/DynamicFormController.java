@@ -1,3 +1,19 @@
+/*
+ * Copyright 2015-2016 https://github.com/hs-web
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.hsweb.web.controller.form;
 
 import org.hsweb.web.bean.common.QueryParam;
@@ -5,6 +21,7 @@ import org.hsweb.web.bean.common.UpdateMapParam;
 import org.hsweb.web.bean.po.form.Form;
 import org.hsweb.web.core.authorize.annotation.Authorize;
 import org.hsweb.web.core.exception.BusinessException;
+import org.hsweb.web.core.exception.NotFoundException;
 import org.hsweb.web.core.logger.annotation.AccessLogger;
 import org.hsweb.web.core.message.ResponseMessage;
 import org.hsweb.web.service.form.DynamicFormService;
@@ -20,7 +37,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by zhouhao on 16-4-23.
+ * 动态表单管理控制器,用于操作动态表单以及对表单数据的增删改查和excel导入导出
+ *
+ * @author zhouhao
  */
 @RestController
 @RequestMapping(value = "/dyn-form")
@@ -38,16 +57,18 @@ public class DynamicFormController {
 
     @RequestMapping(value = "/deployed/{name}", method = RequestMethod.GET)
     @Authorize(expression = "#dynamicFormAuthorizeValidator.validate(#name,#user,#paramsMap,'R')")
-    public ResponseMessage deployed(@PathVariable("name") String name) throws Exception {
+    @AccessLogger("发布表单")
+    public ResponseMessage deployed(@PathVariable("name") String name) {
         return ResponseMessage.ok(formService.selectDeployed(name));
     }
 
     @RequestMapping(value = "/{name}/v/{version}", method = RequestMethod.GET)
     @Authorize(expression = "#dynamicFormAuthorizeValidator.validate(#name,#user,#paramsMap,'R')")
-    public ResponseMessage latest(@PathVariable(value = "name") String name,
-                                  @PathVariable(value = "version") Integer version) throws Exception {
+    @AccessLogger("根据版本获取表单")
+    public ResponseMessage selectByVersion(@PathVariable(value = "name") String name,
+                                           @PathVariable(value = "version") Integer version) {
         Form form = formService.selectByVersion(name, version);
-        if (form == null) throw new BusinessException("表单不存在", 404);
+        if (form == null) throw new NotFoundException("表单不存在");
         return ResponseMessage.ok(form);
     }
 

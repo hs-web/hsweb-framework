@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
 /**
@@ -20,12 +21,12 @@ public class SimpleHttpSessionManager extends AbstractHttpSessionManager {
     /**
      * httpSession存储器，sessionId:HttpSession
      */
-    private static final Map<String, HttpSession> sessionStorage = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<String, HttpSession> sessionStorage = new ConcurrentHashMap<>();
 
     /**
      * 用户ID与session管理存储器，userId:HttpSession
      */
-    private static final Map<String, HttpSession> userSessionStorage = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<String, HttpSession> userSessionStorage = new ConcurrentHashMap<>();
 
     @Override
     public Set<User> tryGetAllUser() {

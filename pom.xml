@@ -129,6 +129,26 @@
             </dependency>
             <dependency>
                 <groupId>org.hsweb</groupId>
+                <artifactId>hsweb-expands-request</artifactId>
+                <version>${hsweb.expands.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.hsweb</groupId>
+                <artifactId>hsweb-expands-shell</artifactId>
+                <version>${hsweb.expands.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.hsweb</groupId>
+                <artifactId>hsweb-expands-compress</artifactId>
+                <version>${hsweb.expands.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.hsweb</groupId>
+                <artifactId>hsweb-expands-template</artifactId>
+                <version>${hsweb.expands.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.hsweb</groupId>
                 <artifactId>hsweb-easy-orm</artifactId>
                 <version>${hsweb.ezorm.version}</version>
             </dependency>

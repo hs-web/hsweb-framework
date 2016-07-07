@@ -1,6 +1,10 @@
 package org.hsweb.web.controller.file;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import org.hsweb.commons.StringUtils;
+import org.hsweb.expands.compress.Compress;
+import org.hsweb.expands.compress.zip.ZIPWriter;
 import org.hsweb.web.bean.po.resource.Resources;
 import org.hsweb.web.core.authorize.annotation.Authorize;
 import org.hsweb.web.core.exception.NotFoundException;
@@ -62,6 +66,21 @@ public class FileController {
         mediaTypeMapper.put(".js", "application/javascript");
         mediaTypeMapper.put(".html", MediaType.TEXT_HTML_VALUE);
         mediaTypeMapper.put(".xml", MediaType.TEXT_XML_VALUE);
+    }
+
+    /**
+     * 构建zip
+     */
+    @RequestMapping(value = "/download-zip/{name:.+}", method = {RequestMethod.POST})
+    public void downloadZip(@PathVariable("name") String name,
+                            @RequestParam("data") String dataStr,
+                            HttpServletResponse response) throws Exception {
+        response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
+        response.setHeader("Content-disposition", "attachment;filename=" + URLEncoder.encode(name, "utf-8"));
+        ZIPWriter writer = Compress.zip();
+        List<Map<String, String>> data = (List) JSON.parseArray(dataStr, Map.class);
+        data.forEach(map -> writer.addTextFile(map.get("name"), map.get("text")));
+        writer.write(response.getOutputStream());
     }
 
     /**

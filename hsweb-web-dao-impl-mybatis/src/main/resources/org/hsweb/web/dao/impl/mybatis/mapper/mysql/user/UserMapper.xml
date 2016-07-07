@@ -33,7 +33,7 @@
         <include refid="BasicMapper.buildDeleteSql"/>
     </delete>
 
-    <update id="updatePassword" parameterType="User">
+    <update id="updatePassword" parameterType="org.hsweb.web.bean.po.user.User">
         update s_user set password=#{password,jdbcType=VARCHAR} where u_id = #{id}
     </update>
 
