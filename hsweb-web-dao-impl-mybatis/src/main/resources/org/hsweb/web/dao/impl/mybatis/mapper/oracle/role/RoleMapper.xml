@@ -17,7 +17,7 @@
         <bind name="resultMapId" value="'RoleResultMap'"/>
         <bind name="tableName" value="'s_role'"/>
     </sql>
-    <insert id="insert" parameterType="Role" >
+    <insert id="insert" parameterType="org.hsweb.web.bean.common.InsertParam" >
         <include refid="config"/>
         <include refid="BasicMapper.buildInsertSql"/>
     </insert>

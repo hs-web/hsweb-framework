@@ -23,7 +23,7 @@
         <bind name="tableName" value="'s_user'"/>
     </sql>
 
-    <insert id="insert" parameterType="User" >
+    <insert id="insert" parameterType="org.hsweb.web.bean.common.InsertParam" >
         <include refid="config"/>
         <include refid="BasicMapper.buildInsertSql"/>
     </insert>

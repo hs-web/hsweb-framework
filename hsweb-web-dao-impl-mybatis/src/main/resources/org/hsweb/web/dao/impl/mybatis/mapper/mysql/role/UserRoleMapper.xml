@@ -18,7 +18,7 @@
         <bind name="tableName" value="'s_user_role'"/>
     </sql>
 
-    <insert id="insert" parameterType="UserRole">
+    <insert id="insert" parameterType="org.hsweb.web.bean.common.InsertParam">
         <include refid="config"/>
         <include refid="BasicMapper.buildInsertSql"/>
     </insert>

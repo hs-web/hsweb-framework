@@ -19,7 +19,7 @@
         <bind name="tableName" value="'s_role_modules'"/>
     </sql>
 
-    <insert id="insert" parameterType="RoleModule">
+    <insert id="insert" parameterType="org.hsweb.web.bean.common.InsertParam">
         <include refid="config"/>
         <include refid="BasicMapper.buildInsertSql"/>
     </insert>
