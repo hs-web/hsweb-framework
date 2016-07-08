@@ -10,7 +10,7 @@
      <dependency>
         <groupId>org.hsweb</groupId>
         <artifactId>hsweb-web-dao-impl-mybatis</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.0.1-SNAPSHOT</version>
     </dependency>
 ```
 
@@ -39,13 +39,14 @@
             <bind name="tableName" value="'s_user'"/>
         </sql>
     
-        <insert id="insert" parameterType="User" >
+        <insert id="insert" parameterType="org.hsweb.web.bean.common.InsertParam" >
             <include refid="config"/>
             <include refid="BasicMapper.buildInsertSql"/>
         </insert>
     
         <delete id="delete" parameterType="org.hsweb.web.bean.common.DeleteParam">
-            delete from s_user where u_id=#{term.primaryKey}
+           <include refid="config"/>
+           <include refid="BasicMapper.buildDeleteSql"/>
         </delete>
     
         <update id="updatePassword" parameterType="User">
