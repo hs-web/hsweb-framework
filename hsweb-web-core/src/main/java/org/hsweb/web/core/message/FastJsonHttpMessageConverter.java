@@ -74,29 +74,29 @@ public class FastJsonHttpMessageConverter extends AbstractHttpMessageConverter<O
             }
         }
         byte[] bytes = baos.toByteArray();
-        if (clazz == String.class) return new String(bytes,charset);
+        if (clazz == String.class) return new String(bytes, charset);
         return JSON.parseObject(bytes, 0, bytes.length, charset.newDecoder(), clazz);
     }
 
     public String converter(Object obj) {
         if (obj instanceof String) return (String) obj;
         String text;
+        String callback = ThreadLocalUtils.get("jsonp-callback");
+        ThreadLocalUtils.remove("jsonp-callback");
         if (obj instanceof ResponseMessage) {
             ResponseMessage message = (ResponseMessage) obj;
             if (message.isSuccess() && message.isOnlyData())
                 obj = message.getData();
             text = JSON.toJSONString(obj, parseFilter(message), features);
-            String callback = ThreadLocalUtils.get("jsonp-callback");
-            ThreadLocalUtils.remove("jsonp-callback");
-            if (callback == null) message.getCallback();
-            if (!StringUtils.isNullOrEmpty(callback)) {
-                text = new StringBuilder()
-                        .append(callback)
-                        .append("(").append(text).append(")")
-                        .toString();
-            }
+            if (callback == null) callback = message.getCallback();
         } else {
             text = JSON.toJSONString(obj, features);
+        }
+        if (!StringUtils.isNullOrEmpty(callback)) {
+            text = new StringBuilder()
+                    .append(callback)
+                    .append("(").append(text).append(")")
+                    .toString();
         }
         return text;
     }
