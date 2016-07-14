@@ -13,10 +13,6 @@ import org.hsweb.expands.script.engine.DynamicScriptEngineFactory;
 
 import java.util.HashMap;
 import java.util.Map;
-
-/**
- * 基于groovy动态bean的校验器
- */
 @Component
 public class GroovyDycBeanValidatorFactory implements ValidatorFactory {
 
@@ -50,11 +46,7 @@ public class GroovyDycBeanValidatorFactory implements ValidatorFactory {
 
     @Override
     public Validator createValidator(TableMetaData metaData) {
-        Validator validator = base.get(metaData.getName());
-        if (validator == null) {
-            validator = initValidator(metaData);
-        }
-        return validator;
+        return initValidator(metaData);
     }
 
     /**
@@ -75,7 +67,7 @@ public class GroovyDycBeanValidatorFactory implements ValidatorFactory {
         for (FieldMetaData fieldMetaData : metaData.getFields()) {
             String typeName = simpleType.get(fieldMetaData.getJavaType());
             if (typeName == null) typeName = fieldMetaData.getJavaType().getName();
-            if (fieldMetaData.getValidator()==null|| fieldMetaData.getValidator().isEmpty()) continue;
+            if (fieldMetaData.getValidator() == null || fieldMetaData.getValidator().isEmpty()) continue;
             for (String ann : fieldMetaData.getValidator()) {
                 hasValidator = true;
                 script.append("\t@").append(ann).append("\n");
@@ -89,7 +81,7 @@ public class GroovyDycBeanValidatorFactory implements ValidatorFactory {
         for (FieldMetaData fieldMetaData : metaData.getFields()) {
             String typeName = simpleType.get(fieldMetaData.getJavaType());
             if (typeName == null) typeName = fieldMetaData.getJavaType().getName();
-            if (fieldMetaData.getValidator()==null||fieldMetaData.getValidator().isEmpty()) continue;
+            if (fieldMetaData.getValidator() == null || fieldMetaData.getValidator().isEmpty()) continue;
             script.append("public ")
                     .append(typeName).append(" get")
                     .append(StringUtils.toUpperCaseFirstOne(fieldMetaData.getName()))
