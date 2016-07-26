@@ -17,4 +17,8 @@
 
 # 使用
 参照:[hsweb-platform](https://github.com/hs-web/hsweb-platform)
-示例:[hsweb.me](http://hsweb.me/admin/index.html)
+示例:[hsweb.me](http://hsweb.me)
+
+# 许可
+
+[apache2.0](http://www.apache.org/licenses/LICENSE-2.0.html)
