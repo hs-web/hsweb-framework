@@ -1,3 +1,19 @@
+/*
+ * Copyright 2015-2016 https://github.com/hs-web
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.hsweb.web.controller.config;
 
 import com.alibaba.fastjson.JSON;
@@ -16,9 +32,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 系统配置控制器，继承自GenericController,使用rest+json。
- * 此功能将传配置文件放到数据库和缓存中，可动态修改配置。
- * Created by generator 2015-8-17 11:16:45
+ * 系统配置控制器.配置管理
+ *
+ * @author zhouhao
  */
 @RestController
 @RequestMapping(value = "/config")
@@ -97,20 +113,28 @@ public class ConfigController extends GenericController<Config, String> {
     }
 
     /**
-     * 获取一个配置的完整内容
+     * 获取一个配置的完整内容,map模式
+     * 格式:{key:value,key2:value2}
      *
      * @param name 配置名称
      * @return 配置内容
      */
     @RequestMapping(value = "/{name:.+}.map", method = RequestMethod.GET)
     @AccessLogger("根据配置名获取配置（map格式）")
-    public Object configInfo(@PathVariable("name") String name)  {
+    public Object configInfo(@PathVariable("name") String name) {
         return configService.get(name);
     }
 
+    /**
+     * 获取配置内容,array模式.
+     * 格式:[{key:key,value:value}....]
+     *
+     * @param name
+     * @return 配置内容
+     */
     @RequestMapping(value = "/{name:.+}.array", method = RequestMethod.GET)
     @AccessLogger("根据配置名获取配置(list格式)")
-    public Object listInfo(@PathVariable("name") String name)  {
+    public Object listInfo(@PathVariable("name") String name) {
         String content = configService.getContent(name);
         if (content == null) content = "[]";
         return content;
@@ -125,33 +149,33 @@ public class ConfigController extends GenericController<Config, String> {
      */
     @RequestMapping(value = {"/{name:.+}/{key:.+}"}, method = RequestMethod.GET)
     @AccessLogger("根据配置名和键获取配置")
-    public Object configInfo(@PathVariable("name") String name, @PathVariable("key") String key)  {
+    public Object configInfo(@PathVariable("name") String name, @PathVariable("key") String key) {
         return configService.get(name, key, "");
     }
 
     @Override
     @RequestMapping(value = "/{id:.+}", method = RequestMethod.GET)
-    public ResponseMessage info(@PathVariable("id") String id)  {
+    public ResponseMessage info(@PathVariable("id") String id) {
         return super.info(id);
     }
 
     @Override
     @Authorize(module = "config", action = "C")
-    public ResponseMessage add(@RequestBody Config object)  {
+    public ResponseMessage add(@RequestBody Config object) {
         return super.add(object);
     }
 
     @Override
     @Authorize(module = "config", action = "D")
     @RequestMapping(value = "/{id:.+}", method = RequestMethod.DELETE)
-    public ResponseMessage delete(@PathVariable("id") String id)  {
+    public ResponseMessage delete(@PathVariable("id") String id) {
         return super.delete(id);
     }
 
     @Override
     @Authorize(module = "config", action = "U")
     @RequestMapping(value = "/{id:.+}", method = RequestMethod.PUT)
-    public ResponseMessage update(@PathVariable("id") String id, @RequestBody Config object)  {
+    public ResponseMessage update(@PathVariable("id") String id, @RequestBody Config object) {
         return super.update(id, object);
     }
 }

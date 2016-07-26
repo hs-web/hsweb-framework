@@ -1,3 +1,19 @@
+/*
+ * Copyright 2015-2016 https://github.com/hs-web
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.hsweb.web.controller.module;
 
 import org.hsweb.web.bean.po.module.ModuleMeta;
@@ -22,7 +38,10 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 /**
- * Created by zhouhao on 16-5-10.
+ * 模板配置定义控制器，继承自{@link GenericController<ModuleMeta, String>}
+ *
+ * @author zhouhao
+ * @since 1.0
  */
 @RestController
 @RequestMapping("/module-meta")
@@ -36,8 +55,14 @@ public class ModuleMetaController extends GenericController<ModuleMeta, String> 
         return moduleMetaService;
     }
 
+    /**
+     * 查询当前用户持有制定key的所有模块配置定义信息
+     *
+     * @param key
+     * @return {@link ResponseMessage}
+     */
     @RequestMapping(value = "/{key}/own", method = RequestMethod.GET)
-    public ResponseMessage userModuleMeta(@PathVariable String key) throws Exception {
+    public ResponseMessage userModuleMeta(@PathVariable String key) {
         User user = WebUtil.getLoginUser();
         List<UserRole> roles = user.getUserRoles();
         String[] roleIdList = roles
