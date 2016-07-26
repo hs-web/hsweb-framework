@@ -31,6 +31,9 @@ public class Resources extends GenericPo<String> {
     //资源分类
     private String classified;
 
+    //文件大小
+    private long size;
+
     //状态
     private int status;
 
@@ -40,6 +43,15 @@ public class Resources extends GenericPo<String> {
 
     public void setClassified(String classified) {
         this.classified = classified;
+    }
+
+
+    public void setSize(long size) {
+        this.size = size;
+    }
+
+    public long getSize() {
+        return size;
     }
 
     /**

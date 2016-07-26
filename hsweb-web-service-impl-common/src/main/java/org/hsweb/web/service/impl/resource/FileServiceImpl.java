@@ -1,9 +1,5 @@
 package org.hsweb.web.service.impl.resource;
 
-/**
- * Created by 浩 on 2015-11-26 0026.
- */
-
 import org.apache.commons.codec.digest.DigestUtils;
 import org.hsweb.web.bean.po.resource.Resources;
 import org.hsweb.web.bean.po.user.User;
@@ -34,14 +30,14 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public InputStream readResources(String resourceId) throws Exception {
+    public InputStream readResources(String resourceId) throws IOException {
         Resources resources = resourcesService.selectByPk(resourceId);
         if (resources == null) throw new NotFoundException("文件不存在");
         return readResources(resources);
     }
 
     @Override
-    public InputStream readResources(Resources resources) throws Exception {
+    public InputStream readResources(Resources resources) throws IOException {
         String fileBasePath = getFileBasePath();
         File file = new File(fileBasePath.concat(resources.getPath().concat("/".concat(resources.getMd5()))));
         if (!file.canRead()) {
@@ -51,7 +47,7 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public void writeResources(Resources resources, OutputStream outputStream) throws Exception {
+    public void writeResources(Resources resources, OutputStream outputStream) throws IOException {
         try (InputStream inputStream = readResources(resources)) {
             byte b[] = new byte[2048 * 10];
             while ((inputStream.read(b)) != -1) {
@@ -61,7 +57,7 @@ public class FileServiceImpl implements FileService {
     }
 
     @Transactional(rollbackFor = Throwable.class)
-    public Resources saveFile(InputStream is, String fileName) throws Exception {
+    public Resources saveFile(InputStream is, String fileName) throws IOException {
         //配置中的文件上传根路径
         String fileBasePath = getFileBasePath();
         //文件存储的相对路径，以日期分隔，每天创建一个新的目录
@@ -73,12 +69,13 @@ public class FileServiceImpl implements FileService {
         String newName = MD5.encode(String.valueOf(System.nanoTime())); //临时文件名 ,纳秒的md5值
         String fileAbsName = absPath.concat("/").concat(newName);
         //try with resource
+        long fileLength = 0;
         try (BufferedInputStream in = new BufferedInputStream(is);
-             //写出文件
              BufferedOutputStream os = new BufferedOutputStream(new FileOutputStream(fileAbsName))) {
             byte[] buffer = new byte[2048 * 10];
             int len;
             while ((len = in.read(buffer)) != -1) {
+                fileLength+=len;
                 os.write(buffer, 0, len);
             }
             os.flush();
@@ -104,6 +101,7 @@ public class FileServiceImpl implements FileService {
         resources.setMd5(md5);
         resources.setCreateDate(new Date());
         resources.setType("file");
+        resources.setSize(fileLength);
         resources.setName(fileName);
         try {
             User user = WebUtil.getLoginUser();
@@ -115,7 +113,6 @@ public class FileServiceImpl implements FileService {
         } catch (Exception e) {
             resources.setCreatorId("1");
         }
-
         resourcesService.insert(resources);
         return resources;
     }

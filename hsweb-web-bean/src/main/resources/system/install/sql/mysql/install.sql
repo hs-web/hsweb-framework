@@ -113,6 +113,8 @@ CREATE TABLE `s_resources` (
   COMMENT 'md5校验值',
   `status`      INT(4)        NULL
   COMMENT '状态',
+  `size`        LONG          NULL
+  COMMENT '资源大小',
   `create_date` DATETIME      NOT NULL
   COMMENT '创建时间',
   `creator_id`  VARCHAR(256)  NOT NULL
