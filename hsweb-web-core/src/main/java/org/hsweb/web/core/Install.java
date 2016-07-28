@@ -82,9 +82,9 @@ public class Install {
         }
     }
 
-    protected void execInstallSql(InputStream sqlStream) {
+    protected void execInstallSql(InputStream sqlStream) throws UnsupportedEncodingException {
         String username = properties.getUsername();
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(sqlStream));
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(sqlStream,"utf-8"));
         List<String> sqlList = new ArrayList<>();
         SqlAppender tmp = new SqlAppender();
         bufferedReader.lines().forEach((line) -> {
