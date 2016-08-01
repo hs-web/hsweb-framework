@@ -26,7 +26,10 @@
 
 # 使用
 参照:[hsweb-platform](https://github.com/hs-web/hsweb-platform)
-示例:[hsweb.me](http://hsweb.me)测试用户:test (test2,test3,test4....) 密码:123456 
+
+# 演示
+1. 示例:[demo.hsweb.me](http://demo.hsweb.me)
+2. 测试用户:test (test2,test3,test4....) 密码:123456 
 
 # 许可
 
