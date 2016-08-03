@@ -32,5 +32,7 @@
 2. 测试用户:test (test2,test3,test4....) 密码:123456 
 
 # 许可
-
 [apache2.0](http://www.apache.org/licenses/LICENSE-2.0.html)
+
+# 鸣谢
+[jetbrains](https://www.jetbrains.com)提供的正版IDE授权
