@@ -25,14 +25,29 @@
 ```
 
 # 使用
-参照:[hsweb-platform](https://github.com/hs-web/hsweb-platform)
+1. 开发文档
+2. FAQ
 
 # 演示
 1. 示例:[demo.hsweb.me](http://demo.hsweb.me)
 2. 测试用户:test (test2,test3,test4....) 密码:123456 
+3. 演示项目源码:[hsweb-platform](https://github.com/hs-web/hsweb-platform)
 
 # 许可
 [apache2.0](http://www.apache.org/licenses/LICENSE-2.0.html)
 
 # 鸣谢
-[jetbrains](https://www.jetbrains.com)提供的正版IDE授权
+*按时间排序*
+
+|    组织&个人   | 方式         |
+| ------------- |:-------------:| 
+| [jetbrains.com](https://www.jetbrains.com)   | 提供的正版IDE授权            | 
+| [@杭州-smart](https://github.com/JetBrainZP) | 赞助: ￥150 (用于服务器升级) | 
+| [@北京-50%](https://github.com/longfeizheng) | 赞助: ￥50 (用于服务器升级)   | 
+| [@王乐](https://github.com/githubweili) | 赞助: ￥20 (用于服务器升级)   | 
+| [@杭州-依然](https://github.com/Gieey) | 赞助: ￥100 (用于服务器升级)   | 
+| [@西安-un](https://github.com/lw5826618) | 赞助: ￥50 (用于服务器升级)   | 
+| [@北京-下下](#) | 赞助: ￥250 (用于服务器升级)   | 
+
+
+
