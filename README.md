@@ -45,7 +45,7 @@
 | [@杭州-smart](https://github.com/JetBrainZP) | 赞助: ￥150 (用于服务器升级) | 
 | [@北京-50%](https://github.com/longfeizheng) | 赞助: ￥50 (用于服务器升级)   | 
 | [@王乐](https://github.com/githubweili) | 赞助: ￥20 (用于服务器升级)   | 
-| 匿名 | 赞助: ￥100 (用于服务器升级)   | 
+| [@天津-MR.Chang](https://github.com/changdaye) | 赞助: ￥100 (用于服务器升级)   | 
 | [@西安-un](https://github.com/lw5826618) | 赞助: ￥50 (用于服务器升级)   | 
 | [@重庆-下下](#) | 赞助: ￥250 (用于服务器升级)   | 
 
