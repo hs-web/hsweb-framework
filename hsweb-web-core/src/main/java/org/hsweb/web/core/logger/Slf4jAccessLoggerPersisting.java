@@ -20,7 +20,7 @@ public class Slf4jAccessLoggerPersisting implements AccessLoggerPersisting {
     @Override
     public void save(LoggerInfo loggerInfo) {
         if (fastJsonHttpMessageConverter == null)
-            logger.info(JSON.toJSONString(fastJsonHttpMessageConverter));
+            logger.info(JSON.toJSONString(loggerInfo));
         else
             logger.info(fastJsonHttpMessageConverter.converter(loggerInfo));
     }
