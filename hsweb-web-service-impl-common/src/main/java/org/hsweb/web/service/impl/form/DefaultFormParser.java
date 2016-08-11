@@ -109,6 +109,7 @@ public class DefaultFormParser implements FormParser {
         DynamicScriptEngine scriptEngine = DynamicScriptEngineFactory.getEngine("groovy");
         String meta = form.getMeta();
         TableMetaData metaData = new TableMetaData();
+        metaData.setProperty("version",form.getRelease());
         metaData.setName(form.getName());
         metaData.setComment(form.getRemark());
         JSONObject object = JSON.parseObject(meta);
@@ -180,8 +181,9 @@ public class DefaultFormParser implements FormParser {
                     fieldMeta.setProperty(key, value);
                 }
             });
-            //name为空的时候 不保持此字段
-            if (!"main".equals(id) && !StringUtils.isNullOrEmpty(fieldMeta.getName())) {
+            //name为空的时候 不保存此字段
+            if (!"main".equals(id)
+                    && !StringUtils.isNullOrEmpty(fieldMeta.getName())) {
                 initField(fieldMeta);
                 if (StringUtils.isNullOrEmpty(fieldMeta.getAlias()))
                     fieldMeta.setAlias(fieldMeta.getName());

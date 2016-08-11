@@ -2,6 +2,7 @@ package org.hsweb.web.service.resource;
 
 import org.hsweb.web.bean.po.resource.Resources;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -18,13 +19,13 @@ public interface FileService {
      * @return 生成的资源对象
      * @throws Exception 保存失败的异常信息
      */
-    Resources saveFile(InputStream is, String fileName) throws Exception;
+    Resources saveFile(InputStream is, String fileName) throws IOException;
 
-    InputStream readResources(Resources resources) throws Exception;
+    InputStream readResources(Resources resources) throws IOException;
 
-    InputStream readResources(String resourceId) throws Exception;
+    InputStream readResources(String resourceId) throws IOException;
 
-    void writeResources(Resources resources, OutputStream outputStream) throws Exception;
+    void writeResources(Resources resources, OutputStream outputStream) throws IOException;
 
     String getFileBasePath();
 

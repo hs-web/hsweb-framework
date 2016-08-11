@@ -2,6 +2,7 @@ package org.hsweb.web.controller;
 
 import org.hsweb.web.core.exception.BusinessException;
 import org.hsweb.web.core.message.ResponseMessage;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ControllerAdvice;

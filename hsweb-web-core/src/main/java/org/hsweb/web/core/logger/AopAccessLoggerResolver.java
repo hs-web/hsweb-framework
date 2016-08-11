@@ -6,6 +6,7 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.hsweb.commons.DateTimeUtils;
 import org.hsweb.web.bean.po.logger.LoggerInfo;
 import org.hsweb.web.core.logger.annotation.AccessLogger;
+import org.hsweb.web.core.utils.AopUtils;
 import org.hsweb.web.core.utils.WebUtil;
 import org.hsweb.commons.ClassUtils;
 import org.hsweb.commons.MD5;
@@ -31,8 +32,7 @@ public class AopAccessLoggerResolver {
         StringBuilder describe = new StringBuilder();
         MethodSignature methodSignature = ((MethodSignature) pjp.getSignature());
         Method method = methodSignature.getMethod();
-        String methodName = getMethodName(pjp);
-
+        String methodName = AopUtils.getMethodName(pjp);
         AccessLogger classAnnotation = ClassUtils.getAnnotation(target, AccessLogger.class);
         AccessLogger methodAnnotation = ClassUtils.getAnnotation(method, AccessLogger.class);
         if (classAnnotation != null) {
@@ -81,16 +81,6 @@ public class AopAccessLoggerResolver {
         return logInfo;
     }
 
-    protected String getMethodName(ProceedingJoinPoint pjp) {
-        StringBuilder methodName = new StringBuilder(pjp.getSignature().getName()).append("(");
-        MethodSignature signature = (MethodSignature) pjp.getSignature();
-        String[] names = signature.getParameterNames();
-        Class[] args = signature.getParameterTypes();
-        for (int i = 0, len = args.length; i < len; i++) {
-            if (i != 0) methodName.append(",");
-            methodName.append(args[i].getSimpleName()).append(" ").append(names[i]);
-        }
-        return methodName.append(")").toString();
-    }
+
 
 }

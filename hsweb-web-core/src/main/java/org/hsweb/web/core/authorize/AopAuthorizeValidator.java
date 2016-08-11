@@ -7,6 +7,7 @@ import org.hsweb.web.core.authorize.validator.SimpleAuthorizeValidator;
 import org.hsweb.web.bean.po.user.User;
 import org.hsweb.web.core.exception.AuthorizeException;
 import org.hsweb.web.core.session.HttpSessionManager;
+import org.hsweb.web.core.utils.AopUtils;
 import org.hsweb.web.core.utils.WebUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.hsweb.commons.ClassUtils;
@@ -27,7 +28,7 @@ public class AopAuthorizeValidator extends SimpleAuthorizeValidator {
     protected ConcurrentMap<String, AuthorizeValidatorConfig> configCache = new ConcurrentHashMap<>();
 
     protected AuthorizeValidatorConfig getConfig(ProceedingJoinPoint pjp) {
-        String cacheKey = StringUtils.concat(pjp.getTarget().getClass().getName(), ".", getMethodName(pjp));
+        String cacheKey = StringUtils.concat(pjp.getTarget().getClass().getName(), ".", AopUtils.getMethodName(pjp));
         AuthorizeValidatorConfig config = configCache.get(cacheKey);
         if (config == null) {
             config = this.createConfig();
@@ -76,15 +77,4 @@ public class AopAuthorizeValidator extends SimpleAuthorizeValidator {
         return validate(user, param, config);
     }
 
-    protected String getMethodName(ProceedingJoinPoint pjp) {
-        StringBuilder methodName = new StringBuilder(pjp.getSignature().getName()).append("(");
-        MethodSignature signature = (MethodSignature) pjp.getSignature();
-        String[] names = signature.getParameterNames();
-        Class[] args = signature.getParameterTypes();
-        for (int i = 0, len = args.length; i < len; i++) {
-            if (i != 0) methodName.append(",");
-            methodName.append(args[i].getSimpleName()).append(" ").append(names[i]);
-        }
-        return methodName.append(")").toString();
-    }
 }

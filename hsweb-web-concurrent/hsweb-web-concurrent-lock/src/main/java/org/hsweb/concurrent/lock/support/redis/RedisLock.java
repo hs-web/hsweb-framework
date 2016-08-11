@@ -33,6 +33,10 @@ public class RedisLock implements Lock {
         lockValue = new byte[0];
     }
 
+    public void setWaitTime(long waitTime) {
+        this.waitTime = waitTime;
+    }
+
     @Override
     public void lock() {
         redisTemplate.execute((RedisCallback<Boolean>) connection -> {

@@ -18,7 +18,6 @@ public class RedisReadWriteLock implements ReadWriteLock {
     static final long DEFAULT_EXPIRE = 60;
     private ReadLock readLock;
     private WriteLock writeLock;
-    private String key;
     private long lockKeyExpireTime = DEFAULT_EXPIRE;
     private long waitTime = 30;
     protected byte[] lockValue;
@@ -29,7 +28,6 @@ public class RedisReadWriteLock implements ReadWriteLock {
     public RedisReadWriteLock(String key, RedisTemplate redisTemplate) {
         Assert.notNull(key);
         Assert.notNull(redisTemplate);
-        this.key = key;
         this.redisTemplate = redisTemplate;
         readLock = new ReadLock();
         writeLock = new WriteLock();

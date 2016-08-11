@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 https://github.com/hs-web
+ * Copyright 2015-2016 http://hsweb.me
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
 
 package org.hsweb.web.controller.form;
 
+import org.hsweb.ezorm.meta.FieldMetaData;
+import org.hsweb.ezorm.meta.TableMetaData;
+import org.hsweb.ezorm.meta.expand.OptionConverter;
 import org.hsweb.web.bean.common.QueryParam;
 import org.hsweb.web.bean.common.UpdateMapParam;
 import org.hsweb.web.bean.po.form.Form;
@@ -28,6 +31,7 @@ import org.hsweb.web.core.message.ResponseMessage;
 import org.hsweb.web.service.form.DynamicFormService;
 import org.hsweb.web.service.form.FormService;
 import org.hsweb.web.service.resource.FileService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -123,6 +127,24 @@ public class DynamicFormController {
             data = dynamicFormService.selectPager(name, param);
         return ResponseMessage.ok(data)
                 .onlyData();
+    }
+
+
+    /**
+     * 根据表单名称和查询参数,查询表单的数据数量
+     *
+     * @param name  表单名称
+     * @param param 查询参数{@link QueryParam}
+     * @return 查询结果
+     * @throws SQLException      执行查询sql错误
+     * @throws NotFoundException 表单不存在或在未发布
+     */
+    @RequestMapping(value = "/{name}/total", method = RequestMethod.GET)
+    @AccessLogger("查看数据数量")
+    @Authorize(expression = "#dynamicFormAuthorizeValidator.validate(#name,#user,#paramsMap,'R')")
+    public ResponseMessage total(@PathVariable("name") String name,
+                                 QueryParam param) throws SQLException {
+        return ResponseMessage.ok(dynamicFormService.total(name, param));
     }
 
     /**
@@ -249,6 +271,42 @@ public class DynamicFormController {
             }
         }
         return ResponseMessage.ok(result);
+    }
+
+    /**
+     * 数据字典映射:将指定的数据映射为数据字典对应的数据。<br>
+     * 如: 表单{name}的字段{field}的字典配置为 [{"男":"1"},{"女":"0"}];<br>
+     * 传入参数type=1,data=男,得到结果 {data:"1"}。传入参数 type!=1,data=1.得到结果{data:"男"}
+     *
+     * @param name  表单名称
+     * @param field 字段
+     * @param data  要映射的数据
+     * @param type  映射的类型 ，1或其他值，当为1时，将key映射为value，其他则将value映射为key。
+     * @return 映射结果
+     * @throws NotFoundException 表单或字段不存在
+     */
+    @RequestMapping(value = "/{name}/{field}/{type}/{data:.+}")
+    @AccessLogger("数据字典映射")
+    @Authorize
+    public ResponseMessage mapperOption(@PathVariable("name") String name,
+                                        @PathVariable("field") String field,
+                                        @PathVariable("data") String data,
+                                        @PathVariable("type") String type) {
+        try {
+            TableMetaData metaData = dynamicFormService.getDefaultDatabase().getTable(name).getMeta();
+            FieldMetaData fieldMetaData = metaData.findFieldByName(field);
+            if (fieldMetaData == null) throw new NullPointerException();
+            OptionConverter converter = fieldMetaData.getOptionConverter();
+            if (converter == null) return ResponseMessage.ok(data);
+            switch (type) {
+                case "1":
+                    return ResponseMessage.ok(converter.converterData(data));
+                default:
+                    return ResponseMessage.ok(converter.converterValue(data));
+            }
+        } catch (NullPointerException e) {
+            throw new NotFoundException("字段不存在");
+        }
     }
 
 }

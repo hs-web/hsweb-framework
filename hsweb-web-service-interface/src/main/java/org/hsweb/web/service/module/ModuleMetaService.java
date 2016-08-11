@@ -11,13 +11,13 @@ import java.util.List;
  */
 public interface ModuleMetaService extends GenericService<ModuleMeta, String> {
 
-    default List<ModuleMeta> selectByKeyAndRoleId(String key, String... roleId) throws Exception {
+    default List<ModuleMeta> selectByKeyAndRoleId(String key, String... roleId) {
         QueryParam queryParam = new QueryParam();
         queryParam.where("key", key).and("role_id$IN", roleId);
         return this.select(queryParam);
     }
 
-    default List<ModuleMeta> selectByKey(String key) throws Exception {
+    default List<ModuleMeta> selectByKey(String key) {
         QueryParam queryParam = new QueryParam();
         queryParam.where("key", key);
         return this.select(queryParam);

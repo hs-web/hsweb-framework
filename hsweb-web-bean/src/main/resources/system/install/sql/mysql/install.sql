@@ -23,7 +23,8 @@ CREATE TABLE `s_config` (
   `update_date`   DATETIME
   COMMENT '修改日期'
 );
-ALTER TABLE `s_config` COMMENT '系统配置文件表';
+ALTER TABLE `s_config`
+  COMMENT '系统配置文件表';
 CREATE TABLE `s_form` (
   `u_id`          VARCHAR(32)  NOT NULL PRIMARY KEY
   COMMENT 'uid',
@@ -42,7 +43,8 @@ CREATE TABLE `s_form` (
   `update_date`   DATETIME COMMENT '修改日期',
   `remark`        VARCHAR(200)
 );
-ALTER TABLE `s_form` COMMENT '动态表单';
+ALTER TABLE `s_form`
+  COMMENT '动态表单';
 CREATE TABLE `s_template` (
   `u_id`          VARCHAR(32)  NOT NULL PRIMARY KEY
   COMMENT 'uid',
@@ -61,7 +63,8 @@ CREATE TABLE `s_template` (
   `using`         TINYINT COMMENT '是否使用中',
   `remark`        VARCHAR(200)
 );
-ALTER TABLE `s_template` COMMENT '模板';
+ALTER TABLE `s_template`
+  COMMENT '模板';
 CREATE TABLE `s_modules` (
   `u_id`       VARCHAR(32)   NOT NULL PRIMARY KEY
   COMMENT 'uid',
@@ -82,7 +85,8 @@ CREATE TABLE `s_modules` (
   `sort_index` INT(32)       NOT NULL
   COMMENT '排序'
 );
-ALTER TABLE `s_modules` COMMENT '系统模块';
+ALTER TABLE `s_modules`
+  COMMENT '系统模块';
 CREATE TABLE `s_module_meta` (
   `u_id`      VARCHAR(32)   NOT NULL PRIMARY KEY
   COMMENT 'uid',
@@ -99,7 +103,8 @@ CREATE TABLE `s_module_meta` (
   `meta`      TEXT          NULL
   COMMENT '定义内容'
 );
-ALTER TABLE `s_modules` COMMENT '系统模块配置';
+ALTER TABLE `s_modules`
+  COMMENT '系统模块配置';
 CREATE TABLE `s_resources` (
   `u_id`        VARCHAR(32)   NOT NULL PRIMARY KEY
   COMMENT 'uid',
@@ -120,7 +125,8 @@ CREATE TABLE `s_resources` (
   `creator_id`  VARCHAR(256)  NOT NULL
   COMMENT '创建人'
 );
-ALTER TABLE `s_resources` COMMENT '资源表';
+ALTER TABLE `s_resources`
+  COMMENT '资源表';
 CREATE TABLE `s_classified` (
   `u_id`       VARCHAR(32)   NOT NULL PRIMARY KEY
   COMMENT 'uid',
@@ -137,7 +143,8 @@ CREATE TABLE `s_classified` (
   `sort_index` INT           NOT NULL
   COMMENT '排序'
 );
-ALTER TABLE `s_resources` COMMENT '资源表';
+ALTER TABLE `s_resources`
+  COMMENT '资源表';
 CREATE TABLE `s_role` (
   `u_id`   VARCHAR(32)  NOT NULL PRIMARY KEY
   COMMENT 'uid',
@@ -148,7 +155,8 @@ CREATE TABLE `s_role` (
   `remark` VARCHAR(512) NULL
   COMMENT '备注'
 );
-ALTER TABLE `s_role` COMMENT '角色表';
+ALTER TABLE `s_role`
+  COMMENT '角色表';
 CREATE TABLE `s_role_modules` (
   `u_id`      VARCHAR(32)  NOT NULL PRIMARY KEY
   COMMENT 'uid',
@@ -159,7 +167,8 @@ CREATE TABLE `s_role_modules` (
   `actions`   TEXT         NULL
   COMMENT '可操作权限'
 );
-ALTER TABLE `s_role_modules` COMMENT '角色模块绑定表';
+ALTER TABLE `s_role_modules`
+  COMMENT '角色模块绑定表';
 CREATE TABLE `s_script` (
   `u_id`          VARCHAR(32)   NOT NULL PRIMARY KEY
   COMMENT 'uid',
@@ -176,7 +185,8 @@ CREATE TABLE `s_script` (
   `status`        INT(4)        NULL
   COMMENT '状态'
 );
-ALTER TABLE `s_script` COMMENT '脚本';
+ALTER TABLE `s_script`
+  COMMENT '脚本';
 CREATE TABLE `s_user` (
   `u_id`        VARCHAR(32)  NOT NULL PRIMARY KEY
   COMMENT 'ID',
@@ -197,7 +207,8 @@ CREATE TABLE `s_user` (
   `update_date` DATETIME     NULL
   COMMENT '修改日期'
 );
-ALTER TABLE `s_user` COMMENT '用户表';
+ALTER TABLE `s_user`
+  COMMENT '用户表';
 CREATE TABLE `s_user_role` (
   `u_id`    VARCHAR(32)  NOT NULL PRIMARY KEY
   COMMENT 'UID',
@@ -206,10 +217,11 @@ CREATE TABLE `s_user_role` (
   `role_id` VARCHAR(256) NOT NULL
   COMMENT '角色ID'
 );
-ALTER TABLE `s_user_role` COMMENT '用户角色关联表';
+ALTER TABLE `s_user_role`
+  COMMENT '用户角色关联表';
 CREATE TABLE s_history
 (
-  `u_id`              VARCHAR(32) NOT NULL
+  `u_id`              VARCHAR(32) NOT NULL PRIMARY KEY
   COMMENT 'UID',
   `type`              VARCHAR(64) NOT NULL
   COMMENT '类型',
@@ -222,4 +234,23 @@ CREATE TABLE s_history
   COMMENT '创建日期',
   `creator_id`        VARCHAR(32) COMMENT '创建人'
 );
-ALTER TABLE `s_history` COMMENT '操作记录表';
+ALTER TABLE `s_history`
+  COMMENT '操作记录表';
+
+CREATE TABLE s_query_plan
+(
+  `u_id`        VARCHAR(32)  NOT NULL PRIMARY KEY
+  COMMENT 'UID',
+  `name`        VARCHAR(256) NOT NULL
+  COMMENT '名称',
+  `type`        VARCHAR(256) NOT NULL
+  COMMENT '类型',
+  `CONFIG`      TEXT COMMENT '方案配置内容',
+  `SHARING`     TINYINT COMMENT '是否共享',
+  `CREATOR_ID`  VARCHAR(32)  NOT NULL
+  COMMENT '创建人ID',
+  `CREATE_DATE` DATE         NOT NULL
+  COMMENT '创建日期'
+);
+ALTER TABLE `s_query_plan`
+  COMMENT '查询方案';

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 https://github.com/hs-web
+ * Copyright 2015-2016 http://hsweb.me
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,10 @@
 package org.hsweb.web.controller;
 
 import com.alibaba.fastjson.JSON;
-import org.hsweb.web.core.authorize.annotation.Authorize;
+import org.hsweb.commons.ClassUtils;
 import org.hsweb.web.bean.common.QueryParam;
 import org.hsweb.web.bean.po.GenericPo;
+import org.hsweb.web.core.authorize.annotation.Authorize;
 import org.hsweb.web.core.exception.BusinessException;
 import org.hsweb.web.core.exception.NotFoundException;
 import org.hsweb.web.core.logger.annotation.AccessLogger;
@@ -29,11 +30,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.hsweb.commons.ClassUtils;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * 通用控制器,此控制器实现了通用的增删改查功能
@@ -134,7 +132,7 @@ public abstract class GenericController<PO, PK> {
     @AccessLogger("新增")
     @Authorize(action = "C")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseMessage add(@RequestBody(required = true) PO object) {
+    public ResponseMessage add(@RequestBody PO object) {
         PK pk = getService().insert(object);
         return ResponseMessage.created(pk);
     }
@@ -167,7 +165,7 @@ public abstract class GenericController<PO, PK> {
     @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
     @AccessLogger("修改")
     @Authorize(action = "U")
-    public ResponseMessage update(@PathVariable("id") PK id, @RequestBody(required = true) PO object) {
+    public ResponseMessage update(@PathVariable("id") PK id, @RequestBody PO object) {
         PO old = getService().selectByPk(id);
         assertFound(old, "data is not found!");
         if (object instanceof GenericPo) {
@@ -187,7 +185,7 @@ public abstract class GenericController<PO, PK> {
     @RequestMapping(method = RequestMethod.PUT)
     @AccessLogger("批量修改")
     @Authorize(action = "U")
-    public ResponseMessage update(@RequestBody(required = true) String json) {
+    public ResponseMessage update(@RequestBody String json) {
         int number;
         if (json.startsWith("[")) {
             number = getService().update(JSON.parseArray(json, getPOType()));

@@ -9,7 +9,6 @@ import java.util.List;
 /**
  * 通用Service。继承了通用mapper的常用增删改查方法
  * <p>
- * Created by zh.sqy@qq.com on 2015-07-20 0020.
  */
 public interface GenericService<Po, Pk> {
 

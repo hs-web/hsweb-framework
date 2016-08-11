@@ -4,6 +4,7 @@ package org.hsweb.web.bean.po;
 import org.hsweb.commons.MD5;
 
 import java.io.Serializable;
+import java.lang.reflect.Field;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -12,7 +13,7 @@ import java.util.UUID;
  * 通用的PO对象，实现基本的属性和方法。新建的PO都应继承该类
  * Created by 浩 on 2015-07-20 0020.
  */
-public class GenericPo<PK> implements Serializable {
+public class GenericPo<PK> implements Serializable, Cloneable {
     private static final long serialVersionUID = 9197157871004374522L;
     /**
      * 主键
@@ -71,5 +72,14 @@ public class GenericPo<PK> implements Serializable {
 
     public void setProperties(Map<String, Object> properties) {
         this.properties = properties;
+    }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        Field[] fields = this.getClass().getDeclaredFields();
+        for (int i = 0; i < fields.length; i++) {
+            
+        }
+        return super.clone();
     }
 }

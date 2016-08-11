@@ -39,7 +39,7 @@ public class CacheDraftService implements DraftService {
         if (wrapper == null) {
             drafts = new LinkedHashMap<>();
         } else {
-            drafts = ((Map) wrapper.get());
+            drafts = ((Map<String, Draft>) wrapper.get());
         }
         drafts.put(draft.getId(), draft);
         cache.put(key, drafts);
@@ -51,7 +51,7 @@ public class CacheDraftService implements DraftService {
         Cache cache = cacheManager.getCache(cacheKey + userId);
         Cache.ValueWrapper wrapper = cache.get(key);
         if (wrapper != null) {
-            return new ArrayList<>(((Map) wrapper.get()).values());
+            return new ArrayList<>(((Map<String, Draft>) wrapper.get()).values());
         }
         return new ArrayList<>();
     }
@@ -61,7 +61,7 @@ public class CacheDraftService implements DraftService {
         Cache cache = cacheManager.getCache(cacheKey + userId);
         Cache.ValueWrapper wrapper = cache.get(key);
         if (wrapper != null) {
-            Map<String, Draft> drafts = ((Map) wrapper.get());
+            Map<String, Draft> drafts = ((Map<String, Draft>) wrapper.get());
             drafts.remove(id);
             cache.put(key, drafts);
             return true;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 https://github.com/hs-web
+ * Copyright 2015-2016 http://hsweb.me
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,8 +110,7 @@ public class AuthorizeController {
     @Authorize
     public ResponseMessage onlineInfo() {
         return ResponseMessage.ok(httpSessionManager.tryGetAllUser())
-                .include(User.class, "id", "username", "name", "phone", "email")
-                .exclude(User.class, "password");
+                .include(User.class, "id", "username", "name", "phone", "email");
     }
 
     /**

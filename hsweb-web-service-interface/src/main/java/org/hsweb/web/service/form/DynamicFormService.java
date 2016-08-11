@@ -34,6 +34,8 @@ public interface DynamicFormService {
 
     String saveOrUpdate(String name, Map<String, Object> map) throws SQLException;
 
+    String saveOrUpdate(String name, List<Map<String, Object>> map) throws SQLException;
+
     int delete(String name, DeleteParam param) throws SQLException;
 
     boolean deleteByPk(String name, String pk) throws SQLException;

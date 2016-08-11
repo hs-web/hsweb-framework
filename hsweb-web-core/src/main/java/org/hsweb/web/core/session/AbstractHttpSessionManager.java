@@ -7,9 +7,6 @@ import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by zhouhao on 16-6-2.
- */
 public abstract class AbstractHttpSessionManager implements HttpSessionManager {
 
     private List<HttpSessionManagerListener> listeners = new ArrayList<>();

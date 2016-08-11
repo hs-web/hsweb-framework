@@ -51,9 +51,8 @@
 
     <select id="selectLatestList" parameterType="org.hsweb.web.bean.common.QueryParam" resultMap="FormResultMap">
         <include refid="config"/>
-        <!--定义字段配置-->
-        <bind name="tableName" value="'t2'"/>
         <!--定义表名-->
+        <bind name="tableName" value="'t2'"/>
         select
         <!--动态生成要查询的字段-->
         <include refid="BasicMapper.buildSelectField"/>

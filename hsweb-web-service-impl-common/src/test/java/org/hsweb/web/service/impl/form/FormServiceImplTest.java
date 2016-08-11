@@ -1,15 +1,14 @@
 package org.hsweb.web.service.impl.form;
 
-import org.hsweb.commons.file.FileUtils;
 import org.hsweb.ezorm.executor.SqlExecutor;
 import org.hsweb.ezorm.run.Database;
 import org.hsweb.ezorm.run.Table;
-import org.hsweb.web.core.authorize.ExpressionScopeBean;
 import org.hsweb.web.bean.po.form.Form;
+import org.hsweb.web.core.authorize.ExpressionScopeBean;
+import org.hsweb.web.core.utils.RandomUtil;
 import org.hsweb.web.service.form.DynamicFormService;
 import org.hsweb.web.service.form.FormService;
 import org.hsweb.web.service.impl.AbstractTestCase;
-import org.hsweb.web.core.utils.RandomUtil;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -103,6 +102,7 @@ public class FormServiceImplTest extends AbstractTestCase {
 
         Table<Map<String, Object>> table = dataBase.getTable("test_form");
         table.createUpdate().set("name", "张三").where("u_id", "test").exec();
+
         Map<String, Object> data = table.createQuery().where("name$LIKE", "张三").single();
         Assert.assertEquals("张三", data.get("name"));
     }

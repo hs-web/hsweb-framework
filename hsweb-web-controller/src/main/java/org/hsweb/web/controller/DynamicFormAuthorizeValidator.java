@@ -9,5 +9,4 @@ import java.util.Map;
  */
 public interface DynamicFormAuthorizeValidator {
     boolean validate(String formName, User user,Map<String,Object> params, String... actions);
-
 }
