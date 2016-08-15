@@ -17,7 +17,13 @@ public interface AuthorizeValidatorConfig {
     AuthorizeValidatorConfig setMod(Authorize.MOD mod);
 
     AuthorizeValidatorConfig addExpression(String expression, String language);
+
+    AuthorizeValidatorConfig setApiSupport(boolean apiSupport);
+
+    boolean isApiSupport();
+
     boolean isEmpty();
+
     default AuthorizeValidatorConfig addAnnotation(Set<Authorize> authorizes) {
         Set<String> modules = new LinkedHashSet<>();
         Set<String> roles = new LinkedHashSet<>();
@@ -28,6 +34,7 @@ public interface AuthorizeValidatorConfig {
             actions.addAll(Arrays.asList(tmp.action()));
             setMod(tmp.mod());
             addExpression(tmp.expression(), tmp.expressionLanguage());
+            setApiSupport(tmp.api());
         });
         setActions(actions).setModules(modules).setRoles(roles);
         return this;
