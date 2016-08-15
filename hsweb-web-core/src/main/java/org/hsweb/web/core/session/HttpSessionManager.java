@@ -7,6 +7,8 @@ import java.util.Set;
 
 public interface HttpSessionManager {
 
+    HttpSession getSessionBySessionId(String sessionId);
+
     /**
      * 根据登陆用户的ID 获取SessionId
      *

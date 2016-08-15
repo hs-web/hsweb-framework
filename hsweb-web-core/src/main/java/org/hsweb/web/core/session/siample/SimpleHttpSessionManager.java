@@ -29,6 +29,11 @@ public class SimpleHttpSessionManager extends AbstractHttpSessionManager {
     private static final ConcurrentMap<String, HttpSession> userSessionStorage = new ConcurrentHashMap<>();
 
     @Override
+    public HttpSession getSessionBySessionId(String sessionId) {
+        return sessionStorage.get(sessionId);
+    }
+
+    @Override
     public Set<User> tryGetAllUser() {
         return userSessionStorage.values().stream().map(httpSession -> (User) httpSession.getAttribute("user"))
                 .filter(user -> user != null).collect(Collectors.toSet());

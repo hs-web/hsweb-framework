@@ -57,6 +57,13 @@ public class RedisHttpSessionManager extends AbstractHttpSessionManager {
     }
 
     @Override
+    public HttpSession getSessionBySessionId(String sessionId) {
+        ExpiringSession redisSession = redisOperationsSessionRepository.getSession(sessionId);
+        if(redisSession==null)return null;
+        return new HttpSessionWrapper(redisSession);
+    }
+
+    @Override
     public void removeUser(String userId) {
         sessionRedisTemplate.execute((RedisCallback) connection -> {
             String key = "http.session.user:" + userId;
