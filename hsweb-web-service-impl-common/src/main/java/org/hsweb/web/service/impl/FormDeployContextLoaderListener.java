@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 
 @Component
-public class FromDeployContextLoaderListener implements ApplicationListener<ContextRefreshedEvent> {
+public class FormDeployContextLoaderListener implements ApplicationListener<ContextRefreshedEvent> {
     @Resource
     private FormService formService;
     @Resource
