@@ -24,7 +24,7 @@ public class FormDeployContextLoaderListener implements ApplicationListener<Cont
     public void onApplicationEvent(ContextRefreshedEvent event) {
         if (event.getApplicationContext().getParent() != null) return;
         QueryParam param = new QueryParam();
-        param.where("using", 1);
+        param.where("using", 1).noPaging();
         try {
             formService.select(param).forEach(form -> {
                 try {
