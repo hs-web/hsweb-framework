@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.hsweb.commons.ClassUtils;
 import org.hsweb.commons.StringUtils;
 
+import javax.servlet.http.HttpSession;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -63,7 +64,9 @@ public class AopAuthorizeValidator extends SimpleAuthorizeValidator {
     public boolean validate(ProceedingJoinPoint pjp) {
         AuthorizeValidatorConfig config = getConfig(pjp);
         if (config == null) return true;
-        User user = httpSessionManager.getUserBySessionId(WebUtil.getHttpServletRequest().getSession().getId());
+        HttpSession session = WebUtil.getHttpServletRequest().getSession(false);
+        if (session == null) throw new AuthorizeException("未登录", 401);
+        User user = httpSessionManager.getUserBySessionId(session.getId());
         if (user == null) throw new AuthorizeException("未登录", 401);
         if (config.isEmpty()) return true;
         Map<String, Object> param = new LinkedHashMap<>();
