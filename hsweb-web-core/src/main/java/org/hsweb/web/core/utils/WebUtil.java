@@ -60,7 +60,9 @@ public class WebUtil {
      */
     public static User getLoginUser(HttpServletRequest request) {
         if (request == null) return null;
-        return getLoginUser(request.getSession());
+        HttpSession session = request.getSession(false);
+        if (session == null) return null;
+        return getLoginUser(session);
     }
 
     public static Map<String, String> getHeaders(HttpServletRequest request) {
