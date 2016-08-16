@@ -36,6 +36,11 @@
 # 许可
 [apache2.0](http://www.apache.org/licenses/LICENSE-2.0.html)
 
+# 加入hsweb
+<a target="_blank" href="http://shang.qq.com/wpa/qunwpa?idkey=3d66b5dd14991d7645af694e7649b373f3a9ce1216131094c78cb2348d542c41">
+<img border="0" src="http://pub.idqqimg.com/wpa/images/group.png" alt="hsweb.me" title="hsweb.me">515649185
+</a>
+
 # 鸣谢
 *按时间排序*
 
