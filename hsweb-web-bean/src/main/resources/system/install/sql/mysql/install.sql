@@ -249,7 +249,7 @@ CREATE TABLE s_query_plan
   `SHARING`     TINYINT COMMENT '是否共享',
   `CREATOR_ID`  VARCHAR(32)  NOT NULL
   COMMENT '创建人ID',
-  `CREATE_DATE` DATE         NOT NULL
+  `CREATE_DATE` DATETIME         NOT NULL
   COMMENT '创建日期'
 );
 ALTER TABLE `s_query_plan`
