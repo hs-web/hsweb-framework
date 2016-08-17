@@ -70,8 +70,9 @@ public abstract class AbstractServiceImpl<Po, PK> implements GenericService<Po, 
                     insertData.add(po);
                     pkList.add(primaryKey);
                 } catch (ValidationException e) {
-                    if (!skipFail) throw e;
-                    else if (logger.isWarnEnabled()) {
+                    if (!skipFail) {
+                        throw e;
+                    } else if (logger.isWarnEnabled()) {
                         logger.warn("data validate fail:{}", e);
                     }
                 }
@@ -139,13 +140,15 @@ public abstract class AbstractServiceImpl<Po, PK> implements GenericService<Po, 
     }
 
     protected void assertNotNull(Object po, String message) {
-        if (po == null) throw new NotFoundException(message);
+        if (po == null) {
+            throw new NotFoundException(message);
+        }
     }
 
     protected void tryValidPo(Po data) {
         Set<ConstraintViolation<Object>> set = validator.validate(data);
         ValidResults results = new ValidResults();
-        if (set.size() != 0) {
+        if (set.isEmpty()) {
             for (ConstraintViolation<Object> violation : set) {
                 results.addResult(violation.getPropertyPath().toString(), violation.getMessage());
             }
