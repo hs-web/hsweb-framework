@@ -19,6 +19,7 @@
         <module>hsweb-web-workflow</module>
         <module>hsweb-web-concurrent</module>
         <module>hsweb-web-crawler</module>
+        <module>hsweb-web-oauth2</module>
     </modules>
 
     <properties>
@@ -112,6 +113,45 @@
 
     <dependencyManagement>
         <dependencies>
+
+            <!--oauth2-->
+            <dependency>
+                <groupId>org.apache.oltu.oauth2</groupId>
+                <artifactId>org.apache.oltu.oauth2.authzserver</artifactId>
+                <version>1.0.2</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.hsweb</groupId>
+                <artifactId>hsweb-web-oauth2-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.hsweb</groupId>
+                <artifactId>hsweb-web-oauth2-mybatis</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.hsweb</groupId>
+                <artifactId>hsweb-web-oauth2-simple</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.hsweb</groupId>
+                <artifactId>hsweb-web-oauth2-service-common</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.hsweb</groupId>
+                <artifactId>hsweb-web-oauth2-controller</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+
             <dependency>
                 <groupId>org.hsweb</groupId>
                 <artifactId>hsweb-commons</artifactId>
