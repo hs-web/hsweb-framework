@@ -19,4 +19,8 @@ public class UpdateMapParam extends UpdateParam<Map<String, Object>> {
         this.getData().put(key, value);
         return this;
     }
+
+    public static UpdateMapParam build() {
+        return new UpdateMapParam();
+    }
 }
