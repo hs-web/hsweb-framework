@@ -16,7 +16,6 @@
 
 package org.hsweb.web.oauth2.simple;
 
-import org.apache.oltu.oauth2.as.request.OAuthAuthzRequest;
 import org.hsweb.web.bean.po.user.User;
 import org.hsweb.web.core.authorize.oauth2.OAuth2Manager;
 import org.hsweb.web.oauth2.service.OAuth2Service;

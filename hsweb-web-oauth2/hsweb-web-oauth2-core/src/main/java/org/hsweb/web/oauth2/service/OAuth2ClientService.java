@@ -16,12 +16,28 @@
 
 package org.hsweb.web.oauth2.service;
 
+import org.hsweb.web.bean.common.PagerResult;
+import org.hsweb.web.bean.common.QueryParam;
+import org.hsweb.web.oauth2.po.OAuth2Access;
 import org.hsweb.web.oauth2.po.OAuth2Client;
 import org.hsweb.web.service.GenericService;
+
+import java.util.List;
 
 /**
  * OAuth2客户端服务类
  * Created by generator
  */
 public interface OAuth2ClientService extends GenericService<OAuth2Client, String> {
+
+    PagerResult<OAuth2Access> selectAccessList(QueryParam param);
+
+    int deleteAccess(String accessId);
+
+    String refreshSecret(String clientId);
+
+    void enable(String id);
+
+    void disable(String id);
+
 }

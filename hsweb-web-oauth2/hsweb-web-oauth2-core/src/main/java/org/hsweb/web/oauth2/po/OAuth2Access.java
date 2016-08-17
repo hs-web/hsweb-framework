@@ -145,4 +145,8 @@ public class OAuth2Access extends GenericPo<String> {
     public void setUser(User user) {
         this.user = user;
     }
+
+    public long getLeftTime() {
+        return getExpireIn() - (System.currentTimeMillis() - getCreateDate().getTime()) / 1000;
+    }
 }

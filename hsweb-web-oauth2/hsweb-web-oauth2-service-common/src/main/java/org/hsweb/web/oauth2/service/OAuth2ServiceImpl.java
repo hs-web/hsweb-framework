@@ -117,10 +117,8 @@ public class OAuth2ServiceImpl implements OAuth2Service {
         if (auth2Access == null) {
             return null;
         }
-        long createTime = auth2Access.getCreateDate().getTime();
-        long expireInMs = auth2Access.getExpireIn() * 60 * 1000;
         //判断是否已超时
-        if (System.currentTimeMillis() - createTime > expireInMs) {
+        if (auth2Access.getLeftTime() <= 0) {
             if (cache != null) {
                 cache.evict(cacheKey);
             }

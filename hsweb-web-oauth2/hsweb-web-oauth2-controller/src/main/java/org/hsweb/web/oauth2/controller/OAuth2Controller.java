@@ -92,6 +92,7 @@ public class OAuth2Controller {
                 oAuth2Service.addAccessToken(access);
                 OAuthResponse response = OAuthASResponse
                         .tokenResponse(HttpServletResponse.SC_OK)
+                        .setTokenType("bearer")
                         .setAccessToken(accessToken)
                         .setExpiresIn(String.valueOf(oAuth2Service.getDefaultExpireIn()))
                         .setRefreshToken(refreshToken)

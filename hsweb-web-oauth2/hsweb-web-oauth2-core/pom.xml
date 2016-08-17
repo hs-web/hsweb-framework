@@ -27,5 +27,10 @@
 
     <artifactId>hsweb-web-oauth2-core</artifactId>
 
-
+    <dependencies>
+        <dependency>
+            <groupId>org.hsweb</groupId>
+            <artifactId>hsweb-web-service-interface</artifactId>
+        </dependency>
+    </dependencies>
 </project>
