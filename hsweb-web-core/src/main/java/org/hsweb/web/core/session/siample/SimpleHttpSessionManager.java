@@ -43,7 +43,7 @@ public class SimpleHttpSessionManager extends AbstractHttpSessionManager {
     public User getUserBySessionId(String sessionId) {
         if (sessionId == null) return null;
         HttpSession session = sessionStorage.get(sessionId);
-        return session == null ? null : ((User) session.getAttribute("user"));
+        return session == null ? null : WebUtil.getLoginUser(session);
     }
 
     @Override
@@ -67,7 +67,7 @@ public class SimpleHttpSessionManager extends AbstractHttpSessionManager {
             session.removeAttribute("user");
             sessionStorage.remove(session.getId());
             userSessionStorage.remove(userId);
-            onUserLoginOut(userId,session);
+            onUserLoginOut(userId, session);
         }
     }
 
@@ -77,7 +77,7 @@ public class SimpleHttpSessionManager extends AbstractHttpSessionManager {
         if (session != null) {
             User user = WebUtil.getLoginUser(session);
             if (user != null) {
-                onUserLoginOut(user.getId(),session);
+                onUserLoginOut(user.getId(), session);
                 userSessionStorage.remove(user.getId());
             }
             sessionStorage.remove(sessionId);
@@ -90,7 +90,7 @@ public class SimpleHttpSessionManager extends AbstractHttpSessionManager {
         sessionStorage.put(session.getId(), session);
         userSessionStorage.put(user.getId(), session);
         session.setAttribute("user", user);
-        onUserLogin(user,session);
+        onUserLogin(user, session);
     }
 
     @Override
