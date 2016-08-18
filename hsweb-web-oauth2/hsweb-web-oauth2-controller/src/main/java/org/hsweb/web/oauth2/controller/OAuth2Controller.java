@@ -96,6 +96,7 @@ public class OAuth2Controller {
                         .setAccessToken(accessToken)
                         .setExpiresIn(String.valueOf(oAuth2Service.getDefaultExpireIn()))
                         .setRefreshToken(refreshToken)
+                        .setScope("public")
                         .buildJSONMessage();
                 return ResponseMessage.ok(response.getBody()).onlyData();
             } else {
