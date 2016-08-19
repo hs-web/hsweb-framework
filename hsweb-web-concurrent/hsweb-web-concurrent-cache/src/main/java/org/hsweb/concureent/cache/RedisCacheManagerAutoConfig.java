@@ -34,22 +34,13 @@ public class RedisCacheManagerAutoConfig extends CachingConfigurerSupport {
 
     @Bean
     public KeyGenerator wiselyKeyGenerator() {
-        return (target, method, params) -> {
-            StringBuilder sb = new StringBuilder();
-            sb.append(target.getClass().getName());
-            sb.append(method.getName());
-            for (Object obj : params) {
-                if (obj == null) obj = "null";
-                sb.append(obj.hashCode());
-            }
-            return sb.toString();
-        };
+        return new SimpleKeyGenerator();
     }
 
     @Bean
     public RedisTemplate<String, String> redisTemplate(
-            RedisConnectionFactory factory) {
-        StringRedisTemplate template = new StringRedisTemplate(factory);
+            RedisConnectionFactory redisConnectionFactory) {
+        StringRedisTemplate template = new StringRedisTemplate(redisConnectionFactory);
         template.setValueSerializer(new JdkSerializationRedisSerializer());
         return template;
     }

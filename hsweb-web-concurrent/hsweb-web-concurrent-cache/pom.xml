@@ -21,5 +21,9 @@
             <artifactId>spring-boot-starter-redis</artifactId>
             <optional>true</optional>
         </dependency>
+        <dependency>
+            <groupId>org.hsweb</groupId>
+            <artifactId>hsweb-web-core</artifactId>
+        </dependency>
     </dependencies>
 </project>
