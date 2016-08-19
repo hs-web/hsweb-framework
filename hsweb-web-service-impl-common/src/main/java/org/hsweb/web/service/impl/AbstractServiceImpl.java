@@ -2,7 +2,7 @@ package org.hsweb.web.service.impl;
 
 import org.hsweb.web.bean.common.*;
 import org.hsweb.web.bean.po.GenericPo;
-import org.hsweb.web.bean.valid.ValidResults;
+import org.hsweb.web.bean.validator.ValidateResults;
 import org.hsweb.web.core.exception.NotFoundException;
 import org.hsweb.web.core.exception.ValidationException;
 import org.hsweb.web.dao.GenericMapper;
@@ -147,7 +147,7 @@ public abstract class AbstractServiceImpl<Po, PK> implements GenericService<Po, 
 
     protected void tryValidPo(Po data) {
         Set<ConstraintViolation<Object>> set = validator.validate(data);
-        ValidResults results = new ValidResults();
+        ValidateResults results = new ValidateResults();
         if (set.isEmpty()) {
             for (ConstraintViolation<Object> violation : set) {
                 results.addResult(violation.getPropertyPath().toString(), violation.getMessage());

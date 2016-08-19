@@ -1,23 +1,23 @@
 package org.hsweb.web.core.exception;
 
-import org.hsweb.web.bean.valid.ValidResults;
+import org.hsweb.web.bean.validator.ValidateResults;
 
 /**
  * Created by zhouhao on 16-5-12.
  */
 public class ValidationException extends BusinessException {
-    private ValidResults results;
+    private ValidateResults results;
 
     public ValidationException(String message) {
         super(message, 400);
     }
 
-    public ValidationException(ValidResults results) {
+    public ValidationException(ValidateResults results) {
         super(results.toString(), 400);
         this.results = results;
     }
 
-    public ValidResults getResults() {
+    public ValidateResults getResults() {
         return results;
     }
 }

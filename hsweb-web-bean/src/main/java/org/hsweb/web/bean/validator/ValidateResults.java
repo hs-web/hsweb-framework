@@ -1,4 +1,4 @@
-package org.hsweb.web.bean.valid;
+package org.hsweb.web.bean.validator;
 
 import com.alibaba.fastjson.JSON;
 
@@ -10,7 +10,7 @@ import java.util.Collection;
  * 对象验证结果集合
  * Created by 浩 on 2015-10-10 0010.
  */
-public class ValidResults extends ArrayList<ValidResults.ValidResult> implements Serializable {
+public class ValidateResults extends ArrayList<ValidateResults.ValidResult> implements Serializable {
     private static final long serialVersionUID = 8910856253780046561L;
     /**
      * 是否验证通过

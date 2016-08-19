@@ -4,7 +4,7 @@ import org.apache.commons.beanutils.BeanMap;
 import org.apache.commons.beanutils.BeanUtils;
 import org.hsweb.ezorm.exception.ValidationException;
 import org.hsweb.ezorm.meta.expand.Validator;
-import org.hsweb.web.bean.valid.ValidResults;
+import org.hsweb.web.bean.validator.ValidateResults;
 import org.hsweb.web.core.exception.BusinessException;
 import org.springframework.util.ReflectionUtils;
 import org.hsweb.expands.script.engine.DynamicScriptEngine;
@@ -33,7 +33,7 @@ public class GroovyDycBeanValidator implements Validator {
     }
 
     public boolean validateMap(Map<Object, Object> data, Operation operation) {
-        ValidResults results = new ValidResults();
+        ValidateResults results = new ValidateResults();
         try {
             Class validatorTargetClass = (Class) engine.execute(className, new HashMap<>()).getResult();
             Object validatorTarget = validatorTargetClass.newInstance();

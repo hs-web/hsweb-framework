@@ -29,7 +29,8 @@ public class GroovyDycBeanValidatorFactory implements ValidatorFactory {
 
     private static final String[] imports = {
             "import org.hibernate.validator.constraints.*;",
-            "import javax.validation.constraints.*;"
+            "import javax.validation.constraints.*;",
+            "import org.hsweb.web.bean.validator.constraints.*;"
     };
 
     static {
