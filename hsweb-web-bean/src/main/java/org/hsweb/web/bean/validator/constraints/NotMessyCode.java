@@ -29,7 +29,7 @@ import java.lang.annotation.*;
 @Documented
 @Constraint(validatedBy = {MessyCodeValidator.class})
 public @interface NotMessyCode {
-    String message() default "值含有乱码字符";
+    String message() default "含有乱码字符";
 
     Class<?>[] groups() default {};
 
