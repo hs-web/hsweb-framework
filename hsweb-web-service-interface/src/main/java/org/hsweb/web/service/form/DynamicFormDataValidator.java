@@ -1,10 +1,10 @@
 package org.hsweb.web.service.form;
 
+import org.hsweb.ezorm.run.Table;
+
 import java.util.Map;
 
-/**
- * Created by zhouhao on 16-5-16.
- */
 public interface DynamicFormDataValidator {
-    String getRepeatDataId(String tableName, Map<String, Object> data);
+    String getRepeatDataId(Table table, Map<String, Object> data);
+
 }
