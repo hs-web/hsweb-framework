@@ -18,11 +18,11 @@ public interface DynamicFormService {
 
     Database getDefaultDatabase();
 
-    TableMetaData parseMeta(Form form) ;
+    TableMetaData parseMeta(Form form);
 
     void deploy(Form form) throws SQLException;
 
-    void unDeploy(Form form) ;
+    void unDeploy(Form form);
 
     <T> PagerResult<T> selectPager(String name, QueryParam param) throws SQLException;
 
@@ -30,7 +30,9 @@ public interface DynamicFormService {
 
     int total(String name, QueryParam param) throws SQLException;
 
-    String insert(String name,Map<String, Object> data) throws SQLException;
+    String insert(String name, Map<String, Object> data) throws SQLException;
+
+    List<String> insert(String name, List<Map<String, Object>> dataList) throws SQLException;
 
     String saveOrUpdate(String name, Map<String, Object> map) throws SQLException;
 
@@ -48,5 +50,5 @@ public interface DynamicFormService {
 
     void exportExcel(String name, QueryParam param, OutputStream outputStream) throws Exception;
 
-    Map<String, Object> importExcel(String name, InputStream inputStream) ;
+    Map<String, Object> importExcel(String name, InputStream inputStream);
 }

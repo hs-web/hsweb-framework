@@ -41,6 +41,7 @@ import java.io.OutputStream;
 import java.sql.JDBCType;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by zhouhao on 16-4-14.
@@ -199,6 +200,22 @@ public class DynamicFormServiceImpl implements DynamicFormService, ExpressionSco
         Insert insert = table.createInsert().value(data);
         insert.exec();
         return pk;
+    }
+
+    @Override
+    @ReadLock
+    @LockName(value = "'form.lock.'+#name", isExpression = true)
+    public List<String> insert(String name, List<Map<String, Object>> dataList) throws SQLException {
+        Table table = getTableByName(name);
+        String primaryKeyName = getPrimaryKeyName(name);
+        List<String> idList = new ArrayList<>();
+        dataList.forEach(data -> {
+            String pk = GenericPo.createUID();
+            data.put(primaryKeyName, pk);
+            idList.add(pk);
+        });
+        table.createInsert().values(dataList).exec();
+        return idList;
     }
 
     @Override
