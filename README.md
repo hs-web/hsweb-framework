@@ -55,4 +55,5 @@
 | [@重庆-下下](https://github.com/web-xiaxia) |赞助: ￥250 (用于服务器升级)   | 
 | [@天津-Mr.Chang](https://github.com/changdaye) |赞助: ￥100 (用于服务器升级)   | 
 | [@北京-青春无罪](https://github.com/gxz04220427) |赞助: ￥100 (用于服务器升级)   | 
+| [@kitkat](https://github.com/wy353208214) |赞助: ￥50  | 
 
