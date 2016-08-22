@@ -129,6 +129,7 @@ public class OAuth2ServiceImpl implements OAuth2Service {
         if (!inCache) {
             User user = userService.selectByPk(auth2Access.getUserId());
             user.initRoleInfo();
+            user.setPassword(null);
             User newUser = new User();
             try {
                 BeanUtilsBean.getInstance().getPropertyUtils()
