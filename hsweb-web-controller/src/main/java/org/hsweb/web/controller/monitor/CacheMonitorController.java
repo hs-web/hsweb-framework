@@ -29,8 +29,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 缓存监控控制器，用于管理缓存，监控等操作
@@ -44,13 +43,45 @@ public class CacheMonitorController {
     @Autowired(required = false)
     private Map<String, CacheManager> cacheManagerMap = new LinkedHashMap<>();
 
-    @RequestMapping(value = "/caches", method = RequestMethod.GET)
+    @RequestMapping(value = "/cache/managers", method = RequestMethod.GET)
     @AccessLogger("获取管理器")
     public ResponseMessage getManagerList() {
         return ResponseMessage.ok(cacheManagerMap.keySet());
     }
 
-    @RequestMapping(value = "/cache/{name}", method = RequestMethod.GET)
+    @RequestMapping(value = "/caches", method = RequestMethod.GET)
+    @AccessLogger("获取缓存信息")
+    public ResponseMessage getCacheTreeList() {
+        List<Map<String, Object>> managers = new ArrayList<>();
+        cacheManagerMap.entrySet().forEach(entry -> {
+            Map<String, Object> manager = new LinkedHashMap<>();
+            manager.put("name", entry.getKey());
+            manager.put("size", getTimes(entry.getValue(), MonitorCache::size));
+            manager.put("totalTimes", getTimes(entry.getValue(), MonitorCache::getTotalTimes));
+            manager.put("hitTimes", getTimes(entry.getValue(), MonitorCache::getHitTimes));
+            manager.put("putTimes", getTimes(entry.getValue(), MonitorCache::getPutTimes));
+            List<Map<String, Object>> caches = new LinkedList<>();
+            manager.put("caches", caches);
+            entry.getValue().getCacheNames().forEach(cacheName -> {
+                Map<String, Object> cacheData = new LinkedHashMap<>();
+                cacheData.put("name", cacheName);
+                Cache cache = entry.getValue().getCache(cacheName);
+                if (cache instanceof MonitorCache) {
+                    MonitorCache monitorCache = ((MonitorCache) cache);
+                    cacheData.put("size", monitorCache.size());
+                    cacheData.put("totalTimes", monitorCache.getTotalTimes());
+                    cacheData.put("hitTimes", monitorCache.getHitTimes());
+                    cacheData.put("putTimes", monitorCache.getPutTimes());
+                }
+                caches.add(cacheData);
+            });
+            managers.add(manager);
+        });
+        return ResponseMessage.ok(managers).onlyData();
+    }
+
+
+    @RequestMapping(value = "/cache/{name:.+}", method = RequestMethod.GET)
     @AccessLogger("获取所有名称")
     public ResponseMessage getNameList(@PathVariable("name") String name) {
         CacheManager cacheManager = cacheManagerMap.get(name);
@@ -61,7 +92,7 @@ public class CacheMonitorController {
     }
 
     @AccessLogger("获取值")
-    @RequestMapping(value = "/cache/{managerName}/{cacheName}/{key:.+}", method = RequestMethod.GET)
+    @RequestMapping(value = "/cache/{managerName}/{cacheName:.+}/{key:.+}", method = RequestMethod.GET)
     public ResponseMessage getValue(@PathVariable("managerName") String managerName,
                                     @PathVariable("cacheName") String cacheName,
                                     @PathVariable("key") String key) {
@@ -80,7 +111,7 @@ public class CacheMonitorController {
         return ResponseMessage.ok();
     }
 
-    @RequestMapping(value = "/cache/{managerName}/{cacheName}", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/cache/{managerName}/{cacheName:.+}", method = RequestMethod.DELETE)
     @Authorize(action = "D")
     @AccessLogger("清空")
     public ResponseMessage clearEvict(@PathVariable("managerName") String managerName,
@@ -89,36 +120,36 @@ public class CacheMonitorController {
         return ResponseMessage.ok();
     }
 
-    @RequestMapping(value = "/cache/{managerName}/{cacheName}", method = RequestMethod.GET)
+    @RequestMapping(value = "/cache/{managerName}/{cacheName:.+}", method = RequestMethod.GET)
     @AccessLogger("获取键列表")
-    public ResponseMessage getKetSet(@PathVariable("managerName") String managerName,
+    public ResponseMessage getKeySet(@PathVariable("managerName") String managerName,
                                      @PathVariable("cacheName") String cacheName) {
         return ResponseMessage.ok(getMonitorCache(managerName, cacheName).keySet());
     }
 
     @AccessLogger("获取缓存命中次数")
-    @RequestMapping(value = "/cache-hits/{managerName}/{cacheName}", method = RequestMethod.GET)
+    @RequestMapping(value = "/cache-hits/{managerName}/{cacheName:.+}", method = RequestMethod.GET)
     public ResponseMessage getHitTimes(@PathVariable("managerName") String managerName,
                                        @PathVariable("cacheName") String cacheName) {
         return ResponseMessage.ok(getMonitorCache(managerName, cacheName).getHitTimes());
     }
 
     @AccessLogger("获取缓存更新次数")
-    @RequestMapping(value = "/cache-puts/{managerName}/{cacheName}", method = RequestMethod.GET)
+    @RequestMapping(value = "/cache-puts/{managerName}/{cacheName:.+}", method = RequestMethod.GET)
     public ResponseMessage getPutTimes(@PathVariable("managerName") String managerName,
                                        @PathVariable("cacheName") String cacheName) {
         return ResponseMessage.ok(getMonitorCache(managerName, cacheName).getPutTimes());
     }
 
     @AccessLogger("获取缓存数量")
-    @RequestMapping(value = "/cache-size/{managerName}/{cacheName}", method = RequestMethod.GET)
+    @RequestMapping(value = "/cache-size/{managerName}/{cacheName:.+}", method = RequestMethod.GET)
     public ResponseMessage getSize(@PathVariable("managerName") String managerName,
                                    @PathVariable("cacheName") String cacheName) {
         return ResponseMessage.ok(getMonitorCache(managerName, cacheName).size());
     }
 
     @AccessLogger("获取缓存获取次数")
-    @RequestMapping(value = "/cache-total/{managerName}/{cacheName}", method = RequestMethod.GET)
+    @RequestMapping(value = "/cache-total/{managerName}/{cacheName:.+}", method = RequestMethod.GET)
     public ResponseMessage getTotalTimes(@PathVariable("managerName") String managerName,
                                          @PathVariable("cacheName") String cacheName) {
         return ResponseMessage.ok(getMonitorCache(managerName, cacheName).getTotalTimes());
@@ -148,14 +179,14 @@ public class CacheMonitorController {
         return ResponseMessage.ok(getTimes(MonitorCache::size));
     }
 
-    public long getTimes(TimesGetter getter) {
+    protected long getTimes(TimesGetter getter) {
         long times = cacheManagerMap.values().stream()
                 .mapToLong(cacheManager -> getTimes(cacheManager, getter))
                 .reduce((i1, i2) -> i1 + i2).orElseGet(() -> 0);
         return times;
     }
 
-    public long getTimes(CacheManager cacheManager, TimesGetter getter) {
+    protected long getTimes(CacheManager cacheManager, TimesGetter getter) {
         long times = cacheManager.getCacheNames().parallelStream()
                 .map(name -> cacheManager.getCache(name))
                 .filter(cache -> cache instanceof MonitorCache)

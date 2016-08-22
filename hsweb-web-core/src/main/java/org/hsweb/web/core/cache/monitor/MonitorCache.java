@@ -38,7 +38,7 @@ public interface MonitorCache extends Cache {
     int size();
 
     /**
-     * 调用命中次数
+     * 缓存调用次数
      *
      * @return 调用次数
      */
