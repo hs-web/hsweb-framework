@@ -16,10 +16,7 @@ import org.hsweb.web.core.message.ResponseMessage;
 import org.hsweb.web.core.utils.WebUtil;
 import org.hsweb.web.service.form.DynamicFormService;
 import org.hsweb.web.service.system.DataBaseManagerService;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.sql.SQLException;
@@ -28,9 +25,6 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-/**
- * Created by zhouhao on 16-6-30.
- */
 @RestController
 @RequestMapping("/database")
 @Authorize(module = "database")
@@ -52,6 +46,33 @@ public class DatabaseManagerController {
     @RequestMapping(value = "/exec", method = RequestMethod.POST)
     @AccessLogger("执行SQL")
     public ResponseMessage exec(@RequestBody String sql) throws Exception {
+        return ResponseMessage.ok(dataBaseManagerService.execSql(buildSqlList(sql)));
+    }
+
+    @RequestMapping(value = "/sql/alter", method = RequestMethod.POST)
+    @AccessLogger("查询修改表结构SQL")
+    public ResponseMessage showAlterSql(@RequestBody JSONObject jsonObject) throws Exception {
+        return ResponseMessage.ok(dataBaseManagerService.createAlterSql(createTableMetaDataByJson(jsonObject)));
+    }
+
+    @RequestMapping(value = "/sql/create", method = RequestMethod.POST)
+    @AccessLogger("查询创建表结构SQL")
+    public ResponseMessage showCreateSql(@RequestBody JSONObject jsonObject) throws Exception {
+        return ResponseMessage.ok(dataBaseManagerService.createCreateSql(createTableMetaDataByJson(jsonObject)));
+    }
+
+
+    @RequestMapping(value = "/tables/{dataSourceId}", method = RequestMethod.GET)
+    @Authorize(action = "R")
+    @AccessLogger("指定数据源获取表结构")
+    public ResponseMessage showTables(@PathVariable("dataSourceId") String dataSourceId) throws SQLException {
+        return ResponseMessage.ok(dataBaseManagerService.getTableList(dataSourceId))
+                .include(TableMetaData.class, "name", "alias", "comment", "fields")
+                .include(FieldMetaData.class, "name", "alias", "comment", "dataType", "properties")
+                .onlyData();
+    }
+
+    public List<String> buildSqlList(String sql) {
         String[] list = sql.split("[\n]");
         List<SqlAppender> sqlList = new LinkedList<>();
         SqlAppender[] tmp = {new SqlAppender()};
@@ -77,19 +98,26 @@ public class DatabaseManagerController {
                 throw new AuthorizeForbiddenException("权限不足");
             sqlStringList.add(sqlLine);
         }
-        return ResponseMessage.ok(dataBaseManagerService.execSql(sqlStringList));
+        return sqlStringList;
     }
 
-    @RequestMapping(value = "/sql/alter", method = RequestMethod.POST)
-    @AccessLogger("查询修改表结构SQL")
-    public ResponseMessage showAlterSql(@RequestBody JSONObject jsonObject) throws Exception {
-        return ResponseMessage.ok(dataBaseManagerService.createAlterSql(createTableMetaDataByJson(jsonObject)));
+    @RequestMapping(value = "/exec/{dataSourceId}", method = RequestMethod.POST)
+    @AccessLogger("指定数据源执行SQL")
+    public ResponseMessage exec(@PathVariable("dataSourceId") String dataSourceId, @RequestBody String sql) throws Exception {
+
+        return ResponseMessage.ok(dataBaseManagerService.execSql(dataSourceId, buildSqlList(sql)));
     }
 
-    @RequestMapping(value = "/sql/create", method = RequestMethod.POST)
-    @AccessLogger("查询创建表结构SQL")
-    public ResponseMessage showCreateSql(@RequestBody JSONObject jsonObject) throws Exception {
-        return ResponseMessage.ok(dataBaseManagerService.createCreateSql(createTableMetaDataByJson(jsonObject)));
+    @RequestMapping(value = "/sql/alter/{dataSourceId}", method = RequestMethod.POST)
+    @AccessLogger("指定数据源查询修改表结构SQL")
+    public ResponseMessage showAlterSql(@PathVariable("dataSourceId") String dataSourceId, @RequestBody JSONObject jsonObject) throws Exception {
+        return ResponseMessage.ok(dataBaseManagerService.createAlterSql(dataSourceId, createTableMetaDataByJson(jsonObject)));
+    }
+
+    @RequestMapping(value = "/sql/create/{dataSourceId}", method = RequestMethod.POST)
+    @AccessLogger("指定数据源查询创建表结构SQL")
+    public ResponseMessage showCreateSql(@PathVariable("dataSourceId") String dataSourceId, @RequestBody JSONObject jsonObject) throws Exception {
+        return ResponseMessage.ok(dataBaseManagerService.createCreateSql(dataSourceId, createTableMetaDataByJson(jsonObject)));
     }
 
     protected TableMetaData createTableMetaDataByJson(JSONObject jsonObject) {
