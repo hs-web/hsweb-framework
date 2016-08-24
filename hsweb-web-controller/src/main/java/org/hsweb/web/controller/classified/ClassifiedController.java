@@ -22,6 +22,7 @@ import org.hsweb.web.controller.GenericController;
 import org.hsweb.web.core.authorize.annotation.Authorize;
 import org.hsweb.web.core.message.ResponseMessage;
 import org.hsweb.web.service.classified.ClassifiedService;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -70,6 +71,7 @@ public class ClassifiedController extends GenericController<Classified, String> 
      * @return 查询结果
      */
     @RequestMapping(value = "/type/{type}")
+    @CrossOrigin
     public ResponseMessage listByType(@PathVariable("type") String type, QueryParam param) {
         param.where("type", type);
         return list(param);
