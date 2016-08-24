@@ -90,4 +90,9 @@ public class SqlExecutorService extends AbstractJdbcSqlExecutor implements Expre
         SimpleSQL sql1 = new SimpleSQL(sql, param);
         return sql1;
     }
+
+    public SqlExecutorService setDataSource(DataSource dataSource) {
+        this.dataSource = dataSource;
+        return this;
+    }
 }

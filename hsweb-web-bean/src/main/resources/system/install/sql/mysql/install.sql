@@ -249,8 +249,33 @@ CREATE TABLE s_query_plan
   `SHARING`     TINYINT COMMENT '是否共享',
   `CREATOR_ID`  VARCHAR(32)  NOT NULL
   COMMENT '创建人ID',
-  `CREATE_DATE` DATETIME         NOT NULL
+  `CREATE_DATE` DATETIME     NOT NULL
   COMMENT '创建日期'
 );
 ALTER TABLE `s_query_plan`
   COMMENT '查询方案';
+
+CREATE TABLE s_data_source
+(
+  u_id        VARCHAR(32) PRIMARY KEY NOT NULL
+  COMMENT 'ID',
+  name        VARCHAR(64)             NOT NULL
+  COMMENT '名称',
+  driver      VARCHAR(128)            NOT NULL
+  COMMENT 'driver',
+  url         VARCHAR(512)            NOT NULL
+  COMMENT 'url',
+  username    VARCHAR(128)            NOT NULL
+  COMMENT '用户名',
+  password    VARCHAR(128)            NOT NULL
+  COMMENT '密码',
+  enabled     TINYINT                 NOT NULL
+  COMMENT '是否启用',
+  create_date DATETIME                NOT NULL
+  COMMENT '创建日期',
+  properties  TEXT COMMENT '其他配置',
+  comment     VARCHAR(512) COMMENT '备注',
+  test_sql    VARCHAR(512) COMMENT '测试sql'
+);
+ALTER TABLE s_data_source
+  COMMENT '数据源';
