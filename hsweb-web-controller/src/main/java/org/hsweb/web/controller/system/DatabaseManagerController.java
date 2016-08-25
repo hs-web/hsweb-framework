@@ -9,6 +9,7 @@ import org.hsweb.ezorm.render.SqlAppender;
 import org.hsweb.ezorm.render.SqlRender;
 import org.hsweb.web.bean.po.user.User;
 import org.hsweb.web.core.authorize.annotation.Authorize;
+import org.hsweb.web.core.datasource.DynamicDataSource;
 import org.hsweb.web.core.exception.AuthorizeException;
 import org.hsweb.web.core.exception.AuthorizeForbiddenException;
 import org.hsweb.web.core.logger.annotation.AccessLogger;
@@ -61,15 +62,19 @@ public class DatabaseManagerController {
         return ResponseMessage.ok(dataBaseManagerService.createCreateSql(createTableMetaDataByJson(jsonObject)));
     }
 
-
     @RequestMapping(value = "/tables/{dataSourceId}", method = RequestMethod.GET)
     @Authorize(action = "R")
     @AccessLogger("指定数据源获取表结构")
     public ResponseMessage showTables(@PathVariable("dataSourceId") String dataSourceId) throws SQLException {
-        return ResponseMessage.ok(dataBaseManagerService.getTableList(dataSourceId))
-                .include(TableMetaData.class, "name", "alias", "comment", "fields")
-                .include(FieldMetaData.class, "name", "alias", "comment", "dataType", "properties")
-                .onlyData();
+        try {
+            DynamicDataSource.use(dataSourceId);
+            return ResponseMessage.ok(dataBaseManagerService.getTableList())
+                    .include(TableMetaData.class, "name", "alias", "comment", "fields")
+                    .include(FieldMetaData.class, "name", "alias", "comment", "dataType", "properties")
+                    .onlyData();
+        } finally {
+            DynamicDataSource.useDefault(false);
+        }
     }
 
     public List<String> buildSqlList(String sql) {
@@ -104,20 +109,34 @@ public class DatabaseManagerController {
     @RequestMapping(value = "/exec/{dataSourceId}", method = RequestMethod.POST)
     @AccessLogger("指定数据源执行SQL")
     public ResponseMessage exec(@PathVariable("dataSourceId") String dataSourceId, @RequestBody String sql) throws Exception {
-
-        return ResponseMessage.ok(dataBaseManagerService.execSql(dataSourceId, buildSqlList(sql)));
+        DynamicDataSource.use(dataSourceId);
+        try {
+            return ResponseMessage.ok(dataBaseManagerService.execSql(buildSqlList(sql)));
+        } finally {
+            DynamicDataSource.useDefault(false);
+        }
     }
 
     @RequestMapping(value = "/sql/alter/{dataSourceId}", method = RequestMethod.POST)
     @AccessLogger("指定数据源查询修改表结构SQL")
     public ResponseMessage showAlterSql(@PathVariable("dataSourceId") String dataSourceId, @RequestBody JSONObject jsonObject) throws Exception {
-        return ResponseMessage.ok(dataBaseManagerService.createAlterSql(dataSourceId, createTableMetaDataByJson(jsonObject)));
+        try {
+            DynamicDataSource.use(dataSourceId);
+            return ResponseMessage.ok(dataBaseManagerService.createAlterSql(createTableMetaDataByJson(jsonObject)));
+        } finally {
+            DynamicDataSource.useDefault(false);
+        }
     }
 
     @RequestMapping(value = "/sql/create/{dataSourceId}", method = RequestMethod.POST)
     @AccessLogger("指定数据源查询创建表结构SQL")
     public ResponseMessage showCreateSql(@PathVariable("dataSourceId") String dataSourceId, @RequestBody JSONObject jsonObject) throws Exception {
-        return ResponseMessage.ok(dataBaseManagerService.createCreateSql(dataSourceId, createTableMetaDataByJson(jsonObject)));
+        try {
+            DynamicDataSource.use(dataSourceId);
+            return ResponseMessage.ok(dataBaseManagerService.createCreateSql(createTableMetaDataByJson(jsonObject)));
+        } finally {
+            DynamicDataSource.useDefault(false);
+        }
     }
 
     protected TableMetaData createTableMetaDataByJson(JSONObject jsonObject) {

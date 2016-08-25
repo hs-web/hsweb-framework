@@ -26,12 +26,4 @@ public interface DataBaseManagerService {
     String createAlterSql(TableMetaData newTable) throws Exception;
 
     String createCreateSql(TableMetaData newTable) throws Exception;
-
-    List<TableMetaData> getTableList(String datasourceId) throws SQLException;
-
-    List<Map<String, Object>> execSql(String datasourceId, List<String> sqlList) throws SQLException;
-
-    String createAlterSql(String datasourceId, TableMetaData newTable) throws Exception;
-
-    String createCreateSql(String datasourceId, TableMetaData newTable) throws Exception;
 }

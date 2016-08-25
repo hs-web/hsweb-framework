@@ -23,6 +23,11 @@
         </dependency>
 
         <dependency>
+            <groupId>org.hsweb</groupId>
+            <artifactId>hsweb-web-core</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-jdbc</artifactId>
         </dependency>

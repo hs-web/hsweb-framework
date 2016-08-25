@@ -15,22 +15,18 @@ import org.hsweb.ezorm.render.dialect.H2DatabaseMeta;
 import org.hsweb.ezorm.render.dialect.MysqlDatabaseMeta;
 import org.hsweb.ezorm.render.dialect.OracleDatabaseMeta;
 import org.hsweb.ezorm.render.support.simple.SimpleSQL;
-import org.hsweb.ezorm.run.simple.SimpleDatabase;
-import org.hsweb.web.core.Install;
+import org.hsweb.web.core.datasource.DynamicDataSource;
 import org.hsweb.web.core.exception.BusinessException;
 import org.hsweb.web.core.exception.NotFoundException;
 import org.hsweb.web.service.datasource.DataSourceService;
-import org.hsweb.web.service.datasource.DynamicDataSourceService;
 import org.hsweb.web.service.impl.DatabaseMetaDataFactoryBean;
 import org.hsweb.web.service.system.DataBaseManagerService;
-import org.hsweb.web.service.system.SqlExecuteProcess;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -51,24 +47,16 @@ public class DataBaseManagerServiceImpl implements DataBaseManagerService {
     @Resource
     private SqlExecutor sqlExecutor;
 
-    @Autowired(required = false)
-    private TableMetaParser tableMetaParser;
-
-    @Autowired
-    private DatabaseMetaDataFactoryBean databaseMetaDataFactoryBean;
-
-    @Resource
-    private DynamicDataSourceService dynamicDataSourceService;
-
     @Resource
     private DataSourceService dataSourceService;
 
+    @Autowired
+    private DataSourceProperties dataSourceProperties;
+
     @Override
+    @Transactional(readOnly = true)
     public List<TableMetaData> getTableList() throws SQLException {
-        if (tableMetaParser == null) {
-            throw new BusinessException("不支持的数据库");
-        }
-        return tableMetaParser.parseAll();
+        return getDBType().getTableMetaParser(sqlExecutor).parseAll();
     }
 
     @Override
@@ -77,6 +65,7 @@ public class DataBaseManagerServiceImpl implements DataBaseManagerService {
         return execSql(sqlExecutor, sqlList);
     }
 
+    @Transactional(rollbackFor = Throwable.class)
     public List<Map<String, Object>> execSql(SqlExecutor sqlExecutor, List<String> sqlList) throws SQLException {
         List<Map<String, Object>> response = new LinkedList<>();
         for (String s : sqlList) {
@@ -115,7 +104,7 @@ public class DataBaseManagerServiceImpl implements DataBaseManagerService {
 
     @Override
     public String createAlterSql(TableMetaData newTable) throws Exception {
-        return createAlterSql(databaseMetaDataFactoryBean.getObject(), tableMetaParser, newTable);
+        return createAlterSql(getDBType().getDatabaseMetaData(), getDBType().getTableMetaParser(sqlExecutor), newTable);
     }
 
     public String createAlterSql(DatabaseMetaData databaseMetaData, TableMetaParser tableMetaParser, TableMetaData newTable) throws Exception {
@@ -131,7 +120,7 @@ public class DataBaseManagerServiceImpl implements DataBaseManagerService {
 
     @Override
     public String createCreateSql(TableMetaData newTable) throws Exception {
-        return createCreateSql(databaseMetaDataFactoryBean.getObject(), newTable);
+        return createCreateSql(getDBType().getDatabaseMetaData(), newTable);
     }
 
     public String createCreateSql(DatabaseMetaData databaseMetaData, TableMetaData newTable) throws Exception {
@@ -144,34 +133,13 @@ public class DataBaseManagerServiceImpl implements DataBaseManagerService {
         return builder.toString();
     }
 
-    @Override
-    public List<TableMetaData> getTableList(String datasourceId) throws SQLException {
-        SqlExecutor sqlExecutor = dynamicDataSourceService.getSqlExecutor(datasourceId);
-        DBType dbType = getDBType(datasourceId);
-        return dbType.getTableMetaParser(sqlExecutor).parseAll();
-    }
-
-    @Override
-    @Transactional(rollbackFor = Throwable.class)
-    public List<Map<String, Object>> execSql(String datasourceId, List<String> sqlList) throws SQLException {
-        return execSql(dynamicDataSourceService.getSqlExecutor(datasourceId), sqlList);
-    }
-
-    @Override
-    public String createAlterSql(String datasourceId, TableMetaData newTable) throws Exception {
-        DBType dbType = getDBType(datasourceId);
-        SqlExecutor sqlExecutor = dynamicDataSourceService.getSqlExecutor(datasourceId);
-        return createAlterSql(dbType.getDatabaseMetaData(), dbType.getTableMetaParser(sqlExecutor), newTable);
-    }
-
-    @Override
-    public String createCreateSql(String datasourceId, TableMetaData newTable) throws Exception {
-        return createCreateSql(getDBType(datasourceId).getDatabaseMetaData(), newTable);
-    }
-
-    public DBType getDBType(String datasourceId) {
-        org.hsweb.web.bean.po.datasource.DataSource dataSource = dataSourceService.selectByPk(datasourceId);
-        String driver = dataSource.getDriver();
+    public DBType getDBType() {
+        String datasourceId = DynamicDataSource.getActiveDataSourceId();
+        String driver = dataSourceProperties.getDriverClassName();
+        if (datasourceId != null) {
+            org.hsweb.web.bean.po.datasource.DataSource dataSource = dataSourceService.selectByPk(datasourceId);
+            driver = dataSource.getDriver();
+        }
         if (driver.contains("mysql")) {
             return DBType.mysql;
         }
@@ -210,7 +178,8 @@ public class DataBaseManagerServiceImpl implements DataBaseManagerService {
                 databaseMetaData.init();
                 return databaseMetaData;
             }
-        }, h2 {
+        },
+        h2 {
             @Override
             public TableMetaParser getTableMetaParser(SqlExecutor sqlExecutor) {
                 return new H2TableMetaParser(sqlExecutor);

@@ -25,19 +25,17 @@ import org.hsweb.web.bean.po.datasource.DataSource;
 import org.hsweb.web.core.exception.BusinessException;
 import org.hsweb.web.dao.datasource.DataSourceMapper;
 import org.hsweb.web.service.config.ConfigService;
-import org.hsweb.web.service.impl.AbstractServiceImpl;
 import org.hsweb.web.service.datasource.DataSourceService;
+import org.hsweb.web.service.impl.AbstractServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceBuilder;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.sql.Connection;
@@ -54,14 +52,14 @@ public class DataSourceServiceImpl extends AbstractServiceImpl<DataSource, Strin
 
     private static final String CACHE_NAME = "datasource";
 
+    @Autowired
+    protected DataSourceProperties properties;
+
     @Resource
     protected DataSourceMapper dataSourceMapper;
 
     @Resource
     protected ConfigService configService;
-
-    @Autowired
-    protected javax.sql.DataSource defaultDataSource;
 
     @Override
     protected DataSourceMapper getMapper() {
@@ -76,12 +74,13 @@ public class DataSourceServiceImpl extends AbstractServiceImpl<DataSource, Strin
                 .url(dataSource.getUrl())
                 .username(dataSource.getUsername())
                 .password(dataSource.getPassword())
-                .type(defaultDataSource.getClass());
+                .type(properties.getType());
         return builder.build();
     }
 
     @Override
     @Cacheable(value = CACHE_NAME, key = "'id:'+#id")
+    @Transactional(readOnly = true, propagation = Propagation.NOT_SUPPORTED)
     public DataSource selectByPk(String id) {
         return super.selectByPk(id);
     }

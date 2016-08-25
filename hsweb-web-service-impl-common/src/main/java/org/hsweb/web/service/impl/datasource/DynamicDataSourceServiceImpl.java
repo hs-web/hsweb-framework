@@ -19,6 +19,7 @@ package org.hsweb.web.service.impl.datasource;
 import org.hsweb.concurrent.lock.LockFactory;
 import org.hsweb.ezorm.executor.SqlExecutor;
 import org.hsweb.web.bean.po.datasource.DataSource;
+import org.hsweb.web.core.datasource.DynamicDataSource;
 import org.hsweb.web.core.exception.NotFoundException;
 import org.hsweb.web.service.datasource.DataSourceService;
 import org.hsweb.web.service.datasource.DynamicDataSourceService;
@@ -26,6 +27,7 @@ import org.hsweb.web.service.impl.basic.SqlExecutorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -36,6 +38,9 @@ public class DynamicDataSourceServiceImpl implements DynamicDataSourceService {
 
     @Resource
     private DataSourceService dataSourceService;
+
+    @Autowired
+    private DynamicDataSource dynamicDataSource;
 
     @Autowired
     private LockFactory lockFactory;
@@ -53,29 +58,39 @@ public class DynamicDataSourceServiceImpl implements DynamicDataSourceService {
     }
 
     protected CacheInfo getCache(String id) {
-        DataSource old = dataSourceService.selectByPk(id);
-        if (old == null || old.getEnabled() != 1) throw new NotFoundException("数据源不存在或已禁用");
-        //创建锁
-        ReadWriteLock readWriteLock = lockFactory.createReadWriteLock("datasource.lock." + id);
-        readWriteLock.readLock().tryLock();
+        DynamicDataSource.useDefault();
         try {
-            CacheInfo cacheInfo = cache.get(id);
-            // 缓存存在,并且hash一致
-            if (cacheInfo != null && cacheInfo.getHash() == old.getHash())
+            DataSource old = dataSourceService.selectByPk(id);
+            if (old == null || old.getEnabled() != 1) throw new NotFoundException("数据源不存在或已禁用");
+            //创建锁
+            ReadWriteLock readWriteLock = lockFactory.createReadWriteLock("datasource.lock." + id);
+            readWriteLock.readLock().tryLock();
+            try {
+                CacheInfo cacheInfo = cache.get(id);
+                // 缓存存在,并且hash一致
+                if (cacheInfo != null && cacheInfo.getHash() == old.getHash())
+                    return cacheInfo;
+            } finally {
+                readWriteLock.readLock().unlock();
+            }
+            //加载datasource到缓存
+            readWriteLock.writeLock().tryLock();
+            try {
+                javax.sql.DataSource dataSource = dataSourceService.createDataSource(id);
+                CacheInfo cacheInfo = new CacheInfo(old.getHash(), dataSource);
+                cache.put(id, cacheInfo);
                 return cacheInfo;
+            } finally {
+                readWriteLock.writeLock().unlock();
+            }
         } finally {
-            readWriteLock.readLock().unlock();
+            DynamicDataSource.useLast();
         }
-        //加载datasource到缓存
-        readWriteLock.writeLock().tryLock();
-        try {
-            javax.sql.DataSource dataSource = dataSourceService.createDataSource(id);
-            CacheInfo cacheInfo = new CacheInfo(old.getHash(), dataSource);
-            cache.put(id, cacheInfo);
-            return cacheInfo;
-        } finally {
-            readWriteLock.writeLock().unlock();
-        }
+    }
+
+    @PostConstruct
+    public void init() {
+        ((DynamicDataSourceImpl) dynamicDataSource).setDynamicDataSourceService(this);
     }
 
     class CacheInfo {
