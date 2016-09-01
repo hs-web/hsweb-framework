@@ -41,6 +41,10 @@
 <img border="0" src="http://pub.idqqimg.com/wpa/images/group.png" alt="hsweb.me" title="hsweb.me">515649185
 </a>
 
+# 赞助 (支付宝)
+<img src="https://raw.githubusercontent.com/hs-web/hs-web.github.io/master/%E4%BB%98%E6%AC%BE%E7%BB%99%E6%88%91.png" 
+    width = "256" height = "256" alt="赞助" align=center />
+
 # 鸣谢
 *按时间排序*
 
