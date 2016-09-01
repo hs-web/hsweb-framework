@@ -18,7 +18,6 @@ package org.hsweb.web.service.impl;
 
 import org.hsweb.web.service.impl.datasource.DynamicDataSourceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceBuilder;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -47,7 +46,7 @@ public class DynamicDataSourceAutoConfiguration {
         if (this.properties.getType() != null) {
             factory.type(this.properties.getType());
         }
-
         return new DynamicDataSourceImpl(factory.build());
     }
+
 }

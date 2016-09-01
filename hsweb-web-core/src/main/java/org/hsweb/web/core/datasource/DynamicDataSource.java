@@ -17,7 +17,10 @@
 package org.hsweb.web.core.datasource;
 
 import org.hsweb.web.core.utils.ThreadLocalUtils;
+import org.springframework.jca.cci.connection.ConnectionHolder;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import javax.sql.CommonDataSource;
 import javax.sql.DataSource;
 
 /**
@@ -50,5 +53,5 @@ public interface DynamicDataSource extends DataSource {
         useDefault(true);
     }
 
-    DataSource getActiveDataSource();
+    CommonDataSource getActiveDataSource();
 }

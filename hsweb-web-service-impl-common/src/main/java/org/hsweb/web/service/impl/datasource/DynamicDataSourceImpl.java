@@ -27,7 +27,7 @@ import java.sql.SQLException;
 public class DynamicDataSourceImpl extends AbstractDataSource implements DynamicDataSource {
     private javax.sql.DataSource defaultDataSource;
 
-    private DynamicDataSourceService dynamicDataSourceService;
+    protected DynamicDataSourceService dynamicDataSourceService;
 
     public DynamicDataSourceImpl(javax.sql.DataSource defaultDataSource) {
         this.defaultDataSource = defaultDataSource;
@@ -58,4 +58,5 @@ public class DynamicDataSourceImpl extends AbstractDataSource implements Dynamic
     public void setDynamicDataSourceService(DynamicDataSourceService dynamicDataSourceService) {
         this.dynamicDataSourceService = dynamicDataSourceService;
     }
+
 }

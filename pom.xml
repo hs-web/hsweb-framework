@@ -44,6 +44,7 @@
         <hsweb.ezorm.version>1.0-SNAPSHOT</hsweb.ezorm.version>
         <hsweb.commons.version>1.0-SNAPSHOT</hsweb.commons.version>
         <hsweb.expands.version>1.0-SNAPSHOT</hsweb.expands.version>
+        <atomikos.version>4.0.4</atomikos.version>
     </properties>
 
     <build>
@@ -113,6 +114,42 @@
 
     <dependencyManagement>
         <dependencies>
+            <!--atomikos-->
+            <dependency>
+                <groupId>com.atomikos</groupId>
+                <artifactId>transactions-jdbc</artifactId>
+                <version>${atomikos.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.atomikos</groupId>
+                <artifactId>transactions-jta</artifactId>
+                <version>${atomikos.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.atomikos</groupId>
+                <artifactId>transactions</artifactId>
+                <version>${atomikos.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.atomikos</groupId>
+                <artifactId>transactions-api</artifactId>
+                <version>${atomikos.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.atomikos</groupId>
+                <artifactId>atomikos-util</artifactId>
+                <version>${atomikos.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>javax.transaction</groupId>
+                <artifactId>jta</artifactId>
+                <version>1.1</version>
+            </dependency>
 
             <!--oauth2-->
             <dependency>

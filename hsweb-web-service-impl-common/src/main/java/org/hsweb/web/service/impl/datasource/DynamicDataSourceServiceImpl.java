@@ -25,7 +25,9 @@ import org.hsweb.web.service.datasource.DataSourceService;
 import org.hsweb.web.service.datasource.DynamicDataSourceService;
 import org.hsweb.web.service.impl.basic.SqlExecutorService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -39,7 +41,7 @@ public class DynamicDataSourceServiceImpl implements DynamicDataSourceService {
     @Resource
     private DataSourceService dataSourceService;
 
-    @Autowired
+    @Autowired(required = false)
     private DynamicDataSource dynamicDataSource;
 
     @Autowired
@@ -50,6 +52,10 @@ public class DynamicDataSourceServiceImpl implements DynamicDataSourceService {
     @Override
     public javax.sql.DataSource getDataSource(String id) {
         return getCache(id).getDataSource();
+    }
+
+    public PlatformTransactionManager getTransactionManager(String id) {
+        return getCache(id).getTransactionManager();
     }
 
     @Override
@@ -90,7 +96,8 @@ public class DynamicDataSourceServiceImpl implements DynamicDataSourceService {
 
     @PostConstruct
     public void init() {
-        ((DynamicDataSourceImpl) dynamicDataSource).setDynamicDataSourceService(this);
+        if (null != dynamicDataSource)
+            ((DynamicDataSourceImpl) dynamicDataSource).setDynamicDataSourceService(this);
     }
 
     class CacheInfo {
@@ -98,12 +105,15 @@ public class DynamicDataSourceServiceImpl implements DynamicDataSourceService {
 
         javax.sql.DataSource dataSource;
 
+        PlatformTransactionManager transactionManager;
+
         SqlExecutor sqlExecutor;
 
         public CacheInfo(int hash, javax.sql.DataSource dataSource) {
             this.hash = hash;
             this.dataSource = dataSource;
             sqlExecutor = new SqlExecutorService().setDataSource(dataSource);
+            transactionManager = new DataSourceTransactionManager(dataSource);
         }
 
         public int getHash() {
@@ -117,5 +127,10 @@ public class DynamicDataSourceServiceImpl implements DynamicDataSourceService {
         public SqlExecutor getSqlExecutor() {
             return sqlExecutor;
         }
+
+        public PlatformTransactionManager getTransactionManager() {
+            return transactionManager;
+        }
     }
+
 }

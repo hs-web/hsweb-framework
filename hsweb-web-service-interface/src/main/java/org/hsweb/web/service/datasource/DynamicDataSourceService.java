@@ -19,6 +19,7 @@ package org.hsweb.web.service.datasource;
 import org.hsweb.ezorm.executor.SqlExecutor;
 
 import javax.sql.DataSource;
+import javax.sql.XADataSource;
 
 /**
  * @author zhouhao
@@ -29,4 +30,5 @@ public interface DynamicDataSourceService {
 
     SqlExecutor getSqlExecutor(String id);
 
+    Object getTransactionManager(String id);
 }
