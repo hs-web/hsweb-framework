@@ -1,7 +1,5 @@
-# hsweb-framework 
-后台管理基础框架,基于maven,spring-boot,mybatis
-[![Build Status](https://travis-ci.org/hs-web/hsweb-framework.svg?branch=master)](https://travis-ci.org/hs-web/hsweb-framework)
-
+## 后台管理基础框架 [![Build Status](https://travis-ci.org/hs-web/hsweb-framework.svg?branch=master)](https://travis-ci.org/hs-web/hsweb-framework)
+基于maven,spring-boot,mybatis
 ### 主要功能
 1. 基础dao,service,controller类，增删改查直接继承即可.
 2. 通用mybatis配置文件,支持多种条件查询自动生成,支持自动生成insert,update,delete语句 支持和查询相同的各种条件.
