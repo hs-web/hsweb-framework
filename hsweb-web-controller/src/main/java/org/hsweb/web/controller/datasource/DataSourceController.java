@@ -16,7 +16,6 @@
 
 package org.hsweb.web.controller.datasource;
 
-import org.hsweb.web.bean.common.QueryParam;
 import org.hsweb.web.bean.po.datasource.DataSource;
 import org.hsweb.web.controller.GenericController;
 import org.hsweb.web.core.authorize.annotation.Authorize;
@@ -64,10 +63,4 @@ public class DataSourceController extends GenericController<DataSource, String> 
         return ResponseMessage.ok();
     }
 
-    @RequestMapping(value = "/test/{id}", method = RequestMethod.GET)
-    @Authorize(action = "R")
-    @AccessLogger("测试连接")
-    public ResponseMessage testConnection(@PathVariable("id") String id) {
-        return ResponseMessage.ok(dataSourceService.testConnection(id));
-    }
 }

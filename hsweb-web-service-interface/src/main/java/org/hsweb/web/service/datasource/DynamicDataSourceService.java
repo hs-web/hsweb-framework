@@ -16,10 +16,7 @@
 
 package org.hsweb.web.service.datasource;
 
-import org.hsweb.ezorm.executor.SqlExecutor;
-
 import javax.sql.DataSource;
-import javax.sql.XADataSource;
 
 /**
  * @author zhouhao
@@ -28,7 +25,6 @@ public interface DynamicDataSourceService {
 
     DataSource getDataSource(String id);
 
-    SqlExecutor getSqlExecutor(String id);
+    void destroyAll()throws Exception;
 
-    Object getTransactionManager(String id);
 }

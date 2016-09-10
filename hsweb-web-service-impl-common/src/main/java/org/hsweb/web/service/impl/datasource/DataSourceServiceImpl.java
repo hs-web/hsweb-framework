@@ -67,18 +67,6 @@ public class DataSourceServiceImpl extends AbstractServiceImpl<DataSource, Strin
     }
 
     @Override
-    public javax.sql.DataSource createDataSource(String id) {
-        DataSource dataSource = selectByPk(id);
-        DataSourceBuilder builder = DataSourceBuilder.create()
-                .driverClassName(dataSource.getDriver())
-                .url(dataSource.getUrl())
-                .username(dataSource.getUsername())
-                .password(dataSource.getPassword())
-                .type(properties.getType());
-        return builder.build();
-    }
-
-    @Override
     @Cacheable(value = CACHE_NAME, key = "'id:'+#id")
     @Transactional(readOnly = true, propagation = Propagation.NOT_SUPPORTED)
     public DataSource selectByPk(String id) {
@@ -130,27 +118,4 @@ public class DataSourceServiceImpl extends AbstractServiceImpl<DataSource, Strin
         return super.delete(id);
     }
 
-    @Override
-    public boolean testConnection(String id) {
-        DataSource old = selectByPk(id);
-        assertNotNull(old, "数据源不存在");
-        javax.sql.DataSource dataSource = createDataSource(id);
-        AbstractJdbcSqlExecutor sqlExecutor = new AbstractJdbcSqlExecutor() {
-            @Override
-            public Connection getConnection() {
-                return DataSourceUtils.getConnection(dataSource);
-            }
-
-            @Override
-            public void releaseConnection(Connection connection) throws SQLException {
-                DataSourceUtils.releaseConnection(connection, dataSource);
-            }
-        };
-        try {
-            sqlExecutor.exec(new SimpleSQL(old.getTestSql()));
-            return true;
-        } catch (SQLException e) {
-            return false;
-        }
-    }
 }

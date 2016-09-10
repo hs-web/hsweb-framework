@@ -33,7 +33,7 @@
 3. 演示项目源码:[hsweb-platform](https://github.com/hs-web/hsweb-platform)
 
 # 许可
-[apache2.0](http://www.apache.org/licenses/LICENSE-2.0.html)
+[![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg?style=flat-square)](https://www.apache.org/licenses/LICENSE-2.0.html)
 
 # 加入hsweb
 <a target="_blank" href="http://shang.qq.com/wpa/qunwpa?idkey=3d66b5dd14991d7645af694e7649b373f3a9ce1216131094c78cb2348d542c41">

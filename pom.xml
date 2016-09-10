@@ -20,6 +20,7 @@
         <module>hsweb-web-concurrent</module>
         <module>hsweb-web-crawler</module>
         <module>hsweb-web-oauth2</module>
+        <module>hsweb-web-datasource</module>
     </modules>
 
     <properties>
@@ -37,7 +38,7 @@
         <fastjson.version>1.2.6</fastjson.version>
 
         <h2.version>1.4.191</h2.version>
-        <mysql.version>5.1.38</mysql.version>
+        <mysql.version>5.1.39</mysql.version>
         <cglib.version>3.2.2</cglib.version>
         <aspectj.version>1.6.12</aspectj.version>
         <hibernate.validator.version>5.1.1.Final</hibernate.validator.version>
@@ -158,6 +159,11 @@
                 <version>1.0.2</version>
             </dependency>
 
+            <dependency>
+                <groupId>org.hsweb</groupId>
+                <artifactId>hsweb-web-datasource</artifactId>
+                <version>${project.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.hsweb</groupId>
                 <artifactId>hsweb-web-oauth2-core</artifactId>

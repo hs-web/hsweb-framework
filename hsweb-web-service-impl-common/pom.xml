@@ -14,6 +14,11 @@
 
         <!--test-->
         <dependency>
+            <groupId>org.hsweb</groupId>
+            <artifactId>hsweb-web-datasource</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>javax.el</groupId>
             <artifactId>el-api</artifactId>
             <version>2.2</version>
@@ -42,9 +47,14 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>druid</artifactId>
-            <version>1.0.5</version>
+            <version>1.0.25</version>
             <scope>test</scope>
         </dependency>
 

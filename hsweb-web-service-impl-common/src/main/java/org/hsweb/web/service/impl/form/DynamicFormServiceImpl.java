@@ -41,7 +41,6 @@ import java.io.OutputStream;
 import java.sql.JDBCType;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Created by zhouhao on 16-4-14.
@@ -455,4 +454,8 @@ public class DynamicFormServiceImpl implements DynamicFormService, ExpressionSco
         return result;
     }
 
+
+    public static void main(String[] args) {
+        Arrays.asList(1,2,3).forEach(System.out::println);
+    }
 }

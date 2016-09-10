@@ -25,18 +25,8 @@ import org.hsweb.web.service.GenericService;
  */
 public interface DataSourceService extends GenericService<DataSource, String> {
 
-    /**
-     * 根据数据源ID，创建数据源实例
-     *
-     * @param id 数据源ID
-     * @return 数据源实例
-     */
-    javax.sql.DataSource createDataSource(String id);
-
     void enable(String id);
 
     void disable(String id);
-
-    boolean testConnection(String id);
 
 }

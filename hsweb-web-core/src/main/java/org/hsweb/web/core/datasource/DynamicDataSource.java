@@ -53,5 +53,5 @@ public interface DynamicDataSource extends DataSource {
         useDefault(true);
     }
 
-    CommonDataSource getActiveDataSource();
+    DataSource getActiveDataSource();
 }

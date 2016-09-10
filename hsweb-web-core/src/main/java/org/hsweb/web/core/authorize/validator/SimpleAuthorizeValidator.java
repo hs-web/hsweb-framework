@@ -1,16 +1,18 @@
 package org.hsweb.web.core.authorize.validator;
 
+import org.hsweb.commons.StringUtils;
+import org.hsweb.expands.script.engine.DynamicScriptEngine;
+import org.hsweb.expands.script.engine.DynamicScriptEngineFactory;
+import org.hsweb.web.bean.po.user.User;
 import org.hsweb.web.core.authorize.AuthorizeValidator;
 import org.hsweb.web.core.authorize.AuthorizeValidatorConfig;
 import org.hsweb.web.core.authorize.ExpressionScopeBean;
 import org.hsweb.web.core.authorize.annotation.Authorize;
-import org.hsweb.web.bean.po.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.hsweb.commons.StringUtils;
-import org.hsweb.expands.script.engine.DynamicScriptEngine;
-import org.hsweb.expands.script.engine.DynamicScriptEngineFactory;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * 权限验证器
@@ -62,6 +64,7 @@ public class SimpleAuthorizeValidator implements AuthorizeValidator {
                     return StringUtils.isTrue(engine.execute(expression.getId(), var).getResult());
                 });
         }
+
         return access;
     }
 
