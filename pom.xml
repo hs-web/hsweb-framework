@@ -6,19 +6,16 @@
     <groupId>org.hsweb</groupId>
     <artifactId>hsweb-framework</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>2.0-SNAPSHOT</version>
     <modules>
-        <module>hsweb-web-dao-interface</module>
-        <module>hsweb-web-dao-impl-mybatis</module>
-        <module>hsweb-web-service-interface</module>
-        <module>hsweb-web-service-impl-common</module>
+        <module>hsweb-web-dao</module>
+        <module>hsweb-web-service</module>
         <module>hsweb-web-controller</module>
         <module>hsweb-web-bean</module>
         <module>hsweb-web-core</module>
         <module>hsweb-web-websocket</module>
         <module>hsweb-web-workflow</module>
         <module>hsweb-web-concurrent</module>
-        <module>hsweb-web-crawler</module>
         <module>hsweb-web-oauth2</module>
         <module>hsweb-web-datasource</module>
     </modules>
@@ -184,7 +181,7 @@
 
             <dependency>
                 <groupId>org.hsweb</groupId>
-                <artifactId>hsweb-web-oauth2-service-common</artifactId>
+                <artifactId>hsweb-web-oauth2-service-simple</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -278,22 +275,22 @@
             </dependency>
             <dependency>
                 <groupId>org.hsweb</groupId>
-                <artifactId>hsweb-web-dao-interface</artifactId>
+                <artifactId>hsweb-web-dao-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.hsweb</groupId>
-                <artifactId>hsweb-web-dao-impl-mybatis</artifactId>
+                <artifactId>hsweb-web-dao-mybatis</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.hsweb</groupId>
-                <artifactId>hsweb-web-service-interface</artifactId>
+                <artifactId>hsweb-web-service-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.hsweb</groupId>
-                <artifactId>hsweb-web-service-impl-common</artifactId>
+                <artifactId>hsweb-web-service-simple</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

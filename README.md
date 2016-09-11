@@ -1,11 +1,17 @@
-## 后台管理基础框架 [![Build Status](https://travis-ci.org/hs-web/hsweb-framework.svg?branch=master)](https://travis-ci.org/hs-web/hsweb-framework)
-基于maven,spring-boot,mybatis
+## 后台管理基础框架
+
+[![Build Status](https://travis-ci.org/hs-web/hsweb-framework.svg?branch=master)](https://travis-ci.org/hs-web/hsweb-framework)
+[![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg?style=flat-square)](https://www.apache.org/licenses/LICENSE-2.0.html)
+
 ### 主要功能
 1. 基础dao,service,controller类，增删改查直接继承即可.
 2. 通用mybatis配置文件,支持多种条件查询自动生成,支持自动生成insert,update,delete语句 支持和查询相同的各种条件.
 3. 实现用户,权限管理;基于aop,注解,精确到按钮的权限控制.
 4. 动态表单功能,可在前端设计表单,动态生成数据库表,提供统一的增删改查接口.
-5. 数据库支持 mysql,oracle,h2
+5. 在线代码生成器,可自定义模板
+6. 动态多数据源,支持数据源热加载,热切换,支持分布式事务
+7. 数据库支持 mysql,oracle,h2
+8. websocket支持
 
 ### 其他组件
 1. [hsweb-easy-orm](https://github.com/hs-web/hsweb-easy-orm) :为动态表单设计的orm框架
@@ -23,40 +29,13 @@
     $ mvn install -DskiptTests
 ```
 
-# 使用
-1. 开发文档
-2. FAQ
+# 此版本待完善功能
+1. 单元测试编写
+2. 增加定时调度,支持集群,任务采用脚本方式编写.
+3. 完善数据库持续集成,版本更新时自动更新数据库结构.
+4. 完善动态表单发布,表单发生变化后,自动重新发布(解决集群下,表单配置不一致).
 
 # 演示
 1. 示例:[demo.hsweb.me](http://demo.hsweb.me)
 2. 测试用户:test (test2,test3,test4....) 密码:123456 
 3. 演示项目源码:[hsweb-platform](https://github.com/hs-web/hsweb-platform)
-
-# 许可
-[![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg?style=flat-square)](https://www.apache.org/licenses/LICENSE-2.0.html)
-
-# 加入hsweb
-<a target="_blank" href="http://shang.qq.com/wpa/qunwpa?idkey=3d66b5dd14991d7645af694e7649b373f3a9ce1216131094c78cb2348d542c41">
-<img border="0" src="http://pub.idqqimg.com/wpa/images/group.png" alt="hsweb.me" title="hsweb.me">515649185
-</a>
-
-# 赞助 (支付宝)
-<img src="https://raw.githubusercontent.com/hs-web/hs-web.github.io/master/%E4%BB%98%E6%AC%BE%E7%BB%99%E6%88%91.png" 
-    width = "256" height = "256" alt="赞助" align=center />
-
-# 鸣谢
-*按时间排序*
-
-|    组织&个人   | 方式         |
-| ------------- |:-------------:| 
-| [jetbrains.com](https://www.jetbrains.com)   |正版 [IDE](https://www.jetbrains.com/Toolbox/) 授权            | 
-| [@杭州-smart](https://github.com/JetBrainZP) |赞助: ￥150 (用于服务器升级) | 
-| [@北京-50%](https://github.com/longfeizheng) |赞助: ￥50 (用于服务器升级)   | 
-| [@王乐](https://github.com/gmle) |赞助: ￥20 (用于服务器升级)   | 
-| 匿名 |赞助: ￥100 (用于服务器升级)   | 
-| [@西安-un](https://github.com/lw5826618) |赞助: ￥50 (用于服务器升级)   | 
-| [@重庆-下下](https://github.com/web-xiaxia) |赞助: ￥250 (用于服务器升级)   | 
-| [@天津-Mr.Chang](https://github.com/changdaye) |赞助: ￥100 (用于服务器升级)   | 
-| [@北京-青春无罪](https://github.com/gxz04220427) |赞助: ￥100 (用于服务器升级)   | 
-| [@kitkat](https://github.com/wy353208214) |赞助: ￥50  | 
-

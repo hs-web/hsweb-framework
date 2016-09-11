@@ -19,18 +19,16 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>hsweb-web-oauth2</artifactId>
+        <artifactId>hsweb-framework</artifactId>
         <groupId>org.hsweb</groupId>
         <version>2.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
+    <modules>
+        <module>hsweb-web-service-api</module>
+        <module>hsweb-web-service-simple</module>
+    </modules>
+    <artifactId>hsweb-web-service</artifactId>
+    <packaging>pom</packaging>
 
-    <artifactId>hsweb-web-oauth2-core</artifactId>
-
-    <dependencies>
-        <dependency>
-            <groupId>org.hsweb</groupId>
-            <artifactId>hsweb-web-service-api</artifactId>
-        </dependency>
-    </dependencies>
 </project>

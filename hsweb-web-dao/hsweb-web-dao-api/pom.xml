@@ -3,26 +3,17 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>hsweb-framework</artifactId>
+        <artifactId>hsweb-web-dao</artifactId>
         <groupId>org.hsweb</groupId>
         <version>2.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>hsweb-web-bean</artifactId>
+    <artifactId>hsweb-web-dao-api</artifactId>
 
     <dependencies>
-        <!-- hibernate-validator -->
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-validator</artifactId>
-        </dependency>
         <dependency>
             <groupId>org.hsweb</groupId>
-            <artifactId>hsweb-easy-orm</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.hsweb</groupId>
-            <artifactId>hsweb-commons</artifactId>
+            <artifactId>hsweb-web-bean</artifactId>
         </dependency>
     </dependencies>
 </project>

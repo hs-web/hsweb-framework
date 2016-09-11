@@ -25,35 +25,16 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>hsweb-web-oauth2-controller</artifactId>
+    <artifactId>hsweb-web-oauth2-service-simple</artifactId>
 
     <dependencies>
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
-            <version>2.5</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.oltu.oauth2</groupId>
-            <artifactId>org.apache.oltu.oauth2.authzserver</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.hsweb</groupId>
-            <artifactId>hsweb-web-controller</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.hsweb</groupId>
-            <artifactId>hsweb-web-core</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.hsweb</groupId>
             <artifactId>hsweb-web-oauth2-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hsweb</groupId>
+            <artifactId>hsweb-web-service-simple</artifactId>
         </dependency>
     </dependencies>
 </project>
