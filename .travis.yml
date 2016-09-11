@@ -2,4 +2,4 @@ language: java
 jdk: oraclejdk8
 sudo: false
 install: true
-script: mvn install -DskipTest
+script: mvn install -DskipTests
