@@ -20,6 +20,7 @@ import org.hsweb.web.bean.common.QueryParam;
 import org.hsweb.web.bean.common.UpdateMapParam;
 import org.hsweb.web.bean.common.UpdateParam;
 import org.hsweb.web.bean.po.datasource.DataSource;
+import org.hsweb.web.core.datasource.DynamicDataSource;
 import org.hsweb.web.core.exception.BusinessException;
 import org.hsweb.web.dao.datasource.DataSourceMapper;
 import org.hsweb.web.service.config.ConfigService;
@@ -33,6 +34,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.util.Date;
 import java.util.List;
@@ -55,6 +57,27 @@ public class DataSourceServiceImpl extends AbstractServiceImpl<DataSource, Strin
     @Resource
     protected ConfigService configService;
 
+    @Autowired(required = false)
+    protected DynamicDataSource dynamicDataSource;
+
+
+    @PostConstruct
+    public void init() {
+        checkDynamicDataSourceSupport();
+    }
+
+    protected void checkDynamicDataSourceSupport() {
+        if (dynamicDataSource == null)
+            logger.warn("\ndynamicDataSource is not support! if you want use it,please import " +
+                    "\n<!--------------------------------------------------------->\n" +
+                    "       <dependency>\n" +
+                    "            <groupId>org.hsweb</groupId>\n" +
+                    "            <artifactId>hsweb-web-datasource</artifactId>\n" +
+                    "       </dependency>" +
+                    "\n<!--------------------------------------------------------->" +
+                    "\n to pom.xml");
+    }
+
     @Override
     protected DataSourceMapper getMapper() {
         return this.dataSourceMapper;
@@ -69,6 +92,7 @@ public class DataSourceServiceImpl extends AbstractServiceImpl<DataSource, Strin
 
     @Override
     public String insert(DataSource data) {
+        checkDynamicDataSourceSupport();
         data.setCreateDate(new Date());
         data.setEnabled(1);
         tryValidPo(data);
@@ -86,22 +110,25 @@ public class DataSourceServiceImpl extends AbstractServiceImpl<DataSource, Strin
     @Override
     @CacheEvict(value = CACHE_NAME, key = "'id:'+#data.id")
     public int update(DataSource data) {
+        checkDynamicDataSourceSupport();
         DataSource old = selectSingle(QueryParam.build()
                 .where("name", data.getName())
                 .and("id$not", data.getId()));
         if (old != null) throw new BusinessException("名称" + data.getName() + "已存在");
-        return getMapper().update(UpdateParam.build(data).excludes("createDate", "enabled").where("id",data.getId()));
+        return getMapper().update(UpdateParam.build(data).excludes("createDate", "enabled").where("id", data.getId()));
     }
 
     @Override
     @CacheEvict(value = CACHE_NAME, key = "'id:'+#id")
     public void enable(String id) {
+        checkDynamicDataSourceSupport();
         getMapper().update((UpdateParam) UpdateMapParam.build().set("enabled", 1).where("id", id));
     }
 
     @Override
     @CacheEvict(value = CACHE_NAME, key = "'id:'+#id")
     public void disable(String id) {
+        checkDynamicDataSourceSupport();
         getMapper().update((UpdateParam) UpdateMapParam.build().set("enabled", 0).where("id", id));
     }
 

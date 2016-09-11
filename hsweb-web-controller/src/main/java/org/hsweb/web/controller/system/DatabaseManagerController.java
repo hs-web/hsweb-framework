@@ -17,6 +17,9 @@ import org.hsweb.web.core.message.ResponseMessage;
 import org.hsweb.web.core.utils.WebUtil;
 import org.hsweb.web.service.form.DynamicFormService;
 import org.hsweb.web.service.system.DataBaseManagerService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -31,8 +34,24 @@ import java.util.List;
 @Authorize(module = "database")
 @AccessLogger("数据库管理")
 public class DatabaseManagerController {
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
     @Resource
     private DataBaseManagerService dataBaseManagerService;
+
+    @Autowired(required = false)
+    protected DynamicDataSource dynamicDataSource;
+
+    protected void checkDynamicDataSourceSupport() {
+        if (dynamicDataSource == null)
+            logger.warn("\ndynamicDataSource is not support! if you want use it,please import " +
+                    "\n<!--------------------------------------------------------->\n" +
+                    "       <dependency>\n" +
+                    "            <groupId>org.hsweb</groupId>\n" +
+                    "            <artifactId>hsweb-web-datasource</artifactId>\n" +
+                    "       </dependency>" +
+                    "\n<!--------------------------------------------------------->" +
+                    "\n to pom.xml");
+    }
 
     @RequestMapping(value = "/tables", method = RequestMethod.GET)
     @Authorize(action = "R")
@@ -67,6 +86,7 @@ public class DatabaseManagerController {
     @AccessLogger("指定数据源获取表结构")
     public ResponseMessage showTables(@PathVariable("dataSourceId") String dataSourceId) throws SQLException {
         try {
+            checkDynamicDataSourceSupport();
             DynamicDataSource.use(dataSourceId);
             return ResponseMessage.ok(dataBaseManagerService.getTableList())
                     .include(TableMetaData.class, "name", "alias", "comment", "fields")
@@ -109,6 +129,7 @@ public class DatabaseManagerController {
     @RequestMapping(value = "/exec/{dataSourceId}", method = RequestMethod.POST)
     @AccessLogger("指定数据源执行SQL")
     public ResponseMessage exec(@PathVariable("dataSourceId") String dataSourceId, @RequestBody String sql) throws Exception {
+        checkDynamicDataSourceSupport();
         DynamicDataSource.use(dataSourceId);
         try {
             return ResponseMessage.ok(dataBaseManagerService.execSql(buildSqlList(sql)));
@@ -121,6 +142,7 @@ public class DatabaseManagerController {
     @AccessLogger("指定数据源查询修改表结构SQL")
     public ResponseMessage showAlterSql(@PathVariable("dataSourceId") String dataSourceId, @RequestBody JSONObject jsonObject) throws Exception {
         try {
+            checkDynamicDataSourceSupport();
             DynamicDataSource.use(dataSourceId);
             return ResponseMessage.ok(dataBaseManagerService.createAlterSql(createTableMetaDataByJson(jsonObject)));
         } finally {
@@ -132,6 +154,7 @@ public class DatabaseManagerController {
     @AccessLogger("指定数据源查询创建表结构SQL")
     public ResponseMessage showCreateSql(@PathVariable("dataSourceId") String dataSourceId, @RequestBody JSONObject jsonObject) throws Exception {
         try {
+            checkDynamicDataSourceSupport();
             DynamicDataSource.use(dataSourceId);
             return ResponseMessage.ok(dataBaseManagerService.createCreateSql(createTableMetaDataByJson(jsonObject)));
         } finally {

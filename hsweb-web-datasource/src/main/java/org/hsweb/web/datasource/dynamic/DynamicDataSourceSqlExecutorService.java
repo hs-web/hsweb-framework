@@ -16,7 +16,6 @@
 
 package org.hsweb.web.datasource.dynamic;
 
-import com.atomikos.jdbc.AtomikosDataSourceBean;
 import org.hsweb.ezorm.executor.AbstractJdbcSqlExecutor;
 import org.hsweb.ezorm.executor.SQL;
 import org.hsweb.ezorm.meta.expand.ObjectWrapper;
@@ -38,16 +37,16 @@ import java.util.Map;
 public class DynamicDataSourceSqlExecutorService extends AbstractJdbcSqlExecutor {
 
     @Resource
-    protected AtomikosDataSourceBean atomikosDataSourceBean;
+    protected DynamicDataSource dynamicDataSource;
 
     @Override
     public Connection getConnection() {
-        return DataSourceUtils.getConnection(((DynamicDataSource) atomikosDataSourceBean.getXaDataSource()).getActiveDataSource());
+        return DataSourceUtils.getConnection(dynamicDataSource.getActiveDataSource());
     }
 
     @Override
     public void releaseConnection(Connection connection) throws SQLException {
-        DataSourceUtils.releaseConnection(connection, ((DynamicDataSource) atomikosDataSourceBean.getXaDataSource()).getActiveDataSource());
+        DataSourceUtils.releaseConnection(connection, dynamicDataSource.getActiveDataSource());
     }
 
     @Override

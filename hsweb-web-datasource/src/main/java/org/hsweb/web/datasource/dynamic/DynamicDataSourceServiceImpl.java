@@ -49,16 +49,10 @@ public class DynamicDataSourceServiceImpl implements DynamicDataSourceService {
     private DataSourceService dataSourceService;
 
     @Autowired(required = false)
-    @Qualifier("atomikosDataSourceBean")
-    private AtomikosDataSourceBean atomikosDataSourceBean;
+    protected DynamicDataSource dynamicDataSource;
 
     @Autowired
     private LockFactory lockFactory;
-//    @Resource
-//    private DynamicDeployBeans dynamicDeployBeans;
-
-//    @Autowired
-//    ApplicationContext applicationContext;
 
     private ConcurrentMap<String, CacheInfo> cache = new ConcurrentHashMap<>();
 
@@ -76,8 +70,7 @@ public class DynamicDataSourceServiceImpl implements DynamicDataSourceService {
     protected void closeDataSource(javax.sql.DataSource ds) {
         if (ds instanceof AtomikosDataSourceBean) {
             ((AtomikosDataSourceBean) ds).close();
-        }
-        if (ds instanceof Closeable) {
+        } else if (ds instanceof Closeable) {
             try {
                 ((Closeable) ds).close();
             } catch (IOException e) {
@@ -151,6 +144,7 @@ public class DynamicDataSourceServiceImpl implements DynamicDataSourceService {
         try {
             dataSourceBean.init();
         } catch (AtomikosSQLException e) {
+            dataSourceBean.close();
             throw new RuntimeException(e);
         }
         return dataSourceBean;
@@ -158,8 +152,8 @@ public class DynamicDataSourceServiceImpl implements DynamicDataSourceService {
 
     @PostConstruct
     public void init() {
-        if (null != atomikosDataSourceBean)
-            ((DynamicXaDataSourceImpl) atomikosDataSourceBean.getXaDataSource()).setDynamicDataSourceService(this);
+        if (null != dynamicDataSource)
+            ((DynamicXaDataSourceImpl) dynamicDataSource).setDynamicDataSourceService(this);
     }
 
     class CacheInfo {

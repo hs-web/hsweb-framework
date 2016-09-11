@@ -21,6 +21,8 @@ import org.hsweb.web.core.exception.NotFoundException;
 import org.hsweb.web.service.datasource.DataSourceService;
 import org.hsweb.web.service.impl.DatabaseMetaDataFactoryBean;
 import org.hsweb.web.service.system.DataBaseManagerService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.stereotype.Service;
@@ -43,7 +45,7 @@ import java.util.Map;
  */
 @Service(value = "dataBaseManagerService")
 public class DataBaseManagerServiceImpl implements DataBaseManagerService {
-
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
     @Resource
     private SqlExecutor sqlExecutor;
 
