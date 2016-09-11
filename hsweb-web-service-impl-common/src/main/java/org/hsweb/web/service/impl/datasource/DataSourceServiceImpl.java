@@ -16,8 +16,6 @@
 
 package org.hsweb.web.service.impl.datasource;
 
-import org.hsweb.ezorm.executor.AbstractJdbcSqlExecutor;
-import org.hsweb.ezorm.render.support.simple.SimpleSQL;
 import org.hsweb.web.bean.common.QueryParam;
 import org.hsweb.web.bean.common.UpdateMapParam;
 import org.hsweb.web.bean.common.UpdateParam;
@@ -28,18 +26,14 @@ import org.hsweb.web.service.config.ConfigService;
 import org.hsweb.web.service.datasource.DataSourceService;
 import org.hsweb.web.service.impl.AbstractServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceBuilder;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 
@@ -78,8 +72,8 @@ public class DataSourceServiceImpl extends AbstractServiceImpl<DataSource, Strin
         data.setCreateDate(new Date());
         data.setEnabled(1);
         tryValidPo(data);
-        DataSource old = selectSingle(QueryParam.build().where("name", data.getName()));
-        if (old != null) throw new BusinessException("名称" + data.getName() + "已存在");
+        DataSource old = selectSingle(QueryParam.build().where("name", data.getName()).or("id", data.getId()));
+        if (old != null) throw new BusinessException("名称:" + data.getName() + "或id:" + data.getId() + "已存在");
         return super.insert(data);
     }
 
@@ -96,7 +90,7 @@ public class DataSourceServiceImpl extends AbstractServiceImpl<DataSource, Strin
                 .where("name", data.getName())
                 .and("id$not", data.getId()));
         if (old != null) throw new BusinessException("名称" + data.getName() + "已存在");
-        return getMapper().update(UpdateParam.build(data).excludes("createDate", "enabled"));
+        return getMapper().update(UpdateParam.build(data).excludes("createDate", "enabled").where("id",data.getId()));
     }
 
     @Override
