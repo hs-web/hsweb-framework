@@ -23,6 +23,7 @@ import org.hsweb.ezorm.meta.expand.SimpleMapWrapper;
 import org.hsweb.ezorm.render.support.simple.SimpleSQL;
 import org.hsweb.web.core.datasource.DynamicDataSource;
 import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
@@ -95,6 +96,12 @@ public class DynamicDataSourceSqlExecutorService extends AbstractJdbcSqlExecutor
     public Map<String, Object> single(String sql, Map<String, Object> param) throws Exception {
         Map<String, Object> data = single(create(sql, param));
         return data;
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public void exec(SQL sql) throws SQLException {
+        super.exec(sql);
     }
 
     public SQL create(String sql) {

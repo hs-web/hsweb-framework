@@ -59,6 +59,7 @@ public class DynamicDataSourceAutoConfiguration {
         dataSourceBean.getXaProperties().putAll(properties.getXa().getProperties());
         dataSourceBean.setXaDataSourceClassName(properties.getXa().getDataSourceClassName());
         dataSourceBean.setUniqueResourceName("core");
+        dataSourceBean.setMinPoolSize(StringUtils.toInt(properties.getXa().getProperties().get("minPoolSize"), 5));
         dataSourceBean.setMaxPoolSize(StringUtils.toInt(properties.getXa().getProperties().get("maxPoolSize"), 200));
         dataSourceBean.setTestQuery(properties.getXa().getProperties().get("validationQuery"));
         dataSourceBean.setBorrowConnectionTimeout(60);
@@ -107,6 +108,7 @@ public class DynamicDataSourceAutoConfiguration {
     }
 
     @Bean(name = "sqlExecutor")
+    @ConditionalOnMissingBean(DynamicDataSourceSqlExecutorService.class)
     public DynamicDataSourceSqlExecutorService sqlExecutor() {
         return new DynamicDataSourceSqlExecutorService();
     }
