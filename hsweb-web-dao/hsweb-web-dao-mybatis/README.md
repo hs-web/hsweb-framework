@@ -9,7 +9,7 @@
 ```xml
      <dependency>
         <groupId>org.hsweb</groupId>
-        <artifactId>hsweb-web-dao-impl-mybatis</artifactId>
+        <artifactId>hsweb-web-dao-mybatis</artifactId>
         <version>2.0-SNAPSHOT</version>
     </dependency>
 ```
