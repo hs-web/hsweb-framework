@@ -8,11 +8,13 @@ import org.hsweb.ezorm.meta.FieldMetaData;
 import org.hsweb.ezorm.meta.TableMetaData;
 import org.hsweb.ezorm.meta.converter.ClobValueConverter;
 import org.hsweb.ezorm.meta.converter.DateTimeConverter;
+import org.hsweb.ezorm.meta.converter.JSONValueConverter;
 import org.hsweb.ezorm.run.simple.trigger.ScriptTraggerSupport;
 import org.hsweb.web.bean.po.form.Form;
 import org.hsweb.web.core.Install;
 import org.hsweb.web.service.form.FormParser;
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,6 +85,10 @@ public class DefaultFormParser implements FormParser {
             if (dataType != null) {
                 if (dataType.contains("varchar")) {
                     fieldMetaData.setJdbcType(JDBCType.VARCHAR);
+                    String className = fieldMetaData.getJavaType().getSimpleName();
+                    if (!typeMapper.containsKey(className)) {
+                        fieldMetaData.setValueConverter(new JSONValueConverter(fieldMetaData.getJavaType(), fieldMetaData.getValueConverter()));
+                    }
                 } else if (dataType.contains("date")
                         || dataType.contains("timestamp")
                         || dataType.contains("datetime")) {
@@ -92,6 +98,10 @@ public class DefaultFormParser implements FormParser {
                 } else if (dataType.contains("clob")) {
                     fieldMetaData.setJdbcType(JDBCType.CLOB);
                     fieldMetaData.setValueConverter(new ClobValueConverter());
+                    String className = fieldMetaData.getJavaType().getSimpleName();
+                    if (!typeMapper.containsKey(className)) {
+                        fieldMetaData.setValueConverter(new JSONValueConverter(fieldMetaData.getJavaType(), fieldMetaData.getValueConverter()));
+                    }
                 } else if (dataType.contains("number") ||
                         dataType.contains("int") ||
                         dataType.contains("double") ||
@@ -99,6 +109,10 @@ public class DefaultFormParser implements FormParser {
                     fieldMetaData.setJdbcType(JDBCType.NUMERIC);
                 } else {
                     fieldMetaData.setJdbcType(JDBCType.VARCHAR);
+                    String className = fieldMetaData.getJavaType().getSimpleName();
+                    if (!typeMapper.containsKey(className)) {
+                        fieldMetaData.setValueConverter(new JSONValueConverter(fieldMetaData.getJavaType(), fieldMetaData.getValueConverter()));
+                    }
                 }
             }
         }
@@ -109,13 +123,17 @@ public class DefaultFormParser implements FormParser {
         DynamicScriptEngine scriptEngine = DynamicScriptEngineFactory.getEngine("groovy");
         String meta = form.getMeta();
         TableMetaData metaData = new TableMetaData();
-        metaData.setProperty("version",form.getRelease());
+        metaData.setProperty("version", form.getRelease());
         metaData.setName(form.getName());
         metaData.setComment(form.getRemark());
         JSONObject object = JSON.parseObject(meta);
+        int[] sortIndex = new int[1];
+        Map<String, FieldMetaData> tmp = new HashMap<>();
         object.forEach((id, field) -> {
             FieldMetaData fieldMeta = new FieldMetaData();
             fieldMeta.setProperty("field-id", id);
+            tmp.put(id, fieldMeta);
+            fieldMeta.setSortIndex(sortIndex[0]++);
             JSONArray obj = ((JSONArray) field);
             obj.forEach((defT) -> {
                 JSONObject def = ((JSONObject) defT);
@@ -192,6 +210,12 @@ public class DefaultFormParser implements FormParser {
         });
         if (listeners != null) {
             listeners.forEach(listener -> listener.afterParse(metaData));
+        }
+        Document document = Jsoup.parse(form.getHtml());
+        Elements elements = document.select("[field-id]");
+        for (int i = 0; i < elements.size(); i++) {
+            FieldMetaData metaData1 = tmp.get(elements.get(i).attr("field-id"));
+            if (metaData1 != null) metaData1.setSortIndex(i);
         }
         return metaData;
     }
