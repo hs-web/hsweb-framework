@@ -63,6 +63,7 @@ public class DraftController {
         draft.setId(Draft.createUID());
         draft.setCreateDate(new Date());
         draft.setCreatorId(user.getId());
+        draft.setKey(key);
         return ResponseMessage.ok(draftService.createDraft(key, draft));
     }
 
@@ -90,7 +91,7 @@ public class DraftController {
     @AccessLogger("删除草稿")
     public ResponseMessage removeDraft(@PathVariable("key") String key, @PathVariable("id") String id) {
         User user = WebUtil.getLoginUser();
-        return ResponseMessage.ok(draftService.removeDraft(key, id, user.getId()));
+        return ResponseMessage.ok(draftService.removeDraft(key, user.getId(), id));
     }
 
 

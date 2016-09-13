@@ -57,7 +57,7 @@ public class CacheDraftService implements DraftService {
     }
 
     @Override
-    public boolean removeDraft(String key, String id, String userId) {
+    public boolean removeDraft(String key, String userId, String id) {
         Cache cache = cacheManager.getCache(cacheKey + userId);
         Cache.ValueWrapper wrapper = cache.get(key);
         if (wrapper != null) {
