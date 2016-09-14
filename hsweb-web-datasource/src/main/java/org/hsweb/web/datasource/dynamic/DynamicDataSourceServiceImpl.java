@@ -27,7 +27,6 @@ import org.hsweb.web.service.datasource.DynamicDataSourceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.stereotype.Service;
 
@@ -139,7 +138,6 @@ public class DynamicDataSourceServiceImpl implements DynamicDataSourceService {
         dataSourceBean.setUniqueResourceName("ds_" + dataSource.getId());
         dataSourceBean.setMaxPoolSize(200);
         dataSourceBean.setMinPoolSize(5);
-        dataSourceBean.setTestQuery(dataSource.getTestSql());
         dataSourceBean.setBorrowConnectionTimeout(60);
         try {
             dataSourceBean.init();

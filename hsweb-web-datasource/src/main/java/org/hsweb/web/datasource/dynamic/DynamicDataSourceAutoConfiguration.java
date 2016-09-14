@@ -19,13 +19,10 @@ package org.hsweb.web.datasource.dynamic;
 import com.atomikos.icatch.jta.UserTransactionImp;
 import com.atomikos.icatch.jta.UserTransactionManager;
 import com.atomikos.jdbc.AtomikosDataSourceBean;
-import org.hsweb.commons.StringUtils;
 import org.hsweb.web.core.datasource.DynamicDataSource;
-import org.hsweb.web.service.datasource.DynamicDataSourceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -44,11 +41,6 @@ public class DynamicDataSourceAutoConfiguration {
     @Autowired
     private DataSourceProperties properties;
 
-    static {
-        //  com.atomikos.icatch.config.Configuration.init();
-        //  com.atomikos.icatch.config.Configuration.installCompositeTransactionManager(new CompositeTransactionManagerImp());
-    }
-
     /**
      * 默认数据库链接
      */
@@ -59,29 +51,14 @@ public class DynamicDataSourceAutoConfiguration {
         dataSourceBean.getXaProperties().putAll(properties.getXa().getProperties());
         dataSourceBean.setXaDataSourceClassName(properties.getXa().getDataSourceClassName());
         dataSourceBean.setUniqueResourceName("core");
-        dataSourceBean.setMinPoolSize(StringUtils.toInt(properties.getXa().getProperties().get("minPoolSize"), 5));
-        dataSourceBean.setMaxPoolSize(StringUtils.toInt(properties.getXa().getProperties().get("maxPoolSize"), 200));
-        dataSourceBean.setTestQuery(properties.getXa().getProperties().get("validationQuery"));
-        dataSourceBean.setBorrowConnectionTimeout(60);
+        dataSourceBean.setMinPoolSize(5);
+        dataSourceBean.setMaxPoolSize(200);
         return dataSourceBean;
     }
 
     @Bean(name = "dynamicDataSource")
     public DynamicXaDataSourceImpl dynamicXaDataSource(@Qualifier("dataSource") DataSource dataSource) {
         return new DynamicXaDataSourceImpl(dataSource);
-    }
-
-    /**
-     * 动态数据源
-     */
-    @Bean(initMethod = "init", destroyMethod = "close")
-    public AtomikosDataSourceBean atomikosDataSourceBean(DynamicXaDataSourceImpl dynamicDataSource) {
-        AtomikosDataSourceBean dataSourceBean = new AtomikosDataSourceBean();
-        dataSourceBean.setXaDataSource(dynamicDataSource);
-        dataSourceBean.setUniqueResourceName("dynamic");
-        dataSourceBean.setMaxPoolSize(StringUtils.toInt(properties.getXa().getProperties().get("maxPoolSize"), 200));
-        dataSourceBean.setBorrowConnectionTimeout(30);
-        return dataSourceBean;
     }
 
     @Bean

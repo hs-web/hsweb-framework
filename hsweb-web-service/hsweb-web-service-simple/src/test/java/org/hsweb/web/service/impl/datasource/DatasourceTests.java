@@ -45,6 +45,7 @@ public class DatasourceTests extends AbstractTestCase {
 
     @Before
     public void setup() throws SQLException {
+        dataSourceService.delete("test");
         DataSource dataSource = new DataSource();
         dataSource.setId("test");
         dataSource.setName("test");

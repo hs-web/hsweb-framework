@@ -3,6 +3,8 @@ package org.hsweb.web.controller;
 import com.alibaba.fastjson.JSON;
 import org.hsweb.web.core.exception.*;
 import org.hsweb.web.core.message.ResponseMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +15,8 @@ import javax.servlet.http.HttpServletResponse;
 @ControllerAdvice(annotations = {RestController.class, ResponseBody.class})
 @Order(1)
 public class RestControllerExceptionTranslator {
+
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @ExceptionHandler(ValidationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -35,7 +39,6 @@ public class RestControllerExceptionTranslator {
         response.setStatus(exception.getStatus());
         return ResponseMessage.error(exception.getMessage(), exception.getStatus());
     }
-
 
     @ExceptionHandler(AuthorizeException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
@@ -63,6 +66,7 @@ public class RestControllerExceptionTranslator {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ResponseBody
     ResponseMessage handleException(Throwable exception) {
+        logger.error("未知错误", exception);
         return ResponseMessage.error(exception.getMessage(), 500);
     }
 
