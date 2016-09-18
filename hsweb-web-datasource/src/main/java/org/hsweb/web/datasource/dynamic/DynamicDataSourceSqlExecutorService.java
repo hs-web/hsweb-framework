@@ -21,6 +21,7 @@ import org.hsweb.ezorm.executor.SQL;
 import org.hsweb.ezorm.meta.expand.ObjectWrapper;
 import org.hsweb.ezorm.meta.expand.SimpleMapWrapper;
 import org.hsweb.ezorm.render.support.simple.SimpleSQL;
+import org.hsweb.web.core.authorize.ExpressionScopeBean;
 import org.hsweb.web.core.datasource.DynamicDataSource;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.transaction.annotation.Propagation;
@@ -35,7 +36,7 @@ import java.util.Map;
 /**
  * 动态数据源sql执行器
  */
-public class DynamicDataSourceSqlExecutorService extends AbstractJdbcSqlExecutor {
+public class DynamicDataSourceSqlExecutorService extends AbstractJdbcSqlExecutor implements ExpressionScopeBean {
 
     @Resource
     protected DynamicDataSource dynamicDataSource;
