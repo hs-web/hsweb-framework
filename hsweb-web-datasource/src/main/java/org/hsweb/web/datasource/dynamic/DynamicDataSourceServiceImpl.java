@@ -66,8 +66,9 @@ public class DynamicDataSourceServiceImpl implements DynamicDataSourceService {
         cache.values().stream().map(CacheInfo::getDataSource).forEach(this::closeDataSource);
     }
 
-    protected void closeDataSource(javax.sql.DataSource ds) {
+    protected void closeDataSource(javax.sql.CommonDataSource ds) {
         if (ds instanceof AtomikosDataSourceBean) {
+            closeDataSource(((AtomikosDataSourceBean) ds).getXaDataSource());
             ((AtomikosDataSourceBean) ds).close();
         } else if (ds instanceof Closeable) {
             try {
@@ -83,31 +84,39 @@ public class DynamicDataSourceServiceImpl implements DynamicDataSourceService {
         try {
             DataSource old = dataSourceService.selectByPk(id);
             if (old == null || old.getEnabled() != 1) throw new NotFoundException("数据源不存在或已禁用");
+
             //创建锁
-            ReadWriteLock readWriteLock = lockFactory.createReadWriteLock("datasource.lock." + id);
+            ReadWriteLock readWriteLock = lockFactory.createReadWriteLock("dynamic.ds." + id);
+
             readWriteLock.readLock().tryLock();
+            CacheInfo cacheInfo = null;
             try {
-                CacheInfo cacheInfo = cache.get(id);
+                cacheInfo = cache.get(id);
                 // 缓存存在,并且hash一致
                 if (cacheInfo != null && cacheInfo.getHash() == old.getHash())
                     return cacheInfo;
             } finally {
-                readWriteLock.readLock().unlock();
+                try {
+                    readWriteLock.readLock().unlock();
+                } catch (Exception e) {
+                }
             }
-            //加载datasource到缓存
             readWriteLock.writeLock().tryLock();
             try {
-                javax.sql.DataSource dataSource = createDataSource(old);
-
-                CacheInfo cacheInfo = new CacheInfo(old.getHash(), dataSource);
-                CacheInfo oldCache = cache.put(id, cacheInfo);
-                if (oldCache != null) {
-                    closeDataSource(oldCache.getDataSource());
+                if (cacheInfo != null) {
+                    closeDataSource(cacheInfo.getDataSource());
                 }
-                return cacheInfo;
+                //加载datasource到缓存
+                javax.sql.DataSource dataSource = createDataSource(old);
+                cacheInfo = new CacheInfo(old.getHash(), dataSource);
+                cache.put(id, cacheInfo);
             } finally {
-                readWriteLock.writeLock().unlock();
+                try {
+                    readWriteLock.writeLock().unlock();
+                } catch (Exception e) {
+                }
             }
+            return cacheInfo;
         } finally {
             DynamicDataSource.useLast();
         }
@@ -139,12 +148,28 @@ public class DynamicDataSourceServiceImpl implements DynamicDataSourceService {
         dataSourceBean.setMaxPoolSize(200);
         dataSourceBean.setMinPoolSize(5);
         dataSourceBean.setBorrowConnectionTimeout(60);
-        try {
-            dataSourceBean.init();
-        } catch (AtomikosSQLException e) {
-            dataSourceBean.close();
-            throw new RuntimeException(e);
-        }
+        boolean[] success = new boolean[1];
+        //异步初始化
+        new Thread(() -> {
+            try {
+                dataSourceBean.init();
+                success[0] = true;
+            } catch (AtomikosSQLException e) {
+                closeDataSource(dataSourceBean);
+            }
+        }).start();
+        //初始化检测
+        new Thread(() -> {
+            try {
+                Thread.sleep(10000);
+                if (!success[0]) {
+                    logger.error("初始化jdbc超时:{}", dataSourceBean);
+                    closeDataSource(dataSourceBean);
+                }
+            } catch (Exception e) {
+
+            }
+        }).start();
         return dataSourceBean;
     }
 
