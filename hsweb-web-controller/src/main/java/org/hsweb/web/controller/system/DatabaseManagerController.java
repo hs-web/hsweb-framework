@@ -2,20 +2,16 @@ package org.hsweb.web.controller.system;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import org.hsweb.ezorm.meta.DatabaseMetaData;
 import org.hsweb.ezorm.meta.FieldMetaData;
 import org.hsweb.ezorm.meta.TableMetaData;
 import org.hsweb.ezorm.render.SqlAppender;
-import org.hsweb.ezorm.render.SqlRender;
 import org.hsweb.web.bean.po.user.User;
 import org.hsweb.web.core.authorize.annotation.Authorize;
 import org.hsweb.web.core.datasource.DynamicDataSource;
-import org.hsweb.web.core.exception.AuthorizeException;
 import org.hsweb.web.core.exception.AuthorizeForbiddenException;
 import org.hsweb.web.core.logger.annotation.AccessLogger;
 import org.hsweb.web.core.message.ResponseMessage;
 import org.hsweb.web.core.utils.WebUtil;
-import org.hsweb.web.service.form.DynamicFormService;
 import org.hsweb.web.service.system.DataBaseManagerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -106,11 +102,11 @@ public class DatabaseManagerController {
                 .forEach(s1 -> {
                     if (s1.trim().endsWith(";")) {
                         s1 = s1.trim();
-                        tmp[0].add(s1.substring(0, s1.length() - 1));
+                        tmp[0].add(s1.substring(0, s1.length() - 1), "\n");
                         sqlList.add(tmp[0]);
                         tmp[0] = new SqlAppender();
                     } else {
-                        tmp[0].add(s1);
+                        tmp[0].add(s1, "\n");
                     }
                 });
         if (!tmp[0].isEmpty()) sqlList.add(tmp[0]);
