@@ -29,7 +29,7 @@
         <javassist.version>3.20.0-GA</javassist.version>
         <project.build.jdk>${java.version}</project.build.jdk>
 
-        <spring.boot.version>1.3.3.RELEASE</spring.boot.version>
+        <spring.boot.version>1.3.7.RELEASE</spring.boot.version>
         <activiti.version>5.19.0.2</activiti.version>
 
         <fastjson.version>1.2.6</fastjson.version>
