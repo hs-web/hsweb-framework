@@ -99,6 +99,31 @@ public class DynamicDataSourceSqlExecutorService extends AbstractJdbcSqlExecutor
         return data;
     }
 
+    @Transactional
+    public int update(String sql, Map<String, Object> param) throws SQLException {
+        return super.update(new SimpleSQL(sql, param));
+    }
+
+    @Transactional
+    public int update(String sql) throws SQLException {
+        return super.update(new SimpleSQL(sql));
+    }
+
+    @Transactional
+    public int delete(String sql, Map<String, Object> param) throws SQLException {
+        return super.delete(new SimpleSQL(sql, param));
+    }
+
+    @Transactional
+    public int delete(String sql) throws SQLException {
+        return super.delete(new SimpleSQL(sql));
+    }
+
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public void exec(String sql) throws SQLException {
+        super.exec(new SimpleSQL(sql));
+    }
+
     @Override
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public void exec(SQL sql) throws SQLException {
