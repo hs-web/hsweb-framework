@@ -1,4 +1,4 @@
-package org.hsweb.web.core.session.siample;
+package org.hsweb.web.core.session.simple;
 
 import org.hsweb.web.core.session.HttpSessionManager;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
