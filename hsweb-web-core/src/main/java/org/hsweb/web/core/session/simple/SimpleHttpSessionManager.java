@@ -1,13 +1,11 @@
-package org.hsweb.web.core.session.siample;
+package org.hsweb.web.core.session.simple;
 
 import org.hsweb.web.bean.po.user.User;
 import org.hsweb.web.core.session.AbstractHttpSessionManager;
-import org.hsweb.web.core.session.HttpSessionManager;
 import org.hsweb.web.core.utils.WebUtil;
 
 import javax.servlet.http.HttpSession;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -55,7 +53,7 @@ public class SimpleHttpSessionManager extends AbstractHttpSessionManager {
                 userSessionStorage.remove(userId);
                 return null;
             }
-            return user.getId();
+            return session.getId();
         }
         return null;
     }
