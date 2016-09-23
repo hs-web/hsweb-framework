@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * 权限验证器
@@ -43,9 +44,9 @@ public class SimpleAuthorizeValidator implements AuthorizeValidator {
         //验证角色
         if (!roles.isEmpty()) {
             if (mod == Authorize.MOD.AND)
-                access = roles.stream().allMatch(role -> user.hasAccessRole(role));
+                access = roles.stream().allMatch(user::hasAccessRole);
             else
-                access = roles.stream().anyMatch(role -> user.hasAccessRole(role));
+                access = roles.stream().anyMatch(user::hasAccessRole);
         }
         //验证表达式
         if (!expressions.isEmpty()) {
