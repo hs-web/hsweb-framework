@@ -17,9 +17,13 @@
 package org.hsweb.web.service.impl.datasource;
 
 import org.hsweb.ezorm.executor.SqlExecutor;
+import org.hsweb.web.bean.common.QueryParam;
 import org.hsweb.web.bean.po.datasource.DataSource;
+import org.hsweb.web.core.Install;
+import org.hsweb.web.core.datasource.DynamicDataSource;
 import org.hsweb.web.service.datasource.DataSourceService;
 import org.hsweb.web.service.impl.AbstractTestCase;
+import org.hsweb.web.service.user.UserService;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -38,13 +42,17 @@ public class DatasourceTests extends AbstractTestCase {
     @Resource
     private TestService testService;
 
+    @Resource
+    private UserService userService;
+    @Resource
+    Install install;
     @PostConstruct
     public void init() {
         testService.setSqlExecutor(sqlExecutor);
     }
 
     @Before
-    public void setup() throws SQLException {
+    public void setup() throws Exception {
         dataSourceService.delete("test");
         DataSource dataSource = new DataSource();
         dataSource.setId("test");
@@ -54,7 +62,17 @@ public class DatasourceTests extends AbstractTestCase {
         dataSource.setPassword("");
         dataSource.setCreateDate(new Date());
         dataSource.setUrl("jdbc:h2:file:./data/h2db2;DB_CLOSE_ON_EXIT=FALSE");
+
         dataSourceService.insert(dataSource);
+
+        DynamicDataSource.use("test");
+        install.install();//安装新的数据库
+
+        DynamicDataSource.useDefault();
+        userService.select(QueryParam.build());
+        DynamicDataSource.use("test");
+        userService.select(QueryParam.build());
+
     }
 
     @Test

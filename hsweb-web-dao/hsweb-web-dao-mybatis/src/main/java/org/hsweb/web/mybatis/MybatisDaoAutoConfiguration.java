@@ -9,9 +9,6 @@ import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
 
-/**
- * Created by zhouhao on 16-5-6.
- */
 @Configuration
 @ComponentScan(basePackages = {"org.hsweb.web.mybatis"})
 @MapperScan(basePackages = {"org.hsweb.web.dao"})
