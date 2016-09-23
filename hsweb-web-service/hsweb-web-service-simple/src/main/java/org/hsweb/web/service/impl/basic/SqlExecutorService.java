@@ -8,6 +8,7 @@ import org.hsweb.ezorm.render.support.simple.SimpleSQL;
 import org.hsweb.web.core.authorize.ExpressionScopeBean;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
@@ -33,6 +34,7 @@ public class SqlExecutorService extends AbstractJdbcSqlExecutor implements Expre
     public void releaseConnection(Connection connection) {
         DataSourceUtils.releaseConnection(connection, dataSource);
     }
+
 
     @Override
     @Transactional(readOnly = true)
@@ -80,6 +82,37 @@ public class SqlExecutorService extends AbstractJdbcSqlExecutor implements Expre
     public Map<String, Object> single(String sql, Map<String, Object> param) throws Exception {
         Map<String, Object> data = single(create(sql, param));
         return data;
+    }
+
+    @Transactional
+    public int update(String sql, Map<String, Object> param) throws SQLException {
+        return super.update(new SimpleSQL(sql, param));
+    }
+
+    @Transactional
+    public int update(String sql) throws SQLException {
+        return super.update(new SimpleSQL(sql));
+    }
+
+    @Transactional
+    public int delete(String sql, Map<String, Object> param) throws SQLException {
+        return super.delete(new SimpleSQL(sql, param));
+    }
+
+    @Transactional
+    public int delete(String sql) throws SQLException {
+        return super.delete(new SimpleSQL(sql));
+    }
+
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public void exec(String sql) throws SQLException {
+        super.exec(new SimpleSQL(sql));
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public void exec(SQL sql) throws SQLException {
+        super.exec(sql);
     }
 
     public SQL create(String sql) {

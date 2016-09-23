@@ -29,7 +29,7 @@
         <javassist.version>3.20.0-GA</javassist.version>
         <project.build.jdk>${java.version}</project.build.jdk>
 
-        <spring.boot.version>1.3.3.RELEASE</spring.boot.version>
+        <spring.boot.version>1.3.7.RELEASE</spring.boot.version>
         <activiti.version>5.19.0.2</activiti.version>
 
         <fastjson.version>1.2.6</fastjson.version>
@@ -42,7 +42,6 @@
         <hsweb.ezorm.version>1.0-SNAPSHOT</hsweb.ezorm.version>
         <hsweb.commons.version>1.0-SNAPSHOT</hsweb.commons.version>
         <hsweb.expands.version>1.0-SNAPSHOT</hsweb.expands.version>
-        <atomikos.version>4.0.4</atomikos.version>
     </properties>
 
     <build>
@@ -112,36 +111,6 @@
 
     <dependencyManagement>
         <dependencies>
-            <!--atomikos-->
-            <dependency>
-                <groupId>com.atomikos</groupId>
-                <artifactId>transactions-jdbc</artifactId>
-                <version>${atomikos.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.atomikos</groupId>
-                <artifactId>transactions-jta</artifactId>
-                <version>${atomikos.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.atomikos</groupId>
-                <artifactId>transactions</artifactId>
-                <version>${atomikos.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.atomikos</groupId>
-                <artifactId>transactions-api</artifactId>
-                <version>${atomikos.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.atomikos</groupId>
-                <artifactId>atomikos-util</artifactId>
-                <version>${atomikos.version}</version>
-            </dependency>
 
             <dependency>
                 <groupId>javax.transaction</groupId>

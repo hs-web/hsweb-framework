@@ -2,9 +2,6 @@ package org.hsweb.web.bean.po.quartz;
 
 import org.hsweb.web.bean.po.GenericPo;
 
-/**
- * Created by zhouhao on 16-5-20.
- */
 public class QuartzJob extends GenericPo<String> {
     private String name;
 

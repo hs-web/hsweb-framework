@@ -9,9 +9,10 @@
     <logger name="org.springframework" level="ERROR" />
     <logger name="org.apache.tomcat" level="ERROR" />
     <logger name="org.hsweb" level="DEBUG" />
-    <logger name="com.atomikos" level="ON" />
+    <logger name="com.atomikos" level="ERROR" />
     <logger name="org.h2" level="ON" />
     <logger name="org.mybatis.spring.SqlSessionUtils" level="DEBUG" />
+    <logger name="org.hsweb.web.datasource" level="INFO" />
     <root level="ERROR">
         <appender-ref ref="Console"/>
     </root>

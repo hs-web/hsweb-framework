@@ -35,12 +35,13 @@ public class TestService {
     }
 
     @Transactional
-    public void test() throws SQLException {
+    public void test() throws Exception {
         sqlExecutor.exec(new SimpleSQL("drop table if exists s_test"));
         sqlExecutor.exec(new SimpleSQL("create table s_test(name varchar(32))"));
         System.out.println(sqlExecutor.list(new SimpleSQL("select * from s_test"), new SimpleMapWrapper()));
         System.out.println(sqlExecutor.insert(new SimpleSQL("insert into s_test values ('默认数据源')")));
         DynamicDataSource.use("test");
+        Thread.sleep(30000);
         sqlExecutor.exec(new SimpleSQL("drop table if exists s_test"));
         sqlExecutor.exec(new SimpleSQL("create table s_test(name varchar(32))"));
         System.out.println(sqlExecutor.list(new SimpleSQL("select * from s_test"), new SimpleMapWrapper()));

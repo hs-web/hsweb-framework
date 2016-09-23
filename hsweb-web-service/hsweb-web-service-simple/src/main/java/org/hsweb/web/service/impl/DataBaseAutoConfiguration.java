@@ -86,7 +86,7 @@ public class DataBaseAutoConfiguration {
         SimpleDatabase dataBase = new SimpleDatabase(dataBaseMetaData, sqlExecutor) {
             @Override
             public Map<String, Object> getTriggerContextRoot() {
-                if (null != null)
+                if (expressionScopeBeanMap != null)
                     return new HashMap<>(expressionScopeBeanMap);
                 return super.getTriggerContextRoot();
             }
