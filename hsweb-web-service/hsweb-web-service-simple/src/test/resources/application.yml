@@ -5,7 +5,7 @@ spring:
         auto: true
     redis:
         host: 127.0.0.1
-        port: 6389
+        port: 6379
     datasource:
         xa:
             dataSourceClassName: com.alibaba.druid.pool.xa.DruidXADataSource
