@@ -10,7 +10,6 @@ import org.springframework.scripting.support.ResourceScriptSource;
 import org.springframework.util.Assert;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -37,9 +36,9 @@ public class RedisReadWriteLock implements ReadWriteLock {
         redisScriptRead = new DefaultRedisScript<>();
         redisScriptWrite = new DefaultRedisScript<>();
 
-        redisScriptRead.setScriptSource(new ResourceScriptSource(new ClassPathResource("MEAT_INF/scripts/vcheckAndSadd.lua")));
+        redisScriptRead.setScriptSource(new ResourceScriptSource(new ClassPathResource("scripts/vcheckAndsAdd.lua", RedisReadWriteLock.class)));
         redisScriptRead.setResultType(Boolean.class);
-        redisScriptWrite.setScriptSource(new ResourceScriptSource(new ClassPathResource("MEAT_INF/scripts/scheckAndVset.lua")));
+        redisScriptWrite.setScriptSource(new ResourceScriptSource(new ClassPathResource("scripts/scheckAndVset.lua", RedisReadWriteLock.class)));
         redisScriptWrite.setResultType(Boolean.class);
     }
 
@@ -49,10 +48,10 @@ public class RedisReadWriteLock implements ReadWriteLock {
         Assert.notNull(key);
         Assert.notNull(redisTemplate);
         this.redisTemplate = new StringRedisTemplate(redisTemplate.getConnectionFactory());
-        readLock = new ReadLock();
-        writeLock = new WriteLock();
         readLockKey = PREFIX + key + ".read.lock";
         writeLockKey = PREFIX + key + ".write.lock";
+        readLock = new ReadLock();
+        writeLock = new WriteLock();
         lockValue = UUID.randomUUID().toString();
     }
 
@@ -88,7 +87,6 @@ public class RedisReadWriteLock implements ReadWriteLock {
     public void setLockKeyExpireTime(long lockKeyExpireTime) {
         this.lockKeyExpireTime = lockKeyExpireTime;
     }
-
 
 
     class ReadLock implements Lock {
@@ -139,7 +137,7 @@ public class RedisReadWriteLock implements ReadWriteLock {
         @Override
         public boolean tryLock() {
             boolean locked = redisTemplate.execute(redisScriptRead, keys, lockValue());
-            if (locked){
+            if (locked) {
                 expire();
             }
             return locked;
