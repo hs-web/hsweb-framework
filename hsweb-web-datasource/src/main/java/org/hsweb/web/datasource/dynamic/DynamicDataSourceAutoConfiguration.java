@@ -20,6 +20,7 @@ import com.atomikos.icatch.jta.UserTransactionImp;
 import com.atomikos.icatch.jta.UserTransactionManager;
 import com.atomikos.jdbc.AtomikosDataSourceBean;
 import org.hsweb.web.core.datasource.DynamicDataSource;
+import org.hsweb.web.core.datasource.DynamicDataSourceHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -58,7 +59,9 @@ public class DynamicDataSourceAutoConfiguration {
 
     @Bean(name = "dynamicDataSource")
     public DynamicXaDataSourceImpl dynamicXaDataSource(@Qualifier("dataSource") DataSource dataSource) {
-        return new DynamicXaDataSourceImpl(dataSource);
+        DynamicXaDataSourceImpl dynamicXaDataSource = new DynamicXaDataSourceImpl(dataSource);
+        DynamicDataSourceHolder.install(dynamicXaDataSource);
+        return dynamicXaDataSource;
     }
 
     @Bean

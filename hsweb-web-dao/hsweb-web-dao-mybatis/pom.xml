@@ -32,6 +32,12 @@
             <artifactId>spring-boot-starter-jdbc</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.hsweb</groupId>
+            <artifactId>hsweb-web-datasource</artifactId>
+            <optional>true</optional>
+        </dependency>
+
         <!-- mybatis start-->
         <dependency>
             <groupId>org.mybatis.spring.boot</groupId>

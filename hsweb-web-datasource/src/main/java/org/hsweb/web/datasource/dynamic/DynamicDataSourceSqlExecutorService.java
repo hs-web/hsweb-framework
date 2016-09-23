@@ -138,5 +138,4 @@ public class DynamicDataSourceSqlExecutorService extends AbstractJdbcSqlExecutor
         SimpleSQL sql1 = new SimpleSQL(sql, param);
         return sql1;
     }
-
 }
