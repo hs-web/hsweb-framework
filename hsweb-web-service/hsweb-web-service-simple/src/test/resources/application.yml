@@ -51,4 +51,4 @@ mybatis:
     mapper-locations: classpath*:org/hsweb/web/dao/impl/mybatis/mapper/oracle/**/*.xml
     config: classpath:mybatis-config.xml
     typeHandlers-package: org.hsweb.web.mybatis.handler
-    dynamic-datasource: on
+    dynamic-datasource: off

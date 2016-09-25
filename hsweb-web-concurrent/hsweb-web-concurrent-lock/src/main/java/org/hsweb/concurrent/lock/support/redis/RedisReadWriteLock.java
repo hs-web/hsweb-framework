@@ -1,5 +1,6 @@
 package org.hsweb.concurrent.lock.support.redis;
 
+import org.joda.time.DateTime;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.redis.connection.StringRedisConnection;
 import org.springframework.data.redis.core.RedisCallback;
@@ -19,271 +20,310 @@ import java.util.concurrent.locks.ReadWriteLock;
  * Created by zhouhao on 16-5-27.
  */
 public class RedisReadWriteLock implements ReadWriteLock {
-    static final String PREFIX = "lock:";
-    static final long DEFAULT_EXPIRE = 60;
-    private ReadLock readLock;
-    private WriteLock writeLock;
-    private long lockKeyExpireTime = DEFAULT_EXPIRE;
-    private long waitTime = 30;
-    protected String lockValue;
-    private String readLockKey, writeLockKey;
+	static final String PREFIX = "lock:";
+	static final long DEFAULT_EXPIRE = 60;
+	private ReadLock readLock;
+	private WriteLock writeLock;
+	private long lockKeyExpireTime = DEFAULT_EXPIRE;
+	private long waitTime = 30;
+	protected String lockValue;
+	private String readLockKey, writeLockKey;
 
-    private static DefaultRedisScript<Boolean> redisScriptRead;
-    private static DefaultRedisScript<Boolean> redisScriptWrite;
+	private static DefaultRedisScript<Boolean> redisScriptRead;
+	private static DefaultRedisScript<Boolean> redisScriptWrite;
 
-    static {
-        //初始化脚本
-        redisScriptRead = new DefaultRedisScript<>();
-        redisScriptWrite = new DefaultRedisScript<>();
+	static {
+		//初始化脚本
+		redisScriptRead = new DefaultRedisScript<>();
+		redisScriptWrite = new DefaultRedisScript<>();
 
-        redisScriptRead.setScriptSource(new ResourceScriptSource(new ClassPathResource("scripts/vcheckAndsAdd.lua", RedisReadWriteLock.class)));
-        redisScriptRead.setResultType(Boolean.class);
-        redisScriptWrite.setScriptSource(new ResourceScriptSource(new ClassPathResource("scripts/scheckAndVset.lua", RedisReadWriteLock.class)));
-        redisScriptWrite.setResultType(Boolean.class);
-    }
+		redisScriptRead.setScriptSource(new ResourceScriptSource(new ClassPathResource("scripts/vcheckAndsAdd.lua", RedisReadWriteLock.class)));
+		redisScriptRead.setResultType(Boolean.class);
+		redisScriptWrite.setScriptSource(new ResourceScriptSource(new ClassPathResource("scripts/scheckAndVset.lua", RedisReadWriteLock.class)));
+		redisScriptWrite.setResultType(Boolean.class);
+	}
 
-    private StringRedisTemplate redisTemplate;
+	private StringRedisTemplate redisTemplate;
 
-    public RedisReadWriteLock(String key, RedisTemplate redisTemplate) {
-        Assert.notNull(key);
-        Assert.notNull(redisTemplate);
-        this.redisTemplate = new StringRedisTemplate(redisTemplate.getConnectionFactory());
-        readLockKey = PREFIX + key + ".read.lock";
-        writeLockKey = PREFIX + key + ".write.lock";
-        readLock = new ReadLock();
-        writeLock = new WriteLock();
-        lockValue = UUID.randomUUID().toString();
-    }
+	public RedisReadWriteLock(String key, RedisTemplate redisTemplate) {
+		Assert.notNull(key);
+		Assert.notNull(redisTemplate);
+		this.redisTemplate = new StringRedisTemplate(redisTemplate.getConnectionFactory());
+		readLockKey = PREFIX + key + ".read.lock";
+		writeLockKey = PREFIX + key + ".write.lock";
+		readLock = new ReadLock();
+		writeLock = new WriteLock();
+		lockValue = UUID.randomUUID().toString();
+	}
 
-    @Override
-    public Lock readLock() {
-        return readLock;
-    }
+	@Override
+	public Lock readLock() {
+		return readLock;
+	}
 
-    @Override
-    public Lock writeLock() {
-        return writeLock;
-    }
+	@Override
+	public Lock writeLock() {
+		return writeLock;
+	}
 
-    private String getReadKey() {
-        return readLockKey;
-    }
+	private String getReadKey() {
+		return readLockKey;
+	}
 
-    private String getWriteKey() {
-        return writeLockKey;
-    }
+	private String getWriteKey() {
+		return writeLockKey;
+	}
 
-    protected void sleep() {
-        try {
-            Thread.sleep(waitTime);
-        } catch (InterruptedException e) {
-        }
-    }
+	protected void sleep() {
+		try {
+			Thread.sleep(waitTime);
+		} catch (InterruptedException e) {
+		}
+	}
 
-    public void setWaitTime(long waitTime) {
-        this.waitTime = waitTime;
-    }
+	public void setWaitTime(long waitTime) {
+		this.waitTime = waitTime;
+	}
 
-    public void setLockKeyExpireTime(long lockKeyExpireTime) {
-        this.lockKeyExpireTime = lockKeyExpireTime;
-    }
+	public void setLockKeyExpireTime(long lockKeyExpireTime) {
+		this.lockKeyExpireTime = lockKeyExpireTime;
+	}
 
 
-    class ReadLock implements Lock {
+	class ReadLock implements Lock {
 
-        private List<String> keys = new ArrayList<>();
+		private List<String> keys = new ArrayList<>();
 
-        public ReadLock() {
-            super();
-            keys.add(getWriteKey().toString());
-            keys.add(getReadKey().toString());
-        }
+		private Long now;
 
-        public String lockValue() {
-            return new String(lockValue).concat(Thread.currentThread().getId() + "");
-        }
+		public ReadLock() {
+			super();
+			keys.add(getWriteKey().toString());
+			keys.add(getReadKey().toString());
+		}
 
-        @Override
-        public void lock() {
+		public String lockValue() {
+			return new String(lockValue).concat(Thread.currentThread().getId() + "");
+		}
 
-            while (true) {
-                Boolean locked = redisTemplate.execute(redisScriptRead, keys, lockValue());
-                if (!locked) {
-                    sleep();
-                } else {
-                    /*
+		@Override
+		public void lock() {
+
+			while (true) {
+				Boolean locked = redisTemplate.execute(redisScriptRead, keys, lockValue());
+				if (!locked) {
+					sleep();
+				} else {
+				    /*
                     * 此处增加对所有读锁的过期
                     * 1、防止项目停止，导致读锁一直存在
                     *
                     * @TODO 后期可以抽出到 redisScriptRead脚本中
                     * */
-                    expire();
-                    break;
-                }
-            }
-        }
+					expire();
+					break;
+				}
+			}
+		}
 
-        @Override
-        public void lockInterruptibly() throws InterruptedException {
+		@Override
+		public void lockInterruptibly() throws InterruptedException {
 
-            boolean locked = redisTemplate.execute(redisScriptRead, keys, lockValue());
-            if (locked) {
-                expire();
-            } else {
-                throw new InterruptedException("could not get the read lock!");
-            }
-        }
+			boolean locked = redisTemplate.execute(redisScriptRead, keys, lockValue());
+			if (locked) {
+				expire();
+			} else {
+				throw new InterruptedException("could not get the read lock!");
+			}
+		}
 
-        @Override
-        public boolean tryLock() {
-            boolean locked = redisTemplate.execute(redisScriptRead, keys, lockValue());
-            if (locked) {
-                expire();
-            }
-            return locked;
-        }
+		@Override
+		public boolean tryLock() {
+			boolean locked = redisTemplate.execute(redisScriptRead, keys, lockValue());
+			if (locked) {
+				expire();
+			}
+			return locked;
+		}
 
-        @Override
-        public boolean tryLock(long time, TimeUnit unit) throws InterruptedException {
-            byte[] error = new byte[1];
+		@Override
+		public boolean tryLock(long time, TimeUnit unit) throws InterruptedException {
+			byte[] error = new byte[1];
 
-            boolean locked;
-            long startWith = System.nanoTime();
-            do {
+			boolean locked;
+			long startWith = System.nanoTime();
+			do {
 
-                locked = redisTemplate.execute(redisScriptRead, keys, lockValue());
-                if (locked) {
-                    expire();
-                    break;
-                }
+				locked = redisTemplate.execute(redisScriptRead, keys, lockValue());
+				if (locked) {
+					expire();
+					break;
+				}
 
-                long now = System.nanoTime();
-                if (now - startWith > unit.toNanos(time)) {
-                    error[0] = 1;
-                    break;
-                }
-                sleep();
-            } while (!locked);
+				long now = System.nanoTime();
+				if (now - startWith > unit.toNanos(time)) {
+					error[0] = 1;
+					break;
+				}
+				sleep();
+			} while (!locked);
 
-            if (error[0] == 1) {
-                throw new InterruptedException("try lock time out!");
-            }
-            return locked;
-        }
+			if (error[0] == 1) {
+				throw new InterruptedException("try lock time out!");
+			}
+			return locked;
+		}
 
-        @Override
-        public void unlock() {
-            redisTemplate.execute((RedisCallback) conn -> {
-                StringRedisConnection strConn = (StringRedisConnection) conn;
-                Set<String> locks = strConn.sMembers(getReadKey());
+		@Override
+		public void unlock() {
+			redisTemplate.execute((RedisCallback) conn -> {
+				StringRedisConnection strConn = (StringRedisConnection) conn;
+				Set<String> locks = strConn.sMembers(getReadKey());
 
-                if (locks == null || locks.size() == 0)
-                    return null;
-                //当前读锁为自己持有 才解锁
-                if (locks.contains(lockValue())) {
-                    strConn.sRem(getReadKey(), lockValue());
-                }
-                return null;
-            });
-        }
+				if (locks == null || locks.size() == 0)
+					return null;
+				//当前读锁为自己持有 才解锁
+				if (locks.contains(lockValue())) {
+					strConn.sRem(getReadKey(), lockValue());
+				}
+				return null;
+			});
+		}
 
-        @Override
-        public Condition newCondition() {
-            throw new UnsupportedOperationException();
-        }
+		public void unlock(String value) {
+			Assert.notNull(value, "read lock can't be null");
+			redisTemplate.execute((RedisCallback) conn -> {
+				StringRedisConnection strConn = (StringRedisConnection) conn;
+				Set<String> locks = strConn.sMembers(getReadKey());
 
-        private void expire() {
-            redisTemplate.expire(getReadKey(), lockKeyExpireTime, TimeUnit.SECONDS);
-        }
-    }
+				if (locks == null || locks.size() == 0)
+					return null;
+				//当前读锁为自己持有 才解锁
+				if (locks.contains(value)) {
+					strConn.sRem(getReadKey(), value);
+					RedisLockFactory.READ_LOCKS_BASE.remove(now, lockValue());
+				}
+				return null;
+			});
+		}
 
-    class WriteLock implements Lock {
+		@Override
+		public Condition newCondition() {
+			throw new UnsupportedOperationException();
+		}
 
-        private List<String> keys = new ArrayList<>();
+		private void expire() {
+			redisTemplate.expire(getReadKey(), lockKeyExpireTime * 2, TimeUnit.SECONDS);
 
-        public WriteLock() {
-            super();
-            keys.add(getReadKey());
-            keys.add(getWriteKey());
-        }
+			now = DateTime.now().getMillis();
+			List<String> list = RedisLockFactory.READ_LOCKS_BASE.computeIfAbsent(now, k -> addNew(k));
+			if (list.size() == 1 && list.get(0).equals(lockValue())) {
+//				已存在,且第一次插入值
+			} else {
+				RedisLockFactory.READ_LOCKS_BASE.computeIfPresent(now, (k, v) -> append(k, v));
+			}
+		}
 
-        @Override
-        public void lock() {
+		private List<String> addNew(Long k) {
+			Vector<String> readLocks = new Vector<>();
+			readLocks.add(lockValue());
+			return readLocks;
+		}
 
-            boolean locked;
+		private List<String> append(Long k, List<String> v) {
+			v.add(lockValue());
+			return v;
+		}
 
-            do {
-                locked = redisTemplate.execute(redisScriptWrite, keys, lockValue);
-                if (locked) {
-                    expire();
-                } else {
-                    sleep();
-                }
-            } while (!locked);
-        }
+	}
 
-        @Override
-        public void lockInterruptibly() throws InterruptedException {
-            boolean locked = redisTemplate.execute(redisScriptWrite, keys, lockValue);
-            if (locked) {
-                expire();
-            } else {
-                throw new InterruptedException("");
-            }
-        }
+	class WriteLock implements Lock {
 
-        @Override
-        public boolean tryLock() {
-            boolean locked = redisTemplate.execute(redisScriptWrite, keys, lockValue);
-            if (locked) {
-                expire();
-            }
-            return locked;
-        }
+		private List<String> keys = new ArrayList<>();
 
-        @Override
-        public boolean tryLock(long time, TimeUnit unit) throws InterruptedException {
-            byte[] error = new byte[1];
+		public WriteLock() {
+			super();
+			keys.add(getReadKey());
+			keys.add(getWriteKey());
+		}
 
-            boolean locked;
-            long startWith = System.nanoTime();
-            do {
-                locked = redisTemplate.execute(redisScriptWrite, keys, lockValue);
-                long now = System.nanoTime();
-                if (now - startWith > unit.toNanos(time)) {
-                    error[0] = 1;
-                    break;
-                }
-                sleep();
-            } while (!locked);
+		@Override
+		public void lock() {
 
-            if (locked) {
-                expire();
-            }
+			boolean locked;
 
-            if (error[0] == 1) {
-                throw new InterruptedException("lock time out!");
-            }
-            return locked;
-        }
+			do {
+				locked = redisTemplate.execute(redisScriptWrite, keys, lockValue);
+				if (locked) {
+					expire();
+				} else {
+					sleep();
+				}
+			} while (!locked);
+		}
 
-        @Override
-        public void unlock() {
-            redisTemplate.execute((RedisCallback) conn -> {
-                StringRedisConnection strConn = (StringRedisConnection) conn;
+		@Override
+		public void lockInterruptibly() throws InterruptedException {
+			boolean locked = redisTemplate.execute(redisScriptWrite, keys, lockValue);
+			if (locked) {
+				expire();
+			} else {
+				throw new InterruptedException("");
+			}
+		}
 
-                strConn.del(getWriteKey());
-                return null;
-            });
-        }
+		@Override
+		public boolean tryLock() {
+			boolean locked = redisTemplate.execute(redisScriptWrite, keys, lockValue);
+			if (locked) {
+				expire();
+			}
+			return locked;
+		}
 
-        @Override
-        public Condition newCondition() {
-            throw new UnsupportedOperationException();
-        }
+		@Override
+		public boolean tryLock(long time, TimeUnit unit) throws InterruptedException {
+			byte[] error = new byte[1];
 
-        private void expire() {
-            redisTemplate.expire(getWriteKey(), lockKeyExpireTime, TimeUnit.SECONDS);
-        }
-    }
+			boolean locked;
+			long startWith = System.nanoTime();
+			do {
+				locked = redisTemplate.execute(redisScriptWrite, keys, lockValue);
+				long now = System.nanoTime();
+				if (now - startWith > unit.toNanos(time)) {
+					error[0] = 1;
+					break;
+				}
+				sleep();
+			} while (!locked);
+
+			if (locked) {
+				expire();
+			}
+
+			if (error[0] == 1) {
+				throw new InterruptedException("lock time out!");
+			}
+			return locked;
+		}
+
+		@Override
+		public void unlock() {
+			redisTemplate.execute((RedisCallback) conn -> {
+				StringRedisConnection strConn = (StringRedisConnection) conn;
+
+				strConn.del(getWriteKey());
+				return null;
+			});
+		}
+
+		@Override
+		public Condition newCondition() {
+			throw new UnsupportedOperationException();
+		}
+
+		private void expire() {
+			redisTemplate.expire(getWriteKey(), lockKeyExpireTime, TimeUnit.SECONDS);
+		}
+	}
 }
