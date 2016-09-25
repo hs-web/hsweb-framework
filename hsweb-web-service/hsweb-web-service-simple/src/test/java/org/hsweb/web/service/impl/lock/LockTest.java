@@ -27,50 +27,50 @@ import java.util.concurrent.locks.ReadWriteLock;
 
 public class LockTest extends AbstractTestCase {
 
-    @Resource
-    private LockFactory lockFactory;
+	@Resource
+	private LockFactory lockFactory;
 
 
-    @Test
-    public void testLock() throws InterruptedException {
-        Lock lock = lockFactory.createLock("test_lock");
-        new Thread(() -> {
-            try {
-                System.out.println("锁");
-                lock.lock();
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-            }
-            System.out.println("解锁");
-            lock.unlock();
-        }).start();
-        Thread.sleep(200);
-        System.out.println("锁2");
-        lock.lock();
-        System.out.println("解锁2");
-        lock.unlock();
-        Thread.sleep(10000);
-    }
+	@Test
+	public void testLock() throws InterruptedException {
+		Lock lock = lockFactory.createLock("test_lock");
+		new Thread(() -> {
+			try {
+				System.out.println("锁");
+				lock.lock();
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+			}
+			System.out.println("解锁");
+			lock.unlock();
+		}).start();
+		Thread.sleep(200);
+		System.out.println("锁2");
+		lock.lock();
+		System.out.println("解锁2");
+		lock.unlock();
+		Thread.sleep(10000);
+	}
 
-    @Test
-    public void testRWLock() throws InterruptedException {
-        ReadWriteLock readWriteLock = lockFactory.createReadWriteLock("test");
-        new Thread(() -> {
-            try {
-                System.out.println("读锁");
-                readWriteLock.readLock().lock();
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-            }
-            System.out.println("解读锁");
-            readWriteLock.readLock().unlock();
-        }).start();
-        Thread.sleep(100);
-        System.out.println("写锁");
-        readWriteLock.writeLock().tryLock(20, TimeUnit.SECONDS);
-        Thread.sleep(100);
-        System.out.println("解写锁");
-        readWriteLock.writeLock().unlock();
-        Thread.sleep(10000);
-    }
+	@Test
+	public void testRWLock() throws InterruptedException {
+		ReadWriteLock readWriteLock = lockFactory.createReadWriteLock("test");
+		new Thread(() -> {
+			try {
+				System.out.println("读锁");
+				readWriteLock.readLock().lock();
+				Thread.sleep(61000);
+			} catch (InterruptedException e) {
+			}
+			System.out.println("解读锁");
+			readWriteLock.readLock().unlock();
+		}).start();
+		Thread.sleep(100);
+		System.out.println("写锁");
+		readWriteLock.writeLock().tryLock(100, TimeUnit.SECONDS);
+		Thread.sleep(100);
+		System.out.println("解写锁");
+		readWriteLock.writeLock().unlock();
+		Thread.sleep(3000);
+	}
 }
