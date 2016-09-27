@@ -175,7 +175,7 @@ public class DynamicDataSourceServiceImpl implements DynamicDataSourceService {
 
     @PostConstruct
     public void init() {
-        if (null != dynamicDataSource)
+        if (null != dynamicDataSource && dynamicDataSource instanceof DynamicXaDataSourceImpl)
             ((DynamicXaDataSourceImpl) dynamicDataSource).setDynamicDataSourceService(this);
     }
 

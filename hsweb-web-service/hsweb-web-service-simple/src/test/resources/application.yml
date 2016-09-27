@@ -46,9 +46,10 @@ spring:
         testOnReturn: false
         poolPreparedStatements: true
         maxOpenPreparedStatements: 20
+#        schema: classpath:h2.sql
 mybatis:
     type-aliases-package: org.hsweb.web.bean.po
     mapper-locations: classpath*:org/hsweb/web/dao/impl/mybatis/mapper/oracle/**/*.xml
     config: classpath:mybatis-config.xml
     typeHandlers-package: org.hsweb.web.mybatis.handler
-    dynamic-datasource: on
+#    dynamic-datasource: on
