@@ -22,6 +22,9 @@ import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.spi.JobFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,7 +36,11 @@ import javax.sql.DataSource;
 
 @Configuration
 @ConditionalOnClass(QuartzScheduler.class)
+@EnableConfigurationProperties(SchedulerProperties.class)
 public class SchedulerAutoConfiguration {
+
+    @Autowired
+    private SchedulerProperties schedulerProperties;
 
     @Autowired
     private ApplicationContext applicationContext;
@@ -55,13 +62,15 @@ public class SchedulerAutoConfiguration {
     public SchedulerFactoryBean schedulerFactory(JobFactory jobFactory) {
         SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean();
         schedulerFactoryBean.setApplicationContext(applicationContext);
-        schedulerFactoryBean.setAutoStartup(true);
+        schedulerFactoryBean.setAutoStartup(schedulerProperties.isAutoStartup());
         schedulerFactoryBean.setDataSource(dataSource);
         schedulerFactoryBean.setTransactionManager(platformTransactionManager);
-        schedulerFactoryBean.setOverwriteExistingJobs(true);
+        schedulerFactoryBean.setOverwriteExistingJobs(schedulerProperties.isOverwriteExistingJobs());
         schedulerFactoryBean.setSchedulerFactoryClass(StdSchedulerFactory.class);
-        schedulerFactoryBean.setBeanName("scheduler");
+        schedulerFactoryBean.setBeanName(schedulerProperties.getBeanName());
         schedulerFactoryBean.setJobFactory(jobFactory);
+        schedulerFactoryBean.setWaitForJobsToCompleteOnShutdown(schedulerProperties.isWaitOnShutdown());
+        schedulerFactoryBean.setQuartzProperties(schedulerProperties.getProperties());
         return schedulerFactoryBean;
     }
 }

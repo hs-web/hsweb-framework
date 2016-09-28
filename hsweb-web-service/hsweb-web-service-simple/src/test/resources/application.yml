@@ -1,5 +1,8 @@
 logging:
     config: classpath:logback.xml
+scheduler:
+    properties:
+        org.quartz.jobStore.isClustered: true
 spring:
     aop:
         auto: true
