@@ -17,6 +17,8 @@
 package org.hsweb.web.service.impl;
 
 import org.hsweb.web.service.impl.quartz.SimpleJobFactory;
+import org.quartz.Calendar;
+import org.quartz.SchedulerListener;
 import org.quartz.core.QuartzScheduler;
 import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.spi.JobFactory;
@@ -33,6 +35,8 @@ import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
+import java.util.List;
+import java.util.Map;
 
 @Configuration
 @ConditionalOnClass(QuartzScheduler.class)
@@ -50,6 +54,12 @@ public class SchedulerAutoConfiguration {
 
     @Autowired
     private PlatformTransactionManager platformTransactionManager;
+
+    @Autowired(required = false)
+    private Map<String, Calendar> calendarMap;
+
+    @Autowired(required = false)
+    private SchedulerListener[] schedulerListeners;
 
     @Bean
     public JobFactory jobFactory() {
@@ -71,6 +81,9 @@ public class SchedulerAutoConfiguration {
         schedulerFactoryBean.setJobFactory(jobFactory);
         schedulerFactoryBean.setWaitForJobsToCompleteOnShutdown(schedulerProperties.isWaitOnShutdown());
         schedulerFactoryBean.setQuartzProperties(schedulerProperties.getProperties());
+        schedulerFactoryBean.setStartupDelay(schedulerProperties.getStartupDelay());
+        schedulerFactoryBean.setCalendars(calendarMap);
+        schedulerFactoryBean.setSchedulerListeners(schedulerListeners);
         return schedulerFactoryBean;
     }
 }

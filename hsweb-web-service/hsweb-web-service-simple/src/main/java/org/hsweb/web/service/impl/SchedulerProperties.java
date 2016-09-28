@@ -30,6 +30,7 @@ public class SchedulerProperties {
 
     private boolean waitOnShutdown = true;
 
+    private int startupDelay = 0;
     private Properties properties;
 
     public boolean isAutoStartup() {
@@ -70,5 +71,13 @@ public class SchedulerProperties {
 
     public void setProperties(Properties properties) {
         this.properties = properties;
+    }
+
+    public int getStartupDelay() {
+        return startupDelay;
+    }
+
+    public void setStartupDelay(int startupDelay) {
+        this.startupDelay = startupDelay;
     }
 }
