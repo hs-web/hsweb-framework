@@ -12,6 +12,7 @@
 6. 动态多数据源,支持数据源热加载,热切换,支持分布式事务.
 7. 数据库支持 mysql,oracle,h2.
 8. websocket支持.
+9. 定时调度支持,可在页面配置定时任务,编写任务脚本执行。
 
 ### 其他组件
 1. [hsweb-easy-orm](https://github.com/hs-web/hsweb-easy-orm) :为动态表单设计的orm框架
