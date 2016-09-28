@@ -8,15 +8,12 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 
-/**
- * Created by zhouhao on 16-4-25.
- */
 @Configuration
-@ConditionalOnMissingBean(Validator.class)
 public class HibernateValidatorAutoConfiguration {
 
-    @Bean
-    public Validator getHibernateValidator() {
+    @Bean(name = "validator")
+    @ConditionalOnMissingBean(Validator.class)
+    public Validator validator() {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         Validator validator = factory.getValidator();
         return validator;
