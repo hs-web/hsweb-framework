@@ -130,6 +130,8 @@ ALTER TABLE `s_resources`
 CREATE TABLE `s_classified` (
   `u_id`       VARCHAR(32)   NOT NULL PRIMARY KEY
   COMMENT 'uid',
+  `name`       VARCHAR(256)  NOT NULL
+  COMMENT '名称',
   `remark`     VARCHAR(1024) NOT NULL
   COMMENT '备注',
   `type`       VARCHAR(256)  NOT NULL
@@ -143,8 +145,8 @@ CREATE TABLE `s_classified` (
   `sort_index` INT           NOT NULL
   COMMENT '排序'
 );
-ALTER TABLE `s_resources`
-  COMMENT '资源表';
+ALTER TABLE `s_classified`
+  COMMENT '分类表';
 CREATE TABLE `s_role` (
   `u_id`   VARCHAR(32)  NOT NULL PRIMARY KEY
   COMMENT 'uid',
