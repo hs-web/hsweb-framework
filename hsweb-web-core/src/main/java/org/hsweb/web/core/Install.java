@@ -84,7 +84,7 @@ public class Install {
 
     protected void execInstallSql(InputStream sqlStream) throws UnsupportedEncodingException {
         String username = properties.getUsername();
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(sqlStream,"utf-8"));
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(sqlStream, "utf-8"));
         List<String> sqlList = new ArrayList<>();
         SqlAppender tmp = new SqlAppender();
         bufferedReader.lines().forEach((line) -> {
@@ -105,7 +105,7 @@ public class Install {
             try {
                 sqlExecutor.exec(new SimpleSQL(sql));
             } catch (Exception e) {
-                logger.warn("install sql fail", e);
+                throw new RuntimeException("install sql fail", e);
             }
         });
     }
