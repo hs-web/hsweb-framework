@@ -132,17 +132,17 @@ CREATE TABLE `s_classified` (
   COMMENT 'uid',
   `name`       VARCHAR(256)  NOT NULL
   COMMENT '名称',
-  `remark`     VARCHAR(1024) NOT NULL
+  `remark`     VARCHAR(1024) NULL
   COMMENT '备注',
-  `type`       VARCHAR(256)  NOT NULL
+  `type`       VARCHAR(256)  NULL
   COMMENT '类型',
   `parent_id`  VARCHAR(32)   NOT NULL
   COMMENT '父级分类',
   `icon`       VARCHAR(256)  NULL
-  COMMENT '状态',
-  `config`     TEXT          NOT NULL
-  COMMENT '创建时间',
-  `sort_index` INT           NOT NULL
+  COMMENT '图标',
+  `config`     TEXT          NULL
+  COMMENT '配置',
+  `sort_index` INT           NULL
   COMMENT '排序'
 );
 ALTER TABLE `s_classified`
