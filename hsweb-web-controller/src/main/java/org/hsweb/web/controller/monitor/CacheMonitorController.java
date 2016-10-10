@@ -184,7 +184,7 @@ public class CacheMonitorController {
     protected long getTimes(TimesGetter getter) {
         long times = cacheManagerMap.values().stream()
                 .mapToLong(cacheManager -> getTimes(cacheManager, getter))
-                .reduce((i1, i2) -> i1 + i2).orElseGet(() -> 0);
+                .reduce(Math::addExact).orElse(0);
         return times;
     }
 
@@ -194,7 +194,7 @@ public class CacheMonitorController {
                 .filter(cache -> cache instanceof MonitorCache)
                 .map(cache -> (MonitorCache) cache)
                 .mapToLong(getter::get)
-                .reduce((i1, i2) -> i1 + i2).orElseGet(() -> 0);
+                .reduce(Math::addExact).orElse(0);
         return times;
     }
 

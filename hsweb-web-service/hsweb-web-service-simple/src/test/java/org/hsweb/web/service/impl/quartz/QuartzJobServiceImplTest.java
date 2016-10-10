@@ -20,12 +20,14 @@ import org.hsweb.web.bean.po.quartz.QuartzJob;
 import org.hsweb.web.service.impl.AbstractTestCase;
 import org.hsweb.web.service.quartz.QuartzJobService;
 import org.junit.Test;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 
 /**
  * @author zhouhao
  */
+@Component
 public class QuartzJobServiceImplTest extends AbstractTestCase {
 
     @Resource

@@ -3,7 +3,6 @@ package org.hsweb.web.socket.cmd.support;
 import org.hsweb.web.bean.po.user.User;
 import org.hsweb.web.socket.cmd.CMD;
 import org.hsweb.web.socket.message.WebSocketMessage;
-import org.hsweb.web.socket.message.WebSocketMessageManager;
 import org.hyperic.sigar.CpuInfo;
 import org.hyperic.sigar.CpuPerc;
 import org.hyperic.sigar.Sigar;
@@ -12,6 +11,7 @@ import org.springframework.web.socket.WebSocketSession;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.function.Supplier;
 
 /**
  * Created by zhouhao on 16-5-29.
@@ -20,7 +20,7 @@ public class SystemMonitorProcessor extends AbstractCmdProcessor {
 
 
     private Sigar sigar;
-    private ExecutorService exec = Executors.newCachedThreadPool();
+    private ExecutorService      exec       = Executors.newCachedThreadPool();
     private Map<String, Publish> cpuPublish = new ConcurrentHashMap<>();
     private Map<String, Publish> memPublish = new ConcurrentHashMap<>();
 
@@ -40,50 +40,51 @@ public class SystemMonitorProcessor extends AbstractCmdProcessor {
         String type = ((String) cmd.getParams().get("type"));
         if (type == null) return;
         String userId = getUser(cmd).getId();
+
+        Supplier<Publish> supplier = () -> {
+            Publish publish = new Publish();
+            publish.setUserId(userId);
+            publish.setCallback((String) cmd.getParams().get("callback"));
+            cpuPublish.put(userId, publish);
+            return publish;
+        };
+
         switch (type) {
             case "cpu":
                 Publish publish = cpuPublish.get(userId);
-                if (publish == null) {
-                    publish = new Publish();
-                    publish.setUserId(userId);
-                    publish.setCallback((String) cmd.getParams().get("callback"));
-                    cpuPublish.put(userId, publish);
-                }
+                if (publish == null)
+                    publish = supplier.get();
                 publish.addSession(cmd.getSession());
                 if (!cpuMonitorIsStarted) {
                     startPublishCpu();
                     cpuMonitorIsStarted = true;
                 }
-                webSocketMessageManager.subscribe(getName()+"-cpu", userId, cmd.getSession());
+                webSocketMessageManager.subscribe(getName() + "-cpu", userId, cmd.getSession());
                 break;
             case "mem":
                 publish = memPublish.get(userId);
-                if (publish == null) {
-                    publish = new Publish();
-                    publish.setUserId(userId);
-                    publish.setCallback((String) cmd.getParams().get("callback"));
-                    memPublish.put(userId, publish);
-                }
+                if (publish == null)
+                    publish = supplier.get();
                 publish.addSession(cmd.getSession());
                 if (!memMonitorIsStarted) {
                     startPublishMem();
                     memMonitorIsStarted = true;
                 }
-                webSocketMessageManager.subscribe(getName()+"-mem", userId, cmd.getSession());
+                webSocketMessageManager.subscribe(getName() + "-mem", userId, cmd.getSession());
                 break;
             case "mem-cancel":
                 cancelPublish(memPublish, userId, cmd.getSession());
-                webSocketMessageManager.deSubscribe(getName()+"-mem", userId, cmd.getSession());
+                webSocketMessageManager.deSubscribe(getName() + "-mem", userId, cmd.getSession());
                 break;
             case "cpu-cancel":
                 cancelPublish(cpuPublish, userId, cmd.getSession());
-                webSocketMessageManager.deSubscribe(getName()+"-cpu", userId, cmd.getSession());
+                webSocketMessageManager.deSubscribe(getName() + "-cpu", userId, cmd.getSession());
                 break;
             case "cancel":
                 cancelPublish(memPublish, userId, cmd.getSession());
                 cancelPublish(cpuPublish, userId, cmd.getSession());
-                webSocketMessageManager.deSubscribe(getName()+"-mem", userId, cmd.getSession());
-                webSocketMessageManager.deSubscribe(getName()+"-cpu", userId, cmd.getSession());
+                webSocketMessageManager.deSubscribe(getName() + "-mem", userId, cmd.getSession());
+                webSocketMessageManager.deSubscribe(getName() + "-cpu", userId, cmd.getSession());
                 break;
         }
     }
@@ -158,7 +159,7 @@ public class SystemMonitorProcessor extends AbstractCmdProcessor {
                         WebSocketMessage msg = new WebSocketMessage();
                         msg.setTo(publish.getUserId());
                         msg.setContent(infoList);
-                        msg.setType(getName()+"-cpu");
+                        msg.setType(getName() + "-cpu");
                         msg.setCallBack(publish.getCallback());
                         msg.setFrom("system");
                         try {
@@ -187,15 +188,15 @@ public class SystemMonitorProcessor extends AbstractCmdProcessor {
                         }
                     }
                     Map<String, Object> map = sigar.getMem().toMap();
-                    Runtime runtime=  Runtime.getRuntime();
+                    Runtime runtime = Runtime.getRuntime();
                     map.put("jvmTotal", runtime.totalMemory());
-                    map.put("jvmMax",runtime.maxMemory());
-                    map.put("jvmFree",runtime.freeMemory());
+                    map.put("jvmMax", runtime.maxMemory());
+                    map.put("jvmFree", runtime.freeMemory());
                     memPublish.values().forEach(publish -> {
                         WebSocketMessage msg = new WebSocketMessage();
                         msg.setTo(publish.getUserId());
                         msg.setContent(map);
-                        msg.setType(getName()+"-mem");
+                        msg.setType(getName() + "-mem");
                         msg.setCallBack(publish.getCallback());
                         msg.setFrom("system");
                         try {
@@ -227,8 +228,8 @@ public class SystemMonitorProcessor extends AbstractCmdProcessor {
         if (user != null) {
             cancelPublish(cpuPublish, user.getId(), session);
             cancelPublish(memPublish, user.getId(), session);
-            webSocketMessageManager.deSubscribe(getName()+"-cpu", user.getId(),session);
-            webSocketMessageManager.deSubscribe(getName()+"-mem", user.getId(),session);
+            webSocketMessageManager.deSubscribe(getName() + "-cpu", user.getId(), session);
+            webSocketMessageManager.deSubscribe(getName() + "-mem", user.getId(), session);
         }
 
     }

@@ -16,11 +16,22 @@
 
 package org.hsweb.web.service.impl.lock;
 
+import org.hsweb.concureent.cache.RedisCacheManagerAutoConfig;
 import org.hsweb.concurrent.lock.LockFactory;
+import org.hsweb.web.bean.po.user.User;
 import org.hsweb.web.service.impl.AbstractTestCase;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.connection.RedisConnection;
+import org.springframework.data.redis.core.RedisCallback;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
 
 import javax.annotation.Resource;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -30,6 +41,28 @@ public class LockTest extends AbstractTestCase {
     @Resource
     private LockFactory lockFactory;
 
+    @Autowired
+    private RedisTemplate redisTemplate;
+
+    @Test
+    public void testCache() {
+        redisTemplate.execute((RedisCallback<? extends Object>) connection -> {
+            for (int i = 0; i < 50000; i++) {
+                User user = new User();
+                user.setName("test" + i);
+                try {
+                    JdkSerializationRedisSerializer s = new JdkSerializationRedisSerializer();
+                    connection.lPush("test".getBytes(), s.serialize(user));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            return null;
+        });
+        long l = System.currentTimeMillis();
+        System.out.println(redisTemplate.opsForList().range("test", 0, -1).size());
+        System.out.println(System.currentTimeMillis() - l);
+    }
 
     @Test
     public void testLock() throws InterruptedException {

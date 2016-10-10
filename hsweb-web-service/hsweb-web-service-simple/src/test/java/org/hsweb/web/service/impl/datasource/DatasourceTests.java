@@ -54,6 +54,7 @@ public class DatasourceTests extends AbstractTestCase {
     @Before
     public void setup() throws Exception {
         dataSourceService.delete("test");
+        //创建一个新的数据源配置，放入到数据库中
         DataSource dataSource = new DataSource();
         dataSource.setId("test");
         dataSource.setName("test");
@@ -65,11 +66,14 @@ public class DatasourceTests extends AbstractTestCase {
 
         dataSourceService.insert(dataSource);
 
+        //使用刚刚创建的数据源
         DynamicDataSource.use("test");
-        install.install();//安装新的数据库
+        install.install();//自动创建系统所需的数据库表
 
+        //使用默认数据源进行查询
         DynamicDataSource.useDefault();
         userService.select(QueryParam.build());
+        //使用test数据源进行查询
         DynamicDataSource.use("test");
         userService.select(QueryParam.build());
 
