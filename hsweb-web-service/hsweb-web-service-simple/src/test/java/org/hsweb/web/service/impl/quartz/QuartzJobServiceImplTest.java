@@ -17,8 +17,11 @@
 package org.hsweb.web.service.impl.quartz;
 
 import org.hsweb.web.bean.po.quartz.QuartzJob;
+import org.hsweb.web.bean.po.user.User;
+import org.hsweb.web.core.utils.WebUtil;
 import org.hsweb.web.service.impl.AbstractTestCase;
 import org.hsweb.web.service.quartz.QuartzJobService;
+import org.hsweb.web.service.user.UserService;
 import org.junit.Test;
 import org.springframework.stereotype.Component;
 
@@ -33,22 +36,29 @@ public class QuartzJobServiceImplTest extends AbstractTestCase {
     @Resource
     private QuartzJobService quartzJobService;
 
+    @Resource
+    private UserService userService;
     static final String jobId = "test";
 
     @Test
     public void testJob() throws InterruptedException {
+        User user = new User();
+        user.setName("admin");
+        user.setUsername("admin");
+        user.setPassword("admin");
+        userService.insert(user);
         quartzJobService.delete(jobId);
         QuartzJob job = new QuartzJob();
         job.setId(jobId);
         job.setName("测试任务");
         job.setCron("0/2 * * * * ?");
         job.setLanguage("groovy");
-        job.setScript("println('任务执行中...');return 'aaaaa';");
+        job.setScript("println('任务执行中...'+(org.hsweb.web.core.utils.WebUtil.getLoginUser())); return 'aaaaa';");
         quartzJobService.insert(job);
         Thread.sleep(20 * 1000);
-        job.setCron("0/5 * * * * ?");
-        job.setScript("println('任务执行中22222...');return 'aaaaa';");
-        quartzJobService.update(job);
+//        job.setCron("0/5 * * * * ?");
+//        job.setScript("println('任务执行中22222...');return 'aaaaa';");
+//        quartzJobService.update(job);
         Thread.sleep(10 * 1000);
         quartzJobService.disable(job.getId());
         Thread.sleep(10 * 1000);

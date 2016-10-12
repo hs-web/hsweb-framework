@@ -17,14 +17,19 @@
 package org.hsweb.web.service.impl.quartz;
 
 import org.hsweb.commons.ClassUtils;
+import org.hsweb.web.bean.po.user.User;
 import org.hsweb.web.core.authorize.ExpressionScopeBean;
+import org.hsweb.web.service.config.ConfigService;
 import org.hsweb.web.service.quartz.QuartzJobHistoryService;
 import org.hsweb.web.service.quartz.QuartzJobService;
+import org.hsweb.web.service.user.UserService;
 import org.quartz.Job;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.spi.JobFactory;
 import org.quartz.spi.TriggerFiredBundle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 
@@ -36,7 +41,7 @@ import java.util.Map;
 public class SimpleJobFactory implements JobFactory {
 
     public static final String QUARTZ_ID_KEY = "quartz.id";
-
+    protected           Logger logger        = LoggerFactory.getLogger(this.getClass());
     @Resource
     private QuartzJobService quartzJobService;
 
@@ -44,6 +49,12 @@ public class SimpleJobFactory implements JobFactory {
     private QuartzJobHistoryService quartzJobHistoryService;
 
     private JobFactory defaultFactory;
+
+    @Resource
+    private UserService userService;
+
+    @Resource
+    private ConfigService configService;
 
     @Autowired(required = false)
     private Map<String, ExpressionScopeBean> expressionScopeBeanMap;
@@ -57,6 +68,15 @@ public class SimpleJobFactory implements JobFactory {
             Assert.notNull(id);
             try {
                 SimpleJob job = (SimpleJob) jobClass.getConstructor(QuartzJobService.class, QuartzJobHistoryService.class).newInstance(quartzJobService, quartzJobHistoryService);
+                String username = configService.get("quartz", "executeUserName", "admin");
+                User user = userService.selectByUserName(username);
+                if (user != null) {
+                    user.initRoleInfo();
+                    job.setDefaultUser(user);
+                } else {
+                    //未找到用户名
+                    logger.warn("job executor user:{} not found!", username);
+                }
                 if (expressionScopeBeanMap != null)
                     job.setDefaultVar(new HashMap<>(expressionScopeBeanMap));
                 return job;
