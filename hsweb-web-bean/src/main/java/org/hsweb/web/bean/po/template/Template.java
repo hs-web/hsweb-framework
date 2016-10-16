@@ -4,9 +4,6 @@ import org.hsweb.web.bean.po.GenericPo;
 
 import java.util.List;
 
-/**
- * Created by zhouhao on 16-5-19.
- */
 public class Template extends GenericPo<String> {
 
     private String name;

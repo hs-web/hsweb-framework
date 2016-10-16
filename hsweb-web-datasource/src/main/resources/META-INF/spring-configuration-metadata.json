@@ -1,0 +1,35 @@
+{
+  "groups": [
+    {
+      "name": "hsweb.dynamic-datasource",
+      "type": "org.hsweb.web.datasource.dynamic.DynamicDataSourceProperties",
+      "sourceType": "org.hsweb.web.datasource.dynamic.DynamicDataSourceProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "hsweb.dynamic-datasource.name",
+      "type": "java.lang.String",
+      "sourceType": "org.hsweb.web.datasource.dynamic.DynamicDataSourceProperties"
+    }
+  ],
+  "hints": [
+    {
+      "name": "hsweb.dynamic-datasource.type",
+      "values": [
+        {
+          "value": "h2",
+          "description": "use h2 database."
+        },
+        {
+          "value": "mysql",
+          "description": "use mysql database."
+        },
+        {
+          "value": "oracle",
+          "description": "use oracle database."
+        }
+      ]
+    }
+  ]
+}

@@ -22,6 +22,7 @@ import org.hsweb.web.bean.po.datasource.DataSource;
 import org.hsweb.web.core.Install;
 import org.hsweb.web.core.datasource.DynamicDataSource;
 import org.hsweb.web.service.datasource.DataSourceService;
+import org.hsweb.web.service.form.FormService;
 import org.hsweb.web.service.impl.AbstractTestCase;
 import org.hsweb.web.service.user.UserService;
 import org.junit.Before;
@@ -46,6 +47,10 @@ public class DatasourceTests extends AbstractTestCase {
     private UserService userService;
     @Resource
     Install install;
+
+    @Resource
+    private FormService formService;
+
     @PostConstruct
     public void init() {
         testService.setSqlExecutor(sqlExecutor);
@@ -76,12 +81,12 @@ public class DatasourceTests extends AbstractTestCase {
         //使用test数据源进行查询
         DynamicDataSource.use("test");
         userService.select(QueryParam.build());
-
     }
 
     @Test
     public void testGetFieldList() throws Exception {
-        testService.test();
+        formService.select(QueryParam.build());
+        System.out.println(1);
     }
 
 }

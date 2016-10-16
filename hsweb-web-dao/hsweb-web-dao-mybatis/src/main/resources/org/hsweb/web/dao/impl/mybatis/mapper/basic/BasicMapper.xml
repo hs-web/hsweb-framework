@@ -5,24 +5,24 @@
 <mapper namespace="BasicMapper">
     <!--通用查询条件-->
     <sql id="buildWhere">
-        ${@org.hsweb.web.mybatis.builder.DefaultSqlParamBuilder@instance().buildWhere(resultMapId,tableName,#this['_parameter'].terms)}
+        ${@org.hsweb.web.mybatis.builder.SqlBuilder@current().buildWhere(resultMapId,tableName,#this['_parameter'].terms)}
     </sql>
 
     <!--生成查询字段-->
     <sql id="buildSelectField">
-        ${@org.hsweb.web.mybatis.builder.DefaultSqlParamBuilder@instance().buildSelectFields(resultMapId,tableName,#this['_parameter'])}
+        ${@org.hsweb.web.mybatis.builder.SqlBuilder@current().buildSelectFields(resultMapId,tableName,#this['_parameter'])}
     </sql>
 
     <!--生成修改字段-->
     <sql id="buildUpdateField">
         <set>
-            ${@org.hsweb.web.mybatis.builder.DefaultSqlParamBuilder@instance().buildUpdateFields(resultMapId,#this['_parameter'])}
+            ${@org.hsweb.web.mybatis.builder.SqlBuilder@current().buildUpdateFields(resultMapId,#this['_parameter'])}
         </set>
     </sql>
 
     <!--生成排序字段-->
     <sql id="buildSortField">
-        ${@org.hsweb.web.mybatis.builder.DefaultSqlParamBuilder@instance().buildOrder(resultMapId,tableName,#this['_parameter'])}
+        ${@org.hsweb.web.mybatis.builder.SqlBuilder@current().buildOrder(resultMapId,tableName,#this['_parameter'])}
     </sql>
 
     <!--生成查询sql-->
@@ -49,7 +49,7 @@
 
     <!--生成InsertSql-->
     <sql id="buildInsertSql">
-        insert into ${tableName} ${@org.hsweb.web.mybatis.builder.DefaultSqlParamBuilder@instance().buildInsertSql(resultMapId,#this['_parameter'])}
+        insert into ${tableName} ${@org.hsweb.web.mybatis.builder.SqlBuilder@current().buildInsertSql(resultMapId,#this['_parameter'])}
     </sql>
 
     <!--生成UpdateSql-->

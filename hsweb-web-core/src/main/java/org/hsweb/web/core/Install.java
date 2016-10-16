@@ -19,13 +19,11 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.util.Assert;
 
 import javax.annotation.PostConstruct;
+import javax.sql.DataSource;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by zhouhao on 16-4-23.
- */
 @Configuration
 @EnableConfigurationProperties({DataSourceProperties.class})
 @AutoConfigureAfter({DataSourceAutoConfiguration.class})

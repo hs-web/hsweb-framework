@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-package org.hsweb.web.mybatis.dynamic;
+package org.hsweb.web.mybatis;
 
 import org.apache.ibatis.mapping.DatabaseIdProvider;
 import org.apache.ibatis.plugin.Interceptor;
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.hsweb.web.core.datasource.DataSourceHolder;
 import org.hsweb.web.datasource.dynamic.DynamicDataSourceAutoConfiguration;
+import org.hsweb.web.mybatis.MybatisProperties;
+import org.hsweb.web.mybatis.dynamic.DynamicDataSourceSqlSessionFactoryBuilder;
 import org.mybatis.spring.SqlSessionFactoryBean;
-import org.mybatis.spring.boot.autoconfigure.MybatisProperties;
 import org.mybatis.spring.boot.autoconfigure.SpringBootVFS;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -30,16 +32,23 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Properties;
 
 @Configuration
 @AutoConfigureAfter(DynamicDataSourceAutoConfiguration.class)
 @EnableConfigurationProperties(MybatisProperties.class)
-@ConditionalOnProperty(prefix = "mybatis", value = "dynamic-datasource")
-public class DynamicDataSourceMyBatisAutoConfiguration {
+public class MyBatisAutoConfiguration {
 
     @Autowired
     private MybatisProperties properties;
@@ -51,12 +60,23 @@ public class DynamicDataSourceMyBatisAutoConfiguration {
     private ResourceLoader resourceLoader = new DefaultResourceLoader();
 
     @Autowired(required = false)
-    private DatabaseIdProvider databaseIdProvider;
+    private DatabaseIdProvider databaseIdProvider = new DatabaseIdProvider() {
+        @Override
+        public void setProperties(Properties p) {
+
+        }
+
+        @Override
+        public String getDatabaseId(DataSource dataSource) throws SQLException {
+            return DataSourceHolder.getActiveDatabaseType().name();
+        }
+    };
 
     @Bean(name = "sqlSessionFactory")
     public SqlSessionFactory sqlSessionFactory(DataSource dataSource) throws Exception {
         SqlSessionFactoryBean factory = new SqlSessionFactoryBean();
-        factory.setSqlSessionFactoryBuilder(new DynamicDataSourceSqlSessionFactoryBuilder());
+        if (properties.isDynamicDatasource())
+            factory.setSqlSessionFactoryBuilder(new DynamicDataSourceSqlSessionFactoryBuilder());
         factory.setDataSource(dataSource);
         factory.setVfs(SpringBootVFS.class);
         if (StringUtils.hasText(this.properties.getConfig())) {
@@ -70,8 +90,13 @@ public class DynamicDataSourceMyBatisAutoConfiguration {
             factory.setDatabaseIdProvider(this.databaseIdProvider);
         }
         factory.setTypeAliasesPackage(this.properties.getTypeAliasesPackage());
-        factory.setTypeHandlersPackage(this.properties.getTypeHandlersPackage());
+        String typeHandlers = "org.hsweb.web.mybatis.handler";
+        if (this.properties.getTypeHandlersPackage() != null) {
+            typeHandlers = typeHandlers + ";" + this.properties.getTypeHandlersPackage();
+        }
+        factory.setTypeHandlersPackage(typeHandlers);
         factory.setMapperLocations(this.properties.resolveMapperLocations());
         return factory.getObject();
     }
+
 }

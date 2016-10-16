@@ -23,14 +23,10 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import javax.sql.CommonDataSource;
 import javax.sql.DataSource;
 
-/**
- * @author zhouhao
- */
 public interface DynamicDataSource extends DataSource {
     String DATA_SOURCE_FLAG = "data-source-id";
 
     String DATA_SOURCE_FLAG_LAST = "data-source-id-last";
-
 
     static void useLast() {
         use(ThreadLocalUtils.get(DATA_SOURCE_FLAG_LAST));
@@ -55,4 +51,6 @@ public interface DynamicDataSource extends DataSource {
     }
 
     DataSource getActiveDataSource();
+
+    DatabaseType getActiveDataBaseType();
 }

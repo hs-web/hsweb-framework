@@ -23,6 +23,6 @@ import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 public class DynamicDataSourceSqlSessionFactoryBuilder extends SqlSessionFactoryBuilder {
     @Override
     public SqlSessionFactory build(Configuration config) {
-            return new DynamicSqlSessionFactory(config);
+        return new DynamicSqlSessionFactory(config);
     }
 }

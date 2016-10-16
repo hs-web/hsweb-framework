@@ -25,7 +25,7 @@ import org.apache.ibatis.session.defaults.DefaultSqlSession;
 import org.apache.ibatis.transaction.Transaction;
 import org.apache.ibatis.transaction.TransactionFactory;
 import org.apache.ibatis.transaction.managed.ManagedTransactionFactory;
-import org.hsweb.web.core.datasource.DynamicDataSourceHolder;
+import org.hsweb.web.core.datasource.DataSourceHolder;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -91,7 +91,7 @@ public class DynamicSqlSessionFactory implements SqlSessionFactory {
         try {
             final Environment environment = getConfiguration().getEnvironment();
             final TransactionFactory transactionFactory = getTransactionFactoryFromEnvironment(environment);
-            DataSource ds = DynamicDataSourceHolder.getActiveSource();
+            DataSource ds = DataSourceHolder.getActiveSource();
             if (ds == null) ds = environment.getDataSource();
             tx = transactionFactory.newTransaction(ds, level, autoCommit);
             final Executor executor = getConfiguration().newExecutor(tx, execType);
