@@ -21,12 +21,9 @@ import org.springframework.core.annotation.Order;
 import javax.annotation.PostConstruct;
 import java.util.List;
 
-/**
- * Created by zhouhao on 16-4-28.
- */
 @Configuration
-@ConditionalOnProperty(name = "logger.access", havingValue = "true")
-public class AopAccessLoggerResolverAutoConfiguration{
+@ConditionalOnProperty(name = "hsweb.access-logger", havingValue = "true")
+public class AopAccessLoggerResolverAutoConfiguration {
     @Bean
     public AopAccessLoggerResolverConfiguration aopAccessLoggerResolverConfiguration() {
         return new AopAccessLoggerResolverConfiguration();
