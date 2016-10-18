@@ -16,14 +16,17 @@
 
 package org.hsweb.web.datasource.dynamic;
 
+import com.atomikos.datasource.pool.ConnectionPool;
 import com.atomikos.jdbc.AtomikosDataSourceBean;
 import org.hsweb.web.core.datasource.DatabaseType;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
+import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
@@ -38,25 +41,25 @@ import java.util.Properties;
 public class DynamicDataSourceProperties
         implements BeanClassLoaderAware, InitializingBean {
     private static final List<String> supportDatasourceType;
-    private String       name                    = "core";
-    private DatabaseType type                    = DatabaseType.h2;
-    private String       datasourceName          = null;
-    private String       username                = "sa";
-    private String       password                = "";
-    private String       url                     = "jdbc:h2:file:./data/h2db;DB_CLOSE_ON_EXIT=FALSE";
-    private String       testQuery               = null;
-    private int          loginTimeout            = -1;
-    private int          maxLifetime             = -1;
-    private int          minPoolSize             = 2;
-    private int          maxPoolSize             = 20;
-    private int          borrowConnectionTimeout = 30;
-    private int          reapTimeout             = 0;
-    private int          maxIdleTime             = 60;
-    private int          maintenanceInterval     = 60;
-    private int          defaultIsolationLevel   = -1;
-    private int          transactionTimeout      = 300;
-    private Properties   properties              = null;
-    private ClassLoader  classLoader             = null;
+    private String       name           = "core";
+    private DatabaseType type           = null;
+    private String       datasourceName = null;
+    private String       username       = "sa";
+    private String       password       = "";
+    private String       url            = "jdbc:h2:file:./data/h2db;DB_CLOSE_ON_EXIT=FALSE";
+    private String testQuery;
+    private int         loginTimeout            = 0;
+    private int         maxLifetime             = 0;
+    private int         minPoolSize             = 2;
+    private int         maxPoolSize             = 20;
+    private int         borrowConnectionTimeout = 30;
+    private int         reapTimeout             = 0;
+    private int         maxIdleTime             = 60;
+    private int         maintenanceInterval     = 60;
+    private int         defaultIsolationLevel   = -1;
+    private int         transactionTimeout      = 300;
+    private Properties  properties              = null;
+    private ClassLoader classLoader             = null;
 
     static {
         supportDatasourceType = new LinkedList<>();
@@ -218,8 +221,13 @@ public class DynamicDataSourceProperties
 
     @Override
     public void afterPropertiesSet() throws Exception {
+        Assert.notNull(url);
+        Assert.notNull(username);
         if (datasourceName == null) {
             datasourceName = lookupSupportDatasourceName();
+        }
+        if (type == null) {
+            type = DatabaseType.fromJdbcUrl(getUrl());
         }
         if (!StringUtils.hasText(testQuery)) testQuery = getType().getTestQuery();
     }
