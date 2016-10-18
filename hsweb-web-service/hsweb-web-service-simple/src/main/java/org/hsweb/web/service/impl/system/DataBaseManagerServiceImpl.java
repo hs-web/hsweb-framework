@@ -16,16 +16,9 @@ import org.hsweb.ezorm.render.dialect.MysqlDatabaseMeta;
 import org.hsweb.ezorm.render.dialect.OracleDatabaseMeta;
 import org.hsweb.ezorm.render.support.simple.SimpleSQL;
 import org.hsweb.web.core.datasource.DataSourceHolder;
-import org.hsweb.web.core.datasource.DynamicDataSource;
-import org.hsweb.web.core.exception.BusinessException;
-import org.hsweb.web.core.exception.NotFoundException;
-import org.hsweb.web.service.datasource.DataSourceService;
-import org.hsweb.web.service.impl.DatabaseMetaDataFactoryBean;
 import org.hsweb.web.service.system.DataBaseManagerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,12 +42,6 @@ public class DataBaseManagerServiceImpl implements DataBaseManagerService {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
     @Resource
     private SqlExecutor sqlExecutor;
-
-    @Resource
-    private DataSourceService dataSourceService;
-
-    @Autowired
-    private DataSourceProperties dataSourceProperties;
 
     @Override
     @Transactional(readOnly = true)
