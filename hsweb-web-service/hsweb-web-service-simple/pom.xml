@@ -13,14 +13,16 @@
     <dependencies>
 
         <!--test-->
-        <dependency>
-            <groupId>org.hsweb</groupId>
-            <artifactId>hsweb-web-datasource</artifactId>
-            <scope>test</scope>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>org.hsweb</groupId>-->
+            <!--<artifactId>hsweb-web-datasource</artifactId>-->
+            <!--<scope>test</scope>-->
+        <!--</dependency>-->
+        <!---->
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
