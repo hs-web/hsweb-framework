@@ -17,6 +17,20 @@
     </properties>
 
     <dependencies>
+
+        <!--test-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>druid</artifactId>
+            <version>1.0.26</version>
+            <scope>test</scope>
+        </dependency>
+
         <dependency>
             <groupId>org.hsweb</groupId>
             <artifactId>hsweb-web-dao-api</artifactId>
@@ -32,11 +46,11 @@
             <artifactId>spring-boot-starter-jdbc</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>org.hsweb</groupId>
-            <artifactId>hsweb-web-datasource</artifactId>
-            <optional>true</optional>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>org.hsweb</groupId>-->
+            <!--<artifactId>hsweb-web-datasource</artifactId>-->
+            <!--<optional>true</optional>-->
+        <!--</dependency>-->
 
         <!-- mybatis start-->
         <dependency>

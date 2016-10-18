@@ -23,19 +23,35 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * mybatis配置,继承官方配置类,增加一些属性以拓展更多功能
+ * <ul>
+ * <li>是否启用动态数据源{@link this#dynamicDatasource}</li>
+ * <li>可设置不加载的配置{@link this#mapperLocationExcludes}</li>
+ * </ul>
+ *
+ * @author zhouhao
+ * @see org.mybatis.spring.boot.autoconfigure.MybatisProperties
+ * @since 2.1
+ */
 public class MybatisProperties extends org.mybatis.spring.boot.autoconfigure.MybatisProperties {
+    /**
+     * 默认支持的hsweb mapper
+     */
     private static final String   defaultMapperLocation  = "classpath*:org/hsweb/web/dao/impl/mybatis/mapper/**/*.xml";
-    private              String   type                   = "oracle";
+    /**
+     * 是否启用动态数据源
+     * 启用后调用{@link org.hsweb.web.core.datasource.DynamicDataSource#use(String)},mybatis也会进行数据源切换
+     *
+     * @see org.hsweb.web.core.datasource.DynamicDataSource
+     */
     private              boolean  dynamicDatasource      = false;
+    /**
+     * 排除加载的mapper.xml
+     * 想自定义mapper并覆盖原始mapper的场景下，通过设置此属性来排除配置文件。
+     * 排除使用{@link Resource#getURL()#toString()}进行对比
+     */
     private              String[] mapperLocationExcludes = null;
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
 
     public String[] getMapperLocationExcludes() {
         return mapperLocationExcludes;
@@ -51,11 +67,6 @@ public class MybatisProperties extends org.mybatis.spring.boot.autoconfigure.Myb
 
     public void setDynamicDatasource(boolean dynamicDatasource) {
         this.dynamicDatasource = dynamicDatasource;
-    }
-
-    @Override
-    public String[] getMapperLocations() {
-        return super.getMapperLocations();
     }
 
     public Resource[] resolveMapperLocations() {
@@ -77,9 +88,8 @@ public class MybatisProperties extends org.mybatis.spring.boot.autoconfigure.Myb
             } catch (IOException e) {
             }
         }
-        if (mapperLocationExcludes != null && mapperLocationExcludes.length > 0)
-
-        {
+        //排除不需要的配置
+        if (mapperLocationExcludes != null && mapperLocationExcludes.length > 0) {
             for (String mapperLocationExclude : mapperLocationExcludes) {
                 try {
                     Resource[] excludesMappers = new PathMatchingResourcePatternResolver().getResources(mapperLocationExclude);
@@ -90,11 +100,8 @@ public class MybatisProperties extends org.mybatis.spring.boot.autoconfigure.Myb
                 }
             }
         }
-
         Resource[] mapperLocations = new Resource[resources.size()];
-        mapperLocations = resources.values().
-
-                toArray(mapperLocations);
+        mapperLocations = resources.values().toArray(mapperLocations);
         return mapperLocations;
     }
 
