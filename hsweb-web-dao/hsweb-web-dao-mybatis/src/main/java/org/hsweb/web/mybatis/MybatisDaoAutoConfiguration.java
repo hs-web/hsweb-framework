@@ -1,6 +1,5 @@
 package org.hsweb.web.mybatis;
 
-import org.hsweb.web.datasource.dynamic.DynamicDataSourceAutoConfiguration;
 import org.hsweb.web.mybatis.utils.ResultMapsUtils;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.mybatis.spring.annotation.MapperScan;
@@ -15,7 +14,7 @@ import javax.annotation.PostConstruct;
 @Configuration
 @ComponentScan(basePackages = {"org.hsweb.web.mybatis"})
 @MapperScan(basePackages = {"org.hsweb.web.dao"})
-@AutoConfigureAfter(DynamicDataSourceAutoConfiguration.class)
+@AutoConfigureAfter(MyBatisAutoConfiguration.class)
 @EnableConfigurationProperties(MybatisProperties.class)
 public class MybatisDaoAutoConfiguration {
 

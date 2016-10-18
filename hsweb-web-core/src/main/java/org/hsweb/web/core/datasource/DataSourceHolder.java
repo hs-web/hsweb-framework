@@ -17,15 +17,10 @@
 package org.hsweb.web.core.datasource;
 
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-@Component
 public class DataSourceHolder {
 
     private static DynamicDataSource dynamicDataSource;
@@ -34,17 +29,12 @@ public class DataSourceHolder {
 
     private static DatabaseType defaultDatabaseType;
 
-    @Autowired(required = false)
-    private DataSource dataSource;
-
-    @PostConstruct
-    public void init() throws SQLException {
+    public void init(DataSource dataSource) throws SQLException {
         if (null != dataSource) {
             Connection connection = null;
             try {
                 connection = dataSource.getConnection();
                 install(dataSource, DatabaseType.fromJdbcUrl(connection.getMetaData().getURL()));
-                dataSource = null;
             } finally {
                 if (null != connection)
                     connection.close();

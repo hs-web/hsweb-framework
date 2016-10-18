@@ -19,35 +19,23 @@ package org.hsweb.web.mybatis;
 import org.apache.ibatis.mapping.DatabaseIdProvider;
 import org.apache.ibatis.plugin.Interceptor;
 import org.apache.ibatis.session.SqlSessionFactory;
-import org.hsweb.web.core.datasource.DataSourceHolder;
-import org.hsweb.web.datasource.dynamic.DynamicDataSourceAutoConfiguration;
-import org.hsweb.web.mybatis.MybatisProperties;
 import org.hsweb.web.mybatis.dynamic.DynamicDataSourceSqlSessionFactoryBuilder;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.boot.autoconfigure.SpringBootVFS;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.AutoConfigureAfter;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.DefaultResourceLoader;
-import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
-import java.io.IOException;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
 
 @Configuration
-@AutoConfigureAfter(DynamicDataSourceAutoConfiguration.class)
 @EnableConfigurationProperties(MybatisProperties.class)
+@ConditionalOnClass({SqlSessionFactory.class, SqlSessionFactoryBean.class})
 public class MyBatisAutoConfiguration {
 
     @Autowired
@@ -60,17 +48,7 @@ public class MyBatisAutoConfiguration {
     private ResourceLoader resourceLoader = new DefaultResourceLoader();
 
     @Autowired(required = false)
-    private DatabaseIdProvider databaseIdProvider = new DatabaseIdProvider() {
-        @Override
-        public void setProperties(Properties p) {
-
-        }
-
-        @Override
-        public String getDatabaseId(DataSource dataSource) throws SQLException {
-            return DataSourceHolder.getActiveDatabaseType().name();
-        }
-    };
+    private DatabaseIdProvider databaseIdProvider;
 
     @Bean(name = "sqlSessionFactory")
     public SqlSessionFactory sqlSessionFactory(DataSource dataSource) throws Exception {

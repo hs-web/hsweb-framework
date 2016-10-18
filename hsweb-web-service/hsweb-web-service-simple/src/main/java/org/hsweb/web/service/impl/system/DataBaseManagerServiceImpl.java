@@ -15,6 +15,7 @@ import org.hsweb.ezorm.render.dialect.H2DatabaseMeta;
 import org.hsweb.ezorm.render.dialect.MysqlDatabaseMeta;
 import org.hsweb.ezorm.render.dialect.OracleDatabaseMeta;
 import org.hsweb.ezorm.render.support.simple.SimpleSQL;
+import org.hsweb.web.core.datasource.DataSourceHolder;
 import org.hsweb.web.core.datasource.DynamicDataSource;
 import org.hsweb.web.core.exception.BusinessException;
 import org.hsweb.web.core.exception.NotFoundException;
@@ -136,22 +137,7 @@ public class DataBaseManagerServiceImpl implements DataBaseManagerService {
     }
 
     public DBType getDBType() {
-        String datasourceId = DynamicDataSource.getActiveDataSourceId();
-        String driver = dataSourceProperties.getDriverClassName();
-        if (datasourceId != null) {
-            org.hsweb.web.bean.po.datasource.DataSource dataSource = dataSourceService.selectByPk(datasourceId);
-            driver = dataSource.getDriver();
-        }
-        if (driver.contains("mysql")) {
-            return DBType.mysql;
-        }
-        if (driver.contains("oracle")) {
-            return DBType.oracle;
-        }
-        if (driver.contains("h2")) {
-            return DBType.h2;
-        }
-        throw new NotFoundException(driver);
+        return DBType.valueOf(DataSourceHolder.getActiveDatabaseType().name());
     }
 
     enum DBType {

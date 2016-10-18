@@ -30,7 +30,6 @@ import javax.annotation.Resource;
 /**
  * @author zhouhao
  */
-@Component
 public class QuartzJobServiceImplTest extends AbstractTestCase {
 
     @Resource
@@ -38,6 +37,7 @@ public class QuartzJobServiceImplTest extends AbstractTestCase {
 
     @Resource
     private UserService userService;
+
     static final String jobId = "test";
 
     @Test

@@ -23,9 +23,8 @@ import org.quartz.core.QuartzScheduler;
 import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.spi.JobFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -35,12 +34,12 @@ import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
-import java.util.List;
 import java.util.Map;
 
 @Configuration
 @ConditionalOnClass(QuartzScheduler.class)
 @EnableConfigurationProperties(SchedulerProperties.class)
+@AutoConfigureAfter(DataBaseAutoConfiguration.class)
 public class SchedulerAutoConfiguration {
 
     @Autowired
