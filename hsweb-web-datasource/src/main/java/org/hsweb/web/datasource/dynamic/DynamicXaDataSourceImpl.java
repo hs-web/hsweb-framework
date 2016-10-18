@@ -33,8 +33,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 public class DynamicXaDataSourceImpl extends AbstractDataSource implements DynamicDataSource, XADataSource, Closeable {
-    private Logger logger = LoggerFactory.getLogger(DynamicDataSource.class);
-    private   javax.sql.DataSource     defaultDataSource;
+    private Logger               logger            = LoggerFactory.getLogger(DynamicDataSource.class);
+    private javax.sql.DataSource defaultDataSource = null;
     private   DatabaseType             defaultDatabaseType;
     protected DynamicDataSourceService dynamicDataSourceService;
 
@@ -60,6 +60,7 @@ public class DynamicXaDataSourceImpl extends AbstractDataSource implements Dynam
         logger.info("use datasource:{}", sourceId == null ? "default" : sourceId);
         if (sourceId == null || dynamicDataSourceService == null) return defaultDataSource;
         DataSource dataSource = dynamicDataSourceService.getDataSource(sourceId);
+        logger.info("use datasource:{} fail,because its not exists! use default datasource now.", sourceId);
         if (dataSource == null) return defaultDataSource;
         return dataSource;
     }

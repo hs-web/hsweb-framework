@@ -8,10 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-/**
- * Created by zhouhao on 16-4-28.
- */
-@Component
 public class Slf4jAccessLoggerPersisting implements AccessLoggerPersisting {
     protected Logger logger = LoggerFactory.getLogger(this.getClass());
     @Autowired(required = false)

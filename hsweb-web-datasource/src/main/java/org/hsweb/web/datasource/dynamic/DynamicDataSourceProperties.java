@@ -16,7 +16,6 @@
 
 package org.hsweb.web.datasource.dynamic;
 
-import com.atomikos.datasource.pool.ConnectionPool;
 import com.atomikos.jdbc.AtomikosDataSourceBean;
 import org.hsweb.web.core.datasource.DatabaseType;
 import org.springframework.beans.factory.BeanClassLoaderAware;
@@ -26,7 +25,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
-import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;

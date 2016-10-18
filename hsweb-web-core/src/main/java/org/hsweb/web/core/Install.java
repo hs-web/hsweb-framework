@@ -4,57 +4,39 @@ import org.hsweb.commons.file.FileUtils;
 import org.hsweb.ezorm.executor.SqlExecutor;
 import org.hsweb.ezorm.render.SqlAppender;
 import org.hsweb.ezorm.render.support.simple.SimpleSQL;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.hsweb.web.core.datasource.DataSourceHolder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.AutoConfigureAfter;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.util.Assert;
 
 import javax.annotation.PostConstruct;
-import javax.sql.DataSource;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 
 @Configuration
-@EnableConfigurationProperties({DataSourceProperties.class})
-@AutoConfigureAfter({DataSourceAutoConfiguration.class})
-@ConfigurationProperties(
-        prefix = "spring.datasource"
-)
 public class Install {
-    private static String DATABASE_TYPE = "h2";
-
     /**
      * 获取当前数据库类型
      *
      * @return
      */
     public static String getDatabaseType() {
-        return DATABASE_TYPE;
+        return DataSourceHolder.getActiveDatabaseType().name();
     }
-
-    @Autowired
-    private DataSourceProperties properties;
 
     @Autowired
     private SqlExecutor sqlExecutor;
 
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
-
     @PostConstruct
     public void install() throws Exception {
-        String dc = properties.getDriverClassName();
-        String dbType = dc.contains("mysql") ? "mysql" : dc.contains("oracle") ? "oracle" : dc.contains("h2") ? "h2" : null;
-        DATABASE_TYPE = dbType;
+        String dbType = DataSourceHolder.getActiveDatabaseType().name();
         Assert.notNull(dbType, "不支持的数据库类型");
         try {
             boolean firstInstall = false;
@@ -80,14 +62,22 @@ public class Install {
         }
     }
 
-    protected void execInstallSql(InputStream sqlStream) throws UnsupportedEncodingException {
-        String username = properties.getUsername();
+    protected void execInstallSql(InputStream sqlStream) throws Exception {
+        String username = "";
+        Connection connection = null;
+        try {
+            connection = DataSourceHolder.getActiveSource().getConnection();
+            username = connection.getMetaData().getUserName();
+        } finally {
+            if (null != connection) connection.close();
+        }
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(sqlStream, "utf-8"));
         List<String> sqlList = new ArrayList<>();
         SqlAppender tmp = new SqlAppender();
+        String uname = username;
         bufferedReader.lines().forEach((line) -> {
             if (line.startsWith("--")) return;
-            line = line.replace("${jdbc.username}", username);
+            line = line.replace("${jdbc.username}", uname);
             //去除sql中的;
             if (line.endsWith(";"))
                 tmp.add(line.substring(0, line.length() - 1));
