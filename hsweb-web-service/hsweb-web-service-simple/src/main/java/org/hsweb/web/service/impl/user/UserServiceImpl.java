@@ -43,12 +43,12 @@ public class UserServiceImpl extends AbstractServiceImpl<User, String> implement
         return this.userMapper;
     }
 
-    public User selectByUserName(String username)  {
+    public User selectByUserName(String username) {
         return this.getMapper().selectByUserName(username);
     }
 
     @Override
-    public String insert(User data)  {
+    public String insert(User data) {
         tryValidPo(data);
         Assert.isNull(selectByUserName(data.getUsername()), "用户已存在!");
         data.setId(RandomUtil.randomChar(6));
@@ -59,7 +59,7 @@ public class UserServiceImpl extends AbstractServiceImpl<User, String> implement
         userMapper.insert(new InsertParam<>(data));
         String id = data.getId();
         //添加角色关联
-        if (data.getUserRoles().size() != 0) {
+        if (data.getUserRoles() != null) {
             for (UserRole userRole : data.getUserRoles()) {
                 userRole.setId(RandomUtil.randomChar());
                 userRole.setUserId(data.getId());
@@ -70,12 +70,12 @@ public class UserServiceImpl extends AbstractServiceImpl<User, String> implement
     }
 
     @Override
-    public List<String> batchInsert(List<User> data, boolean skipFail)  {
+    public List<String> batchInsert(List<User> data, boolean skipFail) {
         throw new UnsupportedOperationException("不支持此操作");
     }
 
     @Override
-    public int update(User data)  {
+    public int update(User data) {
         tryValidPo(data);
         User old = this.selectByUserName(data.getUsername());
         if (old != null && !old.getId().equals(data.getId())) {
@@ -87,7 +87,7 @@ public class UserServiceImpl extends AbstractServiceImpl<User, String> implement
             userMapper.updatePassword(data);
         }
         int i = userMapper.update(new UpdateParam<>(data).excludes("status", "password", "createDate"));
-        if (data.getUserRoles().size() != 0) {
+        if (data.getUserRoles() != null) {
             //删除所有
             userRoleMapper.deleteByUserId(data.getId());
             for (UserRole userRole : data.getUserRoles()) {
@@ -100,7 +100,7 @@ public class UserServiceImpl extends AbstractServiceImpl<User, String> implement
     }
 
     @Override
-    public void initAdminUser(User user)  {
+    public void initAdminUser(User user) {
         QueryParam queryParam = new QueryParam().noPaging();
         queryParam.orderBy("sortIndex");
         List<Module> modules = moduleService.select(queryParam);
@@ -112,14 +112,14 @@ public class UserServiceImpl extends AbstractServiceImpl<User, String> implement
     }
 
     @Override
-    public void initGuestUser(User user)  {
+    public void initGuestUser(User user) {
         List<UserRole> userRoles = userRoleMapper.select(new QueryParam().where("roleId", "guest").noPaging());
         user.setUserRoles(userRoles);
         user.initRoleInfo();
     }
 
     @Override
-    public void enableUser(String id)  {
+    public void enableUser(String id) {
         User user = selectByPk(id);
         if (user == null) throw new NotFoundException("用户不存在!");
         user.setStatus(1);
@@ -127,7 +127,7 @@ public class UserServiceImpl extends AbstractServiceImpl<User, String> implement
     }
 
     @Override
-    public void disableUser(String id)  {
+    public void disableUser(String id) {
         User user = selectByPk(id);
         if (user == null) throw new NotFoundException("用户不存在!");
         user.setStatus(-1);
@@ -135,7 +135,7 @@ public class UserServiceImpl extends AbstractServiceImpl<User, String> implement
     }
 
     @Override
-    public int delete(String s)  {
+    public int delete(String s) {
         throw new BusinessException("服务不支持", 500);
     }
 }
