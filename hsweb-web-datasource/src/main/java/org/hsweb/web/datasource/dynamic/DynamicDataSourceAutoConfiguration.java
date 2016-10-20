@@ -19,12 +19,13 @@ package org.hsweb.web.datasource.dynamic;
 import com.atomikos.icatch.jta.UserTransactionImp;
 import com.atomikos.icatch.jta.UserTransactionManager;
 import com.atomikos.jdbc.AtomikosDataSourceBean;
-import org.hsweb.web.core.datasource.DynamicDataSource;
 import org.hsweb.web.core.datasource.DataSourceHolder;
+import org.hsweb.web.core.datasource.DynamicDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -48,6 +49,8 @@ public class DynamicDataSourceAutoConfiguration {
      */
     @Primary
     @Bean(initMethod = "init", name = "dataSource", destroyMethod = "close")
+    @ConditionalOnMissingBean(DataSource.class)
+    @Cacheable
     public DataSource dataSource() {
         AtomikosDataSourceBean dataSourceBean = new AtomikosDataSourceBean();
         properties.putProperties(dataSourceBean);

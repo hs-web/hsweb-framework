@@ -18,8 +18,6 @@ package org.hsweb.web.datasource.dynamic;
 
 import com.atomikos.jdbc.AtomikosDataSourceBean;
 import com.atomikos.jdbc.AtomikosSQLException;
-import org.apache.commons.beanutils.BeanUtilsBean;
-import org.apache.commons.beanutils.PropertyUtilsBean;
 import org.hsweb.concurrent.lock.LockFactory;
 import org.hsweb.web.bean.po.datasource.DataSource;
 import org.hsweb.web.core.datasource.DatabaseType;
@@ -30,8 +28,6 @@ import org.hsweb.web.service.datasource.DynamicDataSourceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -39,9 +35,7 @@ import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 import java.io.Closeable;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -144,22 +138,18 @@ public class DynamicDataSourceServiceImpl implements DynamicDataSourceService {
         properties.setUrl(dataSource.getUrl());
         properties.setType(DatabaseType.fromJdbcUrl(dataSource.getUrl()));
         properties.setTestQuery(dataSource.getTestSql());
+        Map<String, Object> otherProperties = dataSource.getProperties();
         try {
             properties.afterPropertiesSet();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        Map<String, Object> otherProperties = dataSource.getProperties();
         if (otherProperties != null) {
-            PropertyUtilsBean propertyUtilsBean = BeanUtilsBean.getInstance().getPropertyUtils();
-            otherProperties.forEach((k, v) -> {
-                try {
-                    propertyUtilsBean.setProperty(properties, k, v);
-                } catch (Exception e) {
-                    logger.warn("设置动态数据源配置失败", e);
-                }
-            });
+            properties.getProperties().putAll(otherProperties);
+        } else {
+            properties.initDefaultProperties();
         }
+
         AtomikosDataSourceBean dataSourceBean = new AtomikosDataSourceBean();
         properties.putProperties(dataSourceBean);
         boolean[] success = new boolean[1];
@@ -169,6 +159,7 @@ public class DynamicDataSourceServiceImpl implements DynamicDataSourceService {
                 dataSourceBean.init();
                 success[0] = true;
             } catch (AtomikosSQLException e) {
+                logger.error("创建数据源失败", e);
                 closeDataSource(dataSourceBean);
                 cache.remove(dataSource.getId());
             }

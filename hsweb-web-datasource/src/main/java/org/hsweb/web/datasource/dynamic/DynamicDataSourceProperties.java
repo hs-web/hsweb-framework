@@ -26,8 +26,6 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 import java.sql.SQLException;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Properties;
 
 /**
@@ -38,31 +36,26 @@ import java.util.Properties;
 @ConfigurationProperties(prefix = "hsweb.dynamicDatasource")
 public class DynamicDataSourceProperties
         implements BeanClassLoaderAware, InitializingBean {
-    private static final List<String> supportDatasourceType;
-    private String       name           = "core";
-    private DatabaseType type           = null;
-    private String       datasourceName = null;
-    private String       username       = "sa";
-    private String       password       = "";
-    private String       url            = "jdbc:h2:file:./data/h2db;DB_CLOSE_ON_EXIT=FALSE";
-    private String testQuery;
-    private int         loginTimeout            = 0;
-    private int         maxLifetime             = 0;
-    private int         minPoolSize             = 2;
-    private int         maxPoolSize             = 20;
-    private int         borrowConnectionTimeout = 30;
-    private int         reapTimeout             = 0;
-    private int         maxIdleTime             = 60;
-    private int         maintenanceInterval     = 60;
-    private int         defaultIsolationLevel   = -1;
-    private int         transactionTimeout      = 300;
-    private Properties  properties              = null;
-    private ClassLoader classLoader             = null;
-
-    static {
-        supportDatasourceType = new LinkedList<>();
-        supportDatasourceType.add("com.alibaba.druid.pool.xa.DruidXADataSource");
-    }
+    private String                name                    = "core";
+    private DatabaseType          type                    = null;
+    private String                datasourceName          = null;
+    private String                username                = "sa";
+    private String                password                = "";
+    private String                url                     = "jdbc:h2:file:./data/h2db;DB_CLOSE_ON_EXIT=FALSE";
+    private String                testQuery               = null;
+    private int                   loginTimeout            = 0;
+    private int                   maxLifetime             = 0;
+    private int                   minPoolSize             = 3;
+    private int                   maxPoolSize             = 80;
+    private int                   borrowConnectionTimeout = 60;
+    private int                   reapTimeout             = 0;
+    private int                   maxIdleTime             = 60;
+    private int                   maintenanceInterval     = 60;
+    private int                   defaultIsolationLevel   = -1;
+    private int                   transactionTimeout      = 300;
+    private Properties            properties              = null;
+    private ClassLoader           classLoader             = null;
+    private DatasourceTypeSupport datasourceTypeSupport   = null;
 
     public int getTransactionTimeout() {
         return transactionTimeout;
@@ -207,9 +200,6 @@ public class DynamicDataSourceProperties
         if (properties == null) {
             properties = new Properties();
         }
-        properties.put("username", getUsername());
-        properties.put("password", getPassword());
-        properties.put("url", getUrl());
         return properties;
     }
 
@@ -228,13 +218,18 @@ public class DynamicDataSourceProperties
             type = DatabaseType.fromJdbcUrl(getUrl());
         }
         if (!StringUtils.hasText(testQuery)) testQuery = getType().getTestQuery();
+        getProperties().put(datasourceTypeSupport.usernameProperty, getUsername());
+        getProperties().put(datasourceTypeSupport.passwordProperty, getPassword());
+        getProperties().put(datasourceTypeSupport.urlProperty, getUrl());
+        initDefaultProperties();
     }
 
     public String lookupSupportDatasourceName() throws ClassNotFoundException {
-        for (String dsClass : supportDatasourceType) {
+        for (DatasourceTypeSupport support : DatasourceTypeSupport.values()) {
             try {
-                ClassUtils.forName(dsClass, classLoader);
-                return dsClass;
+                ClassUtils.forName(support.className, classLoader);
+                datasourceTypeSupport = support;
+                return support.className;
             } catch (ClassNotFoundException e) {
             }
         }
@@ -265,4 +260,44 @@ public class DynamicDataSourceProperties
         }
     }
 
+    public void initDefaultProperties() {
+        datasourceTypeSupport.putDefaultProperties(getProperties());
+    }
+
+    private enum DatasourceTypeSupport {
+        druid("com.alibaba.druid.pool.xa.DruidXADataSource", "username", "password", "url") {
+            @Override
+            public void putDefaultProperties(Properties properties) {
+                super.putDefaultProperties(properties);
+                properties.putIfAbsent("filters", "stat");
+                properties.putIfAbsent("maxActive", 200);
+                properties.putIfAbsent("initialSize", 3);
+                properties.putIfAbsent("minIdle", 3);
+                properties.putIfAbsent("maxWait", 5000);
+                properties.putIfAbsent("timeBetweenEvictionRunsMillis", 60000);
+                properties.putIfAbsent("minEvictableIdleTimeMillis", 1800000);
+                properties.putIfAbsent("testWhileIdle", true);
+                properties.putIfAbsent("testOnBorrow", false);
+                properties.putIfAbsent("testOnReturn", false);
+                properties.putIfAbsent("poolPreparedStatements", true);
+                properties.putIfAbsent("maxOpenPreparedStatements", 20);
+            }
+        };
+
+        DatasourceTypeSupport(String className, String usernameProperty, String passwordProperty, String urlProperty) {
+            this.className = className;
+            this.usernameProperty = usernameProperty;
+            this.passwordProperty = passwordProperty;
+            this.urlProperty = urlProperty;
+        }
+
+        final String className;
+        final String usernameProperty;
+        final String passwordProperty;
+        final String urlProperty;
+
+        public void putDefaultProperties(Properties properties) {
+
+        }
+    }
 }
