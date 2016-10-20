@@ -31,6 +31,7 @@ public class SchedulerProperties {
     private boolean waitOnShutdown = true;
 
     private int startupDelay = 0;
+
     private Properties properties;
 
     public boolean isAutoStartup() {

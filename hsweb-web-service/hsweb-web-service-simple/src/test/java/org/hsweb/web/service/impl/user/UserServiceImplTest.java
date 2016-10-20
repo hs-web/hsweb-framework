@@ -22,7 +22,6 @@ import org.hsweb.web.bean.common.UpdateParam;
 import org.hsweb.web.bean.po.user.User;
 import org.hsweb.web.dao.role.UserRoleMapper;
 import org.hsweb.web.dao.user.UserMapper;
-import org.hsweb.web.service.impl.AbstractTestCase;
 import org.hsweb.web.service.module.ModuleService;
 import org.hsweb.web.service.user.UserService;
 import org.junit.Assert;
