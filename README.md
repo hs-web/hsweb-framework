@@ -38,6 +38,11 @@
 8. websocket支持.
 9. 定时调度支持,可在页面配置定时任务,编写任务脚本执行。
 
+### 演示
+1. 示例:[demo.hsweb.me](http://demo.hsweb.me)
+2. 测试用户:test (test2,test3,test4....) 密码:123456 
+3. 演示项目源码:[hsweb-platform](https://github.com/hs-web/hsweb-platform)
+
 ### 文档
 1. [安装使用](doc/1.安装使用.md)
 2. [API](doc/2.API.md)
@@ -48,11 +53,6 @@
 3. ~~增加定时调度,支持集群,任务采用脚本方式编写.~~
 4. 完善数据库持续集成,版本更新时自动更新数据库结构.
 5. 完善动态表单发布,表单发生变化后,自动重新发布(解决集群下,表单配置不一致).
-
-### 演示
-1. 示例:[demo.hsweb.me](http://demo.hsweb.me)
-2. 测试用户:test (test2,test3,test4....) 密码:123456 
-3. 演示项目源码:[hsweb-platform](https://github.com/hs-web/hsweb-platform)
 
 ### 技术选型
 第三方:
