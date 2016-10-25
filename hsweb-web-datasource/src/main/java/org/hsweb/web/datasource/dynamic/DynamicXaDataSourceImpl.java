@@ -17,11 +17,13 @@
 package org.hsweb.web.datasource.dynamic;
 
 import com.atomikos.jdbc.AtomikosDataSourceBean;
+import org.hsweb.web.core.datasource.DatabaseType;
 import org.hsweb.web.core.datasource.DynamicDataSource;
 import org.hsweb.web.service.datasource.DynamicDataSourceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.datasource.AbstractDataSource;
+import org.springframework.util.Assert;
 
 import javax.sql.DataSource;
 import javax.sql.XAConnection;
@@ -31,13 +33,16 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 public class DynamicXaDataSourceImpl extends AbstractDataSource implements DynamicDataSource, XADataSource, Closeable {
-    private Logger logger = LoggerFactory.getLogger(DynamicDataSource.class);
-    private javax.sql.DataSource defaultDataSource;
-
+    private Logger               logger            = LoggerFactory.getLogger(DynamicDataSource.class);
+    private javax.sql.DataSource defaultDataSource = null;
+    private   DatabaseType             defaultDatabaseType;
     protected DynamicDataSourceService dynamicDataSourceService;
 
-    public DynamicXaDataSourceImpl(javax.sql.DataSource defaultDataSource) {
+    public DynamicXaDataSourceImpl(javax.sql.DataSource defaultDataSource, DatabaseType defaultDatabaseType) {
+        Assert.notNull(defaultDataSource);
+        Assert.notNull(defaultDatabaseType);
         this.defaultDataSource = defaultDataSource;
+        this.defaultDatabaseType = defaultDatabaseType;
     }
 
     @Override
@@ -55,8 +60,18 @@ public class DynamicXaDataSourceImpl extends AbstractDataSource implements Dynam
         logger.info("use datasource:{}", sourceId == null ? "default" : sourceId);
         if (sourceId == null || dynamicDataSourceService == null) return defaultDataSource;
         DataSource dataSource = dynamicDataSourceService.getDataSource(sourceId);
+        logger.info("use datasource:{} fail,because its not exists! use default datasource now.", sourceId);
         if (dataSource == null) return defaultDataSource;
         return dataSource;
+    }
+
+    @Override
+    public DatabaseType getActiveDataBaseType() {
+        String sourceId = DynamicDataSource.getActiveDataSourceId();
+        if (sourceId == null || dynamicDataSourceService == null) return defaultDatabaseType;
+        String type = dynamicDataSourceService.getDataBaseType(sourceId);
+        if (type == null) return defaultDatabaseType;
+        return DatabaseType.valueOf(type);
     }
 
     public XADataSource getActiveXADataSource() {
@@ -72,11 +87,8 @@ public class DynamicXaDataSourceImpl extends AbstractDataSource implements Dynam
         return xaDataSource;
     }
 
-    public void setDefaultDataSource(DataSource defaultDataSource) {
-        this.defaultDataSource = defaultDataSource;
-    }
-
-    public void setDynamicDataSourceService(DynamicDataSourceService dynamicDataSourceService) {
+    public synchronized void setDynamicDataSourceService(DynamicDataSourceService dynamicDataSourceService) {
+        if (this.dynamicDataSourceService != null) throw new UnsupportedOperationException();
         this.dynamicDataSourceService = dynamicDataSourceService;
     }
 
@@ -92,7 +104,8 @@ public class DynamicXaDataSourceImpl extends AbstractDataSource implements Dynam
 
     public void close() {
         try {
-            dynamicDataSourceService.destroyAll();
+            if (dynamicDataSourceService != null)
+                dynamicDataSourceService.destroyAll();
         } catch (Exception e) {
             logger.error("close datasource error", e);
         }

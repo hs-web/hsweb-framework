@@ -26,14 +26,12 @@ public class RedisHttpSessionManager extends AbstractHttpSessionManager {
 
     @Override
     public Set<User> tryGetAllUser() {
-        return (Set<User>) sessionRedisTemplate.execute((RedisCallback<Set<User>>) connection -> {
-            Set<byte[]> keys = connection.keys("spring:session:sessions:*".getBytes());
-            return keys.stream().map(key -> {
-                String sessionId = new String(key).split("[:]")[3];
-                ExpiringSession expiringSession = redisOperationsSessionRepository.getSession(sessionId);
-                return (User) expiringSession.getAttribute("user");
-            }).filter(user -> user != null).collect(Collectors.toSet());
-        });
+        return (Set<User>) sessionRedisTemplate.keys("spring:session:sessions:*")
+                .stream().map(key -> {
+                    String sessionId = String.valueOf(key).split("[:]")[3];
+                    ExpiringSession expiringSession = redisOperationsSessionRepository.getSession(sessionId);
+                    return expiringSession.getAttribute("user");
+                }).filter(user -> user != null).collect(Collectors.toSet());
     }
 
     @Override
@@ -59,40 +57,33 @@ public class RedisHttpSessionManager extends AbstractHttpSessionManager {
     @Override
     public HttpSession getSessionBySessionId(String sessionId) {
         ExpiringSession redisSession = redisOperationsSessionRepository.getSession(sessionId);
-        if(redisSession==null)return null;
+        if (redisSession == null) return null;
         return new HttpSessionWrapper(redisSession);
     }
 
     @Override
     public void removeUser(String userId) {
-        sessionRedisTemplate.execute((RedisCallback) connection -> {
-            String key = "http.session.user:" + userId;
-            String sessionId = getSessionIdByUserId(userId);
-            ExpiringSession redisSession = redisOperationsSessionRepository.getSession(sessionId);
-            HttpSession session = new HttpSessionWrapper(redisSession);
-            onUserLoginOut(userId, session);
-            removeSession(sessionId);
-            return connection.del(key.getBytes());
-        });
+        String key = "http.session.user:" + userId;
+        String sessionId = getSessionIdByUserId(userId);
+        ExpiringSession redisSession = redisOperationsSessionRepository.getSession(sessionId);
+        HttpSession session = new HttpSessionWrapper(redisSession);
+        onUserLoginOut(userId, session);
+        removeSession(sessionId);
+        sessionRedisTemplate.delete(key);
     }
 
     @Override
     public void removeSession(String sessionId) {
-        sessionRedisTemplate.execute((RedisCallback) connection ->
-                        connection.del(("spring:session:sessions:" + sessionId).getBytes())
-        );
+        sessionRedisTemplate.delete("spring:session:sessions:".concat(sessionId));
     }
 
     @Override
     public void addUser(User user, HttpSession session) {
         removeUser(user.getId());
-        sessionRedisTemplate.execute((RedisCallback) connection -> {
-            String key = "http.session.user:" + user.getId();
-            String value = session.getId();
-            connection.set(key.getBytes(), value.getBytes());
-            onUserLogin(user, session);
-            return null;
-        });
+        String key = "http.session.user:" + user.getId();
+        String value = session.getId();
+        sessionRedisTemplate.opsForValue().set(key, value);
+        onUserLogin(user, session);
     }
 
     @Override
@@ -131,7 +122,7 @@ public class RedisHttpSessionManager extends AbstractHttpSessionManager {
     @Override
     public boolean isLogin(String userId) {
         return (Boolean) sessionRedisTemplate.execute((RedisCallback) connection ->
-                        connection.exists(("http.session.user:" + userId).getBytes())
+                connection.exists(("http.session.user:" + userId).getBytes())
         );
     }
 
@@ -145,8 +136,8 @@ public class RedisHttpSessionManager extends AbstractHttpSessionManager {
 
     private final class HttpSessionWrapper implements HttpSession {
         private ExpiringSession session;
-        private boolean invalidated;
-        private boolean old;
+        private boolean         invalidated;
+        private boolean         old;
 
         public HttpSessionWrapper(ExpiringSession session) {
             this.session = session;

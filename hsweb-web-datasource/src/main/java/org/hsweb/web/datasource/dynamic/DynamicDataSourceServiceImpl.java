@@ -20,6 +20,7 @@ import com.atomikos.jdbc.AtomikosDataSourceBean;
 import com.atomikos.jdbc.AtomikosSQLException;
 import org.hsweb.concurrent.lock.LockFactory;
 import org.hsweb.web.bean.po.datasource.DataSource;
+import org.hsweb.web.core.datasource.DatabaseType;
 import org.hsweb.web.core.datasource.DynamicDataSource;
 import org.hsweb.web.core.exception.NotFoundException;
 import org.hsweb.web.service.datasource.DataSourceService;
@@ -27,7 +28,6 @@ import org.hsweb.web.service.datasource.DynamicDataSourceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -35,7 +35,7 @@ import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.Properties;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -58,6 +58,11 @@ public class DynamicDataSourceServiceImpl implements DynamicDataSourceService {
     @Override
     public javax.sql.DataSource getDataSource(String id) {
         return getCache(id).getDataSource();
+    }
+
+    @Override
+    public String getDataBaseType(String id) {
+        return getCache(id).getDatabaseType().name();
     }
 
     @Override
@@ -109,7 +114,8 @@ public class DynamicDataSourceServiceImpl implements DynamicDataSourceService {
                 }
                 //加载datasource到缓存
                 javax.sql.DataSource dataSource = createDataSource(old);
-                cacheInfo = new CacheInfo(old.getHash(), dataSource);
+                DatabaseType databaseType = DatabaseType.fromJdbcUrl(old.getUrl());
+                cacheInfo = new CacheInfo(old.getHash(), dataSource, databaseType);
                 cache.put(id, cacheInfo);
             } finally {
                 try {
@@ -123,32 +129,29 @@ public class DynamicDataSourceServiceImpl implements DynamicDataSourceService {
         }
     }
 
-    @Autowired
-    private DataSourceProperties properties;
-
     protected javax.sql.DataSource createDataSource(DataSource dataSource) {
-        AtomikosDataSourceBean dataSourceBean = new AtomikosDataSourceBean();
-        Properties xaProperties = new Properties();
-        if (dataSource.getProperties() != null)
-            xaProperties.putAll(dataSource.getProperties());
-        if (dataSource.getDriver().contains("mysql")) {
-            dataSourceBean.setXaDataSourceClassName("com.mysql.jdbc.jdbc2.optional.MysqlXADataSource");
-            xaProperties.put("pinGlobalTxToPhysicalConnection", true);
-            xaProperties.put("user", dataSource.getUsername());
-            xaProperties.put("password", dataSource.getPassword());
-            xaProperties.put("url", dataSource.getUrl());
-        } else {
-            dataSourceBean.setXaDataSourceClassName(properties.getXa().getDataSourceClassName());
-            xaProperties.put("username", dataSource.getUsername());
-            xaProperties.put("password", dataSource.getPassword());
-            xaProperties.put("url", dataSource.getUrl());
-            xaProperties.put("driverClassName", dataSource.getDriver());
+        DynamicDataSourceProperties properties = new DynamicDataSourceProperties();
+        properties.setName("ds_" + dataSource.getId());
+        properties.setBeanClassLoader(this.getClass().getClassLoader());
+        properties.setUsername(dataSource.getUsername());
+        properties.setPassword(dataSource.getPassword());
+        properties.setUrl(dataSource.getUrl());
+        properties.setType(DatabaseType.fromJdbcUrl(dataSource.getUrl()));
+        properties.setTestQuery(dataSource.getTestSql());
+        Map<String, Object> otherProperties = dataSource.getProperties();
+        try {
+            properties.afterPropertiesSet();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        dataSourceBean.setXaProperties(xaProperties);
-        dataSourceBean.setUniqueResourceName("ds_" + dataSource.getId());
-        dataSourceBean.setMaxPoolSize(200);
-        dataSourceBean.setMinPoolSize(5);
-        dataSourceBean.setBorrowConnectionTimeout(60);
+        if (otherProperties != null) {
+            properties.getProperties().putAll(otherProperties);
+        } else {
+            properties.initDefaultProperties();
+        }
+
+        AtomikosDataSourceBean dataSourceBean = new AtomikosDataSourceBean();
+        properties.putProperties(dataSourceBean);
         boolean[] success = new boolean[1];
         //异步初始化
         new Thread(() -> {
@@ -156,6 +159,7 @@ public class DynamicDataSourceServiceImpl implements DynamicDataSourceService {
                 dataSourceBean.init();
                 success[0] = true;
             } catch (AtomikosSQLException e) {
+                logger.error("创建数据源失败", e);
                 closeDataSource(dataSourceBean);
                 cache.remove(dataSource.getId());
             }
@@ -183,13 +187,14 @@ public class DynamicDataSourceServiceImpl implements DynamicDataSourceService {
     }
 
     class CacheInfo {
-        int hash;
-
+        int                  hash;
+        DatabaseType         databaseType;
         javax.sql.DataSource dataSource;
 
-        public CacheInfo(int hash, javax.sql.DataSource dataSource) {
+        public CacheInfo(int hash, javax.sql.DataSource dataSource, DatabaseType type) {
             this.hash = hash;
             this.dataSource = dataSource;
+            this.databaseType = type;
         }
 
         public int getHash() {
@@ -198,6 +203,10 @@ public class DynamicDataSourceServiceImpl implements DynamicDataSourceService {
 
         public javax.sql.DataSource getDataSource() {
             return dataSource;
+        }
+
+        public DatabaseType getDatabaseType() {
+            return databaseType;
         }
     }
 

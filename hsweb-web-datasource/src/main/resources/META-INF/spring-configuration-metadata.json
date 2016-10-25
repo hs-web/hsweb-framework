@@ -1,0 +1,120 @@
+{
+  "groups": [
+    {
+      "name": "hsweb.dynamic-datasource",
+      "type": "org.hsweb.web.datasource.dynamic.DynamicDataSourceProperties",
+      "sourceType": "org.hsweb.web.datasource.dynamic.DynamicDataSourceProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "hsweb.dynamic-datasource.name",
+      "type": "java.lang.String",
+      "sourceType": "org.hsweb.web.datasource.dynamic.DynamicDataSourceProperties"
+    },
+    {
+      "name": "hsweb.dynamic-datasource.type",
+      "type": "org.hsweb.web.core.datasource.DatabaseType",
+      "sourceType": "org.hsweb.web.datasource.dynamic.DynamicDataSourceProperties"
+    },
+    {
+      "name": "hsweb.dynamic-datasource.datasource-name",
+      "type": "java.lang.String",
+      "sourceType": "org.hsweb.web.datasource.dynamic.DynamicDataSourceProperties"
+    },
+    {
+      "name": "hsweb.dynamic-datasource.username",
+      "type": "java.lang.String",
+      "sourceType": "org.hsweb.web.datasource.dynamic.DynamicDataSourceProperties"
+    },
+    {
+      "name": "hsweb.dynamic-datasource.password",
+      "type": "java.lang.String",
+      "sourceType": "org.hsweb.web.datasource.dynamic.DynamicDataSourceProperties"
+    },
+    {
+      "name": "hsweb.dynamic-datasource.url",
+      "type": "java.lang.String",
+      "sourceType": "org.hsweb.web.datasource.dynamic.DynamicDataSourceProperties"
+    },
+    {
+      "name": "hsweb.dynamic-datasource.testQuery",
+      "type": "java.lang.String",
+      "sourceType": "org.hsweb.web.datasource.dynamic.DynamicDataSourceProperties"
+    },
+    {
+      "name": "hsweb.dynamic-datasource.login-timeout",
+      "type": "java.lang.Integer",
+      "sourceType": "org.hsweb.web.datasource.dynamic.DynamicDataSourceProperties"
+    },
+    {
+      "name": "hsweb.dynamic-datasource.max-life-time",
+      "type": "java.lang.Integer",
+      "sourceType": "org.hsweb.web.datasource.dynamic.DynamicDataSourceProperties"
+    },
+    {
+      "name": "hsweb.dynamic-datasource.min-pool-size",
+      "type": "java.lang.Integer",
+      "sourceType": "org.hsweb.web.datasource.dynamic.DynamicDataSourceProperties"
+    },
+    {
+      "name": "hsweb.dynamic-datasource.max-pool-size",
+      "type": "java.lang.Integer",
+      "sourceType": "org.hsweb.web.datasource.dynamic.DynamicDataSourceProperties"
+    },
+    {
+      "name": "hsweb.dynamic-datasource.borrow-connection-timeout",
+      "type": "java.lang.Integer",
+      "sourceType": "org.hsweb.web.datasource.dynamic.DynamicDataSourceProperties"
+    },
+    {
+      "name": "hsweb.dynamic-datasource.reap-timeout",
+      "type": "java.lang.Integer",
+      "sourceType": "org.hsweb.web.datasource.dynamic.DynamicDataSourceProperties"
+    },
+    {
+      "name": "hsweb.dynamic-datasource.max-idle-time",
+      "type": "java.lang.Integer",
+      "sourceType": "org.hsweb.web.datasource.dynamic.DynamicDataSourceProperties"
+    },
+    {
+      "name": "hsweb.dynamic-datasource.maintenance-interval",
+      "type": "java.lang.Integer",
+      "sourceType": "org.hsweb.web.datasource.dynamic.DynamicDataSourceProperties"
+    },
+    {
+      "name": "hsweb.dynamic-datasource.default-isolation-level",
+      "type": "java.lang.Integer",
+      "sourceType": "org.hsweb.web.datasource.dynamic.DynamicDataSourceProperties"
+    },
+    {
+      "name": "hsweb.dynamic-datasource.transaction-timeout",
+      "type": "java.lang.Integer",
+      "sourceType": "org.hsweb.web.datasource.dynamic.DynamicDataSourceProperties"
+    },
+    {
+      "name": "hsweb.dynamic-datasource.properties",
+      "type": "java.util.Properties",
+      "sourceType": "org.hsweb.web.datasource.dynamic.DynamicDataSourceProperties"
+    }
+  ],
+  "hints": [
+    {
+      "name": "hsweb.dynamic-datasource.type",
+      "values": [
+        {
+          "value": "h2",
+          "description": "use h2 database."
+        },
+        {
+          "value": "mysql",
+          "description": "use mysql database."
+        },
+        {
+          "value": "oracle",
+          "description": "use oracle database."
+        }
+      ]
+    }
+  ]
+}

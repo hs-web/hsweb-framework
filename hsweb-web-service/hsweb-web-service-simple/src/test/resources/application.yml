@@ -1,58 +1,13 @@
 logging:
     config: classpath:logback.xml
-scheduler:
-    properties:
-        org.quartz.jobStore.isClustered: true
 spring:
     aop:
         auto: true
     redis:
         host: 127.0.0.1
         port: 6379
-    datasource:
-        xa:
-            dataSourceClassName: com.alibaba.druid.pool.xa.DruidXADataSource
-            properties:
-                url: jdbc:h2:file:./data/h2db;DB_CLOSE_ON_EXIT=FALSE
-                driverClassName: org.h2.Driver
-                username: sa
-                password:
-#                filters: stat
-#                maxActive: 20
-#                initialSize: 1
-#                maxWait: 60000
-#                minIdle: 1
-#                timeBetweenEvictionRunsMillis: 60000
-#                minEvictableIdleTimeMillis: 300000
-#                validationQuery: select 'x'
-#                testWhileIdle: true
-#                testOnBorrow: false
-#                testOnReturn: false
-#                poolPreparedStatements: false
-#                maxOpenPreparedStatements: 20
-        name: core
-        url: jdbc:h2:file:./data/h2db;DB_CLOSE_ON_EXIT=FALSE
-        driverClassName: org.h2.Driver
-        username: sa
-        password:
-        type: com.alibaba.druid.pool.xa.DruidXADataSource
-        filters: stat
-        maxActive: 20
-        initialSize: 1
-        maxWait: 60000
-        minIdle: 1
-        timeBetweenEvictionRunsMillis: 60000
-        minEvictableIdleTimeMillis: 300000
-        validationQuery: select 'x'
-        testWhileIdle: true
-        testOnBorrow: false
-        testOnReturn: false
-        poolPreparedStatements: true
-        maxOpenPreparedStatements: 20
-#        schema: classpath:h2.sql
 mybatis:
-    type-aliases-package: org.hsweb.web.bean.po
-    mapper-locations: classpath*:org/hsweb/web/dao/impl/mybatis/mapper/oracle/**/*.xml
     config: classpath:mybatis-config.xml
-    typeHandlers-package: org.hsweb.web.mybatis.handler
-   # dynamic-datasource: on
+hsweb:
+    dynamic-datasource:
+          type: h2

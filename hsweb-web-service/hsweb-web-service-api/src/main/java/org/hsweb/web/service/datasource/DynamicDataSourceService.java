@@ -25,6 +25,8 @@ public interface DynamicDataSourceService {
 
     DataSource getDataSource(String id);
 
-    void destroyAll()throws Exception;
+    String getDataBaseType(String id);
+
+    void destroyAll() throws Exception;
 
 }

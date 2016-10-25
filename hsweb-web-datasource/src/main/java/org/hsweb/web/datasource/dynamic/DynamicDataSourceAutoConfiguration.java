@@ -19,12 +19,13 @@ package org.hsweb.web.datasource.dynamic;
 import com.atomikos.icatch.jta.UserTransactionImp;
 import com.atomikos.icatch.jta.UserTransactionManager;
 import com.atomikos.jdbc.AtomikosDataSourceBean;
+import org.hsweb.web.core.datasource.DataSourceHolder;
 import org.hsweb.web.core.datasource.DynamicDataSource;
-import org.hsweb.web.core.datasource.DynamicDataSourceHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -36,31 +37,30 @@ import javax.transaction.SystemException;
 
 @Configuration
 @ConditionalOnMissingBean(DynamicDataSource.class)
+@EnableConfigurationProperties(DynamicDataSourceProperties.class)
 @ComponentScan("org.hsweb.web.datasource.dynamic")
 public class DynamicDataSourceAutoConfiguration {
 
     @Autowired
-    private DataSourceProperties properties;
+    private DynamicDataSourceProperties properties;
 
     /**
      * 默认数据库链接
      */
     @Primary
     @Bean(initMethod = "init", name = "dataSource", destroyMethod = "close")
+    @ConditionalOnMissingBean(DataSource.class)
+    @Cacheable
     public DataSource dataSource() {
         AtomikosDataSourceBean dataSourceBean = new AtomikosDataSourceBean();
-        dataSourceBean.getXaProperties().putAll(properties.getXa().getProperties());
-        dataSourceBean.setXaDataSourceClassName(properties.getXa().getDataSourceClassName());
-        dataSourceBean.setUniqueResourceName("core");
-        dataSourceBean.setMinPoolSize(5);
-        dataSourceBean.setMaxPoolSize(200);
+        properties.putProperties(dataSourceBean);
         return dataSourceBean;
     }
 
     @Bean(name = "dynamicDataSource")
     public DynamicXaDataSourceImpl dynamicXaDataSource(@Qualifier("dataSource") DataSource dataSource) {
-        DynamicXaDataSourceImpl dynamicXaDataSource = new DynamicXaDataSourceImpl(dataSource);
-        DynamicDataSourceHolder.install(dynamicXaDataSource);
+        DynamicXaDataSourceImpl dynamicXaDataSource = new DynamicXaDataSourceImpl(dataSource, properties.getType());
+        DataSourceHolder.install(dynamicXaDataSource);
         return dynamicXaDataSource;
     }
 
@@ -74,7 +74,7 @@ public class DynamicDataSourceAutoConfiguration {
     @Bean
     public UserTransactionImp userTransaction() throws SystemException {
         UserTransactionImp userTransactionImp = new UserTransactionImp();
-        userTransactionImp.setTransactionTimeout(300);
+        userTransactionImp.setTransactionTimeout(properties.getTransactionTimeout());
         return userTransactionImp;
     }
 

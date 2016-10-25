@@ -1,0 +1,10 @@
+logging:
+    config: classpath:logback.xml
+spring:
+    aop:
+        auto: true
+    redis:
+        host: 127.0.0.1
+        port: 6379
+mybatis:
+    config: classpath:mybatis-config.xml
