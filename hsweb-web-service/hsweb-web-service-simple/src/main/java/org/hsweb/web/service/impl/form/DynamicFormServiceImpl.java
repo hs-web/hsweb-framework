@@ -98,7 +98,9 @@ public class DynamicFormServiceImpl implements DynamicFormService, ExpressionSco
 
     @Override
     public TableMetaData parseMeta(Form form) {
-        return formParser.parse(form);
+        TableMetaData metaData = formParser.parse(form);
+        initDefaultField(metaData);
+        return metaData;
     }
 
     @Override

@@ -11,16 +11,16 @@ import org.springframework.context.annotation.Configuration;
 @ConditionalOnWebApplication
 public class SimpleHttpSessionManagerAutoConfiguration {
 
-    @Bean
-    public HttpSessionManager simpleHttpSessionManager() {
+    @Bean(name = "httpSessionManager")
+    public HttpSessionManager httpSessionManager() {
         SimpleHttpSessionManager httpSessionManager = new SimpleHttpSessionManager();
         return httpSessionManager;
     }
 
     @Bean
-    public UserLoginOutListener sessionListener() {
+    public UserLoginOutListener sessionListener(HttpSessionManager httpSessionManager) {
         UserLoginOutListener loginOutListener = new UserLoginOutListener();
-        loginOutListener.setHttpSessionManager(simpleHttpSessionManager());
+        loginOutListener.setHttpSessionManager(httpSessionManager);
         return loginOutListener;
     }
 }
