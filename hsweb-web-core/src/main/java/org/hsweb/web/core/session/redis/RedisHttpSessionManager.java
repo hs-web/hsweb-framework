@@ -2,6 +2,8 @@ package org.hsweb.web.core.session.redis;
 
 import org.hsweb.web.bean.po.user.User;
 import org.hsweb.web.core.session.AbstractHttpSessionManager;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.session.ExpiringSession;
@@ -12,6 +14,7 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionContext;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -46,12 +49,7 @@ public class RedisHttpSessionManager extends AbstractHttpSessionManager {
 
     @Override
     public String getSessionIdByUserId(String userId) {
-        return (String) sessionRedisTemplate.execute((RedisCallback<String>) connection -> {
-            String key = "http.session.user:" + userId;
-            byte[] sessionId = connection.get(key.getBytes());
-            if (sessionId == null) return null;
-            return new String(sessionId);
-        });
+        return (String) sessionRedisTemplate.opsForValue().get("http.session.user:" + userId);
     }
 
     @Override
@@ -74,6 +72,7 @@ public class RedisHttpSessionManager extends AbstractHttpSessionManager {
 
     @Override
     public void removeSession(String sessionId) {
+        if (null == sessionId) return;
         sessionRedisTemplate.delete("spring:session:sessions:".concat(sessionId));
     }
 
@@ -82,24 +81,34 @@ public class RedisHttpSessionManager extends AbstractHttpSessionManager {
         removeUser(user.getId());
         String key = "http.session.user:" + user.getId();
         String value = session.getId();
+        session.setAttribute("user", user);
         sessionRedisTemplate.opsForValue().set(key, value);
         onUserLogin(user, session);
     }
 
+
     @Override
     public Set<String> getUserIdList() {
-        return (Set<String>) sessionRedisTemplate.execute((RedisCallback<Set<String>>) connection -> {
-            Set<byte[]> keys = connection.keys("http.session.user:*".getBytes());
-            return keys.stream().map(key -> {
-                String sessionId = "spring:session:sessions:" + new String(connection.get(key));
-                String userId = new String(key).split("[:]")[1];
-                if (!connection.exists(sessionId.getBytes())) {
-                    removeUser(userId);
-                    return null;
+        Set<String> keys = sessionRedisTemplate.keys("http.session.user:*");
+        if (keys == null || keys.isEmpty()) {
+            return new HashSet<>();
+        }
+        return keys.stream().map(key -> {
+            String sessionId = (String) sessionRedisTemplate.opsForValue().get(key);
+            String sessionIdKey = "spring:session:sessions:".concat(sessionId);
+            String userId = new String(key).split("[:]")[1];
+            boolean sessionExists = (Boolean) sessionRedisTemplate.execute(new RedisCallback<Boolean>() {
+                @Override
+                public Boolean doInRedis(RedisConnection connection) throws DataAccessException {
+                    return connection.exists(sessionIdKey.getBytes());
                 }
-                return userId;
-            }).filter(key -> key != null).collect(Collectors.toSet());
-        });
+            });
+            if (!sessionExists) {
+                sessionRedisTemplate.delete(key);
+                return null;
+            }
+            return userId;
+        }).filter(key -> key != null).collect(Collectors.toSet());
     }
 
     @Override
@@ -125,6 +134,7 @@ public class RedisHttpSessionManager extends AbstractHttpSessionManager {
                 connection.exists(("http.session.user:" + userId).getBytes())
         );
     }
+
 
     public void setRedisOperationsSessionRepository(RedisOperationsSessionRepository redisOperationsSessionRepository) {
         this.redisOperationsSessionRepository = redisOperationsSessionRepository;
