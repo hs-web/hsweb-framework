@@ -65,6 +65,7 @@ public class ModuleMetaController extends GenericController<ModuleMeta, String> 
     public ResponseMessage userModuleMeta(@PathVariable String key) {
         User user = WebUtil.getLoginUser();
         List<UserRole> roles = user.getUserRoles();
+        if (roles == null) roles = new ArrayList<>();
         String[] roleIdList = roles
                 .stream()
                 .map(userRole -> userRole.getRoleId())
