@@ -60,8 +60,10 @@ public class DynamicXaDataSourceImpl extends AbstractDataSource implements Dynam
         logger.info("use datasource:{}", sourceId == null ? "default" : sourceId);
         if (sourceId == null || dynamicDataSourceService == null) return defaultDataSource;
         DataSource dataSource = dynamicDataSourceService.getDataSource(sourceId);
-        logger.info("use datasource:{} fail,because its not exists! use default datasource now.", sourceId);
-        if (dataSource == null) return defaultDataSource;
+        if (dataSource == null) {
+            logger.info("use datasource:{} fail,because its not exists! use default datasource now.", sourceId);
+            return defaultDataSource;
+        }
         return dataSource;
     }
 
