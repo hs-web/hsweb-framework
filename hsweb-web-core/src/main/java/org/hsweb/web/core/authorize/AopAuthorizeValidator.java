@@ -24,9 +24,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-/**
- * Created by zhouhao on 16-4-28.
- */
 public class AopAuthorizeValidator extends SimpleAuthorizeValidator {
 
     private HttpSessionManager httpSessionManager;
@@ -57,7 +54,7 @@ public class AopAuthorizeValidator extends SimpleAuthorizeValidator {
                 return null;
             }
             Set<Authorize> authorizes = new LinkedHashSet<>();
-            if (classAuth != null) {
+            if (classAuth != null && (methodAuth == null || methodAuth.merge())) {
                 if (classAuth.anonymous()) return null;
                 authorizes.add(classAuth);
             }
