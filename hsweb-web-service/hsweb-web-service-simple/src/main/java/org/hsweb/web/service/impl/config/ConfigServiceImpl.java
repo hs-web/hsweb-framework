@@ -22,7 +22,7 @@ import java.util.Map;
  * Created by generator
  */
 @Service("configService")
-public class ConfigServiceImpl extends AbstractServiceImpl<Config, String> implements ConfigService,ExpressionScopeBean {
+public class ConfigServiceImpl extends AbstractServiceImpl<Config, String> implements ConfigService, ExpressionScopeBean {
 
     public static final String CACHE_KEY = "config";
 
@@ -38,7 +38,7 @@ public class ConfigServiceImpl extends AbstractServiceImpl<Config, String> imple
     @Override
     @CacheEvict(value = CACHE_KEY, allEntries = true)
     public int update(Config data) {
-        return configMapper.update(new UpdateParam<>(data).excludes("createDate").where("id",data.getId()));
+        return configMapper.update(new UpdateParam<>(data).excludes("createDate").where("id", data.getId()));
     }
 
     @Override
@@ -108,7 +108,7 @@ public class ConfigServiceImpl extends AbstractServiceImpl<Config, String> imple
         try {
             val = this.get(name, key);
             if (val == null) {
-                logger.error("获取配置:{}.{}失败,defaultValue:{}", name, key, defaultValue);
+                logger.warn("获取配置:{}.{}失败,defaultValue:{}", name, key, defaultValue);
                 return defaultValue;
             }
         } catch (Exception e) {
@@ -161,7 +161,6 @@ public class ConfigServiceImpl extends AbstractServiceImpl<Config, String> imple
     @Override
     @Cacheable(value = CACHE_KEY, key = "'info.'+#name+'.key.'+#key+'.double'")
     public double getDouble(String name, String key, double defaultValue) {
-
         return StringUtils.toDouble(get(name, key, String.valueOf(defaultValue)));
     }
 
@@ -176,6 +175,7 @@ public class ConfigServiceImpl extends AbstractServiceImpl<Config, String> imple
 
 
     @Override
+    @CacheEvict(value = CACHE_KEY, allEntries = true)
     public String insert(Config data) {
         Config old = this.selectByPk(data.getId());
         Assert.isNull(old, "配置已存在，请勿重复添加!");

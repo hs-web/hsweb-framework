@@ -10,10 +10,6 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.List;
 
-/**
- * 系统模块服务类
- * Created by generator
- */
 @Service("moduleService")
 public class ModuleServiceImpl extends AbstractServiceImpl<Module, String> implements ModuleService {
 
@@ -28,6 +24,6 @@ public class ModuleServiceImpl extends AbstractServiceImpl<Module, String> imple
 
     @Override
     public List<Module> selectByPid(String pid) throws Exception {
-        return this.select(new QueryParam().where("p_id", pid));
+        return this.select(new QueryParam().where("parentId", pid));
     }
 }
