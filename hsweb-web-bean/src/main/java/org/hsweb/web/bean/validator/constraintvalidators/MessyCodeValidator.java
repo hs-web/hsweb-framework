@@ -31,7 +31,7 @@ public class MessyCodeValidator implements ConstraintValidator<NotMessyCode, Str
     @Override
     public boolean isValid(String s, ConstraintValidatorContext constraintValidatorContext) {
         if (null == s) return false;
-        return StringUtils.isMessyCode(s);
+        return !StringUtils.isMessyCode(s);
     }
 
 

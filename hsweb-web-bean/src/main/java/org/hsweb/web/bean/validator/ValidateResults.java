@@ -11,11 +11,11 @@ import java.util.Collection;
  * Created by 浩 on 2015-10-10 0010.
  */
 public class ValidateResults extends ArrayList<ValidateResults.ValidResult> implements Serializable {
-    private static final long serialVersionUID = 8910856253780046561L;
+    private static final long    serialVersionUID = 8910856253780046561L;
     /**
      * 是否验证通过
      */
-    private boolean success = true;
+    private              boolean success          = true;
 
     @Override
     public boolean addAll(Collection<? extends ValidResult> c) {
@@ -44,6 +44,7 @@ public class ValidateResults extends ArrayList<ValidateResults.ValidResult> impl
     public class ValidResult {
         public ValidResult() {
         }
+
         /**
          * 带参数构造方法，用于初始化验证的字段和验证的结果
          *
