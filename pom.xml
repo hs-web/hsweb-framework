@@ -7,6 +7,37 @@
     <artifactId>hsweb-framework</artifactId>
     <packaging>pom</packaging>
     <version>2.1-SNAPSHOT</version>
+
+    <name>${project.groupId}:${project.artifactId}</name>
+    <url>http://www.hsweb.me</url>
+    <description>企业后台管理基础框架</description>
+
+    <licenses>
+        <license>
+            <name>The Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>zhouhao</name>
+            <email>i@hsweb.me</email>
+            <roles>
+                <role>Owner</role>
+            </roles>
+            <timezone>+8</timezone>
+            <url>https://github.com/zhou-hao</url>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:https://github.com/hs-web/hsweb-framework.git</connection>
+        <developerConnection>scm:git:https://github.com/hs-web/hsweb-framework.git</developerConnection>
+        <url>https://github.com/hs-web/hsweb-framework</url>
+        <tag>${project.version}</tag>
+    </scm>
+
     <modules>
         <module>hsweb-web-dao</module>
         <module>hsweb-web-service</module>
@@ -46,6 +77,14 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-scm-plugin</artifactId>
+                <version>1.8.1</version>
+                <configuration>
+                    <connectionType>connection</connectionType>
+                </configuration>
+            </plugin>
             <!-- 要将源码放上去，需要加入这个插件 -->
             <plugin>
                 <artifactId>maven-source-plugin</artifactId>

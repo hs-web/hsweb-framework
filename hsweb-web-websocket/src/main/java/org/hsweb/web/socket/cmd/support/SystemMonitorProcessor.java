@@ -45,7 +45,6 @@ public class SystemMonitorProcessor extends AbstractCmdProcessor {
             Publish publish = new Publish();
             publish.setUserId(userId);
             publish.setCallback((String) cmd.getParams().get("callback"));
-            cpuPublish.put(userId, publish);
             return publish;
         };
 
@@ -55,6 +54,7 @@ public class SystemMonitorProcessor extends AbstractCmdProcessor {
                 if (publish == null)
                     publish = supplier.get();
                 publish.addSession(cmd.getSession());
+                cpuPublish.put(userId, publish);
                 if (!cpuMonitorIsStarted) {
                     startPublishCpu();
                     cpuMonitorIsStarted = true;
@@ -66,6 +66,7 @@ public class SystemMonitorProcessor extends AbstractCmdProcessor {
                 if (publish == null)
                     publish = supplier.get();
                 publish.addSession(cmd.getSession());
+                memPublish.put(userId, publish);
                 if (!memMonitorIsStarted) {
                     startPublishMem();
                     memMonitorIsStarted = true;
