@@ -33,6 +33,9 @@ import javax.annotation.Resource;
 import java.sql.SQLException;
 import java.util.List;
 
+import static org.hsweb.web.core.message.ResponseMessage.*;
+import static org.hsweb.web.core.message.ResponseMessage.ok;
+
 /**
  * 动态表单控制器,用于管理动态表单
  *
@@ -65,7 +68,7 @@ public class FormController extends GenericController<Form, String> {
     public ResponseMessage latestList(QueryParam param) {
         ResponseMessage message;
         if (!param.isPaging()) {
-            message = ResponseMessage.ok(formService.selectLatestList(param));
+            message = ok(formService.selectLatestList(param));
         } else {
             param.setPaging(false);
             int total = formService.countLatestList(param);
@@ -73,7 +76,7 @@ public class FormController extends GenericController<Form, String> {
             List<Form> list = formService.selectLatestList(param);
             PagerResult<Form> result = new PagerResult<>();
             result.setData(list).setTotal(total);
-            message = ResponseMessage.ok(result);
+            message = ok(result);
         }
         message.include(Form.class, param.getIncludes())
                 .exclude(Form.class, param.getExcludes())
@@ -92,7 +95,7 @@ public class FormController extends GenericController<Form, String> {
     public ResponseMessage latest(@PathVariable(value = "name") String name) {
         Form form = formService.selectLatest(name);
         assertFound(form, "表单不存在");
-        return ResponseMessage.ok(form);
+        return ok(form);
     }
 
     /**
@@ -104,11 +107,16 @@ public class FormController extends GenericController<Form, String> {
      * @throws NotFoundException 表单不存在
      */
     @RequestMapping(value = "/{name}/{version}", method = RequestMethod.GET)
-    public ResponseMessage version(@PathVariable(value = "name") String name,
+    public ResponseMessage selectByVersion(@PathVariable(value = "name") String name,
                                    @PathVariable(value = "version") Integer version) {
         Form form = formService.selectByVersion(name, version);
         assertFound(form, "表单不存在");
-        return ResponseMessage.ok(form);
+        return ok(form);
+    }
+
+    @RequestMapping(value = "/{name}/version", method = RequestMethod.GET)
+    public ResponseMessage selectVersion(@PathVariable(value = "name") String name) {
+        return ok(formService.selectDeployedVersion(name));
     }
 
     /**
@@ -123,7 +131,7 @@ public class FormController extends GenericController<Form, String> {
     @Authorize(action = "deploy")
     public ResponseMessage deploy(@PathVariable("id") String id) throws SQLException {
         formService.deploy(id);
-        return ResponseMessage.ok();
+        return ok();
     }
 
     /**
@@ -137,7 +145,7 @@ public class FormController extends GenericController<Form, String> {
     @Authorize(action = "deploy")
     public ResponseMessage unDeploy(@PathVariable("id") String id) {
         formService.unDeploy(id);
-        return ResponseMessage.ok();
+        return ok();
     }
 
     /**
@@ -149,7 +157,7 @@ public class FormController extends GenericController<Form, String> {
      */
     @RequestMapping(value = "/{name}/html", method = RequestMethod.GET)
     public ResponseMessage html(@PathVariable("name") String name) {
-        return ResponseMessage.ok(formService.createDeployHtml(name));
+        return ok(formService.createDeployHtml(name));
     }
 
     /**
@@ -162,7 +170,7 @@ public class FormController extends GenericController<Form, String> {
     @RequestMapping(value = "/{id}/new-version", method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseMessage newVersion(@PathVariable("id") String id) {
-        return ResponseMessage.created(formService.createNewVersion(id));
+        return created(formService.createNewVersion(id));
     }
 
     /**
@@ -175,7 +183,7 @@ public class FormController extends GenericController<Form, String> {
     public ResponseMessage using(@PathVariable("name") String name) {
         Form form = formService.selectUsing(name);
         assertFound(form, "表单不存在");
-        return ResponseMessage.ok(form).exclude(Form.class, "html");
+        return ok(form).exclude(Form.class, "html");
     }
 
     /**
@@ -187,6 +195,6 @@ public class FormController extends GenericController<Form, String> {
      */
     @RequestMapping(value = "/{id}/view", method = RequestMethod.GET)
     public ResponseMessage view(@PathVariable("id") String id) throws Exception {
-        return ResponseMessage.ok(formService.createViewHtml(id));
+        return ok(formService.createViewHtml(id));
     }
 }

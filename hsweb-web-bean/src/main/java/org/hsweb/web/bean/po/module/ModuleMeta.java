@@ -1,6 +1,7 @@
 package org.hsweb.web.bean.po.module;
 
 import org.hibernate.validator.constraints.NotBlank;
+import org.hsweb.commons.MD5;
 import org.hsweb.web.bean.po.GenericPo;
 
 /**
@@ -69,5 +70,15 @@ public class ModuleMeta extends GenericPo<String> {
 
     public void setMeta(String meta) {
         this.meta = meta;
+    }
+
+    public String getMd5() {
+        StringBuilder builder = new StringBuilder();
+        builder.append(key);
+        builder.append(moduleId);
+        builder.append(roleId);
+        builder.append(meta);
+        builder.append(status);
+        return MD5.defaultEncode(builder.toString());
     }
 }

@@ -31,10 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 /**
@@ -55,21 +52,33 @@ public class ModuleMetaController extends GenericController<ModuleMeta, String> 
         return moduleMetaService;
     }
 
+    protected List<String> getRoleId() {
+        User user = WebUtil.getLoginUser();
+        List<UserRole> roles = user.getUserRoles();
+        if (roles == null) roles = new ArrayList<>();
+        return roles.stream()
+                .map(UserRole::getRoleId).collect(Collectors.toList());
+    }
+
     /**
      * 查询当前用户持有制定key的所有模块配置定义信息
      *
      * @param key
      * @return {@link ResponseMessage}
      */
-    @RequestMapping(value = "/{key}/own", method = RequestMethod.GET)
+    @RequestMapping(value = "/{key}/list", method = RequestMethod.GET)
     public ResponseMessage userModuleMeta(@PathVariable String key) {
-        User user = WebUtil.getLoginUser();
-        List<UserRole> roles = user.getUserRoles();
-        if (roles == null) roles = new ArrayList<>();
-        String[] roleIdList = roles
-                .stream()
-                .map(userRole -> userRole.getRoleId())
-                .collect(Collectors.toList()).toArray(new String[roles.size()]);
-        return ResponseMessage.ok(getService().selectByKeyAndRoleId(key, roleIdList));
+        return ResponseMessage.ok(getService().selectByKeyAndRoleId(key, getRoleId()));
     }
+
+    @RequestMapping(value = "/{key}/md5", method = RequestMethod.GET)
+    public ResponseMessage getMd5(@PathVariable String key) {
+        return ResponseMessage.ok(moduleMetaService.selectMD5SingleByKeyAndRoleId(key, getRoleId()));
+    }
+
+    @RequestMapping(value = "/{key}/single", method = RequestMethod.GET)
+    public ResponseMessage getSingle(@PathVariable String key) {
+        return ResponseMessage.ok(moduleMetaService.selectSingleByKeyAndRoleId(key, getRoleId()));
+    }
+
 }

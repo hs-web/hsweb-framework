@@ -99,8 +99,8 @@ public interface FormService extends GenericService<Form, String> {
      *
      * @param id 表单ID
      * @return html 字符串
-     * @
      */
+    @Deprecated
     String createViewHtml(String id);
 
     /**
@@ -112,5 +112,5 @@ public interface FormService extends GenericService<Form, String> {
      */
     Form selectUsing(String name);
 
-
+    int selectDeployedVersion(String name);
 }
