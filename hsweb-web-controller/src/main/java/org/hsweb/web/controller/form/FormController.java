@@ -115,7 +115,7 @@ public class FormController extends GenericController<Form, String> {
     }
 
     @RequestMapping(value = "/{name}/version", method = RequestMethod.GET)
-    public ResponseMessage selectVersion(@PathVariable(value = "name") String name) {
+    public ResponseMessage selectDeployedVersion(@PathVariable(value = "name") String name) {
         return ok(formService.selectDeployedVersion(name));
     }
 
