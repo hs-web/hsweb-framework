@@ -51,7 +51,7 @@ public class ModuleMetaServiceImpl extends AbstractServiceImpl<ModuleMeta, Strin
 
     protected QueryParam createSelectByKeyAndRoleIdParam(String key, List<String> roleId) {
         QueryParam param = QueryParam.build();
-        param.nest().and("key", key).or("module_id", key);
+        param.nest().and("key", key).or("moduleId", key).or("id",key);
         Term term = param.nest();
         roleId.forEach(id -> term.or("roleId$LIKE", "%," + id + ",%"));
         term.or("roleId$ISNULL", true).or("roleId$EMPTY", true);
