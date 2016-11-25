@@ -16,16 +16,24 @@
 
 package org.hsweb.web.mybatis.user;
 
+import org.hsweb.ezorm.core.dsl.Query;
+import org.hsweb.ezorm.rdb.render.dialect.Dialect;
+import org.hsweb.web.bean.common.DeleteParam;
 import org.hsweb.web.bean.common.InsertParam;
 import org.hsweb.web.bean.common.QueryParam;
+import org.hsweb.web.bean.common.UpdateParam;
 import org.hsweb.web.bean.po.user.User;
+import org.hsweb.web.dao.form.FormMapper;
 import org.hsweb.web.dao.user.UserMapper;
 import org.hsweb.web.mybatis.AbstractTestCase;
+import org.hsweb.web.mybatis.plgins.pager.Pager;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
+
+import static org.hsweb.ezorm.rdb.render.dialect.Dialect.TermTypeMapper.sql;
 
 /**
  * @author zhouhao
@@ -35,6 +43,9 @@ public class UserMapperTest extends AbstractTestCase {
     @Autowired
     private UserMapper userMapper;
 
+    @Autowired
+    protected FormMapper formMapper;
+
     @Test
     public void testInsert() {
         User user = new User();
@@ -43,11 +54,21 @@ public class UserMapperTest extends AbstractTestCase {
         user.setName("test");
         user.setCreateDate(new Date());
         int i = userMapper.insert(InsertParam.build(user));
+        userMapper.update(UpdateParam.build(user));
+        userMapper.delete(DeleteParam.build().where("id", "111"));
         Assert.assertEquals(i, 1);
     }
 
     @Test
     public void testQuery() {
-        userMapper.select(QueryParam.build());
+        User user = new User();
+        user.setId("test");
+        user.setUsername("admin");
+        user.setName("test");
+        Pager.doPaging(0, 20);
+        Query.forList(userMapper::select, new QueryParam())
+                .where("username", sql("username is not null"))
+                .fromBean(user)
+                .$like$("username").list();
     }
 }

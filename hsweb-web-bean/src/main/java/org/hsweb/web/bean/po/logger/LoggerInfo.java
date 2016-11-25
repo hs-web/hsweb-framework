@@ -246,4 +246,99 @@ public class LoggerInfo extends GenericPo<String> {
     public void setCacheKey(String cacheKey) {
         this.cacheKey = cacheKey;
     }
+
+
+
+public interface Property extends GenericPo.Property{
+	/**
+	 *
+	 * @see LoggerInfo#clientIp
+	 */
+	String clientIp="clientIp";
+	/**
+	 *
+	 * @see LoggerInfo#requestUri
+	 */
+	String requestUri="requestUri";
+	/**
+	 *
+	 * @see LoggerInfo#requestUrl
+	 */
+	String requestUrl="requestUrl";
+	/**
+	 *
+	 * @see LoggerInfo#requestMethod
+	 */
+	String requestMethod="requestMethod";
+	/**
+	 *
+	 * @see LoggerInfo#responseContent
+	 */
+	String responseContent="responseContent";
+	/**
+	 *
+	 * @see LoggerInfo#userId
+	 */
+	String userId="userId";
+	/**
+	 *
+	 * @see LoggerInfo#requestTime
+	 */
+	String requestTime="requestTime";
+	/**
+	 *
+	 * @see LoggerInfo#responseTime
+	 */
+	String responseTime="responseTime";
+	/**
+	 *
+	 * @see LoggerInfo#useTime
+	 */
+	String useTime="useTime";
+	/**
+	 *
+	 * @see LoggerInfo#referer
+	 */
+	String referer="referer";
+	/**
+	 *
+	 * @see LoggerInfo#userAgent
+	 */
+	String userAgent="userAgent";
+	/**
+	 *
+	 * @see LoggerInfo#responseCode
+	 */
+	String responseCode="responseCode";
+	/**
+	 *
+	 * @see LoggerInfo#requestHeader
+	 */
+	String requestHeader="requestHeader";
+	/**
+	 *
+	 * @see LoggerInfo#className
+	 */
+	String className="className";
+	/**
+	 *
+	 * @see LoggerInfo#moduleDesc
+	 */
+	String moduleDesc="moduleDesc";
+	/**
+	 *
+	 * @see LoggerInfo#requestParam
+	 */
+	String requestParam="requestParam";
+	/**
+	 *
+	 * @see LoggerInfo#exceptionInfo
+	 */
+	String exceptionInfo="exceptionInfo";
+	/**
+	 *
+	 * @see LoggerInfo#cacheKey
+	 */
+	String cacheKey="cacheKey";
+	}
 }

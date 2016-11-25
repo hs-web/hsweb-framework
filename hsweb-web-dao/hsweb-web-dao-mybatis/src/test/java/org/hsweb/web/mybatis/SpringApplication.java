@@ -16,8 +16,8 @@
 
 package org.hsweb.web.mybatis;
 
-import org.hsweb.ezorm.executor.AbstractJdbcSqlExecutor;
-import org.hsweb.ezorm.executor.SqlExecutor;
+import org.hsweb.ezorm.rdb.executor.AbstractJdbcSqlExecutor;
+import org.hsweb.ezorm.rdb.executor.SqlExecutor;
 import org.hsweb.web.core.datasource.DataSourceHolder;
 import org.hsweb.web.core.datasource.DatabaseType;
 import org.mybatis.spring.annotation.MapperScan;
@@ -26,7 +26,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DataSourceUtils;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
 import java.sql.Connection;

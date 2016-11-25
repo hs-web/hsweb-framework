@@ -163,4 +163,34 @@ public class QuartzJobHistory extends GenericPo<String> {
             }
         }
     }
+
+
+
+public interface Property extends GenericPo.Property{
+	/**
+	 *
+	 * @see QuartzJobHistory#jobId
+	 */
+	String jobId="jobId";
+	/**
+	 *
+	 * @see QuartzJobHistory#startTime
+	 */
+	String startTime="startTime";
+	/**
+	 *
+	 * @see QuartzJobHistory#endTime
+	 */
+	String endTime="endTime";
+	/**
+	 *
+	 * @see QuartzJobHistory#result
+	 */
+	String result="result";
+	/**
+	 *
+	 * @see QuartzJobHistory#status
+	 */
+	String status="status";
+	}
 }

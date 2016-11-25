@@ -151,4 +151,44 @@ public class Classified extends GenericPo<String> {
     public void setSortIndex(int sortIndex) {
         this.sortIndex = sortIndex;
     }
+
+
+
+public interface Property extends GenericPo.Property{
+	/**
+	 *
+	 * @see Classified#name
+	 */
+	String name="name";
+	/**
+	 *
+	 * @see Classified#remark
+	 */
+	String remark="remark";
+	/**
+	 *
+	 * @see Classified#type
+	 */
+	String type="type";
+	/**
+	 *
+	 * @see Classified#parentId
+	 */
+	String parentId="parentId";
+	/**
+	 *
+	 * @see Classified#icon
+	 */
+	String icon="icon";
+	/**
+	 *
+	 * @see Classified#config
+	 */
+	String config="config";
+	/**
+	 *
+	 * @see Classified#sortIndex
+	 */
+	String sortIndex="sortIndex";
+	}
 }

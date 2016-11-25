@@ -1,9 +1,9 @@
 package org.hsweb.web.core;
 
 import org.hsweb.commons.file.FileUtils;
-import org.hsweb.ezorm.executor.SqlExecutor;
-import org.hsweb.ezorm.render.SqlAppender;
-import org.hsweb.ezorm.render.support.simple.SimpleSQL;
+import org.hsweb.ezorm.rdb.executor.SqlExecutor;
+import org.hsweb.ezorm.rdb.render.SqlAppender;
+import org.hsweb.ezorm.rdb.render.support.simple.SimpleSQL;
 import org.hsweb.web.core.datasource.DataSourceHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;

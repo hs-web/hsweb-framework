@@ -99,17 +99,35 @@ public class SystemVersion implements Comparable<SystemVersion> {
         }
     }
 
-    public static void main(String[] args) {
-        SystemVersion systemVersion = new SystemVersion();
-        systemVersion.setMajorVersion(2);
-        systemVersion.setMinorVersion(2);
-        systemVersion.setRevisionVersion(1);
 
-        SystemVersion systemVersion2 = new SystemVersion();
-        systemVersion2.setMajorVersion(3);
-        systemVersion2.setMinorVersion(2);
-        systemVersion2.setRevisionVersion(1);
-
-        System.out.println(systemVersion.compareTo(systemVersion2));
+    public interface Property {
+        /**
+         * @see SystemVersion#name
+         */
+        String name            = "name";
+        /**
+         * @see SystemVersion#comment
+         */
+        String comment         = "comment";
+        /**
+         * @see SystemVersion#website
+         */
+        String website         = "website";
+        /**
+         * @see SystemVersion#majorVersion
+         */
+        String majorVersion    = "majorVersion";
+        /**
+         * @see SystemVersion#minorVersion
+         */
+        String minorVersion    = "minorVersion";
+        /**
+         * @see SystemVersion#revisionVersion
+         */
+        String revisionVersion = "revisionVersion";
+        /**
+         * @see SystemVersion#snapshot
+         */
+        String snapshot        = "snapshot";
     }
 }

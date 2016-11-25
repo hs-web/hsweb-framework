@@ -1,7 +1,9 @@
 package org.hsweb.web.controller;
 
 import com.alibaba.fastjson.JSON;
+import org.hsweb.ezorm.rdb.exception.*;
 import org.hsweb.web.core.exception.*;
+import org.hsweb.web.core.exception.ValidationException;
 import org.hsweb.web.core.message.ResponseMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,10 +27,10 @@ public class RestControllerExceptionTranslator {
         return ResponseMessage.error(exception.getMessage(), 400);
     }
 
-    @ExceptionHandler(org.hsweb.ezorm.exception.ValidationException.class)
+    @ExceptionHandler(org.hsweb.ezorm.rdb.exception.ValidationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
-    ResponseMessage handleException(org.hsweb.ezorm.exception.ValidationException exception) {
+    ResponseMessage handleException(org.hsweb.ezorm.rdb.exception.ValidationException exception) {
         return ResponseMessage.error(JSON.toJSONString(exception.getValidateResult()), 400);
     }
 

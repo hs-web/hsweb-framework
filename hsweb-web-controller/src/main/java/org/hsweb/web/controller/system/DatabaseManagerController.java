@@ -2,9 +2,9 @@ package org.hsweb.web.controller.system;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import org.hsweb.ezorm.meta.FieldMetaData;
-import org.hsweb.ezorm.meta.TableMetaData;
-import org.hsweb.ezorm.render.SqlAppender;
+import org.hsweb.ezorm.rdb.meta.RDBColumnMetaData;
+import org.hsweb.ezorm.rdb.meta.RDBTableMetaData;
+import org.hsweb.ezorm.rdb.render.SqlAppender;
 import org.hsweb.web.bean.po.user.User;
 import org.hsweb.web.core.authorize.annotation.Authorize;
 import org.hsweb.web.core.datasource.DynamicDataSource;
@@ -54,8 +54,8 @@ public class DatabaseManagerController {
     @AccessLogger("获取所有表结构")
     public ResponseMessage showTables() throws SQLException {
         return ResponseMessage.ok(dataBaseManagerService.getTableList())
-                .include(TableMetaData.class, "name", "alias", "comment", "fields")
-                .include(FieldMetaData.class, "name", "alias", "comment", "dataType", "properties")
+                .include(RDBTableMetaData.class, "name", "alias", "comment", "fields")
+                .include(RDBColumnMetaData.class, "name", "alias", "comment", "dataType", "properties")
                 .onlyData();
     }
 
@@ -85,8 +85,8 @@ public class DatabaseManagerController {
             checkDynamicDataSourceSupport();
             DynamicDataSource.use(dataSourceId);
             return ResponseMessage.ok(dataBaseManagerService.getTableList())
-                    .include(TableMetaData.class, "name", "alias", "comment", "fields")
-                    .include(FieldMetaData.class, "name", "alias", "comment", "dataType", "properties")
+                    .include(RDBTableMetaData.class, "name", "alias", "comment", "fields")
+                    .include(RDBColumnMetaData.class, "name", "alias", "comment", "dataType", "properties")
                     .onlyData();
         } finally {
             DynamicDataSource.useDefault(false);
@@ -158,14 +158,14 @@ public class DatabaseManagerController {
         }
     }
 
-    protected TableMetaData createTableMetaDataByJson(JSONObject jsonObject) {
-        TableMetaData tableMetaData = new TableMetaData();
+    protected RDBTableMetaData createTableMetaDataByJson(JSONObject jsonObject) {
+        RDBTableMetaData tableMetaData = new RDBTableMetaData();
         tableMetaData.setName(jsonObject.getString("name"));
         tableMetaData.setComment(jsonObject.getString("comment"));
         JSONArray jsonArray = jsonObject.getJSONArray("fields");
         for (int i = 0; i < jsonArray.size(); i++) {
-            FieldMetaData field = jsonArray.getObject(i, FieldMetaData.class);
-            tableMetaData.addField(field);
+            RDBColumnMetaData columnMetaData = jsonArray.getObject(i, RDBColumnMetaData.class);
+            tableMetaData.addColumn(columnMetaData);
         }
         return tableMetaData;
     }

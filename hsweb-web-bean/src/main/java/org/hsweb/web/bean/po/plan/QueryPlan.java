@@ -134,4 +134,39 @@ public class QueryPlan extends GenericPo<String> {
     public void setCreateDate(java.util.Date createDate) {
         this.createDate = createDate;
     }
+
+
+
+public interface Property extends GenericPo.Property{
+	/**
+	 *
+	 * @see QueryPlan#name
+	 */
+	String name="name";
+	/**
+	 *
+	 * @see QueryPlan#type
+	 */
+	String type="type";
+	/**
+	 *
+	 * @see QueryPlan#config
+	 */
+	String config="config";
+	/**
+	 *
+	 * @see QueryPlan#sharing
+	 */
+	String sharing="sharing";
+	/**
+	 *
+	 * @see QueryPlan#creatorId
+	 */
+	String creatorId="creatorId";
+	/**
+	 *
+	 * @see QueryPlan#createDate
+	 */
+	String createDate="createDate";
+	}
 }

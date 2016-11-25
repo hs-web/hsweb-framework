@@ -2,8 +2,8 @@ package org.hsweb.web.service.impl.form.validator;
 
 import org.apache.commons.beanutils.BeanMap;
 import org.apache.commons.beanutils.BeanUtils;
-import org.hsweb.ezorm.exception.ValidationException;
-import org.hsweb.ezorm.meta.expand.Validator;
+import org.hsweb.ezorm.core.Validator;
+import org.hsweb.ezorm.rdb.exception.ValidationException;
 import org.hsweb.web.bean.validator.ValidateResults;
 import org.hsweb.web.core.exception.BusinessException;
 import org.springframework.util.ReflectionUtils;
@@ -23,7 +23,7 @@ public class GroovyDycBeanValidator implements Validator {
 
     protected static DynamicScriptEngine engine = DynamicScriptEngineFactory.getEngine("groovy");
 
-    private String className;
+    private String                     className;
     private javax.validation.Validator hibernateValidator;
 
 
@@ -41,7 +41,7 @@ public class GroovyDycBeanValidator implements Validator {
             if (operation == Operation.INSERT) {
                 data.forEach((key, value) -> {
                     try {
-                        BeanUtils.setProperty(validatorTarget , (String) key,value );
+                        BeanUtils.setProperty(validatorTarget, (String) key, value);
                     } catch (Exception e) {
                     }
                 });

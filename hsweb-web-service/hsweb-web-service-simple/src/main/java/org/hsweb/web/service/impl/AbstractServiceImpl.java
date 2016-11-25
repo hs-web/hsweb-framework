@@ -1,5 +1,8 @@
 package org.hsweb.web.service.impl;
 
+import org.hsweb.ezorm.core.dsl.Delete;
+import org.hsweb.ezorm.core.dsl.Query;
+import org.hsweb.ezorm.core.dsl.Update;
 import org.hsweb.web.bean.common.*;
 import org.hsweb.web.bean.po.GenericPo;
 import org.hsweb.web.bean.validator.ValidateResults;
@@ -160,4 +163,19 @@ public abstract class AbstractServiceImpl<Po, PK> implements GenericService<Po, 
         if (!results.isSuccess())
             throw new ValidationException(results);
     }
+
+    public Update<Po, UpdateParam<Po>> createUpdate() {
+        return createUpdate(getMapper());
+    }
+
+    public Update<Po, UpdateParam<Po>> createUpdate(Po data) {
+        Update<Po, UpdateParam<Po>> update = createUpdate();
+        update.getParam().setData(data);
+        return update;
+    }
+
+    public Delete createDelete() {
+        return createDelete(getMapper());
+    }
+
 }

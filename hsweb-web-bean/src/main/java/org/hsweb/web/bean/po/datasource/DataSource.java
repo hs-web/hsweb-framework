@@ -154,4 +154,49 @@ public class DataSource extends GenericPo<String> {
         builder.append(driver).append(url).append(username).append(password).append(enabled);
         return builder.toString().hashCode();
     }
+
+
+
+public interface Property extends GenericPo.Property{
+	/**
+	 *
+	 * @see DataSource#name
+	 */
+	String name="name";
+	/**
+	 *
+	 * @see DataSource#driver
+	 */
+	String driver="driver";
+	/**
+	 *
+	 * @see DataSource#url
+	 */
+	String url="url";
+	/**
+	 *
+	 * @see DataSource#username
+	 */
+	String username="username";
+	/**
+	 *
+	 * @see DataSource#testSql
+	 */
+	String testSql="testSql";
+	/**
+	 *
+	 * @see DataSource#password
+	 */
+	String password="password";
+	/**
+	 *
+	 * @see DataSource#enabled
+	 */
+	String enabled="enabled";
+	/**
+	 *
+	 * @see DataSource#createDate
+	 */
+	String createDate="createDate";
+	}
 }

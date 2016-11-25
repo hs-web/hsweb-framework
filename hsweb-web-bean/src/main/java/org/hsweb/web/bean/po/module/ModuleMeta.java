@@ -81,4 +81,39 @@ public class ModuleMeta extends GenericPo<String> {
         builder.append(status);
         return MD5.defaultEncode(builder.toString());
     }
+
+
+
+public interface Property extends GenericPo.Property{
+	/**
+	 *
+	 * @see ModuleMeta#key
+	 */
+	String key="key";
+	/**
+	 *
+	 * @see ModuleMeta#remark
+	 */
+	String remark="remark";
+	/**
+	 *
+	 * @see ModuleMeta#moduleId
+	 */
+	String moduleId="moduleId";
+	/**
+	 *
+	 * @see ModuleMeta#roleId
+	 */
+	String roleId="roleId";
+	/**
+	 *
+	 * @see ModuleMeta#meta
+	 */
+	String meta="meta";
+	/**
+	 *
+	 * @see ModuleMeta#status
+	 */
+	String status="status";
+	}
 }

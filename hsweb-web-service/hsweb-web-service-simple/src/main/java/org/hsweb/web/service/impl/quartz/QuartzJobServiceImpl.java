@@ -25,6 +25,7 @@ import org.hsweb.web.bean.common.DeleteParam;
 import org.hsweb.web.bean.common.UpdateMapParam;
 import org.hsweb.web.bean.common.UpdateParam;
 import org.hsweb.web.bean.po.quartz.QuartzJob;
+import org.hsweb.web.bean.po.quartz.QuartzJobHistory;
 import org.hsweb.web.core.exception.BusinessException;
 import org.hsweb.web.dao.quartz.QuartzJobHistoryMapper;
 import org.hsweb.web.dao.quartz.QuartzJobMapper;
@@ -47,6 +48,8 @@ import javax.annotation.Resource;
 import java.text.ParseException;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static org.hsweb.web.bean.po.quartz.QuartzJob.Property.*;
 
 /**
  * 定时调度任务服务类
@@ -93,9 +96,7 @@ public class QuartzJobServiceImpl extends AbstractServiceImpl<QuartzJob, String>
     public int update(QuartzJob data) {
         QuartzJob old = selectByPk(data.getId());
         assertNotNull(old, "任务不存在");
-        int i = getMapper().update(UpdateParam.build(data)
-                .excludes("status", "enabled")
-                .where("id", data.getId()));
+        int i = createUpdate(data).fromBean().excludes(enabled).where(id).exec();
         if (old.isEnabled()) {
             deleteJob(data.getId());
             startJob(data);
@@ -111,14 +112,14 @@ public class QuartzJobServiceImpl extends AbstractServiceImpl<QuartzJob, String>
     @Override
     @CacheEvict(value = CACHE_KEY, key = "'id:'+#id")
     public void enable(String id) {
-        getMapper().update((UpdateParam) UpdateMapParam.build().set("enabled", true).where("id", id));
+        createUpdate().set(enabled, true).where(QuartzJob.Property.id, id).exec();
         startJob(getMapper().selectByPk(id));
     }
 
     @Override
     @CacheEvict(value = CACHE_KEY, key = "'id:'+#id")
     public void disable(String id) {
-        getMapper().update((UpdateParam) UpdateMapParam.build().set("enabled", false).where("id", id));
+        createUpdate().set(enabled, false).where(QuartzJob.Property.id, id).exec();
         deleteJob(id);
     }
 
@@ -126,7 +127,7 @@ public class QuartzJobServiceImpl extends AbstractServiceImpl<QuartzJob, String>
     @CacheEvict(value = CACHE_KEY, key = "'id:'+#id")
     public int delete(String id) {
         deleteJob(id);
-        quartzJobHistoryMapper.delete(DeleteParam.build().where("jobId", id));
+        createDelete(quartzJobHistoryMapper::delete).where(QuartzJobHistory.Property.jobId, id).exec();
         return super.delete(id);
     }
 

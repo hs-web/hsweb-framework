@@ -16,7 +16,7 @@
     <!--生成修改字段-->
     <sql id="buildUpdateField">
         <set>
-            ${@org.hsweb.web.mybatis.builder.SqlBuilder@current().buildUpdateFields(resultMapId,#this['_parameter'])}
+            ${@org.hsweb.web.mybatis.builder.SqlBuilder@current().buildUpdateFields(resultMapId,tableName,#this['_parameter'])}
         </set>
     </sql>
 
@@ -27,48 +27,56 @@
 
     <!--生成查询sql-->
     <sql id="buildSelectSql">
-        select
-        <include refid="BasicMapper.buildSelectField"/>
-        from ${tableName}
-        <where>
-            <include refid="BasicMapper.buildWhere"/>
-        </where>
-        <include refid="BasicMapper.buildSortField"/>
+        <trim>
+            select
+            <include refid="BasicMapper.buildSelectField"/>
+            from ${tableName}
+            <where>
+                <include refid="BasicMapper.buildWhere"/>
+            </where>
+            <include refid="BasicMapper.buildSortField"/>
+        </trim>
     </sql>
 
     <!--生成删除sql-->
     <sql id="buildDeleteSql">
-        delete from ${tableName}
-        <where>
-            <include refid="BasicMapper.buildWhere"/>
-            <if test="terms.size()==0">
-               1=2
-            </if>
-        </where>
+        <trim>
+            delete from ${tableName}
+            <where>
+                <include refid="BasicMapper.buildWhere"/>
+                <if test="terms.size()==0">
+                    1=2
+                </if>
+            </where>
+        </trim>
     </sql>
 
     <!--生成InsertSql-->
     <sql id="buildInsertSql">
-        insert into ${tableName} ${@org.hsweb.web.mybatis.builder.SqlBuilder@current().buildInsertSql(resultMapId,#this['_parameter'])}
+        ${@org.hsweb.web.mybatis.builder.SqlBuilder@current().buildInsertSql(resultMapId,tableName,#this['_parameter'])}
     </sql>
 
     <!--生成UpdateSql-->
     <sql id="buildUpdateSql">
-        update ${tableName}
-        <include refid="BasicMapper.buildUpdateField"/>
-        <where>
-            <include refid="BasicMapper.buildWhere"/>
-            <if test="terms.size()==0">
-                u_id=#{data.id}
-            </if>
-        </where>
+        <trim>
+            update ${tableName}
+            <include refid="BasicMapper.buildUpdateField"/>
+            <where>
+                <include refid="BasicMapper.buildWhere"/>
+                <if test="terms.size()==0">
+                    u_id=#{data.id}
+                </if>
+            </where>
+        </trim>
     </sql>
 
     <!--生成查询数量sql-->
     <sql id="buildTotalSql">
-        select count(0) as "total" from ${tableName}
-        <where>
-            <include refid="BasicMapper.buildWhere"/>
-        </where>
+        <trim>
+            select count(0) as total from ${tableName}
+            <where>
+                <include refid="BasicMapper.buildWhere"/>
+            </where>
+        </trim>
     </sql>
 </mapper>

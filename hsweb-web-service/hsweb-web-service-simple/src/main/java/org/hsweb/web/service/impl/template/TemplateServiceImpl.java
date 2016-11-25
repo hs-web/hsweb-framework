@@ -5,7 +5,7 @@ import org.hsweb.web.bean.common.QueryParam;
 import org.hsweb.web.bean.common.UpdateParam;
 import org.hsweb.web.bean.po.history.History;
 import org.hsweb.web.bean.po.template.Template;
-import org.hsweb.web.dao.GenericMapper;
+import org.hsweb.web.bean.po.template.Template.Property;
 import org.hsweb.web.dao.template.TemplateMapper;
 import org.hsweb.web.service.history.HistoryService;
 import org.hsweb.web.service.impl.AbstractServiceImpl;
@@ -19,6 +19,11 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.util.Date;
 import java.util.List;
+
+import static org.hsweb.web.bean.po.GenericPo.Property.id;
+import static org.hsweb.web.bean.po.template.Template.Property.release;
+import static org.hsweb.web.bean.po.template.Template.Property.using;
+import static org.hsweb.web.bean.po.template.Template.Property.version;
 
 /**
  * Created by zhouhao on 16-5-20.
@@ -40,7 +45,7 @@ public class TemplateServiceImpl extends AbstractServiceImpl<Template, String> i
     }
 
     @Override
-    public String insert(Template data)  {
+    public String insert(Template data) {
         data.setVersion(1);
         data.setUsing(false);
         data.setRelease(0);
@@ -81,10 +86,10 @@ public class TemplateServiceImpl extends AbstractServiceImpl<Template, String> i
         Template old = selectByPk(data.getId());
         assertNotNull(old, "模板不存在");
         data.setRevision(old.getRevision() + 1);
-        UpdateParam<Template> param = new UpdateParam<>(data)
-                .excludes("version", "revision", "release", "using")
-                .where("id", data.getId());
-        return templateMapper.update(param);
+        return createUpdate()
+                .excludes(version, release, release, using)
+                .where(id, data.getId())
+                .exec();
     }
 
     @Override
@@ -100,10 +105,10 @@ public class TemplateServiceImpl extends AbstractServiceImpl<Template, String> i
         Template usingTemplate = selectUsing(old.getName());
         if (usingTemplate != null) {
             usingTemplate.setUsing(true);
-            templateMapper.update(new UpdateParam<>(usingTemplate).includes("using").where("id", usingTemplate.getId()));
+            createUpdate(usingTemplate).includes(using).fromBean().where(Property.id).exec();
         }
         old.setUsing(true);
-        templateMapper.update(new UpdateParam<>(old).includes("using").where("id", old.getId()));
+        createUpdate(old).includes(using).fromBean().where(Property.id).exec();
         History history = new History();
         history.setPrimaryKeyName("id");
         history.setPrimaryKeyValue(id);
@@ -125,23 +130,23 @@ public class TemplateServiceImpl extends AbstractServiceImpl<Template, String> i
         Template old = templateMapper.selectByPk(id);
         assertNotNull(old, "模板不存在");
         old.setUsing(false);
-        templateMapper.update(new UpdateParam<>(old).includes("using").where("id", old.getId()));
+        createUpdate(old).includes(using).fromBean().where(Property.id);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Template selectLatest(String name) {
-        QueryParam param = QueryParam.build()
-                .where("name", name).orderBy("version").desc().doPaging(0, 1);
-        List<Template> templates = selectLatestList(param);
-        return templates.size() > 0 ? templates.get(0) : null;
+        return createQuery()
+                .where(Property.name, name)
+                .orderByDesc(version)
+                .list(templateMapper::selectLatestList)
+                .stream().findFirst().orElse(null);
     }
 
     @Override
     @Cacheable(value = CACHE_NAME, key = "'template.name.'+#name+':'+#version")
     public Template selectByVersion(String name, int version) {
-        QueryParam param = QueryParam.build().where("name", name).and("version", version);
-        return this.selectSingle(param);
+        return this.createQuery().where(Property.name, name).and(Property.version, version).single();
     }
 
     @Override
@@ -157,7 +162,6 @@ public class TemplateServiceImpl extends AbstractServiceImpl<Template, String> i
     @Override
     @Cacheable(value = CACHE_NAME, key = "'template.using.name.'+#name")
     public Template selectUsing(String name) {
-        QueryParam param = QueryParam.build().where("name", name).and("using", true);
-        return this.selectSingle(param);
+        return this.createQuery().where(Property.name, name).and(Property.using, true).single();
     }
 }

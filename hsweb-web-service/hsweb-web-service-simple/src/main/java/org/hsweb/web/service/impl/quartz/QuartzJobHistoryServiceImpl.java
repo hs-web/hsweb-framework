@@ -16,9 +16,13 @@
 
 package org.hsweb.web.service.impl.quartz;
 
-import org.hsweb.web.bean.common.*;
-import org.hsweb.web.bean.po.GenericPo;
+import org.hsweb.ezorm.core.dsl.Update;
+import org.hsweb.web.bean.common.InsertParam;
+import org.hsweb.web.bean.common.PagerResult;
+import org.hsweb.web.bean.common.QueryParam;
+import org.hsweb.web.bean.common.UpdateParam;
 import org.hsweb.web.bean.po.quartz.QuartzJobHistory;
+import org.hsweb.web.bean.po.quartz.QuartzJobHistory.Property;
 import org.hsweb.web.dao.quartz.QuartzJobHistoryMapper;
 import org.hsweb.web.service.quartz.QuartzJobHistoryService;
 import org.springframework.stereotype.Service;
@@ -74,10 +78,10 @@ public class QuartzJobHistoryServiceImpl implements QuartzJobHistoryService {
     @Override
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public boolean endHistory(String historyId, String result, QuartzJobHistory.Status status) {
-        return quartzJobHistoryMapper.update((UpdateParam) UpdateMapParam.build()
-                .set("result", result)
-                .set("status", status.getValue())
-                .set("endTime", new Date())
-                .where("id", historyId)) == 1;
+        return Update.build(quartzJobHistoryMapper::update, new UpdateParam<>())
+                .set(Property.result, result)
+                .set(Property.status, status.getValue())
+                .set(Property.endTime, new Date())
+                .where(Property.id, historyId).exec() == 1;
     }
 }

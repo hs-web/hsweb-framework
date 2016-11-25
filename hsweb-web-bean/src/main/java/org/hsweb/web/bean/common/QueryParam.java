@@ -1,20 +1,17 @@
 package org.hsweb.web.bean.common;
 
 
-import org.hsweb.ezorm.param.Term;
-import org.hsweb.ezorm.param.TermType;
+import org.hsweb.ezorm.core.param.Term;
+import org.hsweb.ezorm.core.param.TermType;
 
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Created by 浩 on 2016-01-16 0016.
- */
-public class QueryParam extends org.hsweb.ezorm.param.QueryParam<QueryParam> implements Serializable {
-    private static final long serialVersionUID = 7941767360194797891L;
-    private Map<String, Object> param = new HashMap<>();
+public class QueryParam extends org.hsweb.ezorm.core.param.QueryParam implements Serializable {
+    private static final long                serialVersionUID = 7941767360194797891L;
+    private              Map<String, Object> param            = new HashMap<>();
 
     public QueryParam noPaging() {
         setPaging(false);

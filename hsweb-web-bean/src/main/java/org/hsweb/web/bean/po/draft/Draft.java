@@ -54,4 +54,34 @@ public class Draft extends GenericPo<String> {
     public void setKey(String key) {
         this.key = key;
     }
+
+
+
+public interface Property extends GenericPo.Property{
+	/**
+	 *
+	 * @see Draft#name
+	 */
+	String name="name";
+	/**
+	 *
+	 * @see Draft#value
+	 */
+	String value="value";
+	/**
+	 *
+	 * @see Draft#key
+	 */
+	String key="key";
+	/**
+	 *
+	 * @see Draft#createDate
+	 */
+	String createDate="createDate";
+	/**
+	 *
+	 * @see Draft#creatorId
+	 */
+	String creatorId="creatorId";
+	}
 }

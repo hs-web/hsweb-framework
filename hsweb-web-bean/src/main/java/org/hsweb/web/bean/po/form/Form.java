@@ -189,4 +189,69 @@ public class Form extends GenericPo<String> {
     public void setClassifiedId(String classifiedId) {
         this.classifiedId = classifiedId;
     }
+
+
+
+public interface Property extends GenericPo.Property{
+	/**
+	 *
+	 * @see Form#name
+	 */
+	String name="name";
+	/**
+	 *
+	 * @see Form#html
+	 */
+	String html="html";
+	/**
+	 *
+	 * @see Form#meta
+	 */
+	String meta="meta";
+	/**
+	 *
+	 * @see Form#config
+	 */
+	String config="config";
+	/**
+	 *
+	 * @see Form#remark
+	 */
+	String remark="remark";
+	/**
+	 *
+	 * @see Form#version
+	 */
+	String version="version";
+	/**
+	 *
+	 * @see Form#revision
+	 */
+	String revision="revision";
+	/**
+	 *
+	 * @see Form#release
+	 */
+	String release="release";
+	/**
+	 *
+	 * @see Form#using
+	 */
+	String using="using";
+	/**
+	 *
+	 * @see Form#createDate
+	 */
+	String createDate="createDate";
+	/**
+	 *
+	 * @see Form#updateDate
+	 */
+	String updateDate="updateDate";
+	/**
+	 *
+	 * @see Form#classifiedId
+	 */
+	String classifiedId="classifiedId";
+	}
 }

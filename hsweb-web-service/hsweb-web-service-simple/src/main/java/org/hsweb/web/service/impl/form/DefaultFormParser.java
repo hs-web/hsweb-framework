@@ -4,14 +4,19 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.beanutils.BeanUtils;
-import org.hsweb.ezorm.meta.FieldMetaData;
-import org.hsweb.ezorm.meta.TableMetaData;
-import org.hsweb.ezorm.meta.converter.ClobValueConverter;
-import org.hsweb.ezorm.meta.converter.DateTimeConverter;
-import org.hsweb.ezorm.meta.converter.JSONValueConverter;
-import org.hsweb.ezorm.run.simple.trigger.ScriptTraggerSupport;
+import org.hsweb.commons.StringUtils;
+import org.hsweb.expands.script.engine.DynamicScriptEngine;
+import org.hsweb.expands.script.engine.DynamicScriptEngineFactory;
+import org.hsweb.ezorm.rdb.meta.RDBColumnMetaData;
+import org.hsweb.ezorm.rdb.meta.RDBTableMetaData;
+import org.hsweb.ezorm.rdb.meta.converter.ClobValueConverter;
+import org.hsweb.ezorm.rdb.meta.converter.DateTimeConverter;
+import org.hsweb.ezorm.rdb.meta.converter.JSONValueConverter;
+import org.hsweb.ezorm.rdb.render.dialect.Dialect;
+import org.hsweb.ezorm.rdb.simple.trigger.ScriptTraggerSupport;
 import org.hsweb.web.bean.po.form.Form;
 import org.hsweb.web.core.Install;
+import org.hsweb.web.core.datasource.DataSourceHolder;
 import org.hsweb.web.service.form.FormParser;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -20,98 +25,57 @@ import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
-import org.hsweb.commons.StringUtils;
-import org.hsweb.expands.script.engine.DynamicScriptEngine;
-import org.hsweb.expands.script.engine.DynamicScriptEngineFactory;
 
 import java.lang.reflect.Field;
 import java.sql.JDBCType;
 import java.util.*;
 
-/**
- * Created by zhouhao on 16-4-20.
- */
 @Service
 public class DefaultFormParser implements FormParser {
 
     @Autowired(required = false)
     private List<FormParser.Listener> listeners;
 
-    public void initField(FieldMetaData fieldMetaData) {
-        if (fieldMetaData.getComment() == null)
-            fieldMetaData.setComment("");
-        String db = Install.getDatabaseType();
-        if (fieldMetaData.getDataType() == null) {
-            JDBCType jdbcType = fieldMetaData.getJdbcType();
-            if (jdbcType == null) throw new UnsupportedOperationException("请指定jdbcType或者dataType");
-            switch (jdbcType) {
-                case VARCHAR:
-                    String len = fieldMetaData.getProperty("data-type-len", "256").toString();
-                    if (db.equals("mysql")) {
-                        fieldMetaData.setDataType("varchar(" + len + ")");
-                    } else if (db.equals("oracle") || db.equals("h2")) {
-                        fieldMetaData.setDataType("varchar2(" + len + ")");
-                    }
-                    break;
-                case TINYINT:
-                    if (db.equals("mysql")) {
-                        fieldMetaData.setDataType("tinyint");
-                    } else if (db.equals("oracle") || db.equals("h2")) {
-                        fieldMetaData.setDataType("number(10)");
-                    }
-                case NUMERIC:
-                    len = fieldMetaData.getProperty("data-type-len", "32").toString();
-                    if (db.equals("mysql")) {
-                        fieldMetaData.setDataType((len.contains(",") ? "double" : "int") + "(" + len + ")");
-                    } else if (db.equals("oracle") || db.equals("h2")) {
-                        fieldMetaData.setDataType("number(" + len + ")");
-                    }
-                case DATE:
-                    if (db.equals("mysql")) {
-                        fieldMetaData.setDataType("datetime");
-                    } else if (db.equals("oracle") || db.equals("h2")) {
-                        fieldMetaData.setDataType("date");
-                    }
-                case CLOB:
-                    if (db.equals("mysql")) {
-                        fieldMetaData.setDataType("text");
-                    } else if (db.equals("oracle") || db.equals("h2")) {
-                        fieldMetaData.setDataType("clob");
-                    }
+    public void initField(RDBColumnMetaData column) {
+        Dialect dialect = DataSourceHolder.getActiveDatabaseType().getDialect();
+        if (column.getDataType() == null) {
+            if (column.getJdbcType() == null) {
+                throw new UnsupportedOperationException("请指定jdbcType或者dataType");
             }
+            dialect.buildDataType(column);
         }
-        if (fieldMetaData.getJdbcType() == null) {
-            String dataType = fieldMetaData.getDataType();
+        if (column.getJdbcType() == null) {
+            String dataType = column.getDataType();
             if (dataType != null) {
                 if (dataType.contains("varchar")) {
-                    fieldMetaData.setJdbcType(JDBCType.VARCHAR);
-                    String className = fieldMetaData.getJavaType().getSimpleName();
+                    column.setJdbcType(JDBCType.VARCHAR);
+                    String className = column.getJavaType().getSimpleName();
                     if (!typeMapper.containsKey(className)) {
-                        fieldMetaData.setValueConverter(new JSONValueConverter(fieldMetaData.getJavaType(), fieldMetaData.getValueConverter()));
+                        column.setValueConverter(new JSONValueConverter(column.getJavaType(), column.getValueConverter()));
                     }
                 } else if (dataType.contains("date")
                         || dataType.contains("timestamp")
                         || dataType.contains("datetime")) {
-                    fieldMetaData.setJdbcType(JDBCType.DATE);
-                    String format = fieldMetaData.getProperty("date-format", "yyyy-MM-dd HH:mm:ss").toString();
-                    fieldMetaData.setValueConverter(new DateTimeConverter(format, fieldMetaData.getJavaType()));
+                    column.setJdbcType(JDBCType.DATE);
+                    String format = column.getProperty("date-format", "yyyy-MM-dd HH:mm:ss").toString();
+                    column.setValueConverter(new DateTimeConverter(format, column.getJavaType()));
                 } else if (dataType.contains("clob")) {
-                    fieldMetaData.setJdbcType(JDBCType.CLOB);
-                    fieldMetaData.setValueConverter(new ClobValueConverter());
-                    String className = fieldMetaData.getJavaType().getSimpleName();
+                    column.setJdbcType(JDBCType.CLOB);
+                    column.setValueConverter(new ClobValueConverter());
+                    String className = column.getJavaType().getSimpleName();
                     if (!typeMapper.containsKey(className)) {
-                        fieldMetaData.setValueConverter(new JSONValueConverter(fieldMetaData.getJavaType(), fieldMetaData.getValueConverter()));
+                        column.setValueConverter(new JSONValueConverter(column.getJavaType(), column.getValueConverter()));
                     }
                 } else if (dataType.contains("number") ||
                         dataType.contains("int") ||
                         dataType.contains("double") ||
                         dataType.contains("tinyint")) {
-                    fieldMetaData.setJdbcType(JDBCType.NUMERIC);
+                    column.setJdbcType(JDBCType.NUMERIC);
                 } else {
-                    fieldMetaData.setJdbcType(JDBCType.VARCHAR);
-                    String className = fieldMetaData.getJavaType().getSimpleName();
+                    column.setJdbcType(JDBCType.VARCHAR);
+                    String className = column.getJavaType().getSimpleName();
                     if (!typeMapper.containsKey(className)) {
-                        fieldMetaData.setValueConverter(new JSONValueConverter(fieldMetaData.getJavaType(), fieldMetaData.getValueConverter()));
+                        column.setValueConverter(new JSONValueConverter(column.getJavaType(), column.getValueConverter()));
                     }
                 }
             }
@@ -119,21 +83,21 @@ public class DefaultFormParser implements FormParser {
     }
 
     @Override
-    public TableMetaData parse(Form form) {
+    public RDBTableMetaData parse(Form form) {
         DynamicScriptEngine scriptEngine = DynamicScriptEngineFactory.getEngine("groovy");
         String meta = form.getMeta();
-        TableMetaData metaData = new TableMetaData();
+        RDBTableMetaData metaData = new RDBTableMetaData();
         metaData.setProperty("version", form.getRelease());
         metaData.setName(form.getName());
         metaData.setComment(form.getRemark());
         JSONObject object = JSON.parseObject(meta);
         int[] sortIndex = new int[1];
-        Map<String, FieldMetaData> tmp = new HashMap<>();
+        Map<String, RDBColumnMetaData> tmp = new HashMap<>();
         object.forEach((id, field) -> {
-            FieldMetaData fieldMeta = new FieldMetaData();
-            fieldMeta.setProperty("field-id", id);
-            tmp.put(id, fieldMeta);
-            fieldMeta.setSortIndex(sortIndex[0]++);
+            RDBColumnMetaData columnMetaData = new RDBColumnMetaData();
+            columnMetaData.setProperty("field-id", id);
+            tmp.put(id, columnMetaData);
+            columnMetaData.setSortIndex(sortIndex[0]++);
             JSONArray obj = ((JSONArray) field);
             obj.forEach((defT) -> {
                 JSONObject def = ((JSONObject) defT);
@@ -174,14 +138,14 @@ public class DefaultFormParser implements FormParser {
                                 validatorList.add(validator);
                         });
                     }
-                    fieldMeta.setValidator(validatorList);
+                    columnMetaData.setValidator(validatorList);
                     return;
                 }
-                Field ftmp = ReflectionUtils.findField(FieldMetaData.class, key);
+                Field ftmp = ReflectionUtils.findField(RDBColumnMetaData.class, key);
                 if (ftmp != null) {
                     try {
                         if ("javaType".equals(key)) value = mapperJavaType(value.toString());
-                        BeanUtils.setProperty(fieldMeta, key, value);
+                        BeanUtils.setProperty(columnMetaData, key, value);
                     } catch (RuntimeException e) {
                         throw e;
                     } catch (Exception e) {
@@ -196,16 +160,16 @@ public class DefaultFormParser implements FormParser {
                         } catch (Throwable e) {
                         }
                     }
-                    fieldMeta.setProperty(key, value);
+                    columnMetaData.setProperty(key, value);
                 }
             });
             //name为空的时候 不保存此字段
             if (!"main".equals(id)
-                    && !StringUtils.isNullOrEmpty(fieldMeta.getName())) {
-                initField(fieldMeta);
-                if (StringUtils.isNullOrEmpty(fieldMeta.getAlias()))
-                    fieldMeta.setAlias(fieldMeta.getName());
-                metaData.addField(fieldMeta);
+                    && !StringUtils.isNullOrEmpty(columnMetaData.getName())) {
+                initField(columnMetaData);
+                if (StringUtils.isNullOrEmpty(columnMetaData.getAlias()))
+                    columnMetaData.setAlias(columnMetaData.getName());
+                metaData.addColumn(columnMetaData);
             }
         });
         if (listeners != null) {
@@ -214,8 +178,8 @@ public class DefaultFormParser implements FormParser {
         Document document = Jsoup.parse(form.getHtml());
         Elements elements = document.select("[field-id]");
         for (int i = 0; i < elements.size(); i++) {
-            FieldMetaData metaData1 = tmp.get(elements.get(i).attr("field-id"));
-            if (metaData1 != null) metaData1.setSortIndex(i);
+            RDBColumnMetaData column = tmp.get(elements.get(i).attr("field-id"));
+            if (column != null) column.setSortIndex(i);
         }
         return metaData;
     }
@@ -255,9 +219,9 @@ public class DefaultFormParser implements FormParser {
 
     @Override
     public String parseHtml(Form form) {
-        TableMetaData metaData = parse(form);
+        RDBTableMetaData metaData = parse(form);
         Element html = Jsoup.parse(form.getHtml());
-        metaData.getFields().forEach((field) -> {
+        metaData.getColumns().forEach((field) -> {
             String field_id = field.getProperty("field-id", "").toString();
             if (!"".equals(field_id)) {
                 Elements elements = html.select("[field-id=\"" + field_id + "\"]");

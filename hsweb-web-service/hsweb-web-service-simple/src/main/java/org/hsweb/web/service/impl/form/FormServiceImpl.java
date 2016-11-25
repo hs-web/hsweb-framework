@@ -5,6 +5,7 @@ import org.hsweb.web.bean.common.InsertParam;
 import org.hsweb.web.bean.common.QueryParam;
 import org.hsweb.web.bean.common.UpdateParam;
 import org.hsweb.web.bean.po.form.Form;
+import org.hsweb.web.bean.po.form.Form.Property;
 import org.hsweb.web.bean.po.history.History;
 import org.hsweb.web.dao.form.FormMapper;
 import org.hsweb.web.service.form.DynamicFormService;
@@ -127,17 +128,18 @@ public class FormServiceImpl extends AbstractServiceImpl<Form, String> implement
     @Override
     @Cacheable(value = CACHE_KEY, key = "#name+':'+#version")
     public Form selectByVersion(String name, int version) {
-        QueryParam param = QueryParam.build()
-                .where("name", name).where("version", version);
-        List<Form> formList = formMapper.selectLatestList(param);
+        List<Form> formList = this.createQuery()
+                .where(Property.name, name).and(Property.version, version)
+                .list(formMapper::selectLatestList);
         return formList.size() > 0 ? formList.get(0) : null;
     }
 
     @Override
     public Form selectLatest(String name) {
-        QueryParam param = QueryParam.build()
-                .where("name", name).orderBy("version").asc();
-        List<Form> formList = formMapper.selectLatestList(param);
+        List<Form> formList = this.createQuery()
+                .where(Property.name, name)
+                .orderByAsc(Property.version)
+                .list(formMapper::selectLatestList);
         return formList.size() > 0 ? formList.get(0) : null;
     }
 
@@ -161,7 +163,7 @@ public class FormServiceImpl extends AbstractServiceImpl<Form, String> implement
         old.setUsing(true);
         dynamicFormService.deploy(old);
         old.setRelease(old.getRevision());//发布修订版本
-        getMapper().update(UpdateParam.build(old).includes("using", "release").where("id", old.getId()));
+        createUpdate(old).includes(Property.using, Property.release).where(Property.id, old.getId()).exec();
         //加入发布历史记录
         History history = History.newInstance("form.deploy." + old.getName());
         history.setPrimaryKeyName("id");
@@ -184,9 +186,7 @@ public class FormServiceImpl extends AbstractServiceImpl<Form, String> implement
         assertNotNull(old, "表单不存在");
         dynamicFormService.unDeploy(old);
         old.setUsing(false);
-        UpdateParam param = new UpdateParam<>(old);
-        param.includes("using").where("id", old.getId());
-        getMapper().update(param);
+        createUpdate(old).includes(Property.using).where(Property.id, old.getId()).exec();
     }
 
     @Override

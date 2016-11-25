@@ -131,4 +131,30 @@ public class DynamicScript extends GenericPo<String> {
         this.status = status;
     }
 
+    public interface Property extends GenericPo.Property {
+        /**
+         * @see DynamicScript#name
+         */
+        String name         = "name";
+        /**
+         * @see DynamicScript#type
+         */
+        String type         = "type";
+        /**
+         * @see DynamicScript#content
+         */
+        String content      = "content";
+        /**
+         * @see DynamicScript#remark
+         */
+        String remark       = "remark";
+        /**
+         * @see DynamicScript#classifiedId
+         */
+        String classifiedId = "classifiedId";
+        /**
+         * @see DynamicScript#status
+         */
+        String status       = "status";
+    }
 }

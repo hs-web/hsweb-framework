@@ -80,4 +80,29 @@ public class RoleModule extends GenericPo<String> {
     public void setActions(List<String> actions) {
         this.actions = actions;
     }
+
+
+
+public interface Property extends GenericPo.Property{
+	/**
+	 *
+	 * @see RoleModule#moduleId
+	 */
+	String moduleId="moduleId";
+	/**
+	 *
+	 * @see RoleModule#roleId
+	 */
+	String roleId="roleId";
+	/**
+	 *
+	 * @see RoleModule#actions
+	 */
+	String actions="actions";
+	/**
+	 *
+	 * @see RoleModule#module
+	 */
+	String module="module";
+	}
 }

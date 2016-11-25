@@ -1,8 +1,13 @@
 package org.hsweb.web.service;
 
-import org.hsweb.web.bean.common.PagerResult;
-import org.hsweb.web.bean.common.QueryParam;
+import org.hsweb.ezorm.core.dsl.Delete;
+import org.hsweb.ezorm.core.dsl.Query;
+import org.hsweb.ezorm.core.dsl.Update;
+import org.hsweb.ezorm.core.param.Param;
+import org.hsweb.web.bean.common.*;
+import org.hsweb.web.dao.GenericMapper;
 
+import java.util.HashMap;
 import java.util.List;
 
 
@@ -117,4 +122,44 @@ public interface GenericService<Po, Pk> {
         else return list.get(0);
     }
 
+    default <Po, Pk> Update<Po, UpdateParam<Po>> createUpdate(GenericMapper<Po, Pk> mapper) {
+        Update<Po, UpdateParam<Po>> update = new Update(new UpdateParam(new HashMap<>()));
+        update.setExecutor(mapper::update);
+        return update;
+    }
+
+    default Delete createDelete(GenericMapper<Po, Pk> mapper) {
+        Delete update = new Delete();
+        update.setParam(new DeleteParam());
+        update.setExecutor(param -> mapper.delete(((DeleteParam) param)));
+        return update;
+    }
+
+    default Delete createDelete(Delete.Executor<DeleteParam> executor) {
+        Delete update = new Delete();
+        update.setParam(new DeleteParam());
+        update.setExecutor(param -> executor.doExecute(((DeleteParam) param)));
+        return update;
+    }
+
+    default Query<Po, QueryParam> createQuery() {
+        Query<Po, QueryParam> query = new Query<>(new QueryParam());
+        query.setListExecutor(this::select);
+        query.setTotalExecutor(this::total);
+        query.setSingleExecutor(this::selectSingle);
+        return query;
+    }
+
+    default <Po, Pk> Query<Po, QueryParam> createQuery(GenericMapper<Po, Pk> mapper) {
+        Query<Po, QueryParam> query = new Query<>(new QueryParam());
+        query.setListExecutor(mapper::select);
+        query.setTotalExecutor(mapper::total);
+        query.setSingleExecutor((param) -> {
+            param.doPaging(0, 1);
+            List<Po> list = mapper.select(param);
+            if (null == list || list.size() == 0) return null;
+            else return list.get(0);
+        });
+        return query;
+    }
 }

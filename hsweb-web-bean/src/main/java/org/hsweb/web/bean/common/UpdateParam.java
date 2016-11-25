@@ -3,7 +3,7 @@ package org.hsweb.web.bean.common;
 /**
  * Created by zhouhao on 16-4-19.
  */
-public class UpdateParam<T> extends org.hsweb.ezorm.param.UpdateParam<T,UpdateParam<T>> {
+public class UpdateParam<T> extends org.hsweb.ezorm.core.param.UpdateParam<T> {
 
     public UpdateParam() {
     }

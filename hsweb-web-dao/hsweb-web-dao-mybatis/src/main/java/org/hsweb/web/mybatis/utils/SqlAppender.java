@@ -3,7 +3,8 @@ package org.hsweb.web.mybatis.utils;
 import java.util.LinkedList;
 
 /**
- * Created by zhouhao on 16-5-9.
+ * @see org.hsweb.ezorm.rdb.render.SqlAppender
+ * @deprecated
  */
 public class SqlAppender extends LinkedList<String> {
 

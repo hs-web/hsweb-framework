@@ -16,9 +16,9 @@ import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.TranscoderOutput;
 import org.apache.batik.transcoder.image.PNGTranscoder;
 import org.apache.commons.lang3.StringUtils;
-import org.hsweb.ezorm.meta.expand.PropertyWrapper;
-import org.hsweb.ezorm.meta.expand.SimplePropertyWrapper;
-import org.hsweb.ezorm.param.TermType;
+import org.hsweb.ezorm.core.PropertyWrapper;
+import org.hsweb.ezorm.core.SimplePropertyWrapper;
+import org.hsweb.ezorm.core.param.TermType;
 import org.hsweb.web.bean.common.PagerResult;
 import org.hsweb.web.bean.common.QueryParam;
 import org.hsweb.web.core.authorize.annotation.Authorize;
@@ -57,7 +57,7 @@ public class ActivityModelController extends BasicController {
 
             PropertyWrapper valueWrapper = new SimplePropertyWrapper(term.getValue());
             String stringValue = valueWrapper.toString();
-            switch (term.getField()) {
+            switch (term.getColumn()) {
                 case "name":
                     if (term.getTermType().equals(TermType.like))
                         modelQuery.modelNameLike(stringValue);

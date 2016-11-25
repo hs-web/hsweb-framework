@@ -1,20 +1,20 @@
 package org.hsweb.web.service.impl.system;
 
-import org.hsweb.ezorm.executor.EmptySQL;
-import org.hsweb.ezorm.executor.SQL;
-import org.hsweb.ezorm.executor.SqlExecutor;
-import org.hsweb.ezorm.meta.DatabaseMetaData;
-import org.hsweb.ezorm.meta.TableMetaData;
-import org.hsweb.ezorm.meta.expand.SimpleMapWrapper;
-import org.hsweb.ezorm.meta.parser.H2TableMetaParser;
-import org.hsweb.ezorm.meta.parser.MysqlTableMetaParser;
-import org.hsweb.ezorm.meta.parser.OracleTableMetaParser;
-import org.hsweb.ezorm.meta.parser.TableMetaParser;
-import org.hsweb.ezorm.render.SqlRender;
-import org.hsweb.ezorm.render.dialect.H2DatabaseMeta;
-import org.hsweb.ezorm.render.dialect.MysqlDatabaseMeta;
-import org.hsweb.ezorm.render.dialect.OracleDatabaseMeta;
-import org.hsweb.ezorm.render.support.simple.SimpleSQL;
+import org.hsweb.ezorm.rdb.executor.EmptySQL;
+import org.hsweb.ezorm.rdb.executor.SQL;
+import org.hsweb.ezorm.rdb.executor.SqlExecutor;
+import org.hsweb.ezorm.rdb.meta.RDBDatabaseMetaData;
+import org.hsweb.ezorm.rdb.meta.RDBTableMetaData;
+import org.hsweb.ezorm.rdb.meta.expand.SimpleMapWrapper;
+import org.hsweb.ezorm.rdb.meta.parser.H2TableMetaParser;
+import org.hsweb.ezorm.rdb.meta.parser.MysqlTableMetaParser;
+import org.hsweb.ezorm.rdb.meta.parser.OracleTableMetaParser;
+import org.hsweb.ezorm.rdb.meta.parser.TableMetaParser;
+import org.hsweb.ezorm.rdb.render.SqlRender;
+import org.hsweb.ezorm.rdb.render.dialect.H2RDBDatabaseMetaData;
+import org.hsweb.ezorm.rdb.render.dialect.MysqlRDBDatabaseMetaData;
+import org.hsweb.ezorm.rdb.render.dialect.OracleRDBDatabaseMetaData;
+import org.hsweb.ezorm.rdb.render.support.simple.SimpleSQL;
 import org.hsweb.web.core.datasource.DataSourceHolder;
 import org.hsweb.web.service.system.DataBaseManagerService;
 import org.slf4j.Logger;
@@ -31,7 +31,6 @@ import java.util.Map;
 
 /**
  * 数据库管理服务实现类
- * Created by zhouhao on 16-4-21.
  *
  * @author zhouhao,
  * @version 1.0
@@ -45,7 +44,7 @@ public class DataBaseManagerServiceImpl implements DataBaseManagerService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<TableMetaData> getTableList() throws SQLException {
+    public List<RDBTableMetaData> getTableList() throws SQLException {
         return getDBType().getTableMetaParser(sqlExecutor).parseAll();
     }
 
@@ -93,11 +92,11 @@ public class DataBaseManagerServiceImpl implements DataBaseManagerService {
     }
 
     @Override
-    public String createAlterSql(TableMetaData newTable) throws Exception {
+    public String createAlterSql(RDBTableMetaData newTable) throws Exception {
         return createAlterSql(getDBType().getDatabaseMetaData(), getDBType().getTableMetaParser(sqlExecutor), newTable);
     }
 
-    public String createAlterSql(DatabaseMetaData databaseMetaData, TableMetaParser tableMetaParser, TableMetaData newTable) throws Exception {
+    public String createAlterSql(RDBDatabaseMetaData databaseMetaData, TableMetaParser tableMetaParser, RDBTableMetaData newTable) throws Exception {
         databaseMetaData.putTable(tableMetaParser.parse(newTable.getName()));
         SQL sql = databaseMetaData.getRenderer(SqlRender.TYPE.META_ALTER).render(newTable, true);
         if (sql instanceof EmptySQL) return "";
@@ -109,11 +108,11 @@ public class DataBaseManagerServiceImpl implements DataBaseManagerService {
     }
 
     @Override
-    public String createCreateSql(TableMetaData newTable) throws Exception {
+    public String createCreateSql(RDBTableMetaData newTable) throws Exception {
         return createCreateSql(getDBType().getDatabaseMetaData(), newTable);
     }
 
-    public String createCreateSql(DatabaseMetaData databaseMetaData, TableMetaData newTable) throws Exception {
+    public String createCreateSql(RDBDatabaseMetaData databaseMetaData, RDBTableMetaData newTable) throws Exception {
         SQL sql = databaseMetaData.getRenderer(SqlRender.TYPE.META_CREATE).render(newTable, true);
         if (sql instanceof EmptySQL) return "";
         StringBuilder builder = new StringBuilder(sql.getSql());
@@ -135,10 +134,8 @@ public class DataBaseManagerServiceImpl implements DataBaseManagerService {
             }
 
             @Override
-            public DatabaseMetaData getDatabaseMetaData() {
-                DatabaseMetaData databaseMetaData = new MysqlDatabaseMeta();
-                databaseMetaData.init();
-                return databaseMetaData;
+            public RDBDatabaseMetaData getDatabaseMetaData() {
+                return new MysqlRDBDatabaseMetaData();
             }
         },
         oracle {
@@ -148,10 +145,8 @@ public class DataBaseManagerServiceImpl implements DataBaseManagerService {
             }
 
             @Override
-            public DatabaseMetaData getDatabaseMetaData() {
-                DatabaseMetaData databaseMetaData = new OracleDatabaseMeta();
-                databaseMetaData.init();
-                return databaseMetaData;
+            public RDBDatabaseMetaData getDatabaseMetaData() {
+                return new OracleRDBDatabaseMetaData();
             }
         },
         h2 {
@@ -161,14 +156,12 @@ public class DataBaseManagerServiceImpl implements DataBaseManagerService {
             }
 
             @Override
-            public DatabaseMetaData getDatabaseMetaData() {
-                DatabaseMetaData databaseMetaData = new H2DatabaseMeta();
-                databaseMetaData.init();
-                return databaseMetaData;
+            public RDBDatabaseMetaData getDatabaseMetaData() {
+                return new H2RDBDatabaseMetaData();
             }
         };
 
-        public abstract DatabaseMetaData getDatabaseMetaData();
+        public abstract RDBDatabaseMetaData getDatabaseMetaData();
 
         public abstract TableMetaParser getTableMetaParser(SqlExecutor sqlExecutor);
     }

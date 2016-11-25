@@ -16,9 +16,6 @@
 
 package org.hsweb.web.mybatis.builder;
 
-import org.hsweb.web.core.datasource.DataSourceHolder;
-import org.hsweb.web.core.datasource.DatabaseType;
-
 /**
  * @author zhouhao
  */
@@ -26,15 +23,16 @@ public class SqlBuilder {
     private static boolean dynamic;
 
     public static final Object current() {
-        DatabaseType type = dynamic
-                ? DataSourceHolder.getActiveDatabaseType()
-                : DataSourceHolder.getDefaultDatabaseType();
-        switch (type) {
-            case mysql:
-                return MysqlParamBuilder.instance();
-            default:
-                return DefaultSqlParamBuilder.instance();
-        }
+        return EasyOrmSqlBuilder.getInstance();
+//        DatabaseType type = dynamic
+//                ? DataSourceHolder.getActiveDatabaseType()
+//                : DataSourceHolder.getDefaultDatabaseType();
+//        switch (type) {
+//            case mysql:
+//                return MysqlParamBuilder.instance();
+//            default:
+//                return DefaultSqlParamBuilder.instance();
+//        }
     }
 
     public static void setDynamic(boolean dynamic) {
