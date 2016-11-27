@@ -19,8 +19,11 @@ package org.hsweb.web.mybatis;
 import org.apache.ibatis.mapping.DatabaseIdProvider;
 import org.apache.ibatis.plugin.Interceptor;
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.transaction.managed.ManagedTransactionFactory;
 import org.hsweb.web.mybatis.dynamic.DynamicDataSourceSqlSessionFactoryBuilder;
+import org.hsweb.web.mybatis.dynamic.DynamicSqlSessionTemplate;
 import org.mybatis.spring.SqlSessionFactoryBean;
+import org.mybatis.spring.SqlSessionTemplate;
 import org.mybatis.spring.boot.autoconfigure.SpringBootVFS;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -54,15 +57,14 @@ public class MyBatisAutoConfiguration {
     @Bean(name = "sqlSessionFactory")
     public SqlSessionFactory sqlSessionFactory(@Qualifier("dataSource") DataSource dataSource) throws Exception {
         SqlSessionFactoryBean factory = new SqlSessionFactoryBean();
-
+//        factory.setTransactionFactory(new ManagedTransactionFactory());
         if (properties.isDynamicDatasource())
             factory.setSqlSessionFactoryBuilder(new DynamicDataSourceSqlSessionFactoryBuilder());
-
         factory.setDataSource(dataSource);
         factory.setVfs(SpringBootVFS.class);
-        if (StringUtils.hasText(this.properties.getConfigLocation())) {
+        if (StringUtils.hasText(this.properties.getConfig())) {
             factory.setConfigLocation(this.resourceLoader.getResource(this.properties
-                    .getConfigLocation()));
+                    .getConfig()));
         }
         if (this.interceptors != null && this.interceptors.length > 0) {
             factory.setPlugins(this.interceptors);
@@ -78,6 +80,14 @@ public class MyBatisAutoConfiguration {
         factory.setTypeHandlersPackage(typeHandlers);
         factory.setMapperLocations(this.properties.resolveMapperLocations());
         return factory.getObject();
+    }
+
+    @Bean(name = "sqlSessionTemplate")
+    public SqlSessionTemplate sqlSessionTemplate(SqlSessionFactory sqlSessionFactory) {
+        if (this.properties.isDynamicDatasource()) {
+            return new DynamicSqlSessionTemplate(sqlSessionFactory);
+        }
+        return new SqlSessionTemplate(sqlSessionFactory);
     }
 
 }
