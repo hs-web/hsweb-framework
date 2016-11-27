@@ -8,7 +8,7 @@
         <result property="name" column="name" javaType="String" jdbcType="VARCHAR"/>
         <result property="remark" column="remark" javaType="String" jdbcType="VARCHAR"/>
         <result property="type" column="type" javaType="String" jdbcType="VARCHAR"/>
-        <collection property="modules" column="u_id" ofType="RoleModule"
+        <collection property="modules" column="u_id" ofType="org.hsweb.web.bean.po.role.RoleModule"
                     select="org.hsweb.web.dao.role.RoleModuleMapper.selectByRoleId"/>
     </resultMap>
 

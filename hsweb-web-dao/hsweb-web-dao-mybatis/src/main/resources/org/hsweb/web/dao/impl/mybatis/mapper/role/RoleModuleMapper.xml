@@ -10,7 +10,7 @@
         <result property="roleId" column="role_id" javaType="String" jdbcType="VARCHAR" />
         <result property="actions" column="actions" javaType="java.util.List" jdbcType="VARCHAR"
                 typeHandler="org.hsweb.web.mybatis.handler.JsonArrayHandler" />
-        <collection property="module" column="module_id" ofType="Module" select="org.hsweb.web.dao.module.ModuleMapper.selectByPk"/>
+        <collection property="module" column="module_id" ofType="org.hsweb.web.bean.po.module.Module" select="org.hsweb.web.dao.module.ModuleMapper.selectByPk"/>
     </resultMap>
 
     <!--用于动态生成sql所需的配置-->

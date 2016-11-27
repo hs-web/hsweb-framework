@@ -14,7 +14,7 @@
         <result property="status" column="status" javaType="int" jdbcType="INTEGER"/>
         <result property="createDate" column="create_date" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
         <result property="updateDate" column="update_date" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
-        <collection property="userRoles" column="u_id" ofType="UserRole"
+        <collection property="userRoles" column="u_id" ofType="org.hsweb.web.bean.po.role.UserRole"
                     select="org.hsweb.web.dao.role.UserRoleMapper.selectByUserId"/>
     </resultMap>
     <!--用于动态生成sql所需的配置-->
