@@ -25,7 +25,7 @@ public class FormDeployContextLoaderListener implements ApplicationListener<Cont
     public void onApplicationEvent(ContextRefreshedEvent event) {
         if (event.getApplicationContext().getParent() != null) return;
         try {
-            formService.createQuery().where(Form.Property.using, 1).list().forEach(form -> {
+            formService.createQuery().where(Form.Property.using, 1).listNoPaging().forEach(form -> {
                 try {
                     Form deployed = formService.selectDeployed(form.getName());
                     if (null != deployed) {
