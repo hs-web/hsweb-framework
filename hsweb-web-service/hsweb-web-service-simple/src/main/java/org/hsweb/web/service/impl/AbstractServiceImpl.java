@@ -104,14 +104,14 @@ public abstract class AbstractServiceImpl<Po, PK> implements GenericService<Po, 
 
     @Override
     public int update(Po data) {
-        return getMapper().update(UpdateParam.build(data));
+        return createUpdate().fromBean(data).where(GenericPo.Property.id).exec();
     }
 
     @Override
     public int update(List<Po> data) {
         int i = 0;
         for (Po po : data) {
-            i += createUpdate(po).exec();
+            i += update(po);
         }
         return i;
     }

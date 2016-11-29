@@ -72,7 +72,7 @@ public class FormServiceImpl extends AbstractServiceImpl<Form, String> implement
         old.setRevision(1);
         old.setRelease(0);
         old.setUsing(false);
-        getMapper().insert(new InsertParam<>(old));
+        getMapper().insert(InsertParam.build(old));
         return old.getId();
     }
 
@@ -101,8 +101,8 @@ public class FormServiceImpl extends AbstractServiceImpl<Form, String> implement
         data.setUpdateDate(new Date());
         data.setVersion(old.getVersion());
         data.setRevision(old.getRevision() + 1);
-        UpdateParam<Form> param = UpdateParam.build(data).excludes("createDate", "release", "version", "using");
-        return getMapper().update(param);
+        return createUpdate(data).excludes(Property.createDate, Property.release, Property.version, Property.version)
+                .fromBean().where(Property.id).exec();
     }
 
     @Override
