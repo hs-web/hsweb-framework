@@ -96,6 +96,96 @@
       "name": "hsweb.dynamic-datasource.properties",
       "type": "java.util.Properties",
       "sourceType": "org.hsweb.web.datasource.dynamic.DynamicDataSourceProperties"
+    },
+    {
+      "name": "hsweb.dynamic-datasource.icatch",
+      "type": "org.springframework.boot.jta.atomikos.AtomikosProperties",
+      "sourceType": "org.hsweb.web.datasource.dynamic.DynamicDataSourceProperties"
+    },
+    {
+      "name": "hsweb.dynamic-datasource.icatch.service",
+      "type": "String",
+      "sourceType": "org.springframework.boot.jta.atomikos.AtomikosProperties"
+    },
+    {
+      "name": "hsweb.dynamic-datasource.icatch.max-timeout",
+      "type": "long",
+      "sourceType": "org.springframework.boot.jta.atomikos.AtomikosProperties"
+    },
+    {
+      "name": "hsweb.dynamic-datasource.icatch.default-jta-timeout",
+      "type": "long",
+      "sourceType": "org.springframework.boot.jta.atomikos.AtomikosProperties"
+    },
+    {
+      "name": "hsweb.dynamic-datasource.icatch.max-actives",
+      "type": "int",
+      "sourceType": "org.springframework.boot.jta.atomikos.AtomikosProperties"
+    },
+    {
+      "name": "hsweb.dynamic-datasource.icatch.enable-logging",
+      "type": "boolean",
+      "sourceType": "org.springframework.boot.jta.atomikos.AtomikosProperties"
+    },
+    {
+      "name": "hsweb.dynamic-datasource.icatch.transaction-manager-unique-name",
+      "type": "String",
+      "sourceType": "org.springframework.boot.jta.atomikos.AtomikosProperties"
+    },
+    {
+      "name": "hsweb.dynamic-datasource.icatch.serial-jta-transactions",
+      "type": "boolean",
+      "sourceType": "org.springframework.boot.jta.atomikos.AtomikosProperties"
+    },
+    {
+      "name": "hsweb.dynamic-datasource.icatch.force-shutdown-on-vm-exit",
+      "type": "boolean",
+      "sourceType": "org.springframework.boot.jta.atomikos.AtomikosProperties"
+    },
+    {
+      "name": "hsweb.dynamic-datasource.icatch.log-base-name",
+      "type": "String",
+      "sourceType": "org.springframework.boot.jta.atomikos.AtomikosProperties"
+    },
+    {
+      "name": "hsweb.dynamic-datasource.icatch.log-base-dir",
+      "type": "String",
+      "sourceType": "org.springframework.boot.jta.atomikos.AtomikosProperties"
+    },
+    {
+      "name": "hsweb.dynamic-datasource.icatch.checkpoint-interval",
+      "type": "long",
+      "sourceType": "org.springframework.boot.jta.atomikos.AtomikosProperties"
+    },
+    {
+      "name": "hsweb.dynamic-datasource.icatch.console-log-level",
+      "type": "org.springframework.boot.jta.atomikos.AtomikosLoggingLevel",
+      "sourceType": "org.springframework.boot.jta.atomikos.AtomikosProperties"
+    },
+    {
+      "name": "hsweb.dynamic-datasource.icatch.output-dir",
+      "type": "String",
+      "sourceType": "org.springframework.boot.jta.atomikos.AtomikosProperties"
+    },
+    {
+      "name": "hsweb.dynamic-datasource.icatch.console-file-name",
+      "type": "String",
+      "sourceType": "org.springframework.boot.jta.atomikos.AtomikosProperties"
+    },
+    {
+      "name": "hsweb.dynamic-datasource.icatch.console-file-count",
+      "type": "int",
+      "sourceType": "org.springframework.boot.jta.atomikos.AtomikosProperties"
+    },
+    {
+      "name": "hsweb.dynamic-datasource.icatch.console-file-limit",
+      "type": "int",
+      "sourceType": "org.springframework.boot.jta.atomikos.AtomikosProperties"
+    },
+    {
+      "name": "hsweb.dynamic-datasource.icatch.threaded-2pc",
+      "type": "boolean",
+      "sourceType": "org.springframework.boot.jta.atomikos.AtomikosProperties"
     }
   ],
   "hints": [
@@ -113,6 +203,23 @@
         {
           "value": "oracle",
           "description": "use oracle database."
+        }
+      ]
+    },
+    {
+      "name": "hsweb.dynamic-datasource.icatch.console-log-level",
+      "values": [
+        {
+          "value": "INFO",
+          "description": "INFO LEVEL."
+        },
+        {
+          "value": "DEBUG",
+          "description": "DEBUG LEVEL."
+        },
+        {
+          "value": "WARN",
+          "description": "ERROR LEVEL."
         }
       ]
     }

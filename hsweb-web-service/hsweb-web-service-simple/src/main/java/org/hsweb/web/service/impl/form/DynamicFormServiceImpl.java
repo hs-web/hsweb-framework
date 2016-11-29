@@ -78,7 +78,6 @@ public class DynamicFormServiceImpl implements DynamicFormService, ExpressionSco
         metaData.setDatabaseMetaData(database.getMeta());
         TableBuilder builder = new SimpleTableBuilder(metaData, database, null);
         builder.addColumn().name("u_id").varchar(32).primaryKey().comment("主键").commit();
-        metaData.setPrimaryKeys(new HashSet<>(Arrays.asList("u_id")));
         metaData.setProperty("primaryKey", "u_id");
     }
 

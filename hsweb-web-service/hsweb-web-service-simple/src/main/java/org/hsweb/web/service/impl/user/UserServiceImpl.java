@@ -11,6 +11,7 @@ import org.hsweb.web.core.exception.NotFoundException;
 import org.hsweb.web.core.utils.RandomUtil;
 import org.hsweb.web.dao.role.UserRoleMapper;
 import org.hsweb.web.dao.user.UserMapper;
+import org.hsweb.web.service.GenericService;
 import org.hsweb.web.service.impl.AbstractServiceImpl;
 import org.hsweb.web.service.module.ModuleService;
 import org.hsweb.web.service.user.UserService;
@@ -110,7 +111,7 @@ public class UserServiceImpl extends AbstractServiceImpl<User, String> implement
 
     @Override
     public void initGuestUser(User user) {
-        List<UserRole> userRoles = createQuery(userRoleMapper).where(UserRole.Property.roleId, "guest").list();
+        List<UserRole> userRoles = GenericService.createQuery(userRoleMapper).where(UserRole.Property.roleId, "guest").list();
         user.setUserRoles(userRoles);
         user.initRoleInfo();
     }

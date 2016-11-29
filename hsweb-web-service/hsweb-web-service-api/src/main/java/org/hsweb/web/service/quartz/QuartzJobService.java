@@ -21,6 +21,7 @@ import org.hsweb.web.service.GenericService;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 定时调度任务服务类
@@ -33,4 +34,6 @@ public interface QuartzJobService extends GenericService<QuartzJob, String> {
     void disable(String id);
 
     List<Date> getExecTimes(String cron, int number);
+
+    Object execute(String id, Map<String,Object> var);
 }

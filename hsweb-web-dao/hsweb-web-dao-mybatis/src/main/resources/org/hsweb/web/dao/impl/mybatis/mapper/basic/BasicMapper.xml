@@ -7,6 +7,9 @@
     <sql id="buildWhere">
         ${@org.hsweb.web.mybatis.builder.SqlBuilder@current().buildWhere(resultMapId,tableName,#this['_parameter'].terms)}
     </sql>
+    <sql id="buildWhereForUpdate">
+        ${@org.hsweb.web.mybatis.builder.SqlBuilder@current().buildWhereForUpdate(resultMapId,tableName,#this['_parameter'].terms)}
+    </sql>
 
     <!--生成查询字段-->
     <sql id="buildSelectField">
@@ -43,7 +46,7 @@
         <trim>
             delete from ${tableName}
             <where>
-                <include refid="BasicMapper.buildWhere"/>
+                <include refid="BasicMapper.buildWhereForUpdate"/>
                 <if test="terms.size()==0">
                     1=2
                 </if>
@@ -62,7 +65,7 @@
             update ${tableName}
             <include refid="BasicMapper.buildUpdateField"/>
             <where>
-                <include refid="BasicMapper.buildWhere"/>
+                <include refid="BasicMapper.buildWhereForUpdate"/>
                 <if test="terms.size()==0">
                     u_id=#{data.id}
                 </if>

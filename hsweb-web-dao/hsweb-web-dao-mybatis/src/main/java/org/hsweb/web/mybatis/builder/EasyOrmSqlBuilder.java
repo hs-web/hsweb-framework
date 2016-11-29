@@ -22,6 +22,7 @@ import org.hsweb.web.bean.common.InsertParam;
 import org.hsweb.web.bean.common.UpdateParam;
 import org.hsweb.web.core.datasource.DataSourceHolder;
 import org.hsweb.web.core.datasource.DatabaseType;
+import org.hsweb.web.core.exception.BusinessException;
 import org.hsweb.web.mybatis.plgins.pager.Pager;
 import org.hsweb.web.mybatis.utils.ResultMapsUtils;
 
@@ -135,6 +136,7 @@ public class EasyOrmSqlBuilder {
     }
 
     public String buildUpdateFields(String resultMapId, String tableName, UpdateParam param) {
+        Pager.reset();
         param.excludes("id");
         RDBTableMetaData tableMetaData = createMeta(tableName, resultMapId);
         RDBDatabaseMetaData databaseMetaDate = getActiveDatabase();
@@ -172,12 +174,14 @@ public class EasyOrmSqlBuilder {
     }
 
     public String buildInsertSql(String resultMapId, String tableName, InsertParam param) {
+        Pager.reset();
         RDBTableMetaData tableMetaData = createMeta(tableName, resultMapId);
         SqlRender<InsertParam> render = tableMetaData.getDatabaseMetaData().getRenderer(SqlRender.TYPE.INSERT);
         return render.render(tableMetaData, param).getSql();
     }
 
     public String buildUpdateSql(String resultMapId, String tableName, UpdateParam param) {
+        Pager.reset();
         RDBTableMetaData tableMetaData = createMeta(tableName, resultMapId);
         SqlRender<UpdateParam> render = tableMetaData.getDatabaseMetaData().getRenderer(SqlRender.TYPE.UPDATE);
         return render.render(tableMetaData, param).getSql();
@@ -219,11 +223,21 @@ public class EasyOrmSqlBuilder {
                     if (column == null)
                         column = tableMetaData.findColumn(sort.getName());
                     if (column == null) return;
-                    appender.add(column.getName(), " ", sort.getOrder(), ",");
+                    String cname = column.getName();
+                    if (!cname.contains(".")) cname = tableName.concat(".").concat(cname);
+                    appender.add(encodeColumn(tableMetaData.getDatabaseMetaData().getDialect(), cname), " ", sort.getOrder(), ",");
                 });
         if (appender.isEmpty()) return "";
         appender.removeLast();
         return appender.toString();
+    }
+
+    public String buildWhereForUpdate(String resultMapId, String tableName, List<Term> terms) {
+        String where = buildWhere(resultMapId, tableName, terms);
+        if (where.trim().isEmpty()) {
+            throw new BusinessException("禁止执行无条件的更新操作");
+        }
+        return where;
     }
 
     public String buildWhere(String resultMapId, String tableName, List<Term> terms) {

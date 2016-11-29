@@ -1,19 +1,21 @@
 package org.hsweb.web.service.impl.form;
 
 import com.alibaba.fastjson.JSON;
+import org.hsweb.commons.StringUtils;
+import org.hsweb.ezorm.rdb.meta.RDBTableMetaData;
 import org.hsweb.web.bean.common.InsertParam;
 import org.hsweb.web.bean.common.QueryParam;
 import org.hsweb.web.bean.common.UpdateParam;
 import org.hsweb.web.bean.po.form.Form;
 import org.hsweb.web.bean.po.form.Form.Property;
 import org.hsweb.web.bean.po.history.History;
+import org.hsweb.web.core.utils.RandomUtil;
 import org.hsweb.web.dao.form.FormMapper;
 import org.hsweb.web.service.form.DynamicFormService;
 import org.hsweb.web.service.form.FormParser;
 import org.hsweb.web.service.form.FormService;
 import org.hsweb.web.service.history.HistoryService;
 import org.hsweb.web.service.impl.AbstractServiceImpl;
-import org.hsweb.web.core.utils.RandomUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -21,7 +23,6 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
-import org.hsweb.commons.StringUtils;
 
 import javax.annotation.Resource;
 import java.sql.SQLException;
@@ -141,6 +142,27 @@ public class FormServiceImpl extends AbstractServiceImpl<Form, String> implement
                 .orderByAsc(Property.version)
                 .list(formMapper::selectLatestList);
         return formList.size() > 0 ? formList.get(0) : null;
+    }
+
+    @Override
+    @Caching(evict = {
+            @CacheEvict(value = {CACHE_KEY + ".deploy"}, allEntries = true),
+            @CacheEvict(value = {CACHE_KEY}, allEntries = true)
+    })
+    public void tryDeployAll() {
+        createQuery().where(Form.Property.using, 1).listNoPaging().forEach(form -> {
+            try {
+                Form deployed = selectDeployed(form.getName());
+                if (null != deployed) {
+                    RDBTableMetaData metaData = dynamicFormService.parseMeta(deployed);
+                    dynamicFormService.getDefaultDatabase().reloadTable(metaData);
+                } else {
+                    dynamicFormService.deploy(form);
+                }
+            } catch (Exception e) {
+                logger.error("部署{}:({})失败", form.getName(), form.getRemark(), e);
+            }
+        });
     }
 
     @Override

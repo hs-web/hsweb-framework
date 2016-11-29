@@ -51,6 +51,8 @@ public interface FormService extends GenericService<Form, String> {
      */
     void deploy(String formId) throws SQLException;
 
+    void tryDeployAll();
+
     /**
      * 取消发布,取消发布后。表单失效。使用{@link DynamicFormService}后无法再进行调用
      *

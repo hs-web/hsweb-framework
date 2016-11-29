@@ -16,15 +16,20 @@
 
 package org.hsweb.web.datasource.dynamic;
 
+import com.atomikos.icatch.config.UserTransactionService;
+import com.atomikos.icatch.config.UserTransactionServiceImp;
 import com.atomikos.icatch.jta.UserTransactionImp;
 import com.atomikos.icatch.jta.UserTransactionManager;
 import com.atomikos.jdbc.AtomikosDataSourceBean;
+import org.hsweb.commons.StringUtils;
 import org.hsweb.web.core.datasource.DataSourceHolder;
 import org.hsweb.web.core.datasource.DynamicDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.transaction.jta.JtaAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.jta.atomikos.AtomikosProperties;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -34,6 +39,7 @@ import org.springframework.transaction.jta.JtaTransactionManager;
 
 import javax.sql.DataSource;
 import javax.transaction.SystemException;
+import java.util.Properties;
 
 @Configuration
 @ConditionalOnMissingBean(DynamicDataSource.class)
@@ -43,6 +49,17 @@ public class DynamicDataSourceAutoConfiguration {
 
     @Autowired
     private DynamicDataSourceProperties properties;
+
+    @Bean(initMethod = "init", destroyMethod = "shutdownForce")
+    public UserTransactionServiceImp userTransactionService() {
+        AtomikosProperties atomikosProperties = properties.getIcatch();
+        Properties properties = new Properties();
+        properties.putAll(atomikosProperties.asProperties());
+        if (StringUtils.isNullOrEmpty(properties.get("com.atomikos.icatch.service"))) {
+            properties.put("com.atomikos.icatch.service", "com.atomikos.icatch.standalone.UserTransactionServiceFactory");
+        }
+        return new UserTransactionServiceImp(properties);
+    }
 
     /**
      * 默认数据库链接
@@ -64,10 +81,12 @@ public class DynamicDataSourceAutoConfiguration {
         return dynamicXaDataSource;
     }
 
-    @Bean
-    public UserTransactionManager userTransactionManager() {
+    @Bean(initMethod = "init", destroyMethod = "close")
+    public UserTransactionManager userTransactionManager(
+            UserTransactionService userTransactionService) {
         UserTransactionManager transactionManager = new UserTransactionManager();
         transactionManager.setForceShutdown(true);
+        transactionManager.setStartupTransactionService(false);
         return transactionManager;
     }
 

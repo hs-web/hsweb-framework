@@ -31,6 +31,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 
 import static org.hsweb.ezorm.rdb.render.dialect.Dialect.TermTypeMapper.sql;
@@ -67,7 +69,8 @@ public class UserMapperTest extends AbstractTestCase {
         user.setName("test");
         Pager.doPaging(0, 20);
         Query.forList(userMapper::select, new QueryParam())
-                .where("username", sql("username is not null"))
+                .sql("username is not null")
+                .or().sql("username=#{username}", Collections.singletonMap("username", "root"))
                 .fromBean(user)
                 .$like$("username").list();
     }

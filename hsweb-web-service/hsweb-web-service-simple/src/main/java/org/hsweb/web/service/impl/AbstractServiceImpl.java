@@ -22,7 +22,13 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Created by 浩 on 2016-01-22 0022.
+ * 抽象通用服务实现类，通过指定{@link GenericMapper} 实现通用的增删改查方法
+ *
+ * @param <Po> PO类型
+ * @param <PK> 主键类型
+ * @author zhouhao
+ * @see GenericService
+ * @since 1.0
  */
 @Transactional(rollbackFor = Throwable.class)
 public abstract class AbstractServiceImpl<Po, PK> implements GenericService<Po, PK> {
@@ -63,6 +69,7 @@ public abstract class AbstractServiceImpl<Po, PK> implements GenericService<Po, 
         return primaryKey;
     }
 
+    @Deprecated
     public List<PK> batchInsert(List<Po> data, boolean skipFail) {
         List<PK> pkList = new ArrayList<>();
         List<Po> insertData = new ArrayList<>();
@@ -92,7 +99,7 @@ public abstract class AbstractServiceImpl<Po, PK> implements GenericService<Po, 
 
     @Override
     public int delete(PK pk) {
-        return getMapper().delete(DeleteParam.build().where("id", pk));
+        return createDelete().where(GenericPo.Property.id, pk).exec();
     }
 
     @Override
@@ -104,7 +111,7 @@ public abstract class AbstractServiceImpl<Po, PK> implements GenericService<Po, 
     public int update(List<Po> data) {
         int i = 0;
         for (Po po : data) {
-            i += getMapper().update(UpdateParam.build(po));
+            i += createUpdate(po).exec();
         }
         return i;
     }
@@ -117,7 +124,7 @@ public abstract class AbstractServiceImpl<Po, PK> implements GenericService<Po, 
 
     @Transactional(readOnly = true)
     public List<Po> select() {
-        return this.getMapper().select(QueryParam.build().noPaging());
+        return createQuery().listNoPaging();
     }
 
     @Override
@@ -152,6 +159,10 @@ public abstract class AbstractServiceImpl<Po, PK> implements GenericService<Po, 
         }
     }
 
+    protected void assertNotNull(Object po) {
+        assertNotNull(po, "数据不存在");
+    }
+
     protected void tryValidPo(Po data) {
         Set<ConstraintViolation<Object>> set = validator.validate(data);
         ValidateResults results = new ValidateResults();
@@ -164,18 +175,37 @@ public abstract class AbstractServiceImpl<Po, PK> implements GenericService<Po, 
             throw new ValidationException(results);
     }
 
+    /**
+     * 创建dsl更新操作对象，默认使用map进行数据填充,调用此方法,需要通过{@link Update#set(String, Object)}进行属性赋值
+     *
+     * @return {@link Update}
+     * @see Update
+     * @see GenericService#createUpdate(GenericMapper)
+     */
     public Update<Po, UpdateParam<Po>> createUpdate() {
-        return createUpdate(getMapper());
+        return GenericService.createUpdate(getMapper());
     }
 
+    /**
+     * 创建dsl更新操作对象，并指定要操作的数据
+     *
+     * @return {@link Update}
+     * @see Update
+     * @see GenericService#createUpdate(GenericMapper)
+     */
     public Update<Po, UpdateParam<Po>> createUpdate(Po data) {
-        Update<Po, UpdateParam<Po>> update = createUpdate();
-        update.getParam().setData(data);
-        return update;
+        return Update.build(getMapper()::update, new UpdateParam<>(data));
     }
 
+    /**
+     * 创建dsl删除操作对象
+     *
+     * @return {@link Delete}
+     * @see Delete
+     * @see GenericService#createDelete(Delete.Executor)
+     */
     public Delete createDelete() {
-        return createDelete(getMapper());
+        return GenericService.createDelete(getMapper());
     }
 
 }

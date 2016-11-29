@@ -39,21 +39,12 @@ public class PagerInterceptor implements Interceptor {
             MetaObject metaStatementHandler = SystemMetaObject.forObject(statementHandler);
             String sql = statementHandler.getBoundSql().getSql();
             Pager pager = Pager.getAndReset();
-            if (pager != null) {
+            if (pager != null && sql.trim().toLowerCase().startsWith("select")) {
                 String newSql = EasyOrmSqlBuilder.getInstance()
                         .getActiveDatabase().getDialect()
                         .doPaging(sql, pager.pageIndex(), pager.pageSize());
                 metaStatementHandler.setValue("delegate.boundSql.sql", newSql);
             }
-//            else if (obj instanceof QueryParam) {
-//                QueryParam param = (QueryParam) obj;
-//                if (param.isPaging()) {
-//                    String newSql = EasyOrmSqlBuilder.getInstance()
-//                            .getActiveDatabase().getDialect()
-//                            .doPaging(sql, param.getPageIndex(), param.getPageSize());
-//                    metaStatementHandler.setValue("delegate.boundSql.sql", newSql);
-//                }
-//            }
         }
         return Plugin.wrap(target, this);
     }
