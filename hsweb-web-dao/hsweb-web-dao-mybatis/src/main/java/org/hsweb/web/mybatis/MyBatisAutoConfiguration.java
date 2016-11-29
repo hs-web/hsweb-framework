@@ -58,6 +58,7 @@ public class MyBatisAutoConfiguration {
     @Bean(name = "sqlSessionFactory")
     public SqlSessionFactory sqlSessionFactory(@Qualifier("dataSource") DataSource dataSource) throws Exception {
         SqlSessionFactoryBean factory = new SqlSessionFactoryBean();
+        factory.setVfs(SpringBootVFS.class);
         if (properties.isDynamicDatasource()) {
             factory.setSqlSessionFactoryBuilder(new DynamicDataSourceSqlSessionFactoryBuilder());
             factory.setTransactionFactory(new SpringManagedTransactionFactory() {
@@ -68,10 +69,9 @@ public class MyBatisAutoConfiguration {
             });
         }
         factory.setDataSource(dataSource);
-        factory.setVfs(SpringBootVFS.class);
-        if (StringUtils.hasText(this.properties.getConfig())) {
+        if (StringUtils.hasText(this.properties.getConfigLocation())) {
             factory.setConfigLocation(this.resourceLoader.getResource(this.properties
-                    .getConfig()));
+                    .getConfigLocation()));
         }
         if (this.interceptors != null && this.interceptors.length > 0) {
             factory.setPlugins(this.interceptors);
@@ -88,13 +88,5 @@ public class MyBatisAutoConfiguration {
         factory.setMapperLocations(this.properties.resolveMapperLocations());
         return factory.getObject();
     }
-
-//    @Bean(name = "sqlSessionTemplate")
-//    public SqlSessionTemplate sqlSessionTemplate(SqlSessionFactory sqlSessionFactory) {
-//        if (this.properties.isDynamicDatasource()) {
-//            return new DynamicSqlSessionTemplate(sqlSessionFactory);
-//        }
-//        return new SqlSessionTemplate(sqlSessionFactory);
-//    }
 
 }
