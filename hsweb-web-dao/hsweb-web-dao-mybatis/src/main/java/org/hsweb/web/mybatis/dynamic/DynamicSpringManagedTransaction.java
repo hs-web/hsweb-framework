@@ -6,7 +6,9 @@ import org.apache.ibatis.transaction.Transaction;
 import org.hsweb.web.core.datasource.DataSourceHolder;
 import org.hsweb.web.core.utils.ThreadLocalUtils;
 import org.mybatis.spring.transaction.SpringManagedTransaction;
+import org.springframework.jdbc.datasource.ConnectionHolder;
 import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -113,6 +115,11 @@ public class DynamicSpringManagedTransaction implements Transaction {
         if (null != tmp) throw tmp;
     }
 
+    @Override
+    public Integer getTimeout() throws SQLException {
+        return getProxy().getTimeout();
+    }
+
     class TransactionProxy implements Transaction {
         Connection connection;
         DataSource dataSource;
@@ -165,6 +172,15 @@ public class DynamicSpringManagedTransaction implements Transaction {
         @Override
         public void close() throws SQLException {
             DataSourceUtils.releaseConnection(connection, dataSource);
+        }
+
+        @Override
+        public Integer getTimeout() throws SQLException {
+            ConnectionHolder holder = (ConnectionHolder) TransactionSynchronizationManager.getResource(dataSource);
+            if (holder != null && holder.hasTimeout()) {
+                return holder.getTimeToLiveInSeconds();
+            }
+            return null;
         }
     }
 }
