@@ -169,6 +169,7 @@ public class QuartzJobServiceImpl extends AbstractServiceImpl<QuartzJob, String>
         Assert.notNull(job, "任务不存在");
         String hisId = quartzJobHistoryService.createAndInsertHistory(id);
         String strRes = null;
+        QuartzJobHistory.Status status = FAIL;
         try {
             if (logger.isDebugEnabled())
                 logger.debug("start job [{}]", job.getName());
@@ -199,8 +200,9 @@ public class QuartzJobServiceImpl extends AbstractServiceImpl<QuartzJob, String>
                 if (res instanceof String)
                     strRes = ((String) res);
                 else strRes = JSON.toJSONString(res);
-                quartzJobHistoryService.endHistory(hisId, strRes, SUCCESS);
+                status = SUCCESS;
             } else {
+                status = FAIL;
                 if (result.getException() != null) {
                     strRes = StringUtils.throwable2String(result.getException());
                     logger.error("job failed", result.getException());
@@ -215,7 +217,7 @@ public class QuartzJobServiceImpl extends AbstractServiceImpl<QuartzJob, String>
                 }
             }
         } finally {
-            quartzJobHistoryService.endHistory(hisId, strRes, FAIL);
+            quartzJobHistoryService.endHistory(hisId, strRes, status);
         }
         return strRes;
     }
