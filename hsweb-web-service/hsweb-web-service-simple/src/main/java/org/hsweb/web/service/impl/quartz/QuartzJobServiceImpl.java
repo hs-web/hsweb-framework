@@ -90,6 +90,7 @@ public class QuartzJobServiceImpl extends AbstractServiceImpl<QuartzJob, String>
     }
 
     @Override
+    @CacheEvict(value = CACHE_KEY, key = "'id:'+#data.id")
     public String insert(QuartzJob data) {
         data.setEnabled(true);
         String id = super.insert(data);
