@@ -48,7 +48,7 @@ public class DynamicDataSourceSqlExecutorService extends AbstractJdbcSqlExecutor
         Connection connection = DataSourceUtils.getConnection(dataSource);
         boolean isConnectionTransactional = DataSourceUtils.isConnectionTransactional(connection, dataSource);
         if (logger.isDebugEnabled()) {
-            logger.debug("DataSource ({}) JDBC Connection [{}] will {} be managed by Spring", DataSourceHolder.getActiveSourceId(), connection, (isConnectionTransactional ? " " : " not "));
+            logger.debug("DataSource ({}) JDBC Connection [{}] will {} be managed by Spring", DataSourceHolder.getActiveSourceId(), connection, (isConnectionTransactional ? "" : "not"));
         }
         return connection;
     }
