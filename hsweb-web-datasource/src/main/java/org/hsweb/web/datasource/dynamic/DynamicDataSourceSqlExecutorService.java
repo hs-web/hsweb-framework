@@ -19,15 +19,16 @@ package org.hsweb.web.datasource.dynamic;
 import org.hsweb.ezorm.core.ObjectWrapper;
 import org.hsweb.ezorm.rdb.executor.AbstractJdbcSqlExecutor;
 import org.hsweb.ezorm.rdb.executor.SQL;
-import org.hsweb.ezorm.rdb.meta.expand.SimpleMapWrapper;
 import org.hsweb.ezorm.rdb.render.support.simple.SimpleSQL;
 import org.hsweb.web.core.authorize.ExpressionScopeBean;
+import org.hsweb.web.core.datasource.DataSourceHolder;
 import org.hsweb.web.core.datasource.DynamicDataSource;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -43,11 +44,20 @@ public class DynamicDataSourceSqlExecutorService extends AbstractJdbcSqlExecutor
 
     @Override
     public Connection getConnection() {
-        return DataSourceUtils.getConnection(dynamicDataSource.getActiveDataSource());
+        DataSource dataSource = dynamicDataSource.getActiveDataSource();
+        Connection connection = DataSourceUtils.getConnection(dataSource);
+        boolean isConnectionTransactional = DataSourceUtils.isConnectionTransactional(connection, dataSource);
+        if (logger.isDebugEnabled()) {
+            logger.debug("DataSource ({}) JDBC Connection [{}] will {} be managed by Spring", DataSourceHolder.getActiveSourceId(), connection, (isConnectionTransactional ? " " : " not "));
+        }
+        return connection;
     }
 
     @Override
     public void releaseConnection(Connection connection) throws SQLException {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Releasing DataSource ({}) JDBC Connection [{}]", DataSourceHolder.getActiveSourceId(), connection);
+        }
         DataSourceUtils.releaseConnection(connection, dynamicDataSource.getActiveDataSource());
     }
 

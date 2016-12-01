@@ -24,11 +24,19 @@ public class SqlExecutorService extends AbstractJdbcSqlExecutor implements Expre
 
     @Override
     public Connection getConnection() {
-        return DataSourceUtils.getConnection(dataSource);
+        Connection connection = DataSourceUtils.getConnection(dataSource);
+        boolean isConnectionTransactional = DataSourceUtils.isConnectionTransactional(connection, dataSource);
+        if (logger.isDebugEnabled()) {
+            logger.debug("JDBC Connection [{}] will {} be managed by Spring", connection, (isConnectionTransactional ? " " : " not "));
+        }
+        return connection;
     }
 
     @Override
     public void releaseConnection(Connection connection) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Releasing JDBC Connection [{}]", connection);
+        }
         DataSourceUtils.releaseConnection(connection, dataSource);
     }
 
