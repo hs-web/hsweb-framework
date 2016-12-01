@@ -62,7 +62,7 @@ public class DatabaseManagerController {
         }
         return ok(cached)
                 .include(RDBTableMetaData.class, "name", "alias", "comment", "columns")
-                .include(RDBColumnMetaData.class, "name", "alias", "comment", "dataType", "notNull", "primaryKey", "properties")
+                .include(RDBColumnMetaData.class, "name", "alias", "comment", "dataType","jdbcType", "javaType", "notNull", "primaryKey", "properties")
                 .onlyData();
     }
 
@@ -98,7 +98,7 @@ public class DatabaseManagerController {
             }
             return ok(cached)
                     .include(RDBTableMetaData.class, "name", "alias", "comment", "columns")
-                    .include(RDBColumnMetaData.class, "name", "alias", "comment", "dataType", "notNull", "primaryKey", "properties")
+                    .include(RDBColumnMetaData.class, "name", "alias", "comment", "jdbcType", "javaType", "dataType", "notNull", "primaryKey", "properties")
                     .onlyData();
         } finally {
             DynamicDataSource.useDefault(false);
