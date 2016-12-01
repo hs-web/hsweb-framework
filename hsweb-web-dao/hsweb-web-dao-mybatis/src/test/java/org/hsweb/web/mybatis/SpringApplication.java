@@ -37,7 +37,7 @@ import java.sql.SQLException;
 @Configuration
 @EnableAutoConfiguration
 @ComponentScan("org.hsweb.web")
-@MapperScan("org.hsweb.web.dao")
+@MapperScan({"org.hsweb.web.dao", "org.hsweb.web.mybatis.mappers"})
 public class SpringApplication {
 
     @Bean

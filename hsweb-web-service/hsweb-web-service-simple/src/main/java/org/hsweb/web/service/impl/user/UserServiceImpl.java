@@ -12,6 +12,7 @@ import org.hsweb.web.core.utils.RandomUtil;
 import org.hsweb.web.dao.role.UserRoleMapper;
 import org.hsweb.web.dao.user.UserMapper;
 import org.hsweb.web.service.GenericService;
+import org.hsweb.web.service.QueryService;
 import org.hsweb.web.service.impl.AbstractServiceImpl;
 import org.hsweb.web.service.module.ModuleService;
 import org.hsweb.web.service.user.UserService;
@@ -70,11 +71,6 @@ public class UserServiceImpl extends AbstractServiceImpl<User, String> implement
     }
 
     @Override
-    public List<String> batchInsert(List<User> data, boolean skipFail) {
-        throw new UnsupportedOperationException("不支持此操作");
-    }
-
-    @Override
     public int update(User data) {
         tryValidPo(data);
         User old = this.selectByUserName(data.getUsername());
@@ -111,7 +107,7 @@ public class UserServiceImpl extends AbstractServiceImpl<User, String> implement
 
     @Override
     public void initGuestUser(User user) {
-        List<UserRole> userRoles = GenericService.createQuery(userRoleMapper).where(UserRole.Property.roleId, "guest").list();
+        List<UserRole> userRoles = QueryService.createQuery(userRoleMapper).where(UserRole.Property.roleId, "guest").list();
         user.setUserRoles(userRoles);
         user.initRoleInfo();
     }

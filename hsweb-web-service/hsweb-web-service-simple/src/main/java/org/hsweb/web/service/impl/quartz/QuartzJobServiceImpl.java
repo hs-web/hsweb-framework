@@ -30,6 +30,7 @@ import org.hsweb.web.bean.po.quartz.QuartzJobHistory;
 import org.hsweb.web.core.exception.BusinessException;
 import org.hsweb.web.dao.quartz.QuartzJobHistoryMapper;
 import org.hsweb.web.dao.quartz.QuartzJobMapper;
+import org.hsweb.web.service.DeleteService;
 import org.hsweb.web.service.GenericService;
 import org.hsweb.web.service.impl.AbstractServiceImpl;
 import org.hsweb.web.service.quartz.QuartzJobHistoryService;
@@ -134,7 +135,7 @@ public class QuartzJobServiceImpl extends AbstractServiceImpl<QuartzJob, String>
     @CacheEvict(value = CACHE_KEY, key = "'id:'+#id")
     public int delete(String id) {
         deleteJob(id);
-        GenericService.createDelete(quartzJobHistoryMapper).where(QuartzJobHistory.Property.jobId, id).exec();
+        DeleteService.createDelete(quartzJobHistoryMapper).where(QuartzJobHistory.Property.jobId, id).exec();
         return super.delete(id);
     }
 

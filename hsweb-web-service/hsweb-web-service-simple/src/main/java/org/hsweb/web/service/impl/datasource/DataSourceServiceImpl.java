@@ -16,9 +16,6 @@
 
 package org.hsweb.web.service.impl.datasource;
 
-import org.hsweb.web.bean.common.QueryParam;
-import org.hsweb.web.bean.common.UpdateMapParam;
-import org.hsweb.web.bean.common.UpdateParam;
 import org.hsweb.web.bean.po.datasource.DataSource;
 import org.hsweb.web.core.datasource.DynamicDataSource;
 import org.hsweb.web.core.exception.BusinessException;
@@ -40,7 +37,6 @@ import java.util.Date;
 import java.util.List;
 
 import static org.hsweb.web.bean.po.GenericPo.Property.id;
-import static org.hsweb.web.bean.po.datasource.DataSource.*;
 import static org.hsweb.web.bean.po.datasource.DataSource.Property.*;
 
 /**

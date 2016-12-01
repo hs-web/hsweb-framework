@@ -17,7 +17,6 @@
 package org.hsweb.web.mybatis.user;
 
 import org.hsweb.ezorm.core.dsl.Query;
-import org.hsweb.ezorm.rdb.render.dialect.Dialect;
 import org.hsweb.web.bean.common.DeleteParam;
 import org.hsweb.web.bean.common.InsertParam;
 import org.hsweb.web.bean.common.QueryParam;
@@ -31,11 +30,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-
-import static org.hsweb.ezorm.rdb.render.dialect.Dialect.TermTypeMapper.sql;
 
 /**
  * @author zhouhao
