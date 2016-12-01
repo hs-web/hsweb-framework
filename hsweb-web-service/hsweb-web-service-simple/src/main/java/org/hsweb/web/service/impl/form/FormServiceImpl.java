@@ -5,7 +5,6 @@ import org.hsweb.commons.StringUtils;
 import org.hsweb.ezorm.rdb.meta.RDBTableMetaData;
 import org.hsweb.web.bean.common.InsertParam;
 import org.hsweb.web.bean.common.QueryParam;
-import org.hsweb.web.bean.common.UpdateParam;
 import org.hsweb.web.bean.po.form.Form;
 import org.hsweb.web.bean.po.form.Form.Property;
 import org.hsweb.web.bean.po.history.History;
@@ -42,10 +41,10 @@ public class FormServiceImpl extends AbstractServiceImpl<Form, String> implement
     protected FormParser formParser = new DefaultFormParser();
 
     @Resource
-    private FormMapper formMapper;
+    protected FormMapper formMapper;
 
     @Resource
-    private HistoryService historyService;
+    protected HistoryService historyService;
 
     @Override
     protected FormMapper getMapper() {
