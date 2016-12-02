@@ -16,9 +16,9 @@
 
 package org.hsweb.web.controller.form;
 
-import org.hsweb.ezorm.meta.FieldMetaData;
-import org.hsweb.ezorm.meta.TableMetaData;
-import org.hsweb.ezorm.meta.expand.OptionConverter;
+import org.hsweb.ezorm.core.OptionConverter;
+import org.hsweb.ezorm.rdb.meta.RDBColumnMetaData;
+import org.hsweb.ezorm.rdb.meta.RDBTableMetaData;
 import org.hsweb.web.bean.common.QueryParam;
 import org.hsweb.web.bean.common.UpdateMapParam;
 import org.hsweb.web.bean.po.form.Form;
@@ -31,7 +31,6 @@ import org.hsweb.web.core.message.ResponseMessage;
 import org.hsweb.web.service.form.DynamicFormService;
 import org.hsweb.web.service.form.FormService;
 import org.hsweb.web.service.resource.FileService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -171,9 +170,9 @@ public class DynamicFormController {
      * @param name 表单名称
      * @param data 数据
      * @return 新增成功后返回被新增数据的主键值
-     * @throws SQLException                                  执行查询sql错误
-     * @throws NotFoundException                             表单不存在或在未发布
-     * @throws org.hsweb.ezorm.exception.ValidationException 数据格式验证失败时抛出此异常
+     * @throws SQLException                                      执行查询sql错误
+     * @throws NotFoundException                                 表单不存在或在未发布
+     * @throws org.hsweb.ezorm.rdb.exception.ValidationException 数据格式验证失败时抛出此异常
      */
     @RequestMapping(value = "/{name}", method = RequestMethod.POST)
     @AccessLogger("新增数据")
@@ -191,9 +190,9 @@ public class DynamicFormController {
      * @param primaryKey 数据主键值
      * @param data       数据
      * @return 更新记录数量
-     * @throws SQLException                                  执行查询sql错误
-     * @throws NotFoundException                             表单不存在或在未发布
-     * @throws org.hsweb.ezorm.exception.ValidationException 数据格式验证失败时抛出此异常
+     * @throws SQLException                                      执行查询sql错误
+     * @throws NotFoundException                                 表单不存在或在未发布
+     * @throws org.hsweb.ezorm.rdb.exception.ValidationException 数据格式验证失败时抛出此异常
      */
     @RequestMapping(value = "/{name}/{primaryKey}", method = RequestMethod.PUT)
     @AccessLogger("更新数据")
@@ -293,8 +292,8 @@ public class DynamicFormController {
                                         @PathVariable("data") String data,
                                         @PathVariable("type") String type) {
         try {
-            TableMetaData metaData = dynamicFormService.getDefaultDatabase().getTable(name).getMeta();
-            FieldMetaData fieldMetaData = metaData.findFieldByName(field);
+            RDBTableMetaData metaData = dynamicFormService.getDefaultDatabase().getTable(name).getMeta();
+            RDBColumnMetaData fieldMetaData = metaData.findColumn(field);
             if (fieldMetaData == null) throw new NullPointerException();
             OptionConverter converter = fieldMetaData.getOptionConverter();
             if (converter == null) return ResponseMessage.ok(data);

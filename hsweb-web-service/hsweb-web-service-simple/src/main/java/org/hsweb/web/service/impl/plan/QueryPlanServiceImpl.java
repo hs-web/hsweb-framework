@@ -16,7 +16,6 @@
 
 package org.hsweb.web.service.impl.plan;
 
-import org.hsweb.web.bean.common.UpdateParam;
 import org.hsweb.web.bean.po.plan.QueryPlan;
 import org.hsweb.web.dao.plan.QueryPlanMapper;
 import org.hsweb.web.service.impl.AbstractServiceImpl;
@@ -24,6 +23,8 @@ import org.hsweb.web.service.plan.QueryPlanService;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+
+import static org.hsweb.web.bean.po.plan.QueryPlan.Property.*;
 
 /**
  * 查询方案服务类
@@ -42,6 +43,6 @@ public class QueryPlanServiceImpl extends AbstractServiceImpl<QueryPlan, String>
 
     @Override
     public int update(QueryPlan data) {
-        return queryPlanMapper.update(UpdateParam.build(data).includes("name", "config", "sharing"));
+        return createUpdate(data).includes(name, config, sharing).exec();
     }
 }

@@ -5,6 +5,7 @@ import org.hsweb.expands.script.engine.*;
 import org.hsweb.web.bean.common.QueryParam;
 import org.hsweb.web.bean.common.UpdateParam;
 import org.hsweb.web.bean.po.script.DynamicScript;
+import org.hsweb.web.bean.po.script.DynamicScript.Property;
 import org.hsweb.web.core.authorize.ExpressionScopeBean;
 import org.hsweb.web.dao.script.DynamicScriptMapper;
 import org.hsweb.web.core.exception.BusinessException;
@@ -65,19 +66,18 @@ public class DynamicScriptServiceImpl extends AbstractServiceImpl<DynamicScript,
     @Override
     @Cacheable(value = CACHE_KEY, key = "'script.'+#name+'.'+#type")
     public DynamicScript selectByNameAndType(String name, String type) throws Exception {
-        return selectSingle(QueryParam.build().where("name", name).and("type", type));
+        return createQuery().where(Property.name, name).and(Property.type, type).single();
     }
 
     @Override
     @CacheEvict(value = CACHE_KEY, allEntries = true)
     public int update(DynamicScript data) {
-        DynamicScript old = selectSingle(QueryParam.build()
-                .where("name", data.getName())
-                .and("type", data.getType())
-                .and("id$not", data.getId()));
+        DynamicScript old = createQuery()
+                .fromBean(data)
+                .where(Property.name).and(Property.type).not(Property.id)
+                .single();
         if (old != null) throw new BusinessException("已存在相同名称和类型的脚本!", 400);
-        int i = getMapper().update(UpdateParam.build(data).excludes("status").where("id", data.getId()));
-        return i;
+        return createUpdate(data).excludes(Property.status).fromBean().where(Property.id).exec();
     }
 
     @Override
@@ -101,7 +101,7 @@ public class DynamicScriptServiceImpl extends AbstractServiceImpl<DynamicScript,
     }
 
     public void compileAll() throws Exception {
-        List<DynamicScript> list = this.select(QueryParam.build().where("status", 1).noPaging());
+        List<DynamicScript> list = createQuery().where(Property.status, 1).listNoPaging();
         for (DynamicScript script : list) {
             DynamicScriptEngine engine = DynamicScriptEngineFactory.getEngine(script.getType());
             assertNotNull(engine, "不支持的引擎");

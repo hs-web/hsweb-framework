@@ -2,6 +2,7 @@ package org.hsweb.web.bean.po;
 
 
 import org.hsweb.commons.MD5;
+import org.hsweb.web.bean.po.module.Module;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
@@ -60,7 +61,6 @@ public class GenericPo<PK> implements Serializable, Cloneable {
     /**
      * 创建一个主键
      *
-     * @return
      */
     public static String createUID() {
         return MD5.encode(UUID.randomUUID().toString());
@@ -74,12 +74,19 @@ public class GenericPo<PK> implements Serializable, Cloneable {
         this.properties = properties;
     }
 
-    @Override
-    public Object clone() throws CloneNotSupportedException {
-        Field[] fields = this.getClass().getDeclaredFields();
-        for (int i = 0; i < fields.length; i++) {
-            
-        }
-        return super.clone();
+    public interface Property {
+        /**
+         * 主键
+         *
+         * @see GenericPo#id
+         */
+        String id = "id";
+
+        /**
+         * 其他属性
+         *
+         * @see GenericPo#properties
+         */
+        String properties = "properties";
     }
 }

@@ -1,6 +1,6 @@
 package org.hsweb.web.dao.form;
 
-import org.hsweb.web.bean.common.QueryParam;
+import org.hsweb.ezorm.core.param.QueryParam;
 import org.hsweb.web.dao.GenericMapper;
 import org.hsweb.web.bean.po.form.Form;
 

@@ -131,4 +131,49 @@ public class History extends GenericPo<String> {
         history.setCreatorId("Sys");
         return history;
     }
+
+
+
+public interface Property extends GenericPo.Property{
+	/**
+	 *
+	 * @see History#type
+	 */
+	String type="type";
+	/**
+	 *
+	 * @see History#describe
+	 */
+	String describe="describe";
+	/**
+	 *
+	 * @see History#primaryKeyName
+	 */
+	String primaryKeyName="primaryKeyName";
+	/**
+	 *
+	 * @see History#primaryKeyValue
+	 */
+	String primaryKeyValue="primaryKeyValue";
+	/**
+	 *
+	 * @see History#changeBefore
+	 */
+	String changeBefore="changeBefore";
+	/**
+	 *
+	 * @see History#changeAfter
+	 */
+	String changeAfter="changeAfter";
+	/**
+	 *
+	 * @see History#createDate
+	 */
+	String createDate="createDate";
+	/**
+	 *
+	 * @see History#creatorId
+	 */
+	String creatorId="creatorId";
+	}
 }

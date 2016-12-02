@@ -2,9 +2,9 @@ package org.hsweb.web.controller.system;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import org.hsweb.ezorm.meta.FieldMetaData;
-import org.hsweb.ezorm.meta.TableMetaData;
-import org.hsweb.ezorm.render.SqlAppender;
+import org.hsweb.ezorm.rdb.meta.RDBColumnMetaData;
+import org.hsweb.ezorm.rdb.meta.RDBTableMetaData;
+import org.hsweb.ezorm.rdb.render.SqlAppender;
 import org.hsweb.web.bean.po.user.User;
 import org.hsweb.web.core.authorize.annotation.Authorize;
 import org.hsweb.web.core.datasource.DynamicDataSource;
@@ -20,10 +20,10 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+
+import static org.hsweb.web.core.message.ResponseMessage.ok;
 
 @RestController
 @RequestMapping("/database")
@@ -36,6 +36,8 @@ public class DatabaseManagerController {
 
     @Autowired(required = false)
     protected DynamicDataSource dynamicDataSource;
+
+    protected Map<String, List<RDBTableMetaData>> cache = new ConcurrentHashMap<>();
 
     protected void checkDynamicDataSourceSupport() {
         if (dynamicDataSource == null)
@@ -52,41 +54,51 @@ public class DatabaseManagerController {
     @RequestMapping(value = "/tables", method = RequestMethod.GET)
     @Authorize(action = "R")
     @AccessLogger("获取所有表结构")
-    public ResponseMessage showTables() throws SQLException {
-        return ResponseMessage.ok(dataBaseManagerService.getTableList())
-                .include(TableMetaData.class, "name", "alias", "comment", "fields")
-                .include(FieldMetaData.class, "name", "alias", "comment", "dataType", "properties")
+    public ResponseMessage showTables(boolean reload) throws SQLException {
+        List<RDBTableMetaData> cached = cache.get("default");
+        if (cached == null || reload) {
+            cached = dataBaseManagerService.getTableList();
+            cache.put("default", cached);
+        }
+        return ok(cached)
+                .include(RDBTableMetaData.class, "name", "alias", "comment", "columns")
+                .include(RDBColumnMetaData.class, "name", "alias", "comment", "dataType","jdbcType", "javaType", "notNull", "primaryKey", "properties")
                 .onlyData();
     }
 
     @RequestMapping(value = "/exec", method = RequestMethod.POST)
     @AccessLogger("执行SQL")
     public ResponseMessage exec(@RequestBody String sql) throws Exception {
-        return ResponseMessage.ok(dataBaseManagerService.execSql(buildSqlList(sql)));
+        return ok(dataBaseManagerService.execSql(buildSqlList(sql)));
     }
 
     @RequestMapping(value = "/sql/alter", method = RequestMethod.POST)
     @AccessLogger("查询修改表结构SQL")
     public ResponseMessage showAlterSql(@RequestBody JSONObject jsonObject) throws Exception {
-        return ResponseMessage.ok(dataBaseManagerService.createAlterSql(createTableMetaDataByJson(jsonObject)));
+        return ok(dataBaseManagerService.createAlterSql(createTableMetaDataByJson(jsonObject)));
     }
 
     @RequestMapping(value = "/sql/create", method = RequestMethod.POST)
     @AccessLogger("查询创建表结构SQL")
     public ResponseMessage showCreateSql(@RequestBody JSONObject jsonObject) throws Exception {
-        return ResponseMessage.ok(dataBaseManagerService.createCreateSql(createTableMetaDataByJson(jsonObject)));
+        return ok(dataBaseManagerService.createCreateSql(createTableMetaDataByJson(jsonObject)));
     }
 
     @RequestMapping(value = "/tables/{dataSourceId}", method = RequestMethod.GET)
     @Authorize(action = "R")
     @AccessLogger("指定数据源获取表结构")
-    public ResponseMessage showTables(@PathVariable("dataSourceId") String dataSourceId) throws SQLException {
+    public ResponseMessage showTables(@PathVariable("dataSourceId") String dataSourceId, boolean reload) throws SQLException {
         try {
             checkDynamicDataSourceSupport();
             DynamicDataSource.use(dataSourceId);
-            return ResponseMessage.ok(dataBaseManagerService.getTableList())
-                    .include(TableMetaData.class, "name", "alias", "comment", "fields")
-                    .include(FieldMetaData.class, "name", "alias", "comment", "dataType", "properties")
+            List<RDBTableMetaData> cached = cache.get(dataSourceId);
+            if (cached == null || reload) {
+                cached = dataBaseManagerService.getTableList();
+                cache.put(dataSourceId, cached);
+            }
+            return ok(cached)
+                    .include(RDBTableMetaData.class, "name", "alias", "comment", "columns")
+                    .include(RDBColumnMetaData.class, "name", "alias", "comment", "jdbcType", "javaType", "dataType", "notNull", "primaryKey", "properties")
                     .onlyData();
         } finally {
             DynamicDataSource.useDefault(false);
@@ -128,7 +140,7 @@ public class DatabaseManagerController {
         checkDynamicDataSourceSupport();
         DynamicDataSource.use(dataSourceId);
         try {
-            return ResponseMessage.ok(dataBaseManagerService.execSql(buildSqlList(sql)));
+            return ok(dataBaseManagerService.execSql(buildSqlList(sql)));
         } finally {
             DynamicDataSource.useDefault(false);
         }
@@ -140,7 +152,7 @@ public class DatabaseManagerController {
         try {
             checkDynamicDataSourceSupport();
             DynamicDataSource.use(dataSourceId);
-            return ResponseMessage.ok(dataBaseManagerService.createAlterSql(createTableMetaDataByJson(jsonObject)));
+            return ok(dataBaseManagerService.createAlterSql(createTableMetaDataByJson(jsonObject)));
         } finally {
             DynamicDataSource.useDefault(false);
         }
@@ -152,20 +164,20 @@ public class DatabaseManagerController {
         try {
             checkDynamicDataSourceSupport();
             DynamicDataSource.use(dataSourceId);
-            return ResponseMessage.ok(dataBaseManagerService.createCreateSql(createTableMetaDataByJson(jsonObject)));
+            return ok(dataBaseManagerService.createCreateSql(createTableMetaDataByJson(jsonObject)));
         } finally {
             DynamicDataSource.useDefault(false);
         }
     }
 
-    protected TableMetaData createTableMetaDataByJson(JSONObject jsonObject) {
-        TableMetaData tableMetaData = new TableMetaData();
+    protected RDBTableMetaData createTableMetaDataByJson(JSONObject jsonObject) {
+        RDBTableMetaData tableMetaData = new RDBTableMetaData();
         tableMetaData.setName(jsonObject.getString("name"));
         tableMetaData.setComment(jsonObject.getString("comment"));
-        JSONArray jsonArray = jsonObject.getJSONArray("fields");
+        JSONArray jsonArray = jsonObject.getJSONArray("columns");
         for (int i = 0; i < jsonArray.size(); i++) {
-            FieldMetaData field = jsonArray.getObject(i, FieldMetaData.class);
-            tableMetaData.addField(field);
+            RDBColumnMetaData columnMetaData = jsonArray.getObject(i, RDBColumnMetaData.class);
+            tableMetaData.addColumn(columnMetaData);
         }
         return tableMetaData;
     }

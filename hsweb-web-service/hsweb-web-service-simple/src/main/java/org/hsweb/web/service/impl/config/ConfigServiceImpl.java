@@ -3,6 +3,7 @@ package org.hsweb.web.service.impl.config;
 import org.hsweb.commons.StringUtils;
 import org.hsweb.web.bean.common.UpdateParam;
 import org.hsweb.web.bean.po.config.Config;
+import org.hsweb.web.bean.po.config.Config.Property;
 import org.hsweb.web.core.authorize.ExpressionScopeBean;
 import org.hsweb.web.dao.config.ConfigMapper;
 import org.hsweb.web.service.config.ConfigService;
@@ -16,6 +17,8 @@ import javax.annotation.Resource;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.hsweb.web.bean.po.config.Config.Property.*;
 
 /**
  * 系统配置服务类
@@ -38,7 +41,7 @@ public class ConfigServiceImpl extends AbstractServiceImpl<Config, String> imple
     @Override
     @CacheEvict(value = CACHE_KEY, allEntries = true)
     public int update(Config data) {
-        return configMapper.update(new UpdateParam<>(data).excludes("createDate").where("id", data.getId()));
+        return createUpdate(data).excludes(createDate).where(id, data.getId()).exec();
     }
 
     @Override

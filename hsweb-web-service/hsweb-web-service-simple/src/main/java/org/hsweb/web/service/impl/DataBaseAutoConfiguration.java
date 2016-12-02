@@ -1,18 +1,18 @@
 package org.hsweb.web.service.impl;
 
-import org.hsweb.ezorm.executor.SqlExecutor;
-import org.hsweb.ezorm.meta.DatabaseMetaData;
-import org.hsweb.ezorm.meta.expand.ObjectWrapperFactory;
-import org.hsweb.ezorm.meta.expand.ValidatorFactory;
-import org.hsweb.ezorm.meta.parser.H2TableMetaParser;
-import org.hsweb.ezorm.meta.parser.MysqlTableMetaParser;
-import org.hsweb.ezorm.meta.parser.OracleTableMetaParser;
-import org.hsweb.ezorm.meta.parser.TableMetaParser;
-import org.hsweb.ezorm.render.dialect.H2DatabaseMeta;
-import org.hsweb.ezorm.render.dialect.MysqlDatabaseMeta;
-import org.hsweb.ezorm.render.dialect.OracleDatabaseMeta;
-import org.hsweb.ezorm.run.Database;
-import org.hsweb.ezorm.run.simple.SimpleDatabase;
+import org.hsweb.ezorm.core.ObjectWrapperFactory;
+import org.hsweb.ezorm.core.ValidatorFactory;
+import org.hsweb.ezorm.rdb.RDBDatabase;
+import org.hsweb.ezorm.rdb.executor.SqlExecutor;
+import org.hsweb.ezorm.rdb.meta.RDBDatabaseMetaData;
+import org.hsweb.ezorm.rdb.meta.parser.H2TableMetaParser;
+import org.hsweb.ezorm.rdb.meta.parser.MysqlTableMetaParser;
+import org.hsweb.ezorm.rdb.meta.parser.OracleTableMetaParser;
+import org.hsweb.ezorm.rdb.meta.parser.TableMetaParser;
+import org.hsweb.ezorm.rdb.render.dialect.H2RDBDatabaseMetaData;
+import org.hsweb.ezorm.rdb.render.dialect.MysqlRDBDatabaseMetaData;
+import org.hsweb.ezorm.rdb.render.dialect.OracleRDBDatabaseMetaData;
+import org.hsweb.ezorm.rdb.simple.SimpleDatabase;
 import org.hsweb.web.core.authorize.ExpressionScopeBean;
 import org.hsweb.web.core.datasource.DataSourceHolder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,35 +44,26 @@ public class DataBaseAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(TableMetaParser.class)
     public TableMetaParser tableMetaParser() {
-        switch (DataSourceHolder.getDefaultDatabaseType()) {
-            case mysql:
-                return new MysqlTableMetaParser(sqlExecutor);
-            case oracle:
-                return new OracleTableMetaParser(sqlExecutor);
-            case h2:
-                return new H2TableMetaParser(sqlExecutor);
-            default:
-                return null;
-        }
+        return DataSourceHolder.getActiveDatabaseType().getDialect().getDefaultParser(sqlExecutor);
     }
 
     @Bean
-    public Database database(javax.sql.DataSource dataSource) throws SQLException {
+    public RDBDatabase database(javax.sql.DataSource dataSource) throws SQLException {
         DataSourceHolder holder = new DataSourceHolder();
         holder.init(dataSource);
-        DatabaseMetaData dataBaseMetaData;
+        RDBDatabaseMetaData dataBaseMetaData;
         switch (DataSourceHolder.getDefaultDatabaseType()) {
             case mysql:
-                dataBaseMetaData = new MysqlDatabaseMeta();
+                dataBaseMetaData = new MysqlRDBDatabaseMetaData();
                 break;
             case oracle:
-                dataBaseMetaData = new OracleDatabaseMeta();
+                dataBaseMetaData = new OracleRDBDatabaseMetaData();
                 break;
             case h2:
-                dataBaseMetaData = new H2DatabaseMeta();
+                dataBaseMetaData = new H2RDBDatabaseMetaData();
                 break;
             default:
-                dataBaseMetaData = new OracleDatabaseMeta();
+                dataBaseMetaData = new H2RDBDatabaseMetaData();
                 break;
         }
         if (objectWrapperFactory != null)

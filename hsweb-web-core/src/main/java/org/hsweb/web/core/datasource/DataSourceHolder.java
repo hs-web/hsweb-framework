@@ -49,6 +49,14 @@ public class DataSourceHolder {
         return defaultDataSource;
     }
 
+    public static String getActiveSourceId() {
+        if (DynamicDataSource.getActiveDataSourceId() != null) {
+            return DynamicDataSource.getActiveDataSourceId();
+        }
+        return "default";
+    }
+
+
     public static DatabaseType getActiveDatabaseType() {
         if (dynamicDataSource != null) {
             return dynamicDataSource.getActiveDataBaseType();

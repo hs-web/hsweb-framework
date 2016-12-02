@@ -3,7 +3,7 @@ package org.hsweb.web.bean.common;
 /**
  * Created by zhouhao on 16-4-19.
  */
-public class InsertParam<T> extends org.hsweb.ezorm.param.InsertParam<T> {
+public class InsertParam<T> extends org.hsweb.ezorm.core.param.InsertParam<T> {
 
     public InsertParam() {
     }

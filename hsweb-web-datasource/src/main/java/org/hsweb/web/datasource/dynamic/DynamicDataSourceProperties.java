@@ -21,6 +21,7 @@ import org.hsweb.web.core.datasource.DatabaseType;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.jta.atomikos.AtomikosProperties;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -56,6 +57,7 @@ public class DynamicDataSourceProperties
     private Properties            properties              = null;
     private ClassLoader           classLoader             = null;
     private DatasourceTypeSupport datasourceTypeSupport   = null;
+    private AtomikosProperties    icatch      = new AtomikosProperties();
 
     public int getTransactionTimeout() {
         return transactionTimeout;
@@ -86,6 +88,14 @@ public class DynamicDataSourceProperties
             type = DatabaseType.fromJdbcUrl(getUrl());
         }
         return type;
+    }
+
+    public AtomikosProperties getIcatch() {
+        return icatch;
+    }
+
+    public void setIcatch(AtomikosProperties icatch) {
+        this.icatch = icatch;
     }
 
     public void setType(DatabaseType type) {

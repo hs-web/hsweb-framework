@@ -1,4 +1,4 @@
-## 后台管理基础框架
+## hsweb后台管理基础框架
 
 [![Build Status](https://travis-ci.org/hs-web/hsweb-framework.svg?branch=master)](https://travis-ci.org/hs-web/hsweb-framework)
 [![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg?style=flat-square)](https://www.apache.org/licenses/LICENSE-2.0.html)
@@ -37,6 +37,7 @@
 7. 数据库支持 mysql,oracle,h2.
 8. websocket支持.
 9. 定时调度支持,可在页面配置定时任务,编写任务脚本执行。
+10. **强大的dsl查询方式,复杂条件一句生成**
 
 ### 演示
 1. 示例:[demo.hsweb.me](http://demo.hsweb.me)

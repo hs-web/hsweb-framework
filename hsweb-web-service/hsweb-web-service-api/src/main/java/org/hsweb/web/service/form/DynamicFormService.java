@@ -1,7 +1,7 @@
 package org.hsweb.web.service.form;
 
-import org.hsweb.ezorm.meta.TableMetaData;
-import org.hsweb.ezorm.run.Database;
+import org.hsweb.ezorm.rdb.RDBDatabase;
+import org.hsweb.ezorm.rdb.meta.RDBTableMetaData;
 import org.hsweb.web.bean.common.*;
 import org.hsweb.web.bean.po.form.Form;
 
@@ -16,9 +16,9 @@ import java.util.Map;
  */
 public interface DynamicFormService {
 
-    Database getDefaultDatabase();
+    RDBDatabase getDefaultDatabase();
 
-    TableMetaData parseMeta(Form form);
+    RDBTableMetaData parseMeta(Form form);
 
     void deploy(Form form) throws SQLException;
 

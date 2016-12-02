@@ -135,4 +135,74 @@ public class Template extends GenericPo<String> {
     public void setUsing(boolean using) {
         this.using = using;
     }
+
+
+
+public interface Property extends GenericPo.Property{
+	/**
+	 *
+	 * @see Template#name
+	 */
+	String name="name";
+	/**
+	 *
+	 * @see Template#remark
+	 */
+	String remark="remark";
+	/**
+	 *
+	 * @see Template#template
+	 */
+	String template="template";
+	/**
+	 *
+	 * @see Template#classifiedId
+	 */
+	String classifiedId="classifiedId";
+	/**
+	 *
+	 * @see Template#type
+	 */
+	String type="type";
+	/**
+	 *
+	 * @see Template#script
+	 */
+	String script="script";
+	/**
+	 *
+	 * @see Template#css
+	 */
+	String css="css";
+	/**
+	 *
+	 * @see Template#cssLinks
+	 */
+	String cssLinks="cssLinks";
+	/**
+	 *
+	 * @see Template#scriptLinks
+	 */
+	String scriptLinks="scriptLinks";
+	/**
+	 *
+	 * @see Template#version
+	 */
+	String version="version";
+	/**
+	 *
+	 * @see Template#revision
+	 */
+	String revision="revision";
+	/**
+	 *
+	 * @see Template#release
+	 */
+	String release="release";
+	/**
+	 *
+	 * @see Template#using
+	 */
+	String using="using";
+	}
 }

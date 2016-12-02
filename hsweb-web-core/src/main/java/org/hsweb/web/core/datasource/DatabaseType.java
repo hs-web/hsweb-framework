@@ -16,19 +16,21 @@
 
 package org.hsweb.web.core.datasource;
 
+import org.hsweb.ezorm.rdb.render.dialect.Dialect;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 public enum DatabaseType {
-    unknown(null, null, null),
-    mysql("com.mysql.jdbc.Driver", "com.mysql.jdbc.jdbc2.optional.MysqlXADataSource", "select 1"),
-    h2("org.h2.Driver", "org.h2.jdbcx.JdbcDataSource", "select 1"),
-    oracle("oracle.jdbc.driver.OracleDriver", "oracle.jdbc.xa.client.OracleXADataSource", "select 1 from dual");
+    unknown(null, null, null,null),
+    mysql("com.mysql.jdbc.Driver", "com.mysql.jdbc.jdbc2.optional.MysqlXADataSource", "select 1",Dialect.MYSQL),
+    h2("org.h2.Driver", "org.h2.jdbcx.JdbcDataSource", "select 1",Dialect.H2),
+    oracle("oracle.jdbc.driver.OracleDriver", "oracle.jdbc.xa.client.OracleXADataSource", "select 1 from dual",Dialect.ORACLE);
 
-    DatabaseType(String driverClassName, String xaDataSourceClassName, String testQuery) {
+    DatabaseType(String driverClassName, String xaDataSourceClassName, String testQuery,Dialect dialect) {
         this.driverClassName = driverClassName;
         this.testQuery = testQuery;
         this.xaDataSourceClassName = xaDataSourceClassName;
+        this.dialect=dialect;
     }
 
     private final String testQuery;
@@ -36,7 +38,7 @@ public enum DatabaseType {
     private final String driverClassName;
 
     private final String xaDataSourceClassName;
-
+    private final Dialect dialect;
     public String getDriverClassName() {
         return driverClassName;
     }
@@ -47,6 +49,10 @@ public enum DatabaseType {
 
     public String getTestQuery() {
         return testQuery;
+    }
+
+    public Dialect getDialect() {
+        return dialect;
     }
 
     public static DatabaseType fromJdbcUrl(String url) {

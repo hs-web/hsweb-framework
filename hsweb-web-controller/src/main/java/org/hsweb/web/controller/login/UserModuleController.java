@@ -25,13 +25,13 @@ import org.hsweb.web.core.logger.annotation.AccessLogger;
 import org.hsweb.web.core.message.ResponseMessage;
 import org.hsweb.web.core.utils.WebUtil;
 import org.hsweb.web.service.module.ModuleService;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -43,6 +43,24 @@ public class UserModuleController {
     @Resource
     public ModuleService moduleService;
 
+    @RequestMapping(value = "/loginUser", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @ResponseBody
+    @Authorize
+    public ResponseMessage loginUserInfo() {
+        User user = WebUtil.getLoginUser();
+        Map<String, Set<String>> modules = user.getRoleInfo()
+                .entrySet()
+                .stream()
+                .collect(Collectors.toMap(entry -> entry.getKey().getId(), entry -> entry.getValue()));
+        Map<String, Object> map = new LinkedHashMap<>();
+        map.put("username", user.getUsername());
+        map.put("name", user.getName());
+        map.put("properties", user.getProperties());
+        map.put("modules", modules);
+        map.put("roles", user.getUserRoles());
+        map.put("modulesData", user.getModules());
+        return ResponseMessage.ok(map).exclude(Module.class, "optional").onlyData();
+    }
     @RequestMapping
     @Authorize
     @AccessLogger("用户模块信息")
@@ -53,9 +71,7 @@ public class UserModuleController {
         User user = WebUtil.getLoginUser();
         List<Module> modules;
         if (user == null) {
-            QueryParam queryParam = new QueryParam();
-            queryParam.includes(includes).orderBy("sortIndex");
-            modules = moduleService.select(queryParam);
+            modules = moduleService.createQuery().select(includes).orderByAsc(Module.Property.sortIndex).listNoPaging();
             modules = modules.stream()
                     .filter(module -> {
                         Object obj = module.getOptionalMap().get("M");

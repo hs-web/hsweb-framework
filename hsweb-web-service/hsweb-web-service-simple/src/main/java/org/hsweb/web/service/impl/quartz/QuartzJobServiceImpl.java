@@ -19,22 +19,24 @@ package org.hsweb.web.service.impl.quartz;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.serializer.SerializerFeature;
+import org.hsweb.commons.MD5;
 import org.hsweb.commons.StringUtils;
-import org.hsweb.web.bean.common.DeleteParam;
-import org.hsweb.web.bean.common.UpdateMapParam;
-import org.hsweb.web.bean.common.UpdateParam;
+import org.hsweb.expands.script.engine.DynamicScriptEngine;
+import org.hsweb.expands.script.engine.DynamicScriptEngineFactory;
+import org.hsweb.expands.script.engine.ExecuteResult;
+import org.hsweb.expands.script.engine.ScriptContext;
 import org.hsweb.web.bean.po.quartz.QuartzJob;
+import org.hsweb.web.bean.po.quartz.QuartzJobHistory;
 import org.hsweb.web.core.exception.BusinessException;
 import org.hsweb.web.dao.quartz.QuartzJobHistoryMapper;
 import org.hsweb.web.dao.quartz.QuartzJobMapper;
+import org.hsweb.web.service.DeleteService;
+import org.hsweb.web.service.GenericService;
 import org.hsweb.web.service.impl.AbstractServiceImpl;
 import org.hsweb.web.service.quartz.QuartzJobHistoryService;
 import org.hsweb.web.service.quartz.QuartzJobService;
 import org.joda.time.DateTime;
 import org.quartz.*;
-import org.quartz.Calendar;
-import org.quartz.impl.calendar.CronCalendar;
 import org.quartz.impl.triggers.CronTriggerImpl;
 import org.quartz.spi.MutableTrigger;
 import org.quartz.spi.OperableTrigger;
@@ -42,11 +44,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 import javax.annotation.Resource;
-import java.text.ParseException;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
+import static org.hsweb.web.bean.po.quartz.QuartzJob.Property.enabled;
+import static org.hsweb.web.bean.po.quartz.QuartzJob.Property.id;
+import static org.hsweb.web.bean.po.quartz.QuartzJobHistory.Status.FAIL;
+import static org.hsweb.web.bean.po.quartz.QuartzJobHistory.Status.SUCCESS;
 
 /**
  * 定时调度任务服务类
@@ -81,6 +91,7 @@ public class QuartzJobServiceImpl extends AbstractServiceImpl<QuartzJob, String>
     }
 
     @Override
+    @CacheEvict(value = CACHE_KEY, key = "'id:'+#data.id")
     public String insert(QuartzJob data) {
         data.setEnabled(true);
         String id = super.insert(data);
@@ -93,9 +104,7 @@ public class QuartzJobServiceImpl extends AbstractServiceImpl<QuartzJob, String>
     public int update(QuartzJob data) {
         QuartzJob old = selectByPk(data.getId());
         assertNotNull(old, "任务不存在");
-        int i = getMapper().update(UpdateParam.build(data)
-                .excludes("status", "enabled")
-                .where("id", data.getId()));
+        int i = createUpdate(data).fromBean().excludes(enabled).where(id).exec();
         if (old.isEnabled()) {
             deleteJob(data.getId());
             startJob(data);
@@ -111,14 +120,14 @@ public class QuartzJobServiceImpl extends AbstractServiceImpl<QuartzJob, String>
     @Override
     @CacheEvict(value = CACHE_KEY, key = "'id:'+#id")
     public void enable(String id) {
-        getMapper().update((UpdateParam) UpdateMapParam.build().set("enabled", true).where("id", id));
+        createUpdate().set(enabled, true).where(QuartzJob.Property.id, id).exec();
         startJob(getMapper().selectByPk(id));
     }
 
     @Override
     @CacheEvict(value = CACHE_KEY, key = "'id:'+#id")
     public void disable(String id) {
-        getMapper().update((UpdateParam) UpdateMapParam.build().set("enabled", false).where("id", id));
+        createUpdate().set(enabled, false).where(QuartzJob.Property.id, id).exec();
         deleteJob(id);
     }
 
@@ -126,7 +135,7 @@ public class QuartzJobServiceImpl extends AbstractServiceImpl<QuartzJob, String>
     @CacheEvict(value = CACHE_KEY, key = "'id:'+#id")
     public int delete(String id) {
         deleteJob(id);
-        quartzJobHistoryMapper.delete(DeleteParam.build().where("jobId", id));
+        DeleteService.createDelete(quartzJobHistoryMapper).where(QuartzJobHistory.Property.jobId, id).exec();
         return super.delete(id);
     }
 
@@ -151,6 +160,67 @@ public class QuartzJobServiceImpl extends AbstractServiceImpl<QuartzJob, String>
         } catch (Exception e) {
             throw new BusinessException(e.getMessage(), e, 500);
         }
+    }
+
+    @Override
+    @Transactional
+    public Object execute(String id, Map<String, Object> var) {
+        Assert.notNull(id, "定时任务ID错误");
+        QuartzJob job = selectByPk(id);
+        Assert.notNull(job, "任务不存在");
+        String hisId = quartzJobHistoryService.createAndInsertHistory(id);
+        String strRes = null;
+        QuartzJobHistory.Status status = FAIL;
+        try {
+            if (logger.isDebugEnabled())
+                logger.debug("start job [{}]", job.getName());
+            DynamicScriptEngine engine = DynamicScriptEngineFactory.getEngine(job.getLanguage());
+            String scriptId = "quartz.job.".concat(id);
+            try {
+                if (!engine.compiled(scriptId)) {
+                    engine.compile(scriptId, job.getScript());
+                } else {
+                    ScriptContext scriptContext = engine.getContext(scriptId);
+                    //脚本发生了变化，自动重新编译
+                    if (!MD5.defaultEncode(job.getScript()).equals(scriptContext.getMd5())) {
+                        if (logger.isDebugEnabled())
+                            logger.debug("script is changed,recompile....");
+                        engine.compile(scriptId, job.getScript());
+                    }
+                }
+            } catch (Exception e) {
+                throw new BusinessException("编译任务脚本失败");
+            }
+            if (logger.isDebugEnabled())
+                logger.debug("job running...");
+            ExecuteResult result = engine.execute(scriptId, var);
+            if (logger.isDebugEnabled())
+                logger.debug("job end...{} ", result.isSuccess() ? "success" : "fail");
+            if (result.isSuccess()) {
+                Object res = result.getResult();
+                if (res instanceof String)
+                    strRes = ((String) res);
+                else strRes = JSON.toJSONString(res);
+                status = SUCCESS;
+            } else {
+                status = FAIL;
+                if (result.getException() != null) {
+                    strRes = StringUtils.throwable2String(result.getException());
+                    logger.error("job failed", result.getException());
+                    if (result.getException() instanceof RuntimeException) {
+                        throw ((RuntimeException) result.getException());
+                    }
+                    throw new RuntimeException(result.getException());
+                } else {
+                    strRes = result.getMessage();
+                    logger.error("job failed {}", strRes);
+                    throw new RuntimeException(strRes);
+                }
+            }
+        } finally {
+            quartzJobHistoryService.endHistory(hisId, strRes, status);
+        }
+        return strRes;
     }
 
     public static List<Date> computeFireTimesBetween(OperableTrigger trigger,

@@ -196,4 +196,40 @@ public class Module extends GenericPo<String> implements Comparable<Module> {
         return ((Long) getSortIndex()).compareTo(o.getSortIndex());
     }
 
+
+    public interface Property extends GenericPo.Property {
+        /**
+         * @see Module#name
+         */
+        String name      = "name";
+        /**
+         * @see Module#uri
+         */
+        String uri       = "uri";
+        /**
+         * @see Module#icon
+         */
+        String icon      = "icon";
+        /**
+         * @see Module#parentId
+         */
+        String parentId  = "parentId";
+        /**
+         * @see Module#remark
+         */
+        String remark    = "remark";
+        /**
+         * @see Module#status
+         */
+        String status    = "status";
+        /**
+         * @see Module#optional
+         */
+        String optional  = "optional";
+        /**
+         * @see Module#sortIndex
+         */
+        String sortIndex = "sortIndex";
+    }
+
 }

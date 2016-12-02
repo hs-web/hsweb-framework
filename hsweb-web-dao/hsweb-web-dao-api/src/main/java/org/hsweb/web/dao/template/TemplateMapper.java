@@ -1,6 +1,6 @@
 package org.hsweb.web.dao.template;
 
-import org.hsweb.web.bean.common.QueryParam;
+import org.hsweb.ezorm.core.param.QueryParam;
 import org.hsweb.web.bean.po.template.Template;
 import org.hsweb.web.dao.GenericMapper;
 

@@ -39,4 +39,24 @@ public class UserProfile extends GenericPo<String> {
     public void setContent(String content) {
         this.content = content;
     }
+
+
+
+public interface Property extends GenericPo.Property{
+	/**
+	 *
+	 * @see UserProfile#userId
+	 */
+	String userId="userId";
+	/**
+	 *
+	 * @see UserProfile#type
+	 */
+	String type="type";
+	/**
+	 *
+	 * @see UserProfile#content
+	 */
+	String content="content";
+	}
 }

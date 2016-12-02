@@ -1,10 +1,9 @@
 package org.hsweb.web.mybatis.builder;
 
-import org.hsweb.ezorm.render.Dialect;
 
-/**
- * Created by zhouhao on 16-5-9.
- */
+import org.hsweb.ezorm.rdb.render.dialect.Dialect;
+
+@Deprecated
 public class MysqlParamBuilder extends DefaultSqlParamBuilder {
     private static MysqlParamBuilder instance = new MysqlParamBuilder();
 

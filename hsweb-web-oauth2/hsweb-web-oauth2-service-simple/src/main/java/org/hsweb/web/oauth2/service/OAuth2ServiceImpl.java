@@ -23,7 +23,6 @@ import org.hsweb.web.bean.common.QueryParam;
 import org.hsweb.web.bean.common.UpdateParam;
 import org.hsweb.web.bean.po.user.User;
 import org.hsweb.web.core.exception.AuthorizeException;
-import org.hsweb.web.core.exception.BusinessException;
 import org.hsweb.web.core.exception.NotFoundException;
 import org.hsweb.web.oauth2.dao.OAuth2AccessMapper;
 import org.hsweb.web.oauth2.exception.AccessTimeoutException;
@@ -96,7 +95,7 @@ public class OAuth2ServiceImpl implements OAuth2Service {
     }
 
     @Override
-    @Transactional(noRollbackFor = AccessTimeoutException.class)
+    @Transactional(noRollbackFor = {AccessTimeoutException.class, AuthorizeException.class})
     public User getUserByAccessToken(String accessToken) {
         OAuth2Access auth2Access = null;
         Cache cache = null;

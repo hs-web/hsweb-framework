@@ -22,7 +22,6 @@ import org.hsweb.web.bean.common.QueryParam;
 import org.hsweb.web.bean.common.UpdateMapParam;
 import org.hsweb.web.bean.common.UpdateParam;
 import org.hsweb.web.core.exception.NotFoundException;
-import org.hsweb.web.core.utils.RandomUtil;
 import org.hsweb.web.oauth2.dao.OAuth2AccessMapper;
 import org.hsweb.web.oauth2.dao.OAuth2ClientMapper;
 import org.hsweb.web.oauth2.po.OAuth2Access;
@@ -73,7 +72,7 @@ public class OAuth2ClientServiceImpl extends AbstractServiceImpl<OAuth2Client, S
     @Override
     public String refreshSecret(String clientId) {
         String secret = MD5.encode(UUID.randomUUID().toString() + Math.random());
-        int size = oAuth2ClientMapper.update((UpdateParam) UpdateMapParam.build().set("secret", secret).where("id", clientId));
+        int size = createUpdate().set("secret", secret).where("id", clientId).exec();
         if (size != 1) throw new NotFoundException("客户端不存在");
         return secret;
     }
@@ -82,18 +81,18 @@ public class OAuth2ClientServiceImpl extends AbstractServiceImpl<OAuth2Client, S
     public void enable(String id) {
         OAuth2Client old = selectByPk(id);
         assertNotNull(old, "客户端不存在");
-        oAuth2ClientMapper.update((UpdateParam) UpdateMapParam.build().set("status", 1).where("id", id));
+        createUpdate().set("status", 1).where("id", id).exec();
     }
 
     @Override
     public void disable(String id) {
         OAuth2Client old = selectByPk(id);
         assertNotNull(old, "客户端不存在");
-        oAuth2ClientMapper.update((UpdateParam) UpdateMapParam.build().set("status", -1).where("id", id));
+        createUpdate().set("status", -1).where("id", id).exec();
     }
 
     @Override
     public int update(OAuth2Client data) {
-        return getMapper().update(UpdateParam.build(data).excludes("secret","status").where("id", data.getId()));
+        return createUpdate(data).excludes("secret", "status").where("id", data.getId()).exec();
     }
 }

@@ -16,9 +16,6 @@
 
 package org.hsweb.web.service.impl.datasource;
 
-import org.hsweb.web.bean.common.QueryParam;
-import org.hsweb.web.bean.common.UpdateMapParam;
-import org.hsweb.web.bean.common.UpdateParam;
 import org.hsweb.web.bean.po.datasource.DataSource;
 import org.hsweb.web.core.datasource.DynamicDataSource;
 import org.hsweb.web.core.exception.BusinessException;
@@ -38,6 +35,9 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.util.Date;
 import java.util.List;
+
+import static org.hsweb.web.bean.po.GenericPo.Property.id;
+import static org.hsweb.web.bean.po.datasource.DataSource.Property.*;
 
 /**
  * 数据源服务类
@@ -96,7 +96,7 @@ public class DataSourceServiceImpl extends AbstractServiceImpl<DataSource, Strin
         data.setCreateDate(new Date());
         data.setEnabled(1);
         tryValidPo(data);
-        DataSource old = selectSingle(QueryParam.build().where("name", data.getName()).or("id", data.getId()));
+        DataSource old = createQuery().fromBean(data).where(name).or(id).single();
         if (old != null) throw new BusinessException("名称:" + data.getName() + "或id:" + data.getId() + "已存在");
         return super.insert(data);
     }
@@ -111,25 +111,23 @@ public class DataSourceServiceImpl extends AbstractServiceImpl<DataSource, Strin
     @CacheEvict(value = CACHE_NAME, key = "'id:'+#data.id")
     public int update(DataSource data) {
         checkDynamicDataSourceSupport();
-        DataSource old = selectSingle(QueryParam.build()
-                .where("name", data.getName())
-                .and("id$not", data.getId()));
+        DataSource old = createQuery().fromBean(data).where(name).and().not(id).single();
         if (old != null) throw new BusinessException("名称" + data.getName() + "已存在");
-        return getMapper().update(UpdateParam.build(data).excludes("createDate", "enabled").where("id", data.getId()));
+        return createUpdate(data).excludes(createDate, enabled).where(id, data.getId()).exec();
     }
 
     @Override
     @CacheEvict(value = CACHE_NAME, key = "'id:'+#id")
     public void enable(String id) {
         checkDynamicDataSourceSupport();
-        getMapper().update((UpdateParam) UpdateMapParam.build().set("enabled", 1).where("id", id));
+        createUpdate().set(enabled, 1).includes(enabled).where(DataSource.Property.id, id).exec();
     }
 
     @Override
     @CacheEvict(value = CACHE_NAME, key = "'id:'+#id")
     public void disable(String id) {
         checkDynamicDataSourceSupport();
-        getMapper().update((UpdateParam) UpdateMapParam.build().set("enabled", 0).where("id", id));
+        createUpdate().set(enabled, 0).includes(enabled).where(DataSource.Property.id, id).exec();
     }
 
 

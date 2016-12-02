@@ -183,4 +183,40 @@ public class QuartzJob extends GenericPo<String> {
     public void setType(byte type) {
         this.type = type;
     }
+
+
+    public interface Property extends GenericPo.Property {
+        /**
+         * @see QuartzJob#name
+         */
+        String name       = "name";
+        /**
+         * @see QuartzJob#remark
+         */
+        String remark     = "remark";
+        /**
+         * @see QuartzJob#cron
+         */
+        String cron       = "cron";
+        /**
+         * @see QuartzJob#script
+         */
+        String script     = "script";
+        /**
+         * @see QuartzJob#language
+         */
+        String language   = "language";
+        /**
+         * @see QuartzJob#enabled
+         */
+        String enabled    = "enabled";
+        /**
+         * @see QuartzJob#parameters
+         */
+        String parameters = "parameters";
+        /**
+         * @see QuartzJob#type
+         */
+        String type       = "type";
+    }
 }

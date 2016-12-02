@@ -1,9 +1,13 @@
 package org.hsweb.web.service.impl.form.validator;
 
-import org.hsweb.ezorm.meta.FieldMetaData;
-import org.hsweb.ezorm.meta.TableMetaData;
-import org.hsweb.ezorm.meta.expand.Validator;
-import org.hsweb.ezorm.meta.expand.ValidatorFactory;
+import org.hsweb.ezorm.core.Validator;
+import org.hsweb.ezorm.core.ValidatorFactory;
+import org.hsweb.ezorm.core.meta.ColumnMetaData;
+import org.hsweb.ezorm.core.meta.TableMetaData;
+import org.hsweb.ezorm.core.param.Column;
+import org.hsweb.ezorm.rdb.meta.RDBColumnMetaData;
+import org.hsweb.ezorm.rdb.meta.RDBDatabaseMetaData;
+import org.hsweb.ezorm.rdb.meta.RDBTableMetaData;
 import org.hsweb.web.core.exception.BusinessException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -13,6 +17,7 @@ import org.hsweb.expands.script.engine.DynamicScriptEngineFactory;
 
 import java.util.HashMap;
 import java.util.Map;
+
 @Component
 public class GroovyDycBeanValidatorFactory implements ValidatorFactory {
 
@@ -65,7 +70,7 @@ public class GroovyDycBeanValidatorFactory implements ValidatorFactory {
         }
         script.append("public class ").append(metaData.getName()).append("{\n");
         boolean hasValidator = false;
-        for (FieldMetaData fieldMetaData : metaData.getFields()) {
+        for (ColumnMetaData fieldMetaData : metaData.getColumns()) {
             String typeName = simpleType.get(fieldMetaData.getJavaType());
             if (typeName == null) typeName = fieldMetaData.getJavaType().getName();
             if (fieldMetaData.getValidator() == null || fieldMetaData.getValidator().isEmpty()) continue;
@@ -79,7 +84,7 @@ public class GroovyDycBeanValidatorFactory implements ValidatorFactory {
         }
         //没有配置验证器
         if (!hasValidator) return null;
-        for (FieldMetaData fieldMetaData : metaData.getFields()) {
+        for (ColumnMetaData fieldMetaData : metaData.getColumns()) {
             String typeName = simpleType.get(fieldMetaData.getJavaType());
             if (typeName == null) typeName = fieldMetaData.getJavaType().getName();
             if (fieldMetaData.getValidator() == null || fieldMetaData.getValidator().isEmpty()) continue;

@@ -66,4 +66,20 @@ public class UserRole extends GenericPo<String> {
     public void setRole(Role role) {
         this.role = role;
     }
+
+
+    public interface Property {
+        /**
+         * @see UserRole#userId
+         */
+        String userId = "userId";
+        /**
+         * @see UserRole#roleId
+         */
+        String roleId = "roleId";
+        /**
+         * @see UserRole#role
+         */
+        String role   = "role";
+    }
 }

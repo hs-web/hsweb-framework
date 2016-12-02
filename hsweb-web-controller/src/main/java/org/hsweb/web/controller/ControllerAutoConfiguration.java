@@ -1,5 +1,8 @@
 package org.hsweb.web.controller;
 
+import org.hsweb.web.core.datasource.DynamicDataSource;
+import org.hsweb.web.core.utils.ThreadLocalUtils;
+import org.springframework.boot.autoconfigure.transaction.jta.JtaAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -7,7 +10,9 @@ import org.springframework.context.support.ReloadableResourceBundleMessageSource
 import org.springframework.ui.context.support.ResourceBundleThemeSource;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.LocaleResolver;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.ThemeResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
@@ -41,6 +46,24 @@ public class ControllerAutoConfiguration extends WebMvcConfigurerAdapter {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(new HandlerInterceptor() {
+            @Override
+            public boolean preHandle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o) throws Exception {
+                return true;
+            }
+
+            @Override
+            public void postHandle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o, ModelAndView modelAndView) throws Exception {
+                //ThreadLocalUtils.clear();
+            }
+
+            @Override
+            public void afterCompletion(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o, Exception e) throws Exception {
+                ThreadLocalUtils.clear();
+                DynamicDataSource.useDefault();
+            }
+        });
+
         ThemeChangeInterceptor themeChangeInterceptor = new ThemeChangeInterceptor() {
             @Override
             public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws ServletException {
@@ -96,7 +119,7 @@ public class ControllerAutoConfiguration extends WebMvcConfigurerAdapter {
         registry.addInterceptor(themeChangeInterceptor);
     }
 
-    @Bean(name="localeResolver")
+    @Bean(name = "localeResolver")
     public CookieLocaleResolver cookieLocaleResolver() {
         CookieLocaleResolver resolver = new CookieLocaleResolver();
         resolver.setDefaultLocale(Locale.CHINA);
@@ -110,7 +133,7 @@ public class ControllerAutoConfiguration extends WebMvcConfigurerAdapter {
         return resourceBundleThemeSource;
     }
 
-    @Bean(name="themeResolver")
+    @Bean(name = "themeResolver")
     public CookieThemeResolver cookieThemeResolver() {
         CookieThemeResolver cookieThemeResolver = new CookieThemeResolver();
         cookieThemeResolver.setDefaultThemeName("default");

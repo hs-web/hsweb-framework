@@ -1,22 +1,23 @@
 package org.hsweb.web.service.impl.user;
 
+import org.hsweb.commons.MD5;
 import org.hsweb.web.bean.common.InsertParam;
-import org.hsweb.web.bean.common.QueryParam;
-import org.hsweb.web.bean.common.UpdateParam;
 import org.hsweb.web.bean.po.module.Module;
 import org.hsweb.web.bean.po.role.UserRole;
 import org.hsweb.web.bean.po.user.User;
+import org.hsweb.web.bean.po.user.User.Property;
+import org.hsweb.web.core.exception.BusinessException;
 import org.hsweb.web.core.exception.NotFoundException;
+import org.hsweb.web.core.utils.RandomUtil;
 import org.hsweb.web.dao.role.UserRoleMapper;
 import org.hsweb.web.dao.user.UserMapper;
-import org.hsweb.web.core.exception.BusinessException;
+import org.hsweb.web.service.GenericService;
+import org.hsweb.web.service.QueryService;
 import org.hsweb.web.service.impl.AbstractServiceImpl;
 import org.hsweb.web.service.module.ModuleService;
 import org.hsweb.web.service.user.UserService;
-import org.hsweb.web.core.utils.RandomUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
-import org.hsweb.commons.MD5;
 
 import javax.annotation.Resource;
 import java.util.*;
@@ -70,11 +71,6 @@ public class UserServiceImpl extends AbstractServiceImpl<User, String> implement
     }
 
     @Override
-    public List<String> batchInsert(List<User> data, boolean skipFail) {
-        throw new UnsupportedOperationException("不支持此操作");
-    }
-
-    @Override
     public int update(User data) {
         tryValidPo(data);
         User old = this.selectByUserName(data.getUsername());
@@ -86,7 +82,7 @@ public class UserServiceImpl extends AbstractServiceImpl<User, String> implement
             data.setPassword(MD5.encode(data.getPassword()));
             userMapper.updatePassword(data);
         }
-        int i = userMapper.update(new UpdateParam<>(data).excludes("status", "password", "createDate"));
+        int i = createUpdate(data).excludes(Property.status, Property.password, Property.createDate).exec();
         if (data.getUserRoles() != null) {
             //删除所有
             userRoleMapper.deleteByUserId(data.getId());
@@ -101,9 +97,7 @@ public class UserServiceImpl extends AbstractServiceImpl<User, String> implement
 
     @Override
     public void initAdminUser(User user) {
-        QueryParam queryParam = new QueryParam().noPaging();
-        queryParam.orderBy("sortIndex");
-        List<Module> modules = moduleService.select(queryParam);
+        List<Module> modules = moduleService.createQuery().orderByAsc(Module.Property.sortIndex).listNoPaging();
         Map<Module, Set<String>> roleInfo = new LinkedHashMap<>();
         for (Module module : modules) {
             roleInfo.put(module, new LinkedHashSet<>(module.getOptionalMap().keySet()));
@@ -113,7 +107,7 @@ public class UserServiceImpl extends AbstractServiceImpl<User, String> implement
 
     @Override
     public void initGuestUser(User user) {
-        List<UserRole> userRoles = userRoleMapper.select(new QueryParam().where("roleId", "guest").noPaging());
+        List<UserRole> userRoles = QueryService.createQuery(userRoleMapper).where(UserRole.Property.roleId, "guest").list();
         user.setUserRoles(userRoles);
         user.initRoleInfo();
     }
@@ -123,7 +117,7 @@ public class UserServiceImpl extends AbstractServiceImpl<User, String> implement
         User user = selectByPk(id);
         if (user == null) throw new NotFoundException("用户不存在!");
         user.setStatus(1);
-        getMapper().update(new UpdateParam<>(user).includes("status").where("id", id));
+        createUpdate(user).includes(Property.status).where(Property.id, id).exec();
     }
 
     @Override
@@ -131,11 +125,13 @@ public class UserServiceImpl extends AbstractServiceImpl<User, String> implement
         User user = selectByPk(id);
         if (user == null) throw new NotFoundException("用户不存在!");
         user.setStatus(-1);
-        getMapper().update(new UpdateParam<>(user).includes("status").where("id", id));
+        createUpdate(user).includes(Property.status).where(Property.id, id).exec();
     }
 
     @Override
     public int delete(String s) {
         throw new BusinessException("服务不支持", 500);
     }
+
+
 }

@@ -8,7 +8,7 @@ import java.util.Map;
 /**
  * Created by zhouhao on 16-4-19.
  */
-public class SqlParam<R extends SqlParam> extends org.hsweb.ezorm.param.SqlParam<R> {
+public class SqlParam extends org.hsweb.ezorm.core.param.Param {
 
     protected Map<String, Object> params = new HashMap<>();
 
@@ -26,6 +26,6 @@ public class SqlParam<R extends SqlParam> extends org.hsweb.ezorm.param.SqlParam
     }
 
     public static SqlParam build() {
-        return new SqlParam<>();
+        return new SqlParam();
     }
 }

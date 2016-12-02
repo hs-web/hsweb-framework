@@ -165,4 +165,27 @@ public class Config extends GenericPo<String> {
         List<Map<Object, Object>> array = (List) JSON.parseArray(getContent(), Map.class);
         return array;
     }
+
+    public interface Property extends GenericPo.Property {
+        /**
+         * @see Config#remark
+         */
+        String remark           = "remark";
+        /**
+         * @see Config#content
+         */
+        String content          = "content";
+        /**
+         * @see Config#createDate
+         */
+        String createDate       = "createDate";
+        /**
+         * @see Config#updateDate
+         */
+        String updateDate       = "updateDate";
+        /**
+         * @see Config#classifiedId
+         */
+        String classifiedId     = "classifiedId";
+    }
 }

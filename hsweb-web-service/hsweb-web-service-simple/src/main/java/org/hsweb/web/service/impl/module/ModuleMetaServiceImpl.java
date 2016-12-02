@@ -1,9 +1,8 @@
 package org.hsweb.web.service.impl.module;
 
-import org.hsweb.ezorm.param.Term;
 import org.hsweb.web.bean.common.QueryParam;
 import org.hsweb.web.bean.po.module.ModuleMeta;
-import org.hsweb.web.core.utils.RandomUtil;
+import org.hsweb.web.bean.po.module.ModuleMeta.Property;
 import org.hsweb.web.dao.module.ModuleMetaMapper;
 import org.hsweb.web.service.impl.AbstractServiceImpl;
 import org.hsweb.web.service.module.ModuleMetaService;
@@ -12,8 +11,10 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
+
+import static org.hsweb.web.bean.po.module.ModuleMeta.Property.*;
 
 /**
  * Created by zhouhao on 16-5-10.
@@ -49,13 +50,20 @@ public class ModuleMetaServiceImpl extends AbstractServiceImpl<ModuleMeta, Strin
         return super.delete(s);
     }
 
-    protected QueryParam createSelectByKeyAndRoleIdParam(String key, List<String> roleId) {
-        QueryParam param = QueryParam.build();
-        param.nest().and("key", key).or("moduleId", key).or("id",key);
-        Term term = param.nest();
-        roleId.forEach(id -> term.or("roleId$LIKE", "%," + id + ",%"));
-        term.or("roleId$ISNULL", true).or("roleId$EMPTY", true);
-        return param;
+    static final Function<Object, Object> roleIdValueMapper = (value) -> "," + value + ",";
+
+    protected QueryParam createSelectByKeyAndRoleIdParam(String key, List<String> roleIds) {
+        // (id = ? or key = ? or module_id = ? ) and (role_id like ? or .....) and (role_id is null or role_id ='')
+        return createQuery()
+                //(id = ? or key = ? or module_id = ? )
+                .nest(id, key).or(Property.key, key).or(moduleId, key).end()
+                //and (role_id like ? or .....)
+                //遍历roleId,使用 like %% 并将值转为 ,value, 格式进行查询
+                //如果有条件,应该写sql函数,将数据库中的值转为结果集和参数进行对比
+                .nest().each(roleId, roleIds, query -> query::$like$, roleIdValueMapper).end()
+                //and (role_id is null or role_id ='')
+                .nest().isNull(roleId).or().isEmpty(roleId).end()
+                .getParam();
     }
 
     @Override

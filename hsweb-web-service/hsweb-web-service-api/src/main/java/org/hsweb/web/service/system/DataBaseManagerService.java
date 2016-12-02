@@ -1,6 +1,7 @@
 package org.hsweb.web.service.system;
 
-import org.hsweb.ezorm.meta.TableMetaData;
+
+import org.hsweb.ezorm.rdb.meta.RDBTableMetaData;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -19,11 +20,11 @@ public interface DataBaseManagerService {
      *
      * @return 表名集合
      */
-    List<TableMetaData> getTableList() throws SQLException;
+    List<RDBTableMetaData> getTableList() throws SQLException;
 
     List<Map<String, Object>> execSql(List<String> sqlList) throws SQLException;
 
-    String createAlterSql(TableMetaData newTable) throws Exception;
+    String createAlterSql(RDBTableMetaData newTable) throws Exception;
 
-    String createCreateSql(TableMetaData newTable) throws Exception;
+    String createCreateSql(RDBTableMetaData newTable) throws Exception;
 }

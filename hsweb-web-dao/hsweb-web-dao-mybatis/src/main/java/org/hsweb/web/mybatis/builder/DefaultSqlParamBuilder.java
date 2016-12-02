@@ -6,9 +6,11 @@ import org.apache.ibatis.mapping.ResultMap;
 import org.apache.ibatis.mapping.ResultMapping;
 import org.hsweb.commons.DateTimeUtils;
 import org.hsweb.commons.StringUtils;
-import org.hsweb.ezorm.meta.FieldMetaData;
-import org.hsweb.ezorm.param.Term;
-import org.hsweb.ezorm.render.Dialect;
+import org.hsweb.ezorm.core.param.Param;
+import org.hsweb.ezorm.core.param.Sort;
+import org.hsweb.ezorm.core.param.Term;
+import org.hsweb.ezorm.rdb.meta.RDBColumnMetaData;
+import org.hsweb.ezorm.rdb.render.dialect.Dialect;
 import org.hsweb.web.bean.common.InsertParam;
 import org.hsweb.web.bean.common.QueryParam;
 import org.hsweb.web.bean.common.UpdateParam;
@@ -19,9 +21,7 @@ import java.sql.JDBCType;
 import java.sql.SQLException;
 import java.util.*;
 
-/**
- * Created by zhouhao on 16-5-9.
- */
+@Deprecated
 public class DefaultSqlParamBuilder {
 
     public Dialect getDialect() {
@@ -73,23 +73,23 @@ public class DefaultSqlParamBuilder {
 
     public KeyWordMapper getKeyWordMapper(String type) {
         return (paramKey, tableName, term, jdbcType) -> {
-            String termField = term.getField();
+            String termField = term.getColumn();
             if (termField.contains(".")) {
                 String[] tmp = termField.split("[.]");
                 tableName = tmp[0];
                 termField = tmp[1];
             }
-            FieldMetaData field = new FieldMetaData();
+            RDBColumnMetaData field = new RDBColumnMetaData();
             field.setName(termField);
             field.setJdbcType(jdbcType);
-            return getDialect().wrapperWhere(paramKey, term, field, tableName);
+            return getDialect().buildCondition(paramKey, term, field, tableName).toString();
         };
     }
 
     protected Map<String, Object> createConfig(String resultMapId) {
         ResultMap resultMaps = ResultMapsUtils.getResultMap(resultMapId);
         Map<String, Object> fieldConfig = new HashMap<>();
-        List<ResultMapping> resultMappings=new ArrayList<>(resultMaps.getResultMappings());
+        List<ResultMapping> resultMappings = new ArrayList<>(resultMaps.getResultMappings());
         resultMappings.addAll(resultMaps.getIdResultMappings());
         resultMappings.forEach(resultMapping -> {
             if (resultMapping.getNestedQueryId() == null) {
@@ -161,7 +161,7 @@ public class DefaultSqlParamBuilder {
         return javaType;
     }
 
-    public String buildSelectFields(String resultMapId, String tableName, org.hsweb.ezorm.param.SqlParam param) {
+    public String buildSelectFields(String resultMapId, String tableName, Param param) {
         Map<String, Object> fieldConfig = createConfig(resultMapId);
         if (param == null) return "*";
         Map<String, String> propertyMapper = getPropertyMapper(fieldConfig, param);
@@ -219,9 +219,9 @@ public class DefaultSqlParamBuilder {
         tmp.setSorts(param.getSorts());
         Map<String, String> propertyMapper = getPropertyMapper(fieldConfig, tmp);
         if (tmp.getSorts().isEmpty()) return "";
-        Set<org.hsweb.ezorm.param.Sort> sorts = new LinkedHashSet<>();
+        Set<Sort> sorts = new LinkedHashSet<>();
         param.getSorts().forEach(sort -> {
-            String fieldName = sort.getField();
+            String fieldName = sort.getName();
             if (StringUtils.isNullOrEmpty(fieldName)) return;
             if (fieldName.contains("."))
                 fieldName = fieldName.split("[.]")[1];
@@ -229,7 +229,7 @@ public class DefaultSqlParamBuilder {
                 if (propertyMapper.get(fieldName) == null) {
                     for (Map.Entry<String, String> entry : propertyMapper.entrySet()) {
                         if (entry.getValue().equals(fieldName)) {
-                            sort.setField(entry.getKey());
+                            sort.setName(entry.getKey());
                         }
                     }
                 }
@@ -239,17 +239,17 @@ public class DefaultSqlParamBuilder {
         if (sorts.isEmpty()) return "";
         String sql = sorts.stream()
                 .map(sort -> {
-                    String fieldName = sort.getField();
+                    String fieldName = sort.getName();
                     if (fieldName.contains("."))
                         fieldName = fieldName.split("[.]")[1];
                     return new SqlAppender()
-                            .add(tableName, ".", fieldName, " ", sort.getDir()).toString();
+                            .add(tableName, ".", fieldName, " ", sort.getOrder()).toString();
                 })
                 .reduce((s, s1) -> new SqlAppender().add(s, ",", s1).toString()).get();
         return " order by ".concat(sql);
     }
 
-    public Map<String, String> getPropertyMapper(Map<String, Object> fieldConfig, org.hsweb.ezorm.param.SqlParam param) {
+    public Map<String, String> getPropertyMapper(Map<String, Object> fieldConfig, Param param) {
         Set<String> includes = param.getIncludes(),
                 excludes = param.getExcludes();
         boolean includesIsEmpty = includes.isEmpty(),
@@ -306,11 +306,11 @@ public class DefaultSqlParamBuilder {
         int index = 0;
         String prefixTmp = StringUtils.concat(prefix, StringUtils.isNullOrEmpty(prefix) ? "" : ".");
         for (Term term : terms) {
-            String column = getColumn(fieldConfig, term.getField());
-            if (column != null) term.setField(column);
-            boolean nullTerm = StringUtils.isNullOrEmpty(term.getField());
+            String column = getColumn(fieldConfig, term.getColumn());
+            if (column != null) term.setColumn(column);
+            boolean nullTerm = StringUtils.isNullOrEmpty(term.getColumn());
             //不是空条件 也不是可选字段
-            if (!nullTerm && !fieldConfig.containsKey(term.getField())) continue;
+            if (!nullTerm && !fieldConfig.containsKey(term.getColumn())) continue;
             //不是空条件，值为空
             if (!nullTerm && StringUtils.isNullOrEmpty(term.getValue())) continue;
             //是空条件，但是无嵌套
@@ -318,7 +318,7 @@ public class DefaultSqlParamBuilder {
             //用于sql预编译的参数名
             prefix = StringUtils.concat(prefixTmp, "terms[", index++, "]");
             //JDBC类型
-            JDBCType jdbcType = getFieldJDBCType(term.getField(), fieldConfig);
+            JDBCType jdbcType = getFieldJDBCType(term.getColumn(), fieldConfig);
             //转换参数的值
             term.setValue(transformationValue(jdbcType, term.getValue()));
             //添加类型，and 或者 or

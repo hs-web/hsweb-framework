@@ -180,4 +180,54 @@ public class Resources extends GenericPo<String> {
         return FileUtils.getSuffix(getName());
     }
 
+
+
+
+public interface Property extends GenericPo.Property{
+	/**
+	 *
+	 * @see Resources#name
+	 */
+	String name="name";
+	/**
+	 *
+	 * @see Resources#path
+	 */
+	String path="path";
+	/**
+	 *
+	 * @see Resources#createDate
+	 */
+	String createDate="createDate";
+	/**
+	 *
+	 * @see Resources#creatorId
+	 */
+	String creatorId="creatorId";
+	/**
+	 *
+	 * @see Resources#md5
+	 */
+	String md5="md5";
+	/**
+	 *
+	 * @see Resources#type
+	 */
+	String type="type";
+	/**
+	 *
+	 * @see Resources#classified
+	 */
+	String classified="classified";
+	/**
+	 *
+	 * @see Resources#size
+	 */
+	String size="size";
+	/**
+	 *
+	 * @see Resources#status
+	 */
+	String status="status";
+	}
 }

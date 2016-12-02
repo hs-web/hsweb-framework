@@ -1,7 +1,5 @@
 package org.hsweb.web.service.impl.profile;
 
-import org.hsweb.commons.MD5;
-import org.hsweb.web.bean.common.UpdateParam;
 import org.hsweb.web.bean.po.profile.UserProfile;
 import org.hsweb.web.dao.profile.UserProfileMapper;
 import org.hsweb.web.service.impl.AbstractServiceImpl;
@@ -10,9 +8,8 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 
-/**
- * Created by zhouhao on 16-7-4.
- */
+import static org.hsweb.web.bean.po.profile.UserProfile.Property.*;
+
 @Service("userProfileService")
 public class UserProfileServiceImpl extends AbstractServiceImpl<UserProfile, String> implements UserProfileService {
 
@@ -28,10 +25,12 @@ public class UserProfileServiceImpl extends AbstractServiceImpl<UserProfile, Str
     public int saveOrUpdate(UserProfile userProfile) {
         UserProfile old = selectByUserIdAndType(userProfile.getUserId(), userProfile.getType());
         if (null != old) {
-            return getMapper().update(UpdateParam.build(userProfile)
-                    .includes("content")
-                    .where("userId", userProfile.getUserId())
-                    .and("type", userProfile.getType()));
+            return createUpdate(userProfile)
+                    .includes(content)
+                    .fromBean()
+                    .where(userId)
+                    .and(type)
+                    .exec();
         } else {
             insert(userProfile);
         }

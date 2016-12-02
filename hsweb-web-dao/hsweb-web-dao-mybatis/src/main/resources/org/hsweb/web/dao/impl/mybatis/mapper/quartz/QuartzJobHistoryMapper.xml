@@ -30,7 +30,7 @@
     <!--用于动态生成sql所需的配置-->
     <sql id="config">
         <bind name="resultMapId" value="'QuartzJobHistoryResultMap'"/>
-        <bind name="tableName" value="'S_QUARTZ_JOB_HIS'"/>
+        <bind name="tableName" value="'s_quartz_job_his'"/>
     </sql>
     <insert id="insert" parameterType="org.hsweb.web.bean.common.InsertParam">
         <include refid="config"/>
@@ -48,7 +48,7 @@
     </update>
 
     <select id="selectByPk" parameterType="string" resultMap="QuartzJobHistoryResultMap">
-        select * from S_QUARTZ_JOB_HIS where u_id=#{id}
+        select * from s_quartz_job_his where u_id=#{id}
     </select>
 
     <select id="select" parameterType="org.hsweb.web.bean.common.QueryParam" resultMap="QuartzJobHistoryResultMap">

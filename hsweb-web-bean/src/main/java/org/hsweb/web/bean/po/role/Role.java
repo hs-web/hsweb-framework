@@ -91,4 +91,29 @@ public class Role extends GenericPo<String> {
     public void setType(String type) {
         this.type = type;
     }
+
+
+
+public interface Property extends GenericPo.Property{
+	/**
+	 *
+	 * @see Role#name
+	 */
+	String name="name";
+	/**
+	 *
+	 * @see Role#remark
+	 */
+	String remark="remark";
+	/**
+	 *
+	 * @see Role#type
+	 */
+	String type="type";
+	/**
+	 *
+	 * @see Role#modules
+	 */
+	String modules="modules";
+	}
 }

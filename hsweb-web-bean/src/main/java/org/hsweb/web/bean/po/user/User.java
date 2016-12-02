@@ -299,4 +299,53 @@ public class User extends GenericPo<String> {
     public void setRoleInfo(Map<Module, Set<String>> roleInfo) {
         this.roleInfo = roleInfo;
     }
+
+
+    public interface Property extends GenericPo.Property {
+        /**
+         * @see User#username
+         */
+        String username   = "username";
+        /**
+         * @see User#password
+         */
+        String password   = "password";
+        /**
+         * @see User#name
+         */
+        String name       = "name";
+        /**
+         * @see User#email
+         */
+        String email      = "email";
+        /**
+         * @see User#phone
+         */
+        String phone      = "phone";
+        /**
+         * @see User#status
+         */
+        String status     = "status";
+        /**
+         * @see User#createDate
+         */
+        String createDate = "createDate";
+        /**
+         * @see User#updateDate
+         */
+        String updateDate = "updateDate";
+        /**
+         * @see User#userRoles
+         */
+        String userRoles  = "userRoles";
+        /**
+         * @see User#roleInfo
+         */
+        String roleInfo   = "roleInfo";
+
+        /**
+         * @see User#getModules()
+         */
+        String modules = "modules";
+    }
 }

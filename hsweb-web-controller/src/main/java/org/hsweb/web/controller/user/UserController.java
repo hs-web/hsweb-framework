@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 
+import static org.hsweb.web.bean.po.user.User.Property.*;
+
 /**
  * 后台管理用户控制器，继承自GenericController,使用rest+json
  * Created by generator 2015-8-26 10:35:57
@@ -34,22 +36,22 @@ public class UserController extends GenericController<User, String> {
     }
 
     @Override
-    public ResponseMessage list(QueryParam param)  {
-        param.excludes("password");
+    public ResponseMessage list(QueryParam param) {
+        param.excludes(password);
         return super.list(param)
-                .exclude(User.class, "password", "modules", "userRoles")
+                .exclude(User.class, password, modules, userRoles)
                 .onlyData();
     }
 
     @Override
-    public ResponseMessage info(@PathVariable("id") String id)  {
-        return super.info(id).exclude(User.class, "password", "modules");
+    public ResponseMessage info(@PathVariable("id") String id) {
+        return super.info(id).exclude(User.class, password, modules);
     }
 
     @AccessLogger("禁用")
     @RequestMapping(value = "/{id}/disable", method = RequestMethod.PUT)
     @Authorize(action = "disable")
-    public ResponseMessage disable(@PathVariable("id") String id)  {
+    public ResponseMessage disable(@PathVariable("id") String id) {
         getService().disableUser(id);
         return ResponseMessage.ok();
     }
@@ -57,7 +59,7 @@ public class UserController extends GenericController<User, String> {
     @AccessLogger("启用")
     @RequestMapping(value = "/{id}/enable", method = RequestMethod.PUT)
     @Authorize(action = "enable")
-    public ResponseMessage enable(@PathVariable("id") String id)  {
+    public ResponseMessage enable(@PathVariable("id") String id) {
         getService().enableUser(id);
         return ResponseMessage.ok();
     }
