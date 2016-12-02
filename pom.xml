@@ -49,6 +49,7 @@
         <module>hsweb-web-concurrent</module>
         <module>hsweb-web-oauth2</module>
         <module>hsweb-web-datasource</module>
+        <module>hsweb-web-starter</module>
     </modules>
 
     <properties>
@@ -163,7 +164,11 @@
                 <artifactId>org.apache.oltu.oauth2.authzserver</artifactId>
                 <version>1.0.2</version>
             </dependency>
-
+            <dependency>
+                <groupId>org.hsweb</groupId>
+                <artifactId>hsweb-web-starter</artifactId>
+                <version>${project.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.hsweb</groupId>
                 <artifactId>hsweb-web-datasource</artifactId>
