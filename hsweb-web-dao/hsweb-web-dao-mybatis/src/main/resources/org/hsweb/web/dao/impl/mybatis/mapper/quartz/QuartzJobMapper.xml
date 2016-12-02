@@ -52,7 +52,7 @@
     </update>
 
     <select id="selectByPk" parameterType="string" resultMap="QuartzJobResultMap">
-        select * from S_QUARTZ_JOB where u_id=#{id}
+        select * from s_quartz_job where u_id=#{id}
     </select>
 
     <select id="select" parameterType="org.hsweb.web.bean.common.QueryParam" resultMap="QuartzJobResultMap">
