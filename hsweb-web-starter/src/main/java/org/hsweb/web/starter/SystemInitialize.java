@@ -141,7 +141,6 @@ public class SystemInitialize implements InitializingBean {
             } else if (frameworkCompare < 0) {
                 tryUpgradeFramework();
                 sync = true;
-                syncSystemVersion();
             } else {
                 if (logger.isInfoEnabled())
                     logger.info("framework : {}", installedVersion.getFrameworkVersion());
