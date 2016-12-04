@@ -241,7 +241,7 @@ public class SystemInitialize implements InitializingBean {
                 .addColumn().name("framework_version").notNull().alias(frameworkVersion).clob()
                 .custom(column -> column.setValueConverter(new JSONValueConverter(SystemVersion.FrameworkVersion.class, new ClobValueConverter()))).notNull().comment("框架版本").commit()
                 .comment("系统信息")
-                .custom(table -> table.setObjectWrapper(new BeanWrapper(() -> new SystemVersion(), table)))
+                .custom(table -> table.setObjectWrapper(new BeanWrapper<SystemVersion>(SystemVersion::new, table)))
                 .commit();
 
         if (!tableInstall) {
