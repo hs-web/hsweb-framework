@@ -157,4 +157,4 @@ database.getTable("s_modules").createInsert().value(module).exec();
 
 ## 8. 感觉太麻烦?
 
-**使用在线代码生成器,一键生成上诉全部代码!**
+**使用在线代码生成器,一键生成全部代码!**
