@@ -100,7 +100,7 @@ public class FormServiceImpl extends AbstractServiceImpl<Form, String> implement
         data.setUpdateDate(new Date());
         data.setVersion(old.getVersion());
         data.setRevision(old.getRevision() + 1);
-        return createUpdate(data).excludes(Property.createDate, Property.release, Property.version, Property.version)
+        return createUpdate(data).excludes(Property.using, Property.createDate, Property.release, Property.version)
                 .fromBean().where(Property.id).exec();
     }
 
