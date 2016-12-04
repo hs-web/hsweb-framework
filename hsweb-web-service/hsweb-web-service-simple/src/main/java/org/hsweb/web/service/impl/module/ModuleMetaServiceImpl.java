@@ -57,12 +57,13 @@ public class ModuleMetaServiceImpl extends AbstractServiceImpl<ModuleMeta, Strin
         return createQuery()
                 //(id = ? or key = ? or module_id = ? )
                 .nest(id, key).or(Property.key, key).or(moduleId, key).end()
-                //and (role_id like ? or .....)
+                //and ((role_id like ? or .....) or (role_id is null or role_id =''))
                 //遍历roleId,使用 like %% 并将值转为 ,value, 格式进行查询
                 //如果有条件,应该写sql函数,将数据库中的值转为结果集和参数进行对比
-                .nest().each(roleId, roleIds, query -> query::$like$, roleIdValueMapper).end()
-                //and (role_id is null or role_id ='')
-                .nest().isNull(roleId).or().isEmpty(roleId).end()
+                .nest()
+                    .nest().each(roleId, roleIds, query -> query::$like$, roleIdValueMapper).end()
+                    .orNest().isNull(roleId).or().isEmpty(roleId).end()
+                .end()
                 .getParam();
     }
 

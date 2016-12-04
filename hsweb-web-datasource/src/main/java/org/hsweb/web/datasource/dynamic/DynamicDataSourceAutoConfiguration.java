@@ -21,9 +21,13 @@ import com.atomikos.icatch.config.UserTransactionServiceImp;
 import com.atomikos.icatch.jta.UserTransactionImp;
 import com.atomikos.icatch.jta.UserTransactionManager;
 import com.atomikos.jdbc.AtomikosDataSourceBean;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
 import org.hsweb.commons.StringUtils;
 import org.hsweb.web.core.datasource.DataSourceHolder;
 import org.hsweb.web.core.datasource.DynamicDataSource;
+import org.hsweb.web.core.exception.AuthorizeForbiddenException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -112,4 +116,32 @@ public class DynamicDataSourceAutoConfiguration {
         return new DynamicDataSourceSqlExecutorService();
     }
 
+    @Bean
+    public AnnotationDataSourceChangeConfiguration annotationDataSourceChangeConfiguration() {
+        return new AnnotationDataSourceChangeConfiguration();
+    }
+
+    @Aspect
+    public static class AnnotationDataSourceChangeConfiguration {
+        @Around(value = "@annotation(dataSource)")
+        public Object useDatasource(ProceedingJoinPoint pjp, UseDataSource dataSource) throws Throwable {
+            try {
+                DynamicDataSource.use(dataSource.value());
+                return pjp.proceed();
+            } finally {
+                DynamicDataSource.useDefault(false);
+            }
+        }
+
+        @Around(value = "@annotation(dataSource)")
+        public Object useDefaultDatasource(ProceedingJoinPoint pjp, UseDefaultDataSource dataSource) throws Throwable {
+            try {
+                DynamicDataSource.useDefault(dataSource.value());
+                return pjp.proceed();
+            } finally {
+                if (dataSource.value())
+                    DynamicDataSource.useLast();
+            }
+        }
+    }
 }

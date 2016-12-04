@@ -6,7 +6,6 @@
     <resultMap id="DataSourceResultMap" type="org.hsweb.web.bean.po.datasource.DataSource">
         <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
         <result property="name" column="name" javaType="String" jdbcType="VARCHAR"/>
-        <result property="driver" column="driver" javaType="String" jdbcType="VARCHAR"/>
         <result property="url" column="url" javaType="String" jdbcType="VARCHAR"/>
         <result property="username" column="username" javaType="String" jdbcType="VARCHAR"/>
         <result property="password" column="password" javaType="String" jdbcType="VARCHAR"/>

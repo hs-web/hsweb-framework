@@ -26,22 +26,19 @@ import org.hsweb.web.bean.po.GenericPo;
 public class DataSource extends GenericPo<String> {
     //数据源名称
     @NotBlank
-    private String name;
-    //驱动
-    @NotBlank
-    private String driver;
+    private String         name;
     //url
     @NotBlank
-    private String url;
+    private String         url;
     //用户名
     @NotBlank
-    private String username;
+    private String         username;
     //测试sql
-    private String testSql;
+    private String         testSql;
     //密码
-    private String password;
+    private String         password;
     //是否启用
-    private int enabled;
+    private int            enabled;
     //创建日期
     private java.util.Date createDate;
 
@@ -125,13 +122,6 @@ public class DataSource extends GenericPo<String> {
         this.createDate = createDate;
     }
 
-    public String getDriver() {
-        return driver;
-    }
-
-    public void setDriver(String driver) {
-        this.driver = driver;
-    }
 
     public String getUrl() {
         return url;
@@ -151,52 +141,39 @@ public class DataSource extends GenericPo<String> {
 
     public int getHash() {
         StringBuilder builder = new StringBuilder();
-        builder.append(driver).append(url).append(username).append(password).append(enabled);
+        builder.append(url).append(username).append(password).append(enabled);
         return builder.toString().hashCode();
     }
 
 
-
-public interface Property extends GenericPo.Property{
-	/**
-	 *
-	 * @see DataSource#name
-	 */
-	String name="name";
-	/**
-	 *
-	 * @see DataSource#driver
-	 */
-	String driver="driver";
-	/**
-	 *
-	 * @see DataSource#url
-	 */
-	String url="url";
-	/**
-	 *
-	 * @see DataSource#username
-	 */
-	String username="username";
-	/**
-	 *
-	 * @see DataSource#testSql
-	 */
-	String testSql="testSql";
-	/**
-	 *
-	 * @see DataSource#password
-	 */
-	String password="password";
-	/**
-	 *
-	 * @see DataSource#enabled
-	 */
-	String enabled="enabled";
-	/**
-	 *
-	 * @see DataSource#createDate
-	 */
-	String createDate="createDate";
-	}
+    public interface Property extends GenericPo.Property {
+        /**
+         * @see DataSource#name
+         */
+        String name       = "name";
+        /**
+         * @see DataSource#url
+         */
+        String url        = "url";
+        /**
+         * @see DataSource#username
+         */
+        String username   = "username";
+        /**
+         * @see DataSource#testSql
+         */
+        String testSql    = "testSql";
+        /**
+         * @see DataSource#password
+         */
+        String password   = "password";
+        /**
+         * @see DataSource#enabled
+         */
+        String enabled    = "enabled";
+        /**
+         * @see DataSource#createDate
+         */
+        String createDate = "createDate";
+    }
 }

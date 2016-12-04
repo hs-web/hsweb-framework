@@ -82,7 +82,7 @@ public class UserServiceImpl extends AbstractServiceImpl<User, String> implement
             data.setPassword(MD5.encode(data.getPassword()));
             userMapper.updatePassword(data);
         }
-        int i = createUpdate(data).excludes(Property.status, Property.password, Property.createDate).exec();
+        int i = createUpdate(data).excludes(Property.status, Property.password, Property.createDate).fromBean().where(Property.id).exec();
         if (data.getUserRoles() != null) {
             //删除所有
             userRoleMapper.deleteByUserId(data.getId());
