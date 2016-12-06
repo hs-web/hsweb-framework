@@ -1,9 +1,7 @@
 package org.hsweb.web.controller;
 
 import com.alibaba.fastjson.JSON;
-import org.hsweb.ezorm.rdb.exception.*;
 import org.hsweb.web.core.exception.*;
-import org.hsweb.web.core.exception.ValidationException;
 import org.hsweb.web.core.message.ResponseMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +37,9 @@ public class RestControllerExceptionTranslator {
     @ResponseBody
     ResponseMessage handleException(BusinessException exception, HttpServletResponse response) {
         response.setStatus(exception.getStatus());
+        if (exception.getCause() != null) {
+            logger.error("{}:{}", exception.getMessage(), exception.getStatus(), exception.getCause());
+        }
         return ResponseMessage.error(exception.getMessage(), exception.getStatus());
     }
 
