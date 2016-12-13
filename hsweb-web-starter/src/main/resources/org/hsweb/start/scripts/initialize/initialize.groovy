@@ -29,6 +29,9 @@ def modules = [
         , [u_id: 'query-plan', name: '查询方案', uri: '', icon: 'icon-table-multiple', parent_id: 'others', remark: '', status: 1, optional: '[{"id":"R","text":"查询","checked":true},{"id":"C","text":"新增","checked":true},{"id":"U","text":"修改","checked":true},{"id":"D","text":"删除","checked":false}]', sort_index: 602]
         , [u_id: 'monitor-cache', name: '缓存监控', uri: 'admin/system-monitor/cache.html', icon: 'icon-monitor', parent_id: 'sys-monitor', remark: '', status: 1, optional: '[{"id":"M","text":"菜单可见","checked":true},{"id":"R","text":"查询","checked":true},{"id":"C","text":"新增","checked":true},{"id":"U","text":"修改","checked":true},{"id":"D","text":"删除","checked":false}]', sort_index: 502]
         , [u_id: 'quartz', name: '定时任务', uri: 'admin/quartz/list.html', icon: '', parent_id: 'sys-monitor', remark: '', status: 1, optional: '[{"id":"enable"},{"id":"disable"},{"id":"history","text":"历史记录"},{"id":"M","text":"菜单可见","checked":true},{"id":"R","text":"查询","checked":true},{"id":"C","text":"新增","checked":true},{"id":"U","text":"修改","checked":true},{"id":"D","text":"删除","checked":false}]', sort_index: 503]
+        , [u_id: 'api', name: '接口管理', uri: '', icon: '', parent_id: '-1', remark: '', status: 1, optional: '["id":"M","text":"菜单可见"]', sort_index: 6]
+        , [u_id: 'oauth2-manager', name: '客户端管理', uri: 'admin/oauth2/list.html', icon: '', parent_id: 'api', remark: '', status: 1, optional: '[{"id":"enable","text":"启用"},{"id":"disable","text":"禁用"},{"id":"M","text":"菜单可见","checked":true},{"id":"R","text":"查询","checked":true},{"id":"C","text":"新增","checked":true},{"id":"U","text":"修改","checked":true},{"id":"D","text":"删除","checked":false}]', sort_index: 601]
+
 ];
 for (module in modules) {
     s_modules.createInsert().value(module).exec();
