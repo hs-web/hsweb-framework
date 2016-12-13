@@ -8,6 +8,7 @@ import org.hsweb.ezorm.rdb.render.dialect.H2RDBDatabaseMetaData;
 import org.hsweb.ezorm.rdb.render.dialect.MysqlRDBDatabaseMetaData;
 import org.hsweb.ezorm.rdb.simple.SimpleDatabase;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -59,6 +60,7 @@ public class TestInstall {
         version.setComment("测试");
         SystemInitialize initialize = new SystemInitialize(version, sqlExecutor, database, "sa", "h2");
         initialize.afterPropertiesSet();
+        Assert.assertEquals(sqlExecutor.tableExists("s_oauth2_client"), true);
     }
 
     @After
