@@ -10,6 +10,7 @@ import org.hsweb.ezorm.core.param.Term;
 import org.hsweb.ezorm.rdb.meta.RDBColumnMetaData;
 import org.hsweb.ezorm.rdb.meta.RDBDatabaseMetaData;
 import org.hsweb.ezorm.rdb.meta.RDBTableMetaData;
+import org.hsweb.ezorm.rdb.meta.converter.DateTimeConverter;
 import org.hsweb.ezorm.rdb.render.SqlAppender;
 import org.hsweb.ezorm.rdb.render.SqlRender;
 import org.hsweb.ezorm.rdb.render.dialect.Dialect;
@@ -23,6 +24,7 @@ import org.hsweb.web.bean.common.UpdateParam;
 import org.hsweb.web.core.datasource.DataSourceHolder;
 import org.hsweb.web.core.datasource.DatabaseType;
 import org.hsweb.web.core.exception.BusinessException;
+import org.hsweb.web.core.utils.WebUtil;
 import org.hsweb.web.mybatis.plgins.pager.Pager;
 import org.hsweb.web.mybatis.utils.ResultMapsUtils;
 
@@ -113,6 +115,7 @@ public class EasyOrmSqlBuilder {
         if (cached != null) {
             return cached;
         }
+        WebUtil
         RDBTableMetaData rdbTableMetaData = new RDBTableMetaData();
         rdbTableMetaData.setName(tableName);
         rdbTableMetaData.setDatabaseMetaData(active);

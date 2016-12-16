@@ -20,6 +20,7 @@ import org.hsweb.web.bean.common.QueryParam;
 import org.hsweb.web.bean.po.classified.Classified;
 import org.hsweb.web.controller.GenericController;
 import org.hsweb.web.core.authorize.annotation.Authorize;
+import org.hsweb.web.core.logger.annotation.AccessLogger;
 import org.hsweb.web.core.message.ResponseMessage;
 import org.hsweb.web.service.classified.ClassifiedService;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -37,6 +38,7 @@ import javax.annotation.Resource;
 @RestController
 @RequestMapping(value = "/classified")
 @Authorize(module = "classified")
+@AccessLogger("分类管理")
 public class ClassifiedController extends GenericController<Classified, String> {
 
     @Resource
@@ -57,6 +59,7 @@ public class ClassifiedController extends GenericController<Classified, String> 
      */
     @RequestMapping(value = "/byType/{type}")
     @Deprecated
+    @AccessLogger(value = "根据类别请求", describe = "已弃用")
     public ResponseMessage listByTypeOld(@PathVariable("type") String type, QueryParam param) {
         param.where("type", type);
         return list(param);
@@ -71,7 +74,7 @@ public class ClassifiedController extends GenericController<Classified, String> 
      * @return 查询结果
      */
     @RequestMapping(value = "/type/{type}")
-    @CrossOrigin
+    @AccessLogger("根据类别请求")
     public ResponseMessage listByType(@PathVariable("type") String type, QueryParam param) {
         param.where("type", type);
         return list(param);
