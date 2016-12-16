@@ -31,7 +31,7 @@ public class CoreAutoConfiguration {
 
     protected Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    private String initializeScript = "classpath*:scripts/startup/initialize.";
+    private String initializeScript = "classpath*:scripts/startup/*.";
 
     @PostConstruct
     public void init() {
