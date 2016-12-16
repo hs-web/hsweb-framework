@@ -6,7 +6,7 @@
     <groupId>org.hsweb</groupId>
     <artifactId>hsweb-framework</artifactId>
     <packaging>pom</packaging>
-    <version>2.2-SNAPSHOT</version>
+    <version>2.2.1-SNAPSHOT</version>
 
     <name>${project.groupId}:${project.artifactId}</name>
     <url>http://www.hsweb.me</url>
@@ -50,6 +50,7 @@
         <module>hsweb-web-oauth2</module>
         <module>hsweb-web-datasource</module>
         <module>hsweb-web-starter</module>
+        <module>hsweb-web-message</module>
     </modules>
 
     <properties>
@@ -61,7 +62,7 @@
         <javassist.version>3.20.0-GA</javassist.version>
         <project.build.jdk>${java.version}</project.build.jdk>
 
-        <spring.boot.version>1.3.7.RELEASE</spring.boot.version>
+        <spring.boot.version>1.4.2.RELEASE</spring.boot.version>
 
         <activiti.version>5.19.0.2</activiti.version>
 
