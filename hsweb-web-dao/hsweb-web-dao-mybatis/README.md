@@ -10,7 +10,7 @@
      <dependency>
         <groupId>org.hsweb</groupId>
         <artifactId>hsweb-web-dao-mybatis</artifactId>
-        <version>2.2-SNAPSHOT</version>
+        <version>2.2.1-SNAPSHOT</version>
     </dependency>
 ```
 
