@@ -1,6 +1,0 @@
-spring:
-    activemq:
-        in-memory: false
-        pool:
-          enabled: false
-        broker-url: failover:tcp://127.0.0.1:61616

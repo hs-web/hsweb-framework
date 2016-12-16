@@ -80,11 +80,4 @@ public class CoreAutoConfiguration {
         }
     }
 
-    public static void main(String[] args) throws Exception {
-        new CoreAutoConfiguration().init();
-        DynamicScriptEngine e = DynamicScriptEngineFactory.getEngine("javascript");
-        e.compile("test", "alert('aaa');");
-        System.out.println(e.execute("test").getIfSuccess());
-
-    }
 }
