@@ -34,7 +34,7 @@ public class SystemVersion extends Version {
             setComment("企业后台管理系统基础框架");
             setWebsite("http://www.hsweb.me");
             setComment("");
-            setVersion(2, 2, 0, true);
+            setVersion(2, 3, 0, true);
         }
     }
 
