@@ -1,4 +1,0 @@
-# Auto Configure
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-org.hsweb.concureent.cache.RedisCacheManagerAutoConfig,\
-org.hsweb.concureent.cache.ConcurrentMapCacheManagerAutoConfig

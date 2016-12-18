@@ -1,3 +1,0 @@
-# Auto Configure
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-org.hsweb.web.oauth2.simple.SimpleOAuth2ManagerAutoConfiguration

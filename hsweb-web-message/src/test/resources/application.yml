@@ -1,3 +1,0 @@
-spring:
-    activemq:
-        in-memory: true
