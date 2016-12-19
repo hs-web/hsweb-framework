@@ -55,14 +55,14 @@ public class SimpleAuthorizeValidator implements AuthorizeValidator {
                     DynamicScriptEngine engine = DynamicScriptEngineFactory.getEngine(expression.getLanguage());
                     Map<String, Object> var = getExpressionRoot(user);
                     var.putAll(param);
-                    return StringUtils.isTrue(engine.execute(expression.getId(), var).getResult());
+                    return StringUtils.isTrue(engine.execute(expression.getId(), var).get());
                 });
             else
                 access = expressions.stream().anyMatch(expression -> {
                     DynamicScriptEngine engine = DynamicScriptEngineFactory.getEngine(expression.getLanguage());
                     Map<String, Object> var = getExpressionRoot(user);
                     var.putAll(param);
-                    return StringUtils.isTrue(engine.execute(expression.getId(), var).getResult());
+                    return StringUtils.isTrue(engine.execute(expression.getId(), var).get());
                 });
         }
 

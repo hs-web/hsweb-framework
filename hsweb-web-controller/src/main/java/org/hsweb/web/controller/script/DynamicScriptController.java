@@ -107,10 +107,7 @@ public class DynamicScriptController extends GenericController<DynamicScript, St
         String id = "script.runtime";
         engine.compile(id, script);
         ExecuteResult result = engine.execute(id);
-        if (!result.isSuccess()) {
-            if (result.getException() != null) throw result.getException();
-        }
-        return ResponseMessage.ok(result.getResult());
+        return ResponseMessage.ok(result.getIfSuccess());
     }
 
 

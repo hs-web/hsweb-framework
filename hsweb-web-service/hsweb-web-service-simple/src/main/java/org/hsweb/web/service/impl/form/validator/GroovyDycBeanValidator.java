@@ -35,7 +35,7 @@ public class GroovyDycBeanValidator implements Validator {
     public boolean validateMap(Map<Object, Object> data, Operation operation) {
         ValidateResults results = new ValidateResults();
         try {
-            Class validatorTargetClass = (Class) engine.execute(className, new HashMap<>()).getResult();
+            Class validatorTargetClass = (Class) engine.execute(className, new HashMap<>()).getIfSuccess();
             Object validatorTarget = validatorTargetClass.newInstance();
             Set<ConstraintViolation<Object>> result = new LinkedHashSet<>();
             if (operation == Operation.INSERT) {
