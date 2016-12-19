@@ -32,7 +32,7 @@ public class AnnotationLockAopAdvice {
 
     @Autowired
     private LockFactory lockFactory;
-    private ConcurrentMap<String, Lock> lockMap = new ConcurrentHashMap<>();
+    private ConcurrentMap<String, Lock>          lockMap          = new ConcurrentHashMap<>();
     private ConcurrentMap<String, ReadWriteLock> readWriteLockMap = new ConcurrentHashMap<>();
 
     @Autowired(required = false)
@@ -175,8 +175,7 @@ public class AnnotationLockAopAdvice {
                 }
                 if (expressionScopeBeanMap != null) var.putAll(expressionScopeBeanMap);
                 ExecuteResult result = engine.execute(expressionId, var);
-                if (result.getException() != null) throw result.getException();
-                lockNameStr = result.getResult().toString();
+                lockNameStr = (String) result.getIfSuccess();
             } else {
                 lockNameStr = lockName.value();
             }
