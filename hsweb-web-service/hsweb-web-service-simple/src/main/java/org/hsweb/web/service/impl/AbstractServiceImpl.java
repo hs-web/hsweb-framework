@@ -1,5 +1,7 @@
 package org.hsweb.web.service.impl;
 
+import org.hsweb.commons.ClassUtils;
+import org.hsweb.web.bean.po.GenericPo;
 import org.hsweb.web.bean.validator.ValidateResults;
 import org.hsweb.web.core.exception.NotFoundException;
 import org.hsweb.web.core.exception.ValidationException;
@@ -12,6 +14,7 @@ import org.hsweb.web.service.commons.SimpleUpdateService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ResolvableType;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.ConstraintViolation;
@@ -28,9 +31,9 @@ import java.util.Set;
  * @since 1.0
  */
 @Transactional(rollbackFor = Throwable.class)
-public abstract class AbstractServiceImpl<Po, PK> implements GenericService<Po, PK>
+public abstract class AbstractServiceImpl<Po extends GenericPo<PK>, PK> implements GenericService<Po, PK>
         , SimpleQueryService<Po, PK>
-        , SimpleUpdateService<Po>
+        , SimpleUpdateService<Po, PK>
         , SimpleDeleteService<PK>
         , SimpleInsertService<Po, PK> {
     protected Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -39,6 +42,11 @@ public abstract class AbstractServiceImpl<Po, PK> implements GenericService<Po, 
     protected Validator validator;
 
     protected abstract GenericMapper<Po, PK> getMapper();
+
+    @Override
+    public Class<PK> getPKType() {
+        return (Class<PK>) ClassUtils.getGenericType(this.getClass(), 1);
+    }
 
     @Override
     public QueryMapper<Po, PK> getQueryMapper() {
@@ -79,5 +87,6 @@ public abstract class AbstractServiceImpl<Po, PK> implements GenericService<Po, 
     protected void assertNotNull(Object po) {
         assertNotNull(po, "数据不存在");
     }
+
 
 }

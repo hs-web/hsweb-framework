@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * @author zhouhao
  */
-public interface SimpleUpdateService<Po> extends UpdateService<Po> {
+public interface SimpleUpdateService<Po extends GenericPo<Pk>, Pk> extends UpdateService<Po> {
 
     UpdateMapper<Po> getUpdateMapper();
 
@@ -36,8 +36,8 @@ public interface SimpleUpdateService<Po> extends UpdateService<Po> {
 
     @Override
     default int saveOrUpdate(Po po) {
-        if (po instanceof GenericPo && this instanceof QueryService) {
-            Po old = (Po) ((QueryService) this).selectByPk(((GenericPo) po).getId());
+        if (this instanceof QueryService) {
+            Po old = ((QueryService<Po, Pk>) this).selectByPk(po.getId());
             if (old != null)
                 return update(po);
             else {

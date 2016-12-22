@@ -14,7 +14,7 @@ public interface SimpleDeleteService<Pk> extends DeleteService<Pk> {
     DeleteMapper getDeleteMapper();
 
     default int delete(Pk pk) {
-        return getDeleteMapper().delete(DeleteParam.build().where(GenericPo.Property.id, pk));
+        return createDelete().where(GenericPo.Property.id, pk).exec();
     }
 
     /**
