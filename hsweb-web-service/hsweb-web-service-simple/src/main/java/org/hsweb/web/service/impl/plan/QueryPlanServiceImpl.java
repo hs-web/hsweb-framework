@@ -43,6 +43,6 @@ public class QueryPlanServiceImpl extends AbstractServiceImpl<QueryPlan, String>
 
     @Override
     public int update(QueryPlan data) {
-        return createUpdate(data).includes(name, config, sharing).exec();
+        return createUpdate(data).includes(name, config, sharing).where(id, data.getId()).exec();
     }
 }

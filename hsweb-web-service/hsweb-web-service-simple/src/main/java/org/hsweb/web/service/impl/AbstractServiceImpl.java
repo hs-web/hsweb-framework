@@ -63,11 +63,9 @@ public abstract class AbstractServiceImpl<Po, PK> implements GenericService<Po, 
     public void tryValidPo(Po data) {
         Set<ConstraintViolation<Object>> set = validator.validate(data);
         ValidateResults results = new ValidateResults();
-        
-            for (ConstraintViolation<Object> violation : set) {
-                results.addResult(violation.getPropertyPath().toString(), violation.getMessage());
-            }
-        
+        for (ConstraintViolation<Object> violation : set) {
+            results.addResult(violation.getPropertyPath().toString(), violation.getMessage());
+        }
         if (!results.isSuccess())
             throw new ValidationException(results);
     }
