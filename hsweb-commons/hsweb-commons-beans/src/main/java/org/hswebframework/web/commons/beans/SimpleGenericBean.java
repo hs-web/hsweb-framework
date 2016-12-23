@@ -68,4 +68,7 @@ public abstract class SimpleGenericBean<PK> implements GenericBean<PK> {
         if (null == properties) properties = new LinkedHashMap<>();
         properties.put(propertyName, value);
     }
+
+    @Override
+    public abstract SimpleGenericBean<PK> clone();
 }

@@ -23,6 +23,7 @@ import org.hswebframework.web.commons.beans.Bean;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * TODO 完成注释
@@ -31,38 +32,73 @@ import java.util.Map;
  * @since 3.0
  */
 public class MapperBeanFactory implements BeanFactory {
-    private Map<Class, Class> realTypeMapper = new HashMap<>();
+    private Map<Class, Mapper> realTypeMapper = new HashMap<>();
 
     @Override
-    public <T extends Bean> T getInstance(Class<T> beanClass) {
-        Class<T> realType = getRealType(beanClass);
-        if (realType == null) {
-            if (!Modifier.isInterface(beanClass.getModifiers()) && !Modifier.isAbstract(beanClass.getModifiers())) {
-                realType = beanClass;
-            }
+    @SuppressWarnings("unchecked")
+    public <T extends Bean> T newInstance(Class<T> beanClass) {
+        Mapper<T> mapper = realTypeMapper.get(beanClass);
+        if (mapper != null) return mapper.getInstanceGetter().get();
+        Class<T> realType = null;
+        if (!Modifier.isInterface(beanClass.getModifiers()) && !Modifier.isAbstract(beanClass.getModifiers())) {
+            realType = beanClass;
         }
         //尝试使用 Simple类，如: package.SimpleUserBean
         if (realType == null) {
             String simpleClassName = beanClass.getPackage().getName().concat(".Simple").concat(beanClass.getSimpleName());
             try {
                 realType = (Class<T>) Class.forName(simpleClassName);
-                realTypeMapper.put(beanClass, realType);
+                mapper = new Mapper<>(realType, new DefaultInstanceGetter(realType));
+                realTypeMapper.put(beanClass, mapper);
+                return mapper.getInstanceGetter().get();
             } catch (ClassNotFoundException e) {
             }
         }
-        if (realType != null) {
-            try {
-                return realType.newInstance();
-            } catch (Exception e) {
-                throw new RuntimeException("{create_bean_error}", e);
-            }
-        } else {
-            throw new UnsupportedOperationException("{create_bean_error}:realType not found!");
-        }
+        return null;
     }
 
     @Override
-    public <T extends Bean> Class<T> getRealType(Class<T> beanClass) {
-        return realTypeMapper.get(beanClass);
+    @SuppressWarnings("unchecked")
+    public <T extends Bean> Class<T> getInstanceType(Class<T> beanClass) {
+        Mapper<T> mapper = realTypeMapper.get(beanClass);
+        if (null != mapper) {
+            return mapper.getTarget();
+        }
+        return null;
+    }
+
+    public static class Mapper<T extends Bean> {
+        Class<T>    target;
+        Supplier<T> instanceGetter;
+
+        public Mapper(Class<T> target, Supplier<T> instanceGetter) {
+            this.target = target;
+            this.instanceGetter = instanceGetter;
+        }
+
+        public Class<T> getTarget() {
+            return target;
+        }
+
+        public Supplier<T> getInstanceGetter() {
+            return instanceGetter;
+        }
+    }
+
+    class DefaultInstanceGetter<T extends Bean> implements Supplier<T> {
+        Class<T> type;
+
+        public DefaultInstanceGetter(Class<T> type) {
+            this.type = type;
+        }
+
+        @Override
+        public T get() {
+            try {
+                return type.newInstance();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 }

@@ -25,12 +25,10 @@ import java.util.Map;
  * @author zhouhao
  * @since 3.0
  */
-public interface GenericBean<PK> extends Bean {
+public interface GenericBean<PK> extends CloneableBean {
     String id = "id";
 
     String properties = "properties";
-
-    GenericBean<PK> cloneBean();
 
     PK getId();
 

@@ -21,13 +21,32 @@ package org.hswebframework.web.commons.beans.factory;
 import org.hswebframework.web.commons.beans.Bean;
 
 /**
- * TODO 完成注释
+ * 实体工厂接口,系统各个地方使用此接口来创建实体,在实际编码中也应该使用此接口来创建实体,而不是使用new方式来创建
  *
  * @author zhouhao
+ * @see Bean
  * @since 3.0
  */
 public interface BeanFactory {
-    <T extends Bean> T getInstance(Class<T> beanClass);
+    /**
+     * 根据类型创建实体,类型必须为{@link Bean}的子类。
+     *
+     * @param beanClass 类型
+     * @param <T>       泛型,需实现{@link Bean}
+     * @return 实体
+     */
+    <T extends Bean> T newInstance(Class<T> beanClass);
 
-    <T extends Bean> Class<T> getRealType(Class<T> beanClass);
+    /**
+     * 根据类型获取实体的真实的实体类型,
+     * 可通过此方法获取获取已拓展的实体类型，如:<br>
+     * <code>
+     * factory.getInstanceType(MyBeanInterface.class); -> class SimpleMyBeanInterface
+     * </code>
+     *
+     * @param beanClass 类型
+     * @param <T>       泛型
+     * @return 实体类型
+     */
+    <T extends Bean> Class<T> getInstanceType(Class<T> beanClass);
 }
