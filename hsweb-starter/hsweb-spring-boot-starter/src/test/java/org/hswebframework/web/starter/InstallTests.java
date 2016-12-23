@@ -79,19 +79,4 @@ public class InstallTests {
         systemInitialize.install();
     }
 
-    @Test
-    public void testScript() throws Exception {
-        DynamicScriptEngine engine = DynamicScriptEngineFactory.getEngine("js");
-        engine.addGlobalVariable(Collections.singletonMap("logger", LoggerFactory.getLogger(InstallTests.class)));
-
-        SimpleDependencyInstaller installer = new SimpleDependencyInstaller();
-
-        engine.compile("test", FileUtils.reader2String("/home/zhouhao/IdeaProjects/hsweb-projects/hsweb-framework/hsweb-starter/hsweb-spring-boot-starter/src/test/resources/hsweb-starter.js"));
-
-        Map<String, Object> test = new HashMap<>();
-        test.put("dependency", installer);
-        engine.execute("test", test).getIfSuccess();
-
-        installer.doInstall(new HashMap<>());
-    }
 }
