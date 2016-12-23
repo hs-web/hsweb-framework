@@ -1,0 +1,90 @@
+/*
+ *
+ *  * Copyright 2016 http://www.hswebframework.org
+ *  *
+ *  * Licensed under the Apache License, Version 2.0 (the "License");
+ *  * you may not use this file except in compliance with the License.
+ *  * You may obtain a copy of the License at
+ *  *
+ *  *     http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS,
+ *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  * See the License for the specific language governing permissions and
+ *  * limitations under the License.
+ *
+ */
+
+package org.hswebframework.web.tests;
+
+import org.hsweb.ezorm.rdb.executor.AbstractJdbcSqlExecutor;
+import org.hsweb.ezorm.rdb.executor.SqlExecutor;
+import org.hswebframework.web.commons.beans.factory.BeanFactory;
+import org.hswebframework.web.commons.beans.factory.MapperBeanFactory;
+import org.hswebframework.web.dao.datasource.DataSourceHolder;
+import org.hswebframework.web.dao.datasource.DatabaseType;
+import org.junit.runner.RunWith;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import javax.sql.DataSource;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
+import java.sql.Connection;
+import java.sql.SQLException;
+
+/**
+ * TODO 完成注释
+ *
+ * @author zhouhao
+ */
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = SimpleWebApplicationTests.Config.class)
+public class SimpleWebApplicationTests {
+
+    @Configuration
+    @SpringBootApplication
+    public static class Config {
+
+        @Bean(name = "validator")
+        @ConditionalOnMissingBean(Validator.class)
+        public Validator validator() {
+            ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+            Validator validator = factory.getValidator();
+            return validator;
+        }
+
+        @Bean
+        public BeanFactory beanFactory() {
+            return new MapperBeanFactory();
+        }
+
+        @Bean
+        public SqlExecutor sqlExecutor(DataSource dataSource) throws SQLException {
+            Connection connection = dataSource.getConnection();
+            try {
+                DataSourceHolder.install(dataSource, DatabaseType.fromJdbcUrl(connection.getMetaData().getURL()));
+            } finally {
+                connection.close();
+            }
+            return new AbstractJdbcSqlExecutor() {
+                @Override
+                public Connection getConnection() {
+                    return DataSourceUtils.getConnection(dataSource);
+                }
+
+                @Override
+                public void releaseConnection(Connection connection) throws SQLException {
+                    DataSourceUtils.releaseConnection(connection, dataSource);
+                }
+            };
+        }
+    }
+}

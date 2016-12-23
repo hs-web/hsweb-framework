@@ -12,4 +12,10 @@
     <artifactId>hsweb-core</artifactId>
 
 
+    <dependencies>
+        <dependency>
+            <groupId>org.hswebframework</groupId>
+            <artifactId>hsweb-utils</artifactId>
+        </dependency>
+    </dependencies>
 </project>

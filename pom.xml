@@ -1,4 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ /*
+  ~  * Copyright 2016 http://www.hswebframework.org
+  ~  *
+  ~  * Licensed under the Apache License, Version 2.0 (the "License");
+  ~  * you may not use this file except in compliance with the License.
+  ~  * You may obtain a copy of the License at
+  ~  *
+  ~  *     http://www.apache.org/licenses/LICENSE-2.0
+  ~  *
+  ~  * Unless required by applicable law or agreed to in writing, software
+  ~  * distributed under the License is distributed on an "AS IS" BASIS,
+  ~  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  * See the License for the specific language governing permissions and
+  ~  * limitations under the License.
+  ~  */
+  -->
+
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -14,8 +32,193 @@
         <module>hsweb-message</module>
         <module>hsweb-system</module>
         <module>hsweb-tests</module>
+        <module>hsweb-dynamic-datasource</module>
+        <module>hsweb-commons</module>
+        <module>hsweb-i18n</module>
+        <module>hsweb-logging</module>
     </modules>
 
     <packaging>pom</packaging>
 
+
+    <name>${project.groupId}:${project.artifactId}</name>
+    <url>http://www.hswebframework.org</url>
+    <description>企业后台管理基础框架</description>
+
+    <licenses>
+        <license>
+            <name>The Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>zhouhao</name>
+            <email>i@hsweb.me</email>
+            <roles>
+                <role>Owner</role>
+            </roles>
+            <timezone>+8</timezone>
+            <url>https://github.com/zhou-hao</url>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:https://github.com/hs-web/hsweb-framework.git</connection>
+        <developerConnection>scm:git:https://github.com/hs-web/hsweb-framework.git</developerConnection>
+        <url>https://github.com/hs-web/hsweb-framework</url>
+        <tag>${project.version}</tag>
+    </scm>
+
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.build.locales>zh_CN</project.build.locales>
+
+        <java.version>1.8</java.version>
+        <project.build.jdk>${java.version}</project.build.jdk>
+
+
+        <spring.boot.version>1.4.2.RELEASE</spring.boot.version>
+
+        <javassist.version>3.20.0-GA</javassist.version>
+        <activiti.version>5.19.0.2</activiti.version>
+
+        <fastjson.version>1.2.6</fastjson.version>
+        <h2.version>1.4.191</h2.version>
+        <mysql.version>5.1.39</mysql.version>
+        <cglib.version>3.2.2</cglib.version>
+        <aspectj.version>1.6.12</aspectj.version>
+        <hibernate.validator.version>5.1.1.Final</hibernate.validator.version>
+
+        <hsweb.ezorm.version>3.0.0-SNAPSHOT</hsweb.ezorm.version>
+        <hsweb.utils.version>3.0.2</hsweb.utils.version>
+        <hsweb.expands.version>3.0.0-SNAPSHOT</hsweb.expands.version>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-scm-plugin</artifactId>
+                <version>1.8.1</version>
+                <configuration>
+                    <connectionType>connection</connectionType>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.4</version>
+                <configuration>
+                    <attach>true</attach>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.9.1</version>
+                <configuration>
+                    <aggregate>true</aggregate>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.1</version>
+                <configuration>
+                    <source>${project.build.jdk}</source>
+                    <target>${project.build.jdk}</target>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                </configuration>
+            </plugin>
+
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.1.7</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>4.12</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.hswebframework</groupId>
+                <artifactId>hsweb-utils</artifactId>
+                <version>${hsweb.utils.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring.boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.hswebframework</groupId>
+                <artifactId>hsweb-expands</artifactId>
+                <version>${hsweb.expands.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.springframework</groupId>
+                        <artifactId>spring-expression</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <dependency>
+                <groupId>org.hswebframework</groupId>
+                <artifactId>hsweb-easy-orm</artifactId>
+                <version>${hsweb.ezorm.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+        </dependencies>
+    </dependencyManagement>
 </project>

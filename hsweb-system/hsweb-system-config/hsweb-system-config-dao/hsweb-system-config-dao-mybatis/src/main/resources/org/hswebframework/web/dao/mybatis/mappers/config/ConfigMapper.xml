@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.hswebframework.web.dao.config.ConfigDao">
+    <resultMap id="ConfigResultMap" type="org.hswebframework.web.bean.config.SimpleConfigBean">
+        <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
+        <result property="remark" column="remark" javaType="String" jdbcType="VARCHAR"/>
+        <result property="content" column="content" javaType="java.util.List" jdbcType="CLOB"/>
+        <result property="createDate" column="create_date" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <result property="updateDate" column="update_date" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <result property="classifiedId" column="classified_id" javaType="String" jdbcType="VARCHAR"/>
+        <result property="creatorId" column="creator_id" javaType="String" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!--用于动态生成sql所需的配置-->
+    <sql id="config">
+        <bind name="resultMapId" value="'ConfigResultMap'"/>
+        <bind name="tableName" value="'s_config'"/>
+    </sql>
+
+    <insert id="insert" parameterType="org.hswebframework.web.bean.config.ConfigBean">
+        <include refid="config"/>
+        <include refid="BasicMapper.buildInsertSql"/>
+    </insert>
+
+    <delete id="deleteByPk" parameterType="String">
+        delete from s_config where u_id =#{id}
+    </delete>
+
+    <delete id="delete" parameterType="org.hswebframework.web.commons.beans.Bean">
+        <include refid="config"/>
+        <include refid="BasicMapper.buildDeleteSql"/>
+    </delete>
+
+    <update id="update" parameterType="org.hswebframework.web.commons.beans.Bean">
+        <include refid="config"/>
+        <include refid="BasicMapper.buildUpdateSql"/>
+    </update>
+
+    <select id="query" parameterType="org.hswebframework.web.commons.beans.Bean" resultMap="ConfigResultMap">
+        <include refid="config"/>
+        <include refid="BasicMapper.buildSelectSql"/>
+    </select>
+
+    <select id="count" parameterType="org.hswebframework.web.commons.beans.Bean" resultType="int">
+        <include refid="config"/>
+        <include refid="BasicMapper.buildTotalSql"/>
+    </select>
+</mapper>
