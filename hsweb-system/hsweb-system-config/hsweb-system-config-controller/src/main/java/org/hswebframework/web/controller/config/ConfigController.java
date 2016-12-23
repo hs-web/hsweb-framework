@@ -35,10 +35,10 @@ import org.springframework.web.bind.annotation.RestController;
  * @author zhouhao
  */
 @RestController
-@RequestMapping("/config")
+@RequestMapping("${hsweb.web.mappings.config:config}")
 @Authorize(module = "config")
 @AccessLogger("配置管理")
-public class ConfigController implements GenericBeanController<SimpleConfigBean, String, QueryParamBean> {
+public class ConfigController implements GenericBeanController<SimpleConfigBean, String> {
 
     @Autowired
     private ConfigService<QueryParamBean> configService;
@@ -47,4 +47,5 @@ public class ConfigController implements GenericBeanController<SimpleConfigBean,
     public ConfigService getService() {
         return configService;
     }
+
 }
