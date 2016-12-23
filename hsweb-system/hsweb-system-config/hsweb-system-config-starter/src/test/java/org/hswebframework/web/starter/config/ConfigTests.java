@@ -9,6 +9,7 @@ import org.hswebframework.web.commons.beans.param.QueryParamBean;
 import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.service.config.ConfigService;
 import org.hswebframework.web.tests.SimpleWebApplicationTests;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,11 @@ public class ConfigTests extends SimpleWebApplicationTests {
 
     @Autowired
     private ConfigService<QueryParamBean> configService;
+
+    @After
+    public void clear() throws SQLException {
+        executor.delete("delete from s_config");
+    }
 
     @Test
     public void testMvc() throws Exception {
