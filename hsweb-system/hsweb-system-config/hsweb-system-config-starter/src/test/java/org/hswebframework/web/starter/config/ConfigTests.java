@@ -1,6 +1,7 @@
 package org.hswebframework.web.starter.config;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import org.hsweb.ezorm.rdb.executor.SqlExecutor;
 import org.hswebframework.web.bean.config.ConfigBean;
 import org.hswebframework.web.bean.config.SimpleConfigBean;
@@ -11,6 +12,7 @@ import org.hswebframework.web.tests.SimpleWebApplicationTests;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 
 import java.sql.SQLException;
 import java.util.Date;
@@ -29,27 +31,60 @@ public class ConfigTests extends SimpleWebApplicationTests {
     private ConfigService<QueryParamBean> configService;
 
     @Test
-    public void test() throws SQLException {
-        boolean installSuccess = executor.tableExists("s_config");
-        Assert.assertTrue(installSuccess);
+    public void testMvc() throws Exception {
+        //创建bean
         ConfigBean configBean = configService.createBean();
         Assert.assertEquals(configBean.getClass(), SimpleConfigBean.class);
         configBean.setId(IDGenerator.RANDOM.generate());
         configBean.addContent("test", 1, "测试");
         configBean.setCreateDate(new Date());
         configBean.setCreatorId("test");
+        String jsonStr = JSON.toJSONString(configBean);
 
+        JSONObject jsonObject = testPost("/config")
+                .setUp(builder -> builder.accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonStr))
+                .exec().resultAsJson();
+        Assert.assertEquals(jsonObject.getString("data"), configBean.getId());
+
+        JSONObject getRes = testGet("/config/" + configBean.getId()).exec().resultAsJson();
+        Assert.assertEquals(getRes
+                .getObject("data", SimpleConfigBean.class)
+                .get("test")
+                .getNumber(0).intValue(), 1);
+
+        getRes = testGet("/config").exec().resultAsJson();
+        Assert.assertEquals(getRes.getJSONObject("data").getJSONArray("data")
+                .getObject(0, SimpleConfigBean.class)
+                .get("test")
+                .getNumber(0).intValue(), 1);
+    }
+
+    @Test
+    public void test() throws SQLException {
+        //判断是否安装成功
+        boolean installSuccess = executor.tableExists("s_config");
+        Assert.assertTrue(installSuccess);
+        //创建bean
+        ConfigBean configBean = configService.createBean();
+        Assert.assertEquals(configBean.getClass(), SimpleConfigBean.class);
+        configBean.setId(IDGenerator.RANDOM.generate());
+        configBean.addContent("test", 1, "测试");
+        configBean.setCreateDate(new Date());
+        configBean.setCreatorId("test");
+        //test insert
         configService.insert(configBean);
-
         Assert.assertEquals(configBean.get("test").getNumber(0), 1);
-        configBean = configService.selectSingle(new QueryParamBean());
+        configBean = configService.selectSingle(QueryParamBean.empty());
         configBean.addContent("test2", "2", "");
-        configService.updateByPk(configBean);
-
+        //test update
+        Assert.assertEquals(configService.updateByPk(configBean), 1);
         Assert.assertEquals(configBean.get("test2").getNumber(0).intValue(), 2);
-        configBean = configService.selectSingle(new QueryParamBean());
+        configBean = configService.selectSingle(QueryParamBean.empty());
+        //test delete
         configService.deleteByPk(configBean.getId());
-        Assert.assertEquals(configService.count(new QueryParamBean()), 0);
+        Assert.assertEquals(configService.count(QueryParamBean.empty()), 0);
     }
 
 }

@@ -11,3 +11,6 @@ hsweb:
     app:
       name: 配置管理测试
       version: 3.0.0
+    web:
+      mappings:
+        config: /config #default
