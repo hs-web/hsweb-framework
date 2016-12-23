@@ -91,7 +91,9 @@ public class SimpleConfigBean extends SimpleGenericBean<String> implements Confi
         if (cache == null) {
             synchronized (this) {
                 if (cache == null) {
-                    if (content == null || content.isEmpty()) cache = new HashMap<>();
+                    if (content == null || content.isEmpty()) {
+                        return null;
+                    }
                     cache = content.stream()
                             .collect(Collectors.toMap(ConfigContent::getKey, content -> content));
                 }
