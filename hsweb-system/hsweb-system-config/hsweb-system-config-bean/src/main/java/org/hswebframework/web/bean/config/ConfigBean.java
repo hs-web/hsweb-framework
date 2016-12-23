@@ -34,7 +34,7 @@ public interface ConfigBean extends GenericBean<String> {
 
     String getCreatorId();
 
-    ConfigBean setCreatorId(String creatorId);
+    void setCreatorId(String creatorId);
 
     /**
      * 获取 备注
@@ -48,7 +48,7 @@ public interface ConfigBean extends GenericBean<String> {
      *
      * @param remark 备注
      */
-    ConfigBean setRemark(String remark);
+    void setRemark(String remark);
 
     /**
      * 获取 配置内容
@@ -62,7 +62,7 @@ public interface ConfigBean extends GenericBean<String> {
      *
      * @param content 配置内容
      */
-    ConfigBean setContent(List<ConfigContent> content);
+    void setContent(List<ConfigContent> content);
 
     /**
      * 获取 创建日期
@@ -76,7 +76,7 @@ public interface ConfigBean extends GenericBean<String> {
      *
      * @param createDate 创建日期
      */
-    ConfigBean setCreateDate(Date createDate);
+    void setCreateDate(Date createDate);
 
     /**
      * 获取 最后一次修改日期
@@ -90,7 +90,7 @@ public interface ConfigBean extends GenericBean<String> {
      *
      * @param updateDate 最后一次修改日期
      */
-    ConfigBean setUpdateDate(Date updateDate);
+    void setUpdateDate(Date updateDate);
 
     /**
      * 获取分类ID
@@ -104,33 +104,9 @@ public interface ConfigBean extends GenericBean<String> {
      *
      * @param classifiedId 分类ID
      */
-    ConfigBean setClassifiedId(String classifiedId);
+    void setClassifiedId(String classifiedId);
 
     ConfigBean addContent(String key, Object value, String comment);
 
     ConfigContent get(String key);
-
-    interface ConfigContent {
-        String getKey();
-
-        Object getValue();
-
-        String getComment();
-
-        default Number getNumber(Number defaultValue) {
-            Object val = getValue();
-            if (null == val) return defaultValue;
-            if (val instanceof Number) return ((Number) val);
-            if (val instanceof String)
-                return new BigDecimal(((String) val));
-            return defaultValue;
-        }
-
-        default Object getValue(Object defaultValue) {
-            Object val = getValue();
-            if (val == null) return defaultValue;
-            return val;
-        }
-
-    }
 }

@@ -18,7 +18,6 @@
 
 package org.hswebframework.web.controller;
 
-import org.hswebframework.web.commons.beans.Bean;
 import org.hswebframework.web.commons.beans.GenericBean;
 import org.hswebframework.web.commons.beans.param.QueryParamBean;
 import org.hswebframework.web.controller.message.ResponseMessage;
@@ -33,10 +32,10 @@ import static org.hswebframework.web.controller.message.ResponseMessage.ok;
  *
  * @author zhouhao
  */
-public interface GenericBeanController<B extends GenericBean<PK>, PK, Q extends Bean>
-        extends CrudController<B, PK, Q> {
+public interface GenericBeanController<B extends GenericBean<PK>, PK>
+        extends CrudController<B, PK, QueryParamBean> {
 
-    CrudService<B, PK, Q> getService();
+    CrudService<B, PK, QueryParamBean> getService();
 
     @Override
     default ResponseMessage updateByPrimaryKey(@PathVariable PK id, @RequestBody B data) {

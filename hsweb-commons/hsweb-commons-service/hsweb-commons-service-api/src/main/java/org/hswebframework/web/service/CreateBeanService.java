@@ -19,10 +19,20 @@
 package org.hswebframework.web.service;
 
 /**
- * TODO 完成注释
+ * 实体创建服务接口,通过此接口创建实体.在创建实体类时,建议使用此接口进行创建,而不是使用new
+ * 如:
+ * <code>
+ * YourBean bean =  service.createBean();
+ * </code>
  *
  * @author zhouhao
+ * @since 3.0
  */
 public interface CreateBeanService<B> {
+    /**
+     * 创建实体
+     *
+     * @return 实体
+     */
     B createBean();
 }

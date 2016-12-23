@@ -19,6 +19,7 @@
 package org.hswebframework.web.bean.config;
 
 
+import org.hswebframework.web.commons.beans.CloneableBean;
 import org.hswebframework.web.commons.beans.SimpleGenericBean;
 
 import javax.validation.constraints.NotNull;
@@ -58,9 +59,9 @@ public class SimpleConfigBean extends SimpleGenericBean<String> implements Confi
         return creatorId;
     }
 
-    public ConfigBean setCreatorId(String creatorId) {
+    @Override
+    public void setCreatorId(String creatorId) {
         this.creatorId = creatorId;
-        return this;
     }
 
     @Override
@@ -69,9 +70,8 @@ public class SimpleConfigBean extends SimpleGenericBean<String> implements Confi
     }
 
     @Override
-    public ConfigBean setRemark(String remark) {
+    public void setRemark(String remark) {
         this.remark = remark;
-        return this;
     }
 
     @Override
@@ -82,7 +82,7 @@ public class SimpleConfigBean extends SimpleGenericBean<String> implements Confi
     @Override
     public ConfigBean addContent(String key, Object value, String comment) {
         if (content == null) content = new ArrayList<>();
-        content.add(new SimpleConfigContent(key, value, comment));
+        content.add(new org.hswebframework.web.bean.config.ConfigContent(key, value, comment));
         return this;
     }
 
@@ -101,9 +101,8 @@ public class SimpleConfigBean extends SimpleGenericBean<String> implements Confi
     }
 
     @Override
-    public ConfigBean setContent(List<ConfigContent> content) {
+    public void setContent(List<ConfigContent> content) {
         this.content = content;
-        return this;
     }
 
     @Override
@@ -112,9 +111,8 @@ public class SimpleConfigBean extends SimpleGenericBean<String> implements Confi
     }
 
     @Override
-    public ConfigBean setCreateDate(Date createDate) {
+    public void setCreateDate(Date createDate) {
         this.createDate = createDate;
-        return this;
     }
 
     @Override
@@ -123,9 +121,8 @@ public class SimpleConfigBean extends SimpleGenericBean<String> implements Confi
     }
 
     @Override
-    public ConfigBean setUpdateDate(Date updateDate) {
+    public void setUpdateDate(Date updateDate) {
         this.updateDate = updateDate;
-        return this;
     }
 
     @Override
@@ -134,58 +131,17 @@ public class SimpleConfigBean extends SimpleGenericBean<String> implements Confi
     }
 
     @Override
-    public ConfigBean setClassifiedId(String classifiedId) {
+    public void setClassifiedId(String classifiedId) {
         this.classifiedId = classifiedId;
-        return this;
     }
 
     @Override
-    public SimpleConfigBean cloneBean() {
-        // TODO: 16-12-23  完成克隆代码
-        return null;
-    }
-
-    public static class SimpleConfigContent implements ConfigContent {
-        private String key;
-
-        private Object value;
-
-        private String comment;
-
-        public SimpleConfigContent() {
-        }
-
-        public SimpleConfigContent(String key, Object value, String comment) {
-            this.key = key;
-            this.value = value;
-            this.comment = comment;
-        }
-
-        @Override
-        public String getKey() {
-            return key;
-        }
-
-        @Override
-        public Object getValue() {
-            return value;
-        }
-
-        @Override
-        public String getComment() {
-            return comment;
-        }
-
-        public void setComment(String comment) {
-            this.comment = comment;
-        }
-
-        public void setKey(String key) {
-            this.key = key;
-        }
-
-        public void setValue(Object value) {
-            this.value = value;
-        }
+    public SimpleConfigBean clone() {
+        SimpleConfigBean cloned = new SimpleConfigBean();
+        cloned.setId(getId());
+        cloned.setCreatorId(getCreatorId());
+        cloned.setCreateDate(getCreateDate());
+        cloned.content = getContent().stream().map(ConfigContent::clone).collect(Collectors.toList());
+        return cloned;
     }
 }

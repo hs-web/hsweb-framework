@@ -69,7 +69,7 @@ public abstract class GenericBeanService<B extends GenericBean<PK>, PK> implemen
     }
 
     protected Class<B> getBeanRealType() {
-        return beanFactory.getRealType(getBeanType());
+        return beanFactory.getInstanceType(getBeanType());
     }
 
     protected Class<B> getBeanType() {
@@ -85,7 +85,7 @@ public abstract class GenericBeanService<B extends GenericBean<PK>, PK> implemen
         if (!beanFactoryIsEnabled()) {
             throw new UnsupportedOperationException("{unsupported_operation}");
         }
-        return beanFactory.getInstance(getBeanType());
+        return beanFactory.newInstance(getBeanType());
     }
 
     public void tryValidate(B bean) {
