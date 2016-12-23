@@ -18,8 +18,12 @@
 
 package org.hswebframework.web.starter;
 
+import com.alibaba.fastjson.serializer.SerializerFeature;
+import org.hswebframework.web.starter.convert.FastJsonHttpMessageConverter;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.converter.HttpMessageConverter;
 
 /**
  * TODO 完成注释
@@ -30,4 +34,16 @@ import org.springframework.context.annotation.Configuration;
 @ComponentScan("org.hswebframework.web")
 public class HswebAutoConfiguration {
 
+    @Bean
+    public HttpMessageConverter<Object> converter() {
+        FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();
+        // TODO: 16-12-24  应该可配置
+        converter.setFeatures(
+                SerializerFeature.WriteNullListAsEmpty,
+                SerializerFeature.WriteNullNumberAsZero,
+                SerializerFeature.WriteNullBooleanAsFalse,
+                SerializerFeature.WriteDateUseDateFormat
+        );
+        return converter;
+    }
 }
