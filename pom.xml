@@ -32,7 +32,7 @@
         <module>hsweb-message</module>
         <module>hsweb-system</module>
         <module>hsweb-tests</module>
-        <module>hsweb-dynamic-datasource</module>
+        <module>hsweb-datasource</module>
         <module>hsweb-commons</module>
         <module>hsweb-i18n</module>
         <module>hsweb-logging</module>

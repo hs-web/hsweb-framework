@@ -18,8 +18,8 @@
 
 package org.hswebframework.web.service.config.simple;
 
-import org.hswebframework.web.commons.beans.param.QueryParamBean;
 import org.hswebframework.web.bean.config.ConfigBean;
+import org.hswebframework.web.commons.beans.param.QueryParamBean;
 import org.hswebframework.web.dao.config.ConfigDao;
 import org.hswebframework.web.service.GenericBeanService;
 import org.hswebframework.web.service.config.ConfigService;
@@ -42,5 +42,4 @@ public class SimpleConfigService extends GenericBeanService<ConfigBean, String>
     public ConfigDao getDao() {
         return configDao;
     }
-
 }

@@ -24,6 +24,7 @@ import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.logging.AccessLogger;
 import org.hswebframework.web.service.CrudService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import static org.hswebframework.web.controller.message.ResponseMessage.ok;
