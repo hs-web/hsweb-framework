@@ -22,6 +22,12 @@
         <module>hsweb-system-cli</module>
         <module>hsweb-system-all</module>
         <module>hsweb-system-organizational</module>
+        <module>hsweb-system-classified</module>
+        <module>hsweb-system-file</module>
+        <module>hsweb-system-template</module>
+        <module>hsweb-system-script</module>
+        <module>hsweb-system-history</module>
+        <module>hsweb-system-dictionary</module>
     </modules>
     <artifactId>hsweb-system</artifactId>
 
