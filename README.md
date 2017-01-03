@@ -3,6 +3,9 @@
 [![Build Status](https://travis-ci.org/hs-web/hsweb-framework.svg?branch=master)](https://travis-ci.org/hs-web/hsweb-framework)
 [![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg?style=flat-square)](https://www.apache.org/licenses/LICENSE-2.0.html)
 
+### 3.0
+[全新的架构,开发中...](https://github.com/hs-web/hsweb-framework/tree/3.0)
+
 ### 业务功能
 现在:
 
