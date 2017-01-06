@@ -28,6 +28,7 @@
         <module>hsweb-system-script</module>
         <module>hsweb-system-history</module>
         <module>hsweb-system-dictionary</module>
+        <module>hsweb-system-document</module>
     </modules>
     <artifactId>hsweb-system</artifactId>
 

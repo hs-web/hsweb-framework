@@ -3,9 +3,9 @@ package org.hswebframework.web.starter.config;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.hsweb.ezorm.rdb.executor.SqlExecutor;
-import org.hswebframework.web.bean.config.ConfigBean;
-import org.hswebframework.web.bean.config.SimpleConfigBean;
-import org.hswebframework.web.commons.beans.param.QueryParamBean;
+import org.hswebframework.web.entity.config.ConfigEntity;
+import org.hswebframework.web.entity.config.SimpleConfigEntity;
+import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.service.config.ConfigService;
 import org.hswebframework.web.tests.SimpleWebApplicationTests;
@@ -29,7 +29,7 @@ public class ConfigTests extends SimpleWebApplicationTests {
     private SqlExecutor executor;
 
     @Autowired
-    private ConfigService<QueryParamBean> configService;
+    private ConfigService<QueryParamEntity> configService;
 
     @After
     public void clear() throws SQLException {
@@ -39,8 +39,8 @@ public class ConfigTests extends SimpleWebApplicationTests {
     @Test
     public void testMvc() throws Exception {
         //创建bean
-        ConfigBean configBean = configService.createBean();
-        Assert.assertEquals(configBean.getClass(), SimpleConfigBean.class);
+        ConfigEntity configBean = configService.createEntity();
+        Assert.assertEquals(configBean.getClass(), SimpleConfigEntity.class);
         configBean.setId(IDGenerator.RANDOM.generate());
         configBean.addContent("test", 1, "测试");
         configBean.setCreateDate(new Date());
@@ -52,17 +52,18 @@ public class ConfigTests extends SimpleWebApplicationTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonStr))
                 .exec().resultAsJson();
+        //{data:id,code:200}
         Assert.assertEquals(jsonObject.getString("data"), configBean.getId());
 
         JSONObject getRes = testGet("/config/" + configBean.getId()).exec().resultAsJson();
         Assert.assertEquals(getRes
-                .getObject("data", SimpleConfigBean.class)
+                .getObject("data", SimpleConfigEntity.class)
                 .get("test")
                 .getNumber(0).intValue(), 1);
 
         getRes = testGet("/config").exec().resultAsJson();
         Assert.assertEquals(getRes.getJSONObject("data").getJSONArray("data")
-                .getObject(0, SimpleConfigBean.class)
+                .getObject(0, SimpleConfigEntity.class)
                 .get("test")
                 .getNumber(0).intValue(), 1);
     }
@@ -73,8 +74,8 @@ public class ConfigTests extends SimpleWebApplicationTests {
         boolean installSuccess = executor.tableExists("s_config");
         Assert.assertTrue(installSuccess);
         //创建bean
-        ConfigBean configBean = configService.createBean();
-        Assert.assertEquals(configBean.getClass(), SimpleConfigBean.class);
+        ConfigEntity configBean = configService.createEntity();
+        Assert.assertEquals(configBean.getClass(), SimpleConfigEntity.class);
         configBean.setId(IDGenerator.RANDOM.generate());
         configBean.addContent("test", 1, "测试");
         configBean.setCreateDate(new Date());
@@ -82,15 +83,15 @@ public class ConfigTests extends SimpleWebApplicationTests {
         //test insert
         configService.insert(configBean);
         Assert.assertEquals(configBean.get("test").getNumber(0), 1);
-        configBean = configService.selectSingle(QueryParamBean.empty());
+        configBean = configService.selectSingle(QueryParamEntity.empty());
         configBean.addContent("test2", "2", "");
         //test update
         Assert.assertEquals(configService.updateByPk(configBean), 1);
         Assert.assertEquals(configBean.get("test2").getNumber(0).intValue(), 2);
-        configBean = configService.selectSingle(QueryParamBean.empty());
+        configBean = configService.selectSingle(QueryParamEntity.empty());
         //test delete
         configService.deleteByPk(configBean.getId());
-        Assert.assertEquals(configService.count(QueryParamBean.empty()), 0);
+        Assert.assertEquals(configService.count(QueryParamEntity.empty()), 0);
     }
 
 }

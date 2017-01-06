@@ -20,12 +20,14 @@ package org.hswebframework.web.tests;
 
 import org.hsweb.ezorm.rdb.executor.AbstractJdbcSqlExecutor;
 import org.hsweb.ezorm.rdb.executor.SqlExecutor;
-import org.hswebframework.web.commons.beans.factory.BeanFactory;
-import org.hswebframework.web.commons.beans.factory.MapperBeanFactory;
+import org.hswebframework.web.commons.entity.Entity;
+import org.hswebframework.web.commons.entity.factory.EntityFactory;
+import org.hswebframework.web.commons.entity.factory.MapperEntityFactory;
 import org.hswebframework.web.dao.datasource.DataSourceHolder;
 import org.hswebframework.web.dao.datasource.DatabaseType;
 import org.junit.Before;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -41,7 +43,6 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.web.context.WebApplicationContext;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 import javax.validation.Validation;
 import javax.validation.Validator;
@@ -66,6 +67,9 @@ public class SimpleWebApplicationTests {
     protected WebApplicationContext wac;
 
     protected MockHttpSession session;
+
+    @Autowired
+    protected SqlExecutor sqlExecutor;
 
     @Before
     public void setup() throws Exception {
@@ -127,8 +131,8 @@ public class SimpleWebApplicationTests {
         }
 
         @Bean
-        public BeanFactory beanFactory() {
-            return new MapperBeanFactory();
+        public EntityFactory beanFactory() {
+            return new MapperEntityFactory();
         }
 
         @Bean

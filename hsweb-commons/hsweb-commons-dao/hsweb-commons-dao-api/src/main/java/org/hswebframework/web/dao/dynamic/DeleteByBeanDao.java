@@ -18,7 +18,7 @@
 
 package org.hswebframework.web.dao.dynamic;
 
-import org.hswebframework.web.commons.beans.Bean;
+import org.hswebframework.web.commons.entity.Entity;
 
 /**
  * TODO  完成注释
@@ -27,5 +27,5 @@ import org.hswebframework.web.commons.beans.Bean;
  * @since 3.0
  */
 public interface DeleteByBeanDao {
-    int delete(Bean bean);
+    int delete(Entity entity);
 }

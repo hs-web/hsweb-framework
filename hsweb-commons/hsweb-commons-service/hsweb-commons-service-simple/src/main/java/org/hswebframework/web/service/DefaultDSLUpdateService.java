@@ -19,8 +19,8 @@
 package org.hswebframework.web.service;
 
 import org.hsweb.ezorm.core.dsl.Update;
-import org.hswebframework.web.dao.dynamic.UpdateByBeanDao;
-import org.hswebframework.web.commons.beans.param.UpdateParamBean;
+import org.hswebframework.web.dao.dynamic.UpdateByEntityDao;
+import org.hswebframework.web.commons.entity.param.UpdateParamEntity;
 
 /**
  * TODO 完成注释
@@ -29,9 +29,17 @@ import org.hswebframework.web.commons.beans.param.UpdateParamBean;
  */
 public interface DefaultDSLUpdateService<PO> extends UpdateService<PO> {
 
-    UpdateByBeanDao getDao();
+    UpdateByEntityDao getDao();
 
-    default Update<PO, UpdateParamBean<PO>> createUpdate(PO data) {
-        return Update.build(getDao()::update, new UpdateParamBean<>(data));
+    default Update<PO, UpdateParamEntity<PO>> createUpdate(PO data) {
+        return Update.build(getDao()::update, new UpdateParamEntity<>(data));
+    }
+
+    static <PO> Update<PO, UpdateParamEntity<PO>> createUpdate(UpdateByEntityDao dao) {
+        return Update.build(dao::update, new UpdateParamEntity<>());
+    }
+
+    static <PO> Update<PO, UpdateParamEntity<PO>> createUpdate(UpdateByEntityDao dao, PO data) {
+        return Update.build(dao::update, new UpdateParamEntity<>(data));
     }
 }

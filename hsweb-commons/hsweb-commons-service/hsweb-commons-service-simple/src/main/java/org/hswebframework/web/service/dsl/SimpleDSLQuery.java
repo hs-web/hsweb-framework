@@ -1,8 +1,8 @@
 package org.hswebframework.web.service.dsl;
 
 import org.hsweb.ezorm.core.dsl.Query;
-import org.hswebframework.web.commons.beans.param.QueryParamBean;
-import org.hswebframework.web.service.DefaultQueryByBeanService;
+import org.hswebframework.web.commons.entity.param.QueryParamEntity;
+import org.hswebframework.web.service.DefaultQueryByEntityService;
 
 import java.util.List;
 
@@ -12,15 +12,15 @@ import java.util.List;
  * @author zhouhao
  */
 public class SimpleDSLQuery<PO> implements DSLQuery<PO> {
-    protected Query<PO, QueryParamBean> query = Query.empty(new QueryParamBean());
+    protected Query<PO, QueryParamEntity> query = Query.empty(new QueryParamEntity());
 
-    public SimpleDSLQuery(DefaultQueryByBeanService<PO> service) {
+    public SimpleDSLQuery(DefaultQueryByEntityService<PO> service) {
         query.setListExecutor(service::select);
         query.setTotalExecutor(service::count);
         query.setSingleExecutor(service::selectSingle);
     }
 
-    public Query<PO, QueryParamBean> dynamic() {
+    public Query<PO, QueryParamEntity> dynamic() {
         return query;
     }
 

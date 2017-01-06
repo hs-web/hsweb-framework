@@ -1,7 +1,7 @@
 package org.hswebframework.web.service.dsl;
 
 import org.hsweb.ezorm.core.dsl.Query;
-import org.hswebframework.web.commons.beans.param.QueryParamBean;
+import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 
 import java.util.Collection;
 
@@ -11,11 +11,11 @@ import java.util.Collection;
  * @author zhouhao
  */
 public class SimpleFieldCondition<PO, R extends DSLQuery<PO>> implements FieldCondition<PO, R> {
-    Query<PO, QueryParamBean> query;
-    R                         proxy;
-    String                    filed;
+    Query<PO, QueryParamEntity> query;
+    R                           proxy;
+    String                      filed;
 
-    public SimpleFieldCondition(Query<PO, QueryParamBean> query, R proxy, String filed) {
+    public SimpleFieldCondition(Query<PO, QueryParamEntity> query, R proxy, String filed) {
         this.query = query;
         this.proxy = proxy;
         this.filed = filed;

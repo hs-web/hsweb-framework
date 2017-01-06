@@ -1,7 +1,7 @@
 package org.hswebframework.web.service.dsl;
 
 
-import org.hswebframework.web.commons.beans.Bean;
+import org.hswebframework.web.commons.entity.Entity;
 
 import java.util.List;
 
@@ -10,7 +10,7 @@ import java.util.List;
  *
  * @author zhouhao
  */
-public interface DSLQuery<PO> extends Bean {
+public interface DSLQuery<PO> extends Entity {
     List<PO> list();
 
     List<PO> list(int pageIndex, int pageSize);

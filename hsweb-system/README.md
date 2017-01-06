@@ -4,7 +4,7 @@
 如:
 ```text
 -----hsweb-system-config
-           |------hsweb-system-config-bean
+           |------hsweb-system-config-entity
            |------hsweb-system-config-service
                             |----------hsweb-system-config-service-api
                             |----------hsweb-system-config-service-simple

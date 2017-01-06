@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  ~ Copyright 2016 http://www.hswebframework.org
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~       http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  ~
+  -->
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.hswebframework.web.dao.authorization.PermissionRoleDao">
+    <resultMap id="PermissionRoleResultMap" type="org.hswebframework.web.entity.authorization.SimplePermissionRoleEntity">
+        <result property="roleId" column="role_id" javaType="string" jdbcType="VARCHAR"/>
+        <result property="permissionId" column="permission_id" javaType="string" jdbcType="VARCHAR"/>
+        <result property="actions" column="actions" javaType="java.util.List" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!--用于动态生成sql所需的配置-->
+    <sql id="config">
+        <bind name="resultMapId" value="'PermissionRoleResultMap'"/>
+        <bind name="tableName" value="'s_permission_role'"/>
+    </sql>
+
+    <insert id="insert" parameterType="org.hswebframework.web.entity.authorization.PermissionRoleEntity">
+        <include refid="config"/>
+        <include refid="BasicMapper.buildInsertSql"/>
+    </insert>
+
+    <delete id="deleteByRoleId" parameterType="String">
+        delete from s_permission_role where role_id =#{id}
+    </delete>
+
+    <delete id="deleteByPermissionId" parameterType="String">
+        delete from s_permission_role where permission_id =#{id}
+    </delete>
+
+    <select id="selectByPermissionId" parameterType="string" resultMap="PermissionRoleResultMap">
+        select * from s_permission_role where permission_id=#{id}
+    </select>
+
+    <select id="selectByRoleIdList" parameterType="List" resultMap="PermissionRoleResultMap">
+        select * from s_permission_role
+        <where>
+            role_id in
+            <foreach item="id" collection="list" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+        </where>
+    </select>
+
+    <select id="selectByRoleId" parameterType="String" resultMap="PermissionRoleResultMap">
+        select * from s_permission_role where role_id=#{id}
+    </select>
+
+</mapper>

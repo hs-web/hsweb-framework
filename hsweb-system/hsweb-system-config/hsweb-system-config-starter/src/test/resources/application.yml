@@ -2,7 +2,7 @@ spring:
     aop:
         auto: true
     datasource:
-       url : jdbc:h2:mem:test_mem
+       url : jdbc:h2:mem:config_test_mem
        username : sa
        password :
        type: com.alibaba.druid.pool.DruidDataSource

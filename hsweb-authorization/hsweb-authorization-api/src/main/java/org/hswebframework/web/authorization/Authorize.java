@@ -25,6 +25,7 @@ import java.lang.annotation.*;
  */
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
+@Inherited
 @Documented
 public @interface Authorize {
 
@@ -49,8 +50,18 @@ public @interface Authorize {
      */
     String[] action() default {};
 
+    /**
+     * 验证是否为指定user
+     *
+     * @return
+     */
     String[] user() default {};
 
+    /**
+     * 验证失败时返回的消息
+     *
+     * @return
+     */
     String message() default "{unauthorized}";
 
     /**

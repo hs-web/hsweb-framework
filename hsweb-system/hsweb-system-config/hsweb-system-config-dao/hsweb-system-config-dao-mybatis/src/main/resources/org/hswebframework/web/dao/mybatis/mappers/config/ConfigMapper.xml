@@ -4,7 +4,7 @@
         "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="org.hswebframework.web.dao.config.ConfigDao">
-    <resultMap id="ConfigResultMap" type="org.hswebframework.web.bean.config.SimpleConfigBean">
+    <resultMap id="ConfigResultMap" type="org.hswebframework.web.entity.config.SimpleConfigEntity">
         <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
         <result property="remark" column="remark" javaType="String" jdbcType="VARCHAR"/>
         <result property="content" column="content" javaType="java.util.List" jdbcType="CLOB"/>
@@ -20,7 +20,7 @@
         <bind name="tableName" value="'s_config'"/>
     </sql>
 
-    <insert id="insert" parameterType="org.hswebframework.web.bean.config.ConfigBean">
+    <insert id="insert" parameterType="org.hswebframework.web.entity.config.ConfigEntity">
         <include refid="config"/>
         <include refid="BasicMapper.buildInsertSql"/>
     </insert>
@@ -29,22 +29,22 @@
         delete from s_config where u_id =#{id}
     </delete>
 
-    <delete id="delete" parameterType="org.hswebframework.web.commons.beans.Bean">
+    <delete id="delete" parameterType="org.hswebframework.web.commons.entity.Entity">
         <include refid="config"/>
         <include refid="BasicMapper.buildDeleteSql"/>
     </delete>
 
-    <update id="update" parameterType="org.hswebframework.web.commons.beans.Bean">
+    <update id="update" parameterType="org.hswebframework.web.commons.entity.Entity">
         <include refid="config"/>
         <include refid="BasicMapper.buildUpdateSql"/>
     </update>
 
-    <select id="query" parameterType="org.hswebframework.web.commons.beans.Bean" resultMap="ConfigResultMap">
+    <select id="query" parameterType="org.hswebframework.web.commons.entity.Entity" resultMap="ConfigResultMap">
         <include refid="config"/>
         <include refid="BasicMapper.buildSelectSql"/>
     </select>
 
-    <select id="count" parameterType="org.hswebframework.web.commons.beans.Bean" resultType="int">
+    <select id="count" parameterType="org.hswebframework.web.commons.entity.Entity" resultType="int">
         <include refid="config"/>
         <include refid="BasicMapper.buildTotalSql"/>
     </select>

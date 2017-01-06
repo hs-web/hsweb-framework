@@ -19,13 +19,13 @@
 package org.hswebframework.web.service;
 
 import org.hsweb.ezorm.core.dsl.Query;
-import org.hswebframework.web.commons.beans.param.QueryParamBean;
+import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.dao.dynamic.QueryByBeanDao;
 
 import java.util.List;
 
 public interface DefaultDSLQueryService<B>
-        extends DefaultQueryByBeanService<B> {
+        extends DefaultQueryByEntityService<B> {
 
     /**
      * 创建本服务的dsl查询操作对象
@@ -39,8 +39,8 @@ public interface DefaultDSLQueryService<B>
      * @see org.hsweb.ezorm.core.Conditional
      * @since 3.0
      */
-    default Query<B, QueryParamBean> createQuery() {
-        Query<B, QueryParamBean> query = Query.empty(new QueryParamBean());
+    default Query<B, QueryParamEntity> createQuery() {
+        Query<B, QueryParamEntity> query = Query.empty(new QueryParamEntity());
         query.setListExecutor(this::select);
         query.setTotalExecutor(this::count);
         query.setSingleExecutor(this::selectSingle);
@@ -61,8 +61,8 @@ public interface DefaultDSLQueryService<B>
      * @see org.hsweb.ezorm.core.Conditional
      * @since 3.0
      */
-    static <PO> Query<PO, QueryParamBean> createQuery(QueryByBeanDao<PO> dao) {
-        Query<PO, QueryParamBean> query = new Query<>(new QueryParamBean());
+    static <PO> Query<PO, QueryParamEntity> createQuery(QueryByBeanDao<PO> dao) {
+        Query<PO, QueryParamEntity> query = new Query<>(new QueryParamEntity());
         query.setListExecutor(dao::query);
         query.setTotalExecutor(dao::count);
         query.setSingleExecutor((param) -> {

@@ -32,7 +32,7 @@
     <dependencies>
         <dependency>
             <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-commons-beans</artifactId>
+            <artifactId>hsweb-commons-entity</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

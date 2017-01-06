@@ -32,6 +32,11 @@
     <dependencies>
         <dependency>
             <groupId>org.hswebframework.web</groupId>
+            <artifactId>hsweb-system-config-entity</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-commons-dao-mybatis</artifactId>
             <version>${project.version}</version>
         </dependency>

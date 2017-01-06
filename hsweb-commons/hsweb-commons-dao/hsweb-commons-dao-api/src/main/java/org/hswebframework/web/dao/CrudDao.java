@@ -18,7 +18,7 @@
 
 package org.hswebframework.web.dao;
 
-import org.hswebframework.web.dao.dynamic.UpdateByBeanDao;
+import org.hswebframework.web.dao.dynamic.UpdateByEntityDao;
 import org.hswebframework.web.dao.dynamic.DeleteByBeanDao;
 import org.hswebframework.web.dao.dynamic.QueryByBeanDao;
 
@@ -31,6 +31,6 @@ public interface CrudDao<PO, PK> extends
         InsertDao<PO>,
         DeleteDao<PK>,
         DeleteByBeanDao,
-        UpdateByBeanDao,
+        UpdateByEntityDao,
         QueryByBeanDao<PO> {
 }

@@ -1,1 +1,1 @@
-## 消息模块，整合jms,email,sms等消息首发功能
+## 消息模块，整合jms,email,sms等消息收发功能

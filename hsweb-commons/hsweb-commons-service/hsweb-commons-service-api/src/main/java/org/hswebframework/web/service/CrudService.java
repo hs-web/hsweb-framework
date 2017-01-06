@@ -18,7 +18,7 @@
 
 package org.hswebframework.web.service;
 
-import org.hswebframework.web.commons.beans.Bean;
+import org.hswebframework.web.commons.entity.Entity;
 
 /**
  * 通用Service,实现增删改查
@@ -26,12 +26,12 @@ import org.hswebframework.web.commons.beans.Bean;
  * @author zhouhao
  * @since 3.0
  */
-public interface CrudService<B, PK, Q extends Bean> extends
-        QueryByBeanService<B, Q>,
+public interface CrudService<B, PK, Q extends Entity> extends
+        QueryByEntityService<B, Q>,
         UpdateService<B>,
         InsertService<B, PK>,
         DeleteService<PK>,
-        CreateBeanService<B> {
+        CreateEntityService<B> {
 
     B selectByPk(PK id);
 }

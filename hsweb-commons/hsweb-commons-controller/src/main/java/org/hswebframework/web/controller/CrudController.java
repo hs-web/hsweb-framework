@@ -19,12 +19,11 @@
 package org.hswebframework.web.controller;
 
 import org.hswebframework.web.authorization.Authorize;
-import org.hswebframework.web.commons.beans.Bean;
+import org.hswebframework.web.commons.entity.Entity;
 import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.logging.AccessLogger;
 import org.hswebframework.web.service.CrudService;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import static org.hswebframework.web.controller.message.ResponseMessage.ok;
@@ -34,7 +33,7 @@ import static org.hswebframework.web.controller.message.ResponseMessage.ok;
  *
  * @author zhouhao
  */
-public interface CrudController<B, PK, Q extends Bean> {
+public interface CrudController<B, PK, Q extends Entity> {
 
     CrudService<B, PK, Q> getService();
 

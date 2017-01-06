@@ -18,10 +18,10 @@
 
 package org.hswebframework.web.service.config.simple;
 
-import org.hswebframework.web.bean.config.ConfigBean;
-import org.hswebframework.web.commons.beans.param.QueryParamBean;
+import org.hswebframework.web.entity.config.ConfigEntity;
+import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.dao.config.ConfigDao;
-import org.hswebframework.web.service.GenericBeanService;
+import org.hswebframework.web.service.GenericEntityService;
 import org.hswebframework.web.service.config.ConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,8 +32,8 @@ import org.springframework.stereotype.Service;
  * @author zhouhao
  */
 @Service("configService")
-public class SimpleConfigService extends GenericBeanService<ConfigBean, String>
-        implements ConfigService<QueryParamBean> {
+public class SimpleConfigService extends GenericEntityService<ConfigEntity, String>
+        implements ConfigService<QueryParamEntity> {
 
     @Autowired
     private ConfigDao configDao;

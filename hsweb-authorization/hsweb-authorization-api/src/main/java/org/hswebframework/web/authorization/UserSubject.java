@@ -23,7 +23,6 @@ import java.util.Set;
 /**
  * @author zhouhao
  */
-@Authorize(user = "{data.creatorId}")
 public interface UserSubject {
 
     String getUsername();

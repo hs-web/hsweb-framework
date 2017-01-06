@@ -18,7 +18,7 @@
 
 package org.hswebframework.web.dao.dynamic;
 
-import org.hswebframework.web.commons.beans.Bean;
+import org.hswebframework.web.commons.entity.Entity;
 
 import java.util.List;
 
@@ -29,7 +29,7 @@ import java.util.List;
  * @since 3.0
  */
 public interface QueryByBeanDao<PO> {
-    List<PO> query(Bean queryBean);
+    List<PO> query(Entity queryEntity);
 
-    int count(Bean queryBean);
+    int count(Entity queryEntity);
 }

@@ -19,7 +19,7 @@
 package org.hswebframework.web.service;
 
 import org.hswebframework.web.dao.CrudDao;
-import org.hswebframework.web.commons.beans.param.QueryParamBean;
+import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -30,14 +30,14 @@ import org.springframework.transaction.annotation.Transactional;
  * @see DefaultDSLUpdateService
  * @see DefaultDSLDeleteService
  * @see CrudService
- * @see QueryParamBean
+ * @see QueryParamEntity
  * @see CrudDao
  */
 public interface GenericService<B, PK> extends
         DefaultDSLQueryService<B>,
         DefaultDSLUpdateService<B>,
         DefaultDSLDeleteService<PK>,
-        CrudService<B, PK, QueryParamBean> {
+        CrudService<B, PK, QueryParamEntity> {
     @Override
     @Transactional
     CrudDao<B, PK> getDao();

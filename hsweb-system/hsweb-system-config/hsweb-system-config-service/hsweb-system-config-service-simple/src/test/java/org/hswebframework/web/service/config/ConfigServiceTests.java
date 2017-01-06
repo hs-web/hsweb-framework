@@ -10,6 +10,6 @@ import org.hswebframework.web.service.config.simple.SimpleConfigService;
 public class ConfigServiceTests {
     public static void main(String[] args) {
         SimpleConfigService configService =new SimpleConfigService();
-        System.out.println(new SimpleConfigService().createBean());
+//        System.out.println(new SimpleConfigService().createEntity());
     }
 }

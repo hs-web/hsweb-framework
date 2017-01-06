@@ -28,12 +28,17 @@ public class ValidationException extends BusinessException {
         super(message, 400);
     }
 
+    public ValidationException(String message, String field) {
+        super(message, 400);
+        results = new SimpleValidateResults().addResult(field, message);
+    }
+
     public ValidationException(ValidateResults results) {
         super(results.toString(), 400);
         this.results = results;
     }
 
-    public Object getResults() {
+    public ValidateResults getResults() {
         return results;
     }
 }

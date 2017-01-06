@@ -30,7 +30,7 @@
     <artifactId>hsweb-commons</artifactId>
     <packaging>pom</packaging>
     <modules>
-        <module>hsweb-commons-beans</module>
+        <module>hsweb-commons-entity</module>
         <module>hsweb-commons-dao</module>
         <module>hsweb-commons-service</module>
         <module>hsweb-commons-controller</module>

@@ -18,7 +18,7 @@
 
 package org.hswebframework.web.dao.config;
 
-import org.hswebframework.web.bean.config.ConfigBean;
+import org.hswebframework.web.entity.config.ConfigEntity;
 import org.hswebframework.web.dao.CrudDao;
 
 /**
@@ -26,5 +26,5 @@ import org.hswebframework.web.dao.CrudDao;
  *
  * @author zhouhao
  */
-public interface ConfigDao extends CrudDao<ConfigBean, String> {
+public interface ConfigDao extends CrudDao<ConfigEntity, String> {
 }
