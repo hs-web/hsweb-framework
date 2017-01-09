@@ -38,6 +38,7 @@ public interface GenericEntity<PK> extends CloneableEntity {
 
     void setProperties(Map<String, Object> properties);
 
+    @SuppressWarnings("unchecked")
     default <T> T getProperty(String propertyName, T defaultValue) {
         Map<String, Object> map = getProperties();
         if (map == null) return null;

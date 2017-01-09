@@ -22,13 +22,7 @@ package org.hswebframework.web.dao.mybatis.builder;
  * @author zhouhao
  */
 public class SqlBuilder {
-    private static boolean dynamic;
-
     public static final Object current() {
         return EasyOrmSqlBuilder.getInstance();
-    }
-
-    public static void setDynamic(boolean dynamic) {
-        SqlBuilder.dynamic = dynamic;
     }
 }

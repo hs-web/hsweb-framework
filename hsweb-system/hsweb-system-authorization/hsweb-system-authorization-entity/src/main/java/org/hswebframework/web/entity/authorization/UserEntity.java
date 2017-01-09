@@ -48,4 +48,5 @@ public interface UserEntity extends UserReadEntity, GenericEntity<String> {
 
     void setLastLoginIp(String lastLoginIp);
 
+    UserEntity clone();
 }

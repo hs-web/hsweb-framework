@@ -33,13 +33,8 @@ public class DataSourceHolder {
 
     public void init(DataSource dataSource) throws SQLException {
         if (null != dataSource) {
-            Connection connection = null;
-            try {
-                connection = dataSource.getConnection();
+            try (Connection connection = dataSource.getConnection()) {
                 install(dataSource, DatabaseType.fromJdbcUrl(connection.getMetaData().getURL()));
-            } finally {
-                if (null != connection)
-                    connection.close();
             }
         }
     }
@@ -83,7 +78,7 @@ public class DataSourceHolder {
 
     public static void install(DataSource dataSource, DatabaseType databaseType) {
         if (DataSourceHolder.defaultDataSource != null) {
-           return;
+            return;
         }
         DataSourceHolder.defaultDataSource = dataSource;
         DataSourceHolder.defaultDatabaseType = databaseType;

@@ -70,5 +70,5 @@ public abstract class SimpleGenericEntity<PK> implements GenericEntity<PK> {
     }
 
     @Override
-    public abstract SimpleGenericEntity<PK> clone();
+    public abstract CloneableEntity clone();
 }

@@ -61,6 +61,7 @@ public class MapperEntityFactory implements EntityFactory {
                     realTypeMapper.put(beanClass, mapper);
                     return mapper.getInstanceGetter().get();
                 } catch (ClassNotFoundException e) {
+                    throw new NotFoundException(e.getMessage());
                 }
             }
         }

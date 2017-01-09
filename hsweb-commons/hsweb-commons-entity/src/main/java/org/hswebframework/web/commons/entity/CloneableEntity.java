@@ -6,5 +6,5 @@ package org.hswebframework.web.commons.entity;
  * @author zhouhao
  */
 public interface CloneableEntity extends Entity, Cloneable {
-    <T extends CloneableEntity> T clone();
+    CloneableEntity clone();
 }

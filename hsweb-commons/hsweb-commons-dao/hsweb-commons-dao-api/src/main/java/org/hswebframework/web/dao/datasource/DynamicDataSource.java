@@ -64,7 +64,7 @@ public interface DynamicDataSource extends DataSource {
      * @param rememberLast 是否记住上一次选中的数据源
      */
     static void useDefault(boolean rememberLast) {
-        if (getActiveDataSourceId() != null && rememberLast)
+        if (rememberLast && null != getActiveDataSourceId())
             ThreadLocalUtils.put(DATA_SOURCE_FLAG_LAST, getActiveDataSourceId());
         ThreadLocalUtils.remove(DATA_SOURCE_FLAG);
     }
