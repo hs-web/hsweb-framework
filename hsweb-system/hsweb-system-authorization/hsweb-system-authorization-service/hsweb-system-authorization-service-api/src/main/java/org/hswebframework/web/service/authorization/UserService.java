@@ -1,11 +1,11 @@
 package org.hswebframework.web.service.authorization;
 
-import org.hswebframework.web.entity.authorization.Authorization;
+import org.hswebframework.web.authorization.Authorization;
 import org.hswebframework.web.entity.authorization.UserEntity;
-import org.hswebframework.web.entity.authorization.bind.BindRoleUserEntity;
-import org.hswebframework.web.commons.entity.Entity;
 import org.hswebframework.web.service.CreateEntityService;
+import org.hswebframework.web.service.InsertService;
 import org.hswebframework.web.service.QueryByEntityService;
+import org.hswebframework.web.service.QueryService;
 
 import java.util.Date;
 
@@ -14,11 +14,11 @@ import java.util.Date;
  *
  * @author zhouhao
  */
-public interface UserService<Q extends Entity> extends
+public interface UserService extends
         CreateEntityService<UserEntity>,
-        QueryByEntityService<UserEntity, Q> {
-
-    String add(UserEntity userBean);
+        QueryByEntityService<UserEntity>,
+        QueryService<UserEntity, String>,
+        InsertService<UserEntity, String> {
 
     boolean enable(String userId);
 
@@ -27,8 +27,6 @@ public interface UserService<Q extends Entity> extends
     void update(UserEntity userBean);
 
     UserEntity selectByUsername(String username);
-
-    UserEntity selectById(String id);
 
     String encodePassword(String password, String salt);
 

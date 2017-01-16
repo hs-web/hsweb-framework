@@ -1,8 +1,6 @@
 package org.hswebframework.web.entity.authorization;
 
 import org.hswebframework.web.commons.entity.GenericEntity;
-import org.hswebframework.web.commons.entity.SortSupport;
-import org.hswebframework.web.commons.entity.TreeSupport;
 
 import java.util.List;
 

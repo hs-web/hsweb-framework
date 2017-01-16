@@ -1,6 +1,5 @@
 package org.hswebframework.web.service.authorization.simple;
 
-import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.dao.authorization.PermissionDao;
 import org.hswebframework.web.entity.authorization.ActionEntity;
 import org.hswebframework.web.entity.authorization.PermissionEntity;
@@ -16,7 +15,7 @@ import org.springframework.stereotype.Service;
  */
 @Service("permissionService")
 public class SimplePermissionService extends GenericEntityService<PermissionEntity<ActionEntity>, String>
-        implements PermissionService<QueryParamEntity> {
+        implements PermissionService {
     @Autowired
     private PermissionDao permissionDao;
 

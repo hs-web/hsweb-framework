@@ -1,6 +1,10 @@
 package org.hswebframework.web.entity.authorization;
 
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 /**
  * TODO 完成注释
  *
@@ -58,5 +62,9 @@ public class SimpleActionEntity implements ActionEntity {
         target.setDescribe(getDescribe());
         target.setDefaultCheck(isDefaultCheck());
         return target;
+    }
+
+    public static List<ActionEntity> create(String... actions) {
+        return Arrays.stream(actions).map(SimpleActionEntity::new).collect(Collectors.toList());
     }
 }

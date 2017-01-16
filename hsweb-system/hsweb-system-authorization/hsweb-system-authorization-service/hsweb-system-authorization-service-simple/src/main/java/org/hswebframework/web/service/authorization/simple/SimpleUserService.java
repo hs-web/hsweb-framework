@@ -1,9 +1,8 @@
 package org.hswebframework.web.service.authorization.simple;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.hswebframework.web.BusinessException;
+import org.hswebframework.web.authorization.Authorization;
 import org.hswebframework.web.commons.entity.GenericEntity;
-import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.dao.authorization.*;
 import org.hswebframework.web.entity.authorization.*;
 import org.hswebframework.web.entity.authorization.bind.BindRoleUserEntity;
@@ -33,8 +32,7 @@ import java.util.stream.Collectors;
 @Transactional(rollbackFor = Throwable.class)
 @Service("userService")
 public class SimpleUserService extends AbstractService<UserEntity, String>
-        implements DefaultDSLQueryService<UserEntity>,
-        UserService<QueryParamEntity> {
+        implements DefaultDSLQueryService<UserEntity, String>, UserService {
 
     @Autowired(required = false)
     private PasswordStrengthValidator passwordStrengthValidator;
@@ -53,6 +51,9 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
 
     @Autowired
     private PermissionDao permissionDao;
+
+    @Autowired
+    private RoleDao roleDao;
 
     @Override
     public String encodePassword(String password, String salt) {
@@ -80,13 +81,13 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
 
     @Override
     @Transactional(readOnly = true)
-    public UserEntity selectById(String id) {
+    public UserEntity selectByPk(String id) {
         Assert.notNull(id, "id:{not_be_null}");
         return createQuery().where(GenericEntity.id, id).single();
     }
 
     @Override
-    public String add(UserEntity userEntity) {
+    public String insert(UserEntity userEntity) {
         //判断用户是否已经存在
         tryValidateProperty(null == selectByUsername(userEntity.getUsername()), "username", "{username_exists}");
         //用户名合法性验证
@@ -173,7 +174,7 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
 
     @Override
     public void updatePassword(String userId, String oldPassword, String newPassword) {
-        UserEntity userEntity = selectById(userId);
+        UserEntity userEntity = selectByPk(userId);
         assertNotNull(userEntity);
         oldPassword = encodePassword(oldPassword, userEntity.getSalt());
         if (!userEntity.getPassword().equals(oldPassword)) {
@@ -188,7 +189,7 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
 
     @Override
     public Authorization initUserAuthorization(String userId) {
-        UserEntity userEntity = selectById(userId);
+        UserEntity userEntity = selectByPk(userId);
         assertNotNull(userEntity);
         //用户持有的角色
         List<UserRoleEntity> roleEntities = userRoleDao.selectByUserId(userId);
@@ -196,32 +197,17 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
             return new SimpleAuthorization(userEntity, new ArrayList<>(), new ArrayList<>());
         }
         List<String> roleIdList = roleEntities.stream().map(UserRoleEntity::getRoleId).collect(Collectors.toList());
+
+        List<RoleEntity> roleEntityList = DefaultDSLQueryService.createQuery(roleDao).where().in(GenericEntity.id, roleIdList).noPaging().list();
         //权限角色关联信息
         List<PermissionRoleEntity> permissionRoleEntities = permissionRoleDao.selectByRoleIdList(roleIdList);
-        List<String> permissionIdList = permissionRoleEntities.stream().map(PermissionRoleEntity::getPermissionId).collect(Collectors.toList());
-        //权限信息
-        List<PermissionEntity<ActionEntity>> permissionEntities = DefaultDSLQueryService
-                .createQuery(permissionDao).where().in(GenericEntity.id, permissionIdList).noPaging().list();
-        return new SimpleAuthorization(userEntity, permissionRoleEntities, permissionEntities);
+        return new SimpleAuthorization(userEntity, roleEntityList, permissionRoleEntities);
     }
 
     @Override
     public Authorization initAdminAuthorization(String userId) {
-        UserEntity userEntity = selectById(userId);
+        UserEntity userEntity = selectByPk(userId);
         assertNotNull(userEntity);
-        //获取所有角色信息
-//        List<UserRoleEntity> roleEntities = DefaultDSLQueryService
-//                .createQuery(roleDao)
-//                .noPaging().list()
-//                .stream().map(role -> {
-//                    UserRoleEntity roleEntity = entityFactoryIsEnabled()
-//                            ? entityFactory.newInstance(UserRoleEntity.class)
-//                            : new SimpleUserRoleEntity();
-//                    roleEntity.setRoleId(role.getId());
-//                    roleEntity.setUserId(userId);
-//                    return roleEntity;
-//                }).collect(Collectors.toList());
-
         //所有权限信息
         List<PermissionEntity<ActionEntity>> permissionEntities = DefaultDSLQueryService
                 .createQuery(permissionDao).noPaging().list();
@@ -238,9 +224,16 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
                             .collect(Collectors.toList()));
                     return entity;
                 }).collect(Collectors.toList());
-
-        return new SimpleAuthorization(userEntity, permissionRoleEntities, permissionEntities);
+        List<RoleEntity> roleEntityList = DefaultDSLQueryService.createQuery(roleDao).noPaging().list();
+        if (roleEntityList.isEmpty()) {
+            RoleEntity admin = entityFactory.newInstance(RoleEntity.class);
+            admin.setId("admin");
+            admin.setName("admin");
+            roleEntityList.add(admin);
+        }
+        return new SimpleAuthorization(userEntity, roleEntityList, permissionRoleEntities);
     }
+
 
     @Override
     public UserDao getDao() {

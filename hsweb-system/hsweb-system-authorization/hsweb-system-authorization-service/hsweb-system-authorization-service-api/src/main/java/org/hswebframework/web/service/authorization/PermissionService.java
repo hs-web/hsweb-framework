@@ -10,6 +10,6 @@ import org.hswebframework.web.service.CrudService;
  *
  * @author zhouhao
  */
-public interface PermissionService<Q extends Entity> extends CrudService<PermissionEntity<ActionEntity>, String, Q> {
+public interface PermissionService extends CrudService<PermissionEntity<ActionEntity>, String> {
 
 }

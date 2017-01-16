@@ -40,7 +40,7 @@ import java.util.Arrays;
 public class PermissionTests extends SimpleWebApplicationTests {
 
     @Autowired
-    private PermissionService<QueryParamEntity> permissionService;
+    private PermissionService permissionService;
 
     @Autowired
     private SqlExecutor sqlExecutor;

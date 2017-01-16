@@ -1,6 +1,5 @@
 package org.hswebframework.web.service.authorization;
 
-import org.hswebframework.web.commons.entity.Entity;
 import org.hswebframework.web.entity.authorization.PermissionRoleEntity;
 import org.hswebframework.web.entity.authorization.RoleEntity;
 import org.hswebframework.web.entity.authorization.bind.BindPermissionRoleEntity;
@@ -12,10 +11,10 @@ import org.hswebframework.web.service.QueryByEntityService;
  *
  * @author zhouhao
  */
-public interface RoleService<Q extends Entity> extends
+public interface RoleService extends
         CreateEntityService<RoleEntity>,
-        QueryByEntityService<RoleEntity, Q> {
-    <T extends PermissionRoleEntity> String add(BindPermissionRoleEntity<T> roleEntity);
+        QueryByEntityService<RoleEntity> {
+    <T extends PermissionRoleEntity> String insert(BindPermissionRoleEntity<T> roleEntity);
 
     boolean enable(String roleId);
 
@@ -23,6 +22,6 @@ public interface RoleService<Q extends Entity> extends
 
     <T extends PermissionRoleEntity> boolean update(BindPermissionRoleEntity<T> roleEntity);
 
-    RoleEntity selectById(String roleId);
+    RoleEntity selectByPk(String roleId);
 
 }

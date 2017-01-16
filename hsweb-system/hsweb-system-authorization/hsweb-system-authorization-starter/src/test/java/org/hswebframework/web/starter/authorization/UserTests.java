@@ -17,7 +17,6 @@
 
 package org.hswebframework.web.starter.authorization;
 
-import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.entity.authorization.Authorization;
 import org.hswebframework.web.entity.authorization.UserEntity;
 import org.hswebframework.web.service.authorization.PasswordStrengthValidator;
@@ -66,7 +65,7 @@ public class UserTests extends SimpleWebApplicationTests {
     }
 
     @Autowired
-    private UserService<QueryParamEntity> userService;
+    private UserService userService;
 
     @After
     public void clear() throws SQLException {
@@ -78,7 +77,7 @@ public class UserTests extends SimpleWebApplicationTests {
         userEntity.setName("测试");
         userEntity.setUsername("test");
         userEntity.setPassword("password_1234");
-        userService.add(userEntity);
+        userService.insert(userEntity);
         return userEntity;
     }
 
@@ -100,17 +99,17 @@ public class UserTests extends SimpleWebApplicationTests {
         userEntity.setUsername("test");
         userEntity.setPassword("123");
         try {
-            userService.add(userEntity);
+            userService.insert(userEntity);
             Assert.assertTrue(false);
         } catch (ValidationException e) {
             Assert.assertEquals(e.getResults().getResults().get(0).getMessage(), "密码强度太弱");
         }
         userEntity.setPassword("password_1234");
-        String id = userService.add(userEntity);
+        String id = userService.insert(userEntity);
 
         UserEntity newUserEntity = userEntity.clone();
         newUserEntity.setUsername("test2");
-        String antherId = userService.add(newUserEntity);
+        String antherId = userService.insert(newUserEntity);
 
         Assert.assertNotNull(id);
         Assert.assertEquals(userEntity.getPassword().length(), 32);

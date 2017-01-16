@@ -16,6 +16,7 @@
         <module>hsweb-system-authorization-dao</module>
         <module>hsweb-system-authorization-service</module>
         <module>hsweb-system-authorization-starter</module>
+        <module>hsweb-system-authorization-controller</module>
     </modules>
 
 

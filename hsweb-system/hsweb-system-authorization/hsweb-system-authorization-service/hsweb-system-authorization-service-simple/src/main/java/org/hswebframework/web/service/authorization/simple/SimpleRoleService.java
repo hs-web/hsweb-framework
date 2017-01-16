@@ -17,7 +17,6 @@
 
 package org.hswebframework.web.service.authorization.simple;
 
-import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.dao.authorization.PermissionRoleDao;
 import org.hswebframework.web.dao.authorization.RoleDao;
 import org.hswebframework.web.entity.authorization.PermissionRoleEntity;
@@ -42,7 +41,7 @@ import java.util.List;
 @Transactional(rollbackFor = Throwable.class)
 @Service("roleService")
 public class SimpleRoleService extends AbstractService<RoleEntity, String>
-        implements RoleService<QueryParamEntity>, DefaultDSLQueryService<RoleEntity> {
+        implements RoleService, DefaultDSLQueryService<RoleEntity, String> {
 
     @Autowired
     private RoleDao roleDao;
@@ -64,9 +63,9 @@ public class SimpleRoleService extends AbstractService<RoleEntity, String>
     }
 
     @Override
-    public <T extends PermissionRoleEntity> String add(BindPermissionRoleEntity<T> roleEntity) {
+    public <T extends PermissionRoleEntity> String insert(BindPermissionRoleEntity<T> roleEntity) {
         tryValidateProperty(!StringUtils.hasLength(roleEntity.getId()), RoleEntity.id, "id {not_be_null}");
-        tryValidateProperty(null != selectById(roleEntity.getId()), RoleEntity.id, "{role_exists}");
+        tryValidateProperty(null != selectByPk(roleEntity.getId()), RoleEntity.id, "{role_exists}");
         tryValidate(roleEntity);
         roleDao.insert(roleEntity);
         syncPermissions(roleEntity.getId(), roleEntity.getPermissions());
@@ -84,14 +83,14 @@ public class SimpleRoleService extends AbstractService<RoleEntity, String>
     }
 
     @Override
-    public RoleEntity selectById(String roleId) {
+    public RoleEntity selectByPk(String roleId) {
         return createQuery().where(RoleEntity.id, roleId).single();
     }
 
     @Override
     public <T extends PermissionRoleEntity> boolean update(BindPermissionRoleEntity<T> roleEntity) {
         tryValidateProperty(!StringUtils.hasLength(roleEntity.getId()), RoleEntity.id, "id {not_be_null}");
-        tryValidateProperty(null == selectById(roleEntity.getId()), RoleEntity.id, "{role_not_exists}");
+        tryValidateProperty(null == selectByPk(roleEntity.getId()), RoleEntity.id, "{role_not_exists}");
         tryValidate(roleEntity);
         DefaultDSLUpdateService.createUpdate(roleDao)
                 .set("name", roleEntity.getName())

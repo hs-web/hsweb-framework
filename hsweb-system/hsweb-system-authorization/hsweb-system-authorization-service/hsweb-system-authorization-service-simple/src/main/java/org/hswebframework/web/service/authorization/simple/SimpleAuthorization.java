@@ -17,11 +17,15 @@
 
 package org.hswebframework.web.service.authorization.simple;
 
+import org.hswebframework.web.authorization.Authorization;
+import org.hswebframework.web.authorization.Permission;
+import org.hswebframework.web.authorization.Role;
+import org.hswebframework.web.authorization.User;
 import org.hswebframework.web.entity.authorization.*;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.io.Serializable;
+import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -29,118 +33,205 @@ import java.util.stream.Collectors;
  *
  * @author zhouhao
  */
-class SimpleAuthorization implements Authorization {
-    private UserReadEntity                           userReadEntity;
-    private List<PermissionRoleReadEntity>           permissionRoleReadEntities;
-    private List<PermissionReadEntity<ActionEntity>> permissionReadEntities;
+public class SimpleAuthorization implements Authorization {
+    private ReadOnlyUser user;
+
+    private List<Role> roles;
+
+    private List<Permission> permissions;
+
+    private Map<String, Serializable> attributes = new HashMap<>();
+
+    public SimpleAuthorization() {
+    }
 
     public SimpleAuthorization(UserEntity user,
-                               List<PermissionRoleEntity> permissionRoleEntities,
-                               List<PermissionEntity<ActionEntity>> permissionReadEntities) {
-        final String userId = user.getId();
-        final String name = user.getName();
-        final String userName = user.getUsername();
-        final Date createDate = user.getCreateDate();
-        final Date lastLoginDate = user.getLastLoginDate();
-        final String lastLoginIp = user.getLastLoginIp();
-        final boolean enabled = user.isEnabled();
-        this.userReadEntity = new UserReadEntity() {
-            @Override
-            public String getId() {
-                return userId;
-            }
-
-            @Override
-            public String getName() {
-                return name;
-            }
-
-            @Override
-            public String getUsername() {
-                return userName;
-            }
-
-            public Date getCreateDate() {
-                return createDate;
-            }
-
-            public Date getLastLoginDate() {
-                return lastLoginDate;
-            }
-
-            @Override
-            public boolean isEnabled() {
-                return enabled;
-            }
-
-            @Override
-            public String getLastLoginIp() {
-                return lastLoginIp;
-            }
-        };
-        this.permissionRoleReadEntities = permissionRoleEntities.stream()
-                .map(permissionRoleEntity ->
-                        new PermissionRoleReadEntity() {
-                            @Override
-                            public String getRoleId() {
-                                return permissionRoleEntity.getRoleId();
-                            }
-
-                            @Override
-                            public String getPermissionId() {
-                                return permissionRoleEntity.getPermissionId();
-                            }
-
-                            @Override
-                            public List<String> getActions() {
-                                return new ArrayList<>(permissionRoleEntity.getActions());
-                            }
-                        }
-                ).collect(Collectors.toList());
-
-        this.permissionReadEntities = permissionReadEntities.stream()
-                .map(permission -> new PermissionReadEntity<ActionEntity>() {
-                    @Override
-                    public String getId() {
-                        return permission.getId();
-                    }
-
-                    @Override
-                    public String getName() {
-                        return permission.getName();
-                    }
-
-                    @Override
-                    public String getDescribe() {
-                        return permission.getDescribe();
-                    }
-
-                    @Override
-                    public byte getStatus() {
-                        return permission.getStatus();
-                    }
-
-                    @Override
-                    public List<ActionEntity> getActions() {
-                        return new ArrayList<>(permission.getActions());
-                    }
-                })
+                               List<RoleEntity> roleEntities,
+                               List<PermissionRoleEntity> permissionRoleEntities) {
+        this.user = new ReadOnlyUser(user.getId(), user.getUsername(), user.getName());
+        this.roles = roleEntities.stream()
+                .map(roleEntity -> new ReadOnlyRole(roleEntity.getId(), roleEntity.getDescribe()))
+                .collect(Collectors.toList());
+        this.permissions = permissionRoleEntities.stream()
+                .map(permissionRoleEntity -> new ReadOnlyPermission(permissionRoleEntity.getPermissionId(), permissionRoleEntity.getActions()))
                 .collect(Collectors.toList());
     }
 
+
     @Override
-    public UserReadEntity getUser() {
-        return userReadEntity;
+    public User getUser() {
+        return user;
     }
 
     @Override
-    public List<PermissionRoleReadEntity> getRoles() {
-        return permissionRoleReadEntities;
+    public List<Role> getRoles() {
+        return new ArrayList<>(roles);
     }
 
     @Override
-    public List<PermissionReadEntity<ActionEntity>> getPermissions() {
-        return permissionReadEntities;
+    public List<Permission> getPermissions() {
+        return new ArrayList<>(permissions);
     }
 
+    @Override
+    public <T extends Serializable> T getAttribute(String name) {
+        return ((T) attributes.get(name));
+    }
+
+    @Override
+    public <T extends Serializable> T getAttribute(String name, T defaultValue) {
+        T val = getAttribute(name);
+        return val == null ? defaultValue : val;
+    }
+
+    @Override
+    public <T extends Serializable> T getAttribute(String name, Supplier<T> supplier) {
+        T val = getAttribute(name);
+        return val == null ? supplier.get() : val;
+    }
+
+    @Override
+    public void setAttribute(String name, Serializable value) {
+        attributes.put(name, value);
+    }
+
+    public void setUser(ReadOnlyUser user) {
+        checkWritable(this.user);
+        this.user = user;
+    }
+
+    public void setRoles(List<Role> roles) {
+        checkWritable(this.roles);
+        this.roles = roles;
+    }
+
+    public void setPermissions(List<Permission> permissions) {
+        checkWritable(this.permissions);
+        this.permissions = permissions;
+    }
+
+    public void setAttributes(Map<String, Serializable> attributes) {
+        this.attributes = attributes;
+    }
+
+
+    public static class ReadOnlyPermission implements Permission {
+        private String       id;
+        private List<String> actions;
+
+        public ReadOnlyPermission() {
+        }
+
+        public ReadOnlyPermission(String id, List<String> actions) {
+            this.id = id;
+            this.actions = actions;
+        }
+
+        @Override
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            checkWritable(this.id);
+            this.id = id;
+        }
+
+        @Override
+        public List<String> getActions() {
+            return new ArrayList<>(actions);
+        }
+
+        public void setActions(List<String> actions) {
+            checkWritable(this.actions);
+            this.actions = new ArrayList<>(actions);
+        }
+    }
+
+    public static class ReadOnlyRole implements Role {
+        private String id;
+
+        private String name;
+
+        public ReadOnlyRole() {
+        }
+
+        public ReadOnlyRole(String id, String name) {
+            this.id = id;
+            this.name = name;
+        }
+
+        @Override
+        public String getId() {
+            return id;
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        public void setId(String id) {
+            checkWritable(this.id);
+            this.id = id;
+        }
+
+        public void setName(String name) {
+            checkWritable(this.name);
+            this.name = name;
+        }
+    }
+
+    public static class ReadOnlyUser implements User {
+        private String id;
+
+        private String username;
+
+        private String name;
+
+        public ReadOnlyUser() {
+        }
+
+        public ReadOnlyUser(String id, String username, String name) {
+            this.id = id;
+            this.username = username;
+            this.name = name;
+        }
+
+        @Override
+        public String getId() {
+            return id;
+        }
+
+        @Override
+        public String getUsername() {
+            return username;
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        public void setId(String id) {
+            checkWritable(this.id);
+            this.id = id;
+        }
+
+        public void setUsername(String username) {
+            checkWritable(this.username);
+            this.username = username;
+        }
+
+        public void setName(String name) {
+            checkWritable(this.name);
+            this.name = name;
+        }
+    }
+
+    static final void checkWritable(Object obj) {
+        if (obj != null) {
+            throw new UnsupportedOperationException();
+        }
+    }
 }
