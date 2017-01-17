@@ -133,12 +133,12 @@ CREATE TABLE ${jdbc.username}.qrtz_locks
 );
 
 CREATE INDEX idx_qrtz_j_req_recovery
-  ON ${jdbc.username}.${jdbc.username}.qrtz_job_details (SCHED_NAME, REQUESTS_RECOVERY);
+  ON ${jdbc.username}.qrtz_job_details (SCHED_NAME, REQUESTS_RECOVERY);
 CREATE INDEX idx_qrtz_j_grp
-  ON ${jdbc.username}.${jdbc.username}.qrtz_job_details (SCHED_NAME, JOB_GROUP);
+  ON ${jdbc.username}.qrtz_job_details (SCHED_NAME, JOB_GROUP);
 
 CREATE INDEX idx_qrtz_t_j
-  ON ${jdbc.username}.${jdbc.username}.qrtz_triggers (SCHED_NAME, JOB_NAME, JOB_GROUP);
+  ON ${jdbc.username}.qrtz_triggers (SCHED_NAME, JOB_NAME, JOB_GROUP);
 CREATE INDEX idx_qrtz_t_jg
   ON ${jdbc.username}.qrtz_triggers (SCHED_NAME, JOB_GROUP);
 CREATE INDEX idx_qrtz_t_c
