@@ -167,7 +167,7 @@ public class DynamicDataSourceServiceImpl implements DynamicDataSourceService {
         //初始化检测
         new Thread(() -> {
             try {
-                Thread.sleep(10000);
+                Thread.sleep(30 * 1000);
                 if (!success[0]) {
                     logger.error("初始化jdbc超时:{}", dataSourceBean);
                     closeDataSource(dataSourceBean);

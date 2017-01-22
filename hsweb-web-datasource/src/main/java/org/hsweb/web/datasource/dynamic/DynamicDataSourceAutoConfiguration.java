@@ -86,8 +86,7 @@ public class DynamicDataSourceAutoConfiguration {
     }
 
     @Bean(initMethod = "init", destroyMethod = "close")
-    public UserTransactionManager userTransactionManager(
-            UserTransactionService userTransactionService) {
+    public UserTransactionManager userTransactionManager() {
         UserTransactionManager transactionManager = new UserTransactionManager();
         transactionManager.setForceShutdown(true);
         transactionManager.setStartupTransactionService(false);
