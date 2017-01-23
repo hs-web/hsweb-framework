@@ -253,7 +253,7 @@ public class ResponseMessage implements Serializable {
     public static ResponseMessage error(String message, int code) {
         ResponseMessage response = new ResponseMessage();
         response.setCode(code);
-        response.setData(message);
+        response.setMessage(message);
         return response;
     }
 

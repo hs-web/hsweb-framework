@@ -17,22 +17,31 @@ import javax.validation.Validator;
  *
  * @author zhouhao
  */
-public abstract class AbstractService<B extends Entity, PK> implements CreateEntityService<B>, Service {
+public abstract class AbstractService<E extends Entity, PK> implements CreateEntityService<E>, Service {
     protected Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    @Autowired(required = false)
     protected Validator validator;
 
-    @Autowired(required = false)
     protected EntityFactory entityFactory;
 
-    private Class<B>  beanType;
-    private Class<PK> primaryKeyType;
+    @Autowired(required = false)
+    public void setValidator(Validator validator) {
+        this.validator = validator;
+    }
+
+    @Autowired(required = false)
+    public void setEntityFactory(EntityFactory entityFactory) {
+        this.entityFactory = entityFactory;
+    }
+
+    protected Class<E> entityType;
+
+    protected Class<PK> primaryKeyType;
 
     @SuppressWarnings("unchecked")
     public AbstractService() {
         primaryKeyType = (Class<PK>) ClassUtils.getGenericType(this.getClass(), 1);
-        beanType = (Class<B>) ClassUtils.getGenericType(this.getClass(), 0);
+        entityType = (Class<E>) ClassUtils.getGenericType(this.getClass(), 0);
     }
 
     protected boolean entityFactoryIsEnabled() {
@@ -42,12 +51,12 @@ public abstract class AbstractService<B extends Entity, PK> implements CreateEnt
         return null != entityFactory;
     }
 
-    protected Class<B> getEntityRealType() {
+    protected Class<E> getEntityRealType() {
         return entityFactory.getInstanceType(getEntityType());
     }
 
-    protected Class<B> getEntityType() {
-        return beanType;
+    protected Class<E> getEntityType() {
+        return entityType;
     }
 
     protected Class<PK> getPrimaryKeyType() {
@@ -55,7 +64,7 @@ public abstract class AbstractService<B extends Entity, PK> implements CreateEnt
     }
 
     @Override
-    public B createEntity() {
+    public E createEntity() {
         if (!entityFactoryIsEnabled()) {
             throw new UnsupportedOperationException("{unsupported_operation}");
         }
@@ -84,7 +93,7 @@ public abstract class AbstractService<B extends Entity, PK> implements CreateEnt
         }
     }
 
-    protected void tryValidate(B bean) {
+    protected void tryValidate(E bean) {
         if (validator == null) {
             logger.warn("validator is null!");
             return;
@@ -95,11 +104,11 @@ public abstract class AbstractService<B extends Entity, PK> implements CreateEnt
             throw new ValidationException(results);
     }
 
-    public void assertNotNull(Object data) {
+    public static void assertNotNull(Object data) {
         assertNotNull(data, "{data_not_found}");
     }
 
-    public void assertNotNull(Object data, String message) {
+    public static void assertNotNull(Object data, String message) {
         if (null == data) throw new NotFoundException(message);
     }
 

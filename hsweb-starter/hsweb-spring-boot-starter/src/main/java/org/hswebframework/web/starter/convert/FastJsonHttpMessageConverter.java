@@ -5,6 +5,8 @@ import com.alibaba.fastjson.serializer.PropertyPreFilter;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.serializer.SimplePropertyPreFilter;
 import org.hswebframework.web.ThreadLocalUtils;
+import org.hswebframework.web.commons.entity.Entity;
+import org.hswebframework.web.commons.entity.factory.EntityFactory;
 import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframwork.utils.StringUtils;
 import org.springframework.http.HttpInputMessage;
@@ -32,9 +34,19 @@ public class FastJsonHttpMessageConverter extends AbstractHttpMessageConverter<O
 
     private SerializerFeature[] features = new SerializerFeature[0];
 
+    private EntityFactory entityFactory;
+
     public FastJsonHttpMessageConverter() {
         super(new MediaType("application", "json", UTF8),
                 new MediaType("application", "*+json", UTF8));
+    }
+
+    public void setEntityFactory(EntityFactory entityFactory) {
+        this.entityFactory = entityFactory;
+    }
+
+    public EntityFactory getEntityFactory() {
+        return entityFactory;
     }
 
     @Override
@@ -58,6 +70,20 @@ public class FastJsonHttpMessageConverter extends AbstractHttpMessageConverter<O
         this.features = features;
     }
 
+    public Object readByString(Class<?> clazz, String jsonStr) {
+        return readByBytes(clazz, jsonStr.getBytes());
+    }
+
+    public Object readByBytes(Class<?> clazz, byte[] bytes) {
+        if (clazz == String.class) return new String(bytes, charset);
+        if (entityFactory != null && Entity.class.isAssignableFrom(clazz)) {
+            @SuppressWarnings("unchecked")
+            Class<Entity> tmp = entityFactory.getInstanceType((Class<Entity>) clazz);
+            if (tmp != null) clazz = tmp;
+        }
+        return JSON.parseObject(bytes, 0, bytes.length, charset.newDecoder(), clazz);
+    }
+
     @Override
     protected Object readInternal(Class<?> clazz, HttpInputMessage inputMessage) throws IOException,
             HttpMessageNotReadableException {
@@ -74,16 +100,13 @@ public class FastJsonHttpMessageConverter extends AbstractHttpMessageConverter<O
             }
         }
         byte[] bytes = baos.toByteArray();
-        if (clazz == String.class) return new String(bytes, charset);
-        // TODO: 16-12-24 clazz应该使用beanFactory获取
-        return JSON.parseObject(bytes, 0, bytes.length, charset.newDecoder(), clazz);
+        return readByBytes(clazz, bytes);
     }
 
     public String converter(Object obj) {
         if (obj instanceof String) return (String) obj;
         String text;
-        String callback = ThreadLocalUtils.get("jsonp-callback");
-        ThreadLocalUtils.remove("jsonp-callback");
+        String callback = ThreadLocalUtils.getAndRemove("jsonp-callback");
         if (obj instanceof ResponseMessage) {
             ResponseMessage message = (ResponseMessage) obj;
             if (message.getCode() == 200 && message.isOnlyData())
@@ -109,7 +132,6 @@ public class FastJsonHttpMessageConverter extends AbstractHttpMessageConverter<O
     protected void writeInternal(Object obj, HttpOutputMessage outputMessage) throws IOException,
             HttpMessageNotWritableException {
         OutputStream out = outputMessage.getBody();
-
         byte[] bytes = converter(obj).getBytes(charset);
         out.write(bytes);
         out.flush();

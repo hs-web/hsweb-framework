@@ -17,7 +17,8 @@
 
 package org.hswebframework.web.starter.resolver;
 
-import org.hswebframework.web.starter.convert.FastJsonHttpMessageConverter;
+import org.hswebframework.web.authorization.AuthorizationSupplier;
+import org.hswebframework.web.authorization.annotation.AuthInfo;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -29,28 +30,21 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  *
  * @author zhouhao
  */
-public class JsonParamResolver implements HandlerMethodArgumentResolver {
+public class AuthorizationArgumentResolver implements HandlerMethodArgumentResolver {
 
-    private FastJsonHttpMessageConverter fastJsonHttpMessageConverter;
+    AuthorizationSupplier authorizationSupplier;
 
-    public JsonParamResolver(FastJsonHttpMessageConverter fastJsonHttpMessageConverter) {
-        this.fastJsonHttpMessageConverter = fastJsonHttpMessageConverter;
+    public AuthorizationArgumentResolver(AuthorizationSupplier authorizationSupplier) {
+        this.authorizationSupplier = authorizationSupplier;
     }
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
-        return parameter.hasParameterAnnotation(JsonParam.class) && fastJsonHttpMessageConverter != null;
+        return parameter.hasParameterAnnotation(AuthInfo.class);
     }
 
     @Override
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
-        JsonParam jsonParam = parameter.getParameterAnnotation(JsonParam.class);
-        String object = webRequest.getParameter(jsonParam.value());
-        if (null != object) {
-            Class type = jsonParam.type() != Void.class ? jsonParam.type() : parameter.getParameterType();
-            return fastJsonHttpMessageConverter.readByString(type, object);
-        }
-        return null;
+        return authorizationSupplier.get();
     }
-
 }

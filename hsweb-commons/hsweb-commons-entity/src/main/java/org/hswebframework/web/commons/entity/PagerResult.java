@@ -21,16 +21,16 @@ package org.hswebframework.web.commons.entity;
 
 import java.util.List;
 
-public class PagerResult<B> implements Entity {
+public class PagerResult<E> implements Entity {
     private static final long serialVersionUID = -6171751136953308027L;
     private int total;
 
-    private List<B> data;
+    private List<E> data;
 
     public PagerResult() {
     }
 
-    public PagerResult(int total, List<B> data) {
+    public PagerResult(int total, List<E> data) {
         this.total = total;
         this.data = data;
     }
@@ -39,16 +39,16 @@ public class PagerResult<B> implements Entity {
         return total;
     }
 
-    public PagerResult<B> setTotal(int total) {
+    public PagerResult<E> setTotal(int total) {
         this.total = total;
         return this;
     }
 
-    public List<B> getData() {
+    public List<E> getData() {
         return data;
     }
 
-    public PagerResult<B> setData(List<B> data) {
+    public PagerResult<E> setData(List<E> data) {
         this.data = data;
         return this;
     }

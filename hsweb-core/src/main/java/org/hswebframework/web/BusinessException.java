@@ -24,10 +24,10 @@ package org.hswebframework.web;
  * @author zhouhao
  */
 public class BusinessException extends RuntimeException {
-    private int status = 400;
+    private int status = 500;
 
     public BusinessException(String message) {
-        this(message, 400);
+        this(message, 500);
     }
 
     public BusinessException(String message, int status) {

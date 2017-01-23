@@ -21,7 +21,7 @@ package org.hswebframework.web.service;
 /**
  * @author zhouhao
  */
-public interface InsertService<B,Pk> {
+public interface InsertService<E, PK> {
 
     /**
      * 添加一条数据
@@ -29,5 +29,5 @@ public interface InsertService<B,Pk> {
      * @param data 要添加的数据
      * @return 添加后生成的主键
      */
-    Pk insert(B data);
+    PK insert(E data);
 }

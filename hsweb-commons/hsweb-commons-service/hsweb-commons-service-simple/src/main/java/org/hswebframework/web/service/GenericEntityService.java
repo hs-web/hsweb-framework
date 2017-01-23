@@ -19,18 +19,9 @@
 package org.hswebframework.web.service;
 
 import org.hswebframework.web.commons.entity.GenericEntity;
-import org.hswebframework.web.commons.entity.factory.EntityFactory;
-import org.hswebframework.web.NotFoundException;
 import org.hswebframework.web.dao.CrudDao;
-import org.hswebframework.web.validate.SimpleValidateResults;
-import org.hswebframework.web.validate.ValidationException;
-import org.hswebframwork.utils.ClassUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.validation.Validator;
 import java.util.List;
 
 /**
@@ -39,9 +30,9 @@ import java.util.List;
  * @author zhouhao
  */
 @Transactional(rollbackFor = Throwable.class)
-public abstract class GenericEntityService<B extends GenericEntity<PK>, PK>
-        extends AbstractService<B, PK>
-        implements GenericService<B, PK> {
+public abstract class GenericEntityService<E extends GenericEntity<PK>, PK>
+        extends AbstractService<E, PK>
+        implements GenericService<E, PK> {
 
     @SuppressWarnings("unchecked")
     public GenericEntityService() {
@@ -49,7 +40,7 @@ public abstract class GenericEntityService<B extends GenericEntity<PK>, PK>
     }
 
     @Override
-    public abstract CrudDao<B, PK> getDao();
+    public abstract CrudDao<E, PK> getDao();
 
     @Override
     public int deleteByPk(PK pk) {
@@ -57,37 +48,38 @@ public abstract class GenericEntityService<B extends GenericEntity<PK>, PK>
     }
 
     @Override
-    public int updateByPk(B data) {
-        tryValidate(data);
-        return createUpdate(data).where(GenericEntity.id, data.getId()).exec();
+    public int updateByPk(E entity) {
+        tryValidate(entity);
+        return createUpdate(entity).where(GenericEntity.id, entity.getId()).exec();
     }
 
     @Override
-    public int updateByPk(List<B> data) {
+    public int updateByPk(List<E> data) {
         return data.stream().map(this::updateByPk).reduce(Math::addExact).orElse(0);
     }
 
     @Override
-    public int saveOrUpdate(B po) {
-        if (null != po.getId()) {
-            return updateByPk(po);
+    public int saveOrUpdate(E entity) {
+        if (null != entity.getId() && null != selectByPk(entity.getId())) {
+            return updateByPk(entity);
         } else {
-            insert(po);
+            insert(entity);
         }
         return 1;
     }
 
     @Override
-    public PK insert(B data) {
-        tryValidateProperty(null != data.getId(), GenericEntity.id, "id {not_be_null}");
-        tryValidate(data);
-        getDao().insert(data);
-        return data.getId();
+    public PK insert(E entity) {
+        tryValidate(entity);
+        getDao().insert(entity);
+        return entity.getId();
     }
 
     @Override
     @Transactional(readOnly = true)
-    public B selectByPk(PK id) {
-        return createQuery().where(GenericEntity.id, id).single();
+    public E selectByPk(PK pk) {
+        if (null == pk) return null;
+        return createQuery().where(GenericEntity.id, pk).single();
     }
+
 }

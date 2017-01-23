@@ -40,7 +40,17 @@ public class ThreadLocalUtils {
         local.remove();
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> T get(String key) {
         return ((T) local.get().get(key));
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T getAndRemove(String key) {
+        try {
+            return ((T) local.get().get(key));
+        } finally {
+            local.get().remove(key);
+        }
     }
 }

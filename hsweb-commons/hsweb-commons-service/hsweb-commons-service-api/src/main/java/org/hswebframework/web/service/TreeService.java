@@ -15,10 +15,22 @@
  *
  */
 
-package org.hswebframework.web.commons.entity;
+package org.hswebframework.web.service;
+
+import org.hswebframework.web.commons.entity.TreeSupportEntity;
+
+import java.util.Collection;
+import java.util.List;
 
 /**
- * 支持树形结构，排序的实体类，要使用树形结构，排序功能的实体类直接继承该类
+ * TODO 完成注释
+ *
+ * @author zhouhao
  */
-public interface TreeSortSupportEntity<PK> extends TreeSupportEntity<PK>, SortSupportEntity {
+public interface TreeService<E extends TreeSupportEntity, PK> extends Service {
+    List<E> selectChildNode(PK parentId);
+
+    List<E> selectAllChildNode(PK parentId);
+
+    int updateBatch(Collection<E> data);
 }

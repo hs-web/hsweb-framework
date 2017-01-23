@@ -36,6 +36,8 @@
         <module>hsweb-commons</module>
         <module>hsweb-i18n</module>
         <module>hsweb-logging</module>
+        <module>hsweb-concurrent</module>
+        <module>hsweb-examples</module>
     </modules>
 
     <packaging>pom</packaging>
@@ -256,4 +258,14 @@
             <url>http://nexus.hsweb.me/content/repositories/snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>hsweb-nexus</id>
+            <name>Nexus Release Repository</name>
+            <url>http://nexus.hsweb.me/content/groups/public/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
 </project>

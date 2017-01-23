@@ -212,6 +212,9 @@ public class EasyOrmSqlBuilder {
     }
 
     public String buildSelectFields(String resultMapId, String tableName, QueryParam param) {
+        if (param == null) {
+            return "*";
+        }
         if (param.isPaging() && Pager.get() == null) {
             Pager.doPaging(param.getPageIndex(), param.getPageSize());
         }
@@ -239,6 +242,9 @@ public class EasyOrmSqlBuilder {
     }
 
     public String buildOrder(String resultMapId, String tableName, QueryParam param) {
+        if (param == null) {
+            return "";
+        }
         RDBTableMetaData tableMetaData = createMeta(tableName, resultMapId);
         SqlAppender appender = new SqlAppender(" order by ");
         param.getSorts().stream()

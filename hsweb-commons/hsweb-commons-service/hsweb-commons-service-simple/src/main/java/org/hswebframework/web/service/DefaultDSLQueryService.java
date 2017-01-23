@@ -19,13 +19,24 @@
 package org.hswebframework.web.service;
 
 import org.hsweb.ezorm.core.dsl.Query;
+import org.hswebframework.web.commons.entity.Entity;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.dao.dynamic.QueryByBeanDao;
 
 import java.util.List;
 
-public interface DefaultDSLQueryService<B>
-        extends DefaultQueryByEntityService<B> {
+public interface DefaultDSLQueryService<E, PK>
+        extends DefaultQueryByEntityService<E>, QueryService<E, PK> {
+
+    @Override
+    default List<E> select() {
+        return createQuery().noPaging().list();
+    }
+
+    @Override
+    default int count() {
+        return createQuery().total();
+    }
 
     /**
      * 创建本服务的dsl查询操作对象
@@ -39,11 +50,12 @@ public interface DefaultDSLQueryService<B>
      * @see org.hsweb.ezorm.core.Conditional
      * @since 3.0
      */
-    default Query<B, QueryParamEntity> createQuery() {
-        Query<B, QueryParamEntity> query = Query.empty(new QueryParamEntity());
+    default Query<E, QueryParamEntity> createQuery() {
+        Query<E, QueryParamEntity> query = Query.empty(new QueryParamEntity());
         query.setListExecutor(this::select);
         query.setTotalExecutor(this::count);
         query.setSingleExecutor(this::selectSingle);
+        query.noPaging();
         return query;
     }
 
@@ -71,6 +83,7 @@ public interface DefaultDSLQueryService<B>
             if (null == list || list.size() == 0) return null;
             else return list.get(0);
         });
+        query.noPaging();
         return query;
     }
 }

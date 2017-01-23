@@ -25,20 +25,23 @@ import org.hswebframwork.utils.StringUtils;
 
 import java.util.List;
 
-public interface TreeSupport extends Entity {
-    String getId();
+public interface TreeSupportEntity<PK> extends GenericEntity<PK> {
 
-    void setId(String id);
+    String id = "id";
+
+    String treeCode = "treeCode";
+
+    String parentId = "parentId";
 
     String getTreeCode();
 
     void setTreeCode(String treeCode);
 
-    String getParentId();
+    PK getParentId();
 
-    void setParentId(String parentId);
+    void setParentId(PK parentId);
 
-    <T extends TreeSupport> List<T> getChildren();
+    <T extends TreeSupportEntity<PK>> List<T> getChildren();
 
     static String getParentTreeCode(String treeCode) {
         if (treeCode == null || treeCode.length() < 4) return null;
@@ -52,28 +55,28 @@ public interface TreeSupport extends Entity {
      *
      * @param parent 树结构的根节点
      * @param target 目标集合,转换后的数据将直接添加({@link List#add(Object)})到这个集合.
-     * @param <T>    继承{@link TreeSupport}的类型
+     * @param <T>    继承{@link TreeSupportEntity}的类型
      */
-    static <T extends TreeSupport> void expandTree2List(T parent, List<T> target) {
+    static <T extends TreeSupportEntity<PK>, PK> void expandTree2List(TreeSupportEntity<PK> parent, List<T> target, IDGenerator<PK> idGenerator) {
         List<T> children = parent.getChildren();
         if (parent.getTreeCode() == null) {
             parent.setTreeCode(RandomUtil.randomChar(4));
         }
         if (children != null) {
-            String pid = parent.getId();
+            PK pid = parent.getId();
             if (pid == null) {
-                pid = IDGenerator.MD5.generate();
+                pid = idGenerator.generate();
                 parent.setId(pid);
             }
             for (int i = 0; i < children.size(); i++) {
                 T child = children.get(i);
-                if (child instanceof SortSupport && parent instanceof SortSupport) {
-                    ((SortSupport) child).setSortIndex(StringUtils.toLong(((SortSupport) parent).getSortIndex() + "0" + (i + 1)));
+                if (child instanceof SortSupportEntity && parent instanceof SortSupportEntity) {
+                    ((SortSupportEntity) child).setSortIndex(StringUtils.toLong(((SortSupportEntity) parent).getSortIndex() + "0" + (i + 1)));
                 }
                 child.setParentId(pid);
                 child.setTreeCode(parent.getTreeCode() + "-" + RandomUtil.randomChar(4));
                 target.add(child);
-                expandTree2List(child, target);
+                expandTree2List(child, target, idGenerator);
             }
         }
     }

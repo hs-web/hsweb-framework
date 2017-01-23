@@ -18,57 +18,18 @@
 
 package org.hswebframework.web.controller;
 
-import org.hswebframework.web.authorization.Authorize;
 import org.hswebframework.web.commons.entity.Entity;
-import org.hswebframework.web.controller.message.ResponseMessage;
-import org.hswebframework.web.logging.AccessLogger;
 import org.hswebframework.web.service.CrudService;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
-
-import static org.hswebframework.web.controller.message.ResponseMessage.ok;
 
 /**
  * TODO 完成注释
  *
  * @author zhouhao
  */
-public interface CrudController<B, PK, Q extends Entity> {
+public interface CrudController<E, PK, Q extends Entity>
+        extends QueryController<E, PK, Q>, UpdateController<E, PK>, CreateController<E, PK>, DeleteController<PK> {
 
-    CrudService<B, PK, Q> getService();
-
-    @Authorize(action = "read")
-    @GetMapping
-    @AccessLogger("查询")
-    default ResponseMessage list(Q param) {
-        return ok(getService().selectPager(param));
-    }
-
-    @Authorize(action = "read")
-    @GetMapping(path = "/{id}")
-    @AccessLogger("根据主键查询")
-    default ResponseMessage getByPrimaryKey(PK id) {
-        return ok(getService().selectByPk(id));
-    }
-
-    @Authorize(action = "update")
-    @PutMapping(path = "/{id}")
-    @AccessLogger("根据主键修改数据")
-    ResponseMessage updateByPrimaryKey(@PathVariable PK id, @RequestBody B data);
-
-    @Authorize(action = "delete")
-    @DeleteMapping(path = "/{id}")
-    @AccessLogger("根据主键删除数据")
-    default ResponseMessage deleteByPrimaryKey(@PathVariable PK id) {
-        return ok(getService().deleteByPk(id));
-    }
-
-    @Authorize(action = "add")
-    @PostMapping
-    @AccessLogger("添加数据")
-    @ResponseStatus(HttpStatus.CREATED)
-    default ResponseMessage add(@RequestBody B data) {
-        return ok(getService().insert(data));
-    }
+    @SuppressWarnings("unchecked")
+    CrudService<E, PK> getService();
 
 }

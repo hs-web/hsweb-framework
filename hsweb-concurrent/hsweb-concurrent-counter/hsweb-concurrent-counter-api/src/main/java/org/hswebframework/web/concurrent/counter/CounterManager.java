@@ -15,10 +15,22 @@
  *
  */
 
-package org.hswebframework.web.commons.entity;
+package org.hswebframework.web.concurrent.counter;
+
+import java.util.Map;
 
 /**
- * 支持树形结构，排序的实体类，要使用树形结构，排序功能的实体类直接继承该类
+ * TODO 完成注释
+ *
+ * @author zhouhao
  */
-public interface TreeSortSupportEntity<PK> extends TreeSupportEntity<PK>, SortSupportEntity {
+public interface CounterManager {
+
+    Map<String, Counter> getCounters();
+
+    default Counter getCounter(String name) {
+        return getCounter(name, 0);
+    }
+
+    Counter getCounter(String name, Number initValue);
 }

@@ -18,20 +18,17 @@
 
 package org.hswebframework.web.service;
 
-import org.hswebframework.web.commons.entity.Entity;
-
 /**
  * 通用Service,实现增删改查
  *
  * @author zhouhao
  * @since 3.0
  */
-public interface CrudService<B, PK, Q extends Entity> extends
-        QueryByEntityService<B, Q>,
-        UpdateService<B>,
-        InsertService<B, PK>,
+public interface CrudService<E, PK> extends
+        QueryByEntityService<E>,
+        UpdateService<E>,
+        InsertService<E, PK>,
         DeleteService<PK>,
-        CreateEntityService<B> {
-
-    B selectByPk(PK id);
+        CreateEntityService<E>,
+        QueryService<E, PK> {
 }

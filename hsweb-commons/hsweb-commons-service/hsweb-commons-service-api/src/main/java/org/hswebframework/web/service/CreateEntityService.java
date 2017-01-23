@@ -28,11 +28,11 @@ package org.hswebframework.web.service;
  * @author zhouhao
  * @since 3.0
  */
-public interface CreateEntityService<B> {
+public interface CreateEntityService<E> {
     /**
      * 创建实体
      *
      * @return 实体
      */
-    B createEntity();
+    E createEntity();
 }

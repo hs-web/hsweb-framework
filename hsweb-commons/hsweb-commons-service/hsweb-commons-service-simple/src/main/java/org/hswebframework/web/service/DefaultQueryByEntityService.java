@@ -20,29 +20,31 @@ package org.hswebframework.web.service;
 
 import org.hsweb.ezorm.core.dsl.Query;
 import org.hsweb.ezorm.core.param.QueryParam;
+import org.hswebframework.web.commons.entity.Entity;
 import org.hswebframework.web.commons.entity.PagerResult;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.dao.dynamic.QueryByBeanDao;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-public interface DefaultQueryByEntityService<B>
-        extends QueryByEntityService<B, QueryParamEntity> {
-    QueryByBeanDao<B> getDao();
+public interface DefaultQueryByEntityService<E>
+        extends QueryByEntityService<E> {
+
+    QueryByBeanDao<E> getDao();
 
     @Override
-    default PagerResult<B> selectPager(QueryParamEntity param) {
-        PagerResult<B> pagerResult = new PagerResult<>();
-        param.setPaging(false);
+    default PagerResult<E> selectPager(Entity param) {
+        PagerResult<E> pagerResult = new PagerResult<>();
         int total = getDao().count(param);
         pagerResult.setTotal(total);
         if (total == 0) {
-            pagerResult.setData(new ArrayList<>());
+            pagerResult.setData(Collections.emptyList());
         } else {
             //根据实际记录数量重新指定分页参数
-            param.rePaging(total);
+            if (param instanceof QueryParamEntity)
+                ((QueryParamEntity) param).rePaging(total);
             pagerResult.setData(getDao().query(param));
         }
         return pagerResult;
@@ -65,20 +67,11 @@ public interface DefaultQueryByEntityService<B>
      */
     @Override
     @Transactional(readOnly = true)
-    default List<B> select(QueryParamEntity param) {
+    default List<E> select(Entity param) {
+        if (param == null) param = QueryParamEntity.empty();
         return getDao().query(param);
     }
 
-    /**
-     * 查询所有数据
-     *
-     * @return 所有数据
-     */
-    @Override
-    @Transactional(readOnly = true)
-    default List<B> select() {
-        return getDao().query(new QueryParamEntity());
-    }
 
     /**
      * 查询记录总数，用于分页等操作。查询条件同 {@link DefaultQueryByEntityService#select}
@@ -88,7 +81,8 @@ public interface DefaultQueryByEntityService<B>
      */
     @Override
     @Transactional(readOnly = true)
-    default int count(QueryParamEntity param) {
+    default int count(Entity param) {
+        if (param == null) param = QueryParamEntity.empty();
         return getDao().count(param);
     }
 
@@ -97,13 +91,14 @@ public interface DefaultQueryByEntityService<B>
      *
      * @param param 查询条件
      * @return 单个结果
-     * @see this#select(QueryParamEntity)
+     * @see this#select(Entity)
      */
     @Override
     @Transactional(readOnly = true)
-    default B selectSingle(QueryParamEntity param) {
-        param.doPaging(0, 1);
-        List<B> list = this.select(param);
+    default E selectSingle(Entity param) {
+        if (param instanceof QueryParamEntity)
+            ((QueryParamEntity) param).doPaging(0, 1);
+        List<E> list = this.select(param);
         if (list.size() == 0) return null;
         else return list.get(0);
     }

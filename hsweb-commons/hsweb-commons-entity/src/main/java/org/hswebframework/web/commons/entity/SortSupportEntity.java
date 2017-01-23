@@ -18,13 +18,13 @@
 
 package org.hswebframework.web.commons.entity;
 
-public interface SortSupport extends Comparable<SortSupport>, Entity {
+public interface SortSupportEntity extends Comparable<SortSupportEntity>, Entity {
 
     long getSortIndex();
 
-    SortSupport setSortIndex(long sortIndex);
+    void setSortIndex(long sortIndex);
 
-    default int compareTo(SortSupport support) {
+    default int compareTo(SortSupportEntity support) {
         if (support == null) return -1;
         return Long.compare(getSortIndex(), support.getSortIndex());
     }

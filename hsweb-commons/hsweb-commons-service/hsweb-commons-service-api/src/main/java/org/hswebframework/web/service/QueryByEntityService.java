@@ -23,14 +23,12 @@ import org.hswebframework.web.commons.entity.PagerResult;
 
 import java.util.List;
 
-public interface QueryByEntityService<B, Q extends Entity> extends Service {
-    PagerResult<B> selectPager(Q param);
+public interface QueryByEntityService<E> extends Service {
+    PagerResult<E> selectPager(Entity param);
 
-    List<B> select(Q param);
+    List<E> select(Entity param);
 
-    List<B> select();
+    int count(Entity param);
 
-    int count(Q param);
-
-    B selectSingle(Q param);
+    E selectSingle(Entity param);
 }
