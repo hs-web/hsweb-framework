@@ -16,7 +16,7 @@
  *
  */
 
-package org.hswebframework.web.authorization;
+package org.hswebframework.web.authorization.annotation;
 
 import java.lang.annotation.*;
 
