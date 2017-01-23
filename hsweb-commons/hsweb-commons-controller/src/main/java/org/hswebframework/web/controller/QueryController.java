@@ -24,6 +24,7 @@ import org.hswebframework.web.logging.AccessLogger;
 import org.hswebframework.web.service.QueryByEntityService;
 import org.hswebframework.web.service.QueryService;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import static org.hswebframework.web.controller.message.ResponseMessage.ok;
 
@@ -46,7 +47,7 @@ public interface QueryController<E, PK, Q extends Entity> {
     @Authorize(action = "read")
     @GetMapping(path = "/{id}")
     @AccessLogger("根据主键查询")
-    default ResponseMessage getByPrimaryKey(PK id) {
+    default ResponseMessage getByPrimaryKey(@PathVariable PK id) {
         return ok(getService().selectByPk(id));
     }
 
