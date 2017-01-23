@@ -114,6 +114,9 @@ public class SimpleAuthorization implements Authorization {
         this.attributes = attributes;
     }
 
+    public Map<String, Serializable> getAttributes() {
+        return attributes;
+    }
 
     public static class ReadOnlyPermission implements Permission {
         private String       id;
@@ -139,6 +142,7 @@ public class SimpleAuthorization implements Authorization {
 
         @Override
         public List<String> getActions() {
+            if (actions == null) actions = Collections.emptyList();
             return new ArrayList<>(actions);
         }
 

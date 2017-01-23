@@ -29,7 +29,7 @@ public class ConfigTests extends SimpleWebApplicationTests {
     private SqlExecutor executor;
 
     @Autowired
-    private ConfigService<QueryParamEntity> configService;
+    private ConfigService configService;
 
     @After
     public void clear() throws SQLException {
@@ -50,7 +50,8 @@ public class ConfigTests extends SimpleWebApplicationTests {
         JSONObject jsonObject = testPost("/config")
                 .setUp(builder -> builder.accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonStr))
+                        .content(jsonStr)
+                )
                 .exec().resultAsJson();
         //{data:id,code:200}
         Assert.assertEquals(jsonObject.getString("data"), configBean.getId());
@@ -61,7 +62,10 @@ public class ConfigTests extends SimpleWebApplicationTests {
                 .get("test")
                 .getNumber(0).intValue(), 1);
 
-        getRes = testGet("/config").exec().resultAsJson();
+        getRes = testGet("/config").setUp(builder ->
+                builder.param("terms[0].column", "id")
+                        .param("terms[0].value", configBean.getId())
+        ).exec().resultAsJson();
         Assert.assertEquals(getRes.getJSONObject("data").getJSONArray("data")
                 .getObject(0, SimpleConfigEntity.class)
                 .get("test")

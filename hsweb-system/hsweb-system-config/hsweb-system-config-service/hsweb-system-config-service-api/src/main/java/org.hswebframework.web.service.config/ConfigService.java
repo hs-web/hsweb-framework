@@ -18,7 +18,6 @@
 
 package org.hswebframework.web.service.config;
 
-import org.hswebframework.web.commons.entity.Entity;
 import org.hswebframework.web.entity.config.ConfigEntity;
 import org.hswebframework.web.service.CrudService;
 
@@ -27,6 +26,6 @@ import org.hswebframework.web.service.CrudService;
  *
  * @author zhouhao
  */
-public interface ConfigService<Q extends Entity> extends CrudService<ConfigEntity, String, Q> {
+public interface ConfigService extends CrudService<ConfigEntity, String> {
 
 }

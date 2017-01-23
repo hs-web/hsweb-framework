@@ -29,6 +29,8 @@
         <module>hsweb-system-history</module>
         <module>hsweb-system-dictionary</module>
         <module>hsweb-system-document</module>
+        <module>hsweb-system-explorer</module>
+        <module>hsweb-system-crawler</module>
     </modules>
     <artifactId>hsweb-system</artifactId>
 

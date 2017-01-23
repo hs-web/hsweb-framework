@@ -33,7 +33,7 @@ import org.springframework.stereotype.Service;
  */
 @Service("configService")
 public class SimpleConfigService extends GenericEntityService<ConfigEntity, String>
-        implements ConfigService<QueryParamEntity> {
+        implements ConfigService {
 
     @Autowired
     private ConfigDao configDao;

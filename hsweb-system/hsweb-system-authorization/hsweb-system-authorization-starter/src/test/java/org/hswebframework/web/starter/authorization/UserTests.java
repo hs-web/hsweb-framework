@@ -17,7 +17,7 @@
 
 package org.hswebframework.web.starter.authorization;
 
-import org.hswebframework.web.entity.authorization.Authorization;
+import org.hswebframework.web.authorization.Authorization;
 import org.hswebframework.web.entity.authorization.UserEntity;
 import org.hswebframework.web.service.authorization.PasswordStrengthValidator;
 import org.hswebframework.web.service.authorization.UserService;

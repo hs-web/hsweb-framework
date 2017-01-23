@@ -18,10 +18,10 @@
 
 package org.hswebframework.web.controller.config;
 
-import org.hswebframework.web.authorization.Authorize;
+import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.controller.GenericEntityController;
-import org.hswebframework.web.entity.config.SimpleConfigEntity;
+import org.hswebframework.web.entity.config.ConfigEntity;
 import org.hswebframework.web.logging.AccessLogger;
 import org.hswebframework.web.service.config.ConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,13 +37,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("${hsweb.web.mappings.config:config}")
 @Authorize(module = "config")
 @AccessLogger("配置管理")
-public class ConfigController implements GenericEntityController<SimpleConfigEntity, String> {
+public class ConfigController implements GenericEntityController<ConfigEntity, String, QueryParamEntity> {
+
+    private ConfigService configService;
 
     @Autowired
-    private ConfigService<QueryParamEntity> configService;
+    public void setConfigService(ConfigService configService) {
+        this.configService = configService;
+    }
 
     @Override
-    @SuppressWarnings("unchecked")
     public ConfigService getService() {
         return configService;
     }

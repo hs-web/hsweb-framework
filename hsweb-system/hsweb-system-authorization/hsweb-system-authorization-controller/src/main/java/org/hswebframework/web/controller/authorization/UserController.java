@@ -17,13 +17,13 @@
 
 package org.hswebframework.web.controller.authorization;
 
-import org.hswebframework.web.annotation.AuthInfo;
-import org.hswebframework.web.authorization.Authorize;
+import org.hswebframework.web.authorization.annotation.AuthInfo;
+import org.hswebframework.web.authorization.Authorization;
+import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.controller.CreateController;
 import org.hswebframework.web.controller.QueryController;
 import org.hswebframework.web.controller.message.ResponseMessage;
-import org.hswebframework.web.entity.authorization.Authorization;
 import org.hswebframework.web.entity.authorization.UserEntity;
 import org.hswebframework.web.logging.AccessLogger;
 import org.hswebframework.web.service.authorization.UserService;
