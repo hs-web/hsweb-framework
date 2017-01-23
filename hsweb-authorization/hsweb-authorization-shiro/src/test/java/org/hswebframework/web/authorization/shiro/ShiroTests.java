@@ -25,7 +25,6 @@ import org.apache.shiro.mgt.DefaultSecurityManager;
 import org.apache.shiro.realm.SimpleAccountRealm;
 import org.apache.shiro.session.mgt.DefaultSessionManager;
 import org.apache.shiro.subject.Subject;
-import org.hswebframework.web.authorization.UserSubjectUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -42,6 +41,7 @@ public class ShiroTests {
         securityManager.setAuthenticator(new ModularRealmAuthenticator());
         SimpleAccountRealm realm = new SimpleAccountRealm();
         realm.addAccount("admin", "admin", "admin");
+
         securityManager.setRealm(realm);
         securityManager.setSessionManager(sessionManager);
         SecurityUtils.setSecurityManager(securityManager);
@@ -53,10 +53,7 @@ public class ShiroTests {
         Assert.assertTrue(subject.isAuthenticated());
         Assert.assertTrue(subject.hasRole("admin"));
         Assert.assertFalse(subject.hasRole("test"));
-        new ShiroUserSubjectUtils().bind();
 
-        Assert.assertTrue(UserSubjectUtils.get().hasRole("admin"));
-        Assert.assertEquals(UserSubjectUtils.get().getUsername(), "admin");
         System.out.println();
     }
 }
