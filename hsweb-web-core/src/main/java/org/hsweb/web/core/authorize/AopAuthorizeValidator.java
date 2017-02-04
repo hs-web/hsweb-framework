@@ -2,18 +2,17 @@ package org.hsweb.web.core.authorize;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.hsweb.commons.ClassUtils;
+import org.hsweb.commons.StringUtils;
+import org.hsweb.web.bean.po.user.User;
 import org.hsweb.web.core.authorize.annotation.Authorize;
 import org.hsweb.web.core.authorize.oauth2.OAuth2Manager;
 import org.hsweb.web.core.authorize.validator.SimpleAuthorizeValidator;
-import org.hsweb.web.bean.po.user.User;
 import org.hsweb.web.core.exception.AuthorizeException;
 import org.hsweb.web.core.session.HttpSessionManager;
 import org.hsweb.web.core.utils.AopUtils;
-import org.hsweb.web.core.utils.ThreadLocalUtils;
 import org.hsweb.web.core.utils.WebUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.hsweb.commons.ClassUtils;
-import org.hsweb.commons.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;

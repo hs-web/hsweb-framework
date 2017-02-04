@@ -47,7 +47,6 @@ public interface ConfigService extends GenericService<Config, String> {
      */
     String get(String name, String key, String defaultValue);
 
-
     /**
      * 参照 {@link ConfigService#get(String, String)}，将值转为int类型
      */
