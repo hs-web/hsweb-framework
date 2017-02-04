@@ -139,7 +139,7 @@ public class RedisMonitorCache extends RedisCache implements Cache, MonitorCache
     @Override
     public void clear() {
         super.clear();
-        redisOperations.delete(keySetKey);
+        redisOperations.delete(new String(keySetKey));
     }
 
     @Override
