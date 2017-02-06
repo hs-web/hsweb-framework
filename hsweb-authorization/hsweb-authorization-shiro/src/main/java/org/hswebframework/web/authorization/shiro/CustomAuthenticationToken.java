@@ -55,7 +55,7 @@ public class CustomAuthenticationToken implements AuthenticationToken, HostAuthe
 
     @Override
     public String getHost() {
-        return null;
+        return host;
     }
 
     public void setHost(String host) {
