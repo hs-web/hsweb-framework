@@ -19,7 +19,6 @@ package org.hswebframework.web.starter.explorer;
 
 import com.alibaba.fastjson.JSON;
 import org.hswebframework.web.entity.authorization.ActionEntity;
-import org.hswebframework.web.entity.authorization.SimpleActionEntity;
 import org.hswebframework.web.entity.explorer.MenuEntity;
 import org.hswebframework.web.service.explorer.simple.MenuService;
 import org.hswebframework.web.tests.SimpleWebApplicationTests;
@@ -48,19 +47,19 @@ public class MenuTests extends SimpleWebApplicationTests {
         sqlExecutor.delete("delete from s_menu");
     }
 
-    public MenuEntity<MenuEntity, ActionEntity> createMenu(String name, String... actions) {
-        MenuEntity<MenuEntity, ActionEntity> menuEntity = menuService.createEntity();
+    public MenuEntity<MenuEntity> createMenu(String name, String... actions) {
+        MenuEntity<MenuEntity> menuEntity = menuService.createEntity();
         menuEntity.setName(name);
-        menuEntity.setActions(SimpleActionEntity.create(actions));
+        menuEntity.setActions(ActionEntity.create(actions));
         return menuEntity;
     }
 
     @Test
     public void testCrud() throws Exception {
-        MenuEntity<MenuEntity, ActionEntity> menuEntity = createMenu("测试1", "C", "R");
+        MenuEntity<MenuEntity> menuEntity = createMenu("测试1", "C", "R");
         menuEntity.setSortIndex(1);
-        MenuEntity<MenuEntity, ActionEntity> child1 = createMenu("测试2", "C", "R");
-        MenuEntity<MenuEntity, ActionEntity> child3 = createMenu("测试2", "C", "R");
+        MenuEntity<MenuEntity> child1 = createMenu("测试2", "C", "R");
+        MenuEntity<MenuEntity> child3 = createMenu("测试2", "C", "R");
         menuEntity.setChildren(Arrays.asList(child1, child3));
 
         String id = menuService.insert(menuEntity);

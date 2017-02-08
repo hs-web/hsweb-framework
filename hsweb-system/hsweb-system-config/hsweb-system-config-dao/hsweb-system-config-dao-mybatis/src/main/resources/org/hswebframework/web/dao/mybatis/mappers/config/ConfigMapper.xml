@@ -8,8 +8,8 @@
         <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
         <result property="remark" column="remark" javaType="String" jdbcType="VARCHAR"/>
         <result property="content" column="content" javaType="java.util.List" jdbcType="CLOB"/>
-        <result property="createDate" column="create_date" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
-        <result property="updateDate" column="update_date" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <result property="createTime" column="create_time" javaType="Long" jdbcType="NUMERIC"/>
+        <result property="updateTime" column="update_time" javaType="Long" jdbcType="NUMERIC"/>
         <result property="classifiedId" column="classified_id" javaType="String" jdbcType="VARCHAR"/>
         <result property="creatorId" column="creator_id" javaType="String" jdbcType="VARCHAR"/>
     </resultMap>

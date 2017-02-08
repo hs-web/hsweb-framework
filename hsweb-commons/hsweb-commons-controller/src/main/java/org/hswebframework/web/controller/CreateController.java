@@ -33,7 +33,7 @@ import static org.hswebframework.web.controller.message.ResponseMessage.ok;
  *
  * @author zhouhao
  */
-public interface CreateController<E, PK> {
+public interface CreateController<E, PK> extends HswebController {
 
     InsertService<E, PK> getService();
 

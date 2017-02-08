@@ -33,7 +33,7 @@ import static org.hswebframework.web.controller.message.ResponseMessage.ok;
  *
  * @author zhouhao
  */
-public interface QueryController<E, PK, Q extends Entity> {
+public interface QueryController<E, PK, Q extends Entity> extends HswebController {
 
     <T extends QueryByEntityService<E> & QueryService<E, PK>> T getService();
 

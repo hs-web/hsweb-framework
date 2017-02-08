@@ -64,8 +64,9 @@ public class SimpleRoleService extends AbstractService<RoleEntity, String>
 
     @Override
     public <T extends PermissionRoleEntity> String insert(BindPermissionRoleEntity<T> roleEntity) {
-        tryValidateProperty(!StringUtils.hasLength(roleEntity.getId()), RoleEntity.id, "id {not_be_null}");
-        tryValidateProperty(null != selectByPk(roleEntity.getId()), RoleEntity.id, "{role_exists}");
+        tryValidateProperty(StringUtils.hasLength(roleEntity.getId()), RoleEntity.id, "id {not_be_null}");
+        tryValidateProperty(null == selectByPk(roleEntity.getId()), RoleEntity.id, "{role_exists}");
+        roleEntity.setEnabled(true);
         tryValidate(roleEntity);
         roleDao.insert(roleEntity);
         syncPermissions(roleEntity.getId(), roleEntity.getPermissions());
@@ -89,7 +90,7 @@ public class SimpleRoleService extends AbstractService<RoleEntity, String>
 
     @Override
     public <T extends PermissionRoleEntity> boolean update(BindPermissionRoleEntity<T> roleEntity) {
-        tryValidateProperty(!StringUtils.hasLength(roleEntity.getId()), RoleEntity.id, "id {not_be_null}");
+        tryValidateProperty(StringUtils.hasLength(roleEntity.getId()), RoleEntity.id, "id {not_be_null}");
         tryValidateProperty(null == selectByPk(roleEntity.getId()), RoleEntity.id, "{role_not_exists}");
         tryValidate(roleEntity);
         DefaultDSLUpdateService.createUpdate(roleDao)

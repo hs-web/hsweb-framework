@@ -36,11 +36,17 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.hswebframework.web.AopUtils;
 import org.hswebframework.web.authorization.Authorization;
 import org.hswebframework.web.authorization.AuthorizationSupplier;
+import org.hswebframework.web.authorization.access.DataAccessController;
+import org.hswebframework.web.authorization.access.DataAccessHandler;
+import org.hswebframework.web.authorization.access.FieldAccessController;
 import org.hswebframework.web.authorization.shiro.boost.BoostAuthorizationAttributeSourceAdvisor;
+import org.hswebframework.web.authorization.shiro.boost.DefaultDataAccessController;
+import org.hswebframework.web.authorization.shiro.boost.DefaultFieldAccessController;
 import org.hswebframework.web.authorization.shiro.boost.MethodInterceptorHolder;
 import org.hswebframework.web.authorization.shiro.cache.SpringCacheManagerWrapper;
 import org.hswebframework.web.controller.message.ResponseMessage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnNotWebApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -55,6 +61,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.Collections;
+import java.util.List;
 
 /**
  * TODO 完成注释
@@ -121,9 +128,30 @@ public class ShiroAutoconfiguration {
 //        return advisorAutoProxyCreator;
 //    }
 
+    @Autowired(required = false)
+    private List<DataAccessHandler> dataAccessHandlers;
+
     @Bean
-    public BoostAuthorizationAttributeSourceAdvisor authorizationAttributeSourceAdvisor(SecurityManager securityManager) {
-        BoostAuthorizationAttributeSourceAdvisor advisor = new BoostAuthorizationAttributeSourceAdvisor();
+    @ConditionalOnMissingBean
+    public DefaultDataAccessController defaultDataAccessController() {
+        DefaultDataAccessController accessController = new DefaultDataAccessController();
+        if (dataAccessHandlers != null) {
+            dataAccessHandlers.forEach(accessController::addHandler);
+        }
+        return accessController;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public DefaultFieldAccessController defaultFieldAccessController() {
+        return new DefaultFieldAccessController();
+    }
+
+    @Bean
+    public BoostAuthorizationAttributeSourceAdvisor authorizationAttributeSourceAdvisor(SecurityManager securityManager,
+                                                                                        DataAccessController dataAccessController,
+                                                                                        FieldAccessController fieldAccessController) {
+        BoostAuthorizationAttributeSourceAdvisor advisor = new BoostAuthorizationAttributeSourceAdvisor(dataAccessController, fieldAccessController);
         advisor.setSecurityManager(securityManager);
         return advisor;
     }
@@ -154,10 +182,12 @@ public class ShiroAutoconfiguration {
     @Aspect
     @Order(Ordered.HIGHEST_PRECEDENCE)
     static class MethodInterceptorHolderAdvisor {
-        @Around(value = "@annotation(org.hswebframework.web.authorization.annotation.RequiresExpression)")
+        @Around(value = "@annotation(org.hswebframework.web.authorization.annotation.RequiresExpression)" +
+                "||@annotation(org.hswebframework.web.authorization.annotation.RequiresDataAccess)" +
+                "||@annotation(org.hswebframework.web.authorization.annotation.Authorize)")
         public Object around(ProceedingJoinPoint pjp) throws Throwable {
             MethodSignature signature = (MethodSignature) pjp.getSignature();
-            String methodName = AopUtils.getMethodName(pjp);
+            String methodName = AopUtils.getMethodBody(pjp);
             String className = pjp.getTarget().getClass().getName();
             String id = DigestUtils.md5Hex(className.concat(methodName));
             new MethodInterceptorHolder(id, signature.getMethod(), pjp.getTarget(), AopUtils.getArgsMap(pjp))

@@ -19,7 +19,9 @@
 package org.hswebframework.web.service;
 
 import org.hswebframework.web.commons.entity.GenericEntity;
+import org.hswebframework.web.commons.entity.RecordCreationEntity;
 import org.hswebframework.web.dao.CrudDao;
+import org.hswebframwork.utils.ClassUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -44,18 +46,28 @@ public abstract class GenericEntityService<E extends GenericEntity<PK>, PK>
 
     @Override
     public int deleteByPk(PK pk) {
-        return createDelete().where(GenericEntity.id, pk).exec();
+        return createDelete()
+                .where(GenericEntity.id, pk)
+                .exec();
     }
 
     @Override
     public int updateByPk(E entity) {
         tryValidate(entity);
-        return createUpdate(entity).where(GenericEntity.id, entity.getId()).exec();
+        return createUpdate(entity)
+                //如果是RecordCreationEntity则不修改creator_id和creator_time
+                .when(ClassUtils.instanceOf(getEntityType(), RecordCreationEntity.class),
+                        update -> update.and().excludes("creator_id", "creator_time"))
+                .where(GenericEntity.id, entity.getId())
+                .exec();
     }
 
     @Override
     public int updateByPk(List<E> data) {
-        return data.stream().map(this::updateByPk).reduce(Math::addExact).orElse(0);
+        return data.stream()
+                .map(this::updateByPk)
+                .reduce(Math::addExact)
+                .orElse(0);
     }
 
     @Override

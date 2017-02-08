@@ -17,7 +17,7 @@
 
 package org.hswebframework.web.authorization.annotation;
 
-enum Logical {
+public enum Logical {
     /**
      * 并集，需要满足所有验证条件
      */

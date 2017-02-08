@@ -31,7 +31,7 @@ import static org.hswebframework.web.controller.message.ResponseMessage.ok;
  *
  * @author zhouhao
  */
-public interface DeleteController<PK> {
+public interface DeleteController<PK> extends HswebController {
 
     DeleteService<PK> getService();
 

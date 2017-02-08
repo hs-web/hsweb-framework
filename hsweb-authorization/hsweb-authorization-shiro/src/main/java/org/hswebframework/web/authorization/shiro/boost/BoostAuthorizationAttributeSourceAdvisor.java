@@ -21,9 +21,14 @@ import org.apache.shiro.authz.annotation.*;
 import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.spring.security.interceptor.AopAllianceAnnotationsAuthorizingMethodInterceptor;
 import org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor;
+import org.hswebframework.web.authorization.access.DataAccessController;
+import org.hswebframework.web.authorization.access.FieldAccessController;
 import org.hswebframework.web.authorization.annotation.Authorize;
+import org.hswebframework.web.authorization.annotation.RequiresDataAccess;
 import org.hswebframework.web.authorization.annotation.RequiresExpression;
+import org.hswebframework.web.authorization.annotation.RequiresFieldAccess;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.AnnotationUtils;
 
 import java.lang.annotation.Annotation;
@@ -42,7 +47,9 @@ public class BoostAuthorizationAttributeSourceAdvisor extends StaticMethodMatche
                     RequiresUser.class, RequiresGuest.class, RequiresAuthentication.class,
                     //自定义
                     RequiresExpression.class,
-                    Authorize.class
+                    Authorize.class,
+                    RequiresDataAccess.class,
+                    RequiresFieldAccess.class
             };
 
     protected SecurityManager securityManager = null;
@@ -50,9 +57,12 @@ public class BoostAuthorizationAttributeSourceAdvisor extends StaticMethodMatche
     /**
      * Create a new AuthorizationAttributeSourceAdvisor.
      */
-    public BoostAuthorizationAttributeSourceAdvisor() {
+    public BoostAuthorizationAttributeSourceAdvisor(DataAccessController dataAccessController,
+                                                    FieldAccessController fieldAccessController) {
         AopAllianceAnnotationsAuthorizingMethodInterceptor interceptor = new AopAllianceAnnotationsAuthorizingMethodInterceptor();
         interceptor.getMethodInterceptors().add(new ExpressionAnnotationMethodInterceptor());
+        interceptor.getMethodInterceptors().add(new DataAccessAnnotationMethodInterceptor(dataAccessController));
+        interceptor.getMethodInterceptors().add(new FieldAccessAnnotationMethodInterceptor(fieldAccessController));
         setAdvice(interceptor);
     }
 

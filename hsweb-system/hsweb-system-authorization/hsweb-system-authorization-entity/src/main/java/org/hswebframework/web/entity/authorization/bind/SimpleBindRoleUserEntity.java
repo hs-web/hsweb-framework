@@ -29,10 +29,11 @@ public class SimpleBindRoleUserEntity extends SimpleUserEntity implements BindRo
         SimpleBindRoleUserEntity target = new SimpleBindRoleUserEntity();
         target.setId(getId());
         target.setName(getName());
-        target.setCreateDate(getCreateDate());
+        target.setCreateTime(getCreateTime());
+        target.setCreatorId(getCreatorId());
         target.setEnabled(isEnabled());
         target.setLastLoginIp(getLastLoginIp());
-        target.setLastLoginDate(getLastLoginDate());
+        target.setLastLoginTime(getLastLoginTime());
         target.setSalt(getSalt());
         if (roles != null)
             target.setRoles(new ArrayList<>(getRoles()));

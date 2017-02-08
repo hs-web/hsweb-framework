@@ -30,7 +30,7 @@ public interface UserService extends
 
     String encodePassword(String password, String salt);
 
-    void updateLoginInfo(String userId, String ip, Date loginTime);
+    void updateLoginInfo(String userId, String ip, Long loginTime);
 
     void updatePassword(String userId, String oldPassword, String newPassword);
 

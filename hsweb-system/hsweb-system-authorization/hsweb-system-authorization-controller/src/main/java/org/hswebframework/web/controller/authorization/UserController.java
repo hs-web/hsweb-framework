@@ -39,7 +39,7 @@ import static org.hswebframework.web.controller.message.ResponseMessage.*;
  */
 @RestController
 @RequestMapping("${hsweb.web.mappings.user:user}")
-@Authorize(module = "user")
+@Authorize(permission = "user")
 @AccessLogger("用户管理")
 public class UserController implements QueryController<UserEntity, String, QueryParamEntity>, CreateController<UserEntity, String> {
 

@@ -140,7 +140,7 @@ public class AuthorizationController {
                 throw new BusinessException("{password_error}", 400);
             }
             // TODO: 17-1-13  获取IP
-            userService.updateLoginInfo(entity.getId(), "", new Date());
+            userService.updateLoginInfo(entity.getId(), "", System.currentTimeMillis());
             // 验证通过
             Authorization authorization = userService.initUserAuthorization(entity.getId());
             listenerAdapter.onAuthorizeSuccess(remember, authorization);

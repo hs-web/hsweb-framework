@@ -35,7 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("${hsweb.web.mappings.config:config}")
-@Authorize(module = "config")
+@Authorize(permission = "config")
 @AccessLogger("配置管理")
 public class ConfigController implements GenericEntityController<ConfigEntity, String, QueryParamEntity> {
 

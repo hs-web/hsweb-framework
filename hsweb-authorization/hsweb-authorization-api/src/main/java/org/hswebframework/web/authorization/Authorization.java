@@ -20,6 +20,7 @@ package org.hswebframework.web.authorization;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 /**
@@ -33,6 +34,23 @@ public interface Authorization extends Serializable {
     List<Role> getRoles();
 
     List<Permission> getPermissions();
+
+    default Role getRole(String id) {
+        if (null == id) return null;
+        return getRoles().stream()
+                .filter(role -> role.getId().equals(id))
+                .findAny()
+                .orElse(null);
+    }
+
+    default Permission getPermission(String id) {
+        if (null == id) return null;
+        return getPermissions().parallelStream()
+                .filter(permission -> permission.getId().equals(id))
+                .findAny()
+                .orElse(null);
+    }
+
 
     <T extends Serializable> T getAttribute(String name);
 

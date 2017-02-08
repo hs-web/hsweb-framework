@@ -28,7 +28,7 @@ import java.util.Map;
  *
  * @author zhouhao
  */
-public interface MenuEntity<C extends MenuEntity, A extends ActionEntity>
+public interface MenuEntity<C extends MenuEntity>
         extends TreeSortSupportEntity<String> {
     String getName();
 
@@ -66,9 +66,9 @@ public interface MenuEntity<C extends MenuEntity, A extends ActionEntity>
 
     void setEnabled(boolean enabled);
 
-    List<A> getActions();
+    List<ActionEntity> getActions();
 
-    void setActions(List<A> actions);
+    void setActions(List<ActionEntity> actions);
 
     void setChildren(List<C> children);
 
@@ -76,5 +76,5 @@ public interface MenuEntity<C extends MenuEntity, A extends ActionEntity>
     @SuppressWarnings("unchecked")
     List<C> getChildren();
 
-    MenuEntity<C, A> clone();
+    MenuEntity<C> clone();
 }

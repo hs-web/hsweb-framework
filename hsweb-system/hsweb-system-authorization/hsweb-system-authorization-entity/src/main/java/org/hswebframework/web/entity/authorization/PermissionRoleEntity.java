@@ -9,7 +9,7 @@ import java.util.List;
  *
  * @author zhouhao
  */
-public interface PermissionRoleEntity extends PermissionRoleReadEntity, CloneableEntity {
+public interface PermissionRoleEntity extends CloneableEntity {
 
     void setRoleId(String roleId);
 
@@ -17,4 +17,17 @@ public interface PermissionRoleEntity extends PermissionRoleReadEntity, Cloneabl
 
     void setActions(List<String> actions);
 
+    String getRoleId();
+
+    String getPermissionId();
+
+    List<String> getActions();
+
+    List<DataAccessEntity> getDataAccesses();
+
+    List<FieldAccessEntity> getFieldAccesses();
+
+    void setDataAccesses(List<DataAccessEntity> dataAccesses);
+
+    void setFieldAccesses(List<FieldAccessEntity> fieldAccesses);
 }

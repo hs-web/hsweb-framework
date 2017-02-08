@@ -10,6 +10,7 @@ import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.service.AbstractService;
 import org.hswebframework.web.service.DefaultDSLQueryService;
 import org.hswebframework.web.service.DefaultDSLUpdateService;
+import org.hswebframework.web.service.authorization.DataAccessFactory;
 import org.hswebframework.web.service.authorization.PasswordStrengthValidator;
 import org.hswebframework.web.service.authorization.UserService;
 import org.hswebframework.web.service.authorization.UsernameValidator;
@@ -55,19 +56,22 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
     @Autowired
     private RoleDao roleDao;
 
+    @Autowired(required = false)
+    private DataAccessFactory dataAccessFactory;
+
     @Override
     public String encodePassword(String password, String salt) {
         return DigestUtils.md5Hex(String.format("hsweb.%s.framework.%s", password, salt));
     }
 
     @Override
-    public void updateLoginInfo(String userId, String ip, Date loginTime) {
+    public void updateLoginInfo(String userId, String ip, Long loginTime) {
         Assert.notNull(userId, "userId:{not_be_null}");
         Assert.notNull(ip, "ip:{not_be_null}");
         Assert.notNull(loginTime, "loginTime:{not_be_null}");
         DefaultDSLUpdateService.createUpdate(getDao())
                 .set("lastLoginIp", ip)
-                .set("lastLoginDate", loginTime)
+                .set("lastLoginTime", loginTime)
                 .where(GenericEntity.id, userId)
                 .exec();
     }
@@ -94,7 +98,7 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
         tryValidateProperty(usernameValidator, "username", userEntity.getUsername());
         //密码强度验证
         tryValidateProperty(passwordStrengthValidator, "password", userEntity.getPassword());
-        userEntity.setCreateDate(new Date());
+        userEntity.setCreateTime(System.currentTimeMillis());
         userEntity.setId(IDGenerator.MD5.generate());
         userEntity.setSalt(IDGenerator.RANDOM.generate());
         userEntity.setEnabled(true);
@@ -194,14 +198,14 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
         //用户持有的角色
         List<UserRoleEntity> roleEntities = userRoleDao.selectByUserId(userId);
         if (ListUtils.isNullOrEmpty(roleEntities)) {
-            return new SimpleAuthorization(userEntity, new ArrayList<>(), new ArrayList<>());
+            return new SimpleAuthorization(userEntity, new ArrayList<>(), new ArrayList<>(), dataAccessFactory);
         }
         List<String> roleIdList = roleEntities.stream().map(UserRoleEntity::getRoleId).collect(Collectors.toList());
 
         List<RoleEntity> roleEntityList = DefaultDSLQueryService.createQuery(roleDao).where().in(GenericEntity.id, roleIdList).noPaging().list();
         //权限角色关联信息
         List<PermissionRoleEntity> permissionRoleEntities = permissionRoleDao.selectByRoleIdList(roleIdList);
-        return new SimpleAuthorization(userEntity, roleEntityList, permissionRoleEntities);
+        return new SimpleAuthorization(userEntity, roleEntityList, permissionRoleEntities, dataAccessFactory);
     }
 
     @Override
@@ -209,7 +213,7 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
         UserEntity userEntity = selectByPk(userId);
         assertNotNull(userEntity);
         //所有权限信息
-        List<PermissionEntity<ActionEntity>> permissionEntities = DefaultDSLQueryService
+        List<PermissionEntity> permissionEntities = DefaultDSLQueryService
                 .createQuery(permissionDao).noPaging().list();
         List<PermissionRoleEntity> permissionRoleEntities = permissionEntities
                 .stream().map(permission -> {
@@ -231,7 +235,7 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
             admin.setName("admin");
             roleEntityList.add(admin);
         }
-        return new SimpleAuthorization(userEntity, roleEntityList, permissionRoleEntities);
+        return new SimpleAuthorization(userEntity, roleEntityList, permissionRoleEntities, dataAccessFactory);
     }
 
 

@@ -18,9 +18,8 @@
 
 package org.hswebframework.web.service.config.simple;
 
-import org.hswebframework.web.entity.config.ConfigEntity;
-import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.dao.config.ConfigDao;
+import org.hswebframework.web.entity.config.ConfigEntity;
 import org.hswebframework.web.service.GenericEntityService;
 import org.hswebframework.web.service.config.ConfigService;
 import org.springframework.beans.factory.annotation.Autowired;

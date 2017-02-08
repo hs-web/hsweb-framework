@@ -43,7 +43,7 @@ public class ConfigTests extends SimpleWebApplicationTests {
         Assert.assertEquals(configBean.getClass(), SimpleConfigEntity.class);
         configBean.setId(IDGenerator.RANDOM.generate());
         configBean.addContent("test", 1, "测试");
-        configBean.setCreateDate(new Date());
+        configBean.setCreateTime(System.currentTimeMillis());
         configBean.setCreatorId("test");
         String jsonStr = JSON.toJSONString(configBean);
 
@@ -82,7 +82,7 @@ public class ConfigTests extends SimpleWebApplicationTests {
         Assert.assertEquals(configBean.getClass(), SimpleConfigEntity.class);
         configBean.setId(IDGenerator.RANDOM.generate());
         configBean.addContent("test", 1, "测试");
-        configBean.setCreateDate(new Date());
+        configBean.setCreateTime(System.currentTimeMillis());
         configBean.setCreatorId("test");
         //test insert
         configService.insert(configBean);

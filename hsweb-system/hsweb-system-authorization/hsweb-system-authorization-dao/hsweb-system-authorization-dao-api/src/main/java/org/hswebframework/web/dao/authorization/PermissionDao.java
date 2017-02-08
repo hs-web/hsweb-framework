@@ -9,5 +9,5 @@ import org.hswebframework.web.entity.authorization.PermissionEntity;
  *
  * @author zhouhao
  */
-public interface PermissionDao extends CrudDao<PermissionEntity<ActionEntity>,String> {
+public interface PermissionDao extends CrudDao<PermissionEntity,String> {
 }

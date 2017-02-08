@@ -77,6 +77,8 @@ public class UserTests extends SimpleWebApplicationTests {
         userEntity.setName("测试");
         userEntity.setUsername("test");
         userEntity.setPassword("password_1234");
+        userEntity.setCreateTimeNow();
+        userEntity.setCreatorId("admin");
         userService.insert(userEntity);
         return userEntity;
     }
@@ -98,6 +100,8 @@ public class UserTests extends SimpleWebApplicationTests {
         userEntity.setName("测试");
         userEntity.setUsername("test");
         userEntity.setPassword("123");
+        userEntity.setCreatorId("admin");
+        userEntity.setCreateTimeNow();
         try {
             userService.insert(userEntity);
             Assert.assertTrue(false);
@@ -116,17 +120,17 @@ public class UserTests extends SimpleWebApplicationTests {
 
         UserEntity entityInDb = userService.selectByUsername(userEntity.getUsername());
         Assert.assertEquals(entityInDb.isEnabled(), true);
-        Assert.assertNotNull(entityInDb.getCreateDate());
-        Assert.assertTrue(entityInDb.getLastLoginDate() == null);
+        Assert.assertNotNull(entityInDb.getCreateTime());
+        Assert.assertTrue(entityInDb.getLastLoginTime() == null);
         Assert.assertTrue(entityInDb.getLastLoginIp() == null);
 
         Assert.assertEquals(entityInDb.getPassword(), userService.encodePassword("password_1234", entityInDb.getSalt()));
 
-        userService.updateLoginInfo(id, "127.0.0.1", new Date());
+        userService.updateLoginInfo(id, "127.0.0.1", System.currentTimeMillis());
         entityInDb = userService.selectByUsername(userEntity.getUsername());
         Assert.assertEquals(entityInDb.isEnabled(), true);
-        Assert.assertNotNull(entityInDb.getCreateDate());
-        Assert.assertNotNull(entityInDb.getLastLoginDate());
+        Assert.assertNotNull(entityInDb.getCreateTime());
+        Assert.assertNotNull(entityInDb.getLastLoginTime());
         Assert.assertNotNull(entityInDb.getLastLoginIp());
         try {
             userService.updatePassword(id, "test", "test");

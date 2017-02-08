@@ -5,22 +5,27 @@ import org.hswebframework.web.commons.entity.SimpleGenericEntity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * TODO 完成注释
  *
  * @author zhouhao
  */
-public class SimplePermissionEntity extends SimpleGenericEntity<String> implements PermissionEntity<SimpleActionEntity> {
+public class SimplePermissionEntity extends SimpleGenericEntity<String> implements PermissionEntity {
     @NotBlank
     private String name;
 
     private String describe;
 
-    private byte status = 1;
+    private Byte status = 1;
 
     //可选事件
-    private List<SimpleActionEntity> actions;
+    private List<ActionEntity> actions;
+
+    private List<DataAccessEntity> dataAccess;
+
+    private List<FieldAccessEntity> fieldAccess;
 
     public String getName() {
         return this.name;
@@ -42,18 +47,38 @@ public class SimplePermissionEntity extends SimpleGenericEntity<String> implemen
         return status;
     }
 
-    public void setStatus(byte status) {
+    public void setStatus(Byte status) {
         this.status = status;
     }
 
     @Override
-    public List<SimpleActionEntity> getActions() {
+    public List<ActionEntity> getActions() {
         return actions;
     }
 
     @Override
-    public void setActions(List<SimpleActionEntity> actions) {
+    public void setActions(List<ActionEntity> actions) {
         this.actions = actions;
+    }
+
+    @Override
+    public List<DataAccessEntity> getDataAccess() {
+        return this.dataAccess;
+    }
+
+    @Override
+    public List<FieldAccessEntity> getFieldAccess() {
+        return this.fieldAccess;
+    }
+
+    @Override
+    public void setDataAccess(List<DataAccessEntity> dataAccess) {
+        this.dataAccess = dataAccess;
+    }
+
+    @Override
+    public void setFieldAccess(List<FieldAccessEntity> fieldAccess) {
+        this.fieldAccess = fieldAccess;
     }
 
     @Override
@@ -61,7 +86,7 @@ public class SimplePermissionEntity extends SimpleGenericEntity<String> implemen
         SimplePermissionEntity target = new SimplePermissionEntity();
         target.setId(getId());
         if (actions != null)
-            target.setActions(new ArrayList<>(getActions()));
+            target.setActions(getActions().stream().map(ActionEntity::clone).collect(Collectors.toList()));
         target.setDescribe(getDescribe());
         target.setStatus(getStatus());
         return target;

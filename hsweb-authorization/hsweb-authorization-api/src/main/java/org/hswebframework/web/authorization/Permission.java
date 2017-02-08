@@ -17,16 +17,75 @@
 
 package org.hswebframework.web.authorization;
 
+import org.hswebframework.web.authorization.access.DataAccess;
+import org.hswebframework.web.authorization.access.FieldAccess;
+
 import java.io.Serializable;
-import java.util.List;
+import java.util.Set;
 
 /**
- * TODO 完成注释
+ * 用户持有的权限信息
  *
  * @author zhouhao
  */
 public interface Permission extends Serializable {
+
+    /**
+     * 查询
+     */
+    String ACTION_QUERY  = "query";
+    /**
+     * 获取明细
+     */
+    String ACTION_GET    = "get";
+    /**
+     * 新增
+     */
+    String ACTION_ADD    = "add";
+    /**
+     * 更新
+     */
+    String ACTION_UPDATE = "update";
+    /**
+     * 删除
+     */
+    String ACTION_DELETE = "delete";
+    /**
+     * 导入
+     */
+    String ACTION_IMPORT = "import";
+    /**
+     * 导出
+     */
+    String ACTION_EXPORT = "export";
+
+    /**
+     * 获取权限ID，权限的唯一标识
+     *
+     * @return id
+     */
     String getId();
 
-    List<String> getActions();
+    /**
+     * 获取用户对此权限的可操作事件(按钮)
+     *
+     * @return 操作事件(按钮)集合
+     */
+    Set<String> getActions();
+
+    /**
+     * 获取用户对此权限持有的字段权限信息,用于字段级别的控制
+     *
+     * @return 可操作字段集合
+     * @see FieldAccess
+     */
+    Set<FieldAccess> getFieldAccesses();
+
+    /**
+     * 获取用户对此权限持有的数据权限信息,用于数据级别的控制
+     *
+     * @return 数据权限信息
+     * @see DataAccess
+     */
+    Set<DataAccess> getDataAccesses();
 }

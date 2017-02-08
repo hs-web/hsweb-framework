@@ -12,7 +12,7 @@ public class SimpleRoleEntity extends SimpleGenericEntity<String> implements Rol
 
     private String describe;
 
-    private boolean enabled;
+    private Boolean enabled;
 
     public String getName() {
         return name;
@@ -31,12 +31,12 @@ public class SimpleRoleEntity extends SimpleGenericEntity<String> implements Rol
     }
 
     @Override
-    public boolean isEnabled() {
+    public Boolean isEnabled() {
         return enabled;
     }
 
     @Override
-    public void setEnabled(boolean enabled) {
+    public void setEnabled(Boolean enabled) {
         this.enabled = enabled;
     }
 

@@ -19,7 +19,7 @@ package org.hswebframework.web.entity.explorer;
 
 import org.hswebframework.web.commons.entity.CloneableEntity;
 import org.hswebframework.web.commons.entity.SimpleTreeSortSupportEntity;
-import org.hswebframework.web.entity.authorization.SimpleActionEntity;
+import org.hswebframework.web.entity.authorization.ActionEntity;
 
 import java.util.List;
 import java.util.Map;
@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
  * @author zhouhao
  */
 public class SimpleMenuEntity extends SimpleTreeSortSupportEntity<String>
-        implements MenuEntity<SimpleMenuEntity, SimpleActionEntity> {
+        implements MenuEntity<SimpleMenuEntity> {
 
     //菜单名称
     private String name;
@@ -64,13 +64,13 @@ public class SimpleMenuEntity extends SimpleTreeSortSupportEntity<String>
     private List<SimpleMenuEntity> children;
 
     //可选操作(按钮)
-    private List<SimpleActionEntity> actions;
+    private List<ActionEntity> actions;
 
-    public List<SimpleActionEntity> getActions() {
+    public List<ActionEntity> getActions() {
         return actions;
     }
 
-    public void setActions(List<SimpleActionEntity> actions) {
+    public void setActions(List<ActionEntity> actions) {
         this.actions = actions;
     }
 
@@ -185,7 +185,7 @@ public class SimpleMenuEntity extends SimpleTreeSortSupportEntity<String>
                             })));
         }
         if (null != getActions()) {
-            target.setActions(getActions().stream().map(SimpleActionEntity::clone).collect(Collectors.toList()));
+            target.setActions(getActions().stream().map(ActionEntity::clone).collect(Collectors.toList()));
         }
         if (null != getChildren()) {
             target.setChildren(getChildren().stream().map(SimpleMenuEntity::clone).collect(Collectors.toList()));

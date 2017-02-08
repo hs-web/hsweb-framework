@@ -18,10 +18,11 @@
 package org.hswebframework.web.starter.authorization;
 
 import org.hsweb.ezorm.rdb.executor.SqlExecutor;
-import org.hswebframework.web.commons.entity.param.QueryParamEntity;
+import org.hswebframework.web.authorization.Permission;
+import org.hswebframework.web.authorization.access.DataAccess;
 import org.hswebframework.web.entity.authorization.ActionEntity;
+import org.hswebframework.web.entity.authorization.DataAccessEntity;
 import org.hswebframework.web.entity.authorization.PermissionEntity;
-import org.hswebframework.web.entity.authorization.SimpleActionEntity;
 import org.hswebframework.web.service.authorization.PermissionService;
 import org.hswebframework.web.tests.SimpleWebApplicationTests;
 import org.junit.After;
@@ -54,22 +55,31 @@ public class PermissionTests extends SimpleWebApplicationTests {
     public void testCRUD() throws Exception {
         Assert.assertTrue(sqlExecutor.tableExists("s_permission"));
 
-        PermissionEntity<ActionEntity> entity = permissionService.createEntity();
+        DataAccessEntity dataAccessEntity = new DataAccessEntity();
+        dataAccessEntity.setType(DataAccess.Type.OWN_CREATED.name());
+        dataAccessEntity.setAction(Permission.ACTION_QUERY);
+        dataAccessEntity.setDescribe("只能查询自己创建的数据");
+
+        PermissionEntity entity = permissionService.createEntity();
         entity.setStatus((byte) 1);
         entity.setName("测试");
-        entity.setActions(Arrays.asList(new SimpleActionEntity("C")));
+        entity.setActions(Arrays.asList(new ActionEntity("C")));
         entity.setId("test");
+        entity.setDataAccess(Arrays.asList(dataAccessEntity));
         String id = permissionService.insert(entity);
         Assert.assertNotNull(id);
 
-        PermissionEntity<ActionEntity> data = permissionService.selectByPk("test");
+        PermissionEntity data = permissionService.selectByPk("test");
         Assert.assertEquals(data.getId(), entity.getId());
         Assert.assertEquals(data.getName(), entity.getName());
         Assert.assertEquals(data.getStatus(), entity.getStatus());
+        Assert.assertNotNull(data.getDataAccess());
+        Assert.assertEquals(data.getDataAccess().get(0).getAction(),dataAccessEntity.getAction());
+        Assert.assertEquals(data.getDataAccess().get(0).getType(),dataAccessEntity.getType());
 
         data.setName("测试修改");
         permissionService.updateByPk(data);
-        PermissionEntity<ActionEntity> data2 = permissionService.selectByPk("test");
+        PermissionEntity data2 = permissionService.selectByPk("test");
         Assert.assertEquals(data2.getName(), data.getName());
 
         permissionService.deleteByPk("test");

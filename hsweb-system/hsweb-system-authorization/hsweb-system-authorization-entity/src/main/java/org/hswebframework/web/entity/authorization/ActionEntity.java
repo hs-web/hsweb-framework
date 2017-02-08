@@ -2,16 +2,60 @@ package org.hswebframework.web.entity.authorization;
 
 import org.hswebframework.web.commons.entity.CloneableEntity;
 
-public interface ActionEntity extends CloneableEntity {
-    String getAction();
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
-    void setAction(String action);
+public class ActionEntity implements CloneableEntity {
 
-    String getDescribe();
+    private String action;
 
-    void setDescribe(String describe);
+    private String describe;
 
-    boolean isDefaultCheck();
+    private boolean defaultCheck;
 
-    void setDefaultCheck(boolean defaultCheck);
+    public ActionEntity() {
+    }
+
+    public ActionEntity(String action) {
+        this.action = action;
+    }
+
+    public String getAction() {
+        return action;
+    }
+
+    public void setAction(String action) {
+        this.action = action;
+    }
+
+    public String getDescribe() {
+        return describe;
+    }
+
+    public void setDescribe(String describe) {
+        this.describe = describe;
+    }
+
+    public boolean isDefaultCheck() {
+        return defaultCheck;
+    }
+
+    public void setDefaultCheck(boolean defaultCheck) {
+        this.defaultCheck = defaultCheck;
+    }
+
+    @Override
+    public ActionEntity clone() {
+        ActionEntity target = new ActionEntity();
+        target.setAction(getAction());
+        target.setDescribe(getDescribe());
+        target.setDefaultCheck(isDefaultCheck());
+        return target;
+    }
+
+    public static List<ActionEntity> create(String... actions) {
+        return Arrays.stream(actions).map(ActionEntity::new).collect(Collectors.toList());
+    }
+
 }

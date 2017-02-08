@@ -8,7 +8,7 @@ package org.hswebframework.web.authorization;
 public final class AuthorizationHolder {
     private static AuthorizationSupplier supplier;
 
-    public Authorization get() {
+    public static Authorization get() {
         return supplier.get();
     }
 

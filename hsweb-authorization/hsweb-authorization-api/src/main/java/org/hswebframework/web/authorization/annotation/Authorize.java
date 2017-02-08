@@ -41,7 +41,7 @@ public @interface Authorize {
      *
      * @return 进行授权的模块
      */
-    String[] module() default {};
+    String[] permission() default {};
 
     /**
      * 如增删改查等

@@ -26,7 +26,7 @@ import java.util.Map;
 
 public class AopUtils {
 
-    public static final String getMethodName(JoinPoint pjp) {
+    public static final String getMethodBody(JoinPoint pjp) {
         StringBuilder methodName = new StringBuilder(pjp.getSignature().getName()).append("(");
         MethodSignature signature = (MethodSignature) pjp.getSignature();
         String[] names = signature.getParameterNames();

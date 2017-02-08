@@ -17,11 +17,11 @@
 
 package org.hswebframework.web.service.authorization.simple;
 
-import org.hswebframework.web.authorization.Authorization;
-import org.hswebframework.web.authorization.Permission;
-import org.hswebframework.web.authorization.Role;
-import org.hswebframework.web.authorization.User;
+import org.hswebframework.web.authorization.*;
+import org.hswebframework.web.authorization.access.DataAccess;
+import org.hswebframework.web.authorization.access.FieldAccess;
 import org.hswebframework.web.entity.authorization.*;
+import org.hswebframework.web.service.authorization.DataAccessFactory;
 
 import java.io.Serializable;
 import java.util.*;
@@ -47,13 +47,31 @@ public class SimpleAuthorization implements Authorization {
 
     public SimpleAuthorization(UserEntity user,
                                List<RoleEntity> roleEntities,
-                               List<PermissionRoleEntity> permissionRoleEntities) {
+                               List<PermissionRoleEntity> permissionRoleEntities,
+                               DataAccessFactory dataAccessFactory) {
         this.user = new ReadOnlyUser(user.getId(), user.getUsername(), user.getName());
         this.roles = roleEntities.stream()
                 .map(roleEntity -> new ReadOnlyRole(roleEntity.getId(), roleEntity.getDescribe()))
                 .collect(Collectors.toList());
         this.permissions = permissionRoleEntities.stream()
-                .map(permissionRoleEntity -> new ReadOnlyPermission(permissionRoleEntity.getPermissionId(), permissionRoleEntity.getActions()))
+                .map(permissionRoleEntity -> {
+                    ReadOnlyPermission permission = new ReadOnlyPermission(permissionRoleEntity.getPermissionId(), permissionRoleEntity.getActions());
+                    if (null != dataAccessFactory && null != permissionRoleEntity.getDataAccesses()) {
+                        permission.setDataAccesses(permissionRoleEntity
+                                .getDataAccesses()
+                                .stream()
+                                .map(dataAccessFactory::create)
+                                .collect(Collectors.toSet()));
+                    }
+                    if (null != permissionRoleEntity.getFieldAccesses()) {
+                        permission.setFieldAccesses(permissionRoleEntity
+                                .getFieldAccesses()
+                                .stream()
+                                .map(SimpleFieldAccess::of)
+                                .collect(Collectors.toSet()));
+                    }
+                    return permission;
+                })
                 .collect(Collectors.toList());
     }
 
@@ -119,15 +137,17 @@ public class SimpleAuthorization implements Authorization {
     }
 
     public static class ReadOnlyPermission implements Permission {
-        private String       id;
-        private List<String> actions;
+        private String                 id;
+        private Set<String>            actions;
+        private Set<SimpleFieldAccess> fieldAccesses;
+        private Set<DataAccess>        dataAccesses;
 
         public ReadOnlyPermission() {
         }
 
-        public ReadOnlyPermission(String id, List<String> actions) {
+        public ReadOnlyPermission(String id, Collection<String> actions) {
             this.id = id;
-            this.actions = actions;
+            this.actions = new HashSet<>(actions);
         }
 
         @Override
@@ -141,14 +161,68 @@ public class SimpleAuthorization implements Authorization {
         }
 
         @Override
-        public List<String> getActions() {
-            if (actions == null) actions = Collections.emptyList();
-            return new ArrayList<>(actions);
+        public Set<String> getActions() {
+            if (actions == null) actions = Collections.emptySet();
+            return new HashSet<>(actions);
         }
 
-        public void setActions(List<String> actions) {
+        @Override
+        public Set<FieldAccess> getFieldAccesses() {
+            if (fieldAccesses == null) fieldAccesses = Collections.emptySet();
+            return new HashSet<>(fieldAccesses);
+        }
+
+        @Override
+        public Set<DataAccess> getDataAccesses() {
+            if (dataAccesses == null) dataAccesses = Collections.emptySet();
+            return new HashSet<>(dataAccesses);
+        }
+
+        public void setFieldAccesses(Set<SimpleFieldAccess> fieldAccesses) {
+            checkWritable(this.fieldAccesses);
+            this.fieldAccesses = fieldAccesses;
+        }
+
+        public void setDataAccesses(Set<DataAccess> dataAccesses) {
+            checkWritable(this.dataAccesses);
+            this.dataAccesses = dataAccesses;
+        }
+
+        public void setActions(Set<String> actions) {
             checkWritable(this.actions);
-            this.actions = new ArrayList<>(actions);
+            this.actions = new HashSet<>(actions);
+        }
+    }
+
+    public static class SimpleFieldAccess implements FieldAccess {
+        private String      field;
+        private Set<String> actions;
+
+        public static SimpleFieldAccess of(FieldAccessEntity entity) {
+            SimpleFieldAccess access = new SimpleFieldAccess();
+            access.setField(entity.getField());
+            access.setActions(entity.getActions().stream().map(ActionEntity::getAction).collect(Collectors.toSet()));
+            return access;
+        }
+
+        @Override
+        public String getField() {
+            return field;
+        }
+
+        @Override
+        public Set<String> getActions() {
+            return new HashSet<>(actions);
+        }
+
+        public void setField(String field) {
+            checkWritable(this.field);
+            this.field = field;
+        }
+
+        public void setActions(Set<String> actions) {
+            checkWritable(this.actions);
+            this.actions = actions;
         }
     }
 

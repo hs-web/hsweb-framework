@@ -34,7 +34,7 @@ import java.util.List;
  */
 @Service("menuService")
 public class SimpleMenuService
-        extends AbstractTreeSortService<MenuEntity<MenuEntity, ActionEntity>, String>
+        extends AbstractTreeSortService<MenuEntity<MenuEntity>, String>
         implements MenuService {
 
     //dao api
@@ -56,12 +56,12 @@ public class SimpleMenuService
     }
 
     @Override
-    public List<MenuEntity<MenuEntity, ActionEntity>> getByPermissionId(List<String> permissionId) {
+    public List<MenuEntity<MenuEntity>> getByPermissionId(List<String> permissionId) {
         return createQuery().noPaging().where().in("permissionId", permissionId).list();
     }
 
     @Override
-    public MenuEntity<MenuEntity, ActionEntity> getByPermissionId(String permissionId) {
+    public MenuEntity<MenuEntity> getByPermissionId(String permissionId) {
         return createQuery().noPaging().where().is("permissionId", permissionId).single();
     }
 }

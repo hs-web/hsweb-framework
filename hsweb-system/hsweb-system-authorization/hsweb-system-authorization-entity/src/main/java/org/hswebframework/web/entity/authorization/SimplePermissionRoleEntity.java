@@ -2,6 +2,7 @@ package org.hswebframework.web.entity.authorization;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * TODO 完成注释
@@ -14,6 +15,10 @@ public class SimplePermissionRoleEntity implements PermissionRoleEntity {
     private String permissionId;
 
     private List<String> actions;
+
+    private List<DataAccessEntity> dataAccesses;
+
+    private List<FieldAccessEntity> fieldAccesses;
 
     @Override
     public String getRoleId() {
@@ -46,12 +51,36 @@ public class SimplePermissionRoleEntity implements PermissionRoleEntity {
     }
 
     @Override
+    public List<DataAccessEntity> getDataAccesses() {
+        return this.dataAccesses;
+    }
+
+    @Override
+    public List<FieldAccessEntity> getFieldAccesses() {
+        return this.fieldAccesses;
+    }
+
+    @Override
+    public void setDataAccesses(List<DataAccessEntity> dataAccesses) {
+        this.dataAccesses = dataAccesses;
+    }
+
+    @Override
+    public void setFieldAccesses(List<FieldAccessEntity> fieldAccesses) {
+        this.fieldAccesses = fieldAccesses;
+    }
+
+    @Override
     public SimplePermissionRoleEntity clone() {
         SimplePermissionRoleEntity target = new SimplePermissionRoleEntity();
-        if (actions != null)
-            target.setActions(new ArrayList<>(getActions()));
         target.setPermissionId(getPermissionId());
         target.setRoleId(getRoleId());
+        if (actions != null)
+            target.setActions(new ArrayList<>(getActions()));
+        if (dataAccesses != null)
+            target.setDataAccesses(dataAccesses.stream().map(DataAccessEntity::clone).collect(Collectors.toList()));
+        if (fieldAccesses != null)
+            target.setFieldAccesses(fieldAccesses.stream().map(FieldAccessEntity::clone).collect(Collectors.toList()));
         return target;
     }
 }

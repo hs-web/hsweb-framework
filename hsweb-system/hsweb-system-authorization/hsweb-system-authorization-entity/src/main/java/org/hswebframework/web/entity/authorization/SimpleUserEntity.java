@@ -2,8 +2,6 @@ package org.hswebframework.web.entity.authorization;
 
 import org.hswebframework.web.commons.entity.SimpleGenericEntity;
 
-import java.util.Date;
-
 /**
  * TODO 完成注释
  *
@@ -18,11 +16,13 @@ public class SimpleUserEntity extends SimpleGenericEntity<String> implements Use
 
     private String salt;
 
-    private Date createDate;
+    private Long createTime;
 
-    private Date lastLoginDate;
+    private String creatorId;
 
-    private boolean enabled;
+    private Long lastLoginTime;
+
+    private Boolean enabled;
 
     private String lastLoginIp;
 
@@ -62,29 +62,43 @@ public class SimpleUserEntity extends SimpleGenericEntity<String> implements Use
         this.salt = salt;
     }
 
-    public Date getCreateDate() {
-        return createDate;
-    }
-
-    public void setCreateDate(Date createDate) {
-        this.createDate = createDate;
-    }
-
-    public Date getLastLoginDate() {
-        return lastLoginDate;
-    }
-
-    public void setLastLoginDate(Date lastLoginDate) {
-        this.lastLoginDate = lastLoginDate;
+    @Override
+    public Long getCreateTime() {
+        return createTime;
     }
 
     @Override
-    public boolean isEnabled() {
-        return enabled;
+    public void setCreateTime(Long createTime) {
+        this.createTime = createTime;
     }
 
-    public void setEnabled(boolean enabled) {
+    @Override
+    public String getCreatorId() {
+        return creatorId;
+    }
+
+    @Override
+    public void setCreatorId(String creatorId) {
+        this.creatorId = creatorId;
+    }
+
+    public void setLastLoginTime(Long lastLoginDate) {
+        this.lastLoginTime = lastLoginDate;
+    }
+
+    @Override
+    public Long getLastLoginTime() {
+        return lastLoginTime;
+    }
+
+    @Override
+    public void setEnabled(Boolean enabled) {
         this.enabled = enabled;
+    }
+
+    @Override
+    public Boolean isEnabled() {
+        return enabled;
     }
 
     public String getLastLoginIp() {
@@ -102,9 +116,10 @@ public class SimpleUserEntity extends SimpleGenericEntity<String> implements Use
         target.setName(getName());
         target.setUsername(getUsername());
         target.setPassword(getPassword());
-        target.setCreateDate(getCreateDate());
+        target.setCreateTime(getCreateTime());
+        target.setCreatorId(getCreatorId());
         target.setEnabled(isEnabled());
-        target.setLastLoginDate(getLastLoginDate());
+        target.setLastLoginTime(getLastLoginTime());
         target.setLastLoginIp(getLastLoginIp());
         return target;
     }

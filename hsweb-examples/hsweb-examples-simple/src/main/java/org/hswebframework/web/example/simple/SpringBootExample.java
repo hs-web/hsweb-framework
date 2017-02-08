@@ -17,10 +17,23 @@
 
 package org.hswebframework.web.example.simple;
 
+import com.alibaba.fastjson.JSON;
 import org.hsweb.ezorm.rdb.executor.AbstractJdbcSqlExecutor;
 import org.hsweb.ezorm.rdb.executor.SqlExecutor;
+import org.hswebframework.web.authorization.Permission;
+import org.hswebframework.web.authorization.access.DataAccess;
+import org.hswebframework.web.commons.entity.factory.EntityFactory;
 import org.hswebframework.web.dao.datasource.DataSourceHolder;
 import org.hswebframework.web.dao.datasource.DatabaseType;
+import org.hswebframework.web.entity.authorization.*;
+import org.hswebframework.web.entity.authorization.bind.BindPermissionRoleEntity;
+import org.hswebframework.web.entity.authorization.bind.BindRoleUserEntity;
+import org.hswebframework.web.service.authorization.PermissionService;
+import org.hswebframework.web.service.authorization.RoleService;
+import org.hswebframework.web.service.authorization.UserService;
+import org.hswebframework.web.service.authorization.simple.access.SimpleScriptDataAccess;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -30,9 +43,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Arrays;
 
 /**
  * TODO 完成注释
@@ -43,7 +58,7 @@ import java.sql.SQLException;
 @SpringBootApplication
 @Configuration
 @RequestMapping
-public class SpringBootExample {
+public class SpringBootExample implements CommandLineRunner {
 
     @Bean
     @ConditionalOnMissingBean(SqlExecutor.class)
@@ -60,9 +75,73 @@ public class SpringBootExample {
                 DataSourceUtils.releaseConnection(connection, dataSource);
             }
         };
+
     }
+
+    @Autowired
+    UserService       userService;
+    @Autowired
+    RoleService       roleService;
+    @Autowired
+    PermissionService permissionService;
+    @Autowired
+    EntityFactory     entityFactory;
+
 
     public static void main(String[] args) {
         SpringApplication.run(SpringBootExample.class);
+    }
+
+    @Override
+    public void run(String... strings) throws Exception {
+        DataAccessEntity accessEntity = new DataAccessEntity();
+        accessEntity.setType(DataAccess.Type.OWN_CREATED.name());
+        accessEntity.setAction(Permission.ACTION_QUERY);
+
+        DataAccessEntity updateAccessEntity = new DataAccessEntity();
+        updateAccessEntity.setType(DataAccess.Type.OWN_CREATED.name());
+        updateAccessEntity.setAction(Permission.ACTION_UPDATE);
+//        updateAccessEntity.setConfig(JSON.toJSONString(new SimpleScriptDataAccess("" +
+//                "println(id);" +
+//                "println(entity);" +
+//                "println('脚本权限控制');" +
+//                "return true;" +
+//                "","groovy")));
+
+        //password 属性不能读取和修改
+        FieldAccessEntity fieldAccessEntity = new FieldAccessEntity();
+        fieldAccessEntity.setField("password");
+        fieldAccessEntity.setActions(ActionEntity.create(Permission.ACTION_QUERY,Permission.ACTION_UPDATE));
+
+        PermissionEntity permission = entityFactory.newInstance(PermissionEntity.class);
+        permission.setName("测试");
+        permission.setId("test");
+        permission.setActions(ActionEntity.create(Permission.ACTION_QUERY, Permission.ACTION_UPDATE));
+        permission.setDataAccess(Arrays.asList(accessEntity, updateAccessEntity));
+        permission.setFieldAccess(Arrays.asList(fieldAccessEntity));
+        permissionService.insert(permission);
+
+        BindPermissionRoleEntity<PermissionRoleEntity> roleEntity = entityFactory.newInstance(BindPermissionRoleEntity.class);
+        SimplePermissionRoleEntity permissionRoleEntity = new SimplePermissionRoleEntity();
+        permissionRoleEntity.setRoleId("admin");
+        permissionRoleEntity.setPermissionId("test");
+        permissionRoleEntity.setActions(Arrays.asList(Permission.ACTION_QUERY, Permission.ACTION_UPDATE));
+        permissionRoleEntity.setDataAccesses(permission.getDataAccess());
+        permissionRoleEntity.setFieldAccesses(permission.getFieldAccess());
+        roleEntity.setId("admin");
+        roleEntity.setName("test");
+        roleEntity.setPermissions(Arrays.asList(permissionRoleEntity));
+        roleService.insert(roleEntity);
+
+        BindRoleUserEntity userEntity = entityFactory.newInstance(BindRoleUserEntity.class);
+        userEntity.setId("admin");
+        userEntity.setName("admin");
+        userEntity.setCreateTimeNow();
+        userEntity.setCreatorId("admin");
+        userEntity.setUsername("admin");
+        userEntity.setPassword("admin");
+        userEntity.setRoles(Arrays.asList("admin"));
+        userService.insert(userEntity);
+
     }
 }

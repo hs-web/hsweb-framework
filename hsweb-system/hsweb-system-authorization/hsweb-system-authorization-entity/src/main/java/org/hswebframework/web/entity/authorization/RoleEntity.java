@@ -17,7 +17,7 @@ public interface RoleEntity extends GenericEntity<String> {
 
     void setDescribe(String describe);
 
-    void setEnabled(boolean enabled);
+    void setEnabled(Boolean enabled);
 
-    boolean isEnabled();
+    Boolean isEnabled();
 }

@@ -25,8 +25,11 @@
         <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
         <result property="name" column="name" javaType="string" jdbcType="VARCHAR"/>
         <result property="describe" column="describe" javaType="string" jdbcType="VARCHAR"/>
-        <result property="status" column="status" javaType="byte" jdbcType="NUMERIC"/>
+        <result property="status" column="status" javaType="Byte" jdbcType="NUMERIC"/>
         <result property="actions" column="actions" javaType="java.util.List" jdbcType="VARCHAR"/>
+        <result property="fieldAccess" column="field_access" javaType="java.util.List" jdbcType="CLOB"/>
+        <result property="dataAccess" column="data_access" javaType="java.util.List" jdbcType="CLOB"/>
+
     </resultMap>
 
     <!--用于动态生成sql所需的配置-->

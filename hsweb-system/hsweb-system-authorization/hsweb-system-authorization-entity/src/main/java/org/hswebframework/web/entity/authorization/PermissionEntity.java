@@ -9,14 +9,31 @@ import java.util.List;
  *
  * @author zhouhao
  */
-public interface PermissionEntity<A extends ActionEntity> extends GenericEntity<String>,
-        PermissionReadEntity<A>{
+public interface PermissionEntity extends GenericEntity<String> {
+
+    String getId();
+
+    String getName();
+
+    String getDescribe();
+
+    byte getStatus();
+
     void setName(String name);
 
     void setDescribe(String comment);
 
-    void setStatus(byte status);
+    void setStatus(Byte status);
 
-    void setActions(List<A> actions);
+    List<ActionEntity> getActions();
 
+    void setActions(List<ActionEntity> actions);
+
+    List<DataAccessEntity> getDataAccess();
+
+    List<FieldAccessEntity> getFieldAccess();
+
+    void setDataAccess(List<DataAccessEntity> dataAccess);
+
+    void setFieldAccess(List<FieldAccessEntity> fieldAccess);
 }

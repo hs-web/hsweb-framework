@@ -25,6 +25,8 @@
         <result property="roleId" column="role_id" javaType="string" jdbcType="VARCHAR"/>
         <result property="permissionId" column="permission_id" javaType="string" jdbcType="VARCHAR"/>
         <result property="actions" column="actions" javaType="java.util.List" jdbcType="VARCHAR"/>
+        <result property="fieldAccesses" column="field_access" javaType="java.util.List" jdbcType="CLOB"/>
+        <result property="dataAccesses" column="data_access" javaType="java.util.List" jdbcType="CLOB"/>
     </resultMap>
 
     <!--用于动态生成sql所需的配置-->

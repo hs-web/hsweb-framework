@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RequestBody;
  *
  * @author zhouhao
  */
-public interface UpdateController<E, PK> {
+public interface UpdateController<E, PK> extends HswebController {
     @Authorize(action = "update")
     @PutMapping(path = "/{id}")
     @AccessLogger("根据主键修改数据")

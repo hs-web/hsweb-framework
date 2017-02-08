@@ -40,10 +40,10 @@ public class SimpleConfigEntity extends SimpleGenericEntity<String> implements C
 
     //创建日期
     @NotNull
-    private java.util.Date createDate;
+    private Long createTime;
 
     //最后一次修改日期
-    private java.util.Date updateDate;
+    private Long updateTime;
 
     //配置分类ID
     private String classifiedId;
@@ -107,23 +107,21 @@ public class SimpleConfigEntity extends SimpleGenericEntity<String> implements C
     }
 
     @Override
-    public Date getCreateDate() {
-        return createDate;
+    public Long getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Long createTime) {
+        this.createTime = createTime;
     }
 
     @Override
-    public void setCreateDate(Date createDate) {
-        this.createDate = createDate;
+    public Long getUpdateTime() {
+        return updateTime;
     }
 
-    @Override
-    public Date getUpdateDate() {
-        return updateDate;
-    }
-
-    @Override
-    public void setUpdateDate(Date updateDate) {
-        this.updateDate = updateDate;
+    public void setUpdateTime(Long updateTime) {
+        this.updateTime = updateTime;
     }
 
     @Override
@@ -141,7 +139,7 @@ public class SimpleConfigEntity extends SimpleGenericEntity<String> implements C
         SimpleConfigEntity cloned = new SimpleConfigEntity();
         cloned.setId(getId());
         cloned.setCreatorId(getCreatorId());
-        cloned.setCreateDate(getCreateDate());
+        this.setCreateTime(getCreateTime());
         cloned.content = getContent().stream().map(ConfigContent::clone).collect(Collectors.toList());
         return cloned;
     }

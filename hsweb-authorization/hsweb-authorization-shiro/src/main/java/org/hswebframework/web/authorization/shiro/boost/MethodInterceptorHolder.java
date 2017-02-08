@@ -17,10 +17,14 @@
 
 package org.hswebframework.web.authorization.shiro.boost;
 
+import org.apache.shiro.util.Assert;
 import org.hswebframework.web.ThreadLocalUtils;
+import org.hswebframework.web.authorization.access.ParamContext;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * TODO 完成注释
@@ -54,6 +58,10 @@ public class MethodInterceptorHolder {
     }
 
     public MethodInterceptorHolder(String id, Method method, Object target, Map<String, Object> args) {
+        Assert.notNull(id);
+        Assert.notNull(method);
+        Assert.notNull(target);
+        Assert.notNull(args);
         this.id = id;
         this.method = method;
         this.target = target;
@@ -74,5 +82,30 @@ public class MethodInterceptorHolder {
 
     public Map<String, Object> getArgs() {
         return args;
+    }
+
+    public ParamContext createParamContext(final Annotation annotation) {
+        return new ParamContext() {
+            @Override
+            public Object getTarget() {
+                return target;
+            }
+
+            @Override
+            public <T> Optional<T> getParameter(String name) {
+                if (args == null) return Optional.empty();
+                return Optional.of((T) args.get(name));
+            }
+
+            @Override
+            public <T extends Annotation> T getAnnotation() {
+                return (T) annotation;
+            }
+
+            @Override
+            public Map<String, Object> getParams() {
+                return getArgs();
+            }
+        };
     }
 }

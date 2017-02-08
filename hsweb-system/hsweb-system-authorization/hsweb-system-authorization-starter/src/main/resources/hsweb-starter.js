@@ -43,9 +43,10 @@ function install(context) {
         .addColumn().name("password").varchar(128).notNull().comment("密码").commit()
         .addColumn().name("salt").varchar(128).notNull().comment("密码盐").commit()
         .addColumn().name("enabled").number(1).notNull().comment("是否启用").commit()
-        .addColumn().name("create_date").datetime().notNull().comment("创建时间").commit()
         .addColumn().name("last_login_ip").varchar(128).comment("上一次登录的ip地址").commit()
-        .addColumn().name("last_login_date").datetime().comment("上一次登录时间").commit()
+        .addColumn().name("last_login_time").number(32).comment("上一次登录时间").commit()
+        .addColumn().name("creator_id").varchar(32).notNull().comment("创建者ID").commit()
+        .addColumn().name("create_time").number(32).notNull().comment("创建时间").commit()
         .comment("用户表").commit();
 
     database.createOrAlter("s_role")
@@ -61,18 +62,21 @@ function install(context) {
         .addColumn().name("describe").varchar(128).comment("说明").commit()
         .addColumn().name("status").number(4).notNull().comment("状态").commit()
         .addColumn().name("actions").clob().notNull().comment("可选操作(按钮)").commit()
+        .addColumn().name("data_access").clob().notNull().comment("数据级控制配置").commit()
+        .addColumn().name("field_access").clob().notNull().comment("字段级控制配置").commit()
         .comment("权限表").commit();
 
     database.createOrAlter("s_permission_role")
         .addColumn().name("role_id").varchar(32).notNull().comment("角色ID").commit()
         .addColumn().name("permission_id").varchar(32).notNull().comment("权限ID").commit()
         .addColumn().name("actions").clob().notNull().comment("可选操作").commit()
+        .addColumn().name("data_access").clob().notNull().comment("数据级控制配置").commit()
+        .addColumn().name("field_access").clob().notNull().comment("字段级控制配置").commit()
         .comment("权限与角色关联表").commit();
 
     database.createOrAlter("s_user_role")
         .addColumn().name("role_id").varchar(32).notNull().comment("角色ID").commit()
         .addColumn().name("user_id").varchar(32).notNull().comment("用户ID").commit()
-        .addColumn().name("actions").clob().notNull().comment("可选操作").commit()
         .comment("用户与角色关联表").commit();
 
 }

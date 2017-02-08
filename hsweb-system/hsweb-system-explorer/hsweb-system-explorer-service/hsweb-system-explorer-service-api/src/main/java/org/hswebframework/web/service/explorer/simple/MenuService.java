@@ -17,7 +17,6 @@
 
 package org.hswebframework.web.service.explorer.simple;
 
-import org.hswebframework.web.entity.authorization.ActionEntity;
 import org.hswebframework.web.entity.explorer.MenuEntity;
 import org.hswebframework.web.service.CrudService;
 
@@ -29,9 +28,9 @@ import java.util.List;
  * @author zhouhao
  */
 public interface MenuService
-        extends CrudService<MenuEntity<MenuEntity, ActionEntity>, String> {
-    MenuEntity<MenuEntity, ActionEntity> getByPermissionId(String permissionId);
+        extends CrudService<MenuEntity<MenuEntity>, String> {
+    MenuEntity<MenuEntity> getByPermissionId(String permissionId);
 
-    List<MenuEntity<MenuEntity, ActionEntity>> getByPermissionId(List<String> permissionId);
+    List<MenuEntity<MenuEntity>> getByPermissionId(List<String> permissionId);
 
 }

@@ -19,6 +19,7 @@
 package org.hswebframework.web.entity.authorization;
 
 import org.hswebframework.web.commons.entity.GenericEntity;
+import org.hswebframework.web.commons.entity.RecordCreationEntity;
 
 import java.util.Date;
 
@@ -27,10 +28,15 @@ import java.util.Date;
  *
  * @author zhouhao
  */
-public interface UserEntity extends UserReadEntity, GenericEntity<String> {
+public interface UserEntity extends GenericEntity<String>, RecordCreationEntity {
+
     void setName(String name);
 
+    String getUsername();
+
     void setUsername(String username);
+
+    String getName();
 
     void setPassword(String password);
 
@@ -40,11 +46,15 @@ public interface UserEntity extends UserReadEntity, GenericEntity<String> {
 
     String getSalt();
 
-    void setCreateDate(Date createDate);
+    Long getLastLoginTime();
 
-    void setLastLoginDate(Date lastLoginDate);
+    void setLastLoginTime(Long lastLoginTime);
 
-    void setEnabled(boolean enabled);
+    Boolean isEnabled();
+
+    void setEnabled(Boolean enabled);
+
+    String getLastLoginIp();
 
     void setLastLoginIp(String lastLoginIp);
 

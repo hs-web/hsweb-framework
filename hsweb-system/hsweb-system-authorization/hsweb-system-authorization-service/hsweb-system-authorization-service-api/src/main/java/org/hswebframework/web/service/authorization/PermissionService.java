@@ -1,8 +1,6 @@
 package org.hswebframework.web.service.authorization;
 
-import org.hswebframework.web.entity.authorization.ActionEntity;
 import org.hswebframework.web.entity.authorization.PermissionEntity;
-import org.hswebframework.web.commons.entity.Entity;
 import org.hswebframework.web.service.CrudService;
 
 /**
@@ -10,6 +8,6 @@ import org.hswebframework.web.service.CrudService;
  *
  * @author zhouhao
  */
-public interface PermissionService extends CrudService<PermissionEntity<ActionEntity>, String> {
+public interface PermissionService extends CrudService<PermissionEntity, String> {
 
 }

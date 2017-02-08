@@ -20,6 +20,7 @@ package org.hswebframework.web.entity.config;
 
 
 import org.hswebframework.web.commons.entity.GenericEntity;
+import org.hswebframework.web.commons.entity.RecordCreationEntity;
 
 import java.util.Date;
 import java.util.List;
@@ -29,11 +30,7 @@ import java.util.List;
  *
  * @author zhouhao
  */
-public interface ConfigEntity extends GenericEntity<String> {
-
-    String getCreatorId();
-
-    void setCreatorId(String creatorId);
+public interface ConfigEntity extends GenericEntity<String>,RecordCreationEntity {
 
     /**
      * 获取 备注
@@ -64,32 +61,18 @@ public interface ConfigEntity extends GenericEntity<String> {
     void setContent(List<ConfigContent> content);
 
     /**
-     * 获取 创建日期
-     *
-     * @return {@link Date} 创建日期
-     */
-    Date getCreateDate();
-
-    /**
-     * 设置 创建日期
-     *
-     * @param createDate 创建日期
-     */
-    void setCreateDate(Date createDate);
-
-    /**
      * 获取 最后一次修改日期
      *
      * @return java.util.Date 最后一次修改日期
      */
-    Date getUpdateDate();
+    Long getUpdateTime();
 
     /**
      * 设置 最后一次修改日期
      *
      * @param updateDate 最后一次修改日期
      */
-    void setUpdateDate(Date updateDate);
+    void setUpdateTime(Long updateDate);
 
     /**
      * 获取分类ID
