@@ -52,6 +52,8 @@ public class LoginTests extends SimpleWebApplicationTests {
         userEntity.setName("测试");
         userEntity.setUsername("test");
         userEntity.setPassword("password_1234");
+        userEntity.setCreatorId("admin");
+        userEntity.setCreateTimeNow();
         userService.insert(userEntity);
 
         //获取publicKey
