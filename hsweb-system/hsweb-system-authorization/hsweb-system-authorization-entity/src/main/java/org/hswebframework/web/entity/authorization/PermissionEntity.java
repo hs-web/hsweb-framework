@@ -17,7 +17,7 @@ public interface PermissionEntity extends GenericEntity<String> {
 
     String getDescribe();
 
-    byte getStatus();
+    Byte getStatus();
 
     void setName(String name);
 

@@ -26,15 +26,15 @@ public class SimpleBindRoleUserEntity extends SimpleUserEntity implements BindRo
 
     @Override
     public SimpleBindRoleUserEntity clone() {
-        SimpleBindRoleUserEntity target = new SimpleBindRoleUserEntity();
-        target.setId(getId());
-        target.setName(getName());
-        target.setCreateTime(getCreateTime());
-        target.setCreatorId(getCreatorId());
-        target.setEnabled(isEnabled());
-        target.setLastLoginIp(getLastLoginIp());
-        target.setLastLoginTime(getLastLoginTime());
-        target.setSalt(getSalt());
+        SimpleBindRoleUserEntity target = ((SimpleBindRoleUserEntity) super.clone());
+//        target.setId(getId());
+//        target.setName(getName());
+//        target.setCreateTime(getCreateTime());
+//        target.setCreatorId(getCreatorId());
+//        target.setEnabled(isEnabled());
+//        target.setLastLoginIp(getLastLoginIp());
+//        target.setLastLoginTime(getLastLoginTime());
+//        target.setSalt(getSalt());
         if (roles != null)
             target.setRoles(new ArrayList<>(getRoles()));
         if (getProperties() != null)

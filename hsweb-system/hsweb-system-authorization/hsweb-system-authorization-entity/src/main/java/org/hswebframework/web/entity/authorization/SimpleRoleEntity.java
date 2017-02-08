@@ -41,13 +41,13 @@ public class SimpleRoleEntity extends SimpleGenericEntity<String> implements Rol
     }
 
     @Override
-    public SimpleGenericEntity<String> clone() {
-        SimpleRoleEntity target = new SimpleRoleEntity();
-        target.setId(getId());
-        target.setName(getName());
-        target.setDescribe(getDescribe());
-        target.setProperties(cloneProperties());
-        target.setEnabled(isEnabled());
+    public SimpleRoleEntity clone() {
+        SimpleRoleEntity target = ((SimpleRoleEntity) super.clone());
+//        target.setId(getId());
+//        target.setName(getName());
+//        target.setDescribe(getDescribe());
+//        target.setProperties(cloneProperties());
+//        target.setEnabled(isEnabled());
         return target;
     }
 }

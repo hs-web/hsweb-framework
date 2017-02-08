@@ -1,5 +1,7 @@
 package org.hswebframework.web.entity.authorization;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import org.hswebframework.web.commons.entity.CloneableEntity;
 
 import java.util.Arrays;
@@ -47,11 +49,20 @@ public class ActionEntity implements CloneableEntity {
 
     @Override
     public ActionEntity clone() {
-        ActionEntity target = new ActionEntity();
-        target.setAction(getAction());
-        target.setDescribe(getDescribe());
-        target.setDefaultCheck(isDefaultCheck());
-        return target;
+        try {
+            return (ActionEntity) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void main(String[] args) {
+        SimplePermissionEntity permissionEntity = new SimplePermissionEntity();
+        permissionEntity.setActions(ActionEntity.create("test"));
+        permissionEntity.setName("test");
+        SimplePermissionEntity clone = permissionEntity.clone();
+        permissionEntity.getActions().clear();
+        System.out.println(JSON.toJSONString(clone, SerializerFeature.PrettyFormat));
     }
 
     public static List<ActionEntity> create(String... actions) {

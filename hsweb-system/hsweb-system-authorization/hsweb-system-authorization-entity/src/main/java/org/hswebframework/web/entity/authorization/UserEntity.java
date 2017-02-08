@@ -18,6 +18,7 @@
 
 package org.hswebframework.web.entity.authorization;
 
+import org.hswebframework.web.commons.entity.CloneableEntity;
 import org.hswebframework.web.commons.entity.GenericEntity;
 import org.hswebframework.web.commons.entity.RecordCreationEntity;
 
@@ -58,5 +59,6 @@ public interface UserEntity extends GenericEntity<String>, RecordCreationEntity 
 
     void setLastLoginIp(String lastLoginIp);
 
+    @Override
     UserEntity clone();
 }

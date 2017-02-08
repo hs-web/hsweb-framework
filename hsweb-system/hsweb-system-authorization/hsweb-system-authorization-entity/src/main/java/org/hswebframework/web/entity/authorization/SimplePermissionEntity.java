@@ -18,7 +18,7 @@ public class SimplePermissionEntity extends SimpleGenericEntity<String> implemen
 
     private String describe;
 
-    private Byte status = 1;
+    private Byte status;
 
     //可选事件
     private List<ActionEntity> actions;
@@ -43,7 +43,7 @@ public class SimplePermissionEntity extends SimpleGenericEntity<String> implemen
         this.describe = describe;
     }
 
-    public byte getStatus() {
+    public Byte getStatus() {
         return status;
     }
 
@@ -83,12 +83,9 @@ public class SimplePermissionEntity extends SimpleGenericEntity<String> implemen
 
     @Override
     public SimplePermissionEntity clone() {
-        SimplePermissionEntity target = new SimplePermissionEntity();
-        target.setId(getId());
+        SimplePermissionEntity target = (SimplePermissionEntity) super.clone();
         if (actions != null)
             target.setActions(getActions().stream().map(ActionEntity::clone).collect(Collectors.toList()));
-        target.setDescribe(getDescribe());
-        target.setStatus(getStatus());
         return target;
     }
 

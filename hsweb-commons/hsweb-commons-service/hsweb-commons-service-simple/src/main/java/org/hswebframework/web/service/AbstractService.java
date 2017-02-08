@@ -40,9 +40,8 @@ public abstract class AbstractService<E extends Entity, PK> implements CreateEnt
 
     @SuppressWarnings("unchecked")
     public AbstractService() {
-        Class userClass = org.springframework.util.ClassUtils.getUserClass(this);
-        primaryKeyType = (Class<PK>) ClassUtils.getGenericType(userClass, 1);
-        entityType = (Class<E>) ClassUtils.getGenericType(userClass, 0);
+        primaryKeyType = (Class<PK>) ClassUtils.getGenericType(this.getClass(), 1);
+        entityType = (Class<E>) ClassUtils.getGenericType(this.getClass(), 0);
     }
 
     protected boolean entityFactoryIsEnabled() {

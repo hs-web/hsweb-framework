@@ -22,4 +22,5 @@ public class SimplePermissionService extends GenericEntityService<PermissionEnti
     public PermissionDao getDao() {
         return permissionDao;
     }
+
 }
