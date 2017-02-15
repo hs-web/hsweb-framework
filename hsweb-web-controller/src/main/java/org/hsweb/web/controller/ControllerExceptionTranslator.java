@@ -2,6 +2,7 @@ package org.hsweb.web.controller;
 
 import org.hsweb.web.core.exception.BusinessException;
 import org.hsweb.web.core.message.ResponseMessage;
+import org.hsweb.web.core.utils.WebUtil;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Controller;
@@ -20,6 +21,7 @@ public class ControllerExceptionTranslator {
         ModelAndView modelAndView = new ModelAndView("error/" + exception.getStatus());
         modelAndView.addAllObjects(ResponseMessage.error(exception.getMessage(), exception.getStatus()).toMap());
         modelAndView.addObject("exception", exception);
+        modelAndView.addObject("absPath", WebUtil.getBasePath(WebUtil.getHttpServletRequest()));
         return modelAndView;
     }
 
@@ -29,6 +31,7 @@ public class ControllerExceptionTranslator {
         ModelAndView modelAndView = new ModelAndView("error/" + 500);
         modelAndView.addAllObjects(ResponseMessage.error(exception.getMessage(), 500).toMap());
         modelAndView.addObject("exception", exception);
+        modelAndView.addObject("absPath", WebUtil.getBasePath(WebUtil.getHttpServletRequest()));
         return modelAndView;
     }
 }
