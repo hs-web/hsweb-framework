@@ -7,10 +7,10 @@
 
 | 注解名称       | 实现类       | 
 | ------------- |:-------------:| 
-| [`@Authorize`](src/main/java/org/hswebframework/web/authorization/annotation/Authorize.java)    |      暂未实现        |
-| [`@RequiresExpression`](src/main/java/org/hswebframework/web/authorization/annotation/RequiresExpression.java)    | [ExpressionAnnotationMethodInterceptor](src/main/java/org/hswebframework/web/authorization/shiro/boost/ExpressionAnnotationMethodInterceptor.java)      | 
-| [`@RequiresDataAccess`](src/main/java/org/hswebframework/web/authorization/annotation/RequiresDataAccess.java)    | [DataAccessAnnotationMethodInterceptor](src/main/java/org/hswebframework/web/authorization/shiro/boost/DataAccessAnnotationMethodInterceptor.java)      | 
-| [`@RequiresFieldAccess`](src/main/java/org/hswebframework/web/authorization/annotation/RequiresFieldAccess.java)  | [FieldAccessAnnotationMethodInterceptor](src/main/java/org/hswebframework/web/authorization/shiro/boost/FieldAccessAnnotationMethodInterceptor.java)   | 
+| [`@Authorize`](../hsweb-authorization-api/src/main/java/org/hswebframework/web/authorization/annotation/Authorize.java)    |      暂未实现        |
+| [`@RequiresExpression`](../hsweb-authorization-api/src/main/java/org/hswebframework/web/authorization/annotation/RequiresExpression.java)    | [ExpressionAnnotationMethodInterceptor](src/main/java/org/hswebframework/web/authorization/shiro/boost/ExpressionAnnotationMethodInterceptor.java)      | 
+| [`@RequiresDataAccess`](../hsweb-authorization-api/src/main/java/org/hswebframework/web/authorization/annotation/RequiresDataAccess.java)    | [DataAccessAnnotationMethodInterceptor](src/main/java/org/hswebframework/web/authorization/shiro/boost/DataAccessAnnotationMethodInterceptor.java)      | 
+| [`@RequiresFieldAccess`](../hsweb-authorization-api/src/main/java/org/hswebframework/web/authorization/annotation/RequiresFieldAccess.java)  | [FieldAccessAnnotationMethodInterceptor](src/main/java/org/hswebframework/web/authorization/shiro/boost/FieldAccessAnnotationMethodInterceptor.java)   | 
 
 ## 拓展接口
 
