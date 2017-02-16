@@ -14,7 +14,6 @@ import org.hsweb.web.service.commons.SimpleUpdateService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.ResolvableType;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.ConstraintViolation;
@@ -45,7 +44,7 @@ public abstract class AbstractServiceImpl<Po extends GenericPo<PK>, PK> implemen
 
     @Override
     public Class<PK> getPKType() {
-        return (Class<PK>) ClassUtils.getGenericType(this.getClass(), 1);
+        return (Class<PK>) ClassUtils.getGenericType(org.springframework.util.ClassUtils.getUserClass(this.getClass()), 1);
     }
 
     @Override
@@ -87,6 +86,5 @@ public abstract class AbstractServiceImpl<Po extends GenericPo<PK>, PK> implemen
     protected void assertNotNull(Object po) {
         assertNotNull(po, "数据不存在");
     }
-
 
 }

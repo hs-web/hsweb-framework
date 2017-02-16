@@ -16,32 +16,16 @@
 
 package org.hsweb.concureent.cache.monitor;
 
-import static org.springframework.util.Assert.*;
-import static org.springframework.util.ObjectUtils.*;
-
-import java.lang.reflect.Constructor;
-import java.util.Arrays;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.stream.Collectors;
-
 import org.hsweb.commons.StringUtils;
 import org.hsweb.web.core.cache.monitor.MonitorCache;
 import org.hsweb.web.core.utils.ThreadLocalUtils;
 import org.springframework.cache.Cache;
-import org.springframework.cache.support.SimpleValueWrapper;
-import org.springframework.dao.DataAccessException;
-import org.springframework.data.redis.RedisSystemException;
 import org.springframework.data.redis.cache.RedisCache;
-import org.springframework.data.redis.cache.RedisCacheElement;
-import org.springframework.data.redis.cache.RedisCacheKey;
-import org.springframework.data.redis.connection.RedisConnection;
-import org.springframework.data.redis.connection.ReturnType;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisOperations;
-import org.springframework.data.redis.serializer.RedisSerializer;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.util.ClassUtils;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Cache implementation on top of Redis.
