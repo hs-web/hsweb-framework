@@ -18,11 +18,8 @@
 
 package org.hswebframework.web.entity.authorization;
 
-import org.hswebframework.web.commons.entity.CloneableEntity;
 import org.hswebframework.web.commons.entity.GenericEntity;
 import org.hswebframework.web.commons.entity.RecordCreationEntity;
-
-import java.util.Date;
 
 /**
  * TODO 完成注释

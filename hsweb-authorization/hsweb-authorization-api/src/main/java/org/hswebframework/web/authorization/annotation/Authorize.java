@@ -50,6 +50,7 @@ public @interface Authorize {
      */
     String[] action() default {};
 
+
     /**
      * 验证是否为指定user
      *

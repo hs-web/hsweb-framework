@@ -23,7 +23,12 @@ import org.hswebframework.web.id.IDGenerator;
 import org.hswebframwork.utils.RandomUtil;
 import org.hswebframwork.utils.StringUtils;
 
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 
 public interface TreeSupportEntity<PK> extends GenericEntity<PK> {
 
@@ -79,5 +84,29 @@ public interface TreeSupportEntity<PK> extends GenericEntity<PK> {
                 expandTree2List(child, target, idGenerator);
             }
         }
+    }
+
+    /**
+     * 集合转为树形结构
+     *
+     * @param dataList      需要转换的集合
+     * @param childAccepter
+     * @param <T>
+     * @param <PK>
+     * @return
+     */
+    static <T extends TreeSupportEntity<PK>, PK> List<T> list2tree(Collection<T> dataList, BiConsumer<T, List<T>> childAccepter) {
+        // id,obj
+        Map<PK, T> cache = new HashMap<>();
+        // parentId,children
+        Map<PK, List<T>> treeCache = dataList.parallelStream()
+                .peek(node -> cache.put(node.getId(), node))
+                .collect(Collectors.groupingBy(TreeSupportEntity::getParentId));
+        return dataList.parallelStream()
+                //设置每个节点的子节点
+                .peek(node -> childAccepter.accept(node, treeCache.get(node.getId())))
+                //获取根节点
+                .filter(node -> node.getParentId() == null || cache.get(node.getParentId()) == null)
+                .collect(Collectors.toList());
     }
 }
