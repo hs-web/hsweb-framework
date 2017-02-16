@@ -24,7 +24,7 @@
 
 可自己实现DataAccessHandler接口并注入spring以实现自定义的控制方式
 
-现已实现3中控制器
+现已实现3种控制器
 
 1. [CustomDataAccessHandler](src/main/java/org/hswebframework/web/authorization/shiro/boost/handler/CustomDataAccessHandler.java) 自定义控制器
 2. [OwnCreatedDataAccessHandler](src/main/java/org/hswebframework/web/authorization/shiro/boost/handler/OwnCreatedDataAccessHandler.java) 控制只能操作自己创建的数据
