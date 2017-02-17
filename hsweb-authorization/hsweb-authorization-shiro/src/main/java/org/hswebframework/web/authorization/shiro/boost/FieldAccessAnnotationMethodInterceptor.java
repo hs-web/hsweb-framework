@@ -65,7 +65,7 @@ public class FieldAccessAnnotationMethodInterceptor extends AuthorizingAnnotatio
                 return;
             }
             RequiresFieldAccess accessAnn = ((RequiresFieldAccess) a);
-            ParamContext context = holder.createParamContext(accessAnn);
+            ParamContext context = holder.createParamContext();
             Authorization authorization = AuthorizationHolder.get();
             if (authorization == null) {
                 throw new AuthorizationException("{no_authorization}");

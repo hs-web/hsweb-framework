@@ -27,11 +27,13 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 /**
- * TODO 完成注释
+ * 通用实体更新控制器
  *
  * @author zhouhao
+ * @see UpdateService
+ * @since 3.0
  */
-public interface UpdateEntityController<E extends GenericEntity<PK>, PK> extends UpdateController<E, PK> {
+public interface GenericEntityUpdateController<E extends GenericEntity<PK>, PK> extends UpdateController<E, PK> {
 
     UpdateService<E> getService();
 

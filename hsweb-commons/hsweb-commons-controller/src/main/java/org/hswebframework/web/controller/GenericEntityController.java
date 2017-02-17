@@ -28,9 +28,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import static org.hswebframework.web.controller.message.ResponseMessage.ok;
 
 /**
- * TODO 完成注释
+ * 通用实体的增删改查控制器
  *
  * @author zhouhao
+ * @see GenericEntity
+ * @see CrudController
+ * @see CrudService
  */
 public interface GenericEntityController<E extends GenericEntity<PK>, PK, Q extends Entity>
         extends CrudController<E, PK, Q> {
@@ -39,6 +42,7 @@ public interface GenericEntityController<E extends GenericEntity<PK>, PK, Q exte
 
     @Override
     default ResponseMessage updateByPrimaryKey(@PathVariable PK id, @RequestBody E data) {
+        // 设置id属性
         data.setId(id);
         return ok(getService().updateByPk(data));
     }

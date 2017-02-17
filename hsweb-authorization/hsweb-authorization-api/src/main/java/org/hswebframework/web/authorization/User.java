@@ -20,14 +20,24 @@ package org.hswebframework.web.authorization;
 import java.io.Serializable;
 
 /**
- * TODO 完成注释
+ * 用户信息
  *
  * @author zhouhao
+ * @since 3.0
  */
 public interface User extends Serializable {
+    /**
+     * @return 用户ID
+     */
     String getId();
 
+    /**
+     * @return 用户名
+     */
     String getUsername();
 
+    /**
+     * @return 姓名
+     */
     String getName();
 }

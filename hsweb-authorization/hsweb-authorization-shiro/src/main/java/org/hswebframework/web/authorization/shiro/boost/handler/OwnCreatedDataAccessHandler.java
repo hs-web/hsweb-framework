@@ -11,7 +11,6 @@ import org.hswebframework.web.authorization.annotation.RequiresDataAccess;
 import org.hswebframework.web.commons.entity.Entity;
 import org.hswebframework.web.commons.entity.RecordCreationEntity;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
-import org.hswebframework.web.controller.HswebController;
 import org.hswebframework.web.controller.QueryController;
 import org.hswebframework.web.service.QueryService;
 import org.hswebframwork.utils.ClassUtils;
@@ -35,7 +34,7 @@ public class OwnCreatedDataAccessHandler implements DataAccessHandler {
     }
 
     @Override
-    public boolean doAccess(DataAccess access, ParamContext context) {
+    public boolean handle(DataAccess access, ParamContext context) {
         OwnCreatedDataAccess own = ((OwnCreatedDataAccess) access);
         Object controller = context.getTarget();
         if (controller != null) {
@@ -75,7 +74,7 @@ public class OwnCreatedDataAccessHandler implements DataAccessHandler {
     @SuppressWarnings("unchecked")
     protected boolean doRWAccess(OwnCreatedDataAccess access, ParamContext context, Object controller) {
         //获取注解
-        RequiresDataAccess dataAccess = context.getAnnotation();
+        RequiresDataAccess dataAccess = context.getAnnotation(RequiresDataAccess.class);
         Object id = context.<String>getParameter(dataAccess.idParamName()).orElse(null);
         //通过QueryController获取QueryService
         //然后调用selectByPk 查询旧的数据,进行对比

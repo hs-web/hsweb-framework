@@ -22,6 +22,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
+ * 通用实体,提供实体常用属性
+ *
  * @author zhouhao
  * @since 3.0
  */

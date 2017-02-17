@@ -6,6 +6,9 @@ package org.hswebframework.web.authorization.access;
  * @author zhouhao
  */
 public interface ScriptDataAccess extends DataAccess {
+    default String getType() {
+        return Type.CUSTOM.name();
+    }
 
     /**
      * 脚本语言: javascript(js),groovy

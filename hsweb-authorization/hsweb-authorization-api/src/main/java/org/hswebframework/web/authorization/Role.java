@@ -20,12 +20,20 @@ package org.hswebframework.web.authorization;
 import java.io.Serializable;
 
 /**
- * TODO 完成注释
+ * 角色信息
  *
  * @author zhouhao
  */
 public interface Role extends Serializable {
+
+    /**
+     * @return 角色ID
+     */
     String getId();
 
+    /**
+     *
+     * @return 角色名
+     */
     String getName();
 }

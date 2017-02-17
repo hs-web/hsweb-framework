@@ -34,6 +34,13 @@ public interface DefaultQueryByEntityService<E>
 
     QueryByBeanDao<E> getDao();
 
+    /**
+     * 分页进行查询数据，查询条件同 {@link DefaultQueryByEntityService#select}
+     *
+     * @param param 查询参数
+     * @return 分页结果
+     * @ 查询异常
+     */
     @Override
     default PagerResult<E> selectPager(Entity param) {
         PagerResult<E> pagerResult = new PagerResult<>();
@@ -51,19 +58,11 @@ public interface DefaultQueryByEntityService<E>
     }
 
     /**
-     * 分页进行查询数据，查询条件同 {@link DefaultQueryByEntityService#select}
-     *
-     * @param param 查询参数
-     * @return 分页结果
-     * @ 查询异常
-     */
-
-    /**
      * 根据查询参数进行查询，参数可使用 {@link Query}进行构建
      *
      * @param param 查询参数
      * @return 查询结果
-     * @see QueryParam
+     * @see QueryParamEntity
      */
     @Override
     @Transactional(readOnly = true)

@@ -20,9 +20,10 @@ package org.hswebframework.web.authorization;
 import java.util.function.Supplier;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
+ * @see Supplier
+ * @see Authorization
+ * @see AuthorizationHolder
  */
 public interface AuthorizationSupplier extends Supplier<Authorization> {
 }

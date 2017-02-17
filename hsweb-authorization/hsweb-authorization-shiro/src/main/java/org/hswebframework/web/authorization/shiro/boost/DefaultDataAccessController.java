@@ -39,7 +39,7 @@ public final class DefaultDataAccessController implements DataAccessController {
         if (parent != null) parent.doAccess(access, params);
         return handlers.parallelStream()
                 .filter(handler -> handler.isSupport(access))
-                .anyMatch(handler -> handler.doAccess(access, params));
+                .anyMatch(handler -> handler.handle(access, params));
     }
 
     public DefaultDataAccessController addHandler(DataAccessHandler handler) {

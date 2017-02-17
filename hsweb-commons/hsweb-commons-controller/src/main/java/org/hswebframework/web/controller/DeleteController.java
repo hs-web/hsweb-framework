@@ -27,11 +27,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import static org.hswebframework.web.controller.message.ResponseMessage.ok;
 
 /**
- * TODO 完成注释
+ * 通用删除控制器
  *
  * @author zhouhao
  */
-public interface DeleteController<PK> extends HswebController {
+public interface DeleteController<PK> {
 
     DeleteService<PK> getService();
 

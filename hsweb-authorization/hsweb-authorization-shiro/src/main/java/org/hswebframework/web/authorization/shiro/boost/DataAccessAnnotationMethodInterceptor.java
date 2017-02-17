@@ -22,6 +22,7 @@ import org.apache.shiro.authz.aop.AuthorizingAnnotationHandler;
 import org.apache.shiro.authz.aop.AuthorizingAnnotationMethodInterceptor;
 import org.hsweb.expands.script.engine.DynamicScriptEngine;
 import org.hsweb.expands.script.engine.DynamicScriptEngineFactory;
+import org.hswebframework.web.ApplicationContextHolder;
 import org.hswebframework.web.BusinessException;
 import org.hswebframework.web.authorization.Authorization;
 import org.hswebframework.web.authorization.AuthorizationHolder;
@@ -45,9 +46,14 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
- * TODO 完成注释
+ * 数据级权限控制实现 <br/>
+ * 通过在方法上注解{@link RequiresDataAccess}，标识需要进行数据级权限控制<br/>
+ * 控制的方式和规则由 {@link Permission#getDataAccesses()}实现<br/>
  *
  * @author zhouhao
+ * @see DefaultDataAccessController
+ * @see DataAccessAnnotationHandler#assertAuthorized(Annotation)
+ * @see 3.0
  */
 public class DataAccessAnnotationMethodInterceptor extends AuthorizingAnnotationMethodInterceptor {
 
@@ -75,8 +81,14 @@ public class DataAccessAnnotationMethodInterceptor extends AuthorizingAnnotation
                 logger.warn("MethodInterceptorHolder is null!");
                 return;
             }
+            //无权限信息
+            Authorization authorization = AuthorizationHolder.get();
+            if (authorization == null) {
+                throw new AuthorizationException("{no_authorization}");
+            }
             RequiresDataAccess accessAnn = ((RequiresDataAccess) a);
             DataAccessController accessController = dataAccessController;
+            //在注解上自定义的权限控制器
             if (DataAccessController.class != accessAnn.controllerClass()) {
                 if (null == (accessController = cache.get(accessAnn.controllerClass()))) {
                     synchronized (cache) {
@@ -89,30 +101,29 @@ public class DataAccessAnnotationMethodInterceptor extends AuthorizingAnnotation
                             }
                     }
                 }
-            } else if (StringUtils.isNullOrEmpty(accessAnn.controllerBeanName())) {
-                // TODO: 17-2-8  get controller from spring context
+            } else if (!StringUtils.isNullOrEmpty(accessAnn.controllerBeanName())) {
+                //获取spring上下文中的控制器
+                accessController = ApplicationContextHolder.get().getBean(accessAnn.controllerBeanName(), DataAccessController.class);
             }
             DataAccessController finalAccessController = accessController;
 
-            ParamContext context = holder.createParamContext(accessAnn);
-            Authorization authorization = AuthorizationHolder.get();
-            if (authorization == null) {
-                throw new AuthorizationException("{no_authorization}");
-            }
+            ParamContext context = holder.createParamContext();
             String permission = accessAnn.permission();
             Permission permissionInfo = authorization.getPermission(permission);
             List<String> actionList = Arrays.asList(accessAnn.action());
-
+            //取得当前登录用户持有的控制规则
             Set<DataAccess> accesses = permissionInfo
                     .getDataAccesses()
                     .stream()
                     .filter(access -> actionList.contains(access.getAction()))
                     .collect(Collectors.toSet());
+            //无规则,则代表不进行控制
             if (accesses.isEmpty()) return;
+            //单个规则验证函数
             Function<Predicate<DataAccess>, Boolean> function =
-                    (accessAnn.logical() == Logical.AND) ?
+                    accessAnn.logical() == Logical.AND ?
                             accesses.stream()::allMatch : accesses.stream()::anyMatch;
-
+            //调用控制器进行验证
             boolean isAccess = function.apply(access -> finalAccessController.doAccess(access, context));
             if (!isAccess) {
                 throw new AuthorizationException("{access_deny}");

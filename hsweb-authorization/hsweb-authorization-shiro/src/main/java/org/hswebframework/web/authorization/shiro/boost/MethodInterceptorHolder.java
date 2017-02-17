@@ -20,6 +20,7 @@ package org.hswebframework.web.authorization.shiro.boost;
 import org.apache.shiro.util.Assert;
 import org.hswebframework.web.ThreadLocalUtils;
 import org.hswebframework.web.authorization.access.ParamContext;
+import org.hswebframwork.utils.ClassUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -84,11 +85,16 @@ public class MethodInterceptorHolder {
         return args;
     }
 
-    public ParamContext createParamContext(final Annotation annotation) {
+    public ParamContext createParamContext() {
         return new ParamContext() {
             @Override
             public Object getTarget() {
                 return target;
+            }
+
+            @Override
+            public Method getMethod() {
+                return method;
             }
 
             @Override
@@ -98,8 +104,11 @@ public class MethodInterceptorHolder {
             }
 
             @Override
-            public <T extends Annotation> T getAnnotation() {
-                return (T) annotation;
+            public <T extends Annotation> T getAnnotation(Class<T> type) {
+                T ann = ClassUtils.getAnnotation(method, type);
+                if (ann == null)
+                    ann = ClassUtils.getAnnotation(target.getClass(), type);
+                return ann;
             }
 
             @Override

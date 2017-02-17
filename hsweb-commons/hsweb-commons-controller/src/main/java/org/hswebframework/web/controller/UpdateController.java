@@ -25,11 +25,11 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 /**
- * TODO 完成注释
+ * 通用更新控制器
  *
  * @author zhouhao
  */
-public interface UpdateController<E, PK> extends HswebController {
+public interface UpdateController<E, PK> {
     @Authorize(action = "update")
     @PutMapping(path = "/{id}")
     @AccessLogger("根据主键修改数据")

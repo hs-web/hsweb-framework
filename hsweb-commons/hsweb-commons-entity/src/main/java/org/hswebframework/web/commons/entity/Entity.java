@@ -21,9 +21,14 @@ package org.hswebframework.web.commons.entity;
 import java.io.Serializable;
 
 /**
- * TODO 完成注释
+ * 实体总接口,所有实体需实现此接口
  *
  * @author zhouhao
+ * @see org.hswebframework.web.commons.entity.factory.EntityFactory
+ * @see GenericEntity
+ * @see TreeSupportEntity
+ * @see TreeSortSupportEntity
+ * @since 3.0
  */
-public interface Entity extends Serializable{
+public interface Entity extends Serializable {
 }

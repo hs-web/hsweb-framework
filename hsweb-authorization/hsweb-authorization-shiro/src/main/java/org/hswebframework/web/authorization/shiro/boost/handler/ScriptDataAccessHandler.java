@@ -20,7 +20,7 @@ public class ScriptDataAccessHandler implements DataAccessHandler {
     }
 
     @Override
-    public boolean doAccess(DataAccess access, ParamContext context) {
+    public boolean handle(DataAccess access, ParamContext context) {
         ScriptDataAccess dataAccess = ((ScriptDataAccess) access);
         DynamicScriptEngine engine = DynamicScriptEngineFactory.getEngine(dataAccess.getScriptLanguage());
         if (engine == null) throw new UnsupportedOperationException(dataAccess.getScriptLanguage() + " {not_support}");

@@ -22,9 +22,15 @@ import org.hswebframework.web.commons.entity.Entity;
 import org.hswebframework.web.service.CrudService;
 
 /**
- * TODO 完成注释
+ * 通用增删改查控制器
  *
  * @author zhouhao
+ * @see QueryController
+ * @see CreateController
+ * @see UpdateController
+ * @see DeleteController
+ * @see CrudService
+ * @since 3.0
  */
 public interface CrudController<E, PK, Q extends Entity>
         extends QueryController<E, PK, Q>, UpdateController<E, PK>, CreateController<E, PK>, DeleteController<PK> {
