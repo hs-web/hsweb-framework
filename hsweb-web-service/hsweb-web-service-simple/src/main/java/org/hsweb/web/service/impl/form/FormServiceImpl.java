@@ -176,7 +176,7 @@ public class FormServiceImpl extends AbstractServiceImpl<Form, String> implement
         Form old = this.selectByPk(formId);
         assertNotNull(old, "表单不存在");
         //先卸载正在使用的表单
-        Form using = getMapper().selectUsing(old.getName());
+        Form using = selectUsing(old.getName());
         if (using != null) {
             this.unDeploy(using.getId());
         }
@@ -238,7 +238,7 @@ public class FormServiceImpl extends AbstractServiceImpl<Form, String> implement
     @Override
     @Cacheable(value = CACHE_KEY, key = "'using.'+#name")
     public Form selectUsing(String name) {
-        return formMapper.selectUsing(name);
+        return createQuery().where(Property.using,1).and().is(Property.name,name).single();
     }
 
     @Override
