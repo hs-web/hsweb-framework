@@ -1,29 +1,25 @@
-## 系统功能模块
+# 系统功能模块
 系统基本功能都在这里,此模块的所有子模块都按照功能来划分.
 
-如:
-```text
------hsweb-system-config
-           |------hsweb-system-config-entity
-           |------hsweb-system-config-service
-                            |----------hsweb-system-config-service-api
-                            |----------hsweb-system-config-service-simple
-                            |----------hsweb-system-config-service-spring-cloud
-                            |----------hsweb-system-config-service-dubbo
-           |------hsweb-system-config-dao
-                            |------hsweb-system-config-dao-api
-                            |------hsweb-system-config-dao-mybatis
-                            |------hsweb-system-config-dao-jpa
-``` 
-
-1. hsweb-system-all:所有功能依赖整合
-2. hsweb-system-authorization:权限管理
-3. hsweb-system-cli:命令行功能
-4. hsweb-system-config:配置管理
-5. hsweb-system-database-manager:数据库管理
-6. hsweb-system-datasource:数据源管理
-7. hsweb-system-dynamic-form:动态表单
-8. hsweb-system-monitor:系统监控
-9. hsweb-system-schedule: 定时调度
-10. hsweb-system-organizational: 组织架构
-11. hsweb-system-workflow: 工作流
+# 模块说明
+| 模块       | 说明          |   进度 |
+| ------------- |:-------------:| ----|
+|[hsweb-system-all](hsweb-system-all)|所有功能整合| 0%|
+|[hsweb-system-authorization](hsweb-system-authorization) |权限管理| 90%|
+|[hsweb-system-cli](hsweb-system-cli)|在线命令行功能,在线执行命令| 0%|
+|[hsweb-system-config](hsweb-system-config)|系统配置功能| 60%|
+|[hsweb-system-crawler](hsweb-system-crawler)|爬虫功能| 0%|
+|[hsweb-system-database-manager](hsweb-system-database-manager)|在线数据库维护| 0%|
+|[hsweb-system-datasource](hsweb-system-datasource)|动态数据源管理| 0%|
+|[hsweb-system-dictionary](hsweb-system-dictionary)| 数据字典功能|  0%|
+|[hsweb-system-document](hsweb-system-document)|文档管理功能| 0%|
+|[hsweb-system-dynamic-form](hsweb-system-dynamic-form)|动态表单| 0%|
+|[hsweb-system-explorer](hsweb-system-explorer)|**系统资源管理(菜单,按钮)**| 20%|
+|[hsweb-system-file](hsweb-system-file)|文件管理| 0%|
+|[hsweb-system-history](hsweb-system-history)|历史记录管理| 0%|
+|[hsweb-system-monitor](hsweb-system-monitor)|系统监控| 0%|
+|[hsweb-system-organizational](hsweb-system-organizational)|组织架构| 0%|
+|[hsweb-system-schedule](hsweb-system-schedule)|任务调度| 0%|
+|[hsweb-system-script](hsweb-system-script)|动态脚本| 0%|
+|[hsweb-system-template](hsweb-system-template)|模板管理| 0%|
+|[hsweb-system-workflow](hsweb-system-workflow)|工作流| 0%|
