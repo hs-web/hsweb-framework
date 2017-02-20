@@ -23,6 +23,7 @@ import java.io.Serializable;
  * 角色信息
  *
  * @author zhouhao
+ * @since 3.0
  */
 public interface Role extends Serializable {
 
@@ -32,7 +33,6 @@ public interface Role extends Serializable {
     String getId();
 
     /**
-     *
      * @return 角色名
      */
     String getName();

@@ -93,7 +93,7 @@ public class ResponseMessage implements Serializable {
                 } catch (Throwable e) {
                 }
             } else {
-                getStringListFormMap(includes, type).add(field);
+                getStringListFromMap(includes, type).add(field);
             }
         });
         return this;
@@ -114,7 +114,7 @@ public class ResponseMessage implements Serializable {
                 } catch (Throwable e) {
                 }
             } else {
-                getStringListFormMap(excludes, type).add(field);
+                getStringListFromMap(excludes, type).add(field);
             }
         });
         return this;
@@ -154,13 +154,8 @@ public class ResponseMessage implements Serializable {
         return include(Arrays.asList(fields));
     }
 
-    protected Set<String> getStringListFormMap(Map<Class<?>, Set<String>> map, Class type) {
-        Set<String> list = map.get(type);
-        if (list == null) {
-            list = new HashSet<>();
-            map.put(type, list);
-        }
-        return list;
+    protected Set<String> getStringListFromMap(Map<Class<?>, Set<String>> map, Class type) {
+        return map.computeIfAbsent(type, k -> new HashSet<>());
     }
 
     public Object getData() {

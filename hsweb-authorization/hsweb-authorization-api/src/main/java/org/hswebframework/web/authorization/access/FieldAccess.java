@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.Set;
 
 /**
- * 字段级别权限控制
+ * 字段级别权限控制配置,表示此用户不能对字段{@link this#getField()} 执行 {@link this#getActions()}操作
  *
  * @author zhouhao
  * @see FieldAccessController

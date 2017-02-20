@@ -37,8 +37,7 @@ public interface DefaultQueryByEntityService<E>
      * 分页进行查询数据，查询条件同 {@link DefaultQueryByEntityService#select}
      *
      * @param param 查询参数
-     * @return 分页结果
-     * @ 查询异常
+     * @return 分页查询结果
      */
     @Override
     default PagerResult<E> selectPager(Entity param) {
@@ -85,11 +84,10 @@ public interface DefaultQueryByEntityService<E>
     }
 
     /**
-     * 查询只返回单个结果
+     * 查询只返回单个结果,如果有多个结果,只返回第一个
      *
      * @param param 查询条件
-     * @return 单个结果
-     * @see this#select(Entity)
+     * @return 单个查询结果
      */
     @Override
     @Transactional(readOnly = true)

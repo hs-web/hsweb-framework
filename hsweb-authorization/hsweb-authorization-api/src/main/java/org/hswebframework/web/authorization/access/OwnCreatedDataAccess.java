@@ -1,7 +1,7 @@
 package org.hswebframework.web.authorization.access;
 
 /**
- * TODO 完成注释
+ * 只能操作由自己创建的数据
  *
  * @author zhouhao
  */

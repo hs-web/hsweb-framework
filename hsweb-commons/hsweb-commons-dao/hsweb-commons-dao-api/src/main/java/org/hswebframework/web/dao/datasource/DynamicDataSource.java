@@ -22,6 +22,8 @@ package org.hswebframework.web.dao.datasource;
 import org.hswebframework.web.ThreadLocalUtils;
 
 import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 /**
  * 动态数据源接口,此接口实现多数据源的动态切换
@@ -71,17 +73,13 @@ public interface DynamicDataSource extends DataSource {
 
     /**
      * 切换为默认数据源并记住上一次使用的数据源
-     *
-     * @see this#useDefault(boolean)
      */
     static void useDefault() {
         useDefault(true);
     }
 
     /**
-     * 获取当前激活的数据源
-     *
-     * @return
+     * @return 当前激活的数据源
      */
     DataSource getActiveDataSource();
 
@@ -92,4 +90,5 @@ public interface DynamicDataSource extends DataSource {
      * @see DatabaseType
      */
     DatabaseType getActiveDataBaseType();
+
 }

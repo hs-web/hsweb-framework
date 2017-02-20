@@ -92,20 +92,9 @@ public class SimpleAuthorization implements Authorization {
     }
 
     @Override
-    public <T extends Serializable> T getAttribute(String name) {
-        return ((T) attributes.get(name));
-    }
-
-    @Override
-    public <T extends Serializable> T getAttribute(String name, T defaultValue) {
-        T val = getAttribute(name);
-        return val == null ? defaultValue : val;
-    }
-
-    @Override
-    public <T extends Serializable> T getAttribute(String name, Supplier<T> supplier) {
-        T val = getAttribute(name);
-        return val == null ? supplier.get() : val;
+    @SuppressWarnings("unchecked")
+    public <T extends Serializable> Optional<T> getAttribute(String name) {
+        return Optional.of((T) attributes.get(name));
     }
 
     @Override
@@ -130,6 +119,12 @@ public class SimpleAuthorization implements Authorization {
 
     public void setAttributes(Map<String, Serializable> attributes) {
         this.attributes = attributes;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T extends Serializable> T removeAttributes(String name) {
+        return (T) attributes.remove(name);
     }
 
     public Map<String, Serializable> getAttributes() {

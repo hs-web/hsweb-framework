@@ -27,7 +27,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * 数据级权限控制注解,用于进行需要数据级别权限控制的声明.
+ * <p>
+ * 此注解仅用于声明此方法需要进行数据级权限控制,具体权限控制方式由控制器实{@link DataAccessController}现
+ * </p>
+ *
  * @author zhouhao
+ * @see DataAccessController
+ * @since 3.0
  */
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
@@ -38,17 +45,30 @@ public @interface RequiresDataAccess {
      * @see Permission#getId()
      */
     String permission();
+
     /**
-     * @return
+     * @return action array
      * @see DataAccess#getAction()
      */
     String[] action() default {};
 
+    /**
+     * @return logical
+     */
     Logical logical() default Logical.OR;
 
+    /**
+     * @return 自定义控制器bean名称
+     */
     String controllerBeanName() default "";
 
+    /**
+     * @return 自定义控制器类型
+     */
     Class<DataAccessController> controllerClass() default DataAccessController.class;
 
+    /**
+     * @return id参数名称
+     */
     String idParamName() default "id";
 }

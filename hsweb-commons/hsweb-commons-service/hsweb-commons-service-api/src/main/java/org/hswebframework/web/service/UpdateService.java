@@ -41,7 +41,7 @@ public interface UpdateService<Po> extends Service {
      * 保存或修改
      *
      * @param po 要修改的数据
-     * @return
+     * @return 影响记录数
      */
     int saveOrUpdate(Po po);
 

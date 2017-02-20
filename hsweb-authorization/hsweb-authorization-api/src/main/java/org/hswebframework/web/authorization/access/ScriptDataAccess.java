@@ -1,7 +1,7 @@
 package org.hswebframework.web.authorization.access;
 
 /**
- * 动态脚本数据权限控制
+ * 通过脚本来控制数据操作权限.脚本可以在前端设置角色的时候进行编辑
  *
  * @author zhouhao
  */

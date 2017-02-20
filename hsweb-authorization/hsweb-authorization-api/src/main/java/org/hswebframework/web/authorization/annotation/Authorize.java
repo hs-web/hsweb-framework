@@ -18,10 +18,17 @@
 
 package org.hswebframework.web.authorization.annotation;
 
+import org.hswebframework.web.authorization.Permission;
+import org.hswebframework.web.authorization.Role;
+import org.hswebframework.web.authorization.User;
+
 import java.lang.annotation.*;
 
 /**
- * 权限注解
+ * 基础权限控制注解,提供基本的控制配置
+ *
+ * @author zhouhao
+ * @since 3.0
  */
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
@@ -32,43 +39,47 @@ public @interface Authorize {
     /**
      * 对角色授权,当使用按角色授权时，对模块以及操作级别授权方式失效
      *
-     * @return 进行授权的角色数组
+     * @return 进 role id array
+     * @see Role#getId()
      */
     String[] role() default {};
 
     /**
      * 对模块授权
      *
-     * @return 进行授权的模块
+     * @return permission id array
+     * @see Permission#getId()
      */
     String[] permission() default {};
 
     /**
      * 如增删改查等
      *
-     * @return
+     * @return action array
+     * @see Permission#getActions()
      */
     String[] action() default {};
-
 
     /**
      * 验证是否为指定user
      *
-     * @return
+     * @return user id array
+     * @see User#getId()
      */
     String[] user() default {};
 
     /**
      * 验证失败时返回的消息
      *
-     * @return
+     * @return 验证失败提示的消息
      */
     String message() default "{unauthorized}";
 
     /**
      * 表达式验证
      *
-     * @return
+     * @return 表达式
+     * @see RequiresExpression#value()
      */
     String expression() default "";
 
@@ -76,22 +87,9 @@ public @interface Authorize {
      * 表达式语言，默认spring表达式
      *
      * @return 表达式语言
+     * @see RequiresExpression#language()
      */
     String expressionLanguage() default "spel";
-
-    /**
-     * 是否为api接口，为true时，可使用api方式请求。
-     *
-     * @return
-     */
-    boolean api() default false;
-
-    /**
-     * 可匿名访问
-     *
-     * @return 是否可匿名访问, 匿名访问将不用登录
-     */
-    boolean anonymous() default false;
 
     /**
      * 是否合并类上的注解
@@ -103,7 +101,7 @@ public @interface Authorize {
     /**
      * 验证模式，在使用多个验证条件时有效
      *
-     * @return
+     * @return logical
      */
     Logical logical() default Logical.OR;
 

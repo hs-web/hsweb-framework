@@ -19,7 +19,15 @@
 package org.hswebframework.web.authorization;
 
 /**
- * 权限获取器,用于静态方式获取当前登录用户的权限信息
+ * 权限获取器,用于静态方式获取当前登录用户的权限信息.
+ * 例如:
+ * <pre>
+ *     &#064;RequestMapping("/example")
+ *     public ResponseMessage example(){
+ *         Authorization auth = AuthorizationHolder.get();
+ *         return ResponseMessage.ok();
+ *     }
+ * </pre>
  *
  * @author zhouhao
  * @see AuthorizationSupplier
@@ -28,6 +36,9 @@ package org.hswebframework.web.authorization;
 public final class AuthorizationHolder {
     private static AuthorizationSupplier supplier;
 
+    /**
+     * @return 当前登录用户信息
+     */
     public static Authorization get() {
         if (null == supplier) {
             throw new UnsupportedOperationException("AuthorizationSupplier is null!");

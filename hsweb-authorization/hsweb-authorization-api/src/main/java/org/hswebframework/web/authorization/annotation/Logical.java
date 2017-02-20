@@ -18,12 +18,5 @@
 package org.hswebframework.web.authorization.annotation;
 
 public enum Logical {
-    /**
-     * 并集，需要满足所有验证条件
-     */
-    AND,
-    /**
-     * 交集，满足其中一个验证条件
-     */
-    OR
+    AND,OR
 }

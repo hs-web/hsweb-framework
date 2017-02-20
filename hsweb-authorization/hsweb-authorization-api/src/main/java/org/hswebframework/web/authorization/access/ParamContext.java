@@ -29,9 +29,9 @@ public interface ParamContext extends Serializable {
     Method getMethod();
 
     /**
-     * 根据参数名获取参数值,此参数为方法的参数,而非http参数 <br/>
-     * 如：当前被操作的方法为 query(QueryParam param); 调用getParameter("param"); 则返回QueryParam实例<br/>
-     * 注意:返回值为Optional对象,使用方法见{@link Optional}<br/>
+     * 根据参数名获取参数值,此参数为方法的参数,而非http参数 <br>
+     * 如：当前被操作的方法为 query(QueryParam param); 调用getParameter("param"); 则返回QueryParam实例<br>
+     * 注意:返回值为Optional对象,使用方法见{@link Optional}<br>
      *
      * @param name 参数名称
      * @param <T>  参数泛型

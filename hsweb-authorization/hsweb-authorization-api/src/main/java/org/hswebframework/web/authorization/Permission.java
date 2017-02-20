@@ -27,6 +27,8 @@ import java.util.Set;
  * 用户持有的权限信息
  *
  * @author zhouhao
+ * @see Authorization
+ * @since 3.0
  */
 public interface Permission extends Serializable {
 

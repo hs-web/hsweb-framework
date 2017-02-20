@@ -46,14 +46,14 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
- * 数据级权限控制实现 <br/>
- * 通过在方法上注解{@link RequiresDataAccess}，标识需要进行数据级权限控制<br/>
- * 控制的方式和规则由 {@link Permission#getDataAccesses()}实现<br/>
+ * 数据级权限控制实现 <br>
+ * 通过在方法上注解{@link RequiresDataAccess}，标识需要进行数据级权限控制<br>
+ * 控制的方式和规则由 {@link Permission#getDataAccesses()}实现<br>
  *
  * @author zhouhao
  * @see DefaultDataAccessController
  * @see DataAccessAnnotationHandler#assertAuthorized(Annotation)
- * @see 3.0
+ * @since  3.0
  */
 public class DataAccessAnnotationMethodInterceptor extends AuthorizingAnnotationMethodInterceptor {
 

@@ -4,10 +4,10 @@ import org.hsweb.ezorm.core.param.QueryParam;
 import org.hswebframework.web.commons.entity.Entity;
 
 /**
- * 查询参数实体,使用<a href="https://github.com/hs-web/hsweb-easy-orm">easyorm</a>进行动态查询参数构建<br/>
- * 可通过静态方法创建:<br/>
- * {@link QueryParamEntity#empty()}<br/>
- * {@link QueryParamEntity#single(String, Object)}<br/>
+ * 查询参数实体,使用<a href="https://github.com/hs-web/hsweb-easy-orm">easyorm</a>进行动态查询参数构建<br>
+ * 可通过静态方法创建:<br>
+ * {@link QueryParamEntity#empty()}<br>
+ * {@link QueryParamEntity#single(String, Object)}<br>
  * 如:
  * <code>
  * QueryParamBean.single("id",id);

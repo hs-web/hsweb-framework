@@ -20,9 +20,19 @@ package org.hswebframework.web.authorization.annotation;
 import java.lang.annotation.*;
 
 /**
- * TODO 完成注释
+ * 用于springmvc中,将授权信息自动注入到参数中.
+ * 例如:
+ * <pre>
+ *    &#064;ReuqestMapping("/example")
+ *    public ResponseMessage(&#064;AuthInfo Authorization auth){
+ *      User user = auth.getUser();
+ *      return ok();
+ *    }
+ * </pre>
  *
  * @author zhouhao
+ * @see org.hswebframework.web.authorization.Authorization
+ * @since 3.0
  */
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)

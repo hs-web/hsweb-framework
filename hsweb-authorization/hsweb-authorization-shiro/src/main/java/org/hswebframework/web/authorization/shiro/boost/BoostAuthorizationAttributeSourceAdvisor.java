@@ -56,6 +56,9 @@ public class BoostAuthorizationAttributeSourceAdvisor extends StaticMethodMatche
 
     /**
      * Create a new AuthorizationAttributeSourceAdvisor.
+     *
+     * @param dataAccessController  数据权限控制器
+     * @param fieldAccessController 字段权限控制器
      */
     public BoostAuthorizationAttributeSourceAdvisor(DataAccessController dataAccessController,
                                                     FieldAccessController fieldAccessController) {

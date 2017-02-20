@@ -26,6 +26,7 @@ import java.lang.annotation.Target;
  * 使用表达式进行验证,默认支持spel,ognl表达式。
  *
  * @author zhouhao
+ * @since 3.0
  */
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
@@ -34,16 +35,20 @@ public @interface RequiresExpression {
     /**
      * 表达式内容,表达式可以调用方法的参数值以及当前的用户信息和spring管理的bean
      * 例如:
-     * <code>
-     * <p>
-     * &#064;ReuqestMapping<br>
-     * &#064;RequiresExpression("#param!=null")<br>
-     * public ResponseMessage requestHandle(String param){ <br/>
-     * //...<br>
-     * }<br>
-     * </code>
+     * <pre>
+     * &#064;RequestMapping
+     * &#064;RequiresExpression("#param!=null")
+     * public ResponseMessage requestHandle(String param){
+     *  return ok();
+     * }
+     * </pre>
+     *
+     * @return 表达式
      */
     String value();
 
+    /**
+     * @return 表达式语言 ，支持spel,ognl,groovy,javascript
+     */
     String language() default "spel";
 }

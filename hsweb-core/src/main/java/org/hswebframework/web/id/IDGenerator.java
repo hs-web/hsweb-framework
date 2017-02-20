@@ -25,9 +25,10 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 /**
- * TODO 完成注释
+ * ID生成器,用于生成ID
  *
  * @author zhouhao
+ * @since 3.0
  */
 public interface IDGenerator<T> {
     T generate();

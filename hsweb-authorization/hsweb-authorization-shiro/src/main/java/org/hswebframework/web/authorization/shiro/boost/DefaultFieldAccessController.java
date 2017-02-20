@@ -13,9 +13,12 @@ import org.slf4j.LoggerFactory;
 import java.util.Set;
 
 /**
- * TODO 完成注释
+ * 默认的字段级权限控制,目前已实现提供对查询(query),更新(update)的权限控制。
+ * 控制方式主要是通过被拦截方法的参数类型进行识别,如果是可进行控制的参数类型,则通过修改参数属性等方式,进行控制。
  *
  * @author zhouhao
+ * @see FieldAccessController
+ * @since 3.0
  */
 public class DefaultFieldAccessController implements FieldAccessController {
 
@@ -23,6 +26,7 @@ public class DefaultFieldAccessController implements FieldAccessController {
 
     @Override
     public boolean doAccess(String action, Set<FieldAccess> accesses, ParamContext params) {
+        //控制转发
         switch (action) {
             case Permission.ACTION_QUERY:
                 return doQueryAccess(accesses, params);
@@ -34,6 +38,17 @@ public class DefaultFieldAccessController implements FieldAccessController {
         return false;
     }
 
+    /**
+     * 执行更新操作的控制,此方法永远返回true.通过取得参数中实现{@link Entity}的参数,将把这个参数实体所对应不能操作的字段全部设置为null。 <br>
+     * 注意: 此方式还需要dao框架的支持(为null的字段不进行更新) <br>
+     * 如果没有{@link Entity}的参数,则不进行控制并给出警告信息
+     *
+     * @param accesses 不可操作的字段
+     * @param params   参数上下文
+     * @return true
+     * @see BeanUtilsBean
+     * @see org.apache.commons.beanutils.PropertyUtilsBean
+     */
     protected boolean doUpdateAccess(Set<FieldAccess> accesses, ParamContext params) {
         Entity entity = params.getParams().values().stream()
                 .filter(Entity.class::isInstance)
@@ -55,6 +70,14 @@ public class DefaultFieldAccessController implements FieldAccessController {
         return true;
     }
 
+    /**
+     * 执行查询的控制,查询主要针对参数为{@link QueryParamEntity}的动态条件查询,通过设置{@link QueryParamEntity#excludes(String...)}.指定不需要查询的字段
+     * 如果没有{@link QueryParamEntity}的参数,则不进行控制并给出警告信息
+     *
+     * @param accesses 不能查询的字段
+     * @param params   参数上下文
+     * @return true
+     */
     protected boolean doQueryAccess(Set<FieldAccess> accesses, ParamContext params) {
         QueryParamEntity paramEntity = params.getParams().values().stream()
                 .filter(QueryParamEntity.class::isInstance)

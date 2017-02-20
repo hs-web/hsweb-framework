@@ -41,7 +41,7 @@ public interface EntityFactory {
      * 根据类型获取实体的真实的实体类型,
      * 可通过此方法获取获取已拓展的实体类型，如:<br>
      * <code>
-     * factory.getInstanceType(MyBeanInterface.class); -> class SimpleMyBeanInterface
+     * factory.getInstanceType(MyBeanInterface.class);
      * </code>
      *
      * @param entityClass 类型
