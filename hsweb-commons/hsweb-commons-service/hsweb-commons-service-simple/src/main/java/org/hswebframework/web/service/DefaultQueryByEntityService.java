@@ -19,7 +19,6 @@
 package org.hswebframework.web.service;
 
 import org.hsweb.ezorm.core.dsl.Query;
-import org.hsweb.ezorm.core.param.QueryParam;
 import org.hswebframework.web.commons.entity.Entity;
 import org.hswebframework.web.commons.entity.PagerResult;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
