@@ -87,7 +87,7 @@
         <javassist.version>3.20.0-GA</javassist.version>
         <activiti.version>5.19.0.2</activiti.version>
 
-        <fastjson.version>1.2.6</fastjson.version>
+        <fastjson.version>1.2.24</fastjson.version>
         <h2.version>1.4.191</h2.version>
         <mysql.version>5.1.39</mysql.version>
         <cglib.version>3.2.2</cglib.version>
@@ -196,11 +196,21 @@
                 <version>4.12</version>
                 <scope>test</scope>
             </dependency>
-
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>fastjson</artifactId>
+                <version>${fastjson.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.hswebframework</groupId>
                 <artifactId>hsweb-utils</artifactId>
                 <version>${hsweb.utils.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.alibaba</groupId>
+                        <artifactId>fastjson</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <dependency>
@@ -222,6 +232,10 @@
                         <groupId>org.springframework</groupId>
                         <artifactId>spring-expression</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>com.alibaba</groupId>
+                        <artifactId>fastjson</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
 
@@ -229,6 +243,12 @@
                 <groupId>org.hswebframework</groupId>
                 <artifactId>hsweb-easy-orm</artifactId>
                 <version>${hsweb.ezorm.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.alibaba</groupId>
+                        <artifactId>fastjson</artifactId>
+                    </exclusion>
+                </exclusions>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

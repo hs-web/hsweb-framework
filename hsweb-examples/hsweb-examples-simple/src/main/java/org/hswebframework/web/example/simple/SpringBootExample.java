@@ -17,7 +17,6 @@
 
 package org.hswebframework.web.example.simple;
 
-import com.alibaba.fastjson.JSON;
 import org.hsweb.ezorm.rdb.executor.AbstractJdbcSqlExecutor;
 import org.hsweb.ezorm.rdb.executor.SqlExecutor;
 import org.hswebframework.web.authorization.Permission;
@@ -31,19 +30,15 @@ import org.hswebframework.web.entity.authorization.bind.BindRoleUserEntity;
 import org.hswebframework.web.service.authorization.PermissionService;
 import org.hswebframework.web.service.authorization.RoleService;
 import org.hswebframework.web.service.authorization.UserService;
-import org.hswebframework.web.service.authorization.simple.access.SimpleScriptDataAccess;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DataSourceUtils;
-import org.springframework.web.bind.annotation.RequestMapping;
 
-import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -54,10 +49,8 @@ import java.util.Arrays;
  *
  * @author zhouhao
  */
-@EnableAutoConfiguration
 @SpringBootApplication
 @Configuration
-@RequestMapping
 public class SpringBootExample implements CommandLineRunner {
 
     @Bean
@@ -111,11 +104,12 @@ public class SpringBootExample implements CommandLineRunner {
         //password 属性不能读取和修改
         FieldAccessEntity fieldAccessEntity = new FieldAccessEntity();
         fieldAccessEntity.setField("password");
-        fieldAccessEntity.setActions(ActionEntity.create(Permission.ACTION_QUERY,Permission.ACTION_UPDATE));
+        fieldAccessEntity.setActions(ActionEntity.create(Permission.ACTION_QUERY, Permission.ACTION_UPDATE));
 
         PermissionEntity permission = entityFactory.newInstance(PermissionEntity.class);
         permission.setName("测试");
         permission.setId("test");
+        permission.setStatus((byte) 1);
         permission.setActions(ActionEntity.create(Permission.ACTION_QUERY, Permission.ACTION_UPDATE));
         permission.setDataAccess(Arrays.asList(accessEntity, updateAccessEntity));
         permission.setFieldAccess(Arrays.asList(fieldAccessEntity));
@@ -142,6 +136,5 @@ public class SpringBootExample implements CommandLineRunner {
         userEntity.setPassword("admin");
         userEntity.setRoles(Arrays.asList("admin"));
         userService.insert(userEntity);
-
     }
 }
