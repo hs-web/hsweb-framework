@@ -61,10 +61,6 @@ public class TestController implements QueryController<UserEntity, String, Query
         return ResponseMessage.ok(entity);
     }
 
-    public static void main(String[] args) throws NoSuchMethodException {
-        System.out.println(UserController.class.getMethod("list", Entity.class));
-    }
-
     @Override
     public TestService getService() {
         return new TestService();

@@ -68,6 +68,13 @@ public class ListenerAuthorizingRealm extends AuthorizingRealm implements UserAu
     }
 
     @Override
+    public void onLoginOut(Authorization authorization) {
+        if (null != authorization)
+            getCache(authorization.getUser().getUsername()).clear();
+        SecurityUtils.getSubject().logout();
+    }
+
+    @Override
     public void onAuthorizeSuccess(boolean isRemembered, Authorization authorization) {
         SimpleAuthorizationInfo authorizationInfo = new SimpleAuthorizationInfo();
         authorizationInfo.addRoles(authorization.getRoles().stream().map(Role::getId).collect(Collectors.toList()));

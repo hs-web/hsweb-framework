@@ -62,6 +62,16 @@ public interface Permission extends Serializable {
     String ACTION_EXPORT = "export";
 
     /**
+     * 禁用
+     */
+    String ACTION_DISABLE = "disable";
+
+    /**
+     * 启用
+     */
+    String ACTION_ENABLE = "enable";
+
+    /**
      * 获取权限ID，权限的唯一标识
      *
      * @return id

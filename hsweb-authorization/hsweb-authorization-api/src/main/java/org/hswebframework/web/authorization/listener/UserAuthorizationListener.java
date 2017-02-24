@@ -36,5 +36,8 @@ public interface UserAuthorizationListener {
     default void onAuthorizeFail(String username) {
     }
 
+    default void onLoginOut(Authorization authorization){
+
+    }
     void onAuthorizeSuccess(boolean isRemembered, Authorization authorization);
 }
