@@ -97,8 +97,8 @@ public class AuthorizationController {
 
     @RequestMapping("/login-out")
     @AccessLogger("退出登录")
-    public ResponseMessage loginOut() {
-
+    public ResponseMessage loginOut(Authorization authorization) {
+        listenerAdapter.onLoginOut(authorization);
         return ok();
     }
 
@@ -176,6 +176,12 @@ public class AuthorizationController {
         public void onAuthorizeFail(String username) {
             if (userAuthorizationListeners != null)
                 userAuthorizationListeners.forEach(listener -> listener.onAuthorizeFail(username));
+        }
+
+        @Override
+        public void onLoginOut(Authorization authorization) {
+            if (userAuthorizationListeners != null)
+                userAuthorizationListeners.forEach(listener -> listener.onLoginOut(authorization));
         }
 
         @Override

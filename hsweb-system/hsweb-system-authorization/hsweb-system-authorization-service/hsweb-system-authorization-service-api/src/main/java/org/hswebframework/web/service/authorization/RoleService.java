@@ -14,7 +14,10 @@ import org.hswebframework.web.service.QueryByEntityService;
 public interface RoleService extends
         CreateEntityService<RoleEntity>,
         QueryByEntityService<RoleEntity> {
+
     <T extends PermissionRoleEntity> String insert(BindPermissionRoleEntity<T> roleEntity);
+
+    <T extends PermissionRoleEntity> void updateByPrimaryKey(BindPermissionRoleEntity<T> roleEntity);
 
     boolean enable(String roleId);
 

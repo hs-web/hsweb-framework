@@ -27,10 +27,9 @@ import org.hswebframework.web.entity.authorization.UserEntity;
 import org.hswebframework.web.logging.AccessLogger;
 import org.hswebframework.web.service.authorization.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-import static org.hswebframework.web.controller.message.ResponseMessage.*;
+import static org.hswebframework.web.controller.message.ResponseMessage.ok;
 
 /**
  * TODO 完成注释
@@ -41,7 +40,6 @@ import static org.hswebframework.web.controller.message.ResponseMessage.*;
 @RequestMapping("${hsweb.web.mappings.user:user}")
 @Authorize(permission = "user")
 @AccessLogger("用户管理")
-@Transactional
 public class UserController implements QueryController<UserEntity, String, QueryParamEntity>, CreateController<UserEntity, String> {
 
     private UserService userService;

@@ -17,6 +17,7 @@
 
 package org.hswebframework.web.service.authorization.simple;
 
+import org.hswebframework.web.commons.entity.GenericEntity;
 import org.hswebframework.web.dao.authorization.PermissionRoleDao;
 import org.hswebframework.web.dao.authorization.RoleDao;
 import org.hswebframework.web.entity.authorization.PermissionRoleEntity;
@@ -71,6 +72,17 @@ public class SimpleRoleService extends AbstractService<RoleEntity, String>
         roleDao.insert(roleEntity);
         syncPermissions(roleEntity.getId(), roleEntity.getPermissions());
         return roleEntity.getId();
+    }
+
+    @Override
+    public <T extends PermissionRoleEntity> void updateByPrimaryKey(BindPermissionRoleEntity<T> roleEntity) {
+        tryValidateProperty(StringUtils.hasLength(roleEntity.getId()), RoleEntity.id, "id {not_be_null}");
+        tryValidateProperty(null == selectByPk(roleEntity.getId()), RoleEntity.id, "{role_exists}");
+        roleEntity.setEnabled(null);
+        tryValidate(roleEntity);
+        DefaultDSLUpdateService
+                .createUpdate(roleDao, roleEntity)
+                .where(GenericEntity.id, roleEntity.getId());
     }
 
     @Override
