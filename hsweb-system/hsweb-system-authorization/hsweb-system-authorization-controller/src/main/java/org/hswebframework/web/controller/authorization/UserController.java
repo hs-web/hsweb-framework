@@ -17,8 +17,6 @@
 
 package org.hswebframework.web.controller.authorization;
 
-import org.hswebframework.web.authorization.Permission;
-import org.hswebframework.web.authorization.annotation.AuthInfo;
 import org.hswebframework.web.authorization.Authorization;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
@@ -77,7 +75,7 @@ public class UserController implements QueryController<UserEntity, String, Query
     @Authorize(merge = false)
     @PutMapping(path = "/password")
     @AccessLogger("{update_password_login_user}")
-    public ResponseMessage updateLoginUserPassword(@AuthInfo Authorization authorization,
+    public ResponseMessage updateLoginUserPassword(Authorization authorization,
                                                    @RequestParam String password,
                                                    @RequestParam String oldPassword) {
         getService().updatePassword(authorization.getUser().getId(), oldPassword, password);

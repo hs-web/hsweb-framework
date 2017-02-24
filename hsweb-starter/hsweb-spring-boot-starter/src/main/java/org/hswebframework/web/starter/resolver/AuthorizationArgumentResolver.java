@@ -17,30 +17,41 @@
 
 package org.hswebframework.web.starter.resolver;
 
+import org.hswebframework.web.authorization.Authorization;
 import org.hswebframework.web.authorization.AuthorizationSupplier;
-import org.hswebframework.web.authorization.annotation.AuthInfo;
 import org.springframework.core.MethodParameter;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
- * TODO 完成注释
+ * 权限参数转换器,自动将{@link Authorization}注入controller
+ * 例如:
+ * <pre>
+ *     &#064;RequestMapping("/example")
+ *     public ResponseMessage foo(Authorization auth){
+ *          return ok();
+ *     }
+ * </pre>
  *
  * @author zhouhao
+ * @see Authorization
+ * @since 3.0
  */
 public class AuthorizationArgumentResolver implements HandlerMethodArgumentResolver {
 
     AuthorizationSupplier authorizationSupplier;
 
     public AuthorizationArgumentResolver(AuthorizationSupplier authorizationSupplier) {
+        Assert.notNull(authorizationSupplier);
         this.authorizationSupplier = authorizationSupplier;
     }
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
-        return parameter.hasParameterAnnotation(AuthInfo.class);
+        return parameter.getParameterType() == Authorization.class;
     }
 
     @Override

@@ -34,7 +34,6 @@ import java.util.function.Supplier;
  *
  * @author zhouhao
  * @see AuthorizationHolder
- * @see org.hswebframework.web.authorization.annotation.AuthInfo
  * @since 3.0
  */
 public interface Authorization extends Serializable {

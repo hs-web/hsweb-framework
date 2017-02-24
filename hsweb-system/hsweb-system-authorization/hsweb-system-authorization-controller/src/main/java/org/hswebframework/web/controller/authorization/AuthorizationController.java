@@ -95,6 +95,13 @@ public class AuthorizationController {
         verifyCode.write(response.getOutputStream());
     }
 
+    @RequestMapping("/login-out")
+    @AccessLogger("退出登录")
+    public ResponseMessage loginOut() {
+
+        return ok();
+    }
+
     @PostMapping(value = "/login")
     @AccessLogger("授权")
     public ResponseMessage authorize(@RequestParam String username,
