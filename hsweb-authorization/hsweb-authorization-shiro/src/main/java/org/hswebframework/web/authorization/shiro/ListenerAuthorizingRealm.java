@@ -76,10 +76,9 @@ public class ListenerAuthorizingRealm extends AuthorizingRealm implements UserAu
                         .stream()
                         .map(permission -> {
                             StringBuilder builder = new StringBuilder(permission.getId());
-                            builder.append(":*")
-                                    .append(permission.getActions().isEmpty() ? "" : ",")
-                                    .append(permission.getActions().stream()
-                                            .reduce((a1, a2) -> a1.concat(",").concat(a2)));
+                            builder.append(permission.getActions().stream()
+                                    .reduce((a1, a2) -> a1.concat(",").concat(a2))
+                                    .orElse(""));
                             return new WildcardPermission(builder.toString());
                         }).collect(Collectors.toList()));
 

@@ -63,9 +63,14 @@ public class BoostAuthorizationAttributeSourceAdvisor extends StaticMethodMatche
     public BoostAuthorizationAttributeSourceAdvisor(DataAccessController dataAccessController,
                                                     FieldAccessController fieldAccessController) {
         AopAllianceAnnotationsAuthorizingMethodInterceptor interceptor = new AopAllianceAnnotationsAuthorizingMethodInterceptor();
+        // @RequiresExpression support
         interceptor.getMethodInterceptors().add(new ExpressionAnnotationMethodInterceptor());
+        // @RequiresDataAccess support
         interceptor.getMethodInterceptors().add(new DataAccessAnnotationMethodInterceptor(dataAccessController));
+        // @RequiresFieldAccess support
         interceptor.getMethodInterceptors().add(new FieldAccessAnnotationMethodInterceptor(fieldAccessController));
+        // @Authorize support
+        interceptor.getMethodInterceptors().add(new SimpleAuthorizeMethodInterceptor());
         setAdvice(interceptor);
     }
 

@@ -1,10 +1,12 @@
 package org.hswebframework.web.example.simple;
 
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.authz.annotation.RequiresUser;
 import org.hswebframework.web.authorization.Authorization;
 import org.hswebframework.web.authorization.AuthorizationHolder;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.annotation.AuthInfo;
+import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.annotation.RequiresDataAccess;
 import org.hswebframework.web.authorization.annotation.RequiresFieldAccess;
 import org.hswebframework.web.commons.entity.Entity;
@@ -27,10 +29,17 @@ import java.util.List;
  * @author zhouhao
  */
 @RestController
+@Authorize(permission = "test")
 public class TestController implements QueryController<UserEntity, String, QueryParamEntity> {
 
+    @GetMapping("/test1")
+    @Authorize(action = "query", message = "${'表达式方式'}")
+    public ResponseMessage testSimple(@AuthInfo Authorization authorization) {
+        return ResponseMessage.ok(authorization);
+    }
+
     @GetMapping("/test")
-    @RequiresUser
+    @RequiresPermissions("test:*")
     public ResponseMessage testShiro(@AuthInfo Authorization authorization) {
         return ResponseMessage.ok(authorization);
     }

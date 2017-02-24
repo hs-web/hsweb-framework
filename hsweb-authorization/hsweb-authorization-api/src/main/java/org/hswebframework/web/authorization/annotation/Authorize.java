@@ -76,22 +76,6 @@ public @interface Authorize {
     String message() default "{unauthorized}";
 
     /**
-     * 表达式验证
-     *
-     * @return 表达式
-     * @see RequiresExpression#value()
-     */
-    String expression() default "";
-
-    /**
-     * 表达式语言，默认spring表达式
-     *
-     * @return 表达式语言
-     * @see RequiresExpression#language()
-     */
-    String expressionLanguage() default "spel";
-
-    /**
      * 是否合并类上的注解
      *
      * @return 是否合并类上的注解
@@ -103,6 +87,6 @@ public @interface Authorize {
      *
      * @return logical
      */
-    Logical logical() default Logical.OR;
+    Logical logical() default Logical.DEFAULT;
 
 }

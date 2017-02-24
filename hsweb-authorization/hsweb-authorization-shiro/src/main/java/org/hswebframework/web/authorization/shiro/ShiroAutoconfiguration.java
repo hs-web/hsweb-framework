@@ -209,7 +209,7 @@ public class ShiroAutoconfiguration {
         @ResponseStatus(HttpStatus.UNAUTHORIZED)
         @ResponseBody
         ResponseMessage handleException(UnauthenticatedException exception) {
-            return ResponseMessage.error("{access_denied}", 401);
+            return ResponseMessage.error(exception.getMessage() == null ? "{access_denied}" : exception.getMessage(), 401);
         }
     }
 

@@ -18,5 +18,5 @@
 package org.hswebframework.web.authorization.annotation;
 
 public enum Logical {
-    AND,OR
+    AND, OR, DEFAULT
 }
