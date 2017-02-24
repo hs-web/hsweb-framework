@@ -6,6 +6,7 @@ import org.hswebframework.web.authorization.access.FieldAccess;
 import org.hswebframework.web.authorization.access.FieldAccessController;
 import org.hswebframework.web.authorization.access.ParamContext;
 import org.hswebframework.web.commons.entity.Entity;
+import org.hswebframework.web.commons.entity.RecordCreationEntity;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,6 +64,11 @@ public class DefaultFieldAccessController implements FieldAccessController {
                             .setProperty(entity, access.getField(), null);
                 } catch (Exception e) {
                 }
+            }
+            if (entity instanceof RecordCreationEntity) {
+                RecordCreationEntity creationEntity = ((RecordCreationEntity) entity);
+                creationEntity.setCreateTime(null);
+                creationEntity.setCreatorId(null);
             }
         } else {
             logger.warn("doUpdateAccess skip ,because can not found any entity in param!");

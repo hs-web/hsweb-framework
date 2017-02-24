@@ -28,11 +28,11 @@ import org.hswebframework.web.authorization.annotation.RequiresDataAccess;
 import org.hswebframework.web.authorization.annotation.RequiresExpression;
 import org.hswebframework.web.authorization.annotation.RequiresFieldAccess;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.AnnotationUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 
 /**
  * @author zhouhao
@@ -100,16 +100,28 @@ public class BoostAuthorizationAttributeSourceAdvisor extends StaticMethodMatche
      */
     public boolean matches(Method method, Class targetClass) {
         Method m = method;
-
         if (isAuthzAnnotationPresent(m)) {
             return true;
         }
-
         //The 'method' parameter could be from an interface that doesn't have the annotation.
         //Check to see if the implementation has it.
         if (targetClass != null) {
             try {
-                m = targetClass.getMethod(m.getName(), m.getParameterTypes());
+                //尝试解决由于被拦截的方法使用了泛型,并且重写了方法，导致无法获取父类方法的问题
+                Class[] parameter = Arrays
+                        .stream(m.getParameterTypes())
+                        .map(type -> {
+                            if (type.isInterface()) return type;
+                            Class<?>[] interfaces = type.getInterfaces();
+                            if (interfaces.length > 0) return interfaces[0];
+                            Class superclass = type.getSuperclass();
+                            if (null != superclass && superclass != Object.class) {
+                                return superclass;
+                            }
+                            return type;
+                        })
+                        .toArray(Class[]::new);
+                m = targetClass.getMethod(m.getName(), parameter);
                 if (isAuthzAnnotationPresent(m)) {
                     return true;
                 }
@@ -131,5 +143,4 @@ public class BoostAuthorizationAttributeSourceAdvisor extends StaticMethodMatche
         }
         return false;
     }
-
 }

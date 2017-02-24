@@ -17,6 +17,7 @@
 
 package org.hswebframework.web.controller;
 
+import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.logging.AccessLogger;
@@ -35,9 +36,9 @@ public interface DeleteController<PK> {
 
     DeleteService<PK> getService();
 
-    @Authorize(action = "delete")
+    @Authorize(action = Permission.ACTION_DELETE)
     @DeleteMapping(path = "/{id}")
-    @AccessLogger("根据主键删除数据")
+    @AccessLogger("{delete_by_primary_key}")
     default ResponseMessage deleteByPrimaryKey(@PathVariable PK id) {
         return ok(getService().deleteByPk(id));
     }

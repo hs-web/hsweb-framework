@@ -17,6 +17,7 @@
 
 package org.hswebframework.web.controller;
 
+import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.logging.AccessLogger;
@@ -39,13 +40,13 @@ import static org.hswebframework.web.controller.message.ResponseMessage.ok;
  * @author zhouhao
  * @since 3.0
  */
-public interface CreateController<E, PK>  {
+public interface CreateController<E, PK> {
 
     InsertService<E, PK> getService();
 
-    @Authorize(action = "add")
+    @Authorize(action = Permission.ACTION_ADD)
     @PostMapping
-    @AccessLogger("添加数据")
+    @AccessLogger("{action_add}")
     @ResponseStatus(HttpStatus.CREATED)
     default ResponseMessage add(@RequestBody E data) {
         return ok(getService().insert(data));

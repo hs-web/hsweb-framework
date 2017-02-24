@@ -56,8 +56,8 @@ public class HswebAutoConfiguration {
         converter.setFeatures(
                 SerializerFeature.WriteNullListAsEmpty,
                 SerializerFeature.WriteNullNumberAsZero,
-                SerializerFeature.WriteNullBooleanAsFalse,
-                SerializerFeature.WriteDateUseDateFormat
+                SerializerFeature.WriteNullBooleanAsFalse
+//                SerializerFeature.WriteDateUseDateFormat
         );
         converter.setEntityFactory(entityFactory);
         return converter;

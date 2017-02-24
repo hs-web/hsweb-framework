@@ -184,7 +184,8 @@ public class ShiroAutoconfiguration {
     static class MethodInterceptorHolderAdvisor {
         @Around(value = "@annotation(org.hswebframework.web.authorization.annotation.RequiresExpression)" +
                 "||@annotation(org.hswebframework.web.authorization.annotation.RequiresDataAccess)" +
-                "||@annotation(org.hswebframework.web.authorization.annotation.Authorize)")
+                "||@annotation(org.hswebframework.web.authorization.annotation.Authorize)" +
+                "||within(@org.hswebframework.web.authorization.annotation.Authorize *)")
         public Object around(ProceedingJoinPoint pjp) throws Throwable {
             MethodSignature signature = (MethodSignature) pjp.getSignature();
             String methodName = AopUtils.getMethodBody(pjp);
@@ -202,14 +203,14 @@ public class ShiroAutoconfiguration {
         @ResponseStatus(HttpStatus.FORBIDDEN)
         @ResponseBody
         ResponseMessage handleException(AuthorizationException exception) {
-            return ResponseMessage.error(exception.getMessage(), 403);
+            return ResponseMessage.error(403, exception.getMessage());
         }
 
         @ExceptionHandler(UnauthenticatedException.class)
         @ResponseStatus(HttpStatus.UNAUTHORIZED)
         @ResponseBody
         ResponseMessage handleException(UnauthenticatedException exception) {
-            return ResponseMessage.error(exception.getMessage() == null ? "{access_denied}" : exception.getMessage(), 401);
+            return ResponseMessage.error(401, exception.getMessage() == null ? "{access_denied}" : exception.getMessage());
         }
     }
 

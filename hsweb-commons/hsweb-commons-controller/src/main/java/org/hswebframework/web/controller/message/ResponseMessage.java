@@ -28,23 +28,46 @@ import java.util.*;
 /**
  * 响应消息。controller中处理后，返回此对象，响应请求结果给客户端。
  */
-public class ResponseMessage implements Serializable {
+public class ResponseMessage extends LinkedHashMap<String, Object> implements Serializable {
     private static final long serialVersionUID = 8992436576262574064L;
 
-    /**
-     * 反馈数据
-     */
-    private Object data;
+    public static ResponseMessage error(String message) {
+        return error(500, message);
+    }
 
-    /**
-     * 反馈信息
-     */
-    private String message;
+    public static ResponseMessage error(int status, String message) {
+        ResponseMessage msg = new ResponseMessage();
+        msg.put("message", message);
+        msg.put("status", status);
+        return msg.putTimeStamp();
+    }
 
-    /**
-     * 响应码
-     */
-    private int code;
+    public static ResponseMessage ok() {
+        return ok(null);
+    }
+
+    private ResponseMessage putTimeStamp() {
+        put("timestamp", System.currentTimeMillis());
+        return this;
+    }
+
+    public static ResponseMessage ok(Object data) {
+        return new ResponseMessage()
+                .data(data)
+                .putTimeStamp()
+                .status(200);
+    }
+
+    public ResponseMessage and(String key, Object value) {
+        put(key, value);
+        return this;
+    }
+
+    public ResponseMessage data(Object data) {
+        if (data != null)
+            put("data", data);
+        return this;
+    }
 
     /**
      * 过滤字段：指定需要序列化的字段
@@ -56,23 +79,8 @@ public class ResponseMessage implements Serializable {
      */
     private transient Map<Class<?>, Set<String>> excludes;
 
-    private transient boolean onlyData;
-
-    private transient String callback;
-
-    public Map<String, Object> toMap() {
-        Map<String, Object> map = new HashMap<>();
-        if (data != null)
-            map.put("data", this.getData());
-        if (message != null)
-            map.put("message", this.getMessage());
-        map.put("code", this.getCode());
-        return map;
-    }
-
     protected ResponseMessage() {
     }
-
 
     public ResponseMessage include(Class<?> type, String... fields) {
         return include(type, Arrays.asList(fields));
@@ -125,7 +133,7 @@ public class ResponseMessage implements Serializable {
             excludes = new HashMap<>();
         if (fields == null || fields.isEmpty()) return this;
         Class type;
-        if (data != null) type = data.getClass();
+        if (getData() != null) type = getData().getClass();
         else return this;
         exclude(type, fields);
         return this;
@@ -136,7 +144,7 @@ public class ResponseMessage implements Serializable {
             includes = new HashMap<>();
         if (fields == null || fields.isEmpty()) return this;
         Class type;
-        if (data != null) type = data.getClass();
+        if (getData() != null) type = getData().getClass();
         else return this;
         include(type, fields);
         return this;
@@ -159,30 +167,18 @@ public class ResponseMessage implements Serializable {
     }
 
     public Object getData() {
-        return data;
+        return get("data");
     }
 
-    public ResponseMessage setData(Object data) {
-        this.data = data;
-        return this;
-    }
 
     @Override
     public String toString() {
         return JSON.toJSONStringWithDateFormat(this, "yyyy-MM-dd HH:mm:ss");
     }
 
-    public int getCode() {
-        return code;
-    }
-
-    public ResponseMessage setCode(int code) {
-        this.code = code;
+    public ResponseMessage status(int status) {
+        put("status", status);
         return this;
-    }
-
-    public static ResponseMessage fromJson(String json) {
-        return JSON.parseObject(json, ResponseMessage.class);
     }
 
     public Map<Class<?>, Set<String>> getExcludes() {
@@ -191,65 +187,6 @@ public class ResponseMessage implements Serializable {
 
     public Map<Class<?>, Set<String>> getIncludes() {
         return includes;
-    }
-
-    public ResponseMessage onlyData() {
-        setOnlyData(true);
-        return this;
-    }
-
-    public void setOnlyData(boolean onlyData) {
-        this.onlyData = onlyData;
-    }
-
-    public boolean isOnlyData() {
-        return onlyData;
-    }
-
-    public ResponseMessage callback(String callback) {
-        this.callback = callback;
-        return this;
-    }
-
-    public String getCallback() {
-        return callback;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public static ResponseMessage ok() {
-        return ok(null);
-    }
-
-    public static ResponseMessage ok(Object data) {
-        ResponseMessage message = new ResponseMessage();
-        message.setCode(200);
-        message.setData(data);
-        return message;
-    }
-
-    public static ResponseMessage created(Object data) {
-        ResponseMessage message = new ResponseMessage();
-        message.setCode(201);
-        message.setData(data);
-        return message;
-    }
-
-    public static ResponseMessage error(String message) {
-        return error(message, 500);
-    }
-
-    public static ResponseMessage error(String message, int code) {
-        ResponseMessage response = new ResponseMessage();
-        response.setCode(code);
-        response.setMessage(message);
-        return response;
     }
 
 }

@@ -13,6 +13,7 @@ import org.hswebframework.web.commons.entity.Entity;
 import org.hswebframework.web.commons.entity.PagerResult;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.controller.QueryController;
+import org.hswebframework.web.controller.authorization.UserController;
 import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.entity.authorization.SimpleUserEntity;
 import org.hswebframework.web.entity.authorization.UserEntity;
@@ -30,6 +31,7 @@ import java.util.List;
  */
 @RestController
 @Authorize(permission = "test")
+@RequestMapping("/test")
 public class TestController implements QueryController<UserEntity, String, QueryParamEntity> {
 
     @GetMapping("/test1")
@@ -61,6 +63,9 @@ public class TestController implements QueryController<UserEntity, String, Query
         return ResponseMessage.ok(entity);
     }
 
+    public static void main(String[] args) throws NoSuchMethodException {
+        System.out.println(UserController.class.getMethod("list", Entity.class));
+    }
 
     @Override
     public TestService getService() {

@@ -17,6 +17,7 @@
 
 package org.hswebframework.web.controller;
 
+import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.commons.entity.GenericEntity;
 import org.hswebframework.web.controller.message.ResponseMessage;
@@ -37,9 +38,9 @@ public interface GenericEntityUpdateController<E extends GenericEntity<PK>, PK> 
 
     UpdateService<E> getService();
 
-    @Authorize(action = "update")
+    @Authorize(action = Permission.ACTION_UPDATE)
     @PutMapping(path = "/{id}")
-    @AccessLogger("根据主键修改数据")
+    @AccessLogger("{update_by_primary_key}")
     default ResponseMessage updateByPrimaryKey(@PathVariable PK id, @RequestBody E data) {
         data.setId(id);
         return ResponseMessage.ok(getService().updateByPk(data));

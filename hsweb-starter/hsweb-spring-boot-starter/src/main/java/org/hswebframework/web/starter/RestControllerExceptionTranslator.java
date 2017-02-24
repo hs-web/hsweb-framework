@@ -39,14 +39,14 @@ public class RestControllerExceptionTranslator {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
     ResponseMessage handleException(ValidationException exception) {
-        return ResponseMessage.error(exception.getMessage(), 400);
+        return ResponseMessage.error(400, exception.getMessage());
     }
 
     @ExceptionHandler(org.hsweb.ezorm.rdb.exception.ValidationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
     ResponseMessage handleException(org.hsweb.ezorm.rdb.exception.ValidationException exception) {
-        return ResponseMessage.error(JSON.toJSONString(exception.getValidateResult()), 400);
+        return ResponseMessage.error(400, exception.getMessage()).data(exception.getValidateResult());
     }
 
     @ExceptionHandler(BusinessException.class)
@@ -56,21 +56,21 @@ public class RestControllerExceptionTranslator {
         if (exception.getCause() != null) {
             logger.error("{}:{}", exception.getMessage(), exception.getStatus(), exception.getCause());
         }
-        return ResponseMessage.error(exception.getMessage(), exception.getStatus());
+        return ResponseMessage.error(exception.getStatus(), exception.getMessage());
     }
 
     @ExceptionHandler(AuthorizeException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ResponseBody
     ResponseMessage handleException(AuthorizeException exception) {
-        return ResponseMessage.error(exception.getMessage(), exception.getStatus());
+        return ResponseMessage.error(exception.getStatus(), exception.getMessage());
     }
 
     @ExceptionHandler(AuthorizeForbiddenException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     @ResponseBody
     ResponseMessage handleException(AuthorizeForbiddenException exception) {
-        return ResponseMessage.error(exception.getMessage(), exception.getStatus());
+        return ResponseMessage.error(exception.getStatus(), exception.getMessage());
     }
 
 
@@ -78,7 +78,7 @@ public class RestControllerExceptionTranslator {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ResponseBody
     ResponseMessage handleException(NotFoundException exception) {
-        return ResponseMessage.error(exception.getMessage(), 404);
+        return ResponseMessage.error(404, exception.getMessage());
     }
 
 //    @ExceptionHandler(Throwable.class)

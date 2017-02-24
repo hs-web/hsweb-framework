@@ -17,6 +17,7 @@
 
 package org.hswebframework.web.controller;
 
+import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.commons.entity.Entity;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
@@ -39,7 +40,7 @@ import static org.hswebframework.web.controller.message.ResponseMessage.ok;
  * @see QueryParamEntity
  * @see 3.0
  */
-public interface QueryController<E, PK, Q extends Entity>  {
+public interface QueryController<E, PK, Q extends Entity> {
 
     /**
      * 获取实现了{@link QueryByEntityService}和{@link QueryService}的服务类
@@ -59,16 +60,16 @@ public interface QueryController<E, PK, Q extends Entity>  {
      * @param param 参数
      * @return 查询结果
      */
-    @Authorize(action = "read")
+    @Authorize(action = Permission.ACTION_QUERY)
     @GetMapping
-    @AccessLogger("根据条件查询")
+    @AccessLogger("{dynamic_query}")
     default ResponseMessage list(Q param) {
         return ok(getService().selectPager(param));
     }
 
-    @Authorize(action = "read")
+    @Authorize(action = Permission.ACTION_GET)
     @GetMapping(path = "/{id}")
-    @AccessLogger("根据主键查询")
+    @AccessLogger("{get_by_id}")
     default ResponseMessage getByPrimaryKey(@PathVariable PK id) {
         return ok(getService().selectByPk(id));
     }

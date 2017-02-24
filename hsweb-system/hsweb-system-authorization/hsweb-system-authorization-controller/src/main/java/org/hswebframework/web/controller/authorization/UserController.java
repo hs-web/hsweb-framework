@@ -17,6 +17,7 @@
 
 package org.hswebframework.web.controller.authorization;
 
+import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.annotation.AuthInfo;
 import org.hswebframework.web.authorization.Authorization;
 import org.hswebframework.web.authorization.annotation.Authorize;
@@ -28,6 +29,7 @@ import org.hswebframework.web.entity.authorization.UserEntity;
 import org.hswebframework.web.logging.AccessLogger;
 import org.hswebframework.web.service.authorization.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import static org.hswebframework.web.controller.message.ResponseMessage.*;
@@ -41,6 +43,7 @@ import static org.hswebframework.web.controller.message.ResponseMessage.*;
 @RequestMapping("${hsweb.web.mappings.user:user}")
 @Authorize(permission = "user")
 @AccessLogger("用户管理")
+@Transactional
 public class UserController implements QueryController<UserEntity, String, QueryParamEntity>, CreateController<UserEntity, String> {
 
     private UserService userService;
@@ -64,16 +67,16 @@ public class UserController implements QueryController<UserEntity, String, Query
 
     @Authorize(action = "update")
     @PutMapping(path = "/{id}")
-    @AccessLogger("根据主键修改数据")
+    @AccessLogger("{update_by_primary_key}")
     public ResponseMessage updateByPrimaryKey(@PathVariable String id, @RequestBody UserEntity data) {
         data.setId(id);
         getService().update(data);
         return ok();
     }
 
-    @Authorize
+    @Authorize(merge = false)
     @PutMapping(path = "/password")
-    @AccessLogger("修改当前用户密码")
+    @AccessLogger("{update_password_login_user}")
     public ResponseMessage updateLoginUserPassword(@AuthInfo Authorization authorization,
                                                    @RequestParam String password,
                                                    @RequestParam String oldPassword) {
@@ -83,7 +86,7 @@ public class UserController implements QueryController<UserEntity, String, Query
 
     @Authorize(action = "update")
     @PutMapping(path = "/password/{id}")
-    @AccessLogger("修改密码")
+    @AccessLogger("{update_password_by_id}")
     public ResponseMessage updateByPasswordPrimaryKey(@PathVariable String id,
                                                       @RequestParam String password,
                                                       @RequestParam String oldPassword) {
@@ -93,14 +96,14 @@ public class UserController implements QueryController<UserEntity, String, Query
 
     @Authorize(action = "enable")
     @PutMapping(path = "/{id}/enable")
-    @AccessLogger("启用用户")
+    @AccessLogger("{enable_user}")
     public ResponseMessage enable(@PathVariable String id) {
         return ok(getService().enable(id));
     }
 
     @Authorize(action = "disable")
     @PutMapping(path = "/{id}/disable")
-    @AccessLogger("禁用用户")
+    @AccessLogger("{disable_user}")
     public ResponseMessage disable(@PathVariable String id) {
         return ok(getService().disable(id));
     }

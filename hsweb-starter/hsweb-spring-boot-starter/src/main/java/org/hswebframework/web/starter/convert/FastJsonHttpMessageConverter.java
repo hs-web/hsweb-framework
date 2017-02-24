@@ -1,6 +1,7 @@
 package org.hswebframework.web.starter.convert;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONPObject;
 import com.alibaba.fastjson.serializer.PropertyPreFilter;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.serializer.SimplePropertyPreFilter;
@@ -109,13 +110,7 @@ public class FastJsonHttpMessageConverter extends AbstractHttpMessageConverter<O
         String callback = ThreadLocalUtils.getAndRemove("jsonp-callback");
         if (obj instanceof ResponseMessage) {
             ResponseMessage message = (ResponseMessage) obj;
-            if (message.getCode() == 200 && message.isOnlyData())
-                obj = message.getData();
-            if (obj instanceof String)
-                text = ((String) obj);
-            else
-                text = JSON.toJSONString(obj, parseFilter(message), features);
-            if (callback == null) callback = message.getCallback();
+            text = JSON.toJSONString(obj, parseFilter(message), features);
         } else {
             text = JSON.toJSONString(obj, features);
         }

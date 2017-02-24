@@ -17,6 +17,7 @@
 
 package org.hswebframework.web.controller;
 
+import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.logging.AccessLogger;
@@ -30,8 +31,8 @@ import org.springframework.web.bind.annotation.RequestBody;
  * @author zhouhao
  */
 public interface UpdateController<E, PK> {
-    @Authorize(action = "update")
+    @Authorize(action = Permission.ACTION_UPDATE)
     @PutMapping(path = "/{id}")
-    @AccessLogger("根据主键修改数据")
+    @AccessLogger("{update_by_primary_key}")
     ResponseMessage updateByPrimaryKey(@PathVariable PK id, @RequestBody E data);
 }
