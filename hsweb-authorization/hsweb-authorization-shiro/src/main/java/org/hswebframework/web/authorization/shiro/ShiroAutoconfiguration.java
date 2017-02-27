@@ -25,6 +25,8 @@ import org.apache.shiro.cache.CacheManager;
 import org.apache.shiro.cache.MemoryConstrainedCacheManager;
 import org.apache.shiro.mgt.DefaultSecurityManager;
 import org.apache.shiro.mgt.SecurityManager;
+import org.apache.shiro.realm.AuthorizingRealm;
+import org.apache.shiro.realm.Realm;
 import org.apache.shiro.session.mgt.DefaultSessionManager;
 import org.apache.shiro.spring.LifecycleBeanPostProcessor;
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
@@ -60,6 +62,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -77,6 +80,9 @@ public class ShiroAutoconfiguration {
 
     @Autowired
     private ShiroProperties shiroProperties;
+
+    @Autowired(required = false)
+    private List<DataAccessHandler> dataAccessHandlers;
 
     @Bean
     public CacheManager shiroCacheManager() {
@@ -101,35 +107,26 @@ public class ShiroAutoconfiguration {
 
     @Bean(name = "securityManager")
     @ConditionalOnWebApplication
-    public DefaultWebSecurityManager defaultWebSecurityManager(ListenerAuthorizingRealm authorizingRealm) {
+    public DefaultWebSecurityManager defaultWebSecurityManager(List<AuthorizingRealm> authorizingRealm,
+                                                               CacheManager cacheManager) {
         DefaultWebSecurityManager securityManager = new DefaultWebSecurityManager();
-        securityManager.setRealm(authorizingRealm);
-        securityManager.setCacheManager(authorizingRealm.getCacheManager());
+        securityManager.setRealms(new ArrayList<>(authorizingRealm));
+        securityManager.setCacheManager(cacheManager);
         SecurityUtils.setSecurityManager(securityManager);
         return securityManager;
     }
 
     @Bean(name = "securityManager")
     @ConditionalOnNotWebApplication
-    public DefaultSecurityManager defaultSecurityManager(ListenerAuthorizingRealm authorizingRealm) {
+    public DefaultSecurityManager defaultSecurityManager(List<AuthorizingRealm> authorizingRealm,
+                                                         CacheManager cacheManager) {
         DefaultSecurityManager securityManager = new DefaultSecurityManager();
-        securityManager.setRealm(authorizingRealm);
-        securityManager.setCacheManager(authorizingRealm.getCacheManager());
+        securityManager.setRealms(new ArrayList<>(authorizingRealm));
+        securityManager.setCacheManager(cacheManager);
         securityManager.setSessionManager(new DefaultSessionManager());
         SecurityUtils.setSecurityManager(securityManager);
         return securityManager;
     }
-
-//    @Bean
-//    @ConditionalOnMissingBean
-//    public DefaultAdvisorAutoProxyCreator getDefaultAdvisorAutoProxyCreator() {
-//        DefaultAdvisorAutoProxyCreator advisorAutoProxyCreator = new DefaultAdvisorAutoProxyCreator();
-//        advisorAutoProxyCreator.setProxyTargetClass(true);
-//        return advisorAutoProxyCreator;
-//    }
-
-    @Autowired(required = false)
-    private List<DataAccessHandler> dataAccessHandlers;
 
     @Bean
     @ConditionalOnMissingBean
