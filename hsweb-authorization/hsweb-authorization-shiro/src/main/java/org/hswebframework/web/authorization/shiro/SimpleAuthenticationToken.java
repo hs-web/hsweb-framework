@@ -27,14 +27,14 @@ import org.hswebframework.web.authorization.Authorization;
  *
  * @author zhouhao
  */
-public class CustomAuthenticationToken implements AuthenticationToken, HostAuthenticationToken, RememberMeAuthenticationToken {
+public class SimpleAuthenticationToken implements AuthenticationToken, HostAuthenticationToken, RememberMeAuthenticationToken {
     private Authorization authorization;
 
     private boolean rememberMe;
 
     private String host;
 
-    public CustomAuthenticationToken(Authorization authorization, boolean rememberMe) {
+    public SimpleAuthenticationToken(Authorization authorization, boolean rememberMe) {
         this.authorization = authorization;
         this.rememberMe = rememberMe;
     }

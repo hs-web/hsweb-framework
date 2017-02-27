@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
 public class ListenerAuthorizingRealm extends AuthorizingRealm implements UserAuthorizationListener {
 
     public ListenerAuthorizingRealm() {
-        setAuthenticationTokenClass(CustomAuthenticationToken.class);
+        setAuthenticationTokenClass(SimpleAuthenticationToken.class);
     }
 
     @Override
@@ -53,7 +53,7 @@ public class ListenerAuthorizingRealm extends AuthorizingRealm implements UserAu
 
     @Override
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
-        if (token instanceof CustomAuthenticationToken) {
+        if (token instanceof SimpleAuthenticationToken) {
             return this.<String, AuthenticationInfo>getCache((String) token.getPrincipal())
                     .get(AuthenticationInfo.class.getName());
         }
@@ -63,8 +63,7 @@ public class ListenerAuthorizingRealm extends AuthorizingRealm implements UserAu
     private AuthenticationInfo createAuthenticationInfo(Authorization authorization) {
         return new SimpleAuthenticationInfo(
                 authorization.getUser().getUsername(),
-                authorization.getUser().getId(),
-                authorization.getUser().getName());
+                authorization.getUser().getId(), ListenerAuthorizingRealm.class.getName());
     }
 
     @Override
@@ -96,7 +95,7 @@ public class ListenerAuthorizingRealm extends AuthorizingRealm implements UserAu
                 .put(AuthenticationInfo.class.getName(), createAuthenticationInfo(authorization));
 
         Subject subject = SecurityUtils.getSubject();
-        subject.login(new CustomAuthenticationToken(authorization, isRemembered));
+        subject.login(new SimpleAuthenticationToken(authorization, isRemembered));
         subject.getSession().setAttribute(Authorization.class.getName(), authorization);
     }
 
