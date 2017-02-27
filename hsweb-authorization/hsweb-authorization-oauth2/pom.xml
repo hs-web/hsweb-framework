@@ -10,6 +10,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>hsweb-authorization-oauth2</artifactId>
+    <packaging>pom</packaging>
+    <modules>
+        <module>hsweb-authorization-oauth2-server</module>
+        <module>hsweb-authorization-oauth2-client</module>
+    </modules>
 
 
 </project>
