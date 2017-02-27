@@ -122,19 +122,6 @@ public class SimpleWebApplicationTests {
     @WebAppConfiguration
     public static class Config {
 
-        @Bean(name = "validator")
-        @ConditionalOnMissingBean(Validator.class)
-        public Validator validator() {
-            ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-            Validator validator = factory.getValidator();
-            return validator;
-        }
-
-        @Bean
-        public EntityFactory beanFactory() {
-            return new MapperEntityFactory();
-        }
-
         @Bean
         public SqlExecutor sqlExecutor(DataSource dataSource) throws SQLException {
             Connection connection = dataSource.getConnection();

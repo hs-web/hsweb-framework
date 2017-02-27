@@ -12,3 +12,9 @@ hsweb:
     app:
       name: hsweb示例
       version: 3.0.0
+    entity:
+      mappings:
+          -  source-base-package: org.hswebframework.web.entity.authorization
+             target-base-package: org.hswebframework.web.entity.authorization
+             mapping:
+                UserEntity: SimpleUserEntity

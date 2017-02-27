@@ -1,13 +1,11 @@
 package org.hswebframework.web.service.authorization;
 
-import org.hswebframework.web.authorization.Authorization;
+import org.hswebframework.web.authorization.AuthorizationInitializeService;
 import org.hswebframework.web.entity.authorization.UserEntity;
 import org.hswebframework.web.service.CreateEntityService;
 import org.hswebframework.web.service.InsertService;
 import org.hswebframework.web.service.QueryByEntityService;
 import org.hswebframework.web.service.QueryService;
-
-import java.util.Date;
 
 /**
  * TODO 完成注释
@@ -15,6 +13,7 @@ import java.util.Date;
  * @author zhouhao
  */
 public interface UserService extends
+        AuthorizationInitializeService,
         CreateEntityService<UserEntity>,
         QueryByEntityService<UserEntity>,
         QueryService<UserEntity, String>,
@@ -33,8 +32,4 @@ public interface UserService extends
     void updateLoginInfo(String userId, String ip, Long loginTime);
 
     void updatePassword(String userId, String oldPassword, String newPassword);
-
-    Authorization initUserAuthorization(String userId);
-
-    Authorization initAdminAuthorization(String userId);
 }

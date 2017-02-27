@@ -35,6 +35,9 @@ import java.util.function.Supplier;
 public class MapperEntityFactory implements EntityFactory {
     private Map<Class, Mapper> realTypeMapper = new HashMap<>();
 
+    public MapperEntityFactory() {
+    }
+
     public <T extends Entity> MapperEntityFactory(Map<Class<T>, Mapper> realTypeMapper) {
         this.realTypeMapper.putAll(realTypeMapper);
     }
