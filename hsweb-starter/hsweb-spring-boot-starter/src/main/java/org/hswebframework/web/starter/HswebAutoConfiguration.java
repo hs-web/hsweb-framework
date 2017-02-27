@@ -29,6 +29,7 @@ import org.hswebframework.web.starter.resolver.JsonParamResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -37,6 +38,9 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 import java.util.List;
 
 /**
@@ -46,7 +50,12 @@ import java.util.List;
  */
 @Configuration
 @ComponentScan("org.hswebframework.web")
+@EnableConfigurationProperties(EntityProperties.class)
 public class HswebAutoConfiguration {
+
+    @Autowired(required = false)
+    private EntityProperties entityProperties;
+
 
     @Bean
     @Primary
@@ -86,10 +95,18 @@ public class HswebAutoConfiguration {
         };
     }
 
-    @Bean
-    @ConditionalOnMissingBean
+    @Bean(name = "validator")
+    @ConditionalOnMissingBean(Validator.class)
+    public Validator validator() {
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        Validator validator = factory.getValidator();
+        return validator;
+    }
+
+    @Bean(name = "entityFactory")
+    @ConditionalOnMissingBean(EntityFactory.class)
     public EntityFactory entityFactory() {
-        return new MapperEntityFactory();
+        return new MapperEntityFactory(entityProperties.createMappers());
     }
 
 }
