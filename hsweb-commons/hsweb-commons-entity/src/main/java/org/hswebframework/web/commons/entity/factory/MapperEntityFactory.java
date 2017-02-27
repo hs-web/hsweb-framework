@@ -35,6 +35,10 @@ import java.util.function.Supplier;
 public class MapperEntityFactory implements EntityFactory {
     private Map<Class, Mapper> realTypeMapper = new HashMap<>();
 
+    public <T extends Entity> MapperEntityFactory(Map<Class<T>, Mapper> realTypeMapper) {
+        this.realTypeMapper.putAll(realTypeMapper);
+    }
+
     public <T extends Entity> MapperEntityFactory addMapping(Class<T> target, Mapper<T> mapper) {
         realTypeMapper.put(target, mapper);
         return this;
@@ -43,6 +47,7 @@ public class MapperEntityFactory implements EntityFactory {
     @Override
     @SuppressWarnings("unchecked")
     public <T extends Entity> T newInstance(Class<T> beanClass) {
+        if (beanClass == null) return null;
         Mapper<T> mapper = realTypeMapper.get(beanClass);
         if (mapper != null) return mapper.getInstanceGetter().get();
         synchronized (beanClass) {
@@ -96,7 +101,15 @@ public class MapperEntityFactory implements EntityFactory {
         }
     }
 
-    class DefaultInstanceGetter<T extends Entity> implements Supplier<T> {
+    public static <T extends Entity> Mapper<T> defaultMapper(Class<T> target) {
+        return new Mapper<>(target, defaultInstanceGetter(target));
+    }
+
+    public static <T extends Entity> Supplier<T> defaultInstanceGetter(Class<T> clazz) {
+        return new DefaultInstanceGetter<>(clazz);
+    }
+
+    static class DefaultInstanceGetter<T extends Entity> implements Supplier<T> {
         Class<T> type;
 
         public DefaultInstanceGetter(Class<T> type) {
