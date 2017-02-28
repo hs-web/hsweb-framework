@@ -28,7 +28,7 @@ import java.util.List;
  * @author zhouhao
  * @since 3.0
  */
-public interface QueryByBeanDao<PO> {
+public interface QueryByEntityDao<PO> {
     List<PO> query(Entity queryEntity);
 
     int count(Entity queryEntity);
