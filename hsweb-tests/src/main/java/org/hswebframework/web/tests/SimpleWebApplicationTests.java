@@ -71,6 +71,9 @@ public class SimpleWebApplicationTests {
     @Autowired
     protected SqlExecutor sqlExecutor;
 
+    @Autowired
+    protected EntityFactory entityFactory;
+
     @Before
     public void setup() throws Exception {
         this.mvc = webAppContextSetup(this.wac).build();
