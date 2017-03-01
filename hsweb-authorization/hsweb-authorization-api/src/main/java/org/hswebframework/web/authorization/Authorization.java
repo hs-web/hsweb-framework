@@ -26,9 +26,9 @@ import java.util.function.Supplier;
 
 /**
  * 用户授权信息,当前登录用户的权限信息,包括用户的基本信息,角色,权限集合等常用信息<br>
- * 如何获取:
+ * 获取方式:
  * <ul>
- * <li>springmvc 入参方式: ResponseMessage myTest(@AuthInfo Authorization auth){}</li>
+ * <li>springmvc 入参方式: ResponseMessage myTest(Authorization auth){}</li>
  * <li>静态方法方式:AuthorizationHolder.get();</li>
  * </ul>
  *
@@ -39,23 +39,17 @@ import java.util.function.Supplier;
 public interface Authorization extends Serializable {
 
     /**
-     * 获取用户基本信息
-     *
      * @return 用户信息
      */
     User getUser();
 
     /**
-     * 获取持有的角色集合
-     *
-     * @return 角色集合
+     * @return 用户持有的角色集合
      */
     List<Role> getRoles();
 
     /**
-     * 获取持有的权限集合
-     *
-     * @return 权限集合
+     * @return 用户持有的权限集合
      */
     List<Permission> getPermissions();
 

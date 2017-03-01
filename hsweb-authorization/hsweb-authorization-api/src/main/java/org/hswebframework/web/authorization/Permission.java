@@ -24,7 +24,8 @@ import java.io.Serializable;
 import java.util.Set;
 
 /**
- * 用户持有的权限信息
+ * 用户持有的权限信息,包含了权限基本信息、可操作范围(action)、行,列级权限控制规则。
+ * 是用户权限的重要接口。
  *
  * @author zhouhao
  * @see Authorization
