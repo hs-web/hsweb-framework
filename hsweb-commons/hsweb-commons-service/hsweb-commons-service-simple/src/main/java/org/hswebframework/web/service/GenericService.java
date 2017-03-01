@@ -33,7 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 public interface GenericService<E, PK> extends
         DefaultDSLQueryService<E, PK>,
-        DefaultDSLUpdateService<E>,
+        DefaultDSLUpdateService<E,PK>,
         DefaultDSLDeleteService<PK>,
         CrudService<E, PK> {
     @Override

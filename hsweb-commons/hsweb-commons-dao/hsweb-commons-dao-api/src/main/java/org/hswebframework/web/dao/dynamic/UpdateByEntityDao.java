@@ -21,7 +21,8 @@ package org.hswebframework.web.dao.dynamic;
 import org.hswebframework.web.commons.entity.Entity;
 
 /**
- * TODO  完成注释
+ * 根据实体类进行更新,实体类支持动态条件或者普通实体类。
+ * 动态条件和{@link QueryByEntityDao#query(Entity)} 一致。
  *
  * @author zhouhao
  * @since 3.0

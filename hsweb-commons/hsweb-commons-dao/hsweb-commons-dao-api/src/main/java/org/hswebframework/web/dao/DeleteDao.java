@@ -19,11 +19,18 @@
 package org.hswebframework.web.dao;
 
 /**
- * TODO 完成注释
+ * 通用删除dao
  *
+ * @param <PK> 主键类型
  * @author zhouhao
  * @since 3.0
  */
-public interface DeleteDao<PK> extends Dao{
+public interface DeleteDao<PK> extends Dao {
+    /**
+     * 根据主键删除数据,并返回被删除数据的数量
+     *
+     * @param pk 主键
+     * @return 删除的数据数量, 理论上此返回值应该为0或者1.
+     */
     int deleteByPk(PK pk);
 }

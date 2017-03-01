@@ -17,6 +17,7 @@
 
 package org.hswebframework.web.controller;
 
+import org.hswebframework.web.NotFoundException;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.commons.entity.Entity;
@@ -71,7 +72,12 @@ public interface QueryController<E, PK, Q extends Entity> {
     @GetMapping(path = "/{id}")
     @AccessLogger("{get_by_id}")
     default ResponseMessage getByPrimaryKey(@PathVariable PK id) {
-        return ok(getService().selectByPk(id));
+        return ok(assertNotNull(getService().selectByPk(id)));
+    }
+
+    static Object assertNotNull(Object obj) {
+        if (null == obj) throw new NotFoundException("{data_not_exist}");
+        return obj;
     }
 
 }

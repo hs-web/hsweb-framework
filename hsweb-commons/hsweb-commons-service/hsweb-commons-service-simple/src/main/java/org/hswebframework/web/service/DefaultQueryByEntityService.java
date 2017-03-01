@@ -22,7 +22,7 @@ import org.hsweb.ezorm.core.dsl.Query;
 import org.hswebframework.web.commons.entity.Entity;
 import org.hswebframework.web.commons.entity.PagerResult;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
-import org.hswebframework.web.dao.dynamic.QueryByBeanDao;
+import org.hswebframework.web.dao.dynamic.QueryByEntityDao;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
@@ -31,7 +31,7 @@ import java.util.List;
 public interface DefaultQueryByEntityService<E>
         extends QueryByEntityService<E> {
 
-    QueryByBeanDao<E> getDao();
+    QueryByEntityDao<E> getDao();
 
     /**
      * 分页进行查询数据，查询条件同 {@link DefaultQueryByEntityService#select}

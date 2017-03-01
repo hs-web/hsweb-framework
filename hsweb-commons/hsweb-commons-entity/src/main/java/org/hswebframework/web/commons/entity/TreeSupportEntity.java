@@ -46,6 +46,15 @@ public interface TreeSupportEntity<PK> extends GenericEntity<PK> {
 
     void setParentId(PK parentId);
 
+    Integer getLevel();
+
+    void setLevel(Integer level);
+
+    default void setLevelFromTreeCode() {
+        if (getTreeCode() != null)
+            setLevel(getTreeCode().split("-").length);
+    }
+
     <T extends TreeSupportEntity<PK>> List<T> getChildren();
 
     /**
@@ -74,6 +83,7 @@ public interface TreeSupportEntity<PK> extends GenericEntity<PK> {
         List<T> children = parent.getChildren();
         if (parent.getTreeCode() == null) {
             parent.setTreeCode(RandomUtil.randomChar(4));
+            parent.setLevelFromTreeCode();
         }
         if (children != null) {
             PK pid = parent.getId();
@@ -88,6 +98,7 @@ public interface TreeSupportEntity<PK> extends GenericEntity<PK> {
                 }
                 child.setParentId(pid);
                 child.setTreeCode(parent.getTreeCode() + "-" + RandomUtil.randomChar(4));
+                child.setLevelFromTreeCode();
                 target.add(child);
                 expandTree2List(child, target, idGenerator);
             }

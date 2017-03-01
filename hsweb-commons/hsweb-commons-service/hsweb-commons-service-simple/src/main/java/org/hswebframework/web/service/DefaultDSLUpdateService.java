@@ -27,19 +27,19 @@ import org.hswebframework.web.commons.entity.param.UpdateParamEntity;
  *
  * @author zhouhao
  */
-public interface DefaultDSLUpdateService<PO> extends UpdateService<PO> {
+public interface DefaultDSLUpdateService<E,PK> extends UpdateService<E,PK> {
 
     UpdateByEntityDao getDao();
 
-    default Update<PO, UpdateParamEntity<PO>> createUpdate(PO data) {
+    default Update<E, UpdateParamEntity<E>> createUpdate(E data) {
         return Update.build(getDao()::update, new UpdateParamEntity<>(data));
     }
 
-    static <PO> Update<PO, UpdateParamEntity<PO>> createUpdate(UpdateByEntityDao dao) {
+    static <E> Update<E, UpdateParamEntity<E>> createUpdate(UpdateByEntityDao dao) {
         return Update.build(dao::update, new UpdateParamEntity<>());
     }
 
-    static <PO> Update<PO, UpdateParamEntity<PO>> createUpdate(UpdateByEntityDao dao, PO data) {
+    static <E> Update<E, UpdateParamEntity<E>> createUpdate(UpdateByEntityDao dao, E data) {
         return Update.build(dao::update, new UpdateParamEntity<>(data));
     }
 }

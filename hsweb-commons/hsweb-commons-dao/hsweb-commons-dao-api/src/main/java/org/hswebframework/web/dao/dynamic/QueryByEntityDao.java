@@ -23,8 +23,8 @@ import org.hswebframework.web.commons.entity.Entity;
 import java.util.List;
 
 /**
- * TODO  完成注释
- *
+ * 根据实体类动态查询，可传入特定的实体类进行查询。
+ * 目前支持{@link org.hswebframework.web.commons.entity.param.QueryParamEntity} 动态查询
  * @author zhouhao
  * @since 3.0
  */

@@ -19,9 +19,10 @@
 package org.hswebframework.web.dao;
 
 /**
- * TODO 完成注释
+ * Dao的总接口，用于标识类为Dao
  *
  * @author zhouhao
+ * @since 3.0
  */
 public interface Dao {
 }

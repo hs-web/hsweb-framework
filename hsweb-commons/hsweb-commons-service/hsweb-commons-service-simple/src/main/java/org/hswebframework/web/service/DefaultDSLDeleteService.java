@@ -20,13 +20,13 @@ package org.hswebframework.web.service;
 
 import org.hsweb.ezorm.core.dsl.Delete;
 import org.hswebframework.web.commons.entity.param.DeleteParamEntity;
-import org.hswebframework.web.dao.dynamic.DeleteByBeanDao;
+import org.hswebframework.web.dao.dynamic.DeleteByEntityDao;
 
 /**
  * @author zhouhao
  */
 public interface DefaultDSLDeleteService<PK> extends DefaultDeleteService<PK> {
-    DeleteByBeanDao getDao();
+    DeleteByEntityDao getDao();
 
     default Delete<DeleteParamEntity> createDelete() {
         Delete<DeleteParamEntity> delete = new Delete<>(new DeleteParamEntity());
@@ -34,7 +34,7 @@ public interface DefaultDSLDeleteService<PK> extends DefaultDeleteService<PK> {
         return delete;
     }
 
-    static Delete<DeleteParamEntity> createDelete(DeleteByBeanDao deleteDao) {
+    static Delete<DeleteParamEntity> createDelete(DeleteByEntityDao deleteDao) {
         Delete<DeleteParamEntity> update = new Delete<>(new DeleteParamEntity());
         update.setExecutor(deleteDao::delete);
         return update;

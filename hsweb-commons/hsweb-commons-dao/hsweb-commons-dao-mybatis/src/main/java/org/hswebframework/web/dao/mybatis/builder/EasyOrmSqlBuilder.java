@@ -179,6 +179,7 @@ public class EasyOrmSqlBuilder {
                     "}");
         });
         if (!appender.isEmpty()) appender.removeFirst();
+        else throw new UnsupportedOperationException("{no_columns_will_be_update}");
         return appender.toString();
     }
 

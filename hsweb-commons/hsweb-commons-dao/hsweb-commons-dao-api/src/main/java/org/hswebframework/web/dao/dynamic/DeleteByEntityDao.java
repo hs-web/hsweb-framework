@@ -21,11 +21,11 @@ package org.hswebframework.web.dao.dynamic;
 import org.hswebframework.web.commons.entity.Entity;
 
 /**
- * TODO  完成注释
+ * 根据实体类条件进行删除,删除条件根据实体类进行解析。解析方式和{@link QueryByEntityDao#query}一致
  *
  * @author zhouhao
  * @since 3.0
  */
-public interface DeleteByBeanDao {
+public interface DeleteByEntityDao {
     int delete(Entity entity);
 }

@@ -35,8 +35,6 @@ import java.util.List;
 public abstract class AbstractTreeSortService<E extends TreeSortSupportEntity<PK>, PK>
         extends GenericEntityService<E, PK> implements TreeService<E, PK> {
 
-    protected abstract IDGenerator<PK> getIDGenerator();
-
     @Override
     @Transactional(readOnly = true)
     public List<E> selectAllChildNode(PK parentId) {

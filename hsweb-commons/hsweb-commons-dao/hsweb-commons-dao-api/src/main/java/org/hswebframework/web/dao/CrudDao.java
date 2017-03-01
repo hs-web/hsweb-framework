@@ -19,18 +19,26 @@
 package org.hswebframework.web.dao;
 
 import org.hswebframework.web.dao.dynamic.UpdateByEntityDao;
-import org.hswebframework.web.dao.dynamic.DeleteByBeanDao;
-import org.hswebframework.web.dao.dynamic.QueryByBeanDao;
+import org.hswebframework.web.dao.dynamic.DeleteByEntityDao;
+import org.hswebframework.web.dao.dynamic.QueryByEntityDao;
 
 /**
- * TODO 完成注释
+ * 通用增删改查DAO接口,定义了增删改查.以及动态条件查询,修改,删除。
  *
+ * @param <E> PO类型
+ * @param <PK> 主键类型
  * @author zhouhao
+ * @see InsertDao
+ * @see DeleteDao
+ * @see DeleteByEntityDao
+ * @see UpdateByEntityDao
+ * @see QueryByEntityDao
+ * @since 3.0
  */
-public interface CrudDao<PO, PK> extends
-        InsertDao<PO>,
+public interface CrudDao<E, PK> extends
+        InsertDao<E>,
         DeleteDao<PK>,
-        DeleteByBeanDao,
+        DeleteByEntityDao,
         UpdateByEntityDao,
-        QueryByBeanDao<PO> {
+        QueryByEntityDao<E> {
 }

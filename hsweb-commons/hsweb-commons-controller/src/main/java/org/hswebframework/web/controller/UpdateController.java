@@ -17,10 +17,12 @@
 
 package org.hswebframework.web.controller;
 
+
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.logging.AccessLogger;
+import org.hswebframework.web.service.UpdateService;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,8 +33,12 @@ import org.springframework.web.bind.annotation.RequestBody;
  * @author zhouhao
  */
 public interface UpdateController<E, PK> {
+    UpdateService<E, PK> getService();
+
     @Authorize(action = Permission.ACTION_UPDATE)
     @PutMapping(path = "/{id}")
     @AccessLogger("{update_by_primary_key}")
-    ResponseMessage updateByPrimaryKey(@PathVariable PK id, @RequestBody E data);
+    default ResponseMessage updateByPrimaryKey(@PathVariable PK id, @RequestBody E data) {
+        return ResponseMessage.ok(getService().updateByPk(id, data));
+    }
 }

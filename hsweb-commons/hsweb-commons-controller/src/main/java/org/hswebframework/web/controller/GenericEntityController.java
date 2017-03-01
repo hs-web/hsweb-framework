@@ -20,12 +20,7 @@ package org.hswebframework.web.controller;
 
 import org.hswebframework.web.commons.entity.Entity;
 import org.hswebframework.web.commons.entity.GenericEntity;
-import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.service.CrudService;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-
-import static org.hswebframework.web.controller.message.ResponseMessage.ok;
 
 /**
  * 通用实体的增删改查控制器
@@ -39,11 +34,4 @@ public interface GenericEntityController<E extends GenericEntity<PK>, PK, Q exte
         extends CrudController<E, PK, Q> {
 
     CrudService<E, PK> getService();
-
-    @Override
-    default ResponseMessage updateByPrimaryKey(@PathVariable PK id, @RequestBody E data) {
-        // 设置id属性
-        data.setId(id);
-        return ok(getService().updateByPk(data));
-    }
 }

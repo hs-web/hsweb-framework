@@ -19,11 +19,11 @@
 package org.hswebframework.web.dao;
 
 /**
- * TODO  完成注释
+ * 通用数据插入DAO接口
  *
  * @author zhouhao
  * @since 3.0
  */
-public interface InsertDao<PO> extends Dao {
-    void insert(PO po);
+public interface InsertDao<E> extends Dao {
+    void insert(E e);
 }

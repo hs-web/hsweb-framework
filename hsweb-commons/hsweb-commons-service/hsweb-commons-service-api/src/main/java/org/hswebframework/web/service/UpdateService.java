@@ -20,14 +20,14 @@ package org.hswebframework.web.service;
 
 import java.util.List;
 
-public interface UpdateService<Po> extends Service {
+public interface UpdateService<E, PK> extends Service {
     /**
      * 修改记录信息
      *
      * @param data 要修改的对象
      * @return 影响记录数
      */
-    int updateByPk(Po data);
+    int updateByPk(PK id, E data);
 
     /**
      * 批量修改记录
@@ -35,15 +35,15 @@ public interface UpdateService<Po> extends Service {
      * @param data 要修改的记录集合
      * @return 影响记录数
      */
-    int updateByPk(List<Po> data);
+    int updateByPk(List<E> data);
 
     /**
      * 保存或修改
      *
-     * @param po 要修改的数据
+     * @param e 要修改的数据
      * @return 影响记录数
      */
-    int saveOrUpdate(Po po);
+    int saveOrUpdate(E e);
 
 
 }

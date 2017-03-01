@@ -8,6 +8,10 @@ package org.hswebframework.web.commons.entity;
  * @since 3.0
  */
 public interface RecordCreationEntity extends Entity {
+
+    String creatorId  = "creatorId";
+    String createTime = "createTime";
+
     String getCreatorId();
 
     void setCreatorId(String creatorId);

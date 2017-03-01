@@ -19,9 +19,8 @@
 package org.hswebframework.web.service;
 
 import org.hsweb.ezorm.core.dsl.Query;
-import org.hswebframework.web.commons.entity.Entity;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
-import org.hswebframework.web.dao.dynamic.QueryByBeanDao;
+import org.hswebframework.web.dao.dynamic.QueryByEntityDao;
 
 import java.util.List;
 
@@ -60,7 +59,7 @@ public interface DefaultDSLQueryService<E, PK>
     }
 
     /**
-     * 指定一个dao映射接口,接口需继承{@link QueryByBeanDao}创建dsl数据查询对象<br>
+     * 指定一个dao映射接口,接口需继承{@link QueryByEntityDao}创建dsl数据查询对象<br>
      * 可通过返回的Query对象进行dsl方式操作如:<br>
      * <code>
      * createQuery(userMapper).where("id",1).single();
@@ -73,7 +72,7 @@ public interface DefaultDSLQueryService<E, PK>
      * @see org.hsweb.ezorm.core.Conditional
      * @since 3.0
      */
-    static <PO> Query<PO, QueryParamEntity> createQuery(QueryByBeanDao<PO> dao) {
+    static <PO> Query<PO, QueryParamEntity> createQuery(QueryByEntityDao<PO> dao) {
         Query<PO, QueryParamEntity> query = new Query<>(new QueryParamEntity());
         query.setListExecutor(dao::query);
         query.setTotalExecutor(dao::count);
