@@ -38,7 +38,7 @@
         <dependency>
             <groupId>org.hswebframework</groupId>
             <artifactId>hsweb-expands-security</artifactId>
-            <version>3.0.0-SNAPSHOT</version>
+            <version>${hsweb.expands.version}</version>
         </dependency>
         <dependency>
             <groupId>org.hswebframework.web</groupId>

@@ -57,7 +57,7 @@ public class MenuTests extends SimpleWebApplicationTests {
     @Test
     public void testCrud() throws Exception {
         MenuEntity<MenuEntity> menuEntity = createMenu("测试1", "C", "R");
-        menuEntity.setSortIndex(1);
+        menuEntity.setSortIndex(1L);
         MenuEntity<MenuEntity> child1 = createMenu("测试2", "C", "R");
         MenuEntity<MenuEntity> child3 = createMenu("测试2", "C", "R");
         menuEntity.setChildren(Arrays.asList(child1, child3));

@@ -70,6 +70,14 @@ public class ConfigTests extends SimpleWebApplicationTests {
                 .getObject(0, SimpleConfigEntity.class)
                 .get("test")
                 .getNumber(0).intValue(), 1);
+
+        jsonObject = testPut("/config/" + configBean.getId())
+                .setUp(builder -> builder.accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonStr)
+                )
+                .exec().resultAsJson();
+        Assert.assertEquals(200, jsonObject.get("status"));
     }
 
     @Test
@@ -90,7 +98,7 @@ public class ConfigTests extends SimpleWebApplicationTests {
         configBean = configService.selectSingle(QueryParamEntity.empty());
         configBean.addContent("test2", "2", "");
         //test update
-        Assert.assertEquals(configService.updateByPk(configBean), 1);
+        Assert.assertEquals(configService.updateByPk(configBean.getId(), configBean), 1);
         Assert.assertEquals(configBean.get("test2").getNumber(0).intValue(), 2);
         configBean = configService.selectSingle(QueryParamEntity.empty());
         //test delete

@@ -20,6 +20,7 @@ package org.hswebframework.web.service.config.simple;
 
 import org.hswebframework.web.dao.config.ConfigDao;
 import org.hswebframework.web.entity.config.ConfigEntity;
+import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.service.GenericEntityService;
 import org.hswebframework.web.service.config.ConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,11 @@ public class SimpleConfigService extends GenericEntityService<ConfigEntity, Stri
 
     @Autowired
     private ConfigDao configDao;
+
+    @Override
+    protected IDGenerator<String> getIDGenerator() {
+        return IDGenerator.MD5;
+    }
 
     @Override
     public ConfigDao getDao() {

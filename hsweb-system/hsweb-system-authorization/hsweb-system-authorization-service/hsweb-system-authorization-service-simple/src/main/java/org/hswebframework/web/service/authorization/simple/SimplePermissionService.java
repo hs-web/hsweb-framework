@@ -2,6 +2,7 @@ package org.hswebframework.web.service.authorization.simple;
 
 import org.hswebframework.web.dao.authorization.PermissionDao;
 import org.hswebframework.web.entity.authorization.PermissionEntity;
+import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.service.GenericEntityService;
 import org.hswebframework.web.service.authorization.PermissionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,11 @@ public class SimplePermissionService extends GenericEntityService<PermissionEnti
         implements PermissionService {
     @Autowired
     private PermissionDao permissionDao;
+
+    @Override
+    protected IDGenerator<String> getIDGenerator() {
+        return IDGenerator.MD5;
+    }
 
     @Override
     public PermissionDao getDao() {

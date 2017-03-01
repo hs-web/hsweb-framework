@@ -3,7 +3,6 @@ package org.hswebframework.web.entity.authorization;
 import org.hibernate.validator.constraints.NotBlank;
 import org.hswebframework.web.commons.entity.SimpleGenericEntity;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 

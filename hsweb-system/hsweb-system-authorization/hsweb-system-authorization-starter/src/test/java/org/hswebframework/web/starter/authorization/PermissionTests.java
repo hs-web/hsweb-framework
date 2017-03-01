@@ -74,11 +74,11 @@ public class PermissionTests extends SimpleWebApplicationTests {
         Assert.assertEquals(data.getName(), entity.getName());
         Assert.assertEquals(data.getStatus(), entity.getStatus());
         Assert.assertNotNull(data.getDataAccess());
-        Assert.assertEquals(data.getDataAccess().get(0).getAction(),dataAccessEntity.getAction());
-        Assert.assertEquals(data.getDataAccess().get(0).getType(),dataAccessEntity.getType());
+        Assert.assertEquals(data.getDataAccess().get(0).getAction(), dataAccessEntity.getAction());
+        Assert.assertEquals(data.getDataAccess().get(0).getType(), dataAccessEntity.getType());
 
         data.setName("测试修改");
-        permissionService.updateByPk(data);
+        permissionService.updateByPk(data.getId(), data);
         PermissionEntity data2 = permissionService.selectByPk("test");
         Assert.assertEquals(data2.getName(), data.getName());
 
