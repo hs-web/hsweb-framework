@@ -8,6 +8,7 @@ import org.hswebframework.web.authorization.access.ParamContext;
 import org.hswebframework.web.commons.entity.Entity;
 import org.hswebframework.web.commons.entity.RecordCreationEntity;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
+import org.hswebframework.web.commons.model.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,22 +52,21 @@ public class DefaultFieldAccessController implements FieldAccessController {
      * @see org.apache.commons.beanutils.PropertyUtilsBean
      */
     protected boolean doUpdateAccess(Set<FieldAccess> accesses, ParamContext params) {
-        Entity entity = params.getParams().values().stream()
-                .filter(Entity.class::isInstance)
-                .map(Entity.class::cast)
+        Object supportParam = params.getParams().values().stream()
+                .filter(param -> (param instanceof Entity) | (param instanceof Model))
                 .findAny().orElse(null);
-        if (null != entity) {
+        if (null != supportParam) {
             for (FieldAccess access : accesses) {
                 try {
                     //设置值为null,跳过修改
                     BeanUtilsBean.getInstance()
                             .getPropertyUtils()
-                            .setProperty(entity, access.getField(), null);
+                            .setProperty(supportParam, access.getField(), null);
                 } catch (Exception e) {
                 }
             }
-            if (entity instanceof RecordCreationEntity) {
-                RecordCreationEntity creationEntity = ((RecordCreationEntity) entity);
+            if (supportParam instanceof RecordCreationEntity) {
+                RecordCreationEntity creationEntity = ((RecordCreationEntity) supportParam);
                 creationEntity.setCreateTime(null);
                 creationEntity.setCreatorId(null);
             }
