@@ -20,6 +20,7 @@ package org.hswebframework.web.controller;
 
 import org.hswebframework.web.commons.entity.Entity;
 import org.hswebframework.web.service.CrudService;
+import org.springframework.beans.BeanUtils;
 
 /**
  * 通用增删改查控制器
@@ -32,10 +33,18 @@ import org.hswebframework.web.service.CrudService;
  * @see CrudService
  * @since 3.0
  */
-public interface CrudController<E, PK, Q extends Entity>
-        extends QueryController<E, PK, Q>, UpdateController<E, PK>, CreateController<E, PK>, DeleteController<PK> {
+public interface CrudController<E, PK, Q extends Entity, M>
+        extends QueryController<E, PK, Q>
+        , UpdateController<E, PK, M>
+        , CreateController<E, PK, M>
+        , DeleteController<PK> {
 
     @SuppressWarnings("unchecked")
     CrudService<E, PK> getService();
 
+    @Override
+    default E modelToEntity(M model, E entity) {
+        BeanUtils.copyProperties(model, entity);
+        return entity;
+    }
 }

@@ -43,7 +43,7 @@ public interface UpdateService<E, PK> extends Service {
      * @param e 要修改的数据
      * @return 影响记录数
      */
-    int saveOrUpdate(E e);
+    PK saveOrUpdate(E e);
 
 
 }

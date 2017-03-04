@@ -97,6 +97,8 @@
         <hsweb.ezorm.version>3.0.0-SNAPSHOT</hsweb.ezorm.version>
         <hsweb.utils.version>3.0.0-SNAPSHOT</hsweb.utils.version>
         <hsweb.expands.version>3.0.0-SNAPSHOT</hsweb.expands.version>
+
+        <swagger.version>2.6.1</swagger.version>
     </properties>
 
     <build>
@@ -200,6 +202,23 @@
                 <groupId>com.alibaba</groupId>
                 <artifactId>fastjson</artifactId>
                 <version>${fastjson.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.springfox</groupId>
+                <artifactId>springfox-swagger2</artifactId>
+                <version>${swagger.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.springfox</groupId>
+                <artifactId>springfox-swagger-ui</artifactId>
+                <version>${swagger.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.swagger</groupId>
+                <artifactId>swagger-annotations</artifactId>
+                <version>1.5.10</version>
             </dependency>
             <dependency>
                 <groupId>org.hswebframework</groupId>

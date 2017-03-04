@@ -35,7 +35,7 @@ public interface EntityFactory {
      * @param <T>       泛型,需实现{@link Entity}
      * @return 实体
      */
-    <T extends Entity> T newInstance(Class<T> entityClass);
+    <T> T newInstance(Class<T> entityClass);
 
     /**
      * 根据类型获取实体的真实的实体类型,
@@ -48,5 +48,5 @@ public interface EntityFactory {
      * @param <T>       泛型
      * @return 实体类型
      */
-    <T extends Entity> Class<T> getInstanceType(Class<T> entityClass);
+    <T> Class<T> getInstanceType(Class<T> entityClass);
 }

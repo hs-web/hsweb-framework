@@ -20,6 +20,8 @@ package org.hswebframework.web.commons.entity;
 
 public interface SortSupportEntity extends Comparable<SortSupportEntity>, Entity {
 
+    String sortIndex = "sortIndex";
+
     Long getSortIndex();
 
     void setSortIndex(Long sortIndex);

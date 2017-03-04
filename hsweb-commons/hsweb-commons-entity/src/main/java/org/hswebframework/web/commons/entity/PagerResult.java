@@ -19,8 +19,12 @@
 package org.hswebframework.web.commons.entity;
 
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
 import java.util.List;
 
+@ApiModel(description = "分页结果")
 public class PagerResult<E> implements Entity {
     private static final long serialVersionUID = -6171751136953308027L;
     private int total;
@@ -35,6 +39,7 @@ public class PagerResult<E> implements Entity {
         this.data = data;
     }
 
+    @ApiModelProperty("数据总数量")
     public int getTotal() {
         return total;
     }
@@ -44,6 +49,7 @@ public class PagerResult<E> implements Entity {
         return this;
     }
 
+    @ApiModelProperty("查询结果")
     public List<E> getData() {
         return data;
     }

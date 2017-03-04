@@ -79,13 +79,13 @@ public abstract class GenericEntityService<E extends GenericEntity<PK>, PK>
     }
 
     @Override
-    public int saveOrUpdate(E entity) {
+    public PK saveOrUpdate(E entity) {
         if (null != entity.getId() && null != selectByPk(entity.getId())) {
-            return updateByPk(entity);
+            updateByPk(entity);
         } else {
             insert(entity);
         }
-        return 1;
+        return entity.getId();
     }
 
     @Override

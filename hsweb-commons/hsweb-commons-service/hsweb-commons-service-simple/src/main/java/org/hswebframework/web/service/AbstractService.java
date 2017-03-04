@@ -51,11 +51,11 @@ public abstract class AbstractService<E extends Entity, PK> implements CreateEnt
         return null != entityFactory;
     }
 
-    protected Class<E> getEntityRealType() {
+    public Class<E> getEntityInstanceType() {
         return entityFactory.getInstanceType(getEntityType());
     }
 
-    protected Class<E> getEntityType() {
+    public Class<E> getEntityType() {
         return entityType;
     }
 

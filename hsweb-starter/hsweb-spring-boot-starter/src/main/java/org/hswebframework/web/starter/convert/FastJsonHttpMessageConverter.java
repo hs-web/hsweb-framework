@@ -132,7 +132,7 @@ public class FastJsonHttpMessageConverter extends AbstractHttpMessageConverter<O
         out.flush();
     }
 
-    protected PropertyPreFilter[] parseFilter(ResponseMessage responseMessage) {
+    protected PropertyPreFilter[] parseFilter(ResponseMessage<?> responseMessage) {
         List<PropertyPreFilter> filters = new ArrayList<>();
         if (responseMessage.getIncludes() != null)
             for (Map.Entry<Class<?>, Set<String>> classSetEntry : responseMessage.getIncludes().entrySet()) {

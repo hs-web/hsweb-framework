@@ -17,10 +17,14 @@
 
 package org.hswebframework.web.controller;
 
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.logging.AccessLogger;
+import org.hswebframework.web.service.CreateEntityService;
 import org.hswebframework.web.service.InsertService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -40,15 +44,24 @@ import static org.hswebframework.web.controller.message.ResponseMessage.ok;
  * @author zhouhao
  * @since 3.0
  */
-public interface CreateController<E, PK> {
+public interface CreateController<E, PK, M> {
 
-    InsertService<E, PK> getService();
+    <S extends InsertService<E, PK> & CreateEntityService<E>> S getService();
 
     @Authorize(action = Permission.ACTION_ADD)
     @PostMapping
     @AccessLogger("{action_add}")
     @ResponseStatus(HttpStatus.CREATED)
-    default ResponseMessage add(@RequestBody E data) {
-        return ok(getService().insert(data));
+    @ApiOperation(value = "创建数据")
+    @ApiResponses({
+            @ApiResponse(code = 201, message = "创建成功,返回创建数据的ID"),
+            @ApiResponse(code = 401, message = "未授权"),
+            @ApiResponse(code = 403, message = "无权限")
+    })
+    default ResponseMessage<PK> add(@RequestBody M data) {
+        E entity = getService().createEntity();
+        return ok(getService().insert(modelToEntity(data, entity)));
     }
+
+    E modelToEntity(M model, E entity);
 }

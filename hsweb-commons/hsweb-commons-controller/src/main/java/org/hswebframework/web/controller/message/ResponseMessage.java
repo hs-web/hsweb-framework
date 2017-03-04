@@ -20,6 +20,8 @@ package org.hswebframework.web.controller.message;
 
 
 import com.alibaba.fastjson.JSON;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
@@ -28,8 +30,37 @@ import java.util.*;
 /**
  * 响应消息。controller中处理后，返回此对象，响应请求结果给客户端。
  */
-public class ResponseMessage extends LinkedHashMap<String, Object> implements Serializable {
+@ApiModel(description = "响应结果")
+public class ResponseMessage<T> implements Serializable {
     private static final long serialVersionUID = 8992436576262574064L;
+
+    private String message;
+
+    private T result;
+
+    private int status;
+
+    private Long timestamp;
+
+    @ApiModelProperty("调用结果消息")
+    public String getMessage() {
+        return message;
+    }
+
+    @ApiModelProperty(value = "状态码", required = true)
+    public int getStatus() {
+        return status;
+    }
+
+    @ApiModelProperty("成功时响应数据")
+    public T getResult() {
+        return result;
+    }
+
+    @ApiModelProperty(value = "时间戳", required = true, dataType = "Long")
+    public Long getTimestamp() {
+        return timestamp;
+    }
 
     public static ResponseMessage error(String message) {
         return error(500, message);
@@ -37,35 +68,34 @@ public class ResponseMessage extends LinkedHashMap<String, Object> implements Se
 
     public static ResponseMessage error(int status, String message) {
         ResponseMessage msg = new ResponseMessage();
-        msg.put("message", message);
-        msg.put("status", status);
+        msg.message = message;
+        msg.status(status);
         return msg.putTimeStamp();
     }
 
-    public static ResponseMessage ok() {
+    public static <T> ResponseMessage<T> ok() {
         return ok(null);
     }
 
-    private ResponseMessage putTimeStamp() {
-        put("timestamp", System.currentTimeMillis());
+    private ResponseMessage<T> putTimeStamp() {
+        this.timestamp = System.currentTimeMillis();
         return this;
     }
 
-    public static ResponseMessage ok(Object data) {
-        return new ResponseMessage()
+    public static <T> ResponseMessage<T> ok(T data) {
+        return new ResponseMessage<T>()
                 .data(data)
                 .putTimeStamp()
                 .status(200);
     }
 
-    public ResponseMessage and(String key, Object value) {
-        put(key, value);
-        return this;
-    }
+//    public ResponseMessage and(String key, Object value) {
+//        put(key, value);
+//        return this;
+//    }
 
-    public ResponseMessage data(Object data) {
-        if (data != null)
-            put("data", data);
+    public ResponseMessage<T> data(T data) {
+        this.result = data;
         return this;
     }
 
@@ -79,14 +109,15 @@ public class ResponseMessage extends LinkedHashMap<String, Object> implements Se
      */
     private transient Map<Class<?>, Set<String>> excludes;
 
-    protected ResponseMessage() {
+    public ResponseMessage() {
+
     }
 
-    public ResponseMessage include(Class<?> type, String... fields) {
+    public ResponseMessage<T> include(Class<?> type, String... fields) {
         return include(type, Arrays.asList(fields));
     }
 
-    public ResponseMessage include(Class<?> type, Collection<String> fields) {
+    public ResponseMessage<T> include(Class<?> type, Collection<String> fields) {
         if (includes == null)
             includes = new HashMap<>();
         if (fields == null || fields.isEmpty()) return this;
@@ -107,7 +138,7 @@ public class ResponseMessage extends LinkedHashMap<String, Object> implements Se
         return this;
     }
 
-    public ResponseMessage exclude(Class type, Collection<String> fields) {
+    public ResponseMessage<T> exclude(Class type, Collection<String> fields) {
         if (excludes == null)
             excludes = new HashMap<>();
         if (fields == null || fields.isEmpty()) return this;
@@ -128,37 +159,37 @@ public class ResponseMessage extends LinkedHashMap<String, Object> implements Se
         return this;
     }
 
-    public ResponseMessage exclude(Collection<String> fields) {
+    public ResponseMessage<T> exclude(Collection<String> fields) {
         if (excludes == null)
             excludes = new HashMap<>();
         if (fields == null || fields.isEmpty()) return this;
         Class type;
-        if (getData() != null) type = getData().getClass();
+        if (getResult() != null) type = getResult().getClass();
         else return this;
         exclude(type, fields);
         return this;
     }
 
-    public ResponseMessage include(Collection<String> fields) {
+    public ResponseMessage<T> include(Collection<String> fields) {
         if (includes == null)
             includes = new HashMap<>();
         if (fields == null || fields.isEmpty()) return this;
         Class type;
-        if (getData() != null) type = getData().getClass();
+        if (getResult() != null) type = getResult().getClass();
         else return this;
         include(type, fields);
         return this;
     }
 
-    public ResponseMessage exclude(Class type, String... fields) {
+    public ResponseMessage<T> exclude(Class type, String... fields) {
         return exclude(type, Arrays.asList(fields));
     }
 
-    public ResponseMessage exclude(String... fields) {
+    public ResponseMessage<T> exclude(String... fields) {
         return exclude(Arrays.asList(fields));
     }
 
-    public ResponseMessage include(String... fields) {
+    public ResponseMessage<T> include(String... fields) {
         return include(Arrays.asList(fields));
     }
 
@@ -166,25 +197,22 @@ public class ResponseMessage extends LinkedHashMap<String, Object> implements Se
         return map.computeIfAbsent(type, k -> new HashSet<>());
     }
 
-    public Object getData() {
-        return get("data");
-    }
-
-
     @Override
     public String toString() {
         return JSON.toJSONStringWithDateFormat(this, "yyyy-MM-dd HH:mm:ss");
     }
 
-    public ResponseMessage status(int status) {
-        put("status", status);
+    public ResponseMessage<T> status(int status) {
+        this.status = status;
         return this;
     }
 
+    @ApiModelProperty(hidden = true)
     public Map<Class<?>, Set<String>> getExcludes() {
         return excludes;
     }
 
+    @ApiModelProperty(hidden = true)
     public Map<Class<?>, Set<String>> getIncludes() {
         return includes;
     }

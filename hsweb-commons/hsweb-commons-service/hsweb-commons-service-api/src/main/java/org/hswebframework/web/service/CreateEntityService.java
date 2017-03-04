@@ -35,4 +35,7 @@ public interface CreateEntityService<E> {
      * @return 实体
      */
     E createEntity();
+
+    Class<E> getEntityInstanceType();
+
 }

@@ -1,5 +1,6 @@
 package org.hswebframework.web.example.simple;
 
+import io.swagger.annotations.*;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.authz.annotation.RequiresUser;
 import org.hswebframework.web.authorization.Authorization;
@@ -40,6 +41,8 @@ public class TestController implements QueryController<UserEntity, String, Query
 
     @GetMapping("/test")
     @RequiresPermissions("test:*")
+    @ApiOperation("测试")
+    @ApiResponse(code = 200, message = "成功")
     public ResponseMessage testShiro(Authorization authorization) {
         return ResponseMessage.ok(authorization);
     }
@@ -48,10 +51,10 @@ public class TestController implements QueryController<UserEntity, String, Query
     @RequiresUser
     @RequiresDataAccess(permission = "test", action = Permission.ACTION_QUERY)
     @RequiresFieldAccess(permission = "test", action = Permission.ACTION_QUERY)
+    @ApiOperation("测试查询")
     public ResponseMessage testQuery(QueryParamEntity entity) {
         return ResponseMessage.ok(entity);
     }
-
 
     @PutMapping("/testUpdate/{id}")
     @RequiresUser

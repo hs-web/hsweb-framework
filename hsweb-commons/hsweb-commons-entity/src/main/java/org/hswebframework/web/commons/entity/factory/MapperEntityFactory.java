@@ -38,18 +38,18 @@ public class MapperEntityFactory implements EntityFactory {
     public MapperEntityFactory() {
     }
 
-    public <T extends Entity> MapperEntityFactory(Map<Class<T>, Mapper> realTypeMapper) {
+    public <T> MapperEntityFactory(Map<Class<T>, Mapper> realTypeMapper) {
         this.realTypeMapper.putAll(realTypeMapper);
     }
 
-    public <T extends Entity> MapperEntityFactory addMapping(Class<T> target, Mapper<T> mapper) {
+    public <T> MapperEntityFactory addMapping(Class<T> target, Mapper<T> mapper) {
         realTypeMapper.put(target, mapper);
         return this;
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T extends Entity> T newInstance(Class<T> beanClass) {
+    public <T> T newInstance(Class<T> beanClass) {
         if (beanClass == null) return null;
         Mapper<T> mapper = realTypeMapper.get(beanClass);
         if (mapper != null) return mapper.getInstanceGetter().get();
@@ -78,7 +78,7 @@ public class MapperEntityFactory implements EntityFactory {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T extends Entity> Class<T> getInstanceType(Class<T> beanClass) {
+    public <T> Class<T> getInstanceType(Class<T> beanClass) {
         Mapper<T> mapper = realTypeMapper.get(beanClass);
         if (null != mapper) {
             return mapper.getTarget();
@@ -86,7 +86,7 @@ public class MapperEntityFactory implements EntityFactory {
         return null;
     }
 
-    public static class Mapper<T extends Entity> {
+    public static class Mapper<T> {
         Class<T>    target;
         Supplier<T> instanceGetter;
 
@@ -104,15 +104,15 @@ public class MapperEntityFactory implements EntityFactory {
         }
     }
 
-    public static <T extends Entity> Mapper<T> defaultMapper(Class<T> target) {
+    public static <T> Mapper<T> defaultMapper(Class<T> target) {
         return new Mapper<>(target, defaultInstanceGetter(target));
     }
 
-    public static <T extends Entity> Supplier<T> defaultInstanceGetter(Class<T> clazz) {
+    public static <T> Supplier<T> defaultInstanceGetter(Class<T> clazz) {
         return new DefaultInstanceGetter<>(clazz);
     }
 
-    static class DefaultInstanceGetter<T extends Entity> implements Supplier<T> {
+    static class DefaultInstanceGetter<T> implements Supplier<T> {
         Class<T> type;
 
         public DefaultInstanceGetter(Class<T> type) {

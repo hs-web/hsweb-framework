@@ -35,6 +35,7 @@
         <module>hsweb-commons-service</module>
         <module>hsweb-commons-controller</module>
         <module>hsweb-commons-utils</module>
+        <module>hsweb-commons-model</module>
     </modules>
 
 </project>

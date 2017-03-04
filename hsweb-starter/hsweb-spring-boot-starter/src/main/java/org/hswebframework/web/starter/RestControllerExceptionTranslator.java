@@ -17,7 +17,7 @@
 
 package org.hswebframework.web.starter;
 
-import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONException;
 import org.hswebframework.web.AuthorizeException;
 import org.hswebframework.web.AuthorizeForbiddenException;
 import org.hswebframework.web.BusinessException;
@@ -26,19 +26,21 @@ import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.validate.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class RestControllerExceptionTranslator {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    @ExceptionHandler(ValidationException.class)
+    @ExceptionHandler(JSONException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
-    ResponseMessage handleException(ValidationException exception) {
+    ResponseMessage handleException(JSONException exception) {
         return ResponseMessage.error(400, exception.getMessage());
     }
 

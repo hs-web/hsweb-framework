@@ -57,6 +57,10 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-webmvc</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>org.hswebframework.web</groupId>
+            <artifactId>hsweb-commons-model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 </project>
