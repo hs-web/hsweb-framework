@@ -112,7 +112,7 @@ public class UserTests extends SimpleWebApplicationTests {
 
         UserEntity newUserEntity = userEntity.clone();
         newUserEntity.setUsername("test2");
-        String antherId = userService.insert(newUserEntity);
+        String anotherId = userService.insert(newUserEntity);
 
         Assert.assertNotNull(id);
         Assert.assertEquals(userEntity.getPassword().length(), 32);
@@ -141,16 +141,16 @@ public class UserTests extends SimpleWebApplicationTests {
         entityInDb = userService.selectByUsername(userEntity.getUsername());
         Assert.assertEquals(entityInDb.getPassword(), userService.encodePassword("password_2345", entityInDb.getSalt()));
 
-        entityInDb.setId(antherId);
+        entityInDb.setId(anotherId);
         entityInDb.setName("新名字");
         try {
-            userService.update(entityInDb);
+            userService.update(anotherId,entityInDb);
             Assert.assertTrue(false);
         } catch (ValidationException e) {
             Assert.assertEquals(e.getResults().getResults().get(0).getMessage(), "{username_exists}");
         }
         entityInDb.setId(id);
-        userService.update(entityInDb);
+        userService.update(id,entityInDb);
         entityInDb = userService.selectByUsername(userEntity.getUsername());
         Assert.assertEquals("新名字", entityInDb.getName());
 

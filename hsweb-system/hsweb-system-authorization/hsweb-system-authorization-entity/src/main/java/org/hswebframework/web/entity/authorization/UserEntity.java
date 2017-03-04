@@ -38,9 +38,9 @@ public interface UserEntity extends GenericEntity<String>, RecordCreationEntity 
 
     void setPassword(String password);
 
-    void setSalt(String salt);
-
     String getPassword();
+
+    void setSalt(String salt);
 
     String getSalt();
 

@@ -24,6 +24,7 @@ import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.controller.GenericEntityController;
 import org.hswebframework.web.controller.QueryController;
 import org.hswebframework.web.controller.message.ResponseMessage;
+import org.hswebframework.web.entity.organizational.DepartmentEntity;
 import org.hswebframework.web.entity.organizational.PositionEntity;
 import org.hswebframework.web.logging.AccessLogger;
 import org.hswebframework.web.service.organizational.PositionService;
@@ -40,7 +41,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("${hsweb.web.mappings.position:position}")
 @Authorize(permission = "position")
 @AccessLogger("职位管理")
-public class PositionController implements GenericEntityController<PositionEntity, String, QueryParamEntity> {
+public class PositionController implements GenericEntityController<PositionEntity, String, QueryParamEntity,DepartmentEntity> {
 
     private PositionService positionService;
 

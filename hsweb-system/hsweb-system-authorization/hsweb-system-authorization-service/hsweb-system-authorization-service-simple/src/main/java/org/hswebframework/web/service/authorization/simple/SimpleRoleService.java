@@ -23,6 +23,7 @@ import org.hswebframework.web.dao.authorization.RoleDao;
 import org.hswebframework.web.entity.authorization.PermissionRoleEntity;
 import org.hswebframework.web.entity.authorization.RoleEntity;
 import org.hswebframework.web.entity.authorization.bind.BindPermissionRoleEntity;
+import org.hswebframework.web.entity.authorization.bind.BindRoleUserEntity;
 import org.hswebframework.web.service.AbstractService;
 import org.hswebframework.web.service.DefaultDSLQueryService;
 import org.hswebframework.web.service.DefaultDSLUpdateService;
@@ -96,8 +97,13 @@ public class SimpleRoleService extends AbstractService<RoleEntity, String>
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public RoleEntity selectByPk(String roleId) {
-        return createQuery().where(RoleEntity.id, roleId).single();
+        RoleEntity entity = createQuery().where(RoleEntity.id, roleId).single();
+        if (entity == null) return null;
+        BindPermissionRoleEntity<PermissionRoleEntity> bindPermissionRoleEntity = entityFactory.newInstance(BindPermissionRoleEntity.class);
+        bindPermissionRoleEntity.setPermissions(permissionRoleDao.selectByRoleId(roleId));
+        return entity;
     }
 
     @Override

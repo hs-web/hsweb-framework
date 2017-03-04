@@ -23,7 +23,7 @@ public interface UserService extends
 
     boolean disable(String userId);
 
-    void update(UserEntity userBean);
+    void update(String userId,UserEntity userBean);
 
     UserEntity selectByUsername(String username);
 

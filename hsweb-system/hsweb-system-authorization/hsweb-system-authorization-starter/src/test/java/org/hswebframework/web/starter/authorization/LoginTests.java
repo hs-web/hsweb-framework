@@ -56,17 +56,17 @@ public class LoginTests extends SimpleWebApplicationTests {
         userEntity.setCreateTimeNow();
         userService.insert(userEntity);
 
-        //获取publicKey
-        String publicKey = testGet("/authorize/public-key").exec().resultAsJson().getString("data");
-        Assert.notNull(publicKey);
-        RSAPublicEncrypt publicEncrypt = Encrypt.rsa().publicEncrypt(publicKey);
-        String username = Base64.encodeBase64String(publicEncrypt.encrypt("test".getBytes()));
-        String password = Base64.encodeBase64String(publicEncrypt.encrypt("password_1234".getBytes()));
+//        //获取publicKey
+//        String publicKey = testGet("/authorize/public-key").exec().resultAsJson().getString("result");
+//        Assert.notNull(publicKey);
+//        RSAPublicEncrypt publicEncrypt = Encrypt.rsa().publicEncrypt(publicKey);
+//        String username = Base64.encodeBase64String(publicEncrypt.encrypt("test".getBytes()));
+//        String password = Base64.encodeBase64String(publicEncrypt.encrypt("password_1234".getBytes()));
         JSONObject json = testPost("/authorize/login").setUp((builder) -> {
-            builder.param("username", username);
-            builder.param("password", password);
+            builder.param("username", userEntity.getUsername());
+            builder.param("password","password_1234");
         }).exec().resultAsJson();
 
-        System.out.println(json);
+        org.junit.Assert.assertEquals(json.get("result"), userEntity.getId());
     }
 }

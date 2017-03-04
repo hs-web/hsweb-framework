@@ -11,6 +11,3 @@ hsweb:
     app:
       name: 权限管理测试
       version: 3.0.0
-    web:
-      authorize:
-          rsa: true

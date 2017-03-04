@@ -130,11 +130,12 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
     }
 
     @Override
-    public void update(UserEntity userEntity) {
+    public void update(String userId, UserEntity userEntity) {
+        userEntity.setId(userId);
         //判断用户是否存在
         boolean userExists = createQuery().where()
                 .is("username", userEntity.getUsername())
-                .and().not(GenericEntity.id, userEntity.getId())
+                .and().not(GenericEntity.id, userId)
                 .total() > 0;
         tryValidateProperty(!userExists, GenericEntity.id, "{username_exists}");
         List<String> updateProperties = Arrays.asList("name");

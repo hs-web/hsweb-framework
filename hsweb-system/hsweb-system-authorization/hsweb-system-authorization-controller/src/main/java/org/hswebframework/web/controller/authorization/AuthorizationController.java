@@ -17,31 +17,24 @@
 
 package org.hswebframework.web.controller.authorization;
 
-import org.apache.commons.codec.binary.Base64;
-import org.hswebframework.expands.security.Encrypt;
-import org.hswebframework.expands.security.rsa.RSAEncrypt;
-import org.hswebframework.expands.security.rsa.RSAPrivateEncrypt;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.hswebframework.web.BusinessException;
 import org.hswebframework.web.NotFoundException;
 import org.hswebframework.web.authorization.Authorization;
-import org.hswebframework.web.authorization.listener.UserAuthorizationConfigRegister;
-import org.hswebframework.web.authorization.listener.UserAuthorizationListener;
+import org.hswebframework.web.authorization.annotation.Authorize;
+import org.hswebframework.web.authorization.listener.AuthorizationListenerDispatcher;
+import org.hswebframework.web.authorization.listener.event.*;
 import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.entity.authorization.UserEntity;
 import org.hswebframework.web.logging.AccessLogger;
-import org.hswebframework.web.service.AbstractService;
 import org.hswebframework.web.service.authorization.UserService;
-import org.hswebframework.web.service.authorization.VerifyCode;
-import org.hswebframework.web.service.authorization.VerifyCodeGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import java.io.IOException;
-import java.util.List;
+import javax.servlet.http.HttpServletRequest;
+import java.util.function.Function;
 
 import static org.hswebframework.web.controller.message.ResponseMessage.ok;
 
@@ -53,140 +46,113 @@ import static org.hswebframework.web.controller.message.ResponseMessage.ok;
 @RestController
 @RequestMapping("${hsweb.web.mappings.authorize:authorize}")
 @AccessLogger("授权")
+@Api(tags = "authorize-simple", description = "提供基本的授权功能")
 public class AuthorizationController {
 
-    private static final String RSA_PRIVATE_KEY_NAME  = "RSA_PRIVATE_KEY";
-    private static final String VERIFY_CODE_NAME      = "VERIFY_CODE";
-    private static final String NEED_VERIFY_CODE_NAME = "NEED_VERIFY_CODE";
-
-    @Autowired(required = false)
-    private VerifyCodeGenerator verifyCodeGenerator;
+//    private static final String RSA_PRIVATE_KEY_NAME  = "RSA_PRIVATE_KEY";
+//    private static final String VERIFY_CODE_NAME      = "VERIFY_CODE";
 
     @Autowired
     private UserService userService;
 
-    @Autowired(required = false)
-    private List<UserAuthorizationListener> userAuthorizationListeners;
+    @Autowired
+    private AuthorizationListenerDispatcher authorizationListenerDispatcher;
 
-    @Value("${hsweb.web.authorize.rsa:false}")
-    private boolean useRsa = false;
+//    @GetMapping(value = "/public-key")
+//    @AccessLogger("获取公钥")
+//    @ApiOperation("获取rsa公钥,当开启了用户名密码加密的时候使用此接口获取用于加密的公钥")
+//    public ResponseMessage getAuthorizeToken(@ApiParam(hidden = true) HttpSession session) {
+//        RSAEncrypt rsaEncrypt = Encrypt.rsa();
+//        String publicKey = rsaEncrypt.publicEncrypt().getKey();
+//        String privateKey = rsaEncrypt.privateEncrypt().getKey();
+//        session.setAttribute(RSA_PRIVATE_KEY_NAME, privateKey);
+//        return ok(publicKey);
+//    }
 
-    private UserAuthorizationListenerAdapter listenerAdapter = new UserAuthorizationListenerAdapter();
-
-    @GetMapping(value = "/public-key")
-    @AccessLogger("获取公钥")
-    public ResponseMessage getAuthorizeToken(HttpSession session) {
-        RSAEncrypt rsaEncrypt = Encrypt.rsa();
-        String publicKey = rsaEncrypt.publicEncrypt().getKey();
-        String privateKey = rsaEncrypt.privateEncrypt().getKey();
-        session.setAttribute(RSA_PRIVATE_KEY_NAME, privateKey);
-        return ok(publicKey);
-    }
-
-    @GetMapping(value = "/verify-code")
-    @AccessLogger("获取验证码")
-    public void getVerifyCode(HttpServletResponse response, HttpSession session) throws IOException {
-        if (verifyCodeGenerator == null) throw new NotFoundException("{verify_code_not_found}");
-        response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
-        response.setHeader("Content-disposition", "attachment;filename=verify-code.png");
-        VerifyCode verifyCode = verifyCodeGenerator.generate();
-        session.setAttribute(RSA_PRIVATE_KEY_NAME, verifyCode.getCode());
-        verifyCode.write(response.getOutputStream());
-    }
-
-    @RequestMapping("/login-out")
+    @GetMapping("/login-out")
     @AccessLogger("退出登录")
-    public ResponseMessage loginOut(Authorization authorization) {
-        listenerAdapter.onLoginOut(authorization);
+    @Authorize
+    @ApiOperation("退出当前登录")
+    public ResponseMessage exit(@ApiParam(hidden = true) Authorization authorization) {
+        authorizationListenerDispatcher.doEvent(new AuthorizationExitEvent(authorization));
         return ok();
     }
 
     @PostMapping(value = "/login")
     @AccessLogger("授权")
-    public ResponseMessage authorize(@RequestParam String username,
-                                     @RequestParam String password,
-                                     String verifyCode,
-                                     @RequestParam(defaultValue = "false") boolean remember,
-                                     HttpSession session) {
+    @ApiOperation("用户名密码登录")
+    public ResponseMessage<String> authorize(@RequestParam @ApiParam("用户名") String username,
+                                             @RequestParam @ApiParam("密码") String password,
+                                             @ApiParam(hidden = true) HttpServletRequest request) {
+
+        AuthorizationFailedEvent.Reason reason = AuthorizationFailedEvent.Reason.OTHER;
+        Function<String, Object> parameterGetter = request::getParameter;
         try {
-            if (useRsa) {
-                String privateKey = (String) session.getAttribute(RSA_PRIVATE_KEY_NAME);
-                if (privateKey == null) throw new BusinessException("{private_key_is_null}");
-                // 解密用户名密码
-                try {
-                    RSAEncrypt rsaEncrypt = Encrypt.rsa();
-                    RSAPrivateEncrypt rsaPrivateEncrypt = rsaEncrypt.privateEncrypt(privateKey);
-                    byte[] username_data = Base64.decodeBase64(username);
-                    byte[] password_data = Base64.decodeBase64(password);
-                    username = new String(rsaPrivateEncrypt.decrypt(username_data));
-                    password = new String(rsaPrivateEncrypt.decrypt(password_data));
-                } catch (Exception e) {
-                    throw new BusinessException("{decrypt_param_error}", e, 400);
-                }
-            }
-            UserAuthorizationConfigRegister configHolder = (useVerify) -> session.setAttribute(NEED_VERIFY_CODE_NAME, useVerify);
-            listenerAdapter.onConfig(username, configHolder);
-            Object useVerifyCode = session.getAttribute(NEED_VERIFY_CODE_NAME);
-            // 尝试使用验证码验证
-            if (useVerifyCode instanceof Boolean && (Boolean) useVerifyCode) {
-                String realVerifyCode = (String) session.getAttribute(VERIFY_CODE_NAME);
-                if (realVerifyCode == null || !realVerifyCode.equalsIgnoreCase(verifyCode)) {
-                    throw new BusinessException("{verify_code_error}");
-                }
-            }
-            listenerAdapter.onAuthorizeBefore(username);
+            AuthorizationDecodeEvent decodeEvent = new AuthorizationDecodeEvent(username, password, parameterGetter);
+            authorizationListenerDispatcher.doEvent(decodeEvent);
+            username = decodeEvent.getUsername();
+            password = decodeEvent.getPassword();
+
+            AuthorizationBeforeEvent beforeEvent = new AuthorizationBeforeEvent(username, password, parameterGetter);
+            authorizationListenerDispatcher.doEvent(beforeEvent);
+
+//            if (useRsa) {
+//                String privateKey = (String) session.getAttribute(RSA_PRIVATE_KEY_NAME);
+//                if (privateKey == null) throw new BusinessException("{private_key_is_null}");
+//                // 解密用户名密码
+//                try {
+//                    RSAEncrypt rsaEncrypt = Encrypt.rsa();
+//                    RSAPrivateEncrypt rsaPrivateEncrypt = rsaEncrypt.privateEncrypt(privateKey);
+//                    byte[] username_data = Base64.decodeBase64(username);
+//                    byte[] password_data = Base64.decodeBase64(password);
+//                    username = new String(rsaPrivateEncrypt.decrypt(username_data));
+//                    password = new String(rsaPrivateEncrypt.decrypt(password_data));
+//                } catch (Exception e) {
+//                    throw new BusinessException("{decrypt_param_error}", e, 400);
+//                }
+//            }
+
+//            UserAuthorizationConfigRegister configHolder = (useVerify) -> session.setAttribute(NEED_VERIFY_CODE_NAME, useVerify);
+//            listenerAdapter.onConfig(username, configHolder);
+//            Object useVerifyCode = session.getAttribute(NEED_VERIFY_CODE_NAME);
+//            // 尝试使用验证码验证
+//            if (Boolean.TRUE.equals(useVerifyCode)) {
+//                String realVerifyCode = (String) session.getAttribute(VERIFY_CODE_NAME);
+//                if (realVerifyCode == null || !realVerifyCode.equalsIgnoreCase(verifyCode)) {
+//                    throw new BusinessException("{verify_code_error}");
+//                }
+//            }
+//            listenerAdapter.onAuthorizeBefore(username);
             UserEntity entity = userService.selectByUsername(username);
-            AbstractService.assertNotNull(entity, "{user_not_exists}");
-            if (!entity.isEnabled()) {
+            if (entity == null) {
+                reason = AuthorizationFailedEvent.Reason.USER_NOT_EXISTS;
+                throw new NotFoundException("{user_not_exists}");
+            }
+            if (Boolean.FALSE.equals(entity.isEnabled())) {
+                reason = AuthorizationFailedEvent.Reason.USER_DISABLED;
                 throw new BusinessException("{user_is_disabled}", 400);
             }
             password = userService.encodePassword(password, entity.getSalt());
             if (!entity.getPassword().equals(password)) {
-                listenerAdapter.onAuthorizeFail(username);
+                reason = AuthorizationFailedEvent.Reason.PASSWORD_ERROR;
                 throw new BusinessException("{password_error}", 400);
             }
             // TODO: 17-1-13  获取IP
             userService.updateLoginInfo(entity.getId(), "", System.currentTimeMillis());
             // 验证通过
             Authorization authorization = userService.initUserAuthorization(entity.getId());
-            listenerAdapter.onAuthorizeSuccess(remember, authorization);
-            return ok(authorization.getPermissions());
+            AuthorizationSuccessEvent event = new AuthorizationSuccessEvent(authorization, parameterGetter);
+            authorizationListenerDispatcher.doEvent(event);
+            return ok(entity.getId());
+        } catch (Exception e) {
+            AuthorizationFailedEvent failedEvent = new AuthorizationFailedEvent(username, password, parameterGetter, reason);
+            failedEvent.setException(e);
+            authorizationListenerDispatcher.doEvent(failedEvent);
+            throw e;
         } finally {
             //无论如何都清空验证码和私钥
-            session.removeAttribute(VERIFY_CODE_NAME);
-            session.removeAttribute(RSA_PRIVATE_KEY_NAME);
-        }
-    }
-
-    class UserAuthorizationListenerAdapter implements UserAuthorizationListener {
-        @Override
-        public void onConfig(String username, UserAuthorizationConfigRegister configHolder) {
-            if (userAuthorizationListeners != null)
-                userAuthorizationListeners.forEach(listener -> listener.onConfig(username, configHolder));
-        }
-
-        @Override
-        public void onAuthorizeBefore(String username) {
-            if (userAuthorizationListeners != null)
-                userAuthorizationListeners.forEach(listener -> listener.onAuthorizeBefore(username));
-        }
-
-        @Override
-        public void onAuthorizeFail(String username) {
-            if (userAuthorizationListeners != null)
-                userAuthorizationListeners.forEach(listener -> listener.onAuthorizeFail(username));
-        }
-
-        @Override
-        public void onLoginOut(Authorization authorization) {
-            if (userAuthorizationListeners != null)
-                userAuthorizationListeners.forEach(listener -> listener.onLoginOut(authorization));
-        }
-
-        @Override
-        public void onAuthorizeSuccess(boolean isRemembered, Authorization authorization) {
-            if (userAuthorizationListeners != null)
-                userAuthorizationListeners.forEach(listener -> listener.onAuthorizeSuccess(isRemembered, authorization));
+//            session.removeAttribute(VERIFY_CODE_NAME);
+//            session.removeAttribute(RSA_PRIVATE_KEY_NAME);
         }
     }
 

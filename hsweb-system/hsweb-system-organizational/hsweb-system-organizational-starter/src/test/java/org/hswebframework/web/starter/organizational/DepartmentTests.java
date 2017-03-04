@@ -51,18 +51,18 @@ public class DepartmentTests extends SimpleWebApplicationTests {
         String requestBody = JSON.toJSONString(entity);
         JSONObject result = testPost("/department").setUp(setup -> setup.contentType(MediaType.APPLICATION_JSON).content(requestBody)).exec().resultAsJson();
         Assert.assertEquals(200, result.get("status"));
-        String id = result.getString("data");
+        String id = result.getString("result");
         Assert.assertNotNull(id);
         entity.setId(id);
         // test get data
         result = testGet("/department/" + id).exec().resultAsJson();
-        entity = result.getObject("data", entityFactory.getInstanceType(DepartmentEntity.class));
+        entity = result.getObject("result", entityFactory.getInstanceType(DepartmentEntity.class));
 
         Assert.assertEquals(200, result.get("status"));
-        Assert.assertNotNull(result.getJSONObject("data"));
+        Assert.assertNotNull(result.getJSONObject("result"));
 
         Assert.assertEquals(fastJsonHttpMessageConverter.converter(entity),
-                fastJsonHttpMessageConverter.converter(result.getObject("data", entityFactory.getInstanceType(DepartmentEntity.class))));
+                fastJsonHttpMessageConverter.converter(result.getObject("result", entityFactory.getInstanceType(DepartmentEntity.class))));
         //todo 修改测试属性
         DepartmentEntity newEntity = entityFactory.newInstance(DepartmentEntity.class);
         newEntity.setName("test");
@@ -75,7 +75,7 @@ public class DepartmentTests extends SimpleWebApplicationTests {
         Assert.assertEquals(200, result.get("status"));
 
         result = testGet("/department/" + id).exec().resultAsJson();
-        result = result.getJSONObject("data");
+        result = result.getJSONObject("result");
         Assert.assertNotNull(result);
 
         result = testDelete("/department/" + id).exec().resultAsJson();

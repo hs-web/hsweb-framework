@@ -111,16 +111,6 @@ public class SimpleUserEntity extends SimpleGenericEntity<String> implements Use
 
     @Override
     public SimpleUserEntity clone() {
-        SimpleUserEntity target = ((SimpleUserEntity) super.clone());
-//        target.setId(getId());
-//        target.setName(getName());
-//        target.setUsername(getUsername());
-//        target.setPassword(getPassword());
-//        target.setCreateTime(getCreateTime());
-//        target.setCreatorId(getCreatorId());
-//        target.setEnabled(isEnabled());
-//        target.setLastLoginTime(getLastLoginTime());
-//        target.setLastLoginIp(getLastLoginIp());
-        return target;
+        return ((SimpleUserEntity) super.clone());
     }
 }

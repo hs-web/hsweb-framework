@@ -20,6 +20,7 @@ package org.hswebframework.web.controller.organizational;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.controller.GenericEntityController;
+import org.hswebframework.web.entity.organizational.DepartmentEntity;
 import org.hswebframework.web.entity.organizational.OrganizationalEntity;
 import org.hswebframework.web.logging.AccessLogger;
 import org.hswebframework.web.service.organizational.OrganizationalService;
@@ -36,7 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("${hsweb.web.mappings.organizational:organizational}")
 @Authorize(permission = "organizational")
 @AccessLogger("组织管理")
-public class OrganizationalController implements GenericEntityController<OrganizationalEntity, String, QueryParamEntity> {
+public class OrganizationalController implements GenericEntityController<OrganizationalEntity, String, QueryParamEntity,DepartmentEntity> {
 
     private OrganizationalService organizationalService;
 

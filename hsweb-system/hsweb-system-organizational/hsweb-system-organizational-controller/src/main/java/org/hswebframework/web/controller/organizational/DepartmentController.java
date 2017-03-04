@@ -36,7 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("${hsweb.web.mappings.department:department}")
 @Authorize(permission = "department")
 @AccessLogger("部门管理")
-public class DepartmentController implements GenericEntityController<DepartmentEntity, String, QueryParamEntity> {
+public class DepartmentController implements GenericEntityController<DepartmentEntity, String, QueryParamEntity,DepartmentEntity> {
 
     private DepartmentService departmentService;
 

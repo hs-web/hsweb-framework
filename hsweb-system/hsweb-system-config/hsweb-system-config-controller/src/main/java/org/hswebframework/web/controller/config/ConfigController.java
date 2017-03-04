@@ -18,6 +18,7 @@
 
 package org.hswebframework.web.controller.config;
 
+import io.swagger.annotations.Api;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.controller.GenericEntityController;
@@ -40,7 +41,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("${hsweb.web.mappings.config:config}")
 @Authorize(permission = "config")
 @AccessLogger("配置管理")
-public class ConfigController implements GenericEntityController<ConfigEntity, String, QueryParamEntity> {
+@Api(description = "配置管理，用于系统配置信息维护")
+public class ConfigController implements GenericEntityController<ConfigEntity, String, QueryParamEntity,ConfigEntity> {
 
     private ConfigService configService;
 
@@ -54,8 +56,4 @@ public class ConfigController implements GenericEntityController<ConfigEntity, S
         return configService;
     }
 
-    @Override
-    public ResponseMessage updateByPrimaryKey(@PathVariable String id, @RequestBody ConfigEntity data) {
-        return GenericEntityController.super.updateByPrimaryKey(id, data);
-    }
 }

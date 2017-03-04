@@ -18,7 +18,7 @@
 |[hsweb-system-file](hsweb-system-file)|文件管理| 0%|
 |[hsweb-system-history](hsweb-system-history)|历史记录管理| 0%|
 |[hsweb-system-monitor](hsweb-system-monitor)|系统监控| 0%|
-|[hsweb-system-organizational](hsweb-system-organizational)|组织架构| 0%|
+|[hsweb-system-organizational](hsweb-system-organizational)|组织架构| 50%|
 |[hsweb-system-schedule](hsweb-system-schedule)|任务调度| 0%|
 |[hsweb-system-script](hsweb-system-script)|动态脚本| 0%|
 |[hsweb-system-template](hsweb-system-template)|模板管理| 0%|
