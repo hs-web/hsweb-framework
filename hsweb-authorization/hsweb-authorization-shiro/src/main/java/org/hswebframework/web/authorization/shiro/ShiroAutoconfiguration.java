@@ -94,10 +94,16 @@ public class ShiroAutoconfiguration {
     }
 
     @Bean
+    @Order(Ordered.LOWEST_PRECEDENCE)
     public ListenerAuthorizingRealm listenerAuthorizingRealm(CacheManager cacheManager) {
         ListenerAuthorizingRealm realm = new ListenerAuthorizingRealm();
         realm.setCacheManager(cacheManager);
         return realm;
+    }
+
+    @Bean
+    public LoginExitListener loginExitListener(ListenerAuthorizingRealm listenerAuthorizingRealm) {
+        return new LoginExitListener(listenerAuthorizingRealm);
     }
 
     @Bean(name = "lifecycleBeanPostProcessor")

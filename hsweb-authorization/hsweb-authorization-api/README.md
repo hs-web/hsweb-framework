@@ -23,3 +23,32 @@ _点击名称,查看源代码注释获得使用说明_
 | ------------- |:-------------:| 
 | [`Authorization`](src/main/java/org/hswebframework/web/authorization/Authorization.java)    | 用户的认证信息 | 
 | [`AuthorizationHolder`](src/main/java/org/hswebframework/web/authorization/AuthorizationHolder.java)      | 用于获取当前登录用户的认证信息      | 
+
+
+### Listener
+api提供[AuthorizationListener](src/main/java/org/hswebframework/web/authorization/listener/AuthorizationListener.java)
+来进行授权逻辑拓展，在授权前后执行可自定义的操作.如rsa解密帐号密码,验证码判断等。
+
+默认事件列表():
+
+| 类名       | 说明          | 
+| ------------- |:-------------:| 
+| [`AuthorizationDecodeEvent`](src/main/java/org/hswebframework/web/authorization/listener/event/AuthorizationDecodeEvent.java)    | 接收到请求参数时 | 
+| [`AuthorizationBeforeEvent`](src/main/java/org/hswebframework/web/authorization/listener/event/AuthorizationBeforeEvent.java)      | 验证密码前触发      | 
+| [`AuthorizationFailedEvent`](src/main/java/org/hswebframework/web/authorization/listener/event/AuthorizationFailedEvent.java)      | 授权验证失败时触发      | 
+| [`AuthorizationSuccessEvent`](src/main/java/org/hswebframework/web/authorization/listener/event/AuthorizationSuccessEvent.java)      | 授权成功时触发      | 
+| [`AuthorizationExitEvent`](src/main/java/org/hswebframework/web/authorization/listener/event/AuthorizationExitEvent.java)      | 用户注销时触发      | 
+
+例子:
+
+```java
+@Component
+public class CustomAuthorizationSuccessListener implements AuthorizationListener<AuthorizationSuccessEvent>{
+        @Override
+        public void on(AuthorizationSuccessEvent event) {
+            Authorization authorization=event.getAuthorization();
+            //....
+            System.out.println(authorization.getUser().getName()+"登录啦");
+        }
+}
+```

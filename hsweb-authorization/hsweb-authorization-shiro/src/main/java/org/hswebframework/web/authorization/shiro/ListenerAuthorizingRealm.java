@@ -31,14 +31,16 @@ import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.subject.Subject;
 import org.hswebframework.web.authorization.Authorization;
 import org.hswebframework.web.authorization.Role;
-import org.hswebframework.web.authorization.listener.UserAuthorizationListener;
+import org.hswebframework.web.authorization.listener.AuthorizationListener;
+import org.hswebframework.web.authorization.listener.event.AuthorizationSuccessEvent;
 
 import java.util.stream.Collectors;
 
 /**
  * @author zhouhao
  */
-public class ListenerAuthorizingRealm extends AuthorizingRealm implements UserAuthorizationListener {
+public class ListenerAuthorizingRealm extends AuthorizingRealm
+        implements AuthorizationListener<AuthorizationSuccessEvent> {
 
     public ListenerAuthorizingRealm() {
         setAuthenticationTokenClass(SimpleAuthenticationToken.class);
@@ -66,15 +68,25 @@ public class ListenerAuthorizingRealm extends AuthorizingRealm implements UserAu
                 authorization.getUser().getId(), ListenerAuthorizingRealm.class.getName());
     }
 
-    @Override
-    public void onLoginOut(Authorization authorization) {
+    public void loginOut(Authorization authorization) {
         if (null != authorization)
             getCache(authorization.getUser().getUsername()).clear();
         SecurityUtils.getSubject().logout();
     }
 
+    protected <K, V> Cache<K, V> getCache(String name) {
+        return getCacheManager().getCache(getCacheName(name));
+    }
+
+    protected String getCacheName(String name) {
+        return "shiro.auth.info.".concat(name);
+    }
+
     @Override
-    public void onAuthorizeSuccess(boolean isRemembered, Authorization authorization) {
+    public void on(AuthorizationSuccessEvent event) {
+        Authorization authorization = event.getAuthorization();
+        boolean remember = Boolean.TRUE.equals(event.getParameter("remember").orElse(false));
+
         SimpleAuthorizationInfo authorizationInfo = new SimpleAuthorizationInfo();
         authorizationInfo.addRoles(authorization.getRoles().stream().map(Role::getId).collect(Collectors.toList()));
         authorizationInfo.addObjectPermissions(
@@ -95,15 +107,7 @@ public class ListenerAuthorizingRealm extends AuthorizingRealm implements UserAu
                 .put(AuthenticationInfo.class.getName(), createAuthenticationInfo(authorization));
 
         Subject subject = SecurityUtils.getSubject();
-        subject.login(new SimpleAuthenticationToken(authorization, isRemembered));
+        subject.login(new SimpleAuthenticationToken(authorization, remember));
         subject.getSession().setAttribute(Authorization.class.getName(), authorization);
-    }
-
-    protected <K, V> Cache<K, V> getCache(String name) {
-        return getCacheManager().getCache(getCacheName(name));
-    }
-
-    protected String getCacheName(String name) {
-        return "shiro.auth.info.".concat(name);
     }
 }
