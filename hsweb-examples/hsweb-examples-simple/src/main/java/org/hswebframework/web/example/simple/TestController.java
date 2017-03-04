@@ -1,8 +1,7 @@
 package org.hswebframework.web.example.simple;
 
-import io.swagger.annotations.*;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.apache.shiro.authz.annotation.RequiresUser;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
 import org.hswebframework.web.authorization.Authorization;
 import org.hswebframework.web.authorization.AuthorizationHolder;
 import org.hswebframework.web.authorization.Permission;
@@ -13,10 +12,10 @@ import org.hswebframework.web.commons.entity.Entity;
 import org.hswebframework.web.commons.entity.PagerResult;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.controller.QueryController;
-import org.hswebframework.web.controller.authorization.UserController;
 import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.entity.authorization.SimpleUserEntity;
 import org.hswebframework.web.entity.authorization.UserEntity;
+import org.hswebframework.web.model.authorization.UserModel;
 import org.hswebframework.web.service.QueryByEntityService;
 import org.hswebframework.web.service.QueryService;
 import org.springframework.web.bind.annotation.*;
@@ -39,29 +38,30 @@ public class TestController implements QueryController<UserEntity, String, Query
         return ResponseMessage.ok(authorization);
     }
 
-    @GetMapping("/test")
-    @RequiresPermissions("test:*")
-    @ApiOperation("测试")
-    @ApiResponse(code = 200, message = "成功")
-    public ResponseMessage testShiro(Authorization authorization) {
-        return ResponseMessage.ok(authorization);
-    }
-
     @GetMapping("/testQuery")
-    @RequiresUser
+    @Authorize
     @RequiresDataAccess(permission = "test", action = Permission.ACTION_QUERY)
     @RequiresFieldAccess(permission = "test", action = Permission.ACTION_QUERY)
     @ApiOperation("测试查询")
-    public ResponseMessage testQuery(QueryParamEntity entity) {
+    public ResponseMessage<QueryParamEntity> testQuery(QueryParamEntity entity) {
+        /*
+        @RequiresFieldAccess 字段级别权限控制
+        entity.getExcludes() 自动填充不能访问的字段
+        */
+
+        /*
+        @RequiresDataAccess 数据级别权限控制
+        entity.terms 被嵌入查询条件
+        */
         return ResponseMessage.ok(entity);
     }
 
     @PutMapping("/testUpdate/{id}")
-    @RequiresUser
     @RequiresDataAccess(permission = "test", action = Permission.ACTION_UPDATE)
     @RequiresFieldAccess(permission = "test", action = Permission.ACTION_UPDATE)
-    public ResponseMessage testUpdate(@PathVariable String id, @RequestBody UserEntity entity) {
-        return ResponseMessage.ok(entity);
+    public ResponseMessage<UserModel> testUpdate(@PathVariable String id, @RequestBody UserModel model) {
+
+        return ResponseMessage.ok(model);
     }
 
     @Override
