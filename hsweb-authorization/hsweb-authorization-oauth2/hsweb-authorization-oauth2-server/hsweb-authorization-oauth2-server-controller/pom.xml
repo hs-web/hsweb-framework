@@ -27,12 +27,28 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>hsweb-authorization-oauth2-server-dao</artifactId>
-    <packaging>pom</packaging>
-    <modules>
-        <module>hsweb-authorization-oauth2-server-dao-api</module>
-        <module>hsweb-authorization-oauth2-server-dao-mybatis</module>
-    </modules>
+    <artifactId>hsweb-authorization-oauth2-server-controller</artifactId>
 
-
+    <dependencies>
+        <dependency>
+            <groupId>org.hswebframework.web</groupId>
+            <artifactId>hsweb-commons-controller</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hswebframework.web</groupId>
+            <artifactId>hsweb-authorization-oauth2-server-model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hswebframework.web</groupId>
+            <artifactId>hsweb-authorization-oauth2-server-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.oltu.oauth2</groupId>
+            <artifactId>org.apache.oltu.oauth2.authzserver</artifactId>
+            <version>1.0.2</version>
+        </dependency>
+    </dependencies>
 </project>

@@ -16,13 +16,11 @@
  *
  */
 
-package org.hswebframework.web.authorization.oauth2.entity;
+package org.hswebframework.web.entity.authorization.oauth2;
 
 import org.hswebframework.web.commons.entity.Entity;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public interface OAuth2AccessEntity extends Entity {
@@ -58,4 +56,6 @@ public interface OAuth2AccessEntity extends Entity {
     String getScope();
 
     void setScope(String scope);
+
+
 }

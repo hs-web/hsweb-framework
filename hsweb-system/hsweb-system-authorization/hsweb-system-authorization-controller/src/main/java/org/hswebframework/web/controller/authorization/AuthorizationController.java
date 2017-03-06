@@ -39,14 +39,12 @@ import java.util.function.Function;
 import static org.hswebframework.web.controller.message.ResponseMessage.ok;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 @RestController
 @RequestMapping("${hsweb.web.mappings.authorize:authorize}")
 @AccessLogger("授权")
-@Api(tags = "authorize-simple", description = "提供基本的授权功能")
+@Api(tags = "hsweb-authorization", description = "提供基本的授权功能")
 public class AuthorizationController {
 
 //    private static final String RSA_PRIVATE_KEY_NAME  = "RSA_PRIVATE_KEY";

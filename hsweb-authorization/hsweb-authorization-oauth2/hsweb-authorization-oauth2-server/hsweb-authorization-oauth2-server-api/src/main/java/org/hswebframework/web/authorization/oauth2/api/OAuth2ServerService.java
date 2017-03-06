@@ -18,8 +18,8 @@
 
 package org.hswebframework.web.authorization.oauth2.api;
 
-import org.hswebframework.web.authorization.oauth2.entity.OAuth2AccessEntity;
-import org.hswebframework.web.authorization.oauth2.entity.OAuth2ClientEntity;
+import org.hswebframework.web.entity.authorization.oauth2.OAuth2AccessEntity;
+import org.hswebframework.web.entity.authorization.oauth2.OAuth2ClientEntity;
 
 /**
  * @author zhouhao
@@ -39,6 +39,8 @@ public interface OAuth2ServerService {
     OAuth2AccessEntity requestTokenByClientCredential(String clientId, String clientSecret);
 
     OAuth2AccessEntity requestTokenByPassword(String username, String password);
+
+    OAuth2AccessEntity requestTokenByImplicit(String clientId, String scope);
 
     OAuth2AccessEntity refreshToken(String clientId, String clientSecret, String refreshToken, String scope);
 

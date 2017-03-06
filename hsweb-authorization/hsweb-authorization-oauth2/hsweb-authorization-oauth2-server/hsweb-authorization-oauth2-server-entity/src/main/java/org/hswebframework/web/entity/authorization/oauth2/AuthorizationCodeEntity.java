@@ -16,7 +16,7 @@
  *
  */
 
-package org.hswebframework.web.authorization.oauth2.entity;
+package org.hswebframework.web.entity.authorization.oauth2;
 
 import org.hswebframework.web.commons.entity.Entity;
 

@@ -21,18 +21,20 @@ package org.hswebframework.web.authorization.oauth2.simple;
 import org.hswebframework.web.AuthorizeForbiddenException;
 import org.hswebframework.web.NotFoundException;
 import org.hswebframework.web.authorization.oauth2.api.OAuth2ServerService;
-import org.hswebframework.web.authorization.oauth2.dao.AuthorizationCodeDao;
-import org.hswebframework.web.authorization.oauth2.dao.OAuth2AccessDao;
-import org.hswebframework.web.authorization.oauth2.dao.OAuth2ClientDao;
-import org.hswebframework.web.authorization.oauth2.entity.AuthorizationCodeEntity;
-import org.hswebframework.web.authorization.oauth2.entity.OAuth2AccessEntity;
-import org.hswebframework.web.authorization.oauth2.entity.OAuth2ClientEntity;
+import org.hswebframework.web.dao.authorization.oauth2.AuthorizationCodeDao;
+import org.hswebframework.web.dao.authorization.oauth2.OAuth2AccessDao;
+import org.hswebframework.web.dao.authorization.oauth2.OAuth2ClientDao;
+import org.hswebframework.web.entity.authorization.oauth2.AuthorizationCodeEntity;
+import org.hswebframework.web.entity.authorization.oauth2.OAuth2AccessEntity;
+import org.hswebframework.web.entity.authorization.oauth2.OAuth2ClientEntity;
 import org.hswebframework.web.commons.entity.GenericEntity;
 import org.hswebframework.web.commons.entity.factory.EntityFactory;
 import org.hswebframework.web.entity.authorization.UserEntity;
 import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.service.DefaultDSLQueryService;
 import org.hswebframework.web.service.authorization.UserService;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 
@@ -45,15 +47,15 @@ import static org.hswebframework.web.service.DefaultDSLUpdateService.createUpdat
  *
  * @author zhouhao
  */
+@Service("oAuth2ServerService")
+@Transactional(rollbackFor = Throwable.class)
 public class SimpleOAuth2ServerService implements OAuth2ServerService {
 
     private static final String cacheName = "hsweb.oauth2";
     @Resource
-    private OAuth2ClientDao oAuth2ClientDao;
-
+    private OAuth2ClientDao      oAuth2ClientDao;
     @Resource
-    private OAuth2AccessDao oAuth2AccessDao;
-
+    private OAuth2AccessDao      oAuth2AccessDao;
     @Resource
     private AuthorizationCodeDao authorizationCodeDao;
     @Resource
@@ -115,38 +117,44 @@ public class SimpleOAuth2ServerService implements OAuth2ServerService {
 
     @Override
     public OAuth2AccessEntity requestTokenByCode(String code, String clientId, String clientSecret, String scope) {
-        OAuth2ClientEntity clientEntity = getClient(clientId, clientSecret);
-        if (null == clientEntity) {
-            // TODO: 17-2-28 自定义异常
-            throw new NotFoundException("client not found!");
-        }
-        AuthorizationCodeEntity codeEntity = createQuery(authorizationCodeDao)
-                .where("code", code)
-                .and("clientId", clientId)
-                .single();
+        AuthorizationCodeEntity codeEntity =
+                createQuery(authorizationCodeDao)
+                        .where("code", code)
+                        .and("clientId", clientId)
+                        .single();
         if (codeEntity == null) {
             throw new NotFoundException("code not found!");
         }
-        //授权码已经创建超时(20s)
-        if (System.currentTimeMillis() - codeEntity.getCreateTime() < 20 * 1000) {
-            throw new NotFoundException("time out!");
+        try {
+            //授权码已经创建超时(20s)
+            if (System.currentTimeMillis() - codeEntity.getCreateTime() < 20 * 1000) {
+                throw new NotFoundException("time out!");
+            }
+            // TODO: 17-2-28  验证scope
+
+            OAuth2ClientEntity clientEntity = getClient(clientId, clientSecret);
+            if (null == clientEntity) {
+                // TODO: 17-2-28 自定义异常
+                throw new NotFoundException("client not found!");
+            }
+            if (!clientEntity.grantTypeIsSupport("authorization_code")) {
+                throw new UnsupportedOperationException("grant_type:authorization_code not support!");
+            }
+            OAuth2AccessEntity accessEntity = createNewAccess();
+            accessEntity.setUserId(codeEntity.getUserId());
+            accessEntity.setClientId(clientId);
+            // TODO: 17-2-28 过期时间应该可配置
+            accessEntity.setExpireIn(3600L);
+            accessEntity.setScope(scope);
+            oAuth2AccessDao.insert(accessEntity);
+            return accessEntity;
+        } finally {
+            //删除使用过的授权码
+            createDelete(authorizationCodeDao)
+                    .where("code", code)
+                    .and("clientId", clientId)
+                    .exec();
         }
-        // TODO: 17-2-28  验证scope
-
-        //删除使用过的授权码
-        createDelete(authorizationCodeDao)
-                .where("code", code)
-                .and("clientId", clientId)
-                .exec();
-
-        OAuth2AccessEntity accessEntity = createNewAccess();
-        accessEntity.setUserId(codeEntity.getUserId());
-        accessEntity.setClientId(clientId);
-        // TODO: 17-2-28 过期时间应该可配置
-        accessEntity.setExpireIn(3600L);
-        accessEntity.setScope(scope);
-        oAuth2AccessDao.insert(accessEntity);
-        return accessEntity;
     }
 
     @Override
@@ -156,29 +164,44 @@ public class SimpleOAuth2ServerService implements OAuth2ServerService {
             // TODO: 17-2-28 自定义异常
             throw new NotFoundException("client not found!");
         }
+        if (!clientEntity.grantTypeIsSupport("client_credential")) {
+            throw new UnsupportedOperationException("grant_type:client_credential not support!");
+        }
+        return createNewTokenAndRemoveOld(clientEntity);
+    }
+
+    protected OAuth2AccessEntity createNewTokenAndRemoveOld(OAuth2ClientEntity clientEntity) {
         OAuth2AccessEntity oldEntity = DefaultDSLQueryService
                 .createQuery(oAuth2AccessDao)
                 .where("clientId", clientEntity.getId())
                 .and("userId", clientEntity.getOwnerId())
                 .single();
         OAuth2AccessEntity newEntity = createNewAccess();
-        if (null != oldEntity)
-            createDelete(oAuth2AccessDao)
-                    .where("clientId", oldEntity.getClientId())
-                    .and("accessToken", oldEntity.getAccessToken())
-                    .exec();
-
         if (oldEntity != null) {
             newEntity.setScope(oldEntity.getScope());
             newEntity.setExpireIn(oldEntity.getExpireIn());
             newEntity.setRefreshToken(oldEntity.getRefreshToken());
         } else {
             newEntity.setExpireIn(3600L);
+            newEntity.setScope("public");
         }
+        newEntity.setClientId(clientEntity.getId());
         newEntity.setUserId(clientEntity.getOwnerId());
-        newEntity.setScope("public");
         oAuth2AccessDao.insert(newEntity);
         return newEntity;
+    }
+
+    @Override
+    public OAuth2AccessEntity requestTokenByImplicit(String clientId, String scope) {
+        OAuth2ClientEntity clientEntity = getClient(clientId);
+        if (null == clientEntity) {
+            // TODO: 17-2-28 自定义异常
+            throw new NotFoundException("client not found!");
+        }
+        if (!clientEntity.grantTypeIsSupport("implicit")) {
+            throw new UnsupportedOperationException("grant_type:implicit not support!");
+        }
+        return createNewTokenAndRemoveOld(clientEntity);
     }
 
     @Override
@@ -187,10 +210,18 @@ public class SimpleOAuth2ServerService implements OAuth2ServerService {
         if (null == entity) throw new NotFoundException("user not found");
         if (!userService.encodePassword(password, entity.getSalt()).equals(entity.getPassword()))
             throw new AuthorizeForbiddenException("password error");
+        OAuth2ClientEntity clientEntity = DefaultDSLQueryService.createQuery(oAuth2ClientDao).where("user_id", entity.getId()).single();
+        if (clientEntity == null) {
+            throw new NotFoundException("client not found");
+        }
+        if (!clientEntity.grantTypeIsSupport("password")) {
+            throw new UnsupportedOperationException("grant_type:password not support!");
+        }
         OAuth2AccessEntity accessEntity = createNewAccess();
         accessEntity.setUserId(entity.getId());
         accessEntity.setScope("public");
         accessEntity.setExpireIn(3600L);
+        accessEntity.setClientId(clientEntity.getId());
         oAuth2AccessDao.insert(accessEntity);
         return accessEntity;
     }
@@ -201,6 +232,9 @@ public class SimpleOAuth2ServerService implements OAuth2ServerService {
         if (null == clientEntity) {
             // TODO: 17-2-28 自定义异常
             throw new NotFoundException("client not found!");
+        }
+        if (!clientEntity.grantTypeIsSupport("refresh_token")) {
+            throw new UnsupportedOperationException("grant_type:refresh_token not support!");
         }
         OAuth2AccessEntity accessEntity = DefaultDSLQueryService.createQuery(oAuth2AccessDao)
                 .where("refreshToken", refreshToken)

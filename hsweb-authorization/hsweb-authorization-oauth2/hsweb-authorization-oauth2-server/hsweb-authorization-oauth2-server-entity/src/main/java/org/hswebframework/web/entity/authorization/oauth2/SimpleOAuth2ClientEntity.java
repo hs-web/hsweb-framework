@@ -16,13 +16,13 @@
  *
  */
 
-package org.hswebframework.web.authorization.oauth2.entity;
+package org.hswebframework.web.entity.authorization.oauth2;
 
 import org.hswebframework.web.commons.entity.SimpleGenericEntity;
 
+import java.util.List;
+
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public class SimpleOAuth2ClientEntity extends SimpleGenericEntity<String> implements OAuth2ClientEntity {
@@ -40,14 +40,16 @@ public class SimpleOAuth2ClientEntity extends SimpleGenericEntity<String> implem
 
     private String type;
 
-    private String comments;
+    private String describe;
 
-    public String getComments() {
-        return comments;
+    private List<String> supportGrantType;
+
+    public String getDescribe() {
+        return describe;
     }
 
-    public void setComments(String comments) {
-        this.comments = comments;
+    public void setDescribe(String describe) {
+        this.describe = describe;
     }
 
     @Override
@@ -112,5 +114,15 @@ public class SimpleOAuth2ClientEntity extends SimpleGenericEntity<String> implem
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    @Override
+    public List<String> getSupportGrantType() {
+        return supportGrantType;
+    }
+
+    @Override
+    public void setSupportGrantType(List<String> supportGrantType) {
+        this.supportGrantType = supportGrantType;
     }
 }

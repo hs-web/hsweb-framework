@@ -16,11 +16,13 @@
  *
  */
 
-package org.hswebframework.web.authorization.oauth2.entity;
+package org.hswebframework.web.entity.authorization.oauth2;
 
 import org.hswebframework.web.authorization.User;
 import org.hswebframework.web.commons.entity.GenericEntity;
 import org.hswebframework.web.commons.entity.RecordCreationEntity;
+
+import java.util.List;
 
 /**
  * @author zhouhao
@@ -53,11 +55,20 @@ public interface OAuth2ClientEntity extends GenericEntity<String>, RecordCreatio
 
     void setOwnerId(String ownerId);
 
-    String getComments();
+    String getDescribe();
 
-    void setComments(String comments);
+    void setDescribe(String describe);
 
     String getType();
 
     void setType(String type);
+
+    List<String> getSupportGrantType();
+
+    void setSupportGrantType(List<String> supportGrantType);
+
+    default boolean grantTypeIsSupport(String grantType) {
+        if (getSupportGrantType() == null) return false;
+        return getSupportGrantType().contains(grantType) || getSupportGrantType().contains("*");
+    }
 }

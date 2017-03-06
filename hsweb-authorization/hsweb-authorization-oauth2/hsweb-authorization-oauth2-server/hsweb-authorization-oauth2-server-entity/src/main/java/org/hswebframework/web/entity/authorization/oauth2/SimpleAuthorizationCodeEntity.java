@@ -16,30 +16,30 @@
  *
  */
 
-package org.hswebframework.web.authorization.oauth2.entity;
+package org.hswebframework.web.entity.authorization.oauth2;
+
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
-public class SimpleOAuth2AccessEntity implements OAuth2AccessEntity {
-
+public class SimpleAuthorizationCodeEntity implements AuthorizationCodeEntity {
     private String clientId;
 
     private String userId;
 
-    private String accessToken;
-
-    private String refreshToken;
-
-    private Long expireIn;
+    private String code;
 
     private Long createTime;
 
-    private Long updateTime;
-
     private String scope;
+
+    public String getScope() {
+        return scope;
+    }
+
+    public void setScope(String scope) {
+        this.scope = scope;
+    }
 
     public String getClientId() {
         return clientId;
@@ -57,28 +57,12 @@ public class SimpleOAuth2AccessEntity implements OAuth2AccessEntity {
         this.userId = userId;
     }
 
-    public String getAccessToken() {
-        return accessToken;
+    public String getCode() {
+        return code;
     }
 
-    public void setAccessToken(String accessToken) {
-        this.accessToken = accessToken;
-    }
-
-    public String getRefreshToken() {
-        return refreshToken;
-    }
-
-    public void setRefreshToken(String refreshToken) {
-        this.refreshToken = refreshToken;
-    }
-
-    public Long getExpireIn() {
-        return expireIn;
-    }
-
-    public void setExpireIn(Long expireIn) {
-        this.expireIn = expireIn;
+    public void setCode(String code) {
+        this.code = code;
     }
 
     public Long getCreateTime() {
@@ -87,21 +71,5 @@ public class SimpleOAuth2AccessEntity implements OAuth2AccessEntity {
 
     public void setCreateTime(Long createTime) {
         this.createTime = createTime;
-    }
-
-    public Long getUpdateTime() {
-        return updateTime;
-    }
-
-    public void setUpdateTime(Long updateTime) {
-        this.updateTime = updateTime;
-    }
-
-    public String getScope() {
-        return scope;
-    }
-
-    public void setScope(String scope) {
-        this.scope = scope;
     }
 }

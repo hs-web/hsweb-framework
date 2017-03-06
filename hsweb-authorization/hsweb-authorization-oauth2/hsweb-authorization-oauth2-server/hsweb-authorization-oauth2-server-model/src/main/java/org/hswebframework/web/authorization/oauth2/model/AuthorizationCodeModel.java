@@ -16,47 +16,25 @@
  *
  */
 
-package org.hswebframework.web.authorization.oauth2.entity;
+package org.hswebframework.web.authorization.oauth2.model;
 
+import org.hswebframework.web.commons.model.Model;
 
 /**
- * TODO 完成注释
  *
  * @author zhouhao
  */
-public class SimpleAuthorizationCodeEntity implements AuthorizationCodeEntity {
-    private String clientId;
-
-    private String userId;
-
+public class AuthorizationCodeModel implements Model {
     private String code;
+    private String state;
+    private String redirectUri;
 
-    private Long createTime;
-
-    private String scope;
-
-    public String getScope() {
-        return scope;
+    public String getRedirectUri() {
+        return redirectUri;
     }
 
-    public void setScope(String scope) {
-        this.scope = scope;
-    }
-
-    public String getClientId() {
-        return clientId;
-    }
-
-    public void setClientId(String clientId) {
-        this.clientId = clientId;
-    }
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public void setRedirectUri(String redirectUri) {
+        this.redirectUri = redirectUri;
     }
 
     public String getCode() {
@@ -67,11 +45,11 @@ public class SimpleAuthorizationCodeEntity implements AuthorizationCodeEntity {
         this.code = code;
     }
 
-    public Long getCreateTime() {
-        return createTime;
+    public String getState() {
+        return state;
     }
 
-    public void setCreateTime(Long createTime) {
-        this.createTime = createTime;
+    public void setState(String state) {
+        this.state = state;
     }
 }

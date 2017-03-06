@@ -23,11 +23,13 @@ import org.hswebframework.web.authorization.Authorization;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.access.DataAccess;
 import org.hswebframework.web.commons.entity.factory.EntityFactory;
+import org.hswebframework.web.dao.authorization.oauth2.OAuth2ClientDao;
 import org.hswebframework.web.dao.datasource.DataSourceHolder;
 import org.hswebframework.web.dao.datasource.DatabaseType;
 import org.hswebframework.web.entity.authorization.*;
 import org.hswebframework.web.entity.authorization.bind.BindPermissionRoleEntity;
 import org.hswebframework.web.entity.authorization.bind.BindRoleUserEntity;
+import org.hswebframework.web.entity.authorization.oauth2.OAuth2ClientEntity;
 import org.hswebframework.web.service.authorization.PermissionService;
 import org.hswebframework.web.service.authorization.RoleService;
 import org.hswebframework.web.service.authorization.UserService;
@@ -115,6 +117,8 @@ public class SpringBootExample implements CommandLineRunner {
     @Autowired
     EntityFactory     entityFactory;
 
+    @Autowired
+    OAuth2ClientDao oAuth2ClientDao;
 
     public static void main(String[] args) {
         SpringApplication.run(SpringBootExample.class);
@@ -171,5 +175,18 @@ public class SpringBootExample implements CommandLineRunner {
         userEntity.setPassword("admin");
         userEntity.setRoles(Arrays.asList("admin"));
         userService.insert(userEntity);
+
+        OAuth2ClientEntity clientEntity = entityFactory.newInstance(OAuth2ClientEntity.class);
+
+        clientEntity.setId("test");
+        clientEntity.setSecret("test");
+        clientEntity.setOwnerId("admin");
+        clientEntity.setName("测试");
+        clientEntity.setType("test");
+        clientEntity.setCreatorId("admin");
+        clientEntity.setRedirectUri("http://localhost");
+        clientEntity.setCreateTime(System.currentTimeMillis());
+        clientEntity.setSupportGrantType(Arrays.asList("*"));
+        oAuth2ClientDao.insert(clientEntity);
     }
 }

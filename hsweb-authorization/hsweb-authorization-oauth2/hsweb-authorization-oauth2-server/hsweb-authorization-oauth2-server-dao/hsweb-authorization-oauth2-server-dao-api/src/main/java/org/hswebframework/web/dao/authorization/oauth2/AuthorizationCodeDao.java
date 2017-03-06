@@ -16,20 +16,21 @@
  *
  */
 
-package org.hswebframework.web.authorization.oauth2.dao;
+package org.hswebframework.web.dao.authorization.oauth2;
 
-import org.hswebframework.web.authorization.oauth2.entity.OAuth2AccessEntity;
+import org.hswebframework.web.entity.authorization.oauth2.AuthorizationCodeEntity;
 import org.hswebframework.web.dao.InsertDao;
 import org.hswebframework.web.dao.dynamic.DeleteByEntityDao;
 import org.hswebframework.web.dao.dynamic.QueryByEntityDao;
-import org.hswebframework.web.dao.dynamic.UpdateByEntityDao;
 
 /**
+ * TODO 完成注释
+ *
  * @author zhouhao
  */
-public interface OAuth2AccessDao extends
-        InsertDao<OAuth2AccessEntity>,
+public interface AuthorizationCodeDao extends
+        InsertDao<AuthorizationCodeEntity>,
         DeleteByEntityDao,
-        UpdateByEntityDao,
-        QueryByEntityDao<OAuth2AccessEntity> {
+        QueryByEntityDao<AuthorizationCodeEntity> {
+
 }

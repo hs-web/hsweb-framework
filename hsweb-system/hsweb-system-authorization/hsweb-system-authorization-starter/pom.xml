@@ -28,7 +28,6 @@
 
     <artifactId>hsweb-system-authorization-starter</artifactId>
 
-
     <build>
         <resources>
             <resource>

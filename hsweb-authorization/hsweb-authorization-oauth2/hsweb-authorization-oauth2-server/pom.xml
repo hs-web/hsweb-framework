@@ -34,13 +34,9 @@
         <module>hsweb-authorization-oauth2-server-dao</module>
         <module>hsweb-authorization-oauth2-server-api</module>
         <module>hsweb-authorization-oauth2-server-simple</module>
+        <module>hsweb-authorization-oauth2-server-controller</module>
+        <module>hsweb-authorization-oauth2-server-model</module>
+        <module>hsweb-authorization-oauth2-server-starter</module>
     </modules>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.apache.oltu.oauth2</groupId>
-            <artifactId>org.apache.oltu.oauth2.authzserver</artifactId>
-            <version>1.0.2</version>
-        </dependency>
-    </dependencies>
 </project>
