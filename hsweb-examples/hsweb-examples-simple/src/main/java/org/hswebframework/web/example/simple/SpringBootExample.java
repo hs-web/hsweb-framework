@@ -126,13 +126,16 @@ public class SpringBootExample implements CommandLineRunner {
 
     @Override
     public void run(String... strings) throws Exception {
+        //只能查询自己创建的数据
         DataAccessEntity accessEntity = new DataAccessEntity();
         accessEntity.setType(DataAccess.Type.OWN_CREATED.name());
         accessEntity.setAction(Permission.ACTION_QUERY);
 
+        //只能修改自己创建的数据
         DataAccessEntity updateAccessEntity = new DataAccessEntity();
         updateAccessEntity.setType(DataAccess.Type.OWN_CREATED.name());
         updateAccessEntity.setAction(Permission.ACTION_UPDATE);
+        //脚本方式自定义控制
 //        updateAccessEntity.setConfig(JSON.toJSONString(new SimpleScriptDataAccess("" +
 //                "println(id);" +
 //                "println(entity);" +

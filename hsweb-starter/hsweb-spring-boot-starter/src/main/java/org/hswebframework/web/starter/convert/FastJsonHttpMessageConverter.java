@@ -2,6 +2,7 @@ package org.hswebframework.web.starter.convert;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONPObject;
+import com.alibaba.fastjson.parser.ParserConfig;
 import com.alibaba.fastjson.serializer.PropertyPreFilter;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.serializer.SimplePropertyPreFilter;
@@ -28,6 +29,11 @@ import java.util.Map;
 import java.util.Set;
 
 public class FastJsonHttpMessageConverter extends AbstractHttpMessageConverter<Object> {
+
+    static {
+        // TODO: 17-3-16  白名单应可配置
+        ParserConfig.getGlobalInstance().addAccept("org.hswebframework.web.entity.");
+    }
 
     public final static Charset UTF8 = Charset.forName("UTF-8");
 

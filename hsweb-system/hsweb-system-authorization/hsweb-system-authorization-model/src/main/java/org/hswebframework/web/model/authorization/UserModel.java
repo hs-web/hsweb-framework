@@ -29,7 +29,7 @@ import org.hswebframework.web.commons.model.Model;
 public interface UserModel extends Model {
     void setName(String name);
 
-    @ApiModelProperty(value = "用户登录名", required = true, readOnly = true)
+    @ApiModelProperty(value = "用户名", required = true, readOnly = true)
     String getUsername();
 
     void setUsername(String username);

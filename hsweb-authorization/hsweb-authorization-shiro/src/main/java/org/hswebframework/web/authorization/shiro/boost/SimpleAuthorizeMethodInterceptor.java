@@ -114,7 +114,7 @@ public class SimpleAuthorizeMethodInterceptor extends AuthorizingAnnotationMetho
                 Function<Predicate<String>, Boolean> func = logicalIsOr
                         ? authorizeConfig.user.stream()::anyMatch
                         : authorizeConfig.user.stream()::allMatch;
-                access = func.apply(authorization.getUser().getId()::equals);
+                access = func.apply(authorization.getUser().getUsername()::equals);
             }
             if (!access) {
                 throw new AuthorizationException(authorizeConfig.message);

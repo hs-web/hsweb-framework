@@ -1,7 +1,6 @@
 package org.hswebframework.web.example.simple;
 
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
 import org.hswebframework.web.authorization.Authorization;
 import org.hswebframework.web.authorization.AuthorizationHolder;
 import org.hswebframework.web.authorization.Permission;
@@ -60,7 +59,6 @@ public class TestController implements QueryController<UserEntity, String, Query
     @RequiresDataAccess(permission = "test", action = Permission.ACTION_UPDATE)
     @RequiresFieldAccess(permission = "test", action = Permission.ACTION_UPDATE)
     public ResponseMessage<UserModel> testUpdate(@PathVariable String id, @RequestBody UserModel model) {
-
         return ResponseMessage.ok(model);
     }
 
