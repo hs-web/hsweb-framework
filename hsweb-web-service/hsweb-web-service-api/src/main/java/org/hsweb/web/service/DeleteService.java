@@ -17,7 +17,7 @@ public interface DeleteService<Pk> {
      */
     int delete(Pk pk);
 
-    Delete createDelete();
+    Delete<DeleteParam> createDelete();
 
     /**
      * 指定一个dao映射接口,接口需继承{@link GenericMapper}创建dsl数据删除操作对象<br>
@@ -32,10 +32,9 @@ public interface DeleteService<Pk> {
      * @see org.hsweb.ezorm.core.Conditional
      * @since 2.2
      */
-    static Delete createDelete(DeleteMapper mapper) {
-        Delete update = new Delete();
-        update.setParam(new DeleteParam());
-        update.setExecutor(param -> mapper.delete(((DeleteParam) param)));
+    static Delete<DeleteParam> createDelete(DeleteMapper mapper) {
+        Delete<DeleteParam> update = new Delete<>(new DeleteParam());
+        update.setExecutor(mapper::delete);
         return update;
     }
 
@@ -46,10 +45,9 @@ public interface DeleteService<Pk> {
      * @return {@link Delete}
      * @since 2.2
      */
-    static Delete createDelete(Delete.Executor<DeleteParam> executor) {
-        Delete update = new Delete();
-        update.setParam(new DeleteParam());
-        update.setExecutor(param -> executor.doExecute(((DeleteParam) param)));
+    static Delete<DeleteParam> createDelete(Delete.Executor<DeleteParam> executor) {
+        Delete<DeleteParam> update = new Delete<>(new DeleteParam());
+        update.setExecutor(executor::doExecute);
         return update;
     }
 

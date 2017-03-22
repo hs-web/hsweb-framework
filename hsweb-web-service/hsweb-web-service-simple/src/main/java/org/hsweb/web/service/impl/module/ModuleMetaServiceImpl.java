@@ -50,7 +50,7 @@ public class ModuleMetaServiceImpl extends AbstractServiceImpl<ModuleMeta, Strin
         return super.delete(s);
     }
 
-    static final Function<Object, Object> roleIdValueMapper = (value) -> "," + value + ",";
+    static final Function<String, String> roleIdValueMapper = (value) -> "," + value + ",";
 
     protected QueryParam createSelectByKeyAndRoleIdParam(String key, List<String> roleIds) {
         // (id = ? or key = ? or module_id = ? ) and (role_id like ? or .....) and (role_id is null or role_id ='')
@@ -61,8 +61,8 @@ public class ModuleMetaServiceImpl extends AbstractServiceImpl<ModuleMeta, Strin
                 //遍历roleId,使用 like %% 并将值转为 ,value, 格式进行查询
                 //如果有条件,应该写sql函数,将数据库中的值转为结果集和参数进行对比
                 .nest()
-                    .nest().each(roleId, roleIds, query -> query::$like$, roleIdValueMapper).end()
-                    .orNest().isNull(roleId).or().isEmpty(roleId).end()
+                .nest().each(roleId, roleIds, query -> query::$like$, roleIdValueMapper).end()
+                .orNest().isNull(roleId).or().isEmpty(roleId).end()
                 .end()
                 .getParam();
     }

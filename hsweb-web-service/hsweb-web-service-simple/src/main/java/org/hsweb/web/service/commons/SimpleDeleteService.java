@@ -24,7 +24,7 @@ public interface SimpleDeleteService<Pk> extends DeleteService<Pk> {
      * @see Delete
      * @see GenericService#createDelete(DeleteMapper)
      */
-    default Delete createDelete() {
+    default Delete<DeleteParam> createDelete() {
         return DeleteService.createDelete(getDeleteMapper());
     }
 
