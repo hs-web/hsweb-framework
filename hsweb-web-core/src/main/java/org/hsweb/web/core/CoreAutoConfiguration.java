@@ -40,7 +40,7 @@ public class CoreAutoConfiguration {
 
     private void initScript() {
         Map<String, Object> vars = new HashMap<>(expressionScopeBeanMap);
-        vars.put("LoginUser", (Supplier) () -> WebUtil.getLoginUser());
+        vars.put("LoginUser", (Supplier<User>) WebUtil::getLoginUser);
         vars.put("StringUtils", StringUtils.class);
         vars.put("User", User.class);
 

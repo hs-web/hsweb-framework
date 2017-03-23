@@ -19,6 +19,7 @@ public interface FormMapper extends GenericMapper<Form, String> {
      * @return 表单对象
      * @throws Exception
      */
+    @Deprecated
     Form selectUsing(String name);
 
     /**

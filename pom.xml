@@ -65,8 +65,8 @@
 
         <activiti.version>5.19.0.2</activiti.version>
 
-        <fastjson.version>1.2.6</fastjson.version>
-
+        <fastjson.version>1.2.28</fastjson.version>
+        <slf4j.version>1.7.21</slf4j.version>
         <h2.version>1.4.191</h2.version>
         <mysql.version>5.1.39</mysql.version>
         <cglib.version>3.2.2</cglib.version>
@@ -154,6 +154,11 @@
         <dependencies>
 
             <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>javax.transaction</groupId>
                 <artifactId>jta</artifactId>
                 <version>1.1</version>
@@ -219,6 +224,12 @@
                 <groupId>org.hsweb</groupId>
                 <artifactId>hsweb-expands-office</artifactId>
                 <version>${hsweb.expands.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-api</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.hsweb</groupId>
@@ -246,6 +257,12 @@
                 <version>${hsweb.ezorm.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-api</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.hsweb</groupId>

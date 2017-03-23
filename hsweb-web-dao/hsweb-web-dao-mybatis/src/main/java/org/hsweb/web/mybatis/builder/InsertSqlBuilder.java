@@ -23,8 +23,8 @@ public class InsertSqlBuilder extends SimpleInsertSqlRender {
     }
 
     @Override
-    protected SqlAppender getParamString(String paramName, RDBColumnMetaData rdbColumnMetaData) {
-        return new SqlAppender().add("#{", paramName,
+    protected SqlAppender getParamString(String prefix, String paramName, RDBColumnMetaData rdbColumnMetaData) {
+        return new SqlAppender().add("#{", prefix, paramName,
                 ",javaType=", EasyOrmSqlBuilder.getJavaType(rdbColumnMetaData.getJavaType()),
                 ",jdbcType=", rdbColumnMetaData.getJdbcType(), "}");
     }
