@@ -40,11 +40,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.transaction.jta.JtaTransactionManager;
 
 import javax.sql.DataSource;
 import javax.transaction.SystemException;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.util.Properties;
 
 @Configuration
@@ -128,10 +130,14 @@ public class DynamicDataSourceAutoConfiguration {
 
         private <T extends Annotation> T getAnn(ProceedingJoinPoint pjp, Class<T> annClass) {
             MethodSignature signature = (MethodSignature) pjp.getSignature();
-            T ann = ClassUtils.getAnnotation(signature.getMethod(), annClass);
-            if (null == ann)
-                ann = ClassUtils.getAnnotation(pjp.getTarget().getClass(), annClass);
-            return ann;
+            Method m = signature.getMethod();
+            T a = AnnotationUtils.findAnnotation(m, annClass);
+            if (a != null) return a;
+            Class<?> targetClass = pjp.getThis().getClass();
+            m = org.springframework.util.ClassUtils.getMostSpecificMethod(m, targetClass);
+            a = AnnotationUtils.findAnnotation(m, annClass);
+            if (a != null) return a;
+            return AnnotationUtils.findAnnotation(pjp.getThis().getClass(), annClass);
         }
 
         @Around(value = "within(@org.hsweb.web.datasource.dynamic.UseDataSource *)||@annotation(org.hsweb.web.datasource.dynamic.UseDataSource)")
