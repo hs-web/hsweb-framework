@@ -6,7 +6,7 @@
     <groupId>org.hsweb</groupId>
     <artifactId>hsweb-framework</artifactId>
     <packaging>pom</packaging>
-    <version>2.2-SNAPSHOT</version>
+    <version>2.2</version>
 
     <name>${project.groupId}:${project.artifactId}</name>
     <url>http://www.hsweb.me</url>
@@ -72,9 +72,9 @@
         <cglib.version>3.2.2</cglib.version>
         <aspectj.version>1.6.12</aspectj.version>
         <hibernate.validator.version>5.1.1.Final</hibernate.validator.version>
-        <hsweb.ezorm.version>1.1-SNAPSHOT</hsweb.ezorm.version>
-        <hsweb.commons.version>1.0-SNAPSHOT</hsweb.commons.version>
-        <hsweb.expands.version>1.0-SNAPSHOT</hsweb.expands.version>
+        <hsweb.ezorm.version>1.1</hsweb.ezorm.version>
+        <hsweb.commons.version>1.0</hsweb.commons.version>
+        <hsweb.expands.version>1.0</hsweb.expands.version>
     </properties>
 
     <build>
