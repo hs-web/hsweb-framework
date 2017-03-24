@@ -5,9 +5,9 @@ package org.hswebframework.web.authorization.access;
  *
  * @author zhouhao
  */
-public interface ScriptDataAccess extends DataAccess {
+public interface ScriptDataAccessConfig extends DataAccessConfig {
     default String getType() {
-        return Type.CUSTOM.name();
+        return DefaultType.SCRIPT;
     }
 
     /**

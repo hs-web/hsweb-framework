@@ -16,21 +16,30 @@
  *
  */
 
-package org.hswebframework.web.authorization.access;
-
-import java.util.List;
+package org.hswebframework.web.boost.validator;
 
 /**
- * 根据字段判断是否存在重复的数据
+ * 通过脚本来控制数据重复
  *
  * @author zhouhao
- * @since 3.0
  */
-public interface FiledDuplicateValidatorConfig extends DuplicateValidatorConfig {
-    @Override
+public interface ScriptDuplicateValidatorConfig extends DuplicateValidatorConfig {
     default String getType() {
-        return DefaultType.FIELDS;
+        return DefaultType.SCRIPT;
     }
 
-    List<String> getFields();
+    /**
+     * 脚本语言: javascript(js),groovy
+     *
+     * @return 语言
+     */
+    String getScriptLanguage();
+
+    /**
+     * 脚本内容,在进行验证的时候会执行脚本,如果存在重复数据脚本应当返回false。否则返回true
+     *
+     * @return 脚本
+     */
+    String getScript();
+
 }

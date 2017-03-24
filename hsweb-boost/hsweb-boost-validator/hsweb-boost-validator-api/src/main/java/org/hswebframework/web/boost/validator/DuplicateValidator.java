@@ -16,7 +16,9 @@
  *
  */
 
-package org.hswebframework.web.authorization.access;
+package org.hswebframework.web.boost.validator;
+
+import org.hswebframework.web.boost.aop.context.MethodInterceptorParamContext;
 
 /**
  * 重复数据验证器,验证数据是否重复
@@ -24,7 +26,7 @@ package org.hswebframework.web.authorization.access;
  * @author zhouhao
  */
 public interface DuplicateValidator {
-    Result doValidate(DuplicateValidatorConfig validator, ParamContext context);
+    Result doValidate(DuplicateValidatorConfig validator, MethodInterceptorParamContext context);
 
     /**
      * 验证结果

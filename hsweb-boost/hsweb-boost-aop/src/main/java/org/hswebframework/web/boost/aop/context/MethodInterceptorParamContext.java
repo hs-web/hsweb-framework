@@ -1,4 +1,22 @@
-package org.hswebframework.web.authorization.access;
+/*
+ *  Copyright 2016 http://www.hswebframework.org
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ *
+ */
+
+package org.hswebframework.web.boost.aop.context;
 
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
@@ -7,12 +25,12 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * 参数上下文，用于获取当前进行操作的方法的各种参数信息，如:当前所在类实例，参数集合，注解
+ * AOP拦截到方法的参数上下文，用于获取当前进行操作的方法的各种参数信息，如:当前所在类实例，参数集合，注解
  *
  * @author zhouhao
  * @see 3.0
  */
-public interface ParamContext extends Serializable {
+public interface MethodInterceptorParamContext extends Serializable {
 
     /**
      * 获取当前类实例

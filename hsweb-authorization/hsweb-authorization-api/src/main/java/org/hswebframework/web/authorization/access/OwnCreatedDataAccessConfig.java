@@ -5,8 +5,8 @@ package org.hswebframework.web.authorization.access;
  *
  * @author zhouhao
  */
-public interface OwnCreatedDataAccess extends DataAccess {
+public interface OwnCreatedDataAccessConfig extends DataAccessConfig {
     default String getType() {
-        return Type.OWN_CREATED.name();
+        return DefaultType.OWN_CREATED;
     }
 }

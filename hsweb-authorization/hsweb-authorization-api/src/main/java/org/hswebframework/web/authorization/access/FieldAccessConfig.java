@@ -9,7 +9,7 @@ import java.util.Set;
  * @author zhouhao
  * @see FieldAccessController
  */
-public interface FieldAccess extends Serializable {
+public interface FieldAccessConfig extends Serializable {
     /**
      * 获取字段名称,字段名称支持嵌套如: user.info.name
      * 此值为不能操作的字段

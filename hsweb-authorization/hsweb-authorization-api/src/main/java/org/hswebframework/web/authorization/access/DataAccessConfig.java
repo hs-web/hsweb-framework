@@ -29,10 +29,10 @@ import java.io.Serializable;
  *
  * @author zhouhao
  * @see org.hswebframework.web.authorization.access.CustomDataAccess
- * @see org.hswebframework.web.authorization.access.OwnCreatedDataAccess
- * @see org.hswebframework.web.authorization.access.ScriptDataAccess
+ * @see OwnCreatedDataAccessConfig
+ * @see ScriptDataAccessConfig
  */
-public interface DataAccess extends Serializable {
+public interface DataAccessConfig extends Serializable {
 
     /**
      * 对数据的操作事件
@@ -50,22 +50,19 @@ public interface DataAccess extends Serializable {
      * 控制方式标识
      *
      * @return 控制方式
-     * @see Type#name()
+     * @see DefaultType
      */
     String getType();
 
     /**
      * 内置3中控制方式
      */
-    enum Type {
-        OWN_CREATED("自己创建的数据"),
-        SCRIPT("脚本"),
-        CUSTOM("自定义控制器");
-
-        public final String text;
-
-        Type(String text) {
-            this.text = text;
-        }
+    interface DefaultType {
+        //自己创建的数据
+        String OWN_CREATED = "OWN_CREATED";
+        //脚本
+        String SCRIPT      = "SCRIPT";
+        //自定义控制器
+        String CUSTOM      = "CUSTOM";
     }
 }

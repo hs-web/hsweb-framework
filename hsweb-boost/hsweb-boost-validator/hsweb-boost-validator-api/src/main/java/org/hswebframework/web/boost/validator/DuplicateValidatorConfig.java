@@ -16,9 +16,8 @@
  *
  */
 
-package org.hswebframework.web.authorization.access;
+package org.hswebframework.web.boost.validator;
 
-import org.hswebframework.web.authorization.Permission;
 
 import java.io.Serializable;
 
@@ -31,9 +30,9 @@ public interface DuplicateValidatorConfig extends Serializable {
     /**
      * 对数据的操作事件
      *
-     * @return 操作时间
-     * @see Permission#ACTION_UPDATE
-     * @see Permission#ACTION_ADD
+     * @return 操作事件
+     * @see org.hswebframework.web.authorization.Permission#ACTION_UPDATE
+     * @see org.hswebframework.web.authorization.Permission#ACTION_ADD
      */
     String getAction();
 
