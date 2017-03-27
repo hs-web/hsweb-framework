@@ -16,25 +16,26 @@
  *
  */
 
-package org.hswebframework.web.authorization.shiro;
+package org.hswebframework.web.authorization.shiro.remember;
 
-import org.hswebframework.web.authorization.listener.AuthorizationListener;
-import org.hswebframework.web.authorization.listener.event.AuthorizationExitEvent;
+import org.apache.shiro.subject.PrincipalCollection;
+
+import java.io.Serializable;
+import java.util.Optional;
 
 /**
- *
  * @author zhouhao
  */
-public class LoginExitListener implements AuthorizationListener<AuthorizationExitEvent> {
+public interface RememberInfo extends Serializable {
 
-    private ListenerAuthorizingRealm listenerAuthorizingRealm;
+    String getKey();
 
-    public LoginExitListener(ListenerAuthorizingRealm listenerAuthorizingRealm) {
-        this.listenerAuthorizingRealm = listenerAuthorizingRealm;
-    }
+    <T> Optional<T> getProperty(String name);
 
-    @Override
-    public void on(AuthorizationExitEvent event) {
-        listenerAuthorizingRealm.loginOut(event.getAuthentication());
-    }
+    <T> T setProperty(String name, T value);
+
+    PrincipalCollection getPrincipal();
+
+    Long getCreateTime();
+
 }

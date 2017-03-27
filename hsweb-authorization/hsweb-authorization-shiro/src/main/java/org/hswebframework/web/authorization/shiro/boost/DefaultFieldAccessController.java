@@ -2,9 +2,9 @@ package org.hswebframework.web.authorization.shiro.boost;
 
 import org.apache.commons.beanutils.BeanUtilsBean;
 import org.hswebframework.web.authorization.Permission;
-import org.hswebframework.web.authorization.access.FieldAccess;
+import org.hswebframework.web.authorization.access.FieldAccessConfig;
 import org.hswebframework.web.authorization.access.FieldAccessController;
-import org.hswebframework.web.authorization.access.ParamContext;
+import org.hswebframework.web.boost.aop.context.MethodInterceptorParamContext;
 import org.hswebframework.web.commons.entity.Entity;
 import org.hswebframework.web.commons.entity.RecordCreationEntity;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
@@ -27,7 +27,7 @@ public class DefaultFieldAccessController implements FieldAccessController {
     private Logger logger = LoggerFactory.getLogger(DefaultFieldAccessController.class);
 
     @Override
-    public boolean doAccess(String action, Set<FieldAccess> accesses, ParamContext params) {
+    public boolean doAccess(String action, Set<FieldAccessConfig> accesses, MethodInterceptorParamContext params) {
         //控制转发
         switch (action) {
             case Permission.ACTION_QUERY:
@@ -51,12 +51,12 @@ public class DefaultFieldAccessController implements FieldAccessController {
      * @see BeanUtilsBean
      * @see org.apache.commons.beanutils.PropertyUtilsBean
      */
-    protected boolean doUpdateAccess(Set<FieldAccess> accesses, ParamContext params) {
+    protected boolean doUpdateAccess(Set<FieldAccessConfig> accesses, MethodInterceptorParamContext params) {
         Object supportParam = params.getParams().values().stream()
                 .filter(param -> (param instanceof Entity) | (param instanceof Model))
                 .findAny().orElse(null);
         if (null != supportParam) {
-            for (FieldAccess access : accesses) {
+            for (FieldAccessConfig access : accesses) {
                 try {
                     //设置值为null,跳过修改
                     BeanUtilsBean.getInstance()
@@ -84,13 +84,13 @@ public class DefaultFieldAccessController implements FieldAccessController {
      * @param params   参数上下文
      * @return true
      */
-    protected boolean doQueryAccess(Set<FieldAccess> accesses, ParamContext params) {
+    protected boolean doQueryAccess(Set<FieldAccessConfig> accesses, MethodInterceptorParamContext params) {
         QueryParamEntity paramEntity = params.getParams().values().stream()
                 .filter(QueryParamEntity.class::isInstance)
                 .map(QueryParamEntity.class::cast)
                 .findAny().orElse(null);
         if (paramEntity != null) {
-            paramEntity.excludes(accesses.stream().map(FieldAccess::getField).toArray(String[]::new));
+            paramEntity.excludes(accesses.stream().map(FieldAccessConfig::getField).toArray(String[]::new));
         } else {
             logger.warn("doQueryAccess skip ,because can not found any QueryParamEntity in param!");
         }

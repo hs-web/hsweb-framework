@@ -16,25 +16,23 @@
  *
  */
 
-package org.hswebframework.web.authorization.shiro;
+package org.hswebframework.web.authorization.shiro.remember;
 
-import org.hswebframework.web.authorization.listener.AuthorizationListener;
-import org.hswebframework.web.authorization.listener.event.AuthorizationExitEvent;
+import org.apache.shiro.subject.PrincipalCollection;
 
 /**
+ * TODO 完成注释
  *
  * @author zhouhao
  */
-public class LoginExitListener implements AuthorizationListener<AuthorizationExitEvent> {
+public interface RememberStorage {
 
-    private ListenerAuthorizingRealm listenerAuthorizingRealm;
+    RememberInfo create(PrincipalCollection collection);
 
-    public LoginExitListener(ListenerAuthorizingRealm listenerAuthorizingRealm) {
-        this.listenerAuthorizingRealm = listenerAuthorizingRealm;
-    }
+    RememberInfo get(String key);
 
-    @Override
-    public void on(AuthorizationExitEvent event) {
-        listenerAuthorizingRealm.loginOut(event.getAuthentication());
-    }
+    RememberInfo remove(String key);
+
+    void put(RememberInfo rememberInfo);
+
 }

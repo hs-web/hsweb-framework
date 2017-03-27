@@ -17,17 +17,18 @@
 
 package org.hswebframework.web.authorization.shiro.boost;
 
+import org.apache.shiro.aop.AnnotationResolver;
 import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.authz.aop.AuthorizingAnnotationHandler;
 import org.apache.shiro.authz.aop.AuthorizingAnnotationMethodInterceptor;
-import org.hswebframework.web.authorization.Authorization;
-import org.hswebframework.web.authorization.AuthorizationHolder;
+import org.hswebframework.web.authorization.Authentication;
+import org.hswebframework.web.authorization.AuthenticationHolder;
 import org.hswebframework.web.authorization.Permission;
-import org.hswebframework.web.authorization.access.FieldAccess;
+import org.hswebframework.web.authorization.access.FieldAccessConfig;
 import org.hswebframework.web.authorization.access.FieldAccessController;
-import org.hswebframework.web.authorization.access.ParamContext;
-import org.hswebframework.web.authorization.annotation.RequiresDataAccess;
 import org.hswebframework.web.authorization.annotation.RequiresFieldAccess;
+import org.hswebframework.web.boost.aop.context.MethodInterceptorHolder;
+import org.hswebframework.web.boost.aop.context.MethodInterceptorParamContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,8 +43,8 @@ import java.util.stream.Collectors;
  */
 public class FieldAccessAnnotationMethodInterceptor extends AuthorizingAnnotationMethodInterceptor {
 
-    public FieldAccessAnnotationMethodInterceptor(FieldAccessController controller) {
-        super(new DataAccessAnnotationHandler(controller));
+    public FieldAccessAnnotationMethodInterceptor(FieldAccessController controller,AnnotationResolver resolver) {
+        super(new DataAccessAnnotationHandler(controller),resolver);
     }
 
     private static final Logger logger = LoggerFactory.getLogger(FieldAccessAnnotationMethodInterceptor.class);
@@ -65,15 +66,15 @@ public class FieldAccessAnnotationMethodInterceptor extends AuthorizingAnnotatio
                 return;
             }
             RequiresFieldAccess accessAnn = ((RequiresFieldAccess) a);
-            ParamContext context = holder.createParamContext();
-            Authorization authorization = AuthorizationHolder.get();
-            if (authorization == null) {
+            MethodInterceptorParamContext context = holder.createParamContext();
+            Authentication authentication = AuthenticationHolder.get();
+            if (authentication == null) {
                 throw new AuthorizationException("{no_authorization}");
             }
             String permission = accessAnn.permission();
-            Permission permissionInfo = authorization.getPermission(permission);
+            Permission permissionInfo = authentication.getPermission(permission);
 
-            Set<FieldAccess> accesses = permissionInfo
+            Set<FieldAccessConfig> accesses = permissionInfo
                     .getFieldAccesses()
                     .stream()
                     .filter(access -> access.getActions().contains(accessAnn.action()))

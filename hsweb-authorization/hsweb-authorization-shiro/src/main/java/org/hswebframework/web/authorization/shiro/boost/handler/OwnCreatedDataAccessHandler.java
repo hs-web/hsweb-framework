@@ -1,13 +1,13 @@
 package org.hswebframework.web.authorization.shiro.boost.handler;
 
 import org.hsweb.ezorm.core.param.Term;
-import org.hswebframework.web.authorization.AuthorizationHolder;
+import org.hswebframework.web.authorization.AuthenticationHolder;
 import org.hswebframework.web.authorization.Permission;
-import org.hswebframework.web.authorization.access.DataAccess;
+import org.hswebframework.web.authorization.access.DataAccessConfig;
 import org.hswebframework.web.authorization.access.DataAccessHandler;
-import org.hswebframework.web.authorization.access.OwnCreatedDataAccess;
-import org.hswebframework.web.authorization.access.ParamContext;
+import org.hswebframework.web.authorization.access.OwnCreatedDataAccessConfig;
 import org.hswebframework.web.authorization.annotation.RequiresDataAccess;
+import org.hswebframework.web.boost.aop.context.MethodInterceptorParamContext;
 import org.hswebframework.web.commons.entity.Entity;
 import org.hswebframework.web.commons.entity.RecordCreationEntity;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
@@ -29,13 +29,13 @@ public class OwnCreatedDataAccessHandler implements DataAccessHandler {
     private static final Logger logger = LoggerFactory.getLogger(OwnCreatedDataAccessHandler.class);
 
     @Override
-    public boolean isSupport(DataAccess access) {
-        return access instanceof OwnCreatedDataAccess;
+    public boolean isSupport(DataAccessConfig access) {
+        return access instanceof OwnCreatedDataAccessConfig;
     }
 
     @Override
-    public boolean handle(DataAccess access, ParamContext context) {
-        OwnCreatedDataAccess own = ((OwnCreatedDataAccess) access);
+    public boolean handle(DataAccessConfig access, MethodInterceptorParamContext context) {
+        OwnCreatedDataAccessConfig own = ((OwnCreatedDataAccessConfig) access);
         Object controller = context.getTarget();
         if (controller != null) {
             switch (access.getAction()) {
@@ -57,14 +57,14 @@ public class OwnCreatedDataAccessHandler implements DataAccessHandler {
         return true;
     }
 
-    public boolean putCreatorId(OwnCreatedDataAccess access, ParamContext context) {
+    public boolean putCreatorId(OwnCreatedDataAccessConfig access, MethodInterceptorParamContext context) {
         RecordCreationEntity entity = context.getParams()
                 .values().stream()
                 .filter(RecordCreationEntity.class::isInstance)
                 .map(RecordCreationEntity.class::cast)
                 .findAny().orElse(null);
         if (entity != null) {
-            entity.setCreatorId(AuthorizationHolder.get().getUser().getId());
+            entity.setCreatorId(AuthenticationHolder.get().getUser().getId());
         } else {
             logger.warn("try put creatorId property,but not found any RecordCreationEntity!");
         }
@@ -72,7 +72,7 @@ public class OwnCreatedDataAccessHandler implements DataAccessHandler {
     }
 
     @SuppressWarnings("unchecked")
-    protected boolean doRWAccess(OwnCreatedDataAccess access, ParamContext context, Object controller) {
+    protected boolean doRWAccess(OwnCreatedDataAccessConfig access, MethodInterceptorParamContext context, Object controller) {
         //获取注解
         RequiresDataAccess dataAccess = context.getAnnotation(RequiresDataAccess.class);
         Object id = context.<String>getParameter(dataAccess.idParamName()).orElse(null);
@@ -85,7 +85,7 @@ public class OwnCreatedDataAccessHandler implements DataAccessHandler {
                 QueryService<RecordCreationEntity, Object> queryService =
                         ((QueryController<RecordCreationEntity, Object, Entity>) controller).getService();
                 RecordCreationEntity oldData = queryService.selectByPk(id);
-                if (oldData != null && !AuthorizationHolder.get().getUser().getId().equals(oldData.getCreatorId())) {
+                if (oldData != null && !AuthenticationHolder.get().getUser().getId().equals(oldData.getCreatorId())) {
                     return false;
                 }
             }
@@ -93,7 +93,7 @@ public class OwnCreatedDataAccessHandler implements DataAccessHandler {
         return true;
     }
 
-    protected boolean doQueryAccess(OwnCreatedDataAccess access, ParamContext context) {
+    protected boolean doQueryAccess(OwnCreatedDataAccessConfig access, MethodInterceptorParamContext context) {
         Entity entity = context.getParams()
                 .values().stream()
                 .filter(Entity.class::isInstance)
@@ -113,11 +113,11 @@ public class OwnCreatedDataAccessHandler implements DataAccessHandler {
             queryParamEntity.setTerms(new ArrayList<>());
             //添加一个查询条件
             queryParamEntity
-                    .where("creatorId", AuthorizationHolder.get().getUser().getId())
+                    .where("creatorId", AuthenticationHolder.get().getUser().getId())
                     //客户端提交的参数 作为嵌套参数
                     .nest().setTerms(oldParam);
         } else if (entity instanceof RecordCreationEntity) {
-            ((RecordCreationEntity) entity).setCreatorId(AuthorizationHolder.get().getUser().getId());
+            ((RecordCreationEntity) entity).setCreatorId(AuthenticationHolder.get().getUser().getId());
         } else {
             logger.warn("try validate query access,but entity not support, QueryParamEntity and RecordCreationEntity support now!");
         }

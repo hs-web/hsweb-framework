@@ -19,18 +19,20 @@
 package org.hswebframework.web.authorization.shiro.boost;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.shiro.aop.AnnotationResolver;
 import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.shiro.authz.aop.AuthorizingAnnotationHandler;
 import org.apache.shiro.authz.aop.AuthorizingAnnotationMethodInterceptor;
 import org.hswebframework.expands.script.engine.DynamicScriptEngine;
 import org.hswebframework.expands.script.engine.DynamicScriptEngineFactory;
-import org.hswebframework.web.authorization.Authorization;
-import org.hswebframework.web.authorization.AuthorizationHolder;
+import org.hswebframework.web.authorization.Authentication;
+import org.hswebframework.web.authorization.AuthenticationHolder;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.Role;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.annotation.Logical;
+import org.hswebframework.web.boost.aop.context.MethodInterceptorHolder;
 import org.hswebframwork.utils.ClassUtils;
 import org.hswebframwork.utils.StringUtils;
 import org.slf4j.Logger;
@@ -48,8 +50,8 @@ import java.util.stream.Collectors;
  * @author zhouhao
  */
 public class SimpleAuthorizeMethodInterceptor extends AuthorizingAnnotationMethodInterceptor {
-    public SimpleAuthorizeMethodInterceptor() {
-        super(new AuthorizeAnnotationHandler());
+    public SimpleAuthorizeMethodInterceptor(AnnotationResolver resolver) {
+        super(new AuthorizeAnnotationHandler(), resolver);
     }
 
     private static final Logger logger = LoggerFactory.getLogger(SimpleAuthorizeMethodInterceptor.class);
@@ -78,14 +80,14 @@ public class SimpleAuthorizeMethodInterceptor extends AuthorizingAnnotationMetho
             }
             authorizeConfig.put(authorize);
 
-            Authorization authorization = AuthorizationHolder.get();
-            if (null == authorization) throw new UnauthenticatedException(authorizeConfig.message);
+            Authentication authentication = AuthenticationHolder.get();
+            if (null == authentication) throw new UnauthenticatedException(authorizeConfig.message);
             boolean access = true;
             Logical logical = authorizeConfig.logical == Logical.DEFAULT ? Logical.OR : authorizeConfig.logical;
             boolean logicalIsOr = logical == Logical.OR;
             // 控制权限
             if (!authorizeConfig.permission.isEmpty()) {
-                List<Permission> permissions = authorization.getPermissions().stream()
+                List<Permission> permissions = authentication.getPermissions().stream()
                         .filter(permission -> {
                             // 未持有任何一个权限
                             if (!authorizeConfig.permission.contains(permission.getId())) return false;
@@ -105,8 +107,8 @@ public class SimpleAuthorizeMethodInterceptor extends AuthorizingAnnotationMetho
             //控制角色
             if (!authorizeConfig.role.isEmpty()) {
                 Function<Predicate<Role>, Boolean> func = logicalIsOr
-                        ? authorization.getRoles().stream()::anyMatch
-                        : authorization.getRoles().stream()::allMatch;
+                        ? authentication.getRoles().stream()::anyMatch
+                        : authentication.getRoles().stream()::allMatch;
                 access = func.apply(role -> authorizeConfig.role.contains(role.getId()));
             }
             //控制用户
@@ -114,7 +116,7 @@ public class SimpleAuthorizeMethodInterceptor extends AuthorizingAnnotationMetho
                 Function<Predicate<String>, Boolean> func = logicalIsOr
                         ? authorizeConfig.user.stream()::anyMatch
                         : authorizeConfig.user.stream()::allMatch;
-                access = func.apply(authorization.getUser().getUsername()::equals);
+                access = func.apply(authentication.getUser().getUsername()::equals);
             }
             if (!access) {
                 throw new AuthorizationException(authorizeConfig.message);

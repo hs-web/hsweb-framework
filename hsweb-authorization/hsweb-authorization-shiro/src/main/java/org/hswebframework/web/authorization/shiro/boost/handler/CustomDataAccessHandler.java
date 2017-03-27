@@ -19,6 +19,7 @@
 package org.hswebframework.web.authorization.shiro.boost.handler;
 
 import org.hswebframework.web.authorization.access.*;
+import org.hswebframework.web.boost.aop.context.MethodInterceptorParamContext;
 
 /**
  * 当配置为自定义处理器时(实现{@link CustomDataAccess }接口),此处理器生效
@@ -29,12 +30,12 @@ import org.hswebframework.web.authorization.access.*;
 public class CustomDataAccessHandler implements DataAccessHandler {
 
     @Override
-    public boolean isSupport(DataAccess access) {
+    public boolean isSupport(DataAccessConfig access) {
         return access instanceof CustomDataAccess;
     }
 
     @Override
-    public boolean handle(DataAccess access, ParamContext context) {
+    public boolean handle(DataAccessConfig access, MethodInterceptorParamContext context) {
         CustomDataAccess custom = ((CustomDataAccess) access);
         return custom.getController().doAccess(access, context);
     }

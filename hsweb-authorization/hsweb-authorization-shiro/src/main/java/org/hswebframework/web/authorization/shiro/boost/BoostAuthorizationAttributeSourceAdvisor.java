@@ -17,10 +17,13 @@
 
 package org.hswebframework.web.authorization.shiro.boost;
 
+import org.apache.shiro.aop.AnnotationResolver;
 import org.apache.shiro.authz.annotation.*;
 import org.apache.shiro.mgt.SecurityManager;
+import org.apache.shiro.spring.aop.SpringAnnotationResolver;
 import org.apache.shiro.spring.security.interceptor.AopAllianceAnnotationsAuthorizingMethodInterceptor;
 import org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor;
+import org.hswebframework.web.AopUtils;
 import org.hswebframework.web.authorization.access.DataAccessController;
 import org.hswebframework.web.authorization.access.FieldAccessController;
 import org.hswebframework.web.authorization.annotation.Authorize;
@@ -28,6 +31,7 @@ import org.hswebframework.web.authorization.annotation.RequiresDataAccess;
 import org.hswebframework.web.authorization.annotation.RequiresExpression;
 import org.hswebframework.web.authorization.annotation.RequiresFieldAccess;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
+import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationUtils;
 
 import java.lang.annotation.Annotation;
@@ -43,8 +47,11 @@ public class BoostAuthorizationAttributeSourceAdvisor extends StaticMethodMatche
     @SuppressWarnings("unchecked")
     private static final Class<? extends Annotation>[] AUTHZ_ANNOTATION_CLASSES =
             new Class[]{
-                    RequiresPermissions.class, RequiresRoles.class,
-                    RequiresUser.class, RequiresGuest.class, RequiresAuthentication.class,
+                    RequiresPermissions.class,
+                    RequiresRoles.class,
+                    RequiresUser.class,
+                    RequiresGuest.class,
+                    RequiresAuthentication.class,
                     //自定义
                     RequiresExpression.class,
                     Authorize.class,
@@ -63,14 +70,15 @@ public class BoostAuthorizationAttributeSourceAdvisor extends StaticMethodMatche
     public BoostAuthorizationAttributeSourceAdvisor(DataAccessController dataAccessController,
                                                     FieldAccessController fieldAccessController) {
         AopAllianceAnnotationsAuthorizingMethodInterceptor interceptor = new AopAllianceAnnotationsAuthorizingMethodInterceptor();
+        AnnotationResolver resolver = new SpringAnnotationResolver();
         // @RequiresExpression support
-        interceptor.getMethodInterceptors().add(new ExpressionAnnotationMethodInterceptor());
+        interceptor.getMethodInterceptors().add(new ExpressionAnnotationMethodInterceptor(resolver));
         // @RequiresDataAccess support
-        interceptor.getMethodInterceptors().add(new DataAccessAnnotationMethodInterceptor(dataAccessController));
+        interceptor.getMethodInterceptors().add(new DataAccessAnnotationMethodInterceptor(dataAccessController, resolver));
         // @RequiresFieldAccess support
-        interceptor.getMethodInterceptors().add(new FieldAccessAnnotationMethodInterceptor(fieldAccessController));
+        interceptor.getMethodInterceptors().add(new FieldAccessAnnotationMethodInterceptor(fieldAccessController, resolver));
         // @Authorize support
-        interceptor.getMethodInterceptors().add(new SimpleAuthorizeMethodInterceptor());
+        interceptor.getMethodInterceptors().add(new SimpleAuthorizeMethodInterceptor(resolver));
         setAdvice(interceptor);
     }
 
@@ -82,65 +90,8 @@ public class BoostAuthorizationAttributeSourceAdvisor extends StaticMethodMatche
         this.securityManager = securityManager;
     }
 
-    /**
-     * Returns <tt>true</tt> if the method has any Shiro annotations, false otherwise.
-     * The annotations inspected are:
-     * <ul>
-     * <li>{@link org.apache.shiro.authz.annotation.RequiresAuthentication RequiresAuthentication}</li>
-     * <li>{@link org.apache.shiro.authz.annotation.RequiresUser RequiresUser}</li>
-     * <li>{@link org.apache.shiro.authz.annotation.RequiresGuest RequiresGuest}</li>
-     * <li>{@link org.apache.shiro.authz.annotation.RequiresRoles RequiresRoles}</li>
-     * <li>{@link org.apache.shiro.authz.annotation.RequiresPermissions RequiresPermissions}</li>
-     * </ul>
-     *
-     * @param method      the method to check for a Shiro annotation
-     * @param targetClass the class potentially declaring Shiro annotations
-     * @return <tt>true</tt> if the method has a Shiro annotation, false otherwise.
-     * @see org.springframework.aop.MethodMatcher#matches(java.lang.reflect.Method, Class)
-     */
     public boolean matches(Method method, Class targetClass) {
-        Method m = method;
-        if (isAuthzAnnotationPresent(m)) {
-            return true;
-        }
-        //The 'method' parameter could be from an interface that doesn't have the annotation.
-        //Check to see if the implementation has it.
-        if (targetClass != null) {
-            try {
-                //尝试解决由于被拦截的方法使用了泛型,并且重写了方法，导致无法获取父类方法的问题
-                Class[] parameter = Arrays
-                        .stream(m.getParameterTypes())
-                        .map(type -> {
-                            if (type.isInterface()) return type;
-                            Class<?>[] interfaces = type.getInterfaces();
-                            if (interfaces.length > 0) return interfaces[0];
-                            Class superclass = type.getSuperclass();
-                            if (null != superclass && superclass != Object.class) {
-                                return superclass;
-                            }
-                            return type;
-                        })
-                        .toArray(Class[]::new);
-                m = targetClass.getMethod(m.getName(), parameter);
-                if (isAuthzAnnotationPresent(m)) {
-                    return true;
-                }
-            } catch (NoSuchMethodException ignored) {
-                //default return value is false.  If we can't find the method, then obviously
-                //there is no annotation, so just use the default return value.
-            }
-        }
-
-        return false;
-    }
-
-    private boolean isAuthzAnnotationPresent(Method method) {
-        for (Class<? extends Annotation> annClass : AUTHZ_ANNOTATION_CLASSES) {
-            Annotation a = AnnotationUtils.findAnnotation(method, annClass);
-            if (a != null) {
-                return true;
-            }
-        }
-        return false;
+        return Arrays.stream(AUTHZ_ANNOTATION_CLASSES)
+                .anyMatch(aClass -> AopUtils.findAnnotation(targetClass, method, aClass) != null);
     }
 }

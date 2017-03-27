@@ -17,14 +17,16 @@
 
 package org.hswebframework.web.authorization.shiro.boost;
 
+import org.apache.shiro.aop.AnnotationResolver;
 import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.authz.aop.AuthorizingAnnotationHandler;
 import org.apache.shiro.authz.aop.AuthorizingAnnotationMethodInterceptor;
 import org.hsweb.expands.script.engine.DynamicScriptEngine;
 import org.hsweb.expands.script.engine.DynamicScriptEngineFactory;
 import org.hswebframework.web.BusinessException;
-import org.hswebframework.web.authorization.Authorization;
+import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.annotation.RequiresExpression;
+import org.hswebframework.web.boost.aop.context.MethodInterceptorHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +42,10 @@ import java.util.Map;
 public class ExpressionAnnotationMethodInterceptor extends AuthorizingAnnotationMethodInterceptor {
     public ExpressionAnnotationMethodInterceptor() {
         super(new ExpressionAnnotationHandler());
+    }
+
+    public ExpressionAnnotationMethodInterceptor(AnnotationResolver resolver) {
+        super(new ExpressionAnnotationHandler(), resolver);
     }
 
     private static final Logger logger = LoggerFactory.getLogger(ExpressionAnnotationMethodInterceptor.class);
@@ -71,7 +77,7 @@ public class ExpressionAnnotationMethodInterceptor extends AuthorizingAnnotation
                 }
             }
             Map<String, Object> var = new HashMap<>(holder.getArgs());
-            var.put("auth", getSubject().getSession().getAttribute(Authorization.class.getName()));
+            var.put("auth", getSubject().getSession().getAttribute(Authentication.class.getName()));
             Object success = engine.execute(holder.getId(), var).get();
             if (!(success instanceof Boolean) || !((Boolean) success)) {
                 throw new AuthorizationException();
