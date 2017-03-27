@@ -17,35 +17,31 @@
 
 package org.hswebframework.web.authorization.shiro;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.shiro.cache.CacheManager;
 import org.apache.shiro.cache.MemoryConstrainedCacheManager;
 import org.apache.shiro.mgt.DefaultSecurityManager;
+import org.apache.shiro.mgt.RememberMeManager;
 import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.realm.AuthorizingRealm;
-import org.apache.shiro.realm.Realm;
 import org.apache.shiro.session.mgt.DefaultSessionManager;
 import org.apache.shiro.spring.LifecycleBeanPostProcessor;
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
+import org.apache.shiro.web.mgt.CookieRememberMeManager;
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
-import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.Around;
-import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.reflect.MethodSignature;
-import org.hswebframework.web.AopUtils;
-import org.hswebframework.web.authorization.Authorization;
-import org.hswebframework.web.authorization.AuthorizationSupplier;
+import org.hswebframework.web.authorization.AuthenticationHolder;
+import org.hswebframework.web.authorization.AuthenticationManager;
+import org.hswebframework.web.authorization.AuthenticationSupplier;
 import org.hswebframework.web.authorization.access.DataAccessController;
 import org.hswebframework.web.authorization.access.DataAccessHandler;
 import org.hswebframework.web.authorization.access.FieldAccessController;
 import org.hswebframework.web.authorization.shiro.boost.BoostAuthorizationAttributeSourceAdvisor;
 import org.hswebframework.web.authorization.shiro.boost.DefaultDataAccessController;
 import org.hswebframework.web.authorization.shiro.boost.DefaultFieldAccessController;
-import org.hswebframework.web.authorization.shiro.boost.MethodInterceptorHolder;
 import org.hswebframework.web.authorization.shiro.cache.SpringCacheManagerWrapper;
+import org.hswebframework.web.authorization.shiro.remember.SimpleRememberMeManager;
 import org.hswebframework.web.controller.message.ResponseMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -73,7 +69,7 @@ import java.util.List;
  */
 @Configuration
 @EnableConfigurationProperties(ShiroProperties.class)
-public class ShiroAutoconfiguration {
+public class ShiroAutoConfiguration {
 
     @Autowired(required = false)
     private org.springframework.cache.CacheManager cacheManager;
@@ -95,8 +91,9 @@ public class ShiroAutoconfiguration {
 
     @Bean
     @Order(Ordered.LOWEST_PRECEDENCE)
-    public ListenerAuthorizingRealm listenerAuthorizingRealm(CacheManager cacheManager) {
-        ListenerAuthorizingRealm realm = new ListenerAuthorizingRealm();
+    public ListenerAuthorizingRealm listenerAuthorizingRealm(CacheManager cacheManager,
+                                                             AuthenticationManager authenticationManager) {
+        ListenerAuthorizingRealm realm = new ListenerAuthorizingRealm(authenticationManager);
         realm.setCacheManager(cacheManager);
         return realm;
     }
@@ -118,6 +115,7 @@ public class ShiroAutoconfiguration {
         DefaultWebSecurityManager securityManager = new DefaultWebSecurityManager();
         securityManager.setRealms(new ArrayList<>(authorizingRealm));
         securityManager.setCacheManager(cacheManager);
+        securityManager.setRememberMeManager(new SimpleRememberMeManager());
         SecurityUtils.setSecurityManager(securityManager);
         return securityManager;
     }
@@ -160,9 +158,11 @@ public class ShiroAutoconfiguration {
     }
 
     @Bean
-    public AuthorizationSupplier authorizationSupplier() {
-        return () ->
-                (Authorization) SecurityUtils.getSubject().getSession().getAttribute(Authorization.class.getName());
+    @ConditionalOnMissingBean
+    public AuthenticationSupplier authorizationSupplier(AuthenticationManager authenticationManager) {
+        AutoSyncAuthenticationSupplier syncAuthenticationSupplier = new AutoSyncAuthenticationSupplier(authenticationManager);
+        AuthenticationHolder.setSupplier(syncAuthenticationSupplier);
+        return syncAuthenticationSupplier;
     }
 
     @Bean(name = "shiroFilter")
@@ -175,35 +175,6 @@ public class ShiroAutoconfiguration {
         else
             shiroFilterFactoryBean.setFilterChainDefinitionMap(Collections.emptyMap());
         return shiroFilterFactoryBean;
-    }
-
-    @Bean
-    public MethodInterceptorHolderAdvisor methodInterceptorHolderAdvisor() {
-        return new MethodInterceptorHolderAdvisor();
-    }
-
-    @Aspect
-    @Order(Ordered.HIGHEST_PRECEDENCE)
-    static class MethodInterceptorHolderAdvisor {
-        @Around(value = "@annotation(org.hswebframework.web.authorization.annotation.RequiresExpression)"
-                + "||@annotation(org.hswebframework.web.authorization.annotation.RequiresDataAccess)"
-                + "||@annotation(org.hswebframework.web.authorization.annotation.Authorize)"
-                + "||("
-                + "within(@org.hswebframework.web.authorization.annotation.Authorize *) "
-                + "&& ("
-                + "@annotation(org.springframework.web.bind.annotation.RequestMapping)||"
-                + "execution(org.hswebframework.web.controller.message.ResponseMessage *(..)"
-                + ")))"
-        )
-        public Object around(ProceedingJoinPoint pjp) throws Throwable {
-            MethodSignature signature = (MethodSignature) pjp.getSignature();
-            String methodName = AopUtils.getMethodBody(pjp);
-            String className = pjp.getTarget().getClass().getName();
-            String id = DigestUtils.md5Hex(className.concat(methodName));
-            new MethodInterceptorHolder(id, signature.getMethod(), pjp.getTarget(), AopUtils.getArgsMap(pjp))
-                    .set();
-            return pjp.proceed();
-        }
     }
 
     @RestControllerAdvice
