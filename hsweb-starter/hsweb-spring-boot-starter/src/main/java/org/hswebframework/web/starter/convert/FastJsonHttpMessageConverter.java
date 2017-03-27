@@ -2,10 +2,10 @@ package org.hswebframework.web.starter.convert;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONPObject;
+import com.alibaba.fastjson.parser.Feature;
 import com.alibaba.fastjson.parser.ParserConfig;
-import com.alibaba.fastjson.serializer.PropertyPreFilter;
-import com.alibaba.fastjson.serializer.SerializerFeature;
-import com.alibaba.fastjson.serializer.SimplePropertyPreFilter;
+import com.alibaba.fastjson.serializer.*;
+import org.hsweb.ezorm.core.param.SqlTerm;
 import org.hswebframework.web.ThreadLocalUtils;
 import org.hswebframework.web.commons.entity.Entity;
 import org.hswebframework.web.commons.entity.factory.EntityFactory;
@@ -33,6 +33,8 @@ public class FastJsonHttpMessageConverter extends AbstractHttpMessageConverter<O
     static {
         // TODO: 17-3-16  白名单应可配置
         ParserConfig.getGlobalInstance().addAccept("org.hswebframework.web.entity.");
+        ParserConfig.getGlobalInstance().addAccept("org.hsweb.");
+        ParserConfig.getGlobalInstance().addDeny("org.hsweb.ezorm.core.param.SqlTerm");
     }
 
     public final static Charset UTF8 = Charset.forName("UTF-8");
@@ -138,8 +140,8 @@ public class FastJsonHttpMessageConverter extends AbstractHttpMessageConverter<O
         out.flush();
     }
 
-    protected PropertyPreFilter[] parseFilter(ResponseMessage<?> responseMessage) {
-        List<PropertyPreFilter> filters = new ArrayList<>();
+    protected static SerializeFilter[] parseFilter(ResponseMessage<?> responseMessage) {
+        List<SerializeFilter> filters = new ArrayList<>();
         if (responseMessage.getIncludes() != null)
             for (Map.Entry<Class<?>, Set<String>> classSetEntry : responseMessage.getIncludes().entrySet()) {
                 SimplePropertyPreFilter filter = new SimplePropertyPreFilter(classSetEntry.getKey());
@@ -152,7 +154,11 @@ public class FastJsonHttpMessageConverter extends AbstractHttpMessageConverter<O
                 filter.getExcludes().addAll(classSetEntry.getValue());
                 filters.add(filter);
             }
-        return filters.toArray(new PropertyPreFilter[filters.size()]);
+        PropertyFilter responseMessageFilter = (object, name, value) ->
+                !(object instanceof ResponseMessage) || value != null;
+        filters.add(responseMessageFilter);
+
+        return filters.toArray(new SerializeFilter[filters.size()]);
     }
 
 }
