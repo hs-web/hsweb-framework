@@ -11,7 +11,7 @@
 |[hsweb-system-crawler](hsweb-system-crawler)|爬虫功能| 0%|
 |[hsweb-system-database-manager](hsweb-system-database-manager)|在线数据库维护| 0%|
 |[hsweb-system-datasource](hsweb-system-datasource)|动态数据源管理| 0%|
-|[hsweb-system-dictionary](hsweb-system-dictionary)| 数据字典功能|  0%|
+|[hsweb-system-dictionary](hsweb-system-dictionary)| 数据字典功能|  50%|
 |[hsweb-system-document](hsweb-system-document)|文档管理功能| 0%|
 |[hsweb-system-dynamic-form](hsweb-system-dynamic-form)|动态表单| 0%|
 |[hsweb-system-explorer](hsweb-system-explorer)|**系统资源管理(菜单,按钮)**| 20%|

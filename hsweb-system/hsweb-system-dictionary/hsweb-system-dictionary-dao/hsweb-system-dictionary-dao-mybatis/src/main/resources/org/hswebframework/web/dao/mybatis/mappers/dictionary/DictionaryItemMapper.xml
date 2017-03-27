@@ -21,18 +21,19 @@
 <mapper namespace="org.hswebframework.web.dao.dictionary.DictionaryItemDao">
     <resultMap id="DictionaryItemResultMap" type="org.hswebframework.web.entity.dictionary.SimpleDictionaryItemEntity">
         <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
-            <result property="dictId" column="dict_id" javaType="String" jdbcType="VARCHAR"/>
-            <result property="name" column="name" javaType="String" jdbcType="VARCHAR"/>
-            <result property="value" column="value" javaType="String" jdbcType="VARCHAR"/>
-            <result property="text" column="text" javaType="String" jdbcType="VARCHAR"/>
-            <result property="valueType" column="value_type" javaType="String" jdbcType="VARCHAR"/>
-            <result property="enabled" column="enabled" javaType="Long" jdbcType="DECIMAL"/>
-            <result property="describe" column="describe" javaType="String" jdbcType="VARCHAR"/>
-            <result property="parentId" column="parent_id" javaType="String" jdbcType="VARCHAR"/>
-            <result property="treeCode" column="tree_code" javaType="String" jdbcType="VARCHAR"/>
-            <result property="searchCode" column="search_code" javaType="String" jdbcType="VARCHAR"/>
-            <result property="sortIndex" column="sort_index" javaType="Long" jdbcType="DECIMAL"/>
-            <result property="level" column="level" javaType="Long" jdbcType="DECIMAL"/>
+        <result property="dictId" column="dict_id" javaType="String" jdbcType="VARCHAR"/>
+        <result property="name" column="name" javaType="String" jdbcType="VARCHAR"/>
+        <result property="value" column="value" javaType="String" jdbcType="VARCHAR"/>
+        <result property="text" column="text" javaType="String" jdbcType="VARCHAR"/>
+        <result property="valueType" column="value_type" javaType="String" jdbcType="VARCHAR"/>
+        <result property="enabled" column="enabled" javaType="Long" jdbcType="DECIMAL"/>
+        <result property="describe" column="describe" javaType="String" jdbcType="VARCHAR"/>
+        <result property="parentId" column="parent_id" javaType="String" jdbcType="VARCHAR"/>
+        <result property="treeCode" column="tree_code" javaType="String" jdbcType="VARCHAR"/>
+        <result property="searchCode" column="search_code" javaType="String" jdbcType="VARCHAR"/>
+        <result property="sortIndex" column="sort_index" javaType="Long" jdbcType="DECIMAL"/>
+        <result property="level" column="level" javaType="Long" jdbcType="DECIMAL"/>
+        <result property="properties" column="properties" javaType="Map" jdbcType="CLOB"/>
     </resultMap>
 
     <!--用于动态生成sql所需的配置-->
@@ -40,8 +41,8 @@
         <bind name="resultMapId" value="'DictionaryItemResultMap'"/>
         <bind name="tableName" value="'s_dict_item'"/>
     </sql>
-  
-    <insert id="insert" parameterType="org.hswebframework.web.entity.dictionary.SimpleDictionaryItemEntity" >
+
+    <insert id="insert" parameterType="org.hswebframework.web.entity.dictionary.SimpleDictionaryItemEntity">
         <include refid="config"/>
         <include refid="BasicMapper.buildInsertSql"/>
     </insert>

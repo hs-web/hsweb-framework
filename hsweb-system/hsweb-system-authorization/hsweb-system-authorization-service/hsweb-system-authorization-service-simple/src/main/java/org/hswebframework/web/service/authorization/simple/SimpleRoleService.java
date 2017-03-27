@@ -29,11 +29,14 @@ import org.hswebframework.web.service.DefaultDSLQueryService;
 import org.hswebframework.web.service.DefaultDSLUpdateService;
 import org.hswebframework.web.service.authorization.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
+
+import static org.hswebframework.web.service.authorization.simple.CacheConstants.USER_AUTH_CACHE_NAME;
 
 /**
  * TODO 完成注释
@@ -107,6 +110,7 @@ public class SimpleRoleService extends AbstractService<RoleEntity, String>
     }
 
     @Override
+    @CacheEvict(value = USER_AUTH_CACHE_NAME, allEntries = true)
     public <T extends PermissionRoleEntity> boolean update(BindPermissionRoleEntity<T> roleEntity) {
         tryValidateProperty(StringUtils.hasLength(roleEntity.getId()), RoleEntity.id, "id {not_be_null}");
         tryValidateProperty(null == selectByPk(roleEntity.getId()), RoleEntity.id, "{role_not_exists}");

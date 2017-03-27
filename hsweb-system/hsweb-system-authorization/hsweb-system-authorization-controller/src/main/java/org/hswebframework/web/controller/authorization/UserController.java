@@ -18,10 +18,9 @@
 package org.hswebframework.web.controller.authorization;
 
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
-import org.hswebframework.web.authorization.Authorization;
-import org.hswebframework.web.authorization.AuthorizationHolder;
+import org.hswebframework.web.authorization.Authentication;
+import org.hswebframework.web.authorization.AuthenticationHolder;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.commons.entity.PagerResult;
@@ -102,9 +101,9 @@ public class UserController implements
     @ApiOperation("修改当前用户的密码")
     public ResponseMessage<Void> updateLoginUserPassword(@RequestParam String password,
                                                    @RequestParam String oldPassword) {
-        Authorization authorization = AuthorizationHolder.get();
-        Assert.notNull(authorization);
-        getService().updatePassword(authorization.getUser().getId(), oldPassword, password);
+        Authentication authentication = AuthenticationHolder.get();
+        Assert.notNull(authentication);
+        getService().updatePassword(authentication.getUser().getId(), oldPassword, password);
         return ok();
     }
 

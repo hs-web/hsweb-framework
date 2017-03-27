@@ -18,8 +18,8 @@
 package org.hswebframework.web.service.authorization.simple;
 
 import org.hswebframework.web.authorization.*;
-import org.hswebframework.web.authorization.access.DataAccess;
-import org.hswebframework.web.authorization.access.FieldAccess;
+import org.hswebframework.web.authorization.access.DataAccessConfig;
+import org.hswebframework.web.authorization.access.FieldAccessConfig;
 import org.hswebframework.web.entity.authorization.*;
 import org.hswebframework.web.service.authorization.DataAccessFactory;
 
@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
  *
  * @author zhouhao
  */
-public class SimpleAuthorization implements Authorization {
+public class SimpleAuthentication implements Authentication {
     private ReadOnlyUser user;
 
     private List<Role> roles;
@@ -41,13 +41,13 @@ public class SimpleAuthorization implements Authorization {
 
     private Map<String, Serializable> attributes = new HashMap<>();
 
-    public SimpleAuthorization() {
+    public SimpleAuthentication() {
     }
 
-    public SimpleAuthorization(UserEntity user,
-                               List<RoleEntity> roleEntities,
-                               List<PermissionRoleEntity> permissionRoleEntities,
-                               DataAccessFactory dataAccessFactory) {
+    public SimpleAuthentication(UserEntity user,
+                                List<RoleEntity> roleEntities,
+                                List<PermissionRoleEntity> permissionRoleEntities,
+                                DataAccessFactory dataAccessFactory) {
         this.user = new ReadOnlyUser(user.getId(), user.getUsername(), user.getName());
         this.roles = roleEntities.stream()
                 .map(roleEntity -> new ReadOnlyRole(roleEntity.getId(), roleEntity.getDescribe()))
@@ -56,7 +56,7 @@ public class SimpleAuthorization implements Authorization {
                 .map(permissionRoleEntity -> {
                     ReadOnlyPermission permission = new ReadOnlyPermission(permissionRoleEntity.getPermissionId(), permissionRoleEntity.getActions());
                     if (null != dataAccessFactory && null != permissionRoleEntity.getDataAccesses()) {
-                        permission.setDataAccesses(permissionRoleEntity
+                        permission.setDataAccessConfigs(permissionRoleEntity
                                 .getDataAccesses()
                                 .stream()
                                 .map(dataAccessFactory::create)
@@ -134,7 +134,7 @@ public class SimpleAuthorization implements Authorization {
         private String                 id;
         private Set<String>            actions;
         private Set<SimpleFieldAccess> fieldAccesses;
-        private Set<DataAccess>        dataAccesses;
+        private Set<DataAccessConfig>  dataAccessConfigs;
 
         public ReadOnlyPermission() {
         }
@@ -161,15 +161,14 @@ public class SimpleAuthorization implements Authorization {
         }
 
         @Override
-        public Set<FieldAccess> getFieldAccesses() {
+        public Set<FieldAccessConfig> getFieldAccesses() {
             if (fieldAccesses == null) fieldAccesses = Collections.emptySet();
             return new HashSet<>(fieldAccesses);
         }
 
-        @Override
-        public Set<DataAccess> getDataAccesses() {
-            if (dataAccesses == null) dataAccesses = Collections.emptySet();
-            return new HashSet<>(dataAccesses);
+        public Set<DataAccessConfig> getDataAccessConfigs() {
+            if (dataAccessConfigs == null) dataAccessConfigs = Collections.emptySet();
+            return new HashSet<>(dataAccessConfigs);
         }
 
         public void setFieldAccesses(Set<SimpleFieldAccess> fieldAccesses) {
@@ -177,9 +176,9 @@ public class SimpleAuthorization implements Authorization {
             this.fieldAccesses = fieldAccesses;
         }
 
-        public void setDataAccesses(Set<DataAccess> dataAccesses) {
-            checkWritable(this.dataAccesses);
-            this.dataAccesses = dataAccesses;
+        public void setDataAccessConfigs(Set<DataAccessConfig> dataAccessConfigs) {
+            checkWritable(this.dataAccessConfigs);
+            this.dataAccessConfigs = dataAccessConfigs;
         }
 
         public void setActions(Set<String> actions) {
@@ -188,7 +187,7 @@ public class SimpleAuthorization implements Authorization {
         }
     }
 
-    public static class SimpleFieldAccess implements FieldAccess {
+    public static class SimpleFieldAccess implements FieldAccessConfig {
         private String      field;
         private Set<String> actions;
 

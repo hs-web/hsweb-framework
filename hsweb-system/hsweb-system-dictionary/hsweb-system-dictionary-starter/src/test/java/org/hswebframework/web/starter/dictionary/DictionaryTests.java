@@ -21,6 +21,7 @@ package org.hswebframework.web.starter.dictionary;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.hswebframework.web.entity.dictionary.DictionaryEntity;
+import org.hswebframework.web.entity.dictionary.DictionaryItemEntity;
 import org.hswebframework.web.entity.dictionary.SimpleDictionaryEntity;
 import org.hswebframework.web.starter.convert.FastJsonHttpMessageConverter;
 import org.hswebframework.web.tests.SimpleWebApplicationTests;
@@ -42,7 +43,7 @@ public class DictionaryTests extends SimpleWebApplicationTests {
 
     @Test
     public void testCrud() throws Exception {
-        DictionaryEntity entity = entityFactory.newInstance(DictionaryEntity.class);
+        DictionaryEntity<DictionaryItemEntity> entity = entityFactory.newInstance(DictionaryEntity.class);
         //todo 设置测试属性
         entity.setName("test");
         entity.setCreatorId("admin");

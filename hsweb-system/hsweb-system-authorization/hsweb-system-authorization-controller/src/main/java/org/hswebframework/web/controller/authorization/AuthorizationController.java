@@ -22,7 +22,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.hswebframework.web.BusinessException;
 import org.hswebframework.web.NotFoundException;
-import org.hswebframework.web.authorization.Authorization;
+import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.listener.AuthorizationListenerDispatcher;
 import org.hswebframework.web.authorization.listener.event.*;
@@ -71,8 +71,8 @@ public class AuthorizationController {
     @AccessLogger("退出登录")
     @Authorize
     @ApiOperation("退出当前登录")
-    public ResponseMessage exit(@ApiParam(hidden = true) Authorization authorization) {
-        authorizationListenerDispatcher.doEvent(new AuthorizationExitEvent(authorization));
+    public ResponseMessage exit(@ApiParam(hidden = true) Authentication authentication) {
+        authorizationListenerDispatcher.doEvent(new AuthorizationExitEvent(authentication));
         return ok();
     }
 
@@ -138,8 +138,8 @@ public class AuthorizationController {
             // TODO: 17-1-13  获取IP
             userService.updateLoginInfo(entity.getId(), "", System.currentTimeMillis());
             // 验证通过
-            Authorization authorization = userService.initUserAuthorization(entity.getId());
-            AuthorizationSuccessEvent event = new AuthorizationSuccessEvent(authorization, parameterGetter);
+            Authentication authentication = userService.initUserAuthorization(entity.getId());
+            AuthorizationSuccessEvent event = new AuthorizationSuccessEvent(authentication, parameterGetter);
             authorizationListenerDispatcher.doEvent(event);
             return ok(entity.getId());
         } catch (Exception e) {

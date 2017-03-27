@@ -60,6 +60,8 @@ function install(context) {
         .addColumn().name("search_code").alias("searchCode").comment("快速搜索码").jdbcType(java.sql.JDBCType.VARCHAR).length(128).commit()
         .addColumn().name("sort_index").alias("sortIndex").comment("排序索引").jdbcType(java.sql.JDBCType.DECIMAL).length(32,0).commit()
         .addColumn().name("level").alias("level").comment("树结构层级").jdbcType(java.sql.JDBCType.DECIMAL).length(32,0).commit()
+        .addColumn().name("properties").alias("properties").comment("其他自定义属性").jdbcType(java.sql.JDBCType.CLOB).commit()
+
         .comment("数据字典解析配置").commit();
 
     database.createOrAlter("s_dict_parser")

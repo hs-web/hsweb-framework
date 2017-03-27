@@ -1,13 +1,13 @@
 package org.hswebframework.web.service.authorization.simple.access;
 
-import org.hswebframework.web.authorization.access.ScriptDataAccess;
+import org.hswebframework.web.authorization.access.ScriptDataAccessConfig;
 
 /**
  * TODO 完成注释
  *
  * @author zhouhao
  */
-public class SimpleScriptDataAccess extends AbstractDataAccess implements ScriptDataAccess {
+public class SimpleScriptDataAccess extends AbstractDataAccess implements ScriptDataAccessConfig {
     private String script;
 
     private String scriptLanguage;

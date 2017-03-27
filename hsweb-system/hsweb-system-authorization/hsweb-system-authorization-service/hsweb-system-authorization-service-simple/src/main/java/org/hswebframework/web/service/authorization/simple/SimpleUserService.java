@@ -1,7 +1,7 @@
 package org.hswebframework.web.service.authorization.simple;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.hswebframework.web.authorization.Authorization;
+import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.commons.entity.GenericEntity;
 import org.hswebframework.web.dao.authorization.*;
 import org.hswebframework.web.entity.authorization.*;
@@ -17,6 +17,10 @@ import org.hswebframework.web.service.authorization.UsernameValidator;
 import org.hswebframework.web.validate.ValidationException;
 import org.hswebframwork.utils.ListUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -24,6 +28,8 @@ import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static org.hswebframework.web.service.authorization.simple.CacheConstants.*;
 
 /**
  * TODO 完成注释
@@ -60,6 +66,18 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
     private DataAccessFactory dataAccessFactory;
 
     @Override
+    @Cacheable(value = USER_AUTH_CACHE_NAME, key = "#userId")
+    public Authentication getByUserId(String userId) {
+        return initUserAuthorization(userId);
+    }
+
+    @Override
+    @CachePut(value = USER_AUTH_CACHE_NAME, key = "#authentication.user.id")
+    public Authentication sync(Authentication authentication) {
+        return authentication;
+    }
+
+    @Override
     public String encodePassword(String password, String salt) {
         return DigestUtils.md5Hex(String.format("hsweb.%s.framework.%s", password, salt));
     }
@@ -91,6 +109,7 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
     }
 
     @Override
+    @CacheEvict(value = USER_CACHE_NAME, key = "#userEntity.id")
     public String insert(UserEntity userEntity) {
         //判断用户是否已经存在
         tryValidateProperty(null == selectByUsername(userEntity.getUsername()), "username", "{username_exists}");
@@ -130,6 +149,10 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
     }
 
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = USER_CACHE_NAME, key = "#userId"),
+            @CacheEvict(value = USER_AUTH_CACHE_NAME, key = "#userId"),
+    })
     public void update(String userId, UserEntity userEntity) {
         userEntity.setId(userId);
         //判断用户是否存在
@@ -193,24 +216,24 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
     }
 
     @Override
-    public Authorization initUserAuthorization(String userId) {
+    public Authentication initUserAuthorization(String userId) {
         UserEntity userEntity = selectByPk(userId);
         assertNotNull(userEntity);
         //用户持有的角色
         List<UserRoleEntity> roleEntities = userRoleDao.selectByUserId(userId);
         if (ListUtils.isNullOrEmpty(roleEntities)) {
-            return new SimpleAuthorization(userEntity, new ArrayList<>(), new ArrayList<>(), dataAccessFactory);
+            return new SimpleAuthentication(userEntity, new ArrayList<>(), new ArrayList<>(), dataAccessFactory);
         }
         List<String> roleIdList = roleEntities.stream().map(UserRoleEntity::getRoleId).collect(Collectors.toList());
 
         List<RoleEntity> roleEntityList = DefaultDSLQueryService.createQuery(roleDao).where().in(GenericEntity.id, roleIdList).noPaging().list();
         //权限角色关联信息
         List<PermissionRoleEntity> permissionRoleEntities = permissionRoleDao.selectByRoleIdList(roleIdList);
-        return new SimpleAuthorization(userEntity, roleEntityList, permissionRoleEntities, dataAccessFactory);
+        return new SimpleAuthentication(userEntity, roleEntityList, permissionRoleEntities, dataAccessFactory);
     }
 
     @Override
-    public Authorization initAdminAuthorization(String userId) {
+    public Authentication initAdminAuthorization(String userId) {
         UserEntity userEntity = selectByPk(userId);
         assertNotNull(userEntity);
         //所有权限信息
@@ -236,7 +259,7 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
             admin.setName("admin");
             roleEntityList.add(admin);
         }
-        return new SimpleAuthorization(userEntity, roleEntityList, permissionRoleEntities, dataAccessFactory);
+        return new SimpleAuthentication(userEntity, roleEntityList, permissionRoleEntities, dataAccessFactory);
     }
 
 
