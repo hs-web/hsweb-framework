@@ -16,10 +16,10 @@
  *
  */
 
-package org.hswebframework.web.authorization.annotation;
+package org.hswebframework.web.boost.validator.annotation;
 
-import org.hswebframework.web.authorization.Permission;
-import org.hswebframework.web.authorization.access.DataAccessConfig;
+
+import org.hswebframework.web.boost.aop.context.RecordAopContext;
 
 import java.lang.annotation.*;
 
@@ -31,17 +31,16 @@ import java.lang.annotation.*;
 @Target({ElementType.TYPE, ElementType.METHOD, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
+@RecordAopContext
 public @interface RequiresDuplicate {
 
     /**
      * @return permission id
-     * @see Permission#getId()
      */
     String permission();
 
     /**
      * @return action array
-     * @see DataAccessConfig#getAction()
      */
     String[] action() default {};
 

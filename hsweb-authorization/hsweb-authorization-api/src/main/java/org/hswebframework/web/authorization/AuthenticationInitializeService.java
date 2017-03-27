@@ -19,12 +19,25 @@
 package org.hswebframework.web.authorization;
 
 /**
- * TODO 完成注释
+ * 授权信息初始化服务接口,使用该接口初始化用的权限信息
  *
  * @author zhouhao
+ * @since 3.0
  */
-public interface AuthorizationInitializeService {
-    Authorization initUserAuthorization(String userId);
+public interface AuthenticationInitializeService {
+    /**
+     * 根据用户ID初始化权限信息
+     *
+     * @param userId 用户ID
+     * @return 权限信息
+     */
+    Authentication initUserAuthorization(String userId);
 
-    Authorization initAdminAuthorization(String userId);
+    /**
+     * 将指定的用户初始化为超级管理员权限
+     *
+     * @param userId 用户ID
+     * @return 权限信息
+     */
+    Authentication initAdminAuthorization(String userId);
 }

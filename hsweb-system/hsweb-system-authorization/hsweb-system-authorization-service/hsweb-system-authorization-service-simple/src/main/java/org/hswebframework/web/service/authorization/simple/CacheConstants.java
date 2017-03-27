@@ -16,23 +16,17 @@
  *
  */
 
-package org.hswebframework.web.authorization.listener.event;
-
-import org.hswebframework.web.authorization.Authentication;
+package org.hswebframework.web.service.authorization.simple;
 
 /**
- * 退出登录事件
+ * 缓存所需常量
  *
  * @author zhouhao
  */
-public class AuthorizationExitEvent implements AuthorizationEvent {
-    private Authentication authentication;
+public interface CacheConstants {
 
-    public AuthorizationExitEvent(Authentication authentication) {
-        this.authentication = authentication;
-    }
+    String USER_CACHE_NAME = "user-";
 
-    public Authentication getAuthentication() {
-        return authentication;
-    }
+    String USER_AUTH_CACHE_NAME = "user-auth-";
+
 }

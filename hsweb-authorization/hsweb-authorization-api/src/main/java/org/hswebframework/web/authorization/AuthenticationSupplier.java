@@ -22,8 +22,8 @@ import java.util.function.Supplier;
 /**
  * @author zhouhao
  * @see Supplier
- * @see Authorization
- * @see AuthorizationHolder
+ * @see Authentication
+ * @see AuthenticationHolder
  */
-public interface AuthorizationSupplier extends Supplier<Authorization> {
+public interface AuthenticationSupplier extends Supplier<Authentication> {
 }

@@ -30,24 +30,24 @@ package org.hswebframework.web.authorization;
  * </pre>
  *
  * @author zhouhao
- * @see AuthorizationSupplier
+ * @see AuthenticationSupplier
  * @since 3.0
  */
-public final class AuthorizationHolder {
-    private static AuthorizationSupplier supplier;
+public final class AuthenticationHolder {
+    private static AuthenticationSupplier supplier;
 
     /**
      * @return 当前登录用户信息
      */
-    public static Authorization get() {
+    public static Authentication get() {
         if (null == supplier) {
             throw new UnsupportedOperationException("AuthorizationSupplier is null!");
         }
         return supplier.get();
     }
 
-    public static void setSupplier(AuthorizationSupplier supplier) {
-        if (null == AuthorizationHolder.supplier)
-            AuthorizationHolder.supplier = supplier;
+    public static void setSupplier(AuthenticationSupplier supplier) {
+        if (null == AuthenticationHolder.supplier)
+            AuthenticationHolder.supplier = supplier;
     }
 }

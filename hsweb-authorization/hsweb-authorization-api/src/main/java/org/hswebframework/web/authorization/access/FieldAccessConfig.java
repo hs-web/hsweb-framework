@@ -10,18 +10,25 @@ import java.util.Set;
  * @see FieldAccessController
  */
 public interface FieldAccessConfig extends Serializable {
+
     /**
-     * 获取字段名称,字段名称支持嵌套如: user.info.name
-     * 此值为不能操作的字段
-     *
-     * @return 字段名称
+     * @return 要控制的字段名称, 字段名称支持嵌套如: user.info.name
      */
     String getField();
 
     /**
-     * 对此字段的操作权限
-     *
-     * @return 操作权限集合
+     * @return 对此字段的操作权限
+     * @see org.hswebframework.web.authorization.Permission#ACTION_QUERY
+     * @see org.hswebframework.web.authorization.Permission#ACTION_UPDATE
      */
     Set<String> getActions();
+
+    default Type getType() {
+        return Type.DENY;
+    }
+
+    enum Type {
+        //目前之支持 deny
+        DENY
+    }
 }

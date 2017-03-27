@@ -21,6 +21,7 @@ package org.hswebframework.web.authorization.annotation;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.Role;
 import org.hswebframework.web.authorization.User;
+import org.hswebframework.web.boost.aop.context.RecordAopContext;
 
 import java.lang.annotation.*;
 
@@ -34,6 +35,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
+@RecordAopContext
 public @interface Authorize {
 
     /**

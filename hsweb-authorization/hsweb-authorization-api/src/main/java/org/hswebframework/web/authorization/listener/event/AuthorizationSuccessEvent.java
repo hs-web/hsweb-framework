@@ -18,7 +18,7 @@
 
 package org.hswebframework.web.authorization.listener.event;
 
-import org.hswebframework.web.authorization.Authorization;
+import org.hswebframework.web.authorization.Authentication;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -27,21 +27,21 @@ import java.util.function.Function;
  * 授权成功事件,当授权成功时,触发此事件,并传入授权的信息
  *
  * @author zhouhao
- * @see Authorization
+ * @see Authentication
  * @since 3.0
  */
 public class AuthorizationSuccessEvent implements AuthorizationEvent {
-    private Authorization authorization;
+    private Authentication authentication;
 
     private Function<String,Object> parameterGetter;
 
-    public AuthorizationSuccessEvent(Authorization authorization, Function<String, Object> parameterGetter) {
-        this.authorization = authorization;
+    public AuthorizationSuccessEvent(Authentication authentication, Function<String, Object> parameterGetter) {
+        this.authentication = authentication;
         this.parameterGetter = parameterGetter;
     }
 
-    public Authorization getAuthorization() {
-        return authorization;
+    public Authentication getAuthentication() {
+        return authentication;
     }
 
     @SuppressWarnings("unchecked")

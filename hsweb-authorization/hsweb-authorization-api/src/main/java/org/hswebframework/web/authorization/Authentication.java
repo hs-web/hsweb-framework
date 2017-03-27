@@ -20,9 +20,7 @@ package org.hswebframework.web.authorization;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Supplier;
 
 /**
  * 用户授权信息,当前登录用户的权限信息,包括用户的基本信息,角色,权限集合等常用信息<br>
@@ -33,10 +31,11 @@ import java.util.function.Supplier;
  * </ul>
  *
  * @author zhouhao
- * @see AuthorizationHolder
+ * @see AuthenticationHolder
+ * @see AuthenticationManager
  * @since 3.0
  */
-public interface Authorization extends Serializable {
+public interface Authentication extends Serializable {
 
     /**
      * @return 用户信息
@@ -97,6 +96,7 @@ public interface Authorization extends Serializable {
      *
      * @param name   属性名称
      * @param object 属性值
+     * @see AuthenticationManager#sync(Authentication)
      */
     void setAttribute(String name, Serializable object);
 
@@ -104,6 +104,7 @@ public interface Authorization extends Serializable {
      * 设置多个属性值,参数为map类型,key为属性名称,value为属性值
      *
      * @param attributes 属性值map
+     * @see AuthenticationManager#sync(Authentication)
      */
     void setAttributes(Map<String, Serializable> attributes);
 
@@ -113,6 +114,7 @@ public interface Authorization extends Serializable {
      * @param name 属性名
      * @param <T>  被删除的值类型
      * @return 被删除的值
+     * @see AuthenticationManager#sync(Authentication)
      */
     <T extends Serializable> T removeAttributes(String name);
 
