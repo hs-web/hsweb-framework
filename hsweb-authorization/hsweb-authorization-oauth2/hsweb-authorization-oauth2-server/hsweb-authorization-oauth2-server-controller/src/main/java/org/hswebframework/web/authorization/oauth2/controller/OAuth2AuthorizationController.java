@@ -18,17 +18,17 @@
 
 package org.hswebframework.web.authorization.oauth2.controller;
 
-import io.swagger.annotations.*;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.apache.commons.codec.binary.Base64;
-import org.hswebframework.web.authorization.Authorization;
-import org.hswebframework.web.authorization.AuthorizationHolder;
+import org.hswebframework.web.authorization.Authentication;
+import org.hswebframework.web.authorization.AuthenticationHolder;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.oauth2.api.OAuth2ServerService;
-import org.hswebframework.web.entity.authorization.oauth2.OAuth2AccessEntity;
 import org.hswebframework.web.authorization.oauth2.model.AccessTokenModel;
 import org.hswebframework.web.authorization.oauth2.model.AuthorizationCodeModel;
 import org.hswebframework.web.authorization.oauth2.model.ImplicitAccessTokenModel;
-import org.hswebframework.web.controller.message.ResponseMessage;
+import org.hswebframework.web.entity.authorization.oauth2.OAuth2AccessEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -55,8 +55,8 @@ public class OAuth2AuthorizationController {
             @RequestParam("redirect_uri") String redirectUri,
             @RequestParam(value = "scope", required = false) String scope,
             @RequestParam(value = "state", required = false) String state) {
-        Authorization authorization = AuthorizationHolder.get();
-        String code = oAuth2ServerService.requestCode(clientId, authorization.getUser().getId(), scope);
+        Authentication authentication = AuthenticationHolder.get();
+        String code = oAuth2ServerService.requestCode(clientId, authentication.getUser().getId(), scope);
         AuthorizationCodeModel model = new AuthorizationCodeModel();
         model.setCode(code);
         model.setRedirectUri(redirectUri);

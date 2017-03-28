@@ -20,10 +20,13 @@ package org.hswebframework.web;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
- * Created by zhouhao on 16-5-26.
+ * @author zhouhao
+ * @since 2.0
  */
+@SuppressWarnings("unchecked")
 public class ThreadLocalUtils {
     private static final ThreadLocal<Map<String, Object>> local = ThreadLocal.withInitial(() -> new HashMap<>());
 
@@ -40,12 +43,21 @@ public class ThreadLocalUtils {
         local.remove();
     }
 
-    @SuppressWarnings("unchecked")
     public static <T> T get(String key) {
         return ((T) local.get().get(key));
     }
 
-    @SuppressWarnings("unchecked")
+    /**
+     * @since 3.0
+     */
+    public static <T> T get(String key, Supplier<T> supplierOnNull) {
+        T val = ((T) local.get().get(key));
+        if (null != val) return val;
+        val = supplierOnNull.get();
+        local.get().put(key, val);
+        return val;
+    }
+
     public static <T> T getAndRemove(String key) {
         try {
             return ((T) local.get().get(key));

@@ -28,7 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 /**
- * TODO 完成注释
+ * 通用实体服务类，提供增删改查的默认实现
  *
  * @author zhouhao
  */
@@ -42,6 +42,12 @@ public abstract class GenericEntityService<E extends GenericEntity<PK>, PK>
         super();
     }
 
+    /**
+     * 获取ID生成器,在insert的时候，如果ID为空,则调用生成器进行生成
+     *
+     * @return IDGenerator
+     * @see IDGenerator
+     */
     protected abstract IDGenerator<PK> getIDGenerator();
 
     @Override
