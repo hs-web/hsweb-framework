@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -41,6 +42,7 @@ public class AutoSyncAuthenticationSupplier implements AuthenticationSupplier {
     private AuthenticationManager authenticationManager;
 
     public AutoSyncAuthenticationSupplier(AuthenticationManager authenticationManager) {
+        Objects.requireNonNull(authenticationManager);
         this.authenticationManager = authenticationManager;
     }
 
