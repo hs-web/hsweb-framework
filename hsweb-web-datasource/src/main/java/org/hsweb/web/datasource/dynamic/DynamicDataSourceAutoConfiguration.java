@@ -133,11 +133,11 @@ public class DynamicDataSourceAutoConfiguration {
             Method m = signature.getMethod();
             T a = AnnotationUtils.findAnnotation(m, annClass);
             if (a != null) return a;
-            Class<?> targetClass = pjp.getThis().getClass();
+            Class<?> targetClass = pjp.getTarget().getClass();
             m = org.springframework.util.ClassUtils.getMostSpecificMethod(m, targetClass);
             a = AnnotationUtils.findAnnotation(m, annClass);
             if (a != null) return a;
-            return AnnotationUtils.findAnnotation(pjp.getThis().getClass(), annClass);
+            return AnnotationUtils.findAnnotation(pjp.getTarget().getClass(), annClass);
         }
 
         @Around(value = "within(@org.hsweb.web.datasource.dynamic.UseDataSource *)||@annotation(org.hsweb.web.datasource.dynamic.UseDataSource)")
