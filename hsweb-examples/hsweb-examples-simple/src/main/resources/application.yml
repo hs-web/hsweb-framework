@@ -8,6 +8,8 @@ spring:
        password :
        type: com.alibaba.druid.pool.DruidDataSource
        driver-class-name : org.h2.Driver
+    cache:
+       type: simple
 hsweb:
     app:
       name: hsweb示例

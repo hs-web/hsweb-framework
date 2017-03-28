@@ -19,9 +19,9 @@ package org.hswebframework.web.example.simple;
 
 import org.hsweb.ezorm.rdb.executor.AbstractJdbcSqlExecutor;
 import org.hsweb.ezorm.rdb.executor.SqlExecutor;
-import org.hswebframework.web.authorization.Authorization;
+import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.Permission;
-import org.hswebframework.web.authorization.access.DataAccess;
+import org.hswebframework.web.authorization.access.DataAccessConfig;
 import org.hswebframework.web.commons.entity.factory.EntityFactory;
 import org.hswebframework.web.dao.authorization.oauth2.OAuth2ClientDao;
 import org.hswebframework.web.dao.datasource.DataSourceHolder;
@@ -38,8 +38,10 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
@@ -65,6 +67,8 @@ import java.util.Arrays;
 @SpringBootApplication
 @Configuration
 @EnableSwagger2
+@EnableCaching
+@EnableAspectJAutoProxy
 public class SpringBootExample implements CommandLineRunner {
 
     @Bean
@@ -72,7 +76,7 @@ public class SpringBootExample implements CommandLineRunner {
         return new Docket(DocumentationType.SWAGGER_2)
                 .apiInfo(apiInfo())
                 .groupName("example")
-                .ignoredParameterTypes(HttpSession.class, Authorization.class, HttpServletRequest.class, HttpServletResponse.class)
+                .ignoredParameterTypes(HttpSession.class, Authentication.class, HttpServletRequest.class, HttpServletResponse.class)
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("org.hswebframework.web"))
                 .paths(PathSelectors.any())
@@ -116,7 +120,6 @@ public class SpringBootExample implements CommandLineRunner {
     PermissionService permissionService;
     @Autowired
     EntityFactory     entityFactory;
-
     @Autowired
     OAuth2ClientDao oAuth2ClientDao;
 
@@ -128,12 +131,12 @@ public class SpringBootExample implements CommandLineRunner {
     public void run(String... strings) throws Exception {
         //只能查询自己创建的数据
         DataAccessEntity accessEntity = new DataAccessEntity();
-        accessEntity.setType(DataAccess.Type.OWN_CREATED.name());
+        accessEntity.setType(DataAccessConfig.DefaultType.OWN_CREATED);
         accessEntity.setAction(Permission.ACTION_QUERY);
 
         //只能修改自己创建的数据
         DataAccessEntity updateAccessEntity = new DataAccessEntity();
-        updateAccessEntity.setType(DataAccess.Type.OWN_CREATED.name());
+        updateAccessEntity.setType(DataAccessConfig.DefaultType.OWN_CREATED);
         updateAccessEntity.setAction(Permission.ACTION_UPDATE);
         //脚本方式自定义控制
 //        updateAccessEntity.setConfig(JSON.toJSONString(new SimpleScriptDataAccess("" +

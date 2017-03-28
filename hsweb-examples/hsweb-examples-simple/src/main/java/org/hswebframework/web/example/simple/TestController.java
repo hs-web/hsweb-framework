@@ -1,8 +1,9 @@
 package org.hswebframework.web.example.simple;
 
 import io.swagger.annotations.ApiOperation;
-import org.hswebframework.web.authorization.Authorization;
-import org.hswebframework.web.authorization.AuthorizationHolder;
+import org.apache.shiro.authz.annotation.RequiresRoles;
+import org.hswebframework.web.authorization.Authentication;
+import org.hswebframework.web.authorization.AuthenticationHolder;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.annotation.RequiresDataAccess;
@@ -17,8 +18,12 @@ import org.hswebframework.web.entity.authorization.UserEntity;
 import org.hswebframework.web.model.authorization.UserModel;
 import org.hswebframework.web.service.QueryByEntityService;
 import org.hswebframework.web.service.QueryService;
+import org.hswebframework.web.service.authorization.UserService;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -31,10 +36,17 @@ import java.util.List;
 @RequestMapping("/test")
 public class TestController implements QueryController<UserEntity, String, QueryParamEntity> {
 
+
     @GetMapping("/test1")
-    @Authorize(action = "query", message = "${'表达式方式'}")
-    public ResponseMessage testSimple(Authorization authorization) {
-        return ResponseMessage.ok(authorization);
+    @Authorize(action = "query")
+    public ResponseMessage testSimple(Authentication authentication) {
+        return ResponseMessage.ok(authentication).exclude(Authentication.class, "attributes");
+    }
+
+    @GetMapping("/test2")
+    @RequiresRoles("admin")
+    public ResponseMessage test2(Authentication authentication) {
+        return ResponseMessage.ok(authentication);
     }
 
     @GetMapping("/testQuery")
@@ -73,7 +85,7 @@ public class TestController implements QueryController<UserEntity, String, Query
         public UserEntity selectByPk(String id) {
             SimpleUserEntity userEntity = new SimpleUserEntity();
             // 同一个用户
-            userEntity.setCreatorId(AuthorizationHolder.get().getUser().getId());
+            userEntity.setCreatorId(AuthenticationHolder.get().getUser().getId());
 
             return userEntity;
         }
