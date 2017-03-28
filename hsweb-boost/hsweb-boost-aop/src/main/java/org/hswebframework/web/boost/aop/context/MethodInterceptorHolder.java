@@ -18,11 +18,16 @@
 
 package org.hswebframework.web.boost.aop.context;
 
+import org.aopalliance.intercept.MethodInvocation;
 import org.hswebframework.web.AopUtils;
 import org.hswebframework.web.ThreadLocalUtils;
+import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
+import org.springframework.core.ParameterNameDiscoverer;
+import org.springframework.util.DigestUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -31,6 +36,7 @@ import java.util.Optional;
  * @author zhouhao
  */
 public class MethodInterceptorHolder {
+    public static final ParameterNameDiscoverer nameDiscoverer = new LocalVariableTableParameterNameDiscoverer();
 
     public static MethodInterceptorHolder current() {
         return ThreadLocalUtils.get(MethodInterceptorHolder.class.getName());
@@ -44,6 +50,19 @@ public class MethodInterceptorHolder {
         return ThreadLocalUtils.put(MethodInterceptorHolder.class.getName(), holder);
     }
 
+    public static MethodInterceptorHolder create(MethodInvocation invocation) {
+        String id = DigestUtils.md5DigestAsHex(String.valueOf(invocation.getMethod().hashCode()).getBytes());
+        String[] argNames = nameDiscoverer.getParameterNames(invocation.getMethod());
+        Object[] args = invocation.getArguments();
+        Map<String, Object> argMap = new LinkedHashMap<>();
+        for (int i = 0, len = args.length; i < len; i++) {
+            argMap.put(argNames[i] == null ? "arg" + i : argNames[i], args[i]);
+        }
+        return new MethodInterceptorHolder(id,
+                invocation.getMethod(),
+                invocation.getThis(), argMap);
+    }
+
     private String id;
 
     private Method method;
@@ -52,8 +71,9 @@ public class MethodInterceptorHolder {
 
     private Map<String, Object> args;
 
-    public void set() {
+    public MethodInterceptorHolder set() {
         MethodInterceptorHolder.setCurrent(this);
+        return this;
     }
 
     public MethodInterceptorHolder(String id, Method method, Object target, Map<String, Object> args) {
@@ -84,6 +104,10 @@ public class MethodInterceptorHolder {
         return args;
     }
 
+    public <T extends Annotation> T findAnnotation(Class<T> annClass) {
+        return AopUtils.findAnnotation(target.getClass(), method, annClass);
+    }
+
     public MethodInterceptorParamContext createParamContext() {
         return new MethodInterceptorParamContext() {
             @Override
@@ -104,7 +128,7 @@ public class MethodInterceptorHolder {
 
             @Override
             public <T extends Annotation> T getAnnotation(Class<T> annClass) {
-                return AopUtils.findAnnotation(target.getClass(), method, annClass);
+                return findAnnotation(annClass);
             }
 
             @Override
