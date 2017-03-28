@@ -20,7 +20,6 @@ package org.hswebframework.web.authorization.annotation;
 import org.hswebframework.web.authorization.access.DataAccessConfig;
 import org.hswebframework.web.authorization.access.DataAccessController;
 import org.hswebframework.web.authorization.Permission;
-import org.hswebframework.web.boost.aop.context.RecordAopContext;
 
 import java.lang.annotation.*;
 
@@ -37,7 +36,6 @@ import java.lang.annotation.*;
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@RecordAopContext
 public @interface RequiresDataAccess {
 
     /**

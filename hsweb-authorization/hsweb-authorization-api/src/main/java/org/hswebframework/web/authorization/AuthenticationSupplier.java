@@ -26,4 +26,5 @@ import java.util.function.Supplier;
  * @see AuthenticationHolder
  */
 public interface AuthenticationSupplier extends Supplier<Authentication> {
+    Authentication get(String userId);
 }

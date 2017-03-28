@@ -37,15 +37,33 @@ public final class AuthenticationHolder {
     private static AuthenticationSupplier supplier;
 
     /**
-     * @return 当前登录用户信息
+     * @return 当前登录的用户权限信息
      */
     public static Authentication get() {
         if (null == supplier) {
-            throw new UnsupportedOperationException("AuthorizationSupplier is null!");
+            throw new UnsupportedOperationException("supplier is null!");
         }
         return supplier.get();
     }
 
+    /**
+     * 获取指定用户的权限信息
+     *
+     * @param userId 用户ID
+     * @return 权限信息
+     */
+    public static Authentication get(String userId) {
+        if (null == supplier) {
+            throw new UnsupportedOperationException("supplier is null!");
+        }
+        return supplier.get(userId);
+    }
+
+    /**
+     * 初始化 {@link AuthenticationSupplier}
+     *
+     * @param supplier
+     */
     public static void setSupplier(AuthenticationSupplier supplier) {
         if (null == AuthenticationHolder.supplier)
             AuthenticationHolder.supplier = supplier;
