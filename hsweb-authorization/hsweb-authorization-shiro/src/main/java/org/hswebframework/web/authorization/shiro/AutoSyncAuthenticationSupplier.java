@@ -21,11 +21,11 @@ package org.hswebframework.web.authorization.shiro;
 import org.apache.shiro.SecurityUtils;
 import org.hswebframework.web.ThreadLocalUtils;
 import org.hswebframework.web.authorization.*;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -41,8 +41,14 @@ public class AutoSyncAuthenticationSupplier implements AuthenticationSupplier {
     private AuthenticationManager authenticationManager;
 
     public AutoSyncAuthenticationSupplier(AuthenticationManager authenticationManager) {
-        Objects.requireNonNull(authenticationManager);
         this.authenticationManager = authenticationManager;
+    }
+
+    @Override
+    public Authentication get(String userId) {
+        Authentication nativeAuth = getNative(userId);
+        if (null == nativeAuth) return null;
+        return new AutoSyncAuthentication(nativeAuth);
     }
 
     @Override
@@ -52,13 +58,17 @@ public class AutoSyncAuthenticationSupplier implements AuthenticationSupplier {
         return new AutoSyncAuthentication(nativeAuth);
     }
 
+    protected Authentication getNative(String userId) {
+        return ThreadLocalUtils.get(Authentication.class.getName(), () -> authenticationManager.getByUserId(userId));
+    }
+
     protected Authentication getNative() {
         //未授权并且未记住登录
         if (!SecurityUtils.getSubject().isAuthenticated() && !SecurityUtils.getSubject().isRemembered()) return null;
         String id = (String) SecurityUtils.getSubject().getPrincipal();
         if (null == id) return null;
         // ThreadLocal cache
-        return ThreadLocalUtils.get(Authentication.class.getName(), () -> authenticationManager.getByUserId(id));
+        return getNative(id);
     }
 
     protected void sync(Authentication authentication) {

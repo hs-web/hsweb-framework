@@ -23,17 +23,14 @@ import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.shiro.cache.CacheManager;
 import org.apache.shiro.cache.MemoryConstrainedCacheManager;
 import org.apache.shiro.mgt.DefaultSecurityManager;
-import org.apache.shiro.mgt.RememberMeManager;
 import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.session.mgt.DefaultSessionManager;
 import org.apache.shiro.spring.LifecycleBeanPostProcessor;
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
-import org.apache.shiro.web.mgt.CookieRememberMeManager;
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
 import org.hswebframework.web.authorization.AuthenticationHolder;
 import org.hswebframework.web.authorization.AuthenticationManager;
-import org.hswebframework.web.authorization.AuthenticationSupplier;
 import org.hswebframework.web.authorization.access.DataAccessController;
 import org.hswebframework.web.authorization.access.DataAccessHandler;
 import org.hswebframework.web.authorization.access.FieldAccessController;
@@ -91,11 +88,18 @@ public class ShiroAutoConfiguration {
 
     @Bean
     @Order(Ordered.LOWEST_PRECEDENCE)
-    public ListenerAuthorizingRealm listenerAuthorizingRealm(CacheManager cacheManager,
-                                                             AuthenticationManager authenticationManager) {
-        ListenerAuthorizingRealm realm = new ListenerAuthorizingRealm(authenticationManager);
+    public ListenerAuthorizingRealm listenerAuthorizingRealm(CacheManager cacheManager) {
+        ListenerAuthorizingRealm realm = new ListenerAuthorizingRealm();
         realm.setCacheManager(cacheManager);
         return realm;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public AutoSyncAuthenticationSupplier authorizationSupplier(AuthenticationManager authenticationManager) {
+        AutoSyncAuthenticationSupplier syncAuthenticationSupplier = new AutoSyncAuthenticationSupplier(authenticationManager);
+        AuthenticationHolder.setSupplier(syncAuthenticationSupplier);
+        return syncAuthenticationSupplier;
     }
 
     @Bean
@@ -155,14 +159,6 @@ public class ShiroAutoConfiguration {
         BoostAuthorizationAttributeSourceAdvisor advisor = new BoostAuthorizationAttributeSourceAdvisor(dataAccessController, fieldAccessController);
         advisor.setSecurityManager(securityManager);
         return advisor;
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public AuthenticationSupplier authorizationSupplier(AuthenticationManager authenticationManager) {
-        AutoSyncAuthenticationSupplier syncAuthenticationSupplier = new AutoSyncAuthenticationSupplier(authenticationManager);
-        AuthenticationHolder.setSupplier(syncAuthenticationSupplier);
-        return syncAuthenticationSupplier;
     }
 
     @Bean(name = "shiroFilter")

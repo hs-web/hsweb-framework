@@ -17,6 +17,7 @@
 
 package org.hswebframework.web.authorization.shiro.boost;
 
+import org.aopalliance.intercept.MethodInvocation;
 import org.apache.shiro.aop.AnnotationResolver;
 import org.apache.shiro.authz.annotation.*;
 import org.apache.shiro.mgt.SecurityManager;
@@ -30,6 +31,7 @@ import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.annotation.RequiresDataAccess;
 import org.hswebframework.web.authorization.annotation.RequiresExpression;
 import org.hswebframework.web.authorization.annotation.RequiresFieldAccess;
+import org.hswebframework.web.boost.aop.context.MethodInterceptorHolder;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -69,7 +71,14 @@ public class BoostAuthorizationAttributeSourceAdvisor extends StaticMethodMatche
      */
     public BoostAuthorizationAttributeSourceAdvisor(DataAccessController dataAccessController,
                                                     FieldAccessController fieldAccessController) {
-        AopAllianceAnnotationsAuthorizingMethodInterceptor interceptor = new AopAllianceAnnotationsAuthorizingMethodInterceptor();
+        AopAllianceAnnotationsAuthorizingMethodInterceptor interceptor =
+                new AopAllianceAnnotationsAuthorizingMethodInterceptor() {
+                    @Override
+                    public Object invoke(MethodInvocation methodInvocation) throws Throwable {
+                        MethodInterceptorHolder.create(methodInvocation).set();
+                        return super.invoke(methodInvocation);
+                    }
+                };
         AnnotationResolver resolver = new SpringAnnotationResolver();
         // @RequiresExpression support
         interceptor.getMethodInterceptors().add(new ExpressionAnnotationMethodInterceptor(resolver));

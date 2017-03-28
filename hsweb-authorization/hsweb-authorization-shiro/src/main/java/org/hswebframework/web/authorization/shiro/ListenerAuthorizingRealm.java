@@ -30,12 +30,11 @@ import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.subject.Subject;
 import org.hswebframework.web.authorization.Authentication;
-import org.hswebframework.web.authorization.AuthenticationManager;
+import org.hswebframework.web.authorization.AuthenticationHolder;
 import org.hswebframework.web.authorization.Role;
 import org.hswebframework.web.authorization.listener.AuthorizationListener;
 import org.hswebframework.web.authorization.listener.event.AuthorizationSuccessEvent;
 
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -43,20 +42,15 @@ import java.util.stream.Collectors;
  */
 public class ListenerAuthorizingRealm extends AuthorizingRealm
         implements AuthorizationListener<AuthorizationSuccessEvent> {
-    private AuthenticationManager authenticationManager;
 
-
-    public ListenerAuthorizingRealm(AuthenticationManager authenticationManager) {
-        Objects.requireNonNull(authenticationManager);
-        this.authenticationManager=authenticationManager;
+    public ListenerAuthorizingRealm() {
         setAuthenticationTokenClass(SimpleAuthenticationToken.class);
     }
-
 
     @Override
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
         String loginUserId = (String) super.getAvailablePrincipal(principals);
-        return createAuthorizationInfo(authenticationManager.getByUserId(loginUserId));
+        return createAuthorizationInfo(AuthenticationHolder.get(loginUserId));
     }
 
     @Override
