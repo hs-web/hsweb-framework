@@ -22,6 +22,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.hswebframework.web.BusinessException;
 import org.hswebframework.web.NotFoundException;
+import org.hswebframework.web.WebUtil;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.listener.AuthorizationListenerDispatcher;
@@ -47,25 +48,11 @@ import static org.hswebframework.web.controller.message.ResponseMessage.ok;
 @Api(tags = "hsweb-authorization", description = "提供基本的授权功能")
 public class AuthorizationController {
 
-//    private static final String RSA_PRIVATE_KEY_NAME  = "RSA_PRIVATE_KEY";
-//    private static final String VERIFY_CODE_NAME      = "VERIFY_CODE";
-
     @Autowired
     private UserService userService;
 
     @Autowired
     private AuthorizationListenerDispatcher authorizationListenerDispatcher;
-
-//    @GetMapping(value = "/public-key")
-//    @AccessLogger("获取公钥")
-//    @ApiOperation("获取rsa公钥,当开启了用户名密码加密的时候使用此接口获取用于加密的公钥")
-//    public ResponseMessage getAuthorizeToken(@ApiParam(hidden = true) HttpSession session) {
-//        RSAEncrypt rsaEncrypt = Encrypt.rsa();
-//        String publicKey = rsaEncrypt.publicEncrypt().getKey();
-//        String privateKey = rsaEncrypt.privateEncrypt().getKey();
-//        session.setAttribute(RSA_PRIVATE_KEY_NAME, privateKey);
-//        return ok(publicKey);
-//    }
 
     @GetMapping("/login-out")
     @AccessLogger("退出登录")
@@ -93,34 +80,6 @@ public class AuthorizationController {
 
             AuthorizationBeforeEvent beforeEvent = new AuthorizationBeforeEvent(username, password, parameterGetter);
             authorizationListenerDispatcher.doEvent(beforeEvent);
-
-//            if (useRsa) {
-//                String privateKey = (String) session.getAttribute(RSA_PRIVATE_KEY_NAME);
-//                if (privateKey == null) throw new BusinessException("{private_key_is_null}");
-//                // 解密用户名密码
-//                try {
-//                    RSAEncrypt rsaEncrypt = Encrypt.rsa();
-//                    RSAPrivateEncrypt rsaPrivateEncrypt = rsaEncrypt.privateEncrypt(privateKey);
-//                    byte[] username_data = Base64.decodeBase64(username);
-//                    byte[] password_data = Base64.decodeBase64(password);
-//                    username = new String(rsaPrivateEncrypt.decrypt(username_data));
-//                    password = new String(rsaPrivateEncrypt.decrypt(password_data));
-//                } catch (Exception e) {
-//                    throw new BusinessException("{decrypt_param_error}", e, 400);
-//                }
-//            }
-
-//            UserAuthorizationConfigRegister configHolder = (useVerify) -> session.setAttribute(NEED_VERIFY_CODE_NAME, useVerify);
-//            listenerAdapter.onConfig(username, configHolder);
-//            Object useVerifyCode = session.getAttribute(NEED_VERIFY_CODE_NAME);
-//            // 尝试使用验证码验证
-//            if (Boolean.TRUE.equals(useVerifyCode)) {
-//                String realVerifyCode = (String) session.getAttribute(VERIFY_CODE_NAME);
-//                if (realVerifyCode == null || !realVerifyCode.equalsIgnoreCase(verifyCode)) {
-//                    throw new BusinessException("{verify_code_error}");
-//                }
-//            }
-//            listenerAdapter.onAuthorizeBefore(username);
             UserEntity entity = userService.selectByUsername(username);
             if (entity == null) {
                 reason = AuthorizationFailedEvent.Reason.USER_NOT_EXISTS;
@@ -135,8 +94,8 @@ public class AuthorizationController {
                 reason = AuthorizationFailedEvent.Reason.PASSWORD_ERROR;
                 throw new BusinessException("{password_error}", 400);
             }
-            // TODO: 17-1-13  获取IP
-            userService.updateLoginInfo(entity.getId(), "", System.currentTimeMillis());
+
+            userService.updateLoginInfo(entity.getId(), WebUtil.getIpAddr(request), System.currentTimeMillis());
             // 验证通过
             Authentication authentication = userService.initUserAuthorization(entity.getId());
             AuthorizationSuccessEvent event = new AuthorizationSuccessEvent(authentication, parameterGetter);
@@ -147,10 +106,6 @@ public class AuthorizationController {
             failedEvent.setException(e);
             authorizationListenerDispatcher.doEvent(failedEvent);
             throw e;
-        } finally {
-            //无论如何都清空验证码和私钥
-//            session.removeAttribute(VERIFY_CODE_NAME);
-//            session.removeAttribute(RSA_PRIVATE_KEY_NAME);
         }
     }
 
