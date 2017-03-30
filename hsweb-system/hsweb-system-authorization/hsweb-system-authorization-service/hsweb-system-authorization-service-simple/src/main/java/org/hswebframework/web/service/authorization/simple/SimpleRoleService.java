@@ -34,6 +34,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.hswebframework.web.service.authorization.simple.CacheConstants.USER_AUTH_CACHE_NAME;
@@ -102,11 +103,19 @@ public class SimpleRoleService extends AbstractService<RoleEntity, String>
     @Override
     @SuppressWarnings("unchecked")
     public RoleEntity selectByPk(String roleId) {
+        return createQuery().where(RoleEntity.id, roleId).single();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T extends PermissionRoleEntity> BindPermissionRoleEntity<T> selectDetailByPk(String roleId) {
         RoleEntity entity = createQuery().where(RoleEntity.id, roleId).single();
         if (entity == null) return null;
-        BindPermissionRoleEntity<PermissionRoleEntity> bindPermissionRoleEntity = entityFactory.newInstance(BindPermissionRoleEntity.class);
-        bindPermissionRoleEntity.setPermissions(permissionRoleDao.selectByRoleId(roleId));
-        return entity;
+        BindPermissionRoleEntity<T> bindPermissionRoleEntity =
+                entityFactory.newInstance(BindPermissionRoleEntity.class, entity);
+
+        bindPermissionRoleEntity.setPermissions(new ArrayList(permissionRoleDao.selectByRoleId(roleId)));
+        return bindPermissionRoleEntity;
     }
 
     @Override

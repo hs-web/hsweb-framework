@@ -31,6 +31,7 @@ import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.entity.authorization.UserEntity;
 import org.hswebframework.web.logging.AccessLogger;
 import org.hswebframework.web.model.authorization.UserModel;
+import org.hswebframework.web.service.AbstractService;
 import org.hswebframework.web.service.authorization.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
@@ -75,6 +76,7 @@ public class UserController implements
 
     @Override
     public ResponseMessage<PagerResult<UserEntity>> list(QueryParamEntity param) {
+        param.excludes("password", "salt");
         return QueryController.super.list(param)
                 .exclude(UserEntity.class, "password", "salt");
     }
@@ -90,7 +92,7 @@ public class UserController implements
     @AccessLogger("{update_by_primary_key}")
     @ApiOperation("根据ID修改用户信息")
     public ResponseMessage<Void> updateByPrimaryKey(@PathVariable String id,
-                                              @RequestBody UserModel userModel) {
+                                                    @RequestBody UserModel userModel) {
         getService().update(id, modelToEntity(userModel, getService().createEntity()));
         return ok();
     }
@@ -100,9 +102,8 @@ public class UserController implements
     @AccessLogger("{update_password_login_user}")
     @ApiOperation("修改当前用户的密码")
     public ResponseMessage<Void> updateLoginUserPassword(@RequestParam String password,
-                                                   @RequestParam String oldPassword) {
-        Authentication authentication = AuthenticationHolder.get();
-        Assert.notNull(authentication);
+                                                         @RequestParam String oldPassword) {
+        Authentication authentication = Authentication.current().get();
         getService().updatePassword(authentication.getUser().getId(), oldPassword, password);
         return ok();
     }
@@ -112,8 +113,8 @@ public class UserController implements
     @AccessLogger("{update_password_by_id}")
     @ApiOperation("修改指定用户的密码")
     public ResponseMessage<Void> updateByPasswordPrimaryKey(@PathVariable String id,
-                                                      @RequestParam String password,
-                                                      @RequestParam String oldPassword) {
+                                                            @RequestParam String password,
+                                                            @RequestParam String oldPassword) {
         getService().updatePassword(id, oldPassword, password);
         return ok();
     }

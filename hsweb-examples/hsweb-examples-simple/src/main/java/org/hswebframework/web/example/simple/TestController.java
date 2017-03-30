@@ -1,7 +1,6 @@
 package org.hswebframework.web.example.simple;
 
 import io.swagger.annotations.ApiOperation;
-import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.AuthenticationHolder;
 import org.hswebframework.web.authorization.Permission;
@@ -18,12 +17,8 @@ import org.hswebframework.web.entity.authorization.UserEntity;
 import org.hswebframework.web.model.authorization.UserModel;
 import org.hswebframework.web.service.QueryByEntityService;
 import org.hswebframework.web.service.QueryService;
-import org.hswebframework.web.service.authorization.UserService;
-import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -44,7 +39,7 @@ public class TestController implements QueryController<UserEntity, String, Query
     }
 
     @GetMapping("/test2")
-    @RequiresRoles("admin")
+//    @RequiresRoles("admin")
     public ResponseMessage test2(Authentication authentication) {
         return ResponseMessage.ok(authentication);
     }

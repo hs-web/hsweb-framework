@@ -18,6 +18,8 @@
 
 package org.hswebframework.web.authorization;
 
+import org.hswebframework.web.ThreadLocalUtils;
+
 /**
  * 权限获取器,用于静态方式获取当前登录用户的权限信息.
  * 例如:
@@ -36,12 +38,18 @@ package org.hswebframework.web.authorization;
 public final class AuthenticationHolder {
     private static AuthenticationSupplier supplier;
 
+    public static final String CURRENT_USER_ID_KEY = Authentication.class.getName() + "_current_id";
+
     /**
      * @return 当前登录的用户权限信息
      */
     public static Authentication get() {
         if (null == supplier) {
             throw new UnsupportedOperationException("supplier is null!");
+        }
+        String currentId = ThreadLocalUtils.get(CURRENT_USER_ID_KEY);
+        if (currentId != null) {
+            return supplier.get(currentId);
         }
         return supplier.get();
     }
@@ -67,5 +75,9 @@ public final class AuthenticationHolder {
     public static void setSupplier(AuthenticationSupplier supplier) {
         if (null == AuthenticationHolder.supplier)
             AuthenticationHolder.supplier = supplier;
+    }
+
+    public static void setCureentUserId(String id) {
+        ThreadLocalUtils.put(AuthenticationHolder.CURRENT_USER_ID_KEY, id);
     }
 }

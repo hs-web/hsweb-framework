@@ -27,4 +27,6 @@ public interface RoleService extends
 
     RoleEntity selectByPk(String roleId);
 
+    <T extends PermissionRoleEntity> BindPermissionRoleEntity<T> selectDetailByPk(String roleId);
+
 }

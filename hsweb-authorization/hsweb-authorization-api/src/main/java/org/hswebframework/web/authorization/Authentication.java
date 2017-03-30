@@ -37,6 +37,10 @@ import java.util.Optional;
  */
 public interface Authentication extends Serializable {
 
+    static Optional<Authentication> current() {
+        return Optional.ofNullable(AuthenticationHolder.get());
+    }
+
     /**
      * @return 用户信息
      */
