@@ -29,6 +29,7 @@ import org.apache.shiro.session.mgt.DefaultSessionManager;
 import org.apache.shiro.spring.LifecycleBeanPostProcessor;
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
+import org.apache.shiro.web.mgt.WebSecurityManager;
 import org.hswebframework.web.authorization.AuthenticationHolder;
 import org.hswebframework.web.authorization.AuthenticationManager;
 import org.hswebframework.web.authorization.access.DataAccessController;
@@ -41,9 +42,7 @@ import org.hswebframework.web.authorization.shiro.cache.SpringCacheManagerWrappe
 import org.hswebframework.web.authorization.shiro.remember.SimpleRememberMeManager;
 import org.hswebframework.web.controller.message.ResponseMessage;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnNotWebApplication;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.boot.autoconfigure.condition.*;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -65,14 +64,11 @@ import java.util.List;
  * @author zhouhao
  */
 @Configuration
-@EnableConfigurationProperties(ShiroProperties.class)
+@Order(Ordered.LOWEST_PRECEDENCE)
 public class ShiroAutoConfiguration {
 
     @Autowired(required = false)
     private org.springframework.cache.CacheManager cacheManager;
-
-    @Autowired
-    private ShiroProperties shiroProperties;
 
     @Autowired(required = false)
     private List<DataAccessHandler> dataAccessHandlers;
@@ -161,16 +157,27 @@ public class ShiroAutoConfiguration {
         return advisor;
     }
 
-    @Bean(name = "shiroFilter")
-    public ShiroFilterFactoryBean shiroFilterFactoryBean(DefaultWebSecurityManager securityManager) {
-        ShiroFilterFactoryBean shiroFilterFactoryBean = new ShiroFilterFactoryBean();
-        // 必须设置 SecurityManager
-        shiroFilterFactoryBean.setSecurityManager(securityManager);
-        if (null != shiroProperties)
-            shiroFilterFactoryBean.setFilterChainDefinitionMap(shiroProperties.getFilters());
-        else
-            shiroFilterFactoryBean.setFilterChainDefinitionMap(Collections.emptyMap());
-        return shiroFilterFactoryBean;
+    @Configuration
+    @EnableConfigurationProperties(ShiroProperties.class)
+    @ConditionalOnProperty(prefix = "hsweb.authorize", name = "enable", havingValue = "true", matchIfMissing = true)
+    static class FilterConfiguration {
+        @Autowired
+        private ShiroProperties shiroProperties;
+
+        @Bean(name = "shiroFilter")
+        public ShiroFilterFactoryBean shiroFilterFactoryBean(WebSecurityManager securityManager) {
+            ShiroFilterFactoryBean shiroFilterFactoryBean = new ShiroFilterFactoryBean();
+            // 必须设置 SecurityManager
+            shiroFilterFactoryBean.setSecurityManager(securityManager);
+            if (null != shiroProperties)
+                shiroFilterFactoryBean.setFilterChainDefinitionMap(shiroProperties.getFilters());
+            else
+                shiroFilterFactoryBean.setFilterChainDefinitionMap(Collections.emptyMap());
+            shiroFilterFactoryBean.setSuccessUrl(shiroProperties.getSuccessUrl());
+            shiroFilterFactoryBean.setLoginUrl(shiroProperties.getLoginUrl());
+            shiroFilterFactoryBean.setUnauthorizedUrl(shiroProperties.getUnauthorizedUrl());
+            return shiroFilterFactoryBean;
+        }
     }
 
     @RestControllerAdvice

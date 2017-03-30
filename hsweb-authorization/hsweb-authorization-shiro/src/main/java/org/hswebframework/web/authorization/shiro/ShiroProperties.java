@@ -17,6 +17,9 @@
 
 package org.hswebframework.web.authorization.shiro;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.Map;
@@ -27,10 +30,42 @@ import java.util.Map;
  * @author zhouhao
  */
 @ConfigurationProperties(prefix = "hsweb.authorize")
-public class ShiroProperties {
+public class ShiroProperties implements InitializingBean {
+    static Logger logger = LoggerFactory.getLogger(ShiroProperties.class);
+
     private Map<String, String> filters;
 
+    private String loginUrl = "/401.html";
+
+    private String unauthorizedUrl = "";
+
+    private String successUrl = "/";
+
     private boolean enable = true;
+
+    public String getLoginUrl() {
+        return loginUrl;
+    }
+
+    public void setLoginUrl(String loginUrl) {
+        this.loginUrl = loginUrl;
+    }
+
+    public String getUnauthorizedUrl() {
+        return unauthorizedUrl;
+    }
+
+    public void setUnauthorizedUrl(String unauthorizedUrl) {
+        this.unauthorizedUrl = unauthorizedUrl;
+    }
+
+    public String getSuccessUrl() {
+        return successUrl;
+    }
+
+    public void setSuccessUrl(String successUrl) {
+        this.successUrl = successUrl;
+    }
 
     public Map<String, String> getFilters() {
         return filters;
@@ -46,5 +81,12 @@ public class ShiroProperties {
 
     public void setEnable(boolean enable) {
         this.enable = enable;
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        if (logger.isDebugEnabled() && null != filters) {
+            filters.forEach((k, v) -> logger.debug("path [{}] use filter [{}]", k, v));
+        }
     }
 }

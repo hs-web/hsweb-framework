@@ -11,6 +11,9 @@ spring:
     cache:
        type: simple
 hsweb:
+    authorize:
+#      filters:
+#           "/swagger-ui.html": "authc"
     app:
       name: hsweb示例
       version: 3.0.0

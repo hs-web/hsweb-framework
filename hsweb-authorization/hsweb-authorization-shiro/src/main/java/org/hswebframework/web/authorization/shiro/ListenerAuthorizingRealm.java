@@ -101,10 +101,6 @@ public class ListenerAuthorizingRealm extends AuthorizingRealm
     public void on(AuthorizationSuccessEvent event) {
         Authentication authentication = event.getAuthentication();
         boolean remember = Boolean.valueOf((String) event.getParameter("remember").orElse("false"));
-
-//        authentication.setAttribute(AuthorizationInfo.class.getName(), authorizationInfo);
-//        authentication.setAttribute(AuthenticationInfo.class.getName(), createAuthenticationInfo(authentication));
-
         Subject subject = SecurityUtils.getSubject();
         subject.login(new SimpleAuthenticationToken(authentication, remember));
     }

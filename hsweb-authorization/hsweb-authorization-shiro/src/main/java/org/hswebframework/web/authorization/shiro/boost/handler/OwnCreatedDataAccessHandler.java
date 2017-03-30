@@ -113,7 +113,7 @@ public class OwnCreatedDataAccessHandler implements DataAccessHandler {
             queryParamEntity.setTerms(new ArrayList<>());
             //添加一个查询条件
             queryParamEntity
-                    .where("creatorId", AuthenticationHolder.get().getUser().getId())
+                    .where(RecordCreationEntity.creatorId, AuthenticationHolder.get().getUser().getId())
                     //客户端提交的参数 作为嵌套参数
                     .nest().setTerms(oldParam);
         } else if (entity instanceof RecordCreationEntity) {
