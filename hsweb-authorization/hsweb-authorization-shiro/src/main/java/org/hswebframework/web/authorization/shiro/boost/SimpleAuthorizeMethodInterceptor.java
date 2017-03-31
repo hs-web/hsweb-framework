@@ -80,8 +80,8 @@ public class SimpleAuthorizeMethodInterceptor extends AuthorizingAnnotationMetho
             }
             authorizeConfig.put(authorize);
 
-            Authentication authentication = AuthenticationHolder.get();
-            if (null == authentication) throw new UnauthenticatedException(authorizeConfig.message);
+            Authentication authentication = Authentication.current()
+                    .orElseThrow(() -> new UnauthenticatedException(authorizeConfig.message));
             boolean access = true;
             Logical logical = authorizeConfig.logical == Logical.DEFAULT ? Logical.OR : authorizeConfig.logical;
             boolean logicalIsOr = logical == Logical.OR;

@@ -43,8 +43,8 @@ import java.util.stream.Collectors;
  */
 public class FieldAccessAnnotationMethodInterceptor extends AuthorizingAnnotationMethodInterceptor {
 
-    public FieldAccessAnnotationMethodInterceptor(FieldAccessController controller,AnnotationResolver resolver) {
-        super(new DataAccessAnnotationHandler(controller),resolver);
+    public FieldAccessAnnotationMethodInterceptor(FieldAccessController controller, AnnotationResolver resolver) {
+        super(new DataAccessAnnotationHandler(controller), resolver);
     }
 
     private static final Logger logger = LoggerFactory.getLogger(FieldAccessAnnotationMethodInterceptor.class);
@@ -67,10 +67,8 @@ public class FieldAccessAnnotationMethodInterceptor extends AuthorizingAnnotatio
             }
             RequiresFieldAccess accessAnn = ((RequiresFieldAccess) a);
             MethodInterceptorParamContext context = holder.createParamContext();
-            Authentication authentication = AuthenticationHolder.get();
-            if (authentication == null) {
-                throw new AuthorizationException("{no_authorization}");
-            }
+            Authentication authentication = Authentication.current().orElseThrow(AuthorizationException::new);
+            
             String permission = accessAnn.permission();
             Permission permissionInfo = authentication.getPermission(permission);
 

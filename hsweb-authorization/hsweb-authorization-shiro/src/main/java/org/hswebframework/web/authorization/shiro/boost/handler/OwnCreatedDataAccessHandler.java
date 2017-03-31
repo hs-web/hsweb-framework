@@ -1,7 +1,8 @@
 package org.hswebframework.web.authorization.shiro.boost.handler;
 
 import org.hsweb.ezorm.core.param.Term;
-import org.hswebframework.web.authorization.AuthenticationHolder;
+import org.hswebframework.web.AuthorizeException;
+import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.access.DataAccessConfig;
 import org.hswebframework.web.authorization.access.DataAccessHandler;
@@ -64,7 +65,9 @@ public class OwnCreatedDataAccessHandler implements DataAccessHandler {
                 .map(RecordCreationEntity.class::cast)
                 .findAny().orElse(null);
         if (entity != null) {
-            entity.setCreatorId(AuthenticationHolder.get().getUser().getId());
+            entity.setCreatorId(Authentication.current()
+                    .orElseThrow(AuthorizeException::new)
+                    .getUser().getId());
         } else {
             logger.warn("try put creatorId property,but not found any RecordCreationEntity!");
         }
@@ -85,7 +88,7 @@ public class OwnCreatedDataAccessHandler implements DataAccessHandler {
                 QueryService<RecordCreationEntity, Object> queryService =
                         ((QueryController<RecordCreationEntity, Object, Entity>) controller).getService();
                 RecordCreationEntity oldData = queryService.selectByPk(id);
-                if (oldData != null && !AuthenticationHolder.get().getUser().getId().equals(oldData.getCreatorId())) {
+                if (oldData != null && !Authentication.current().orElseThrow(AuthorizeException::new).getUser().getId().equals(oldData.getCreatorId())) {
                     return false;
                 }
             }
@@ -113,11 +116,11 @@ public class OwnCreatedDataAccessHandler implements DataAccessHandler {
             queryParamEntity.setTerms(new ArrayList<>());
             //添加一个查询条件
             queryParamEntity
-                    .where(RecordCreationEntity.creatorId, AuthenticationHolder.get().getUser().getId())
+                    .where(RecordCreationEntity.creatorId,Authentication.current().orElseThrow(AuthorizeException::new).getUser().getId())
                     //客户端提交的参数 作为嵌套参数
                     .nest().setTerms(oldParam);
         } else if (entity instanceof RecordCreationEntity) {
-            ((RecordCreationEntity) entity).setCreatorId(AuthenticationHolder.get().getUser().getId());
+            ((RecordCreationEntity) entity).setCreatorId(Authentication.current().orElseThrow(AuthorizeException::new).getUser().getId());
         } else {
             logger.warn("try validate query access,but entity not support, QueryParamEntity and RecordCreationEntity support now!");
         }

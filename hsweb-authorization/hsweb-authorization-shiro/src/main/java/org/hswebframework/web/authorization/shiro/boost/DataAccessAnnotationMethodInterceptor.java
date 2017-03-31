@@ -22,8 +22,8 @@ import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.authz.aop.AuthorizingAnnotationHandler;
 import org.apache.shiro.authz.aop.AuthorizingAnnotationMethodInterceptor;
 import org.hswebframework.web.ApplicationContextHolder;
+import org.hswebframework.web.AuthorizeException;
 import org.hswebframework.web.authorization.Authentication;
-import org.hswebframework.web.authorization.AuthenticationHolder;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.access.DataAccessConfig;
 import org.hswebframework.web.authorization.access.DataAccessController;
@@ -49,12 +49,12 @@ import java.util.stream.Collectors;
  * @author zhouhao
  * @see DefaultDataAccessController
  * @see DataAccessAnnotationHandler#assertAuthorized(Annotation)
- * @since  3.0
+ * @since 3.0
  */
 public class DataAccessAnnotationMethodInterceptor extends AuthorizingAnnotationMethodInterceptor {
 
-    public DataAccessAnnotationMethodInterceptor(DataAccessController controller,AnnotationResolver resolver) {
-        super(new DataAccessAnnotationHandler(controller),resolver);
+    public DataAccessAnnotationMethodInterceptor(DataAccessController controller, AnnotationResolver resolver) {
+        super(new DataAccessAnnotationHandler(controller), resolver);
     }
 
     private static final Logger logger = LoggerFactory.getLogger(DataAccessAnnotationMethodInterceptor.class);
@@ -78,10 +78,7 @@ public class DataAccessAnnotationMethodInterceptor extends AuthorizingAnnotation
                 return;
             }
             //无权限信息
-            Authentication authentication = AuthenticationHolder.get();
-            if (authentication == null) {
-                throw new AuthorizationException("{no_authorization}");
-            }
+            Authentication authentication = Authentication.current().orElseThrow(AuthorizeException::new);
             RequiresDataAccess accessAnn = ((RequiresDataAccess) a);
             DataAccessController accessController = dataAccessController;
             //在注解上自定义的权限控制器

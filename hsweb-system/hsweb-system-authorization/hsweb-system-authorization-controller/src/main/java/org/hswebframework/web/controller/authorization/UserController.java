@@ -19,8 +19,8 @@ package org.hswebframework.web.controller.authorization;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.hswebframework.web.AuthorizeException;
 import org.hswebframework.web.authorization.Authentication;
-import org.hswebframework.web.authorization.AuthenticationHolder;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.commons.entity.PagerResult;
@@ -31,11 +31,10 @@ import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.entity.authorization.UserEntity;
 import org.hswebframework.web.logging.AccessLogger;
 import org.hswebframework.web.model.authorization.UserModel;
-import org.hswebframework.web.service.AbstractService;
 import org.hswebframework.web.service.authorization.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
+
 
 import static org.hswebframework.web.controller.message.ResponseMessage.ok;
 
@@ -103,7 +102,8 @@ public class UserController implements
     @ApiOperation("修改当前用户的密码")
     public ResponseMessage<Void> updateLoginUserPassword(@RequestParam String password,
                                                          @RequestParam String oldPassword) {
-        Authentication authentication = Authentication.current().get();
+
+        Authentication authentication = Authentication.current().orElseThrow(AuthorizeException::new);
         getService().updatePassword(authentication.getUser().getId(), oldPassword, password);
         return ok();
     }

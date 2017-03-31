@@ -21,8 +21,8 @@ package org.hswebframework.web.authorization.oauth2.controller;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.codec.binary.Base64;
+import org.hswebframework.web.AuthorizeException;
 import org.hswebframework.web.authorization.Authentication;
-import org.hswebframework.web.authorization.AuthenticationHolder;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.oauth2.api.OAuth2ServerService;
 import org.hswebframework.web.authorization.oauth2.model.AccessTokenModel;
@@ -55,7 +55,7 @@ public class OAuth2AuthorizationController {
             @RequestParam("redirect_uri") String redirectUri,
             @RequestParam(value = "scope", required = false) String scope,
             @RequestParam(value = "state", required = false) String state) {
-        Authentication authentication = AuthenticationHolder.get();
+        Authentication authentication = Authentication.current().orElseThrow(AuthorizeException::new);
         String code = oAuth2ServerService.requestCode(clientId, authentication.getUser().getId(), scope);
         AuthorizationCodeModel model = new AuthorizationCodeModel();
         model.setCode(code);

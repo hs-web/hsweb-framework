@@ -20,6 +20,7 @@ package org.hswebframework.web.authorization;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 /**
@@ -37,6 +38,21 @@ import java.util.Optional;
  */
 public interface Authentication extends Serializable {
 
+    /**
+     * 获取当前登录的用户权限信息
+     * <pre>
+     *
+     *   Authentication auth= Authentication.current().get();
+     *   //如果权限信息不存在将抛出{@link NoSuchElementException}建议使用下面的方式获取
+     *   Authentication auth=Authentication.current().orElse(null);
+     *   //或者
+     *   Authentication auth=Authentication.current().orElseThrow(AuthorizeException::new);
+     * </pre>
+     *
+     * @return 返回Optional对象进行操作
+     * @see Optional
+     * @see AuthenticationHolder
+     */
     static Optional<Authentication> current() {
         return Optional.ofNullable(AuthenticationHolder.get());
     }
