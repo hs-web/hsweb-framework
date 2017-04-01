@@ -16,22 +16,19 @@
  *
  */
 
-package org.hswebframework.web.message.builder;
+package org.hswebframework.web.message.support;
 
-import org.hswebframework.web.message.support.DataMessage;
-import org.hswebframework.web.message.support.ObjectMessage;
-import org.hswebframework.web.message.support.ServiceInvokerMessage;
-import org.hswebframework.web.message.support.TextMessage;
+import org.hswebframework.web.message.Message;
+
+import java.io.Serializable;
 
 /**
  * @author zhouhao
  */
-public interface MessageBuilder {
-    TextMessage text(String msg);
+public interface ServiceInvokerMessage extends Message {
+    String getServiceName();
 
-    <T> ObjectMessage object(T msg);
+    String getMethod();
 
-    DataMessage data(byte[] msg);
-
-    ServiceInvokerMessage service(String serviceName);
+    Serializable[] getArgs();
 }

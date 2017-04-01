@@ -24,14 +24,26 @@ import org.hswebframework.web.message.support.ServiceInvokerMessage;
 import org.hswebframework.web.message.support.TextMessage;
 
 /**
+ * TODO 完成注释
+ *
  * @author zhouhao
  */
-public interface MessageBuilder {
-    TextMessage text(String msg);
+public class StaticMessageBuilder {
+    private static MessageBuilder messageBuilder = new SimpleMessageBuilder();
 
-    <T> ObjectMessage object(T msg);
+    public static TextMessage text(String msg) {
+        return messageBuilder.text(msg);
+    }
 
-    DataMessage data(byte[] msg);
+    public <T> ObjectMessage object(T msg) {
+        return messageBuilder.object(msg);
+    }
 
-    ServiceInvokerMessage service(String serviceName);
+    public DataMessage data(byte[] msg) {
+        return messageBuilder.data(msg);
+    }
+
+    public ServiceInvokerMessage service(String serviceName) {
+        return messageBuilder.service(serviceName);
+    }
 }

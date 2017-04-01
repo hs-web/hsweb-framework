@@ -18,13 +18,39 @@
 
 package org.hswebframework.web.message;
 
+import java.util.function.Consumer;
+
 /**
+ * TODO 完成注释
+ *
  * @author zhouhao
  */
-public interface MessageContext {
-    MessageContext from(MessageSubject subject);
+public abstract class SimpleMessagePublish implements MessagePublish {
+    MessageSubject from;
 
-    MessageContext to(MessageSubject subject);
+    MessageSubject to;
 
-    void send();
+    @Override
+    public MessagePublish from(MessageSubject subject) {
+        this.from = subject;
+        return this;
+    }
+
+    @Override
+    public MessagePublish to(MessageSubject subject) {
+        this.to = subject;
+
+        return this;
+    }
+
+    @Override
+    public MessagePublish deleteOnTimeout(long timeOutSecond) {
+        //not support now
+        return this;
+    }
+
+    @Override
+    public <T> void send(Consumer<T> responseConsumer) {
+        responseConsumer.accept(send());
+    }
 }

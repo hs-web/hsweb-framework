@@ -16,22 +16,21 @@
  *
  */
 
-package org.hswebframework.web.message.builder;
+package org.hswebframework.web.message;
 
-import org.hswebframework.web.message.support.DataMessage;
-import org.hswebframework.web.message.support.ObjectMessage;
-import org.hswebframework.web.message.support.ServiceInvokerMessage;
-import org.hswebframework.web.message.support.TextMessage;
+import java.util.function.Consumer;
 
 /**
  * @author zhouhao
  */
-public interface MessageBuilder {
-    TextMessage text(String msg);
+public interface MessagePublish {
+    MessagePublish from(MessageSubject subject);
 
-    <T> ObjectMessage object(T msg);
+    MessagePublish to(MessageSubject subject);
 
-    DataMessage data(byte[] msg);
+    MessagePublish deleteOnTimeout(long timeOutSecond);
 
-    ServiceInvokerMessage service(String serviceName);
+    <T> T send();
+
+    <T> void send(Consumer<T> responseConsumer);
 }

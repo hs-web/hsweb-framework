@@ -16,22 +16,14 @@
  *
  */
 
-package org.hswebframework.web.message.builder;
-
-import org.hswebframework.web.message.support.DataMessage;
-import org.hswebframework.web.message.support.ObjectMessage;
-import org.hswebframework.web.message.support.ServiceInvokerMessage;
-import org.hswebframework.web.message.support.TextMessage;
+package org.hswebframework.web.message.support;
 
 /**
+ * TODO 完成注释
+ *
  * @author zhouhao
  */
-public interface MessageBuilder {
-    TextMessage text(String msg);
+public interface TopicMessageSubject {
+    String getTopic();
 
-    <T> ObjectMessage object(T msg);
-
-    DataMessage data(byte[] msg);
-
-    ServiceInvokerMessage service(String serviceName);
 }

@@ -19,31 +19,49 @@
 package org.hswebframework.web.message;
 
 /**
+ * simple
  * <pre>
  *     messager
- *     .create(text("hello"))
+ *     .publish(text("hello"))
  *     .from(system())
  *     .to(user("admin"))
  *     .send();
  * </pre>
+ * service invoke
+ * <pre>
+ *    User admin = messager
+ *     .publish(service("userService"))
+ *     .from(system())
+ *     .to(method("getById","admin"))
+ *     .send();
+ * </pre>
+ * send object to topic
  * <pre>
  *     messager
- *     .create(object(user))
+ *     .publish(object(user))
  *     .from(system())
  *     .to(topic("user-login"))
  *     .send();
  * </pre>
+ * subscribe topic
  * <pre>
  *     messager
  *     .subscribe(topic("user-login"))
  *     .iam(user("admin"))
  *     .onMessage(user->System.out.println(user));
  * </pre>
+ * subscribe user msg
+ * <pre>
+ *      messager
+ *     .subscribe(user("admin"))
+ *     .onMessage(message->System.out.println(message));
+ * </pre>
  *
  * @author zhouhao
+ * @since 3.0
  */
 public interface Messager {
-    MessageContext create(Message message);
+    MessagePublish publish(Message message);
 
     <M extends Message> MessageSubscribe<M> subscribe(MessageSubject subscribe);
 }

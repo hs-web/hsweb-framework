@@ -23,19 +23,35 @@ import org.hswebframework.web.message.support.MultipleUserMessageSubject;
 import org.hswebframework.web.message.support.TopicMessageSubject;
 import org.hswebframework.web.message.support.UserMessageSubject;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
+ * TODO 完成注释
+ *
  * @author zhouhao
  */
-public interface MessageSubjectBuilder {
-    UserMessageSubject user(String userId);
+public class StaticMessageSubjectBuilder {
+    private static MessageSubjectBuilder messageSubjectBuilder = new SimpleMessageSubjectBuilder();
 
-    MultipleUserMessageSubject users(String... userIds);
+    public static UserMessageSubject user(String userId) {
+        return messageSubjectBuilder.user(userId);
+    }
 
-    MultipleUserMessageSubject users(Set<String> userIds);
+    public static MultipleUserMessageSubject users(String... userIds) {
+        return messageSubjectBuilder.users(userIds);
+    }
 
-    MessageSubject system();
+    public MultipleUserMessageSubject users(Set<String> userIds) {
+        return messageSubjectBuilder.users(userIds);
+    }
 
-    TopicMessageSubject topic(String topic);
+    public MessageSubject system() {
+        return messageSubjectBuilder.system();
+    }
+
+    public TopicMessageSubject topic(String topic) {
+        return messageSubjectBuilder.topic(topic);
+    }
 }

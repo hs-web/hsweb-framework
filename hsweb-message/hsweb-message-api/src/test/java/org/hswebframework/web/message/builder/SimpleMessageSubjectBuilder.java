@@ -23,19 +23,38 @@ import org.hswebframework.web.message.support.MultipleUserMessageSubject;
 import org.hswebframework.web.message.support.TopicMessageSubject;
 import org.hswebframework.web.message.support.UserMessageSubject;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
+ * TODO 完成注释
+ *
  * @author zhouhao
  */
-public interface MessageSubjectBuilder {
-    UserMessageSubject user(String userId);
+public class SimpleMessageSubjectBuilder implements MessageSubjectBuilder {
+    @Override
+    public UserMessageSubject user(String userId) {
+        return () -> userId;
+    }
 
-    MultipleUserMessageSubject users(String... userIds);
+    @Override
+    public MultipleUserMessageSubject users(String... userIds) {
+        return (MultipleUserMessageSubject) () -> new HashSet<>(Arrays.asList(userIds));
+    }
 
-    MultipleUserMessageSubject users(Set<String> userIds);
+    @Override
+    public MultipleUserMessageSubject users(Set<String> userIds) {
+        return (MultipleUserMessageSubject) () -> userIds;
+    }
 
-    MessageSubject system();
+    @Override
+    public MessageSubject system() {
+        return null;
+    }
 
-    TopicMessageSubject topic(String topic);
+    @Override
+    public TopicMessageSubject topic(String topic) {
+        return () -> topic;
+    }
 }
