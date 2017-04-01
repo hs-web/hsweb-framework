@@ -28,7 +28,7 @@ import java.util.function.Supplier;
  */
 @SuppressWarnings("unchecked")
 public class ThreadLocalUtils {
-    private static final ThreadLocal<Map<String, Object>> local = ThreadLocal.withInitial(() -> new HashMap<>());
+    private static final ThreadLocal<Map<String, Object>> local = ThreadLocal.withInitial(HashMap::new);
 
     public static <T> T put(String key, T value) {
         local.get().put(key, value);
