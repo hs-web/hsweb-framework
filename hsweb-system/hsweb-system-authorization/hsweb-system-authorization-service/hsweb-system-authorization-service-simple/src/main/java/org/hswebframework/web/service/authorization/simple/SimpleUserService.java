@@ -105,7 +105,7 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
     @Transactional(readOnly = true)
     public UserEntity selectByPk(String id) {
         Assert.notNull(id, "id:{not_be_null}");
-        return createQuery().selectExcludes("password", "salt").where(GenericEntity.id, id).single();
+        return createQuery().where(GenericEntity.id, id).single();
     }
 
     @Override
