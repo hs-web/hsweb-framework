@@ -28,13 +28,9 @@
         <result property="name" column="name" javaType="String" jdbcType="VARCHAR"/>
         <result property="treeCode" column="tree_code" javaType="String" jdbcType="VARCHAR"/>
         <result property="permissionId" column="permission_id" javaType="String" jdbcType="VARCHAR"/>
-        <result property="onInit" column="on_init" javaType="String" jdbcType="CLOB"/>
         <result property="enabled" column="enabled" javaType="boolean" jdbcType="NUMERIC"/>
         <result property="sortIndex" column="sort_index" javaType="long" jdbcType="NUMERIC"/>
         <result property="icon" column="icon" javaType="String" jdbcType="VARCHAR"/>
-        <result property="authentication" column="authentication" javaType="boolean" jdbcType="VARCHAR"/>
-        <result property="authenticationConfig" column="authentication_config" javaType="java.util.Map" jdbcType="CLOB"/>
-        <result property="actions" column="actions" javaType="java.util.List" jdbcType="CLOB"/>
     </resultMap>
 
     <!--用于动态生成sql所需的配置-->
