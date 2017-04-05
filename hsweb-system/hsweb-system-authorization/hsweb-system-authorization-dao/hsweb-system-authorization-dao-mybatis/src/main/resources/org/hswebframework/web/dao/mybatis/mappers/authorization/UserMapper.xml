@@ -28,10 +28,8 @@
         <result property="password" column="password" javaType="String" jdbcType="VARCHAR"/>
         <result property="salt" column="salt" javaType="String" jdbcType="VARCHAR"/>
         <result property="enabled" column="enabled" javaType="Boolean" jdbcType="NUMERIC"/>
-        <result property="lastLoginIp" column="last_login_ip" javaType="string" jdbcType="VARCHAR"/>
         <result property="createTime" column="create_time" javaType="Long" jdbcType="NUMERIC"/>
         <result property="creatorId" column="creator_id" javaType="String" jdbcType="VARCHAR"/>
-        <result property="lastLoginTime" column="last_login_time" javaType="Long" jdbcType="NUMERIC"/>
     </resultMap>
 
     <!--用于动态生成sql所需的配置-->

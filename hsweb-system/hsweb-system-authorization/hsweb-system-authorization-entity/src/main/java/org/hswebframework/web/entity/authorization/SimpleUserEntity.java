@@ -20,11 +20,7 @@ public class SimpleUserEntity extends SimpleGenericEntity<String> implements Use
 
     private String creatorId;
 
-    private Long lastLoginTime;
-
     private Boolean enabled;
-
-    private String lastLoginIp;
 
     @Override
     public String getName() {
@@ -82,15 +78,6 @@ public class SimpleUserEntity extends SimpleGenericEntity<String> implements Use
         this.creatorId = creatorId;
     }
 
-    public void setLastLoginTime(Long lastLoginDate) {
-        this.lastLoginTime = lastLoginDate;
-    }
-
-    @Override
-    public Long getLastLoginTime() {
-        return lastLoginTime;
-    }
-
     @Override
     public void setEnabled(Boolean enabled) {
         this.enabled = enabled;
@@ -99,14 +86,6 @@ public class SimpleUserEntity extends SimpleGenericEntity<String> implements Use
     @Override
     public Boolean isEnabled() {
         return enabled;
-    }
-
-    public String getLastLoginIp() {
-        return lastLoginIp;
-    }
-
-    public void setLastLoginIp(String lastLoginIp) {
-        this.lastLoginIp = lastLoginIp;
     }
 
     @Override

@@ -94,8 +94,6 @@ public class AuthorizationController {
                 reason = AuthorizationFailedEvent.Reason.PASSWORD_ERROR;
                 throw new BusinessException("{password_error}", 400);
             }
-
-            userService.updateLoginInfo(entity.getId(), WebUtil.getIpAddr(request), System.currentTimeMillis());
             // 验证通过
             Authentication authentication = userService.initUserAuthorization(entity.getId());
             AuthorizationSuccessEvent event = new AuthorizationSuccessEvent(authentication, parameterGetter);
