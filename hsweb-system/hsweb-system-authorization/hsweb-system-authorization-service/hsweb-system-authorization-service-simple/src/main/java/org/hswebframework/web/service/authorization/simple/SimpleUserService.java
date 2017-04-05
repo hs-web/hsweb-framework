@@ -10,10 +10,7 @@ import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.service.AbstractService;
 import org.hswebframework.web.service.DefaultDSLQueryService;
 import org.hswebframework.web.service.DefaultDSLUpdateService;
-import org.hswebframework.web.service.authorization.DataAccessFactory;
-import org.hswebframework.web.service.authorization.PasswordStrengthValidator;
-import org.hswebframework.web.service.authorization.UserService;
-import org.hswebframework.web.service.authorization.UsernameValidator;
+import org.hswebframework.web.service.authorization.*;
 import org.hswebframework.web.validate.ValidationException;
 import org.hswebframwork.utils.ListUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +44,9 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
     @Autowired(required = false)
     private UsernameValidator usernameValidator;
 
+    @Autowired(required = false)
+    private PasswordEncoder passwordEncoder = (password, salt) -> DigestUtils.md5Hex(String.format("hsweb.%s.framework.%s", password, salt));
+
     @Autowired
     private UserDao userDao;
 
@@ -79,24 +79,14 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
 
     @Override
     public String encodePassword(String password, String salt) {
-        return DigestUtils.md5Hex(String.format("hsweb.%s.framework.%s", password, salt));
-    }
-
-    @Override
-    public void updateLoginInfo(String userId, String ip, Long loginTime) {
-        Assert.notNull(userId, "userId:{not_be_null}");
-        Assert.notNull(ip, "ip:{not_be_null}");
-        Assert.notNull(loginTime, "loginTime:{not_be_null}");
-        DefaultDSLUpdateService.createUpdate(getDao())
-                .set("lastLoginIp", ip)
-                .set("lastLoginTime", loginTime)
-                .where(GenericEntity.id, userId)
-                .exec();
+        return passwordEncoder.encode(password, salt);
     }
 
     @Override
     @Transactional(readOnly = true)
     public UserEntity selectByUsername(String username) {
+        tryValidateProperty(StringUtils.hasLength(username), UserEntity.username, "id:{not_be_null}");
+
         Assert.notNull(username, "username:{not_be_null}");
         return createQuery().where("username", username).single();
     }
@@ -104,19 +94,25 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
     @Override
     @Transactional(readOnly = true)
     public UserEntity selectByPk(String id) {
-        Assert.notNull(id, "id:{not_be_null}");
-        return createQuery().where(GenericEntity.id, id).single();
+        tryValidateProperty(StringUtils.hasLength(id), UserEntity.id, "id:{not_be_null}");
+        return createQuery().where(UserEntity.id, id).single();
+    }
+
+    @Override
+    public List<UserEntity> selectByPk(List<String> id) {
+        tryValidateProperty(id != null && !id.isEmpty(), UserEntity.id, "id:{not_be_null}");
+        return createQuery().where().in(UserEntity.id, id).listNoPaging();
     }
 
     @Override
     @CacheEvict(value = USER_CACHE_NAME, key = "#userEntity.id")
     public String insert(UserEntity userEntity) {
         //判断用户是否已经存在
-        tryValidateProperty(null == selectByUsername(userEntity.getUsername()), "username", "{username_exists}");
+        tryValidateProperty(null == selectByUsername(userEntity.getUsername()), UserEntity.username, "{username_exists}");
         //用户名合法性验证
-        tryValidateProperty(usernameValidator, "username", userEntity.getUsername());
+        tryValidateProperty(usernameValidator, UserEntity.username, userEntity.getUsername());
         //密码强度验证
-        tryValidateProperty(passwordStrengthValidator, "password", userEntity.getPassword());
+        tryValidateProperty(passwordStrengthValidator, UserEntity.password, userEntity.getPassword());
         userEntity.setCreateTime(System.currentTimeMillis());
         userEntity.setId(IDGenerator.MD5.generate());
         userEntity.setSalt(IDGenerator.RANDOM.generate());
