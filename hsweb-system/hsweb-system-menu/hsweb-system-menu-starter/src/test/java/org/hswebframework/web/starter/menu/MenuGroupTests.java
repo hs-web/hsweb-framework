@@ -49,39 +49,39 @@ public class MenuGroupTests extends SimpleWebApplicationTests {
 
         // test add data
         String requestBody = JSON.toJSONString(entity);
-        JSONObject result = testPost("/menuGroup").setUp(setup -> setup.contentType(MediaType.APPLICATION_JSON).content(requestBody)).exec().resultAsJson();
+        JSONObject result = testPost("/menu-group").setUp(setup -> setup.contentType(MediaType.APPLICATION_JSON).content(requestBody)).exec().resultAsJson();
         Assert.assertEquals(200, result.get("status"));
         String id = result.getString("result");
         Assert.assertNotNull(id);
         entity.setId(id);
         // test get data
-        result = testGet("/menuGroup/" + id).exec().resultAsJson();
+        result = testGet("/menu-group/" + id).exec().resultAsJson();
         entity = result.getObject("result", entityFactory.getInstanceType(MenuGroupEntity.class));
 
         Assert.assertEquals(200, result.get("status"));
         Assert.assertNotNull(result.getJSONObject("result"));
 
         Assert.assertEquals(fastJsonHttpMessageConverter.converter(entity),
-                fastJsonHttpMessageConverter.converter(result.getObject("data", entityFactory.getInstanceType(MenuGroupEntity.class))));
+                fastJsonHttpMessageConverter.converter(result.getObject("result", entityFactory.getInstanceType(MenuGroupEntity.class))));
         //todo 修改测试属性
         MenuGroupEntity newEntity = entityFactory.newInstance(MenuGroupEntity.class);
         newEntity.setName("test");
 
-        result = testPut("/menuGroup/" + id)
+        result = testPut("/menu-group/" + id)
                 .setUp(setup ->
                         setup.contentType(MediaType.APPLICATION_JSON)
                                 .content(JSON.toJSONString(newEntity)))
                 .exec().resultAsJson();
         Assert.assertEquals(200, result.get("status"));
 
-        result = testGet("/menuGroup/" + id).exec().resultAsJson();
+        result = testGet("/menu-group/" + id).exec().resultAsJson();
         result = result.getJSONObject("result");
         Assert.assertNotNull(result);
 
-        result = testDelete("/menuGroup/" + id).exec().resultAsJson();
+        result = testDelete("/menu-group/" + id).exec().resultAsJson();
         Assert.assertEquals(200, result.get("status"));
 
-        result = testGet("/menuGroup/" + id).exec().resultAsJson();
+        result = testGet("/menu-group/" + id).exec().resultAsJson();
         Assert.assertEquals(404, result.get("status"));
     }
 }
