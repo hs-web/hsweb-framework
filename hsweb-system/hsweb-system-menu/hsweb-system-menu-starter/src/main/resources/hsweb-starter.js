@@ -58,7 +58,7 @@ function install(context) {
         .addColumn().name("parent_id").alias("parentId").comment("父级id").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
         .addColumn().name("level").alias("level").comment("树层级").jdbcType(java.sql.JDBCType.DECIMAL).length(32, 0).commit()
         .addColumn().name("sort_index").alias("sortIndex").comment("排序序号").jdbcType(java.sql.JDBCType.DECIMAL).length(32, 0).commit()
-        .addColumn().name("enable").alias("enable").comment("是否启用").jdbcType(java.sql.JDBCType.DECIMAL).length(4, 0).commit()
+        .addColumn().name("enabled").alias("enabled").comment("是否启用").jdbcType(java.sql.JDBCType.DECIMAL).length(4, 0).commit()
         .comment("菜单分组").commit();
 
     database.createOrAlter("s_menu_group_bind")
@@ -69,7 +69,7 @@ function install(context) {
         .addColumn().name("parent_id").alias("parentId").comment("父级id").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
         .addColumn().name("level").alias("level").comment("树层级").jdbcType(java.sql.JDBCType.DECIMAL).length(32, 0).commit()
         .addColumn().name("sort_index").alias("sortIndex").comment("排序序号").jdbcType(java.sql.JDBCType.DECIMAL).length(32, 0).commit()
-        .addColumn().name("enable").alias("enable").comment("是否启用").jdbcType(java.sql.JDBCType.DECIMAL).length(4, 0).commit()
+        .addColumn().name("enabled").alias("enabled").comment("是否启用").jdbcType(java.sql.JDBCType.DECIMAL).length(4, 0).commit()
         .addColumn().name("actions").alias("actions").comment("可选按钮").jdbcType(java.sql.JDBCType.VARCHAR).length(4000).commit()
         .addColumn().name("data_accesses").alias("dataAccesses").comment("行级权限控制配置").jdbcType(java.sql.JDBCType.CLOB).commit()
         .addColumn().name("field_accesses").alias("fieldAccesses").comment("列级权限控制").jdbcType(java.sql.JDBCType.CLOB).commit()
