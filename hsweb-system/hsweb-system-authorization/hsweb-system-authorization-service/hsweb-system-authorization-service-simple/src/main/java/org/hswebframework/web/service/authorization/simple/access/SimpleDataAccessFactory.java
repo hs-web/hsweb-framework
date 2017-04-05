@@ -18,14 +18,11 @@ public class SimpleDataAccessFactory implements DataAccessFactory {
     public DataAccessConfig create(DataAccessEntity entity) {
         AbstractDataAccess dataAccess = null;
         try {
-            switch (entity.getType()) {
-                case "custom":
+            switch (entity.getType().toUpperCase()) {
                 case "CUSTOM":
                     return dataAccess = new SimpleCustomDataAccess(entity.getConfig());
-                case "script":
                 case "SCRIPT":
                     return dataAccess = JSON.parseObject(entity.getConfig(), SimpleScriptDataAccess.class);
-                case "own_created":
                 case "OWN_CREATED":
                     return dataAccess = new SimpleOwnCreatedDataAccess();
             }
