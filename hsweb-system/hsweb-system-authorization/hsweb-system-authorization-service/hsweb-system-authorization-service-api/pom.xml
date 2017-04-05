@@ -24,7 +24,7 @@
         </dependency>
         <dependency>
             <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-system-authorization-dao-api</artifactId>
+            <artifactId>hsweb-system-authorization-entity</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
