@@ -17,6 +17,7 @@
 
 package org.hswebframework.web.starter.resolver;
 
+import org.hswebframework.web.AuthorizeException;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.AuthenticationSupplier;
 import org.springframework.core.MethodParameter;
@@ -42,12 +43,6 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  */
 public class AuthorizationArgumentResolver implements HandlerMethodArgumentResolver {
 
-    AuthenticationSupplier authenticationSupplier;
-
-    public AuthorizationArgumentResolver(AuthenticationSupplier authenticationSupplier) {
-        Assert.notNull(authenticationSupplier);
-        this.authenticationSupplier = authenticationSupplier;
-    }
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
@@ -56,6 +51,6 @@ public class AuthorizationArgumentResolver implements HandlerMethodArgumentResol
 
     @Override
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
-        return authenticationSupplier.get();
+        return Authentication.current().orElseThrow(AuthorizeException::new);
     }
 }

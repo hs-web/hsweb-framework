@@ -81,9 +81,8 @@ public class HswebAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnBean(AuthenticationSupplier.class)
-    public AuthorizationArgumentResolver authorizationArgumentResolver(AuthenticationSupplier authenticationSupplier) {
-        return new AuthorizationArgumentResolver(authenticationSupplier);
+    public AuthorizationArgumentResolver authorizationArgumentResolver() {
+        return new AuthorizationArgumentResolver();
     }
 
     @Bean
