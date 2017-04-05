@@ -3,11 +3,15 @@ package org.hswebframework.web.entity.authorization;
 import org.hswebframework.web.commons.entity.GenericEntity;
 
 /**
- * TODO 完成注释
+ * 角色实体
  *
  * @author zhouhao
  */
 public interface RoleEntity extends GenericEntity<String> {
+
+    String name     = "name";
+    String describe = "describe";
+    String enabled  = "enabled";
 
     String getName();
 
