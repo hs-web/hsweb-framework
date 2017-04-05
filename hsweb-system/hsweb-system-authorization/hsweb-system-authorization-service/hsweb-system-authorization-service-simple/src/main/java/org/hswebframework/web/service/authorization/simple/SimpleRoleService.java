@@ -91,19 +91,34 @@ public class SimpleRoleService extends AbstractService<RoleEntity, String>
     }
 
     @Override
-    public boolean enable(String roleId) {
-        return DefaultDSLUpdateService.createUpdate(getDao()).set("enabled", true).where(RoleEntity.id, roleId).exec() > 0;
+    public void enable(String roleId) {
+        tryValidateProperty(StringUtils.hasLength(roleId), RoleEntity.id, "{id_is_null}");
+        DefaultDSLUpdateService.createUpdate(getDao())
+                .set(RoleEntity.enabled, true)
+                .where(RoleEntity.id, roleId)
+                .exec();
     }
 
     @Override
-    public boolean disable(String roleId) {
-        return DefaultDSLUpdateService.createUpdate(getDao()).set("enabled", false).where(RoleEntity.id, roleId).exec() > 0;
+    public void disable(String roleId) {
+        tryValidateProperty(StringUtils.hasLength(roleId), RoleEntity.id, "{id_is_null}");
+        DefaultDSLUpdateService.createUpdate(getDao())
+                .set(RoleEntity.enabled, false)
+                .where(RoleEntity.id, roleId)
+                .exec();
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public RoleEntity selectByPk(String roleId) {
+        tryValidateProperty(StringUtils.hasLength(roleId), RoleEntity.id, "{id_is_null}");
         return createQuery().where(RoleEntity.id, roleId).single();
+    }
+
+    @Override
+    public List<RoleEntity> selectByPk(List<String> id) {
+        tryValidateProperty(id == null || id.isEmpty(), RoleEntity.id, "{id_is_null}");
+        return createQuery().where().in(RoleEntity.id, id).listNoPaging();
     }
 
     @Override
@@ -125,8 +140,8 @@ public class SimpleRoleService extends AbstractService<RoleEntity, String>
         tryValidateProperty(null == selectByPk(roleEntity.getId()), RoleEntity.id, "{role_not_exists}");
         tryValidate(roleEntity);
         DefaultDSLUpdateService.createUpdate(roleDao)
-                .set("name", roleEntity.getName())
-                .set("describe", roleEntity.getDescribe())
+                .set(RoleEntity.name, roleEntity.getName())
+                .set(RoleEntity.describe, roleEntity.getDescribe())
                 .where(RoleEntity.id, roleEntity.getId()).exec();
         if (roleEntity.getProperties() != null) {
             permissionRoleDao.deleteByRoleId(roleEntity.getId());
