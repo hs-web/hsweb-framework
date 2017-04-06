@@ -77,12 +77,14 @@ public class MapperEntityFactory implements EntityFactory {
                 String simpleClassName = beanClass.getPackage().getName().concat(".Simple").concat(beanClass.getSimpleName());
                 try {
                     realType = (Class<T>) Class.forName(simpleClassName);
-                    mapper = new Mapper<>(realType, new DefaultInstanceGetter(realType));
-                    realTypeMapper.put(beanClass, mapper);
-                    return mapper.getInstanceGetter().get();
                 } catch (ClassNotFoundException e) {
                     throw new NotFoundException(e.getMessage());
                 }
+            }
+            if (realType != null) {
+                mapper = new Mapper<>(realType, new DefaultInstanceGetter(realType));
+                realTypeMapper.put(beanClass, mapper);
+                return mapper.getInstanceGetter().get();
             }
         }
         throw new NotFoundException("can't create instance for " + beanClass);
