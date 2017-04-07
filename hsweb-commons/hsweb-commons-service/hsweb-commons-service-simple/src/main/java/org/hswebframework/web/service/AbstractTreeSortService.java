@@ -26,11 +26,14 @@ import org.springframework.util.Assert;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
- * TODO 完成注释
+ * 抽象树形结构服务类
  *
  * @author zhouhao
+ * @see TreeSortSupportEntity
+ * @since 3.0
  */
 public abstract class AbstractTreeSortService<E extends TreeSortSupportEntity<PK>, PK>
         extends GenericEntityService<E, PK> implements TreeService<E, PK> {
@@ -53,7 +56,7 @@ public abstract class AbstractTreeSortService<E extends TreeSortSupportEntity<PK
 
     @Override
     public PK insert(E entity) {
-        entity.setId(getIDGenerator().generate());
+        if (entity.getId() == null) entity.setId(getIDGenerator().generate());
         List<E> childrenList = new ArrayList<>();
         TreeSupportEntity.expandTree2List(entity, childrenList, getIDGenerator());
         super.insert(entity);
@@ -61,33 +64,38 @@ public abstract class AbstractTreeSortService<E extends TreeSortSupportEntity<PK
         return entity.getId();
     }
 
+    @Override
+    public List<PK> insertBatch(Collection<E> data) {
+        return data.parallelStream()
+                .map(this::insert)
+                .collect(Collectors.toList());
+    }
+
     public int updateBatch(Collection<E> data) {
-        Assert.notNull(data);
+        assertNotNull(data);
         return data.stream().map(this::updateByPk).reduce(Math::addExact).orElse(0);
     }
 
     @Override
     public int updateByPk(E entity) {
-        Assert.notNull(entity);
+        assertNotNull(entity);
         List<E> childrenList = new ArrayList<>();
         TreeSupportEntity.expandTree2List(entity, childrenList, getIDGenerator());
-        return this.saveOrUpdateForSingle(entity) +
-                childrenList.stream()
-                        .map(this::saveOrUpdateForSingle)
-                        .reduce(Math::addExact)
-                        .orElse(0);
+        this.saveOrUpdateForSingle(entity);
+        childrenList.forEach(this::saveOrUpdateForSingle);
+        return childrenList.size() + 1;
     }
 
-    public int saveOrUpdateForSingle(E entity) {
-        Assert.notNull(entity);
+    public PK saveOrUpdateForSingle(E entity) {
+        assertNotNull(entity);
         PK id = entity.getId();
         if (null == id || this.selectByPk(id) == null) {
             if (null == id)
                 entity.setId(getIDGenerator().generate());
-            super.insert(entity);
-            return 1;
+            return super.insert(entity);
         }
-        return super.updateByPk(entity);
+        super.updateByPk(entity);
+        return id;
     }
 
     @Override

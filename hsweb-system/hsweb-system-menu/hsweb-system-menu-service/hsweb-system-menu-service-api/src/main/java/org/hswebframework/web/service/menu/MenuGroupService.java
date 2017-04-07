@@ -32,7 +32,7 @@ public interface MenuGroupService extends
         CrudService<MenuGroupEntity, String>
         , TreeService<MenuGroupEntity, String> {
 
-    List<MenuEntity<MenuEntity>> getMenuByGroupId(List<String> groupId);
+    List<MenuEntity> getMenuByGroupId(List<String> groupId);
 
     void enable(String id);
 

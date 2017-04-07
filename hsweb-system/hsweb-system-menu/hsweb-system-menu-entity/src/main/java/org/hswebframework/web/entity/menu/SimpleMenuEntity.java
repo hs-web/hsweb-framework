@@ -20,6 +20,7 @@ package org.hswebframework.web.entity.menu;
 
 import org.hswebframework.web.commons.entity.SimpleTreeSortSupportEntity;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,7 +30,7 @@ import java.util.stream.Collectors;
  * @author zhouhao
  */
 public class SimpleMenuEntity extends SimpleTreeSortSupportEntity<String>
-        implements MenuEntity<SimpleMenuEntity> {
+        implements MenuEntity {
 
     //菜单名称
     private String name;
@@ -55,12 +56,13 @@ public class SimpleMenuEntity extends SimpleTreeSortSupportEntity<String>
     @Override
     @SuppressWarnings("unchecked")
     public List<SimpleMenuEntity> getChildren() {
-        return children;
+        return new ArrayList<>(children);
     }
 
     @Override
-    public void setChildren(List<SimpleMenuEntity> children) {
-        this.children = children;
+    public void setChildren(List<MenuEntity> children) {
+        // TODO: 17-4-6 有待优化
+        this.children = ((List) children);
     }
 
     public String getName() {
@@ -116,7 +118,9 @@ public class SimpleMenuEntity extends SimpleTreeSortSupportEntity<String>
         SimpleMenuEntity target = (SimpleMenuEntity) super.clone();
         target.setProperties(cloneProperties());
         if (null != getChildren()) {
-            target.setChildren(getChildren().stream().map(SimpleMenuEntity::clone).collect(Collectors.toList()));
+            target.setChildren(getChildren().stream()
+                    .map(MenuEntity::clone)
+                    .collect(Collectors.toList()));
         }
         return target;
     }

@@ -39,7 +39,7 @@ import java.util.List;
 @Service("menuService")
 @CacheConfig(cacheNames = CacheConstants.MENU_CACHE_NAME)
 public class SimpleMenuService
-        extends AbstractTreeSortService<MenuEntity<MenuEntity>, String>
+        extends AbstractTreeSortService<MenuEntity, String>
         implements MenuService {
 
     private MenuDao menuDao;
@@ -61,13 +61,13 @@ public class SimpleMenuService
 
     @Override
     @CacheEvict(allEntries = true)
-    public int updateByPk(List<MenuEntity<MenuEntity>> data) {
+    public int updateByPk(List<MenuEntity> data) {
         return super.updateByPk(data);
     }
 
     @Override
     @CacheEvict(allEntries = true)
-    public String insert(MenuEntity<MenuEntity> entity) {
+    public String insert(MenuEntity entity) {
         return super.insert(entity);
     }
 
@@ -79,13 +79,13 @@ public class SimpleMenuService
 
     @Override
     @Cacheable(key = "'permission-ids:'+#permissionId==null?'0':#permissionId.hashCode()")
-    public List<MenuEntity<MenuEntity>> getByPermissionId(List<String> permissionId) {
+    public List<MenuEntity> getByPermissionId(List<String> permissionId) {
         return createQuery().noPaging().where().in("permissionId", permissionId).list();
     }
 
     @Override
     @Cacheable(key = "'permission-id:'+#permissionId")
-    public MenuEntity<MenuEntity> getByPermissionId(String permissionId) {
+    public MenuEntity getByPermissionId(String permissionId) {
         return createQuery().noPaging().where().is("permissionId", permissionId).single();
     }
 }

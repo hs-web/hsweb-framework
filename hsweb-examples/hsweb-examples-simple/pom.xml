@@ -99,17 +99,17 @@
         </dependency>
         <dependency>
             <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-system-explorer-starter</artifactId>
+            <artifactId>hsweb-system-menu-starter</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <!--<dependency>-->
-            <!--<groupId>org.hswebframework.web</groupId>-->
-            <!--<artifactId>hsweb-authorization-shiro</artifactId>-->
-            <!--<version>${project.version}</version>-->
-        <!--</dependency>-->
         <dependency>
             <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-authorization-oauth2-server-starter</artifactId>
+            <artifactId>hsweb-authorization-shiro</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hswebframework.web</groupId>
+            <artifactId>hsweb-system-oauth2-server-starter</artifactId>
             <version>${project.version}</version>
         </dependency>
 

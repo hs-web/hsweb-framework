@@ -24,11 +24,9 @@ import org.hswebframework.web.entity.authorization.ActionEntity;
 import java.util.List;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
-public interface MenuEntity<C extends MenuEntity>
+public interface MenuEntity
         extends TreeSortSupportEntity<String> {
     String getName();
 
@@ -54,11 +52,7 @@ public interface MenuEntity<C extends MenuEntity>
 
     void setEnabled(boolean enabled);
 
-    void setChildren(List<C> children);
+    void setChildren(List<MenuEntity> children);
 
-    @Override
-    @SuppressWarnings("unchecked")
-    List<C> getChildren();
-
-    MenuEntity<C> clone();
+    MenuEntity clone();
 }

@@ -143,7 +143,7 @@ public class SimpleRoleService extends AbstractService<RoleEntity, String>
                 .set(RoleEntity.name, roleEntity.getName())
                 .set(RoleEntity.describe, roleEntity.getDescribe())
                 .where(RoleEntity.id, roleEntity.getId()).exec();
-        if (roleEntity.getProperties() != null) {
+        if (roleEntity.getPermissions() != null) {
             permissionRoleDao.deleteByRoleId(roleEntity.getId());
             syncPermissions(roleEntity.getId(), roleEntity.getPermissions());
         }

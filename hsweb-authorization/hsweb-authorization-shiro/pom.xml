@@ -78,6 +78,12 @@
             <version>2.5</version>
             <optional>true</optional>
         </dependency>
+        <dependency>
+            <groupId>org.hswebframework.web</groupId>
+            <artifactId>hsweb-authorization-oauth2-client</artifactId>
+            <version>${project.version}</version>
+            <optional>true</optional>
+        </dependency>
     </dependencies>
 
 </project>

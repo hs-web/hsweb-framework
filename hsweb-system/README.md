@@ -14,7 +14,7 @@
 |[hsweb-system-dictionary](hsweb-system-dictionary)| 数据字典功能|  50%|
 |[hsweb-system-document](hsweb-system-document)|文档管理功能| 0%|
 |[hsweb-system-dynamic-form](hsweb-system-dynamic-form)|动态表单| 0%|
-|[hsweb-system-explorer](hsweb-system-explorer)|**系统资源管理(菜单,按钮)**| 20%|
+|[hsweb-system-explorer](hsweb-system-menu)|**系统菜单**| 80%|
 |[hsweb-system-file](hsweb-system-file)|文件管理| 0%|
 |[hsweb-system-history](hsweb-system-history)|历史记录管理| 0%|
 |[hsweb-system-monitor](hsweb-system-monitor)|系统监控| 0%|

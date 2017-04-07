@@ -20,7 +20,12 @@ package org.hswebframework.web.controller.authorization;
 
 import io.swagger.annotations.Api;
 import org.hswebframework.web.authorization.annotation.Authorize;
+import org.hswebframework.web.commons.entity.param.QueryParamEntity;
+import org.hswebframework.web.controller.GenericEntityController;
+import org.hswebframework.web.entity.authorization.PermissionEntity;
 import org.hswebframework.web.logging.AccessLogger;
+import org.hswebframework.web.service.authorization.PermissionService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -32,6 +37,17 @@ import org.springframework.web.bind.annotation.RestController;
 @AccessLogger("{permission_manager}")
 @Authorize(permission = "permission")
 @Api(tags = "permission-manager", description = "权限管理")
-public class PermissionController {
+public class PermissionController implements GenericEntityController<PermissionEntity, String, QueryParamEntity, PermissionEntity> {
 
+    private PermissionService permissionService;
+
+    @Autowired
+    public void setPermissionService(PermissionService permissionService) {
+        this.permissionService = permissionService;
+    }
+
+    @Override
+    public PermissionService getService() {
+        return permissionService;
+    }
 }

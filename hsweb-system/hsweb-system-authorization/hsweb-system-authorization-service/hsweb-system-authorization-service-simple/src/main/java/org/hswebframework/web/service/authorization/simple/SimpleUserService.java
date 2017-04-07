@@ -23,10 +23,14 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.hswebframework.web.service.authorization.simple.CacheConstants.*;
+import static org.hswebframework.web.service.authorization.simple.CacheConstants.USER_AUTH_CACHE_NAME;
+import static org.hswebframework.web.service.authorization.simple.CacheConstants.USER_CACHE_NAME;
 
 /**
  * TODO 完成注释

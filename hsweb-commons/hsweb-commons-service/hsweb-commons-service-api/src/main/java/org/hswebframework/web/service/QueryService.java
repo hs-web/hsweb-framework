@@ -27,6 +27,8 @@ import java.util.List;
 public interface QueryService<E, PK> {
     E selectByPk(PK id);
 
+    List<E> selectByPk(List<PK> id);
+
     List<E> select();
 
     int count();

@@ -109,4 +109,8 @@ public abstract class GenericEntityService<E extends GenericEntity<PK>, PK>
         return createQuery().where(GenericEntity.id, pk).single();
     }
 
+    @Override
+    public List<E> selectByPk(List<PK> id) {
+        return createQuery().where().in(GenericEntity.id, id).listNoPaging();
+    }
 }

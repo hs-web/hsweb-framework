@@ -120,17 +120,12 @@ public class UserTests extends SimpleWebApplicationTests {
         UserEntity entityInDb = userService.selectByUsername(userEntity.getUsername());
         Assert.assertEquals(entityInDb.isEnabled(), true);
         Assert.assertNotNull(entityInDb.getCreateTime());
-        Assert.assertTrue(entityInDb.getLastLoginTime() == null);
-        Assert.assertTrue(entityInDb.getLastLoginIp() == null);
 
         Assert.assertEquals(entityInDb.getPassword(), userService.encodePassword("password_1234", entityInDb.getSalt()));
 
-        userService.updateLoginInfo(id, "127.0.0.1", System.currentTimeMillis());
         entityInDb = userService.selectByUsername(userEntity.getUsername());
         Assert.assertEquals(entityInDb.isEnabled(), true);
         Assert.assertNotNull(entityInDb.getCreateTime());
-        Assert.assertNotNull(entityInDb.getLastLoginTime());
-        Assert.assertNotNull(entityInDb.getLastLoginIp());
         try {
             userService.updatePassword(id, "test", "test");
             Assert.assertTrue(false);

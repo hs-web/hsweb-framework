@@ -18,10 +18,12 @@ package org.hswebframework.web.service.menu.simple;
 
 import org.hswebframework.web.dao.menu.MenuGroupDao;
 import org.hswebframework.web.entity.authorization.PermissionRoleEntity;
+import org.hswebframework.web.entity.authorization.UserEntity;
 import org.hswebframework.web.entity.authorization.bind.BindPermissionRoleEntity;
 import org.hswebframework.web.entity.menu.MenuEntity;
 import org.hswebframework.web.entity.menu.MenuGroupBindEntity;
 import org.hswebframework.web.entity.menu.MenuGroupEntity;
+import org.hswebframework.web.entity.menu.SimpleMenuGroupEntity;
 import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.service.AbstractTreeSortService;
 import org.hswebframework.web.service.DefaultDSLUpdateService;
@@ -29,7 +31,6 @@ import org.hswebframework.web.service.authorization.RoleService;
 import org.hswebframework.web.service.menu.MenuGroupBindService;
 import org.hswebframework.web.service.menu.MenuGroupService;
 import org.hswebframework.web.service.menu.MenuService;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
@@ -37,6 +38,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -85,11 +87,12 @@ public class SimpleMenuGroupService
     }
 
     @Cacheable(key = "'group-id-list:'+#groupId==null?0:#groupId.hashCode()")
-    public List<MenuEntity<MenuEntity>> getMenuByGroupId(List<String> groupId) {
+    public List<MenuEntity> getMenuByGroupId(List<String> groupId) {
         List<MenuGroupBindEntity> bindEntities = menuGroupBindService.selectByPk(groupId);
         if (bindEntities == null || bindEntities.isEmpty()) return new LinkedList<>();
         return menuService.selectByPk(bindEntities.stream()
                 .map(MenuGroupBindEntity::getMenuId)
+                .distinct()
                 .collect(Collectors.toList()));
     }
 
@@ -134,10 +137,10 @@ public class SimpleMenuGroupService
     @CacheEvict(allEntries = true)
     public void enable(String id) {
         tryValidateProperty(StringUtils.hasLength(id), MenuGroupEntity.id, "{id_is_null}");
-        DefaultDSLUpdateService
-                .createUpdate(getDao())
+        createUpdate()
                 .set(MenuGroupEntity.enabled, true)
-                .where(MenuGroupEntity.id, id).exec();
+                .where(MenuGroupEntity.id, id)
+                .exec();
         if (checkRoleServiceIsEnable())
             roleService.enable(id);
     }
@@ -149,7 +152,8 @@ public class SimpleMenuGroupService
         DefaultDSLUpdateService
                 .createUpdate(getDao())
                 .set(MenuGroupEntity.enabled, false)
-                .where(MenuGroupEntity.id, id).exec();
+                .where(MenuGroupEntity.id, id)
+                .exec();
         if (checkRoleServiceIsEnable())
             roleService.disable(id);
     }
@@ -159,7 +163,9 @@ public class SimpleMenuGroupService
         if (!checkRoleServiceIsEnable()) return;
         //角色的操作,新增or更新
         Consumer<BindPermissionRoleEntity<PermissionRoleEntity>> roleEntityConsumer =
-                roleService.selectByPk(menuGroupEntity.getId()) == null ? roleService::insert : roleService::update;
+                roleService.selectByPk(menuGroupEntity.getId()) == null
+                        ? roleService::insert
+                        : roleService::update;
 
         //设置属性
         BindPermissionRoleEntity<PermissionRoleEntity> roleEntity = entityFactory.newInstance(BindPermissionRoleEntity.class);
@@ -174,7 +180,7 @@ public class SimpleMenuGroupService
                                 //转换 MenuGroupBindEntity 为PermissionRoleEntity
                                 PermissionRoleEntity permission = entityFactory.newInstance(PermissionRoleEntity.class, bind);
                                 permission.setRoleId(bind.getGroupId());
-                                MenuEntity<? extends MenuEntity> menuEntity = menuService.selectByPk(bind.getMenuId());
+                                MenuEntity menuEntity = menuService.selectByPk(bind.getMenuId());
                                 assertNotNull(menuEntity, "menu " + bind.getMenuId() + " not found");
                                 permission.setPermissionId(menuEntity.getPermissionId());
                                 return permission;

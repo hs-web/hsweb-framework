@@ -50,10 +50,10 @@ public class ThreadLocalUtils {
     /**
      * @since 3.0
      */
-    public static <T> T get(String key, Supplier<T> supplierOnNull) {
+    public static <T> T get(String key, Supplier<T> other) {
         T val = ((T) local.get().get(key));
         if (null != val) return val;
-        val = supplierOnNull.get();
+        val = other.get();
         local.get().put(key, val);
         return val;
     }

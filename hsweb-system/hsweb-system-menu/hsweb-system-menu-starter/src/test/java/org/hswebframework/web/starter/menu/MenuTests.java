@@ -47,18 +47,18 @@ public class MenuTests extends SimpleWebApplicationTests {
         sqlExecutor.delete("delete from s_menu");
     }
 
-    public MenuEntity<MenuEntity> createMenu(String name) {
-        MenuEntity<MenuEntity> menuEntity = menuService.createEntity();
+    public MenuEntity createMenu(String name) {
+        MenuEntity menuEntity = menuService.createEntity();
         menuEntity.setName(name);
         return menuEntity;
     }
 
     @Test
     public void testCrud() throws Exception {
-        MenuEntity<MenuEntity> menuEntity = createMenu("测试1");
+        MenuEntity menuEntity = createMenu("测试1");
         menuEntity.setSortIndex(1L);
-        MenuEntity<MenuEntity> child1 = createMenu("测试2");
-        MenuEntity<MenuEntity> child3 = createMenu("测试2");
+        MenuEntity child1 = createMenu("测试2");
+        MenuEntity child3 = createMenu("测试2");
         menuEntity.setChildren(Arrays.asList(child1, child3));
 
         String id = menuService.insert(menuEntity);

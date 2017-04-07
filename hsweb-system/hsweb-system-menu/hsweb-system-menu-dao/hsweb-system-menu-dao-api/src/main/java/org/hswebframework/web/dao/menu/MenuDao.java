@@ -26,5 +26,5 @@ import org.hswebframework.web.entity.menu.MenuEntity;
  *
  * @author zhouhao
  */
-public interface MenuDao extends CrudDao<MenuEntity<MenuEntity>, String> {
+public interface MenuDao extends CrudDao<MenuEntity, String> {
 }

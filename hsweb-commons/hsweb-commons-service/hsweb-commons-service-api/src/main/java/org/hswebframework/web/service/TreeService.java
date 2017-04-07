@@ -33,4 +33,6 @@ public interface TreeService<E extends TreeSupportEntity, PK> extends Service {
     List<E> selectAllChildNode(PK parentId);
 
     int updateBatch(Collection<E> data);
+
+    List<PK> insertBatch(Collection<E> data);
 }

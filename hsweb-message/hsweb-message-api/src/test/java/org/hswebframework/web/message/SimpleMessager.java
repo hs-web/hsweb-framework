@@ -42,6 +42,7 @@ public class SimpleMessager implements Messager {
     List<MessagePublishHanlder> publishHanlders = new ArrayList<>();
 
     public SimpleMessager() {
+        //just support TextMessage
         publishHanlders.add(new MessagePublishHanlder() {
             @Override
             public boolean isSupport(Message message) {
