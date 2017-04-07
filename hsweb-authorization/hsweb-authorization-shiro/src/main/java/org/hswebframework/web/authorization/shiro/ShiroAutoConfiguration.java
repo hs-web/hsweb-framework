@@ -32,6 +32,7 @@ import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
 import org.apache.shiro.web.mgt.WebSecurityManager;
 import org.hswebframework.web.authorization.AuthenticationHolder;
 import org.hswebframework.web.authorization.AuthenticationManager;
+import org.hswebframework.web.authorization.AuthenticationSupplier;
 import org.hswebframework.web.authorization.access.DataAccessController;
 import org.hswebframework.web.authorization.access.DataAccessHandler;
 import org.hswebframework.web.authorization.access.FieldAccessController;
@@ -41,7 +42,9 @@ import org.hswebframework.web.authorization.shiro.boost.DefaultFieldAccessContro
 import org.hswebframework.web.authorization.shiro.cache.SpringCacheManagerWrapper;
 import org.hswebframework.web.authorization.shiro.remember.SimpleRememberMeManager;
 import org.hswebframework.web.controller.message.ResponseMessage;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.condition.*;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -59,8 +62,6 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 @Configuration
@@ -94,7 +95,6 @@ public class ShiroAutoConfiguration {
     @ConditionalOnMissingBean
     public AutoSyncAuthenticationSupplier authorizationSupplier(AuthenticationManager authenticationManager) {
         AutoSyncAuthenticationSupplier syncAuthenticationSupplier = new AutoSyncAuthenticationSupplier(authenticationManager);
-        AuthenticationHolder.setSupplier(syncAuthenticationSupplier);
         return syncAuthenticationSupplier;
     }
 
@@ -106,6 +106,24 @@ public class ShiroAutoConfiguration {
     @Bean(name = "lifecycleBeanPostProcessor")
     public LifecycleBeanPostProcessor getLifecycleBeanPostProcessor() {
         return new LifecycleBeanPostProcessor();
+    }
+
+    @Bean
+    public BeanPostProcessor authenticationSupplierBeanPostProcessor() {
+        return new BeanPostProcessor() {
+            @Override
+            public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+                return bean;
+            }
+
+            @Override
+            public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+                if (bean instanceof AuthenticationSupplier) {
+                    AuthenticationHolder.addSupplier(((AuthenticationSupplier) bean));
+                }
+                return bean;
+            }
+        };
     }
 
     @Bean(name = "securityManager")
