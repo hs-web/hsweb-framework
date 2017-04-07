@@ -21,7 +21,6 @@ package org.hswebframework.web.authorization.shiro;
 import org.apache.shiro.SecurityUtils;
 import org.hswebframework.web.ThreadLocalUtils;
 import org.hswebframework.web.authorization.*;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.Serializable;
 import java.util.List;
@@ -61,6 +60,7 @@ public class AutoSyncAuthenticationSupplier implements AuthenticationSupplier {
     }
 
     protected Authentication getNative(String userId) {
+        // ThreadLocal cache
         return ThreadLocalUtils.get(Authentication.class.getName(), () -> authenticationManager.getByUserId(userId));
     }
 
@@ -69,7 +69,6 @@ public class AutoSyncAuthenticationSupplier implements AuthenticationSupplier {
         if (!SecurityUtils.getSubject().isAuthenticated() && !SecurityUtils.getSubject().isRemembered()) return null;
         String id = (String) SecurityUtils.getSubject().getPrincipal();
         if (null == id) return null;
-        // ThreadLocal cache
         return getNative(id);
     }
 
