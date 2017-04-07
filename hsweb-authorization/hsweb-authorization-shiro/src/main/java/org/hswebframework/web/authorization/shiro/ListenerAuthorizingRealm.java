@@ -25,7 +25,6 @@ import org.apache.shiro.authc.SimpleAuthenticationInfo;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.authz.permission.WildcardPermission;
-import org.apache.shiro.cache.Cache;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.subject.Subject;
@@ -72,14 +71,6 @@ public class ListenerAuthorizingRealm extends AuthorizingRealm
         SecurityUtils.getSubject().logout();
     }
 
-    protected <K, V> Cache<K, V> getCache(String name) {
-        return getCacheManager().getCache(getCacheName(name));
-    }
-
-    protected String getCacheName(String name) {
-        return "shiro.auth.info.".concat(name);
-    }
-
     protected AuthorizationInfo createAuthorizationInfo(Authentication authentication) {
         SimpleAuthorizationInfo authorizationInfo = new SimpleAuthorizationInfo();
         authorizationInfo.addRoles(authentication.getRoles().stream().map(Role::getId).collect(Collectors.toList()));
@@ -104,4 +95,5 @@ public class ListenerAuthorizingRealm extends AuthorizingRealm
         Subject subject = SecurityUtils.getSubject();
         subject.login(new SimpleAuthenticationToken(authentication, remember));
     }
+
 }
