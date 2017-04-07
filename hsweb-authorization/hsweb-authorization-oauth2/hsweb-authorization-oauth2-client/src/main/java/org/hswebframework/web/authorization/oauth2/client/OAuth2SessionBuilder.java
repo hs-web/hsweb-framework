@@ -21,19 +21,53 @@ package org.hswebframework.web.authorization.oauth2.client;
 import org.hswebframework.web.authorization.oauth2.client.request.OAuth2Session;
 
 /**
+ * OAuth2会话创建器,根据各种方式创建 OAuth2会话
+ *
  * @author zhouhao
+ * @see OAuth2Session
+ * @since 3.0
  */
 public interface OAuth2SessionBuilder {
+
+    /**
+     * 根据授权码方式创建会话
+     *
+     * @param code 授权码
+     * @return 会话
+     * @see "grant_type=authorization_code"
+     */
     OAuth2Session byAuthorizationCode(String code);
 
+    /**
+     * 根据密钥方式创建会话
+     *
+     * @return 会话
+     * @see "grant_type=client_credentials"
+     */
     OAuth2Session byClientCredentials();
 
+    /**
+     * 根据密码方式创建会话
+     *
+     * @return 会话
+     * @see "grant_type=password"
+     */
     OAuth2Session byPassword(String username, String password);
 
+    /**
+     * 根据简化模式创建会话
+     *
+     * @return 会话
+     * @see "grant_type=implicit"
+     */
     OAuth2Session byImplicit();
 
-    OAuth2Session refreshToken(String refreshToken);
-
+    /**
+     * 直接指定accessToken创建会话
+     *
+     * @param accessToken
+     * @return 会话
+     */
     OAuth2Session byAccessToken(String accessToken);
 
 }

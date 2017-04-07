@@ -18,47 +18,48 @@
 
 package org.hswebframework.web.authorization.oauth2.client;
 
-import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.oauth2.client.listener.OAuth2Event;
 import org.hswebframework.web.authorization.oauth2.client.listener.OAuth2Listener;
-import org.hswebframework.web.authorization.oauth2.client.request.OAuth2Session;
-import org.hswebframework.web.authorization.oauth2.client.response.OAuth2Response;
-
-import java.util.List;
-import java.util.function.Function;
 
 /**
+ * OAuth2请求服务接口,用于创建OAuth2请求,注册监听器等操作
+ *
  * @author zhouhao
+ * @@since 3.0
  */
 public interface OAuth2RequestService {
+
+    /**
+     * 创建一个OAuth2服务的会话创建器
+     *
+     * @param serverId 服务ID,serverId是由接口的实现模块自行定义的
+     * @return OAuth2会话创建器
+     * @see OAuth2ServerConfig
+     * @see OAuth2SessionBuilder
+     */
     OAuth2SessionBuilder create(String serverId);
 
+    /**
+     * 注册一个监听器到指定的OAuth2服务
+     *
+     * @param serverId 服务ID
+     * @param listener 监听器
+     */
     void registerListener(String serverId, OAuth2Listener<? extends OAuth2Event> listener);
 
+    /**
+     * 触发一个监听事件
+     *
+     * @param serverId 服务ID
+     * @param event    事件实例
+     */
     void doEvent(String serverId, OAuth2Event event);
 
+    /**
+     * 触发一个指定类型的事件
+     * @param serverId
+     * @param event
+     * @param eventType
+     */
     void doEvent(String serverId, OAuth2Event event, Class<? extends OAuth2Event> eventType);
-
-
-    static void main(String[] args) {
-        OAuth2RequestService requestService = null;
-        Function<OAuth2Response, Authentication> authExchanger = null;
-        String authorizationCode = "";
-
-        OAuth2Session session = requestService
-                .create("hsweb-user-center")
-                .byAuthorizationCode(authorizationCode);
-
-        Authentication authentication = session
-                .request("oauth2/user-auth-info")
-                .get()
-                .as(Authentication.class);
-
-        session.request("menu")
-                .param("paging", "0")
-                .get().as(List.class);
-
-        authentication.getUser().getId();
-
-    }
 }
