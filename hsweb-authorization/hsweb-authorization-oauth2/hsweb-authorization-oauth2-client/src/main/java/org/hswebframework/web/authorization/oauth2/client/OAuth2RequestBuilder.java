@@ -18,25 +18,13 @@
 
 package org.hswebframework.web.authorization.oauth2.client;
 
+import org.hswebframework.web.authorization.oauth2.client.request.OAuth2Request;
+
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
-public interface OAuth2ServerConfig {
-    String name = "name";
+public interface OAuth2RequestBuilder {
+    OAuth2RequestBuilder url(String url);
 
-    String describe = "describe";
-
-    String apiBaseUrl = "apiBaseUrl";
-
-    String authUrl = "authUrl";
-
-    String accessTokenUrl = "accessTokenUrl";
-
-    String clientId = "clientId";
-
-    String clientSecret = "clientSecret";
-
-
+    OAuth2Request build();
 }

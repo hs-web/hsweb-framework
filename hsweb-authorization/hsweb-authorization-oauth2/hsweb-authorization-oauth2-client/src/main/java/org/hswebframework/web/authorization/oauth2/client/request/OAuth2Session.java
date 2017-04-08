@@ -18,6 +18,9 @@
 
 package org.hswebframework.web.authorization.oauth2.client.request;
 
+import org.hswebframework.web.authorization.annotation.Authorize;
+import org.hswebframework.web.authorization.oauth2.client.AccessTokenInfo;
+
 import java.io.Serializable;
 
 /**
@@ -30,11 +33,11 @@ import java.io.Serializable;
  */
 public interface OAuth2Session extends Serializable {
     /**
-     * 连接会话
+     * 尝试进行认证
      *
      * @return 会话自身
      */
-    OAuth2Session connect();
+    OAuth2Session authorize();
 
     /**
      * 发起一个OAuth2请求,参数为接口地址
@@ -53,6 +56,8 @@ public interface OAuth2Session extends Serializable {
      */
     OAuth2Session param(String name, Object value);
 
+    OAuth2Session scope(String scope);
+
     /**
      * 关闭会话,将清空
      */
@@ -62,4 +67,7 @@ public interface OAuth2Session extends Serializable {
      * @return 是否已关闭
      */
     boolean isClosed();
+
+    AccessTokenInfo getAccessToken();
+
 }

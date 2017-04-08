@@ -23,15 +23,14 @@ import java.util.Optional;
 import java.util.function.Function;
 
 /**
- *
  * @author zhouhao
  */
 public class OAuth2CodeAuthBeforeEvent implements OAuth2Event {
     private String                   code;
     private String                   state;
-    private Function<String, Object> parameterGetter;
+    private Function<String, String> parameterGetter;
 
-    public OAuth2CodeAuthBeforeEvent(String code, String state, Function<String, Object> parameterGetter) {
+    public OAuth2CodeAuthBeforeEvent(String code, String state, Function<String, String> parameterGetter) {
         this.code = code;
         this.state = state;
         this.parameterGetter = parameterGetter;
@@ -45,9 +44,8 @@ public class OAuth2CodeAuthBeforeEvent implements OAuth2Event {
         return state;
     }
 
-    @SuppressWarnings("unchecked")
-    public <T> Optional<T> getParameter(String name) {
-        return Optional.ofNullable((T) parameterGetter.apply(name));
+    public Optional<String> getParameter(String name) {
+        return Optional.ofNullable(parameterGetter.apply(name));
     }
 
 }

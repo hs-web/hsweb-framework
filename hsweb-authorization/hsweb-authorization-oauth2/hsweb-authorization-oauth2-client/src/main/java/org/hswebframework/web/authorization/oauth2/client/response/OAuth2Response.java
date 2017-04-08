@@ -18,8 +18,10 @@
 
 package org.hswebframework.web.authorization.oauth2.client.response;
 
+import org.hswebframework.web.authorization.oauth2.client.exception.OAuth2RequestException;
+
 import java.util.List;
-import java.util.function.Function;
+import java.util.function.BiConsumer;
 
 /**
  * OAuth2 请求结果
@@ -27,6 +29,24 @@ import java.util.function.Function;
  * @author zhouhao
  */
 public interface OAuth2Response {
+    enum ErrorType {
+        ILLEGAL_CODE, //错误的授权码
+        ILLEGAL_ACCESS_TOKEN, //错误的access_token
+        ILLEGAL_CLIENT_ID,//客户端信息错误
+        ILLEGAL_CLIENT_SECRET,//客户端信息错误
+        ILLEGAL_GRANT_TYPE, //错误的授权方式
+        ILLEGAL_RESPONSE_TYPE,//response_type 错误
+        ILLEGAL_AUTHORIZATION,//Authorization 错误
+        ILLEGAL_REFRESH_TOKEN,//refresh_token 错误
+        ILLEGAL_REDIRECT_URI, //redirect_url 错误
+        UNAUTHORIZED_CLIENT, //无权限
+        EXPIRED_TOKEN, //TOKEN过期
+        INVALID_TOKEN, //TOKEN已失效
+        UNSUPPORTED_GRANT_TYPE, //不支持的认证类型
+        UNSUPPORTED_RESPONSE_TYPE, //不支持的响应类型
+        ACCESS_DENIED, //访问被拒绝
+        OTHER //其他错误
+    }
 
     /**
      * @return 结果转为字符串
@@ -41,11 +61,11 @@ public interface OAuth2Response {
     /**
      * 自定义转换方式
      *
-     * @param exchangeFunction 转换函数
-     * @param <T>              转换结果类型
+     * @param convert 转换函数
+     * @param <T>     转换结果类型
      * @return 转换结果
      */
-    <T> T as(Function<OAuth2Response, T> exchangeFunction);
+    <T> T as(ResponseConvert<T> convert);
 
     /**
      * 转换为指定的类型
@@ -75,5 +95,9 @@ public interface OAuth2Response {
      *
      * @return 响应结果本身
      */
-    OAuth2Response ifSuccess();
+    OAuth2Response onError(BiConsumer<OAuth2Response, ErrorType> onError);
+
+    BiConsumer<OAuth2Response, ErrorType> throwOnError = (response, errorType) -> {
+        throw new OAuth2RequestException(errorType, response);
+    };
 }

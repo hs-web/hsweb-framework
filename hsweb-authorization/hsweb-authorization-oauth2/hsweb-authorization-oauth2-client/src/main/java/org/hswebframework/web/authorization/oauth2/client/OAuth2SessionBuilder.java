@@ -55,14 +55,6 @@ public interface OAuth2SessionBuilder {
     OAuth2Session byPassword(String username, String password);
 
     /**
-     * 根据简化模式创建会话
-     *
-     * @return 会话
-     * @see "grant_type=implicit"
-     */
-    OAuth2Session byImplicit();
-
-    /**
      * 直接指定accessToken创建会话
      *
      * @param accessToken

@@ -34,7 +34,6 @@ public interface OAuth2RequestService {
      *
      * @param serverId 服务ID,serverId是由接口的实现模块自行定义的
      * @return OAuth2会话创建器
-     * @see OAuth2ServerConfig
      * @see OAuth2SessionBuilder
      */
     OAuth2SessionBuilder create(String serverId);

@@ -28,14 +28,8 @@ import java.util.function.Consumer;
  * @author zhouhao
  */
 public interface OAuth2Request {
-    /**
-     * 设置路径参数,如url为:/user/{userId} .设置pathParam("userId","admin"),将自动解析url为 /user/admin
-     *
-     * @param name  参数名称
-     * @param value 参数值
-     * @return request自身
-     */
-    OAuth2Request pathParam(String name, Object value);
+
+    OAuth2Request onTokenExpired(TokenExpiredCallBack callback);
 
     /**
      * 设置请求参数,相当于/url?name=value
@@ -52,7 +46,7 @@ public interface OAuth2Request {
      * @param value 请求内容
      * @return request自身
      */
-    OAuth2Request requestBody(Object value);
+    OAuth2Request requestBody(String value);
 
     /**
      * 设置请求头
@@ -66,11 +60,10 @@ public interface OAuth2Request {
     /**
      * 设置cookie
      *
-     * @param name  名称
-     * @param value 值
+     * @param cookie 值
      * @return request自身
      */
-    OAuth2Request cookie(String name, String value);
+    OAuth2Request cookie(String cookie);
 
     /**
      * 设置请求的contentType
