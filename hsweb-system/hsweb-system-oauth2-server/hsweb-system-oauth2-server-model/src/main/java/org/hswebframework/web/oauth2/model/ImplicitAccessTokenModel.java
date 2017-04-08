@@ -30,9 +30,19 @@ public class ImplicitAccessTokenModel implements Model {
 
     private String token_type;
 
-    private Long expire_in;
+    private Long expires_in;
 
     private String state;
+
+    private String redirect_uri;
+
+    public String getRedirect_uri() {
+        return redirect_uri;
+    }
+
+    public void setRedirect_uri(String redirect_uri) {
+        this.redirect_uri = redirect_uri;
+    }
 
     public String getState() {
         return state;
@@ -58,11 +68,11 @@ public class ImplicitAccessTokenModel implements Model {
         this.token_type = token_type;
     }
 
-    public Long getExpire_in() {
-        return expire_in;
+    public Long getExpires_in() {
+        return expires_in;
     }
 
-    public void setExpire_in(Long expire_in) {
-        this.expire_in = expire_in;
+    public void setExpires_in(Long expires_in) {
+        this.expires_in = expires_in;
     }
 }

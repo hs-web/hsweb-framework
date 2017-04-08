@@ -16,15 +16,21 @@
  *
  */
 
-package org.hswebframework.web.service.oauth2.client.simple.request.definition;
+package org.hswebframework.web.service.oauth2.client.request.definition;
 
-import org.hswebframework.web.service.oauth2.client.simple.request.ResponseConvertHandler;
+import org.hswebframework.web.service.oauth2.client.request.ProviderSupport;
+import org.hswebframework.web.service.oauth2.client.request.ResponseConvertHandler;
 
 /**
  * TODO 完成注释
  *
  * @author zhouhao
  */
-public interface ResponseConvertForServerIdDefinition extends ResponseConvertHandler {
-    String getServerId();
+public interface ResponseConvertForProviderDefinition extends ResponseConvertHandler {
+
+    /**
+     * @return 支持的厂商标识
+     * @see ProviderSupport
+     */
+    String getProvider();
 }

@@ -33,7 +33,7 @@ public class SimpleOAuth2AccessEntity implements OAuth2AccessEntity {
 
     private String refreshToken;
 
-    private Long expireIn;
+    private Long expiresIn;
 
     private Long createTime;
 
@@ -81,14 +81,12 @@ public class SimpleOAuth2AccessEntity implements OAuth2AccessEntity {
         this.refreshToken = refreshToken;
     }
 
-    @Override
-    public Long getExpireIn() {
-        return expireIn;
+    public Long getExpiresIn() {
+        return expiresIn;
     }
 
-    @Override
-    public void setExpireIn(Long expireIn) {
-        this.expireIn = expireIn;
+    public void setExpiresIn(Long expiresIn) {
+        this.expiresIn = expiresIn;
     }
 
     @Override

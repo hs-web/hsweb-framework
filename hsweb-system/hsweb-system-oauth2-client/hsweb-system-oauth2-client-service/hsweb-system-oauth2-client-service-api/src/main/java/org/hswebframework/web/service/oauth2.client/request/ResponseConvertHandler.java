@@ -16,21 +16,19 @@
  *
  */
 
-package org.hswebframework.web.authorization.oauth2.client;
+package org.hswebframework.web.service.oauth2.client.request;
+
+import org.hswebframework.web.authorization.oauth2.client.response.OAuth2Response;
+
+import java.util.List;
 
 /**
  * TODO 完成注释
  *
  * @author zhouhao
  */
-public interface OAuth2Constants {
-    String access_token  = "access_token";
-    String grant_type    = "grant_type";
-    String scope         = "scope";
-    String client_id     = "client_id";
-    String client_secret = "client_secret";
-    String authorization = "Authorization";
-    String redirect_uri  = "redirect_uri";
-    String response_type = "response_type";
-    String state         = "state";
+public interface ResponseConvertHandler {
+    <T> T convert(OAuth2Response response, Class<T> type);
+
+    <T> List<T> convertList(OAuth2Response response, Class<T> type);
 }

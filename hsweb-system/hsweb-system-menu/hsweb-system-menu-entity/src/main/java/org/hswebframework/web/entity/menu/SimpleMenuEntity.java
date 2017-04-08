@@ -56,6 +56,7 @@ public class SimpleMenuEntity extends SimpleTreeSortSupportEntity<String>
     @Override
     @SuppressWarnings("unchecked")
     public List<SimpleMenuEntity> getChildren() {
+        if (children == null) return null;
         return new ArrayList<>(children);
     }
 

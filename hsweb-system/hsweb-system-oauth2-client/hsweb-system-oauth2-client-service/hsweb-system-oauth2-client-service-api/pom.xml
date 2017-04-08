@@ -35,6 +35,11 @@
         </dependency>
         <dependency>
             <groupId>org.hswebframework.web</groupId>
+            <artifactId>hsweb-authorization-oauth2-client</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-system-oauth2-client-dao-api</artifactId>
             <version>${project.version}</version>
         </dependency>

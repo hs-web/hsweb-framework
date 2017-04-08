@@ -16,15 +16,16 @@
  *
  */
 
-package org.hswebframework.web.service.oauth2.client.simple.request.definition;
-
-import org.hswebframework.web.service.oauth2.client.simple.request.ResponseConvertHandler;
+package org.hswebframework.web.service.oauth2.client.request;
 
 /**
  * TODO 完成注释
  *
  * @author zhouhao
  */
-public interface ResponseConvertForProviderDefinition extends ResponseConvertHandler {
-    String getProvider();
+public interface ProviderSupport {
+    String hsweb      = "hsweb";
+
+    String tencent_qq = "QQ";
+    String sina       = "sina";
 }

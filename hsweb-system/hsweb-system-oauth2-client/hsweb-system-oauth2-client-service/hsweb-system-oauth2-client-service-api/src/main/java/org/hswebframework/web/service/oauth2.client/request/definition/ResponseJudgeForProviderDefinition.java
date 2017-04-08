@@ -16,19 +16,14 @@
  *
  */
 
-package org.hswebframework.web.service.oauth2.client.simple.request;
+package org.hswebframework.web.service.oauth2.client.request.definition;
 
-import org.hswebframework.web.authorization.oauth2.client.response.OAuth2Response;
-
-import java.util.List;
+import org.hswebframework.web.service.oauth2.client.request.ResponseJudge;
 
 /**
- * TODO 完成注释
  *
  * @author zhouhao
  */
-public interface ResponseConvertHandler {
-    <T> T convert(OAuth2Response response, Class<T> type);
-
-    <T> List<T> convertList(OAuth2Response response, Class<T> type);
+public interface ResponseJudgeForProviderDefinition extends ResponseJudge {
+    String getProvider();
 }

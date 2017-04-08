@@ -31,11 +31,9 @@ public interface OAuth2ServerService {
 
     OAuth2ClientEntity getClient(String clientId, String clientSecret);
 
-    OAuth2AccessEntity getAccessByToken(String accessToken);
+    String requestCode(String clientId, String userId, String scope, String redirectUri);
 
-    String requestCode(String clientId, String userId, String scope);
-
-    OAuth2AccessEntity requestTokenByCode(String code, String clientId, String clientSecret, String scope);
+    OAuth2AccessEntity requestTokenByCode(String code, String clientId, String clientSecret, String scope, String redirectUri);
 
     OAuth2AccessEntity requestTokenByClientCredential(String clientId, String clientSecret);
 

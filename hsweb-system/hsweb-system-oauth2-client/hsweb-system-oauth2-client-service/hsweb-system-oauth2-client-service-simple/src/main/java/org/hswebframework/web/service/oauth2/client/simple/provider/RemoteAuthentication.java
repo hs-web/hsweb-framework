@@ -1,81 +1,70 @@
 /*
- * Copyright 2016 http://www.hswebframework.org
+ *  Copyright 2016 http://www.hswebframework.org
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *        http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
+ *
  */
 
-package org.hswebframework.web.service.authorization.simple;
+package org.hswebframework.web.service.oauth2.client.simple.provider;
 
-import org.hswebframework.web.authorization.*;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import org.hswebframework.web.authorization.Authentication;
+import org.hswebframework.web.authorization.Permission;
+import org.hswebframework.web.authorization.Role;
+import org.hswebframework.web.authorization.User;
 import org.hswebframework.web.authorization.access.DataAccessConfig;
 import org.hswebframework.web.authorization.access.FieldAccessConfig;
-import org.hswebframework.web.entity.authorization.*;
-import org.hswebframework.web.service.authorization.DataAccessFactory;
 
 import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
-public class SimpleAuthentication implements Authentication {
+public class RemoteAuthentication implements Authentication {
     private ReadOnlyUser user;
 
-    private List<Role> roles;
+    private List<ReadOnlyRole> roles;
 
-    private List<Permission> permissions;
+    private List<ReadOnlyPermission> permissions;
 
     private Map<String, Serializable> attributes = new HashMap<>();
 
-    public SimpleAuthentication() {
-    }
-    public SimpleAuthentication(UserEntity user,
-                                List<RoleEntity> roleEntities,
-                                List<PermissionRoleEntity> permissionRoleEntities,
-                                DataAccessFactory dataAccessFactory) {
-        this.user = new ReadOnlyUser(user.getId(), user.getUsername(), user.getName());
-        this.roles = roleEntities.stream()
-                .map(roleEntity -> new ReadOnlyRole(roleEntity.getId(), roleEntity.getDescribe()))
-                .collect(Collectors.toList());
-        this.permissions = permissionRoleEntities.stream()
-                .map(permissionRoleEntity -> {
-                    ReadOnlyPermission permission = new ReadOnlyPermission(permissionRoleEntity.getPermissionId(), permissionRoleEntity.getActions());
-                    if (null != dataAccessFactory && null != permissionRoleEntity.getDataAccesses()) {
-                        permission.setDataAccessConfigs(permissionRoleEntity
-                                .getDataAccesses()
-                                .stream()
-                                .map(dataAccessFactory::create)
-                                .collect(Collectors.toSet()));
-                    }
-                    if (null != permissionRoleEntity.getFieldAccesses()) {
-                        permission.setFieldAccesses(permissionRoleEntity
-                                .getFieldAccesses()
-                                .stream()
-                                .map(SimpleFieldAccess::of)
-                                .collect(Collectors.toSet()));
-                    }
-                    return permission;
-                })
-                .collect(Collectors.toList());
-    }
+    public static RemoteAuthentication fromJson(String json) {
+        RemoteAuthentication authentication = new RemoteAuthentication();
 
+        JSONObject jsonObject = JSONObject.parseObject(json);
+
+        authentication.setUser(jsonObject.getObject("user", ReadOnlyUser.class));
+        authentication.setRoles(jsonObject.getJSONArray("roles").stream().map(role ->
+                ((JSONObject) role).toJavaObject(ReadOnlyRole.class)
+        ).collect(Collectors.toList()));
+        authentication.setPermissions(jsonObject.getJSONArray("permissions").parallelStream().map(permission ->
+                {
+                    JSONObject permissionObj= ((JSONObject) permission);
+
+                    return permissionObj.toJavaObject(ReadOnlyPermission.class);
+                }
+        ).collect(Collectors.toList()));
+        authentication.setAttributes((Map) jsonObject.getJSONObject("attributes"));
+        return authentication;
+    }
 
     @Override
-    public User getUser() {
+    public ReadOnlyUser getUser() {
         return user;
     }
 
@@ -105,12 +94,12 @@ public class SimpleAuthentication implements Authentication {
         this.user = user;
     }
 
-    public void setRoles(List<Role> roles) {
+    public void setRoles(List<ReadOnlyRole> roles) {
         checkWritable(this.roles);
         this.roles = roles;
     }
 
-    public void setPermissions(List<Permission> permissions) {
+    public void setPermissions(List<ReadOnlyPermission> permissions) {
         checkWritable(this.permissions);
         this.permissions = permissions;
     }
@@ -189,13 +178,6 @@ public class SimpleAuthentication implements Authentication {
     public static class SimpleFieldAccess implements FieldAccessConfig {
         private String      field;
         private Set<String> actions;
-
-        public static SimpleFieldAccess of(FieldAccessEntity entity) {
-            SimpleFieldAccess access = new SimpleFieldAccess();
-            access.setField(entity.getField());
-            access.setActions(entity.getActions().stream().map(ActionEntity::getAction).collect(Collectors.toSet()));
-            return access;
-        }
 
         @Override
         public String getField() {

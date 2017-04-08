@@ -81,15 +81,7 @@ public class SimpleOAuth2ServerService implements OAuth2ServerService {
     }
 
     @Override
-    public OAuth2AccessEntity getAccessByToken(String accessToken) {
-        return createQuery(oAuth2AccessDao)
-                // TODO: 17-2-28 key (accessToken) 应该为常量
-                .where("accessToken", accessToken)
-                .single();
-    }
-
-    @Override
-    public String requestCode(String clientId, String userId, String scope) {
+    public String requestCode(String clientId, String userId, String scope, String redirectUri) {
         String code = IDGenerator.MD5.generate();
         //删除旧的code
         createDelete(authorizationCodeDao)
@@ -103,6 +95,7 @@ public class SimpleOAuth2ServerService implements OAuth2ServerService {
         codeEntity.setUserId(userId);
         codeEntity.setCode(code);
         codeEntity.setScope(scope);
+        codeEntity.setRedirectUri(redirectUri);
         authorizationCodeDao.insert(codeEntity);
         return code;
     }
@@ -116,7 +109,11 @@ public class SimpleOAuth2ServerService implements OAuth2ServerService {
     }
 
     @Override
-    public OAuth2AccessEntity requestTokenByCode(String code, String clientId, String clientSecret, String scope) {
+    public OAuth2AccessEntity requestTokenByCode(String code,
+                                                 String clientId,
+                                                 String clientSecret,
+                                                 String scope,
+                                                 String redirectUri) {
         AuthorizationCodeEntity codeEntity =
                 createQuery(authorizationCodeDao)
                         .where("code", code)
@@ -126,8 +123,12 @@ public class SimpleOAuth2ServerService implements OAuth2ServerService {
             throw new NotFoundException("code not found!");
         }
         try {
-            //授权码已经创建超时(20s)
-            if (System.currentTimeMillis() - codeEntity.getCreateTime() < 20 * 1000) {
+//            if (!redirectUri.equals(codeEntity.getRedirectUri())) {
+//                // redirectUri error
+//                throw new IllegalArgumentException("redirectUri error!");
+//            }
+            //授权码已经创建超时(10分钟)
+            if (System.currentTimeMillis() - codeEntity.getCreateTime() > 10 * 60 * 1000) {
                 throw new NotFoundException("time out!");
             }
             // TODO: 17-2-28  验证scope
@@ -135,7 +136,7 @@ public class SimpleOAuth2ServerService implements OAuth2ServerService {
             OAuth2ClientEntity clientEntity = getClient(clientId, clientSecret);
             if (null == clientEntity) {
                 // TODO: 17-2-28 自定义异常
-                throw new NotFoundException("client not found!");
+                throw new IllegalArgumentException("client not found!");
             }
             if (!clientEntity.grantTypeIsSupport("authorization_code")) {
                 throw new UnsupportedOperationException("grant_type:authorization_code not support!");
@@ -144,7 +145,7 @@ public class SimpleOAuth2ServerService implements OAuth2ServerService {
             accessEntity.setUserId(codeEntity.getUserId());
             accessEntity.setClientId(clientId);
             // TODO: 17-2-28 过期时间应该可配置
-            accessEntity.setExpireIn(3600L);
+            accessEntity.setExpiresIn(3600L);
             accessEntity.setScope(scope);
             oAuth2AccessDao.insert(accessEntity);
             return accessEntity;
@@ -179,10 +180,10 @@ public class SimpleOAuth2ServerService implements OAuth2ServerService {
         OAuth2AccessEntity newEntity = createNewAccess();
         if (oldEntity != null) {
             newEntity.setScope(oldEntity.getScope());
-            newEntity.setExpireIn(oldEntity.getExpireIn());
+            newEntity.setExpiresIn(oldEntity.getExpiresIn());
             newEntity.setRefreshToken(oldEntity.getRefreshToken());
         } else {
-            newEntity.setExpireIn(3600L);
+            newEntity.setExpiresIn(3600L);
             newEntity.setScope("public");
         }
         newEntity.setClientId(clientEntity.getId());
@@ -220,7 +221,7 @@ public class SimpleOAuth2ServerService implements OAuth2ServerService {
         OAuth2AccessEntity accessEntity = createNewAccess();
         accessEntity.setUserId(entity.getId());
         accessEntity.setScope("public");
-        accessEntity.setExpireIn(3600L);
+        accessEntity.setExpiresIn(3600L);
         accessEntity.setClientId(clientEntity.getId());
         oAuth2AccessDao.insert(accessEntity);
         return accessEntity;

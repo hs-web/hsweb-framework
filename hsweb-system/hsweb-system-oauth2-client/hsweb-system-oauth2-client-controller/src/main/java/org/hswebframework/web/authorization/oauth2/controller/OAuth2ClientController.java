@@ -18,11 +18,14 @@
 
 package org.hswebframework.web.authorization.oauth2.controller;
 
-import org.hswebframework.web.BusinessException;
+import org.hswebframework.web.WebUtil;
+import org.hswebframework.web.authorization.oauth2.client.OAuth2Constants;
 import org.hswebframework.web.authorization.oauth2.client.OAuth2RequestService;
 import org.hswebframework.web.authorization.oauth2.client.listener.OAuth2CodeAuthBeforeEvent;
 import org.hswebframework.web.controller.message.ResponseMessage;
+import org.hswebframework.web.entity.oauth2.client.OAuth2ServerConfigEntity;
 import org.hswebframework.web.id.IDGenerator;
+import org.hswebframework.web.service.oauth2.client.OAuth2ServerConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -30,6 +33,9 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 
 /**
  * @author zhouhao
@@ -39,6 +45,13 @@ import javax.servlet.http.HttpSession;
 public class OAuth2ClientController {
 
     private OAuth2RequestService oAuth2RequestService;
+
+    private OAuth2ServerConfigService oAuth2ServerConfigService;
+
+    @Autowired
+    public void setoAuth2ServerConfigService(OAuth2ServerConfigService oAuth2ServerConfigService) {
+        this.oAuth2ServerConfigService = oAuth2ServerConfigService;
+    }
 
     @Autowired
     public void setoAuth2RequestService(OAuth2RequestService oAuth2RequestService) {
@@ -55,20 +68,38 @@ public class OAuth2ClientController {
         return ResponseMessage.ok(state);
     }
 
+    @GetMapping("/boot/{serverId}")
+    public RedirectView boot(@PathVariable String serverId,
+                             @RequestParam(defaultValue = "/") String redirect,
+                             HttpServletRequest request,
+                             HttpSession session) throws UnsupportedEncodingException {
+        OAuth2ServerConfigEntity entity = oAuth2ServerConfigService.selectByPk(serverId);
+        if (entity == null) return new RedirectView("/401.html");
+        String callback = WebUtil.getBasePath(request)
+                .concat("oauth2/callback/")
+                .concat(serverId).concat("/?redirect=")
+                .concat(URLEncoder.encode(redirect, "UTF-8"));
+        RedirectView view = new RedirectView(entity.getRealUrl(entity.getAuthUrl()));
+        view.addStaticAttribute(OAuth2Constants.response_type, "code");
+        view.addStaticAttribute(OAuth2Constants.state, requestState(session).getResult());
+        view.addStaticAttribute(OAuth2Constants.client_id, entity.getClientId());
+        view.addStaticAttribute(OAuth2Constants.redirect_uri, URLEncoder.encode(callback, "UTF-8"));
+        return view;
+    }
+
     @GetMapping("/callback/{serverId}")
     public RedirectView callback(@RequestParam(defaultValue = "/") String redirect,
                                  @PathVariable String serverId,
                                  @RequestParam String code,
                                  @RequestParam String state,
                                  HttpServletRequest request,
-                                 HttpSession session) {
+                                 HttpSession session) throws UnsupportedEncodingException {
         try {
             String cachedState = (String) session.getAttribute(STATE_SESSION_KEY);
-            if (!state.equals(cachedState)) throw new BusinessException("state error");
-
+            //  if (!state.equals(cachedState)) throw new BusinessException("state error");
             oAuth2RequestService.doEvent(serverId, new OAuth2CodeAuthBeforeEvent(code, state, request::getParameter));
             // TODO: 17-4-7 验证并解码redirect
-            return new RedirectView(redirect);
+            return new RedirectView(URLDecoder.decode(redirect, "UTF-8"));
         } finally {
             session.removeAttribute(STATE_SESSION_KEY);
         }

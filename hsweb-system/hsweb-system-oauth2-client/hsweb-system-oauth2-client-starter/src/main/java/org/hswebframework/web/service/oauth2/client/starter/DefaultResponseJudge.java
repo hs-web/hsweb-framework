@@ -19,7 +19,7 @@
 package org.hswebframework.web.service.oauth2.client.starter;
 
 import org.hswebframework.web.authorization.oauth2.client.response.OAuth2Response;
-import org.hswebframework.web.service.oauth2.client.simple.request.ResponseJudge;
+import org.hswebframework.web.service.oauth2.client.request.ResponseJudge;
 
 import java.util.*;
 import java.util.stream.Collectors;

@@ -54,7 +54,7 @@ function install(context) {
         .addColumn().name("client_id").varchar(32).notNull().comment("client_id").commit()
         .addColumn().name("user_id").varchar(32).notNull().comment("授权对应的用户ID").commit()
         .addColumn().name("access_token").varchar(32).notNull().comment("授权码").commit()
-        .addColumn().name("expire_in").varchar(32).notNull().comment("有效期").commit()
+        .addColumn().name("expires_in").varchar(32).notNull().comment("有效期").commit()
         .addColumn().name("refresh_token").varchar(32).notNull().comment("用于更新授权的token").commit()
         .addColumn().name("create_time").number(32).notNull().comment("创建时间").commit()
         .addColumn().name("update_time").number(32).comment("更新时间").commit()
@@ -67,6 +67,7 @@ function install(context) {
         .addColumn().name("code").varchar(32).notNull().comment("授权码").commit()
         .addColumn().name("create_time").number(32).notNull().comment("创建时间").commit()
         .addColumn().name("scope").clob().notNull().comment("授权范围").commit()
+        .addColumn().name("redirect_uri").varchar(1024).notNull().comment("重定向URI").commit()
         .comment("OAuth2授权码信息").commit();
 }
 

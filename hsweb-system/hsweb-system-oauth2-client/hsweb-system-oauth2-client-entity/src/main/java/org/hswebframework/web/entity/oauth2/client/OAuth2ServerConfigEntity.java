@@ -107,6 +107,13 @@ public interface OAuth2ServerConfigEntity extends GenericEntity<String> {
      */
     String getAuthUrl();
 
+    default String getRealUrl(String url) {
+        String base = getApiBaseUrl();
+        if (url.startsWith("http")) return url;
+        if (!base.endsWith("/") && !url.startsWith("/")) base += "/";
+        return base + url;
+    }
+
     /**
      * 设置 认证地址
      */

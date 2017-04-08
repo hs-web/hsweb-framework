@@ -46,36 +46,36 @@ public class OAuth2ServerConfigTests extends SimpleWebApplicationTests {
     @Autowired
     private OAuth2RequestService oAuth2RequestService;
 
-    @Test
-    public void testOAuth2() throws Exception {
-        OAuth2ServerConfigEntity entity = entityFactory.newInstance(OAuth2ServerConfigEntity.class);
-        //https://graph.qq.com/oauth2.0/authorize?response_type=code&client_id=123&redirect_uri=www.baidu.com
-        entity.setId("my_qq_test");
-        entity.setName("QQ OAuth2");
-        entity.setApiBaseUrl("https://graph.qq.com/oauth2.0/");
-        entity.setAuthUrl("authorize");
-        entity.setAccessTokenUrl("token");
-        entity.setClientId("911ab25b8a87684beba8f394f47d3de9");
-        entity.setClientSecret("2cce659031d5e1495e102be0de9e9cb0");
-        entity.setRedirectUri("http://demo.hsweb.me");
-        entity.setProvider("QQ");
-        entity.setEnabled(true);
-        //add
-        String requestBody = JSON.toJSONString(entity);
-        JSONObject result = testPost("/oauth2-server-config")
-                .setUp(setup -> setup.contentType(MediaType.APPLICATION_JSON)
-                        .content(requestBody)).exec().resultAsJson();
-        Assert.assertEquals(200, result.get("status"));
-
-        try {
-            Map meInfo = oAuth2RequestService.create("my_qq_test")
-                    .byAuthorizationCode("D8C3B5E8B55E4AAAC8EA1FB8DC0AFCEC")
-                    .request("me").get().as(Map.class);
-            System.out.println(meInfo);
-        } catch (OAuth2RequestException e) {
-            System.out.println(e.getErrorType() + ":" + e.getResponse().as(Map.class));
-        }
-    }
+//    @Test
+//    public void testOAuth2() throws Exception {
+//        OAuth2ServerConfigEntity entity = entityFactory.newInstance(OAuth2ServerConfigEntity.class);
+//        //https://graph.qq.com/oauth2.0/authorize?response_type=code&client_id=123&redirect_uri=www.baidu.com
+//        entity.setId("my_qq_test");
+//        entity.setName("QQ OAuth2");
+//        entity.setApiBaseUrl("https://graph.qq.com/oauth2.0/");
+//        entity.setAuthUrl("authorize");
+//        entity.setAccessTokenUrl("token");
+//        entity.setClientId("911ab25b8a87684beba8f394f47d3de9");
+//        entity.setClientSecret("2cce659031d5e1495e102be0de9e9cb0");
+//        entity.setRedirectUri("http://demo.hsweb.me");
+//        entity.setProvider("QQ");
+//        entity.setEnabled(true);
+//        //add
+//        String requestBody = JSON.toJSONString(entity);
+//        JSONObject result = testPost("/oauth2-server-config")
+//                .setUp(setup -> setup.contentType(MediaType.APPLICATION_JSON)
+//                        .content(requestBody)).exec().resultAsJson();
+//        Assert.assertEquals(200, result.get("status"));
+//
+//        try {
+//            Map meInfo = oAuth2RequestService.create("my_qq_test")
+//                    .byAuthorizationCode("D8C3B5E8B55E4AAAC8EA1FB8DC0AFCEC")
+//                    .request("me").get().as(Map.class);
+//            System.out.println(meInfo);
+//        } catch (OAuth2RequestException e) {
+//            System.out.println(e.getErrorType() + ":" + e.getResponse().as(Map.class));
+//        }
+//    }
 
     @Test
     public void testCrud() throws Exception {

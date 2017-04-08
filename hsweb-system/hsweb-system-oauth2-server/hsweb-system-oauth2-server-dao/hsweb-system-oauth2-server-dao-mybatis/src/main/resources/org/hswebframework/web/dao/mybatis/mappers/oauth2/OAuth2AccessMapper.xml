@@ -26,7 +26,7 @@
         <result property="clientId" column="client_id" javaType="String" jdbcType="VARCHAR"/>
         <result property="userId" column="user_id" javaType="String" jdbcType="VARCHAR"/>
         <result property="accessToken" column="access_token" javaType="String" jdbcType="VARCHAR"/>
-        <result property="expireIn" column="expire_in" javaType="Long" jdbcType="NUMERIC"/>
+        <result property="expiresIn" column="expires_in" javaType="Long" jdbcType="NUMERIC"/>
         <result property="refreshToken" column="refresh_token" javaType="String" jdbcType="VARCHAR"/>
         <result property="createTime" column="create_time" javaType="Long" jdbcType="NUMERIC"/>
         <result property="updateTime" column="update_time" javaType="Long" jdbcType="NUMERIC"/>

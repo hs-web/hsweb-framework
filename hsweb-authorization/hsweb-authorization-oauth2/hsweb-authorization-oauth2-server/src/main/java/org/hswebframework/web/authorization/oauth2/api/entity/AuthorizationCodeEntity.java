@@ -45,4 +45,8 @@ public interface AuthorizationCodeEntity extends Entity {
     String getScope();
 
     void setScope(String scope);
+
+    String getRedirectUri();
+
+    void setRedirectUri(String redirectUri);
 }

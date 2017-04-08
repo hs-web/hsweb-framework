@@ -41,9 +41,9 @@ public interface OAuth2AccessEntity extends Entity {
 
     void setRefreshToken(String refreshToken);
 
-    Long getExpireIn();
+    Long getExpiresIn();
 
-    void setExpireIn(Long expireIn);
+    void setExpiresIn(Long expiresIn);
 
     Long getCreateTime();
 

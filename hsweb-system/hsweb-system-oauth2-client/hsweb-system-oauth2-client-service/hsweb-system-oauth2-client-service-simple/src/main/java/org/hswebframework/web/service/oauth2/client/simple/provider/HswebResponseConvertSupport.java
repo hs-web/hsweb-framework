@@ -16,10 +16,12 @@
  *
  */
 
-package org.hswebframework.web.starter.oauth2.client;
+package org.hswebframework.web.service.oauth2.client.simple.provider;
 
 import com.alibaba.fastjson.JSON;
+import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.oauth2.client.response.OAuth2Response;
+import org.hswebframework.web.service.oauth2.client.request.ProviderSupport;
 import org.hswebframework.web.service.oauth2.client.request.definition.ResponseConvertForProviderDefinition;
 import org.springframework.stereotype.Component;
 
@@ -31,12 +33,13 @@ import java.util.List;
  * @author zhouhao
  */
 @Component
-public class QQResponseConvertSupport implements ResponseConvertForProviderDefinition {
+public class HswebResponseConvertSupport implements ResponseConvertForProviderDefinition {
     @Override
     public <T> T convert(OAuth2Response response, Class<T> type) {
         String json = response.asString();
-        if (json.contains("callback(")) {
-            json = json.trim().substring("callback(".length(), json.length() - 3);
+
+        if (type == Authentication.class) {
+            return (T) RemoteAuthentication.fromJson(json);
         }
         return JSON.parseObject(json, type);
     }
@@ -44,14 +47,11 @@ public class QQResponseConvertSupport implements ResponseConvertForProviderDefin
     @Override
     public <T> List<T> convertList(OAuth2Response response, Class<T> type) {
         String json = response.asString();
-        if (json.contains("callback(")) {
-            json = json.trim().substring("callback(".length(), json.length() - 3);
-        }
         return JSON.parseArray(json, type);
     }
 
     @Override
     public String getProvider() {
-        return "QQ";
+        return ProviderSupport.hsweb;
     }
 }

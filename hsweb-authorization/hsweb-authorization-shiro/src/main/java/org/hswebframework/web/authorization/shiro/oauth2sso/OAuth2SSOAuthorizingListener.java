@@ -24,6 +24,7 @@ import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.oauth2.client.OAuth2RequestService;
 import org.hswebframework.web.authorization.oauth2.client.listener.OAuth2CodeAuthBeforeEvent;
 import org.hswebframework.web.authorization.oauth2.client.listener.OAuth2Listener;
+import org.hswebframework.web.authorization.oauth2.client.response.OAuth2Response;
 import org.hswebframework.web.authorization.shiro.SimpleAuthenticationToken;
 
 /**
@@ -57,10 +58,10 @@ public class OAuth2SSOAuthorizingListener
                 .create(userCenterServerId)
                 .byAuthorizationCode(event.getCode())
                 .request(userAuthInfoApi)
-                .get()
+                .get().onError(OAuth2Response.throwOnError)
                 .as(Authentication.class);
 
-        boolean remember = Boolean.valueOf((String) event.getParameter("remember").orElse("false"));
+        boolean remember = Boolean.valueOf(event.getParameter("remember").orElse("false"));
         Subject subject = SecurityUtils.getSubject();
         subject.login(new SimpleAuthenticationToken(authentication, remember));
 

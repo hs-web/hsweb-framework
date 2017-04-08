@@ -79,14 +79,13 @@ public class DefaultOAuth2Session implements OAuth2Session {
     }
 
     protected String encodeAuthorization(String auth) {
-        String code = "basic ".concat(auth);
-        return Base64.encodeBase64String(code.getBytes());
+        return "basic ".concat(Base64.encodeBase64String(auth.getBytes()));
     }
 
     protected void applyBasicAuthParam(OAuth2Request request) {
         request.param(client_id, configEntity.getClientId());
         request.param(client_secret, configEntity.getClientSecret());
-
+        request.param(redirect_uri, configEntity.getRedirectUri());
         request.header(authorization, encodeAuthorization(configEntity.getClientId().concat(":").concat(configEntity.getClientSecret())));
     }
 

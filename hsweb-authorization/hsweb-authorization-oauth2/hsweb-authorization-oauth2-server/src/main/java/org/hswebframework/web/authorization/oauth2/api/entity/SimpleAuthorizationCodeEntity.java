@@ -33,6 +33,16 @@ public class SimpleAuthorizationCodeEntity implements AuthorizationCodeEntity {
 
     private String scope;
 
+    private String redirectUri;
+
+    public String getRedirectUri() {
+        return redirectUri;
+    }
+
+    public void setRedirectUri(String redirectUri) {
+        this.redirectUri = redirectUri;
+    }
+
     public String getScope() {
         return scope;
     }

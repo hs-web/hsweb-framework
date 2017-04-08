@@ -16,13 +16,15 @@
  *
  */
 
-package org.hswebframework.web.service.oauth2.client.simple.request;
+package org.hswebframework.web.service.oauth2.client.request.definition;
 
-import org.hswebframework.web.authorization.oauth2.client.response.OAuth2Response;
+import org.hswebframework.web.service.oauth2.client.request.ResponseConvertHandler;
 
 /**
+ * TODO 完成注释
+ *
  * @author zhouhao
  */
-public interface ResponseJudge {
-    OAuth2Response.ErrorType judge(OAuth2Response response);
+public interface ResponseConvertForServerIdDefinition extends ResponseConvertHandler {
+    String getServerId();
 }

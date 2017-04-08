@@ -21,14 +21,10 @@ package org.hswebframework.web.authorization.oauth2.controller;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.codec.binary.Base64;
-import org.hswebframework.web.AuthorizeException;
-import org.hswebframework.web.authorization.Authentication;
-import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.oauth2.api.OAuth2ServerService;
 import org.hswebframework.web.authorization.oauth2.api.entity.OAuth2AccessEntity;
 import org.hswebframework.web.oauth2.model.AccessTokenModel;
-import org.hswebframework.web.oauth2.model.AuthorizationCodeModel;
-import org.hswebframework.web.oauth2.model.ImplicitAccessTokenModel;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -36,72 +32,34 @@ import javax.annotation.Resource;
 import static org.springframework.util.StringUtils.isEmpty;
 
 /**
- *
  * @author zhouhao
  */
 @RestController
-@Api(tags = "hsweb-authorization", description = "OAuth2授权", hidden = true)
-@RequestMapping("${hsweb.web.mappings.authorize-oauth2:oauth2/authorize}")
-public class OAuth2AuthorizationController {
+@Api(tags = "hsweb-oauth2", description = "OAuth2授权token获取", hidden = true)
+@RequestMapping("${hsweb.web.mappings.authorize-oauth2:oauth2/token}")
+public class OAuth2TokenController {
 
     @Resource
     private OAuth2ServerService oAuth2ServerService;
 
-    @RequestMapping(params = "response_type=code", method = RequestMethod.GET)
-    @ApiOperation("登录用户获取OAuth2.0授权码")
-    @Authorize
-    public AuthorizationCodeModel requestCode(
-            @RequestParam("client_id") String clientId,
-            @RequestParam("redirect_uri") String redirectUri,
-            @RequestParam(value = "scope", required = false) String scope,
-            @RequestParam(value = "state", required = false) String state) {
-        Authentication authentication = Authentication.current().orElseThrow(AuthorizeException::new);
-        String code = oAuth2ServerService.requestCode(clientId, authentication.getUser().getId(), scope);
-        AuthorizationCodeModel model = new AuthorizationCodeModel();
-        model.setCode(code);
-        model.setRedirectUri(redirectUri);
-        model.setState(state);
-        return model;
-    }
-
-
-    @RequestMapping(params = "response_type=token", method = RequestMethod.GET)
-    @ApiOperation("implicit方式授权")
-    public ImplicitAccessTokenModel authorizeByImplicit(
-            @RequestParam(value = "client_id") String client_id,
-            @RequestParam(value = "redirect_uri") String redirect_uri,
-            @RequestParam(value = "state") String state,
-            @RequestParam(value = "scope", required = false) String scope) {
-
-        // OAuth2ClientEntity clientEntity = oAuth2ServerService.getClient(client_id);
-        // TODO: 17-3-6  validate redirect_uri
-        OAuth2AccessEntity accessEntity = oAuth2ServerService.requestTokenByImplicit(client_id, scope);
-        ImplicitAccessTokenModel model = new ImplicitAccessTokenModel();
-        model.setState(state);
-        model.setToken_type("example");
-        model.setAccess_token(accessEntity.getAccessToken());
-        model.setExpire_in(accessEntity.getExpireIn());
-        return model;
-    }
-
-    @RequestMapping(params = "grant_type=authorization_code", method = RequestMethod.POST)
+    @PostMapping(params = "grant_type=authorization_code")
     @ApiOperation("authorization_code方式授权")
     public AccessTokenModel authorizeByCode(
             @RequestParam("code") String code,
             @RequestParam(value = "client_id", required = false) String clientId,
             @RequestParam(value = "client_secret", required = false) String clientSecret,
+            @RequestParam(value = "redirect_uri") String redirect_uri,
             @RequestHeader(value = "Authorization", required = false) String authorization,
             @RequestParam(value = "scope", required = false) String scope) {
 
         String[] clientCredentials = getClientCredentials(clientId, clientSecret, authorization);
         clientId = clientCredentials[0];
         clientSecret = clientCredentials[1];
-
-        AccessTokenModel model = entityToModel(oAuth2ServerService.requestTokenByCode(code, clientId, clientSecret, scope));
+        AccessTokenModel model = entityToModel(oAuth2ServerService.requestTokenByCode(code, clientId, clientSecret, scope, redirect_uri));
         return model;
     }
 
-    @RequestMapping(params = "grant_type=client_credentials", method = RequestMethod.POST)
+    @PostMapping(params = "grant_type=client_credentials")
     @ApiOperation("client_credentials方式授权")
     public AccessTokenModel authorizeByClientCredentials(
             @RequestParam(value = "client_id", required = false) String clientId,
@@ -114,7 +72,7 @@ public class OAuth2AuthorizationController {
         return model;
     }
 
-    @RequestMapping(params = "grant_type=password", method = RequestMethod.POST)
+    @PostMapping(params = "grant_type=password")
     @ApiOperation("password方式授权")
     public AccessTokenModel authorizeByPassword(
             @RequestParam(value = "username") String username,
@@ -127,7 +85,7 @@ public class OAuth2AuthorizationController {
         return model;
     }
 
-    @RequestMapping(params = "grant_type=refresh_token", method = RequestMethod.POST)
+    @PostMapping(params = "grant_type=refresh_token")
     @ApiOperation("刷新授权码")
     public AccessTokenModel refreshToken(
             @RequestHeader(value = "Authorization", required = false) String authorization,
@@ -150,6 +108,7 @@ public class OAuth2AuthorizationController {
         }
         if (!isEmpty(authorization)) {
             String[] creds = decodeClientAuthenticationHeader(authorization);
+            Assert.notNull(creds, "");
             if (creds.length > 1) {
                 clientId = creds[0];
                 clientSecret = creds[1];
@@ -157,6 +116,8 @@ public class OAuth2AuthorizationController {
                 clientSecret = creds[0];
             }
         }
+        Assert.hasLength(clientId, "");
+        Assert.hasLength(clientSecret, "");
         return new String[]{clientId, clientSecret};
     }
 
@@ -164,7 +125,7 @@ public class OAuth2AuthorizationController {
         AccessTokenModel model = new AccessTokenModel();
         model.setAccess_token(entity.getAccessToken());
         model.setRefresh_token(entity.getRefreshToken());
-        model.setExpire_in(entity.getExpireIn());
+        model.setExpires_in(entity.getExpiresIn());
         model.setScope(entity.getScope());
         model.setToken_type("bearer");
         return model;

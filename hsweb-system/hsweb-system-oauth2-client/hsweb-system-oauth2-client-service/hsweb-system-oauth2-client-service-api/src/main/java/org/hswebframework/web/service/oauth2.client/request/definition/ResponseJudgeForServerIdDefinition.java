@@ -16,14 +16,15 @@
  *
  */
 
-package org.hswebframework.web.service.oauth2.client.simple.request.definition;
+package org.hswebframework.web.service.oauth2.client.request.definition;
 
-import org.hswebframework.web.service.oauth2.client.simple.request.ResponseJudge;
+import org.hswebframework.web.service.oauth2.client.request.ResponseJudge;
 
 /**
+ * TODO 完成注释
  *
  * @author zhouhao
  */
-public interface ResponseJudgeForProviderDefinition extends ResponseJudge {
-    String getProvider();
+public interface ResponseJudgeForServerIdDefinition extends ResponseJudge {
+    String getServerId();
 }
