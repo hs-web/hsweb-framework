@@ -26,10 +26,10 @@ import org.hswebframework.web.id.IDGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.view.RedirectView;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.util.Map;
 
 /**
  * @author zhouhao
@@ -56,17 +56,19 @@ public class OAuth2ClientController {
     }
 
     @GetMapping("/callback/{serverId}")
-    public ModelAndView callback(@RequestParam(defaultValue = "/") String redirect
-            , @PathVariable String serverId
-            , @RequestParam String code
-            , @RequestParam String state
-            , @RequestParam Map<String, Object> param
-            , HttpSession session) {
+    public RedirectView callback(@RequestParam(defaultValue = "/") String redirect,
+                                 @PathVariable String serverId,
+                                 @RequestParam String code,
+                                 @RequestParam String state,
+                                 HttpServletRequest request,
+                                 HttpSession session) {
         try {
             String cachedState = (String) session.getAttribute(STATE_SESSION_KEY);
             if (!state.equals(cachedState)) throw new BusinessException("state error");
-            oAuth2RequestService.doEvent(serverId, new OAuth2CodeAuthBeforeEvent(code, state, param::get));
-            return new ModelAndView("redirect:" + redirect);
+
+            oAuth2RequestService.doEvent(serverId, new OAuth2CodeAuthBeforeEvent(code, state, request::getParameter));
+            // TODO: 17-4-7 验证并解码redirect
+            return new RedirectView(redirect);
         } finally {
             session.removeAttribute(STATE_SESSION_KEY);
         }

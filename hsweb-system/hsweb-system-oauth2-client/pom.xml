@@ -31,6 +31,10 @@
     <packaging>pom</packaging>
     <modules>
         <module>hsweb-system-oauth2-client-controller</module>
+        <module>hsweb-system-oauth2-client-dao</module>
+        <module>hsweb-system-oauth2-client-entity</module>
+        <module>hsweb-system-oauth2-client-service</module>
+        <module>hsweb-system-oauth2-client-starter</module>
     </modules>
 
 
