@@ -65,7 +65,8 @@ public class SystemInitializeAutoConfiguration {
                 break;
         }
 
-        RDBDatabase database = new SimpleDatabase(metaData, sqlExecutor);
+        SimpleDatabase database = new SimpleDatabase(metaData, sqlExecutor);
+        database.setAutoParse(true);
         SystemInitialize initialize = new SystemInitialize(version, sqlExecutor, database, jdbcUserName, type.name());
         initialize.afterPropertiesSet();
 
