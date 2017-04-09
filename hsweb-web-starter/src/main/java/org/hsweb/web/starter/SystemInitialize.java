@@ -176,15 +176,7 @@ public class SystemInitialize implements InitializingBean {
             engine.compile(id, s);
             ExecuteResult result = engine.execute(id, var);
             engine.remove(id);
-            if (result.isSuccess()) {
-                //logger.debug("install success!");
-            } else {
-                if (result.getException() != null) {
-                    throw (Exception) result.getException();
-                } else {
-                    throw new RuntimeException("execute groovy script error!");
-                }
-            }
+            result.getIfSuccess();
         }
     }
 
