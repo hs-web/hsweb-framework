@@ -2,8 +2,8 @@ package org.hsweb.web.core.session.redis;
 
 import org.hsweb.web.bean.po.user.User;
 import org.hsweb.web.core.session.AbstractHttpSessionManager;
-import org.springframework.dao.DataAccessException;
-import org.springframework.data.redis.connection.RedisConnection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.session.ExpiringSession;
@@ -26,6 +26,8 @@ public class RedisHttpSessionManager extends AbstractHttpSessionManager {
     private RedisTemplate sessionRedisTemplate;
 
     private RedisOperationsSessionRepository redisOperationsSessionRepository;
+
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Override
     public Set<User> tryGetAllUser() {
@@ -63,6 +65,10 @@ public class RedisHttpSessionManager extends AbstractHttpSessionManager {
     public void removeUser(String userId) {
         String key = "http.session.user:" + userId;
         String sessionId = getSessionIdByUserId(userId);
+        if (sessionId == null) {
+            // 没有登录?
+            return;
+        }
         ExpiringSession redisSession = redisOperationsSessionRepository.getSession(sessionId);
         HttpSession session = new HttpSessionWrapper(redisSession);
         onUserLoginOut(userId, session);
@@ -78,12 +84,22 @@ public class RedisHttpSessionManager extends AbstractHttpSessionManager {
 
     @Override
     public void addUser(User user, HttpSession session) {
-        removeUser(user.getId());
+        //removeUser(user.getId());
         String key = "http.session.user:" + user.getId();
         String value = session.getId();
+        //获取旧的ID
+        String sessionId = getSessionIdByUserId(user.getId());
+        if (sessionId != null) {
+            removeSession(sessionId);
+        }
         session.setAttribute("user", user);
-        sessionRedisTemplate.opsForValue().set(key, value);
         onUserLogin(user, session);
+        //不知道为啥 有时候会添加失败???
+        sessionRedisTemplate.opsForValue().set(key, value);
+        sessionId = (String) sessionRedisTemplate.opsForValue().get(key);
+        if (sessionId == null) {
+            logger.error("添加用户信息到redis失败,用户可能无法退出登录:user[{}:{}],sessionId[{}]", user.getId(), user.getUsername(), session.getId());
+        }
     }
 
 
@@ -97,12 +113,8 @@ public class RedisHttpSessionManager extends AbstractHttpSessionManager {
             String sessionId = (String) sessionRedisTemplate.opsForValue().get(key);
             String sessionIdKey = "spring:session:sessions:".concat(sessionId);
             String userId = new String(key).split("[:]")[1];
-            boolean sessionExists = (Boolean) sessionRedisTemplate.execute(new RedisCallback<Boolean>() {
-                @Override
-                public Boolean doInRedis(RedisConnection connection) throws DataAccessException {
-                    return connection.exists(sessionIdKey.getBytes());
-                }
-            });
+            boolean sessionExists = (Boolean) sessionRedisTemplate.execute((RedisCallback<Boolean>) connection ->
+                    connection.exists(sessionIdKey.getBytes()));
             if (!sessionExists) {
                 sessionRedisTemplate.delete(key);
                 return null;
