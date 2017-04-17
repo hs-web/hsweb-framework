@@ -162,6 +162,10 @@ public class QuartzJobServiceImpl extends AbstractServiceImpl<QuartzJob, String>
         }
     }
 
+    public interface JobHelper {
+        void cancel();
+    }
+
     @Override
     @Transactional
     public Object execute(String id, Map<String, Object> var) {
@@ -193,11 +197,13 @@ public class QuartzJobServiceImpl extends AbstractServiceImpl<QuartzJob, String>
             }
             if (logger.isDebugEnabled())
                 logger.debug("job running...");
+            //取消任务
+            var.put("job", (JobHelper) () -> disable(id));
             ExecuteResult result = engine.execute(scriptId, var);
             if (logger.isDebugEnabled())
                 logger.debug("job end...{} ", result.isSuccess() ? "success" : "fail");
             if (result.isSuccess()) {
-                Object res = result.getResult();
+                Object res = result.get();
                 if (res instanceof String)
                     strRes = ((String) res);
                 else strRes = JSON.toJSONString(res);

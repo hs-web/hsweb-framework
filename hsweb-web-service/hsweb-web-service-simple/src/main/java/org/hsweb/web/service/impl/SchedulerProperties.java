@@ -32,7 +32,7 @@ public class SchedulerProperties {
 
     private int startupDelay = 0;
 
-    private Properties properties;
+    private Properties properties = new Properties();
 
     public boolean isAutoStartup() {
         return autoStartup;

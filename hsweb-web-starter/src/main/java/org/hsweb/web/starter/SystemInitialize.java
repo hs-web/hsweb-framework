@@ -247,7 +247,7 @@ public class SystemInitialize implements InitializingBean {
             }
         }
         RDBTable<SystemVersion> rdbTable = database.getTable("s_system");
-        return rdbTable.createQuery().single();
+        return rdbTable.createQuery().noPaging().list().stream().findFirst().orElse(null);
     }
 
     private int compareFileName(Resource resource, Resource target) {

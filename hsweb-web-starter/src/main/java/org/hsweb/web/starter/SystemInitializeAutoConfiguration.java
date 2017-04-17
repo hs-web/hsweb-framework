@@ -1,12 +1,13 @@
 package org.hsweb.web.starter;
 
-import org.hsweb.ezorm.rdb.RDBDatabase;
 import org.hsweb.ezorm.rdb.executor.SqlExecutor;
 import org.hsweb.ezorm.rdb.meta.RDBDatabaseMetaData;
 import org.hsweb.ezorm.rdb.meta.parser.H2TableMetaParser;
 import org.hsweb.ezorm.rdb.meta.parser.MysqlTableMetaParser;
 import org.hsweb.ezorm.rdb.meta.parser.OracleTableMetaParser;
+import org.hsweb.ezorm.rdb.meta.parser.SqlServer2012TableMetaParser;
 import org.hsweb.ezorm.rdb.render.dialect.H2RDBDatabaseMetaData;
+import org.hsweb.ezorm.rdb.render.dialect.MSSQLRDBDatabaseMetaData;
 import org.hsweb.ezorm.rdb.render.dialect.MysqlRDBDatabaseMetaData;
 import org.hsweb.ezorm.rdb.render.dialect.OracleRDBDatabaseMetaData;
 import org.hsweb.ezorm.rdb.simple.SimpleDatabase;
@@ -57,6 +58,11 @@ public class SystemInitializeAutoConfiguration {
             case mysql:
                 metaData = new MysqlRDBDatabaseMetaData();
                 metaData.setParser(new MysqlTableMetaParser(sqlExecutor));
+                break;
+            case jtds_sqlserver:
+            case sqlserver:
+                metaData = new MSSQLRDBDatabaseMetaData();
+                metaData.setParser(new SqlServer2012TableMetaParser(sqlExecutor));
                 break;
             default:
                 h2:

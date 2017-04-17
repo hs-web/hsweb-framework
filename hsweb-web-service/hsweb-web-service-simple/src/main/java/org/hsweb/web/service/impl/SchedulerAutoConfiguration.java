@@ -16,6 +16,8 @@
 
 package org.hsweb.web.service.impl;
 
+import org.hsweb.web.core.datasource.DataSourceHolder;
+import org.hsweb.web.core.datasource.DatabaseType;
 import org.hsweb.web.service.impl.quartz.SimpleJobFactory;
 import org.quartz.Calendar;
 import org.quartz.SchedulerListener;
@@ -69,6 +71,10 @@ public class SchedulerAutoConfiguration {
 
     @Bean
     public SchedulerFactoryBean schedulerFactory(JobFactory jobFactory) {
+        if (schedulerProperties.getProperties().get("org.quartz.jobStore.selectWithLockSQL") == null
+                && (DataSourceHolder.getDefaultDatabaseType() == DatabaseType.jtds_sqlserver || DataSourceHolder.getDefaultDatabaseType() == DatabaseType.sqlserver)) {
+            schedulerProperties.getProperties().put("org.quartz.jobStore.selectWithLockSQL", "SELECT * FROM {0}LOCKS UPDLOCK WHERE LOCK_NAME = ? ");
+        }
         SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean();
         schedulerFactoryBean.setApplicationContext(applicationContext);
         schedulerFactoryBean.setAutoStartup(schedulerProperties.isAutoStartup());

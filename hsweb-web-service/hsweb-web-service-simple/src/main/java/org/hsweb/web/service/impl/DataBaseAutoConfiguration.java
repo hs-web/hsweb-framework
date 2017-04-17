@@ -5,11 +5,9 @@ import org.hsweb.ezorm.core.ValidatorFactory;
 import org.hsweb.ezorm.rdb.RDBDatabase;
 import org.hsweb.ezorm.rdb.executor.SqlExecutor;
 import org.hsweb.ezorm.rdb.meta.RDBDatabaseMetaData;
-import org.hsweb.ezorm.rdb.meta.parser.H2TableMetaParser;
-import org.hsweb.ezorm.rdb.meta.parser.MysqlTableMetaParser;
-import org.hsweb.ezorm.rdb.meta.parser.OracleTableMetaParser;
 import org.hsweb.ezorm.rdb.meta.parser.TableMetaParser;
 import org.hsweb.ezorm.rdb.render.dialect.H2RDBDatabaseMetaData;
+import org.hsweb.ezorm.rdb.render.dialect.MSSQLRDBDatabaseMetaData;
 import org.hsweb.ezorm.rdb.render.dialect.MysqlRDBDatabaseMetaData;
 import org.hsweb.ezorm.rdb.render.dialect.OracleRDBDatabaseMetaData;
 import org.hsweb.ezorm.rdb.simple.SimpleDatabase;
@@ -61,6 +59,10 @@ public class DataBaseAutoConfiguration {
                 break;
             case h2:
                 dataBaseMetaData = new H2RDBDatabaseMetaData();
+                break;
+            case jtds_sqlserver:
+            case sqlserver:
+                dataBaseMetaData = new MSSQLRDBDatabaseMetaData();
                 break;
             default:
                 dataBaseMetaData = new H2RDBDatabaseMetaData();
