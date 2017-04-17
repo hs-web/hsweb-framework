@@ -12,10 +12,7 @@ import org.hsweb.ezorm.rdb.meta.RDBDatabaseMetaData;
 import org.hsweb.ezorm.rdb.meta.RDBTableMetaData;
 import org.hsweb.ezorm.rdb.render.SqlAppender;
 import org.hsweb.ezorm.rdb.render.SqlRender;
-import org.hsweb.ezorm.rdb.render.dialect.Dialect;
-import org.hsweb.ezorm.rdb.render.dialect.H2RDBDatabaseMetaData;
-import org.hsweb.ezorm.rdb.render.dialect.MysqlRDBDatabaseMetaData;
-import org.hsweb.ezorm.rdb.render.dialect.OracleRDBDatabaseMetaData;
+import org.hsweb.ezorm.rdb.render.dialect.*;
 import org.hsweb.ezorm.rdb.render.support.simple.CommonSqlRender;
 import org.hsweb.ezorm.rdb.render.support.simple.SimpleWhereSqlBuilder;
 import org.hsweb.web.bean.common.InsertParam;
@@ -79,6 +76,8 @@ public class EasyOrmSqlBuilder {
     private final RDBDatabaseMetaData oracle = new OracleMeta();
     private final RDBDatabaseMetaData h2     = new H2Meta();
 
+    private final RDBDatabaseMetaData mssql = new MSSQLMeta();
+
     private final ConcurrentMap<RDBDatabaseMetaData, Map<String, RDBTableMetaData>> metaCache = new ConcurrentHashMap<RDBDatabaseMetaData, Map<String, RDBTableMetaData>>() {
         @Override
         public Map<String, RDBTableMetaData> get(Object key) {
@@ -98,6 +97,9 @@ public class EasyOrmSqlBuilder {
                 return h2;
             case mysql:
                 return mysql;
+            case jtds_sqlserver:
+            case sqlserver:
+                return mssql;
             case oracle:
                 return oracle;
             default:
@@ -275,6 +277,14 @@ public class EasyOrmSqlBuilder {
             super();
             renderMap.put(SqlRender.TYPE.INSERT, new InsertSqlBuilder());
             renderMap.put(SqlRender.TYPE.UPDATE, new UpdateSqlBuilder(Dialect.MYSQL));
+        }
+    }
+
+    class MSSQLMeta extends MSSQLRDBDatabaseMetaData {
+        public MSSQLMeta() {
+            super();
+            renderMap.put(SqlRender.TYPE.INSERT, new InsertSqlBuilder());
+            renderMap.put(SqlRender.TYPE.UPDATE, new UpdateSqlBuilder(Dialect.MSSQL));
         }
     }
 }
