@@ -40,6 +40,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 /**
  * 授权控制器,用于登录系统
@@ -115,10 +116,12 @@ public class AuthorizeController {
      */
     @RequestMapping(value = "/exit", method = RequestMethod.POST)
     @AccessLogger("登出")
-    public ResponseMessage exit() {
+    public ResponseMessage exit(HttpSession session) {
         User user = WebUtil.getLoginUser();
         if (user != null) {
             httpSessionManager.removeUser(user.getId());
+            //使用redis时,有时候removeUser会失效,removeSession总可以了吧
+            httpSessionManager.removeSession(session.getId());
         }
         return ResponseMessage.ok();
     }

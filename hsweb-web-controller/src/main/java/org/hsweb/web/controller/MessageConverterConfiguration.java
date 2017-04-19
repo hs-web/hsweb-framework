@@ -16,11 +16,11 @@ public class MessageConverterConfiguration {
     public HttpMessageConverter<Object> converter() {
         FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();
         converter.setFeatures(
-        SerializerFeature.WriteNullListAsEmpty,
-        SerializerFeature.WriteNullNumberAsZero,
-        SerializerFeature.WriteNullBooleanAsFalse,
-        SerializerFeature.WriteDateUseDateFormat
-       );
-            return converter;
+                SerializerFeature.WriteNullListAsEmpty,
+                SerializerFeature.WriteNullNumberAsZero,
+                SerializerFeature.WriteNullBooleanAsFalse,
+                SerializerFeature.WriteDateUseDateFormat
+        );
+        return converter;
     }
 }
