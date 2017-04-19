@@ -73,14 +73,17 @@ public class WebUtil {
     public static User getLoginUser(HttpServletRequest request) {
         if (request == null) return ThreadLocalUtils.get("current-user");
         HttpSession session = request.getSession(false);
-        if (session == null) {
+        User user = null;
+        if (session != null) {
+            user = getLoginUser(session);
+        }
+        if (user == null) {
             OAuth2Manager manager = OAuth2ManagerHolder.getManager();
             if (manager != null) {
-                return manager.getUserByRequest(request);
+                user = manager.getUserByRequest(request);
             }
-            return null;
         }
-        return getLoginUser(session);
+        return user;
     }
 
     public static Map<String, String> getHeaders(HttpServletRequest request) {
