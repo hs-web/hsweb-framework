@@ -88,7 +88,10 @@ public class AopAuthorizeValidator extends SimpleAuthorizeValidator {
             HttpSession session = request.getSession(false);
             if (session == null) throw new AuthorizeException("未登录", 401);
             user = httpSessionManager.getUserBySessionId(session.getId());
-            if (user == null) throw new AuthorizeException("未登录", 401);
+            if (user == null)
+                user = (User) session.getAttribute("user");
+            if (user == null)
+                throw new AuthorizeException("未登录", 401);
         }
         if (config.isEmpty()) return true;
         Map<String, Object> param = new LinkedHashMap<>();

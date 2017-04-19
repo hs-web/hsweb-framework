@@ -20,7 +20,7 @@ public class SimpleAuthorizeValidatorConfig implements AuthorizeValidatorConfig 
     protected Set<String> actions;
     protected Set<Expression> expressions = new LinkedHashSet<>();
     protected Authorize.MOD mod;
-    protected boolean apiSupport;
+    protected boolean       apiSupport;
 
     @Override
     public AuthorizeValidatorConfig setApiSupport(boolean apiSupport) {
@@ -92,7 +92,8 @@ public class SimpleAuthorizeValidatorConfig implements AuthorizeValidatorConfig 
     }
 
     public boolean isApiSupport() {
-        return apiSupport;
+        return true;
+        //    return apiSupport;
     }
 
     public void setExpressions(Set<Expression> expressions) {
