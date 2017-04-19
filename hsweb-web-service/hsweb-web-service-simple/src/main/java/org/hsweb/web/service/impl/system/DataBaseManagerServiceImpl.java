@@ -6,12 +6,10 @@ import org.hsweb.ezorm.rdb.executor.SqlExecutor;
 import org.hsweb.ezorm.rdb.meta.RDBDatabaseMetaData;
 import org.hsweb.ezorm.rdb.meta.RDBTableMetaData;
 import org.hsweb.ezorm.rdb.meta.expand.SimpleMapWrapper;
-import org.hsweb.ezorm.rdb.meta.parser.H2TableMetaParser;
-import org.hsweb.ezorm.rdb.meta.parser.MysqlTableMetaParser;
-import org.hsweb.ezorm.rdb.meta.parser.OracleTableMetaParser;
-import org.hsweb.ezorm.rdb.meta.parser.TableMetaParser;
+import org.hsweb.ezorm.rdb.meta.parser.*;
 import org.hsweb.ezorm.rdb.render.SqlRender;
 import org.hsweb.ezorm.rdb.render.dialect.H2RDBDatabaseMetaData;
+import org.hsweb.ezorm.rdb.render.dialect.MSSQLRDBDatabaseMetaData;
 import org.hsweb.ezorm.rdb.render.dialect.MysqlRDBDatabaseMetaData;
 import org.hsweb.ezorm.rdb.render.dialect.OracleRDBDatabaseMetaData;
 import org.hsweb.ezorm.rdb.render.support.simple.SimpleSQL;
@@ -97,6 +95,7 @@ public class DataBaseManagerServiceImpl implements DataBaseManagerService {
     }
 
     public String createAlterSql(RDBDatabaseMetaData databaseMetaData, TableMetaParser tableMetaParser, RDBTableMetaData newTable) throws Exception {
+        newTable.setDatabaseMetaData(databaseMetaData);
         databaseMetaData.putTable(tableMetaParser.parse(newTable.getName()));
         SQL sql = databaseMetaData.getRenderer(SqlRender.TYPE.META_ALTER).render(newTable, true);
         if (sql instanceof EmptySQL) return "";
@@ -113,6 +112,7 @@ public class DataBaseManagerServiceImpl implements DataBaseManagerService {
     }
 
     public String createCreateSql(RDBDatabaseMetaData databaseMetaData, RDBTableMetaData newTable) throws Exception {
+        newTable.setDatabaseMetaData(databaseMetaData);
         SQL sql = databaseMetaData.getRenderer(SqlRender.TYPE.META_CREATE).render(newTable, true);
         if (sql instanceof EmptySQL) return "";
         StringBuilder builder = new StringBuilder(sql.getSql());
@@ -158,6 +158,28 @@ public class DataBaseManagerServiceImpl implements DataBaseManagerService {
             @Override
             public RDBDatabaseMetaData getDatabaseMetaData() {
                 return new H2RDBDatabaseMetaData();
+            }
+        },
+        sqlserver {
+            @Override
+            public RDBDatabaseMetaData getDatabaseMetaData() {
+                return new MSSQLRDBDatabaseMetaData();
+            }
+
+            @Override
+            public TableMetaParser getTableMetaParser(SqlExecutor sqlExecutor) {
+                return new SqlServer2012TableMetaParser(sqlExecutor);
+            }
+        },
+        jtds_sqlserver{
+            @Override
+            public RDBDatabaseMetaData getDatabaseMetaData() {
+                return new MSSQLRDBDatabaseMetaData();
+            }
+
+            @Override
+            public TableMetaParser getTableMetaParser(SqlExecutor sqlExecutor) {
+                return new SqlServer2012TableMetaParser(sqlExecutor);
             }
         };
 

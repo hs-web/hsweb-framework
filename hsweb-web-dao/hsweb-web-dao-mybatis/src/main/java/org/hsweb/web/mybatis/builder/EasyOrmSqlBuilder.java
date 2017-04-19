@@ -30,7 +30,6 @@ import java.util.concurrent.ConcurrentMap;
 
 /**
  * @author zhouhao
- * @TODO
  */
 public class EasyOrmSqlBuilder {
 
@@ -148,8 +147,8 @@ public class EasyOrmSqlBuilder {
         SqlAppender appender = new SqlAppender();
         columns.forEach(column -> {
             RDBColumnMetaData columnMetaData = column.getRDBColumnMetaData();
-            if (columnMetaData.getName().contains(".")) return;
             if (columnMetaData == null) return;
+            if (columnMetaData.getName().contains(".")) return;
             try {
                 Object tmp = propertyUtils.getProperty(param.getData(), columnMetaData.getAlias());
                 if (tmp == null) return;
@@ -219,16 +218,15 @@ public class EasyOrmSqlBuilder {
     public String buildOrder(String resultMapId, String tableName, QueryParam param) {
         RDBTableMetaData tableMetaData = createMeta(tableName, resultMapId);
         SqlAppender appender = new SqlAppender(" order by ");
-        param.getSorts().stream()
-                .forEach(sort -> {
-                    RDBColumnMetaData column = tableMetaData.getColumn(sort.getName());
-                    if (column == null)
-                        column = tableMetaData.findColumn(sort.getName());
-                    if (column == null) return;
-                    String cname = column.getName();
-                    if (!cname.contains(".")) cname = tableName.concat(".").concat(cname);
-                    appender.add(encodeColumn(tableMetaData.getDatabaseMetaData().getDialect(), cname), " ", sort.getOrder(), ",");
-                });
+        param.getSorts().forEach(sort -> {
+            RDBColumnMetaData column = tableMetaData.getColumn(sort.getName());
+            if (column == null)
+                column = tableMetaData.findColumn(sort.getName());
+            if (column == null) return;
+            String cname = column.getName();
+            if (!cname.contains(".")) cname = tableName.concat(".").concat(cname);
+            appender.add(encodeColumn(tableMetaData.getDatabaseMetaData().getDialect(), cname), " ", sort.getOrder(), ",");
+        });
         if (appender.isEmpty()) return "";
         appender.removeLast();
         return appender.toString();
@@ -240,6 +238,14 @@ public class EasyOrmSqlBuilder {
             throw new BusinessException("禁止执行无条件的更新操作");
         }
         return where;
+    }
+
+    public String buildQuerySql(String resultMapId, String tableName, Object param) {
+        Pager.reset(); //不使用插件进行分页
+        RDBTableMetaData tableMetaData = createMeta(tableName, resultMapId);
+        RDBDatabaseMetaData databaseMetaDate = getActiveDatabase();
+        CommonSqlRender render = (CommonSqlRender) databaseMetaDate.getRenderer(SqlRender.TYPE.SELECT);
+        return render.render(tableMetaData, param).getSql();
     }
 
     public String buildWhere(String resultMapId, String tableName, List<Term> terms) {
