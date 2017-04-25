@@ -190,7 +190,7 @@ public class CacheMonitorController {
 
     protected long getTimes(CacheManager cacheManager, TimesGetter getter) {
         long times = cacheManager.getCacheNames().parallelStream()
-                .map(name -> cacheManager.getCache(name))
+                .map(cacheManager::getCache)
                 .filter(cache -> cache instanceof MonitorCache)
                 .map(cache -> (MonitorCache) cache)
                 .mapToLong(getter::get)
