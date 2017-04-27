@@ -62,10 +62,22 @@ public class SimpleHttpSessionManager extends AbstractHttpSessionManager {
     public void removeUser(String userId) {
         HttpSession session = userSessionStorage.get(userId);
         if (session != null) {
-            session.removeAttribute("user");
             sessionStorage.remove(session.getId());
             userSessionStorage.remove(userId);
-            onUserLoginOut(userId, session);
+            Exception exception = null;
+            try {
+                onUserLoginOut(userId, session);
+            } catch (Exception ignored) {
+                exception = ignored;
+            }
+            try {
+                session.removeAttribute("user");
+            } catch (Exception ignored) {
+                // do noting
+            }
+            if (null != exception) {
+                throw new RuntimeException(exception);
+            }
         }
     }
 
@@ -75,8 +87,8 @@ public class SimpleHttpSessionManager extends AbstractHttpSessionManager {
         if (session != null) {
             User user = WebUtil.getLoginUser(session);
             if (user != null) {
-                onUserLoginOut(user.getId(), session);
                 userSessionStorage.remove(user.getId());
+                onUserLoginOut(user.getId(), session);
             }
             sessionStorage.remove(sessionId);
         }
