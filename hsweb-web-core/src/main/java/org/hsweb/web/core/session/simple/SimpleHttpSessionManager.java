@@ -2,10 +2,12 @@ package org.hsweb.web.core.session.simple;
 
 import org.hsweb.web.bean.po.user.User;
 import org.hsweb.web.core.session.AbstractHttpSessionManager;
+import org.hsweb.web.core.utils.UnCheck;
 import org.hsweb.web.core.utils.WebUtil;
 
 import javax.servlet.http.HttpSession;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -33,8 +35,9 @@ public class SimpleHttpSessionManager extends AbstractHttpSessionManager {
 
     @Override
     public Set<User> tryGetAllUser() {
-        return userSessionStorage.values().stream().map(httpSession -> (User) httpSession.getAttribute("user"))
-                .filter(user -> user != null).collect(Collectors.toSet());
+        return userSessionStorage.values().stream()
+                .map(httpSession -> UnCheck.forNull(() -> (User) httpSession.getAttribute("user")))
+                .filter(Objects::nonNull).collect(Collectors.toSet());
     }
 
     @Override
