@@ -6,6 +6,7 @@ import org.apache.ibatis.mapping.ResultMap;
 import org.apache.ibatis.mapping.ResultMapping;
 import org.hsweb.commons.DateTimeUtils;
 import org.hsweb.commons.StringUtils;
+import org.hsweb.commons.time.DateFormatter;
 import org.hsweb.ezorm.core.param.Param;
 import org.hsweb.ezorm.core.param.Sort;
 import org.hsweb.ezorm.core.param.Term;
@@ -360,7 +361,7 @@ public class DefaultSqlParamBuilder {
             case DATE:
                 if (!(value instanceof Date)) {
                     String strValue = String.valueOf(value);
-                    Date date = DateTimeUtils.formatUnknownString2Date(strValue);
+                    Date date =  DateFormatter.fromString(strValue);
                     if (date != null) return date;
                 }
                 break;
