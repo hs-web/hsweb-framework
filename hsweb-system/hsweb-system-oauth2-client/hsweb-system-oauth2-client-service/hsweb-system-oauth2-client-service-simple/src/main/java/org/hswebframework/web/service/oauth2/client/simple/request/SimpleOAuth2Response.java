@@ -21,6 +21,7 @@ package org.hswebframework.web.service.oauth2.client.simple.request;
 import org.hswebframework.expands.request.http.Response;
 import org.hswebframework.web.authorization.oauth2.client.response.OAuth2Response;
 import org.hswebframework.web.authorization.oauth2.client.response.ResponseConvert;
+import org.hswebframework.web.oauth2.core.ErrorType;
 import org.hswebframework.web.service.oauth2.client.request.ResponseConvertHandler;
 import org.hswebframework.web.service.oauth2.client.request.ResponseJudge;
 import org.slf4j.Logger;

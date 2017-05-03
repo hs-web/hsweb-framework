@@ -23,11 +23,11 @@ import org.hswebframework.web.id.IDGenerator;
 import org.hswebframwork.utils.RandomUtil;
 import org.hswebframwork.utils.StringUtils;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public interface TreeSupportEntity<PK> extends GenericEntity<PK> {
@@ -115,17 +115,48 @@ public interface TreeSupportEntity<PK> extends GenericEntity<PK> {
      * @return 树形结构集合
      */
     static <T extends TreeSupportEntity<PK>, PK> List<T> list2tree(Collection<T> dataList, BiConsumer<T, List<T>> childAccepter) {
+        return list2tree(dataList, childAccepter, (Function<RootNodePredicate<T, PK>, Predicate<T>>) predicate -> node -> node == null || predicate.getNode(node.getParentId()) == null);
+    }
+
+    static <T extends TreeSupportEntity<PK>, PK> List<T> list2tree(Collection<T> dataList,
+                                                                   BiConsumer<T, List<T>> childAccepter,
+                                                                   Predicate<T> rootNodePredicate) {
+        return list2tree(dataList, childAccepter, (Function<RootNodePredicate<T, PK>, Predicate<T>>) predicate -> rootNodePredicate);
+    }
+
+    static <T extends TreeSupportEntity<PK>, PK> List<T> list2tree(Collection<T> dataList,
+                                                                   BiConsumer<T, List<T>> childAccepter,
+                                                                   Function<RootNodePredicate<T, PK>, Predicate<T>> predicateFunction) {
         // id,obj
         Map<PK, T> cache = new HashMap<>();
         // parentId,children
         Map<PK, List<T>> treeCache = dataList.parallelStream()
                 .peek(node -> cache.put(node.getId(), node))
                 .collect(Collectors.groupingBy(TreeSupportEntity::getParentId));
+
+        Predicate<T> rootNodePredicate = predicateFunction.apply(new RootNodePredicate<T, PK>() {
+            @Override
+            public List<T> getChildren(PK parentId) {
+                return treeCache.get(parentId);
+            }
+
+            @Override
+            public T getNode(PK id) {
+                return cache.get(id);
+            }
+        });
+
         return dataList.parallelStream()
                 //设置每个节点的子节点
                 .peek(node -> childAccepter.accept(node, treeCache.get(node.getId())))
                 //获取根节点
-                .filter(node -> node.getParentId() == null || cache.get(node.getParentId()) == null)
+                .filter(rootNodePredicate)
                 .collect(Collectors.toList());
+    }
+
+    interface RootNodePredicate<T, PK> {
+        List<T> getChildren(PK parentId);
+
+        T getNode(PK id);
     }
 }

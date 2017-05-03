@@ -41,13 +41,14 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 
 /**
  * TODO 完成注释
@@ -155,7 +156,8 @@ public class OAuth2ServerApplication implements CommandLineRunner {
         // 这里与 hsweb-examples-oauth2-client 的回调地址对应
         clientEntity.setRedirectUri("http://localhost:8808/oauth2/callback/hsweb");
         clientEntity.setCreateTime(System.currentTimeMillis());
-        clientEntity.setSupportGrantType(Arrays.asList("*"));
+        clientEntity.setSupportGrantTypes(new HashSet<>(Collections.singletonList("*")));
+        clientEntity.setEnabled(true);
         oAuth2ClientDao.insert(clientEntity);
     }
 

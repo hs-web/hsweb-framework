@@ -21,6 +21,7 @@ package org.hswebframework.web.starter.oauth2.client;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.hswebframework.web.authorization.oauth2.client.response.OAuth2Response;
+import org.hswebframework.web.oauth2.core.ErrorType;
 import org.hswebframework.web.service.oauth2.client.request.definition.ResponseJudgeForProviderDefinition;
 import org.springframework.stereotype.Component;
 
@@ -34,7 +35,7 @@ import java.util.Map;
  */
 @Component
 public class QQResponseJudgeSupport implements ResponseJudgeForProviderDefinition {
-    static Map<String, OAuth2Response.ErrorType> errorTypeMap = new HashMap<>();
+    static Map<String, ErrorType> errorTypeMap = new HashMap<>();
 
     static {
         /*
@@ -43,25 +44,25 @@ public class QQResponseJudgeSupport implements ResponseJudgeForProviderDefinitio
         // success
         errorTypeMap.put("0", null);
 
-        errorTypeMap.put("100000", OAuth2Response.ErrorType.ILLEGAL_RESPONSE_TYPE);
-        errorTypeMap.put("100001", OAuth2Response.ErrorType.ILLEGAL_CLIENT_ID);
+        errorTypeMap.put("100000", ErrorType.ILLEGAL_RESPONSE_TYPE);
+        errorTypeMap.put("100001", ErrorType.ILLEGAL_CLIENT_ID);
         // missing
-        errorTypeMap.put("100002", OAuth2Response.ErrorType.ILLEGAL_CLIENT_SECRET);
-        errorTypeMap.put("100003", OAuth2Response.ErrorType.ILLEGAL_AUTHORIZATION);
-        errorTypeMap.put("100004", OAuth2Response.ErrorType.ILLEGAL_GRANT_TYPE);
-        errorTypeMap.put("100005", OAuth2Response.ErrorType.ILLEGAL_CODE);
-        errorTypeMap.put("100006", OAuth2Response.ErrorType.ILLEGAL_REFRESH_TOKEN);
-        errorTypeMap.put("100007", OAuth2Response.ErrorType.ILLEGAL_ACCESS_TOKEN);
+        errorTypeMap.put("100002", ErrorType.ILLEGAL_CLIENT_SECRET);
+        errorTypeMap.put("100003", ErrorType.ILLEGAL_AUTHORIZATION);
+        errorTypeMap.put("100004", ErrorType.ILLEGAL_GRANT_TYPE);
+        errorTypeMap.put("100005", ErrorType.ILLEGAL_CODE);
+        errorTypeMap.put("100006", ErrorType.ILLEGAL_REFRESH_TOKEN);
+        errorTypeMap.put("100007", ErrorType.ILLEGAL_ACCESS_TOKEN);
         //param error
-        errorTypeMap.put("100009", OAuth2Response.ErrorType.ILLEGAL_CLIENT_SECRET);
-        errorTypeMap.put("100010", OAuth2Response.ErrorType.ILLEGAL_REDIRECT_URI);
-        errorTypeMap.put("100013", OAuth2Response.ErrorType.ILLEGAL_ACCESS_TOKEN);
-        errorTypeMap.put("100014", OAuth2Response.ErrorType.EXPIRED_TOKEN);
-        errorTypeMap.put("100015", OAuth2Response.ErrorType.INVALID_TOKEN);
+        errorTypeMap.put("100009", ErrorType.ILLEGAL_CLIENT_SECRET);
+        errorTypeMap.put("100010", ErrorType.ILLEGAL_REDIRECT_URI);
+        errorTypeMap.put("100013", ErrorType.ILLEGAL_ACCESS_TOKEN);
+        errorTypeMap.put("100014", ErrorType.EXPIRED_TOKEN);
+        errorTypeMap.put("100015", ErrorType.INVALID_TOKEN);
 
-        errorTypeMap.put("100016", OAuth2Response.ErrorType.ILLEGAL_ACCESS_TOKEN);
+        errorTypeMap.put("100016", ErrorType.ILLEGAL_ACCESS_TOKEN);
 
-        errorTypeMap.put("100019", OAuth2Response.ErrorType.ILLEGAL_CODE);
+        errorTypeMap.put("100019", ErrorType.ILLEGAL_CODE);
 
     }
 
@@ -71,9 +72,9 @@ public class QQResponseJudgeSupport implements ResponseJudgeForProviderDefinitio
     }
 
     @Override
-    public OAuth2Response.ErrorType judge(OAuth2Response response) {
+    public ErrorType judge(OAuth2Response response) {
         String result = response.asString();
-        if (result == null) return OAuth2Response.ErrorType.OTHER;
+        if (result == null) return ErrorType.OTHER;
         if (result.contains("callback(")) {
             result = result.substring("callback(".length(), result.length() - 3);
         }

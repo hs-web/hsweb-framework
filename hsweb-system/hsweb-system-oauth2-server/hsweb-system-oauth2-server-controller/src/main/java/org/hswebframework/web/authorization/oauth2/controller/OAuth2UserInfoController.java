@@ -26,6 +26,8 @@ import org.hswebframework.web.authorization.AuthenticationHolder;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.oauth2.api.OAuth2ServerService;
 import org.hswebframework.web.authorization.oauth2.api.entity.OAuth2AccessEntity;
+import org.hswebframework.web.authorization.oauth2.server.OAuth2AccessToken;
+import org.hswebframework.web.authorization.oauth2.server.token.AccessTokenService;
 import org.hswebframework.web.oauth2.model.AuthorizationCodeModel;
 import org.hswebframework.web.oauth2.model.ImplicitAccessTokenModel;
 import org.springframework.web.bind.annotation.*;
@@ -42,26 +44,26 @@ import javax.annotation.Resource;
 @RequestMapping("${hsweb.web.mappings.oauth2-auth-info:oauth2/user-auth-info}")
 public class OAuth2UserInfoController {
 
+
     @Resource
-    private OAuth2ServerService oAuth2ServerService;
+    private AccessTokenService accessTokenService;
 
     @GetMapping
     @ApiOperation("根据accessToken获取用户信息")
     public Authentication getLoginUser(@RequestParam("access_token") String access_token) {
-        OAuth2AccessEntity auth2AccessEntity = oAuth2ServerService.getAccessToken(access_token);
+        OAuth2AccessToken auth2AccessEntity = accessTokenService.getTokenByAccessToken(access_token);
         if (null == auth2AccessEntity) {
             throw new AuthorizeException();
         }
-        return AuthenticationHolder.get(auth2AccessEntity.getUserId());
+        return AuthenticationHolder.get(auth2AccessEntity.getOwnerId());
     }
-
 
     @GetMapping("/{userId}")
     @ApiOperation("根据accessToken获取用户信息")
     public Authentication getUserById(
             @PathVariable("userId") String userId,
             @RequestParam("access_token") String access_token) {
-        OAuth2AccessEntity auth2AccessEntity = oAuth2ServerService.getAccessToken(access_token);
+        OAuth2AccessToken auth2AccessEntity = accessTokenService.getTokenByAccessToken(access_token);
         if (null == auth2AccessEntity) {
             throw new AuthorizeException();
         }

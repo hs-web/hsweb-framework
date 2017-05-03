@@ -58,6 +58,7 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.Collections;
 
 /**
  * TODO 完成注释
@@ -192,7 +193,7 @@ public class SpringBootExample implements CommandLineRunner {
         clientEntity.setCreatorId("admin");
         clientEntity.setRedirectUri("http://localhost");
         clientEntity.setCreateTime(System.currentTimeMillis());
-        clientEntity.setSupportGrantType(Arrays.asList("*"));
+        clientEntity.setSupportGrantTypes(Collections.singleton("*"));
         oAuth2ClientDao.insert(clientEntity);
     }
 }

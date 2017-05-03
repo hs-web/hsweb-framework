@@ -18,7 +18,6 @@
 
 package org.hswebframework.web.service.oauth2.client.simple.provider;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.Permission;

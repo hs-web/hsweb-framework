@@ -12,8 +12,10 @@
     <artifactId>hsweb-authorization-oauth2</artifactId>
     <packaging>pom</packaging>
     <modules>
-        <module>hsweb-authorization-oauth2-server</module>
+        <module>hsweb-authorization-oauth2-auth-server</module>
         <module>hsweb-authorization-oauth2-client</module>
+        <module>hsweb-authorization-oauth2-resource-server</module>
+        <module>hsweb-authorization-oauth2-core</module>
     </modules>
 
 

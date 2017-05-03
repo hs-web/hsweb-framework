@@ -33,7 +33,7 @@ public class AccessTokenModel implements Model {
 
     private String token_type;
 
-    private Long expires_in;
+    private Integer expires_in;
 
     private String scope;
 
@@ -69,11 +69,11 @@ public class AccessTokenModel implements Model {
         this.token_type = token_type;
     }
 
-    public Long getExpires_in() {
+    public Integer getExpires_in() {
         return expires_in;
     }
 
-    public void setExpires_in(Long expires_in) {
+    public void setExpires_in(Integer expires_in) {
         this.expires_in = expires_in;
     }
 }

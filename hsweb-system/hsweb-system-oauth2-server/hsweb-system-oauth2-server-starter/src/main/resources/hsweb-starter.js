@@ -48,11 +48,14 @@ function install(context) {
         .addColumn().name("redirect_uri").varchar(1024).notNull().comment("redirect_uri").commit()
         .addColumn().name("create_time").number(32).notNull().comment("创建时间").commit()
         .addColumn().name("support_grant_type").clob().notNull().comment("支持的授权列表").commit()
+        .addColumn().name("default_expires_in").number(16).comment("默认认证过期时间").commit()
+        .addColumn().name("default_grant_scope").clob().comment("默认认证范围").commit()
+        .addColumn().name("enabled").number(4).comment("是否启用").commit()
         .comment("OAuth2客户端").commit();
 
     database.createOrAlter("s_oauth2_access")
         .addColumn().name("client_id").varchar(32).notNull().comment("client_id").commit()
-        .addColumn().name("user_id").varchar(32).notNull().comment("授权对应的用户ID").commit()
+        .addColumn().name("owner_id").varchar(32).notNull().comment("授权对应的用户ID").commit()
         .addColumn().name("access_token").varchar(32).notNull().comment("授权码").commit()
         .addColumn().name("expires_in").varchar(32).notNull().comment("有效期").commit()
         .addColumn().name("refresh_token").varchar(32).notNull().comment("用于更新授权的token").commit()

@@ -23,6 +23,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -44,6 +45,16 @@ public class WebUtil {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    public static Map<String, String> getParameters(HttpServletRequest request) {
+        Map<String, String> parameters = new HashMap<>();
+        Enumeration enumeration = request.getParameterNames();
+        while (enumeration.hasMoreElements()) {
+            String name = String.valueOf(enumeration.nextElement());
+            parameters.put(name, request.getParameter(name));
+        }
+        return parameters;
     }
 
     public static Map<String, String> getHeaders(HttpServletRequest request) {

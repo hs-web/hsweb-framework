@@ -67,7 +67,9 @@ public class FieldAccessAnnotationMethodInterceptor extends AuthorizingAnnotatio
             }
             RequiresFieldAccess accessAnn = ((RequiresFieldAccess) a);
             MethodInterceptorParamContext context = holder.createParamContext();
-            Authentication authentication = Authentication.current().orElseThrow(AuthorizationException::new);
+            Authentication authentication = Authentication
+                    .current()
+                    .orElseThrow(AuthorizationException::new);
             
             String permission = accessAnn.permission();
             Permission permissionInfo = authentication.getPermission(permission);

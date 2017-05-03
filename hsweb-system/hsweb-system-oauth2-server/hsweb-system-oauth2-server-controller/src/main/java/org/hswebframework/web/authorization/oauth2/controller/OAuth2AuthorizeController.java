@@ -25,11 +25,20 @@ import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.oauth2.api.OAuth2ServerService;
 import org.hswebframework.web.authorization.oauth2.api.entity.OAuth2AccessEntity;
+import org.hswebframework.web.authorization.oauth2.server.OAuth2AccessToken;
+import org.hswebframework.web.authorization.oauth2.server.support.OAuth2Granter;
+import org.hswebframework.web.authorization.oauth2.server.support.code.AuthorizationCodeRequest;
+import org.hswebframework.web.authorization.oauth2.server.support.code.AuthorizationCodeService;
+import org.hswebframework.web.authorization.oauth2.server.support.code.HttpAuthorizationCodeRequest;
+import org.hswebframework.web.authorization.oauth2.server.support.implicit.HttpImplicitRequest;
+import org.hswebframework.web.authorization.oauth2.server.support.implicit.ImplicitRequest;
+import org.hswebframework.web.oauth2.core.GrantType;
 import org.hswebframework.web.oauth2.model.AuthorizationCodeModel;
 import org.hswebframework.web.oauth2.model.ImplicitAccessTokenModel;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * TODO 完成注释
@@ -42,19 +51,25 @@ import javax.annotation.Resource;
 public class OAuth2AuthorizeController {
 
     @Resource
-    private OAuth2ServerService oAuth2ServerService;
+    private AuthorizationCodeService authorizationCodeService;
+
+    @Resource
+    private OAuth2Granter oAuth2Granter;
 
 
     @GetMapping(params = "response_type=code")
     @ApiOperation("登录用户获取OAuth2.0授权码")
     @Authorize
     public AuthorizationCodeModel requestCode(
-            @RequestParam("client_id") String clientId,
             @RequestParam("redirect_uri") String redirectUri,
-            @RequestParam(value = "scope", required = false) String scope,
-            @RequestParam(value = "state", required = false) String state) {
+            @RequestParam(value = "state", required = false) String state,
+            HttpServletRequest request) {
         Authentication authentication = Authentication.current().orElseThrow(AuthorizeException::new);
-        String code = oAuth2ServerService.requestCode(clientId, authentication.getUser().getId(), scope,redirectUri);
+
+        AuthorizationCodeRequest codeRequest = new HttpAuthorizationCodeRequest(authentication.getUser().getId(), request);
+
+        String code = authorizationCodeService.createAuthorizationCode(codeRequest);
+
         AuthorizationCodeModel model = new AuthorizationCodeModel();
         model.setCode(code);
         model.setRedirectUri(redirectUri);
@@ -66,19 +81,18 @@ public class OAuth2AuthorizeController {
     @GetMapping(params = "response_type=token")
     @ApiOperation("implicit方式授权")
     public ImplicitAccessTokenModel authorizeByImplicit(
-            @RequestParam(value = "client_id") String client_id,
             @RequestParam(value = "redirect_uri") String redirect_uri,
             @RequestParam(value = "state") String state,
-            @RequestParam(value = "scope", required = false) String scope) {
+            HttpServletRequest request) {
 
-        // TODO: 17-4-7  用户是否为当前登录的用户,而非client绑定的用户?
-        // TODO: 17-3-6  validate redirect_uri
-        OAuth2AccessEntity accessEntity = oAuth2ServerService.requestTokenByImplicit(client_id, scope);
+        ImplicitRequest implicitRequest = new HttpImplicitRequest(request);
+        OAuth2AccessToken accessToken = oAuth2Granter.grant(GrantType.implicit, implicitRequest);
+
         ImplicitAccessTokenModel model = new ImplicitAccessTokenModel();
         model.setState(state);
         model.setToken_type("example");
-        model.setAccess_token(accessEntity.getAccessToken());
-        model.setExpires_in(accessEntity.getExpiresIn());
+        model.setAccess_token(accessToken.getAccessToken());
+        model.setExpires_in(accessToken.getExpiresIn());
         model.setRedirect_uri(redirect_uri);
         return model;
     }

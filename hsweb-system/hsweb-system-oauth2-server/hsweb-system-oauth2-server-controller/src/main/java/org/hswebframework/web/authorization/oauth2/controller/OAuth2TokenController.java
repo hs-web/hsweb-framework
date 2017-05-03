@@ -19,17 +19,24 @@
 package org.hswebframework.web.authorization.oauth2.controller;
 
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import org.apache.commons.codec.binary.Base64;
-import org.hswebframework.web.authorization.oauth2.api.OAuth2ServerService;
-import org.hswebframework.web.authorization.oauth2.api.entity.OAuth2AccessEntity;
+import org.hswebframework.web.authorization.oauth2.server.OAuth2AccessToken;
+import org.hswebframework.web.authorization.oauth2.server.exception.GrantTokenException;
+import org.hswebframework.web.authorization.oauth2.server.support.OAuth2Granter;
+import org.hswebframework.web.authorization.oauth2.server.support.client.HttpClientCredentialRequest;
+import org.hswebframework.web.authorization.oauth2.server.support.code.HttpAuthorizationCodeTokenRequest;
+import org.hswebframework.web.authorization.oauth2.server.support.implicit.HttpImplicitRequest;
+import org.hswebframework.web.authorization.oauth2.server.support.password.HttpPasswordRequest;
+import org.hswebframework.web.authorization.oauth2.server.support.refresh.HttpRefreshTokenRequest;
+import org.hswebframework.web.oauth2.core.ErrorType;
+import org.hswebframework.web.oauth2.core.GrantType;
 import org.hswebframework.web.oauth2.model.AccessTokenModel;
-import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
-
-import static org.springframework.util.StringUtils.isEmpty;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * @author zhouhao
@@ -40,120 +47,47 @@ import static org.springframework.util.StringUtils.isEmpty;
 public class OAuth2TokenController {
 
     @Resource
-    private OAuth2ServerService oAuth2ServerService;
+    private OAuth2Granter oAuth2Granter;
 
-    @PostMapping(params = "grant_type=authorization_code")
-    @ApiOperation("authorization_code方式授权")
-    public AccessTokenModel authorizeByCode(
-            @RequestParam("code") String code,
-            @RequestParam(value = "client_id", required = false) String clientId,
-            @RequestParam(value = "client_secret", required = false) String clientSecret,
-            @RequestParam(value = "redirect_uri") String redirect_uri,
-            @RequestHeader(value = "Authorization", required = false) String authorization,
-            @RequestParam(value = "scope", required = false) String scope) {
-
-        String[] clientCredentials = getClientCredentials(clientId, clientSecret, authorization);
-        clientId = clientCredentials[0];
-        clientSecret = clientCredentials[1];
-        AccessTokenModel model = entityToModel(oAuth2ServerService.requestTokenByCode(code, clientId, clientSecret, scope, redirect_uri));
-        return model;
-    }
-
-    @PostMapping(params = "grant_type=client_credentials")
-    @ApiOperation("client_credentials方式授权")
-    public AccessTokenModel authorizeByClientCredentials(
-            @RequestParam(value = "client_id", required = false) String clientId,
-            @RequestParam(value = "client_secret", required = false) String clientSecret,
-            @RequestHeader(value = "Authorization", required = false) String authorization) {
-        String[] clientCredentials = getClientCredentials(clientId, clientSecret, authorization);
-        clientId = clientCredentials[0];
-        clientSecret = clientCredentials[1];
-        AccessTokenModel model = entityToModel(oAuth2ServerService.requestTokenByClientCredential(clientId, clientSecret));
-        return model;
-    }
-
-    @PostMapping(params = "grant_type=password")
-    @ApiOperation("password方式授权")
-    public AccessTokenModel authorizeByPassword(
-            @RequestParam(value = "username") String username,
-            @RequestParam(value = "password") String password,
-            @RequestHeader(value = "Authorization", required = false) String authorization) {
-        String[] clientCredentials = getClientCredentials(username, password, authorization);
-        username = clientCredentials[0];
-        password = clientCredentials[1];
-        AccessTokenModel model = entityToModel(oAuth2ServerService.requestTokenByPassword(username, password));
-        return model;
-    }
-
-    @PostMapping(params = "grant_type=refresh_token")
-    @ApiOperation("刷新授权码")
-    public AccessTokenModel refreshToken(
-            @RequestHeader(value = "Authorization", required = false) String authorization,
-            @RequestParam(value = "client_id", required = false) String clientId,
-            @RequestParam(value = "client_secret", required = false) String clientSecret,
-            @RequestParam(value = "refresh_token") String refreshToken,
-            @RequestParam(value = "scope", required = false) String scope) {
-
-        String[] clientCredentials = getClientCredentials(clientId, clientSecret, authorization);
-        clientId = clientCredentials[0];
-        clientSecret = clientCredentials[1];
-
-        AccessTokenModel model = entityToModel(oAuth2ServerService.refreshToken(clientId, clientSecret, refreshToken, scope));
-        return model;
-    }
-
-    protected String[] getClientCredentials(String clientId, String clientSecret, String authorization) {
-        if ((clientId == null || clientSecret == null) && authorization == null) {
-            throw new IllegalArgumentException("authorization error!");
+    @PostMapping
+    public AccessTokenModel requestToken(
+            @RequestParam("grant_type") String grant_type,
+            HttpServletRequest request) {
+        OAuth2AccessToken accessToken = null;
+        switch (grant_type) {
+            case GrantType.authorization_code:
+                accessToken = oAuth2Granter.grant(GrantType.authorization_code, new HttpAuthorizationCodeTokenRequest(request));
+                break;
+            case GrantType.client_credentials:
+                accessToken = oAuth2Granter.grant(GrantType.client_credentials, new HttpClientCredentialRequest(request));
+                break;
+            case GrantType.implicit:
+                accessToken = oAuth2Granter.grant(GrantType.implicit, new HttpImplicitRequest(request));
+                break;
+            case GrantType.password:
+                accessToken = oAuth2Granter.grant(GrantType.password, new HttpPasswordRequest(request));
+                break;
+            case GrantType.refresh_token:
+                accessToken = oAuth2Granter.grant(GrantType.refresh_token, new HttpRefreshTokenRequest(request));
+                break;
+            default:
+                ErrorType.UNSUPPORTED_GRANT_TYPE.throwThis(GrantTokenException::new);
         }
-        if (!isEmpty(authorization)) {
-            String[] creds = decodeClientAuthenticationHeader(authorization);
-            Assert.notNull(creds, "");
-            if (creds.length > 1) {
-                clientId = creds[0];
-                clientSecret = creds[1];
-            } else {
-                clientSecret = creds[0];
-            }
-        }
-        Assert.hasLength(clientId, "");
-        Assert.hasLength(clientSecret, "");
-        return new String[]{clientId, clientSecret};
+        return entityToModel(accessToken);
     }
 
-    protected AccessTokenModel entityToModel(OAuth2AccessEntity entity) {
+
+    protected AccessTokenModel entityToModel(OAuth2AccessToken token) {
         AccessTokenModel model = new AccessTokenModel();
-        model.setAccess_token(entity.getAccessToken());
-        model.setRefresh_token(entity.getRefreshToken());
-        model.setExpires_in(entity.getExpiresIn());
-        model.setScope(entity.getScope());
+        model.setAccess_token(token.getAccessToken());
+        model.setRefresh_token(token.getRefreshToken());
+        model.setExpires_in(token.getExpiresIn());
+        if (token.getScope() != null)
+            model.setScope(token.getScope().stream().reduce((t1, t2) -> t1.concat(",").concat(t2)).orElse(""));
+        else
+            model.setScope("public");
         model.setToken_type("bearer");
         return model;
     }
 
-
-    protected static String[] decodeClientAuthenticationHeader(String authenticationHeader) {
-        if (isEmpty(authenticationHeader)) {
-            return null;
-        } else {
-            String[] tokens = authenticationHeader.split(" ");
-            if (tokens.length != 2) {
-                return null;
-            } else {
-                String authType = tokens[0];
-                if (!"basic".equalsIgnoreCase(authType)) {
-                    return null;
-                } else {
-                    String encodedCreds = tokens[1];
-                    return decodeBase64EncodedCredentials(encodedCreds);
-                }
-            }
-        }
-    }
-
-    protected static String[] decodeBase64EncodedCredentials(String encodedCreds) {
-        String decodedCreds = new String(Base64.decodeBase64(encodedCreds));
-        String[] creds = decodedCreds.split(":", 2);
-        return creds.length != 2 ? null : (!isEmpty(creds[0]) && !isEmpty(creds[1]) ? creds : null);
-    }
 }

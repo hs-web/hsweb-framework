@@ -32,48 +32,48 @@ import java.util.Set;
 @Alias("jsonSetHandler")
 @MappedTypes({Set.class})
 @MappedJdbcTypes({JdbcType.VARCHAR, JdbcType.CLOB})
-public class JsonSetHandler extends BaseTypeHandler<Set<Object>> {
+public class JsonSetHandler extends BaseTypeHandler<Set> {
 
     @Override
-    public Set<Object> getResult(ResultSet rs, int columnIndex) throws SQLException {
+    public Set getResult(ResultSet rs, int columnIndex) throws SQLException {
         String s = rs.getString(columnIndex);
-        return new HashSet<>(JSON.parseArray(s));
+        return JSON.parseObject(s, Set.class);
     }
 
     @Override
-    public Set<Object> getResult(ResultSet rs, String columnName) throws SQLException {
+    public Set getResult(ResultSet rs, String columnName) throws SQLException {
         String s = rs.getString(columnName);
-        return new HashSet<>(JSON.parseArray(s));
+        return JSON.parseObject(s, Set.class);
     }
 
     @Override
-    public Set<Object> getResult(CallableStatement cs, int columnIndex) throws SQLException {
+    public Set getResult(CallableStatement cs, int columnIndex) throws SQLException {
         String s = cs.getString(columnIndex);
-        return new HashSet<>(JSON.parseArray(s));
+        return JSON.parseObject(s, Set.class);
     }
 
     @Override
-    public void setParameter(PreparedStatement ps, int i, Set<Object> parameter, JdbcType jdbcType) throws SQLException {
+    public void setParameter(PreparedStatement ps, int i, Set parameter, JdbcType jdbcType) throws SQLException {
         ps.setString(i, JSON.toJSONString(parameter, SerializerFeature.WriteClassName));
     }
 
     @Override
-    public void setNonNullParameter(PreparedStatement ps, int i, Set<Object> parameter, JdbcType jdbcType) throws SQLException {
+    public void setNonNullParameter(PreparedStatement ps, int i, Set parameter, JdbcType jdbcType) throws SQLException {
         ps.setString(i, "[]");
     }
 
     @Override
-    public Set<Object> getNullableResult(ResultSet rs, String columnName) throws SQLException {
+    public Set getNullableResult(ResultSet rs, String columnName) throws SQLException {
         return new HashSet<>();
     }
 
     @Override
-    public Set<Object> getNullableResult(ResultSet rs, int columnIndex) throws SQLException {
+    public Set getNullableResult(ResultSet rs, int columnIndex) throws SQLException {
         return new HashSet<>();
     }
 
     @Override
-    public Set<Object> getNullableResult(CallableStatement cs, int columnIndex) throws SQLException {
+    public Set getNullableResult(CallableStatement cs, int columnIndex) throws SQLException {
         return new HashSet<>();
     }
 }

@@ -19,23 +19,23 @@
 package org.hswebframework.web.authorization.oauth2.client.exception;
 
 import org.hswebframework.web.authorization.oauth2.client.response.OAuth2Response;
+import org.hswebframework.web.oauth2.core.ErrorType;
 
 /**
- *
  * @author zhouhao
  */
 public class OAuth2RequestException extends RuntimeException {
-    OAuth2Response.ErrorType errorType;
+    ErrorType errorType;
 
     OAuth2Response response;
 
-    public OAuth2RequestException(OAuth2Response.ErrorType errorType, OAuth2Response response) {
+    public OAuth2RequestException(ErrorType errorType, OAuth2Response response) {
         super(errorType.name());
         this.errorType = errorType;
         this.response = response;
     }
 
-    public OAuth2Response.ErrorType getErrorType() {
+    public ErrorType getErrorType() {
         return errorType;
     }
 

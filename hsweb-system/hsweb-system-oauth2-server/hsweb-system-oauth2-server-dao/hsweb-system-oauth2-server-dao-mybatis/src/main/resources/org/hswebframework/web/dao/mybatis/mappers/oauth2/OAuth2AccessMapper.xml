@@ -24,13 +24,13 @@
 <mapper namespace="org.hswebframework.web.dao.oauth2.OAuth2AccessDao">
     <resultMap id="OAuth2AccessResultMap" type="org.hswebframework.web.authorization.oauth2.api.entity.SimpleOAuth2AccessEntity">
         <result property="clientId" column="client_id" javaType="String" jdbcType="VARCHAR"/>
-        <result property="userId" column="user_id" javaType="String" jdbcType="VARCHAR"/>
+        <result property="ownerId" column="owner_id" javaType="String" jdbcType="VARCHAR"/>
         <result property="accessToken" column="access_token" javaType="String" jdbcType="VARCHAR"/>
-        <result property="expiresIn" column="expires_in" javaType="Long" jdbcType="NUMERIC"/>
+        <result property="expiresIn" column="expires_in" javaType="Integer" jdbcType="NUMERIC"/>
         <result property="refreshToken" column="refresh_token" javaType="String" jdbcType="VARCHAR"/>
         <result property="createTime" column="create_time" javaType="Long" jdbcType="NUMERIC"/>
         <result property="updateTime" column="update_time" javaType="Long" jdbcType="NUMERIC"/>
-        <result property="scope" column="scope" javaType="String" jdbcType="VARCHAR"/>
+        <result property="scope" column="scope" javaType="java.util.Set" jdbcType="VARCHAR"/>
     </resultMap>
 
     <!--用于动态生成sql所需的配置-->

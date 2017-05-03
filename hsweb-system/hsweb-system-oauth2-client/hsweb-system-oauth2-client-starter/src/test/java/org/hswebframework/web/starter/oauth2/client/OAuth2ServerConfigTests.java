@@ -98,7 +98,7 @@ public class OAuth2ServerConfigTests extends SimpleWebApplicationTests {
         Assert.assertNotNull(result.getJSONObject("result"));
 
         Assert.assertEquals(fastJsonHttpMessageConverter.converter(entity),
-                fastJsonHttpMessageConverter.converter(result.getObject("data", entityFactory.getInstanceType(OAuth2ServerConfigEntity.class))));
+                fastJsonHttpMessageConverter.converter(result.getObject("result", entityFactory.getInstanceType(OAuth2ServerConfigEntity.class))));
         //todo 修改测试属性
         OAuth2ServerConfigEntity newEntity = entityFactory.newInstance(OAuth2ServerConfigEntity.class);
         newEntity.setName("test2");

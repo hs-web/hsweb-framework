@@ -34,12 +34,12 @@
         var uri = getRequest()["redirect"];
         if (!uri) uri = "/";
         window.open('/oauth2/boot/hsweb-oauth-server?redirect=' + uri);
-        var clientId = "hsweb_oauth2_example";
+        var principal = "hsweb_oauth2_example";
 //        var api = "http://localhost:8080/oauth2/login.html";
 //        //申请一个state
 //        doAjax("GET", "/oauth2/state", {}, function (e) {
 //            if (e) {
-//                window.open(api + "?client_id=" + clientId + "&response_type=code&state=" + e.result + "&redirect_uri="
+//                window.open(api + "?client_id=" + principal + "&response_type=code&state=" + e.result + "&redirect_uri="
 //                    + escape("http://localhost:8808/oauth2/callback/hsweb-oauth-server/?redirect=" + uri))
 //            }
 //        });

@@ -19,9 +19,11 @@
 package org.hswebframework.web.service.oauth2.client.starter;
 
 import org.hswebframework.web.authorization.oauth2.client.response.OAuth2Response;
+import org.hswebframework.web.oauth2.core.ErrorType;
 import org.hswebframework.web.service.oauth2.client.request.ResponseJudge;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -30,15 +32,15 @@ import java.util.stream.Collectors;
  * @author zhouhao
  */
 public class DefaultResponseJudge implements ResponseJudge {
-    private static List<OAuth2Response.ErrorType> errorTypes = Arrays.stream(OAuth2Response.ErrorType.values())
-            .filter(errorType -> errorType != OAuth2Response.ErrorType.OTHER)
+    private static List<ErrorType> errorTypes = Arrays.stream(ErrorType.values())
+            .filter(errorType -> errorType != ErrorType.OTHER)
             .collect(Collectors.toList());
 
     @Override
-    public OAuth2Response.ErrorType judge(OAuth2Response response) {
+    public ErrorType judge(OAuth2Response response) {
         if (response.status() == 200) return null;
         String result = response.asString();
-        if (result == null) return OAuth2Response.ErrorType.OTHER;
+        if (result == null) return ErrorType.OTHER;
         return errorTypes.stream()
                 .filter(errorType -> result.contains(errorType.name().toLowerCase()))
                 .findAny().orElse(null);

@@ -21,6 +21,7 @@ package org.hswebframework.web.service.oauth2.client.simple.provider;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.hswebframework.web.authorization.oauth2.client.response.OAuth2Response;
+import org.hswebframework.web.oauth2.core.ErrorType;
 import org.hswebframework.web.service.oauth2.client.request.ProviderSupport;
 import org.hswebframework.web.service.oauth2.client.request.definition.ResponseJudgeForProviderDefinition;
 import org.springframework.stereotype.Component;
@@ -35,14 +36,6 @@ import java.util.Map;
  */
 @Component
 public class HswebResponseJudgeSupport implements ResponseJudgeForProviderDefinition {
-    static Map<Integer, OAuth2Response.ErrorType> errorTypeMap = new HashMap<>();
-
-    static {
-        // success
-        errorTypeMap.put(401, OAuth2Response.ErrorType.ILLEGAL_RESPONSE_TYPE);
-        errorTypeMap.put(500, OAuth2Response.ErrorType.ILLEGAL_RESPONSE_TYPE);
-
-    }
 
     @Override
     public String getProvider() {
@@ -50,16 +43,19 @@ public class HswebResponseJudgeSupport implements ResponseJudgeForProviderDefini
     }
 
     @Override
-    public OAuth2Response.ErrorType judge(OAuth2Response response) {
+    public ErrorType judge(OAuth2Response response) {
         String result = response.asString();
-        if (result == null) return OAuth2Response.ErrorType.OTHER;
+        if (result == null) return ErrorType.OTHER;
         JSONObject jsonRes = JSON.parseObject(result);
         Integer status = jsonRes.getInteger("status");
         if (status == null && response.status() == 200) return null;
         if (status != null) {
             if (status == 200) return null;
-            return errorTypeMap.getOrDefault(status, OAuth2Response.ErrorType.OTHER);
+            return ErrorType.fromCode(status).orElse(ErrorType.OTHER);
         }
-        return errorTypeMap.getOrDefault(response.status(), OAuth2Response.ErrorType.OTHER);
+        if (jsonRes.get("message") != null) {
+            return ErrorType.valueOf(jsonRes.getString("message"));
+        }
+        return null;
     }
 }
