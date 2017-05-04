@@ -35,6 +35,6 @@ public class LoginExitListener implements AuthorizationListener<AuthorizationExi
 
     @Override
     public void on(AuthorizationExitEvent event) {
-        listenerAuthorizingRealm.loginOut(event.getAuthorization());
+        listenerAuthorizingRealm.loginOut(event.getAuthentication());
     }
 }

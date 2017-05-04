@@ -1,6 +1,7 @@
 package org.hswebframework.web.service.authorization;
 
-import org.hswebframework.web.authorization.AuthorizationInitializeService;
+import org.hswebframework.web.authorization.AuthenticationInitializeService;
+import org.hswebframework.web.authorization.AuthenticationManager;
 import org.hswebframework.web.entity.authorization.UserEntity;
 import org.hswebframework.web.service.CreateEntityService;
 import org.hswebframework.web.service.InsertService;
@@ -13,7 +14,8 @@ import org.hswebframework.web.service.QueryService;
  * @author zhouhao
  */
 public interface UserService extends
-        AuthorizationInitializeService,
+        AuthenticationManager,
+        AuthenticationInitializeService,
         CreateEntityService<UserEntity>,
         QueryByEntityService<UserEntity>,
         QueryService<UserEntity, String>,
@@ -28,8 +30,6 @@ public interface UserService extends
     UserEntity selectByUsername(String username);
 
     String encodePassword(String password, String salt);
-
-    void updateLoginInfo(String userId, String ip, Long loginTime);
 
     void updatePassword(String userId, String oldPassword, String newPassword);
 }

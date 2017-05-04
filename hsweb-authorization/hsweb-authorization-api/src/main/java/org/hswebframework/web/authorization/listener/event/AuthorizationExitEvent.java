@@ -18,7 +18,7 @@
 
 package org.hswebframework.web.authorization.listener.event;
 
-import org.hswebframework.web.authorization.Authorization;
+import org.hswebframework.web.authorization.Authentication;
 
 /**
  * 退出登录事件
@@ -26,13 +26,13 @@ import org.hswebframework.web.authorization.Authorization;
  * @author zhouhao
  */
 public class AuthorizationExitEvent implements AuthorizationEvent {
-    private Authorization authorization;
+    private Authentication authentication;
 
-    public AuthorizationExitEvent(Authorization authorization) {
-        this.authorization = authorization;
+    public AuthorizationExitEvent(Authentication authentication) {
+        this.authentication = authentication;
     }
 
-    public Authorization getAuthorization() {
-        return authorization;
+    public Authentication getAuthentication() {
+        return authentication;
     }
 }

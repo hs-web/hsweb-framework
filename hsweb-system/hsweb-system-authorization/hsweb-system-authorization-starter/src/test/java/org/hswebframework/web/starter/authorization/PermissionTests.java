@@ -19,7 +19,7 @@ package org.hswebframework.web.starter.authorization;
 
 import org.hsweb.ezorm.rdb.executor.SqlExecutor;
 import org.hswebframework.web.authorization.Permission;
-import org.hswebframework.web.authorization.access.DataAccess;
+import org.hswebframework.web.authorization.access.DataAccessConfig;
 import org.hswebframework.web.entity.authorization.ActionEntity;
 import org.hswebframework.web.entity.authorization.DataAccessEntity;
 import org.hswebframework.web.entity.authorization.PermissionEntity;
@@ -56,7 +56,7 @@ public class PermissionTests extends SimpleWebApplicationTests {
         Assert.assertTrue(sqlExecutor.tableExists("s_permission"));
 
         DataAccessEntity dataAccessEntity = new DataAccessEntity();
-        dataAccessEntity.setType(DataAccess.Type.OWN_CREATED.name());
+        dataAccessEntity.setType(DataAccessConfig.DefaultType.OWN_CREATED);
         dataAccessEntity.setAction(Permission.ACTION_QUERY);
         dataAccessEntity.setDescribe("只能查询自己创建的数据");
 

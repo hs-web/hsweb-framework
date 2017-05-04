@@ -20,7 +20,7 @@ package org.hswebframework.web.authorization.shiro;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.HostAuthenticationToken;
 import org.apache.shiro.authc.RememberMeAuthenticationToken;
-import org.hswebframework.web.authorization.Authorization;
+import org.hswebframework.web.authorization.Authentication;
 
 /**
  * TODO 完成注释
@@ -28,29 +28,29 @@ import org.hswebframework.web.authorization.Authorization;
  * @author zhouhao
  */
 public class SimpleAuthenticationToken implements AuthenticationToken, HostAuthenticationToken, RememberMeAuthenticationToken {
-    private Authorization authorization;
+    private Authentication authentication;
 
     private boolean rememberMe;
 
     private String host;
 
-    public SimpleAuthenticationToken(Authorization authorization, boolean rememberMe) {
-        this.authorization = authorization;
+    public SimpleAuthenticationToken(Authentication authentication, boolean rememberMe) {
+        this.authentication = authentication;
         this.rememberMe = rememberMe;
     }
 
     @Override
     public Object getPrincipal() {
-        return authorization.getUser().getUsername();
+        return authentication.getUser().getId();
     }
 
     @Override
     public Object getCredentials() {
-        return authorization.getUser().getId();
+        return authentication.getUser().getUsername();
     }
 
-    public Authorization getAuthorization() {
-        return authorization;
+    public Authentication getAuthentication() {
+        return authentication;
     }
 
     @Override

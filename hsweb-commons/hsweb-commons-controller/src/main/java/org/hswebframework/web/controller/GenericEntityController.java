@@ -60,4 +60,5 @@ public interface GenericEntityController<E extends GenericEntity<PK>, PK, Q exte
         entity.setId(id);
         return ResponseMessage.ok(getService().saveOrUpdate(modelToEntity(data, entity)));
     }
+
 }

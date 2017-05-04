@@ -19,12 +19,14 @@ public interface RoleService extends
 
     <T extends PermissionRoleEntity> void updateByPrimaryKey(BindPermissionRoleEntity<T> roleEntity);
 
-    boolean enable(String roleId);
+    void enable(String roleId);
 
-    boolean disable(String roleId);
+    void disable(String roleId);
 
     <T extends PermissionRoleEntity> boolean update(BindPermissionRoleEntity<T> roleEntity);
 
     RoleEntity selectByPk(String roleId);
+
+    <T extends PermissionRoleEntity> BindPermissionRoleEntity<T> selectDetailByPk(String roleId);
 
 }

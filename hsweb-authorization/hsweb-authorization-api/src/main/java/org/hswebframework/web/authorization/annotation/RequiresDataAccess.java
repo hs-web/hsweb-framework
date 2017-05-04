@@ -17,14 +17,11 @@
 
 package org.hswebframework.web.authorization.annotation;
 
-import org.hswebframework.web.authorization.access.DataAccess;
+import org.hswebframework.web.authorization.access.DataAccessConfig;
 import org.hswebframework.web.authorization.access.DataAccessController;
 import org.hswebframework.web.authorization.Permission;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * 数据级权限控制注解,用于进行需要数据级别权限控制的声明.
@@ -38,6 +35,7 @@ import java.lang.annotation.Target;
  */
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
+@Documented
 public @interface RequiresDataAccess {
 
     /**
@@ -48,7 +46,7 @@ public @interface RequiresDataAccess {
 
     /**
      * @return action array
-     * @see DataAccess#getAction()
+     * @see DataAccessConfig#getAction()
      */
     String[] action() default {};
 

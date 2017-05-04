@@ -18,13 +18,9 @@
 package org.hswebframework.web.authorization.annotation;
 
 import org.hswebframework.web.authorization.Permission;
-import org.hswebframework.web.authorization.access.DataAccessController;
-import org.hswebframework.web.authorization.access.FieldAccess;
+import org.hswebframework.web.authorization.access.FieldAccessConfig;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * 字段级权限控制注解,用于进行需要字段级别权限控制的声明.
@@ -38,6 +34,7 @@ import java.lang.annotation.Target;
  */
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
+@Documented
 public @interface RequiresFieldAccess {
 
     /**
@@ -48,7 +45,7 @@ public @interface RequiresFieldAccess {
 
     /**
      * @return action
-     * @see FieldAccess#getActions()
+     * @see FieldAccessConfig#getActions()
      */
     String action();
 

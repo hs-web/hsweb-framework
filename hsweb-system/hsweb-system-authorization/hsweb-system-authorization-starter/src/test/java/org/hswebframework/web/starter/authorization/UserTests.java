@@ -17,7 +17,7 @@
 
 package org.hswebframework.web.starter.authorization;
 
-import org.hswebframework.web.authorization.Authorization;
+import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.entity.authorization.UserEntity;
 import org.hswebframework.web.service.authorization.PasswordStrengthValidator;
 import org.hswebframework.web.service.authorization.UserService;
@@ -85,12 +85,12 @@ public class UserTests extends SimpleWebApplicationTests {
     @Test
     public void testInitAuth() {
         UserEntity entity = createTestUser();
-        Authorization authorization = userService.initAdminAuthorization(entity.getId());
-        Assert.assertNotNull(authorization);
-        Assert.assertEquals(authorization.getUser().getUsername(), entity.getUsername());
-        authorization = userService.initUserAuthorization(entity.getId());
-        Assert.assertNotNull(authorization);
-        Assert.assertEquals(authorization.getUser().getUsername(), entity.getUsername());
+        Authentication authentication = userService.initAdminAuthorization(entity.getId());
+        Assert.assertNotNull(authentication);
+        Assert.assertEquals(authentication.getUser().getUsername(), entity.getUsername());
+        authentication = userService.initUserAuthorization(entity.getId());
+        Assert.assertNotNull(authentication);
+        Assert.assertEquals(authentication.getUser().getUsername(), entity.getUsername());
     }
 
     @Test
@@ -120,17 +120,12 @@ public class UserTests extends SimpleWebApplicationTests {
         UserEntity entityInDb = userService.selectByUsername(userEntity.getUsername());
         Assert.assertEquals(entityInDb.isEnabled(), true);
         Assert.assertNotNull(entityInDb.getCreateTime());
-        Assert.assertTrue(entityInDb.getLastLoginTime() == null);
-        Assert.assertTrue(entityInDb.getLastLoginIp() == null);
 
         Assert.assertEquals(entityInDb.getPassword(), userService.encodePassword("password_1234", entityInDb.getSalt()));
 
-        userService.updateLoginInfo(id, "127.0.0.1", System.currentTimeMillis());
         entityInDb = userService.selectByUsername(userEntity.getUsername());
         Assert.assertEquals(entityInDb.isEnabled(), true);
         Assert.assertNotNull(entityInDb.getCreateTime());
-        Assert.assertNotNull(entityInDb.getLastLoginTime());
-        Assert.assertNotNull(entityInDb.getLastLoginIp());
         try {
             userService.updatePassword(id, "test", "test");
             Assert.assertTrue(false);

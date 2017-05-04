@@ -21,8 +21,8 @@ _点击名称,查看源代码注释获得使用说明_
 
 | 类名       | 说明          | 
 | ------------- |:-------------:| 
-| [`Authorization`](src/main/java/org/hswebframework/web/authorization/Authorization.java)    | 用户的认证信息 | 
-| [`AuthorizationHolder`](src/main/java/org/hswebframework/web/authorization/AuthorizationHolder.java)      | 用于获取当前登录用户的认证信息      | 
+| [`Authentication`](src/main/java/org/hswebframework/web/authorization/Authentication.java)    | 用户的认证信息 | 
+| [`AuthenticationHolder`](src/main/java/org/hswebframework/web/authorization/AuthenticationHolder.java)      | 用于获取当前登录用户的认证信息      | 
 
 
 ### Listener
@@ -46,9 +46,9 @@ api提供[AuthorizationListener](src/main/java/org/hswebframework/web/authorizat
 public class CustomAuthorizationSuccessListener implements AuthorizationListener<AuthorizationSuccessEvent>{
         @Override
         public void on(AuthorizationSuccessEvent event) {
-            Authorization authorization=event.getAuthorization();
+            Authentication authentication=event.getAuthentication();
             //....
-            System.out.println(authorization.getUser().getName()+"登录啦");
+            System.out.println(authentication.getUser().getName()+"登录啦");
         }
 }
 ```

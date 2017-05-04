@@ -21,6 +21,10 @@ package org.hswebframework.web;
 public class AuthorizeException extends BusinessException {
     private static final long serialVersionUID = 2422918455013900645L;
 
+    public AuthorizeException() {
+        this("{no_authorization}");
+    }
+
     public AuthorizeException(String message) {
         this(message, 401);
     }

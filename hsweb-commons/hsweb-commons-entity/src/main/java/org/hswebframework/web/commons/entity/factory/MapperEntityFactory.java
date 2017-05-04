@@ -18,8 +18,10 @@
 
 package org.hswebframework.web.commons.entity.factory;
 
+import org.apache.commons.beanutils.BeanUtils;
 import org.hswebframework.web.NotFoundException;
-import org.hswebframework.web.commons.entity.Entity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
@@ -27,13 +29,12 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  * @since 3.0
  */
 public class MapperEntityFactory implements EntityFactory {
     private Map<Class, Mapper> realTypeMapper = new HashMap<>();
+    private Logger             logger         = LoggerFactory.getLogger(this.getClass());
 
     public MapperEntityFactory() {
     }
@@ -45,6 +46,17 @@ public class MapperEntityFactory implements EntityFactory {
     public <T> MapperEntityFactory addMapping(Class<T> target, Mapper<T> mapper) {
         realTypeMapper.put(target, mapper);
         return this;
+    }
+
+    @Override
+    public <S, T> T copyProperties(S source, T target) {
+        try {
+            // TODO: 17-3-30 应该设计为可自定义
+            BeanUtils.copyProperties(target, source);
+        } catch (Exception e) {
+            logger.warn("copy properties error", e);
+        }
+        return target;
     }
 
     @Override
@@ -65,12 +77,14 @@ public class MapperEntityFactory implements EntityFactory {
                 String simpleClassName = beanClass.getPackage().getName().concat(".Simple").concat(beanClass.getSimpleName());
                 try {
                     realType = (Class<T>) Class.forName(simpleClassName);
-                    mapper = new Mapper<>(realType, new DefaultInstanceGetter(realType));
-                    realTypeMapper.put(beanClass, mapper);
-                    return mapper.getInstanceGetter().get();
                 } catch (ClassNotFoundException e) {
                     throw new NotFoundException(e.getMessage());
                 }
+            }
+            if (realType != null) {
+                mapper = new Mapper<>(realType, new DefaultInstanceGetter(realType));
+                realTypeMapper.put(beanClass, mapper);
+                return mapper.getInstanceGetter().get();
             }
         }
         throw new NotFoundException("can't create instance for " + beanClass);

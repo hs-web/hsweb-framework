@@ -19,8 +19,8 @@
 package org.hswebframework.web.starter;
 
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import org.hswebframework.web.authorization.AuthorizationHolder;
-import org.hswebframework.web.authorization.AuthorizationSupplier;
+import org.hswebframework.web.ThreadLocalUtils;
+import org.hswebframework.web.authorization.AuthenticationSupplier;
 import org.hswebframework.web.commons.entity.factory.EntityFactory;
 import org.hswebframework.web.commons.entity.factory.MapperEntityFactory;
 import org.hswebframework.web.starter.convert.FastJsonHttpMessageConverter;
@@ -35,9 +35,13 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
@@ -77,10 +81,8 @@ public class HswebAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnBean(AuthorizationSupplier.class)
-    public AuthorizationArgumentResolver authorizationArgumentResolver(AuthorizationSupplier authorizationSupplier) {
-        AuthorizationHolder.setSupplier(authorizationSupplier);
-        return new AuthorizationArgumentResolver(authorizationSupplier);
+    public AuthorizationArgumentResolver authorizationArgumentResolver() {
+        return new AuthorizationArgumentResolver();
     }
 
     @Bean
@@ -90,6 +92,17 @@ public class HswebAutoConfiguration {
             public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
                 super.addArgumentResolvers(argumentResolvers);
                 argumentResolvers.addAll(handlerMethodArgumentResolvers);
+            }
+
+            @Override
+            public void addInterceptors(InterceptorRegistry registry) {
+                registry.addInterceptor(new HandlerInterceptorAdapter() {
+                    @Override
+                    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+                        //clear thread local
+                        ThreadLocalUtils.clear();
+                    }
+                });
             }
         };
     }

@@ -10,5 +10,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>hsweb-authorization-api</artifactId>
-
+    <dependencies>
+        <dependency>
+            <groupId>org.hswebframework.web</groupId>
+            <artifactId>hsweb-boost-aop</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 </project>

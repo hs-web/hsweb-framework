@@ -42,7 +42,7 @@ public interface QueryByEntityService<E> extends Service {
     PagerResult<E> selectPager(Entity param);
 
     /**
-     * 不分页查询
+     * 直接查询
      *
      * @param param 查询参数
      * @return 查询结果

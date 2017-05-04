@@ -17,10 +17,7 @@
 
 package org.hswebframework.web.authorization.annotation;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * 使用表达式进行验证,默认支持spel,ognl表达式。
@@ -30,6 +27,7 @@ import java.lang.annotation.Target;
  */
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
+@Documented
 public @interface RequiresExpression {
 
     /**

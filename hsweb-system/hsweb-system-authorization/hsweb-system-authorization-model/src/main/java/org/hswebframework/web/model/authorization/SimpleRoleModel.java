@@ -64,6 +64,7 @@ public class SimpleRoleModel implements RoleModel {
 
     @Override
     public List<PermissionRoleModel> getPermissions() {
+        if (null == permissions) permissions = new ArrayList<>();
         return new ArrayList<>(permissions);
     }
 

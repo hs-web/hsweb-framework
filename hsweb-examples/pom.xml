@@ -30,6 +30,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>hsweb-examples-simple</module>
+        <module>hsweb-examples-oauth2</module>
     </modules>
 
 

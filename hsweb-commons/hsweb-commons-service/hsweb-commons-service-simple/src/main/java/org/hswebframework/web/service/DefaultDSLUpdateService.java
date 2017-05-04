@@ -23,16 +23,20 @@ import org.hswebframework.web.dao.dynamic.UpdateByEntityDao;
 import org.hswebframework.web.commons.entity.param.UpdateParamEntity;
 
 /**
- * TODO 完成注释
+ * 默认的DSL方式更新服务
  *
  * @author zhouhao
  */
-public interface DefaultDSLUpdateService<E,PK> extends UpdateService<E,PK> {
+public interface DefaultDSLUpdateService<E, PK> extends UpdateService<E, PK> {
 
     UpdateByEntityDao getDao();
 
     default Update<E, UpdateParamEntity<E>> createUpdate(E data) {
-        return Update.build(getDao()::update, new UpdateParamEntity<>(data));
+        return createUpdate(getDao(), data);
+    }
+
+    default Update<E, UpdateParamEntity<E>> createUpdate() {
+        return createUpdate(getDao());
     }
 
     static <E> Update<E, UpdateParamEntity<E>> createUpdate(UpdateByEntityDao dao) {

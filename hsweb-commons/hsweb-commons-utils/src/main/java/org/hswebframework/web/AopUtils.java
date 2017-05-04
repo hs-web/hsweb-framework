@@ -18,13 +18,33 @@
 package org.hswebframework.web;
 
 import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.util.ClassUtils;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class AopUtils {
+
+    public static <T extends Annotation> T findAnnotation(Class targetClass, Method method, Class<T> annClass) {
+        Method m = method;
+        T a = AnnotationUtils.findAnnotation(m, annClass);
+        if (a != null) return a;
+        m = ClassUtils.getMostSpecificMethod(m, targetClass);
+        a = AnnotationUtils.findAnnotation(m, annClass);
+        if (a != null) return a;
+        return AnnotationUtils.findAnnotation(targetClass, annClass);
+    }
+
+    public static <T extends Annotation> T findAnnotation(JoinPoint pjp, Class<T> annClass) {
+        MethodSignature signature = (MethodSignature) pjp.getSignature();
+        Method m = signature.getMethod();
+        Class<?> targetClass = pjp.getTarget().getClass();
+        return findAnnotation(targetClass, m, annClass);
+    }
 
     public static final String getMethodBody(JoinPoint pjp) {
         StringBuilder methodName = new StringBuilder(pjp.getSignature().getName()).append("(");

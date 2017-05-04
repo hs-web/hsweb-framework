@@ -1,7 +1,7 @@
 package org.hswebframework.web.service.authorization.simple.access;
 
 import com.alibaba.fastjson.JSON;
-import org.hswebframework.web.authorization.access.DataAccess;
+import org.hswebframework.web.authorization.access.DataAccessConfig;
 import org.hswebframework.web.entity.authorization.DataAccessEntity;
 import org.hswebframework.web.service.authorization.DataAccessFactory;
 import org.springframework.stereotype.Component;
@@ -15,17 +15,14 @@ import org.springframework.stereotype.Component;
 public class SimpleDataAccessFactory implements DataAccessFactory {
 
     @Override
-    public DataAccess create(DataAccessEntity entity) {
+    public DataAccessConfig create(DataAccessEntity entity) {
         AbstractDataAccess dataAccess = null;
         try {
-            switch (entity.getType()) {
-                case "custom":
+            switch (entity.getType().toUpperCase()) {
                 case "CUSTOM":
                     return dataAccess = new SimpleCustomDataAccess(entity.getConfig());
-                case "script":
                 case "SCRIPT":
                     return dataAccess = JSON.parseObject(entity.getConfig(), SimpleScriptDataAccess.class);
-                case "own_created":
                 case "OWN_CREATED":
                     return dataAccess = new SimpleOwnCreatedDataAccess();
             }
@@ -35,7 +32,7 @@ public class SimpleDataAccessFactory implements DataAccessFactory {
         return createOtherType(entity);
     }
 
-    protected DataAccess createOtherType(DataAccessEntity entity) {
+    protected DataAccessConfig createOtherType(DataAccessEntity entity) {
         return null;
     }
 }

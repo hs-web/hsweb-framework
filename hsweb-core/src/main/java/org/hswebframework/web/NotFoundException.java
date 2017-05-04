@@ -19,7 +19,7 @@
 package org.hswebframework.web;
 
 /**
- * Created by zhouhao on 16-4-29.
+ *
  */
 public class NotFoundException extends BusinessException {
     public NotFoundException(String message) {

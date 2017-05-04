@@ -1,6 +1,7 @@
 package org.hswebframework.web.authorization.access;
 
 import org.hswebframework.web.authorization.Permission;
+import org.hswebframework.web.boost.aop.context.MethodInterceptorParamContext;
 
 import java.util.Set;
 
@@ -19,5 +20,5 @@ public interface FieldAccessController {
      * @param params   参数上下文
      * @return 验证是否通过
      */
-    boolean doAccess(String action, Set<FieldAccess> accesses, ParamContext params);
+    boolean doAccess(String action, Set<FieldAccessConfig> accesses, MethodInterceptorParamContext params);
 }

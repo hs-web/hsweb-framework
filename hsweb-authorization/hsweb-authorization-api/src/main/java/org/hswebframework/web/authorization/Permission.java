@@ -17,8 +17,8 @@
 
 package org.hswebframework.web.authorization;
 
-import org.hswebframework.web.authorization.access.DataAccess;
-import org.hswebframework.web.authorization.access.FieldAccess;
+import org.hswebframework.web.authorization.access.DataAccessConfig;
+import org.hswebframework.web.authorization.access.FieldAccessConfig;
 
 import java.io.Serializable;
 import java.util.Set;
@@ -28,11 +28,10 @@ import java.util.Set;
  * 是用户权限的重要接口。
  *
  * @author zhouhao
- * @see Authorization
+ * @see Authentication
  * @since 3.0
  */
 public interface Permission extends Serializable {
-
     /**
      * 查询
      */
@@ -73,32 +72,24 @@ public interface Permission extends Serializable {
     String ACTION_ENABLE = "enable";
 
     /**
-     * 获取权限ID，权限的唯一标识
-     *
-     * @return id
+     * @return 权限ID，权限的唯一标识
      */
     String getId();
 
     /**
-     * 获取用户对此权限的可操作事件(按钮)
-     *
-     * @return 操作事件(按钮)集合
+     * @return 用户对此权限的可操作事件(按钮)
      */
     Set<String> getActions();
 
     /**
-     * 获取用户对此权限持有的字段权限信息,用于字段级别的控制
-     *
-     * @return 可操作字段集合
-     * @see FieldAccess
+     * @return 用户对此权限持有的字段权限信息, 用于字段级别的控制
+     * @see FieldAccessConfig
      */
-    Set<FieldAccess> getFieldAccesses();
+    Set<FieldAccessConfig> getFieldAccesses();
 
     /**
-     * 获取用户对此权限持有的数据权限信息,用于数据级别的控制
-     *
-     * @return 数据权限信息
-     * @see DataAccess
+     * @return 用户对此权限持有的数据权限信息, 用于数据级别的控制
+     * @see DataAccessConfig
      */
-    Set<DataAccess> getDataAccesses();
+    Set<DataAccessConfig> getDataAccessConfigs();
 }

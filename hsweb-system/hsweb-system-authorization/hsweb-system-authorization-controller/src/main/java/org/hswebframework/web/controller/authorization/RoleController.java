@@ -65,103 +65,19 @@ public class RoleController implements QueryController<RoleEntity, String, Query
 
     @SuppressWarnings("unchecked")
     public BindPermissionRoleEntity<PermissionRoleEntity> modelToEntity(RoleModel roleModel) {
-        BindPermissionRoleEntity<PermissionRoleEntity> roleEntity = entityFactory.newInstance(BindPermissionRoleEntity.class);
-        roleEntity.setId(roleModel.getId());
-        roleEntity.setName(roleModel.getName());
-        roleEntity.setDescribe(roleModel.getDescribe());
-        List<PermissionRoleEntity> permissionRoleEntities =
-                roleModel.getPermissions().stream()
-                        .map(model -> {
-                            PermissionRoleEntity entity = entityFactory.newInstance(PermissionRoleEntity.class);
-                            entity.setActions(model.getActions());
-                            entity.setPermissionId(model.getPermissionId());
-                            entity.setRoleId(roleModel.getId());
-                            //copy field accesses
-                            entity.setFieldAccesses(model.getFieldAccesses().stream().map(accessModel -> {
-                                FieldAccessEntity accessEntity = new FieldAccessEntity();
-                                accessEntity.setField(accessEntity.getField());
-                                accessEntity.setDescribe(accessEntity.getDescribe());
-                                accessEntity.setActions(accessModel.getActions().stream().map(actionModel -> {
-                                    ActionEntity actionEntity = new ActionEntity();
-                                    actionEntity.setAction(actionModel.getAction());
-                                    actionEntity.setDescribe(actionModel.getDescribe());
-                                    actionEntity.setDefaultCheck(actionModel.isDefaultCheck());
-                                    return actionEntity;
-                                }).collect(Collectors.toList()));
-                                return accessEntity;
-                            }).collect(Collectors.toList()));
-                            //copy data accesses
-                            entity.setDataAccesses(model.getDataAccesses().stream().map(accessModel -> {
-                                DataAccessEntity dataAccessEntity = new DataAccessEntity();
-                                dataAccessEntity.setConfig(accessModel.getConfig());
-                                dataAccessEntity.setType(accessModel.getType());
-                                dataAccessEntity.setDescribe(accessModel.getDescribe());
-                                dataAccessEntity.setAction(accessModel.getAction());
-                                return dataAccessEntity;
-                            }).collect(Collectors.toList()));
-                            return entity;
-                        }).collect(Collectors.toList());
-        roleEntity.setPermissions(permissionRoleEntities);
-        return roleEntity;
+        return entityFactory.newInstance(BindPermissionRoleEntity.class, roleModel);
     }
 
     protected RoleModel entityToModel(RoleEntity roleEntity) {
-        RoleModel roleModel = entityFactory.newInstance(RoleModel.class);
-        roleModel.setId(roleEntity.getId());
-        roleModel.setDescribe(roleEntity.getDescribe());
-        roleModel.setName(roleEntity.getName());
-        if (roleEntity instanceof BindPermissionRoleEntity) {
-            BindPermissionRoleEntity<PermissionRoleEntity> permissionRoleEntity = (BindPermissionRoleEntity) roleEntity;
-            List<PermissionRoleEntity> roleEntities = permissionRoleEntity.getPermissions();
-            if (CollectionUtils.isNotEmpty(roleEntities)) {
-                List<PermissionRoleModel> roleModels = roleEntities.stream().map(entity -> {
-                    PermissionRoleModel model = entityFactory.newInstance(PermissionRoleModel.class);
-                    model.setActions(entity.getActions());
-                    model.setPermissionId(entity.getPermissionId());
-                    //copy field accesses
-                    model.setFieldAccesses(entity.getFieldAccesses().stream().map(accessEntity -> {
-                        FieldAccessModel accessModel = new FieldAccessModel();
-                        accessModel.setField(accessModel.getField());
-                        accessModel.setDescribe(accessModel.getDescribe());
-                        accessModel.setActions(accessModel.getActions().stream().map(actionEntity -> {
-                            ActionModel actionModel = new ActionModel();
-                            actionModel.setAction(actionEntity.getAction());
-                            actionModel.setDescribe(actionEntity.getDescribe());
-                            actionModel.setDefaultCheck(actionEntity.isDefaultCheck());
-                            return actionModel;
-                        }).collect(Collectors.toList()));
-                        return accessModel;
-                    }).collect(Collectors.toList()));
-                    //copy data accesses
-                    model.setDataAccesses(model.getDataAccesses().stream().map(accessesEntity -> {
-                        DataAccessModel dataAccessModel = new DataAccessModel();
-                        dataAccessModel.setConfig(accessesEntity.getConfig());
-                        dataAccessModel.setType(accessesEntity.getType());
-                        dataAccessModel.setDescribe(accessesEntity.getDescribe());
-                        dataAccessModel.setAction(accessesEntity.getAction());
-                        return dataAccessModel;
-                    }).collect(Collectors.toList()));
-                    return model;
-                }).collect(Collectors.toList());
-                roleModel.setPermissions(roleModels);
-            }
-        }
-
-        return roleModel;
+        return entityFactory.newInstance(RoleModel.class, roleEntity);
     }
 
     @Authorize(action = Permission.ACTION_GET)
     @GetMapping(path = "/{id:.+}/detail")
     @AccessLogger("{get_by_id}")
     @ApiOperation("根据主键查询完整数据")
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "查询成功"),
-            @ApiResponse(code = 401, message = "未授权"),
-            @ApiResponse(code = 403, message = "无权限"),
-            @ApiResponse(code = 404, message = "数据不存在")
-    })
     public ResponseMessage<RoleModel> getDetailByPrimaryKey(@PathVariable String id) {
-        return ok(entityToModel(assertNotNull(getService().selectByPk(id))));
+        return ok(entityToModel(assertNotNull(getService().selectDetailByPk(id))));
     }
 
     @PostMapping
@@ -175,7 +91,7 @@ public class RoleController implements QueryController<RoleEntity, String, Query
     @PutMapping("/{id:.+}")
     @Authorize(action = Permission.ACTION_UPDATE)
     @AccessLogger("{update}")
-    @ApiModelProperty("修改角色")
+    @ApiOperation("修改角色")
     public ResponseMessage updateRole(@PathVariable String id, @RequestBody RoleModel roleModel) {
         roleModel.setId(id);
         roleService.updateByPrimaryKey(modelToEntity(roleModel));
@@ -185,7 +101,7 @@ public class RoleController implements QueryController<RoleEntity, String, Query
     @PutMapping("/disable/{id:.+}")
     @Authorize(action = Permission.ACTION_DISABLE)
     @AccessLogger("{disable}")
-    @ApiModelProperty("禁用角色")
+    @ApiOperation("禁用角色")
     public ResponseMessage disable(@PathVariable String id) {
         roleService.disable(id);
         return ok();
@@ -194,7 +110,7 @@ public class RoleController implements QueryController<RoleEntity, String, Query
     @PutMapping("/enable/{id}")
     @Authorize(action = Permission.ACTION_ENABLE)
     @AccessLogger("{disable}")
-    @ApiModelProperty("启用角色")
+    @ApiOperation("启用角色")
     public ResponseMessage enable(@PathVariable String id) {
         roleService.enable(id);
         return ok();

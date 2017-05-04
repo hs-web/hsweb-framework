@@ -16,7 +16,6 @@
  */
 package org.hswebframework.web.entity.organizational;
 
-import org.hswebframework.web.commons.entity.GenericEntity;
 import org.hswebframework.web.commons.entity.TreeSortSupportEntity;
 
 /**

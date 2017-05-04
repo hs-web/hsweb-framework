@@ -85,12 +85,6 @@
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-spring-boot-starter</artifactId>
             <version>${project.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                    <artifactId>jackson-databind</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <dependency>
@@ -105,7 +99,7 @@
         </dependency>
         <dependency>
             <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-system-explorer-starter</artifactId>
+            <artifactId>hsweb-system-menu-starter</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -115,7 +109,7 @@
         </dependency>
         <dependency>
             <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-authorization-oauth2-server-starter</artifactId>
+            <artifactId>hsweb-system-oauth2-server-starter</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -126,10 +120,6 @@
         <dependency>
             <groupId>io.springfox</groupId>
             <artifactId>springfox-swagger-ui</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
         </dependency>
     </dependencies>
 </project>

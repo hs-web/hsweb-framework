@@ -1,6 +1,6 @@
 package org.hswebframework.web.service.authorization;
 
-import org.hswebframework.web.authorization.access.DataAccess;
+import org.hswebframework.web.authorization.access.DataAccessConfig;
 import org.hswebframework.web.entity.authorization.DataAccessEntity;
 
 /**
@@ -9,5 +9,5 @@ import org.hswebframework.web.entity.authorization.DataAccessEntity;
  * @author zhouhao
  */
 public interface DataAccessFactory {
-    DataAccess create(DataAccessEntity entity);
+    DataAccessConfig create(DataAccessEntity entity);
 }
