@@ -16,11 +16,10 @@
  *
  */
 
-package org.hswebframework.web.authorization.oauth2.api.entity;
+package org.hswebframework.web.authorization.oauth2.server.entity;
 
 import org.hswebframework.web.commons.entity.SimpleGenericEntity;
 
-import java.util.List;
 import java.util.Set;
 
 /**

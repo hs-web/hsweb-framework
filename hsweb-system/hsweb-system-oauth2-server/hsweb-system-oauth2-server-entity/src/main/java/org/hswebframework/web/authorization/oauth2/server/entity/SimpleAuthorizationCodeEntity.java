@@ -16,7 +16,7 @@
  *
  */
 
-package org.hswebframework.web.authorization.oauth2.api.entity;
+package org.hswebframework.web.authorization.oauth2.server.entity;
 
 
 import java.util.Set;
