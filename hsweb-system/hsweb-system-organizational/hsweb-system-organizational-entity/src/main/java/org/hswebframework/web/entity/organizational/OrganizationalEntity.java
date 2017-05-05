@@ -50,7 +50,7 @@ public interface OrganizationalEntity extends TreeSortSupportEntity<String> {
     /**
      * 树定位码
      */
-    String treeCode      = "treeCode";
+    String path      = "path";
     /**
      * 树结构编码
      */

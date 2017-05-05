@@ -16,9 +16,7 @@
  */
 package org.hswebframework.web.entity.organizational;
 
-import org.hswebframework.web.commons.entity.SimpleGenericEntity;
 import org.hswebframework.web.commons.entity.SimpleTreeSortSupportEntity;
-import org.hswebframework.web.commons.entity.TreeSupportEntity;
 
 import java.util.List;
 
@@ -97,13 +95,6 @@ public class SimpleOrganizationalEntity extends SimpleTreeSortSupportEntity<Stri
         this.optionalRoles = optionalRoles;
     }
 
-    /**
-     * @return 上级机构id
-     */
-    public String getParentId() {
-        return this.parentId;
-    }
-
     @Override
     @SuppressWarnings("unchecked")
     public List<SimpleOrganizationalEntity> getChildren() {
@@ -113,14 +104,6 @@ public class SimpleOrganizationalEntity extends SimpleTreeSortSupportEntity<Stri
     public void setChildren(List<SimpleOrganizationalEntity> children) {
         this.children = children;
     }
-
-    /**
-     * @return 树定位码
-     */
-    public String getTreeCode() {
-        return this.treeCode;
-    }
-
 
     /**
      * @return 是否启用

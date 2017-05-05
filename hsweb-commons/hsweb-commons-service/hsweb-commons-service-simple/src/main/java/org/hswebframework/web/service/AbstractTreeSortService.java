@@ -19,9 +19,7 @@ package org.hswebframework.web.service;
 
 import org.hswebframework.web.commons.entity.TreeSortSupportEntity;
 import org.hswebframework.web.commons.entity.TreeSupportEntity;
-import org.hswebframework.web.id.IDGenerator;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -44,7 +42,7 @@ public abstract class AbstractTreeSortService<E extends TreeSortSupportEntity<PK
         assertNotNull(parentId);
         E old = selectByPk(parentId);
         assertNotNull(old);
-        return createQuery().where().like$(TreeSupportEntity.treeCode, old.getTreeCode()).noPaging().list();
+        return createQuery().where().like$(TreeSupportEntity.path, old.getPath()).noPaging().list();
     }
 
     @Override
@@ -103,8 +101,8 @@ public abstract class AbstractTreeSortService<E extends TreeSortSupportEntity<PK
         E old = selectByPk(id);
         assertNotNull(old);
         return DefaultDSLDeleteService.createDelete(getDao())
-                // where tree_code like 'treeCode%'
-                .where().like$(TreeSupportEntity.treeCode, old.getTreeCode())
+                // where path like 'path%'
+                .where().like$(TreeSupportEntity.path, old.getPath())
                 .exec();
     }
 }

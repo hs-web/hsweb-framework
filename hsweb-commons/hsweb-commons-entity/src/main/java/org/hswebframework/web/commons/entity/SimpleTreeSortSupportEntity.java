@@ -33,7 +33,7 @@ public abstract class SimpleTreeSortSupportEntity<PK> extends SimpleGenericEntit
      * 树结构编码,用于快速查找, 每一层由4位字符组成,用-分割
      * 如第一层:0001 第二层:0001-0001 第三层:0001-0001-0001
      */
-    private String treeCode;
+    private String path;
 
     /**
      * 排序索引
@@ -42,14 +42,12 @@ public abstract class SimpleTreeSortSupportEntity<PK> extends SimpleGenericEntit
 
     private Integer level;
 
-    @Override
-    public String getTreeCode() {
-        return treeCode;
+    public String getPath() {
+        return path;
     }
 
-    @Override
-    public void setTreeCode(String treeCode) {
-        this.treeCode = treeCode;
+    public void setPath(String path) {
+        this.path = path;
     }
 
     @Override

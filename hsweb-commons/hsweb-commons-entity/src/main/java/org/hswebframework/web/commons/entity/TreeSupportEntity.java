@@ -25,7 +25,6 @@ import org.hswebframwork.utils.StringUtils;
 
 import java.util.*;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -34,13 +33,13 @@ public interface TreeSupportEntity<PK> extends GenericEntity<PK> {
 
     String id = "id";
 
-    String treeCode = "treeCode";
+    String path = "path";
 
     String parentId = "parentId";
 
-    String getTreeCode();
+    String getPath();
 
-    void setTreeCode(String treeCode);
+    void setPath(String path);
 
     PK getParentId();
 
@@ -50,28 +49,28 @@ public interface TreeSupportEntity<PK> extends GenericEntity<PK> {
 
     void setLevel(Integer level);
 
-    default void setLevelFromTreeCode() {
-        if (getTreeCode() != null)
-            setLevel(getTreeCode().split("-").length);
+    default void setLevelFromPath() {
+        if (getPath() != null)
+            setLevel(getPath().split("-").length);
     }
 
     <T extends TreeSupportEntity<PK>> List<T> getChildren();
 
     /**
-     * 根据treeCode获取父节点的treeCode
+     * 根据path获取父节点的path
      *
-     * @param treeCode treeCode
-     * @return 父节点treeCode
+     * @param path path
+     * @return 父节点path
      */
-    static String getParentTreeCode(String treeCode) {
-        if (treeCode == null || treeCode.length() < 4) return null;
-        return treeCode.substring(0, treeCode.length() - 5);
+    static String getParentPath(String path) {
+        if (path == null || path.length() < 4) return null;
+        return path.substring(0, path.length() - 5);
     }
 
     /**
      * 将树形结构转为列表结构，并填充对应的数据。<br>
      * 如树结构数据： {name:'父节点',children:[{name:'子节点1'},{name:'子节点2'}]}<br>
-     * 解析后:[{id:'id1',name:'父节点',treeCode:'<b>aoSt</b>'},{id:'id2',name:'子节点1',treeCode:'<b>aoSt</b>-oS5a'},{id:'id3',name:'子节点2',treeCode:'<b>aoSt</b>-uGpM'}]
+     * 解析后:[{id:'id1',name:'父节点',path:'<b>aoSt</b>'},{id:'id2',name:'子节点1',path:'<b>aoSt</b>-oS5a'},{id:'id3',name:'子节点2',path:'<b>aoSt</b>-uGpM'}]
      *
      * @param parent      树结构的根节点
      * @param target      目标集合,转换后的数据将直接添加({@link List#add(Object)})到这个集合.
@@ -81,9 +80,9 @@ public interface TreeSupportEntity<PK> extends GenericEntity<PK> {
      */
     static <T extends TreeSupportEntity<PK>, PK> void expandTree2List(TreeSupportEntity<PK> parent, List<T> target, IDGenerator<PK> idGenerator) {
         List<T> children = parent.getChildren();
-        if (parent.getTreeCode() == null) {
-            parent.setTreeCode(RandomUtil.randomChar(4));
-            parent.setLevelFromTreeCode();
+        if (parent.getPath() == null) {
+            parent.setPath(RandomUtil.randomChar(4));
+            parent.setLevelFromPath();
         }
         if (children != null) {
             PK pid = parent.getId();
@@ -97,8 +96,8 @@ public interface TreeSupportEntity<PK> extends GenericEntity<PK> {
                     ((SortSupportEntity) child).setSortIndex(StringUtils.toLong(((SortSupportEntity) parent).getSortIndex() + "0" + (i + 1)));
                 }
                 child.setParentId(pid);
-                child.setTreeCode(parent.getTreeCode() + "-" + RandomUtil.randomChar(4));
-                child.setLevelFromTreeCode();
+                child.setPath(parent.getPath() + "-" + RandomUtil.randomChar(4));
+                child.setLevelFromPath();
                 target.add(child);
                 expandTree2List(child, target, idGenerator);
             }

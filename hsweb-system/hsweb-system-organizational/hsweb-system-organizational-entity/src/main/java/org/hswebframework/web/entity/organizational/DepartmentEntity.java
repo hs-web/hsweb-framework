@@ -46,7 +46,7 @@ public interface DepartmentEntity extends TreeSortSupportEntity<String> {
     /**
      * 树结构编码
      */
-    String treeCode  = "treeCode";
+    String path  = "path";
     /**
      * 排序序号
      */

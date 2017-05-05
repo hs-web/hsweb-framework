@@ -26,7 +26,7 @@
             <result property="roles" column="roles" javaType="String" jdbcType="CLOB"/>
             <result property="remark" column="remark" javaType="String" jdbcType="VARCHAR"/>
             <result property="parentId" column="parent_id" javaType="String" jdbcType="VARCHAR"/>
-            <result property="treeCode" column="tree_code" javaType="String" jdbcType="VARCHAR"/>
+            <result property="path" column="path" javaType="String" jdbcType="VARCHAR"/>
             <result property="sortIndex" column="sort_index" javaType="Long" jdbcType="DECIMAL"/>
             <result property="level" column="level" javaType="Integer" jdbcType="DECIMAL"/>
     </resultMap>

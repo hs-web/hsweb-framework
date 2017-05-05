@@ -44,7 +44,7 @@ public interface MenuGroupEntity extends TreeSortSupportEntity<String> {
     /**
      * 树结构编码
      */
-    String treeCode     = "treeCode";
+    String path     = "path";
     /**
      * 父级id
      */

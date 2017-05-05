@@ -56,7 +56,7 @@ function install(context) {
         .addColumn().name("is_enabled").alias("enabled").comment("是否启用").jdbcType(java.sql.JDBCType.DECIMAL).length(4,0).commit()
         .addColumn().name("describe").alias("describe").comment("说明").jdbcType(java.sql.JDBCType.VARCHAR).length(128).commit()
         .addColumn().name("parent_id").alias("parentId").comment("父级选项").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
-        .addColumn().name("tree_code").alias("treeCode").comment("树编码").jdbcType(java.sql.JDBCType.VARCHAR).length(3000).commit()
+        .addColumn().name("path").alias("path").comment("树编码").jdbcType(java.sql.JDBCType.VARCHAR).length(3000).commit()
         .addColumn().name("search_code").alias("searchCode").comment("快速搜索码").jdbcType(java.sql.JDBCType.VARCHAR).length(128).commit()
         .addColumn().name("sort_index").alias("sortIndex").comment("排序索引").jdbcType(java.sql.JDBCType.DECIMAL).length(32,0).commit()
         .addColumn().name("level").alias("level").comment("树结构层级").jdbcType(java.sql.JDBCType.DECIMAL).length(32,0).commit()

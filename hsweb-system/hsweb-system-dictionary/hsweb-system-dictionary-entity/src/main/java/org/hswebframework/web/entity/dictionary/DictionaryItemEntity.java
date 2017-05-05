@@ -62,7 +62,7 @@ public interface DictionaryItemEntity extends TreeSortSupportEntity<String> {
     /**
      * 树编码
      */
-    String treeCode   = "treeCode";
+    String path   = "path";
     /**
      * 快速搜索码
      */

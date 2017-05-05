@@ -21,7 +21,7 @@
 <mapper namespace="org.hswebframework.web.dao.menu.MenuGroupBindDao">
     <resultMap id="MenuGroupBindResultMap" type="org.hswebframework.web.entity.menu.SimpleMenuGroupBindEntity">
         <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
-            <result property="treeCode" column="tree_code" javaType="String" jdbcType="VARCHAR"/>
+            <result property="path" column="path" javaType="String" jdbcType="VARCHAR"/>
             <result property="parentId" column="parent_id" javaType="String" jdbcType="VARCHAR"/>
             <result property="level" column="level" javaType="Integer" jdbcType="DECIMAL"/>
             <result property="sortIndex" column="sort_index" javaType="Long" jdbcType="DECIMAL"/>
