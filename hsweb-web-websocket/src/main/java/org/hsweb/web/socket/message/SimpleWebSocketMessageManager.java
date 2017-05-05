@@ -4,6 +4,7 @@ import org.hsweb.web.bean.po.user.User;
 import org.hsweb.web.core.exception.AuthorizeException;
 import org.hsweb.web.core.session.HttpSessionManager;
 import org.hsweb.web.socket.utils.SessionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -26,17 +27,13 @@ public class SimpleWebSocketMessageManager implements WebSocketMessageManager {
 
     private HttpSessionManager httpSessionManager;
 
+    @Autowired
     public void setHttpSessionManager(HttpSessionManager httpSessionManager) {
         this.httpSessionManager = httpSessionManager;
     }
 
     public Map<String, WebSocketSession> getSessionMap(String userId) {
-        Map<String, WebSocketSession> map = session_map.get(userId);
-        if (map == null) {
-            map = Collections.synchronizedMap(new HashMap<>());
-            session_map.put(userId, map);
-        }
-        return map;
+        return session_map.computeIfAbsent(userId, k -> Collections.synchronizedMap(new HashMap<>()));
     }
 
     @Override
