@@ -22,7 +22,6 @@ package org.hswebframework.web.entity.config;
 import org.hswebframework.web.commons.entity.GenericEntity;
 import org.hswebframework.web.commons.entity.RecordCreationEntity;
 
-import java.util.Date;
 import java.util.List;
 
 /**

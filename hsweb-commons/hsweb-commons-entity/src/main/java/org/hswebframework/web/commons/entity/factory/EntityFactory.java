@@ -25,6 +25,7 @@ import org.hswebframework.web.commons.entity.Entity;
  *
  * @author zhouhao
  * @see Entity
+ * @see MapperEntityFactory
  * @since 3.0
  */
 public interface EntityFactory {

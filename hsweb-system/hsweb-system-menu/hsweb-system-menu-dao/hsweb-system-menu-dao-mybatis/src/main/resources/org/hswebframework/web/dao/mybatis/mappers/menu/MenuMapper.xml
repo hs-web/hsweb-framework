@@ -45,7 +45,7 @@
     </insert>
 
     <delete id="deleteByPk" parameterType="String">
-        delete from s_config where u_id =#{id}
+        delete from s_menu where u_id =#{id}
     </delete>
 
     <delete id="delete" parameterType="org.hswebframework.web.commons.entity.Entity">

@@ -19,7 +19,6 @@
 package org.hswebframework.web.entity.menu;
 
 import org.hswebframework.web.commons.entity.*;
-import org.hswebframework.web.entity.authorization.ActionEntity;
 
 import java.util.List;
 
