@@ -38,5 +38,9 @@
             <artifactId>hsweb-system-dictionary-service-api</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.hswebframework</groupId>
+            <artifactId>hsweb-expands-script</artifactId>
+        </dependency>
     </dependencies>
 </project>

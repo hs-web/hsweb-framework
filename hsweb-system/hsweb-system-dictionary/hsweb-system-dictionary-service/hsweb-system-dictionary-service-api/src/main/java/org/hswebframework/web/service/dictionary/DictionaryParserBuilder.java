@@ -22,7 +22,7 @@ package org.hswebframework.web.service.dictionary;
  * @author zhouhao
  */
 public interface DictionaryParserBuilder {
-    DictionaryParser<Object, String> buildValueToTextParser(String config);
+    DictionaryParser buildValueToTextParser(String config);
 
-    DictionaryParser<String, Object> buildTextToValueParser(String config);
+    DictionaryParser buildTextToValueParser(String config);
 }

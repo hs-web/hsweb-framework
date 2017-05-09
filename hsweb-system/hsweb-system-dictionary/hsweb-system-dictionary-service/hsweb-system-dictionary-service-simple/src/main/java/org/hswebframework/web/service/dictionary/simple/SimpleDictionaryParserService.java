@@ -17,6 +17,8 @@
 package org.hswebframework.web.service.dictionary.simple;
 
 import org.hswebframework.web.dao.dictionary.DictionaryParserDao;
+import org.hswebframework.web.entity.dictionary.DictionaryEntity;
+import org.hswebframework.web.entity.dictionary.DictionaryItemEntity;
 import org.hswebframework.web.entity.dictionary.DictionaryParserEntity;
 import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.service.GenericEntityService;
@@ -47,7 +49,8 @@ public class SimpleDictionaryParserService extends GenericEntityService<Dictiona
     }
 
     @Override
-    public <V, T> DictionaryParser<V, T> getParser(String parserId) {
+    public <V> DictionaryParser<V> getParser(DictionaryEntity<? extends DictionaryItemEntity> dict, String parserId) {
+
         // TODO: 17-3-9
         return null;
     }

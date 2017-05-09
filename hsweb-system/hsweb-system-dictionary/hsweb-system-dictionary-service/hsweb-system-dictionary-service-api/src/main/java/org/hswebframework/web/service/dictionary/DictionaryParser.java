@@ -18,17 +18,27 @@
 
 package org.hswebframework.web.service.dictionary;
 
-import org.hswebframework.web.entity.dictionary.DictionaryEntity;
-import org.hswebframework.web.entity.dictionary.DictionaryItemEntity;
-
 import java.io.Serializable;
+import java.util.List;
 import java.util.Optional;
 
 /**
+ * 字典解析器接口
+ *
  * @author zhouhao
  */
-public interface DictionaryParser<V, T> extends Serializable {
-    Optional<V> textToValue(DictionaryEntity<? extends DictionaryItemEntity> dict, T text);
+public interface DictionaryParser<V> extends Serializable {
 
-    Optional<T> valueToText(DictionaryEntity<? extends DictionaryItemEntity> dict, V value);
+    Optional<V> textToValue(String text, Object context);
+
+    Optional<String> valueToText(V value, Object context);
+
+    default Optional<V> textToValue(String text) {
+        return textToValue(text, null);
+    }
+
+    default Optional<String> valueToText(V value) {
+        return valueToText(value, null);
+    }
+
 }

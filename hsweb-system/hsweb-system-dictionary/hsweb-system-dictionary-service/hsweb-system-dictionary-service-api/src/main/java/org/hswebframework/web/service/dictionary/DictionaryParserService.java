@@ -16,6 +16,8 @@
  */
 package org.hswebframework.web.service.dictionary;
 
+import org.hswebframework.web.entity.dictionary.DictionaryEntity;
+import org.hswebframework.web.entity.dictionary.DictionaryItemEntity;
 import org.hswebframework.web.entity.dictionary.DictionaryParserEntity;
 import org.hswebframework.web.service.CrudService;
 
@@ -26,7 +28,7 @@ import org.hswebframework.web.service.CrudService;
  */
 public interface DictionaryParserService extends CrudService<DictionaryParserEntity, String> {
 
-    <V, T> DictionaryParser<V, T> getParser(String parserId);
+    <V> DictionaryParser<V> getParser(DictionaryEntity<? extends DictionaryItemEntity> dict, String parserId);
 
 
 }
