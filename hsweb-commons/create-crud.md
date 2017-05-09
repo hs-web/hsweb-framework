@@ -22,14 +22,14 @@ hsweb 按照功能分模块, 再将controller,service,dao分为子模块.例如:
 ## Entity 
 模块:hsweb-system-menu-entity
 
-    hsweb中的entity都为接口并提供了一个默认实现,例如 `MenuEntity`=>`SimpleMenuEntity`.但是并不强制使用此方式创建entity
-    约定: 
-    1. entity应该实现`Entity`接口
-    2. 有主键的entity应该实现`GenericEntity<PK>`接口
-    3. entity应该使用`EntityFactory`创建而不是new
-    4. 树形结构的entity,可以实现`TreeSortSupportEntity<PK>`
+    hsweb中的entity都为接口并提供了一个默认实现,例如 MenuEntity=>SimpleMenuEntity.但是并不强制使用此方式创建entity
+约定: 
+1. entity应该实现`Entity`接口
+2. 有主键的entity应该实现`GenericEntity<PK>`接口
+3. entity应该使用`EntityFactory`创建而不是new
+4. 树形结构的entity,可以实现`TreeSortSupportEntity<PK>`
 
-    注: `PK`=主键
+注: `PK`=主键
 
 创建一个entity.
 
@@ -96,15 +96,15 @@ public class SimpleMenuEntity implements MenuEntity {
 模块:hsweb-system-menu-dao
 
     hsweb 目前提供了mybatis的通用dao实现,支持动态条件.
-    常用dao接口:
-    1. [InsertDao](hsweb-commons-dao/hsweb-commons-dao-api/src/main/java/org/hswebframework/web/dao/InsertDao.java) : 支持insert
-    2. [DeleteDao](hsweb-commons-dao/hsweb-commons-dao-api/src/main/java/org/hswebframework/web/dao/DeleteDao.java) : 支持根据主键删除
-    3. [DeleteByEntityDao](hsweb-commons-dao/hsweb-commons-dao-api/src/main/java/org/hswebframework/web/dao/dynamic/DeleteByEntityDao.java) : 支持根据实体删除（动态条件）
-    4. [QueryByEntityDao](hsweb-commons-dao/hsweb-commons-dao-api/src/main/java/org/hswebframework/web/dao/dynamic/QueryByEntityDao.java) : 支持根据实体查询（动态条件）
-    5. [UpdateByEntityDao](hsweb-commons-dao/hsweb-commons-dao-api/src/main/java/org/hswebframework/web/dao/dynamic/UpdateByEntityDao.java) : 支持根据实体更新（动态条件）
-    6. [CrudDao](hsweb-commons-dao/hsweb-commons-dao-api/src/main/java/org/hswebframework/web/dao/CrudDao.java) : 集上述dao于一体
+常用dao接口:
+1. [InsertDao](hsweb-commons-dao/hsweb-commons-dao-api/src/main/java/org/hswebframework/web/dao/InsertDao.java) : 支持insert
+2. [DeleteDao](hsweb-commons-dao/hsweb-commons-dao-api/src/main/java/org/hswebframework/web/dao/DeleteDao.java) : 支持根据主键删除
+3. [DeleteByEntityDao](hsweb-commons-dao/hsweb-commons-dao-api/src/main/java/org/hswebframework/web/dao/dynamic/DeleteByEntityDao.java) : 支持根据实体删除（动态条件）
+4. [QueryByEntityDao](hsweb-commons-dao/hsweb-commons-dao-api/src/main/java/org/hswebframework/web/dao/dynamic/QueryByEntityDao.java) : 支持根据实体查询（动态条件）
+5. [UpdateByEntityDao](hsweb-commons-dao/hsweb-commons-dao-api/src/main/java/org/hswebframework/web/dao/dynamic/UpdateByEntityDao.java) : 支持根据实体更新（动态条件）
+6. [CrudDao](hsweb-commons-dao/hsweb-commons-dao-api/src/main/java/org/hswebframework/web/dao/CrudDao.java) : 集上述dao于一体
 
-    一般增删改查功能继承 `CrudDao`即可.
+增删改查功能继承 `CrudDao`即可.
 
 1. 新建Dao接口
 进入模块: hsweb-system-menu-dao-api 引入依赖
