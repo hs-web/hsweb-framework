@@ -21,6 +21,7 @@ package org.hswebframework.web.starter.dictionary;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.hswebframework.web.entity.dictionary.DictionaryParserEntity;
+import org.hswebframework.web.entity.dictionary.SimpleDictionaryItemEntity;
 import org.hswebframework.web.entity.dictionary.SimpleDictionaryParserEntity;
 import org.hswebframework.web.starter.convert.FastJsonHttpMessageConverter;
 import org.hswebframework.web.tests.SimpleWebApplicationTests;
@@ -29,6 +30,8 @@ import org.junit.Test;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+
+import java.util.List;
 
 /**
  * TODO 完善单元测试
@@ -46,6 +49,7 @@ public class DictionaryParserTests extends SimpleWebApplicationTests {
         //todo 设置测试属性
         entity.setName("test");
         entity.setClassifiedId("1");
+
         // test add data
         String requestBody = JSON.toJSONString(entity);
         JSONObject result = testPost("/dictionary-parser").setUp(setup -> setup.contentType(MediaType.APPLICATION_JSON).content(requestBody)).exec().resultAsJson();

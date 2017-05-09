@@ -17,6 +17,9 @@
 package org.hswebframework.web.entity.dictionary;
 
 import org.hswebframework.web.commons.entity.TreeSortSupportEntity;
+import org.hswebframework.web.commons.entity.TreeSupportEntity;
+
+import java.util.List;
 
 /**
  * 数据字典选项 实体
@@ -30,51 +33,68 @@ public interface DictionaryItemEntity extends TreeSortSupportEntity<String> {
     /**
      * 字典id
      */
-    String dictId     = "dictId";
+    String dictId         = "dictId";
     /**
      * 名称
      */
-    String name       = "name";
+    String name           = "name";
     /**
      * 字典值
      */
-    String value      = "value";
+    String value          = "value";
     /**
      * 字典文本
      */
-    String text       = "text";
+    String text           = "text";
     /**
      * 字典值类型
      */
-    String valueType  = "valueType";
+    String valueType      = "valueType";
     /**
      * 是否启用
      */
-    String enabled    = "enabled";
+    String enabled        = "enabled";
     /**
      * 说明
      */
-    String describe   = "describe";
+    String describe       = "describe";
     /**
      * 父级选项
      */
-    String parentId   = "parentId";
+    String parentId       = "parentId";
     /**
      * 树编码
      */
-    String path   = "path";
+    String path           = "path";
     /**
      * 快速搜索码
      */
-    String searchCode = "searchCode";
+    String searchCode     = "searchCode";
     /**
      * 排序索引
      */
-    String sortIndex  = "sortIndex";
+    String sortIndex      = "sortIndex";
     /**
      * 树结构层级
      */
-    String level      = "level";
+    String level          = "level";
+    /**
+     * 文本提取表达式
+     */
+    String textExpression = "textExpression";
+
+    /**
+     * 文本提取表达式
+     */
+    String valueExpression = "valueExpression";
+
+    String getTextExpression();
+
+    void setTextExpression(String textExpression);
+
+    String getValueExpression();
+
+    void setValueExpression(String valueExpression);
 
     /**
      * @return 字典id
@@ -155,6 +175,4 @@ public interface DictionaryItemEntity extends TreeSortSupportEntity<String> {
      * 设置 快速搜索码
      */
     void setSearchCode(String searchCode);
-
-
 }

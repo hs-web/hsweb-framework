@@ -34,6 +34,9 @@
         <result property="sortIndex" column="sort_index" javaType="Long" jdbcType="DECIMAL"/>
         <result property="level" column="level" javaType="Long" jdbcType="DECIMAL"/>
         <result property="properties" column="properties" javaType="Map" jdbcType="CLOB"/>
+        <result property="valueExpression" column="value_expression" javaType="String" jdbcType="CLOB"/>
+        <result property="textExpression" column="text_expression" javaType="String" jdbcType="CLOB"/>
+        <result property="properties" column="properties" javaType="Map" jdbcType="CLOB"/>
     </resultMap>
 
     <!--用于动态生成sql所需的配置-->

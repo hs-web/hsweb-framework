@@ -23,6 +23,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.hswebframework.web.entity.dictionary.DictionaryEntity;
 import org.hswebframework.web.entity.dictionary.DictionaryItemEntity;
 import org.hswebframework.web.entity.dictionary.SimpleDictionaryEntity;
+import org.hswebframework.web.entity.dictionary.SimpleDictionaryItemEntity;
 import org.hswebframework.web.starter.convert.FastJsonHttpMessageConverter;
 import org.hswebframework.web.tests.SimpleWebApplicationTests;
 import org.junit.Assert;
@@ -30,6 +31,8 @@ import org.junit.Test;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+
+import java.util.List;
 
 /**
  * TODO 完善单元测试
@@ -52,6 +55,26 @@ public class DictionaryTests extends SimpleWebApplicationTests {
         entity.setDescribe("test");
         entity.setClassifiedId("test");
         entity.setEnabled(true);
+        String json = "[" +
+                "{'value':'1','text':'水果','children':" +
+                "[" +
+                "{'value':'101','text':'苹果'," +
+                "'children':[" +
+                "{'value':'10102','text':'红富士'}" +
+                ",{'value':'10103','text':'青苹果'}" +
+                //使用表达式进行解析
+                ",{'value':'10105','text':'其他苹果'" +
+                ",'textExpression':'${#value}[${#context[otherApple]}]'" +
+                ",'valueExpression':'${(#context.put(\\'otherApple\\',#pattern.split(\"[ \\\\[ \\\\]]\")[1])==null)?#value:#value}'" +
+                "}" +
+                "]}" +
+                ",{'value':'102','text':'梨子'}]" +
+                "}" +
+                ",{'value':'2','text':'蔬菜'}" +
+                "]";
+
+        List<DictionaryItemEntity> itemEntities = (List) JSON.parseArray(json, SimpleDictionaryItemEntity.class);
+        entity.setItems(itemEntities);
         // test add data
         String requestBody = JSON.toJSONString(entity);
         JSONObject result = testPost("/dictionary").setUp(setup -> setup.contentType(MediaType.APPLICATION_JSON).content(requestBody)).exec().resultAsJson();

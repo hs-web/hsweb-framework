@@ -43,6 +43,12 @@ public class SimpleDictionaryItemEntity extends SimpleTreeSortSupportEntity<Stri
     //快速搜索码
     private String searchCode;
 
+    // 使用表达式拼接text
+    // #value+'('+#context.otherVal+')'
+    private String textExpression;
+    private String valueExpression;
+
+
     private List<SimpleDictionaryItemEntity> children;
 
     @Override
@@ -53,6 +59,24 @@ public class SimpleDictionaryItemEntity extends SimpleTreeSortSupportEntity<Stri
 
     public void setChildren(List<SimpleDictionaryItemEntity> children) {
         this.children = children;
+    }
+
+    public String getTextExpression() {
+        return textExpression;
+    }
+
+    public void setTextExpression(String textExpression) {
+        this.textExpression = textExpression;
+    }
+
+    @Override
+    public String getValueExpression() {
+        return valueExpression;
+    }
+
+    @Override
+    public void setValueExpression(String valueExpression) {
+        this.valueExpression = valueExpression;
     }
 
     /**
