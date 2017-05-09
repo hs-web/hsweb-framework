@@ -18,7 +18,8 @@
 
 package org.hswebframework.web.oauth2.server.simple;
 
-import org.hswebframework.web.authorization.oauth2.api.entity.OAuth2AccessEntity;
+
+import org.hswebframework.web.authorization.oauth2.server.entity.OAuth2AccessEntity;
 import org.hswebframework.web.authorization.oauth2.server.OAuth2AccessToken;
 import org.hswebframework.web.authorization.oauth2.server.token.AccessTokenService;
 import org.hswebframework.web.commons.entity.factory.EntityFactory;

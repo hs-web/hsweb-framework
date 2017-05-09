@@ -111,10 +111,10 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
     @Override
     @CacheEvict(value = USER_CACHE_NAME, key = "#userEntity.id")
     public String insert(UserEntity userEntity) {
-        //判断用户是否已经存在
-        tryValidateProperty(null == selectByUsername(userEntity.getUsername()), UserEntity.username, "{username_exists}");
         //用户名合法性验证
         tryValidateProperty(usernameValidator, UserEntity.username, userEntity.getUsername());
+        //判断用户是否已经存在
+        tryValidateProperty(null == selectByUsername(userEntity.getUsername()), UserEntity.username, "{username_exists}");
         //密码强度验证
         tryValidateProperty(passwordStrengthValidator, UserEntity.password, userEntity.getPassword());
         userEntity.setCreateTime(System.currentTimeMillis());

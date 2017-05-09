@@ -18,7 +18,7 @@
 
 package org.hswebframework.web.dao.oauth2;
 
-import org.hswebframework.web.authorization.oauth2.api.entity.AuthorizationCodeEntity;
+import org.hswebframework.web.authorization.oauth2.server.entity.AuthorizationCodeEntity;
 import org.hswebframework.web.dao.InsertDao;
 import org.hswebframework.web.dao.dynamic.DeleteByEntityDao;
 import org.hswebframework.web.dao.dynamic.QueryByEntityDao;

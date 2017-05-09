@@ -23,13 +23,8 @@ import io.swagger.annotations.ApiOperation;
 import org.hswebframework.web.AuthorizeException;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.AuthenticationHolder;
-import org.hswebframework.web.authorization.annotation.Authorize;
-import org.hswebframework.web.authorization.oauth2.api.OAuth2ServerService;
-import org.hswebframework.web.authorization.oauth2.api.entity.OAuth2AccessEntity;
 import org.hswebframework.web.authorization.oauth2.server.OAuth2AccessToken;
 import org.hswebframework.web.authorization.oauth2.server.token.AccessTokenService;
-import org.hswebframework.web.oauth2.model.AuthorizationCodeModel;
-import org.hswebframework.web.oauth2.model.ImplicitAccessTokenModel;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;

@@ -19,7 +19,7 @@
 package org.hswebframework.web.dao.oauth2;
 
 
-import org.hswebframework.web.authorization.oauth2.api.entity.OAuth2ClientEntity;
+import org.hswebframework.web.authorization.oauth2.server.entity.OAuth2ClientEntity;
 import org.hswebframework.web.dao.CrudDao;
 
 /**

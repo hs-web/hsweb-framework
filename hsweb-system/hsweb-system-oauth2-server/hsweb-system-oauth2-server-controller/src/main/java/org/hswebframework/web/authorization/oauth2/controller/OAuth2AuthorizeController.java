@@ -23,8 +23,6 @@ import io.swagger.annotations.ApiOperation;
 import org.hswebframework.web.AuthorizeException;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.annotation.Authorize;
-import org.hswebframework.web.authorization.oauth2.api.OAuth2ServerService;
-import org.hswebframework.web.authorization.oauth2.api.entity.OAuth2AccessEntity;
 import org.hswebframework.web.authorization.oauth2.server.OAuth2AccessToken;
 import org.hswebframework.web.authorization.oauth2.server.support.OAuth2Granter;
 import org.hswebframework.web.authorization.oauth2.server.support.code.AuthorizationCodeRequest;

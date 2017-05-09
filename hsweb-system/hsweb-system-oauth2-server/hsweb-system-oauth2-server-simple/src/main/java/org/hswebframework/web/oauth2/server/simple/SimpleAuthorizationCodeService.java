@@ -18,8 +18,7 @@
 
 package org.hswebframework.web.oauth2.server.simple;
 
-import com.alibaba.fastjson.JSON;
-import org.hswebframework.web.authorization.oauth2.api.entity.AuthorizationCodeEntity;
+import org.hswebframework.web.authorization.oauth2.server.entity.AuthorizationCodeEntity;
 import org.hswebframework.web.authorization.oauth2.server.support.code.AuthorizationCode;
 import org.hswebframework.web.authorization.oauth2.server.support.code.AuthorizationCodeRequest;
 import org.hswebframework.web.authorization.oauth2.server.support.code.AuthorizationCodeService;

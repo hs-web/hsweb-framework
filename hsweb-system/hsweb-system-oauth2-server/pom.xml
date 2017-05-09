@@ -33,6 +33,7 @@
         <module>hsweb-system-oauth2-server-starter</module>
         <module>hsweb-system-oauth2-server-dao</module>
         <module>hsweb-system-oauth2-server-model</module>
+        <module>hsweb-system-oauth2-server-entity</module>
     </modules>
     <packaging>pom</packaging>
     <artifactId>hsweb-system-oauth2-server</artifactId>

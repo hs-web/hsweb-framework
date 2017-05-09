@@ -37,7 +37,7 @@
         </dependency>
         <dependency>
             <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-authorization-oauth2-auth-server</artifactId>
+            <artifactId>hsweb-system-oauth2-server-entity</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

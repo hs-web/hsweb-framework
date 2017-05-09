@@ -22,7 +22,7 @@
         "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="org.hswebframework.web.dao.oauth2.OAuth2ClientDao">
-    <resultMap id="OAuth2ClientResultMap" type="org.hswebframework.web.authorization.oauth2.api.entity.SimpleOAuth2ClientEntity">
+    <resultMap id="OAuth2ClientResultMap" type="org.hswebframework.web.authorization.oauth2.server.entity.SimpleOAuth2ClientEntity">
         <id property="id" column="u_id" javaType="String" jdbcType="VARCHAR"/>
         <result property="secret" column="secret" javaType="String" jdbcType="VARCHAR"/>
         <result property="name" column="name" javaType="String" jdbcType="VARCHAR"/>
@@ -43,7 +43,7 @@
         <bind name="tableName" value="'s_oauth2_client'"/>
     </sql>
 
-    <insert id="insert" parameterType="org.hswebframework.web.authorization.oauth2.api.entity.SimpleOAuth2ClientEntity">
+    <insert id="insert" parameterType="org.hswebframework.web.commons.entity.Entity">
         <include refid="config"/>
         <include refid="BasicMapper.buildInsertSql"/>
     </insert>

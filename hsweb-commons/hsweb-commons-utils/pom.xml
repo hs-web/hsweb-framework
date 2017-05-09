@@ -55,5 +55,10 @@
             <artifactId>aspectjweaver</artifactId>
             <optional>true</optional>
         </dependency>
+        <dependency>
+            <groupId>org.hswebframework</groupId>
+            <artifactId>hsweb-expands-script</artifactId>
+            <optional>true</optional>
+        </dependency>
     </dependencies>
 </project>

@@ -55,7 +55,7 @@ public interface GenericEntityController<E extends GenericEntity<PK>, PK, Q exte
             @ApiResponse(code = 403, message = "无权限"),
             @ApiResponse(code = 409, message = "存在重复的资源")
     })
-    default ResponseMessage saveOrUpdate(@PathVariable PK id, @RequestBody M data) {
+    default ResponseMessage<PK> saveOrUpdate(@PathVariable PK id, @RequestBody M data) {
         E entity = getService().createEntity();
         entity.setId(id);
         return ResponseMessage.ok(getService().saveOrUpdate(modelToEntity(data, entity)));
