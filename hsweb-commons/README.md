@@ -7,3 +7,5 @@
 1. [hsweb-commons-service](hsweb-commons-service):通用服务类
 1. [hsweb-commons-utils](hsweb-commons-utils):工具类
 
+# 使用
+[如何建一个增删改查功能](create-crud.md)
