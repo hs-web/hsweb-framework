@@ -216,7 +216,7 @@ public interface MenuDao extends CrudDao<MenuEntity, String> {
 6. [DefaultDSLQueryService](hsweb-commons-service/hsweb-commons-service-simple/src/main/java/org/hswebframework/web/service/DefaultDSLQueryService.java): dsl方式查询
 7. [DefaultDSLUpdateService](hsweb-commons-service/hsweb-commons-service-simple/src/main/java/org/hswebframework/web/service/DefaultDSLUpdateService.java): dsl方式更新
 
-DSL方式操作使用[easy-orm](https://github.com/hs-web/hsweb-easy-orm)来构建动态查询参数,[使用方法](dsl-use.md).
+DSL方式操作使用[easy-orm](https://github.com/hs-web/hsweb-easy-orm)来构建动态查询参数,[使用方法](hsweb-commons-service/hsweb-commons-service-simple/README.md).
 
 1. 创建service接口
 进入模块: hsweb-system-menu-service-api
