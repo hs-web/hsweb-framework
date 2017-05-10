@@ -43,7 +43,7 @@ where name like '张%' and (age>10 and age <18)
 
 4. 排序
 ```html
-sort[0].name=age&sort[0].order=desc
+sorts[0].name=age&sorts[0].order=desc
 ```
 等同于sql
 ```sql
