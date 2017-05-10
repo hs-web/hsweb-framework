@@ -18,7 +18,7 @@ where name like '张三'
 2. 复杂条件
 ```html
 terms[0].column=name&terms[0].termType=eq&terms[0].value=张三
-&terms[1].column=name&terms[1].termType=eq&type=or&terms[1].value=李四
+&terms[1].column=name&terms[1].termType=eq&terms[1].type=or&terms[1].value=李四
 ```
 等同于sql
 ```sql
