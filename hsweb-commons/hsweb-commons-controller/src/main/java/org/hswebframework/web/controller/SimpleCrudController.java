@@ -16,24 +16,35 @@
  *
  */
 
-package org.hswebframework.web.service;
+package org.hswebframework.web.controller;
 
-import org.hswebframework.web.dao.CrudDao;
+import org.hswebframework.web.commons.entity.Entity;
+import org.hswebframework.web.service.CrudService;
+import org.springframework.beans.BeanUtils;
 
 /**
+ * 通用增删改查控制器
  *
  * @author zhouhao
- * @see DefaultDSLQueryService
- * @see DefaultDSLUpdateService
- * @see DefaultDSLDeleteService
+ * @see QueryController
+ * @see CreateController
+ * @see UpdateController
+ * @see DeleteController
  * @see CrudService
- * @see CrudDao
+ * @since 3.0
  */
-public interface GenericService<E, PK> extends
-        DefaultDSLQueryService<E, PK>,
-        DefaultDSLUpdateService<E,PK>,
-        DefaultDSLDeleteService<PK>,
-        CrudService<E, PK> {
+public interface SimpleCrudController<E, PK, Q extends Entity>
+        extends QueryController<E, PK, Q>
+        , UpdateController<E, PK, E>
+        , CreateController<E, PK, E>
+        , DeleteController<PK> {
+
+    @SuppressWarnings("unchecked")
+    CrudService<E, PK> getService();
+
     @Override
-    CrudDao<E, PK> getDao();
+    default E modelToEntity(E model, E entity) {
+        // model = entity
+        return model;
+    }
 }

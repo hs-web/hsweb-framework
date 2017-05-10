@@ -27,6 +27,7 @@ import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.commons.entity.TreeSupportEntity;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.controller.GenericEntityController;
+import org.hswebframework.web.controller.SimpleGenericEntityController;
 import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.entity.menu.MenuEntity;
 import org.hswebframework.web.logging.AccessLogger;
@@ -53,7 +54,7 @@ import static org.hswebframework.web.controller.message.ResponseMessage.ok;
 @Authorize(permission = "menu")
 @AccessLogger("菜单")
 @Api(value = "menu-manager", description = "系统菜单管理")
-public class MenuController implements GenericEntityController<MenuEntity, String, QueryParamEntity, MenuEntity> {
+public class MenuController implements SimpleGenericEntityController<MenuEntity, String, QueryParamEntity> {
 
     private MenuService menuService;
 
