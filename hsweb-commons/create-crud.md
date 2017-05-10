@@ -22,7 +22,8 @@ hsweb 按照功能分模块, 再将controller,service,dao等分为子模块.
 ## Entity 
 模块:hsweb-system-menu-entity
 
-    hsweb中的entity都为接口并提供了一个默认实现,例如 MenuEntity=>SimpleMenuEntity.但是并不强制使用此方式创建entity
+    hsweb中的entity都为接口并提供了一个默认实现,例如 MenuEntity=>SimpleMenuEntity.
+    但是并不强制使用此方式创建entity. 可以只有类,不使用接口.
 约定: 
 1. entity应该实现`Entity`接口
 2. 有主键的entity应该实现`GenericEntity<PK>`接口
@@ -321,7 +322,7 @@ public class SimpleMenuService
 泛型: E, PK, Q extends Entity, M => Entity,主键,动态查询实体类,Model. 
 增改时,使用Model接收参数;查询时,使用Q接受参数,使用Model作为响应.
 注意: Model 并不是必须,如果不使用单独的Model,可使用 `SimpleCrudController`. 通用controller使用restful方式提供接口
-响应结果统一为`ResponseMessage<T>`. [更多使用方法](controller-use.md)
+响应结果统一为`ResponseMessage<T>`. [更多使用方法](hsweb-commons-controller/README.md)
 
 1. 创建Controller
 
