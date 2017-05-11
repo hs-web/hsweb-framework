@@ -1,7 +1,7 @@
 package org.hswebframework.web.concurrent.lock;
 
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 
@@ -11,17 +11,25 @@ import java.util.concurrent.locks.ReadWriteLock;
  * @author zhouhao
  */
 public abstract class AbstactLocakFactory implements LockFactory {
-    private Map<String, Lock>          lockStore          = new ConcurrentHashMap<>(128);
-    private Map<String, ReadWriteLock> readWriteLockStore = new ConcurrentHashMap<>(128);
+    private final Map<String, Lock>          lockStore          = new HashMap<>(128);
+    private final Map<String, ReadWriteLock> readWriteLockStore = new HashMap<>(128);
 
     @Override
     public Lock getLock(String lockKey) {
-        return lockStore.computeIfAbsent(lockKey, this::createLock);
+        Lock lock = lockStore.get(lockKey);
+        if (lock != null) return lock;
+        synchronized (lockStore) {
+            return lockStore.computeIfAbsent(lockKey, this::createLock);
+        }
     }
 
     @Override
     public ReadWriteLock getReadWriteLock(String lockKey) {
-        return readWriteLockStore.computeIfAbsent(lockKey, this::createReadWriteLock);
+        ReadWriteLock lock = readWriteLockStore.get(lockKey);
+        if (lock != null) return lock;
+        synchronized (readWriteLockStore) {
+            return readWriteLockStore.computeIfAbsent(lockKey, this::createReadWriteLock);
+        }
     }
 
     protected abstract Lock createLock(String lockKey);

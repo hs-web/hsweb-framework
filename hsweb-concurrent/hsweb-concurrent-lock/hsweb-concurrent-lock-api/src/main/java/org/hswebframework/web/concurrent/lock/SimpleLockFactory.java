@@ -14,7 +14,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * @see AbstactLocakFactory
  * @since 3.0
  */
-public class SimpleLocakFactory extends AbstactLocakFactory {
+public class SimpleLockFactory extends AbstactLocakFactory {
     @Override
     protected synchronized Lock createLock(String lockKey) {
         return new ReentrantLock();

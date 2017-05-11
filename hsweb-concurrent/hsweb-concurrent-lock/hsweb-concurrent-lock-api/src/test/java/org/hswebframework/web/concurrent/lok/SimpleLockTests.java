@@ -1,12 +1,10 @@
 package org.hswebframework.web.concurrent.lok;
 
 import org.hswebframework.web.concurrent.lock.LockFactory;
-import org.hswebframework.web.concurrent.lock.SimpleLocakFactory;
+import org.hswebframework.web.concurrent.lock.SimpleLockFactory;
 import org.junit.Assert;
 import org.junit.Test;
-import org.slf4j.Logger;
 
-import java.math.BigDecimal;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.function.Consumer;
@@ -18,7 +16,7 @@ import java.util.function.Consumer;
  */
 public class SimpleLockTests {
 
-    private LockFactory lockFactory = new SimpleLocakFactory();
+    private LockFactory lockFactory = new SimpleLockFactory();
 
     private long counter = 0;
 
