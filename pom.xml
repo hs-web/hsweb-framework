@@ -216,6 +216,13 @@
                 <artifactId>swagger-annotations</artifactId>
                 <version>1.5.10</version>
             </dependency>
+
+            <dependency>
+                <groupId>org.redisson</groupId>
+                <artifactId>redisson</artifactId>
+                <version>3.4.1</version>
+            </dependency>
+
             <dependency>
                 <groupId>org.hswebframework</groupId>
                 <artifactId>hsweb-utils</artifactId>
