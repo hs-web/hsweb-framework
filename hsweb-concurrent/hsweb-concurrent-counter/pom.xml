@@ -30,6 +30,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>hsweb-concurrent-counter-api</module>
+        <module>hsweb-concurrent-counter-redis</module>
     </modules>
 
 
