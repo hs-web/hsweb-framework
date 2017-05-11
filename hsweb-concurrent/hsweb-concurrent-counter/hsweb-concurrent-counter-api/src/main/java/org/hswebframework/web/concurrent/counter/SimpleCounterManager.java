@@ -7,7 +7,7 @@ package org.hswebframework.web.concurrent.counter;
  */
 public class SimpleCounterManager extends AbstractCounterManager {
     @Override
-    protected Counter createCount(String name, long initValue) {
+    protected Counter createCount(String name) {
         return new SimpleCounter();
     }
 }

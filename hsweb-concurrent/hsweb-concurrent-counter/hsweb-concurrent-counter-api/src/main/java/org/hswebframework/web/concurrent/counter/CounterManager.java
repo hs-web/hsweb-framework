@@ -24,9 +24,6 @@ package org.hswebframework.web.concurrent.counter;
  */
 public interface CounterManager {
 
-    default Counter getCounter(String name) {
-        return getCounter(name, 0);
-    }
+    Counter getCounter(String name);
 
-    Counter getCounter(String name, long initValue);
 }
