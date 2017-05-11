@@ -31,7 +31,17 @@ import org.hswebframework.web.message.support.TextMessage;
 public class SimpleMessageBuilder implements MessageBuilder {
     @Override
     public TextMessage text(String msg) {
-        return (TextMessage) () -> msg;
+        return new TextMessage() {
+            @Override
+            public String getMessage() {
+                return msg;
+            }
+
+            @Override
+            public String toString() {
+                return msg;
+            }
+        };
     }
 
     @Override

@@ -18,6 +18,7 @@
 
 package org.hswebframework.web.message;
 
+import org.hswebframework.web.message.support.TextMessage;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -33,12 +34,16 @@ public class SimpleMessageTests {
     @Test
     public void simpleTest() throws InterruptedException {
         byte[] stat = new byte[1];
-        messager.subscribe(user("test"))
+
+       messager.subscribe(user("test"))
+                .onMessage(System.out::println)
                 .onMessage(msg -> stat[0] = 1);
+
         messager.publish(text("hello2"))
                 .to(user("test"))
                 .from(user("admin"))
                 .send();
+
         Thread.sleep(1000);
         Assert.assertEquals(stat[0], 1);
     }
