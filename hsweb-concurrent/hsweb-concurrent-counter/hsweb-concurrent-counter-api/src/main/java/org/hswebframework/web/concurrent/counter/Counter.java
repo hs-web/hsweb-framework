@@ -17,19 +17,17 @@
 
 package org.hswebframework.web.concurrent.counter;
 
-import java.math.BigDecimal;
-
 /**
  * TODO 完成注释
  *
  * @author zhouhao
  */
 public interface Counter {
-    BigDecimal get();
+    long get();
 
-    void set(Number num);
+    void set(long num);
 
-    BigDecimal getAndAdd(long num);
+    long getAndAdd(long num);
 
     void add(long num);
 
@@ -37,8 +35,8 @@ public interface Counter {
 
     void decrement();
 
-    BigDecimal incrementAndGet();
+    long incrementAndGet();
 
-    BigDecimal decrementAndGet();
+    long decrementAndGet();
 
 }
