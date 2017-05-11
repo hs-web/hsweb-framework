@@ -22,7 +22,8 @@ public class RedissonCounterManager extends AbstractCounterManager {
     @Override
     protected Counter createCount(String name, long initValue) {
         Counter counter = new RedissonCounter(redisson.getAtomicLong(name));
-        counter.set(initValue);
+        if (counter.get() == 0)
+            counter.set(initValue);
         return counter;
     }
 }

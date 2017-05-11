@@ -22,6 +22,9 @@ public class RedissonCounterTest {
         Redisson redisson = (Redisson) Redisson.create(config);
 
         CounterManager counterManager = new RedissonCounterManager(redisson);
+        //重置
+        counterManager.getCounter("test").set(0);
+
         for (int i = 0; i < 100; i++) {
             new Thread(() -> counterManager.getCounter("test").increment()).start();
         }
