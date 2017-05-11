@@ -10,7 +10,7 @@ import java.util.concurrent.locks.ReadWriteLock;
  *
  * @author zhouhao
  */
-public abstract class AbstactLocakFactory implements LockFactory {
+public abstract class AbstactLocakManager implements LockManager {
     private final Map<String, Lock>          lockStore          = new HashMap<>(128);
     private final Map<String, ReadWriteLock> readWriteLockStore = new HashMap<>(128);
 

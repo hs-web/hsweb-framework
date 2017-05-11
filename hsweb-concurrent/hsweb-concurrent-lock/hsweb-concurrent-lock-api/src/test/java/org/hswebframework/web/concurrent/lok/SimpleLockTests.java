@@ -1,7 +1,7 @@
 package org.hswebframework.web.concurrent.lok;
 
-import org.hswebframework.web.concurrent.lock.LockFactory;
-import org.hswebframework.web.concurrent.lock.SimpleLockFactory;
+import org.hswebframework.web.concurrent.lock.LockManager;
+import org.hswebframework.web.concurrent.lock.SimpleLockManager;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -16,14 +16,14 @@ import java.util.function.Consumer;
  */
 public class SimpleLockTests {
 
-    private LockFactory lockFactory = new SimpleLockFactory();
+    private LockManager lockManager = new SimpleLockManager();
 
     private long counter = 0;
 
     @Test
     public void testLock() throws InterruptedException {
         counter = 0;
-        Lock lock = lockFactory.getLock("foo");
+        Lock lock = lockManager.getLock("foo");
         for (int i = 0; i < 100; i++) {
             new Thread(() -> {
                 lock.lock();
@@ -40,7 +40,7 @@ public class SimpleLockTests {
     @Test
     public void testReadWriteLock() throws InterruptedException {
         counter = 0;
-        ReadWriteLock readWriteLock = lockFactory.getReadWriteLock("foo");
+        ReadWriteLock readWriteLock = lockManager.getReadWriteLock("foo");
 
         Lock readLock = readWriteLock.readLock();
 

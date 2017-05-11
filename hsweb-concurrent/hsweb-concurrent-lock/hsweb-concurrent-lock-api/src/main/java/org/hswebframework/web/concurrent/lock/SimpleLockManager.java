@@ -11,10 +11,10 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * @author zhouhao
  * @see ReentrantLock
  * @see ReentrantReadWriteLock
- * @see AbstactLocakFactory
+ * @see AbstactLocakManager
  * @since 3.0
  */
-public class SimpleLockFactory extends AbstactLocakFactory {
+public class SimpleLockManager extends AbstactLocakManager {
     @Override
     protected synchronized Lock createLock(String lockKey) {
         return new ReentrantLock();

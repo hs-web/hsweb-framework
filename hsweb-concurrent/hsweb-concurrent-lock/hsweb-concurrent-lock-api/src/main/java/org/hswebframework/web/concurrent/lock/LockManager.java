@@ -11,7 +11,7 @@ import java.util.concurrent.locks.ReadWriteLock;
  * @see ReadWriteLock
  * @since 3.0
  */
-public interface LockFactory {
+public interface LockManager {
     Lock getLock(String lockKey);
 
     ReadWriteLock getReadWriteLock(String lockKey);
