@@ -18,7 +18,6 @@
 
 package org.hswebframework.web.message;
 
-import org.hswebframework.web.message.support.TextMessage;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -41,7 +40,6 @@ public class SimpleMessageTests {
 
         messager.publish(text("hello2"))
                 .to(user("test"))
-                .from(user("admin"))
                 .send();
 
         Thread.sleep(1000);

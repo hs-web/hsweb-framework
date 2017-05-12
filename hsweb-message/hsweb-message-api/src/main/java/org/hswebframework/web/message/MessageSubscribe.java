@@ -29,4 +29,6 @@ public interface MessageSubscribe<M extends Message> {
     MessageSubscribe<M> iam(MessageSubject iam);
 
     MessageSubscribe<M> onMessage(Consumer<M> consumer);
+
+    void cancel();
 }

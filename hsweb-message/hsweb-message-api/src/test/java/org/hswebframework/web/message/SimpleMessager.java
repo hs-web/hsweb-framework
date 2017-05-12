@@ -39,11 +39,11 @@ public class SimpleMessager implements Messager {
         return queueStorage.computeIfAbsent(key, k -> new LinkedBlockingQueue<>());
     }
 
-    List<MessagePublishHanlder> publishHanlders = new ArrayList<>();
+    List<MessagePublishHandler> publishHanlders = new ArrayList<>();
 
     public SimpleMessager() {
         //just support TextMessage
-        publishHanlders.add(new MessagePublishHanlder() {
+        publishHanlders.add(new MessagePublishHandler() {
             @Override
             public boolean isSupport(Message message) {
                 return message instanceof TextMessage;
@@ -53,11 +53,9 @@ public class SimpleMessager implements Messager {
             public MessagePublish handle(Message message) {
                 return new SimpleMessagePublish() {
                     @Override
-                    public <T> T send() {
-                        getQueue(buildKey(to)).add(message);
-                        return null;
+                    public void send() {
+                        getQueue(buildKey(to)).offer(message);
                     }
-
                 };
             }
         });

@@ -43,15 +43,15 @@ public class StaticMessageSubjectBuilder {
         return messageSubjectBuilder.users(userIds);
     }
 
-    public MultipleUserMessageSubject users(Set<String> userIds) {
+    public static MultipleUserMessageSubject users(Set<String> userIds) {
         return messageSubjectBuilder.users(userIds);
     }
 
-    public MessageSubject system() {
+    public static MessageSubject system() {
         return messageSubjectBuilder.system();
     }
 
-    public TopicMessageSubject topic(String topic) {
+    public static TopicMessageSubject topic(String topic) {
         return messageSubjectBuilder.topic(topic);
     }
 }

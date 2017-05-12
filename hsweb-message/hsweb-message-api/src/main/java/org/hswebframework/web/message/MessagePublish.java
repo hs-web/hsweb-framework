@@ -18,19 +18,11 @@
 
 package org.hswebframework.web.message;
 
-import java.util.function.Consumer;
-
 /**
  * @author zhouhao
  */
 public interface MessagePublish {
-    MessagePublish from(MessageSubject subject);
-
     MessagePublish to(MessageSubject subject);
 
-    MessagePublish deleteOnTimeout(long timeOutSecond);
-
-    <T> T send();
-
-    <T> void send(Consumer<T> responseConsumer);
+    void send();
 }

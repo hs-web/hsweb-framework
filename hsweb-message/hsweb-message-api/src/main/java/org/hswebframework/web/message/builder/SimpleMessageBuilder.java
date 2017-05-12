@@ -23,27 +23,42 @@ import org.hswebframework.web.message.support.ObjectMessage;
 import org.hswebframework.web.message.support.ServiceInvokerMessage;
 import org.hswebframework.web.message.support.TextMessage;
 
+import java.io.Serializable;
+
 /**
  * TODO 完成注释
  *
  * @author zhouhao
  */
-public class StaticMessageBuilder {
-    private static MessageBuilder messageBuilder = new SimpleMessageBuilder();
+public class SimpleMessageBuilder implements MessageBuilder ,Serializable {
+    @Override
+    public TextMessage text(String msg) {
+        return new TextMessage() {
+            @Override
+            public String getMessage() {
+                return msg;
+            }
 
-    public static TextMessage text(String msg) {
-        return messageBuilder.text(msg);
+            @Override
+            public String toString() {
+                return msg;
+            }
+        };
     }
 
+    @Override
     public <T> ObjectMessage object(T msg) {
-        return messageBuilder.object(msg);
+        return (ObjectMessage) () -> msg;
     }
 
+    @Override
     public DataMessage data(byte[] msg) {
-        return messageBuilder.data(msg);
+        return (DataMessage) () -> msg;
     }
 
+    @Override
     public ServiceInvokerMessage service(String serviceName) {
-        return messageBuilder.service(serviceName);
+
+        return null;
     }
 }

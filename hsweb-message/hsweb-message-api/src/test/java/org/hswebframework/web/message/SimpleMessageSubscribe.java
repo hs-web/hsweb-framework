@@ -61,6 +61,11 @@ public class SimpleMessageSubscribe<T extends Message> implements MessageSubscri
         return this;
     }
 
+    @Override
+    public void cancel() {
+        stop = true;
+    }
+
     public void startConsumer() {
         if (started) return;
         new Thread(() -> {

@@ -20,7 +20,6 @@ import java.util.function.Consumer;
  * @author zhouhao
  */
 public class RedissonMessagePublish implements MessagePublish {
-    private MessageSubject from;
     private MessageSubject to;
     private RedissonClient redissonClient;
     private Message        message;
@@ -31,20 +30,9 @@ public class RedissonMessagePublish implements MessagePublish {
     }
 
     @Override
-    public MessagePublish from(MessageSubject subject) {
-        this.from = subject;
-        return this;
-    }
-
-    @Override
     public MessagePublish to(MessageSubject subject) {
         this.to = subject;
         return this;
-    }
-
-    @Override
-    public MessagePublish deleteOnTimeout(long timeOutSecond) {
-        return null;
     }
 
     private boolean useQueue() {
@@ -61,7 +49,10 @@ public class RedissonMessagePublish implements MessagePublish {
     };
 
     @Override
-    public <T> T send() {
+    public void send() {
+        if (redissonClient.isShutdown() || redissonClient.isShuttingDown()) {
+            return;
+        }
         if (to instanceof UserMessageSubject) {
             queueConsumer.accept(((UserMessageSubject) to).getUserId());
         }
@@ -72,12 +63,7 @@ public class RedissonMessagePublish implements MessagePublish {
             RTopic<Message> topic = redissonClient.getTopic("topic_" + ((TopicMessageSubject) to).getTopic(), codec);
             topic.publish(message);
         }
-        throw new UnsupportedOperationException();
     }
 
-    @Override
-    public <T> void send(Consumer<T> responseConsumer) {
-        responseConsumer.accept(send());
-    }
 
 }

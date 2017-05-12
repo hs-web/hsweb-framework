@@ -28,35 +28,22 @@ import org.hswebframework.web.message.support.TextMessage;
  *
  * @author zhouhao
  */
-public class SimpleMessageBuilder implements MessageBuilder {
-    @Override
-    public TextMessage text(String msg) {
-        return new TextMessage() {
-            @Override
-            public String getMessage() {
-                return msg;
-            }
+public class StaticMessageBuilder {
+    private static MessageBuilder messageBuilder = new SimpleMessageBuilder();
 
-            @Override
-            public String toString() {
-                return msg;
-            }
-        };
+    public static TextMessage text(String msg) {
+        return messageBuilder.text(msg);
     }
 
-    @Override
-    public <T> ObjectMessage object(T msg) {
-        return (ObjectMessage) () -> msg;
+    public static <T> ObjectMessage object(T msg) {
+        return messageBuilder.object(msg);
     }
 
-    @Override
-    public DataMessage data(byte[] msg) {
-        return (DataMessage) () -> msg;
+    public static DataMessage data(byte[] msg) {
+        return messageBuilder.data(msg);
     }
 
-    @Override
-    public ServiceInvokerMessage service(String serviceName) {
-
-        return null;
+    public static ServiceInvokerMessage service(String serviceName) {
+        return messageBuilder.service(serviceName);
     }
 }

@@ -23,7 +23,7 @@ package org.hswebframework.web.message;
  *
  * @author zhouhao
  */
-public interface MessagePublishHanlder {
+public interface MessagePublishHandler {
     boolean isSupport(Message message);
 
     MessagePublish handle(Message message);

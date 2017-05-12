@@ -23,6 +23,7 @@ import org.hswebframework.web.message.support.MultipleUserMessageSubject;
 import org.hswebframework.web.message.support.TopicMessageSubject;
 import org.hswebframework.web.message.support.UserMessageSubject;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -32,7 +33,7 @@ import java.util.Set;
  *
  * @author zhouhao
  */
-public class SimpleMessageSubjectBuilder implements MessageSubjectBuilder {
+public class SimpleMessageSubjectBuilder implements MessageSubjectBuilder,Serializable {
     @Override
     public UserMessageSubject user(String userId) {
         return () -> userId;
