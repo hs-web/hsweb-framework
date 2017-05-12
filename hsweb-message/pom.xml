@@ -14,6 +14,8 @@
     <modules>
         <module>hsweb-message-api</module>
         <module>hsweb-message-jms</module>
+        <module>hsweb-message-redis</module>
+        <module>hsweb-message-websocket</module>
     </modules>
 
 
