@@ -49,7 +49,7 @@ public class RedissonLockTest {
         Lock readLock = readWriteLock.readLock();
 
         Lock writeLock = readWriteLock.writeLock();
-        Consumer<Long>[] consumer = new Consumer[1];
+        Consumer[] consumer = new Consumer[1];
         consumer[0] = System.out::println;
         for (int i = 0; i < 10; i++) {
             new Thread(() -> {
