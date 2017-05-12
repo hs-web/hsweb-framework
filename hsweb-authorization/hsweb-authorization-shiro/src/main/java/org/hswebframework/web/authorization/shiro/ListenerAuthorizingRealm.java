@@ -78,11 +78,10 @@ public class ListenerAuthorizingRealm extends AuthorizingRealm
                 authentication.getPermissions()
                         .stream()
                         .map(permission -> {
-                            StringBuilder builder = new StringBuilder(permission.getId());
-                            builder.append(permission.getActions().stream()
+                            String builder = permission.getId() + permission.getActions().stream()
                                     .reduce((a1, a2) -> a1.concat(",").concat(a2))
-                                    .orElse(""));
-                            return new WildcardPermission(builder.toString());
+                                    .orElse("");
+                            return new WildcardPermission(builder);
                         }).collect(Collectors.toList()));
 
         return authorizationInfo;
