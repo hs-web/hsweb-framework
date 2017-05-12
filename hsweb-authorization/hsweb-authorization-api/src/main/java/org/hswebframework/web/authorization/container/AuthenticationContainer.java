@@ -20,6 +20,7 @@ package org.hswebframework.web.authorization.container;
 
 import org.hswebframework.web.authorization.Authentication;
 
+import javax.servlet.http.HttpSession;
 import java.util.List;
 
 /**
@@ -29,6 +30,14 @@ import java.util.List;
  * @since 3.0
  */
 public interface AuthenticationContainer {
+
+    /**
+     * 根据sessionId获取权限信息
+     *
+     * @param sessionId
+     * @return 权限信息, 未授权时返回null
+     */
+    Authentication getAuthenticationBySessionId(String sessionId);
 
     /**
      * @param userId 用户ID
@@ -58,5 +67,5 @@ public interface AuthenticationContainer {
      * @param authentication
      * @return 添加后被覆盖的权限信息 ,如果没有则返回null
      */
-    Authentication addAuthentication(Authentication authentication);
+    Authentication addAuthentication(Authentication authentication, String sessionId);
 }
