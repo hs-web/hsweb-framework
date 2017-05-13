@@ -19,9 +19,7 @@
 package org.hswebframework.web.message.builder;
 
 import org.hswebframework.web.message.MessageSubject;
-import org.hswebframework.web.message.support.MultipleUserMessageSubject;
-import org.hswebframework.web.message.support.TopicMessageSubject;
-import org.hswebframework.web.message.support.UserMessageSubject;
+import org.hswebframework.web.message.support.*;
 
 import java.util.Set;
 
@@ -37,5 +35,12 @@ public interface MessageSubjectBuilder {
 
     MessageSubject system();
 
-    TopicMessageSubject topic(String topic);
+    TopicMessageSubject topic(String topicName);
+
+    QueueMessageSubject queue(String queueName);
+
+    MultipleQueueMessageSubject queues(String... userIds);
+
+    MultipleQueueMessageSubject queues(Set<String> userIds);
+
 }

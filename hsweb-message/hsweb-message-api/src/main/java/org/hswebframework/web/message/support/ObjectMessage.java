@@ -20,11 +20,13 @@ package org.hswebframework.web.message.support;
 
 import org.hswebframework.web.message.Message;
 
+import java.io.Serializable;
+
 /**
  * TODO 完成注释
  *
  * @author zhouhao
  */
-public interface ObjectMessage<T> extends Message {
+public interface ObjectMessage<T extends Serializable> extends Message {
     T getObject();
 }

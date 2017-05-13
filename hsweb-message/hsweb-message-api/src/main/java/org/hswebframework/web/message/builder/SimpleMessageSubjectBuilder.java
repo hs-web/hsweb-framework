@@ -19,21 +19,20 @@
 package org.hswebframework.web.message.builder;
 
 import org.hswebframework.web.message.MessageSubject;
-import org.hswebframework.web.message.support.MultipleUserMessageSubject;
-import org.hswebframework.web.message.support.TopicMessageSubject;
-import org.hswebframework.web.message.support.UserMessageSubject;
+import org.hswebframework.web.message.support.*;
 
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * TODO 完成注释
  *
  * @author zhouhao
  */
-public class SimpleMessageSubjectBuilder implements MessageSubjectBuilder,Serializable {
+public class SimpleMessageSubjectBuilder implements MessageSubjectBuilder, Serializable {
     @Override
     public UserMessageSubject user(String userId) {
         return () -> userId;
@@ -57,5 +56,21 @@ public class SimpleMessageSubjectBuilder implements MessageSubjectBuilder,Serial
     @Override
     public TopicMessageSubject topic(String topic) {
         return () -> topic;
+    }
+
+    @Override
+    public QueueMessageSubject queue(String queueName) {
+        return () -> queueName;
+    }
+
+    @Override
+    public MultipleQueueMessageSubject queues(String... userIds) {
+        Set<String> ids = Arrays.stream(userIds).collect(Collectors.toSet());
+        return queues(ids);
+    }
+
+    @Override
+    public MultipleQueueMessageSubject queues(Set<String> userIds) {
+        return () -> userIds;
     }
 }

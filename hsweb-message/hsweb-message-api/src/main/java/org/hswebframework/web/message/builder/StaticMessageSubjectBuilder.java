@@ -19,9 +19,7 @@
 package org.hswebframework.web.message.builder;
 
 import org.hswebframework.web.message.MessageSubject;
-import org.hswebframework.web.message.support.MultipleUserMessageSubject;
-import org.hswebframework.web.message.support.TopicMessageSubject;
-import org.hswebframework.web.message.support.UserMessageSubject;
+import org.hswebframework.web.message.support.*;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -54,4 +52,17 @@ public class StaticMessageSubjectBuilder {
     public static TopicMessageSubject topic(String topic) {
         return messageSubjectBuilder.topic(topic);
     }
+
+    public static QueueMessageSubject queue(String queueName) {
+        return messageSubjectBuilder.queue(queueName);
+    }
+
+    public static MultipleQueueMessageSubject queues(String... queueNames) {
+        return messageSubjectBuilder.queues(queueNames);
+    }
+
+    public static MultipleQueueMessageSubject queues(Set<String> queueNames) {
+        return messageSubjectBuilder.queues(queueNames);
+    }
+
 }

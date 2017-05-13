@@ -30,4 +30,5 @@ import java.lang.annotation.*;
 public @interface MessageConsumer {
     String topic() default "";
 
+    String queue() default "";
 }

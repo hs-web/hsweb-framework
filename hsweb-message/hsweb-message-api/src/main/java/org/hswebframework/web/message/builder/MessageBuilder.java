@@ -23,15 +23,17 @@ import org.hswebframework.web.message.support.ObjectMessage;
 import org.hswebframework.web.message.support.ServiceInvokerMessage;
 import org.hswebframework.web.message.support.TextMessage;
 
+import java.io.Serializable;
+
 /**
  * @author zhouhao
  */
 public interface MessageBuilder {
     TextMessage text(String msg);
 
-    <T> ObjectMessage object(T msg);
+    <T extends Serializable> ObjectMessage<T> object(T msg);
 
     DataMessage data(byte[] msg);
 
-    ServiceInvokerMessage service(String serviceName);
+    ServiceInvokerMessage service(String serviceName, String method, Serializable... args);
 }

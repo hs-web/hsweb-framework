@@ -16,20 +16,31 @@
  *
  */
 
-package org.hswebframework.web.message.annotation;
+package org.hswebframework.web.message.support.simple;
 
-
-import java.lang.annotation.*;
+import org.hswebframework.web.message.support.DataMessage;
 
 /**
+ * TODO 完成注释
+ *
  * @author zhouhao
  */
-@Target({ElementType.TYPE, ElementType.METHOD})
-@Retention(RetentionPolicy.RUNTIME)
-@Inherited
-@Documented
-public @interface MessageSupplier {
-    String queue() default "";
+public class SimpleDataMessage implements DataMessage {
+    private byte[] message;
 
-    String topic() default "";
+    @Override
+    public byte[] getMessage() {
+        return message;
+    }
+
+    public void setMessage(byte[] message) {
+        this.message = message;
+    }
+
+    public SimpleDataMessage(byte[] message) {
+        this.message = message;
+    }
+
+    public SimpleDataMessage() {
+    }
 }

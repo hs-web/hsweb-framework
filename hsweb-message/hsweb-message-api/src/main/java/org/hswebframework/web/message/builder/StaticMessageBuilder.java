@@ -23,6 +23,8 @@ import org.hswebframework.web.message.support.ObjectMessage;
 import org.hswebframework.web.message.support.ServiceInvokerMessage;
 import org.hswebframework.web.message.support.TextMessage;
 
+import java.io.Serializable;
+
 /**
  * TODO 完成注释
  *
@@ -35,7 +37,7 @@ public class StaticMessageBuilder {
         return messageBuilder.text(msg);
     }
 
-    public static <T> ObjectMessage object(T msg) {
+    public static <T extends Serializable> ObjectMessage<T> object(T msg) {
         return messageBuilder.object(msg);
     }
 
@@ -43,7 +45,7 @@ public class StaticMessageBuilder {
         return messageBuilder.data(msg);
     }
 
-    public static ServiceInvokerMessage service(String serviceName) {
-        return messageBuilder.service(serviceName);
+    public static ServiceInvokerMessage service(String serviceName, String method, Serializable... args) {
+        return messageBuilder.service(serviceName, method, args);
     }
 }

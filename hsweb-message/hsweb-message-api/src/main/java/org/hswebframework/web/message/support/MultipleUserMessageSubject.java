@@ -18,15 +18,20 @@
 
 package org.hswebframework.web.message.support;
 
-import org.hswebframework.web.message.MessageSubject;
-
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * TODO 完成注释
  *
  * @author zhouhao
  */
-public interface MultipleUserMessageSubject extends MessageSubject {
+public interface MultipleUserMessageSubject extends MultipleQueueMessageSubject {
     Set<String> getUserIdList();
+
+    default Set<String> getQueueName() {
+        return getUserIdList().stream()
+                .map(id -> "queue_for_user:" + id)
+                .collect(Collectors.toSet());
+    }
 }

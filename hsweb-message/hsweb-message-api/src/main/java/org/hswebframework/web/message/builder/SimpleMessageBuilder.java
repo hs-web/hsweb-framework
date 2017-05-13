@@ -22,6 +22,10 @@ import org.hswebframework.web.message.support.DataMessage;
 import org.hswebframework.web.message.support.ObjectMessage;
 import org.hswebframework.web.message.support.ServiceInvokerMessage;
 import org.hswebframework.web.message.support.TextMessage;
+import org.hswebframework.web.message.support.simple.SimpleDataMessage;
+import org.hswebframework.web.message.support.simple.SimpleObjectMessage;
+import org.hswebframework.web.message.support.simple.SimpleServiceInvokerMessage;
+import org.hswebframework.web.message.support.simple.SimpleTextMessage;
 
 import java.io.Serializable;
 
@@ -30,35 +34,24 @@ import java.io.Serializable;
  *
  * @author zhouhao
  */
-public class SimpleMessageBuilder implements MessageBuilder ,Serializable {
+public class SimpleMessageBuilder implements MessageBuilder, Serializable {
     @Override
     public TextMessage text(String msg) {
-        return new TextMessage() {
-            @Override
-            public String getMessage() {
-                return msg;
-            }
-
-            @Override
-            public String toString() {
-                return msg;
-            }
-        };
+        return new SimpleTextMessage(msg);
     }
 
     @Override
-    public <T> ObjectMessage object(T msg) {
-        return (ObjectMessage) () -> msg;
+    public <T extends Serializable> ObjectMessage<T> object(T msg) {
+        return new SimpleObjectMessage<>(msg);
     }
 
     @Override
     public DataMessage data(byte[] msg) {
-        return (DataMessage) () -> msg;
+        return new SimpleDataMessage(msg);
     }
 
     @Override
-    public ServiceInvokerMessage service(String serviceName) {
-
-        return null;
+    public ServiceInvokerMessage service(String serviceName, String method, Serializable... args) {
+        return new SimpleServiceInvokerMessage(serviceName,method,args);
     }
 }
