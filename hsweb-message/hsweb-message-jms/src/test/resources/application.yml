@@ -9,6 +9,7 @@ spring:
        driver-class-name : org.h2.Driver
     jms:
       pub-sub-domain: true
+
 hsweb:
     app:
       name: jms测试
