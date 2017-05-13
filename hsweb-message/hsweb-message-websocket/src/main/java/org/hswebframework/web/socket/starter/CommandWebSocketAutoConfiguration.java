@@ -6,9 +6,9 @@ import org.hswebframework.web.socket.WebSocketSessionListener;
 import org.hswebframework.web.socket.handler.CommandWebSocketMessageDispatcher;
 import org.hswebframework.web.socket.message.DefaultWebSocketMessager;
 import org.hswebframework.web.socket.message.WebSocketMessager;
-import org.hswebframework.web.socket.processor.DefaultWebSocketProcessorContainer;
-import org.hswebframework.web.socket.processor.WebSocketProcessor;
-import org.hswebframework.web.socket.processor.WebSocketProcessorContainer;
+import org.hswebframework.web.socket.processor.DefaultCommandProcessorContainer;
+import org.hswebframework.web.socket.processor.CommandProcessor;
+import org.hswebframework.web.socket.processor.CommandProcessorContainer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -28,16 +28,16 @@ import java.util.List;
 public class CommandWebSocketAutoConfiguration {
 
     @Configuration
-    @ConditionalOnMissingBean(WebSocketProcessorContainer.class)
+    @ConditionalOnMissingBean(CommandProcessorContainer.class)
     public static class WebSocketProcessorContainerConfiguration {
         @Autowired(required = false)
-        private List<WebSocketProcessor> webSocketProcessors;
+        private List<CommandProcessor> commandProcessors;
 
         @Bean(destroyMethod = "destroy")
-        public DefaultWebSocketProcessorContainer defaultWebSocketProcessorContainer() {
-            DefaultWebSocketProcessorContainer container = new DefaultWebSocketProcessorContainer();
-            if (webSocketProcessors != null) {
-                webSocketProcessors.forEach(container::install);
+        public DefaultCommandProcessorContainer defaultWebSocketProcessorContainer() {
+            DefaultCommandProcessorContainer container = new DefaultCommandProcessorContainer();
+            if (commandProcessors != null) {
+                commandProcessors.forEach(container::install);
             }
             return container;
         }
@@ -62,12 +62,12 @@ public class CommandWebSocketAutoConfiguration {
         private List<WebSocketSessionListener> webSocketSessionListeners;
 
         @Autowired
-        private WebSocketProcessorContainer webSocketProcessorContainer;
+        private CommandProcessorContainer commandProcessorContainer;
 
         @Override
         protected void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
             CommandWebSocketMessageDispatcher dispatcher = new CommandWebSocketMessageDispatcher();
-            dispatcher.setProcessorContainer(webSocketProcessorContainer);
+            dispatcher.setProcessorContainer(commandProcessorContainer);
             dispatcher.setAuthenticationContainer(authenticationContainer);
             dispatcher.setWebSocketSessionListeners(webSocketSessionListeners);
             registry.addHandler(dispatcher, "/sockjs")

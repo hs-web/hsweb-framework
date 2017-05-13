@@ -4,11 +4,11 @@ import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.core.JsonParseException;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.container.AuthenticationContainer;
-import org.hswebframework.web.socket.WebSocketCommand;
+import org.hswebframework.web.socket.CommandRequest;
 import org.hswebframework.web.socket.WebSocketSessionListener;
 import org.hswebframework.web.socket.message.WebSocketMessage;
-import org.hswebframework.web.socket.processor.WebSocketProcessor;
-import org.hswebframework.web.socket.processor.WebSocketProcessorContainer;
+import org.hswebframework.web.socket.processor.CommandProcessor;
+import org.hswebframework.web.socket.processor.CommandProcessorContainer;
 import org.springframework.util.StringUtils;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -23,7 +23,7 @@ import java.util.Map;
  */
 public class CommandWebSocketMessageDispatcher extends TextWebSocketHandler {
 
-    private WebSocketProcessorContainer processorContainer;
+    private CommandProcessorContainer processorContainer;
 
     private AuthenticationContainer authenticationContainer;
 
@@ -37,7 +37,7 @@ public class CommandWebSocketMessageDispatcher extends TextWebSocketHandler {
         this.authenticationContainer = authenticationContainer;
     }
 
-    public void setProcessorContainer(WebSocketProcessorContainer processorContainer) {
+    public void setProcessorContainer(CommandProcessorContainer processorContainer) {
         this.processorContainer = processorContainer;
     }
 
@@ -50,9 +50,9 @@ public class CommandWebSocketMessageDispatcher extends TextWebSocketHandler {
         String payload = message.getPayload();
         if (StringUtils.isEmpty(payload)) return;
         try {
-            CommandRequest request = JSON.parseObject(payload, CommandRequest.class);
-            WebSocketCommand command = buildCommand(request, session);
-            WebSocketProcessor processor = processorContainer.getProcessor(command.getCommand());
+            WebSocketCommandRequest request = JSON.parseObject(payload, WebSocketCommandRequest.class);
+            CommandRequest command = buildCommand(request, session);
+            CommandProcessor processor = processorContainer.getProcessor(request.getCommand());
             if (processor != null) {
                 processor.execute(command);
             } else {
@@ -71,13 +71,8 @@ public class CommandWebSocketMessageDispatcher extends TextWebSocketHandler {
         return WebSocketUtils.getAuthentication(authenticationContainer, socketSession);
     }
 
-    private WebSocketCommand buildCommand(CommandRequest request, WebSocketSession socketSession) {
-        return new WebSocketCommand() {
-            @Override
-            public String getCommand() {
-                return request.getCommand();
-            }
-
+    private CommandRequest buildCommand(WebSocketCommandRequest request, WebSocketSession socketSession) {
+        return new CommandRequest() {
             @Override
             public Authentication getAuthentication() {
                 return getAuthenticationFromSession(socketSession);

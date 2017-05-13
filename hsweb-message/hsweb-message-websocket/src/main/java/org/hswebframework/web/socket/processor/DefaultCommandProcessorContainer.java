@@ -8,35 +8,35 @@ import java.util.concurrent.ConcurrentMap;
 /**
  * @author zhouhao
  */
-public class DefaultWebSocketProcessorContainer implements WebSocketProcessorContainer {
+public class DefaultCommandProcessorContainer implements CommandProcessorContainer {
 
-    private final ConcurrentMap<String, WebSocketProcessor> processorStore = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, CommandProcessor> processorStore = new ConcurrentHashMap<>();
 
     @Override
-    public WebSocketProcessor install(WebSocketProcessor command) {
+    public CommandProcessor install(CommandProcessor command) {
         command.init();
         return processorStore.put(command.getName(), command);
     }
 
     @Override
-    public WebSocketProcessor uninstall(String name) {
-        WebSocketProcessor processor = processorStore.remove(name);
+    public CommandProcessor uninstall(String name) {
+        CommandProcessor processor = processorStore.remove(name);
         if (null != processor) processor.destroy();
         return processor;
     }
 
     public void destroy() {
-        getAllProcessor().forEach(WebSocketProcessor::destroy);
+        getAllProcessor().forEach(CommandProcessor::destroy);
         processorStore.clear();
     }
 
     @Override
-    public WebSocketProcessor getProcessor(String name) {
+    public CommandProcessor getProcessor(String name) {
         return processorStore.get(name);
     }
 
     @Override
-    public List<WebSocketProcessor> getAllProcessor() {
+    public List<CommandProcessor> getAllProcessor() {
         return new ArrayList<>(processorStore.values());
     }
 }

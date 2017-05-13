@@ -8,8 +8,7 @@ import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.handler.AbstractWebSocketHandler;
 
-public class WebSocketClientTest {
-
+public class WebSocketClientTests {
     public static void main(String[] args) throws Exception {
         for (int i = 0; i < 10; i++) {
             WebSocketClient client = new StandardWebSocketClient();

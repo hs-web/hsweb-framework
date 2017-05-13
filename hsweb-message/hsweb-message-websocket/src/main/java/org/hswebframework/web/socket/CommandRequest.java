@@ -10,9 +10,7 @@ import java.util.Map;
  *
  * @author zhouhao
  */
-public interface WebSocketCommand {
-    String getCommand();
-
+public interface CommandRequest {
     Authentication getAuthentication();
 
     Map<String, Object> getParameters();

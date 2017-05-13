@@ -7,7 +7,7 @@ import java.util.Map;
  *
  * @author zhouhao
  */
-public class CommandRequest {
+public class WebSocketCommandRequest {
     private String command;
 
     private Map<String, Object> parameters;

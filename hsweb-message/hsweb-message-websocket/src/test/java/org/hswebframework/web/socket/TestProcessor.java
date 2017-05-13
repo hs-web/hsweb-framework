@@ -4,7 +4,7 @@ import org.hswebframework.web.message.MessageSubscribe;
 import org.hswebframework.web.message.Messager;
 import org.hswebframework.web.message.support.ObjectMessage;
 import org.hswebframework.web.socket.message.WebSocketMessage;
-import org.hswebframework.web.socket.processor.WebSocketProcessor;
+import org.hswebframework.web.socket.processor.CommandProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -21,7 +21,7 @@ import static org.hswebframework.web.message.builder.StaticMessageSubjectBuilder
  *
  * @author zhouhao
  */
-public class TestProcessor implements WebSocketProcessor, WebSocketSessionListener {
+public class TestProcessor implements CommandProcessor, WebSocketSessionListener {
 
     @Autowired
     private Messager messager;
@@ -61,7 +61,7 @@ public class TestProcessor implements WebSocketProcessor, WebSocketSessionListen
     }
 
     @Override
-    public void execute(WebSocketCommand command) {
+    public void execute(CommandRequest command) {
         String type = String.valueOf(command.getParameters().get("type"));
         switch (type) {
             case "conn":
