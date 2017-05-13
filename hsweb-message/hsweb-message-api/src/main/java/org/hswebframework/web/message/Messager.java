@@ -23,23 +23,13 @@ package org.hswebframework.web.message;
  * <pre>
  *     messager
  *     .publish(text("hello"))
- *     .from(system())
  *     .to(user("admin"))
- *     .send();
- * </pre>
- * service invoke
- * <pre>
- *    User admin = messager
- *     .publish(service("userService"))
- *     .from(system())
- *     .to(method("getById","admin"))
  *     .send();
  * </pre>
  * send object to topic
  * <pre>
  *     messager
  *     .publish(object(user))
- *     .from(system())
  *     .to(topic("user-login"))
  *     .send();
  * </pre>
