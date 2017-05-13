@@ -2,14 +2,10 @@ package org.hswebframework.web.socket;
 
 import org.hswebframework.web.message.MessageSubscribe;
 import org.hswebframework.web.message.Messager;
-import org.hswebframework.web.message.builder.StaticMessageBuilder;
-import org.hswebframework.web.message.builder.StaticMessageSubjectBuilder;
 import org.hswebframework.web.message.support.ObjectMessage;
 import org.hswebframework.web.socket.message.WebSocketMessage;
-import org.hswebframework.web.socket.message.WebSocketMessager;
 import org.hswebframework.web.socket.processor.WebSocketProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -18,7 +14,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static org.hswebframework.web.message.builder.StaticMessageBuilder.object;
-import static org.hswebframework.web.message.builder.StaticMessageSubjectBuilder.topic;
+import static org.hswebframework.web.message.builder.StaticMessageSubjectBuilder.queue;
 
 /**
  * TODO 完成注释
@@ -29,23 +25,24 @@ public class TestProcessor implements WebSocketProcessor, WebSocketSessionListen
 
     @Autowired
     private Messager messager;
-    Map<String, MessageSubscribe<ObjectMessage<WebSocketMessage>>>
-            store = new ConcurrentHashMap<>();
+
+    private final Map<String, MessageSubscribe<ObjectMessage<WebSocketMessage>>> store = new ConcurrentHashMap<>();
 
     @Override
     public String getName() {
         return "test";
     }
 
-    public void sub(WebSocketSession socketSession) {
+    private void sub(WebSocketSession socketSession) {
         MessageSubscribe<ObjectMessage<WebSocketMessage>> subscribe =
                 store.get(socketSession.getId());
         if (subscribe != null) return;
-        store.put(socketSession.getId(), messager.<ObjectMessage<WebSocketMessage>>subscribe(topic("test"))
+        store.put(socketSession.getId(), messager
+                .<ObjectMessage<WebSocketMessage>>subscribe(queue("test")) //订阅 queue队列
                 .onMessage(message -> {
                     try {
                         if (!socketSession.isOpen()) {
-                            desub(socketSession);
+                            deSub(socketSession);
                             return;
                         }
                         socketSession.sendMessage(new TextMessage(message.getObject().toString()));
@@ -55,7 +52,7 @@ public class TestProcessor implements WebSocketProcessor, WebSocketSessionListen
                 }));
     }
 
-    public void desub(WebSocketSession socketSession) {
+    private void deSub(WebSocketSession socketSession) {
         MessageSubscribe<ObjectMessage<WebSocketMessage>> subscribe =
                 store.get(socketSession.getId());
         if (subscribe == null) return;
@@ -71,7 +68,7 @@ public class TestProcessor implements WebSocketProcessor, WebSocketSessionListen
                 sub(command.getSession());
                 break;
             case "close": {
-                desub(command.getSession());
+                deSub(command.getSession());
             }
         }
     }
@@ -86,10 +83,12 @@ public class TestProcessor implements WebSocketProcessor, WebSocketSessionListen
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                messager.publish(object(new WebSocketMessage(200, "hello" + total++)))
-                        .to(topic("test"))
-                        .send();
-                System.out.println(total);
+                if (store.size() > 0) {
+                    messager.publish(object(new WebSocketMessage(200, "hello" + total++)))
+                            .to(queue("test")) //向队列发送消息
+                            .send();
+                    System.out.println(total);
+                }
             }
         }).start();
     }
@@ -107,6 +106,6 @@ public class TestProcessor implements WebSocketProcessor, WebSocketSessionListen
 
     @Override
     public void onSessionClose(WebSocketSession session) {
-        desub(session);
+        deSub(session);
     }
 }

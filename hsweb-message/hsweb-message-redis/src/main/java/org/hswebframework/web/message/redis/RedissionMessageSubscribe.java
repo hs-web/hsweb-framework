@@ -69,6 +69,9 @@ public class RedissionMessageSubscribe<M extends Message> implements MessageSubs
             Thread thread = new Thread(() -> {
                 while (running) {
                     try {
+                        if (redisson.isShutdown() || redisson.isShuttingDown()) {
+                            return;
+                        }
                         countDownLatch.trySetCount(1);
                         countDownLatch.await();
                         consumers.forEach(cons -> {

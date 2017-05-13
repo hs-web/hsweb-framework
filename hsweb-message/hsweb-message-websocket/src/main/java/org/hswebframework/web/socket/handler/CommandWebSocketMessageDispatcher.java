@@ -1,6 +1,7 @@
 package org.hswebframework.web.socket.handler;
 
 import com.alibaba.fastjson.JSON;
+import com.fasterxml.jackson.core.JsonParseException;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.container.AuthenticationContainer;
 import org.hswebframework.web.socket.WebSocketCommand;
@@ -57,8 +58,11 @@ public class CommandWebSocketMessageDispatcher extends TextWebSocketHandler {
             } else {
                 session.sendMessage(commandNotFoundMessage);
             }
-        } catch (Exception e) {
+        } catch (JsonParseException e) {
             session.sendMessage(requestFormatErrorMessage);
+        } catch (Exception e) {
+            e.printStackTrace();
+            session.sendMessage(new TextMessage(new WebSocketMessage(500, "error!" + e.getMessage()).toString()));
         }
     }
 

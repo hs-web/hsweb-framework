@@ -29,8 +29,6 @@ import java.util.function.Consumer;
  * @author zhouhao
  */
 public class SimpleMessageSubscribe<T extends Message> implements MessageSubscribe<T> {
-    MessageSubject im;
-
     MessageSubject subject;
 
     final List<Consumer<T>> consumers = new ArrayList<>();
@@ -44,12 +42,6 @@ public class SimpleMessageSubscribe<T extends Message> implements MessageSubscri
     public SimpleMessageSubscribe(MessageSubject subject, Queue<T> queue) {
         this.subject = subject;
         this.queue = queue;
-    }
-
-    @Override
-    public MessageSubscribe<T> iam(MessageSubject iam) {
-        im = iam;
-        return this;
     }
 
     @Override

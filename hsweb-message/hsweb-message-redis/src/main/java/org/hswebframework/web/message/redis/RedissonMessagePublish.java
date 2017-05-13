@@ -66,6 +66,4 @@ public class RedissonMessagePublish implements MessagePublish {
             topic.publish(message);
         }
     }
-
-
 }
