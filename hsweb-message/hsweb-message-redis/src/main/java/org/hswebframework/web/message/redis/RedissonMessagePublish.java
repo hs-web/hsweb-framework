@@ -3,13 +3,15 @@ package org.hswebframework.web.message.redis;
 import org.hswebframework.web.message.Message;
 import org.hswebframework.web.message.MessagePublish;
 import org.hswebframework.web.message.MessageSubject;
-import org.hswebframework.web.message.support.MultipleUserMessageSubject;
+import org.hswebframework.web.message.support.MultipleQueueMessageSubject;
+import org.hswebframework.web.message.support.QueueMessageSubject;
 import org.hswebframework.web.message.support.TopicMessageSubject;
-import org.hswebframework.web.message.support.UserMessageSubject;
 import org.redisson.api.RCountDownLatch;
 import org.redisson.api.RQueue;
 import org.redisson.api.RTopic;
 import org.redisson.api.RedissonClient;
+import org.redisson.client.codec.Codec;
+import org.redisson.codec.JsonJacksonCodec;
 import org.redisson.codec.SerializationCodec;
 
 import java.util.function.Consumer;
@@ -36,14 +38,14 @@ public class RedissonMessagePublish implements MessagePublish {
     }
 
     private boolean useQueue() {
-        return to instanceof UserMessageSubject || to instanceof MultipleUserMessageSubject;
+        return to instanceof QueueMessageSubject || to instanceof MultipleQueueMessageSubject;
     }
 
-    private SerializationCodec codec = new SerializationCodec();
+    private static Codec codec = JsonJacksonCodec.INSTANCE;
 
-    private Consumer<String> queueConsumer = id -> {
-        RQueue<Message> queue = redissonClient.getQueue("queue_user_" + id, codec);
-        RCountDownLatch downLatch = redissonClient.getCountDownLatch("cdl_user_" + id);
+    private Consumer<String> queueConsumer = queueName -> {
+        RQueue<Message> queue = redissonClient.getQueue(queueName, codec);
+        RCountDownLatch downLatch = redissonClient.getCountDownLatch("cdl_" + queueName);
         queue.add(message);
         downLatch.countDown();
     };
@@ -53,11 +55,11 @@ public class RedissonMessagePublish implements MessagePublish {
         if (redissonClient.isShutdown() || redissonClient.isShuttingDown()) {
             return;
         }
-        if (to instanceof UserMessageSubject) {
-            queueConsumer.accept(((UserMessageSubject) to).getUserId());
+        if (to instanceof QueueMessageSubject) {
+            queueConsumer.accept(((QueueMessageSubject) to).getQueueName());
         }
-        if (to instanceof MultipleUserMessageSubject) {
-            ((MultipleUserMessageSubject) to).getUserIdList().forEach(queueConsumer);
+        if (to instanceof MultipleQueueMessageSubject) {
+            ((MultipleQueueMessageSubject) to).getQueueName().forEach(queueConsumer);
         }
         if (to instanceof TopicMessageSubject) {
             RTopic<Message> topic = redissonClient.getTopic("topic_" + ((TopicMessageSubject) to).getTopic(), codec);

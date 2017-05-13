@@ -9,8 +9,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 @Configuration
