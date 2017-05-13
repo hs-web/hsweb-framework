@@ -9,6 +9,7 @@
 
 ## API
 ```java
+import org.hswebframework.web.message.Messager;
 import static org.hswebframework.web.message.builder.StaticMessageBuilder.object;
 import static org.hswebframework.web.message.builder.StaticMessageSubjectBuilder.queue;
 import static org.hswebframework.web.message.builder.StaticMessageSubjectBuilder.topic;
