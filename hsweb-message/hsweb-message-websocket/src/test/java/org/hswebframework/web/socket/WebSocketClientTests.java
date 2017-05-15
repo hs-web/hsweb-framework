@@ -10,9 +10,9 @@ import org.springframework.web.socket.handler.AbstractWebSocketHandler;
 
 public class WebSocketClientTests {
     public static void main(String[] args) throws Exception {
-        for (int i = 0; i < 10; i++) {
+//        for (int i = 0; i < 10; i++) {
             WebSocketClient client = new StandardWebSocketClient();
-            String url = "ws://localhost:8080/socket";
+            String url = "ws://localhost:8081/socket";
             ListenableFuture<WebSocketSession> future = client.doHandshake(new AbstractWebSocketHandler() {
                 @Override
                 public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
@@ -22,7 +22,7 @@ public class WebSocketClientTests {
 
             WebSocketSession socketSession = future.get();
             socketSession.sendMessage(new TextMessage("{\"command\":\"test\",\"parameters\":{\"type\":\"conn\"}}"));
-        }
+//        }
         System.in.read();
     }
 }

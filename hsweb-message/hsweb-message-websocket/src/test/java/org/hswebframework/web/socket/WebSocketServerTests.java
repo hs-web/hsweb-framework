@@ -1,5 +1,8 @@
 package org.hswebframework.web.socket;
 
+import org.hswebframework.web.concurrent.counter.Counter;
+import org.hswebframework.web.concurrent.counter.CounterManager;
+import org.hswebframework.web.counter.redis.RedissonCounterManager;
 import org.hswebframework.web.message.Messager;
 import org.hswebframework.web.message.jms.JmsMessager;
 import org.redisson.Redisson;
@@ -36,7 +39,15 @@ public class WebSocketServerTests {
         return new TestProcessor();
     }
 
-// 使用redis
+    @Bean
+    public CounterManager counterManager() {
+        Config config = new Config();
+        config.useSingleServer().setAddress("127.0.0.1:6379");
+        RedissonClient client = Redisson.create(config);
+        return new RedissonCounterManager(client);
+    }
+
+//    // 使用redis
 //    @Bean(destroyMethod = "shutdown")
 //    public RedissonClient redissonClient() {
 //        Config config = new Config();

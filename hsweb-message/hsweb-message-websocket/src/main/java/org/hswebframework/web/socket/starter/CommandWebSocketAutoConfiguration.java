@@ -1,6 +1,7 @@
 package org.hswebframework.web.socket.starter;
 
 import org.hswebframework.web.authorization.container.AuthenticationContainer;
+import org.hswebframework.web.concurrent.counter.CounterManager;
 import org.hswebframework.web.message.Messager;
 import org.hswebframework.web.socket.WebSocketSessionListener;
 import org.hswebframework.web.socket.handler.CommandWebSocketMessageDispatcher;
@@ -47,9 +48,12 @@ public class CommandWebSocketAutoConfiguration {
     @ConditionalOnBean(Messager.class)
     @ConditionalOnMissingBean(WebSocketMessager.class)
     public static class WebSocketMessagerConfiguration {
+        @Autowired(required = false)
+        private CounterManager counterManager;
+
         @Bean
         public WebSocketMessager webSocketMessager(Messager messager) {
-            return new DefaultWebSocketMessager(messager);
+            return new DefaultWebSocketMessager(messager,counterManager);
         }
     }
 

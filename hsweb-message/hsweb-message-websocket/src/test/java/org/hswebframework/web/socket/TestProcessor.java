@@ -1,20 +1,10 @@
 package org.hswebframework.web.socket;
 
-import org.hswebframework.web.message.MessageSubscribe;
-import org.hswebframework.web.message.Messager;
-import org.hswebframework.web.message.support.ObjectMessage;
 import org.hswebframework.web.socket.message.WebSocketMessage;
+import org.hswebframework.web.socket.message.WebSocketMessager;
 import org.hswebframework.web.socket.processor.CommandProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
-
-import java.io.IOException;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import static org.hswebframework.web.message.builder.StaticMessageBuilder.object;
-import static org.hswebframework.web.message.builder.StaticMessageSubjectBuilder.queue;
 
 /**
  * TODO 完成注释
@@ -24,9 +14,7 @@ import static org.hswebframework.web.message.builder.StaticMessageSubjectBuilder
 public class TestProcessor implements CommandProcessor, WebSocketSessionListener {
 
     @Autowired
-    private Messager messager;
-
-    private final Map<String, MessageSubscribe<ObjectMessage<WebSocketMessage>>> store = new ConcurrentHashMap<>();
+    private WebSocketMessager messager;
 
     @Override
     public String getName() {
@@ -34,30 +22,11 @@ public class TestProcessor implements CommandProcessor, WebSocketSessionListener
     }
 
     private void sub(WebSocketSession socketSession) {
-        MessageSubscribe<ObjectMessage<WebSocketMessage>> subscribe =
-                store.get(socketSession.getId());
-        if (subscribe != null) return;
-        store.put(socketSession.getId(), messager
-                .<ObjectMessage<WebSocketMessage>>subscribe(queue("test")) //订阅 queue队列
-                .onMessage(message -> {
-                    try {
-                        if (!socketSession.isOpen()) {
-                            deSub(socketSession);
-                            return;
-                        }
-                        socketSession.sendMessage(new TextMessage(message.getObject().toString()));
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }));
+        messager.subscribeQueue(getName(), socketSession);
     }
 
     private void deSub(WebSocketSession socketSession) {
-        MessageSubscribe<ObjectMessage<WebSocketMessage>> subscribe =
-                store.get(socketSession.getId());
-        if (subscribe == null) return;
-        subscribe.cancel();
-        store.remove(socketSession.getId());
+        messager.deSubscribeQueue(getName(), socketSession);
     }
 
     @Override
@@ -83,10 +52,8 @@ public class TestProcessor implements CommandProcessor, WebSocketSessionListener
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                if (store.size() > 0) {
-                    messager.publish(object(new WebSocketMessage(200, "hello" + total++)))
-                            .to(queue("test")) //向队列发送消息
-                            .send();
+                if (messager.getSubscribeTotal(getName(), WebSocketMessager.TYPE_QUEUE) > 0) {
+                    messager.publishQueue(getName(), new WebSocketMessage(200, "hello" + total++));
                     System.out.println(total);
                 }
             }
@@ -95,8 +62,6 @@ public class TestProcessor implements CommandProcessor, WebSocketSessionListener
 
     @Override
     public void destroy() {
-        store.values().forEach(MessageSubscribe::cancel);
-        store.clear();
     }
 
     @Override
