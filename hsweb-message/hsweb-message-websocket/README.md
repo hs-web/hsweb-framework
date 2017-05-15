@@ -19,10 +19,10 @@ public class MyCommand implements CommandProcessor {
     }
 
     @Override
-    public void execute(WebSocketCommand command) {
-        command.getSession(); // WebSocketSession
-        command.getAuthentication(); //获取权限信息
-        command.getParameters(); //参数
+    public void execute(CommandRequest request) {
+        request.getSession(); // WebSocketSession
+        request.getAuthentication(); //获取权限信息
+        request.getParameters(); //参数
     }
 
     @Override
