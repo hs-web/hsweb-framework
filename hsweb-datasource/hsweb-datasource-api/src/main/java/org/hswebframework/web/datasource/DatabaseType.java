@@ -20,6 +20,12 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.Predicate;
 
+/**
+ * 数据库类型枚举
+ *
+ * @author zhouhao
+ * @since 3.0
+ */
 public enum DatabaseType {
     unknown(null, null, null, String::isEmpty),
     mysql("com.mysql.jdbc.Driver", "com.mysql.jdbc.jdbc2.optional.MysqlXADataSource", "select 1", createUrlPredicate("mysql")),
@@ -42,7 +48,6 @@ public enum DatabaseType {
         this.xaDataSourceClassName = xaDataSourceClassName;
         this.urlPredicate = urlPredicate;
     }
-
 
     private final String testQuery;
 

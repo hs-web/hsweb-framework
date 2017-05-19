@@ -8,9 +8,10 @@ import java.sql.SQLFeatureNotSupportedException;
 import java.util.logging.Logger;
 
 /**
- * TODO 完成注释
+ * 动态数据源代理,将数据源代理为动态数据源
  *
  * @author zhouhao
+ * @since 3.0
  */
 public class DynamicDataSourceProxy implements DynamicDataSource {
 

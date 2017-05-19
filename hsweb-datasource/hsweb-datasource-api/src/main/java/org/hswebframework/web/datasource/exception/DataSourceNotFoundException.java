@@ -1,8 +1,6 @@
 package org.hswebframework.web.datasource.exception;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public class DataSourceNotFoundException extends RuntimeException {
