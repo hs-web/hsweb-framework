@@ -94,27 +94,6 @@ public class SimpleAtomikosTests {
             };
         }
 
-        @Bean(initMethod = "init", destroyMethod = "destroy")
-        public AtomikosDataSourceBean atomikosDataSourceBean() {
-            AtomikosDataSourceBean dataSourceBean = new AtomikosDataSourceBean();
-            return dataSourceBean;
-        }
-
-        @Bean
-        public MemoryJtaDataSourceStore memoryJtaDataSourceStore() {
-            return new MemoryJtaDataSourceStore();
-        }
-
-        @Bean
-        public MemoryJtaDataSourceStore jtaDynamicDataSourceService() {
-            return new MemoryJtaDataSourceStore();
-        }
-
-        @Bean
-        public JtaDynamicDataSourceService jtaDynamicDataSourceService(JtaDataSourceStore jtaDataSourceStore, DataSource dataSource) throws SQLException {
-            return new JtaDynamicDataSourceService(jtaDataSourceStore, dataSource);
-        }
-
         @Bean
         public DynDsTest transTest(SqlExecutor sqlExecutor) {
             SimpleDatabase database = new SimpleDatabase(new DynDatabaseMeta(sqlExecutor), sqlExecutor);
@@ -177,7 +156,6 @@ public class SimpleAtomikosTests {
 
     @Autowired
     private DynDsTest dynDsTest;
-
 
     @Test
     @Transactional
