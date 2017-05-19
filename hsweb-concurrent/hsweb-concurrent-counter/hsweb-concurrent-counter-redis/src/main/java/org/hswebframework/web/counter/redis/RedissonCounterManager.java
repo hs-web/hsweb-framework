@@ -5,6 +5,7 @@ import org.hswebframework.web.concurrent.counter.Counter;
 import org.hswebframework.web.concurrent.counter.CounterManager;
 import org.redisson.Redisson;
 import org.redisson.api.RAtomicLong;
+import org.redisson.api.RedissonClient;
 
 import java.util.Map;
 
@@ -13,9 +14,9 @@ import java.util.Map;
  */
 public class RedissonCounterManager extends AbstractCounterManager {
 
-    private Redisson redisson;
+    private RedissonClient redisson;
 
-    public RedissonCounterManager(Redisson redisson) {
+    public RedissonCounterManager(RedissonClient redisson) {
         this.redisson = redisson;
     }
 

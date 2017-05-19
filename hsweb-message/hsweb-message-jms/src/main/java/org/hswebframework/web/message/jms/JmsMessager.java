@@ -1,5 +1,6 @@
 package org.hswebframework.web.message.jms;
 
+import org.apache.activemq.command.ActiveMQQueue;
 import org.hswebframework.web.message.*;
 import org.hswebframework.web.message.support.QueueMessageSubject;
 import org.hswebframework.web.message.support.TopicMessageSubject;

@@ -44,7 +44,8 @@ public class MemoryPublish implements MessagePublish {
         queueConsumer.lock.readLock().lock();
         try {
             int size = queueConsumer.consumers.size();
-            queueConsumer.consumers.get(random.nextInt(size)).accept(message);
+            if (size > 0)
+                queueConsumer.consumers.get(random.nextInt(size)).accept(message);
         } finally {
             queueConsumer.lock.readLock().unlock();
         }

@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jms.UncategorizedJmsException;
 import org.springframework.jms.core.JmsTemplate;
+import org.springframework.jms.core.SessionCallback;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,7 +59,6 @@ public class JmsMessageSubscribe<M extends Message> implements MessageSubscribe<
                     logger.error(e.getMessage(), e);
                     // running = false;
                 }
-
             }
         });
     }
