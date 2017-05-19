@@ -17,7 +17,7 @@ spring:
 
   activemq:
     broker-url: tcp://localhost:61616
-    in-memory: false
+    in-memory: true
 
 logging:
   level:
@@ -42,3 +42,7 @@ hsweb:
             password:
           max-pool-size: 20
           borrow-connection-timeout: 1000
+          init-timeout: 20
+
+config:
+    test: 123

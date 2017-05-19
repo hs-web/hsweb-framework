@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.jta.atomikos.AtomikosDataSourceBean;
-import org.springframework.jdbc.datasource.DataSourceUtils;
 
 import javax.sql.DataSource;
 import javax.sql.XADataSource;
@@ -19,7 +18,6 @@ import java.sql.SQLException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -83,7 +81,7 @@ public class JtaDynamicDataSourceService extends AbstractDynamicDataSourceServic
                             logger.error("close xa datasource error", e);
                         }
                     } else {
-                        logger.warn("XADataSource is not instanceof Closeable!", Thread.currentThread().getStackTrace());
+                        logger.warn("XADataSource is not instanceof Closeable!", (Object) Thread.currentThread().getStackTrace());
                     }
                 }
             };
@@ -91,21 +89,22 @@ public class JtaDynamicDataSourceService extends AbstractDynamicDataSourceServic
             executor.execute(() -> {
                 try {
                     atomikosDataSourceBean.init();
-                    downLatch.countDown();
                     successCounter.incrementAndGet();
+                    downLatch.countDown();
                 } catch (Exception e) {
+                    logger.error("init datasource {} error", id, e);
                     //atomikosDataSourceBean.close();
                 }
             });
             //初始化状态判断
             executor.execute(() -> {
                 try {
-                    Thread.sleep(config.getInitTimeOut());
+                    Thread.sleep(config.getInitTimeout() * 1000);
                 } catch (InterruptedException ignored) {
                 } finally {
                     if (successCounter.get() == 0) {
                         // 初始化超时,认定为失败
-                        logger.error("init timeout ({}ms)", config.getInitTimeOut());
+                        logger.error("init timeout ({}ms)", config.getInitTimeout());
                         cache.closeDataSource();
                         if (downLatch.getCount() > 0)
                             downLatch.countDown();

@@ -1,32 +1,52 @@
 package org.hswebframework.web.datasource.jta;
 
-import com.alibaba.druid.pool.DruidDataSource;
 import org.hsweb.ezorm.rdb.RDBDatabase;
 import org.hsweb.ezorm.rdb.executor.AbstractJdbcSqlExecutor;
 import org.hsweb.ezorm.rdb.executor.SQL;
 import org.hsweb.ezorm.rdb.executor.SqlExecutor;
 import org.hsweb.ezorm.rdb.meta.RDBDatabaseMetaData;
+import org.hsweb.ezorm.rdb.meta.RDBTableMetaData;
+import org.hsweb.ezorm.rdb.meta.parser.H2TableMetaParser;
+import org.hsweb.ezorm.rdb.meta.parser.MysqlTableMetaParser;
+import org.hsweb.ezorm.rdb.meta.parser.OracleTableMetaParser;
+import org.hsweb.ezorm.rdb.meta.parser.TableMetaParser;
 import org.hsweb.ezorm.rdb.render.SqlRender;
 import org.hsweb.ezorm.rdb.render.dialect.Dialect;
 import org.hsweb.ezorm.rdb.render.dialect.H2RDBDatabaseMetaData;
 import org.hsweb.ezorm.rdb.render.dialect.MysqlRDBDatabaseMetaData;
 import org.hsweb.ezorm.rdb.render.dialect.OracleRDBDatabaseMetaData;
 import org.hsweb.ezorm.rdb.simple.SimpleDatabase;
+import org.hswebframework.expands.script.engine.DynamicScriptEngine;
+import org.hswebframework.expands.script.engine.DynamicScriptEngineFactory;
+import org.hswebframework.expands.script.engine.SpEL.SpElEngine;
 import org.hswebframework.web.datasource.DataSourceHolder;
 import org.hswebframework.web.datasource.DatabaseType;
-import org.hswebframework.web.datasource.DynamicDataSourceProxy;
-import org.hswebframework.web.datasource.service.DataSourceCache;
+import org.hswebframework.web.datasource.annotation.UseDataSource;
+import org.hswebframework.web.datasource.annotation.UseDefaultDataSource;
+import org.hswebframework.web.datasource.starter.AopDataSourceSwitcherAutoConfiguration;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.BeanExpressionContext;
+import org.springframework.beans.factory.config.BeanExpressionResolver;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.jta.atomikos.AtomikosDataSourceBean;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.context.expression.*;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.expression.spel.support.StandardTypeConverter;
+import org.springframework.expression.spel.support.StandardTypeLocator;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.core.JmsTemplate;
+import org.springframework.messaging.simp.SimpSessionScope;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
@@ -36,7 +56,6 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * TODO 完成注释
@@ -50,6 +69,8 @@ public class SimpleAtomikosTests {
     @Configuration
     @SpringBootApplication
     @EnableJms
+    @ImportAutoConfiguration(AopDataSourceSwitcherAutoConfiguration.class)
+    @EnableAspectJAutoProxy
     public static class Config {
         @Bean
         public SqlExecutor sqlExecutor() {
@@ -63,12 +84,12 @@ public class SimpleAtomikosTests {
 
                 @Override
                 public Connection getConnection() {
-                    return DataSourceUtils.getConnection(DataSourceHolder.getActiveDataSource());
+                    return DataSourceUtils.getConnection(DataSourceHolder.currentDataSource());
                 }
 
                 @Override
                 public void releaseConnection(Connection connection) throws SQLException {
-                    DataSourceUtils.releaseConnection(connection, DataSourceHolder.getActiveDataSource());
+                    DataSourceUtils.releaseConnection(connection, DataSourceHolder.currentDataSource());
                 }
             };
         }
@@ -96,28 +117,45 @@ public class SimpleAtomikosTests {
 
         @Bean
         public DynDsTest transTest(SqlExecutor sqlExecutor) {
-            return new DynDsTest(new SimpleDatabase(new DynDatabaseMeta(), sqlExecutor));
+            SimpleDatabase database = new SimpleDatabase(new DynDatabaseMeta(sqlExecutor), sqlExecutor);
+            database.setAutoParse(true);
+            return new DynDsTest(database);
         }
 
         public class DynDatabaseMeta extends RDBDatabaseMetaData {
             private Map<DatabaseType, Dialect>             dialectMap;
             private Map<DatabaseType, RDBDatabaseMetaData> metaDataMap;
+            private Map<DatabaseType, TableMetaParser>     parserMap;
 
-            public DynDatabaseMeta() {
+            public DynDatabaseMeta(SqlExecutor sqlExecutor) {
                 dialectMap = new HashMap<>();
                 metaDataMap = new HashMap<>();
+                parserMap = new HashMap<>();
                 dialectMap.put(DatabaseType.h2, Dialect.H2);
                 dialectMap.put(DatabaseType.mysql, Dialect.MYSQL);
                 dialectMap.put(DatabaseType.oracle, Dialect.ORACLE);
-
                 metaDataMap.put(DatabaseType.h2, new H2RDBDatabaseMetaData());
                 metaDataMap.put(DatabaseType.mysql, new MysqlRDBDatabaseMetaData());
                 metaDataMap.put(DatabaseType.oracle, new OracleRDBDatabaseMetaData());
+
+                parserMap.put(DatabaseType.h2, new H2TableMetaParser(sqlExecutor));
+                parserMap.put(DatabaseType.mysql, new MysqlTableMetaParser(sqlExecutor));
+                parserMap.put(DatabaseType.oracle, new OracleTableMetaParser(sqlExecutor));
+            }
+
+            @Override
+            public RDBTableMetaData putTable(RDBTableMetaData tableMetaData) {
+                return metaDataMap.get(DataSourceHolder.currentDatabaseType()).putTable(tableMetaData);
+            }
+
+            @Override
+            public TableMetaParser getParser() {
+                return parserMap.get(DataSourceHolder.currentDatabaseType());
             }
 
             @Override
             public Dialect getDialect() {
-                return dialectMap.get(DataSourceHolder.getActiveDatabaseType());
+                return dialectMap.get(DataSourceHolder.currentDatabaseType());
             }
 
             @Override
@@ -127,12 +165,12 @@ public class SimpleAtomikosTests {
 
             @Override
             public SqlRender getRenderer(SqlRender.TYPE type) {
-                return metaDataMap.get(DataSourceHolder.getActiveDatabaseType()).getRenderer(type);
+                return metaDataMap.get(DataSourceHolder.currentDatabaseType()).getRenderer(type);
             }
 
             @Override
             public String getName() {
-                return metaDataMap.get(DataSourceHolder.getActiveDatabaseType()).getName();
+                return metaDataMap.get(DataSourceHolder.currentDatabaseType()).getName();
             }
         }
     }
@@ -157,6 +195,8 @@ public class SimpleAtomikosTests {
     @Rollback(false)
     public void test() {
         try {
+            DataSourceHolder.switcher().reset();
+
             dynDsTest.testCreateTable();
             dynDsTest.testInsert();
             DataSourceHolder.switcher().use("test_ds");
@@ -166,22 +206,20 @@ public class SimpleAtomikosTests {
             DataSourceHolder.switcher().use("test_ds2");
 
             dynDsTest.testCreateTable();
-            System.out.println(DataSourceHolder.getActiveDatabaseType());
+            System.out.println(DataSourceHolder.switcher().currentDataSourceId());
             System.out.println(dynDsTest.testQuery());
 
             DataSourceHolder.switcher().useLast();
-            System.out.println(DataSourceHolder.getActiveDatabaseType());
+            System.out.println(DataSourceHolder.switcher().currentDataSourceId());
             System.out.println(dynDsTest.testQuery());
 
             DataSourceHolder.switcher().useLast();
-            System.out.println(DataSourceHolder.getActiveDatabaseType());
+            System.out.println(DataSourceHolder.switcher().currentDataSourceId());
             System.out.println(dynDsTest.testQuery());
             jmsTemplate.convertAndSend("test", "hello");
             Thread.sleep(1000);
             //   throw new RuntimeException();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
+        } catch (SQLException | InterruptedException e) {
             e.printStackTrace();
         }
     }
@@ -206,6 +244,7 @@ public class SimpleAtomikosTests {
                     .value(Collections.singletonMap("name", "test"))
                     .exec();
         }
+
 
         public List testQuery() throws SQLException {
             return database.getTable("s_user").createQuery().list();

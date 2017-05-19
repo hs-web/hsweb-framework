@@ -11,9 +11,9 @@ import java.util.Properties;
  * @author zhouhao
  */
 public class AtomikosDataSourceConfig {
-    private int        minPoolSize             = 1;
-    private int        maxPoolSize             = 20;
-    private int        borrowConnectionTimeout = 30;
+    private int        minPoolSize             = 5;
+    private int        maxPoolSize             = 200;
+    private int        borrowConnectionTimeout = 60;
     private int        reapTimeout             = 0;
     private int        maxIdleTime             = 60;
     private int        maintenanceInterval     = 60;
@@ -23,7 +23,8 @@ public class AtomikosDataSourceConfig {
     private String     testQuery               = null;
     private int        maxLifetime             = 0;
     private Properties xaProperties            = null;
-    private int        initTimeOut             = 10 * 1000;
+    //初始化超时时间
+    private int        initTimeout             = 10;
 
     @Override
     public int hashCode() {
@@ -50,7 +51,7 @@ public class AtomikosDataSourceConfig {
                 ", testQuery='" + testQuery + '\'' +
                 ", maxLifetime=" + maxLifetime +
                 ", xaProperties=" + xaProperties +
-                ", initTimeOut=" + initTimeOut +
+                ", initTimeout=" + initTimeout +
                 '}';
     }
 
@@ -150,12 +151,12 @@ public class AtomikosDataSourceConfig {
         this.maxLifetime = maxLifetime;
     }
 
-    public int getInitTimeOut() {
-        return initTimeOut;
+    public int getInitTimeout() {
+        return initTimeout;
     }
 
-    public void setInitTimeOut(int initTimeOut) {
-        this.initTimeOut = initTimeOut;
+    public void setInitTimeout(int initTimeout) {
+        this.initTimeout = initTimeout;
     }
 
     public void putProperties(AtomikosDataSourceBean atomikosDataSourceBean) {
@@ -164,10 +165,12 @@ public class AtomikosDataSourceConfig {
         }
         atomikosDataSourceBean.setXaDataSourceClassName(getXaDataSourceClassName());
         atomikosDataSourceBean.setBorrowConnectionTimeout(getBorrowConnectionTimeout());
-        try {
-            atomikosDataSourceBean.setLoginTimeout(getLoginTimeout());
-        } catch (SQLException e) {
-            e.printStackTrace();
+        if (loginTimeout != 0) {
+            try {
+                atomikosDataSourceBean.setLoginTimeout(getLoginTimeout());
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
         atomikosDataSourceBean.setMaxIdleTime(getMaxIdleTime());
         atomikosDataSourceBean.setMaxPoolSize(getMaxPoolSize());

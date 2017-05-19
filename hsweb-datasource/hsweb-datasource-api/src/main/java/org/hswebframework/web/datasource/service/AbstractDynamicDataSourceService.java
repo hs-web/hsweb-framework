@@ -4,6 +4,7 @@ import org.hswebframework.web.datasource.DynamicDataSource;
 import org.hswebframework.web.datasource.DynamicDataSourceProxy;
 import org.hswebframework.web.datasource.DynamicDataSourceService;
 
+import javax.annotation.PreDestroy;
 import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.Map;
@@ -23,6 +24,11 @@ public abstract class AbstractDynamicDataSourceService implements DynamicDataSou
 
     public AbstractDynamicDataSourceService(DataSource dataSource) throws SQLException {
         this(dataSource instanceof DynamicDataSource ? (DynamicDataSource) dataSource : new DynamicDataSourceProxy(null, dataSource));
+    }
+
+    @PreDestroy
+    public void destroy() {
+        dataSourceStore.values().forEach(DataSourceCache::closeDataSource);
     }
 
     @Override
