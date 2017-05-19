@@ -21,6 +21,10 @@ public final class DataSourceHolder {
      */
     static DynamicDataSourceService dynamicDataSourceService;
 
+    public static void checkDynamicDataSourceReady() {
+        if (dynamicDataSourceService == null) throw new UnsupportedOperationException("dynamicDataSourceService not ready");
+    }
+
     /**
      * @return 动态数据源切换器
      */
@@ -41,6 +45,7 @@ public final class DataSourceHolder {
     public static DynamicDataSource currentDataSource() {
         String id = dataSourceSwitcher.currentDataSourceId();
         if (id == null) return defaultDataSource();
+        checkDynamicDataSourceReady();
         return dynamicDataSourceService.getDataSource(id);
     }
 
@@ -59,6 +64,7 @@ public final class DataSourceHolder {
      */
     public static boolean existing(String id) {
         try {
+            checkDynamicDataSourceReady();
             return dynamicDataSourceService.getDataSource(id) != null;
         } catch (DataSourceNotFoundException e) {
             return false;
