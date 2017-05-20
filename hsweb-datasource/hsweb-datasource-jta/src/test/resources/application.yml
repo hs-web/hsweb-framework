@@ -16,7 +16,7 @@ spring:
         local-transaction-mode: true
 
   activemq:
-    broker-url: tcp://localhost:61616
+#    broker-url: tcp://localhost:61616
     in-memory: true
 
 logging:
