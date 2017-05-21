@@ -43,6 +43,7 @@ public class SimpleAuthentication implements Authentication {
 
     public SimpleAuthentication() {
     }
+
     public SimpleAuthentication(UserEntity user,
                                 List<RoleEntity> roleEntities,
                                 List<PermissionRoleEntity> permissionRoleEntities,
@@ -193,7 +194,7 @@ public class SimpleAuthentication implements Authentication {
         public static SimpleFieldAccess of(FieldAccessEntity entity) {
             SimpleFieldAccess access = new SimpleFieldAccess();
             access.setField(entity.getField());
-            access.setActions(entity.getActions().stream().map(ActionEntity::getAction).collect(Collectors.toSet()));
+            access.setActions(new HashSet<>(entity.getActions()));
             return access;
         }
 

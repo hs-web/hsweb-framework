@@ -1,3 +1,4 @@
+
 spring:
     aop:
         auto: true
@@ -23,3 +24,5 @@ hsweb:
              target-base-package: org.hswebframework.web.entity.authorization
              mapping:
                 UserEntity: SimpleUserEntity
+server:
+  port: 8081

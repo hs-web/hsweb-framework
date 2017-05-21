@@ -39,8 +39,9 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.hswebframework</groupId>
-            <artifactId>hsweb-expands-script</artifactId>
+            <groupId>org.hswebframework.web</groupId>
+            <artifactId>hsweb-commons-utils</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 </project>

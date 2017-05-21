@@ -2,7 +2,9 @@ package org.hswebframework.web.entity.authorization;
 
 import org.hswebframework.web.commons.entity.CloneableEntity;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,7 +19,7 @@ public class FieldAccessEntity implements CloneableEntity {
 
     private String describe;
 
-    private List<ActionEntity> actions;
+    private List<String> actions;
 
     private boolean defaultCheck;
 
@@ -45,12 +47,12 @@ public class FieldAccessEntity implements CloneableEntity {
         this.defaultCheck = defaultCheck;
     }
 
-    public List<ActionEntity> getActions() {
+    public List<String> getActions() {
         if (actions == null) actions = Collections.emptyList();
         return actions;
     }
 
-    public void setActions(List<ActionEntity> actions) {
+    public void setActions(List<String> actions) {
         this.actions = actions;
     }
 
@@ -61,7 +63,7 @@ public class FieldAccessEntity implements CloneableEntity {
         target.setDescribe(getDescribe());
         target.setDefaultCheck(isDefaultCheck());
         if (actions != null) {
-            target.setActions(actions.stream().map(ActionEntity::clone).collect(Collectors.toList()));
+            target.setActions(new ArrayList<>(actions));
         }
         return target;
     }

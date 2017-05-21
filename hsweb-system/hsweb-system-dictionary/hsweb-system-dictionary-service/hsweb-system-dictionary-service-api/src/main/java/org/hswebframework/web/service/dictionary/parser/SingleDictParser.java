@@ -1,4 +1,4 @@
-package org.hswebframework.web.service.dictionary.simple.parser;
+package org.hswebframework.web.service.dictionary.parser;
 
 import java.io.Serializable;
 import java.util.Optional;

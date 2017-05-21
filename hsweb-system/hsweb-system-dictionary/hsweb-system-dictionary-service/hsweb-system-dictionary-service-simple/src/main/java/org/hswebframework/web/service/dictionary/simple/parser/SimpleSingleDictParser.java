@@ -3,10 +3,10 @@ package org.hswebframework.web.service.dictionary.simple.parser;
 import org.hswebframework.web.ExpressionUtils;
 import org.hswebframework.web.entity.dictionary.DictionaryEntity;
 import org.hswebframework.web.entity.dictionary.DictionaryItemEntity;
+import org.hswebframework.web.service.dictionary.parser.SingleDictParser;
 
 import java.io.Serializable;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -32,6 +32,14 @@ public class SimpleSingleDictParser implements SingleDictParser {
                         Function<DictionaryItemEntity, String> valueGetter,
                         Function<DictionaryItemEntity, String> expressionGetter) {
         dict.getItems().forEach(item -> addMapping(item, keyGetter, valueGetter, expressionGetter));
+    }
+
+    public void setSourceFormat(DictParserFormat sourceFormat) {
+        this.sourceFormat = sourceFormat;
+    }
+
+    public void setTargetFormat(DictParserFormat targetFormat) {
+        this.targetFormat = targetFormat;
     }
 
     public DictParserFormat getTargetFormat() {

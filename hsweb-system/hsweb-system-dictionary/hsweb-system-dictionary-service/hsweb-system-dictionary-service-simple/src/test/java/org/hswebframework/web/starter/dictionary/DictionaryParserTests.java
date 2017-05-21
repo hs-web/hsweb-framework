@@ -40,11 +40,6 @@ public class DictionaryParserTests {
 
     @Before
     public void init() {
-        SimpleDictionaryParser<String> parser = new SimpleDictionaryParser<>();
-
-//        parser.getToTextParser().getTargetFormat().setSplitter("、");
-//        parser.getToValueParser().getSourceFormat().setSplitter("、");
-
         SimpleDictionaryEntity dictionaryEntity = new SimpleDictionaryEntity();
         String json = "[" +
                 "{'value':'1','text':'水果','children':" +
@@ -66,8 +61,7 @@ public class DictionaryParserTests {
 
         List<SimpleDictionaryItemEntity> itemEntities = JSON.parseArray(json, SimpleDictionaryItemEntity.class);
         dictionaryEntity.setItems(itemEntities);
-        parser.setDict(dictionaryEntity);
-        this.parser = parser;
+        this.parser = SimpleDictionaryParser.setDict(dictionaryEntity);
     }
 
     //支持表达式

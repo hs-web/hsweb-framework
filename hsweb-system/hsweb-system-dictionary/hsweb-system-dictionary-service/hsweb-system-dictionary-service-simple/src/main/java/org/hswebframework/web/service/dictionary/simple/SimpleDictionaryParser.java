@@ -1,17 +1,12 @@
 package org.hswebframework.web.service.dictionary.simple;
 
-import org.hswebframework.web.ExpressionUtils;
 import org.hswebframework.web.entity.dictionary.DictionaryEntity;
 import org.hswebframework.web.entity.dictionary.DictionaryItemEntity;
 import org.hswebframework.web.service.dictionary.DictionaryParser;
 import org.hswebframework.web.service.dictionary.simple.parser.SimpleSingleDictParser;
-import org.hswebframework.web.service.dictionary.simple.parser.SingleDictParser;
+import org.hswebframework.web.service.dictionary.parser.SingleDictParser;
 
-import java.io.Serializable;
 import java.util.*;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 /**
  * 简单的字典解析器实现,支持树形结构字典
@@ -42,32 +37,49 @@ import java.util.stream.Collectors;
  */
 public class SimpleDictionaryParser<V> implements DictionaryParser<V> {
 
-    private SimpleSingleDictParser toTextParser = new SimpleSingleDictParser();
+    private SingleDictParser toTextParser;
 
-    private SimpleSingleDictParser toValueParser = new SimpleSingleDictParser();
+    private SingleDictParser toValueParser;
 
-    public SimpleSingleDictParser getToTextParser() {
+    private Map<String, String> toTextExpressions = new HashMap<>();
+
+    private Map<String, String> toValueExpressions = new HashMap<>();
+
+    public SingleDictParser getToTextParser() {
         return toTextParser;
     }
 
-    public SimpleSingleDictParser getToValueParser() {
+    public SingleDictParser getToValueParser() {
         return toValueParser;
     }
 
+    public void setToTextParser(SingleDictParser toTextParser) {
+        this.toTextParser = toTextParser;
+    }
+
+    public void setToValueParser(SingleDictParser toValueParser) {
+        this.toValueParser = toValueParser;
+    }
+
     //设置DictionaryEntity作为配置
-    public void setDict(DictionaryEntity<? extends DictionaryItemEntity> dict) {
+    public SimpleDictionaryParser<V> setDict(DictionaryEntity<? extends DictionaryItemEntity> dict) {
+        SimpleSingleDictParser toTextParser = new SimpleSingleDictParser();
         toTextParser.setDict(dict, DictionaryItemEntity::getValue
                 , DictionaryItemEntity::getText
-                , DictionaryItemEntity::getTextExpression);
+                , item -> toTextExpressions.get(item.getId()));
 
+        SimpleSingleDictParser toValueParser = new SimpleSingleDictParser();
         toValueParser.setDict(dict, DictionaryItemEntity::getText
                 , DictionaryItemEntity::getValue,
-                DictionaryItemEntity::getValueExpression);
+                item -> toValueExpressions.get(item.getId()));
 
         toValueParser.getTargetFormat().setSplitter(",");
         toValueParser.getTargetFormat().setChildStartChar(",");
         toValueParser.getTargetFormat().setChildEndChar("");
         toValueParser.getTargetFormat().setChildSplitter(",");
+        this.setToTextParser(toTextParser);
+        this.setToValueParser(toValueParser);
+        return this;
     }
 
     @Override

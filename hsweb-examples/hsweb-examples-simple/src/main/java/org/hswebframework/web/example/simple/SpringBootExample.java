@@ -122,7 +122,7 @@ public class SpringBootExample implements CommandLineRunner {
     @Autowired
     EntityFactory     entityFactory;
     @Autowired
-    OAuth2ClientDao oAuth2ClientDao;
+    OAuth2ClientDao   oAuth2ClientDao;
 
     public static void main(String[] args) {
         SpringApplication.run(SpringBootExample.class);
@@ -150,7 +150,7 @@ public class SpringBootExample implements CommandLineRunner {
         //password 属性不能读取和修改
         FieldAccessEntity fieldAccessEntity = new FieldAccessEntity();
         fieldAccessEntity.setField("password");
-        fieldAccessEntity.setActions(ActionEntity.create(Permission.ACTION_QUERY, Permission.ACTION_UPDATE));
+        fieldAccessEntity.setActions(Arrays.asList(Permission.ACTION_QUERY, Permission.ACTION_UPDATE));
 
         PermissionEntity permission = entityFactory.newInstance(PermissionEntity.class);
         permission.setName("测试");

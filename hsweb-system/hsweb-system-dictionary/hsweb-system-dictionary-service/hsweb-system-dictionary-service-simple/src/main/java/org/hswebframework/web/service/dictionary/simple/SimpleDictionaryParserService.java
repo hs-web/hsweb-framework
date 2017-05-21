@@ -24,6 +24,7 @@ import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.service.GenericEntityService;
 import org.hswebframework.web.service.dictionary.DictionaryParser;
 import org.hswebframework.web.service.dictionary.DictionaryParserService;
+import org.hswebframework.web.service.dictionary.builder.DictionaryParserBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -38,6 +39,9 @@ public class SimpleDictionaryParserService extends GenericEntityService<Dictiona
     @Autowired
     private DictionaryParserDao dictionaryParserDao;
 
+    @Autowired
+    private DictionaryParserBuilder dictionaryParserBuilder;
+
     @Override
     protected IDGenerator<String> getIDGenerator() {
         return IDGenerator.MD5;
@@ -50,9 +54,12 @@ public class SimpleDictionaryParserService extends GenericEntityService<Dictiona
 
     @Override
     public <V> DictionaryParser<V> getParser(DictionaryEntity<? extends DictionaryItemEntity> dict, String parserId) {
-
-        // TODO: 17-3-9
-        return null;
+        DictionaryParserEntity entity = selectByPk(parserId);
+        assertNotNull(entity);
+        SimpleDictionaryParser<V> parser = new SimpleDictionaryParser<>();
+        parser.setToValueParser(dictionaryParserBuilder.build(entity.getTextToValueParser()));
+        parser.setToTextParser(dictionaryParserBuilder.build(entity.getValueToTextParser()));
+        return parser;
     }
 
 }
