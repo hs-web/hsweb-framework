@@ -62,12 +62,12 @@ public class ResponseMessage<T> implements Serializable {
         return timestamp;
     }
 
-    public static ResponseMessage error(String message) {
+    public static <T> ResponseMessage<T> error(String message) {
         return error(500, message);
     }
 
-    public static ResponseMessage error(int status, String message) {
-        ResponseMessage msg = new ResponseMessage();
+    public static <T> ResponseMessage<T> error(int status, String message) {
+        ResponseMessage<T> msg = new ResponseMessage<>();
         msg.message = message;
         msg.status(status);
         return msg.putTimeStamp();

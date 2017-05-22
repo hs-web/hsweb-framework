@@ -23,6 +23,7 @@ import org.hswebframework.web.AuthorizeForbiddenException;
 import org.hswebframework.web.BusinessException;
 import org.hswebframework.web.NotFoundException;
 import org.hswebframework.web.controller.message.ResponseMessage;
+import org.hswebframework.web.validate.ValidateResults;
 import org.hswebframework.web.validate.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +32,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.List;
 
 @RestControllerAdvice
 public class RestControllerExceptionTranslator {
@@ -47,8 +50,16 @@ public class RestControllerExceptionTranslator {
     @ExceptionHandler(org.hsweb.ezorm.rdb.exception.ValidationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
-    ResponseMessage handleException(org.hsweb.ezorm.rdb.exception.ValidationException exception) {
+    ResponseMessage<Object> handleException(org.hsweb.ezorm.rdb.exception.ValidationException exception) {
         return ResponseMessage.error(400, exception.getMessage()).data(exception.getValidateResult());
+    }
+
+    @ExceptionHandler(ValidationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    ResponseMessage<List<ValidateResults.Result>> handleException(ValidationException exception) {
+        return ResponseMessage.<List<ValidateResults.Result>>error(400, exception.getMessage())
+                .data(exception.getResults());
     }
 
     @ExceptionHandler(BusinessException.class)

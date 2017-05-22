@@ -20,6 +20,7 @@ package org.hswebframework.web.entity.authorization;
 
 import org.hswebframework.web.commons.entity.GenericEntity;
 
+import javax.validation.constraints.Pattern;
 import java.util.List;
 
 /**
@@ -29,6 +30,7 @@ import java.util.List;
  */
 public interface PermissionEntity extends GenericEntity<String> {
 
+    @Pattern(regexp = "[a-zA-Z0-9_\\-]+")
     String getId();
 
     String getName();

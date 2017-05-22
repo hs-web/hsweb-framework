@@ -42,6 +42,15 @@ public interface DefaultQueryByEntityService<E>
     @Override
     default PagerResult<E> selectPager(Entity param) {
         PagerResult<E> pagerResult = new PagerResult<>();
+        if (param instanceof QueryParamEntity) {
+            QueryParamEntity entity = ((QueryParamEntity) param);
+            //不分页,不进行count
+            if (!entity.isPaging()) {
+                pagerResult.setData(getDao().query(param));
+                pagerResult.setTotal(pagerResult.getData().size());
+                return pagerResult;
+            }
+        }
         int total = getDao().count(param);
         pagerResult.setTotal(total);
         if (total == 0) {

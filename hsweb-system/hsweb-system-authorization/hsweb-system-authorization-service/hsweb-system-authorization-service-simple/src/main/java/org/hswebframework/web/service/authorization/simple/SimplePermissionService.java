@@ -29,4 +29,10 @@ public class SimplePermissionService extends GenericEntityService<PermissionEnti
         return permissionDao;
     }
 
+    @Override
+    public String insert(PermissionEntity entity) {
+        entity.setStatus((byte) 1);
+        return super.insert(entity);
+    }
+
 }

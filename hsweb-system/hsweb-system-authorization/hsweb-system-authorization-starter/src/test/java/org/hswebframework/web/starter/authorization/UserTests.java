@@ -105,7 +105,7 @@ public class UserTests extends SimpleWebApplicationTests {
             userService.insert(userEntity);
             Assert.assertTrue(false);
         } catch (ValidationException e) {
-            Assert.assertEquals(e.getResults().getResults().get(0).getMessage(), "密码强度太弱");
+            Assert.assertEquals(e.getResults().get(0).getMessage(), "密码强度太弱");
         }
         userEntity.setPassword("password_1234");
         String id = userService.insert(userEntity);
@@ -130,7 +130,7 @@ public class UserTests extends SimpleWebApplicationTests {
             userService.updatePassword(id, "test", "test");
             Assert.assertTrue(false);
         } catch (ValidationException e) {
-            Assert.assertEquals(e.getResults().getResults().get(0).getMessage(), "{old_password_error}");
+            Assert.assertEquals(e.getResults().get(0).getMessage(), "{old_password_error}");
         }
         userService.updatePassword(id, "password_1234", "password_2345");
         entityInDb = userService.selectByUsername(userEntity.getUsername());
@@ -142,7 +142,7 @@ public class UserTests extends SimpleWebApplicationTests {
             userService.update(anotherId,entityInDb);
             Assert.assertTrue(false);
         } catch (ValidationException e) {
-            Assert.assertEquals(e.getResults().getResults().get(0).getMessage(), "{username_exists}");
+            Assert.assertEquals(e.getResults().get(0).getMessage(), "{username_exists}");
         }
         entityInDb.setId(id);
         userService.update(id,entityInDb);

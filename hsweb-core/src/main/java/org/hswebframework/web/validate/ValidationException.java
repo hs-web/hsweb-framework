@@ -21,6 +21,8 @@ package org.hswebframework.web.validate;
 
 import org.hswebframework.web.BusinessException;
 
+import java.util.List;
+
 public class ValidationException extends BusinessException {
     private ValidateResults results;
 
@@ -38,7 +40,8 @@ public class ValidationException extends BusinessException {
         this.results = results;
     }
 
-    public ValidateResults getResults() {
-        return results;
+    public List<ValidateResults.Result> getResults() {
+        if (results == null) return null;
+        return results.getResults();
     }
 }

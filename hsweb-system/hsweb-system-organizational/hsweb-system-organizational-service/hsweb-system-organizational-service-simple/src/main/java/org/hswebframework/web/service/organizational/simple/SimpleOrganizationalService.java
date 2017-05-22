@@ -29,9 +29,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -63,8 +62,7 @@ public class SimpleOrganizationalService extends AbstractTreeSortService<Organiz
 
     @Override
     public List<String> getCanUseRoleIds(List<String> orgIds) {
-        Assert.notNull(orgIds);
-        if (orgIds.isEmpty()) return new ArrayList<>();
+        if (orgIds == null || orgIds.isEmpty()) return new ArrayList<>();
         return createQuery().where().in(GenericEntity.id, orgIds).listNoPaging()
                 .stream().map(OrganizationalEntity::getOptionalRoles) //得到机构可选角色id集合
                 .filter(Objects::nonNull)
