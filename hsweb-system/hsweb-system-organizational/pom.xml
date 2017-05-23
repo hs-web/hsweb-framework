@@ -34,6 +34,7 @@
         <module>hsweb-system-organizational-controller</module>
         <module>hsweb-system-organizational-entity</module>
         <module>hsweb-system-organizational-starter</module>
+        <module>hsweb-system-organizational-authorization</module>
     </modules>
 
 
