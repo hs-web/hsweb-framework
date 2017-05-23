@@ -67,7 +67,7 @@ public class DataAccessAnnotationMethodInterceptor extends AuthorizingAnnotation
             this.dataAccessController = controller;
         }
 
-        Map<Class<DataAccessController>, DataAccessController> cache = new HashMap<>();
+        final Map<Class<DataAccessController>, DataAccessController> cache = new HashMap<>(128);
 
         @Override
         public void assertAuthorized(Annotation a) throws AuthorizationException {
