@@ -93,7 +93,7 @@ public class SimpleAuthentication implements Authentication {
     @Override
     @SuppressWarnings("unchecked")
     public <T extends Serializable> Optional<T> getAttribute(String name) {
-        return Optional.of((T) attributes.get(name));
+        return Optional.ofNullable((T) attributes.get(name));
     }
 
     @Override
