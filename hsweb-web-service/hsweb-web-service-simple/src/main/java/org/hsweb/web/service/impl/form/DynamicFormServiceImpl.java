@@ -16,6 +16,7 @@ import org.hsweb.ezorm.rdb.meta.RDBTableMetaData;
 import org.hsweb.ezorm.rdb.meta.builder.TableBuilder;
 import org.hsweb.ezorm.rdb.meta.builder.simple.SimpleTableBuilder;
 import org.hsweb.ezorm.rdb.meta.parser.TableMetaParser;
+import org.hsweb.ezorm.rdb.simple.SimpleDatabase;
 import org.hsweb.web.bean.common.DeleteParam;
 import org.hsweb.web.bean.common.PagerResult;
 import org.hsweb.web.bean.common.QueryParam;

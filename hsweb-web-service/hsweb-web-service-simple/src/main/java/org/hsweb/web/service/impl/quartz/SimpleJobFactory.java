@@ -22,6 +22,7 @@ import org.hsweb.web.core.authorize.ExpressionScopeBean;
 import org.hsweb.web.service.config.ConfigService;
 import org.hsweb.web.service.quartz.QuartzJobHistoryService;
 import org.hsweb.web.service.quartz.QuartzJobService;
+import org.hsweb.web.service.script.DynamicScriptExecuteService;
 import org.hsweb.web.service.user.UserService;
 import org.quartz.Job;
 import org.quartz.Scheduler;
@@ -34,7 +35,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 
 import javax.annotation.Resource;
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -55,6 +55,9 @@ public class SimpleJobFactory implements JobFactory {
 
     @Resource
     private ConfigService configService;
+
+    @Resource
+    private DynamicScriptExecuteService dynamicScriptExecuteService;
 
     @Autowired(required = false)
     private Map<String, ExpressionScopeBean> expressionScopeBeanMap;
@@ -77,8 +80,10 @@ public class SimpleJobFactory implements JobFactory {
                     //未找到用户名
                     logger.warn("job executor user:{} not found!", username);
                 }
+                Map<String, Object> var = new HashMap<>();
                 if (expressionScopeBeanMap != null)
-                    job.setDefaultVar(new HashMap<>(expressionScopeBeanMap));
+                    var.putAll(expressionScopeBeanMap);
+                var.put("scriptExecutor", (DynamicScriptExecuteService.ScriptRunner) dynamicScriptExecuteService::exec);
                 return job;
             } catch (Exception e) {
                 throw new SchedulerException("create simple job instance error", e);

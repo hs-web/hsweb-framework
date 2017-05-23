@@ -35,7 +35,7 @@ public class DynamicScriptExecuteServiceImpl implements DynamicScriptExecuteServ
 
     @Override
     @Transactional(rollbackFor = Throwable.class)
-    public Object exec(String name, String type, Map<String, Object> var) throws Throwable {
+    public Object exec(String name, String type, Map<String, Object> var) throws Exception {
         DynamicScript script = dynamicScriptService.selectByNameAndType(name, type);
         assertNotNull(script, "脚本不存在");
         return exec(script, var);
@@ -43,7 +43,7 @@ public class DynamicScriptExecuteServiceImpl implements DynamicScriptExecuteServ
 
     @Override
     @Transactional(rollbackFor = Throwable.class)
-    public Object exec(String id, Map<String, Object> var) throws Throwable {
+    public Object exec(String id, Map<String, Object> var) throws Exception {
         if (id.contains(".")) {
             String nameAndType[] = id.split("[.]");
             return exec(nameAndType[0], nameAndType[1], var);
@@ -52,8 +52,9 @@ public class DynamicScriptExecuteServiceImpl implements DynamicScriptExecuteServ
         assertNotNull(script, "脚本不存在");
         return exec(script, var);
     }
+
     @Transactional(rollbackFor = Throwable.class)
-    protected Object exec(DynamicScript script, Map<String, Object> var) throws Throwable {
+    protected Object exec(DynamicScript script, Map<String, Object> var) throws Exception {
         if (script.getStatus() != 1) {
             assertNotNull(null, "脚本已禁用");
         }
@@ -64,18 +65,14 @@ public class DynamicScriptExecuteServiceImpl implements DynamicScriptExecuteServ
         }
         if (expressionScopeBeanMap != null) {
             var.putAll(expressionScopeBeanMap);
+            var.put("scriptExecutor", (ScriptRunner) this::exec);
         }
         ScriptContext context = engine.getContext(script.getId());
         //如果发生了变化,自动重新进行编译
         if (!context.getMd5().equals(MD5.defaultEncode(script.getContent()))) {
             dynamicScriptService.compile(script.getId());
         }
-        ExecuteResult result = engine.execute(script.getId(), var);
-        if (!result.isSuccess()) {
-            if (result.getException() != null)
-                throw result.getException();
-        }
-        return result.getResult();
+        return engine.execute(script.getId(), var).getIfSuccess();
     }
 
     protected void assertNotNull(Object po, String message) {
@@ -83,3 +80,4 @@ public class DynamicScriptExecuteServiceImpl implements DynamicScriptExecuteServ
     }
 
 }
+

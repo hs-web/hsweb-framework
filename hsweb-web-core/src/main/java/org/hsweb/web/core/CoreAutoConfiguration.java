@@ -57,6 +57,7 @@ public class CoreAutoConfiguration {
     private void initScript(String language, Map<String, Object> vars) {
         try {
             DynamicScriptEngine engine = DynamicScriptEngineFactory.getEngine(language);
+
             if (engine == null) return;
             vars.put("logger", LoggerFactory.getLogger("org.hsweb.script.".concat(language)));
             vars.put("scriptEngine", engine);
