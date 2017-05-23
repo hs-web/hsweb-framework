@@ -20,6 +20,7 @@ import org.hsweb.web.core.datasource.DataSourceHolder;
 import org.hsweb.web.core.datasource.DatabaseType;
 import org.hsweb.web.service.impl.quartz.SimpleJobFactory;
 import org.quartz.Calendar;
+import org.quartz.Scheduler;
 import org.quartz.SchedulerListener;
 import org.quartz.core.QuartzScheduler;
 import org.quartz.impl.StdSchedulerFactory;
@@ -27,6 +28,7 @@ import org.quartz.spi.JobFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -42,6 +44,7 @@ import java.util.Map;
 @ConditionalOnClass(QuartzScheduler.class)
 @EnableConfigurationProperties(SchedulerProperties.class)
 @AutoConfigureAfter(DataBaseAutoConfiguration.class)
+@ConditionalOnMissingBean({Scheduler.class, SchedulerFactoryBean.class})
 public class SchedulerAutoConfiguration {
 
     @Autowired
