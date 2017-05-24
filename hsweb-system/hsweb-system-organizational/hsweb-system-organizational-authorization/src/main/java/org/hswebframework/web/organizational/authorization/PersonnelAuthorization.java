@@ -25,9 +25,7 @@ public interface PersonnelAuthorization extends Serializable {
      * @see Authentication#getAttribute(String)
      */
     static Optional<PersonnelAuthorization> current() {
-        return Authentication.current()
-                .map(authentication -> authentication.<PersonnelAuthorization>getAttribute(PersonnelAuthorization.class.getName()))
-                .orElseGet(Optional::empty);
+        return Optional.ofNullable(PersonnelAuthorizationHolder.get());
     }
 
     /**

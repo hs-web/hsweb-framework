@@ -25,11 +25,10 @@ public interface DataAccessType extends Serializable {
      * 控制职位
      */
     String POSITION_SCOPE   = "POSITION_SCOPE";
-
     /**
      * 控制人员
      */
-    String PERSON_SCOPE = "PERSON_SCOPE";
+    String PERSON_SCOPE     = "PERSON_SCOPE";
 
     enum ScopeType implements Serializable {
         ONLY_SELF("只能查看自己"),

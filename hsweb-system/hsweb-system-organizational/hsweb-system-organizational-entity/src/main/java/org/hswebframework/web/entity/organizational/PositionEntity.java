@@ -53,7 +53,7 @@ public interface PositionEntity extends TreeSortSupportEntity<String> {
     /**
      * 树结构编码
      */
-    String path     = "path";
+    String path         = "path";
     /**
      * 排序索引
      */
@@ -103,15 +103,6 @@ public interface PositionEntity extends TreeSortSupportEntity<String> {
      */
     void setRemark(String remark);
 
-    /**
-     * @return 排序索引
-     */
-    Long getSortIndex();
-
-    /**
-     * 设置 排序索引
-     */
-    void setSortIndex(Long sortIndex);
-
+    void setChildren(List<PositionEntity> children);
 
 }

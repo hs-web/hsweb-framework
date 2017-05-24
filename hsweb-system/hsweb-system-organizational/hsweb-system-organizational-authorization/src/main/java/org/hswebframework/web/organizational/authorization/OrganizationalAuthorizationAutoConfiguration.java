@@ -1,6 +1,10 @@
 package org.hswebframework.web.organizational.authorization;
 
 import org.hswebframework.web.organizational.authorization.simple.*;
+import org.hswebframework.web.organizational.authorization.simple.handler.*;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,7 +15,7 @@ import org.springframework.context.annotation.Configuration;
  * @author zhouhao
  */
 @Configuration
-public class OrganizationalAuthorizationAutoConfiguration {
+public class OrganizationalAuthorizationAutoConfiguration implements BeanPostProcessor {
 
     @Bean
     @ConditionalOnMissingBean(AreaScopeDataAccessHandler.class)
@@ -41,5 +45,33 @@ public class OrganizationalAuthorizationAutoConfiguration {
     @ConditionalOnMissingBean(PositionScopeDataAccessHandler.class)
     public PositionScopeDataAccessHandler positionScopeDataAccessHandler() {
         return new PositionScopeDataAccessHandler();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(ScopeDataAccessConfigConvert.class)
+    public ScopeDataAccessConfigConvert scopeDataAccessConfigConvert() {
+        return new ScopeDataAccessConfigConvert();
+    }
+
+    @Override
+    public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+        return bean;
+    }
+
+    @Override
+    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+        if (bean instanceof PersonnelAuthorizationSupplier) {
+            PersonnelAuthorizationHolder.addSupplier(((PersonnelAuthorizationSupplier) bean));
+        }
+        return bean;
+    }
+
+    @Configuration
+    @ConditionalOnBean(PersonnelAuthorizationManager.class)
+    public static class PersonnelAuthorizationSupplierAutoConfiguration {
+        @Bean
+        public DefaultPersonnelAuthorizationSupplier personnelAuthorizationManager(PersonnelAuthorizationManager personnelAuthorizationManager) {
+            return new DefaultPersonnelAuthorizationSupplier(personnelAuthorizationManager);
+        }
     }
 }

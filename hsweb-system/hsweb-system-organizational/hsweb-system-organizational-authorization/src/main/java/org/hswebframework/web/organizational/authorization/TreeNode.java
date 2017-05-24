@@ -3,6 +3,7 @@ package org.hswebframework.web.organizational.authorization;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 
 /**
@@ -29,7 +30,7 @@ public class TreeNode<V> implements Serializable {
      */
     private int level;
 
-    private List<TreeNode<V>> children;
+    private Set<TreeNode<V>> children;
 
     public TreeNode<V> getParent() {
         return parent;
@@ -47,11 +48,11 @@ public class TreeNode<V> implements Serializable {
         this.value = value;
     }
 
-    public List<TreeNode<V>> getChildren() {
+    public Set<TreeNode<V>> getChildren() {
         return children;
     }
 
-    public void setChildren(List<TreeNode<V>> children) {
+    public void setChildren(Set<TreeNode<V>> children) {
         this.children = children;
     }
 
@@ -64,10 +65,26 @@ public class TreeNode<V> implements Serializable {
     }
 
     public List<V> getAllValue() {
-        List<V> values = new ArrayList<>(getChildren().size() + 1);
+        List<V> values = new ArrayList<>(children != null ? children.size() + 1 : 1);
         values.add(value);
-        children.stream().map(TreeNode::getAllValue).flatMap(List::stream).forEach(values::add);
+        if (null != children)
+            children.stream().map(TreeNode::getAllValue).flatMap(List::stream).forEach(values::add);
         return values;
+    }
+
+    @Override
+    public int hashCode() {
+        if (value != null)
+            return value.hashCode();
+        return 0;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof TreeNode) {
+            return obj.hashCode() == hashCode();
+        }
+        return false;
     }
 
     public List<V> getAllValue(Predicate<TreeNode<V>> filter) {

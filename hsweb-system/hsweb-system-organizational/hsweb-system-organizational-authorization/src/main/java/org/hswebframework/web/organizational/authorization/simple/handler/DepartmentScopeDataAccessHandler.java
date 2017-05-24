@@ -1,10 +1,10 @@
-package org.hswebframework.web.organizational.authorization.simple;
+package org.hswebframework.web.organizational.authorization.simple.handler;
 
 import org.hsweb.ezorm.core.param.Term;
 import org.hsweb.ezorm.core.param.TermType;
-import org.hswebframework.web.organizational.authorization.access.DataAccessType;
 import org.hswebframework.web.organizational.authorization.PersonnelAuthorization;
-import org.hswebframework.web.organizational.authorization.entity.PersonAttachEntity;
+import org.hswebframework.web.organizational.authorization.access.DataAccessType;
+import org.hswebframework.web.organizational.authorization.entity.DepartmentAttachEntity;
 
 import java.util.Collections;
 import java.util.Set;
@@ -14,38 +14,38 @@ import java.util.Set;
  *
  * @author zhouhao
  */
-public class PersonScopeDataAccessHandler extends AbstractScopeDataAccessHander<PersonAttachEntity> {
+public class DepartmentScopeDataAccessHandler extends AbstractScopeDataAccessHander<DepartmentAttachEntity> {
     @Override
-    protected Class<PersonAttachEntity> getEntityClass() {
-        return PersonAttachEntity.class;
+    protected Class<DepartmentAttachEntity> getEntityClass() {
+        return DepartmentAttachEntity.class;
     }
 
     @Override
     protected String getSupportScope() {
-        return DataAccessType.PERSON_SCOPE;
+        return DataAccessType.DEPARTMENT_SCOPE;
+    }
+
+    @Override
+    protected String getOperationScope(DepartmentAttachEntity entity) {
+        return entity.getDepartmentId();
     }
 
     @Override
     protected Set<String> getTryOperationScope(DataAccessType.ScopeType scopeType, PersonnelAuthorization authorization) {
         switch (scopeType) {
             case CHILDREN:
-                logger.warn("not support person children control!");
+                return authorization.getAllDepartmentId();
             case ONLY_SELF:
-                return Collections.singleton(authorization.getPersonnel().getId());
+                return authorization.getRootDepartmentId();
             default:
                 return Collections.emptySet();
         }
     }
 
     @Override
-    protected String getOperationScope(PersonAttachEntity entity) {
-        return entity.getPersonId();
-    }
-
-    @Override
     protected Term applyQueryTerm(Set<String> scope) {
         Term term = new Term();
-        term.setColumn(PersonAttachEntity.personId);
+        term.setColumn(DepartmentAttachEntity.departmentId);
         term.setTermType(TermType.in);
         term.setValue(scope);
         term.setType(Term.Type.and);

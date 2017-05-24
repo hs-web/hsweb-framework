@@ -1,10 +1,10 @@
-package org.hswebframework.web.organizational.authorization.simple;
+package org.hswebframework.web.organizational.authorization.simple.handler;
 
 import org.hsweb.ezorm.core.param.Term;
 import org.hsweb.ezorm.core.param.TermType;
-import org.hswebframework.web.organizational.authorization.access.DataAccessType;
 import org.hswebframework.web.organizational.authorization.PersonnelAuthorization;
-import org.hswebframework.web.organizational.authorization.entity.PositionAttachEntity;
+import org.hswebframework.web.organizational.authorization.access.DataAccessType;
+import org.hswebframework.web.organizational.authorization.entity.OrgAttachEntity;
 
 import java.util.Collections;
 import java.util.Set;
@@ -14,38 +14,38 @@ import java.util.Set;
  *
  * @author zhouhao
  */
-public class PositionScopeDataAccessHandler extends AbstractScopeDataAccessHander<PositionAttachEntity> {
+public class OrgScopeDataAccessHandler extends AbstractScopeDataAccessHander<OrgAttachEntity> {
     @Override
-    protected Class<PositionAttachEntity> getEntityClass() {
-        return PositionAttachEntity.class;
+    protected Class<OrgAttachEntity> getEntityClass() {
+        return OrgAttachEntity.class;
     }
 
     @Override
     protected String getSupportScope() {
-        return DataAccessType.POSITION_SCOPE;
+        return DataAccessType.ORG_SCOPE;
     }
 
     @Override
     protected Set<String> getTryOperationScope(DataAccessType.ScopeType scopeType, PersonnelAuthorization authorization) {
         switch (scopeType) {
             case CHILDREN:
-                return authorization.getAllPositionId();
+                return authorization.getAllOrgId();
             case ONLY_SELF:
-                return authorization.getRootPositionId();
+                return authorization.getRootOrgId();
             default:
                 return Collections.emptySet();
         }
     }
 
     @Override
-    protected String getOperationScope(PositionAttachEntity entity) {
-        return entity.getPositionId();
+    protected String getOperationScope(OrgAttachEntity entity) {
+        return entity.getOrgId();
     }
 
     @Override
     protected Term applyQueryTerm(Set<String> scope) {
         Term term = new Term();
-        term.setColumn(PositionAttachEntity.positionId);
+        term.setColumn(OrgAttachEntity.orgId);
         term.setTermType(TermType.in);
         term.setValue(scope);
         term.setType(Term.Type.and);

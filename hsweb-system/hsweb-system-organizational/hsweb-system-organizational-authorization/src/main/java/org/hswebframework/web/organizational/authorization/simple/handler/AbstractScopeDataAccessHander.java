@@ -1,4 +1,4 @@
-package org.hswebframework.web.organizational.authorization.simple;
+package org.hswebframework.web.organizational.authorization.simple.handler;
 
 import org.hsweb.ezorm.core.param.Term;
 import org.hswebframework.web.authorization.Permission;
