@@ -45,6 +45,24 @@ public class SimpleDictionaryParser<V> implements DictionaryParser<V> {
 
     private Map<String, String> toValueExpressions = new HashMap<>();
 
+    public SimpleDictionaryParser<V> addToTextExpression(String id, String expression) {
+        toTextExpressions.put(id, expression);
+        return this;
+    }
+
+    public SimpleDictionaryParser<V> addToValueExpression(String id, String expression) {
+        toValueExpressions.put(id, expression);
+        return this;
+    }
+
+    public void setToTextExpressions(Map<String, String> toTextExpressions) {
+        this.toTextExpressions = toTextExpressions;
+    }
+
+    public void setToValueExpressions(Map<String, String> toValueExpressions) {
+        this.toValueExpressions = toValueExpressions;
+    }
+
     public SingleDictParser getToTextParser() {
         return toTextParser;
     }
