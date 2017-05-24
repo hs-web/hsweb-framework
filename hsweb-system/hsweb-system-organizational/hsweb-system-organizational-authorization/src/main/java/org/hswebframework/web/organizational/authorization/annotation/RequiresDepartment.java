@@ -1,4 +1,4 @@
-package organizational.annotation;
+package org.hswebframework.web.organizational.authorization.annotation;
 
 import org.hswebframework.web.authorization.annotation.Logical;
 
@@ -10,7 +10,7 @@ import java.lang.annotation.*;
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface RequiresOrg {
+public @interface RequiresDepartment {
     String[] value() default {};
 
     boolean hasChidren() default true;

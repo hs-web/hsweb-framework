@@ -1,4 +1,4 @@
-package organizational.annotation;
+package org.hswebframework.web.organizational.authorization.annotation;
 
 import org.hswebframework.web.authorization.annotation.Logical;
 

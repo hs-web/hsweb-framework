@@ -1,4 +1,4 @@
-package organizational.access;
+package org.hswebframework.web.organizational.authorization.access;
 
 import java.io.Serializable;
 

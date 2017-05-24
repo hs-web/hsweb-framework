@@ -1,6 +1,6 @@
-package organizational.entity;
+package org.hswebframework.web.organizational.authorization.entity;
 
-import java.io.Serializable;
+import org.hswebframework.web.commons.entity.Entity;
 
 /**
  * 关联部门信息的实体,实现此接口,才能对相应的操作进行部门相关的权限控制
@@ -8,7 +8,7 @@ import java.io.Serializable;
  * @author zhouhao
  * @since 3.0
  */
-public interface DepartmentAttachEntity extends Serializable {
+public interface DepartmentAttachEntity extends Entity {
 
     /*-------------------------------------------
      |               属性名常量               |

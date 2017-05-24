@@ -1,14 +1,14 @@
-package organizational.simple;
+package org.hswebframework.web.organizational.authorization.simple;
 
 import org.hsweb.ezorm.core.param.Term;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.access.DataAccessConfig;
 import org.hswebframework.web.authorization.access.DataAccessHandler;
 import org.hswebframework.web.authorization.annotation.RequiresDataAccess;
-import organizational.PersonnelAuthorization;
-import organizational.access.DataAccessType;
-import organizational.access.ScopeDataAccessConfig;
-import organizational.entity.OrgAttachEntity;
+import org.hswebframework.web.organizational.authorization.access.DataAccessType;
+import org.hswebframework.web.organizational.authorization.PersonnelAuthorization;
+import org.hswebframework.web.organizational.authorization.access.ScopeDataAccessConfig;
+import org.hswebframework.web.organizational.authorization.entity.OrgAttachEntity;
 import org.hswebframework.web.boost.aop.context.MethodInterceptorParamContext;
 import org.hswebframework.web.commons.entity.Entity;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;

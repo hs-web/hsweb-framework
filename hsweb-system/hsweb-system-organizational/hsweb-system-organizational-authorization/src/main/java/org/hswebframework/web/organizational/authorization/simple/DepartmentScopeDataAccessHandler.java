@@ -1,10 +1,10 @@
-package organizational.simple;
+package org.hswebframework.web.organizational.authorization.simple;
 
 import org.hsweb.ezorm.core.param.Term;
 import org.hsweb.ezorm.core.param.TermType;
-import organizational.PersonnelAuthorization;
-import organizational.access.DataAccessType;
-import organizational.entity.DepartmentAttachEntity;
+import org.hswebframework.web.organizational.authorization.PersonnelAuthorization;
+import org.hswebframework.web.organizational.authorization.access.DataAccessType;
+import org.hswebframework.web.organizational.authorization.entity.DepartmentAttachEntity;
 
 import java.util.Collections;
 import java.util.Set;

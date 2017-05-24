@@ -1,4 +1,4 @@
-package organizational;
+package org.hswebframework.web.organizational.authorization;
 
 import java.io.Serializable;
 
