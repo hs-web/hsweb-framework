@@ -4,8 +4,8 @@ import com.alibaba.fastjson.JSON;
 import org.hswebframework.web.authorization.access.DataAccessConfig;
 import org.hswebframework.web.authorization.builder.DataAccessConfigBuilder;
 import org.hswebframework.web.authorization.builder.DataAccessConfigBuilderFactory;
-import org.hswebframework.web.authorization.simple.SimpleCustomDataAccess;
-import org.hswebframework.web.authorization.simple.SimpleOwnCreatedDataAccess;
+import org.hswebframework.web.authorization.simple.SimpleCustomDataAccessConfig;
+import org.hswebframework.web.authorization.simple.SimpleOwnCreatedDataAccessConfig;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -17,16 +17,16 @@ import java.util.Objects;
  * @author zhouhao
  */
 public class SimpleDataAccessConfigBuilderFactory implements DataAccessConfigBuilderFactory {
-    private List<DataAccessConfigBuilderConvert> converts = new LinkedList<>();
+    private List<DataAccessConfigConvert> converts = new LinkedList<>();
 
-    public SimpleDataAccessConfigBuilderFactory addConvert(DataAccessConfigBuilderConvert configBuilderConvert) {
+    public SimpleDataAccessConfigBuilderFactory addConvert(DataAccessConfigConvert configBuilderConvert) {
         Objects.requireNonNull(configBuilderConvert);
         converts.add(configBuilderConvert);
         return this;
     }
 
     public SimpleDataAccessConfigBuilderFactory() {
-        converts.add(new DataAccessConfigBuilderConvert() {
+        converts.add(new DataAccessConfigConvert() {
             @Override
             public boolean isSupport(String type, String action, String config) {
                 return DataAccessConfig.DefaultType.OWN_CREATED.equals(type);
@@ -34,11 +34,11 @@ public class SimpleDataAccessConfigBuilderFactory implements DataAccessConfigBui
 
             @Override
             public DataAccessConfig convert(String type, String action, String config) {
-                return new SimpleOwnCreatedDataAccess(action);
+                return new SimpleOwnCreatedDataAccessConfig(action);
             }
         });
 
-        converts.add(new DataAccessConfigBuilderConvert() {
+        converts.add(new DataAccessConfigConvert() {
             @Override
             public boolean isSupport(String type, String action, String config) {
                 return DataAccessConfig.DefaultType.SCRIPT.equals(type);
@@ -46,12 +46,12 @@ public class SimpleDataAccessConfigBuilderFactory implements DataAccessConfigBui
 
             @Override
             public DataAccessConfig convert(String type, String action, String config) {
-                SimpleOwnCreatedDataAccess access = JSON.parseObject(config, SimpleOwnCreatedDataAccess.class);
+                SimpleOwnCreatedDataAccessConfig access = JSON.parseObject(config, SimpleOwnCreatedDataAccessConfig.class);
                 access.setAction(config);
                 return access;
             }
         });
-        converts.add(new DataAccessConfigBuilderConvert() {
+        converts.add(new DataAccessConfigConvert() {
             @Override
             public boolean isSupport(String type, String action, String config) {
                 return DataAccessConfig.DefaultType.CUSTOM.equals(type);
@@ -59,7 +59,7 @@ public class SimpleDataAccessConfigBuilderFactory implements DataAccessConfigBui
 
             @Override
             public DataAccessConfig convert(String type, String action, String config) {
-                SimpleCustomDataAccess access = new SimpleCustomDataAccess(config);
+                SimpleCustomDataAccessConfig access = new SimpleCustomDataAccessConfig(config);
                 access.setAction(action);
                 return access;
             }

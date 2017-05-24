@@ -6,16 +6,16 @@ import org.hswebframework.web.authorization.access.DataAccessController;
 /**
  * @author zhouhao
  */
-public class SimpleCustomDataAccess extends AbstractDataAccess implements CustomDataAccess {
+public class SimpleCustomDataAccessConfig extends AbstractDataAccessConfig implements CustomDataAccess {
 
     private String classOrBeanName;
 
     private transient DataAccessController instance;
 
-    public SimpleCustomDataAccess() {
+    public SimpleCustomDataAccessConfig() {
     }
 
-    public SimpleCustomDataAccess(String classOrBeanName) {
+    public SimpleCustomDataAccessConfig(String classOrBeanName) {
         this.classOrBeanName = classOrBeanName;
     }
 

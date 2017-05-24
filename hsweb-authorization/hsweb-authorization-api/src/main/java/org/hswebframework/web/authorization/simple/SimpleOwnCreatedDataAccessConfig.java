@@ -7,12 +7,12 @@ import org.hswebframework.web.authorization.access.OwnCreatedDataAccessConfig;
  *
  * @author zhouhao
  */
-public class SimpleOwnCreatedDataAccess extends AbstractDataAccess implements OwnCreatedDataAccessConfig {
+public class SimpleOwnCreatedDataAccessConfig extends AbstractDataAccessConfig implements OwnCreatedDataAccessConfig {
 
-    public SimpleOwnCreatedDataAccess() {
+    public SimpleOwnCreatedDataAccessConfig() {
     }
 
-    public SimpleOwnCreatedDataAccess(String action) {
+    public SimpleOwnCreatedDataAccessConfig(String action) {
         setAction(action);
     }
 }

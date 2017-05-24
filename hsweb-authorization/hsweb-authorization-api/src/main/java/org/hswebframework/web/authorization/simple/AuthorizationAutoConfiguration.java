@@ -3,7 +3,7 @@ package org.hswebframework.web.authorization.simple;
 import org.hswebframework.web.authorization.builder.AuthenticationBuilderFactory;
 import org.hswebframework.web.authorization.builder.DataAccessConfigBuilderFactory;
 import org.hswebframework.web.authorization.builder.FieldAccessConfigBuilderFactory;
-import org.hswebframework.web.authorization.simple.builder.DataAccessConfigBuilderConvert;
+import org.hswebframework.web.authorization.simple.builder.DataAccessConfigConvert;
 import org.hswebframework.web.authorization.simple.builder.SimpleAuthenticationBuilderFactory;
 import org.hswebframework.web.authorization.simple.builder.SimpleDataAccessConfigBuilderFactory;
 import org.hswebframework.web.authorization.simple.builder.SimpleFieldAccessConfigBuilderFactory;
@@ -23,7 +23,7 @@ import java.util.List;
 public class AuthorizationAutoConfiguration {
 
     @Autowired(required = false)
-    private List<DataAccessConfigBuilderConvert> dataAccessConfigBuilderConverts;
+    private List<DataAccessConfigConvert> dataAccessConfigConverts;
 
     @Bean
     @ConditionalOnMissingBean(FieldAccessConfigBuilderFactory.class)
@@ -35,8 +35,8 @@ public class AuthorizationAutoConfiguration {
     @ConditionalOnMissingBean(DataAccessConfigBuilderFactory.class)
     public DataAccessConfigBuilderFactory dataAccessConfigBuilderFactory() {
         SimpleDataAccessConfigBuilderFactory factory = new SimpleDataAccessConfigBuilderFactory();
-        if (null != dataAccessConfigBuilderConverts) {
-            dataAccessConfigBuilderConverts.forEach(factory::addConvert);
+        if (null != dataAccessConfigConverts) {
+            dataAccessConfigConverts.forEach(factory::addConvert);
         }
         return factory;
     }

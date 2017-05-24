@@ -7,15 +7,15 @@ import org.hswebframework.web.authorization.access.ScriptDataAccessConfig;
  *
  * @author zhouhao
  */
-public class SimpleScriptDataAccess extends AbstractDataAccess implements ScriptDataAccessConfig {
+public class SimpleScriptDataAccessConfig extends AbstractDataAccessConfig implements ScriptDataAccessConfig {
     private String script;
 
     private String scriptLanguage;
 
-    public SimpleScriptDataAccess() {
+    public SimpleScriptDataAccessConfig() {
     }
 
-    public SimpleScriptDataAccess(String script, String scriptLanguage) {
+    public SimpleScriptDataAccessConfig(String script, String scriptLanguage) {
         this.script = script;
         this.scriptLanguage = scriptLanguage;
     }

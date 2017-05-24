@@ -7,7 +7,7 @@ import org.hswebframework.web.authorization.access.DataAccessConfig;
  *
  * @author zhouhao
  */
-public abstract class AbstractDataAccess implements DataAccessConfig {
+public abstract class AbstractDataAccessConfig implements DataAccessConfig {
 
     private String action;
 

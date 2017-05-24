@@ -4,10 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.hswebframework.web.authorization.access.DataAccessConfig;
 import org.hswebframework.web.authorization.builder.DataAccessConfigBuilder;
-import org.hswebframework.web.authorization.simple.SimpleCustomDataAccess;
-import org.hswebframework.web.authorization.simple.SimpleOwnCreatedDataAccess;
 
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
@@ -17,9 +14,9 @@ import java.util.Objects;
 public class SimpleDataAccessConfigBuilder implements DataAccessConfigBuilder {
     private String json;
 
-    private List<DataAccessConfigBuilderConvert> converts;
+    private List<DataAccessConfigConvert> converts;
 
-    public SimpleDataAccessConfigBuilder(List<DataAccessConfigBuilderConvert> converts) {
+    public SimpleDataAccessConfigBuilder(List<DataAccessConfigConvert> converts) {
         Objects.requireNonNull(converts);
         this.converts = converts;
     }
