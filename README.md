@@ -1,5 +1,5 @@
-## hsweb-framework 3.0
-
+## hsweb  3.0
+[Features](FEATURES.md) 
 ## 模块简介
 
 | 模块       | 说明          |   进度 |
@@ -8,7 +8,7 @@
 |[hsweb-commons](hsweb-commons) |基础通用功能| 90%|
 |[hsweb-concurrent](hsweb-concurrent)|并发包,缓存,锁,计数器等| 80%|
 |[hsweb-core](hsweb-core)|框架核心| 90%|
-|[hsweb-datasource](hsweb-datasource)|数据源| 0%|
+|[hsweb-datasource](hsweb-datasource)|数据源| 90%|
 |[hsweb-examples](hsweb-examples)|例子,演示| 10%|
 |[hsweb-i18n](hsweb-i18n)|国际化| 0%|
 |[hsweb-logging](hsweb-logging)| 日志|  10%|
