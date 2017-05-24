@@ -28,7 +28,7 @@ public interface FieldAccessConfig extends Serializable {
     }
 
     enum Type {
-        //目前之支持 deny
+        //目前仅支持 deny
         DENY
     }
 }

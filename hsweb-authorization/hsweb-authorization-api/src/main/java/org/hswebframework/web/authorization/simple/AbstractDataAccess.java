@@ -1,4 +1,4 @@
-package org.hswebframework.web.service.authorization.simple.access;
+package org.hswebframework.web.authorization.simple;
 
 import org.hswebframework.web.authorization.access.DataAccessConfig;
 

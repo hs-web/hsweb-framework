@@ -1,4 +1,4 @@
-package org.hswebframework.web.service.authorization.simple.access;
+package org.hswebframework.web.authorization.simple;
 
 import org.hswebframework.web.authorization.access.OwnCreatedDataAccessConfig;
 
@@ -8,4 +8,11 @@ import org.hswebframework.web.authorization.access.OwnCreatedDataAccessConfig;
  * @author zhouhao
  */
 public class SimpleOwnCreatedDataAccess extends AbstractDataAccess implements OwnCreatedDataAccessConfig {
+
+    public SimpleOwnCreatedDataAccess() {
+    }
+
+    public SimpleOwnCreatedDataAccess(String action) {
+        setAction(action);
+    }
 }
