@@ -20,9 +20,11 @@ package org.hswebframework.web.service.oauth2.client.simple.provider;
 
 import com.alibaba.fastjson.JSON;
 import org.hswebframework.web.authorization.Authentication;
+import org.hswebframework.web.authorization.builder.AuthenticationBuilderFactory;
 import org.hswebframework.web.authorization.oauth2.client.response.OAuth2Response;
 import org.hswebframework.web.service.oauth2.client.request.ProviderSupport;
 import org.hswebframework.web.service.oauth2.client.request.definition.ResponseConvertForProviderDefinition;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -34,12 +36,24 @@ import java.util.List;
  */
 @Component
 public class HswebResponseConvertSupport implements ResponseConvertForProviderDefinition {
+
+    private AuthenticationBuilderFactory authenticationBuilderFactory;
+
+    @Autowired(required = false)
+    public void setAuthenticationBuilderFactory(AuthenticationBuilderFactory authenticationBuilderFactory) {
+        this.authenticationBuilderFactory = authenticationBuilderFactory;
+    }
+
     @Override
     public <T> T convert(OAuth2Response response, Class<T> type) {
-        String json = response.asString();
 
+        String json = response.asString();
         if (type == Authentication.class) {
-            return (T) RemoteAuthentication.fromJson(json);
+            if (authenticationBuilderFactory != null) {
+                return (T) authenticationBuilderFactory.create().json(json).build();
+            } else {
+                throw new UnsupportedOperationException("authenticationBuilderFactory not ready");
+            }
         }
         return JSON.parseObject(json, type);
     }

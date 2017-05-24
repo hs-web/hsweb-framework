@@ -44,7 +44,7 @@ import java.util.stream.Collectors;
 /**
  * 数据级权限控制实现 <br>
  * 通过在方法上注解{@link RequiresDataAccess}，标识需要进行数据级权限控制<br>
- * 控制的方式和规则由 {@link Permission#getDataAccessConfigs()}实现<br>
+ * 控制的方式和规则由 {@link Permission#getDataAccesses()}实现<br>
  *
  * @author zhouhao
  * @see DefaultDataAccessController
@@ -106,7 +106,7 @@ public class DataAccessAnnotationMethodInterceptor extends AuthorizingAnnotation
             List<String> actionList = Arrays.asList(accessAnn.action());
             //取得当前登录用户持有的控制规则
             Set<DataAccessConfig> accesses = permissionInfo
-                    .getDataAccessConfigs()
+                    .getDataAccesses()
                     .stream()
                     .filter(access -> actionList.contains(access.getAction()))
                     .collect(Collectors.toSet());

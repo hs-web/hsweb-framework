@@ -222,14 +222,14 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
         //用户持有的角色
         List<UserRoleEntity> roleEntities = userRoleDao.selectByUserId(userId);
         if (ListUtils.isNullOrEmpty(roleEntities)) {
-            return new SimpleAuthentication(userEntity, new ArrayList<>(), new ArrayList<>(), dataAccessFactory);
+            return SimpleAuthenticationBuilder.build(userEntity, new ArrayList<>(), new ArrayList<>(), dataAccessFactory);
         }
         List<String> roleIdList = roleEntities.stream().map(UserRoleEntity::getRoleId).collect(Collectors.toList());
 
         List<RoleEntity> roleEntityList = DefaultDSLQueryService.createQuery(roleDao).where().in(GenericEntity.id, roleIdList).noPaging().list();
         //权限角色关联信息
         List<PermissionRoleEntity> permissionRoleEntities = permissionRoleDao.selectByRoleIdList(roleIdList);
-        return new SimpleAuthentication(userEntity, roleEntityList, permissionRoleEntities, dataAccessFactory);
+        return SimpleAuthenticationBuilder.build(userEntity, roleEntityList, permissionRoleEntities, dataAccessFactory);
     }
 
     @Override
@@ -259,7 +259,7 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
             admin.setName("admin");
             roleEntityList.add(admin);
         }
-        return new SimpleAuthentication(userEntity, roleEntityList, permissionRoleEntities, dataAccessFactory);
+        return SimpleAuthenticationBuilder.build(userEntity, roleEntityList, permissionRoleEntities, dataAccessFactory);
     }
 
 
