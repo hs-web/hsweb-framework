@@ -18,6 +18,8 @@ package org.hswebframework.web.entity.organizational;
 
 import org.hswebframework.web.commons.entity.TreeSortSupportEntity;
 
+import java.util.List;
+
 /**
  * 组织 实体
  *
@@ -103,6 +105,8 @@ public interface OrganizationalEntity extends TreeSortSupportEntity<String> {
      * 设置 可选角色
      */
     void setOptionalRoles(java.util.List<String> optionalRoles);
+
+    void setChildren(List<OrganizationalEntity> children);
 
     /**
      * @return 是否启用

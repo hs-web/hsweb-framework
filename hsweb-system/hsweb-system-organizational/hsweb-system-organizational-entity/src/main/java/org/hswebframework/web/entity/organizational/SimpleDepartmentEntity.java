@@ -99,7 +99,8 @@ public class SimpleDepartmentEntity extends SimpleTreeSortSupportEntity<String> 
         return children;
     }
 
-    public void setChildren(List<SimpleDepartmentEntity> children) {
-        this.children = children;
+    @SuppressWarnings("unchecked")
+    public void setChildren(List<DepartmentEntity> children) {
+        this.children = (List) children;
     }
 }

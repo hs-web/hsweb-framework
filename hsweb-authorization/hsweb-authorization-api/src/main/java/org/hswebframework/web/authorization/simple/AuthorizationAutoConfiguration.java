@@ -9,6 +9,7 @@ import org.hswebframework.web.authorization.simple.builder.SimpleDataAccessConfi
 import org.hswebframework.web.authorization.simple.builder.SimpleFieldAccessConfigBuilderFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -33,7 +34,8 @@ public class AuthorizationAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(DataAccessConfigBuilderFactory.class)
-    public DataAccessConfigBuilderFactory dataAccessConfigBuilderFactory() {
+    @ConfigurationProperties(prefix = "hsweb.authorization.data-access", ignoreInvalidFields = true)
+    public SimpleDataAccessConfigBuilderFactory dataAccessConfigBuilderFactory() {
         SimpleDataAccessConfigBuilderFactory factory = new SimpleDataAccessConfigBuilderFactory();
         if (null != dataAccessConfigConverts) {
             dataAccessConfigConverts.forEach(factory::addConvert);

@@ -19,12 +19,14 @@
 package org.hswebframework.web.commons.entity;
 
 
-import org.hibernate.validator.constraints.NotBlank;
 import org.hswebframework.web.id.IDGenerator;
 import org.hswebframwork.utils.RandomUtil;
 import org.hswebframwork.utils.StringUtils;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -38,7 +40,6 @@ public interface TreeSupportEntity<PK> extends GenericEntity<PK> {
 
     String parentId = "parentId";
 
-    @NotBlank
     String getPath();
 
     void setPath(String path);

@@ -18,6 +18,8 @@ package org.hswebframework.web.entity.organizational;
 
 import org.hswebframework.web.commons.entity.TreeSortSupportEntity;
 
+import java.util.List;
+
 /**
  * 部门 实体
  *
@@ -46,7 +48,7 @@ public interface DepartmentEntity extends TreeSortSupportEntity<String> {
     /**
      * 树结构编码
      */
-    String path  = "path";
+    String path      = "path";
     /**
      * 排序序号
      */
@@ -100,4 +102,5 @@ public interface DepartmentEntity extends TreeSortSupportEntity<String> {
      */
     void setEnabled(Boolean enabled);
 
+    void setChildren(List<DepartmentEntity> children);
 }

@@ -17,15 +17,10 @@
 package org.hswebframework.web.service.organizational.simple;
 
 import com.alibaba.fastjson.JSON;
-import org.hswebframework.web.commons.entity.TreeSortSupportEntity;
 import org.hswebframework.web.commons.entity.TreeSupportEntity;
-import org.hswebframework.web.dao.organizational.PersonDao;
-import org.hswebframework.web.dao.organizational.PersonPositionDao;
-import org.hswebframework.web.dao.organizational.PositionDao;
-import org.hswebframework.web.entity.organizational.PersonEntity;
-import org.hswebframework.web.entity.organizational.PersonPositionEntity;
-import org.hswebframework.web.entity.organizational.PositionEntity;
-import org.hswebframework.web.entity.organizational.SimplePositionEntity;
+import org.hswebframework.web.dao.dynamic.QueryByEntityDao;
+import org.hswebframework.web.dao.organizational.*;
+import org.hswebframework.web.entity.organizational.*;
 import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.organizational.authorization.PersonnelAuthorization;
 import org.hswebframework.web.organizational.authorization.PersonnelAuthorizationManager;
@@ -38,11 +33,14 @@ import org.hswebframework.web.service.organizational.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
-import static org.hswebframework.web.service.DefaultDSLQueryService.*;
 
 /**
  * 默认的服务实现
@@ -60,6 +58,12 @@ public class SimplePersonService extends GenericEntityService<PersonEntity, Stri
 
     @Autowired
     private PositionDao positionDao;
+
+    @Autowired
+    private DepartmentDao departmentDao;
+
+    @Autowired
+    private OrganizationalDao organizationalDao;
 
     @Override
     protected IDGenerator<String> getIDGenerator() {
@@ -96,51 +100,63 @@ public class SimplePersonService extends GenericEntityService<PersonEntity, Stri
                 .list().stream()
                 .map(PersonPositionEntity::getPositionId)
                 .collect(Collectors.toSet());
-        Set<String> departmentIds = null;
-
-        if (!positionIds.isEmpty()) {
-            //获取用户的职位信息
-            List<PositionEntity> positions = DefaultDSLQueryService.createQuery(positionDao)
-                    .where().in(PositionEntity.id, positionIds)
-                    .list();
-            //职位被删除了但是人员信息违背
-            if (!positions.isEmpty()) {
-                departmentIds = positions.stream().map(PositionEntity::getDepartmentId).collect(Collectors.toSet());
-                //所有子节点,使用树节点的path属性进行快速查询
-                //注意:如果path全为空,则可能导致查出全部职位
-                List<PositionEntity> allPositions = DefaultDSLQueryService
-                        .createQuery(positionDao)
-                        //遍历生成查询条件: like path like ?||'%' or path like ?||'%'  ....
-                        .each(positions, (query, position) -> query.or().like$(PositionEntity.path, position.getPath()))
-                        .list();
-                //转为树形结构
-                List<PositionEntity> rootPositions = TreeSupportEntity
-                        .list2tree(allPositions, PositionEntity::setChildren,
-                                // 人员的所在职位为根节点
-                                (Predicate<PositionEntity>) node -> positionIds.contains(node.getId()));
-                // 转为treeNode后设置到权限信息
-                authorization.setPositionIds(transformationTreeNode(null, rootPositions));
+        //获取所有职位,并得到根职位(树结构)
+        List<PositionEntity> positionEntities = getAllChildrenAndReturnRootNode(positionDao, positionIds, PositionEntity::setChildren, rootPosList -> {
+            //根据职位获取部门
+            Set<String> departmentIds = rootPosList.stream().map(PositionEntity::getDepartmentId).collect(Collectors.toSet());
+            if (null != departmentIds && !departmentIds.isEmpty()) {
+                List<DepartmentEntity> departmentEntities = getAllChildrenAndReturnRootNode(departmentDao, departmentIds, DepartmentEntity::setChildren, rootDepList -> {
+                    //根据部门获取机构
+                    Set<String> orgIds = rootDepList.stream().map(DepartmentEntity::getOrgId).collect(Collectors.toSet());
+                    if (null != orgIds && !orgIds.isEmpty()) {
+                        List<OrganizationalEntity> orgEntities = getAllChildrenAndReturnRootNode(organizationalDao, orgIds, OrganizationalEntity::setChildren, rootOrgList -> {
+                            //根据机构获取地区
+                            // TODO: 17-5-25
+                        });
+                        authorization.setOrgIds(transformationTreeNode(null, orgEntities));
+                    }
+                });
+                authorization.setDepartmentIds(transformationTreeNode(null, departmentEntities));
             }
-            // TODO: 17-5-24 初始化部门信息
-        }
-
+        });
+        authorization.setPositionIds(transformationTreeNode(null, positionEntities));
         return authorization;
     }
 
-    public static void main(String[] args) {
-        String json = "[{'id':'1','name':'test','parentId':'-1'},{'id':'2','name':'test2','parentId':'-1'}" +
-                ",{'id':'101','name':'test1-1','parentId':'1'},{'id':'102','name':'test1-2','parentId':'1'}]";
-
-        List<PositionEntity> positionEntities = (List) JSON.parseArray(json, SimplePositionEntity.class);
-
-        List<PositionEntity> rootPositions = TreeSupportEntity.list2tree(positionEntities,
-                PositionEntity::setChildren,
-                (Predicate<PositionEntity>) node -> "-1".equals(node.getParentId()));
-
-        System.out.println(JSON.toJSONString(rootPositions));
-
-        System.out.println(JSON.toJSONString(transformationTreeNode(null, rootPositions)));
-
+    /**
+     * 获取一个树形结构的数据,并返回根节点集合
+     *
+     * @param dao           查询dao接口
+     * @param rootIds       根节点ID集合
+     * @param childAccepter 子节点接收方法
+     * @param rootConsumer  根节点消费回调
+     * @param <T>           节点类型
+     * @return 根节点集合
+     */
+    protected <T extends TreeSupportEntity<String>> List<T> getAllChildrenAndReturnRootNode(QueryByEntityDao<T> dao,
+                                                                                            Set<String> rootIds,
+                                                                                            BiConsumer<T, List<T>> childAccepter,
+                                                                                            Consumer<List<T>> rootConsumer) {
+        //获取根节点
+        List<T> root = DefaultDSLQueryService.createQuery(dao)
+                .where().in(TreeSupportEntity.id, rootIds)
+                .list();
+        //节点不存在?
+        if (!root.isEmpty()) {
+            //所有子节点,使用节点的path属性进行快速查询,查询结果包含了根节点
+            List<T> allNode = DefaultDSLQueryService
+                    .createQuery(dao)
+                    //遍历生成查询条件: like path like ?||'%' or path like ?||'%'  ....
+                    .each(root, (query, data) -> query.or().like$(TreeSupportEntity.path, data.getPath()))
+                    .list();
+            //转为树形结构
+            List<T> tree = TreeSupportEntity
+                    .list2tree(allNode, childAccepter,
+                            (Predicate<T>) node -> rootIds.contains(node.getId()));  // 根节点判定
+            rootConsumer.accept(root);
+            return tree;
+        }
+        return Collections.emptyList();
     }
 
     public static <V extends TreeSupportEntity<String>> Set<TreeNode<String>> transformationTreeNode(V parent, List<V> data) {
@@ -164,6 +180,8 @@ public class SimplePersonService extends GenericEntityService<PersonEntity, Stri
 
     @Override
     public PersonnelAuthorization getPersonnelAuthorizationByUserId(String userId) {
-        return null;
+        PersonEntity entity = createQuery().where(PersonEntity.userId, userId).single();
+        assertNotNull(entity);
+        return getPersonnelAuthorizationByPersonId(entity.getId());
     }
 }

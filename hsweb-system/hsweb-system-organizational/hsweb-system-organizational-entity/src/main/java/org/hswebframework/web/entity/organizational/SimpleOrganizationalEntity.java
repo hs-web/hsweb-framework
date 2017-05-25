@@ -101,8 +101,8 @@ public class SimpleOrganizationalEntity extends SimpleTreeSortSupportEntity<Stri
         return children;
     }
 
-    public void setChildren(List<SimpleOrganizationalEntity> children) {
-        this.children = children;
+    public void setChildren(List<OrganizationalEntity> children) {
+        this.children = (List) children;
     }
 
     /**
