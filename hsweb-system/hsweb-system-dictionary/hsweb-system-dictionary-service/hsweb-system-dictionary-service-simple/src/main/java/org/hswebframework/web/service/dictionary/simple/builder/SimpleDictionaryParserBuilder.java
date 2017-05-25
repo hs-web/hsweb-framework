@@ -23,7 +23,7 @@ public class SimpleDictionaryParserBuilder implements DictionaryParserBuilder {
             case "simple":
                 return object.getObject("parser", SimpleSingleDictParser.class);
             case "script":
-
+                // TODO: 17-5-25
             default:
                 throw new UnsupportedOperationException(config);
         }
