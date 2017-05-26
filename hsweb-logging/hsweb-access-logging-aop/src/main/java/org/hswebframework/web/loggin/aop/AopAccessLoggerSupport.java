@@ -14,11 +14,14 @@ import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 /**
- * TODO 完成注释
+ * 使用AOP记录访问日志,并触发{@link AccessLoggerListener#onLogger(AccessLoggerInfo)}
  *
  * @author zhouhao
+ * @since 3.0
  */
 public class AopAccessLoggerSupport extends StaticMethodMatcherPointcutAdvisor {
 
@@ -42,6 +45,7 @@ public class AopAccessLoggerSupport extends StaticMethodMatcherPointcutAdvisor {
                 info.setException(e);
                 throw e;
             } finally {
+                //触发监听
                 listeners.forEach(listener -> listener.onLogger(info));
             }
             return response;
@@ -52,9 +56,23 @@ public class AopAccessLoggerSupport extends StaticMethodMatcherPointcutAdvisor {
         AccessLoggerInfo info = new AccessLoggerInfo();
         info.setRequestTime(System.currentTimeMillis());
 
-        AccessLogger ann = holder.findAnnotation(AccessLogger.class);
-        info.setAction(ann.value());
-        info.setDescribe(String.join("\n", ann.describe()));
+        AccessLogger methodAnn = holder.findMethodAnnotation(AccessLogger.class);
+        AccessLogger classAnn = holder.findClassAnnotation(AccessLogger.class);
+
+        String action = Stream.of(classAnn, methodAnn)
+                .filter(Objects::nonNull)
+                .map(AccessLogger::value)
+                .reduce((c, m) -> c.concat("-").concat(m))
+                .orElse("");
+        String describe = Stream.of(classAnn, methodAnn)
+                .filter(Objects::nonNull)
+                .map(AccessLogger::describe)
+                .flatMap(Stream::of)
+                .reduce((c, s) -> c.concat("\n").concat(s))
+                .orElse("");
+
+        info.setAction(action);
+        info.setDescribe(describe);
         info.setParameters(holder.getArgs());
         info.setTarget(holder.getTarget().getClass());
         info.setMethod(holder.getMethod());
@@ -77,6 +95,8 @@ public class AopAccessLoggerSupport extends StaticMethodMatcherPointcutAdvisor {
 
     @Override
     public boolean matches(Method method, Class<?> aClass) {
-        return null != AopUtils.findAnnotation(aClass, method, AccessLogger.class);
+        AccessLogger ann = AopUtils.findAnnotation(aClass, method, AccessLogger.class);
+        //注解了并且未取消
+        return null != ann && !ann.ignore();
     }
 }

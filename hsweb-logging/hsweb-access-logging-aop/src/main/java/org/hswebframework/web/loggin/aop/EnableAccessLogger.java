@@ -22,6 +22,13 @@ import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 
 import java.lang.annotation.*;
 
+/**
+ * 启用访问日志
+ *
+ * @see AopAccessLoggerSupportAutoConfiguration
+ * @see org.hswebframework.web.logging.AccessLoggerListener
+ * @since 3.0
+ */
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented

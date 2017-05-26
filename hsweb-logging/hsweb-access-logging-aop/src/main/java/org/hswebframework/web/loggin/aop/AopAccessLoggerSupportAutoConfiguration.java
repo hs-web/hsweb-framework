@@ -5,14 +5,18 @@ import org.hswebframework.web.logging.AccessLoggerListener;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * TODO 完成注释
+ * AOP 访问日志记录自动配置
  *
  * @author zhouhao
+ * @see org.hswebframework.web.logging.AccessLogger
+ * @see AopAccessLoggerSupport
  */
+@ConditionalOnClass(AccessLoggerListener.class)
 @Configuration
 public class AopAccessLoggerSupportAutoConfiguration {
 
