@@ -17,6 +17,7 @@
 
 package org.hswebframework.web.example.simple;
 
+import com.alibaba.fastjson.JSON;
 import org.hsweb.ezorm.rdb.executor.AbstractJdbcSqlExecutor;
 import org.hsweb.ezorm.rdb.executor.SqlExecutor;
 import org.hswebframework.web.authorization.Authentication;
@@ -30,6 +31,9 @@ import org.hswebframework.web.dao.datasource.DatabaseType;
 import org.hswebframework.web.entity.authorization.*;
 import org.hswebframework.web.entity.authorization.bind.BindPermissionRoleEntity;
 import org.hswebframework.web.entity.authorization.bind.BindRoleUserEntity;
+import org.hswebframework.web.loggin.aop.EnableAccessLogger;
+import org.hswebframework.web.logging.AccessLoggerInfo;
+import org.hswebframework.web.logging.AccessLoggerListener;
 import org.hswebframework.web.service.authorization.PermissionService;
 import org.hswebframework.web.service.authorization.RoleService;
 import org.hswebframework.web.service.authorization.UserService;
@@ -70,7 +74,13 @@ import java.util.Collections;
 @EnableSwagger2
 @EnableCaching
 @EnableAspectJAutoProxy
+@EnableAccessLogger
 public class SpringBootExample implements CommandLineRunner {
+
+    @Bean
+    public AccessLoggerListener accessLoggerListener() {
+        return loggerInfo -> System.out.println("有请求啦:" + JSON.toJSONString(loggerInfo));
+    }
 
     @Bean
     public Docket createRestApi() {
