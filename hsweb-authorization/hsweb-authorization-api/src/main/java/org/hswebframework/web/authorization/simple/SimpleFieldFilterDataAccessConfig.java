@@ -7,9 +7,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * TODO 完成注释
+ * 默认配置实现
  *
  * @author zhouhao
+ * @see FieldFilterDataAccessConfig
+ * @since 3.0
  */
 public class SimpleFieldFilterDataAccessConfig extends AbstractDataAccessConfig implements FieldFilterDataAccessConfig {
     private Set<String> fields;

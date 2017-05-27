@@ -4,7 +4,7 @@ package org.hswebframework.web.authorization.access;
 import static org.hswebframework.web.authorization.access.DataAccessConfig.DefaultType.FIELD_SCOPE;
 
 /**
- * 范围数据权限控制配置
+ * 范围数据权限控制配置,控制某个字段的值在范围内
  *
  * @author zhouhao
  * @see ScopeDataAccessConfig
