@@ -13,6 +13,7 @@ import org.hswebframework.web.controller.QueryController;
 import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.entity.authorization.SimpleUserEntity;
 import org.hswebframework.web.entity.authorization.UserEntity;
+import org.hswebframework.web.logging.AccessLogger;
 import org.hswebframework.web.model.authorization.UserModel;
 import org.hswebframework.web.service.QueryByEntityService;
 import org.hswebframework.web.service.QueryService;
@@ -28,6 +29,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/test")
 @Authorize(permission = "test")
+@AccessLogger("测试")
 public class TestController implements QueryController<UserEntity, String, QueryParamEntity> {
 
     @GetMapping("/test1")

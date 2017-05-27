@@ -24,15 +24,15 @@ import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.access.DataAccessConfig;
 import org.hswebframework.web.authorization.oauth2.server.entity.OAuth2ClientEntity;
+import org.hswebframework.web.authorization.simple.SimpleFieldFilterDataAccessConfig;
 import org.hswebframework.web.commons.entity.factory.EntityFactory;
-import org.hswebframework.web.dao.oauth2.OAuth2ClientDao;
 import org.hswebframework.web.dao.datasource.DataSourceHolder;
 import org.hswebframework.web.dao.datasource.DatabaseType;
+import org.hswebframework.web.dao.oauth2.OAuth2ClientDao;
 import org.hswebframework.web.entity.authorization.*;
 import org.hswebframework.web.entity.authorization.bind.BindPermissionRoleEntity;
 import org.hswebframework.web.entity.authorization.bind.BindRoleUserEntity;
 import org.hswebframework.web.loggin.aop.EnableAccessLogger;
-import org.hswebframework.web.logging.AccessLoggerInfo;
 import org.hswebframework.web.logging.AccessLoggerListener;
 import org.hswebframework.web.service.authorization.PermissionService;
 import org.hswebframework.web.service.authorization.RoleService;
@@ -79,7 +79,7 @@ public class SpringBootExample implements CommandLineRunner {
 
     @Bean
     public AccessLoggerListener accessLoggerListener() {
-        return loggerInfo -> System.out.println("有请求啦:" + JSON.toJSONString(loggerInfo));
+        return loggerInfo -> System.out.println("有请求啦:" + JSON.toJSONString(loggerInfo.getAction()));
     }
 
     @Bean
@@ -150,11 +150,17 @@ public class SpringBootExample implements CommandLineRunner {
         updateAccessEntity.setType(DataAccessConfig.DefaultType.OWN_CREATED);
         updateAccessEntity.setAction(Permission.ACTION_UPDATE);
 
-        //只能修改自己创建的数据
-        DataAccessEntity queryFieldsEntity = new DataAccessEntity();
-        updateAccessEntity.setType(DataAccessConfig.DefaultType.DENY_FIELDS);
-        updateAccessEntity.setAction(Permission.ACTION_UPDATE);
-        updateAccessEntity.setConfig("");
+        //不能查询password
+        DataAccessEntity denyQueryFields = new DataAccessEntity();
+        denyQueryFields.setType(DataAccessConfig.DefaultType.ALLOW_FIELDS);
+        denyQueryFields.setAction(Permission.ACTION_QUERY);
+        denyQueryFields.setConfig(JSON.toJSONString(new SimpleFieldFilterDataAccessConfig("password")));
+
+        //不能修改password
+        DataAccessEntity denyUpdateFields = new DataAccessEntity();
+        denyUpdateFields.setType(DataAccessConfig.DefaultType.ALLOW_FIELDS);
+        denyUpdateFields.setAction(Permission.ACTION_UPDATE);
+        denyUpdateFields.setConfig(JSON.toJSONString(new SimpleFieldFilterDataAccessConfig("password")));
 
 
         PermissionEntity permission = entityFactory.newInstance(PermissionEntity.class);
@@ -162,7 +168,7 @@ public class SpringBootExample implements CommandLineRunner {
         permission.setId("test");
         permission.setStatus((byte) 1);
         permission.setActions(ActionEntity.create(Permission.ACTION_QUERY, Permission.ACTION_UPDATE));
-        permission.setDataAccess(Arrays.asList(accessEntity, updateAccessEntity, queryFieldsEntity));
+        permission.setDataAccess(Arrays.asList(accessEntity, updateAccessEntity, denyUpdateFields,denyUpdateFields));
         permissionService.insert(permission);
 
         BindPermissionRoleEntity<PermissionRoleEntity> roleEntity = entityFactory.newInstance(BindPermissionRoleEntity.class);
