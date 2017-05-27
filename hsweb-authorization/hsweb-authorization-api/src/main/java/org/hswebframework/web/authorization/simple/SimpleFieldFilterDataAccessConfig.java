@@ -2,6 +2,8 @@ package org.hswebframework.web.authorization.simple;
 
 import org.hswebframework.web.authorization.access.FieldFilterDataAccessConfig;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -13,6 +15,13 @@ public class SimpleFieldFilterDataAccessConfig extends AbstractDataAccessConfig 
     private Set<String> fields;
 
     private String type;
+
+    public SimpleFieldFilterDataAccessConfig() {
+    }
+
+    public SimpleFieldFilterDataAccessConfig(String... fields) {
+        this.fields = new HashSet<>(Arrays.asList(fields));
+    }
 
     @Override
     public Set<String> getFields() {

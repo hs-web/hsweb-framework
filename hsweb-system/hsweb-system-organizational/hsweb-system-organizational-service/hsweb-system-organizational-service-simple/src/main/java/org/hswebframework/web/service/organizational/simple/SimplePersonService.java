@@ -16,7 +16,6 @@
  */
 package org.hswebframework.web.service.organizational.simple;
 
-import com.alibaba.fastjson.JSON;
 import org.hswebframework.web.commons.entity.TreeSupportEntity;
 import org.hswebframework.web.dao.dynamic.QueryByEntityDao;
 import org.hswebframework.web.dao.organizational.*;

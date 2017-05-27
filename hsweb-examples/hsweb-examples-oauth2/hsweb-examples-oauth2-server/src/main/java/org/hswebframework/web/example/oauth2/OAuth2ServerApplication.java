@@ -18,11 +18,13 @@
 
 package org.hswebframework.web.example.oauth2;
 
+import com.alibaba.fastjson.JSON;
 import org.hsweb.ezorm.rdb.executor.AbstractJdbcSqlExecutor;
 import org.hsweb.ezorm.rdb.executor.SqlExecutor;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.access.DataAccessConfig;
 import org.hswebframework.web.authorization.oauth2.server.entity.OAuth2ClientEntity;
+import org.hswebframework.web.authorization.simple.SimpleFieldFilterDataAccessConfig;
 import org.hswebframework.web.commons.entity.factory.EntityFactory;
 import org.hswebframework.web.dao.datasource.DataSourceHolder;
 import org.hswebframework.web.dao.datasource.DatabaseType;
@@ -96,6 +98,12 @@ public class OAuth2ServerApplication implements CommandLineRunner {
         DataAccessEntity updateAccessEntity = new DataAccessEntity();
         updateAccessEntity.setType(DataAccessConfig.DefaultType.OWN_CREATED);
         updateAccessEntity.setAction(Permission.ACTION_UPDATE);
+
+        DataAccessEntity denyFields = new DataAccessEntity();
+        denyFields.setType(DataAccessConfig.DefaultType.ALLOW_FIELDS);
+        denyFields.setAction(Permission.ACTION_UPDATE);
+        denyFields.setConfig(JSON.toJSONString(new SimpleFieldFilterDataAccessConfig("password")));
+
         //脚本方式自定义控制
 //        updateAccessEntity.setConfig(JSON.toJSONString(new SimpleScriptDataAccess("" +
 //                "println(id);" +
