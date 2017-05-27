@@ -4,15 +4,15 @@ import org.hsweb.ezorm.core.param.Term;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.access.DataAccessConfig;
 import org.hswebframework.web.authorization.access.DataAccessHandler;
+import org.hswebframework.web.authorization.access.ScopeDataAccessConfig;
 import org.hswebframework.web.authorization.annotation.RequiresDataAccess;
-import org.hswebframework.web.organizational.authorization.access.DataAccessType;
-import org.hswebframework.web.organizational.authorization.PersonnelAuthorization;
-import org.hswebframework.web.organizational.authorization.access.ScopeDataAccessConfig;
-import org.hswebframework.web.organizational.authorization.entity.OrgAttachEntity;
 import org.hswebframework.web.boost.aop.context.MethodInterceptorParamContext;
 import org.hswebframework.web.commons.entity.Entity;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.controller.QueryController;
+import org.hswebframework.web.organizational.authorization.PersonnelAuthorization;
+import org.hswebframework.web.organizational.authorization.access.DataAccessType;
+import org.hswebframework.web.organizational.authorization.entity.OrgAttachEntity;
 import org.hswebframework.web.service.QueryService;
 import org.hswebframwork.utils.ClassUtils;
 import org.slf4j.Logger;
@@ -21,13 +21,14 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * TODO 完成注释
  *
  * @author zhouhao
  */
-public abstract class AbstractScopeDataAccessHander<E> implements DataAccessHandler {
+public abstract class AbstractScopeDataAccessHandler<E> implements DataAccessHandler {
     protected Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private boolean defaultSuccessOnError = true;
@@ -40,7 +41,7 @@ public abstract class AbstractScopeDataAccessHander<E> implements DataAccessHand
 
     protected abstract Term applyQueryTerm(Set<String> scope);
 
-    protected abstract Set<String> getTryOperationScope(DataAccessType.ScopeType scopeType, PersonnelAuthorization authorization);
+    protected abstract Set<String> getTryOperationScope(String scopeType, PersonnelAuthorization authorization);
 
     @Override
     public boolean isSupport(DataAccessConfig access) {
@@ -75,7 +76,7 @@ public abstract class AbstractScopeDataAccessHander<E> implements DataAccessHand
         if (scopes.size() == 0) return true;
         else if (scopes.size() == 1) scope = scopes.iterator().next();
         else logger.warn("existing many scope :{} , try use config.", scopes);
-        scopes = access.getScope();
+        scopes = access.getScope().stream().map(String::valueOf).collect(Collectors.toSet());
         if (scope == null && scopes.size() == 1) {
             scope = scopes.iterator().next();
         }
@@ -123,8 +124,8 @@ public abstract class AbstractScopeDataAccessHander<E> implements DataAccessHand
     }
 
     protected Set<String> getTryOperationScope(ScopeDataAccessConfig access) {
-        if (access.getScopeType() == DataAccessType.ScopeType.CUSTOM)
-            return access.getScope();
+        if (DataAccessType.SCOPE_TYPE_CUSTOM.equals(access.getScopeType()))
+            return access.getScope().stream().map(String::valueOf).collect(Collectors.toSet());
         return getTryOperationScope(access.getScopeType(), getPersonnelAuthorization());
     }
 

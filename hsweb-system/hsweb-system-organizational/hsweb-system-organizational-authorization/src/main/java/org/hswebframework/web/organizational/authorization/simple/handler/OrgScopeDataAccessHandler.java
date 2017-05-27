@@ -9,12 +9,15 @@ import org.hswebframework.web.organizational.authorization.entity.OrgAttachEntit
 import java.util.Collections;
 import java.util.Set;
 
+import static org.hswebframework.web.organizational.authorization.access.DataAccessType.SCOPE_TYPE_CHILDREN;
+import static org.hswebframework.web.organizational.authorization.access.DataAccessType.SCOPE_TYPE_ONLY_SELF;
+
 /**
  * TODO 完成注释
  *
  * @author zhouhao
  */
-public class OrgScopeDataAccessHandler extends AbstractScopeDataAccessHander<OrgAttachEntity> {
+public class OrgScopeDataAccessHandler extends AbstractScopeDataAccessHandler<OrgAttachEntity> {
     @Override
     protected Class<OrgAttachEntity> getEntityClass() {
         return OrgAttachEntity.class;
@@ -26,11 +29,11 @@ public class OrgScopeDataAccessHandler extends AbstractScopeDataAccessHander<Org
     }
 
     @Override
-    protected Set<String> getTryOperationScope(DataAccessType.ScopeType scopeType, PersonnelAuthorization authorization) {
+    protected Set<String> getTryOperationScope(String scopeType, PersonnelAuthorization authorization) {
         switch (scopeType) {
-            case CHILDREN:
+            case SCOPE_TYPE_CHILDREN:
                 return authorization.getAllOrgId();
-            case ONLY_SELF:
+            case SCOPE_TYPE_ONLY_SELF:
                 return authorization.getRootOrgId();
             default:
                 return Collections.emptySet();

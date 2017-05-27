@@ -21,16 +21,15 @@
 <mapper namespace="org.hswebframework.web.dao.menu.MenuGroupBindDao">
     <resultMap id="MenuGroupBindResultMap" type="org.hswebframework.web.entity.menu.SimpleMenuGroupBindEntity">
         <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
-            <result property="path" column="path" javaType="String" jdbcType="VARCHAR"/>
-            <result property="parentId" column="parent_id" javaType="String" jdbcType="VARCHAR"/>
-            <result property="level" column="level" javaType="Integer" jdbcType="DECIMAL"/>
-            <result property="sortIndex" column="sort_index" javaType="Long" jdbcType="DECIMAL"/>
-            <result property="enabled" column="enabled" javaType="Boolean" jdbcType="DECIMAL"/>
-            <result property="menuId" column="menu_id" javaType="String" jdbcType="VARCHAR"/>
-            <result property="groupId" column="group_id" javaType="String" jdbcType="VARCHAR"/>
-            <result property="actions" column="actions" javaType="java.util.List" jdbcType="VARCHAR"/>
-            <result property="dataAccesses" column="data_accesses" javaType="java.util.List" jdbcType="CLOB"/>
-            <result property="fieldAccesses" column="field_accesses" javaType="java.util.List" jdbcType="CLOB"/>
+        <result property="path" column="path" javaType="String" jdbcType="VARCHAR"/>
+        <result property="parentId" column="parent_id" javaType="String" jdbcType="VARCHAR"/>
+        <result property="level" column="level" javaType="Integer" jdbcType="DECIMAL"/>
+        <result property="sortIndex" column="sort_index" javaType="Long" jdbcType="DECIMAL"/>
+        <result property="enabled" column="enabled" javaType="Boolean" jdbcType="DECIMAL"/>
+        <result property="menuId" column="menu_id" javaType="String" jdbcType="VARCHAR"/>
+        <result property="groupId" column="group_id" javaType="String" jdbcType="VARCHAR"/>
+        <result property="actions" column="actions" javaType="java.util.List" jdbcType="VARCHAR"/>
+        <result property="dataAccesses" column="data_accesses" javaType="java.util.List" jdbcType="CLOB"/>
     </resultMap>
 
     <!--用于动态生成sql所需的配置-->
@@ -38,8 +37,8 @@
         <bind name="resultMapId" value="'MenuGroupBindResultMap'"/>
         <bind name="tableName" value="'S_MENU_GROUP_BIND'"/>
     </sql>
-  
-    <insert id="insert" parameterType="org.hswebframework.web.entity.menu.SimpleMenuGroupBindEntity" >
+
+    <insert id="insert" parameterType="org.hswebframework.web.entity.menu.SimpleMenuGroupBindEntity">
         <include refid="config"/>
         <include refid="BasicMapper.buildInsertSql"/>
     </insert>

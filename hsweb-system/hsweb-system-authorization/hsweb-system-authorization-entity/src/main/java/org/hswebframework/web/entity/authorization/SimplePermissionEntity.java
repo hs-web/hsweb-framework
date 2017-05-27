@@ -24,7 +24,7 @@ public class SimplePermissionEntity extends SimpleGenericEntity<String> implemen
 
     private List<DataAccessEntity> dataAccess;
 
-    private List<FieldAccessEntity> fieldAccess;
+    private List<OptionalField> optionalFields;
 
     public String getName() {
         return this.name;
@@ -66,18 +66,18 @@ public class SimplePermissionEntity extends SimpleGenericEntity<String> implemen
     }
 
     @Override
-    public List<FieldAccessEntity> getFieldAccess() {
-        return this.fieldAccess;
-    }
-
-    @Override
     public void setDataAccess(List<DataAccessEntity> dataAccess) {
         this.dataAccess = dataAccess;
     }
 
     @Override
-    public void setFieldAccess(List<FieldAccessEntity> fieldAccess) {
-        this.fieldAccess = fieldAccess;
+    public void setOptionalFields(List<OptionalField> optionalFields) {
+        this.optionalFields = optionalFields;
+    }
+
+    @Override
+    public List<OptionalField> getOptionalFields() {
+        return optionalFields;
     }
 
     @Override
@@ -85,6 +85,12 @@ public class SimplePermissionEntity extends SimpleGenericEntity<String> implemen
         SimplePermissionEntity target = (SimplePermissionEntity) super.clone();
         if (actions != null)
             target.setActions(getActions().stream().map(ActionEntity::clone).collect(Collectors.toList()));
+        if (optionalFields != null) {
+            target.setOptionalFields(getOptionalFields().stream().map(OptionalField::clone).collect(Collectors.toList()));
+        }
+        if (dataAccess != null) {
+            target.setDataAccess(getDataAccess().stream().map(DataAccessEntity::clone).collect(Collectors.toList()));
+        }
         return target;
     }
 

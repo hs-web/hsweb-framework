@@ -6,7 +6,7 @@ package org.hswebframework.web.authorization.access;
  * @author zhouhao
  * @see DefaultType#CUSTOM
  */
-public interface CustomDataAccess extends DataAccessConfig {
+public interface CustomDataAccessConfig extends DataAccessConfig {
 
     /**
      * @return 自定义的控制器

@@ -4,6 +4,7 @@ import org.hswebframework.web.organizational.authorization.Personnel;
 import org.hswebframework.web.organizational.authorization.PersonnelAuthorization;
 import org.hswebframework.web.organizational.authorization.TreeNode;
 
+import java.util.Collections;
 import java.util.Set;
 
 /**
@@ -29,6 +30,7 @@ public class SimplePersonnelAuthorization implements PersonnelAuthorization {
 
     @Override
     public Set<TreeNode<String>> getAreaIds() {
+        if (areaIds == null) areaIds = Collections.emptySet();
         return areaIds;
     }
 
@@ -38,6 +40,7 @@ public class SimplePersonnelAuthorization implements PersonnelAuthorization {
 
     @Override
     public Set<TreeNode<String>> getOrgIds() {
+        if (orgIds == null) orgIds = Collections.emptySet();
         return orgIds;
     }
 
@@ -47,6 +50,7 @@ public class SimplePersonnelAuthorization implements PersonnelAuthorization {
 
     @Override
     public Set<TreeNode<String>> getPositionIds() {
+        if (positionIds == null) positionIds = Collections.emptySet();
         return positionIds;
     }
 
@@ -56,6 +60,7 @@ public class SimplePersonnelAuthorization implements PersonnelAuthorization {
 
     @Override
     public Set<TreeNode<String>> getDepartmentIds() {
+        if (departmentIds == null) departmentIds = Collections.emptySet();
         return departmentIds;
     }
 

@@ -35,17 +35,18 @@ import org.hswebframework.web.authorization.AuthenticationManager;
 import org.hswebframework.web.authorization.AuthenticationSupplier;
 import org.hswebframework.web.authorization.access.DataAccessController;
 import org.hswebframework.web.authorization.access.DataAccessHandler;
-import org.hswebframework.web.authorization.access.FieldAccessController;
 import org.hswebframework.web.authorization.shiro.boost.BoostAuthorizationAttributeSourceAdvisor;
 import org.hswebframework.web.authorization.shiro.boost.DefaultDataAccessController;
-import org.hswebframework.web.authorization.shiro.boost.DefaultFieldAccessController;
 import org.hswebframework.web.authorization.shiro.cache.SpringCacheManagerWrapper;
 import org.hswebframework.web.authorization.shiro.remember.SimpleRememberMeManager;
 import org.hswebframework.web.controller.message.ResponseMessage;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.boot.autoconfigure.condition.*;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnNotWebApplication;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -160,17 +161,11 @@ public class ShiroAutoConfiguration {
         return accessController;
     }
 
-    @Bean
-    @ConditionalOnMissingBean
-    public DefaultFieldAccessController defaultFieldAccessController() {
-        return new DefaultFieldAccessController();
-    }
 
     @Bean
     public BoostAuthorizationAttributeSourceAdvisor authorizationAttributeSourceAdvisor(SecurityManager securityManager,
-                                                                                        DataAccessController dataAccessController,
-                                                                                        FieldAccessController fieldAccessController) {
-        BoostAuthorizationAttributeSourceAdvisor advisor = new BoostAuthorizationAttributeSourceAdvisor(dataAccessController, fieldAccessController);
+                                                                                        DataAccessController dataAccessController) {
+        BoostAuthorizationAttributeSourceAdvisor advisor = new BoostAuthorizationAttributeSourceAdvisor(dataAccessController);
         advisor.setSecurityManager(securityManager);
         return advisor;
     }

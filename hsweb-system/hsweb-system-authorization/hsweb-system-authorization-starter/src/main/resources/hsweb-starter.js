@@ -63,7 +63,7 @@ function install(context) {
         .addColumn().name("status").number(4).notNull().comment("状态").commit()
         .addColumn().name("actions").clob().notNull().comment("可选操作(按钮)").commit()
         .addColumn().name("data_access").clob().notNull().comment("数据级控制配置").commit()
-        .addColumn().name("field_access").clob().notNull().comment("字段级控制配置").commit()
+        .addColumn().name("optional_fields").clob().notNull().comment("可选字段").commit()
         .comment("权限表").commit();
 
     database.createOrAlter("s_permission_role")
@@ -71,7 +71,6 @@ function install(context) {
         .addColumn().name("permission_id").varchar(32).notNull().comment("权限ID").commit()
         .addColumn().name("actions").clob().notNull().comment("可选操作").commit()
         .addColumn().name("data_access").clob().notNull().comment("数据级控制配置").commit()
-        .addColumn().name("field_access").clob().notNull().comment("字段级控制配置").commit()
         .comment("权限与角色关联表").commit();
 
     database.createOrAlter("s_user_role")

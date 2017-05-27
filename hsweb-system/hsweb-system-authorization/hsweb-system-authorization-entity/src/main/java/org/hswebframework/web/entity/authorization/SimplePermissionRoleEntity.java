@@ -18,8 +18,6 @@ public class SimplePermissionRoleEntity implements PermissionRoleEntity {
 
     private List<DataAccessEntity> dataAccesses;
 
-    private List<FieldAccessEntity> fieldAccesses;
-
     @Override
     public String getRoleId() {
         return roleId;
@@ -56,18 +54,8 @@ public class SimplePermissionRoleEntity implements PermissionRoleEntity {
     }
 
     @Override
-    public List<FieldAccessEntity> getFieldAccesses() {
-        return this.fieldAccesses;
-    }
-
-    @Override
     public void setDataAccesses(List<DataAccessEntity> dataAccesses) {
         this.dataAccesses = dataAccesses;
-    }
-
-    @Override
-    public void setFieldAccesses(List<FieldAccessEntity> fieldAccesses) {
-        this.fieldAccesses = fieldAccesses;
     }
 
     @Override
@@ -79,8 +67,6 @@ public class SimplePermissionRoleEntity implements PermissionRoleEntity {
             target.setActions(new ArrayList<>(getActions()));
         if (dataAccesses != null)
             target.setDataAccesses(dataAccesses.stream().map(DataAccessEntity::clone).collect(Collectors.toList()));
-        if (fieldAccesses != null)
-            target.setFieldAccesses(fieldAccesses.stream().map(FieldAccessEntity::clone).collect(Collectors.toList()));
         return target;
     }
 }

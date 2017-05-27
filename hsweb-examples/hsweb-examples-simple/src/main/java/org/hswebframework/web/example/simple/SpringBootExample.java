@@ -149,26 +149,20 @@ public class SpringBootExample implements CommandLineRunner {
         DataAccessEntity updateAccessEntity = new DataAccessEntity();
         updateAccessEntity.setType(DataAccessConfig.DefaultType.OWN_CREATED);
         updateAccessEntity.setAction(Permission.ACTION_UPDATE);
-        //脚本方式自定义控制
-//        updateAccessEntity.setConfig(JSON.toJSONString(new SimpleScriptDataAccess("" +
-//                "println(id);" +
-//                "println(entity);" +
-//                "println('脚本权限控制');" +
-//                "return true;" +
-//                "","groovy")));
 
-        //password 属性不能读取和修改
-        FieldAccessEntity fieldAccessEntity = new FieldAccessEntity();
-        fieldAccessEntity.setField("password");
-        fieldAccessEntity.setActions(Arrays.asList(Permission.ACTION_QUERY, Permission.ACTION_UPDATE));
+        //只能修改自己创建的数据
+        DataAccessEntity queryFieldsEntity = new DataAccessEntity();
+        updateAccessEntity.setType(DataAccessConfig.DefaultType.DENY_FIELDS);
+        updateAccessEntity.setAction(Permission.ACTION_UPDATE);
+        updateAccessEntity.setConfig("");
+
 
         PermissionEntity permission = entityFactory.newInstance(PermissionEntity.class);
         permission.setName("测试");
         permission.setId("test");
         permission.setStatus((byte) 1);
         permission.setActions(ActionEntity.create(Permission.ACTION_QUERY, Permission.ACTION_UPDATE));
-        permission.setDataAccess(Arrays.asList(accessEntity, updateAccessEntity));
-        permission.setFieldAccess(Arrays.asList(fieldAccessEntity));
+        permission.setDataAccess(Arrays.asList(accessEntity, updateAccessEntity, queryFieldsEntity));
         permissionService.insert(permission);
 
         BindPermissionRoleEntity<PermissionRoleEntity> roleEntity = entityFactory.newInstance(BindPermissionRoleEntity.class);
@@ -177,7 +171,6 @@ public class SpringBootExample implements CommandLineRunner {
         permissionRoleEntity.setPermissionId("test");
         permissionRoleEntity.setActions(Arrays.asList(Permission.ACTION_QUERY, Permission.ACTION_UPDATE));
         permissionRoleEntity.setDataAccesses(permission.getDataAccess());
-        permissionRoleEntity.setFieldAccesses(permission.getFieldAccess());
         roleEntity.setId("admin");
         roleEntity.setName("test");
         roleEntity.setPermissions(Arrays.asList(permissionRoleEntity));

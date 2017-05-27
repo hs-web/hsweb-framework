@@ -9,7 +9,6 @@ import org.hswebframework.web.authorization.Role;
 import org.hswebframework.web.authorization.User;
 import org.hswebframework.web.authorization.builder.AuthenticationBuilder;
 import org.hswebframework.web.authorization.builder.DataAccessConfigBuilderFactory;
-import org.hswebframework.web.authorization.builder.FieldAccessConfigBuilderFactory;
 import org.hswebframework.web.authorization.simple.SimpleAuthentication;
 import org.hswebframework.web.authorization.simple.SimplePermission;
 import org.hswebframework.web.authorization.simple.SimpleRole;
@@ -27,16 +26,10 @@ import java.util.stream.Collectors;
 public class SimpleAuthenticationBuilder implements AuthenticationBuilder {
     private SimpleAuthentication authentication = new SimpleAuthentication();
 
-    private FieldAccessConfigBuilderFactory fieldBuilderFactory;
-    private DataAccessConfigBuilderFactory  dataBuilderFactory;
+    private DataAccessConfigBuilderFactory dataBuilderFactory;
 
-    public SimpleAuthenticationBuilder(FieldAccessConfigBuilderFactory fieldBuilderFactory, DataAccessConfigBuilderFactory dataBuilderFactory) {
-        this.fieldBuilderFactory = fieldBuilderFactory;
+    public SimpleAuthenticationBuilder(DataAccessConfigBuilderFactory dataBuilderFactory) {
         this.dataBuilderFactory = dataBuilderFactory;
-    }
-
-    public void setFieldBuilderFactory(FieldAccessConfigBuilderFactory fieldBuilderFactory) {
-        this.fieldBuilderFactory = fieldBuilderFactory;
     }
 
     public void setDataBuilderFactory(DataAccessConfigBuilderFactory dataBuilderFactory) {
@@ -89,16 +82,11 @@ public class SimpleAuthenticationBuilder implements AuthenticationBuilder {
             SimplePermission permission = new SimplePermission();
             permission.setId(jsonObject.getString("id"));
             permission.setActions(new HashSet<>(jsonObject.getJSONArray("actions").toJavaList(String.class)));
-            permission.setFieldAccesses(jsonObject.getJSONArray("fieldAccesses").stream().map(JSONObject.class::cast)
-                    .map(fieldJson -> fieldBuilderFactory.create().fromJson(fieldJson.toJSONString()).build())
-                    .collect(Collectors.toSet()));
-
             permission.setDataAccesses(jsonObject.getJSONArray("dataAccesses").stream().map(JSONObject.class::cast)
                     .map(dataJson -> dataBuilderFactory.create().fromJson(dataJson.toJSONString()).build())
                     .collect(Collectors.toSet()));
             permissions.add(permission);
         }
-
         authentication.setPermissions(permissions);
         return this;
     }

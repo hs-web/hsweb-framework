@@ -18,7 +18,6 @@ package org.hswebframework.web.entity.menu;
 
 import org.hswebframework.web.commons.entity.SimpleTreeSortSupportEntity;
 import org.hswebframework.web.entity.authorization.DataAccessEntity;
-import org.hswebframework.web.entity.authorization.FieldAccessEntity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,8 +38,6 @@ public class SimpleMenuGroupBindEntity extends SimpleTreeSortSupportEntity<Strin
     private java.util.List<String>            actions;
     //行级权限控制配置
     private java.util.List<DataAccessEntity>  dataAccesses;
-    //列级权限控制
-    private java.util.List<FieldAccessEntity> fieldAccesses;
     //子节点
     private List<SimpleMenuGroupBindEntity>   children;
 
@@ -112,20 +109,6 @@ public class SimpleMenuGroupBindEntity extends SimpleTreeSortSupportEntity<Strin
      */
     public void setDataAccesses(java.util.List<DataAccessEntity> dataAccesses) {
         this.dataAccesses = dataAccesses;
-    }
-
-    /**
-     * @return 列级权限控制
-     */
-    public java.util.List<FieldAccessEntity> getFieldAccesses() {
-        return this.fieldAccesses;
-    }
-
-    /**
-     * 设置 列级权限控制
-     */
-    public void setFieldAccesses(java.util.List<FieldAccessEntity> fieldAccesses) {
-        this.fieldAccesses = fieldAccesses;
     }
 
 

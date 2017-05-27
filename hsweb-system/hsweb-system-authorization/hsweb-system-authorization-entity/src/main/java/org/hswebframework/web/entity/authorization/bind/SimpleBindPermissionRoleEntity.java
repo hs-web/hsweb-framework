@@ -27,9 +27,6 @@ public class SimpleBindPermissionRoleEntity extends SimpleRoleEntity implements 
     @Override
     public SimpleBindPermissionRoleEntity clone() {
         SimpleBindPermissionRoleEntity target = ((SimpleBindPermissionRoleEntity) super.clone());
-//        target.setId(getId());
-//        target.setName(getName());
-//        target.setDescribe(getDescribe());
         if (permissions != null && !permissions.isEmpty()) {
             target.permissions = permissions.stream().map(SimplePermissionRoleEntity::clone).collect(Collectors.toList());
         }

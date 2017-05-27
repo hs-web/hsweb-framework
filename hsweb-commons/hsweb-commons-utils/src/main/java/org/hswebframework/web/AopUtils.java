@@ -29,14 +29,23 @@ import java.util.Map;
 
 public class AopUtils {
 
-    public static <T extends Annotation> T findAnnotation(Class targetClass, Method method, Class<T> annClass) {
+    public static <T extends Annotation> T findMethodAnnotation(Class targetClass, Method method, Class<T> annClass) {
         Method m = method;
         T a = AnnotationUtils.findAnnotation(m, annClass);
         if (a != null) return a;
         m = ClassUtils.getMostSpecificMethod(m, targetClass);
         a = AnnotationUtils.findAnnotation(m, annClass);
-        if (a != null) return a;
+        return a;
+    }
+
+    public static <T extends Annotation> T findAnnotation(Class targetClass, Class<T> annClass) {
         return AnnotationUtils.findAnnotation(targetClass, annClass);
+    }
+
+    public static <T extends Annotation> T findAnnotation(Class targetClass, Method method, Class<T> annClass) {
+        T a = findMethodAnnotation(targetClass, method, annClass);
+        if (a != null) return a;
+        return findAnnotation(targetClass, annClass);
     }
 
     public static <T extends Annotation> T findAnnotation(JoinPoint pjp, Class<T> annClass) {

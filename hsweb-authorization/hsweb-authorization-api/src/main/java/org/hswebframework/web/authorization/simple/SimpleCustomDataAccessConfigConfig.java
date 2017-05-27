@@ -1,21 +1,21 @@
 package org.hswebframework.web.authorization.simple;
 
-import org.hswebframework.web.authorization.access.CustomDataAccess;
+import org.hswebframework.web.authorization.access.CustomDataAccessConfig;
 import org.hswebframework.web.authorization.access.DataAccessController;
 
 /**
  * @author zhouhao
  */
-public class SimpleCustomDataAccessConfig extends AbstractDataAccessConfig implements CustomDataAccess {
+public class SimpleCustomDataAccessConfigConfig extends AbstractDataAccessConfig implements CustomDataAccessConfig {
 
     private String classOrBeanName;
 
     private transient DataAccessController instance;
 
-    public SimpleCustomDataAccessConfig() {
+    public SimpleCustomDataAccessConfigConfig() {
     }
 
-    public SimpleCustomDataAccessConfig(String classOrBeanName) {
+    public SimpleCustomDataAccessConfigConfig(String classOrBeanName) {
         this.classOrBeanName = classOrBeanName;
     }
 

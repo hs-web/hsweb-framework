@@ -2,7 +2,7 @@ package org.hswebframework.web.organizational.authorization.simple;
 
 import org.hswebframework.web.authorization.simple.AbstractDataAccessConfig;
 import org.hswebframework.web.organizational.authorization.access.DataAccessType;
-import org.hswebframework.web.organizational.authorization.access.ScopeDataAccessConfig;
+import org.hswebframework.web.authorization.access.ScopeDataAccessConfig;
 
 import java.util.Set;
 
@@ -12,25 +12,25 @@ import java.util.Set;
  * @author zhouhao
  */
 public class SimpleScopeDataAccessConfig extends AbstractDataAccessConfig implements ScopeDataAccessConfig {
-    private DataAccessType.ScopeType scopeType;
-    private Set<String>              scope;
-    private String                   type;
+    private String      scopeType;
+    private Set<Object> scope;
+    private String      type;
 
     @Override
-    public DataAccessType.ScopeType getScopeType() {
+    public String getScopeType() {
         return scopeType;
     }
 
-    public void setScopeType(DataAccessType.ScopeType scopeType) {
+    public void setScopeType(String scopeType) {
         this.scopeType = scopeType;
     }
 
     @Override
-    public Set<String> getScope() {
+    public Set<Object> getScope() {
         return scope;
     }
 
-    public void setScope(Set<String> scope) {
+    public void setScope(Set<Object> scope) {
         this.scope = scope;
     }
 

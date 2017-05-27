@@ -36,6 +36,9 @@ import java.util.Optional;
  * @author zhouhao
  */
 public class MethodInterceptorHolder {
+    /**
+     * 参数名称获取器,用于获取方法参数的名称
+     */
     public static final ParameterNameDiscoverer nameDiscoverer = new LocalVariableTableParameterNameDiscoverer();
 
     public static MethodInterceptorHolder current() {
@@ -102,6 +105,14 @@ public class MethodInterceptorHolder {
 
     public Map<String, Object> getArgs() {
         return args;
+    }
+
+    public <T extends Annotation> T findMethodAnnotation(Class<T> annClass) {
+        return AopUtils.findMethodAnnotation(annClass, method, annClass);
+    }
+
+    public <T extends Annotation> T findClassAnnotation(Class<T> annClass) {
+        return AopUtils.findAnnotation(annClass, annClass);
     }
 
     public <T extends Annotation> T findAnnotation(Class<T> annClass) {

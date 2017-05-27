@@ -72,7 +72,6 @@ function install(context) {
         .addColumn().name("enabled").alias("enabled").comment("是否启用").jdbcType(java.sql.JDBCType.DECIMAL).length(4, 0).commit()
         .addColumn().name("actions").alias("actions").comment("可选按钮").jdbcType(java.sql.JDBCType.VARCHAR).length(4000).commit()
         .addColumn().name("data_accesses").alias("dataAccesses").comment("行级权限控制配置").jdbcType(java.sql.JDBCType.CLOB).commit()
-        .addColumn().name("field_accesses").alias("fieldAccesses").comment("列级权限控制").jdbcType(java.sql.JDBCType.CLOB).commit()
         .comment("菜单分组关联").commit();
 }
 

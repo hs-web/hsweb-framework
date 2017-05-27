@@ -27,7 +27,7 @@
         <result property="describe" column="describe" javaType="string" jdbcType="VARCHAR"/>
         <result property="status" column="status" javaType="Byte" jdbcType="NUMERIC"/>
         <result property="actions" column="actions" javaType="java.util.List" jdbcType="VARCHAR"/>
-        <result property="fieldAccess" column="field_access" javaType="java.util.List" jdbcType="CLOB"/>
+        <result property="optionalFields" column="optional_fields" javaType="java.util.List" jdbcType="CLOB"/>
         <result property="dataAccess" column="data_access" javaType="java.util.List" jdbcType="CLOB"/>
 
     </resultMap>

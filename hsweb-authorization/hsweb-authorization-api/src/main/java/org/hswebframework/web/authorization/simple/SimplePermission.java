@@ -2,7 +2,6 @@ package org.hswebframework.web.authorization.simple;
 
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.access.DataAccessConfig;
-import org.hswebframework.web.authorization.access.FieldAccessConfig;
 
 import java.util.Set;
 
@@ -16,8 +15,6 @@ public class SimplePermission implements Permission {
     private String id;
 
     private Set<String> actions;
-
-    private Set<FieldAccessConfig> fieldAccesses;
 
     private Set<DataAccessConfig> dataAccesses;
 
@@ -45,15 +42,6 @@ public class SimplePermission implements Permission {
 
     public void setActions(Set<String> actions) {
         this.actions = actions;
-    }
-
-    @Override
-    public Set<FieldAccessConfig> getFieldAccesses() {
-        return fieldAccesses;
-    }
-
-    public void setFieldAccesses(Set<FieldAccessConfig> fieldAccesses) {
-        this.fieldAccesses = fieldAccesses;
     }
 
     @Override

@@ -22,7 +22,6 @@ import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.annotation.RequiresDataAccess;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.controller.GenericEntityController;
-import org.hswebframework.web.controller.QueryController;
 import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.entity.organizational.DepartmentEntity;
 import org.hswebframework.web.entity.organizational.PositionEntity;

@@ -18,7 +18,10 @@
 package org.hswebframework.web.service.authorization.simple;
 
 import org.hswebframework.web.authorization.Authentication;
-import org.hswebframework.web.authorization.simple.*;
+import org.hswebframework.web.authorization.simple.SimpleAuthentication;
+import org.hswebframework.web.authorization.simple.SimplePermission;
+import org.hswebframework.web.authorization.simple.SimpleRole;
+import org.hswebframework.web.authorization.simple.SimpleUser;
 import org.hswebframework.web.entity.authorization.PermissionRoleEntity;
 import org.hswebframework.web.entity.authorization.RoleEntity;
 import org.hswebframework.web.entity.authorization.UserEntity;
@@ -52,13 +55,6 @@ public class SimpleAuthenticationBuilder {
                                 .getDataAccesses()
                                 .stream()
                                 .map(dataAccessFactory::create)
-                                .collect(Collectors.toSet()));
-                    }
-                    if (null != permissionRoleEntity.getFieldAccesses()) {
-                        permission.setFieldAccesses(permissionRoleEntity
-                                .getFieldAccesses()
-                                .stream()
-                                .map(entity -> new SimpleFieldAccess(entity.getField(), new HashSet<>(entity.getActions())))
                                 .collect(Collectors.toSet()));
                     }
                     return permission;

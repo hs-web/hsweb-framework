@@ -18,7 +18,6 @@
 package org.hswebframework.web.authorization;
 
 import org.hswebframework.web.authorization.access.DataAccessConfig;
-import org.hswebframework.web.authorization.access.FieldAccessConfig;
 
 import java.io.Serializable;
 import java.util.Set;
@@ -80,12 +79,6 @@ public interface Permission extends Serializable {
      * @return 用户对此权限的可操作事件(按钮)
      */
     Set<String> getActions();
-
-    /**
-     * @return 用户对此权限持有的字段权限信息, 用于字段级别的控制
-     * @see FieldAccessConfig
-     */
-    Set<FieldAccessConfig> getFieldAccesses();
 
     /**
      * @return 用户对此权限持有的数据权限信息, 用于数据级别的控制

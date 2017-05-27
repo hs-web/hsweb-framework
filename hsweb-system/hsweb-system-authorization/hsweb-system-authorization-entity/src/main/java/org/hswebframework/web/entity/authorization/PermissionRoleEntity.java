@@ -25,9 +25,5 @@ public interface PermissionRoleEntity extends CloneableEntity {
 
     List<DataAccessEntity> getDataAccesses();
 
-    List<FieldAccessEntity> getFieldAccesses();
-
     void setDataAccesses(List<DataAccessEntity> dataAccesses);
-
-    void setFieldAccesses(List<FieldAccessEntity> fieldAccesses);
 }

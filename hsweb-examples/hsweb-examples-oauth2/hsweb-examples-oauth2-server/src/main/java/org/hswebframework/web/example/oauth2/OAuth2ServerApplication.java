@@ -104,10 +104,6 @@ public class OAuth2ServerApplication implements CommandLineRunner {
 //                "return true;" +
 //                "","groovy")));
 
-        //password 属性不能读取和修改
-        FieldAccessEntity fieldAccessEntity = new FieldAccessEntity();
-        fieldAccessEntity.setField("password");
-        fieldAccessEntity.setActions(Arrays.asList(Permission.ACTION_QUERY, Permission.ACTION_UPDATE));
 
         PermissionEntity permission = entityFactory.newInstance(PermissionEntity.class);
         permission.setName("测试");
@@ -115,7 +111,6 @@ public class OAuth2ServerApplication implements CommandLineRunner {
         permission.setStatus((byte) 1);
         permission.setActions(ActionEntity.create(Permission.ACTION_QUERY, Permission.ACTION_UPDATE));
         permission.setDataAccess(Arrays.asList(accessEntity, updateAccessEntity));
-        permission.setFieldAccess(Arrays.asList(fieldAccessEntity));
         permissionService.insert(permission);
 
         BindPermissionRoleEntity<PermissionRoleEntity> roleEntity = entityFactory.newInstance(BindPermissionRoleEntity.class);
@@ -124,7 +119,6 @@ public class OAuth2ServerApplication implements CommandLineRunner {
         permissionRoleEntity.setPermissionId("test");
         permissionRoleEntity.setActions(Arrays.asList(Permission.ACTION_QUERY, Permission.ACTION_UPDATE));
         permissionRoleEntity.setDataAccesses(permission.getDataAccess());
-        permissionRoleEntity.setFieldAccesses(permission.getFieldAccess());
         roleEntity.setId("admin");
         roleEntity.setName("test");
         roleEntity.setPermissions(Arrays.asList(permissionRoleEntity));

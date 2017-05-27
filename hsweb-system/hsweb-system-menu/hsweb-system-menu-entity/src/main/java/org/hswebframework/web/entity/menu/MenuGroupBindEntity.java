@@ -18,7 +18,6 @@ package org.hswebframework.web.entity.menu;
 
 import org.hswebframework.web.commons.entity.TreeSortSupportEntity;
 import org.hswebframework.web.entity.authorization.DataAccessEntity;
-import org.hswebframework.web.entity.authorization.FieldAccessEntity;
 
 import java.util.List;
 
@@ -67,10 +66,6 @@ public interface MenuGroupBindEntity extends TreeSortSupportEntity<String> {
      * 行级权限控制配置
      */
     String dataAccesses  = "dataAccesses";
-    /**
-     * 列级权限控制
-     */
-    String fieldAccesses = "fieldAccesses";
 
     /**
      * @return 是否启用
@@ -121,16 +116,6 @@ public interface MenuGroupBindEntity extends TreeSortSupportEntity<String> {
      * 设置 行级权限控制配置
      */
     void setDataAccesses(java.util.List<DataAccessEntity> dataAccesses);
-
-    /**
-     * @return 列级权限控制
-     */
-    java.util.List<FieldAccessEntity> getFieldAccesses();
-
-    /**
-     * 设置 列级权限控制
-     */
-    void setFieldAccesses(java.util.List<FieldAccessEntity> fieldAccesses);
 
     void setChildren(List<MenuGroupBindEntity> children);
 }

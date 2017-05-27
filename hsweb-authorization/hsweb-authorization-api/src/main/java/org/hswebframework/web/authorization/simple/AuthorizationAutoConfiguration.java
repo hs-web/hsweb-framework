@@ -2,11 +2,9 @@ package org.hswebframework.web.authorization.simple;
 
 import org.hswebframework.web.authorization.builder.AuthenticationBuilderFactory;
 import org.hswebframework.web.authorization.builder.DataAccessConfigBuilderFactory;
-import org.hswebframework.web.authorization.builder.FieldAccessConfigBuilderFactory;
 import org.hswebframework.web.authorization.simple.builder.DataAccessConfigConvert;
 import org.hswebframework.web.authorization.simple.builder.SimpleAuthenticationBuilderFactory;
 import org.hswebframework.web.authorization.simple.builder.SimpleDataAccessConfigBuilderFactory;
-import org.hswebframework.web.authorization.simple.builder.SimpleFieldAccessConfigBuilderFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -27,12 +25,6 @@ public class AuthorizationAutoConfiguration {
     private List<DataAccessConfigConvert> dataAccessConfigConverts;
 
     @Bean
-    @ConditionalOnMissingBean(FieldAccessConfigBuilderFactory.class)
-    public FieldAccessConfigBuilderFactory fieldAccessConfigBuilderFactory() {
-        return new SimpleFieldAccessConfigBuilderFactory();
-    }
-
-    @Bean
     @ConditionalOnMissingBean(DataAccessConfigBuilderFactory.class)
     @ConfigurationProperties(prefix = "hsweb.authorization.data-access", ignoreInvalidFields = true)
     public SimpleDataAccessConfigBuilderFactory dataAccessConfigBuilderFactory() {
@@ -45,8 +37,7 @@ public class AuthorizationAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(AuthenticationBuilderFactory.class)
-    public AuthenticationBuilderFactory authenticationBuilderFactory(DataAccessConfigBuilderFactory dataAccessConfigBuilderFactory
-            , FieldAccessConfigBuilderFactory fieldAccessConfigBuilderFactory) {
-        return new SimpleAuthenticationBuilderFactory(fieldAccessConfigBuilderFactory, dataAccessConfigBuilderFactory);
+    public AuthenticationBuilderFactory authenticationBuilderFactory(DataAccessConfigBuilderFactory dataAccessConfigBuilderFactory) {
+        return new SimpleAuthenticationBuilderFactory(dataAccessConfigBuilderFactory);
     }
 }
