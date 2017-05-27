@@ -13,7 +13,6 @@ _点击名称,查看源代码注释获得使用说明_
 | [`@Authorize`](src/main/java/org/hswebframework/web/authorization/annotation/Authorize.java)    | RBAC方式权限控制注解 | 
 | [`@RequiresExpression`](src/main/java/org/hswebframework/web/authorization/annotation/RequiresExpression.java)      | 表达式方式验证      | 
 | [`@RequiresDataAccess`](src/main/java/org/hswebframework/web/authorization/annotation/RequiresDataAccess.java)      | 行级权限控制      | 
-| [`@RequiresFieldAccess`](src/main/java/org/hswebframework/web/authorization/annotation/RequiresFieldAccess.java)      | 列级权限控制      | 
 
 ### 常用类
 _点击名称,查看源代码注释获得使用说明_
