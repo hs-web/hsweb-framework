@@ -42,7 +42,7 @@ public final class DefaultDataAccessController implements DataAccessController {
         return handlers.parallelStream()
                 // TODO: 17-3-28 可以换成access对应的handler以提高效率
                 .filter(handler -> handler.isSupport(access))
-                .anyMatch(handler -> handler.handle(access, params));
+                .allMatch(handler -> handler.handle(access, params));
     }
 
     public DefaultDataAccessController addHandler(DataAccessHandler handler) {
