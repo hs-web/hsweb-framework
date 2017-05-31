@@ -112,7 +112,7 @@ public class MethodInterceptorHolder {
     }
 
     public <T extends Annotation> T findClassAnnotation(Class<T> annClass) {
-        return AopUtils.findAnnotation(annClass, annClass);
+        return AopUtils.findAnnotation(target.getClass(), annClass);
     }
 
     public <T extends Annotation> T findAnnotation(Class<T> annClass) {
