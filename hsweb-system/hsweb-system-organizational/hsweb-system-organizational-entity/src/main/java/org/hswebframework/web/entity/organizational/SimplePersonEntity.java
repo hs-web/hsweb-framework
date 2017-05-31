@@ -20,6 +20,8 @@ import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotBlank;
 import org.hswebframework.web.commons.entity.SimpleGenericEntity;
 
+import java.util.Set;
+
 /**
  * 人员
  *
@@ -44,6 +46,8 @@ public class SimplePersonEntity extends SimpleGenericEntity<String> implements P
     private Byte   status;
     //备注
     private String remark;
+
+    private Set<String> positionIds;
 
     /**
      * @return 姓名
@@ -155,5 +159,15 @@ public class SimplePersonEntity extends SimpleGenericEntity<String> implements P
      */
     public void setRemark(String remark) {
         this.remark = remark;
+    }
+
+    @Override
+    public Set<String> getPositionIds() {
+        return positionIds;
+    }
+
+    @Override
+    public void setPositionIds(Set<String> positionIds) {
+        this.positionIds = positionIds;
     }
 }

@@ -18,6 +18,8 @@ package org.hswebframework.web.entity.organizational;
 
 import org.hswebframework.web.commons.entity.GenericEntity;
 
+import java.util.Set;
+
 /**
  * 人员 实体
  *
@@ -139,5 +141,9 @@ public interface PersonEntity extends GenericEntity<String> {
      * 设置 备注
      */
     void setRemark(String remark);
+
+    Set<String> getPositionIds();
+
+    void setPositionIds(Set<String> positionIds);
 
 }

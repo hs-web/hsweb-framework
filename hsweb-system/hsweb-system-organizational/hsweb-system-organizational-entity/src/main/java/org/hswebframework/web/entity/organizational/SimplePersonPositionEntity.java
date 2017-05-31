@@ -15,42 +15,46 @@
  *  
  */
 package org.hswebframework.web.entity.organizational;
+
 import org.hswebframework.web.commons.entity.SimpleGenericEntity;
 
 /**
-* 人员职位关联
-* @author hsweb-generator-online
-*/
-public class SimplePersonPositionEntity extends SimpleGenericEntity<String> implements PersonPositionEntity{
-  		//人员id
-        private String personId;
-  		//职位id
-        private String positionId;
+ * 人员职位关联
+ *
+ * @author hsweb-generator-online
+ */
+public class SimplePersonPositionEntity extends SimpleGenericEntity<String> implements PersonPositionEntity {
+    //人员id
+    private String personId;
+    //职位id
+    private String positionId;
 
-        /**
-        * @return  人员id
-        */
-        public String getPersonId(){
-			return this.personId;
-        }
+    /**
+     * @return 人员id
+     */
+    public String getPersonId() {
+        return this.personId;
+    }
 
-        /**
-        * 设置 人员id
-        */
-        public void setPersonId(String personId){
-        	this.personId=personId;
-        }
-        /**
-        * @return  职位id
-        */
-        public String getPositionId(){
-			return this.positionId;
-        }
+    /**
+     * 设置 人员id
+     */
+    public void setPersonId(String personId) {
+        this.personId = personId;
+    }
 
-        /**
-        * 设置 职位id
-        */
-        public void setPositionId(String positionId){
-        	this.positionId=positionId;
-        }
+    /**
+     * @return 职位id
+     */
+    public String getPositionId() {
+        return this.positionId;
+    }
+
+    /**
+     * 设置 职位id
+     */
+    public void setPositionId(String positionId) {
+        this.positionId = positionId;
+    }
+
 }
