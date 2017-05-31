@@ -53,7 +53,7 @@ public @interface RequiresDataAccess {
     /**
      * @return logical
      */
-    Logical logical() default Logical.OR;
+    Logical logical() default Logical.AND;
 
     /**
      * @return 自定义控制器bean名称
