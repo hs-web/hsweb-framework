@@ -56,6 +56,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
@@ -64,14 +65,19 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.stream.Stream;
 
 /**
  * TODO 完成注释
@@ -88,7 +94,17 @@ public class SpringBootExample implements CommandLineRunner {
 
     @Bean
     public AccessLoggerListener accessLoggerListener() {
-        return loggerInfo -> System.out.println("有请求啦:" + loggerInfo.getAction());
+        Class excludes[] = {
+                ServletRequest.class,
+                ServletResponse.class,
+                InputStream.class,
+                OutputStream.class,
+                MultipartFile.class
+        };
+        return loggerInfo -> System.out.println("有请求啦:" + JSON.toJSONString(loggerInfo.toSimpleMap(obj -> {
+            if (Stream.of(excludes).anyMatch(aClass -> aClass.isInstance(obj))) return obj.getClass().getName();
+            return JSON.toJSONString(obj);
+        })));
     }
 
     @Bean

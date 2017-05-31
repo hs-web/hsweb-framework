@@ -17,6 +17,19 @@ public class SimpleFiledScopeDataAccessConfig extends AbstractDataAccessConfig i
 
     private String field;
 
+    public SimpleFiledScopeDataAccessConfig() {
+    }
+
+    public SimpleFiledScopeDataAccessConfig(String field, Set<Object> scope) {
+        this.scope = scope;
+        this.field = field;
+    }
+
+    public SimpleFiledScopeDataAccessConfig(String field, String scopeType) {
+        this.scopeType = scopeType;
+        this.field = field;
+    }
+
     @Override
     public String getScopeType() {
         return scopeType;
