@@ -23,20 +23,29 @@ import org.hsweb.ezorm.rdb.executor.SqlExecutor;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.access.DataAccessConfig;
-import org.hswebframework.web.authorization.oauth2.server.entity.OAuth2ClientEntity;
 import org.hswebframework.web.authorization.simple.SimpleFieldFilterDataAccessConfig;
+import org.hswebframework.web.authorization.simple.SimpleFiledScopeDataAccessConfig;
 import org.hswebframework.web.commons.entity.factory.EntityFactory;
 import org.hswebframework.web.dao.datasource.DataSourceHolder;
 import org.hswebframework.web.dao.datasource.DatabaseType;
-import org.hswebframework.web.dao.oauth2.OAuth2ClientDao;
 import org.hswebframework.web.entity.authorization.*;
 import org.hswebframework.web.entity.authorization.bind.BindPermissionRoleEntity;
 import org.hswebframework.web.entity.authorization.bind.BindRoleUserEntity;
+import org.hswebframework.web.entity.organizational.DepartmentEntity;
+import org.hswebframework.web.entity.organizational.OrganizationalEntity;
+import org.hswebframework.web.entity.organizational.PersonEntity;
+import org.hswebframework.web.entity.organizational.PositionEntity;
 import org.hswebframework.web.loggin.aop.EnableAccessLogger;
 import org.hswebframework.web.logging.AccessLoggerListener;
+import org.hswebframework.web.organizational.authorization.access.DataAccessType;
+import org.hswebframework.web.organizational.authorization.simple.SimpleScopeDataAccessConfig;
 import org.hswebframework.web.service.authorization.PermissionService;
 import org.hswebframework.web.service.authorization.RoleService;
 import org.hswebframework.web.service.authorization.UserService;
+import org.hswebframework.web.service.organizational.DepartmentService;
+import org.hswebframework.web.service.organizational.OrganizationalService;
+import org.hswebframework.web.service.organizational.PersonService;
+import org.hswebframework.web.service.organizational.PositionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -79,7 +88,7 @@ public class SpringBootExample implements CommandLineRunner {
 
     @Bean
     public AccessLoggerListener accessLoggerListener() {
-        return loggerInfo -> System.out.println("有请求啦:" + JSON.toJSONString(loggerInfo.getAction()));
+        return loggerInfo -> System.out.println("有请求啦:" + loggerInfo.getAction());
     }
 
     @Bean
@@ -131,8 +140,16 @@ public class SpringBootExample implements CommandLineRunner {
     PermissionService permissionService;
     @Autowired
     EntityFactory     entityFactory;
+
     @Autowired
-    OAuth2ClientDao   oAuth2ClientDao;
+    OrganizationalService organizationalService;
+    @Autowired
+    DepartmentService     departmentService;
+    @Autowired
+    PositionService       positionService;
+    @Autowired
+    PersonService         personService;
+
 
     public static void main(String[] args) {
         SpringApplication.run(SpringBootExample.class);
@@ -162,13 +179,18 @@ public class SpringBootExample implements CommandLineRunner {
         denyUpdateFields.setAction(Permission.ACTION_UPDATE);
         denyUpdateFields.setConfig(JSON.toJSONString(new SimpleFieldFilterDataAccessConfig("password")));
 
+        DataAccessEntity onlyDepartmentData = new DataAccessEntity();
+        onlyDepartmentData.setType(DataAccessType.DEPARTMENT_SCOPE);
+        onlyDepartmentData.setAction(Permission.ACTION_QUERY);
+        onlyDepartmentData.setConfig(JSON.toJSONString(new SimpleScopeDataAccessConfig(DataAccessType.SCOPE_TYPE_CHILDREN, DataAccessType.DEPARTMENT_SCOPE)));
+
 
         PermissionEntity permission = entityFactory.newInstance(PermissionEntity.class);
         permission.setName("测试");
         permission.setId("test");
         permission.setStatus((byte) 1);
         permission.setActions(ActionEntity.create(Permission.ACTION_QUERY, Permission.ACTION_UPDATE));
-        permission.setDataAccess(Arrays.asList(accessEntity, updateAccessEntity, denyUpdateFields,denyUpdateFields));
+        permission.setDataAccess(Arrays.asList(accessEntity, updateAccessEntity, denyUpdateFields, denyUpdateFields, onlyDepartmentData));
         permissionService.insert(permission);
 
         BindPermissionRoleEntity<PermissionRoleEntity> roleEntity = entityFactory.newInstance(BindPermissionRoleEntity.class);
@@ -192,17 +214,39 @@ public class SpringBootExample implements CommandLineRunner {
         userEntity.setRoles(Arrays.asList("admin"));
         userService.insert(userEntity);
 
-        OAuth2ClientEntity clientEntity = entityFactory.newInstance(OAuth2ClientEntity.class);
 
-        clientEntity.setId("test");
-        clientEntity.setSecret("test");
-        clientEntity.setOwnerId("admin");
-        clientEntity.setName("测试");
-        clientEntity.setType("test");
-        clientEntity.setCreatorId("admin");
-        clientEntity.setRedirectUri("http://localhost");
-        clientEntity.setCreateTime(System.currentTimeMillis());
-        clientEntity.setSupportGrantTypes(Collections.singleton("*"));
-        oAuth2ClientDao.insert(clientEntity);
+        OrganizationalEntity org = entityFactory.newInstance(OrganizationalEntity.class);
+
+        org.setName("测试机构");
+        org.setEnabled(true);
+        org.setId("test");
+        org.setParentId("-1");
+
+        organizationalService.insert(org);
+
+        DepartmentEntity department = entityFactory.newInstance(DepartmentEntity.class);
+        department.setEnabled(true);
+        department.setOrgId("test");
+        department.setId("test");
+        department.setName("职务");
+        department.setParentId("-1");
+
+        departmentService.insert(department);
+
+        PositionEntity position = entityFactory.newInstance(PositionEntity.class);
+        position.setName("职务");
+        position.setId("test");
+        position.setDepartmentId("test");
+        position.setParentId("-1");
+        positionService.insert(position);
+
+        PersonEntity personEntity = entityFactory.newInstance(PersonEntity.class);
+        personEntity.setName("测试人员");
+        personEntity.setPositionIds(Collections.singleton(position.getId()));
+        personEntity.setUserId(userEntity.getId());
+
+        personService.insert(personEntity);
+
+
     }
 }

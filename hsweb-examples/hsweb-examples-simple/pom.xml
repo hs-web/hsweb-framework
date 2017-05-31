@@ -92,29 +92,29 @@
             <version>${project.version}</version>
         </dependency>
 
+        <!--权限管理-->
         <dependency>
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-system-authorization-starter</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!--使用shiro实现权限控制-->
         <dependency>
             <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-system-config-starter</artifactId>
+            <artifactId>hsweb-authorization-shiro</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <!--组织架构-->
+        <dependency>
+            <groupId>org.hswebframework.web</groupId>
+            <artifactId>hsweb-system-organizational-starter</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-system-menu-starter</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <!--<dependency>-->
-            <!--<groupId>org.hswebframework.web</groupId>-->
-            <!--<artifactId>hsweb-authorization-shiro</artifactId>-->
-            <!--<version>${project.version}</version>-->
-        <!--</dependency>-->
-        <dependency>
-            <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-system-oauth2-server-starter</artifactId>
             <version>${project.version}</version>
         </dependency>
 
