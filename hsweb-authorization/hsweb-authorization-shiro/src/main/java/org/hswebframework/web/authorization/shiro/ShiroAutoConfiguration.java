@@ -43,10 +43,7 @@ import org.hswebframework.web.controller.message.ResponseMessage;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnNotWebApplication;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.boot.autoconfigure.condition.*;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -71,9 +68,6 @@ public class ShiroAutoConfiguration {
 
     @Autowired(required = false)
     private org.springframework.cache.CacheManager cacheManager;
-
-    @Autowired(required = false)
-    private List<DataAccessHandler> dataAccessHandlers;
 
     @Bean
     public CacheManager shiroCacheManager() {
@@ -154,11 +148,26 @@ public class ShiroAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public DefaultDataAccessController defaultDataAccessController() {
-        DefaultDataAccessController accessController = new DefaultDataAccessController();
-        if (dataAccessHandlers != null) {
-            dataAccessHandlers.forEach(accessController::addHandler);
-        }
-        return accessController;
+        return new DefaultDataAccessController();
+    }
+
+    @Bean
+    @ConditionalOnBean(DefaultDataAccessController.class)
+    public BeanPostProcessor dataAccessControllerProcessor(DefaultDataAccessController defaultDataAccessController) {
+        return new BeanPostProcessor() {
+            @Override
+            public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+                return bean;
+            }
+
+            @Override
+            public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+                if (bean instanceof DataAccessHandler) {
+                    defaultDataAccessController.addHandler(((DataAccessHandler) bean));
+                }
+                return bean;
+            }
+        };
     }
 
 
