@@ -21,14 +21,14 @@
 <mapper namespace="org.hswebframework.web.dao.organizational.PositionDao">
     <resultMap id="PositionResultMap" type="org.hswebframework.web.entity.organizational.SimplePositionEntity">
         <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
-            <result property="name" column="name" javaType="String" jdbcType="VARCHAR"/>
-            <result property="departmentId" column="department_id" javaType="String" jdbcType="VARCHAR"/>
-            <result property="roles" column="roles" javaType="String" jdbcType="CLOB"/>
-            <result property="remark" column="remark" javaType="String" jdbcType="VARCHAR"/>
-            <result property="parentId" column="parent_id" javaType="String" jdbcType="VARCHAR"/>
-            <result property="path" column="path" javaType="String" jdbcType="VARCHAR"/>
-            <result property="sortIndex" column="sort_index" javaType="Long" jdbcType="DECIMAL"/>
-            <result property="level" column="level" javaType="Integer" jdbcType="DECIMAL"/>
+        <result property="name" column="name" javaType="String" jdbcType="VARCHAR"/>
+        <result property="departmentId" column="department_id" javaType="String" jdbcType="VARCHAR"/>
+        <result property="roles" column="roles" javaType="java.util.List" jdbcType="CLOB"/>
+        <result property="remark" column="remark" javaType="String" jdbcType="VARCHAR"/>
+        <result property="parentId" column="parent_id" javaType="String" jdbcType="VARCHAR"/>
+        <result property="path" column="path" javaType="String" jdbcType="VARCHAR"/>
+        <result property="sortIndex" column="sort_index" javaType="Long" jdbcType="DECIMAL"/>
+        <result property="level" column="level" javaType="Integer" jdbcType="DECIMAL"/>
     </resultMap>
 
     <!--用于动态生成sql所需的配置-->
@@ -36,8 +36,8 @@
         <bind name="resultMapId" value="'PositionResultMap'"/>
         <bind name="tableName" value="'s_position'"/>
     </sql>
-  
-    <insert id="insert" parameterType="org.hswebframework.web.entity.organizational.SimplePositionEntity" >
+
+    <insert id="insert" parameterType="org.hswebframework.web.entity.organizational.SimplePositionEntity">
         <include refid="config"/>
         <include refid="BasicMapper.buildInsertSql"/>
     </insert>
