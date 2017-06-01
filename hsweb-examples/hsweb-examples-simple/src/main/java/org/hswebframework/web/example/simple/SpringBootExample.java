@@ -31,10 +31,7 @@ import org.hswebframework.web.dao.datasource.DatabaseType;
 import org.hswebframework.web.entity.authorization.*;
 import org.hswebframework.web.entity.authorization.bind.BindPermissionRoleEntity;
 import org.hswebframework.web.entity.authorization.bind.BindRoleUserEntity;
-import org.hswebframework.web.entity.organizational.DepartmentEntity;
-import org.hswebframework.web.entity.organizational.OrganizationalEntity;
-import org.hswebframework.web.entity.organizational.PersonEntity;
-import org.hswebframework.web.entity.organizational.PositionEntity;
+import org.hswebframework.web.entity.organizational.*;
 import org.hswebframework.web.loggin.aop.EnableAccessLogger;
 import org.hswebframework.web.logging.AccessLoggerListener;
 import org.hswebframework.web.organizational.authorization.access.DataAccessType;
@@ -195,10 +192,11 @@ public class SpringBootExample implements CommandLineRunner {
         denyUpdateFields.setAction(Permission.ACTION_UPDATE);
         denyUpdateFields.setConfig(JSON.toJSONString(new SimpleFieldFilterDataAccessConfig("password")));
 
+        //只能查看自己部门的数据
         DataAccessEntity onlyDepartmentData = new DataAccessEntity();
         onlyDepartmentData.setType(DataAccessType.DEPARTMENT_SCOPE);
         onlyDepartmentData.setAction(Permission.ACTION_QUERY);
-        onlyDepartmentData.setConfig(JSON.toJSONString(new SimpleScopeDataAccessConfig(DataAccessType.SCOPE_TYPE_CHILDREN, DataAccessType.DEPARTMENT_SCOPE)));
+        onlyDepartmentData.setConfig(JSON.toJSONString(new SimpleScopeDataAccessConfig(DataAccessType.SCOPE_TYPE_CHILDREN)));
 
 
         PermissionEntity permission = entityFactory.newInstance(PermissionEntity.class);
@@ -244,22 +242,35 @@ public class SpringBootExample implements CommandLineRunner {
         department.setEnabled(true);
         department.setOrgId("test");
         department.setId("test");
-        department.setName("职务");
+        department.setName("部门");
         department.setParentId("-1");
 
+        DepartmentEntity department2 = entityFactory.newInstance(DepartmentEntity.class);
+        department2.setEnabled(true);
+        department2.setOrgId("test");
+        department2.setId("test2");
+        department2.setName("部门2");
+        department2.setParentId("test");
+        department.setChildren(Collections.singletonList(department2));
         departmentService.insert(department);
+
 
         PositionEntity position = entityFactory.newInstance(PositionEntity.class);
         position.setName("职务");
         position.setId("test");
         position.setDepartmentId("test");
         position.setParentId("-1");
+        position.setRoles(Collections.singletonList("admin"));
         positionService.insert(position);
 
-        PersonEntity personEntity = entityFactory.newInstance(PersonEntity.class);
+        PersonAuthBindEntity personEntity = entityFactory.newInstance(PersonAuthBindEntity.class);
         personEntity.setName("测试人员");
         personEntity.setPositionIds(Collections.singleton(position.getId()));
         personEntity.setUserId(userEntity.getId());
+
+        PersonUserEntity personUserEntity = new PersonUserEntity();
+        personUserEntity.setUsername("admin");
+        personEntity.setPersonUser(personUserEntity);
 
         personService.insert(personEntity);
 
