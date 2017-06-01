@@ -44,5 +44,11 @@
             <artifactId>hsweb-system-organizational-authorization</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.hswebframework.web</groupId>
+            <artifactId>hsweb-system-authorization-service-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 </project>

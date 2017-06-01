@@ -47,8 +47,6 @@ public class SimplePersonEntity extends SimpleGenericEntity<String> implements P
     //备注
     private String remark;
 
-    private Set<String> positionIds;
-
     /**
      * @return 姓名
      */
@@ -161,13 +159,4 @@ public class SimplePersonEntity extends SimpleGenericEntity<String> implements P
         this.remark = remark;
     }
 
-    @Override
-    public Set<String> getPositionIds() {
-        return positionIds;
-    }
-
-    @Override
-    public void setPositionIds(Set<String> positionIds) {
-        this.positionIds = positionIds;
-    }
 }

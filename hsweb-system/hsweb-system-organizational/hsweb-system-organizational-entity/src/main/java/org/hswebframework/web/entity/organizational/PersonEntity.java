@@ -142,8 +142,4 @@ public interface PersonEntity extends GenericEntity<String> {
      */
     void setRemark(String remark);
 
-    Set<String> getPositionIds();
-
-    void setPositionIds(Set<String> positionIds);
-
 }
