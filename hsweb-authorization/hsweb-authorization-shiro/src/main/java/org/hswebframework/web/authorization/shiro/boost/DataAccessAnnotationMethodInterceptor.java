@@ -18,6 +18,7 @@
 package org.hswebframework.web.authorization.shiro.boost;
 
 import org.apache.shiro.aop.AnnotationResolver;
+import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.authz.aop.AuthorizingAnnotationHandler;
 import org.apache.shiro.authz.aop.AuthorizingAnnotationMethodInterceptor;
@@ -102,7 +103,8 @@ public class DataAccessAnnotationMethodInterceptor extends AuthorizingAnnotation
 
             MethodInterceptorParamContext context = holder.createParamContext();
             String permission = accessAnn.permission();
-            Permission permissionInfo = authentication.getPermission(permission);
+            Permission permissionInfo = authentication.getPermission(permission).orElseThrow(AuthenticationException::new);
+
             List<String> actionList = Arrays.asList(accessAnn.action());
             //取得当前登录用户持有的控制规则
             Set<DataAccessConfig> accesses = permissionInfo
