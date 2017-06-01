@@ -46,7 +46,7 @@ public class PositionScopeDataAccessHandler extends AbstractScopeDataAccessHandl
     }
 
     @Override
-    protected Term applyQueryTerm(Set<String> scope) {
+    protected Term createQueryTerm(Set<String> scope) {
         Term term = new Term();
         term.setColumn(PositionAttachEntity.positionId);
         term.setTermType(TermType.in);

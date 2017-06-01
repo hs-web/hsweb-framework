@@ -39,7 +39,7 @@ public abstract class AbstractScopeDataAccessHandler<E> implements DataAccessHan
 
     protected abstract String getOperationScope(E entity);
 
-    protected abstract Term applyQueryTerm(Set<String> scope);
+    protected abstract Term createQueryTerm(Set<String> scope);
 
     protected abstract Set<String> getTryOperationScope(String scopeType, PersonnelAuthorization authorization);
 
@@ -156,7 +156,7 @@ public abstract class AbstractScopeDataAccessHandler<E> implements DataAccessHan
             queryParamEntity.setTerms(new ArrayList<>());
             //添加一个查询条件
             queryParamEntity
-                    .addTerm(applyQueryTerm(scope))
+                    .addTerm(createQueryTerm(scope))
                     //客户端提交的参数 作为嵌套参数
                     .nest().setTerms(oldParam);
         } else {

@@ -46,7 +46,7 @@ public class PersonScopeDataAccessHandler extends AbstractScopeDataAccessHandler
     }
 
     @Override
-    protected Term applyQueryTerm(Set<String> scope) {
+    protected Term createQueryTerm(Set<String> scope) {
         Term term = new Term();
         term.setColumn(PersonAttachEntity.personId);
         term.setTermType(TermType.in);

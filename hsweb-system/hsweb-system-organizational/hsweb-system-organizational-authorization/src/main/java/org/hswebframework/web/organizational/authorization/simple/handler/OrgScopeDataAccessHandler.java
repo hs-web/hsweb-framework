@@ -46,7 +46,7 @@ public class OrgScopeDataAccessHandler extends AbstractScopeDataAccessHandler<Or
     }
 
     @Override
-    protected Term applyQueryTerm(Set<String> scope) {
+    protected Term createQueryTerm(Set<String> scope) {
         Term term = new Term();
         term.setColumn(OrgAttachEntity.orgId);
         term.setTermType(TermType.in);

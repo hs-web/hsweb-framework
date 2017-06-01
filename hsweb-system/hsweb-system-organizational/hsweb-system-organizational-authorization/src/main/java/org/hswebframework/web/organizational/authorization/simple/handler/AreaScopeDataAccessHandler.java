@@ -23,7 +23,7 @@ public class AreaScopeDataAccessHandler extends AbstractScopeDataAccessHandler<A
 
     @Override
     protected String getSupportScope() {
-        return DEPARTMENT_SCOPE;
+        return AREA_SCOPE;
     }
 
     @Override
@@ -44,7 +44,7 @@ public class AreaScopeDataAccessHandler extends AbstractScopeDataAccessHandler<A
     }
 
     @Override
-    protected Term applyQueryTerm(Set<String> scope) {
+    protected Term createQueryTerm(Set<String> scope) {
         Term term = new Term();
         term.setColumn(AreaAttachEntity.areaId);
         term.setTermType(TermType.in);

@@ -46,7 +46,7 @@ public class DepartmentScopeDataAccessHandler extends AbstractScopeDataAccessHan
     }
 
     @Override
-    protected Term applyQueryTerm(Set<String> scope) {
+    protected Term createQueryTerm(Set<String> scope) {
         Term term = new Term();
         term.setColumn(DepartmentAttachEntity.departmentId);
         term.setTermType(TermType.in);
