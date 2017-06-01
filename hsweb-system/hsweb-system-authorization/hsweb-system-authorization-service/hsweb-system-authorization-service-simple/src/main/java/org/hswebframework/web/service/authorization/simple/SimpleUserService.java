@@ -163,7 +163,7 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
         tryValidateProperty(!userExists, GenericEntity.id, "{username_exists}");
         List<String> updateProperties = Arrays.asList("name");
         //修改密码
-        if (!StringUtils.hasLength(userEntity.getPassword())) {
+        if (StringUtils.hasLength(userEntity.getPassword())) {
             //密码强度验证
             tryValidateProperty(usernameValidator, UserEntity.password, userEntity.getPassword());
             //密码MD5
