@@ -23,10 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.hswebframework.web.service.authorization.simple.CacheConstants.USER_AUTH_CACHE_NAME;
@@ -161,7 +158,7 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
                 .and().not(GenericEntity.id, userId)
                 .total() > 0;
         tryValidateProperty(!userExists, GenericEntity.id, "{username_exists}");
-        List<String> updateProperties = Arrays.asList("name");
+        List<String> updateProperties = new ArrayList<>(Collections.singletonList("name"));
         //修改密码
         if (StringUtils.hasLength(userEntity.getPassword())) {
             //密码强度验证
