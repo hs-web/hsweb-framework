@@ -47,6 +47,7 @@ public interface Permission extends Serializable {
      * 更新
      */
     String ACTION_UPDATE = "update";
+
     /**
      * 删除
      */

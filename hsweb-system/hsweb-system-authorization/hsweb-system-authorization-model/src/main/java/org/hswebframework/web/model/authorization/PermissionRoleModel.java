@@ -51,11 +51,6 @@ public interface PermissionRoleModel extends Model {
     @ApiModelProperty(value = "数据级权限控制配置", dataType = "DataAccessModel")
     List<DataAccessModel> getDataAccesses();
 
-    @ApiModelProperty(value = "字段级权限控制配置", dataType = "FieldAccessModel")
-    List<FieldAccessModel> getFieldAccesses();
-
     void setDataAccesses(List<DataAccessModel> dataAccesses);
-
-    void setFieldAccesses(List<FieldAccessModel> fieldAccesses);
 
 }

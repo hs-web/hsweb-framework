@@ -79,16 +79,6 @@ public class SimpleRoleService extends AbstractService<RoleEntity, String>
     }
 
     @Override
-    public <T extends PermissionRoleEntity> void updateByPrimaryKey(BindPermissionRoleEntity<T> roleEntity) {
-        tryValidateProperty(StringUtils.hasLength(roleEntity.getId()), RoleEntity.id, "id {not_be_null}");
-        roleEntity.setEnabled(null);
-        tryValidate(roleEntity);
-        DefaultDSLUpdateService
-                .createUpdate(roleDao, roleEntity)
-                .where(GenericEntity.id, roleEntity.getId());
-    }
-
-    @Override
     public void enable(String roleId) {
         tryValidateProperty(StringUtils.hasLength(roleId), RoleEntity.id, "{id_is_null}");
         DefaultDSLUpdateService.createUpdate(getDao())
@@ -135,7 +125,6 @@ public class SimpleRoleService extends AbstractService<RoleEntity, String>
     @CacheEvict(value = USER_AUTH_CACHE_NAME, allEntries = true)
     public <T extends PermissionRoleEntity> boolean update(BindPermissionRoleEntity<T> roleEntity) {
         tryValidateProperty(StringUtils.hasLength(roleEntity.getId()), RoleEntity.id, "id {not_be_null}");
-        tryValidateProperty(null == selectByPk(roleEntity.getId()), RoleEntity.id, "{role_not_exists}");
         tryValidate(roleEntity);
         DefaultDSLUpdateService.createUpdate(roleDao)
                 .set(RoleEntity.name, roleEntity.getName())

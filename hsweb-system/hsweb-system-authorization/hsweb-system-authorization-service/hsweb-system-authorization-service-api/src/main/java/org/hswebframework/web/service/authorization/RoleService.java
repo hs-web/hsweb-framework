@@ -17,8 +17,6 @@ public interface RoleService extends
 
     <T extends PermissionRoleEntity> String insert(BindPermissionRoleEntity<T> roleEntity);
 
-    <T extends PermissionRoleEntity> void updateByPrimaryKey(BindPermissionRoleEntity<T> roleEntity);
-
     void enable(String roleId);
 
     void disable(String roleId);

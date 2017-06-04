@@ -35,18 +35,6 @@ public class SimplePermissionRoleModel implements PermissionRoleModel {
 
     private List<DataAccessModel> dataAccesses;
 
-    private List<FieldAccessModel> fieldAccesses;
-//
-//    @Override
-//    public String getRoleId() {
-//        return roleId;
-//    }
-//
-//    @Override
-//    public void setRoleId(String roleId) {
-//        this.roleId = roleId;
-//    }
-
     @Override
     public String getPermissionId() {
         return permissionId;
@@ -75,19 +63,8 @@ public class SimplePermissionRoleModel implements PermissionRoleModel {
     }
 
     @Override
-    public List<FieldAccessModel> getFieldAccesses() {
-        if (this.fieldAccesses == null) return Collections.emptyList();
-        return this.fieldAccesses;
-    }
-
-    @Override
     public void setDataAccesses(List<DataAccessModel> dataAccesses) {
         this.dataAccesses = dataAccesses;
-    }
-
-    @Override
-    public void setFieldAccesses(List<FieldAccessModel> fieldAccesses) {
-        this.fieldAccesses = fieldAccesses;
     }
 
 }

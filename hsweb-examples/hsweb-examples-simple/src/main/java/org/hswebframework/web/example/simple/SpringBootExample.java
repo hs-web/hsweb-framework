@@ -46,6 +46,7 @@ import org.hswebframework.web.service.organizational.PositionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cache.annotation.EnableCaching;
@@ -174,37 +175,38 @@ public class SpringBootExample implements CommandLineRunner {
         DataAccessEntity accessEntity = new DataAccessEntity();
         accessEntity.setType(DataAccessConfig.DefaultType.OWN_CREATED);
         accessEntity.setAction(Permission.ACTION_QUERY);
+        accessEntity.setDescribe("只能查询自己创建的数据");
 
         //只能修改自己创建的数据
         DataAccessEntity updateAccessEntity = new DataAccessEntity();
         updateAccessEntity.setType(DataAccessConfig.DefaultType.OWN_CREATED);
         updateAccessEntity.setAction(Permission.ACTION_UPDATE);
-
+        updateAccessEntity.setDescribe("只能修改自己的数据");
         //不能查询password
         DataAccessEntity denyQueryFields = new DataAccessEntity();
-        denyQueryFields.setType(DataAccessConfig.DefaultType.ALLOW_FIELDS);
+        denyQueryFields.setType(DataAccessConfig.DefaultType.DENY_FIELDS);
         denyQueryFields.setAction(Permission.ACTION_QUERY);
         denyQueryFields.setConfig(JSON.toJSONString(new SimpleFieldFilterDataAccessConfig("password")));
-
+        denyQueryFields.setDescribe("不能查询密码");
         //不能修改password
         DataAccessEntity denyUpdateFields = new DataAccessEntity();
-        denyUpdateFields.setType(DataAccessConfig.DefaultType.ALLOW_FIELDS);
+        denyUpdateFields.setType(DataAccessConfig.DefaultType.DENY_FIELDS);
         denyUpdateFields.setAction(Permission.ACTION_UPDATE);
         denyUpdateFields.setConfig(JSON.toJSONString(new SimpleFieldFilterDataAccessConfig("password")));
-
+        denyUpdateFields.setDescribe("不能直接修改密码");
         //只能查看自己部门的数据
         DataAccessEntity onlyDepartmentData = new DataAccessEntity();
         onlyDepartmentData.setType(DataAccessType.DEPARTMENT_SCOPE);
         onlyDepartmentData.setAction(Permission.ACTION_QUERY);
         onlyDepartmentData.setConfig(JSON.toJSONString(new SimpleScopeDataAccessConfig(DataAccessType.SCOPE_TYPE_CHILDREN)));
-
+        onlyDepartmentData.setDescribe("只能查看自己部门的数据");
 
         PermissionEntity permission = entityFactory.newInstance(PermissionEntity.class);
         permission.setName("测试");
         permission.setId("test");
         permission.setStatus((byte) 1);
         permission.setActions(ActionEntity.create(Permission.ACTION_QUERY, Permission.ACTION_UPDATE));
-        permission.setDataAccess(Arrays.asList(accessEntity, updateAccessEntity, denyUpdateFields, denyUpdateFields, onlyDepartmentData));
+//        permission.setDataAccess(Arrays.asList(accessEntity, updateAccessEntity, denyUpdateFields, denyUpdateFields, onlyDepartmentData));
         permissionService.insert(permission);
 
         BindPermissionRoleEntity<PermissionRoleEntity> roleEntity = entityFactory.newInstance(BindPermissionRoleEntity.class);
@@ -212,7 +214,7 @@ public class SpringBootExample implements CommandLineRunner {
         permissionRoleEntity.setRoleId("admin");
         permissionRoleEntity.setPermissionId("test");
         permissionRoleEntity.setActions(Arrays.asList(Permission.ACTION_QUERY, Permission.ACTION_UPDATE));
-        permissionRoleEntity.setDataAccesses(permission.getDataAccess());
+        permissionRoleEntity.setDataAccesses(Arrays.asList(accessEntity, updateAccessEntity, denyQueryFields, denyUpdateFields, onlyDepartmentData));
         roleEntity.setId("admin");
         roleEntity.setName("test");
         roleEntity.setPermissions(Arrays.asList(permissionRoleEntity));

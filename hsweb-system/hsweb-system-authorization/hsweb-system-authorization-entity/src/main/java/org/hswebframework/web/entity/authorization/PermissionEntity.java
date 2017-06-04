@@ -49,8 +49,10 @@ public interface PermissionEntity extends GenericEntity<String> {
 
     void setActions(List<ActionEntity> actions);
 
+    @Deprecated
     List<DataAccessEntity> getDataAccess();
 
+    @Deprecated
     void setDataAccess(List<DataAccessEntity> dataAccess);
 
     void setOptionalFields(List<OptionalField> fields);

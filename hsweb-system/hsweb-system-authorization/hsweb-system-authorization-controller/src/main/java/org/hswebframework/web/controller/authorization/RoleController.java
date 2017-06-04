@@ -94,7 +94,7 @@ public class RoleController implements QueryController<RoleEntity, String, Query
     @ApiOperation("修改角色")
     public ResponseMessage updateRole(@PathVariable String id, @RequestBody RoleModel roleModel) {
         roleModel.setId(id);
-        roleService.updateByPrimaryKey(modelToEntity(roleModel));
+        roleService.update(modelToEntity(roleModel));
         return ok();
     }
 
