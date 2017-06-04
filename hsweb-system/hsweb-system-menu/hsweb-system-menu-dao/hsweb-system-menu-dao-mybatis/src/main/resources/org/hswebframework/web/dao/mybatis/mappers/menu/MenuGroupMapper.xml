@@ -21,14 +21,15 @@
 <mapper namespace="org.hswebframework.web.dao.menu.MenuGroupDao">
     <resultMap id="MenuGroupResultMap" type="org.hswebframework.web.entity.menu.SimpleMenuGroupEntity">
         <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
-            <result property="name" column="name" javaType="String" jdbcType="VARCHAR"/>
-            <result property="describe" column="describe" javaType="String" jdbcType="VARCHAR"/>
-            <result property="defaultGroup" column="default_group" javaType="Boolean" jdbcType="DECIMAL"/>
-            <result property="path" column="path" javaType="String" jdbcType="VARCHAR"/>
-            <result property="parentId" column="parent_id" javaType="String" jdbcType="VARCHAR"/>
-            <result property="level" column="level" javaType="Integer" jdbcType="DECIMAL"/>
-            <result property="sortIndex" column="sort_index" javaType="Long" jdbcType="DECIMAL"/>
-            <result property="enabled" column="enabled" javaType="Boolean" jdbcType="DECIMAL"/>
+        <result property="name" column="name" javaType="String" jdbcType="VARCHAR"/>
+        <result property="describe" column="describe" javaType="String" jdbcType="VARCHAR"/>
+        <result property="defaultGroup" column="default_group" javaType="Boolean" jdbcType="DECIMAL"/>
+        <result property="path" column="path" javaType="String" jdbcType="VARCHAR"/>
+        <result property="parentId" column="parent_id" javaType="String" jdbcType="VARCHAR"/>
+        <result property="level" column="level" javaType="Integer" jdbcType="DECIMAL"/>
+        <result property="sortIndex" column="sort_index" javaType="Long" jdbcType="DECIMAL"/>
+        <result property="enabled" column="enabled" javaType="Boolean" jdbcType="DECIMAL"/>
+        <collection property="bindInfo" column="u_id" select="org.hswebframework.web.dao.menu.MenuGroupBindDao.queryByGroupId"/>
     </resultMap>
 
     <!--用于动态生成sql所需的配置-->
@@ -36,8 +37,8 @@
         <bind name="resultMapId" value="'MenuGroupResultMap'"/>
         <bind name="tableName" value="'S_MENU_GROUP'"/>
     </sql>
-  
-    <insert id="insert" parameterType="org.hswebframework.web.entity.menu.SimpleMenuGroupEntity" >
+
+    <insert id="insert" parameterType="org.hswebframework.web.entity.menu.SimpleMenuGroupEntity">
         <include refid="config"/>
         <include refid="BasicMapper.buildInsertSql"/>
     </insert>

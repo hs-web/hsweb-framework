@@ -57,6 +57,10 @@
         <include refid="BasicMapper.buildUpdateSql"/>
     </update>
 
+    <select id="queryByGroupId" parameterType="String" resultMap="MenuGroupBindResultMap">
+        select * from S_MENU_GROUP_BIND where group_id =#{id}
+    </select>
+
     <select id="query" parameterType="org.hswebframework.web.commons.entity.Entity" resultMap="MenuGroupBindResultMap">
         <include refid="config"/>
         <include refid="BasicMapper.buildSelectSql"/>

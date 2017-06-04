@@ -47,9 +47,9 @@ public interface MenuEntity
 
     void setIcon(String icon);
 
-    boolean isEnabled();
+    Boolean isEnabled();
 
-    void setEnabled(boolean enabled);
+    void setEnabled(Boolean enabled);
 
     void setChildren(List<MenuEntity> children);
 

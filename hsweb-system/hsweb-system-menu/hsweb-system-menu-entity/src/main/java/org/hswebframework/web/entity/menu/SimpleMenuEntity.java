@@ -48,7 +48,7 @@ public class SimpleMenuEntity extends SimpleTreeSortSupportEntity<String>
     private String icon;
 
     //是否启用
-    private boolean enabled = true;
+    private Boolean enabled;
 
     //子菜单
     private List<SimpleMenuEntity> children;
@@ -106,11 +106,11 @@ public class SimpleMenuEntity extends SimpleTreeSortSupportEntity<String>
         this.icon = icon;
     }
 
-    public boolean isEnabled() {
+    public Boolean isEnabled() {
         return enabled;
     }
 
-    public void setEnabled(boolean enabled) {
+    public void setEnabled(Boolean enabled) {
         this.enabled = enabled;
     }
 

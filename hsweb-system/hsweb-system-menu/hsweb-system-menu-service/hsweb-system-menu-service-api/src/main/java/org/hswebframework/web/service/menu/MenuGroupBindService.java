@@ -29,4 +29,5 @@ public interface MenuGroupBindService extends
         CrudService<MenuGroupBindEntity, String>
         , TreeService<MenuGroupBindEntity, String> {
 
+    int deleteByGroupId(String groupId);
 }

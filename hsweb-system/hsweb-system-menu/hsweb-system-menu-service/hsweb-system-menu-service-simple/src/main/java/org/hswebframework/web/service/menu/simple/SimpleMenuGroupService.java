@@ -16,6 +16,7 @@
  */
 package org.hswebframework.web.service.menu.simple;
 
+import org.hswebframework.web.commons.entity.TreeSupportEntity;
 import org.hswebframework.web.dao.menu.MenuGroupDao;
 import org.hswebframework.web.entity.authorization.PermissionRoleEntity;
 import org.hswebframework.web.entity.authorization.UserEntity;
@@ -42,6 +43,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.hswebframework.web.service.menu.simple.CacheConstants.MENU_CACHE_NAME;
@@ -98,14 +100,34 @@ public class SimpleMenuGroupService
 
     @CacheEvict(allEntries = true)
     public String insert(MenuGroupEntity entity) {
+        entity.setEnabled(true);
         String id = super.insert(entity);
         List<MenuGroupBindEntity> bindEntities = entity.getBindInfo();
         if (bindEntities != null && !bindEntities.isEmpty()) {
-            bindEntities.forEach(bind -> bind.setGroupId(entity.getId()));
+            TreeSupportEntity.forEach(bindEntities, bindEntity -> {
+                bindEntity.setGroupId(id);
+                bindEntity.setEnabled(true);
+            });
             menuGroupBindService.insertBatch(bindEntities);
         }
         trySyncRoleInfo(entity);
         return id;
+    }
+
+    @Override
+    @CacheEvict(allEntries = true)
+    public int updateByPk(MenuGroupEntity entity) {
+        int size = super.updateByPk(entity);
+        List<MenuGroupBindEntity> bindEntities = entity.getBindInfo();
+        if (bindEntities != null && !bindEntities.isEmpty()) {
+            TreeSupportEntity.forEach(bindEntities, bindEntity -> {
+                bindEntity.setGroupId(entity.getId());
+                bindEntity.setEnabled(true);
+            });
+            menuGroupBindService.deleteByGroupId(entity.getId());
+            menuGroupBindService.insertBatch(bindEntities);
+        }
+        return size;
     }
 
     @CacheEvict(allEntries = true)
@@ -175,7 +197,8 @@ public class SimpleMenuGroupService
         roleEntity.setDescribe(menuGroupEntity.getDescribe());
         List<MenuGroupBindEntity> bindEntities = menuGroupEntity.getBindInfo();
         if (bindEntities != null && bindEntities.size() > 0) {
-            roleEntity.setPermissions(bindEntities.parallelStream()
+            roleEntity.setPermissions(bindEntities.stream()
+                    .sorted()
                     .map(bind -> {
                                 //转换 MenuGroupBindEntity 为PermissionRoleEntity
                                 PermissionRoleEntity permission = entityFactory.newInstance(PermissionRoleEntity.class, bind);
@@ -185,8 +208,7 @@ public class SimpleMenuGroupService
                                 permission.setPermissionId(menuEntity.getPermissionId());
                                 return permission;
                             }
-                    ).sorted()
-                    .collect(Collectors.toList()));
+                    ).collect(Collectors.toList()));
         }
 
         roleEntityConsumer.accept(roleEntity);

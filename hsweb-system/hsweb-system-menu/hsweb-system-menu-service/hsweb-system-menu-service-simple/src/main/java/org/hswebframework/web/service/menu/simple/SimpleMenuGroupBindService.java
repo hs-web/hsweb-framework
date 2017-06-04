@@ -35,7 +35,8 @@ public class SimpleMenuGroupBindService extends AbstractTreeSortService<MenuGrou
         implements MenuGroupBindService {
     @Autowired
     private MenuGroupBindDao menuGroupBindDao;
-   @Override
+
+    @Override
     protected IDGenerator<String> getIDGenerator() {
         return IDGenerator.MD5;
     }
@@ -45,4 +46,9 @@ public class SimpleMenuGroupBindService extends AbstractTreeSortService<MenuGrou
         return menuGroupBindDao;
     }
 
+    @Override
+    public int deleteByGroupId(String groupId) {
+        tryValidateProperty(groupId != null, MenuGroupBindEntity.groupId, "group id can not be null");
+        return createDelete().where(MenuGroupBindEntity.groupId, groupId).exec();
+    }
 }

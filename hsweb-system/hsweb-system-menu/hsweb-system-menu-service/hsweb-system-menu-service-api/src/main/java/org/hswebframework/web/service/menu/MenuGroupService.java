@@ -17,6 +17,7 @@
 package org.hswebframework.web.service.menu;
 
 import org.hswebframework.web.entity.menu.MenuEntity;
+import org.hswebframework.web.entity.menu.MenuGroupBindEntity;
 import org.hswebframework.web.entity.menu.MenuGroupEntity;
 import org.hswebframework.web.service.CrudService;
 import org.hswebframework.web.service.TreeService;
