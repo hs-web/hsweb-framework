@@ -23,7 +23,6 @@ import org.hswebframework.web.dao.authorization.RoleDao;
 import org.hswebframework.web.entity.authorization.PermissionRoleEntity;
 import org.hswebframework.web.entity.authorization.RoleEntity;
 import org.hswebframework.web.entity.authorization.bind.BindPermissionRoleEntity;
-import org.hswebframework.web.entity.authorization.bind.BindRoleUserEntity;
 import org.hswebframework.web.service.AbstractService;
 import org.hswebframework.web.service.DefaultDSLQueryService;
 import org.hswebframework.web.service.DefaultDSLUpdateService;
@@ -82,7 +81,6 @@ public class SimpleRoleService extends AbstractService<RoleEntity, String>
     @Override
     public <T extends PermissionRoleEntity> void updateByPrimaryKey(BindPermissionRoleEntity<T> roleEntity) {
         tryValidateProperty(StringUtils.hasLength(roleEntity.getId()), RoleEntity.id, "id {not_be_null}");
-        tryValidateProperty(null == selectByPk(roleEntity.getId()), RoleEntity.id, "{role_exists}");
         roleEntity.setEnabled(null);
         tryValidate(roleEntity);
         DefaultDSLUpdateService
