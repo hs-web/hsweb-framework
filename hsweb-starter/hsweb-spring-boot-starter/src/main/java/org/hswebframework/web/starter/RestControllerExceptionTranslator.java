@@ -44,6 +44,7 @@ public class RestControllerExceptionTranslator {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
     ResponseMessage handleException(JSONException exception) {
+        logger.error("json error", exception);
         return ResponseMessage.error(400, exception.getMessage());
     }
 

@@ -18,17 +18,25 @@
 
 package org.hswebframework.web.starter;
 
+import com.alibaba.fastjson.parser.ParserConfig;
+import com.alibaba.fastjson.parser.deserializer.JavaBeanDeserializer;
+import com.alibaba.fastjson.parser.deserializer.ObjectDeserializer;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import org.hswebframework.web.ThreadLocalUtils;
-import org.hswebframework.web.authorization.AuthenticationSupplier;
+import org.hswebframework.web.commons.entity.Entity;
 import org.hswebframework.web.commons.entity.factory.EntityFactory;
 import org.hswebframework.web.commons.entity.factory.MapperEntityFactory;
+import org.hswebframework.web.commons.entity.factory.PropertyCopier;
+import org.hswebframework.web.commons.model.Model;
 import org.hswebframework.web.starter.convert.FastJsonHttpMessageConverter;
 import org.hswebframework.web.starter.resolver.AuthorizationArgumentResolver;
 import org.hswebframework.web.starter.resolver.JsonParamResolver;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -45,6 +53,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
 import java.util.List;
 
 /**
@@ -62,16 +72,38 @@ public class HswebAutoConfiguration {
 
     @Bean
     @Primary
+    @ConfigurationProperties(prefix = "fastjson")
     public FastJsonHttpMessageConverter fastJsonHttpMessageConverter(@Autowired(required = false) EntityFactory entityFactory) {
         FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();
-        // TODO: 16-12-24  应该可配置
         converter.setFeatures(
                 SerializerFeature.WriteNullListAsEmpty,
                 SerializerFeature.WriteNullNumberAsZero,
                 SerializerFeature.WriteNullBooleanAsFalse
-//                SerializerFeature.WriteDateUseDateFormat
         );
         converter.setEntityFactory(entityFactory);
+        ParserConfig.global = new ParserConfig() {
+            @Override
+            public ObjectDeserializer getDeserializer(Type type) {
+                ObjectDeserializer derializer = getDeserializers().get(type);
+                if (derializer != null) {
+                    return derializer;
+                }
+                if (type instanceof Class) {
+                    Class classType = ((Class) type);
+                    if (Modifier.isAbstract(classType.getModifiers()) || Modifier.isInterface(classType.getModifiers())) {
+                        if (entityFactory != null && (Entity.class.isAssignableFrom(classType) || Model.class.isAssignableFrom(classType))) {
+                            return new JavaBeanDeserializer(this, entityFactory.getInstanceType(classType), type);
+                        }
+                    } else {
+                        return new JavaBeanDeserializer(this, classType);
+                    }
+                }
+                return super.getDeserializer(type);
+            }
+        };
+        ParserConfig.getGlobalInstance().addAccept("org.hswebframework.web.entity.");
+        ParserConfig.getGlobalInstance().addAccept("org.hsweb.");
+        ParserConfig.getGlobalInstance().addDeny("org.hsweb.ezorm.core.param.SqlTerm");
         return converter;
     }
 
@@ -111,8 +143,7 @@ public class HswebAutoConfiguration {
     @ConditionalOnMissingBean(Validator.class)
     public Validator validator() {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-        Validator validator = factory.getValidator();
-        return validator;
+        return factory.getValidator();
     }
 
     @Bean(name = "entityFactory")
@@ -121,4 +152,26 @@ public class HswebAutoConfiguration {
         return new MapperEntityFactory(entityProperties.createMappers());
     }
 
+
+    @Configuration
+    @ConditionalOnBean(MapperEntityFactory.class)
+    public class EntityFactoryInitConfiguration implements BeanPostProcessor {
+
+        @Autowired
+        private MapperEntityFactory mapperEntityFactory;
+
+
+        @Override
+        public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+            return bean;
+        }
+
+        @Override
+        public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+            if (bean instanceof PropertyCopier) {
+                mapperEntityFactory.addCopier(((PropertyCopier) bean));
+            }
+            return bean;
+        }
+    }
 }
