@@ -25,6 +25,7 @@ import org.hswebframework.web.authorization.AuthenticationManager;
 import org.hswebframework.web.authorization.oauth2.client.OAuth2RequestService;
 import org.hswebframework.web.authorization.oauth2.client.response.OAuth2Response;
 import org.hswebframework.web.authorization.shiro.oauth2sso.OAuth2SSOAuthorizingListener;
+import org.hswebframework.web.commons.entity.DataStatus;
 import org.hswebframework.web.commons.entity.factory.EntityFactory;
 import org.hswebframework.web.dao.datasource.DataSourceHolder;
 import org.hswebframework.web.dao.datasource.DatabaseType;
@@ -107,7 +108,7 @@ public class OAuth2ClientApplication implements CommandLineRunner {
         entity.setRedirectUri("http://localhost:8808/");
         //hsweb
         entity.setProvider("hsweb");
-        entity.setEnabled(true);
+        entity.setStatus(DataStatus.STATUS_ENABLED);
         //add
         serverConfigService.insert(entity);
 

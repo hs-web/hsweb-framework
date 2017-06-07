@@ -26,7 +26,7 @@
         <result property="value" column="value" javaType="String" jdbcType="VARCHAR"/>
         <result property="text" column="text" javaType="String" jdbcType="VARCHAR"/>
         <result property="valueType" column="value_type" javaType="String" jdbcType="VARCHAR"/>
-        <result property="enabled" column="enabled" javaType="Long" jdbcType="DECIMAL"/>
+        <result property="status" column="status" javaType="Byte" jdbcType="DECIMAL"/>
         <result property="describe" column="describe" javaType="String" jdbcType="VARCHAR"/>
         <result property="parentId" column="parent_id" javaType="String" jdbcType="VARCHAR"/>
         <result property="path" column="path" javaType="String" jdbcType="VARCHAR"/>

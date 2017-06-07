@@ -71,5 +71,5 @@ public interface OAuth2ClientEntity extends GenericEntity<String>, OAuth2Client,
 
     void setSupportGrantTypes(Set<String> supportGrantType);
 
-    void setEnabled(Boolean enabled);
+    void setStatus(Byte status);
 }

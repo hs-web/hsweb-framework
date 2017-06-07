@@ -35,17 +35,16 @@ public class SimplePositionEntity extends SimpleTreeSortSupportEntity<String> im
     //备注
     private String       remark;
 
-    private List<SimplePositionEntity> children;
+    private List<PositionEntity> children;
 
     @Override
     @SuppressWarnings("unchecked")
-    public List<SimplePositionEntity> getChildren() {
+    public List<PositionEntity> getChildren() {
         return children;
     }
 
-    @SuppressWarnings("unchecked")
     public void setChildren(List<PositionEntity> children) {
-        this.children = (List) children;
+        this.children = children;
     }
 
     /**

@@ -26,6 +26,7 @@ import org.hswebframework.web.authorization.oauth2.client.OAuth2RequestService;
 import org.hswebframework.web.authorization.oauth2.client.OAuth2SessionBuilder;
 import org.hswebframework.web.authorization.oauth2.client.listener.OAuth2Event;
 import org.hswebframework.web.authorization.oauth2.client.listener.OAuth2Listener;
+import org.hswebframework.web.commons.entity.DataStatus;
 import org.hswebframework.web.entity.oauth2.client.OAuth2ServerConfigEntity;
 import org.hswebframework.web.service.oauth2.client.OAuth2ServerConfigService;
 import org.hswebframework.web.service.oauth2.client.OAuth2UserTokenService;
@@ -53,7 +54,7 @@ public class SimpleOAuth2RequestService implements OAuth2RequestService {
     @Override
     public OAuth2SessionBuilder create(String serverId) {
         OAuth2ServerConfigEntity configEntity = oAuth2ServerConfigService.selectByPk(serverId);
-        if (null == configEntity || !Boolean.TRUE.equals(configEntity.isEnabled())) throw new NotFoundException("server not found!");
+        if (null == configEntity || !DataStatus.STATUS_ENABLED.equals(configEntity.getStatus())) throw new NotFoundException("server not found!");
         return new SimpleOAuth2SessionBuilder(oAuth2UserTokenService, configEntity, oAuth2RequestBuilderFactory);
     }
 

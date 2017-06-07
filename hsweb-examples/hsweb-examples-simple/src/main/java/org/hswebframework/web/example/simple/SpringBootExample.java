@@ -24,7 +24,7 @@ import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.access.DataAccessConfig;
 import org.hswebframework.web.authorization.simple.SimpleFieldFilterDataAccessConfig;
-import org.hswebframework.web.authorization.simple.SimpleFiledScopeDataAccessConfig;
+import org.hswebframework.web.commons.entity.DataStatus;
 import org.hswebframework.web.commons.entity.factory.EntityFactory;
 import org.hswebframework.web.dao.datasource.DataSourceHolder;
 import org.hswebframework.web.dao.datasource.DatabaseType;
@@ -36,6 +36,7 @@ import org.hswebframework.web.loggin.aop.EnableAccessLogger;
 import org.hswebframework.web.logging.AccessLoggerListener;
 import org.hswebframework.web.organizational.authorization.access.DataAccessType;
 import org.hswebframework.web.organizational.authorization.simple.SimpleScopeDataAccessConfig;
+import org.hswebframework.web.service.authorization.AuthorizationSettingService;
 import org.hswebframework.web.service.authorization.PermissionService;
 import org.hswebframework.web.service.authorization.RoleService;
 import org.hswebframework.web.service.authorization.UserService;
@@ -46,7 +47,6 @@ import org.hswebframework.web.service.organizational.PositionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cache.annotation.EnableCaching;
@@ -75,6 +75,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.stream.Stream;
 
 /**
@@ -164,6 +165,8 @@ public class SpringBootExample implements CommandLineRunner {
     @Autowired
     PersonService         personService;
 
+    @Autowired
+    AuthorizationSettingService authorizationSettingService;
 
     public static void main(String[] args) {
         SpringApplication.run(SpringBootExample.class);
@@ -201,25 +204,45 @@ public class SpringBootExample implements CommandLineRunner {
         onlyDepartmentData.setConfig(JSON.toJSONString(new SimpleScopeDataAccessConfig(DataAccessType.SCOPE_TYPE_CHILDREN)));
         onlyDepartmentData.setDescribe("只能查看自己部门的数据");
 
+        //创建权限
         PermissionEntity permission = entityFactory.newInstance(PermissionEntity.class);
         permission.setName("测试");
         permission.setId("test");
-        permission.setStatus((byte) 1);
+        permission.setStatus(DataStatus.STATUS_ENABLED);
         permission.setActions(ActionEntity.create(Permission.ACTION_QUERY, Permission.ACTION_UPDATE));
 //        permission.setDataAccess(Arrays.asList(accessEntity, updateAccessEntity, denyUpdateFields, denyUpdateFields, onlyDepartmentData));
         permissionService.insert(permission);
 
+        //角色
         BindPermissionRoleEntity<PermissionRoleEntity> roleEntity = entityFactory.newInstance(BindPermissionRoleEntity.class);
         SimplePermissionRoleEntity permissionRoleEntity = new SimplePermissionRoleEntity();
         permissionRoleEntity.setRoleId("admin");
         permissionRoleEntity.setPermissionId("test");
-        permissionRoleEntity.setActions(Arrays.asList(Permission.ACTION_QUERY, Permission.ACTION_UPDATE));
-        permissionRoleEntity.setDataAccesses(Arrays.asList(accessEntity, updateAccessEntity, denyQueryFields, denyUpdateFields, onlyDepartmentData));
         roleEntity.setId("admin");
         roleEntity.setName("test");
         roleEntity.setPermissions(Arrays.asList(permissionRoleEntity));
         roleService.insert(roleEntity);
 
+        /*            权限设置        */
+        AuthorizationSettingEntity settingEntity = entityFactory.newInstance(AuthorizationSettingEntity.class);
+
+        settingEntity.setType("role"); //绑定到角色
+        settingEntity.setSettingFor(roleEntity.getId());
+
+        settingEntity.setDescribe("测试");
+        //权限配置详情
+        AuthorizationSettingDetailEntity detailEntity = entityFactory.newInstance(AuthorizationSettingDetailEntity.class);
+        detailEntity.setPermissionId(permission.getId());
+        detailEntity.setMerge(true);
+        detailEntity.setPriority(1L);
+        detailEntity.setActions(new HashSet<>(Arrays.asList(Permission.ACTION_QUERY, Permission.ACTION_UPDATE)));
+        detailEntity.setDataAccesses(Arrays.asList(accessEntity, updateAccessEntity, denyQueryFields, denyUpdateFields, onlyDepartmentData));
+
+        settingEntity.setDetails(Arrays.asList(detailEntity));
+
+        authorizationSettingService.insert(settingEntity);
+
+        //关联角色给用户
         BindRoleUserEntity userEntity = entityFactory.newInstance(BindRoleUserEntity.class);
         userEntity.setId("admin");
         userEntity.setName("admin");
@@ -234,21 +257,21 @@ public class SpringBootExample implements CommandLineRunner {
         OrganizationalEntity org = entityFactory.newInstance(OrganizationalEntity.class);
 
         org.setName("测试机构");
-        org.setEnabled(true);
+        org.setStatus(DataStatus.STATUS_ENABLED);
         org.setId("test");
         org.setParentId("-1");
 
         organizationalService.insert(org);
 
         DepartmentEntity department = entityFactory.newInstance(DepartmentEntity.class);
-        department.setEnabled(true);
+        department.setStatus(DataStatus.STATUS_ENABLED);
         department.setOrgId("test");
         department.setId("test");
         department.setName("部门");
         department.setParentId("-1");
 
         DepartmentEntity department2 = entityFactory.newInstance(DepartmentEntity.class);
-        department2.setEnabled(true);
+        department2.setStatus(DataStatus.STATUS_ENABLED);
         department2.setOrgId("test");
         department2.setId("test2");
         department2.setName("部门2");
@@ -275,7 +298,5 @@ public class SpringBootExample implements CommandLineRunner {
         personEntity.setPersonUser(personUserEntity);
 
         personService.insert(personEntity);
-
-
     }
 }

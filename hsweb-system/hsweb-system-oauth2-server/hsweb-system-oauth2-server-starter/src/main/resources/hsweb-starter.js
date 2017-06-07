@@ -50,7 +50,7 @@ function install(context) {
         .addColumn().name("support_grant_type").clob().notNull().comment("支持的授权列表").commit()
         .addColumn().name("default_expires_in").number(16).comment("默认认证过期时间").commit()
         .addColumn().name("default_grant_scope").clob().comment("默认认证范围").commit()
-        .addColumn().name("enabled").number(4).comment("是否启用").commit()
+        .addColumn().name("status").number(4).comment("状态").commit()
         .comment("OAuth2客户端").commit();
 
     database.createOrAlter("s_oauth2_access")

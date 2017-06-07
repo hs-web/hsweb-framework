@@ -45,7 +45,7 @@ function install(context) {
         .addColumn().name("parent_id").alias("parentId").comment("上级机构id").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
         .addColumn().name("path").alias("path").comment("树定位码").jdbcType(java.sql.JDBCType.VARCHAR).length(1024).commit()
         .addColumn().name("sort_index").alias("sortIndex").comment("树结构编码").jdbcType(java.sql.JDBCType.DECIMAL).length(32, 0).commit()
-        .addColumn().name("enabled").alias("enabled").comment("是否启用").jdbcType(java.sql.JDBCType.DECIMAL).length(32, 0).commit()
+        .addColumn().name("status").alias("status").comment("状态").jdbcType(java.sql.JDBCType.DECIMAL).length(32, 0).commit()
         .addColumn().name("level").alias("level").comment("级别").jdbcType(java.sql.JDBCType.DECIMAL).length(32, 0).commit()
         .comment("组织").commit();
 
@@ -57,7 +57,7 @@ function install(context) {
         .addColumn().name("parent_id").alias("parentId").comment("父级id").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
         .addColumn().name("path").alias("path").comment("树结构编码").jdbcType(java.sql.JDBCType.VARCHAR).length(3000).commit()
         .addColumn().name("sort_index").alias("sortIndex").comment("排序序号").jdbcType(java.sql.JDBCType.DECIMAL).length(32, 0).commit()
-        .addColumn().name("enabled").alias("enabled").comment("是否启用").jdbcType(java.sql.JDBCType.DECIMAL).length(32, 0).commit()
+        .addColumn().name("status").alias("status").comment("状态").jdbcType(java.sql.JDBCType.DECIMAL).length(32, 0).commit()
         .addColumn().name("level").alias("level").comment("级别").jdbcType(java.sql.JDBCType.DECIMAL).length(32, 0).commit()
         .comment("部门").commit();
 
@@ -76,12 +76,12 @@ function install(context) {
     database.createOrAlter("s_person")
         .addColumn().name("u_id").alias("id").comment("ID").jdbcType(java.sql.JDBCType.VARCHAR).length(32).primaryKey().commit()
         .addColumn().name("name").alias("name").comment("姓名").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
-        .addColumn().name("sex").alias("sex").comment("性别").jdbcType(java.sql.JDBCType.DECIMAL).length(4,0).commit()
+        .addColumn().name("sex").alias("sex").comment("性别").jdbcType(java.sql.JDBCType.DECIMAL).length(4, 0).commit()
         .addColumn().name("email").alias("email").comment("电子邮箱").jdbcType(java.sql.JDBCType.VARCHAR).length(128).commit()
         .addColumn().name("phone").alias("phone").comment("联系电话").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
         .addColumn().name("photo").alias("photo").comment("照片").jdbcType(java.sql.JDBCType.VARCHAR).length(128).commit()
         .addColumn().name("user_id").alias("userId").comment("关联用户id").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
-        .addColumn().name("status").alias("status").comment("状态").jdbcType(java.sql.JDBCType.DECIMAL).length(32,0).commit()
+        .addColumn().name("status").alias("status").comment("状态").jdbcType(java.sql.JDBCType.DECIMAL).length(32, 0).commit()
         .addColumn().name("remark").alias("remark").comment("备注").jdbcType(java.sql.JDBCType.VARCHAR).length(256).commit()
         .comment("人员").commit();
 

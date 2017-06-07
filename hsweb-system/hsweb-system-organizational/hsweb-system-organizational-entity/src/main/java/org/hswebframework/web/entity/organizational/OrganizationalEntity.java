@@ -58,9 +58,9 @@ public interface OrganizationalEntity extends TreeSortSupportEntity<String> {
      */
     String sortIndex     = "sortIndex";
     /**
-     * 是否启用
+     * 状态
      */
-    String enabled       = "enabled";
+    String status       = "status";
     /**
      * 级别
      */
@@ -108,15 +108,9 @@ public interface OrganizationalEntity extends TreeSortSupportEntity<String> {
 
     void setChildren(List<OrganizationalEntity> children);
 
-    /**
-     * @return 是否启用
-     */
-    Boolean isEnabled();
+    Byte getStatus();
 
-    /**
-     * 设置 是否启用
-     */
-    void setEnabled(Boolean enabled);
+    void setStatus(Byte status);
 
 
 }

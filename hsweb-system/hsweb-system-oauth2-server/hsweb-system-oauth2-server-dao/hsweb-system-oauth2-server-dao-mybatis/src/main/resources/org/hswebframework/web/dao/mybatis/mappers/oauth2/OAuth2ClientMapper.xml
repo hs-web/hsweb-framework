@@ -34,7 +34,7 @@
         <result property="createTime" column="create_time" javaType="Long" jdbcType="NUMERIC"/>
         <result property="supportGrantType" column="support_grant_type" javaType="java.util.Set" jdbcType="VARCHAR"/>
         <result property="defaultGrantScope" column="default_grant_scope" javaType="java.util.Set" jdbcType="VARCHAR"/>
-        <result property="enabled" column="enabled" javaType="Boolean" jdbcType="NUMERIC"/>
+        <result property="status" column="status" javaType="Byte" jdbcType="NUMERIC"/>
     </resultMap>
 
     <!--用于动态生成sql所需的配置-->

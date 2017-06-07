@@ -37,7 +37,7 @@ public class SimpleDictionaryItemEntity extends SimpleTreeSortSupportEntity<Stri
     //字典值类型
     private String valueType;
     //是否启用
-    private Long   enabled;
+    private Byte   status;
     //说明
     private String describe;
     //快速搜索码
@@ -152,15 +152,15 @@ public class SimpleDictionaryItemEntity extends SimpleTreeSortSupportEntity<Stri
     /**
      * @return 是否启用
      */
-    public Long getEnabled() {
-        return this.enabled;
+    public Byte getStatus() {
+        return this.status;
     }
 
     /**
      * 设置 是否启用
      */
-    public void setEnabled(Long enabled) {
-        this.enabled = enabled;
+    public void setStatus(Byte enabled) {
+        this.status = enabled;
     }
 
     /**

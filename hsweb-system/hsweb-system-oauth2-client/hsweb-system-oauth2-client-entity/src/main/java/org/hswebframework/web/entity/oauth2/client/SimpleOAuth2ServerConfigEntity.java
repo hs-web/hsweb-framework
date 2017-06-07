@@ -25,23 +25,23 @@ import org.hswebframework.web.commons.entity.SimpleGenericEntity;
  */
 public class SimpleOAuth2ServerConfigEntity extends SimpleGenericEntity<String> implements OAuth2ServerConfigEntity {
     //服务名称
-    private String  name;
+    private String name;
     //备注
-    private String  describe;
+    private String describe;
     //api根地址
-    private String  apiBaseUrl;
+    private String apiBaseUrl;
     //认证地址
-    private String  authUrl;
+    private String authUrl;
     //token获取地址
-    private String  accessTokenUrl;
+    private String accessTokenUrl;
     //客户端id
-    private String  clientId;
+    private String clientId;
     //客户端密钥
-    private String  clientSecret;
+    private String clientSecret;
     //是否启用
-    private Boolean enabled;
+    private Byte   status;
     //重定向地址
-    private String  redirectUri;
+    private String redirectUri;
 
     //服务提供商
     private String provider;
@@ -165,14 +165,14 @@ public class SimpleOAuth2ServerConfigEntity extends SimpleGenericEntity<String> 
     /**
      * @return 是否启用
      */
-    public Boolean isEnabled() {
-        return this.enabled;
+    public Byte getStatus() {
+        return this.status;
     }
 
     /**
      * 设置 是否启用
      */
-    public void setEnabled(Boolean enabled) {
-        this.enabled = enabled;
+    public void setStatus(Byte status) {
+        this.status = status;
     }
 }

@@ -38,7 +38,11 @@ public interface OAuth2Client {
 
     Long getCreateTime();
 
-    Boolean isEnabled();
+    /**
+     * @return 状态
+     * @see org.hswebframework.web.commons.entity.DataStatus
+     */
+    Byte getStatus();
 
     /**
      * @return 客户端支持的认证类型

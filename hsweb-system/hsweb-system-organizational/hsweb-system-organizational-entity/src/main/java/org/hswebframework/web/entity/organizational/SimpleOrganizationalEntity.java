@@ -27,17 +27,17 @@ import java.util.List;
  */
 public class SimpleOrganizationalEntity extends SimpleTreeSortSupportEntity<String> implements OrganizationalEntity {
     //名称
-    private String                           name;
+    private String                     name;
     //全称
-    private String                           fullName;
+    private String                     fullName;
     //机构编码
-    private String                           code;
+    private String                     code;
     //可选角色
-    private java.util.List<String>           optionalRoles;
+    private java.util.List<String>     optionalRoles;
     //是否启用
-    private Boolean                          enabled;
+    private Byte                       status;
     //子级组织
-    private List<SimpleOrganizationalEntity> children;
+    private List<OrganizationalEntity> children;
 
     /**
      * @return 名称
@@ -97,25 +97,21 @@ public class SimpleOrganizationalEntity extends SimpleTreeSortSupportEntity<Stri
 
     @Override
     @SuppressWarnings("unchecked")
-    public List<SimpleOrganizationalEntity> getChildren() {
+    public List<OrganizationalEntity> getChildren() {
         return children;
     }
 
     public void setChildren(List<OrganizationalEntity> children) {
-        this.children = (List) children;
+        this.children = children;
     }
 
-    /**
-     * @return 是否启用
-     */
-    public Boolean isEnabled() {
-        return this.enabled;
+    @Override
+    public Byte getStatus() {
+        return status;
     }
 
-    /**
-     * 设置 是否启用
-     */
-    public void setEnabled(Boolean enabled) {
-        this.enabled = enabled;
+    @Override
+    public void setStatus(Byte status) {
+        this.status = status;
     }
 }

@@ -56,9 +56,9 @@ public interface OAuth2ServerConfigEntity extends GenericEntity<String> {
      */
     String clientSecret   = "clientSecret";
     /**
-     * 是否启用
+     * 状态
      */
-    String enabled        = "enabled";
+    String status         = "status";
 
     String redirectUri = "redirectUri";
 
@@ -152,11 +152,11 @@ public interface OAuth2ServerConfigEntity extends GenericEntity<String> {
     /**
      * @return 是否启用
      */
-    Boolean isEnabled();
+    Byte getStatus();
 
     /**
      * 设置 是否启用
      */
-    void setEnabled(Boolean enabled);
+    void setStatus(Byte status);
 
 }

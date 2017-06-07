@@ -54,9 +54,9 @@ public interface DepartmentEntity extends TreeSortSupportEntity<String> {
      */
     String sortIndex = "sortIndex";
     /**
-     * 是否启用
+     * 状态
      */
-    String enabled   = "enabled";
+    String status    = "status";
     /**
      * 级别
      */
@@ -93,14 +93,14 @@ public interface DepartmentEntity extends TreeSortSupportEntity<String> {
     void setCode(String code);
 
     /**
-     * @return 是否启用
+     * @return 状态
      */
-    Boolean isEnabled();
+    Byte getStatus();
 
     /**
-     * 设置 是否启用
+     * 设置 状态
      */
-    void setEnabled(Boolean enabled);
+    void setStatus(Byte status);
 
     void setChildren(List<DepartmentEntity> children);
 }
