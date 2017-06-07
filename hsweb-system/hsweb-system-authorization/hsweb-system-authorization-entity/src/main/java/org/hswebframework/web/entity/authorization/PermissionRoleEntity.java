@@ -5,7 +5,7 @@ import org.hswebframework.web.commons.entity.CloneableEntity;
 import java.util.List;
 
 /**
- * TODO 完成注释
+ * 权限设置已经重构至 {@link AuthorizationSettingEntity} ,将在接下来移除
  *
  * @author zhouhao
  */
