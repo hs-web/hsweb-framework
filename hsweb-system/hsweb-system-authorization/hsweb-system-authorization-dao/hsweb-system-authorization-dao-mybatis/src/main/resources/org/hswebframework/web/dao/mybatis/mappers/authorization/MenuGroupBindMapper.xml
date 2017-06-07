@@ -15,32 +15,34 @@
   ~  limitations under the License.
   ~
   -->
-
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
-
-<mapper namespace="org.hswebframework.web.dao.authorization.RoleDao">
-    <resultMap id="RoleResultMap" type="org.hswebframework.web.entity.authorization.SimpleRoleEntity">
+<mapper namespace="org.hswebframework.web.dao.authorization.MenuGroupBindDao">
+    <resultMap id="MenuGroupBindResultMap" type="org.hswebframework.web.entity.authorization.SimpleMenuGroupBindEntity">
         <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
-        <result property="name" column="name" javaType="string" jdbcType="VARCHAR"/>
-        <result property="describe" column="describe" javaType="string" jdbcType="VARCHAR"/>
-        <result property="status" column="status" javaType="Byte" jdbcType="NUMERIC"/>
+        <result property="path" column="path" javaType="String" jdbcType="VARCHAR"/>
+        <result property="parentId" column="parent_id" javaType="String" jdbcType="VARCHAR"/>
+        <result property="level" column="level" javaType="Integer" jdbcType="DECIMAL"/>
+        <result property="sortIndex" column="sort_index" javaType="Long" jdbcType="DECIMAL"/>
+        <result property="status" column="status" javaType="Byte" jdbcType="DECIMAL"/>
+        <result property="menuId" column="menu_id" javaType="String" jdbcType="VARCHAR"/>
+        <result property="groupId" column="group_id" javaType="String" jdbcType="VARCHAR"/>
     </resultMap>
 
     <!--用于动态生成sql所需的配置-->
     <sql id="config">
-        <bind name="resultMapId" value="'RoleResultMap'"/>
-        <bind name="tableName" value="'s_role'"/>
+        <bind name="resultMapId" value="'MenuGroupBindResultMap'"/>
+        <bind name="tableName" value="'s_menu_group_bind'"/>
     </sql>
 
-    <insert id="insert" parameterType="org.hswebframework.web.entity.authorization.RoleEntity">
+    <insert id="insert" parameterType="org.hswebframework.web.entity.authorization.SimpleMenuGroupBindEntity">
         <include refid="config"/>
         <include refid="BasicMapper.buildInsertSql"/>
     </insert>
 
     <delete id="deleteByPk" parameterType="String">
-        delete from s_role where u_id =#{id}
+        delete from s_menu_group_bind where u_id =#{id}
     </delete>
 
     <delete id="delete" parameterType="org.hswebframework.web.commons.entity.Entity">
@@ -53,7 +55,11 @@
         <include refid="BasicMapper.buildUpdateSql"/>
     </update>
 
-    <select id="query" parameterType="org.hswebframework.web.commons.entity.Entity" resultMap="RoleResultMap">
+    <select id="queryByGroupId" parameterType="String" resultMap="MenuGroupBindResultMap">
+        select * from s_menu_group_bind where group_id =#{id}
+    </select>
+
+    <select id="query" parameterType="org.hswebframework.web.commons.entity.Entity" resultMap="MenuGroupBindResultMap">
         <include refid="config"/>
         <include refid="BasicMapper.buildSelectSql"/>
     </select>

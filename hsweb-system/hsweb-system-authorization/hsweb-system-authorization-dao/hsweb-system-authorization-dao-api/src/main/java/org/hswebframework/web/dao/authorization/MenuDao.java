@@ -16,18 +16,15 @@
  *
  */
 
-package org.hswebframework.web.service.authorization.simple;
+package org.hswebframework.web.dao.authorization;
+
+import org.hswebframework.web.dao.CrudDao;
+import org.hswebframework.web.entity.authorization.MenuEntity;
 
 /**
- * 缓存所需常量
+ * TODO 完成注释
  *
  * @author zhouhao
  */
-public interface CacheConstants {
-    String MENU_CACHE_NAME = "hsweb-menu-";
-
-    String USER_CACHE_NAME = "user-";
-
-    String USER_AUTH_CACHE_NAME = "user-auth-";
-
+public interface MenuDao extends CrudDao<MenuEntity, String> {
 }

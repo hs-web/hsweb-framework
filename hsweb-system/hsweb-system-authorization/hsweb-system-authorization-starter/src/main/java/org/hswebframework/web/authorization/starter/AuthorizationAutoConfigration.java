@@ -18,11 +18,15 @@
 
 package org.hswebframework.web.authorization.starter;
 
+import org.hswebframework.web.authorization.AuthenticationInitializeService;
+import org.hswebframework.web.authorization.AuthenticationManager;
 import org.hswebframework.web.authorization.listener.AuthorizationListener;
 import org.hswebframework.web.authorization.listener.AuthorizationListenerDispatcher;
 import org.hswebframework.web.authorization.listener.event.AuthorizationEvent;
+import org.hswebframework.web.service.authorization.simple.SimpleAuthenticationManager;
 import org.hswebframwork.utils.ClassUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -46,5 +50,12 @@ public class AuthorizationAutoConfigration {
             listeners.forEach(listener -> dispatcher.addListener((Class<E>) ClassUtils.getGenericType(listener.getClass()), listener));
         }
         return dispatcher;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(AuthenticationManager.class)
+    @ConditionalOnBean(AuthenticationInitializeService.class)
+    public AuthenticationManager authenticationManager(AuthenticationInitializeService authenticationInitializeService) {
+        return new SimpleAuthenticationManager(authenticationInitializeService);
     }
 }

@@ -9,6 +9,7 @@ import java.util.List;
  *
  * @author zhouhao
  */
+@Deprecated
 public interface PermissionRoleEntity extends CloneableEntity {
 
     void setRoleId(String roleId);

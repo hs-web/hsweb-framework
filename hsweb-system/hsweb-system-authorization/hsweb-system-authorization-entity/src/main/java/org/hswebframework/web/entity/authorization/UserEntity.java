@@ -32,7 +32,7 @@ public interface UserEntity extends GenericEntity<String>, RecordCreationEntity 
     String salt     = "salt";
     @SuppressWarnings("unchecked")
     String password = "password";
-    String enabled = "enabled";
+    String status = "status";
 
     void setName(String name);
 
@@ -50,9 +50,13 @@ public interface UserEntity extends GenericEntity<String>, RecordCreationEntity 
 
     String getSalt();
 
-    Boolean isEnabled();
+    /**
+     * @return 数据状态
+     * @see org.hswebframework.web.commons.entity.DataStatus
+     */
+    Byte getStatus();
 
-    void setEnabled(Boolean enabled);
+    void setStatus(Byte status);
 
     @Override
     UserEntity clone();

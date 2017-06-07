@@ -17,7 +17,7 @@
 
 package org.hswebframework.web.service.authorization.simple;
 
-import org.hswebframework.web.commons.entity.GenericEntity;
+import org.hswebframework.web.commons.entity.DataStatus;
 import org.hswebframework.web.dao.authorization.PermissionRoleDao;
 import org.hswebframework.web.dao.authorization.RoleDao;
 import org.hswebframework.web.entity.authorization.PermissionRoleEntity;
@@ -71,7 +71,7 @@ public class SimpleRoleService extends AbstractService<RoleEntity, String>
     public <T extends PermissionRoleEntity> String insert(BindPermissionRoleEntity<T> roleEntity) {
         tryValidateProperty(StringUtils.hasLength(roleEntity.getId()), RoleEntity.id, "id {not_be_null}");
         tryValidateProperty(null == selectByPk(roleEntity.getId()), RoleEntity.id, "{role_exists}");
-        roleEntity.setEnabled(true);
+        roleEntity.setStatus(DataStatus.STATUS_ENABLED);
         tryValidate(roleEntity);
         roleDao.insert(roleEntity);
         syncPermissions(roleEntity.getId(), roleEntity.getPermissions());
@@ -82,7 +82,7 @@ public class SimpleRoleService extends AbstractService<RoleEntity, String>
     public void enable(String roleId) {
         tryValidateProperty(StringUtils.hasLength(roleId), RoleEntity.id, "{id_is_null}");
         DefaultDSLUpdateService.createUpdate(getDao())
-                .set(RoleEntity.enabled, true)
+                .set(RoleEntity.status, DataStatus.STATUS_ENABLED)
                 .where(RoleEntity.id, roleId)
                 .exec();
     }
@@ -91,7 +91,7 @@ public class SimpleRoleService extends AbstractService<RoleEntity, String>
     public void disable(String roleId) {
         tryValidateProperty(StringUtils.hasLength(roleId), RoleEntity.id, "{id_is_null}");
         DefaultDSLUpdateService.createUpdate(getDao())
-                .set(RoleEntity.enabled, false)
+                .set(RoleEntity.status, DataStatus.STATUS_DISABLED)
                 .where(RoleEntity.id, roleId)
                 .exec();
     }

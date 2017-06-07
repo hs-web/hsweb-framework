@@ -15,32 +15,36 @@
   ~  limitations under the License.
   ~
   -->
-
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
-
-<mapper namespace="org.hswebframework.web.dao.authorization.RoleDao">
-    <resultMap id="RoleResultMap" type="org.hswebframework.web.entity.authorization.SimpleRoleEntity">
+<mapper namespace="org.hswebframework.web.dao.authorization.MenuGroupDao">
+    <resultMap id="MenuGroupResultMap" type="org.hswebframework.web.entity.authorization.SimpleMenuGroupEntity">
         <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
-        <result property="name" column="name" javaType="string" jdbcType="VARCHAR"/>
-        <result property="describe" column="describe" javaType="string" jdbcType="VARCHAR"/>
-        <result property="status" column="status" javaType="Byte" jdbcType="NUMERIC"/>
+        <result property="name" column="name" javaType="String" jdbcType="VARCHAR"/>
+        <result property="describe" column="describe" javaType="String" jdbcType="VARCHAR"/>
+        <result property="defaultGroup" column="default_group" javaType="Boolean" jdbcType="DECIMAL"/>
+        <result property="path" column="path" javaType="String" jdbcType="VARCHAR"/>
+        <result property="parentId" column="parent_id" javaType="String" jdbcType="VARCHAR"/>
+        <result property="level" column="level" javaType="Integer" jdbcType="DECIMAL"/>
+        <result property="sortIndex" column="sort_index" javaType="Long" jdbcType="DECIMAL"/>
+        <result property="status" column="status" javaType="Byte" jdbcType="DECIMAL"/>
+        <collection property="bindInfo" column="u_id" select="org.hswebframework.web.dao.menu.MenuGroupBindDao.queryByGroupId"/>
     </resultMap>
 
     <!--用于动态生成sql所需的配置-->
     <sql id="config">
-        <bind name="resultMapId" value="'RoleResultMap'"/>
-        <bind name="tableName" value="'s_role'"/>
+        <bind name="resultMapId" value="'MenuGroupResultMap'"/>
+        <bind name="tableName" value="'s_menu_group'"/>
     </sql>
 
-    <insert id="insert" parameterType="org.hswebframework.web.entity.authorization.RoleEntity">
+    <insert id="insert" parameterType="org.hswebframework.web.entity.authorization.SimpleMenuGroupEntity">
         <include refid="config"/>
         <include refid="BasicMapper.buildInsertSql"/>
     </insert>
 
     <delete id="deleteByPk" parameterType="String">
-        delete from s_role where u_id =#{id}
+        delete from S_MENU_GROUP where u_id =#{id}
     </delete>
 
     <delete id="delete" parameterType="org.hswebframework.web.commons.entity.Entity">
@@ -53,7 +57,7 @@
         <include refid="BasicMapper.buildUpdateSql"/>
     </update>
 
-    <select id="query" parameterType="org.hswebframework.web.commons.entity.Entity" resultMap="RoleResultMap">
+    <select id="query" parameterType="org.hswebframework.web.commons.entity.Entity" resultMap="MenuGroupResultMap">
         <include refid="config"/>
         <include refid="BasicMapper.buildSelectSql"/>
     </select>

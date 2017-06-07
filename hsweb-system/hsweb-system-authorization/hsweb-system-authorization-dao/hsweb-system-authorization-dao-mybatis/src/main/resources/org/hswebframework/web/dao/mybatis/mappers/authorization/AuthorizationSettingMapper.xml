@@ -15,32 +15,31 @@
   ~  limitations under the License.
   ~
   -->
-
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
-
-<mapper namespace="org.hswebframework.web.dao.authorization.RoleDao">
-    <resultMap id="RoleResultMap" type="org.hswebframework.web.entity.authorization.SimpleRoleEntity">
+<mapper namespace="org.hswebframework.web.dao.authorization.AuthorizationSettingDao">
+    <resultMap id="AuthorizationSettingResultMap" type="org.hswebframework.web.entity.authorization.SimpleAuthorizationSettingEntity">
         <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
-        <result property="name" column="name" javaType="string" jdbcType="VARCHAR"/>
-        <result property="describe" column="describe" javaType="string" jdbcType="VARCHAR"/>
-        <result property="status" column="status" javaType="Byte" jdbcType="NUMERIC"/>
+            <result property="type" column="type" javaType="String" jdbcType="VARCHAR"/>
+            <result property="settingFor" column="setting_for" javaType="String" jdbcType="VARCHAR"/>
+            <result property="status" column="status" javaType="Byte" jdbcType="DECIMAL"/>
+            <result property="describe" column="describe" javaType="String" jdbcType="VARCHAR"/>
     </resultMap>
 
     <!--用于动态生成sql所需的配置-->
     <sql id="config">
-        <bind name="resultMapId" value="'RoleResultMap'"/>
-        <bind name="tableName" value="'s_role'"/>
+        <bind name="resultMapId" value="'AuthorizationSettingResultMap'"/>
+        <bind name="tableName" value="'s_autz_setting'"/>
     </sql>
-
-    <insert id="insert" parameterType="org.hswebframework.web.entity.authorization.RoleEntity">
+  
+    <insert id="insert" parameterType="org.hswebframework.web.entity.authorization.SimpleAuthorizationSettingEntity" >
         <include refid="config"/>
         <include refid="BasicMapper.buildInsertSql"/>
     </insert>
 
     <delete id="deleteByPk" parameterType="String">
-        delete from s_role where u_id =#{id}
+        delete from s_autz_setting where u_id =#{id}
     </delete>
 
     <delete id="delete" parameterType="org.hswebframework.web.commons.entity.Entity">
@@ -53,7 +52,7 @@
         <include refid="BasicMapper.buildUpdateSql"/>
     </update>
 
-    <select id="query" parameterType="org.hswebframework.web.commons.entity.Entity" resultMap="RoleResultMap">
+    <select id="query" parameterType="org.hswebframework.web.commons.entity.Entity" resultMap="AuthorizationSettingResultMap">
         <include refid="config"/>
         <include refid="BasicMapper.buildSelectSql"/>
     </select>

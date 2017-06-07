@@ -16,18 +16,25 @@
  *
  */
 
-package org.hswebframework.web.service.authorization.simple;
+package org.hswebframework.web.service.authorization;
+
+
+import org.hswebframework.web.entity.authorization.MenuEntity;
+import org.hswebframework.web.service.CrudService;
+import org.hswebframework.web.service.TreeService;
+
+import java.util.List;
 
 /**
- * 缓存所需常量
+ * 菜单服务类
  *
  * @author zhouhao
  */
-public interface CacheConstants {
-    String MENU_CACHE_NAME = "hsweb-menu-";
+public interface MenuService
+        extends CrudService<MenuEntity, String>
+        , TreeService<MenuEntity, String> {
+    MenuEntity getByPermissionId(String permissionId);
 
-    String USER_CACHE_NAME = "user-";
-
-    String USER_AUTH_CACHE_NAME = "user-auth-";
+    List<MenuEntity> getByPermissionId(List<String> permissionId);
 
 }

@@ -10,6 +10,7 @@ import java.util.List;
  *
  * @author zhouhao
  */
+@Deprecated
 public interface PermissionRoleDao extends Dao {
     int insert(PermissionRoleEntity permissionRoleBean);
 
