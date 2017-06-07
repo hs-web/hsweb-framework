@@ -48,7 +48,7 @@ public interface MenuGroupBindEntity extends TreeSortSupportEntity<String> {
     /**
      * 状态
      */
-    String state     = "status";
+    String status     = "status";
     /**
      * 菜单id
      */

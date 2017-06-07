@@ -49,7 +49,7 @@ public interface AuthorizationSettingMenuEntity extends TreeSortSupportEntity<St
     /**
      * 状态
      */
-    String state     = "status";
+    String status     = "status";
     /**
      * 树路径
      */

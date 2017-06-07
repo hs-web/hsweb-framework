@@ -40,7 +40,7 @@ public interface AuthorizationSettingEntity extends GenericEntity<String> {
     /**
      * 状态
      */
-    String state      = "status";
+    String status      = "status";
     /**
      * 备注
      */

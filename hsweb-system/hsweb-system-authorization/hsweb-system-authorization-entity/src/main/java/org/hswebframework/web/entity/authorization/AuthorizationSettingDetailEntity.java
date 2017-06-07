@@ -52,7 +52,7 @@ public interface AuthorizationSettingDetailEntity extends GenericEntity<String>,
     /**
      * 状态
      */
-    String state        = "status";
+    String status        = "status";
 
     /**
      * @return 权限id

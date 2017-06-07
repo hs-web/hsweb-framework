@@ -60,7 +60,7 @@ public interface MenuGroupEntity extends TreeSortSupportEntity<String> {
     /**
      * 状态
      */
-    String state        = "status";
+    String status       = "status";
 
     /**
      * @return 分组名称
