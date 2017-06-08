@@ -33,6 +33,7 @@ import org.hswebframework.web.dao.oauth2.OAuth2ClientDao;
 import org.hswebframework.web.entity.authorization.*;
 import org.hswebframework.web.entity.authorization.bind.BindPermissionRoleEntity;
 import org.hswebframework.web.entity.authorization.bind.BindRoleUserEntity;
+import org.hswebframework.web.service.authorization.AuthorizationSettingService;
 import org.hswebframework.web.service.authorization.PermissionService;
 import org.hswebframework.web.service.authorization.RoleService;
 import org.hswebframework.web.service.authorization.UserService;
@@ -79,6 +80,8 @@ public class OAuth2ServerApplication implements CommandLineRunner {
     @Autowired
     OAuth2ClientDao   oAuth2ClientDao;
 
+    @Autowired
+    AuthorizationSettingService authorizationSettingService;
 
     @Override
     public void run(String... strings) throws Exception {
@@ -132,6 +135,25 @@ public class OAuth2ServerApplication implements CommandLineRunner {
         roleEntity.setName("test");
         roleEntity.setPermissions(Arrays.asList(permissionRoleEntity));
         roleService.insert(roleEntity);
+
+          /*            权限设置        */
+        AuthorizationSettingEntity settingEntity = entityFactory.newInstance(AuthorizationSettingEntity.class);
+
+        settingEntity.setType("role"); //绑定到角色
+        settingEntity.setSettingFor(roleEntity.getId());
+
+        settingEntity.setDescribe("测试");
+        //权限配置详情
+        AuthorizationSettingDetailEntity detailEntity = entityFactory.newInstance(AuthorizationSettingDetailEntity.class);
+        detailEntity.setPermissionId(permission.getId());
+        detailEntity.setMerge(true);
+        detailEntity.setPriority(1L);
+        detailEntity.setActions(new HashSet<>(Arrays.asList(Permission.ACTION_QUERY, Permission.ACTION_UPDATE)));
+        detailEntity.setDataAccesses(Arrays.asList(accessEntity, updateAccessEntity));
+
+        settingEntity.setDetails(Arrays.asList(detailEntity));
+
+        authorizationSettingService.insert(settingEntity);
 
         BindRoleUserEntity userEntity = entityFactory.newInstance(BindRoleUserEntity.class);
         userEntity.setId("admin");
