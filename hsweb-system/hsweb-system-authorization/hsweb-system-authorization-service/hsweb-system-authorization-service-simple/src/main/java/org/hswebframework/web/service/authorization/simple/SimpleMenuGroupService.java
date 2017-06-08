@@ -132,7 +132,7 @@ public class SimpleMenuGroupService
     public void enable(String id) {
         tryValidateProperty(StringUtils.hasLength(id), MenuGroupEntity.id, "{id_is_null}");
         createUpdate()
-                .set(MenuGroupEntity.state, 1)
+                .set(MenuGroupEntity.status, 1)
                 .where(MenuGroupEntity.id, id)
                 .exec();
     }
@@ -143,7 +143,7 @@ public class SimpleMenuGroupService
         tryValidateProperty(StringUtils.hasLength(id), MenuGroupEntity.id, "{id_is_null}");
         DefaultDSLUpdateService
                 .createUpdate(getDao())
-                .set(MenuGroupEntity.state, 0)
+                .set(MenuGroupEntity.status, 0)
                 .where(MenuGroupEntity.id, id)
                 .exec();
     }

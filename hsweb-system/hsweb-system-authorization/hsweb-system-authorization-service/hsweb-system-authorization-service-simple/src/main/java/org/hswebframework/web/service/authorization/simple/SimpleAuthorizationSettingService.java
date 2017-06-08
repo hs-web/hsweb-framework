@@ -248,7 +248,7 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
         // where status=1 and setting_id in (?,?,?)
         List<AuthorizationSettingDetailEntity> detailList = DefaultDSLQueryService
                 .createQuery(authorizationSettingDetailDao)
-                .where(AuthorizationSettingDetailEntity.state, STATE_OK)
+                .where(AuthorizationSettingDetailEntity.status, STATE_OK)
                 .and().in(AuthorizationSettingDetailEntity.settingId, settingIdList)
                 .list();
         //权限
