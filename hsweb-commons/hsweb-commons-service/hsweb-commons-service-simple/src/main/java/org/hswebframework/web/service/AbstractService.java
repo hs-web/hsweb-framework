@@ -5,7 +5,7 @@ import org.hswebframework.web.commons.entity.Entity;
 import org.hswebframework.web.commons.entity.factory.EntityFactory;
 import org.hswebframework.web.validate.SimpleValidateResults;
 import org.hswebframework.web.validate.ValidationException;
-import org.hswebframwork.utils.ClassUtils;
+import org.hswebframework.utils.ClassUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -16,7 +16,6 @@
  */
 package org.hswebframework.web.service.authorization.simple;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.AuthenticationInitializeService;
 import org.hswebframework.web.authorization.Permission;
@@ -89,14 +88,27 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
 
     @Override
     public AuthorizationSettingEntity select(String type, String settingFor) {
+        Objects.requireNonNull(type);
+        Objects.requireNonNull(settingFor);
         return createQuery().where(AuthorizationSettingEntity.type, type)
                 .and(AuthorizationSettingEntity.settingFor, settingFor)
                 .single();
     }
 
     @Override
+    public String saveOrUpdate(AuthorizationSettingEntity entity) {
+        AuthorizationSettingEntity old = select(entity.getType(), entity.getSettingFor());
+        if (old != null) {
+            updateByPk(old.getId(), entity);
+            return old.getId();
+        }
+        return insert(entity);
+    }
+
+    @Override
     @CacheEvict(allEntries = true)
     public String insert(AuthorizationSettingEntity entity) {
+        tryValidateProperty(select(entity.getType(), entity.getSettingFor()) == null, AuthorizationSettingEntity.settingFor, "存在相同的配置!");
         entity.setStatus(DataStatus.STATUS_ENABLED);
         String id = super.insert(entity);
         if (entity.getMenus() != null) {

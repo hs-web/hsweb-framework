@@ -23,7 +23,7 @@ import org.hswebframework.web.authorization.oauth2.server.TokenRequest;
 import org.hswebframework.web.authorization.oauth2.server.exception.GrantTokenException;
 import org.hswebframework.web.oauth2.core.ErrorType;
 import org.hswebframework.web.oauth2.core.OAuth2Constants;
-import org.hswebframwork.utils.StringUtils;
+import org.hswebframework.utils.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;

@@ -20,10 +20,17 @@ import org.hswebframework.web.entity.authorization.AuthorizationSettingEntity;
 import org.hswebframework.web.service.CrudService;
 
 /**
- *  权限设置 服务类
+ * 权限设置 服务类,提供通用的权限设置
  *
  * @author hsweb-generator-online
  */
 public interface AuthorizationSettingService extends CrudService<AuthorizationSettingEntity, String> {
+    /**
+     * 根据类型和被设置者获取配置
+     *
+     * @param type       设置类型 {@link AuthorizationSettingEntity#getType()}
+     * @param settingFor {@link AuthorizationSettingEntity#getSettingFor()}
+     * @return 设置内容, 不存在时返回 <code>null</code>
+     */
     AuthorizationSettingEntity select(String type, String settingFor);
 }

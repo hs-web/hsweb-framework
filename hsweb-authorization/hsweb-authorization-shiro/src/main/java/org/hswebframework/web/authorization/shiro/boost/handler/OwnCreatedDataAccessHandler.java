@@ -14,7 +14,7 @@ import org.hswebframework.web.commons.entity.RecordCreationEntity;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.controller.QueryController;
 import org.hswebframework.web.service.QueryService;
-import org.hswebframwork.utils.ClassUtils;
+import org.hswebframework.utils.ClassUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

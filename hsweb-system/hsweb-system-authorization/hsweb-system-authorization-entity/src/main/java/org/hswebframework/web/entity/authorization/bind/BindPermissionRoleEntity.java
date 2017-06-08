@@ -10,6 +10,7 @@ import java.util.List;
  *
  * @author zhouhao
  */
+@Deprecated
 public interface BindPermissionRoleEntity<T extends PermissionRoleEntity> extends RoleEntity {
     List<T> getPermissions();
 

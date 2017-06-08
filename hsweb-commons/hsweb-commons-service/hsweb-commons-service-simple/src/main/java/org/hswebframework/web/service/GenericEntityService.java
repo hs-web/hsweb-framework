@@ -22,7 +22,7 @@ import org.hswebframework.web.commons.entity.GenericEntity;
 import org.hswebframework.web.commons.entity.RecordCreationEntity;
 import org.hswebframework.web.dao.CrudDao;
 import org.hswebframework.web.id.IDGenerator;
-import org.hswebframwork.utils.ClassUtils;
+import org.hswebframework.utils.ClassUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;

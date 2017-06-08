@@ -24,7 +24,7 @@ import org.hswebframework.web.authorization.listener.AuthorizationListener;
 import org.hswebframework.web.authorization.listener.AuthorizationListenerDispatcher;
 import org.hswebframework.web.authorization.listener.event.AuthorizationEvent;
 import org.hswebframework.web.service.authorization.simple.SimpleAuthenticationManager;
-import org.hswebframwork.utils.ClassUtils;
+import org.hswebframework.utils.ClassUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;

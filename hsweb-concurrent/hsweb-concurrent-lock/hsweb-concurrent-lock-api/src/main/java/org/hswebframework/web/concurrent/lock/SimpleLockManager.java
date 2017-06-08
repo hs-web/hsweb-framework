@@ -11,17 +11,17 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * @author zhouhao
  * @see ReentrantLock
  * @see ReentrantReadWriteLock
- * @see AbstactLocakManager
+ * @see AbstractLockManager
  * @since 3.0
  */
-public class SimpleLockManager extends AbstactLocakManager {
+public class SimpleLockManager extends AbstractLockManager {
     @Override
-    protected synchronized Lock createLock(String lockKey) {
+    protected Lock createLock(String lockName) {
         return new ReentrantLock();
     }
 
     @Override
-    protected synchronized ReadWriteLock createReadWriteLock(String lockKey) {
+    protected ReadWriteLock createReadWriteLock(String lockName) {
         return new ReentrantReadWriteLock();
     }
 }

@@ -6,7 +6,7 @@ import org.hswebframework.expands.script.engine.DynamicScriptEngineFactory;
 import org.hswebframework.web.BusinessException;
 import org.hswebframework.web.authorization.access.*;
 import org.hswebframework.web.boost.aop.context.MethodInterceptorParamContext;
-import org.hswebframwork.utils.StringUtils;
+import org.hswebframework.utils.StringUtils;
 
 /**
  * TODO 完成注释

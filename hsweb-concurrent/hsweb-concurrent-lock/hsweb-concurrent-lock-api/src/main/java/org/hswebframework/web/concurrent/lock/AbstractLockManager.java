@@ -10,30 +10,30 @@ import java.util.concurrent.locks.ReadWriteLock;
  *
  * @author zhouhao
  */
-public abstract class AbstactLocakManager implements LockManager {
+public abstract class AbstractLockManager implements LockManager {
     private final Map<String, Lock>          lockStore          = new HashMap<>(128);
     private final Map<String, ReadWriteLock> readWriteLockStore = new HashMap<>(128);
 
     @Override
-    public Lock getLock(String lockKey) {
-        Lock lock = lockStore.get(lockKey);
+    public Lock getLock(String lockName) {
+        Lock lock = lockStore.get(lockName);
         if (lock != null) return lock;
         synchronized (lockStore) {
-            return lockStore.computeIfAbsent(lockKey, this::createLock);
+            return lockStore.computeIfAbsent(lockName, this::createLock);
         }
     }
 
     @Override
-    public ReadWriteLock getReadWriteLock(String lockKey) {
-        ReadWriteLock lock = readWriteLockStore.get(lockKey);
+    public ReadWriteLock getReadWriteLock(String lockName) {
+        ReadWriteLock lock = readWriteLockStore.get(lockName);
         if (lock != null) return lock;
         synchronized (readWriteLockStore) {
-            return readWriteLockStore.computeIfAbsent(lockKey, this::createReadWriteLock);
+            return readWriteLockStore.computeIfAbsent(lockName, this::createReadWriteLock);
         }
     }
 
-    protected abstract Lock createLock(String lockKey);
+    protected abstract Lock createLock(String lockName);
 
-    protected abstract ReadWriteLock createReadWriteLock(String lockKey);
+    protected abstract ReadWriteLock createReadWriteLock(String lockName);
 
 }

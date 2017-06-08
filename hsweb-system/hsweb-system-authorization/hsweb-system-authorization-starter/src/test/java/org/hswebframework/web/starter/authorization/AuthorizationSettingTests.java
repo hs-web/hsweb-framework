@@ -71,7 +71,6 @@ public class AuthorizationSettingTests extends SimpleWebApplicationTests {
         newEntity.setId("test");
 
         newEntity.setDescribe("测试2");
-
         result = testPut("/autz-setting/" + id)
                 .setUp(setup ->
                         setup.contentType(MediaType.APPLICATION_JSON)

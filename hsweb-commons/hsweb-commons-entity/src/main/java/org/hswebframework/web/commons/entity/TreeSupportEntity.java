@@ -20,7 +20,7 @@ package org.hswebframework.web.commons.entity;
 
 
 import org.hswebframework.web.id.IDGenerator;
-import org.hswebframwork.utils.RandomUtil;
+import org.hswebframework.utils.RandomUtil;
 
 import java.math.BigDecimal;
 import java.util.*;

@@ -14,7 +14,7 @@ import org.hswebframework.web.organizational.authorization.PersonnelAuthorizatio
 import org.hswebframework.web.organizational.authorization.access.DataAccessType;
 import org.hswebframework.web.organizational.authorization.entity.OrgAttachEntity;
 import org.hswebframework.web.service.QueryService;
-import org.hswebframwork.utils.ClassUtils;
+import org.hswebframework.utils.ClassUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

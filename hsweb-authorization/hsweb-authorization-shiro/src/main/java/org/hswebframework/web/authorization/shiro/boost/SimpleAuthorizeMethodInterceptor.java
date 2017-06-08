@@ -33,8 +33,8 @@ import org.hswebframework.web.authorization.Role;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.annotation.Logical;
 import org.hswebframework.web.boost.aop.context.MethodInterceptorHolder;
-import org.hswebframwork.utils.ClassUtils;
-import org.hswebframwork.utils.StringUtils;
+import org.hswebframework.utils.ClassUtils;
+import org.hswebframework.utils.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

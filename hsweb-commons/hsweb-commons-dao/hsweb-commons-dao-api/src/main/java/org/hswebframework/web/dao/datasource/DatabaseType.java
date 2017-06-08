@@ -19,7 +19,7 @@
 package org.hswebframework.web.dao.datasource;
 
 import org.hsweb.ezorm.rdb.render.dialect.Dialect;
-import org.hswebframwork.utils.StringUtils;
+import org.hswebframework.utils.StringUtils;
 
 public enum DatabaseType {
     unknown(null, null, null, null),

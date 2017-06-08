@@ -23,7 +23,7 @@ import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.service.AbstractTreeSortService;
 import org.hswebframework.web.service.GenericEntityService;
 import org.hswebframework.web.service.organizational.OrganizationalService;
-import org.hswebframwork.utils.ListUtils;
+import org.hswebframework.utils.ListUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;

@@ -30,7 +30,7 @@ import org.hswebframework.web.commons.entity.DataStatus;
 import org.hswebframework.web.entity.oauth2.client.OAuth2ServerConfigEntity;
 import org.hswebframework.web.service.oauth2.client.OAuth2ServerConfigService;
 import org.hswebframework.web.service.oauth2.client.OAuth2UserTokenService;
-import org.hswebframwork.utils.ClassUtils;
+import org.hswebframework.utils.ClassUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

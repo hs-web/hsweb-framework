@@ -20,7 +20,7 @@ package org.hswebframework.web.commons.entity.factory;
 
 import com.alibaba.fastjson.JSON;
 import org.hswebframework.web.NotFoundException;
-import org.hswebframwork.utils.ClassUtils;
+import org.hswebframework.utils.ClassUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

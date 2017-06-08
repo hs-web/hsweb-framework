@@ -20,8 +20,8 @@ package org.hswebframework.web.starter;
 
 import org.hswebframework.web.commons.entity.Entity;
 import org.hswebframework.web.commons.entity.factory.MapperEntityFactory;
-import org.hswebframwork.utils.MapUtils;
-import org.hswebframwork.utils.StringUtils;
+import org.hswebframework.utils.MapUtils;
+import org.hswebframework.utils.StringUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.util.ClassUtils;
 

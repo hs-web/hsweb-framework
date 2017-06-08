@@ -27,7 +27,7 @@ import org.hsweb.ezorm.rdb.simple.SimpleDatabase;
 import org.hswebframework.expands.script.engine.DynamicScriptEngine;
 import org.hswebframework.expands.script.engine.DynamicScriptEngineFactory;
 import org.hswebframework.web.starter.init.simple.SimpleDependencyInstaller;
-import org.hswebframwork.utils.file.FileUtils;
+import org.hswebframework.utils.file.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
