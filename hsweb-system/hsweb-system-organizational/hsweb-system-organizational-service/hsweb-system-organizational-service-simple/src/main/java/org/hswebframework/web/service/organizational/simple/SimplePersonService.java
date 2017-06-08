@@ -30,6 +30,7 @@ import org.hswebframework.web.organizational.authorization.simple.SimplePersonne
 import org.hswebframework.web.organizational.authorization.simple.SimplePersonnelAuthorization;
 import org.hswebframework.web.service.DefaultDSLQueryService;
 import org.hswebframework.web.service.EnableCacheGernericEntityService;
+import org.hswebframework.web.service.authorization.AuthorizationSettingTypeSupplier;
 import org.hswebframework.web.service.authorization.UserService;
 import org.hswebframework.web.service.organizational.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,7 +60,11 @@ import static org.springframework.util.StringUtils.*;
 @Service("personService")
 @CacheConfig(cacheNames = "person")
 public class SimplePersonService extends EnableCacheGernericEntityService<PersonEntity, String>
-        implements PersonService, PersonnelAuthorizationManager {
+        implements PersonService, PersonnelAuthorizationManager, AuthorizationSettingTypeSupplier {
+
+    private static String SETTING_TYPE_PERSON   = "person";
+    private static String SETTING_TYPE_POSITION = "position";
+
     @Autowired
     private PersonDao personDao;
 
@@ -128,7 +133,7 @@ public class SimplePersonService extends EnableCacheGernericEntityService<Person
         entityFactory.copyProperties(personEntity, bindEntity);
         Set<String> positionIds = DefaultDSLQueryService.createQuery(personPositionDao)
                 .where(PersonPositionEntity.personId, id)
-                .list().stream()
+                .listNoPaging().stream()
                 .map(PersonPositionEntity::getPositionId)
                 .collect(Collectors.toSet());
 
@@ -167,7 +172,7 @@ public class SimplePersonService extends EnableCacheGernericEntityService<Person
         //获取职位实体
         List<PositionEntity> positionEntities = DefaultDSLQueryService.createQuery(positionDao)
                 .where().in(PositionEntity.id, positionIds)
-                .list();
+                .listNoPaging();
         if (positionEntities.isEmpty()) return;
         //获取用户是否存在
         UserEntity oldUser = userService.selectByUsername(bindEntity.getPersonUser().getUsername());
@@ -227,7 +232,7 @@ public class SimplePersonService extends EnableCacheGernericEntityService<Person
         // 获取用户的职位ID集合(多个职位)
         Set<String> positionIds = DefaultDSLQueryService.createQuery(personPositionDao)
                 .where(PersonPositionEntity.personId, personId)
-                .list().stream()
+                .listNoPaging().stream()
                 .map(PersonPositionEntity::getPositionId)
                 .collect(Collectors.toSet());
         //获取所有职位,并得到根职位(树结构)
@@ -271,7 +276,7 @@ public class SimplePersonService extends EnableCacheGernericEntityService<Person
         //获取根节点
         List<T> root = DefaultDSLQueryService.createQuery(dao)
                 .where().in(TreeSupportEntity.id, rootIds)
-                .list();
+                .listNoPaging();
         //节点不存在?
         if (!root.isEmpty()) {
             //所有子节点,使用节点的path属性进行快速查询,查询结果包含了根节点
@@ -279,7 +284,7 @@ public class SimplePersonService extends EnableCacheGernericEntityService<Person
                     .createQuery(dao)
                     //遍历生成查询条件: like path like ?||'%' or path like ?||'%'  ....
                     .each(root, (query, data) -> query.or().like$(TreeSupportEntity.path, data.getPath()))
-                    .list();
+                    .listNoPaging();
             //转为树形结构
             List<T> tree = TreeSupportEntity
                     .list2tree(allNode, childAccepter,
@@ -315,5 +320,26 @@ public class SimplePersonService extends EnableCacheGernericEntityService<Person
         PersonEntity entity = createQuery().where(PersonEntity.userId, userId).single();
         assertNotNull(entity);
         return getPersonnelAuthorizationByPersonId(entity.getId());
+    }
+
+    @Override
+    public Set<SettingInfo> get(String userId) {
+        //支持职位和人员 设置权限
+        PersonEntity entity = createQuery().where(PersonEntity.userId, userId).single();
+        if (entity == null) return new HashSet<>();
+        Set<SettingInfo> settingInfo = new HashSet<>();
+        //岗位设置
+        //TODO 2017/06/08 是否将子级岗位的设置也放进来??
+        DefaultDSLQueryService.createQuery(personPositionDao)
+                .where(PersonPositionEntity.personId, entity.getId())
+                .listNoPaging()
+                .stream()
+                .map(position -> new SettingInfo(SETTING_TYPE_POSITION, position.getPositionId()))
+                .forEach(settingInfo::add);
+        //其他设置支持?
+
+        //人员配置
+        settingInfo.add(new SettingInfo(SETTING_TYPE_PERSON, entity.getId()));
+        return settingInfo;
     }
 }
