@@ -16,6 +16,8 @@
 
 package org.hsweb.web.starter;
 
+import java.io.Serializable;
+
 public class SystemVersion extends Version {
 
     private FrameworkVersion frameworkVersion = new FrameworkVersion();
@@ -72,7 +74,8 @@ public class SystemVersion extends Version {
     }
 }
 
-class Version implements Comparable<Version> {
+class Version implements Comparable<Version>, Serializable {
+
     protected String name;
     protected String comment;
     protected String website;
@@ -80,6 +83,9 @@ class Version implements Comparable<Version> {
     protected int     minorVersion    = 0;
     protected int     revisionVersion = 0;
     protected boolean snapshot        = false;
+
+    public Version() {
+    }
 
     public void setVersion(int major, int minor, int revision, boolean snapshot) {
         this.majorVersion = major;
@@ -177,4 +183,5 @@ class Version implements Comparable<Version> {
                 .append(minorVersion).append(".")
                 .append(revisionVersion).append(snapshot ? ".SNAPSHOT" : "").toString();
     }
+
 }
