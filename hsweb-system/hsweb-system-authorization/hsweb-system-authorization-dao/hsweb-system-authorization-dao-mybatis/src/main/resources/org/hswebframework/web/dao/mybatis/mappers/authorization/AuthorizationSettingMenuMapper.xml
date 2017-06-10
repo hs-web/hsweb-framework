@@ -27,7 +27,7 @@
         <result property="parentId" column="parent_id" javaType="String" jdbcType="VARCHAR"/>
         <result property="status" column="status" javaType="Byte" jdbcType="DECIMAL"/>
         <result property="path" column="path" javaType="String" jdbcType="VARCHAR"/>
-        <result property="level" column="level" javaType="Long" jdbcType="DECIMAL"/>
+        <result property="level" column="level" javaType="Integer" jdbcType="DECIMAL"/>
         <result property="config" column="config" javaType="String" jdbcType="CLOB"/>
     </resultMap>
 
