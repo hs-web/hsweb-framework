@@ -23,15 +23,19 @@ import org.apache.ibatis.plugin.Interceptor;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.TransactionIsolationLevel;
 import org.apache.ibatis.transaction.Transaction;
+import org.hsweb.ezorm.rdb.executor.AbstractJdbcSqlExecutor;
+import org.hsweb.ezorm.rdb.executor.SqlExecutor;
+import org.hswebframework.web.dao.datasource.DataSourceHolder;
+import org.hswebframework.web.dao.datasource.DatabaseType;
 import org.hswebframework.web.dao.mybatis.dynamic.DynamicDataSourceSqlSessionFactoryBuilder;
 import org.hswebframework.web.dao.mybatis.dynamic.DynamicSpringManagedTransaction;
 import org.mybatis.spring.SqlSessionFactoryBean;
-import org.mybatis.spring.boot.autoconfigure.MybatisAutoConfiguration;
 import org.mybatis.spring.boot.autoconfigure.SpringBootVFS;
 import org.mybatis.spring.transaction.SpringManagedTransactionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -39,10 +43,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 @Configuration
 @EnableConfigurationProperties(MybatisProperties.class)
@@ -102,4 +109,24 @@ public class MyBatisAutoConfiguration {
         return factory.getObject();
     }
 
+    @Bean
+    @ConditionalOnMissingBean(SqlExecutor.class)
+    public SqlExecutor sqlExecutor(DataSource dataSource) {
+        try (Connection connection = dataSource.getConnection()) {
+            DataSourceHolder.install(dataSource, DatabaseType.fromJdbcUrl(connection.getMetaData().getURL()));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return new AbstractJdbcSqlExecutor() {
+            @Override
+            public Connection getConnection() {
+                return DataSourceUtils.getConnection(dataSource);
+            }
+
+            @Override
+            public void releaseConnection(Connection connection) throws SQLException {
+                DataSourceUtils.releaseConnection(connection, dataSource);
+            }
+        };
+    }
 }
