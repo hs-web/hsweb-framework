@@ -29,7 +29,7 @@ import java.util.function.Supplier;
  * ThreadLocalUtils.get("key");<br>
  * ThreadLocalUtils.remove("key");<br>
  * ThreadLocalUtils.getAndRemove("key");<br>
- * ThreadLocalUtils.get("key",()->defaultValue);<br>
+ * ThreadLocalUtils.get("key",()-&gt;defaultValue);<br>
  * ThreadLocalUtils.clear();<br>
  * </code>
  *
