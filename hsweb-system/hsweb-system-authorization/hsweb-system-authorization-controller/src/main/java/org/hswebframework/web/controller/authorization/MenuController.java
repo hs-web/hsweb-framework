@@ -55,18 +55,11 @@ public class MenuController implements SimpleGenericEntityController<MenuEntity,
 
     private MenuService menuService;
 
-    private MenuGroupService menuGroupService;
-
     private UserMenuManagerService userMenuManagerService;
 
     @Autowired
     public void setMenuService(MenuService menuService) {
         this.menuService = menuService;
-    }
-
-    @Autowired
-    public void setMenuGroupService(MenuGroupService menuGroupService) {
-        this.menuGroupService = menuGroupService;
     }
 
     @Autowired

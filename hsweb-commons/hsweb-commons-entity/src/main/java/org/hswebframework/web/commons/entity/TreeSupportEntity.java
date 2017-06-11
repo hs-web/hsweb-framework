@@ -87,6 +87,12 @@ public interface TreeSupportEntity<PK> extends GenericEntity<PK> {
             parent.setPath(RandomUtil.randomChar(4));
             if (parent.getPath() != null)
                 parent.setLevel(parent.getPath().split("-").length);
+            if (parent instanceof SortSupportEntity) {
+                Long index = ((SortSupportEntity) parent).getSortIndex();
+                if (null == index) {
+                    ((SortSupportEntity) parent).setSortIndex(1L);
+                }
+            }
         }
         if (children != null) {
             PK pid = parent.getId();

@@ -89,7 +89,9 @@ import java.util.stream.Stream;
 @EnableCaching
 @EnableAspectJAutoProxy
 @EnableAccessLogger
-public class SpringBootExample implements CommandLineRunner {
+public class SpringBootExample
+//        implements CommandLineRunner
+{
 
     @Bean
     public AccessLoggerListener accessLoggerListener() {
@@ -172,7 +174,7 @@ public class SpringBootExample implements CommandLineRunner {
         SpringApplication.run(SpringBootExample.class);
     }
 
-    @Override
+//    @Override
     public void run(String... strings) throws Exception {
         //只能查询自己创建的数据
         DataAccessEntity accessEntity = new DataAccessEntity();
@@ -212,6 +214,7 @@ public class SpringBootExample implements CommandLineRunner {
         permission.setActions(ActionEntity.create(Permission.ACTION_QUERY, Permission.ACTION_UPDATE));
 //        permission.setDataAccess(Arrays.asList(accessEntity, updateAccessEntity, denyUpdateFields, denyUpdateFields, onlyDepartmentData));
         permissionService.insert(permission);
+
 
         //角色
         BindPermissionRoleEntity<PermissionRoleEntity> roleEntity = entityFactory.newInstance(BindPermissionRoleEntity.class);

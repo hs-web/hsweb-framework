@@ -69,8 +69,8 @@ function install(context) {
     database.createOrAlter("s_permission_role")
         .addColumn().name("role_id").varchar(32).notNull().comment("角色ID").commit()
         .addColumn().name("permission_id").varchar(32).notNull().comment("权限ID").commit()
-        .addColumn().name("actions").clob().notNull().comment("可选操作").commit()
-        .addColumn().name("data_access").clob().notNull().comment("数据级控制配置").commit()
+        .addColumn().name("actions").clob().comment("可选操作").commit()
+        .addColumn().name("data_access").clob().comment("数据级控制配置").commit()
         .comment("权限与角色关联表").commit();
 
     database.createOrAlter("s_user_role")
@@ -83,8 +83,8 @@ function install(context) {
         .addColumn().name("u_id").varchar(32).notNull().primaryKey().comment("uid").commit()
         .addColumn().name("type").varchar(32).notNull().comment("权限类型").commit()
         .addColumn().name("setting_for").varchar(64).notNull().comment("设置给谁").commit()
-        .addColumn().name("describe").varchar(256).notNull().comment("备注").commit()
-        .addColumn().name("status").number(4, 0).notNull().comment("设置给谁").commit()
+        .addColumn().name("describe").varchar(256).comment("备注").commit()
+        .addColumn().name("status").number(4, 0).comment("设置给谁").commit()
         .comment("权限设置表").commit();
 
     database.createOrAlter("s_autz_detail")

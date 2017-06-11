@@ -77,7 +77,14 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
     @Transactional(readOnly = true)
     public UserEntity selectByPk(String id) {
         tryValidateProperty(StringUtils.hasLength(id), UserEntity.id, "id:{not_be_null}");
-        return createQuery().where(UserEntity.id, id).single();
+        UserEntity userEntity=createQuery().where(UserEntity.id, id).single();
+        if(null!=userEntity){
+            List<String> roleId= userRoleDao.selectByUserId(id).stream().map(UserRoleEntity::getRoleId).collect(Collectors.toList());
+            BindRoleUserEntity roleUserEntity=entityFactory.newInstance(BindRoleUserEntity.class,userEntity);
+            roleUserEntity.setRoles(roleId);
+            return roleUserEntity;
+        }
+        return null;
     }
 
     @Override

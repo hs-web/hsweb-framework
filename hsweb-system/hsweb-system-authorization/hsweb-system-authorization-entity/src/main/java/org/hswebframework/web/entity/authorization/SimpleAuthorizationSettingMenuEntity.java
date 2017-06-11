@@ -100,7 +100,7 @@ public class SimpleAuthorizationSettingMenuEntity extends SimpleTreeSortSupportE
     }
 
     @Override
-    public void setChildren(List<AuthorizationSettingMenuEntity> chidren) {
+    public void setChildren(List<AuthorizationSettingMenuEntity> children) {
         this.children = children;
     }
 }

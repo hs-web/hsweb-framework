@@ -17,13 +17,18 @@
 
 package org.hswebframework.web.controller.authorization;
 
+import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.controller.GenericEntityController;
+import org.hswebframework.web.controller.SimpleGenericEntityController;
+import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.entity.authorization.AuthorizationSettingEntity;
 import org.hswebframework.web.logging.AccessLogger;
 import org.hswebframework.web.service.authorization.AuthorizationSettingService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -36,14 +41,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("${hsweb.web.mappings.autz-setting:autz-setting}")
 @Authorize(permission = "autz-setting")
 @AccessLogger("权限设置")
-public class AuthorizationSettingController implements GenericEntityController<AuthorizationSettingEntity, String, QueryParamEntity, AuthorizationSettingEntity> {
+public class AuthorizationSettingController implements SimpleGenericEntityController<AuthorizationSettingEntity, String, QueryParamEntity> {
 
     private AuthorizationSettingService authorizationSettingService;
-
-    @Override
-    public AuthorizationSettingEntity modelToEntity(AuthorizationSettingEntity model, AuthorizationSettingEntity entity) {
-        return model;
-    }
 
     @Autowired
     public void setAuthorizationSettingService(AuthorizationSettingService authorizationSettingService) {
@@ -53,5 +53,12 @@ public class AuthorizationSettingController implements GenericEntityController<A
     @Override
     public AuthorizationSettingService getService() {
         return authorizationSettingService;
+    }
+
+    @GetMapping("/{type}/{settingFor}")
+    @Authorize(action = Permission.ACTION_GET)
+    @AccessLogger("根据type和settingFor获取配置")
+    public ResponseMessage<AuthorizationSettingEntity> select(@PathVariable String type, @PathVariable String settingFor) {
+        return ResponseMessage.ok(authorizationSettingService.select(type, settingFor));
     }
 }

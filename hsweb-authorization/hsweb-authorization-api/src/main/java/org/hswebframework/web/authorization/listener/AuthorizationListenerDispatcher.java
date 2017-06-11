@@ -35,15 +35,17 @@ public class AuthorizationListenerDispatcher {
     }
 
     @SuppressWarnings("unchecked")
-    public <E extends AuthorizationEvent> void doEvent(Class<E> eventType, E event) {
+    public <E extends AuthorizationEvent> int doEvent(Class<E> eventType, E event) {
         List<AuthorizationListener<E>> store = (List) listenerStore.get(eventType);
         if (null != store) {
             store.forEach(listener -> listener.on(event));
+            return store.size();
         }
+        return 0;
     }
 
     @SuppressWarnings("unchecked")
-    public <E extends AuthorizationEvent> void doEvent(E event) {
-        doEvent((Class<E>) event.getClass(), event);
+    public <E extends AuthorizationEvent> int doEvent(E event) {
+        return doEvent((Class<E>) event.getClass(), event);
     }
 }

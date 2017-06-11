@@ -32,6 +32,8 @@ import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.entity.authorization.UserEntity;
 import org.hswebframework.web.logging.AccessLogger;
 import org.hswebframework.web.service.authorization.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -48,6 +50,8 @@ import static org.hswebframework.web.controller.message.ResponseMessage.ok;
 @AccessLogger("授权")
 @Api(tags = "hsweb-authorization", description = "提供基本的授权功能")
 public class AuthorizationController {
+
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     private UserService userService;
@@ -107,7 +111,10 @@ public class AuthorizationController {
             // 验证通过
             Authentication authentication = authenticationInitializeService.initUserAuthorization(entity.getId());
             AuthorizationSuccessEvent event = new AuthorizationSuccessEvent(authentication, parameterGetter);
-            authorizationListenerDispatcher.doEvent(event);
+            int size = authorizationListenerDispatcher.doEvent(event);
+            if (size == 0) {
+                logger.warn("not found any AuthorizationSuccessEvent,access control maybe disabled!");
+            }
             return ok(entity.getId());
         } catch (Exception e) {
             AuthorizationFailedEvent failedEvent = new AuthorizationFailedEvent(username, password, parameterGetter, reason);

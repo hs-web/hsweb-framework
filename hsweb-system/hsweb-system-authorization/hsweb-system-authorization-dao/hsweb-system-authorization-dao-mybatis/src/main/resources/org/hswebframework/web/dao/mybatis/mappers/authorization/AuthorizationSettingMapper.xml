@@ -21,10 +21,12 @@
 <mapper namespace="org.hswebframework.web.dao.authorization.AuthorizationSettingDao">
     <resultMap id="AuthorizationSettingResultMap" type="org.hswebframework.web.entity.authorization.SimpleAuthorizationSettingEntity">
         <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
-            <result property="type" column="type" javaType="String" jdbcType="VARCHAR"/>
-            <result property="settingFor" column="setting_for" javaType="String" jdbcType="VARCHAR"/>
-            <result property="status" column="status" javaType="Byte" jdbcType="DECIMAL"/>
-            <result property="describe" column="describe" javaType="String" jdbcType="VARCHAR"/>
+        <result property="type" column="type" javaType="String" jdbcType="VARCHAR"/>
+        <result property="settingFor" column="setting_for" javaType="String" jdbcType="VARCHAR"/>
+        <result property="status" column="status" javaType="Byte" jdbcType="DECIMAL"/>
+        <result property="describe" column="describe" javaType="String" jdbcType="VARCHAR"/>
+        <collection property="menus" column="u_id" select="org.hswebframework.web.dao.authorization.AuthorizationSettingMenuDao.selectBySettingId"/>
+        <collection property="details" column="u_id" select="org.hswebframework.web.dao.authorization.AuthorizationSettingDetailDao.selectBySettingId"/>
     </resultMap>
 
     <!--用于动态生成sql所需的配置-->
@@ -32,8 +34,8 @@
         <bind name="resultMapId" value="'AuthorizationSettingResultMap'"/>
         <bind name="tableName" value="'s_autz_setting'"/>
     </sql>
-  
-    <insert id="insert" parameterType="org.hswebframework.web.entity.authorization.SimpleAuthorizationSettingEntity" >
+
+    <insert id="insert" parameterType="org.hswebframework.web.entity.authorization.SimpleAuthorizationSettingEntity">
         <include refid="config"/>
         <include refid="BasicMapper.buildInsertSql"/>
     </insert>

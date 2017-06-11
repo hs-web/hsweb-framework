@@ -25,6 +25,7 @@ import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.utils.ClassUtils;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -117,6 +118,7 @@ public abstract class GenericEntityService<E extends GenericEntity<PK>, PK>
 
     @Override
     public List<E> selectByPk(List<PK> id) {
+        if (id == null || id.isEmpty()) return new ArrayList<>();
         return createQuery().where().in(GenericEntity.id, id).listNoPaging();
     }
 }

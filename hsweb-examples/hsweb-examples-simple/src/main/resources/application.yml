@@ -4,7 +4,7 @@ spring:
         auto: true
         proxy-target-class: true
     datasource:
-       url : jdbc:h2:mem:examples
+       url : jdbc:h2:file:./data
        username : sa
        password :
        type: com.alibaba.druid.pool.DruidDataSource
