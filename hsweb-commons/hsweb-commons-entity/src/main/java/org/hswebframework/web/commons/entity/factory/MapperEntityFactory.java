@@ -101,7 +101,7 @@ public class MapperEntityFactory implements EntityFactory {
             try {
                 realType = (Class<T>) Class.forName(simpleClassName);
             } catch (ClassNotFoundException e) {
-                throw new NotFoundException(e.getMessage());
+               // throw new NotFoundException(e.getMessage());
             }
         }
         if (!Modifier.isInterface(beanClass.getModifiers()) && !Modifier.isAbstract(beanClass.getModifiers())) {
