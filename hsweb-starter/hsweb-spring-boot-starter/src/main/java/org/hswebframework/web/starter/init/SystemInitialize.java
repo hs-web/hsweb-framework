@@ -74,18 +74,26 @@ public class SystemInitialize {
     }
 
     protected void doInstall() {
+        List<SimpleDependencyInstaller> doInitializeDep = new ArrayList<>();
         List<SystemVersion.Dependency> installedDependencies =
                 readyToInstall.stream().map(installer -> {
                     SystemVersion.Dependency dependency = installer.getDependency();
                     SystemVersion.Dependency installed = getInstalledDependency(dependency.getGroupId(), dependency.getArtifactId());
                     //安装依赖
-                    if (installed == null)
+                    if (installed == null) {
+                        doInitializeDep.add(installer);
                         installer.doInstall(getScriptContext());
+                    }
                     //更新依赖
-                    if (installed == null || installed.compareTo(dependency) > 0)
+                    if (installed == null || installed.compareTo(dependency) > 0) {
                         installer.doUpgrade(getScriptContext(), installed);
+                    }
                     return dependency;
                 }).collect(Collectors.toList());
+
+        for (SimpleDependencyInstaller installer : doInitializeDep) {
+            installer.doInitialize(getScriptContext());
+        }
         targetVersion.setDependencies(installedDependencies);
     }
 

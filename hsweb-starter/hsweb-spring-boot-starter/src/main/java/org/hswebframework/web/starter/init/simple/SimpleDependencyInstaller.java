@@ -2,6 +2,7 @@ package org.hswebframework.web.starter.init.simple;
 
 import org.hswebframework.web.starter.SystemVersion;
 import org.hswebframework.web.starter.init.DependencyInstaller;
+import org.hswebframework.web.starter.init.InitializeCallBack;
 import org.hswebframework.web.starter.init.InstallerCallBack;
 import org.hswebframework.web.starter.init.UpgradeCallBack;
 import org.slf4j.Logger;
@@ -19,6 +20,7 @@ public class SimpleDependencyInstaller implements DependencyInstaller {
     InstallerCallBack        installer;
     UpgradeCallBack          upgrader;
     InstallerCallBack        unInstaller;
+    InitializeCallBack       initializer;
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     public SimpleDependencyInstaller() {
@@ -34,6 +36,15 @@ public class SimpleDependencyInstaller implements DependencyInstaller {
                 logger.info("install [{}/{}] version {} {}", dependency.getGroupId(), dependency.getArtifactId(), dependency.versionToString(), dependency.getWebsite());
             }
             installer.execute(context);
+        }
+    }
+
+    public void doInitialize(Map<String, Object> context) {
+        if (initializer != null) {
+            if (logger.isInfoEnabled()) {
+                logger.info("initialize [{}/{}] version {} {}", dependency.getGroupId(), dependency.getArtifactId(), dependency.versionToString(), dependency.getWebsite());
+            }
+            initializer.execute(context);
         }
     }
 
@@ -69,6 +80,12 @@ public class SimpleDependencyInstaller implements DependencyInstaller {
     @Override
     public DependencyInstaller onUninstall(InstallerCallBack callBack) {
         this.unInstaller = callBack;
+        return this;
+    }
+
+    @Override
+    public DependencyInstaller onInitialize(InitializeCallBack initializeCallBack) {
+        this.initializer = initializeCallBack;
         return this;
     }
 }
