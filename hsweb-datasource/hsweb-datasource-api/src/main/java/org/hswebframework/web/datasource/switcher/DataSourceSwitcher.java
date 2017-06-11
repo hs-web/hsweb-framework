@@ -4,7 +4,7 @@ package org.hswebframework.web.datasource.switcher;
  * 动态数据源切换器,用于切换数据源操作
  *
  * @author zhouhao
- * @see 3.0
+ * @since  3.0
  * @see DefaultDataSourceSwitcher
  */
 public interface DataSourceSwitcher {

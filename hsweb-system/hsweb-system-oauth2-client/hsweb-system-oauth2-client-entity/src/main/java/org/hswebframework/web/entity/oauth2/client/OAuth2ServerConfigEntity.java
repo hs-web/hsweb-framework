@@ -125,7 +125,7 @@ public interface OAuth2ServerConfigEntity extends GenericEntity<String> {
     String getAccessTokenUrl();
 
     /**
-     * 设置 token获取地址
+     * @param accessTokenUrl token获取地址
      */
     void setAccessTokenUrl(String accessTokenUrl);
 

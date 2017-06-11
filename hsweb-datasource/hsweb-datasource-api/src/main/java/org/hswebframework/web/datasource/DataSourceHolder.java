@@ -7,7 +7,7 @@ import org.hswebframework.web.datasource.switcher.DataSourceSwitcher;
  * 用于操作动态数据源,如获取当前使用的数据源,使用switcher切换数据源等
  *
  * @author zhouhao
- * @see 3.0
+ * @since  3.0
  */
 public final class DataSourceHolder {
 
