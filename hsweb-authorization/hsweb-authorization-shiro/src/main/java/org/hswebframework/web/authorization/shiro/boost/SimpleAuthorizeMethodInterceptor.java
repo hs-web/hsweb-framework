@@ -100,7 +100,7 @@ public class SimpleAuthorizeMethodInterceptor extends AuthorizingAnnotationMetho
                                     .filter(authorizeConfig.action::contains)
                                     .collect(Collectors.toList());
                             //如果 控制逻辑是or,则只要过滤结果数量不为0.否则过滤结果数量必须和配置的数量相同
-                            return logicalIsOr ? actions.size() > 0 : actions.size() == permission.getActions().size();
+                            return logicalIsOr ? actions.size() > 0 : permission.getActions().containsAll(actions);
                         }).collect(Collectors.toList());
                 access = logicalIsOr ? permissions.size() > 0 : permissions.size() == authorizeConfig.permission.size();
             }
