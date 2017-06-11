@@ -77,10 +77,10 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
     @Transactional(readOnly = true)
     public UserEntity selectByPk(String id) {
         tryValidateProperty(StringUtils.hasLength(id), UserEntity.id, "id:{not_be_null}");
-        UserEntity userEntity=createQuery().where(UserEntity.id, id).single();
-        if(null!=userEntity){
-            List<String> roleId= userRoleDao.selectByUserId(id).stream().map(UserRoleEntity::getRoleId).collect(Collectors.toList());
-            BindRoleUserEntity roleUserEntity=entityFactory.newInstance(BindRoleUserEntity.class,userEntity);
+        UserEntity userEntity = createQuery().where(UserEntity.id, id).single();
+        if (null != userEntity) {
+            List<String> roleId = userRoleDao.selectByUserId(id).stream().map(UserRoleEntity::getRoleId).collect(Collectors.toList());
+            BindRoleUserEntity roleUserEntity = entityFactory.newInstance(BindRoleUserEntity.class, userEntity);
             roleUserEntity.setRoles(roleId);
             return roleUserEntity;
         }
@@ -140,6 +140,8 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
     })
     public void update(String userId, UserEntity userEntity) {
         userEntity.setId(userId);
+        UserEntity oldUser = selectByPk(userId);
+        assertNotNull(oldUser);
         //判断用户是否存在
         boolean userExists = createQuery().where()
                 .is(UserEntity.username, userEntity.getUsername())
@@ -152,7 +154,7 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
             //密码强度验证
             tryValidateProperty(usernameValidator, UserEntity.password, userEntity.getPassword());
             //密码MD5
-            userEntity.setPassword(encodePassword(userEntity.getPassword(), userEntity.getSalt()));
+            userEntity.setPassword(encodePassword(userEntity.getPassword(), oldUser.getSalt()));
             updateProperties.add(UserEntity.password);
         }
         //修改数据
