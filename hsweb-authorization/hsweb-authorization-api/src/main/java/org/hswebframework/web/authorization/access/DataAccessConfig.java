@@ -79,22 +79,17 @@ public interface DataAccessConfig extends Serializable {
         String DENY_FIELDS = "DENY_FIELDS";
 
         /**
-         * 字段过滤,白名单
-         *
-         * @see FieldFilterDataAccessConfig#getType()
-         */
-        String ALLOW_FIELDS = "ALLOW_FIELDS";
-        /**
          * 自定义脚本方式
          *
          * @see ScriptDataAccessConfig#getType()
          */
-        String SCRIPT       = "SCRIPT";
+        String SCRIPT = "SCRIPT";
+
         /**
          * 自定义控制器
          *
          * @see CustomDataAccessConfig#getType()
          */
-        String CUSTOM       = "CUSTOM";
+        String CUSTOM = "CUSTOM";
     }
 }

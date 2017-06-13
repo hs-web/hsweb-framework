@@ -25,12 +25,10 @@ import static org.hswebframework.web.authorization.access.DataAccessConfig.Defau
 public class SimpleDataAccessConfigBuilderFactory implements DataAccessConfigBuilderFactory {
 
     private List<String> defaultSupportConvert = Arrays.asList(
-            CUSTOM
-//            DataAccessConfig.DefaultType.SCRIPT
-            , OWN_CREATED,
+            CUSTOM,
+            OWN_CREATED,
             FIELD_SCOPE,
-            DENY_FIELDS,
-            ALLOW_FIELDS);
+            DENY_FIELDS);
 
     private List<DataAccessConfigConvert> converts = new LinkedList<>();
 
@@ -78,9 +76,6 @@ public class SimpleDataAccessConfigBuilderFactory implements DataAccessConfigBui
 
         if (defaultSupportConvert.contains(DENY_FIELDS))
             converts.add(createJsonConfig(DENY_FIELDS, SimpleFieldFilterDataAccessConfig.class));
-
-        if (defaultSupportConvert.contains(ALLOW_FIELDS))
-            converts.add(createJsonConfig(ALLOW_FIELDS, SimpleFieldFilterDataAccessConfig.class));
 
         if (defaultSupportConvert.contains(OWN_CREATED))
             converts.add(createConfig(OWN_CREATED, (action, config) -> new SimpleOwnCreatedDataAccessConfig(action)));

@@ -53,7 +53,7 @@ public interface DictionaryItemEntity extends TreeSortSupportEntity<String> {
     /**
      * 是否启用
      */
-    String status        = "status";
+    String status         = "status";
     /**
      * 说明
      */
@@ -175,4 +175,6 @@ public interface DictionaryItemEntity extends TreeSortSupportEntity<String> {
      * 设置 快速搜索码
      */
     void setSearchCode(String searchCode);
+
+    void setChildren(List<DictionaryItemEntity> children);
 }

@@ -103,7 +103,7 @@ public class OAuth2ServerApplication implements CommandLineRunner {
         updateAccessEntity.setAction(Permission.ACTION_UPDATE);
 
         DataAccessEntity denyFields = new DataAccessEntity();
-        denyFields.setType(DataAccessConfig.DefaultType.ALLOW_FIELDS);
+        denyFields.setType(DataAccessConfig.DefaultType.DENY_FIELDS);
         denyFields.setAction(Permission.ACTION_UPDATE);
         denyFields.setConfig(JSON.toJSONString(new SimpleFieldFilterDataAccessConfig("password")));
 

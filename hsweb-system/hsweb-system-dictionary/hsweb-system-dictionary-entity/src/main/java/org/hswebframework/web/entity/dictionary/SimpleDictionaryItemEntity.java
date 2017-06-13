@@ -49,15 +49,15 @@ public class SimpleDictionaryItemEntity extends SimpleTreeSortSupportEntity<Stri
     private String valueExpression;
 
 
-    private List<SimpleDictionaryItemEntity> children;
+    private List<DictionaryItemEntity> children;
 
     @Override
     @SuppressWarnings("unchecked")
-    public List<SimpleDictionaryItemEntity> getChildren() {
+    public List<DictionaryItemEntity> getChildren() {
         return children;
     }
 
-    public void setChildren(List<SimpleDictionaryItemEntity> children) {
+    public void setChildren(List<DictionaryItemEntity> children) {
         this.children = children;
     }
 
