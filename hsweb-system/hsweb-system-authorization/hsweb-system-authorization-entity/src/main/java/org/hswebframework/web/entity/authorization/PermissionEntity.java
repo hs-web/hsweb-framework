@@ -39,21 +39,23 @@ public interface PermissionEntity extends GenericEntity<String> {
 
     Byte getStatus();
 
+    void setStatus(Byte status);
+
+    String getType();
+
+    void setType(String type);
+
     void setName(String name);
 
     void setDescribe(String comment);
-
-    void setStatus(Byte status);
 
     List<ActionEntity> getActions();
 
     void setActions(List<ActionEntity> actions);
 
-    @Deprecated
-    List<DataAccessEntity> getDataAccess();
+    List<String> getSupportDataAccessTypes();
 
-    @Deprecated
-    void setDataAccess(List<DataAccessEntity> dataAccess);
+    void setSupportDataAccessTypes(List<String> supportDataAccessTypes);
 
     void setOptionalFields(List<OptionalField> fields);
 

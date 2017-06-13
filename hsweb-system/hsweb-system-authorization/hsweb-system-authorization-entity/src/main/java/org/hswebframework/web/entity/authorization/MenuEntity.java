@@ -51,7 +51,7 @@ public interface MenuEntity
 
     void setStatus(Byte status);
 
-    void setChildren(List<? extends MenuEntity> children);
+    void setChildren(List<MenuEntity> children);
 
     MenuEntity clone();
 }

@@ -62,7 +62,7 @@ function install(context) {
         .addColumn().name("describe").varchar(128).comment("说明").commit()
         .addColumn().name("status").number(4).notNull().comment("状态").commit()
         .addColumn().name("actions").clob().notNull().comment("可选操作(按钮)").commit()
-        .addColumn().name("data_access").clob().comment("数据级控制配置").commit()
+        .addColumn().name("spt_da_types").clob().comment("支持的数据权限类型").commit()
         .addColumn().name("optional_fields").clob().comment("可选字段").commit()
         .comment("权限表").commit();
 

@@ -18,64 +18,47 @@
 package org.hswebframework.web.service.authorization.simple;
 
 import org.hswebframework.web.commons.entity.DataStatus;
-import org.hswebframework.web.dao.authorization.PermissionRoleDao;
 import org.hswebframework.web.dao.authorization.RoleDao;
-import org.hswebframework.web.entity.authorization.PermissionRoleEntity;
 import org.hswebframework.web.entity.authorization.RoleEntity;
-import org.hswebframework.web.entity.authorization.bind.BindPermissionRoleEntity;
-import org.hswebframework.web.service.AbstractService;
-import org.hswebframework.web.service.DefaultDSLQueryService;
+import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.service.DefaultDSLUpdateService;
+import org.hswebframework.web.service.GenericEntityService;
 import org.hswebframework.web.service.authorization.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.hswebframework.web.service.authorization.simple.CacheConstants.USER_AUTH_CACHE_NAME;
 
 /**
  * TODO 完成注释
  *
  * @author zhouhao
  */
-@Transactional(rollbackFor = Throwable.class)
 @Service("roleService")
-public class SimpleRoleService extends AbstractService<RoleEntity, String>
-        implements RoleService, DefaultDSLQueryService<RoleEntity, String> {
+public class SimpleRoleService extends GenericEntityService<RoleEntity, String> implements RoleService {
 
     @Autowired
     private RoleDao roleDao;
 
-    @Autowired
-    private PermissionRoleDao permissionRoleDao;
+    @Override
+    protected IDGenerator<String> getIDGenerator() {
+        return IDGenerator.MD5;
+    }
 
     @Override
     public RoleDao getDao() {
         return roleDao;
     }
 
-    protected <T extends PermissionRoleEntity> void syncPermissions(String roleId, List<T> permissionRoleEntities) {
-        if (permissionRoleEntities == null) return;
-        permissionRoleEntities.forEach(permission -> {
-            permission.setRoleId(roleId);
-            permissionRoleDao.insert(permission);
-        });
+    @Override
+    public String insert(RoleEntity entity) {
+        entity.setStatus(DataStatus.STATUS_ENABLED);
+        return super.insert(entity);
     }
 
     @Override
-    public <T extends PermissionRoleEntity> String insert(BindPermissionRoleEntity<T> roleEntity) {
-        tryValidateProperty(StringUtils.hasLength(roleEntity.getId()), RoleEntity.id, "id {not_be_null}");
-        tryValidateProperty(null == selectByPk(roleEntity.getId()), RoleEntity.id, "{role_exists}");
-        roleEntity.setStatus(DataStatus.STATUS_ENABLED);
-        tryValidate(roleEntity);
-        roleDao.insert(roleEntity);
-        syncPermissions(roleEntity.getId(), roleEntity.getPermissions());
-        return roleEntity.getId();
+    public int updateByPk(String s, RoleEntity entity) {
+        entity.setStatus(null);
+        return super.updateByPk(s, entity);
     }
 
     @Override
@@ -94,46 +77,5 @@ public class SimpleRoleService extends AbstractService<RoleEntity, String>
                 .set(RoleEntity.status, DataStatus.STATUS_DISABLED)
                 .where(RoleEntity.id, roleId)
                 .exec();
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public RoleEntity selectByPk(String roleId) {
-        tryValidateProperty(StringUtils.hasLength(roleId), RoleEntity.id, "{id_is_null}");
-        return createQuery().where(RoleEntity.id, roleId).single();
-    }
-
-    @Override
-    public List<RoleEntity> selectByPk(List<String> id) {
-        tryValidateProperty(id == null || id.isEmpty(), RoleEntity.id, "{id_is_null}");
-        return createQuery().where().in(RoleEntity.id, id).listNoPaging();
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T extends PermissionRoleEntity> BindPermissionRoleEntity<T> selectDetailByPk(String roleId) {
-        RoleEntity entity = createQuery().where(RoleEntity.id, roleId).single();
-        if (entity == null) return null;
-        BindPermissionRoleEntity<T> bindPermissionRoleEntity =
-                entityFactory.newInstance(BindPermissionRoleEntity.class, entity);
-
-        bindPermissionRoleEntity.setPermissions(new ArrayList(permissionRoleDao.selectByRoleId(roleId)));
-        return bindPermissionRoleEntity;
-    }
-
-    @Override
-    @CacheEvict(value = USER_AUTH_CACHE_NAME, allEntries = true)
-    public <T extends PermissionRoleEntity> boolean update(BindPermissionRoleEntity<T> roleEntity) {
-        tryValidateProperty(StringUtils.hasLength(roleEntity.getId()), RoleEntity.id, "id {not_be_null}");
-        tryValidate(roleEntity);
-        DefaultDSLUpdateService.createUpdate(roleDao)
-                .set(RoleEntity.name, roleEntity.getName())
-                .set(RoleEntity.describe, roleEntity.getDescribe())
-                .where(RoleEntity.id, roleEntity.getId()).exec();
-        if (roleEntity.getPermissions() != null) {
-            permissionRoleDao.deleteByRoleId(roleEntity.getId());
-            syncPermissions(roleEntity.getId(), roleEntity.getPermissions());
-        }
-        return true;
     }
 }

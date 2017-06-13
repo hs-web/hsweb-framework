@@ -53,17 +53,16 @@ public class SimpleMenuEntity extends SimpleTreeSortSupportEntity<String>
     private Byte status;
 
     //子菜单
-    private List<SimpleMenuEntity> children;
+    private List<MenuEntity> children;
 
     @Override
-    public List<SimpleMenuEntity> getChildren() {
-        if (children == null) return null;
-        return new ArrayList<>(children);
+    public List<MenuEntity> getChildren() {
+        return children;
     }
 
     @Override
-    public void setChildren(List<? extends MenuEntity> children) {
-        this.children = ((List) children);
+    public void setChildren(List<MenuEntity> children) {
+        this.children = children;
     }
 
     public String getName() {

@@ -1,5 +1,6 @@
 package org.hswebframework.web.service.authorization.simple;
 
+import org.hswebframework.web.commons.entity.DataStatus;
 import org.hswebframework.web.dao.authorization.PermissionDao;
 import org.hswebframework.web.entity.authorization.PermissionEntity;
 import org.hswebframework.web.id.IDGenerator;
@@ -31,7 +32,7 @@ public class SimplePermissionService extends GenericEntityService<PermissionEnti
 
     @Override
     public String insert(PermissionEntity entity) {
-        entity.setStatus((byte) 1);
+        entity.setStatus(DataStatus.STATUS_ENABLED);
         return super.insert(entity);
     }
 
