@@ -32,7 +32,7 @@
         <bind name="tableName" value="'s_user_role'"/>
     </sql>
 
-    <insert id="insert" parameterType="org.hswebframework.web.entity.authorization.PermissionRoleEntity">
+    <insert id="insert" parameterType="org.hswebframework.web.entity.authorization.SimpleUserRoleEntity">
         <include refid="config"/>
         <include refid="BasicMapper.buildInsertSql"/>
     </insert>
