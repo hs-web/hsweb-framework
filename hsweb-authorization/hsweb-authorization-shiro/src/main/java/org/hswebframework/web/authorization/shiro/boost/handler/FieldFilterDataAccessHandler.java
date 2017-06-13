@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * TODO 完成注释
+ * 数据权限字段过滤处理,目前仅支持deny. {@link DataAccessConfig.DefaultType#DENY_FIELDS}
  *
  * @author zhouhao
  */
@@ -22,12 +22,13 @@ public class FieldFilterDataAccessHandler implements DataAccessHandler {
 
     @Override
     public boolean isSupport(DataAccessConfig access) {
-        return access instanceof FieldFilterDataAccessConfig;
+        return access instanceof FieldFilterDataAccessConfig && DataAccessConfig.DefaultType.DENY_FIELDS.equals(access.getType());
     }
 
     @Override
     public boolean handle(DataAccessConfig access, MethodInterceptorParamContext context) {
         FieldFilterDataAccessConfig filterDataAccessConfig = ((FieldFilterDataAccessConfig) access);
+
         switch (access.getAction()) {
             case Permission.ACTION_QUERY:
                 return doQueryAccess(filterDataAccessConfig, context);

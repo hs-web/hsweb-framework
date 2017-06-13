@@ -42,7 +42,7 @@ public class SimpleOAuth2ClientEntity extends SimpleGenericEntity<String> implem
 
     private String describe;
 
-    private Set<String> supportGrantType;
+    private Set<String> supportGrantTypes;
 
     private Set<String> defaultGrantScope;
 
@@ -122,12 +122,12 @@ public class SimpleOAuth2ClientEntity extends SimpleGenericEntity<String> implem
 
     @Override
     public Set<String> getSupportGrantTypes() {
-        return supportGrantType;
+        return supportGrantTypes;
     }
 
     @Override
     public void setSupportGrantTypes(Set<String> supportGrantType) {
-        this.supportGrantType = supportGrantType;
+        this.supportGrantTypes = supportGrantType;
     }
 
     @Override

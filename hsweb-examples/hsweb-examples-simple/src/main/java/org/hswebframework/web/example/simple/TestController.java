@@ -49,6 +49,7 @@ public class TestController implements QueryController<UserEntity, String, Query
     @Authorize
     @RequiresDataAccess(permission = "test", action = Permission.ACTION_QUERY)
     @ApiOperation("测试查询")
+    @AccessLogger("查询")
     public ResponseMessage<QueryParamEntity> testQuery(QueryParamEntity entity) {
 
         /*

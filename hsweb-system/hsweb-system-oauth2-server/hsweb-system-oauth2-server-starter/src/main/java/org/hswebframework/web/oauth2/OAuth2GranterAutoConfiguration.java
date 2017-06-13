@@ -16,7 +16,7 @@
  *
  */
 
-package org.hswebframework.web.oauth2.server.simple;
+package org.hswebframework.web.oauth2;
 
 import org.hswebframework.web.authorization.oauth2.server.client.OAuth2ClientService;
 import org.hswebframework.web.authorization.oauth2.server.support.AbstractAuthorizationService;
@@ -36,6 +36,7 @@ import org.hswebframework.web.commons.entity.factory.EntityFactory;
 import org.hswebframework.web.dao.oauth2.AuthorizationCodeDao;
 import org.hswebframework.web.dao.oauth2.OAuth2AccessDao;
 import org.hswebframework.web.dao.oauth2.OAuth2ClientDao;
+import org.hswebframework.web.oauth2.server.simple.*;
 import org.hswebframework.web.service.authorization.UserService;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +60,12 @@ public class OAuth2GranterAutoConfiguration {
 
     @Autowired(required = false)
     private TokenGenerator tokenGenerator;
+
+    @Bean
+    public OAuth2ServerErrorControllerAdvice oAuth2ServerErrorControllerAdvice() {
+        return new OAuth2ServerErrorControllerAdvice();
+    }
+
 
     @ConditionalOnMissingBean(AuthorizationCodeService.class)
     @Bean

@@ -47,7 +47,7 @@ function install(context) {
         .addColumn().name("creator_id").varchar(32).notNull().comment("创建者ID").commit()
         .addColumn().name("redirect_uri").varchar(1024).notNull().comment("redirect_uri").commit()
         .addColumn().name("create_time").number(32).notNull().comment("创建时间").commit()
-        .addColumn().name("support_grant_type").clob().notNull().comment("支持的授权列表").commit()
+        .addColumn().name("support_grant_types").varchar(2048).comment("支持的授权列表").commit()
         .addColumn().name("default_expires_in").number(16).comment("默认认证过期时间").commit()
         .addColumn().name("default_grant_scope").clob().comment("默认认证范围").commit()
         .addColumn().name("status").number(4).comment("状态").commit()
@@ -61,7 +61,7 @@ function install(context) {
         .addColumn().name("refresh_token").varchar(32).notNull().comment("用于更新授权的token").commit()
         .addColumn().name("create_time").number(32).notNull().comment("创建时间").commit()
         .addColumn().name("update_time").number(32).comment("更新时间").commit()
-        .addColumn().name("scope").clob().notNull().comment("授权范围").commit()
+        .addColumn().name("scope").clob().comment("授权范围").commit()
         .comment("OAuth2授权认证信息").commit();
 
     database.createOrAlter("s_oauth2_auth_code")
