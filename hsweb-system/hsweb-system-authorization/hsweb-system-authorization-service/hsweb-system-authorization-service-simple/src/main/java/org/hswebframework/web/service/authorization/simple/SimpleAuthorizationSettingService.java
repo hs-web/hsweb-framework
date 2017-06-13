@@ -309,7 +309,7 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
             }
             if (isEmpty(entity.getSupportDataAccessTypes())) {
                 detail.setDataAccesses(Collections.emptyList());
-            } else if (isNotEmpty(detail.getDataAccesses())) {
+            } else if (isNotEmpty(detail.getDataAccesses()) && !entity.getSupportDataAccessTypes().contains("*")) {
                 //重构为权限支持的数据权限控制方式,防止越权设置权限
                 detail.setDataAccesses(detail
                         .getDataAccesses()

@@ -29,7 +29,6 @@ import org.hswebframework.web.commons.entity.factory.EntityFactory;
 import org.hswebframework.web.dao.datasource.DataSourceHolder;
 import org.hswebframework.web.dao.datasource.DatabaseType;
 import org.hswebframework.web.entity.authorization.*;
-import org.hswebframework.web.entity.authorization.bind.BindPermissionRoleEntity;
 import org.hswebframework.web.entity.authorization.bind.BindRoleUserEntity;
 import org.hswebframework.web.entity.organizational.*;
 import org.hswebframework.web.loggin.aop.EnableAccessLogger;
@@ -90,8 +89,7 @@ import java.util.stream.Stream;
 @EnableAspectJAutoProxy
 @EnableAccessLogger
 public class SpringBootExample
-//        implements CommandLineRunner
-{
+        implements CommandLineRunner {
 
     @Bean
     public AccessLoggerListener accessLoggerListener() {
@@ -174,7 +172,7 @@ public class SpringBootExample
         SpringApplication.run(SpringBootExample.class);
     }
 
-//    @Override
+    //    @Override
     public void run(String... strings) throws Exception {
         //只能查询自己创建的数据
         DataAccessEntity accessEntity = new DataAccessEntity();
@@ -212,18 +210,13 @@ public class SpringBootExample
         permission.setId("test");
         permission.setStatus(DataStatus.STATUS_ENABLED);
         permission.setActions(ActionEntity.create(Permission.ACTION_QUERY, Permission.ACTION_UPDATE));
-//        permission.setDataAccess(Arrays.asList(accessEntity, updateAccessEntity, denyUpdateFields, denyUpdateFields, onlyDepartmentData));
+        permission.setSupportDataAccessTypes(Arrays.asList("*"));
         permissionService.insert(permission);
 
-
         //角色
-        BindPermissionRoleEntity<PermissionRoleEntity> roleEntity = entityFactory.newInstance(BindPermissionRoleEntity.class);
-        SimplePermissionRoleEntity permissionRoleEntity = new SimplePermissionRoleEntity();
-        permissionRoleEntity.setRoleId("admin");
-        permissionRoleEntity.setPermissionId("test");
+        RoleEntity roleEntity = entityFactory.newInstance(RoleEntity.class);
         roleEntity.setId("admin");
         roleEntity.setName("test");
-        roleEntity.setPermissions(Arrays.asList(permissionRoleEntity));
         roleService.insert(roleEntity);
 
         /*            权限设置        */
