@@ -28,6 +28,7 @@ import org.hswebframework.expands.script.engine.DynamicScriptEngine;
 import org.hswebframework.expands.script.engine.DynamicScriptEngineFactory;
 import org.hswebframework.utils.ClassUtils;
 import org.hswebframework.utils.StringUtils;
+import org.hswebframework.web.ExpressionUtils;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.Role;
@@ -149,22 +150,27 @@ public class SimpleAuthorizeMethodInterceptor extends AuthorizingAnnotationMetho
         }
 
         public String tryCompileExpression(String express) {
-            if (express.startsWith("${") && express.endsWith("}")) {
-                express = express.substring(2, express.length() - 1);
-                DynamicScriptEngine spelEngine = DynamicScriptEngineFactory.getEngine("spel");
-                String id = DigestUtils.md5Hex(express);
-                try {
-                    if (!spelEngine.compiled(id))
-                        spelEngine.compile(id, express);
-                    return String.valueOf(spelEngine.execute(id, var).getIfSuccess());
-                } catch (Exception e) {
-                    throw new AuthorizationException("系统错误", e);
-                } finally {
-                    //     spelEngine.remove(id);
-                }
-            } else {
-                return express;
+            try {
+                return ExpressionUtils.analytical(express, var, "spel");
+            } catch (Exception e) {
+                throw new AuthorizationException("系统错误", e);
             }
+//            if (express.startsWith("${") && express.endsWith("}")) {
+//                express = express.substring(2, express.length() - 1);
+//                DynamicScriptEngine spelEngine = DynamicScriptEngineFactory.getEngine("spel");
+//                String id = DigestUtils.md5Hex(express);
+//                try {
+//                    if (!spelEngine.compiled(id))
+//                        spelEngine.compile(id, express);
+//                    return String.valueOf(spelEngine.execute(id, var).getIfSuccess());
+//                } catch (Exception e) {
+//                    throw new AuthorizationException("系统错误", e);
+//                } finally {
+//                    //     spelEngine.remove(id);
+//                }
+//            } else {
+//                return express;
+//            }
         }
 
         public Collection<String> tryCompileExpression(String... expresses) {
