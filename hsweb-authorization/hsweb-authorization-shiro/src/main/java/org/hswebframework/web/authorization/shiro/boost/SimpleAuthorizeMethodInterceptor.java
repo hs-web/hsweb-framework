@@ -26,15 +26,14 @@ import org.apache.shiro.authz.aop.AuthorizingAnnotationHandler;
 import org.apache.shiro.authz.aop.AuthorizingAnnotationMethodInterceptor;
 import org.hswebframework.expands.script.engine.DynamicScriptEngine;
 import org.hswebframework.expands.script.engine.DynamicScriptEngineFactory;
+import org.hswebframework.utils.ClassUtils;
+import org.hswebframework.utils.StringUtils;
 import org.hswebframework.web.authorization.Authentication;
-import org.hswebframework.web.authorization.AuthenticationHolder;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.Role;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.annotation.Logical;
 import org.hswebframework.web.boost.aop.context.MethodInterceptorHolder;
-import org.hswebframework.utils.ClassUtils;
-import org.hswebframework.utils.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -125,14 +124,13 @@ public class SimpleAuthorizeMethodInterceptor extends AuthorizingAnnotationMetho
     }
 
     static class AuthorizeConfig {
-        Set<String>         permission        = new LinkedHashSet<>();
-        Set<String>         action            = new LinkedHashSet<>();
-        Set<String>         role              = new LinkedHashSet<>();
-        Set<String>         user              = new LinkedHashSet<>();
-        Logical             logical           = Logical.DEFAULT;
-        String              message           = "unauthorized";
-        Map<String, Object> var               = null;
-        boolean             controlAccessData = false;
+        Set<String>         permission = new LinkedHashSet<>();
+        Set<String>         action     = new LinkedHashSet<>();
+        Set<String>         role       = new LinkedHashSet<>();
+        Set<String>         user       = new LinkedHashSet<>();
+        Logical             logical    = Logical.DEFAULT;
+        String              message    = "unauthorized";
+        Map<String, Object> var        = null;
 
         public AuthorizeConfig(Map<String, Object> var) {
             this.var = var;
@@ -148,7 +146,6 @@ public class SimpleAuthorizeMethodInterceptor extends AuthorizingAnnotationMetho
             }
             if (authorize.logical() != Logical.DEFAULT)
                 logical = authorize.logical();
-            controlAccessData = authorize.controlAccessData();
         }
 
         public String tryCompileExpression(String express) {
