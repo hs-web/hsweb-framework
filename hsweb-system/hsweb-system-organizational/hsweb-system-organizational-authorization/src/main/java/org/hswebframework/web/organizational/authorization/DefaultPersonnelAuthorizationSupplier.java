@@ -2,8 +2,7 @@ package org.hswebframework.web.organizational.authorization;
 
 import org.hswebframework.web.ThreadLocalUtils;
 import org.hswebframework.web.authorization.Authentication;
-import org.hswebframework.web.authorization.AuthenticationSupplier;
-import org.hswebframework.web.organizational.authorization.entity.PersonAttachEntity;
+import org.hswebframework.web.entity.organizational.authorization.PersonAttachEntity;
 
 import java.util.Objects;
 

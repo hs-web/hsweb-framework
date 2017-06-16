@@ -39,6 +39,18 @@ public class SimpleOrganizationalEntity extends SimpleTreeSortSupportEntity<Stri
     //子级组织
     private List<OrganizationalEntity> children;
 
+    private String areaId;
+
+    @Override
+    public String getAreaId() {
+        return areaId;
+    }
+
+    @Override
+    public void setAreaId(String areaId) {
+        this.areaId = areaId;
+    }
+
     /**
      * @return 名称
      */

@@ -2,9 +2,10 @@ package org.hswebframework.web.organizational.authorization.simple.handler;
 
 import org.hsweb.ezorm.core.param.Term;
 import org.hsweb.ezorm.core.param.TermType;
+import org.hswebframework.web.entity.organizational.PositionEntity;
+import org.hswebframework.web.entity.organizational.authorization.PositionAttachEntity;
 import org.hswebframework.web.organizational.authorization.PersonnelAuthorization;
 import org.hswebframework.web.organizational.authorization.access.DataAccessType;
-import org.hswebframework.web.organizational.authorization.entity.PositionAttachEntity;
 
 import java.util.Collections;
 import java.util.Set;
@@ -41,6 +42,11 @@ public class PositionScopeDataAccessHandler extends AbstractScopeDataAccessHandl
     }
 
     @Override
+    protected void applyScopeProperty(PositionAttachEntity entity, String value) {
+        entity.setPositionId(value);
+    }
+
+    @Override
     protected String getOperationScope(PositionAttachEntity entity) {
         return entity.getPositionId();
     }
@@ -48,7 +54,11 @@ public class PositionScopeDataAccessHandler extends AbstractScopeDataAccessHandl
     @Override
     protected Term createQueryTerm(Set<String> scope) {
         Term term = new Term();
-        term.setColumn(PositionAttachEntity.positionId);
+        if (genericTypeInstanceOf(PositionEntity.class)) {
+            term.setColumn(PositionEntity.id);
+        } else {
+            term.setColumn(PositionAttachEntity.positionId);
+        }
         term.setTermType(TermType.in);
         term.setValue(scope);
         term.setType(Term.Type.and);

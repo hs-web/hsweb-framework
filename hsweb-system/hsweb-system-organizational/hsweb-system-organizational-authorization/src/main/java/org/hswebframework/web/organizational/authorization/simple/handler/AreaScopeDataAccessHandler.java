@@ -2,8 +2,8 @@ package org.hswebframework.web.organizational.authorization.simple.handler;
 
 import org.hsweb.ezorm.core.param.Term;
 import org.hsweb.ezorm.core.param.TermType;
+import org.hswebframework.web.entity.organizational.authorization.AreaAttachEntity;
 import org.hswebframework.web.organizational.authorization.PersonnelAuthorization;
-import org.hswebframework.web.organizational.authorization.entity.AreaAttachEntity;
 
 import java.util.Collections;
 import java.util.Set;
@@ -29,6 +29,11 @@ public class AreaScopeDataAccessHandler extends AbstractScopeDataAccessHandler<A
     @Override
     protected String getOperationScope(AreaAttachEntity entity) {
         return entity.getAreaId();
+    }
+
+    @Override
+    protected void applyScopeProperty(AreaAttachEntity entity, String value) {
+        entity.setAreaId(value);
     }
 
     @Override

@@ -30,7 +30,7 @@ public interface DataAccessType extends Serializable {
      */
     String PERSON_SCOPE         = "PERSON_SCOPE";
     /**
-     * 只能查看自己
+     * 仅限本人
      */
     String SCOPE_TYPE_ONLY_SELF = "ONLY_SELF";
     /**

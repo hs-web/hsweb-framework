@@ -2,9 +2,14 @@ package org.hswebframework.web.organizational.authorization.simple.handler;
 
 import org.hsweb.ezorm.core.param.Term;
 import org.hsweb.ezorm.core.param.TermType;
+import org.hswebframework.utils.ClassUtils;
+import org.hswebframework.web.boost.aop.context.MethodInterceptorHolder;
+import org.hswebframework.web.boost.aop.context.MethodInterceptorParamContext;
+import org.hswebframework.web.entity.organizational.OrganizationalEntity;
+import org.hswebframework.web.entity.organizational.SimpleOrganizationalEntity;
+import org.hswebframework.web.entity.organizational.authorization.OrgAttachEntity;
 import org.hswebframework.web.organizational.authorization.PersonnelAuthorization;
 import org.hswebframework.web.organizational.authorization.access.DataAccessType;
-import org.hswebframework.web.organizational.authorization.entity.OrgAttachEntity;
 
 import java.util.Collections;
 import java.util.Set;
@@ -29,6 +34,11 @@ public class OrgScopeDataAccessHandler extends AbstractScopeDataAccessHandler<Or
     }
 
     @Override
+    protected void applyScopeProperty(OrgAttachEntity entity, String value) {
+        entity.setOrgId(value);
+    }
+
+    @Override
     protected Set<String> getTryOperationScope(String scopeType, PersonnelAuthorization authorization) {
         switch (scopeType) {
             case SCOPE_TYPE_CHILDREN:
@@ -48,7 +58,11 @@ public class OrgScopeDataAccessHandler extends AbstractScopeDataAccessHandler<Or
     @Override
     protected Term createQueryTerm(Set<String> scope) {
         Term term = new Term();
-        term.setColumn(OrgAttachEntity.orgId);
+        if (genericTypeInstanceOf(OrganizationalEntity.class)) {
+            term.setColumn(OrganizationalEntity.id);
+        } else {
+            term.setColumn(OrgAttachEntity.orgId);
+        }
         term.setTermType(TermType.in);
         term.setValue(scope);
         term.setType(Term.Type.and);

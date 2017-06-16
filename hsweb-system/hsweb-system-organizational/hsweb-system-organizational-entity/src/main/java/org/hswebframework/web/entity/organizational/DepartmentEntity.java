@@ -17,6 +17,8 @@
 package org.hswebframework.web.entity.organizational;
 
 import org.hswebframework.web.commons.entity.TreeSortSupportEntity;
+import org.hswebframework.web.entity.organizational.authorization.DepartmentAttachEntity;
+import org.hswebframework.web.entity.organizational.authorization.OrgAttachEntity;
 
 import java.util.List;
 
@@ -25,7 +27,7 @@ import java.util.List;
  *
  * @author hsweb-generator-online
  */
-public interface DepartmentEntity extends TreeSortSupportEntity<String> {
+public interface DepartmentEntity extends TreeSortSupportEntity<String>, OrgAttachEntity, DepartmentAttachEntity {
  /*-------------------------------------------
     |               属性名常量               |
     ===========================================*/
@@ -36,7 +38,7 @@ public interface DepartmentEntity extends TreeSortSupportEntity<String> {
     /**
      * 所在组织id
      */
-    String orgid     = "orgid";
+    String orgId     = "orgId";
     /**
      * 部门编码
      */
@@ -73,16 +75,6 @@ public interface DepartmentEntity extends TreeSortSupportEntity<String> {
     void setName(String name);
 
     /**
-     * @return 所在组织id
-     */
-    String getOrgId();
-
-    /**
-     * 设置 所在组织id
-     */
-    void setOrgId(String orgId);
-
-    /**
      * @return 部门编码
      */
     String getCode();
@@ -103,4 +95,14 @@ public interface DepartmentEntity extends TreeSortSupportEntity<String> {
     void setStatus(Byte status);
 
     void setChildren(List<DepartmentEntity> children);
+
+    @Override
+    default String getDepartmentId() {
+        return getId();
+    }
+
+    @Override
+    default void setDepartmentId(String departmentId) {
+        setId(departmentId);
+    }
 }

@@ -1,4 +1,4 @@
-package org.hswebframework.web.organizational.authorization.entity;
+package org.hswebframework.web.entity.organizational.authorization;
 
 import org.hswebframework.web.commons.entity.Entity;
 

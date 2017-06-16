@@ -1,20 +1,22 @@
 package org.hswebframework.web.organizational.authorization.simple.handler;
 
 import org.hsweb.ezorm.core.param.Term;
+import org.hswebframework.utils.ClassUtils;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.access.DataAccessConfig;
 import org.hswebframework.web.authorization.access.DataAccessHandler;
 import org.hswebframework.web.authorization.access.ScopeDataAccessConfig;
 import org.hswebframework.web.authorization.annotation.RequiresDataAccess;
+import org.hswebframework.web.boost.aop.context.MethodInterceptorHolder;
 import org.hswebframework.web.boost.aop.context.MethodInterceptorParamContext;
 import org.hswebframework.web.commons.entity.Entity;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.controller.QueryController;
+import org.hswebframework.web.entity.organizational.OrganizationalEntity;
+import org.hswebframework.web.entity.organizational.authorization.OrgAttachEntity;
 import org.hswebframework.web.organizational.authorization.PersonnelAuthorization;
 import org.hswebframework.web.organizational.authorization.access.DataAccessType;
-import org.hswebframework.web.organizational.authorization.entity.OrgAttachEntity;
 import org.hswebframework.web.service.QueryService;
-import org.hswebframework.utils.ClassUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,6 +40,8 @@ public abstract class AbstractScopeDataAccessHandler<E> implements DataAccessHan
     protected abstract String getSupportScope();
 
     protected abstract String getOperationScope(E entity);
+
+    protected abstract void applyScopeProperty(E entity, String value);
 
     protected abstract Term createQueryTerm(Set<String> scope);
 
@@ -83,9 +87,9 @@ public abstract class AbstractScopeDataAccessHandler<E> implements DataAccessHan
         if (scope != null) {
             String finalScopeId = scope;
             context.getParams().values().stream()
-                    .filter(OrgAttachEntity.class::isInstance)
-                    .map(OrgAttachEntity.class::cast)
-                    .forEach(entity -> entity.setOrgId(finalScopeId));
+                    .filter(getEntityClass()::isInstance)
+                    .map(getEntityClass()::cast)
+                    .forEach(entity -> applyScopeProperty(entity, finalScopeId));
         } else {
             logger.warn("scope is null!");
         }
@@ -163,5 +167,11 @@ public abstract class AbstractScopeDataAccessHandler<E> implements DataAccessHan
             logger.warn("try validate query access,but entity not support, QueryParamEntity support now!");
         }
         return true;
+    }
+
+    protected boolean genericTypeInstanceOf(Class type) {
+        MethodInterceptorHolder holder = MethodInterceptorHolder.current();
+        Class entity = ClassUtils.getGenericType(holder.getTarget().getClass());
+        return null != entity && ClassUtils.instanceOf(entity, type);
     }
 }

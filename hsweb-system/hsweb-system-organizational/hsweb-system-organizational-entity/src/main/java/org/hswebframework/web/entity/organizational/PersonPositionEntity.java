@@ -17,13 +17,15 @@
 package org.hswebframework.web.entity.organizational;
 
 import org.hswebframework.web.commons.entity.Entity;
+import org.hswebframework.web.entity.organizational.authorization.PersonAttachEntity;
+import org.hswebframework.web.entity.organizational.authorization.PositionAttachEntity;
 
 /**
  * 人员职位关联 实体
  *
  * @author hsweb-generator-online
  */
-public interface PersonPositionEntity extends Entity {
+public interface PersonPositionEntity extends PersonAttachEntity, PositionAttachEntity {
  /*-------------------------------------------
     |               属性名常量               |
     ===========================================*/
@@ -35,25 +37,5 @@ public interface PersonPositionEntity extends Entity {
      * 职位id
      */
     String positionId = "positionId";
-
-    /**
-     * @return 人员id
-     */
-    String getPersonId();
-
-    /**
-     * 设置 人员id
-     */
-    void setPersonId(String personId);
-
-    /**
-     * @return 职位id
-     */
-    String getPositionId();
-
-    /**
-     * 设置 职位id
-     */
-    void setPositionId(String positionId);
 
 }

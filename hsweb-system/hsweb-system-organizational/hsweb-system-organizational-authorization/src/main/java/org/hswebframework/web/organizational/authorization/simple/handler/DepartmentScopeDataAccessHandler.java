@@ -2,9 +2,12 @@ package org.hswebframework.web.organizational.authorization.simple.handler;
 
 import org.hsweb.ezorm.core.param.Term;
 import org.hsweb.ezorm.core.param.TermType;
+import org.hswebframework.web.entity.organizational.DepartmentEntity;
+import org.hswebframework.web.entity.organizational.OrganizationalEntity;
+import org.hswebframework.web.entity.organizational.authorization.DepartmentAttachEntity;
+import org.hswebframework.web.entity.organizational.authorization.OrgAttachEntity;
 import org.hswebframework.web.organizational.authorization.PersonnelAuthorization;
 import org.hswebframework.web.organizational.authorization.access.DataAccessType;
-import org.hswebframework.web.organizational.authorization.entity.DepartmentAttachEntity;
 
 import java.util.Collections;
 import java.util.Set;
@@ -21,6 +24,11 @@ public class DepartmentScopeDataAccessHandler extends AbstractScopeDataAccessHan
     @Override
     protected Class<DepartmentAttachEntity> getEntityClass() {
         return DepartmentAttachEntity.class;
+    }
+
+    @Override
+    protected void applyScopeProperty(DepartmentAttachEntity entity, String value) {
+        entity.setDepartmentId(value);
     }
 
     @Override
@@ -48,7 +56,11 @@ public class DepartmentScopeDataAccessHandler extends AbstractScopeDataAccessHan
     @Override
     protected Term createQueryTerm(Set<String> scope) {
         Term term = new Term();
-        term.setColumn(DepartmentAttachEntity.departmentId);
+        if (genericTypeInstanceOf(DepartmentEntity.class)) {
+            term.setColumn(DepartmentEntity.id);
+        } else {
+            term.setColumn(DepartmentAttachEntity.departmentId);
+        }
         term.setTermType(TermType.in);
         term.setValue(scope);
         term.setType(Term.Type.and);

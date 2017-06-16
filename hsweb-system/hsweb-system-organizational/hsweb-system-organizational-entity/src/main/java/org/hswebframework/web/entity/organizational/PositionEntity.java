@@ -17,7 +17,8 @@
 package org.hswebframework.web.entity.organizational;
 
 import org.hswebframework.web.commons.entity.TreeSortSupportEntity;
-import org.hswebframework.web.commons.entity.TreeSupportEntity;
+import org.hswebframework.web.entity.organizational.authorization.DepartmentAttachEntity;
+import org.hswebframework.web.entity.organizational.authorization.PositionAttachEntity;
 
 import java.util.List;
 
@@ -26,7 +27,7 @@ import java.util.List;
  *
  * @author hsweb-generator-online
  */
-public interface PositionEntity extends TreeSortSupportEntity<String> {
+public interface PositionEntity extends TreeSortSupportEntity<String>, DepartmentAttachEntity, PositionAttachEntity {
  /*-------------------------------------------
     |               属性名常量               |
     ===========================================*/
@@ -74,16 +75,6 @@ public interface PositionEntity extends TreeSortSupportEntity<String> {
     void setName(String name);
 
     /**
-     * @return 部门id
-     */
-    String getDepartmentId();
-
-    /**
-     * 设置 部门id
-     */
-    void setDepartmentId(String departmentId);
-
-    /**
      * @return 持有的角色
      */
     List<String> getRoles();
@@ -105,4 +96,12 @@ public interface PositionEntity extends TreeSortSupportEntity<String> {
 
     void setChildren(List<PositionEntity> children);
 
+    @Override
+    default String getPositionId() {
+        return getId();
+    }
+
+    default void setPositionId(String positionId) {
+        setId(positionId);
+    }
 }

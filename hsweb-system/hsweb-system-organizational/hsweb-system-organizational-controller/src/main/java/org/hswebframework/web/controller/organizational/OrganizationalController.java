@@ -17,11 +17,17 @@
 
 package org.hswebframework.web.controller.organizational;
 
+import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.annotation.Authorize;
+import org.hswebframework.web.authorization.annotation.RequiresDataAccess;
+import org.hswebframework.web.commons.entity.PagerResult;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.controller.GenericEntityController;
+import org.hswebframework.web.controller.SimpleGenericEntityController;
+import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.entity.organizational.DepartmentEntity;
 import org.hswebframework.web.entity.organizational.OrganizationalEntity;
+import org.hswebframework.web.entity.organizational.PersonEntity;
 import org.hswebframework.web.logging.AccessLogger;
 import org.hswebframework.web.service.organizational.OrganizationalService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,8 +42,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("${hsweb.web.mappings.organizational:organizational}")
 @Authorize(permission = "organizational")
+@RequiresDataAccess
 @AccessLogger("组织管理")
-public class OrganizationalController implements GenericEntityController<OrganizationalEntity, String, QueryParamEntity,DepartmentEntity> {
+public class OrganizationalController implements SimpleGenericEntityController<OrganizationalEntity, String, QueryParamEntity> {
 
     private OrganizationalService organizationalService;
 
@@ -50,4 +57,5 @@ public class OrganizationalController implements GenericEntityController<Organiz
     public OrganizationalService getService() {
         return organizationalService;
     }
+
 }
