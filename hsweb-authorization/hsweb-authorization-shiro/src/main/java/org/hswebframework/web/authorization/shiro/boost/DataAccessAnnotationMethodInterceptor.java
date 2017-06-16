@@ -101,19 +101,29 @@ public class DataAccessAnnotationMethodInterceptor extends AuthorizingAnnotation
                 accessController = ApplicationContextHolder.get().getBean(accessAnn.controllerBeanName(), DataAccessController.class);
             }
             DataAccessController finalAccessController = accessController;
-            Authorize authorize = holder.findAnnotation(Authorize.class);
-
-            String permission = accessAnn.permission();
+            Authorize classAnnotation = holder.findClassAnnotation(Authorize.class);
+            Authorize methodAnnotation = holder.findMethodAnnotation(Authorize.class);
+            Set<String> permissions = new HashSet<>();
             List<String> actionList = new ArrayList<>(Arrays.asList(accessAnn.action()));
 
-            if ("".equals(permission)) {
-                if (null == authorize) {
-                    throw new NullPointerException("permission setting can not be null");
-                }
-                permission = authorize.permission()[0];
+            if (classAnnotation != null) {
+                permissions.addAll(Arrays.asList(classAnnotation.permission()));
+                if (actionList.isEmpty())
+                    actionList.addAll(Arrays.asList(classAnnotation.action()));
             }
-            if (actionList.isEmpty()) {
-                actionList.addAll(Arrays.asList(authorize.action()));
+            if (methodAnnotation != null) {
+                permissions.addAll(Arrays.asList(methodAnnotation.permission()));
+                if (actionList.isEmpty())
+                    actionList.addAll(Arrays.asList(methodAnnotation.action()));
+            }
+
+            String permission = accessAnn.permission();
+
+            if ("".equals(permission)) {
+                if (permissions.size() != 1) {
+                    throw new IndexOutOfBoundsException("permission setting size must be 1");
+                }
+                permission = permissions.iterator().next();
             }
             MethodInterceptorParamContext context = holder.createParamContext();
             Permission permissionInfo = authentication.getPermission(permission).orElseThrow(AuthenticationException::new);
