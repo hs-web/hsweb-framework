@@ -125,13 +125,14 @@ public class SimpleAuthorizeMethodInterceptor extends AuthorizingAnnotationMetho
     }
 
     static class AuthorizeConfig {
-        Set<String>         permission = new LinkedHashSet<>();
-        Set<String>         action     = new LinkedHashSet<>();
-        Set<String>         role       = new LinkedHashSet<>();
-        Set<String>         user       = new LinkedHashSet<>();
-        Logical             logical    = Logical.DEFAULT;
-        String              message    = "unauthorized";
-        Map<String, Object> var        = null;
+        Set<String>         permission        = new LinkedHashSet<>();
+        Set<String>         action            = new LinkedHashSet<>();
+        Set<String>         role              = new LinkedHashSet<>();
+        Set<String>         user              = new LinkedHashSet<>();
+        Logical             logical           = Logical.DEFAULT;
+        String              message           = "unauthorized";
+        Map<String, Object> var               = null;
+        boolean             controlAccessData = false;
 
         public AuthorizeConfig(Map<String, Object> var) {
             this.var = var;
@@ -147,6 +148,7 @@ public class SimpleAuthorizeMethodInterceptor extends AuthorizingAnnotationMetho
             }
             if (authorize.logical() != Logical.DEFAULT)
                 logical = authorize.logical();
+            controlAccessData = authorize.controlAccessData();
         }
 
         public String tryCompileExpression(String express) {

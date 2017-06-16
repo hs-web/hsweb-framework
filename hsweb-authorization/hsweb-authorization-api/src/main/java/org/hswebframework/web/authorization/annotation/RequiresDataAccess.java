@@ -39,13 +39,13 @@ import java.lang.annotation.*;
 public @interface RequiresDataAccess {
 
     /**
-     * @return permission id
+     * @return permission id ,如果为空将继承 {@link Authorize#permission()}
      * @see Permission#getId()
      */
-    String permission();
+    String permission() default "";
 
     /**
-     * @return action array
+     * @return action array ,如果为空将继承 {@link Authorize#action()}
      * @see DataAccessConfig#getAction()
      */
     String[] action() default {};

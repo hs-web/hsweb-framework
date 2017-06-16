@@ -28,6 +28,7 @@ import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.access.DataAccessConfig;
 import org.hswebframework.web.authorization.access.DataAccessController;
+import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.annotation.Logical;
 import org.hswebframework.web.authorization.annotation.RequiresDataAccess;
 import org.hswebframework.web.boost.aop.context.MethodInterceptorHolder;
@@ -100,12 +101,23 @@ public class DataAccessAnnotationMethodInterceptor extends AuthorizingAnnotation
                 accessController = ApplicationContextHolder.get().getBean(accessAnn.controllerBeanName(), DataAccessController.class);
             }
             DataAccessController finalAccessController = accessController;
+            Authorize authorize = holder.findAnnotation(Authorize.class);
 
-            MethodInterceptorParamContext context = holder.createParamContext();
             String permission = accessAnn.permission();
+            List<String> actionList = new ArrayList<>(Arrays.asList(accessAnn.action()));
+
+            if ("".equals(permission)) {
+                if (null == authorize) {
+                    throw new NullPointerException("permission setting can not be null");
+                }
+                permission = authorize.permission()[0];
+            }
+            if (actionList.isEmpty()) {
+                actionList.addAll(Arrays.asList(authorize.action()));
+            }
+            MethodInterceptorParamContext context = holder.createParamContext();
             Permission permissionInfo = authentication.getPermission(permission).orElseThrow(AuthenticationException::new);
 
-            List<String> actionList = Arrays.asList(accessAnn.action());
             //取得当前登录用户持有的控制规则
             Set<DataAccessConfig> accesses = permissionInfo
                     .getDataAccesses()
