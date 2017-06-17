@@ -120,6 +120,7 @@ java类
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.hswebframework.web.dao.organizational.OrganizationalDao">
+     <!--修改type为新的实体类型-->
     <resultMap id="OrganizationalResultMap" type="org.hswebframework.web.example.custom.entity.CustomOrganizationalEntity">
         <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
         <result property="name" column="name" javaType="String" jdbcType="VARCHAR"/>
@@ -143,7 +144,7 @@ java类
         <bind name="resultMapId" value="'OrganizationalResultMap'"/>
         <bind name="tableName" value="'s_organization'"/>
     </sql>
-
+    <!--修改parameterType为新的实体类型-->
     <insert id="insert" parameterType="org.hswebframework.web.example.custom.entity.CustomOrganizationalEntity">
         <include refid="config"/>
         <include refid="BasicMapper.buildInsertSql"/>
