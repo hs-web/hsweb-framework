@@ -31,6 +31,7 @@
     <modules>
         <module>hsweb-examples-simple</module>
         <module>hsweb-examples-oauth2</module>
+        <module>hsweb-examples-custom-entity</module>
     </modules>
 
     <build>
