@@ -16,7 +16,7 @@
  *
  */
 
-package org.hswebframework.web.starter;
+package org.hswebframework.web.starter.entity;
 
 import org.hswebframework.web.commons.entity.Entity;
 import org.hswebframework.web.commons.entity.factory.MapperEntityFactory;
