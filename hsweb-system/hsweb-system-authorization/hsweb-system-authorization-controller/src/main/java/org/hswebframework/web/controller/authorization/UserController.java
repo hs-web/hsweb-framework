@@ -112,6 +112,15 @@ public class UserController implements
         return ok();
     }
 
+    @Override
+    public ResponseMessage<String> add(@RequestBody BindRoleUserEntity data) {
+        Authentication authentication = Authentication.current().orElse(null);
+        if (null != authentication) {
+            data.setCreatorId(authentication.getUser().getId());
+        }
+        return CreateController.super.add(data);
+    }
+
     @Authorize(action = "enable")
     @PutMapping(path = "/{id}/enable")
     @AccessLogger("{enable_user}")

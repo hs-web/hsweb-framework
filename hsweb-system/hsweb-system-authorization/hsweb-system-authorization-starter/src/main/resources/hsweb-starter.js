@@ -45,7 +45,7 @@ function install(context) {
         .addColumn().name("status").number(4).notNull().comment("用户状态").commit()
         .addColumn().name("last_login_ip").varchar(128).comment("上一次登录的ip地址").commit()
         .addColumn().name("last_login_time").number(32).comment("上一次登录时间").commit()
-        .addColumn().name("creator_id").varchar(32).notNull().comment("创建者ID").commit()
+        .addColumn().name("creator_id").varchar(32).comment("创建者ID").commit()
         .addColumn().name("create_time").number(32).notNull().comment("创建时间").commit()
         .comment("用户表").commit();
 
