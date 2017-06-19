@@ -18,14 +18,11 @@
 
 package org.hswebframework.web.authorization.shiro.boost;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.shiro.aop.AnnotationResolver;
 import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.shiro.authz.aop.AuthorizingAnnotationHandler;
 import org.apache.shiro.authz.aop.AuthorizingAnnotationMethodInterceptor;
-import org.hswebframework.expands.script.engine.DynamicScriptEngine;
-import org.hswebframework.expands.script.engine.DynamicScriptEngineFactory;
 import org.hswebframework.utils.ClassUtils;
 import org.hswebframework.utils.StringUtils;
 import org.hswebframework.web.ExpressionUtils;
@@ -56,6 +53,7 @@ public class SimpleAuthorizeMethodInterceptor extends AuthorizingAnnotationMetho
 
     private static final Logger logger = LoggerFactory.getLogger(SimpleAuthorizeMethodInterceptor.class);
 
+
     static class AuthorizeAnnotationHandler extends AuthorizingAnnotationHandler {
 
         public AuthorizeAnnotationHandler() {
@@ -72,9 +70,12 @@ public class SimpleAuthorizeMethodInterceptor extends AuthorizingAnnotationMetho
             }
             AuthorizeConfig authorizeConfig = new AuthorizeConfig(holder.getArgs());
             Authorize authorize = ((Authorize) a);
+            if (authorize.ignore()) return;
+
             if (authorize.merge()) {
                 Authorize classAnn = ClassUtils.getAnnotation(holder.getTarget().getClass(), Authorize.class);
                 if (null != classAnn) {
+                    if (classAnn.ignore()) return;
                     authorizeConfig.put(classAnn);
                 }
             }
