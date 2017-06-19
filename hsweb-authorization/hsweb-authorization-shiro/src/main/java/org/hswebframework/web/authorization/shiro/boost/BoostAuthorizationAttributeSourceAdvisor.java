@@ -95,7 +95,7 @@ public class BoostAuthorizationAttributeSourceAdvisor extends StaticMethodMatche
         if (null != authorize) {
             if (authorize.ignore()) return false;
         }
-        authorize = AopUtils.findAnnotation(targetClass, method, Authorize.class);
+        authorize = AopUtils.findAnnotation(targetClass, Authorize.class);
         if (null != authorize) {
             if (authorize.ignore()) return false;
         }
