@@ -25,6 +25,7 @@ import org.apache.ibatis.session.TransactionIsolationLevel;
 import org.apache.ibatis.transaction.Transaction;
 import org.hsweb.ezorm.rdb.executor.AbstractJdbcSqlExecutor;
 import org.hsweb.ezorm.rdb.executor.SqlExecutor;
+import org.hswebframework.web.commons.entity.factory.EntityFactory;
 import org.hswebframework.web.dao.datasource.DataSourceHolder;
 import org.hswebframework.web.dao.datasource.DatabaseType;
 import org.hswebframework.web.dao.mybatis.dynamic.DynamicDataSourceSqlSessionFactoryBuilder;
@@ -68,6 +69,8 @@ public class MyBatisAutoConfiguration {
     @Autowired(required = false)
     private DatabaseIdProvider databaseIdProvider;
 
+    @Autowired(required = false)
+    private EntityFactory entityFactory;
 
     @Bean
     @Primary
@@ -79,6 +82,9 @@ public class MyBatisAutoConfiguration {
     @Bean(name = "sqlSessionFactory")
     public SqlSessionFactory sqlSessionFactory(@Qualifier("dataSource") DataSource dataSource) throws Exception {
         SqlSessionFactoryBean factory = new SqlSessionFactoryBean();
+        if (null != entityFactory) {
+            factory.setObjectFactory(new MybatisEntityFactory(entityFactory));
+        }
         factory.setVfs(SpringBootVFS.class);
         if (mybatisProperties.isDynamicDatasource()) {
             factory.setSqlSessionFactoryBuilder(new DynamicDataSourceSqlSessionFactoryBuilder());
