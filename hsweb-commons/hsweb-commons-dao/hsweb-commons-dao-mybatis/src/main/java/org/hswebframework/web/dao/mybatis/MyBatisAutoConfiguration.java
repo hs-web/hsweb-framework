@@ -124,16 +124,6 @@ public class MyBatisAutoConfiguration {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return new AbstractJdbcSqlExecutor() {
-            @Override
-            public Connection getConnection() {
-                return DataSourceUtils.getConnection(dataSource);
-            }
-
-            @Override
-            public void releaseConnection(Connection connection) throws SQLException {
-                DataSourceUtils.releaseConnection(connection, dataSource);
-            }
-        };
+        return new DefaultJdbcExecutor(dataSource);
     }
 }

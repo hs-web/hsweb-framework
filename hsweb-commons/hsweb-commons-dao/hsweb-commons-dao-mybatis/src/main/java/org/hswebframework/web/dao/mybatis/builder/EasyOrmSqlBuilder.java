@@ -29,6 +29,8 @@ import org.hsweb.ezorm.core.param.UpdateParam;
 import org.hsweb.ezorm.rdb.meta.RDBColumnMetaData;
 import org.hsweb.ezorm.rdb.meta.RDBDatabaseMetaData;
 import org.hsweb.ezorm.rdb.meta.RDBTableMetaData;
+import org.hsweb.ezorm.rdb.meta.converter.DateTimeConverter;
+import org.hsweb.ezorm.rdb.meta.converter.NumberValueConverter;
 import org.hsweb.ezorm.rdb.render.SqlAppender;
 import org.hsweb.ezorm.rdb.render.SqlRender;
 import org.hsweb.ezorm.rdb.render.dialect.Dialect;
@@ -146,6 +148,12 @@ public class EasyOrmSqlBuilder {
                     column.setAlias(resultMapping.getProperty());
                 column.setJavaType(resultMapping.getJavaType());
                 column.setProperty("resultMapping", resultMapping);
+                if (column.getJdbcType() == JDBCType.DATE || column.getJdbcType() == JDBCType.TIME) {
+                    column.setValueConverter(new DateTimeConverter("yyyy-MM-dd HH:mm:ss", column.getJavaType()));
+                }
+                if (column.getJdbcType() == JDBCType.NUMERIC) {
+                    column.setValueConverter(new NumberValueConverter(column.getJavaType()));
+                }
                 rdbTableMetaData.addColumn(column);
             }
         });
@@ -248,7 +256,7 @@ public class EasyOrmSqlBuilder {
         }
         RDBTableMetaData tableMetaData = createMeta(tableName, resultMapId);
         SqlAppender appender = new SqlAppender(" order by ");
-        param.getSorts().stream()
+        param.getSorts()
                 .forEach(sort -> {
                     RDBColumnMetaData column = tableMetaData.getColumn(sort.getName());
                     if (column == null)
