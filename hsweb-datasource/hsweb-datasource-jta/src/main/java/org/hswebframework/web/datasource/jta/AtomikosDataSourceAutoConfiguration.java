@@ -37,8 +37,4 @@ public class AtomikosDataSourceAutoConfiguration {
         return new JtaDynamicDataSourceService(jtaDataSourceRepository, dataSource);
     }
 
-    @Bean
-    public JtaJdbcSqlExecutor jtaJdbcSqlExecutor() {
-        return new JtaJdbcSqlExecutor();
-    }
 }
