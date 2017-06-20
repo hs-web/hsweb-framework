@@ -11,7 +11,7 @@ import java.util.Map;
  * @author zhouhao
  */
 @ConfigurationProperties(prefix = "hsweb.dynamic")
-public class MemoryJtaDataSourceStore implements JtaDataSourceStore {
+public class MemoryJtaDataSourceRepository implements JtaDataSourceRepository {
     private Map<String, AtomikosDataSourceConfig> datasource = new HashMap<>();
 
     @Override

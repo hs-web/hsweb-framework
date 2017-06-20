@@ -5,7 +5,7 @@ package org.hswebframework.web.datasource.jta;
  *
  * @author zhouhao
  */
-public interface JtaDataSourceStore {
+public interface JtaDataSourceRepository {
 
     AtomikosDataSourceConfig getConfig(String id);
 

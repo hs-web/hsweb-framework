@@ -47,7 +47,7 @@ public class DynamicDataSourceProxy implements DynamicDataSource {
                             databaseType = DatabaseType.fromJdbcUrl(connection.getMetaData().getURL());
                         }
                     } catch (SQLException e) {
-                        e.printStackTrace();
+                        throw new RuntimeException(e);
                     }
                 }
             }

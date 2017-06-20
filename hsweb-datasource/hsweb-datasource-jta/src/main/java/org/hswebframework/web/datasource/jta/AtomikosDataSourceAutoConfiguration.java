@@ -25,15 +25,20 @@ public class AtomikosDataSourceAutoConfiguration {
         return new AtomikosDataSourceBean();
     }
 
-    @ConditionalOnMissingBean(JtaDataSourceStore.class)
+    @ConditionalOnMissingBean(JtaDataSourceRepository.class)
     @Bean
-    public MemoryJtaDataSourceStore memoryJtaDataSourceStore() {
-        return new MemoryJtaDataSourceStore();
+    public MemoryJtaDataSourceRepository memoryJtaDataSourceStore() {
+        return new MemoryJtaDataSourceRepository();
     }
 
     @Bean
     @ConditionalOnMissingBean(DynamicDataSourceService.class)
-    public JtaDynamicDataSourceService jtaDynamicDataSourceService(JtaDataSourceStore jtaDataSourceStore, DataSource dataSource) throws SQLException {
-        return new JtaDynamicDataSourceService(jtaDataSourceStore, dataSource);
+    public JtaDynamicDataSourceService jtaDynamicDataSourceService(JtaDataSourceRepository jtaDataSourceRepository, DataSource dataSource) throws SQLException {
+        return new JtaDynamicDataSourceService(jtaDataSourceRepository, dataSource);
+    }
+
+    @Bean
+    public JtaJdbcSqlExecutor jtaJdbcSqlExecutor() {
+        return new JtaJdbcSqlExecutor();
     }
 }

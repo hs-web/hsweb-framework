@@ -69,30 +69,8 @@ public class SimpleAtomikosTests {
     @Configuration
     @SpringBootApplication
     @EnableJms
-    @ImportAutoConfiguration(AopDataSourceSwitcherAutoConfiguration.class)
     @EnableAspectJAutoProxy
     public static class Config {
-        @Bean
-        public SqlExecutor sqlExecutor() {
-            return new AbstractJdbcSqlExecutor() {
-
-                @Override
-                @Transactional(propagation = Propagation.NOT_SUPPORTED)
-                public void exec(SQL sql) throws SQLException {
-                    super.exec(sql);
-                }
-
-                @Override
-                public Connection getConnection() {
-                    return DataSourceUtils.getConnection(DataSourceHolder.currentDataSource());
-                }
-
-                @Override
-                public void releaseConnection(Connection connection) throws SQLException {
-                    DataSourceUtils.releaseConnection(connection, DataSourceHolder.currentDataSource());
-                }
-            };
-        }
 
         @Bean
         public DynDsTest transTest(SqlExecutor sqlExecutor) {

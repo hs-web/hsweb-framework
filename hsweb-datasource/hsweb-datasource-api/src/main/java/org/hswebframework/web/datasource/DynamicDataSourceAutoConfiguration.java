@@ -1,9 +1,11 @@
 package org.hswebframework.web.datasource;
 
+import org.hswebframework.web.datasource.starter.AopDataSourceSwitcherAutoConfiguration;
 import org.hswebframework.web.datasource.switcher.DataSourceSwitcher;
 import org.hswebframework.web.datasource.switcher.DefaultDataSourceSwitcher;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -15,6 +17,7 @@ import org.springframework.context.annotation.Configuration;
  * @author zhouhao
  */
 @Configuration
+@ImportAutoConfiguration(AopDataSourceSwitcherAutoConfiguration.class)
 public class DynamicDataSourceAutoConfiguration implements BeanPostProcessor {
 
     @Bean
