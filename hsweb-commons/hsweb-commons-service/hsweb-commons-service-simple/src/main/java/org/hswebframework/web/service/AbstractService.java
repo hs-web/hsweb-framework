@@ -1,16 +1,19 @@
 package org.hswebframework.web.service;
 
+import org.hswebframework.utils.ClassUtils;
 import org.hswebframework.web.NotFoundException;
 import org.hswebframework.web.commons.entity.Entity;
 import org.hswebframework.web.commons.entity.factory.EntityFactory;
 import org.hswebframework.web.validate.SimpleValidateResults;
 import org.hswebframework.web.validate.ValidationException;
-import org.hswebframework.utils.ClassUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
+import java.util.Set;
+import java.util.function.Supplier;
 
 /**
  * 抽象服务类,提供通用模板方法、类,如验证器,实体工厂等
@@ -95,13 +98,26 @@ public abstract class AbstractService<E extends Entity, PK> implements CreateEnt
         }
     }
 
-    protected void tryValidate(Object data) {
+    protected void tryValidate(Object data, String property, Class... groups) {
+        validate(() -> validator.validateProperty(data, property, groups));
+    }
+
+    protected void tryValidate(Class type, String property, Object value, Class... groups) {
+        validate(() -> validator.validateValue(type, property, value, groups));
+    }
+
+    protected void tryValidate(Object data, Class... groups) {
+        validate(() -> validator.validate(data, groups));
+    }
+
+    private <T> void validate(Supplier<Set<ConstraintViolation<T>>> validatorSetFunction) {
         if (validator == null) {
             logger.warn("validator is null!");
             return;
         }
         SimpleValidateResults results = new SimpleValidateResults();
-        validator.validate(data).forEach(violation -> results.addResult(violation.getPropertyPath().toString(), violation.getMessage()));
+        validatorSetFunction.get()
+                .forEach(violation -> results.addResult(violation.getPropertyPath().toString(), violation.getMessage()));
         if (!results.isSuccess())
             throw new ValidationException(results);
     }
