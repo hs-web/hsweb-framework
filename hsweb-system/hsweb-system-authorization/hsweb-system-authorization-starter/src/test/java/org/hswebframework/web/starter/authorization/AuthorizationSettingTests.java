@@ -69,7 +69,6 @@ public class AuthorizationSettingTests extends SimpleWebApplicationTests {
         //todo 修改测试属性
         AuthorizationSettingEntity newEntity = entityFactory.newInstance(AuthorizationSettingEntity.class);
         newEntity.setId("test");
-
         newEntity.setDescribe("测试2");
         result = testPut("/autz-setting/" + id)
                 .setUp(setup ->

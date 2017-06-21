@@ -36,6 +36,7 @@ import org.hswebframework.web.service.DefaultDSLQueryService;
 import org.hswebframework.web.service.GenericEntityService;
 import org.hswebframework.web.service.authorization.*;
 import org.hswebframework.web.service.authorization.AuthorizationSettingTypeSupplier.SettingInfo;
+import org.hswebframework.web.validator.group.CreateGroup;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
@@ -128,7 +129,7 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
         }
         if (entity.getDetails() != null) {
             for (AuthorizationSettingDetailEntity detail : entity.getDetails()) {
-                tryValidate(detail);
+                tryValidate(detail, CreateGroup.class);
                 detail.setId(getIDGenerator().generate());
                 detail.setSettingId(id);
                 detail.setStatus(STATUS_ENABLED);

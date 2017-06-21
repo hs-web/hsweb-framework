@@ -16,7 +16,9 @@
  */
 package org.hswebframework.web.entity.authorization;
 
+import org.hibernate.validator.constraints.NotBlank;
 import org.hswebframework.web.commons.entity.GenericEntity;
+import org.hswebframework.web.validator.group.CreateGroup;
 
 import java.util.List;
 
@@ -49,6 +51,7 @@ public interface AuthorizationSettingEntity extends GenericEntity<String> {
     /**
      * @return 类型
      */
+    @NotBlank(groups = CreateGroup.class)
     String getType();
 
     /**
@@ -59,6 +62,7 @@ public interface AuthorizationSettingEntity extends GenericEntity<String> {
     /**
      * @return 设置给谁
      */
+    @NotBlank(groups = CreateGroup.class)
     String getSettingFor();
 
     /**

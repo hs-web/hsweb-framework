@@ -20,7 +20,6 @@ package org.hswebframework.web.controller.authorization;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
-import org.hswebframework.web.controller.GenericEntityController;
 import org.hswebframework.web.controller.SimpleGenericEntityController;
 import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.entity.authorization.AuthorizationSettingEntity;

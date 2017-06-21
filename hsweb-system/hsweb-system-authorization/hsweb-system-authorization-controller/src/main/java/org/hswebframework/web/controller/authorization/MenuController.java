@@ -29,7 +29,6 @@ import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.entity.authorization.MenuEntity;
 import org.hswebframework.web.entity.authorization.UserMenuEntity;
 import org.hswebframework.web.logging.AccessLogger;
-import org.hswebframework.web.service.authorization.MenuGroupService;
 import org.hswebframework.web.service.authorization.MenuService;
 import org.hswebframework.web.service.authorization.UserMenuManagerService;
 import org.springframework.beans.factory.annotation.Autowired;

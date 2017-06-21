@@ -27,6 +27,7 @@ import java.util.List;
  */
 public interface MenuEntity
         extends TreeSortSupportEntity<String> {
+
     String getName();
 
     void setName(String name);

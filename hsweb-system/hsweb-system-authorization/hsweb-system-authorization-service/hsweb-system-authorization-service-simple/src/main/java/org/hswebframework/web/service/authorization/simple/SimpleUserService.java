@@ -17,6 +17,7 @@ import org.hswebframework.web.service.DefaultDSLUpdateService;
 import org.hswebframework.web.service.authorization.*;
 import org.hswebframework.web.validate.ValidationException;
 import org.hswebframework.utils.ListUtils;
+import org.hswebframework.web.validator.group.CreateGroup;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Caching;
@@ -112,7 +113,7 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
         userEntity.setSalt(IDGenerator.RANDOM.generate());
         userEntity.setStatus(DataStatus.STATUS_ENABLED);
         //验证其他属性
-        tryValidate(userEntity);
+        tryValidate(userEntity, CreateGroup.class);
         //密码MD5
         userEntity.setPassword(encodePassword(userEntity.getPassword(), userEntity.getSalt()));
         //创建用户
