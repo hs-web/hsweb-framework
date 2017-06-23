@@ -16,7 +16,6 @@
  */
 package org.hswebframework.web.service.authorization.simple;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.AuthenticationInitializeService;
 import org.hswebframework.web.authorization.Permission;
@@ -25,7 +24,6 @@ import org.hswebframework.web.authorization.simple.SimpleAuthentication;
 import org.hswebframework.web.authorization.simple.SimplePermission;
 import org.hswebframework.web.authorization.simple.SimpleRole;
 import org.hswebframework.web.authorization.simple.SimpleUser;
-import org.hswebframework.web.commons.entity.DataStatus;
 import org.hswebframework.web.commons.entity.TreeSupportEntity;
 import org.hswebframework.web.dao.authorization.AuthorizationSettingDao;
 import org.hswebframework.web.dao.authorization.AuthorizationSettingDetailDao;
@@ -49,10 +47,10 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.apache.commons.collections.CollectionUtils.*;
-import static org.hswebframework.web.commons.entity.DataStatus.*;
+import static org.apache.commons.collections.CollectionUtils.isEmpty;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static org.hswebframework.web.commons.entity.DataStatus.STATUS_ENABLED;
 import static org.hswebframework.web.entity.authorization.AuthorizationSettingDetailEntity.*;
-import static org.hswebframework.web.entity.authorization.AuthorizationSettingDetailEntity.STATE_OK;
 import static org.hswebframework.web.entity.authorization.AuthorizationSettingEntity.settingFor;
 import static org.hswebframework.web.entity.authorization.AuthorizationSettingEntity.type;
 import static org.hswebframework.web.service.authorization.simple.CacheConstants.USER_AUTH_CACHE_NAME;
@@ -129,10 +127,10 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
         }
         if (entity.getDetails() != null) {
             for (AuthorizationSettingDetailEntity detail : entity.getDetails()) {
-                tryValidate(detail, CreateGroup.class);
                 detail.setId(getIDGenerator().generate());
                 detail.setSettingId(id);
                 detail.setStatus(STATUS_ENABLED);
+                tryValidate(detail, CreateGroup.class);
                 authorizationSettingDetailDao.insert(detail);
             }
         }
@@ -160,6 +158,7 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
                 detail.setId(getIDGenerator().generate());
                 detail.setSettingId(id);
                 detail.setStatus(STATUS_ENABLED);
+                tryValidate(detail, CreateGroup.class);
                 authorizationSettingDetailDao.insert(detail);
             }
         }
@@ -169,7 +168,10 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
     @Override
     @CacheEvict(allEntries = true)
     public int deleteByPk(String id) {
+        Objects.requireNonNull(id, "id can not be null");
         authorizationSettingMenuService.deleteBySettingId(id);
+        DefaultDSLDeleteService.createDelete(authorizationSettingDetailDao)
+                .where(AuthorizationSettingDetailEntity.settingId, id).exec();
         return super.deleteByPk(id);
     }
 
