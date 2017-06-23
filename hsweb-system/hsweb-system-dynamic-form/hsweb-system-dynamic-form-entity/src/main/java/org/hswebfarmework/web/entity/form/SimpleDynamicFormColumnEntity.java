@@ -9,21 +9,21 @@ import org.hswebframework.web.commons.entity.SimpleGenericEntity;
  */
 public class SimpleDynamicFormColumnEntity extends SimpleGenericEntity<String> implements DynamicFormColumnEntity {
     //表单ID
-    private String  formId;
+    private String formId;
     //字段名称
-    private String  name;
+    private String name;
     //数据库列
-    private String  columnName;
+    private String columnName;
     //备注
-    private String  describe;
+    private String describe;
     //别名
-    private String  alias;
+    private String alias;
     //java类型
-    private String  javaType;
+    private String javaType;
     //jdbc类型
-    private String  jdbcType;
+    private String jdbcType;
     //数据类型
-    private String  dataType;
+    private String dataType;
     //长度
     private Integer length;
     //精度
@@ -31,7 +31,7 @@ public class SimpleDynamicFormColumnEntity extends SimpleGenericEntity<String> i
     //小数点位数
     private Integer scale;
     //其他配置
-    private String  properties;
+    private String properties;
 
     /**
      * @return 表单ID

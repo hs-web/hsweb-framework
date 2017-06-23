@@ -24,19 +24,19 @@
     <dependencies>
         <dependency>
             <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-system-form-service-simple</artifactId>
+            <artifactId>hsweb-system-dynamic-form-service-simple</artifactId>
             <version>${project.version}</version>
         </dependency>
       
         <dependency>
             <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-system-form-dao-mybatis</artifactId>
+            <artifactId>hsweb-system-dynamic-form-dao-mybatis</artifactId>
             <version>${project.version}</version>
         </dependency>
       
         <dependency>
             <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-system-form-controller</artifactId>
+            <artifactId>hsweb-system-dynamic-form-controller</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -56,14 +56,14 @@
         <dependency>
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-spring-boot-starter</artifactId>
-            <version>${hsweb.framework.version}</version>
+            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-tests</artifactId>
-            <version>${hsweb.framework.version}</version>
+            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
 

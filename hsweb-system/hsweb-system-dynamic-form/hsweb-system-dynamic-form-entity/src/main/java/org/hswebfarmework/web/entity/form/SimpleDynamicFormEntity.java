@@ -11,7 +11,7 @@ public class SimpleDynamicFormEntity extends SimpleGenericEntity<String> impleme
   		//数据库表名
         private String tableName;
   		//备注
-        private String descibe;
+        private String describe;
   		//版本
         private Long version;
   		//创建人id
@@ -30,8 +30,6 @@ public class SimpleDynamicFormEntity extends SimpleGenericEntity<String> impleme
         private String correlations;
   		//数据源id,为空使用默认数据源
         private String dataSourceId;
-  		//其他配置
-        private String properties;
   		//表单类型
         private String type;
 
@@ -64,15 +62,15 @@ public class SimpleDynamicFormEntity extends SimpleGenericEntity<String> impleme
         /**
         * @return  备注
         */
-        public String getDescibe(){
-			return this.descibe;
+        public String getDescribe(){
+			return this.describe;
         }
 
         /**
-        * @param  descibe  备注
+        * @param  describe  备注
         */
-        public void setDescibe(String descibe){
-        	this.descibe=descibe;
+        public void setDescribe(String describe){
+        	this.describe = describe;
         }
         /**
         * @return  版本
@@ -191,19 +189,7 @@ public class SimpleDynamicFormEntity extends SimpleGenericEntity<String> impleme
         public void setDataSourceId(String dataSourceId){
         	this.dataSourceId=dataSourceId;
         }
-        /**
-        * @return  其他配置
-        */
-        public String getProperties(){
-			return this.properties;
-        }
 
-        /**
-        * @param  properties  其他配置
-        */
-        public void setProperties(String properties){
-        	this.properties=properties;
-        }
         /**
         * @return  表单类型
         */
