@@ -5,7 +5,22 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReadWriteLock;
 
 /**
- * 写锁注解,在方法上注解,则对此方法加锁.
+ * 写锁注解,在方法上注解,则对此方法加锁.<br>
+ * e.g.
+ * <pre>
+ *     &#064;ReadLock("my_lock_${#id}")
+ *     public void foo(String id){
+ *          //do some thing
+ *     }
+ * </pre>
+ * 满足条件才锁
+ * e.g.
+ * <pre>
+ *     &#064;WriteLock(value="my_lock_${#id}",condition="#id!=null")
+ *     public void foo(String id){
+ *
+ *     }
+ * </pre>
  *
  * @author zhouhao
  * @see org.hswebframework.web.concurrent.lock.LockManager
