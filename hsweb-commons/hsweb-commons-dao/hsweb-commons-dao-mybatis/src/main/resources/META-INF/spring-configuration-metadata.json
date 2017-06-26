@@ -1,0 +1,151 @@
+{
+  "groups": [
+    {
+      "name": "mybatis",
+      "type": "org.hswebframework.web.dao.mybatis.MybatisProperties",
+      "sourceType": "org.hswebframework.web.dao.mybatis.MybatisProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "mybatis.dynamic-datasource",
+      "type": "java.lang.Boolean",
+      "sourceType": "org.hswebframework.web.dao.mybatis.MybatisProperties",
+      "description": "enable dynamicDatasource."
+    },
+    {
+      "name": "mybatis.mapper-location-excludes",
+      "type": "java.lang.String[]",
+      "sourceType": "org.hswebframework.web.dao.mybatis.MybatisProperties",
+      "description": "exclude mapperLocations."
+    },
+    {
+      "name": "mybatis.check-config-location",
+      "type": "java.lang.Boolean",
+      "sourceType": "org.hswebframework.web.dao.mybatis.MybatisProperties"
+    },
+    {
+      "name": "mybatis.check-config-location",
+      "type": "java.lang.Boolean",
+      "sourceType": "org.hswebframework.web.dao.mybatis.MybatisProperties"
+    },
+    {
+      "name": "mybatis.check-config-location",
+      "type": "java.lang.Boolean",
+      "sourceType": "org.hswebframework.web.dao.mybatis.MybatisProperties"
+    },
+    {
+      "name": "mybatis.check-config-location",
+      "type": "java.lang.Boolean",
+      "description": "Check the config file exists.",
+      "sourceType": "org.hswebframework.web.dao.mybatis.MybatisProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "mybatis.config",
+      "type": "java.lang.String",
+      "sourceType": "org.hswebframework.web.dao.mybatis.MybatisProperties"
+    },
+    {
+      "name": "mybatis.config",
+      "type": "java.lang.String",
+      "sourceType": "org.hswebframework.web.dao.mybatis.MybatisProperties"
+    },
+    {
+      "name": "mybatis.config",
+      "type": "java.lang.String",
+      "sourceType": "org.hswebframework.web.dao.mybatis.MybatisProperties"
+    },
+    {
+      "name": "mybatis.config",
+      "type": "java.lang.String",
+      "description": "Config file path.",
+      "sourceType": "org.hswebframework.web.dao.mybatis.MybatisProperties"
+    },
+    {
+      "name": "mybatis.executor-type",
+      "type": "org.apache.ibatis.session.ExecutorType",
+      "sourceType": "org.hswebframework.web.dao.mybatis.MybatisProperties"
+    },
+    {
+      "name": "mybatis.executor-type",
+      "type": "org.apache.ibatis.session.ExecutorType",
+      "sourceType": "org.hswebframework.web.dao.mybatis.MybatisProperties"
+    },
+    {
+      "name": "mybatis.executor-type",
+      "type": "org.apache.ibatis.session.ExecutorType",
+      "sourceType": "org.hswebframework.web.dao.mybatis.MybatisProperties"
+    },
+    {
+      "name": "mybatis.executor-type",
+      "type": "org.apache.ibatis.session.ExecutorType",
+      "description": "Execution mode.",
+      "sourceType": "org.hswebframework.web.dao.mybatis.MybatisProperties"
+    },
+    {
+      "name": "mybatis.mapper-locations",
+      "type": "java.lang.String[]",
+      "sourceType": "org.hswebframework.web.dao.mybatis.MybatisProperties"
+    },
+    {
+      "name": "mybatis.mapper-locations",
+      "type": "java.lang.String[]",
+      "sourceType": "org.hswebframework.web.dao.mybatis.MybatisProperties"
+    },
+    {
+      "name": "mybatis.mapper-locations",
+      "type": "java.lang.String[]",
+      "sourceType": "org.hswebframework.web.dao.mybatis.MybatisProperties"
+    },
+    {
+      "name": "mybatis.mapper-locations",
+      "type": "java.lang.String[]",
+      "description": "Location of mybatis mapper files.",
+      "sourceType": "org.hswebframework.web.dao.mybatis.MybatisProperties"
+    },
+    {
+      "name": "mybatis.type-aliases-package",
+      "type": "java.lang.String",
+      "sourceType": "org.hswebframework.web.dao.mybatis.MybatisProperties"
+    },
+    {
+      "name": "mybatis.type-aliases-package",
+      "type": "java.lang.String",
+      "sourceType": "org.hswebframework.web.dao.mybatis.MybatisProperties"
+    },
+    {
+      "name": "mybatis.type-aliases-package",
+      "type": "java.lang.String",
+      "sourceType": "org.hswebframework.web.dao.mybatis.MybatisProperties"
+    },
+    {
+      "name": "mybatis.type-aliases-package",
+      "type": "java.lang.String",
+      "description": "Package to scan domain objects.",
+      "sourceType": "org.hswebframework.web.dao.mybatis.MybatisProperties"
+    },
+    {
+      "name": "mybatis.type-handlers-package",
+      "type": "java.lang.String",
+      "sourceType": "org.hswebframework.web.dao.mybatis.MybatisProperties"
+    },
+    {
+      "name": "mybatis.type-handlers-package",
+      "type": "java.lang.String",
+      "sourceType": "org.hswebframework.web.dao.mybatis.MybatisProperties"
+    },
+    {
+      "name": "mybatis.type-handlers-package",
+      "type": "java.lang.String",
+      "sourceType": "org.hswebframework.web.dao.mybatis.MybatisProperties"
+    },
+    {
+      "name": "mybatis.type-handlers-package",
+      "type": "java.lang.String",
+      "description": "Package to scan handlers.",
+      "sourceType": "org.hswebframework.web.dao.mybatis.MybatisProperties"
+    }
+  ],
+  "hints": []
+}

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<!--
+  ~  Copyright 2016 http://www.hswebframework.org
+  ~
+  ~  Licensed under the Apache License, Version 2.0 (the "License");
+  ~  you may not use this file except in compliance with the License.
+  ~  You may obtain a copy of the License at
+  ~
+  ~        http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  ~
+  ~
+  -->
+
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv=Content-Type content="text/html;charset=utf-8">
+    <title>登录</title>
+    <script type="application/javascript" src="//cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
+
+</head>
+<body>
+<button onclick="doHswebLogin()">使用hsweb登录</button>
+</body>
+</html>
+<script type="text/javascript">
+    function doHswebLogin() {
+        var uri = getRequest()["redirect"];
+        if (!uri) uri = "/";
+        window.open('/oauth2/boot/hsweb-oauth-server?redirect=' + uri);
+        var principal = "hsweb_oauth2_example";
+//        var api = "http://localhost:8080/oauth2/login.html";
+//        //申请一个state
+//        doAjax("GET", "/oauth2/state", {}, function (e) {
+//            if (e) {
+//                window.open(api + "?client_id=" + principal + "&response_type=code&state=" + e.result + "&redirect_uri="
+//                    + escape("http://localhost:8808/oauth2/callback/hsweb-oauth-server/?redirect=" + uri))
+//            }
+//        });
+    }
+
+    function getRequest() {
+        var url = location.search; //获取url中"?"符后的字串
+        var theRequest = new Object();
+        if (url.indexOf("?") != -1) {
+            var str = url.substr(1);
+            strs = str.split("&");
+            for (var i = 0; i < strs.length; i++) {
+                theRequest[strs[i].split("=")[0]] = unescape((strs[i].split("=")[1]));
+            }
+        }
+        return theRequest;
+    }
+
+    function doAjax(method, url, data, success, error) {
+        $.ajax({
+            type: method,
+            url: url,
+            data: data,
+            success: success,
+            error: function (e) {
+                error(e.responseJSON);
+            },
+            dataType: "json"
+        });
+    }
+</script>
