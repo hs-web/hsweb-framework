@@ -23,17 +23,14 @@ import com.alibaba.fastjson.JSONObject;
 import org.hswebframework.web.commons.entity.DataStatus;
 import org.hswebframework.web.entity.dictionary.DictionaryEntity;
 import org.hswebframework.web.entity.dictionary.DictionaryItemEntity;
-import org.hswebframework.web.entity.dictionary.SimpleDictionaryEntity;
 import org.hswebframework.web.entity.dictionary.SimpleDictionaryItemEntity;
-import org.hswebframework.web.starter.convert.FastJsonHttpMessageConverter;
+import org.hswebframework.web.starter.convert.FastJsonGenericHttpMessageConverter;
 import org.hswebframework.web.tests.SimpleWebApplicationTests;
 import org.junit.Assert;
 import org.junit.Test;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 
-import javax.xml.crypto.Data;
 import java.util.List;
 
 /**
@@ -44,7 +41,7 @@ import java.util.List;
 public class DictionaryTests extends SimpleWebApplicationTests {
 
     @Autowired
-    private FastJsonHttpMessageConverter fastJsonHttpMessageConverter;
+    private FastJsonGenericHttpMessageConverter fastJsonHttpMessageConverter;
 
     @Test
     public void testCrud() throws Exception {
