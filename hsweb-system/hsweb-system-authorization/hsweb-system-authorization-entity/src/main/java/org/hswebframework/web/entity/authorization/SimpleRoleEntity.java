@@ -12,7 +12,7 @@ public class SimpleRoleEntity extends SimpleGenericEntity<String> implements Rol
 
     private String describe;
 
-    private Boolean enabled;
+    private Byte status;
 
     public String getName() {
         return name;
@@ -30,24 +30,17 @@ public class SimpleRoleEntity extends SimpleGenericEntity<String> implements Rol
         this.describe = describe;
     }
 
-    @Override
-    public Boolean isEnabled() {
-        return enabled;
+    public Byte getStatus() {
+        return status;
     }
 
-    @Override
-    public void setEnabled(Boolean enabled) {
-        this.enabled = enabled;
+    public void setStatus(Byte status) {
+        this.status = status;
     }
 
     @Override
     public SimpleRoleEntity clone() {
         SimpleRoleEntity target = ((SimpleRoleEntity) super.clone());
-//        target.setId(getId());
-//        target.setName(getName());
-//        target.setDescribe(getDescribe());
-//        target.setProperties(cloneProperties());
-//        target.setEnabled(isEnabled());
         return target;
     }
 }

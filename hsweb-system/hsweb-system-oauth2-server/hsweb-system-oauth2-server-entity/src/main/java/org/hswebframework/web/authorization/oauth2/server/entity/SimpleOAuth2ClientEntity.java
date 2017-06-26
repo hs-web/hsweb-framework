@@ -42,11 +42,11 @@ public class SimpleOAuth2ClientEntity extends SimpleGenericEntity<String> implem
 
     private String describe;
 
-    private Set<String> supportGrantType;
+    private Set<String> supportGrantTypes;
 
     private Set<String> defaultGrantScope;
 
-    private Boolean enabled;
+    private Byte status;
 
     public String getDescribe() {
         return describe;
@@ -122,12 +122,12 @@ public class SimpleOAuth2ClientEntity extends SimpleGenericEntity<String> implem
 
     @Override
     public Set<String> getSupportGrantTypes() {
-        return supportGrantType;
+        return supportGrantTypes;
     }
 
     @Override
     public void setSupportGrantTypes(Set<String> supportGrantType) {
-        this.supportGrantType = supportGrantType;
+        this.supportGrantTypes = supportGrantType;
     }
 
     @Override
@@ -141,11 +141,11 @@ public class SimpleOAuth2ClientEntity extends SimpleGenericEntity<String> implem
     }
 
     @Override
-    public Boolean isEnabled() {
-        return enabled;
+    public Byte getStatus() {
+        return status;
     }
 
-    public void setEnabled(Boolean enabled) {
-        this.enabled = enabled;
+    public void setStatus(Byte status) {
+        this.status = status;
     }
 }

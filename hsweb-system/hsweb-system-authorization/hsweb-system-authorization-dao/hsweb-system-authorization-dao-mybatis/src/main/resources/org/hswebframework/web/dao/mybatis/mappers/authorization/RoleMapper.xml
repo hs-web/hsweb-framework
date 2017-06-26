@@ -25,7 +25,7 @@
         <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
         <result property="name" column="name" javaType="string" jdbcType="VARCHAR"/>
         <result property="describe" column="describe" javaType="string" jdbcType="VARCHAR"/>
-        <result property="enabled" column="enabled" javaType="boolean" jdbcType="NUMERIC"/>
+        <result property="status" column="status" javaType="Byte" jdbcType="NUMERIC"/>
     </resultMap>
 
     <!--用于动态生成sql所需的配置-->

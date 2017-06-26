@@ -32,8 +32,11 @@ import org.hswebframework.web.dao.datasource.DataSourceHolder;
 import org.hswebframework.web.dao.datasource.DatabaseType;
 import org.hswebframework.web.starter.init.SystemInitialize;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
@@ -44,7 +47,8 @@ import java.sql.Connection;
  */
 @Configuration
 @EnableConfigurationProperties(AppProperties.class)
-public class SystemInitializeAutoConfiguration {
+@Order(Ordered.HIGHEST_PRECEDENCE)
+public class SystemInitializeAutoConfiguration implements CommandLineRunner {
 
     @Autowired
     private AppProperties appProperties;
@@ -55,8 +59,8 @@ public class SystemInitializeAutoConfiguration {
     @Autowired
     SqlExecutor sqlExecutor;
 
-    @PostConstruct
-    public void systemInitialize() throws Exception {
+    @Override
+    public void run(String... args) throws Exception {
         DatabaseType type = DataSourceHolder.getDefaultDatabaseType();
         SystemVersion version = appProperties.build();
         Connection connection = null;
@@ -90,6 +94,5 @@ public class SystemInitializeAutoConfiguration {
         initialize.addScriptContext("dbType", type.name());
 
         initialize.install();
-
     }
 }

@@ -16,9 +16,7 @@
  */
 package org.hswebframework.web.entity.organizational;
 
-import org.hswebframework.web.commons.entity.SimpleGenericEntity;
 import org.hswebframework.web.commons.entity.SimpleTreeSortSupportEntity;
-import org.hswebframework.web.commons.entity.TreeSupportEntity;
 
 import java.util.List;
 
@@ -37,15 +35,15 @@ public class SimplePositionEntity extends SimpleTreeSortSupportEntity<String> im
     //备注
     private String       remark;
 
-    private List<SimplePositionEntity> children;
+    private List<PositionEntity> children;
 
     @Override
     @SuppressWarnings("unchecked")
-    public List<SimplePositionEntity> getChildren() {
+    public List<PositionEntity> getChildren() {
         return children;
     }
 
-    public void setChildren(List<SimplePositionEntity> children) {
+    public void setChildren(List<PositionEntity> children) {
         this.children = children;
     }
 

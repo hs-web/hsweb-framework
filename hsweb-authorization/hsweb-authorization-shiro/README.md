@@ -10,11 +10,10 @@
 | [`@Authorize`](../hsweb-authorization-api/src/main/java/org/hswebframework/web/authorization/annotation/Authorize.java)    |      [ExpressionAnnotationMethodInterceptor](src/main/java/org/hswebframework/web/authorization/shiro/boost/SimpleAuthorizeMethodInterceptor.java)        |
 | [`@RequiresExpression`](../hsweb-authorization-api/src/main/java/org/hswebframework/web/authorization/annotation/RequiresExpression.java)    | [ExpressionAnnotationMethodInterceptor](src/main/java/org/hswebframework/web/authorization/shiro/boost/ExpressionAnnotationMethodInterceptor.java)      | 
 | [`@RequiresDataAccess`](../hsweb-authorization-api/src/main/java/org/hswebframework/web/authorization/annotation/RequiresDataAccess.java)    | [DataAccessAnnotationMethodInterceptor](src/main/java/org/hswebframework/web/authorization/shiro/boost/DataAccessAnnotationMethodInterceptor.java)      | 
-| [`@RequiresFieldAccess`](../hsweb-authorization-api/src/main/java/org/hswebframework/web/authorization/annotation/RequiresFieldAccess.java)  | [FieldAccessAnnotationMethodInterceptor](src/main/java/org/hswebframework/web/authorization/shiro/boost/FieldAccessAnnotationMethodInterceptor.java)   | 
 
 ## 拓展接口
 
-### 行级权限控制器
+### 数据级权限控制器
 
 控制逻辑简述:
 
@@ -24,15 +23,14 @@
 
 可自己实现DataAccessHandler接口并注入spring以实现自定义的控制方式
 
-现已实现3种控制器
+内置的控制方式
 
 1. [CustomDataAccessHandler](src/main/java/org/hswebframework/web/authorization/shiro/boost/handler/CustomDataAccessHandler.java) 自定义控制器
 2. [OwnCreatedDataAccessHandler](src/main/java/org/hswebframework/web/authorization/shiro/boost/handler/OwnCreatedDataAccessHandler.java) 控制只能操作自己创建的数据
 3. [ScriptDataAccessHandler](src/main/java/org/hswebframework/web/authorization/shiro/boost/handler/ScriptDataAccessHandler.java) 使用脚本方式控制
+4. [FieldScopeDataAccessHandler](src/main/java/org/hswebframework/web/authorization/shiro/boost/handler/FieldScopeDataAccessHandler.java) 控制字段的值范围,如: orgId in (1,2,3,4)
+5. [FieldFilterDataAccessHandler](src/main/java/org/hswebframework/web/authorization/shiro/boost/handler/FieldFilterDataAccessHandler.java) 控制字段的操作范围,此控制器替代之前的FieldAccess功能
+
 
 注意: 控制需满足的条件请查看控制器源代码查看注释获取
 
-### 列级别控制器
-控制逻辑和行级类似
-
-提供默认的控制器 [DefaultFieldAccessController](src/main/java/org/hswebframework/web/authorization/shiro/boost/DefaultFieldAccessController.java) 

@@ -45,7 +45,7 @@
         </dependency>
         <dependency>
             <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-logging</artifactId>
+            <artifactId>hsweb-access-logging-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

@@ -28,7 +28,7 @@ import java.io.Serializable;
  * 具体的控制逻辑由控制器{@link DataAccessController}实现
  *
  * @author zhouhao
- * @see org.hswebframework.web.authorization.access.CustomDataAccess
+ * @see CustomDataAccessConfig
  * @see OwnCreatedDataAccessConfig
  * @see ScriptDataAccessConfig
  */
@@ -55,14 +55,41 @@ public interface DataAccessConfig extends Serializable {
     String getType();
 
     /**
-     * 内置3中控制方式
+     * 内置的控制方式
      */
     interface DefaultType {
-        //自己创建的数据
+        /**
+         * 自己创建的数据
+         *
+         * @see OwnCreatedDataAccessConfig#getType()
+         */
         String OWN_CREATED = "OWN_CREATED";
-        //脚本
-        String SCRIPT      = "SCRIPT";
-        //自定义控制器
-        String CUSTOM      = "CUSTOM";
+        /**
+         * 字段值范围
+         *
+         * @see FieldScopeDataAccessConfig#getType()
+         */
+        String FIELD_SCOPE = "FIELD_SCOPE";
+
+        /**
+         * 字段过滤,黑名单
+         *
+         * @see FieldFilterDataAccessConfig#getType()
+         */
+        String DENY_FIELDS = "DENY_FIELDS";
+
+        /**
+         * 自定义脚本方式
+         *
+         * @see ScriptDataAccessConfig#getType()
+         */
+        String SCRIPT = "SCRIPT";
+
+        /**
+         * 自定义控制器
+         *
+         * @see CustomDataAccessConfig#getType()
+         */
+        String CUSTOM = "CUSTOM";
     }
 }

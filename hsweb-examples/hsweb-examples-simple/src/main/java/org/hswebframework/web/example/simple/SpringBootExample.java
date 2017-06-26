@@ -17,22 +17,32 @@
 
 package org.hswebframework.web.example.simple;
 
+import com.alibaba.fastjson.JSON;
 import org.hsweb.ezorm.rdb.executor.AbstractJdbcSqlExecutor;
 import org.hsweb.ezorm.rdb.executor.SqlExecutor;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.access.DataAccessConfig;
-import org.hswebframework.web.authorization.oauth2.server.entity.OAuth2ClientEntity;
+import org.hswebframework.web.authorization.simple.SimpleFieldFilterDataAccessConfig;
+import org.hswebframework.web.commons.entity.DataStatus;
 import org.hswebframework.web.commons.entity.factory.EntityFactory;
-import org.hswebframework.web.dao.oauth2.OAuth2ClientDao;
 import org.hswebframework.web.dao.datasource.DataSourceHolder;
 import org.hswebframework.web.dao.datasource.DatabaseType;
 import org.hswebframework.web.entity.authorization.*;
-import org.hswebframework.web.entity.authorization.bind.BindPermissionRoleEntity;
 import org.hswebframework.web.entity.authorization.bind.BindRoleUserEntity;
+import org.hswebframework.web.entity.organizational.*;
+import org.hswebframework.web.loggin.aop.EnableAccessLogger;
+import org.hswebframework.web.logging.AccessLoggerListener;
+import org.hswebframework.web.organizational.authorization.access.DataAccessType;
+import org.hswebframework.web.organizational.authorization.simple.SimpleScopeDataAccessConfig;
+import org.hswebframework.web.service.authorization.AuthorizationSettingService;
 import org.hswebframework.web.service.authorization.PermissionService;
 import org.hswebframework.web.service.authorization.RoleService;
 import org.hswebframework.web.service.authorization.UserService;
+import org.hswebframework.web.service.organizational.DepartmentService;
+import org.hswebframework.web.service.organizational.OrganizationalService;
+import org.hswebframework.web.service.organizational.PersonService;
+import org.hswebframework.web.service.organizational.PositionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -43,6 +53,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
@@ -51,14 +62,20 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.stream.Stream;
 
 /**
  * TODO 完成注释
@@ -70,7 +87,24 @@ import java.util.Collections;
 @EnableSwagger2
 @EnableCaching
 @EnableAspectJAutoProxy
-public class SpringBootExample implements CommandLineRunner {
+@EnableAccessLogger
+public class SpringBootExample
+        implements CommandLineRunner {
+
+    @Bean
+    public AccessLoggerListener accessLoggerListener() {
+        Class excludes[] = {
+                ServletRequest.class,
+                ServletResponse.class,
+                InputStream.class,
+                OutputStream.class,
+                MultipartFile.class
+        };
+        return loggerInfo -> System.out.println("有请求啦:" + JSON.toJSONString(loggerInfo.toSimpleMap(obj -> {
+            if (Stream.of(excludes).anyMatch(aClass -> aClass.isInstance(obj))) return obj.getClass().getName();
+            return JSON.toJSONString(obj);
+        })));
+    }
 
     @Bean
     public Docket createRestApi() {
@@ -121,58 +155,90 @@ public class SpringBootExample implements CommandLineRunner {
     PermissionService permissionService;
     @Autowired
     EntityFactory     entityFactory;
+
     @Autowired
-    OAuth2ClientDao   oAuth2ClientDao;
+    OrganizationalService organizationalService;
+    @Autowired
+    DepartmentService     departmentService;
+    @Autowired
+    PositionService       positionService;
+    @Autowired
+    PersonService         personService;
+
+    @Autowired
+    AuthorizationSettingService authorizationSettingService;
 
     public static void main(String[] args) {
         SpringApplication.run(SpringBootExample.class);
     }
 
-    @Override
+    //    @Override
     public void run(String... strings) throws Exception {
         //只能查询自己创建的数据
         DataAccessEntity accessEntity = new DataAccessEntity();
         accessEntity.setType(DataAccessConfig.DefaultType.OWN_CREATED);
         accessEntity.setAction(Permission.ACTION_QUERY);
+        accessEntity.setDescribe("只能查询自己创建的数据");
 
         //只能修改自己创建的数据
         DataAccessEntity updateAccessEntity = new DataAccessEntity();
         updateAccessEntity.setType(DataAccessConfig.DefaultType.OWN_CREATED);
         updateAccessEntity.setAction(Permission.ACTION_UPDATE);
-        //脚本方式自定义控制
-//        updateAccessEntity.setConfig(JSON.toJSONString(new SimpleScriptDataAccess("" +
-//                "println(id);" +
-//                "println(entity);" +
-//                "println('脚本权限控制');" +
-//                "return true;" +
-//                "","groovy")));
+        updateAccessEntity.setDescribe("只能修改自己的数据");
+        //不能查询password
+        DataAccessEntity denyQueryFields = new DataAccessEntity();
+        denyQueryFields.setType(DataAccessConfig.DefaultType.DENY_FIELDS);
+        denyQueryFields.setAction(Permission.ACTION_QUERY);
+        denyQueryFields.setConfig(JSON.toJSONString(new SimpleFieldFilterDataAccessConfig("password")));
+        denyQueryFields.setDescribe("不能查询密码");
+        //不能修改password
+        DataAccessEntity denyUpdateFields = new DataAccessEntity();
+        denyUpdateFields.setType(DataAccessConfig.DefaultType.DENY_FIELDS);
+        denyUpdateFields.setAction(Permission.ACTION_UPDATE);
+        denyUpdateFields.setConfig(JSON.toJSONString(new SimpleFieldFilterDataAccessConfig("password")));
+        denyUpdateFields.setDescribe("不能直接修改密码");
+        //只能查看自己部门的数据
+        DataAccessEntity onlyDepartmentData = new DataAccessEntity();
+        onlyDepartmentData.setType(DataAccessType.DEPARTMENT_SCOPE);
+        onlyDepartmentData.setAction(Permission.ACTION_QUERY);
+        onlyDepartmentData.setConfig(JSON.toJSONString(new SimpleScopeDataAccessConfig(DataAccessType.SCOPE_TYPE_CHILDREN)));
+        onlyDepartmentData.setDescribe("只能查看自己部门的数据");
 
-        //password 属性不能读取和修改
-        FieldAccessEntity fieldAccessEntity = new FieldAccessEntity();
-        fieldAccessEntity.setField("password");
-        fieldAccessEntity.setActions(Arrays.asList(Permission.ACTION_QUERY, Permission.ACTION_UPDATE));
-
+        //创建权限
         PermissionEntity permission = entityFactory.newInstance(PermissionEntity.class);
         permission.setName("测试");
         permission.setId("test");
-        permission.setStatus((byte) 1);
+        permission.setStatus(DataStatus.STATUS_ENABLED);
         permission.setActions(ActionEntity.create(Permission.ACTION_QUERY, Permission.ACTION_UPDATE));
-        permission.setDataAccess(Arrays.asList(accessEntity, updateAccessEntity));
-        permission.setFieldAccess(Arrays.asList(fieldAccessEntity));
+        permission.setSupportDataAccessTypes(Arrays.asList("*"));
         permissionService.insert(permission);
 
-        BindPermissionRoleEntity<PermissionRoleEntity> roleEntity = entityFactory.newInstance(BindPermissionRoleEntity.class);
-        SimplePermissionRoleEntity permissionRoleEntity = new SimplePermissionRoleEntity();
-        permissionRoleEntity.setRoleId("admin");
-        permissionRoleEntity.setPermissionId("test");
-        permissionRoleEntity.setActions(Arrays.asList(Permission.ACTION_QUERY, Permission.ACTION_UPDATE));
-        permissionRoleEntity.setDataAccesses(permission.getDataAccess());
-        permissionRoleEntity.setFieldAccesses(permission.getFieldAccess());
+        //角色
+        RoleEntity roleEntity = entityFactory.newInstance(RoleEntity.class);
         roleEntity.setId("admin");
         roleEntity.setName("test");
-        roleEntity.setPermissions(Arrays.asList(permissionRoleEntity));
         roleService.insert(roleEntity);
 
+        /*            权限设置        */
+        AuthorizationSettingEntity settingEntity = entityFactory.newInstance(AuthorizationSettingEntity.class);
+
+        settingEntity.setType("role"); //绑定到角色
+        settingEntity.setSettingFor(roleEntity.getId());
+
+        settingEntity.setDescribe("测试");
+        //权限配置详情
+        AuthorizationSettingDetailEntity detailEntity = entityFactory.newInstance(AuthorizationSettingDetailEntity.class);
+        detailEntity.setPermissionId(permission.getId());
+        detailEntity.setMerge(true);
+        detailEntity.setPriority(1L);
+        detailEntity.setActions(new HashSet<>(Arrays.asList(Permission.ACTION_QUERY, Permission.ACTION_UPDATE)));
+        detailEntity.setDataAccesses(Arrays.asList(accessEntity, updateAccessEntity, denyQueryFields, denyUpdateFields, onlyDepartmentData));
+
+        settingEntity.setDetails(Arrays.asList(detailEntity));
+
+        authorizationSettingService.insert(settingEntity);
+
+        //关联角色给用户
         BindRoleUserEntity userEntity = entityFactory.newInstance(BindRoleUserEntity.class);
         userEntity.setId("admin");
         userEntity.setName("admin");
@@ -183,17 +249,50 @@ public class SpringBootExample implements CommandLineRunner {
         userEntity.setRoles(Arrays.asList("admin"));
         userService.insert(userEntity);
 
-        OAuth2ClientEntity clientEntity = entityFactory.newInstance(OAuth2ClientEntity.class);
 
-        clientEntity.setId("test");
-        clientEntity.setSecret("test");
-        clientEntity.setOwnerId("admin");
-        clientEntity.setName("测试");
-        clientEntity.setType("test");
-        clientEntity.setCreatorId("admin");
-        clientEntity.setRedirectUri("http://localhost");
-        clientEntity.setCreateTime(System.currentTimeMillis());
-        clientEntity.setSupportGrantTypes(Collections.singleton("*"));
-        oAuth2ClientDao.insert(clientEntity);
+        OrganizationalEntity org = entityFactory.newInstance(OrganizationalEntity.class);
+
+        org.setName("测试机构");
+        org.setStatus(DataStatus.STATUS_ENABLED);
+        org.setId("test");
+        org.setParentId("-1");
+
+        organizationalService.insert(org);
+
+        DepartmentEntity department = entityFactory.newInstance(DepartmentEntity.class);
+        department.setStatus(DataStatus.STATUS_ENABLED);
+        department.setOrgId("test");
+        department.setId("test");
+        department.setName("部门");
+        department.setParentId("-1");
+
+        DepartmentEntity department2 = entityFactory.newInstance(DepartmentEntity.class);
+        department2.setStatus(DataStatus.STATUS_ENABLED);
+        department2.setOrgId("test");
+        department2.setId("test2");
+        department2.setName("部门2");
+        department2.setParentId("test");
+        department.setChildren(Collections.singletonList(department2));
+        departmentService.insert(department);
+
+
+        PositionEntity position = entityFactory.newInstance(PositionEntity.class);
+        position.setName("职务");
+        position.setId("test");
+        position.setDepartmentId("test");
+        position.setParentId("-1");
+        position.setRoles(Collections.singletonList("admin"));
+        positionService.insert(position);
+
+        PersonAuthBindEntity personEntity = entityFactory.newInstance(PersonAuthBindEntity.class);
+        personEntity.setName("测试人员");
+        personEntity.setPositionIds(Collections.singleton(position.getId()));
+        personEntity.setUserId(userEntity.getId());
+
+        PersonUserEntity personUserEntity = new PersonUserEntity();
+        personUserEntity.setUsername("admin");
+        personEntity.setPersonUser(personUserEntity);
+
+        personService.insert(personEntity);
     }
 }

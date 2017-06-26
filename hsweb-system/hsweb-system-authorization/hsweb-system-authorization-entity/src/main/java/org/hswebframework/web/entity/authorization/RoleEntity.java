@@ -11,7 +11,7 @@ public interface RoleEntity extends GenericEntity<String> {
 
     String name     = "name";
     String describe = "describe";
-    String enabled  = "enabled";
+    String status   = "status";
 
     String getName();
 
@@ -21,7 +21,7 @@ public interface RoleEntity extends GenericEntity<String> {
 
     void setDescribe(String describe);
 
-    void setEnabled(Boolean enabled);
+    void setStatus(Byte status);
 
-    Boolean isEnabled();
+    Byte getStatus();
 }

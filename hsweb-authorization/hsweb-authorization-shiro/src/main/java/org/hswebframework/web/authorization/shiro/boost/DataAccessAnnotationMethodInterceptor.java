@@ -18,6 +18,7 @@
 package org.hswebframework.web.authorization.shiro.boost;
 
 import org.apache.shiro.aop.AnnotationResolver;
+import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.authz.aop.AuthorizingAnnotationHandler;
 import org.apache.shiro.authz.aop.AuthorizingAnnotationMethodInterceptor;
@@ -27,11 +28,12 @@ import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.access.DataAccessConfig;
 import org.hswebframework.web.authorization.access.DataAccessController;
+import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.annotation.Logical;
 import org.hswebframework.web.authorization.annotation.RequiresDataAccess;
 import org.hswebframework.web.boost.aop.context.MethodInterceptorHolder;
 import org.hswebframework.web.boost.aop.context.MethodInterceptorParamContext;
-import org.hswebframwork.utils.StringUtils;
+import org.hswebframework.utils.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +46,7 @@ import java.util.stream.Collectors;
 /**
  * 数据级权限控制实现 <br>
  * 通过在方法上注解{@link RequiresDataAccess}，标识需要进行数据级权限控制<br>
- * 控制的方式和规则由 {@link Permission#getDataAccessConfigs()}实现<br>
+ * 控制的方式和规则由 {@link Permission#getDataAccesses()}实现<br>
  *
  * @author zhouhao
  * @see DefaultDataAccessController
@@ -67,7 +69,7 @@ public class DataAccessAnnotationMethodInterceptor extends AuthorizingAnnotation
             this.dataAccessController = controller;
         }
 
-        Map<Class<DataAccessController>, DataAccessController> cache = new HashMap<>();
+        final Map<Class<DataAccessController>, DataAccessController> cache = new HashMap<>(128);
 
         @Override
         public void assertAuthorized(Annotation a) throws AuthorizationException {
@@ -99,14 +101,36 @@ public class DataAccessAnnotationMethodInterceptor extends AuthorizingAnnotation
                 accessController = ApplicationContextHolder.get().getBean(accessAnn.controllerBeanName(), DataAccessController.class);
             }
             DataAccessController finalAccessController = accessController;
+            Authorize classAnnotation = holder.findClassAnnotation(Authorize.class);
+            Authorize methodAnnotation = holder.findMethodAnnotation(Authorize.class);
+            Set<String> permissions = new HashSet<>();
+            List<String> actionList = new ArrayList<>(Arrays.asList(accessAnn.action()));
 
-            MethodInterceptorParamContext context = holder.createParamContext();
+            if (classAnnotation != null) {
+                permissions.addAll(Arrays.asList(classAnnotation.permission()));
+                if (actionList.isEmpty())
+                    actionList.addAll(Arrays.asList(classAnnotation.action()));
+            }
+            if (methodAnnotation != null) {
+                permissions.addAll(Arrays.asList(methodAnnotation.permission()));
+                if (actionList.isEmpty())
+                    actionList.addAll(Arrays.asList(methodAnnotation.action()));
+            }
+
             String permission = accessAnn.permission();
-            Permission permissionInfo = authentication.getPermission(permission);
-            List<String> actionList = Arrays.asList(accessAnn.action());
+
+            if ("".equals(permission)) {
+                if (permissions.size() != 1) {
+                    throw new IndexOutOfBoundsException("permission setting size must be 1");
+                }
+                permission = permissions.iterator().next();
+            }
+            MethodInterceptorParamContext context = holder.createParamContext();
+            Permission permissionInfo = authentication.getPermission(permission).orElseThrow(AuthenticationException::new);
+
             //取得当前登录用户持有的控制规则
             Set<DataAccessConfig> accesses = permissionInfo
-                    .getDataAccessConfigs()
+                    .getDataAccesses()
                     .stream()
                     .filter(access -> actionList.contains(access.getAction()))
                     .collect(Collectors.toSet());

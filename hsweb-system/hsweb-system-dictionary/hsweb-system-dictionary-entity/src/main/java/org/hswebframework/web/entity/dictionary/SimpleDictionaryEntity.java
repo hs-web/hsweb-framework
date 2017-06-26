@@ -36,8 +36,8 @@ public class SimpleDictionaryEntity extends SimpleGenericEntity<String> implemen
     private Long                             createTime;
     //创建人id
     private String                           creatorId;
-    //是否启用
-    private Boolean                          enabled;
+    //状态
+    private Byte                             status;
     //字段选项
     private List<SimpleDictionaryItemEntity> items;
 
@@ -112,17 +112,17 @@ public class SimpleDictionaryEntity extends SimpleGenericEntity<String> implemen
     }
 
     /**
-     * @return 是否启用
+     * @return 状态
      */
-    public Boolean isEnabled() {
-        return this.enabled;
+    public Byte getStatus() {
+        return this.status;
     }
 
     /**
-     * 设置 是否启用
+     * 设置 状态
      */
-    public void setEnabled(Boolean enabled) {
-        this.enabled = enabled;
+    public void setStatus(Byte status) {
+        this.status = status;
     }
 
     @Override

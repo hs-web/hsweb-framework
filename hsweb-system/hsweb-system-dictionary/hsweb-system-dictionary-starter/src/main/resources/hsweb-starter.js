@@ -43,7 +43,7 @@ function install(context) {
         .addColumn().name("describe").alias("describe").comment("说明").jdbcType(java.sql.JDBCType.VARCHAR).length(256).commit()
         .addColumn().name("create_time").alias("createTime").comment("创建时间").jdbcType(java.sql.JDBCType.DECIMAL).length(32, 0).commit()
         .addColumn().name("creator_id").alias("creatorId").comment("创建人id").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
-        .addColumn().name("enabled").alias("enabled").comment("是否启用").jdbcType(java.sql.JDBCType.DECIMAL).length(4, 0).commit()
+        .addColumn().name("status").alias("status").comment("状态").jdbcType(java.sql.JDBCType.DECIMAL).length(4, 0).commit()
         .comment("数据字典").commit();
 
     database.createOrAlter("s_dict_item")
@@ -53,7 +53,7 @@ function install(context) {
         .addColumn().name("value").alias("value").comment("字典值").jdbcType(java.sql.JDBCType.VARCHAR).length(64).commit()
         .addColumn().name("text").alias("text").comment("字典文本").jdbcType(java.sql.JDBCType.VARCHAR).length(128).commit()
         .addColumn().name("value_type").alias("valueType").comment("字典值类型").jdbcType(java.sql.JDBCType.VARCHAR).length(64).commit()
-        .addColumn().name("is_enabled").alias("enabled").comment("是否启用").jdbcType(java.sql.JDBCType.DECIMAL).length(4, 0).commit()
+        .addColumn().name("is_status").alias("status").comment("状态").jdbcType(java.sql.JDBCType.DECIMAL).length(4, 0).commit()
         .addColumn().name("describe").alias("describe").comment("说明").jdbcType(java.sql.JDBCType.VARCHAR).length(128).commit()
         .addColumn().name("parent_id").alias("parentId").comment("父级选项").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
         .addColumn().name("path").alias("path").comment("树编码").jdbcType(java.sql.JDBCType.VARCHAR).length(3000).commit()

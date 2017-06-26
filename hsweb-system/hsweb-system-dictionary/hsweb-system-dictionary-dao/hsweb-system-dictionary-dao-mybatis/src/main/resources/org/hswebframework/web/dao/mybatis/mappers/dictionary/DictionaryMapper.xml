@@ -21,12 +21,12 @@
 <mapper namespace="org.hswebframework.web.dao.dictionary.DictionaryDao">
     <resultMap id="DictionaryResultMap" type="org.hswebframework.web.entity.dictionary.SimpleDictionaryEntity">
         <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
-            <result property="name" column="name" javaType="String" jdbcType="VARCHAR"/>
-            <result property="classifiedId" column="classified_id" javaType="String" jdbcType="VARCHAR"/>
-            <result property="describe" column="describe" javaType="String" jdbcType="VARCHAR"/>
-            <result property="createTime" column="create_time" javaType="Long" jdbcType="DECIMAL"/>
-            <result property="creatorId" column="creator_id" javaType="String" jdbcType="VARCHAR"/>
-            <result property="enabled" column="enabled" javaType="Boolean" jdbcType="DECIMAL"/>
+        <result property="name" column="name" javaType="String" jdbcType="VARCHAR"/>
+        <result property="classifiedId" column="classified_id" javaType="String" jdbcType="VARCHAR"/>
+        <result property="describe" column="describe" javaType="String" jdbcType="VARCHAR"/>
+        <result property="createTime" column="create_time" javaType="Long" jdbcType="DECIMAL"/>
+        <result property="creatorId" column="creator_id" javaType="String" jdbcType="VARCHAR"/>
+        <result property="status" column="status" javaType="Byte" jdbcType="DECIMAL"/>
     </resultMap>
 
     <!--用于动态生成sql所需的配置-->
@@ -34,8 +34,8 @@
         <bind name="resultMapId" value="'DictionaryResultMap'"/>
         <bind name="tableName" value="'s_dictionary'"/>
     </sql>
-  
-    <insert id="insert" parameterType="org.hswebframework.web.entity.dictionary.SimpleDictionaryEntity" >
+
+    <insert id="insert" parameterType="org.hswebframework.web.entity.dictionary.SimpleDictionaryEntity">
         <include refid="config"/>
         <include refid="BasicMapper.buildInsertSql"/>
     </insert>

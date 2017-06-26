@@ -24,6 +24,7 @@ package org.hswebframework.web.service.authorization.simple;
  * @author zhouhao
  */
 public interface CacheConstants {
+    String MENU_CACHE_NAME = "hsweb-menu-";
 
     String USER_CACHE_NAME = "user-";
 

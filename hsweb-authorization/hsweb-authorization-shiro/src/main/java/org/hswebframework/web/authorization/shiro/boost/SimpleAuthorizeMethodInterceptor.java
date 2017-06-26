@@ -18,23 +18,20 @@
 
 package org.hswebframework.web.authorization.shiro.boost;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.shiro.aop.AnnotationResolver;
 import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.shiro.authz.aop.AuthorizingAnnotationHandler;
 import org.apache.shiro.authz.aop.AuthorizingAnnotationMethodInterceptor;
-import org.hswebframework.expands.script.engine.DynamicScriptEngine;
-import org.hswebframework.expands.script.engine.DynamicScriptEngineFactory;
+import org.hswebframework.utils.ClassUtils;
+import org.hswebframework.utils.StringUtils;
+import org.hswebframework.web.ExpressionUtils;
 import org.hswebframework.web.authorization.Authentication;
-import org.hswebframework.web.authorization.AuthenticationHolder;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.Role;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.annotation.Logical;
 import org.hswebframework.web.boost.aop.context.MethodInterceptorHolder;
-import org.hswebframwork.utils.ClassUtils;
-import org.hswebframwork.utils.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,6 +53,7 @@ public class SimpleAuthorizeMethodInterceptor extends AuthorizingAnnotationMetho
 
     private static final Logger logger = LoggerFactory.getLogger(SimpleAuthorizeMethodInterceptor.class);
 
+
     static class AuthorizeAnnotationHandler extends AuthorizingAnnotationHandler {
 
         public AuthorizeAnnotationHandler() {
@@ -72,9 +70,12 @@ public class SimpleAuthorizeMethodInterceptor extends AuthorizingAnnotationMetho
             }
             AuthorizeConfig authorizeConfig = new AuthorizeConfig(holder.getArgs());
             Authorize authorize = ((Authorize) a);
+            if (authorize.ignore()) return;
+
             if (authorize.merge()) {
                 Authorize classAnn = ClassUtils.getAnnotation(holder.getTarget().getClass(), Authorize.class);
                 if (null != classAnn) {
+                    if (classAnn.ignore()) return;
                     authorizeConfig.put(classAnn);
                 }
             }
@@ -100,7 +101,7 @@ public class SimpleAuthorizeMethodInterceptor extends AuthorizingAnnotationMetho
                                     .filter(authorizeConfig.action::contains)
                                     .collect(Collectors.toList());
                             //如果 控制逻辑是or,则只要过滤结果数量不为0.否则过滤结果数量必须和配置的数量相同
-                            return logicalIsOr ? actions.size() > 0 : actions.size() == permission.getActions().size();
+                            return logicalIsOr ? actions.size() > 0 : permission.getActions().containsAll(actions);
                         }).collect(Collectors.toList());
                 access = logicalIsOr ? permissions.size() > 0 : permissions.size() == authorizeConfig.permission.size();
             }
@@ -150,22 +151,27 @@ public class SimpleAuthorizeMethodInterceptor extends AuthorizingAnnotationMetho
         }
 
         public String tryCompileExpression(String express) {
-            if (express.startsWith("${") && express.endsWith("}")) {
-                express = express.substring(2, express.length() - 1);
-                DynamicScriptEngine spelEngine = DynamicScriptEngineFactory.getEngine("spel");
-                String id = DigestUtils.md5Hex(express);
-                try {
-                    if (!spelEngine.compiled(id))
-                        spelEngine.compile(id, express);
-                    return String.valueOf(spelEngine.execute(id, var).getIfSuccess());
-                } catch (Exception e) {
-                    throw new AuthorizationException("系统错误", e);
-                } finally {
-                    //     spelEngine.remove(id);
-                }
-            } else {
-                return express;
+            try {
+                return ExpressionUtils.analytical(express, var, "spel");
+            } catch (Exception e) {
+                throw new AuthorizationException("系统错误", e);
             }
+//            if (express.startsWith("${") && express.endsWith("}")) {
+//                express = express.substring(2, express.length() - 1);
+//                DynamicScriptEngine spelEngine = DynamicScriptEngineFactory.getEngine("spel");
+//                String id = DigestUtils.md5Hex(express);
+//                try {
+//                    if (!spelEngine.compiled(id))
+//                        spelEngine.compile(id, express);
+//                    return String.valueOf(spelEngine.execute(id, var).getIfSuccess());
+//                } catch (Exception e) {
+//                    throw new AuthorizationException("系统错误", e);
+//                } finally {
+//                    //     spelEngine.remove(id);
+//                }
+//            } else {
+//                return express;
+//            }
         }
 
         public Collection<String> tryCompileExpression(String... expresses) {

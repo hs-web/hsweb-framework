@@ -6,7 +6,6 @@ import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.annotation.RequiresDataAccess;
-import org.hswebframework.web.authorization.annotation.RequiresFieldAccess;
 import org.hswebframework.web.commons.entity.Entity;
 import org.hswebframework.web.commons.entity.PagerResult;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
@@ -14,16 +13,15 @@ import org.hswebframework.web.controller.QueryController;
 import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.entity.authorization.SimpleUserEntity;
 import org.hswebframework.web.entity.authorization.UserEntity;
+import org.hswebframework.web.logging.AccessLogger;
 import org.hswebframework.web.model.authorization.UserModel;
+import org.hswebframework.web.organizational.authorization.PersonnelAuthorization;
 import org.hswebframework.web.service.QueryByEntityService;
 import org.hswebframework.web.service.QueryService;
-import org.hswebframework.web.service.authorization.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.context.ContextLoader;
 
-import javax.annotation.PostConstruct;
 import java.util.List;
+
 
 /**
  * TODO 完成注释
@@ -33,6 +31,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/test")
 @Authorize(permission = "test")
+@AccessLogger("测试")
 public class TestController implements QueryController<UserEntity, String, QueryParamEntity> {
 
     @GetMapping("/test1")
@@ -42,7 +41,6 @@ public class TestController implements QueryController<UserEntity, String, Query
     }
 
     @GetMapping("/test2")
-//    @RequiresRoles("admin")
     public ResponseMessage test2(Authentication authentication) {
         return ResponseMessage.ok(authentication);
     }
@@ -50,14 +48,9 @@ public class TestController implements QueryController<UserEntity, String, Query
     @GetMapping("/testQuery")
     @Authorize
     @RequiresDataAccess(permission = "test", action = Permission.ACTION_QUERY)
-    @RequiresFieldAccess(permission = "test", action = Permission.ACTION_QUERY)
     @ApiOperation("测试查询")
+    @AccessLogger("查询")
     public ResponseMessage<QueryParamEntity> testQuery(QueryParamEntity entity) {
-
-        /*
-        @RequiresFieldAccess 字段级别权限控制
-        entity.getExcludes() 自动填充不能访问的字段
-        */
 
         /*
         @RequiresDataAccess 数据级别权限控制
@@ -68,9 +61,13 @@ public class TestController implements QueryController<UserEntity, String, Query
 
     @PutMapping("/testUpdate/{id}")
     @RequiresDataAccess(permission = "test", action = Permission.ACTION_UPDATE)
-    @RequiresFieldAccess(permission = "test", action = Permission.ACTION_UPDATE)
     public ResponseMessage<UserModel> testUpdate(@PathVariable String id, @RequestBody UserModel model) {
         return ResponseMessage.ok(model);
+    }
+
+    @PutMapping("/test/testPersonnel")
+    public ResponseMessage<PersonnelAuthorization> testPersonnel() {
+        return ResponseMessage.ok(PersonnelAuthorization.current().get());
     }
 
     @Override

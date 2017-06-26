@@ -18,26 +18,22 @@
 
 package org.hswebframework.web.controller.authorization;
 
-import io.swagger.annotations.*;
-import org.apache.commons.collections.CollectionUtils;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.annotation.Authorize;
-import org.hswebframework.web.commons.entity.factory.EntityFactory;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
-import org.hswebframework.web.controller.QueryController;
+import org.hswebframework.web.controller.SimpleGenericEntityController;
 import org.hswebframework.web.controller.message.ResponseMessage;
-import org.hswebframework.web.entity.authorization.*;
-import org.hswebframework.web.entity.authorization.bind.BindPermissionRoleEntity;
+import org.hswebframework.web.entity.authorization.RoleEntity;
 import org.hswebframework.web.logging.AccessLogger;
-import org.hswebframework.web.model.authorization.*;
 import org.hswebframework.web.service.authorization.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static org.hswebframework.web.controller.QueryController.*;
 import static org.hswebframework.web.controller.message.ResponseMessage.ok;
 
 /**
@@ -50,52 +46,14 @@ import static org.hswebframework.web.controller.message.ResponseMessage.ok;
 @AccessLogger("{role_manager}")
 @Authorize(permission = "role")
 @Api(tags = "role-manager", description = "角色管理")
-public class RoleController implements QueryController<RoleEntity, String, QueryParamEntity> {
+public class RoleController implements SimpleGenericEntityController<RoleEntity, String, QueryParamEntity> {
 
     @Autowired
     private RoleService roleService;
 
-    @Autowired
-    private EntityFactory entityFactory;
-
     @Override
     public RoleService getService() {
         return roleService;
-    }
-
-    @SuppressWarnings("unchecked")
-    public BindPermissionRoleEntity<PermissionRoleEntity> modelToEntity(RoleModel roleModel) {
-        return entityFactory.newInstance(BindPermissionRoleEntity.class, roleModel);
-    }
-
-    protected RoleModel entityToModel(RoleEntity roleEntity) {
-        return entityFactory.newInstance(RoleModel.class, roleEntity);
-    }
-
-    @Authorize(action = Permission.ACTION_GET)
-    @GetMapping(path = "/{id:.+}/detail")
-    @AccessLogger("{get_by_id}")
-    @ApiOperation("根据主键查询完整数据")
-    public ResponseMessage<RoleModel> getDetailByPrimaryKey(@PathVariable String id) {
-        return ok(entityToModel(assertNotNull(getService().selectDetailByPk(id))));
-    }
-
-    @PostMapping
-    @Authorize(action = Permission.ACTION_ADD)
-    @AccessLogger("{add}")
-    @ApiOperation("添加角色")
-    public ResponseMessage<String> addRole(@RequestBody RoleModel roleModel) {
-        return ok(roleService.insert(modelToEntity(roleModel)));
-    }
-
-    @PutMapping("/{id:.+}")
-    @Authorize(action = Permission.ACTION_UPDATE)
-    @AccessLogger("{update}")
-    @ApiOperation("修改角色")
-    public ResponseMessage updateRole(@PathVariable String id, @RequestBody RoleModel roleModel) {
-        roleModel.setId(id);
-        roleService.updateByPrimaryKey(modelToEntity(roleModel));
-        return ok();
     }
 
     @PutMapping("/disable/{id:.+}")

@@ -17,13 +17,17 @@
 package org.hswebframework.web.entity.organizational;
 
 import org.hswebframework.web.commons.entity.TreeSortSupportEntity;
+import org.hswebframework.web.entity.organizational.authorization.DepartmentAttachEntity;
+import org.hswebframework.web.entity.organizational.authorization.OrgAttachEntity;
+
+import java.util.List;
 
 /**
  * 部门 实体
  *
  * @author hsweb-generator-online
  */
-public interface DepartmentEntity extends TreeSortSupportEntity<String> {
+public interface DepartmentEntity extends TreeSortSupportEntity<String>, OrgAttachEntity, DepartmentAttachEntity {
  /*-------------------------------------------
     |               属性名常量               |
     ===========================================*/
@@ -34,7 +38,7 @@ public interface DepartmentEntity extends TreeSortSupportEntity<String> {
     /**
      * 所在组织id
      */
-    String orgid     = "orgid";
+    String orgId     = "orgId";
     /**
      * 部门编码
      */
@@ -46,15 +50,15 @@ public interface DepartmentEntity extends TreeSortSupportEntity<String> {
     /**
      * 树结构编码
      */
-    String path  = "path";
+    String path      = "path";
     /**
      * 排序序号
      */
     String sortIndex = "sortIndex";
     /**
-     * 是否启用
+     * 状态
      */
-    String enabled   = "enabled";
+    String status    = "status";
     /**
      * 级别
      */
@@ -71,16 +75,6 @@ public interface DepartmentEntity extends TreeSortSupportEntity<String> {
     void setName(String name);
 
     /**
-     * @return 所在组织id
-     */
-    String getOrgId();
-
-    /**
-     * 设置 所在组织id
-     */
-    void setOrgId(String orgId);
-
-    /**
      * @return 部门编码
      */
     String getCode();
@@ -91,13 +85,24 @@ public interface DepartmentEntity extends TreeSortSupportEntity<String> {
     void setCode(String code);
 
     /**
-     * @return 是否启用
+     * @return 状态
      */
-    Boolean isEnabled();
+    Byte getStatus();
 
     /**
-     * 设置 是否启用
+     * 设置 状态
      */
-    void setEnabled(Boolean enabled);
+    void setStatus(Byte status);
 
+    void setChildren(List<DepartmentEntity> children);
+
+    @Override
+    default String getDepartmentId() {
+        return getId();
+    }
+
+    @Override
+    default void setDepartmentId(String departmentId) {
+        setId(departmentId);
+    }
 }

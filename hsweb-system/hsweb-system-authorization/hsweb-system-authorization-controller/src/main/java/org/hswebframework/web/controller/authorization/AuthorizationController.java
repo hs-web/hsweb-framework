@@ -22,15 +22,18 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.hswebframework.web.BusinessException;
 import org.hswebframework.web.NotFoundException;
-import org.hswebframework.web.WebUtil;
 import org.hswebframework.web.authorization.Authentication;
+import org.hswebframework.web.authorization.AuthenticationInitializeService;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.listener.AuthorizationListenerDispatcher;
 import org.hswebframework.web.authorization.listener.event.*;
+import org.hswebframework.web.commons.entity.DataStatus;
 import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.entity.authorization.UserEntity;
 import org.hswebframework.web.logging.AccessLogger;
 import org.hswebframework.web.service.authorization.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -48,8 +51,14 @@ import static org.hswebframework.web.controller.message.ResponseMessage.ok;
 @Api(tags = "hsweb-authorization", description = "提供基本的授权功能")
 public class AuthorizationController {
 
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
+
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private AuthenticationInitializeService authenticationInitializeService;
+
 
     @Autowired
     private AuthorizationListenerDispatcher authorizationListenerDispatcher;
@@ -90,7 +99,7 @@ public class AuthorizationController {
                 reason = AuthorizationFailedEvent.Reason.USER_NOT_EXISTS;
                 throw new NotFoundException("{user_not_exists}");
             }
-            if (Boolean.FALSE.equals(entity.isEnabled())) {
+            if (!DataStatus.STATUS_ENABLED.equals(entity.getStatus())) {
                 reason = AuthorizationFailedEvent.Reason.USER_DISABLED;
                 throw new BusinessException("{user_is_disabled}", 400);
             }
@@ -100,9 +109,12 @@ public class AuthorizationController {
                 throw new BusinessException("{password_error}", 400);
             }
             // 验证通过
-            Authentication authentication = userService.initUserAuthorization(entity.getId());
+            Authentication authentication = authenticationInitializeService.initUserAuthorization(entity.getId());
             AuthorizationSuccessEvent event = new AuthorizationSuccessEvent(authentication, parameterGetter);
-            authorizationListenerDispatcher.doEvent(event);
+            int size = authorizationListenerDispatcher.doEvent(event);
+            if (size == 0) {
+                logger.warn("not found any AuthorizationSuccessEvent,access control maybe disabled!");
+            }
             return ok(entity.getId());
         } catch (Exception e) {
             AuthorizationFailedEvent failedEvent = new AuthorizationFailedEvent(username, password, parameterGetter, reason);

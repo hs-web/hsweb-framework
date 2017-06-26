@@ -18,6 +18,7 @@
 
 package org.hswebframework.web.dao.mybatis;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
@@ -55,6 +56,13 @@ public class MybatisProperties extends org.mybatis.spring.boot.autoconfigure.Myb
      */
     private              String[] mapperLocationExcludes = null;
 
+    private List<MybatisMapperCustomer> mybatisMappers;
+
+    @Autowired(required = false)
+    public void setMybatisMappers(List<MybatisMapperCustomer> mybatisMappers) {
+        this.mybatisMappers = mybatisMappers;
+    }
+
     public String[] getMapperLocationExcludes() {
         return mapperLocationExcludes;
     }
@@ -79,7 +87,16 @@ public class MybatisProperties extends org.mybatis.spring.boot.autoconfigure.Myb
             locations = new HashSet<>();
         else
             locations = Arrays.stream(getMapperLocations()).collect(Collectors.toSet());
+
         locations.add(defaultMapperLocation);
+
+        if (mybatisMappers != null) {
+            mybatisMappers.stream()
+                    .map(MybatisMapperCustomer::getIncludes)
+                    .flatMap(Arrays::stream)
+                    .forEach(locations::add);
+        }
+
         for (String mapperLocation : locations) {
             Resource[] mappers;
             try {
@@ -90,16 +107,27 @@ public class MybatisProperties extends org.mybatis.spring.boot.autoconfigure.Myb
             } catch (IOException e) {
             }
         }
-        //排除不需要的配置
+        Set<String> excludes = new HashSet<>();
+        if (mybatisMappers != null) {
+            mybatisMappers.stream()
+                    .map(MybatisMapperCustomer::getExcludes)
+                    .flatMap(Arrays::stream)
+                    .forEach(excludes::add);
+        }
         if (mapperLocationExcludes != null && mapperLocationExcludes.length > 0) {
-            for (String mapperLocationExclude : mapperLocationExcludes) {
-                try {
-                    Resource[] excludesMappers = new PathMatchingResourcePatternResolver().getResources(mapperLocationExclude);
-                    for (Resource excludesMapper : excludesMappers) {
-                        resources.remove(excludesMapper.getURL().toString());
-                    }
-                } catch (IOException e) {
+            for (String exclude : mapperLocationExcludes) {
+                excludes.add(exclude);
+            }
+        }
+        PathMatchingResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
+        //排除不需要的配置
+        for (String mapperLocationExclude : excludes) {
+            try {
+                Resource[] excludesMappers = resourcePatternResolver.getResources(mapperLocationExclude);
+                for (Resource excludesMapper : excludesMappers) {
+                    resources.remove(excludesMapper.getURL().toString());
                 }
+            } catch (IOException e) {
             }
         }
         Resource[] mapperLocations = new Resource[resources.size()];

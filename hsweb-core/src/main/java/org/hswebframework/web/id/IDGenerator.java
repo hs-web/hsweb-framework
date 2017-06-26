@@ -18,7 +18,7 @@
 
 package org.hswebframework.web.id;
 
-import org.hswebframwork.utils.RandomUtil;
+import org.hswebframework.utils.RandomUtil;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;

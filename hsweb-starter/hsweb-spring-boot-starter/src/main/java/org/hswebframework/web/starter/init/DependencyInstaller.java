@@ -41,4 +41,5 @@ public interface DependencyInstaller {
 
     DependencyInstaller onUninstall(InstallerCallBack callBack);
 
+    DependencyInstaller onInitialize(InitializeCallBack initializeCallBack);
 }

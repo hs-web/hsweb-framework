@@ -46,7 +46,6 @@ public class DepartmentTests extends SimpleWebApplicationTests {
         //todo 设置测试属性
         entity.setName("test");
         entity.setCode("2");
-
         // test add data
         String requestBody = JSON.toJSONString(entity);
         JSONObject result = testPost("/department").setUp(setup -> setup.contentType(MediaType.APPLICATION_JSON).content(requestBody)).exec().resultAsJson();

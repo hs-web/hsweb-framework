@@ -18,8 +18,9 @@
 package org.hswebframework.web.controller.organizational;
 
 import org.hswebframework.web.authorization.annotation.Authorize;
+import org.hswebframework.web.authorization.annotation.RequiresDataAccess;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
-import org.hswebframework.web.controller.GenericEntityController;
+import org.hswebframework.web.controller.SimpleGenericEntityController;
 import org.hswebframework.web.entity.organizational.DepartmentEntity;
 import org.hswebframework.web.logging.AccessLogger;
 import org.hswebframework.web.service.organizational.DepartmentService;
@@ -28,15 +29,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- *  部门
+ * 部门
  *
  * @author hsweb-generator-online
  */
 @RestController
 @RequestMapping("${hsweb.web.mappings.department:department}")
 @Authorize(permission = "department")
+@RequiresDataAccess
 @AccessLogger("部门管理")
-public class DepartmentController implements GenericEntityController<DepartmentEntity, String, QueryParamEntity,DepartmentEntity> {
+public class DepartmentController implements SimpleGenericEntityController<DepartmentEntity, String, QueryParamEntity> {
 
     private DepartmentService departmentService;
 
@@ -49,4 +51,5 @@ public class DepartmentController implements GenericEntityController<DepartmentE
     public DepartmentService getService() {
         return departmentService;
     }
+
 }

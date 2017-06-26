@@ -26,15 +26,11 @@ import org.apache.shiro.spring.security.interceptor.AopAllianceAnnotationsAuthor
 import org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor;
 import org.hswebframework.web.AopUtils;
 import org.hswebframework.web.authorization.access.DataAccessController;
-import org.hswebframework.web.authorization.access.FieldAccessController;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.annotation.RequiresDataAccess;
 import org.hswebframework.web.authorization.annotation.RequiresExpression;
-import org.hswebframework.web.authorization.annotation.RequiresFieldAccess;
 import org.hswebframework.web.boost.aop.context.MethodInterceptorHolder;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.AnnotationUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -57,8 +53,7 @@ public class BoostAuthorizationAttributeSourceAdvisor extends StaticMethodMatche
                     //自定义
                     RequiresExpression.class,
                     Authorize.class,
-                    RequiresDataAccess.class,
-                    RequiresFieldAccess.class
+                    RequiresDataAccess.class
             };
 
     protected SecurityManager securityManager = null;
@@ -66,11 +61,9 @@ public class BoostAuthorizationAttributeSourceAdvisor extends StaticMethodMatche
     /**
      * Create a new AuthorizationAttributeSourceAdvisor.
      *
-     * @param dataAccessController  数据权限控制器
-     * @param fieldAccessController 字段权限控制器
+     * @param dataAccessController 数据权限控制器
      */
-    public BoostAuthorizationAttributeSourceAdvisor(DataAccessController dataAccessController,
-                                                    FieldAccessController fieldAccessController) {
+    public BoostAuthorizationAttributeSourceAdvisor(DataAccessController dataAccessController) {
         AopAllianceAnnotationsAuthorizingMethodInterceptor interceptor =
                 new AopAllianceAnnotationsAuthorizingMethodInterceptor() {
                     @Override
@@ -84,8 +77,6 @@ public class BoostAuthorizationAttributeSourceAdvisor extends StaticMethodMatche
         interceptor.getMethodInterceptors().add(new ExpressionAnnotationMethodInterceptor(resolver));
         // @RequiresDataAccess support
         interceptor.getMethodInterceptors().add(new DataAccessAnnotationMethodInterceptor(dataAccessController, resolver));
-        // @RequiresFieldAccess support
-        interceptor.getMethodInterceptors().add(new FieldAccessAnnotationMethodInterceptor(fieldAccessController, resolver));
         // @Authorize support
         interceptor.getMethodInterceptors().add(new SimpleAuthorizeMethodInterceptor(resolver));
         setAdvice(interceptor);
@@ -100,6 +91,14 @@ public class BoostAuthorizationAttributeSourceAdvisor extends StaticMethodMatche
     }
 
     public boolean matches(Method method, Class targetClass) {
+        Authorize authorize = AopUtils.findMethodAnnotation(targetClass, method, Authorize.class);
+        if (null != authorize) {
+            if (authorize.ignore()) return false;
+        }
+        authorize = AopUtils.findAnnotation(targetClass, Authorize.class);
+        if (null != authorize) {
+            if (authorize.ignore()) return false;
+        }
         return Arrays.stream(AUTHZ_ANNOTATION_CLASSES)
                 .anyMatch(aClass -> AopUtils.findAnnotation(targetClass, method, aClass) != null);
     }

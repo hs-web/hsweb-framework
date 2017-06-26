@@ -22,9 +22,12 @@ import org.hswebframework.web.commons.entity.GenericEntity;
 import org.hswebframework.web.commons.entity.RecordCreationEntity;
 import org.hswebframework.web.dao.CrudDao;
 import org.hswebframework.web.id.IDGenerator;
-import org.hswebframwork.utils.ClassUtils;
+import org.hswebframework.utils.ClassUtils;
+import org.hswebframework.web.validator.group.CreateGroup;
+import org.hswebframework.web.validator.group.UpdateGroup;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -63,7 +66,7 @@ public abstract class GenericEntityService<E extends GenericEntity<PK>, PK>
     @Override
     public int updateByPk(PK pk, E entity) {
         entity.setId(pk);
-        tryValidate(entity);
+        tryValidate(entity, UpdateGroup.class);
         return createUpdate(entity)
                 //如果是RecordCreationEntity则不修改creator_id和creator_time
                 .when(ClassUtils.instanceOf(getEntityType(), RecordCreationEntity.class),
@@ -103,7 +106,7 @@ public abstract class GenericEntityService<E extends GenericEntity<PK>, PK>
             tryValidateProperty(selectByPk(entity.getId()) == null, "id", entity.getId() + "已存在");
         }
         if (entity.getId() == null) entity.setId(getIDGenerator().generate());
-        tryValidate(entity);
+        tryValidate(entity, CreateGroup.class);
         getDao().insert(entity);
         return entity.getId();
     }
@@ -117,6 +120,7 @@ public abstract class GenericEntityService<E extends GenericEntity<PK>, PK>
 
     @Override
     public List<E> selectByPk(List<PK> id) {
+        if (id == null || id.isEmpty()) return new ArrayList<>();
         return createQuery().where().in(GenericEntity.id, id).listNoPaging();
     }
 }

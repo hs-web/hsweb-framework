@@ -1,0 +1,24 @@
+spring:
+    aop:
+        auto: true
+        proxy-target-class: true
+    datasource:
+       url : jdbc:h2:mem:example
+       username : sa
+       password :
+       type: com.alibaba.druid.pool.DruidDataSource
+       driver-class-name : org.h2.Driver
+    cache:
+       type: simple
+hsweb:
+    app:
+      name: hsweb示例
+      version: 3.0.0
+#    entity:
+#      mappings:
+#         -  source-base-package: org.hswebframework.web.entity.organizational
+#            target-base-package: org.hswebframework.web.example.custom.entity
+#            mapping:
+#                OrganizationalEntity: CustomOrganizationalEntity
+server:
+  port: 8081

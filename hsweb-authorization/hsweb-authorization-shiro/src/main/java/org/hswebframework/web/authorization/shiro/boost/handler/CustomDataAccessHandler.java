@@ -22,7 +22,7 @@ import org.hswebframework.web.authorization.access.*;
 import org.hswebframework.web.boost.aop.context.MethodInterceptorParamContext;
 
 /**
- * 当配置为自定义处理器时(实现{@link CustomDataAccess }接口),此处理器生效
+ * 当配置为自定义处理器时(实现{@link CustomDataAccessConfig }接口),此处理器生效
  *
  * @author zhouhao
  * @see 3.0
@@ -31,12 +31,12 @@ public class CustomDataAccessHandler implements DataAccessHandler {
 
     @Override
     public boolean isSupport(DataAccessConfig access) {
-        return access instanceof CustomDataAccess;
+        return access instanceof CustomDataAccessConfig;
     }
 
     @Override
     public boolean handle(DataAccessConfig access, MethodInterceptorParamContext context) {
-        CustomDataAccess custom = ((CustomDataAccess) access);
+        CustomDataAccessConfig custom = ((CustomDataAccessConfig) access);
         return custom.getController().doAccess(access, context);
     }
 }

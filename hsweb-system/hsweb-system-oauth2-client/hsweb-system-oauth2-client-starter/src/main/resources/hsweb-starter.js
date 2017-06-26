@@ -48,7 +48,7 @@ function install(context) {
         .addColumn().name("client_secret").alias("clientSecret").comment("客户端密钥").jdbcType(java.sql.JDBCType.VARCHAR).length(128).commit()
         .addColumn().name("provider").alias("provider").comment("服务提供商").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
         .addColumn().name("properties").alias("properties").comment("其他配置").jdbcType(java.sql.JDBCType.CLOB).commit()
-        .addColumn().name("enabled").alias("enabled").comment("是否启用").jdbcType(java.sql.JDBCType.DECIMAL).length(4, 0).commit()
+        .addColumn().name("status").alias("status").comment("状态").jdbcType(java.sql.JDBCType.DECIMAL).length(4, 0).commit()
         .comment("OAuth2 服务配置").commit();
 
     database.createOrAlter("s_oauth2_user_token")

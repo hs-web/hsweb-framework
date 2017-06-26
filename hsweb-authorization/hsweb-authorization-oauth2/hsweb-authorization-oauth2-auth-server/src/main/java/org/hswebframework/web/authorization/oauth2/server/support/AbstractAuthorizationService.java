@@ -22,6 +22,7 @@ import org.hswebframework.web.authorization.oauth2.server.client.OAuth2Client;
 import org.hswebframework.web.authorization.oauth2.server.client.OAuth2ClientService;
 import org.hswebframework.web.authorization.oauth2.server.exception.GrantTokenException;
 import org.hswebframework.web.authorization.oauth2.server.token.AccessTokenService;
+import org.hswebframework.web.commons.entity.DataStatus;
 import org.hswebframework.web.oauth2.core.ErrorType;
 
 import static org.hswebframework.web.oauth2.core.ErrorType.*;
@@ -75,7 +76,7 @@ public abstract class AbstractAuthorizationService {
         if (client == null) {
             throw new GrantTokenException(CLIENT_NOT_EXIST);
         }
-        if (Boolean.TRUE != client.isEnabled()) {
+        if (DataStatus.STATUS_ENABLED != client.getStatus()) {
             throw new GrantTokenException(CLIENT_DISABLED);
         }
         return client;

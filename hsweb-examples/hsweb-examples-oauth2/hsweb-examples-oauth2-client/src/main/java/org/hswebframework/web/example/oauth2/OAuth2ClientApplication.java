@@ -23,8 +23,10 @@ import org.hsweb.ezorm.rdb.executor.SqlExecutor;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.AuthenticationManager;
 import org.hswebframework.web.authorization.oauth2.client.OAuth2RequestService;
+import org.hswebframework.web.authorization.oauth2.client.request.OAuth2Session;
 import org.hswebframework.web.authorization.oauth2.client.response.OAuth2Response;
 import org.hswebframework.web.authorization.shiro.oauth2sso.OAuth2SSOAuthorizingListener;
+import org.hswebframework.web.commons.entity.DataStatus;
 import org.hswebframework.web.commons.entity.factory.EntityFactory;
 import org.hswebframework.web.dao.datasource.DataSourceHolder;
 import org.hswebframework.web.dao.datasource.DatabaseType;
@@ -44,6 +46,8 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * TODO 完成注释
@@ -66,12 +70,14 @@ public class OAuth2ClientApplication implements CommandLineRunner {
         // 而且暂时没有实现默认的OAuth2相关的权限获取策略,
         // 所以这里使用通过OAuth2进行获取
         // 实现类似sso的功能,这里实际上应该将权限信息存储起来
+        Map<String, OAuth2Session> sessionMap = new HashMap<>();
+
         return new AuthenticationManager() {
             @Override
             public Authentication getByUserId(String userId) {
                 //获取远程的用户权限信息
-                return oAuth2RequestService.create("hsweb-oauth-server")
-                        .byClientCredentials()
+                return sessionMap.computeIfAbsent("auth", key -> oAuth2RequestService.create("hsweb-oauth-server")
+                        .byClientCredentials())
                         .request("oauth2/user-auth-info/" + userId)
                         .get().onError(OAuth2Response.throwOnError)
                         .as(Authentication.class);
@@ -107,7 +113,7 @@ public class OAuth2ClientApplication implements CommandLineRunner {
         entity.setRedirectUri("http://localhost:8808/");
         //hsweb
         entity.setProvider("hsweb");
-        entity.setEnabled(true);
+        entity.setStatus(DataStatus.STATUS_ENABLED);
         //add
         serverConfigService.insert(entity);
 

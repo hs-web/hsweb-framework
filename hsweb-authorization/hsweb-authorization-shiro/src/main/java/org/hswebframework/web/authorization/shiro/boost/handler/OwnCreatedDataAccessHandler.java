@@ -14,7 +14,7 @@ import org.hswebframework.web.commons.entity.RecordCreationEntity;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.controller.QueryController;
 import org.hswebframework.web.service.QueryService;
-import org.hswebframwork.utils.ClassUtils;
+import org.hswebframework.utils.ClassUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +53,7 @@ public class OwnCreatedDataAccessHandler implements DataAccessHandler {
                     logger.warn("action: {} not support now!", access.getAction());
             }
         } else {
-            logger.warn("target is not instance of HswebController!");
+            logger.warn("target is null!");
         }
         return true;
     }
@@ -116,7 +116,7 @@ public class OwnCreatedDataAccessHandler implements DataAccessHandler {
             queryParamEntity.setTerms(new ArrayList<>());
             //添加一个查询条件
             queryParamEntity
-                    .where(RecordCreationEntity.creatorId,Authentication.current().orElseThrow(AuthorizeException::new).getUser().getId())
+                    .where(RecordCreationEntity.creatorId, Authentication.current().orElseThrow(AuthorizeException::new).getUser().getId())
                     //客户端提交的参数 作为嵌套参数
                     .nest().setTerms(oldParam);
         } else if (entity instanceof RecordCreationEntity) {

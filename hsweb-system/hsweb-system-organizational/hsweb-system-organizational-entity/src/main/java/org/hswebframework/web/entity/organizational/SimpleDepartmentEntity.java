@@ -27,15 +27,15 @@ import java.util.List;
  */
 public class SimpleDepartmentEntity extends SimpleTreeSortSupportEntity<String> implements DepartmentEntity {
     //名称
-    private String  name;
+    private String name;
     //所在组织id
-    private String  orgId;
+    private String orgId;
     //部门编码
-    private String  code;
+    private String code;
     //是否启用
-    private Boolean enabled;
+    private Byte   status;
 
-    private List<SimpleDepartmentEntity> children;
+    private List<DepartmentEntity> children;
 
     /**
      * @return 名称
@@ -79,27 +79,23 @@ public class SimpleDepartmentEntity extends SimpleTreeSortSupportEntity<String> 
         this.code = code;
     }
 
-    /**
-     * @return 是否启用
-     */
-    public Boolean isEnabled() {
-        return this.enabled;
+    @Override
+    public Byte getStatus() {
+        return status;
     }
 
-    /**
-     * 设置 是否启用
-     */
-    public void setEnabled(Boolean enabled) {
-        this.enabled = enabled;
+    @Override
+    public void setStatus(Byte status) {
+        this.status = status;
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public List<SimpleDepartmentEntity> getChildren() {
+    public List<DepartmentEntity> getChildren() {
         return children;
     }
 
-    public void setChildren(List<SimpleDepartmentEntity> children) {
+    public void setChildren(List<DepartmentEntity> children) {
         this.children = children;
     }
 }

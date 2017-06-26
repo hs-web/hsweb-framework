@@ -23,6 +23,16 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 /**
+ * ThreadLocal 工具类,通过在ThreadLocal存储map信息,来实现在ThreadLocal中维护多个信息
+ * <br>e.g.<code>
+ * ThreadLocalUtils.put("key",value);<br>
+ * ThreadLocalUtils.get("key");<br>
+ * ThreadLocalUtils.remove("key");<br>
+ * ThreadLocalUtils.getAndRemove("key");<br>
+ * ThreadLocalUtils.get("key",()-&gt;defaultValue);<br>
+ * ThreadLocalUtils.clear();<br>
+ * </code>
+ *
  * @author zhouhao
  * @since 2.0
  */
@@ -30,39 +40,77 @@ import java.util.function.Supplier;
 public class ThreadLocalUtils {
     private static final ThreadLocal<Map<String, Object>> local = ThreadLocal.withInitial(HashMap::new);
 
+    /**
+     * 设置一个值到ThreadLocal
+     *
+     * @param key   键
+     * @param value 值
+     * @param <T>   值的类型
+     * @return 被放入的值
+     * @see Map#put(Object, Object)
+     */
     public static <T> T put(String key, T value) {
         local.get().put(key, value);
         return value;
     }
 
+    /**
+     * 删除参数对应的值
+     *
+     * @param key
+     * @see Map#remove(Object)
+     */
     public static void remove(String key) {
         local.get().remove(key);
     }
 
+    /**
+     * 清空ThreadLocal
+     *
+     * @see Map#clear()
+     */
     public static void clear() {
         local.remove();
     }
 
+    /**
+     * 从ThreadLocal中获取值
+     *
+     * @param key 键
+     * @param <T> 值泛型
+     * @return 值, 不存在则返回null, 如果类型与泛型不一致, 可能抛出{@link ClassCastException}
+     * @see Map#get(Object)
+     * @see ClassCastException
+     */
     public static <T> T get(String key) {
         return ((T) local.get().get(key));
     }
 
     /**
+     * 从ThreadLocal中获取值,并指定一个当值不存在的提供者
+     *
+     * @see Supplier
      * @since 3.0
      */
-    public static <T> T get(String key, Supplier<T> other) {
-        T val = ((T) local.get().get(key));
-        if (null != val) return val;
-        val = other.get();
-        local.get().put(key, val);
-        return val;
+    public static <T> T get(String key, Supplier<T> supplierOnNull) {
+        return ((T) local.get().computeIfAbsent(key, k -> supplierOnNull.get()));
     }
 
+    /**
+     * 获取一个值后然后删除掉
+     *
+     * @param key 键
+     * @param <T> 值类型
+     * @return 值, 不存在则返回null
+     * @see this#get(String)
+     * @see this#remove(String)
+     */
     public static <T> T getAndRemove(String key) {
         try {
-            return ((T) local.get().get(key));
+            return get(key);
         } finally {
-            local.get().remove(key);
+            remove(key);
         }
     }
+
 }

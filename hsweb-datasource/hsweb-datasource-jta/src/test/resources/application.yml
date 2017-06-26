@@ -1,7 +1,7 @@
 
 spring:
   jta:
-    enabled: true
+    status: true
     atomikos:
       datasource:
         xa-data-source-class-name: com.alibaba.druid.pool.xa.DruidXADataSource
@@ -14,7 +14,6 @@ spring:
       connectionfactory:
         max-pool-size: 20
         local-transaction-mode: true
-
   activemq:
 #    broker-url: tcp://localhost:61616
     in-memory: true

@@ -16,14 +16,20 @@
  */
 package org.hswebframework.web.service.organizational;
 
+import org.hswebframework.web.entity.organizational.PersonAuthBindEntity;
 import org.hswebframework.web.entity.organizational.PersonEntity;
 import org.hswebframework.web.service.CrudService;
 
 /**
- *  人员 服务类
+ * 人员 服务类
  *
  * @author hsweb-generator-online
  */
 public interface PersonService extends CrudService<PersonEntity, String> {
 
+    String insert(PersonAuthBindEntity authBindEntity);
+
+    int updateByPk(PersonAuthBindEntity authBindEntity);
+
+    PersonAuthBindEntity selectAuthBindByPk(String id);
 }

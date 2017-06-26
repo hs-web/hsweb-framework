@@ -6,7 +6,7 @@
 ```yaml
 spring:
   jta:
-    enabled: true
+    status: true
     atomikos:
       datasource:
         xa-data-source-class-name: com.alibaba.druid.pool.xa.DruidXADataSource

@@ -20,6 +20,7 @@ package org.hswebframework.web.starter.dictionary;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import org.hswebframework.web.commons.entity.DataStatus;
 import org.hswebframework.web.entity.dictionary.DictionaryEntity;
 import org.hswebframework.web.entity.dictionary.DictionaryItemEntity;
 import org.hswebframework.web.entity.dictionary.SimpleDictionaryEntity;
@@ -32,6 +33,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 
+import javax.xml.crypto.Data;
 import java.util.List;
 
 /**
@@ -54,7 +56,7 @@ public class DictionaryTests extends SimpleWebApplicationTests {
         entity.setId("test");
         entity.setDescribe("test");
         entity.setClassifiedId("test");
-        entity.setEnabled(true);
+        entity.setStatus(DataStatus.STATUS_ENABLED);
         String json = "[" +
                 "{'value':'1','text':'水果','children':" +
                 "[" +

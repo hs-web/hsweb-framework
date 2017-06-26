@@ -65,4 +65,6 @@ dependency.setup(info)
     })
     .onUninstall(function (context) { //卸载时执行
 
-    });
+    }).onInitialize(function (context) {
+    java.lang.System.out.println("初始化啦");
+});

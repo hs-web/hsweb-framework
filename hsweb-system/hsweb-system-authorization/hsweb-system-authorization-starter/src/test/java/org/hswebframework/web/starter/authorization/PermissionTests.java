@@ -65,7 +65,6 @@ public class PermissionTests extends SimpleWebApplicationTests {
         entity.setName("测试");
         entity.setActions(Arrays.asList(new ActionEntity("C")));
         entity.setId("test");
-        entity.setDataAccess(Arrays.asList(dataAccessEntity));
         String id = permissionService.insert(entity);
         Assert.assertNotNull(id);
 
@@ -73,9 +72,6 @@ public class PermissionTests extends SimpleWebApplicationTests {
         Assert.assertEquals(data.getId(), entity.getId());
         Assert.assertEquals(data.getName(), entity.getName());
         Assert.assertEquals(data.getStatus(), entity.getStatus());
-        Assert.assertNotNull(data.getDataAccess());
-        Assert.assertEquals(data.getDataAccess().get(0).getAction(), dataAccessEntity.getAction());
-        Assert.assertEquals(data.getDataAccess().get(0).getType(), dataAccessEntity.getType());
 
         data.setName("测试修改");
         permissionService.updateByPk(data.getId(), data);

@@ -15,7 +15,14 @@
   
 ```
 
-启动成功后,浏览器打开: [swagger-ui](http://localhost:8080/swagger-ui.html) 试试
+3. 测试
+使用Postman之类的http测试工具请求: 
+```bash
+  # 登录
+  HTTP POST : http://localhost:8081/authorize/login?username=admin&password=admin
+  # 测试数据权限控制-查询
+  HTTP GET :  http://localhost:8081/test/testQuery
+```
 
 如果不想使用权限控制,请注释掉 pom.xml的
 ```xml

@@ -3,9 +3,7 @@ package org.hswebframework.web.authorization.shiro.boost;
 import org.hswebframework.web.authorization.access.DataAccessConfig;
 import org.hswebframework.web.authorization.access.DataAccessController;
 import org.hswebframework.web.authorization.access.DataAccessHandler;
-import org.hswebframework.web.authorization.shiro.boost.handler.CustomDataAccessHandler;
-import org.hswebframework.web.authorization.shiro.boost.handler.OwnCreatedDataAccessHandler;
-import org.hswebframework.web.authorization.shiro.boost.handler.ScriptDataAccessHandler;
+import org.hswebframework.web.authorization.shiro.boost.handler.*;
 import org.hswebframework.web.boost.aop.context.MethodInterceptorParamContext;
 
 import java.util.LinkedList;
@@ -34,6 +32,8 @@ public final class DefaultDataAccessController implements DataAccessController {
         addHandler(new CustomDataAccessHandler());
         addHandler(new OwnCreatedDataAccessHandler());
         addHandler(new ScriptDataAccessHandler());
+        addHandler(new FieldFilterDataAccessHandler());
+        addHandler(new FieldScopeDataAccessHandler());
     }
 
     @Override
@@ -42,7 +42,7 @@ public final class DefaultDataAccessController implements DataAccessController {
         return handlers.parallelStream()
                 // TODO: 17-3-28 可以换成access对应的handler以提高效率
                 .filter(handler -> handler.isSupport(access))
-                .anyMatch(handler -> handler.handle(access, params));
+                .allMatch(handler -> handler.handle(access, params));
     }
 
     public DefaultDataAccessController addHandler(DataAccessHandler handler) {

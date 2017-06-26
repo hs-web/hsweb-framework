@@ -31,7 +31,7 @@
         <result property="clientSecret" column="client_secret" javaType="String" jdbcType="VARCHAR"/>
         <result property="provider" column="provider" javaType="String" jdbcType="VARCHAR"/>
         <result property="properties" column="properties" javaType="java.util.Map" jdbcType="CLOB"/>
-        <result property="enabled" column="enabled" javaType="Boolean" jdbcType="DECIMAL"/>
+        <result property="status" column="status" javaType="Byte" jdbcType="DECIMAL"/>
     </resultMap>
 
     <!--用于动态生成sql所需的配置-->

@@ -20,6 +20,8 @@ import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotBlank;
 import org.hswebframework.web.commons.entity.SimpleGenericEntity;
 
+import java.util.Set;
+
 /**
  * 人员
  *
@@ -156,4 +158,5 @@ public class SimplePersonEntity extends SimpleGenericEntity<String> implements P
     public void setRemark(String remark) {
         this.remark = remark;
     }
+
 }

@@ -27,7 +27,7 @@
         <result property="username" column="username" javaType="string" jdbcType="VARCHAR"/>
         <result property="password" column="password" javaType="String" jdbcType="VARCHAR"/>
         <result property="salt" column="salt" javaType="String" jdbcType="VARCHAR"/>
-        <result property="enabled" column="enabled" javaType="Boolean" jdbcType="NUMERIC"/>
+        <result property="status" column="status" javaType="Byte" jdbcType="NUMERIC"/>
         <result property="createTime" column="create_time" javaType="Long" jdbcType="NUMERIC"/>
         <result property="creatorId" column="creator_id" javaType="String" jdbcType="VARCHAR"/>
     </resultMap>

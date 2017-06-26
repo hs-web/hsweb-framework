@@ -27,7 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class JtaDynamicDataSourceService extends AbstractDynamicDataSourceService {
 
-    private JtaDataSourceStore jtaDataSourceStore;
+    private JtaDataSourceRepository jtaDataSourceRepository;
 
     private Executor executor = Executors.newCachedThreadPool();
 
@@ -38,26 +38,26 @@ public class JtaDynamicDataSourceService extends AbstractDynamicDataSourceServic
         this.executor = executor;
     }
 
-    public JtaDynamicDataSourceService(JtaDataSourceStore jtaDataSourceStore, DynamicDataSource defaultDataSource) {
+    public JtaDynamicDataSourceService(JtaDataSourceRepository jtaDataSourceRepository, DynamicDataSource defaultDataSource) {
         super(defaultDataSource);
-        this.jtaDataSourceStore = jtaDataSourceStore;
+        this.jtaDataSourceRepository = jtaDataSourceRepository;
     }
 
-    public JtaDynamicDataSourceService(JtaDataSourceStore jtaDataSourceStore, DataSource dataSource) throws SQLException {
+    public JtaDynamicDataSourceService(JtaDataSourceRepository jtaDataSourceRepository, DataSource dataSource) throws SQLException {
         super(dataSource);
-        this.jtaDataSourceStore = jtaDataSourceStore;
+        this.jtaDataSourceRepository = jtaDataSourceRepository;
     }
 
     @Override
     protected int getHash(String id) {
-        AtomikosDataSourceConfig config = jtaDataSourceStore.getConfig(id);
+        AtomikosDataSourceConfig config = jtaDataSourceRepository.getConfig(id);
         if (null == config) return 0;
         return config.hashCode();
     }
 
     @Override
     protected DataSourceCache createCache(String id) {
-        AtomikosDataSourceConfig config = jtaDataSourceStore.getConfig(id);
+        AtomikosDataSourceConfig config = jtaDataSourceRepository.getConfig(id);
         if (config == null) {
             throw new DataSourceNotFoundException(id);
         }

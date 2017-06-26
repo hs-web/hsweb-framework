@@ -64,7 +64,7 @@ public abstract class AbstractTreeSortService<E extends TreeSortSupportEntity<PK
 
     @Override
     public List<PK> insertBatch(Collection<E> data) {
-        return data.parallelStream()
+        return data.stream()
                 .map(this::insert)
                 .collect(Collectors.toList());
     }

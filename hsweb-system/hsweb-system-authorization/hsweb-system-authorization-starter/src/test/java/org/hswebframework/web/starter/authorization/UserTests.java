@@ -18,6 +18,8 @@
 package org.hswebframework.web.starter.authorization;
 
 import org.hswebframework.web.authorization.Authentication;
+import org.hswebframework.web.authorization.AuthenticationInitializeService;
+import org.hswebframework.web.commons.entity.DataStatus;
 import org.hswebframework.web.entity.authorization.UserEntity;
 import org.hswebframework.web.service.authorization.PasswordStrengthValidator;
 import org.hswebframework.web.service.authorization.UserService;
@@ -66,6 +68,9 @@ public class UserTests extends SimpleWebApplicationTests {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private AuthenticationInitializeService authenticationInitializeService;
+
     @After
     public void clear() throws SQLException {
         sqlExecutor.delete("delete from s_user");
@@ -85,10 +90,7 @@ public class UserTests extends SimpleWebApplicationTests {
     @Test
     public void testInitAuth() {
         UserEntity entity = createTestUser();
-        Authentication authentication = userService.initAdminAuthorization(entity.getId());
-        Assert.assertNotNull(authentication);
-        Assert.assertEquals(authentication.getUser().getUsername(), entity.getUsername());
-        authentication = userService.initUserAuthorization(entity.getId());
+        Authentication authentication = authenticationInitializeService.initUserAuthorization(entity.getId());
         Assert.assertNotNull(authentication);
         Assert.assertEquals(authentication.getUser().getUsername(), entity.getUsername());
     }
@@ -118,13 +120,13 @@ public class UserTests extends SimpleWebApplicationTests {
         Assert.assertEquals(userEntity.getPassword().length(), 32);
 
         UserEntity entityInDb = userService.selectByUsername(userEntity.getUsername());
-        Assert.assertEquals(entityInDb.isEnabled(), true);
+        Assert.assertEquals(entityInDb.getStatus(), DataStatus.STATUS_ENABLED);
         Assert.assertNotNull(entityInDb.getCreateTime());
 
         Assert.assertEquals(entityInDb.getPassword(), userService.encodePassword("password_1234", entityInDb.getSalt()));
 
         entityInDb = userService.selectByUsername(userEntity.getUsername());
-        Assert.assertEquals(entityInDb.isEnabled(), true);
+        Assert.assertEquals(entityInDb.getStatus(), DataStatus.STATUS_ENABLED);
         Assert.assertNotNull(entityInDb.getCreateTime());
         try {
             userService.updatePassword(id, "test", "test");
@@ -139,24 +141,24 @@ public class UserTests extends SimpleWebApplicationTests {
         entityInDb.setId(anotherId);
         entityInDb.setName("新名字");
         try {
-            userService.update(anotherId,entityInDb);
+            userService.update(anotherId, entityInDb);
             Assert.assertTrue(false);
         } catch (ValidationException e) {
             Assert.assertEquals(e.getResults().get(0).getMessage(), "{username_exists}");
         }
         entityInDb.setId(id);
-        userService.update(id,entityInDb);
+        userService.update(id, entityInDb);
         entityInDb = userService.selectByUsername(userEntity.getUsername());
         Assert.assertEquals("新名字", entityInDb.getName());
 
 
         userService.disable(id);
         entityInDb = userService.selectByUsername(userEntity.getUsername());
-        Assert.assertFalse(entityInDb.isEnabled());
+        Assert.assertEquals(DataStatus.STATUS_DISABLED, entityInDb.getStatus());
 
         userService.enable(id);
         entityInDb = userService.selectByUsername(userEntity.getUsername());
-        Assert.assertTrue(entityInDb.isEnabled());
+        Assert.assertEquals(DataStatus.STATUS_ENABLED, entityInDb.getStatus());
 
     }
 }

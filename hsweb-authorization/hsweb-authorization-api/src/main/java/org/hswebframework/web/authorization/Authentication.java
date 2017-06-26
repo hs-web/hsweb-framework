@@ -78,12 +78,11 @@ public interface Authentication extends Serializable {
      * @param id 角色id
      * @return 角色信息
      */
-    default Role getRole(String id) {
+    default Optional<Role> getRole(String id) {
         if (null == id) return null;
         return getRoles().stream()
                 .filter(role -> role.getId().equals(id))
-                .findAny()
-                .orElse(null);
+                .findAny();
     }
 
     /**
@@ -92,12 +91,11 @@ public interface Authentication extends Serializable {
      * @param id 权限id
      * @return 权限信息
      */
-    default Permission getPermission(String id) {
+    default Optional<Permission> getPermission(String id) {
         if (null == id) return null;
         return getPermissions().parallelStream()
                 .filter(permission -> permission.getId().equals(id))
-                .findAny()
-                .orElse(null);
+                .findAny();
     }
 
     /**

@@ -29,6 +29,7 @@ import org.hswebframework.web.controller.CreateController;
 import org.hswebframework.web.controller.QueryController;
 import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.entity.authorization.UserEntity;
+import org.hswebframework.web.entity.authorization.bind.BindRoleUserEntity;
 import org.hswebframework.web.logging.AccessLogger;
 import org.hswebframework.web.model.authorization.UserModel;
 import org.hswebframework.web.service.authorization.UserService;
@@ -50,7 +51,7 @@ import static org.hswebframework.web.controller.message.ResponseMessage.ok;
 @Api(tags = "user-manager", description = "用户基本信息管理")
 public class UserController implements
         QueryController<UserEntity, String, QueryParamEntity>,
-        CreateController<UserEntity, String, UserModel> {
+        CreateController<BindRoleUserEntity, String, BindRoleUserEntity> {
 
     private UserService userService;
 
@@ -63,14 +64,6 @@ public class UserController implements
     @Autowired
     public void setUserService(UserService userService) {
         this.userService = userService;
-    }
-
-    @Override
-    public UserEntity modelToEntity(UserModel model, UserEntity entity) {
-        entity.setName(model.getName());
-        entity.setPassword(model.getPassword());
-        entity.setUsername(model.getUsername());
-        return entity;
     }
 
     @Override
@@ -91,8 +84,8 @@ public class UserController implements
     @AccessLogger("{update_by_primary_key}")
     @ApiOperation("根据ID修改用户信息")
     public ResponseMessage<Void> updateByPrimaryKey(@PathVariable String id,
-                                                    @RequestBody UserModel userModel) {
-        getService().update(id, modelToEntity(userModel, getService().createEntity()));
+                                                    @RequestBody BindRoleUserEntity userModel) {
+        getService().update(id, userModel);
         return ok();
     }
 
@@ -119,6 +112,15 @@ public class UserController implements
         return ok();
     }
 
+    @Override
+    public ResponseMessage<String> add(@RequestBody BindRoleUserEntity data) {
+        Authentication authentication = Authentication.current().orElse(null);
+        if (null != authentication) {
+            data.setCreatorId(authentication.getUser().getId());
+        }
+        return CreateController.super.add(data);
+    }
+
     @Authorize(action = "enable")
     @PutMapping(path = "/{id}/enable")
     @AccessLogger("{enable_user}")
@@ -135,4 +137,8 @@ public class UserController implements
         return ok(getService().disable(id));
     }
 
+    @Override
+    public BindRoleUserEntity modelToEntity(BindRoleUserEntity model, BindRoleUserEntity entity) {
+        return model;
+    }
 }

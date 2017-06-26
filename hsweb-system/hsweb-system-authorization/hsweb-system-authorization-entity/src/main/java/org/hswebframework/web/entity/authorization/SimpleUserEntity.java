@@ -20,7 +20,7 @@ public class SimpleUserEntity extends SimpleGenericEntity<String> implements Use
 
     private String creatorId;
 
-    private Boolean enabled;
+    private Byte status;
 
     @Override
     public String getName() {
@@ -78,14 +78,12 @@ public class SimpleUserEntity extends SimpleGenericEntity<String> implements Use
         this.creatorId = creatorId;
     }
 
-    @Override
-    public void setEnabled(Boolean enabled) {
-        this.enabled = enabled;
+    public Byte getStatus() {
+        return status;
     }
 
-    @Override
-    public Boolean isEnabled() {
-        return enabled;
+    public void setStatus(Byte status) {
+        this.status = status;
     }
 
     @Override

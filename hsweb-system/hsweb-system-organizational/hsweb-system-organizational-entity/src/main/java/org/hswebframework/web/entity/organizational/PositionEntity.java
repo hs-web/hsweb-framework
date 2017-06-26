@@ -17,7 +17,8 @@
 package org.hswebframework.web.entity.organizational;
 
 import org.hswebframework.web.commons.entity.TreeSortSupportEntity;
-import org.hswebframework.web.commons.entity.TreeSupportEntity;
+import org.hswebframework.web.entity.organizational.authorization.DepartmentAttachEntity;
+import org.hswebframework.web.entity.organizational.authorization.PositionAttachEntity;
 
 import java.util.List;
 
@@ -26,7 +27,7 @@ import java.util.List;
  *
  * @author hsweb-generator-online
  */
-public interface PositionEntity extends TreeSortSupportEntity<String> {
+public interface PositionEntity extends TreeSortSupportEntity<String>, DepartmentAttachEntity, PositionAttachEntity {
  /*-------------------------------------------
     |               属性名常量               |
     ===========================================*/
@@ -53,7 +54,7 @@ public interface PositionEntity extends TreeSortSupportEntity<String> {
     /**
      * 树结构编码
      */
-    String path     = "path";
+    String path         = "path";
     /**
      * 排序索引
      */
@@ -72,16 +73,6 @@ public interface PositionEntity extends TreeSortSupportEntity<String> {
      * 设置 职位名称
      */
     void setName(String name);
-
-    /**
-     * @return 部门id
-     */
-    String getDepartmentId();
-
-    /**
-     * 设置 部门id
-     */
-    void setDepartmentId(String departmentId);
 
     /**
      * @return 持有的角色
@@ -103,15 +94,14 @@ public interface PositionEntity extends TreeSortSupportEntity<String> {
      */
     void setRemark(String remark);
 
-    /**
-     * @return 排序索引
-     */
-    Long getSortIndex();
+    void setChildren(List<PositionEntity> children);
 
-    /**
-     * 设置 排序索引
-     */
-    void setSortIndex(Long sortIndex);
+    @Override
+    default String getPositionId() {
+        return getId();
+    }
 
-
+    default void setPositionId(String positionId) {
+        setId(positionId);
+    }
 }

@@ -17,13 +17,17 @@
 package org.hswebframework.web.entity.organizational;
 
 import org.hswebframework.web.commons.entity.TreeSortSupportEntity;
+import org.hswebframework.web.entity.organizational.authorization.AreaAttachEntity;
+import org.hswebframework.web.entity.organizational.authorization.OrgAttachEntity;
+
+import java.util.List;
 
 /**
  * 组织 实体
  *
  * @author hsweb-generator-online
  */
-public interface OrganizationalEntity extends TreeSortSupportEntity<String> {
+public interface OrganizationalEntity extends TreeSortSupportEntity<String>, AreaAttachEntity, OrgAttachEntity {
  /*-------------------------------------------
     |               属性名常量               |
     ===========================================*/
@@ -50,15 +54,15 @@ public interface OrganizationalEntity extends TreeSortSupportEntity<String> {
     /**
      * 树定位码
      */
-    String path      = "path";
+    String path          = "path";
     /**
      * 树结构编码
      */
     String sortIndex     = "sortIndex";
     /**
-     * 是否启用
+     * 状态
      */
-    String enabled       = "enabled";
+    String status        = "status";
     /**
      * 级别
      */
@@ -104,15 +108,18 @@ public interface OrganizationalEntity extends TreeSortSupportEntity<String> {
      */
     void setOptionalRoles(java.util.List<String> optionalRoles);
 
-    /**
-     * @return 是否启用
-     */
-    Boolean isEnabled();
+    void setChildren(List<OrganizationalEntity> children);
 
-    /**
-     * 设置 是否启用
-     */
-    void setEnabled(Boolean enabled);
+    Byte getStatus();
 
+    void setStatus(Byte status);
 
+    default String getOrgId() {
+        return getId();
+    }
+
+    @Override
+    default void setOrgId(String orgId) {
+        setId(orgId);
+    }
 }
