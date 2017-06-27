@@ -21,17 +21,12 @@ package org.hswebframework.web.starter.dictionary;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.hswebframework.web.entity.dictionary.DictionaryParserEntity;
-import org.hswebframework.web.entity.dictionary.SimpleDictionaryItemEntity;
-import org.hswebframework.web.entity.dictionary.SimpleDictionaryParserEntity;
-import org.hswebframework.web.starter.convert.FastJsonHttpMessageConverter;
+import org.hswebframework.web.starter.convert.FastJsonGenericHttpMessageConverter;
 import org.hswebframework.web.tests.SimpleWebApplicationTests;
 import org.junit.Assert;
 import org.junit.Test;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-
-import java.util.List;
 
 /**
  * TODO 完善单元测试
@@ -41,7 +36,7 @@ import java.util.List;
 public class DictionaryParserTests extends SimpleWebApplicationTests {
 
     @Autowired
-    private FastJsonHttpMessageConverter fastJsonHttpMessageConverter;
+    private FastJsonGenericHttpMessageConverter fastJsonHttpMessageConverter;
 
     @Test
     public void testCrud() throws Exception {

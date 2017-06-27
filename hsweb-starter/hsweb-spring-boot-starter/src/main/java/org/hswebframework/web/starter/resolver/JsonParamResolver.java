@@ -17,7 +17,7 @@
 
 package org.hswebframework.web.starter.resolver;
 
-import org.hswebframework.web.starter.convert.FastJsonHttpMessageConverter;
+import org.hswebframework.web.starter.convert.FastJsonGenericHttpMessageConverter;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -31,9 +31,9 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  */
 public class JsonParamResolver implements HandlerMethodArgumentResolver {
 
-    private FastJsonHttpMessageConverter fastJsonHttpMessageConverter;
+    private FastJsonGenericHttpMessageConverter fastJsonHttpMessageConverter;
 
-    public JsonParamResolver(FastJsonHttpMessageConverter fastJsonHttpMessageConverter) {
+    public JsonParamResolver(FastJsonGenericHttpMessageConverter fastJsonHttpMessageConverter) {
         this.fastJsonHttpMessageConverter = fastJsonHttpMessageConverter;
     }
 
