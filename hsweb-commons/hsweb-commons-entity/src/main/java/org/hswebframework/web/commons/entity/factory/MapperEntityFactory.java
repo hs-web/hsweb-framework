@@ -108,7 +108,8 @@ public class MapperEntityFactory implements EntityFactory {
             realType = beanClass;
         }
         if (realType != null) {
-            logger.debug("use instance {} for {}", realType, beanClass);
+            if (logger.isDebugEnabled())
+                logger.debug("use instance {} for {}", realType, beanClass);
             mapper = new Mapper<>(realType, new DefaultInstanceGetter(realType));
             realTypeMapper.put(beanClass, mapper);
         }
