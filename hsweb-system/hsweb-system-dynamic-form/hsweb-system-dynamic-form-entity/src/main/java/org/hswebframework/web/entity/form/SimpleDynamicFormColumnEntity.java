@@ -30,9 +30,9 @@ public class SimpleDynamicFormColumnEntity extends SimpleGenericEntity<String> i
     private Integer precision;
     //小数点位数
     private Integer scale;
-    //其他配置
-    private String  properties;
+    //字典ID
     private String  dictId;
+    //字典解析器ID
     private String  dictParserId;
 
     /**
