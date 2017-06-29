@@ -65,6 +65,14 @@ public class TestController implements QueryController<UserEntity, String, Query
         return ResponseMessage.ok(model);
     }
 
+
+    @PutMapping("/testUpdateBatch")
+    @Authorize(ignore = true)
+    public ResponseMessage<List<UserModel>> testUpdate(@RequestBody List<UserModel> model) {
+        return ResponseMessage.ok(model);
+    }
+
+
     @PutMapping("/test/testPersonnel")
     public ResponseMessage<PersonnelAuthorization> testPersonnel() {
         return ResponseMessage.ok(PersonnelAuthorization.current().get());

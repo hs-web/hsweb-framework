@@ -21,7 +21,7 @@ package org.hswebframework.web.starter.organizational;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.hswebframework.web.entity.organizational.PersonEntity;
-import org.hswebframework.web.starter.convert.FastJsonHttpMessageConverter;
+import org.hswebframework.web.starter.convert.FastJsonGenericHttpMessageConverter;
 import org.hswebframework.web.tests.SimpleWebApplicationTests;
 import org.junit.Assert;
 import org.junit.Test;
@@ -36,7 +36,7 @@ import org.springframework.http.MediaType;
 public class PersonTests extends SimpleWebApplicationTests {
 
     @Autowired
-    private FastJsonHttpMessageConverter fastJsonHttpMessageConverter;
+    private FastJsonGenericHttpMessageConverter fastJsonHttpMessageConverter;
 
     @Test
     public void testCrud() throws Exception {
