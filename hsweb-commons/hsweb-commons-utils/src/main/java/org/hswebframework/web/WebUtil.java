@@ -18,6 +18,7 @@
 
 package org.hswebframework.web;
 
+import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -68,6 +69,13 @@ public class WebUtil {
         return map;
     }
 
+     static final String[] ipHeaders = {
+            "X-Forwarded-For",
+            "X-Real-IP",
+            "Proxy-Client-IP",
+            "WL-Proxy-Client-IP"
+    };
+
     /**
      * 获取请求客户端的真实ip地址
      *
@@ -75,23 +83,13 @@ public class WebUtil {
      * @return ip地址
      */
     public static String getIpAddr(HttpServletRequest request) {
-        String ip = request.getHeader(" x-forwarded-for ");
-        if (ip == null || ip.length() == 0 || " unknown ".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("X-Forwarded-For");
+        String ip = request.getHeader("X-Forwarded-For");
+        for (String ipHeader : ipHeaders) {
+            if (!StringUtils.isEmpty(ipHeader) && ip.contains("unknown")) {
+                return request.getHeader(ipHeader);
+            }
         }
-        if (ip == null || ip.length() == 0 || " unknown ".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("X-Real-IP");
-        }
-        if (ip == null || ip.length() == 0 || " unknown ".equalsIgnoreCase(ip)) {
-            ip = request.getHeader(" Proxy-Client-IP ");
-        }
-        if (ip == null || ip.length() == 0 || " unknown ".equalsIgnoreCase(ip)) {
-            ip = request.getHeader(" WL-Proxy-Client-IP ");
-        }
-        if (ip == null || ip.length() == 0 || " unknown ".equalsIgnoreCase(ip)) {
-            ip = request.getRemoteAddr();
-        }
-        return ip;
+        return request.getRemoteAddr();
     }
 
     /**
