@@ -1,4 +1,4 @@
-package org.hswebframework.web.dao.mybatis;
+package org.hswebframework.web.datasource;
 
 import org.hsweb.ezorm.rdb.executor.AbstractJdbcSqlExecutor;
 import org.hsweb.ezorm.rdb.executor.SQL;
