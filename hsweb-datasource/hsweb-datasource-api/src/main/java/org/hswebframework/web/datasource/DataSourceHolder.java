@@ -40,6 +40,16 @@ public final class DataSourceHolder {
     }
 
     /**
+     * 根据指定的数据源id获取动态数据源
+     * @param dataSourceId 数据源id
+     * @return 动态数据源
+     * @throws DataSourceNotFoundException 如果数据源不存在将抛出此异常
+     */
+    public  static DynamicDataSource dataSource(String dataSourceId){
+        checkDynamicDataSourceReady();
+        return dynamicDataSourceService.getDataSource(dataSourceId);
+    }
+    /**
      * @return 当前使用的数据源
      */
     public static DynamicDataSource currentDataSource() {

@@ -27,9 +27,14 @@ public class DynamicDataSourceProxy implements DynamicDataSource {
         this.proxy = proxy;
     }
 
-    public DynamicDataSourceProxy(String id, DataSource proxy) throws SQLException {
+    public DynamicDataSourceProxy(String id, DataSource proxy) {
         this.id = id;
         this.proxy = proxy;
+    }
+
+    @Override
+    public DataSource getNative() {
+        return proxy;
     }
 
     @Override
