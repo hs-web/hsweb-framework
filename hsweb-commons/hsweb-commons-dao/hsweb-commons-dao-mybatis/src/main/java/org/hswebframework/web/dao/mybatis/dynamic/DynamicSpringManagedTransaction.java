@@ -21,7 +21,7 @@ package org.hswebframework.web.dao.mybatis.dynamic;
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
 import org.apache.ibatis.transaction.Transaction;
-import org.hswebframework.web.dao.datasource.DataSourceHolder;
+import org.hswebframework.web.datasource.DataSourceHolder;
 import org.mybatis.spring.transaction.SpringManagedTransaction;
 import org.springframework.jdbc.datasource.ConnectionHolder;
 import org.springframework.jdbc.datasource.DataSourceUtils;
@@ -33,6 +33,8 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.hswebframework.web.datasource.DataSourceHolder.switcher;
 
 /**
  * mybatis 同一事务，同一个mapper，动态数据源切换支持
@@ -51,7 +53,7 @@ public class DynamicSpringManagedTransaction implements Transaction {
      * @return {@link TransactionProxy}
      */
     protected TransactionProxy getProxy() {
-        return connectionMap.get(DataSourceHolder.getActiveSourceId());
+        return connectionMap.get(switcher().currentDataSourceId());
     }
 
     /**
@@ -60,7 +62,7 @@ public class DynamicSpringManagedTransaction implements Transaction {
      * @param proxy
      */
     protected void addProxy(TransactionProxy proxy) {
-        connectionMap.put(DataSourceHolder.getActiveSourceId(), proxy);
+        connectionMap.put(switcher().currentDataSourceId(), proxy);
     }
 
     /**
@@ -79,15 +81,15 @@ public class DynamicSpringManagedTransaction implements Transaction {
             return proxy.getConnection();
         }
         //根据当前激活的数据源 获取jdbc链接
-        DataSource dataSource = DataSourceHolder.getActiveSource();
-        String dsId = DataSourceHolder.getActiveSourceId();
+        DataSource dataSource = DataSourceHolder.currentDataSource().getNative();
+        String dsId = switcher().currentDataSourceId();
         Connection connection = DataSourceUtils.getConnection(dataSource);
         proxy = new TransactionProxy(dsId, connection, dataSource);
         addProxy(proxy);
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug(
-                    "DataSource (" + DataSourceHolder.getActiveSourceId() + ") JDBC Connection ["
+                    "DataSource (" + dsId + ") JDBC Connection ["
                             + connection
                             + "] will"
                             + (proxy.isConnectionTransactional ? " " : " not ")

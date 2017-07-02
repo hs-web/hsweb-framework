@@ -72,7 +72,6 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
 
     }
 
-    @WriteLock("dynamic-form:${#formId}")
     public void deploy(String formId) {
         DynamicFormEntity formEntity = selectByPk(formId);
         assertNotNull(formEntity);

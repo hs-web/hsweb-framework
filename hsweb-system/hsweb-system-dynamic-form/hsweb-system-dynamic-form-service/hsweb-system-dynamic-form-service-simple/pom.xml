@@ -32,5 +32,10 @@
             <artifactId>hsweb-system-dictionary-service-api</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.hswebframework.web</groupId>
+            <artifactId>hsweb-datasource-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 </project>

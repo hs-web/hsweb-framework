@@ -28,7 +28,6 @@ import org.hswebframework.web.authorization.oauth2.client.response.OAuth2Respons
 import org.hswebframework.web.authorization.shiro.oauth2sso.OAuth2SSOAuthorizingListener;
 import org.hswebframework.web.commons.entity.DataStatus;
 import org.hswebframework.web.commons.entity.factory.EntityFactory;
-import org.hswebframework.web.dao.datasource.DataSourceHolder;
 import org.hswebframework.web.dao.datasource.DatabaseType;
 import org.hswebframework.web.entity.oauth2.client.OAuth2ServerConfigEntity;
 import org.hswebframework.web.service.oauth2.client.OAuth2ServerConfigService;

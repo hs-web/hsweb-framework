@@ -28,8 +28,8 @@ import org.hsweb.ezorm.rdb.render.dialect.H2RDBDatabaseMetaData;
 import org.hsweb.ezorm.rdb.render.dialect.MysqlRDBDatabaseMetaData;
 import org.hsweb.ezorm.rdb.render.dialect.OracleRDBDatabaseMetaData;
 import org.hsweb.ezorm.rdb.simple.SimpleDatabase;
-import org.hswebframework.web.dao.datasource.DataSourceHolder;
-import org.hswebframework.web.dao.datasource.DatabaseType;
+import org.hswebframework.web.datasource.DataSourceHolder;
+import org.hswebframework.web.datasource.DatabaseType;
 import org.hswebframework.web.starter.init.SystemInitialize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -38,7 +38,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 
-import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 import java.sql.Connection;
 
@@ -61,12 +60,12 @@ public class SystemInitializeAutoConfiguration implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        DatabaseType type = DataSourceHolder.getDefaultDatabaseType();
+        DatabaseType type = DataSourceHolder.currentDatabaseType();
         SystemVersion version = appProperties.build();
         Connection connection = null;
         String jdbcUserName;
         try {
-            connection = DataSourceHolder.getActiveSource().getConnection();
+            connection = DataSourceHolder.currentDataSource().getConnection();
             jdbcUserName = connection.getMetaData().getUserName();
         } finally {
             if (null != connection) connection.close();

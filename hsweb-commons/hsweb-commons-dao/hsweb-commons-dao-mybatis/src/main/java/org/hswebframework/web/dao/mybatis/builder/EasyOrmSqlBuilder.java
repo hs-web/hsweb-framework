@@ -40,11 +40,11 @@ import org.hsweb.ezorm.rdb.render.dialect.OracleRDBDatabaseMetaData;
 import org.hsweb.ezorm.rdb.render.support.simple.CommonSqlRender;
 import org.hsweb.ezorm.rdb.render.support.simple.SimpleWhereSqlBuilder;
 import org.hswebframework.web.BusinessException;
-import org.hswebframework.web.dao.datasource.DataSourceHolder;
-import org.hswebframework.web.dao.datasource.DatabaseType;
 import org.hswebframework.web.dao.mybatis.plgins.pager.Pager;
 import org.hswebframework.web.dao.mybatis.utils.ResultMapsUtils;
 import org.hswebframework.utils.StringUtils;
+import org.hswebframework.web.datasource.DataSourceHolder;
+import org.hswebframework.web.datasource.DatabaseType;
 
 import java.sql.JDBCType;
 import java.util.*;
@@ -52,8 +52,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
+ *  使用easyorm 动态构建 sql
  * @author zhouhao
- * @TODO
+ * @since 2.0
  */
 public class EasyOrmSqlBuilder {
 
@@ -112,7 +113,7 @@ public class EasyOrmSqlBuilder {
     };
 
     public RDBDatabaseMetaData getActiveDatabase() {
-        DatabaseType type = DataSourceHolder.getActiveDatabaseType();
+        DatabaseType type = DataSourceHolder.currentDatabaseType();
         switch (type) {
             case h2:
                 return h2;
@@ -172,8 +173,8 @@ public class EasyOrmSqlBuilder {
         SqlAppender appender = new SqlAppender();
         columns.forEach(column -> {
             RDBColumnMetaData columnMetaData = column.getRDBColumnMetaData();
-            if (columnMetaData.getName().contains(".")) return;
             if (columnMetaData == null) return;
+            if (columnMetaData.getName().contains(".")) return;
             try {
                 Object tmp = propertyUtils.getProperty(param.getData(), columnMetaData.getAlias());
                 if (tmp == null) return;
@@ -305,7 +306,7 @@ public class EasyOrmSqlBuilder {
         public OracleMeta() {
             super();
             renderMap.put(SqlRender.TYPE.INSERT, new InsertSqlBuilder());
-            renderMap.put(SqlRender.TYPE.UPDATE, new UpdateSqlBuilder(Dialect.MYSQL));
+            renderMap.put(SqlRender.TYPE.UPDATE, new UpdateSqlBuilder(Dialect.ORACLE));
         }
     }
 
@@ -313,7 +314,7 @@ public class EasyOrmSqlBuilder {
         public H2Meta() {
             super();
             renderMap.put(SqlRender.TYPE.INSERT, new InsertSqlBuilder());
-            renderMap.put(SqlRender.TYPE.UPDATE, new UpdateSqlBuilder(Dialect.MYSQL));
+            renderMap.put(SqlRender.TYPE.UPDATE, new UpdateSqlBuilder(Dialect.H2));
         }
     }
 }

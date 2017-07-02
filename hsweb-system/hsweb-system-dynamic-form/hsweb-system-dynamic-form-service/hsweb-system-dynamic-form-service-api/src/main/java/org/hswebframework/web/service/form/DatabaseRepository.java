@@ -14,5 +14,5 @@ public interface DatabaseRepository {
 
     RDBDatabase getDatabase(String datasourceId);
 
-    RDBDatabase getActiveDatabase();
+    RDBDatabase getCurrentDatabase();
 }
