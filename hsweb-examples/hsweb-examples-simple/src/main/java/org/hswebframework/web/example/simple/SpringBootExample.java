@@ -18,16 +18,12 @@
 package org.hswebframework.web.example.simple;
 
 import com.alibaba.fastjson.JSON;
-import org.hsweb.ezorm.rdb.executor.AbstractJdbcSqlExecutor;
-import org.hsweb.ezorm.rdb.executor.SqlExecutor;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.access.DataAccessConfig;
 import org.hswebframework.web.authorization.simple.SimpleFieldFilterDataAccessConfig;
 import org.hswebframework.web.commons.entity.DataStatus;
 import org.hswebframework.web.commons.entity.factory.EntityFactory;
-import org.hswebframework.web.dao.datasource.DataSourceHolder;
-import org.hswebframework.web.dao.datasource.DatabaseType;
 import org.hswebframework.web.entity.authorization.*;
 import org.hswebframework.web.entity.authorization.bind.BindRoleUserEntity;
 import org.hswebframework.web.entity.organizational.*;
@@ -47,12 +43,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
-import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
@@ -67,11 +61,8 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import javax.sql.DataSource;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -129,23 +120,6 @@ public class SpringBootExample
     }
 
 
-    @Bean
-    @ConditionalOnMissingBean(SqlExecutor.class)
-    public SqlExecutor sqlExecutor(DataSource dataSource) {
-        DataSourceHolder.install(dataSource, DatabaseType.h2);
-        return new AbstractJdbcSqlExecutor() {
-            @Override
-            public Connection getConnection() {
-                return DataSourceUtils.getConnection(dataSource);
-            }
-
-            @Override
-            public void releaseConnection(Connection connection) throws SQLException {
-                DataSourceUtils.releaseConnection(connection, dataSource);
-            }
-        };
-
-    }
 
     @Autowired
     UserService       userService;
