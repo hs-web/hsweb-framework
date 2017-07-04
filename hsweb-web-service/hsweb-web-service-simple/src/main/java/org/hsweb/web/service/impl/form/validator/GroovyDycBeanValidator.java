@@ -4,6 +4,8 @@ import org.apache.commons.beanutils.BeanMap;
 import org.apache.commons.beanutils.BeanUtils;
 import org.hsweb.ezorm.core.Validator;
 import org.hsweb.ezorm.rdb.exception.ValidationException;
+import org.hsweb.ezorm.rdb.meta.RDBColumnMetaData;
+import org.hsweb.ezorm.rdb.meta.RDBTableMetaData;
 import org.hsweb.web.bean.validator.ValidateResults;
 import org.hsweb.web.core.exception.BusinessException;
 import org.springframework.util.ReflectionUtils;
@@ -26,13 +28,17 @@ public class GroovyDycBeanValidator implements Validator {
     private String                     className;
     private javax.validation.Validator hibernateValidator;
 
+    private RDBTableMetaData tableMetaData;
 
-    public GroovyDycBeanValidator(String className, javax.validation.Validator hibernateValidator) {
+
+    public GroovyDycBeanValidator(String className, RDBTableMetaData tableMetaData, javax.validation.Validator hibernateValidator) {
         this.className = className;
         this.hibernateValidator = hibernateValidator;
+        this.tableMetaData = tableMetaData;
     }
 
-    public boolean validateMap(Map<Object, Object> data, Operation operation) {
+    public boolean validateMap(Map<String, Object> data, Operation operation) {
+        data = transformation(data);
         ValidateResults results = new ValidateResults();
         try {
             Class validatorTargetClass = (Class) engine.execute(className, new HashMap<>()).getIfSuccess();
@@ -41,16 +47,15 @@ public class GroovyDycBeanValidator implements Validator {
             if (operation == Operation.INSERT) {
                 data.forEach((key, value) -> {
                     try {
-                        BeanUtils.setProperty(validatorTarget, (String) key, value);
+                        BeanUtils.setProperty(validatorTarget, key, value);
                     } catch (Exception e) {
                     }
                 });
                 result.addAll(hibernateValidator.validate(validatorTarget));
             } else
                 data.forEach((key, value) -> {
-                    Field field = ReflectionUtils.findField(validatorTargetClass, (String) key);
-                    if (field != null)
-                        result.addAll(hibernateValidator.validateValue(validatorTargetClass, (String) key, value));
+                    if (tableMetaData.getColumn(key) != null)
+                        result.addAll(hibernateValidator.validateValue(validatorTargetClass, key, value));
                 });
             if (result.size() > 0) {
                 for (ConstraintViolation<Object> violation : result) {
@@ -65,6 +70,17 @@ public class GroovyDycBeanValidator implements Validator {
         return true;
     }
 
+    private Map<String, Object> transformation(Map<String, Object> map) {
+        Map<String, Object> newData = new HashMap<>(map);
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            RDBColumnMetaData column = tableMetaData.findColumn(entry.getKey());
+            if (column != null) {
+                entry.setValue(column.getValueConverter().getData(entry.getValue()));
+            }
+        }
+        return newData;
+    }
+
     @Override
     public boolean validate(Object data, Operation operation) throws ValidationException {
         if (data instanceof Map)
@@ -76,7 +92,7 @@ public class GroovyDycBeanValidator implements Validator {
         } else {
             BeanMap beanMap = new BeanMap();
             beanMap.setBean(data);
-            validateMap(beanMap, operation);
+            validateMap((Map) beanMap, operation);
         }
         return true;
     }

@@ -2,6 +2,7 @@ package org.hsweb.web.service.impl.form.validator;
 
 import org.hsweb.ezorm.core.Validator;
 import org.hsweb.ezorm.core.ValidatorFactory;
+import org.hsweb.ezorm.core.meta.AbstractTableMetaData;
 import org.hsweb.ezorm.core.meta.ColumnMetaData;
 import org.hsweb.ezorm.core.meta.TableMetaData;
 import org.hsweb.ezorm.core.param.Column;
@@ -38,17 +39,17 @@ public class GroovyDycBeanValidatorFactory implements ValidatorFactory {
             "import org.hsweb.web.bean.validator.constraints.*;"
     };
 
-    static {
-        simpleType.put(Integer.class, "int");
-        simpleType.put(Long.class, "long");
-        simpleType.put(String.class, "String");
-        simpleType.put(Double.class, "double");
-        simpleType.put(Float.class, "float");
-        simpleType.put(Boolean.class, "boolean");
-        simpleType.put(Short.class, "short");
-        simpleType.put(Byte.class, "byte");
-        simpleType.put(Character.class, "char");
-    }
+//    static {
+//        simpleType.put(Integer.class, "int");
+//        simpleType.put(Long.class, "long");
+//        simpleType.put(String.class, "String");
+//        simpleType.put(Double.class, "double");
+//        simpleType.put(Float.class, "float");
+//        simpleType.put(Boolean.class, "boolean");
+//        simpleType.put(Short.class, "short");
+//        simpleType.put(Byte.class, "byte");
+//        simpleType.put(Character.class, "char");
+//    }
 
     @Override
     public Validator createValidator(TableMetaData metaData) {
@@ -108,7 +109,7 @@ public class GroovyDycBeanValidatorFactory implements ValidatorFactory {
         } catch (Exception e) {
             throw new BusinessException("创建动态表单验证器失败!", e, 500);
         }
-        GroovyDycBeanValidator validator = new GroovyDycBeanValidator(className, hibernateValidator);
+        GroovyDycBeanValidator validator = new GroovyDycBeanValidator(className, ((RDBTableMetaData) metaData), hibernateValidator);
         base.put(metaData.getName(), validator);
         return validator;
     }
