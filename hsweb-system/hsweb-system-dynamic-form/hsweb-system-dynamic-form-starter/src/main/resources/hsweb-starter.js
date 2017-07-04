@@ -23,7 +23,7 @@ function install(context) {
     database.createOrAlter("s_dyn_form")
         .addColumn().name("u_id").alias("id").comment("ID").jdbcType(java.sql.JDBCType.VARCHAR).length(32).primaryKey().commit()
         .addColumn().name("name").alias("name").comment("表单名称").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
-        .addColumn().name("table_name").alias("tableName").comment("数据库表名").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
+        .addColumn().name("t_name").alias("tableName").comment("数据库表名").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
         .addColumn().name("describe").alias("describe").comment("备注").jdbcType(java.sql.JDBCType.VARCHAR).length(512).commit()
         .addColumn().name("type").alias("type").comment("表单类型").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
         .addColumn().name("version").alias("version").comment("版本").jdbcType(java.sql.JDBCType.DECIMAL).length(32, 0).commit()
@@ -60,7 +60,7 @@ function install(context) {
         .addColumn().name("u_id").alias("id").comment("ID").jdbcType(java.sql.JDBCType.VARCHAR).length(32).primaryKey().commit()
         .addColumn().name("form_id").alias("formId").comment("表单ID").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
         .addColumn().name("version").alias("version").comment("发布的版本").jdbcType(java.sql.JDBCType.NUMERIC).length(32).commit()
-        .addColumn().name("deploy_time").alias("deployTime").comment("发布时间").jdbcType(java.sql.JDBCType.TIMESTAMP).commit()
+        .addColumn().name("deploy_time").alias("deployTime").comment("发布时间").jdbcType(java.sql.JDBCType.DECIMAL).commit()
         .addColumn().name("meta_data").alias("metaData").comment("部署的元数据").jdbcType(java.sql.JDBCType.CLOB).commit()
         .addColumn().name("status").alias("status").comment("状态").jdbcType(java.sql.JDBCType.NUMERIC).length(4).commit()
         .comment("表单发布日志").commit();

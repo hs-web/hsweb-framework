@@ -2,27 +2,31 @@ package org.hswebframework.web.datasource;
 
 import org.hswebframework.web.datasource.exception.DataSourceNotFoundException;
 import org.hswebframework.web.datasource.switcher.DataSourceSwitcher;
+import org.hswebframework.web.datasource.switcher.DefaultDataSourceSwitcher;
 
 /**
  * 用于操作动态数据源,如获取当前使用的数据源,使用switcher切换数据源等
  *
  * @author zhouhao
- * @since  3.0
+ * @since 3.0
  */
 public final class DataSourceHolder {
+
+    private static final DataSourceSwitcher defaultSwitcher = new DefaultDataSourceSwitcher();
 
     /**
      * 动态数据源切换器
      */
-    static DataSourceSwitcher dataSourceSwitcher;
-
+    static DataSourceSwitcher dataSourceSwitcher = defaultSwitcher;
     /**
      * 动态数据源服务
      */
     static DynamicDataSourceService dynamicDataSourceService;
 
     public static void checkDynamicDataSourceReady() {
-        if (dynamicDataSourceService == null) throw new UnsupportedOperationException("dynamicDataSourceService not ready");
+        if (dynamicDataSourceService == null) {
+            throw new UnsupportedOperationException("dataSourceService not ready");
+        }
     }
 
     /**
@@ -36,19 +40,22 @@ public final class DataSourceHolder {
      * @return 默认数据源
      */
     public static DynamicDataSource defaultDataSource() {
+        checkDynamicDataSourceReady();
         return dynamicDataSourceService.getDefaultDataSource();
     }
 
     /**
      * 根据指定的数据源id获取动态数据源
+     *
      * @param dataSourceId 数据源id
      * @return 动态数据源
      * @throws DataSourceNotFoundException 如果数据源不存在将抛出此异常
      */
-    public  static DynamicDataSource dataSource(String dataSourceId){
+    public static DynamicDataSource dataSource(String dataSourceId) {
         checkDynamicDataSourceReady();
         return dynamicDataSourceService.getDataSource(dataSourceId);
     }
+
     /**
      * @return 当前使用的数据源
      */

@@ -16,6 +16,7 @@
  */
 package org.hswebframework.web.service.organizational.simple;
 
+import org.hswebframework.web.commons.entity.DataStatus;
 import org.hswebframework.web.commons.entity.TreeSupportEntity;
 import org.hswebframework.web.dao.dynamic.QueryByEntityDao;
 import org.hswebframework.web.dao.organizational.*;
@@ -38,9 +39,6 @@ import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -49,8 +47,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static org.hswebframework.web.service.DefaultDSLQueryService.*;
-import static org.springframework.util.StringUtils.*;
+import static org.springframework.util.StringUtils.isEmpty;
 
 /**
  * 默认的服务实现
@@ -96,7 +93,7 @@ public class SimplePersonService extends EnableCacheGernericEntityService<Person
     @Override
     @CacheEvict(allEntries = true)
     public String insert(PersonAuthBindEntity authBindEntity) {
-        authBindEntity.setStatus((byte) 1);
+        authBindEntity.setStatus(DataStatus.STATUS_ENABLED);
         // TODO: 17-6-1 应该使用锁,防止并发同步用户,导致多个人员使用相同的用户
         if (authBindEntity.getPersonUser() != null) {
             syncUserInfo(authBindEntity);
