@@ -96,6 +96,7 @@ public class SimplePersonService extends EnableCacheGernericEntityService<Person
     @Override
     @CacheEvict(allEntries = true)
     public String insert(PersonAuthBindEntity authBindEntity) {
+        authBindEntity.setStatus((byte) 1);
         // TODO: 17-6-1 应该使用锁,防止并发同步用户,导致多个人员使用相同的用户
         if (authBindEntity.getPersonUser() != null) {
             syncUserInfo(authBindEntity);
