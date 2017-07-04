@@ -77,7 +77,7 @@ public class GroovyDycBeanValidator implements Validator {
 
     private Map<String, Object> transformation(Map<String, Object> map) {
         Map<String, Object> newData = new HashMap<>(map);
-        for (Map.Entry<String, Object> entry : map.entrySet()) {
+        for (Map.Entry<String, Object> entry : newData.entrySet()) {
             RDBColumnMetaData column = tableMetaData.findColumn(entry.getKey());
             if (column != null) {
                 entry.setValue(column.getValueConverter().getData(entry.getValue()));
