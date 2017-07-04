@@ -4,10 +4,10 @@ import org.hswebframework.web.service.form.DynamicFormService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.ApplicationListener;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.event.ContextStartedEvent;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 
 /**
  * TODO 完成注释
@@ -15,22 +15,20 @@ import org.springframework.context.event.ContextStartedEvent;
  * @author zhouhao
  */
 @Configuration
-public class DynamicFormAutoConfiguration {
+@Order(Ordered.LOWEST_PRECEDENCE)
+public class DynamicFormAutoConfiguration implements CommandLineRunner {
 
-    public static class DynamicFormAutoDeploy implements ApplicationListener<ContextStartedEvent> {
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-        private Logger logger = LoggerFactory.getLogger(this.getClass());
+    @Autowired
+    private DynamicFormService dynamicFormService;
 
-        @Autowired
-        private DynamicFormService dynamicFormService;
-
-        @Override
-        public void onApplicationEvent(ContextStartedEvent event) {
-            try {
-                dynamicFormService.deployAllFromLog();
-            } catch (Exception e) {
-                logger.error("deploy form error", e);
-            }
+    @Override
+    public void run(String... args) throws Exception {
+        try {
+            dynamicFormService.deployAllFromLog();
+        } catch (Exception e) {
+            logger.error("deploy form error", e);
         }
     }
 }
