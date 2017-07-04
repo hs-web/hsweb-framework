@@ -54,8 +54,13 @@ public class GroovyDycBeanValidator implements Validator {
                 result.addAll(hibernateValidator.validate(validatorTarget));
             } else
                 data.forEach((key, value) -> {
-                    if (tableMetaData.getColumn(key) != null)
-                        result.addAll(hibernateValidator.validateValue(validatorTargetClass, key, value));
+                    try {
+                        RDBColumnMetaData column = tableMetaData.getColumn(key);
+                        if (column != null && column.getValidator() != null && !column.getValidator().isEmpty())
+                            result.addAll(hibernateValidator.validateValue(validatorTargetClass, key, value));
+                    } catch (IllegalArgumentException ignore) {
+
+                    }
                 });
             if (result.size() > 0) {
                 for (ConstraintViolation<Object> violation : result) {
