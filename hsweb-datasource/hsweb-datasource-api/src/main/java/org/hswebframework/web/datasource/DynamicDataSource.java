@@ -24,5 +24,8 @@ public interface DynamicDataSource extends DataSource {
      */
     DatabaseType getType();
 
+    /**
+     * @return 原始数据源
+     */
     DataSource getNative();
 }
