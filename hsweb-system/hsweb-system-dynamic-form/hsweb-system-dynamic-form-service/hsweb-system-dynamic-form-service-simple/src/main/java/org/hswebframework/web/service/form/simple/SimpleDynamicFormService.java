@@ -1,7 +1,6 @@
 package org.hswebframework.web.service.form.simple;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import org.hsweb.ezorm.core.ValueConverter;
 import org.hsweb.ezorm.rdb.RDBDatabase;
 import org.hsweb.ezorm.rdb.meta.RDBColumnMetaData;
@@ -11,26 +10,32 @@ import org.hsweb.ezorm.rdb.render.dialect.Dialect;
 import org.hswebframework.web.commons.entity.DataStatus;
 import org.hswebframework.web.dao.form.DynamicFormColumnDao;
 import org.hswebframework.web.dao.form.DynamicFormDao;
+import org.hswebframework.web.entity.form.DynamicFormColumnBindEntity;
 import org.hswebframework.web.entity.form.DynamicFormColumnEntity;
 import org.hswebframework.web.entity.form.DynamicFormDeployLogEntity;
 import org.hswebframework.web.entity.form.DynamicFormEntity;
 import org.hswebframework.web.id.IDGenerator;
+import org.hswebframework.web.service.DefaultDSLDeleteService;
 import org.hswebframework.web.service.DefaultDSLQueryService;
+import org.hswebframework.web.service.DefaultDSLUpdateService;
 import org.hswebframework.web.service.GenericEntityService;
 import org.hswebframework.web.service.form.DatabaseRepository;
 import org.hswebframework.web.service.form.DynamicFormDeployLogService;
 import org.hswebframework.web.service.form.DynamicFormService;
 import org.hswebframework.web.service.form.OptionalConvertBuilder;
+import org.hswebframework.web.validator.group.CreateGroup;
+import org.hswebframework.web.validator.group.UpdateGroup;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.sql.JDBCType;
 import java.sql.SQLException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 默认的服务实现
@@ -38,6 +43,7 @@ import java.util.Map;
  * @author hsweb-generator-online
  */
 @Service("dynamicFormService")
+@CacheConfig(cacheNames = "dyn-form")
 public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEntity, String>
         implements DynamicFormService {
     @Autowired
@@ -66,11 +72,6 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
     }
 
     @Override
-    public int updateByPk(String s, DynamicFormEntity entity) {
-        return super.updateByPk(s, entity);
-    }
-
-    @Override
     public void deployAllFromLog() {
         List<DynamicFormEntity> entities = createQuery()
                 .select(DynamicFormEntity.id)
@@ -88,6 +89,7 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
     }
 
     @Override
+    @CacheEvict(value = "dyn-form-deploy", allEntries = true)
     public void deployAll() {
         createQuery()
                 .select(DynamicFormEntity.id)
@@ -101,30 +103,51 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
         entity.setDeployTime(System.currentTimeMillis());
         entity.setVersion(form.getVersion());
         entity.setFormId(form.getId());
-        Map<String, Object> meta = new HashMap<>();
-        meta.put("form", form);
-        meta.put("columns", columns);
-        entity.setMetaData(JSON.toJSONString(meta));
+        DynamicFormColumnBindEntity bindEntity = new DynamicFormColumnBindEntity();
+        bindEntity.setForm(form);
+        bindEntity.setColumns(columns);
+        entity.setMetaData(JSON.toJSONString(bindEntity));
         return entity;
     }
 
     public void deployFromLog(DynamicFormDeployLogEntity logEntity) {
-        JSONObject metadata = JSON.parseObject(logEntity.getMetaData());
-        DynamicFormEntity form = metadata.getObject("form", DynamicFormEntity.class);
-        List<DynamicFormColumnEntity> columns = metadata.getJSONArray("columns").toJavaList(DynamicFormColumnEntity.class);
+        DynamicFormColumnBindEntity entity = JSON.parseObject(logEntity.getMetaData(), DynamicFormColumnBindEntity.class);
+        DynamicFormEntity form = entity.getForm();
+        List<DynamicFormColumnEntity> columns = entity.getColumns();
         if (logger.isDebugEnabled()) {
             logger.debug("do deploy form {} , columns size:{}", form.getName(), columns.size());
         }
         deploy(form, columns);
     }
 
+
     @Override
+    @CacheEvict(key = "'form_id:'+#entity.id")
     public String insert(DynamicFormEntity entity) {
         entity.setDeployed(false);
+        entity.setVersion(1L);
+        entity.setCreateTime(System.currentTimeMillis());
         return super.insert(entity);
     }
 
     @Override
+    @CacheEvict(key = "'form_id:'+#id")
+    public DynamicFormEntity selectByPk(String id) {
+        return super.selectByPk(id);
+    }
+
+    @Override
+    @CacheEvict(key = "'form_id:'+#id")
+    public int updateByPk(String id, DynamicFormEntity entity) {
+        entity.setVersion(null);
+        entity.setDeployed(null);
+        entity.setUpdateTime(System.currentTimeMillis());
+        getDao().incrementVersion(id);
+        return super.updateByPk(id, entity);
+    }
+
+    @Override
+    @CacheEvict(value = "dyn-form-deploy", allEntries = true)
     public void unDeploy(String formId) {
         DynamicFormEntity form = selectByPk(formId);
         assertNotNull(form);
@@ -137,6 +160,111 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
         database.removeTable(form.getDatabaseTableName());
     }
 
+    private String saveOrUpdate0(DynamicFormColumnEntity columnEntity) {
+        if (StringUtils.isEmpty(columnEntity.getId())
+                || DefaultDSLQueryService.createQuery(formColumnDao)
+                .where(DynamicFormColumnEntity.id, columnEntity.getId())
+                .total() == 0) {
+            if (StringUtils.isEmpty(columnEntity.getId())) {
+                columnEntity.setId(getIDGenerator().generate());
+            }
+            tryValidate(columnEntity, CreateGroup.class);
+            formColumnDao.insert(columnEntity);
+        } else {
+            tryValidate(columnEntity, UpdateGroup.class);
+            DefaultDSLUpdateService
+                    .createUpdate(formColumnDao, columnEntity)
+                    .where(DynamicFormColumnEntity.id, columnEntity.getId())
+                    .exec();
+        }
+        return columnEntity.getId();
+    }
+
+    @Override
+    @CacheEvict(key = "'form-columns:'+#columnEntity.formId")
+    public String saveOrUpdateColumn(DynamicFormColumnEntity columnEntity) {
+        String id = saveOrUpdate0(columnEntity);
+        getDao().incrementVersion(columnEntity.getFormId());
+        return id;
+    }
+
+    @Override
+    @CacheEvict(allEntries = true)
+    public List<String> saveOrUpdateColumn(List<DynamicFormColumnEntity> columnEntities) {
+        Set<String> formId = new HashSet<>();
+
+        List<String> columnIds = columnEntities.stream()
+                .peek(columnEntity -> formId.add(columnEntity.getFormId()))
+                .map(this::saveOrUpdateColumn)
+                .collect(Collectors.toList());
+
+        formId.forEach(getDao()::incrementVersion);
+        return columnIds;
+
+    }
+
+    @Override
+    @CacheEvict(key = "'form-columns:'+#formId")
+    public DynamicFormColumnEntity deleteColumn(String formId) {
+        DynamicFormColumnEntity oldColumn = DefaultDSLQueryService
+                .createQuery(formColumnDao)
+                .where(DynamicFormColumnEntity.id, formId)
+                .single();
+        assertNotNull(oldColumn);
+        DefaultDSLDeleteService.createDelete(formColumnDao)
+                .where(DynamicFormDeployLogEntity.id, formId)
+                .exec();
+        return oldColumn;
+    }
+
+    @Override
+    @CacheEvict(allEntries = true)
+    public List<DynamicFormColumnEntity> deleteColumn(List<String> ids) {
+        Objects.requireNonNull(ids);
+        if (ids.isEmpty()) return Collections.emptyList();
+        List<DynamicFormColumnEntity> oldColumns = DefaultDSLQueryService
+                .createQuery(formColumnDao)
+                .where()
+                .in(DynamicFormColumnEntity.id, ids)
+                .listNoPaging();
+
+        DefaultDSLDeleteService.createDelete(formColumnDao)
+                .where().in(DynamicFormDeployLogEntity.id, ids)
+                .exec();
+        return oldColumns;
+    }
+
+    @Override
+    public List<DynamicFormColumnEntity> selectColumnsByFormId(String formId) {
+        Objects.requireNonNull(formId);
+        return DefaultDSLQueryService.createQuery(formColumnDao)
+                .where(DynamicFormColumnEntity.formId, formId)
+                .listNoPaging();
+    }
+
+    @Override
+    @Cacheable(value = "dyn-form-deploy", key = "'form-deploy:'+#formId+':'+#version")
+    public DynamicFormColumnBindEntity selectDeployed(String formId, int version) {
+        DynamicFormDeployLogEntity entity = dynamicFormDeployLogService.selectDeployed(formId, version);
+        assertNotNull(entity);
+        return JSON.parseObject(entity.getMetaData(), DynamicFormColumnBindEntity.class);
+    }
+
+    @Override
+    @Cacheable(value = "dyn-form-deploy", key = "'form-deploy:'+#formId+':latest'")
+    public DynamicFormColumnBindEntity selectLatestDeployed(String formId) {
+        DynamicFormDeployLogEntity entity = dynamicFormDeployLogService.selectLastDeployed(formId);
+        assertNotNull(entity);
+        return JSON.parseObject(entity.getMetaData(), DynamicFormColumnBindEntity.class);
+    }
+
+    @Override
+    public DynamicFormColumnBindEntity selectEditing(String formId) {
+        Objects.requireNonNull(formId);
+        return new DynamicFormColumnBindEntity(selectByPk(formId), selectColumnsByFormId(formId));
+    }
+
+    @CacheEvict(value = "dyn-form-deploy", key = "'form-deploy:'+#formId+':latest'")
     public void deploy(String formId) {
         DynamicFormEntity formEntity = selectByPk(formId);
         assertNotNull(formEntity);
@@ -174,17 +302,18 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
         metaData.setName(form.getDatabaseTableName());
         metaData.setProperties(form.getProperties());
         metaData.setAlias(form.getAlias());
-        columns.stream().map(column -> {
+        columns.forEach(column -> {
             RDBColumnMetaData columnMeta = new RDBColumnMetaData();
-            columnMeta.setName(column.getName());
+            columnMeta.setName(column.getColumnName());
             columnMeta.setAlias(column.getAlias());
-            columnMeta.setComment(column.getDescribe());
+            columnMeta.setComment(column.getName());
             columnMeta.setLength(column.getLength() == null ? 0 : column.getLength());
             columnMeta.setPrecision(column.getPrecision() == null ? 0 : column.getPrecision());
             columnMeta.setScale(column.getScale() == null ? 0 : column.getScale());
             columnMeta.setJdbcType(JDBCType.valueOf(column.getJdbcType()));
             columnMeta.setJavaType(getJavaType(column.getJavaType()));
             columnMeta.setProperties(column.getProperties() == null ? new HashMap<>() : column.getProperties());
+            columnMeta.setValidator(columnMeta.getValidator());
             if (StringUtils.isEmpty(column.getDataType())) {
                 Dialect dialect = database.getMeta().getDialect();
                 columnMeta.setDataType(dialect.buildDataType(columnMeta));
@@ -196,8 +325,8 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
                 columnMeta.setOptionConverter(optionalConvertBuilder.buildFromDict(column.getDictId(), column.getDictParserId()));
             }
             customColumnSetting(database, form, metaData, column, columnMeta);
-            return columnMeta;
-        }).forEach(metaData::addColumn);
+            metaData.addColumn(columnMeta);
+        });
         customTableSetting(database, form, metaData);
         return metaData;
     }

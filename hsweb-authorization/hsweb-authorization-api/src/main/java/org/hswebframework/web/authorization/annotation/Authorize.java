@@ -28,6 +28,7 @@ import java.lang.annotation.*;
  * 基础权限控制注解,提供基本的控制配置
  *
  * @author zhouhao
+ * @see org.hswebframework.web.authorization.Authentication
  * @since 3.0
  */
 @Target({ElementType.TYPE, ElementType.METHOD})

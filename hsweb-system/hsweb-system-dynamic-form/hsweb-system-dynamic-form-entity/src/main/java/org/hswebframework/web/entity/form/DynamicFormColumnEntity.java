@@ -1,6 +1,8 @@
 package org.hswebframework.web.entity.form;
 
+import org.hibernate.validator.constraints.NotBlank;
 import org.hswebframework.web.commons.entity.GenericEntity;
+import org.hswebframework.web.validator.group.CreateGroup;
 
 /**
  * 动态表单 实体
@@ -74,6 +76,7 @@ public interface DynamicFormColumnEntity extends GenericEntity<String> {
     /**
      * @return 表单ID
      */
+    @NotBlank(groups = CreateGroup.class)
     String getFormId();
 
     /**
@@ -84,6 +87,7 @@ public interface DynamicFormColumnEntity extends GenericEntity<String> {
     /**
      * @return 字段名称
      */
+    @NotBlank(groups = CreateGroup.class)
     String getName();
 
     /**
@@ -94,6 +98,7 @@ public interface DynamicFormColumnEntity extends GenericEntity<String> {
     /**
      * @return 数据库列
      */
+    @NotBlank(groups = CreateGroup.class)
     String getColumnName();
 
     /**
@@ -124,6 +129,7 @@ public interface DynamicFormColumnEntity extends GenericEntity<String> {
     /**
      * @return java类型
      */
+    @NotBlank(groups = CreateGroup.class)
     String getJavaType();
 
     /**
@@ -134,6 +140,7 @@ public interface DynamicFormColumnEntity extends GenericEntity<String> {
     /**
      * @return jdbc类型
      */
+    @NotBlank(groups = CreateGroup.class)
     String getJdbcType();
 
     /**

@@ -1,6 +1,9 @@
 package org.hswebframework.web.entity.form;
 
+import io.swagger.annotations.ApiModelProperty;
+import org.hibernate.validator.constraints.NotBlank;
 import org.hswebframework.web.commons.entity.GenericEntity;
+import org.hswebframework.web.validator.group.CreateGroup;
 
 /**
  * 动态表单 实体
@@ -60,10 +63,6 @@ public interface DynamicFormEntity extends GenericEntity<String> {
      */
     String dataSourceId      = "dataSourceId";
     /**
-     * 其他配置
-     */
-    String properties        = "properties";
-    /**
      * 表单类型
      */
     String type              = "type";
@@ -71,6 +70,8 @@ public interface DynamicFormEntity extends GenericEntity<String> {
     /**
      * @return 表单名称
      */
+    @ApiModelProperty(value = "表单名称", required = true, example = "测试表单")
+    @NotBlank(groups = CreateGroup.class)
     String getName();
 
     /**
@@ -81,6 +82,8 @@ public interface DynamicFormEntity extends GenericEntity<String> {
     /**
      * @return 数据库表名
      */
+    @ApiModelProperty(value = "数据库表名", required = true, example = "f_test_form")
+    @NotBlank(groups = CreateGroup.class)
     String getDatabaseTableName();
 
     /**
@@ -91,6 +94,7 @@ public interface DynamicFormEntity extends GenericEntity<String> {
     /**
      * @return 备注
      */
+
     String getDescribe();
 
     /**
@@ -101,6 +105,7 @@ public interface DynamicFormEntity extends GenericEntity<String> {
     /**
      * @return 版本
      */
+    @ApiModelProperty(value = "版本号,无需设置,每次保存自动自增.", example = "1")
     Long getVersion();
 
     /**
@@ -111,6 +116,7 @@ public interface DynamicFormEntity extends GenericEntity<String> {
     /**
      * @return 创建人id
      */
+    @ApiModelProperty(value = "创建人,根据当前用户自动获取.", example = "1")
     String getCreatorId();
 
     /**
@@ -121,6 +127,7 @@ public interface DynamicFormEntity extends GenericEntity<String> {
     /**
      * @return 创建时间
      */
+    @ApiModelProperty(value = "创建时间,新增时自动设置.")
     Long getCreateTime();
 
     /**
@@ -131,6 +138,7 @@ public interface DynamicFormEntity extends GenericEntity<String> {
     /**
      * @return 修改时间
      */
+    @ApiModelProperty(value = "创建时间,修改时自动设置.")
     Long getUpdateTime();
 
     /**
@@ -141,6 +149,7 @@ public interface DynamicFormEntity extends GenericEntity<String> {
     /**
      * @return 是否已发布
      */
+    @ApiModelProperty(value = "是否已发布,发布时自动设置.", example = "false")
     Boolean isDeployed();
 
     /**
@@ -151,6 +160,7 @@ public interface DynamicFormEntity extends GenericEntity<String> {
     /**
      * @return 别名
      */
+    @ApiModelProperty(value = "表别名.", example = "testForm")
     String getAlias();
 
     /**
@@ -161,6 +171,7 @@ public interface DynamicFormEntity extends GenericEntity<String> {
     /**
      * @return 触发器
      */
+    @ApiModelProperty(value = "触发器.", example = "[{\"language\":\"groovy\",\"script\":\" return true;\"}]")
     String getTriggers();
 
     /**

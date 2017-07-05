@@ -68,7 +68,7 @@ public interface QueryController<E, PK, Q extends Entity> {
     @Authorize(action = Permission.ACTION_QUERY)
     @GetMapping
     @AccessLogger("{dynamic_query}")
-    @ApiOperation("根据动态条件查询数据")
+    @ApiOperation(value = "根据动态条件查询数据", responseReference = "get")
     @ApiResponses({
             @ApiResponse(code = 200, message = "查询成功"),
             @ApiResponse(code = 401, message = "未授权"),

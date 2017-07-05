@@ -46,6 +46,10 @@
         <include refid="BasicMapper.buildUpdateSql"/>
     </update>
 
+    <update id="incrementVersion" parameterType="String">
+        update s_dyn_form set version=version+1 where u_id = #{id}
+    </update>
+
     <select id="query" parameterType="org.hswebframework.web.commons.entity.Entity" resultMap="DynamicFormResultMap">
         <include refid="config"/>
         <include refid="BasicMapper.buildSelectSql"/>
