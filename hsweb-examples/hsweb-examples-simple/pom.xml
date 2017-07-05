@@ -99,16 +99,23 @@
             <version>${project.version}</version>
         </dependency>
         <!--使用shiro实现权限控制-->
-        <dependency>
-            <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-authorization-shiro</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>org.hswebframework.web</groupId>-->
+            <!--<artifactId>hsweb-authorization-shiro</artifactId>-->
+            <!--<version>${project.version}</version>-->
+        <!--</dependency>-->
 
         <!--组织架构-->
         <dependency>
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-system-organizational-starter</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!--动态表单-->
+        <dependency>
+            <groupId>org.hswebframework.web</groupId>
+            <artifactId>hsweb-system-dynamic-form-starter</artifactId>
             <version>${project.version}</version>
         </dependency>
 

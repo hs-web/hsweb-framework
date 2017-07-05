@@ -25,3 +25,6 @@ hsweb:
                 UserEntity: SimpleUserEntity
 server:
   port: 8081
+logging:
+  level:
+    org.hswebframework: debug
