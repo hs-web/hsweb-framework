@@ -69,7 +69,7 @@ public class WebUtil {
         return map;
     }
 
-     static final String[] ipHeaders = {
+    static final String[] ipHeaders = {
             "X-Forwarded-For",
             "X-Real-IP",
             "Proxy-Client-IP",
@@ -83,10 +83,10 @@ public class WebUtil {
      * @return ip地址
      */
     public static String getIpAddr(HttpServletRequest request) {
-        String ip = request.getHeader("X-Forwarded-For");
         for (String ipHeader : ipHeaders) {
-            if (!StringUtils.isEmpty(ipHeader) && ip.contains("unknown")) {
-                return request.getHeader(ipHeader);
+            String ip = request.getHeader(ipHeader);
+            if (!StringUtils.isEmpty(ip) && !ip.contains("unknown")) {
+                return ip;
             }
         }
         return request.getRemoteAddr();
