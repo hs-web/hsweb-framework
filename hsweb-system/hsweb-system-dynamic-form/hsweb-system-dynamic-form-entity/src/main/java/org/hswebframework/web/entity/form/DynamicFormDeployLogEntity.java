@@ -27,6 +27,9 @@ public interface DynamicFormDeployLogEntity extends GenericEntity<String> {
      * 部署的元数据
      */
     String metaData   = "metaData";
+    /**
+     * 部署状态
+     */
     String status     = "status";
 
     /**

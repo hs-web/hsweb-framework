@@ -50,7 +50,6 @@
         select * from s_autz_menu where setting_id =#{setting_id}
     </select>
 
-
     <delete id="delete" parameterType="org.hswebframework.web.commons.entity.Entity">
         <include refid="config"/>
         <include refid="BasicMapper.buildDeleteSql"/>

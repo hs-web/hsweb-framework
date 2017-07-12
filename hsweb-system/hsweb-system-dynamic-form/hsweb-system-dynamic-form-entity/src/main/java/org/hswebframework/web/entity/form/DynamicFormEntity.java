@@ -14,59 +14,59 @@ public interface DynamicFormEntity extends GenericEntity<String> {
     /**
      * 表单名称
      */
-    String name = "name";
+    String name              = "name";
     /**
      * 数据库表名
      */
-    String tableName = "tableName";
+    String databaseTableName = "databaseTableName";
     /**
      * 备注
      */
-    String describe = "describe";
+    String describe          = "describe";
     /**
      * 版本
      */
-    String version = "version";
+    String version           = "version";
     /**
      * 创建人id
      */
-    String creatorId = "creatorId";
+    String creatorId         = "creatorId";
     /**
      * 创建时间
      */
-    String createTime = "createTime";
+    String createTime        = "createTime";
     /**
      * 修改时间
      */
-    String updateTime = "updateTime";
+    String updateTime        = "updateTime";
     /**
      * 是否已发布
      */
-    String deployed = "deployed";
+    String deployed          = "deployed";
     /**
      * 别名
      */
-    String alias = "alias";
+    String alias             = "alias";
     /**
      * 触发器
      */
-    String triggers = "triggers";
+    String triggers          = "triggers";
     /**
      * 表链接
      */
-    String correlations = "correlations";
+    String correlations      = "correlations";
     /**
      * 数据源id,为空使用默认数据源
      */
-    String dataSourceId = "dataSourceId";
+    String dataSourceId      = "dataSourceId";
     /**
      * 其他配置
      */
-    String properties = "properties";
+    String properties        = "properties";
     /**
      * 表单类型
      */
-    String type = "type";
+    String type              = "type";
 
     /**
      * @return 表单名称
@@ -81,12 +81,12 @@ public interface DynamicFormEntity extends GenericEntity<String> {
     /**
      * @return 数据库表名
      */
-    String getTableName();
+    String getDatabaseTableName();
 
     /**
-     * @param tableName 数据库表名
+     * @param databaseTableName 数据库表名
      */
-    void setTableName(String tableName);
+    void setDatabaseTableName(String databaseTableName);
 
     /**
      * @return 备注

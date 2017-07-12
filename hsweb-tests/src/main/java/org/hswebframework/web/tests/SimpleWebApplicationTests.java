@@ -28,6 +28,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
+import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -46,7 +47,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = SimpleWebApplicationTests.Config.class)
-public class SimpleWebApplicationTests {
+public class SimpleWebApplicationTests extends AbstractTransactionalJUnit4SpringContextTests {
 
     protected MockMvc               mvc;
     @Resource
@@ -110,7 +111,6 @@ public class SimpleWebApplicationTests {
     @SpringBootApplication
     @WebAppConfiguration
     public static class Config {
-
 
     }
 }

@@ -7,7 +7,7 @@
         <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
         <result property="formId" column="form_id" javaType="String" jdbcType="VARCHAR"/>
         <result property="version" column="version" javaType="Long" jdbcType="NUMERIC"/>
-        <result property="deployTime" column="deploy_time" javaType="Long" jdbcType="TIMESTAMP"/>
+        <result property="deployTime" column="deploy_time" javaType="Long" jdbcType="DECIMAL"/>
         <result property="metaData" column="meta_data" javaType="String" jdbcType="CLOB"/>
         <result property="status" column="status" javaType="Byte" jdbcType="NUMERIC"/>
     </resultMap>

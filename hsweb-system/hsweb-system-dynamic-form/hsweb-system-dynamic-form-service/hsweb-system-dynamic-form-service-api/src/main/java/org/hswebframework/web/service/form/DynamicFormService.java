@@ -9,6 +9,7 @@ import org.hswebframework.web.service.CrudService;
  * @author hsweb-generator-online
  */
 public interface DynamicFormService extends CrudService<DynamicFormEntity, String> {
+    void deployAllFromLog();
 
     void deployAll();
 

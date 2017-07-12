@@ -16,23 +16,17 @@ import java.util.Objects;
  */
 @Transactional(rollbackFor = Throwable.class)
 public class DefaultJdbcExecutor extends AbstractJdbcSqlExecutor {
-    private DataSource dataSource;
-
-    public DefaultJdbcExecutor(DataSource dataSource) {
-        Objects.requireNonNull(dataSource);
-        this.dataSource = dataSource;
-    }
 
     @Override
     public Connection getConnection() {
-        return DataSourceUtils.getConnection(dataSource);
+        return DataSourceUtils.getConnection(DataSourceHolder.currentDataSource());
     }
 
     @Override
     public void releaseConnection(Connection connection) throws SQLException {
-        DataSourceUtils.releaseConnection(connection, dataSource);
+        DataSourceUtils.releaseConnection(connection, DataSourceHolder.currentDataSource());
     }
-    
+
     @Override
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public void exec(SQL sql) throws SQLException {

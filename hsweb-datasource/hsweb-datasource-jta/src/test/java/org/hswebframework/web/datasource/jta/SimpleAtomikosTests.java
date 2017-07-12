@@ -1,8 +1,6 @@
 package org.hswebframework.web.datasource.jta;
 
 import org.hsweb.ezorm.rdb.RDBDatabase;
-import org.hsweb.ezorm.rdb.executor.AbstractJdbcSqlExecutor;
-import org.hsweb.ezorm.rdb.executor.SQL;
 import org.hsweb.ezorm.rdb.executor.SqlExecutor;
 import org.hsweb.ezorm.rdb.meta.RDBDatabaseMetaData;
 import org.hsweb.ezorm.rdb.meta.RDBTableMetaData;
@@ -16,46 +14,28 @@ import org.hsweb.ezorm.rdb.render.dialect.H2RDBDatabaseMetaData;
 import org.hsweb.ezorm.rdb.render.dialect.MysqlRDBDatabaseMetaData;
 import org.hsweb.ezorm.rdb.render.dialect.OracleRDBDatabaseMetaData;
 import org.hsweb.ezorm.rdb.simple.SimpleDatabase;
-import org.hswebframework.expands.script.engine.DynamicScriptEngine;
-import org.hswebframework.expands.script.engine.DynamicScriptEngineFactory;
-import org.hswebframework.expands.script.engine.SpEL.SpElEngine;
 import org.hswebframework.web.datasource.DataSourceHolder;
 import org.hswebframework.web.datasource.DatabaseType;
-import org.hswebframework.web.datasource.annotation.UseDataSource;
-import org.hswebframework.web.datasource.annotation.UseDefaultDataSource;
-import org.hswebframework.web.datasource.starter.AopDataSourceSwitcherAutoConfiguration;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.beans.factory.config.BeanExpressionContext;
-import org.springframework.beans.factory.config.BeanExpressionResolver;
-import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.jta.atomikos.AtomikosDataSourceBean;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
-import org.springframework.context.expression.*;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.expression.spel.support.StandardTypeConverter;
-import org.springframework.expression.spel.support.StandardTypeLocator;
-import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.core.JmsTemplate;
-import org.springframework.messaging.simp.SimpSessionScope;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * TODO 完成注释
@@ -140,35 +120,31 @@ public class SimpleAtomikosTests {
 
     @Test
     @Rollback(false)
-    public void test() {
-        try {
-            DataSourceHolder.switcher().reset();
+    public void test() throws SQLException, InterruptedException {
+        DataSourceHolder.switcher().reset();
 
-            dynDsTest.testCreateTable();
-            dynDsTest.testInsert();
-            DataSourceHolder.switcher().use("test_ds");
+        dynDsTest.testCreateTable();
+        dynDsTest.testInsert();
+        DataSourceHolder.switcher().use("test_ds");
 
-            dynDsTest.testCreateTable();
+        dynDsTest.testCreateTable();
 
-            DataSourceHolder.switcher().use("test_ds2");
+        DataSourceHolder.switcher().use("test_ds2");
 
-            dynDsTest.testCreateTable();
-            System.out.println(DataSourceHolder.switcher().currentDataSourceId());
-            System.out.println(dynDsTest.testQuery());
+        dynDsTest.testCreateTable();
+        Assert.assertEquals(DataSourceHolder.switcher().currentDataSourceId(), "test_ds2");
+        Assert.assertTrue(dynDsTest.testQuery().isEmpty());
 
-            DataSourceHolder.switcher().useLast();
-            System.out.println(DataSourceHolder.switcher().currentDataSourceId());
-            System.out.println(dynDsTest.testQuery());
+        DataSourceHolder.switcher().useLast();
+        Assert.assertEquals(DataSourceHolder.switcher().currentDataSourceId(), "test_ds");
+        Assert.assertTrue(dynDsTest.testQuery().isEmpty());
 
-            DataSourceHolder.switcher().useLast();
-            System.out.println(DataSourceHolder.switcher().currentDataSourceId());
-            System.out.println(dynDsTest.testQuery());
-            jmsTemplate.convertAndSend("test", "hello");
-            Thread.sleep(1000);
-            //   throw new RuntimeException();
-        } catch (SQLException | InterruptedException e) {
-            e.printStackTrace();
-        }
+        DataSourceHolder.switcher().useLast();
+        Assert.assertNull(DataSourceHolder.switcher().currentDataSourceId());
+        Assert.assertTrue(dynDsTest.testQuery().size() > 0);
+
+        jmsTemplate.convertAndSend("test", "hello");
+        Thread.sleep(1000);
     }
 
 
