@@ -38,7 +38,7 @@ public class WebSocketUtils {
 
         Function<Set<String>, Optional<Authentication>> userGetter = set ->
                 set == null ? Optional.empty() : set.stream()
-                        .map(container::getAuthenticationBySessionId)
+                        .map(container::getByToken)
                         .filter(Objects::nonNull).findFirst();
 
         return userGetter.apply(sessionId.get("SESSION"))
