@@ -33,6 +33,9 @@ public class PagerResult<E> implements Entity {
         return new PagerResult<>(0, Collections.emptyList());
     }
 
+    public static <E> PagerResult<E> of(int total,List<E> list){
+        return new PagerResult<>(total,list);
+    }
     private int total;
 
     private List<E> data;
