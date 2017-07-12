@@ -18,9 +18,6 @@
 
 package org.hswebframework.web.authorization.container;
 
-import org.hswebframework.web.authorization.Authentication;
-
-import javax.servlet.http.HttpSession;
 import java.util.List;
 
 /**
@@ -32,40 +29,62 @@ import java.util.List;
 public interface AuthenticationContainer {
 
     /**
-     * 根据sessionId获取权限信息
+     * 根据token获取权限信息
      *
-     * @param sessionId
+     * @param token
      * @return 权限信息, 未授权时返回null
      */
-    Authentication getAuthenticationBySessionId(String sessionId);
+    UserToken getByToken(String token);
+
+    /**
+     * 根据用户id，获取全部授权信息，如果设置了不能跨地点登陆，返回值只可能是{@code null}或者size为1的list
+     * @param userId 用户id
+     * @return 授权信息
+     */
+    List<UserToken> getByUserId(String userId);
 
     /**
      * @param userId 用户ID
      * @return 用户是否已经授权
      */
-    boolean userIsAuthorized(String userId);
+    boolean userIsLoggedIn(String userId);
+
+    boolean tokenIsLoggedIn(String token);
 
     /**
-     * @return 已经授权的总人数
+     * @return 总用户数量，一个用户多个地方登陆数量算1
      */
-    int totalAuthorizedUser();
+    int totalUser();
 
+    /**
+     *
+     * @return 总token数量
+     */
+    int totalToken();
     /**
      * @return 所有被授权的用户
      */
-    List<Authentication> allAuthorizedUser();
+    List<UserToken> allLoggedUser();
 
     /**
      * 删除用户授权信息
      *
      * @param userId 用户ID
-     * @return 被删除的权限信息
      */
-    Authentication removeAuthentication(String userId);
+    void logoutByUserId(String userId);
 
     /**
-     * @param authentication
-     * @return 添加后被覆盖的权限信息 ,如果没有则返回null
+     * 根据token删除
+     * @param token
      */
-    Authentication addAuthentication(Authentication authentication, String sessionId);
+    void logoutByToken(String token);
+
+    /**
+     * @param token
+     * @param userId
+     */
+    UserToken signIn(String token, String userId);
+
+
+    void touch(String token);
 }
