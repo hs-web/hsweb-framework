@@ -22,11 +22,17 @@ package org.hswebframework.web.commons.entity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import java.util.Collections;
 import java.util.List;
 
 @ApiModel(description = "分页结果")
 public class PagerResult<E> implements Entity {
     private static final long serialVersionUID = -6171751136953308027L;
+
+    public static <E> PagerResult<E> empty(){
+        return new PagerResult<>(0, Collections.emptyList());
+    }
+
     private int total;
 
     private List<E> data;
