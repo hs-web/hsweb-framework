@@ -26,6 +26,8 @@ public interface DynamicFormOperationService {
 
     <T> int update(String formId, UpdateParamEntity<T> paramEntity);
 
+    <T> void insert(String formId, T entity);
+
     int delete(String formId, DeleteParamEntity paramEntity);
 
 

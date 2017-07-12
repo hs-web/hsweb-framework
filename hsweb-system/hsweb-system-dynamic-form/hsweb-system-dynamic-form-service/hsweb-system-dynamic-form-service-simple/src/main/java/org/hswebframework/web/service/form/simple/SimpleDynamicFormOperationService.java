@@ -1,6 +1,7 @@
 package org.hswebframework.web.service.form.simple;
 
 import org.hsweb.ezorm.core.Delete;
+import org.hsweb.ezorm.core.Insert;
 import org.hsweb.ezorm.core.Update;
 import org.hsweb.ezorm.rdb.RDBDatabase;
 import org.hsweb.ezorm.rdb.RDBQuery;
@@ -43,9 +44,10 @@ public class SimpleDynamicFormOperationService implements DynamicFormOperationSe
         DynamicFormEntity entity= dynamicFormService.selectByPk(formId);
         if(null==entity)throw new NotFoundException("表单不存在");
 
-        RDBDatabase database=entity.getDataSourceId()==null?databaseRepository.getDatabase(entity.getDataSourceId()):
+        RDBDatabase database=entity.getDataSourceId()!=null?
+                databaseRepository.getDatabase(entity.getDataSourceId()):
                 databaseRepository.getDefaultDatabase();
-        return database.getTable(entity.getTableName());
+        return database.getTable(entity.getDatabaseTableName());
     };
     @Override
     public <T> PagerResult<T> selectPager(String formId, QueryParamEntity paramEntity) {
@@ -112,6 +114,18 @@ public class SimpleDynamicFormOperationService implements DynamicFormOperationSe
             Update<T> update=table.createUpdate();
 
             return update.setParam(paramEntity).exec();
+        } catch (SQLException e) {
+            //todo custom exception
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public <T> void insert(String formId, T entity) {
+        RDBTable table=getTable(formId);
+        try {
+           Insert<T> insert=table.createInsert();
+            insert.value(entity).exec();
         } catch (SQLException e) {
             //todo custom exception
             throw new RuntimeException(e);
