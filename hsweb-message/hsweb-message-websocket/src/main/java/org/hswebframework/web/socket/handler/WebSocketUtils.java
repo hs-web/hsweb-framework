@@ -36,13 +36,16 @@ public class WebSocketUtils {
                         .add(tmp[1].trim());
         }
 
-        Function<Set<String>, Optional<Authentication>> userGetter = set ->
-                set == null ? Optional.empty() : set.stream()
-                        .map(container::getAuthenticationBySessionId)
-                        .filter(Objects::nonNull).findFirst();
-
-        return userGetter.apply(sessionId.get("SESSION"))
-                .orElseGet(() -> userGetter.apply(sessionId.get("JSESSIONID")).orElse(null));
+        // TODO: 2017/7/12  修改权限获取方式
+        throw new UnsupportedOperationException();
+//        Function<Set<String>, Optional<Authentication>> userGetter = set ->
+//                set == null ? Optional.empty() : set.stream()
+//                        .map(container::getByToken)
+//                        .filter(Objects::nonNull)
+//                        .findFirst();
+//
+//        return userGetter.apply(sessionId.get("SESSION"))
+//                .orElseGet(() -> userGetter.apply(sessionId.get("JSESSIONID")).orElse(null));
 
     }
 }

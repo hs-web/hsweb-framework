@@ -23,7 +23,8 @@ import io.swagger.annotations.ApiParam;
 import org.hswebframework.web.BusinessException;
 import org.hswebframework.web.NotFoundException;
 import org.hswebframework.web.authorization.Authentication;
-import org.hswebframework.web.authorization.AuthenticationInitializeService;
+//import org.hswebframework.web.authorization.AuthenticationInitializeService;
+import org.hswebframework.web.authorization.AuthenticationManager;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.listener.AuthorizationListenerDispatcher;
 import org.hswebframework.web.authorization.listener.event.*;
@@ -56,10 +57,11 @@ public class AuthorizationController {
     @Autowired
     private UserService userService;
 
+//    @Autowired
+//    private AuthenticationInitializeService authenticationInitializeService;
+
     @Autowired
-    private AuthenticationInitializeService authenticationInitializeService;
-
-
+    private AuthenticationManager authenticationManager;
     @Autowired
     private AuthorizationListenerDispatcher authorizationListenerDispatcher;
 
@@ -109,7 +111,7 @@ public class AuthorizationController {
                 throw new BusinessException("{password_error}", 400);
             }
             // 验证通过
-            Authentication authentication = authenticationInitializeService.initUserAuthorization(entity.getId());
+            Authentication authentication = authenticationManager.getByUserId(entity.getId());
             AuthorizationSuccessEvent event = new AuthorizationSuccessEvent(authentication, parameterGetter);
             int size = authorizationListenerDispatcher.doEvent(event);
             if (size == 0) {
