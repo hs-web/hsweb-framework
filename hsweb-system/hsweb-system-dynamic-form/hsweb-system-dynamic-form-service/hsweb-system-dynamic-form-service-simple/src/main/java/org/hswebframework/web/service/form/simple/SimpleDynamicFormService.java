@@ -7,6 +7,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.hsweb.ezorm.core.Trigger;
 import org.hsweb.ezorm.core.ValueConverter;
 import org.hsweb.ezorm.rdb.RDBDatabase;
+import org.hsweb.ezorm.rdb.meta.Correlation;
 import org.hsweb.ezorm.rdb.meta.RDBColumnMetaData;
 import org.hsweb.ezorm.rdb.meta.RDBTableMetaData;
 import org.hsweb.ezorm.rdb.meta.converter.*;
@@ -139,7 +140,7 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
     }
 
     @Override
-    @CacheEvict(key = "'form_id:'+#id")
+    @Cacheable(key = "'form_id:'+#id")
     public DynamicFormEntity selectByPk(String id) {
         return super.selectByPk(id);
     }
@@ -304,6 +305,32 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
         }
     }
 
+    protected Set<Correlation> buildCorrelations(String correlations){
+        if(StringUtils.isEmpty(correlations))return new LinkedHashSet<>();
+        JSONArray correlationsConfig = JSON.parseArray(correlations);
+        Set<Correlation> correlations1=new LinkedHashSet<>();
+        for (int i = 0; i < correlationsConfig.size(); i++) {
+            JSONObject single = correlationsConfig.getJSONObject(i);
+
+            String target = single.getString("target");
+            String alias = single.getString("alias");
+            String condition = single.getString("condition");
+            Objects.requireNonNull(target);
+            Objects.requireNonNull(condition);
+            Correlation correlation=new Correlation(target,alias,condition);
+            correlation.setJoin(Correlation.JOIN.valueOf(String.valueOf(single.getOrDefault("join","LEFT")).toUpperCase()));
+            JSONObject properties= single.getJSONObject("properties");
+
+            if(properties!=null){
+                properties.forEach(correlation::setProperty);
+            }
+            correlations1.add(correlation);
+        }
+
+        return correlations1;
+
+    }
+
     protected Map<String,Trigger> buildTrigger(String config){
         if(StringUtils.isEmpty(config))return new HashMap<>();
         JSONArray triggerConfig = JSON.parseArray(config);
@@ -337,6 +364,7 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
         metaData.setName(form.getDatabaseTableName());
         metaData.setProperties(form.getProperties());
         metaData.setAlias(form.getAlias());
+        metaData.setCorrelations(buildCorrelations(form.getCorrelations()));
         buildTrigger(form.getTriggers()).forEach(metaData::on);
         columns.forEach(column -> {
             RDBColumnMetaData columnMeta = new RDBColumnMetaData();
