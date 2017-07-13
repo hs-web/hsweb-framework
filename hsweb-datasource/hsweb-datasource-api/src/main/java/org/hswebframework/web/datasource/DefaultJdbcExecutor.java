@@ -19,12 +19,12 @@ public class DefaultJdbcExecutor extends AbstractJdbcSqlExecutor {
 
     @Override
     public Connection getConnection() {
-        return DataSourceUtils.getConnection(DataSourceHolder.currentDataSource());
+        return DataSourceUtils.getConnection(DataSourceHolder.currentDataSource().getNative());
     }
 
     @Override
     public void releaseConnection(Connection connection) throws SQLException {
-        DataSourceUtils.releaseConnection(connection, DataSourceHolder.currentDataSource());
+        DataSourceUtils.releaseConnection(connection, DataSourceHolder.currentDataSource().getNative());
     }
 
     @Override
