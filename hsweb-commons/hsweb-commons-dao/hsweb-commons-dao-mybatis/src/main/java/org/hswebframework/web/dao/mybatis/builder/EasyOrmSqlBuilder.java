@@ -227,6 +227,8 @@ public class EasyOrmSqlBuilder {
         }
         if (param.isPaging() && Pager.get() == null) {
             Pager.doPaging(param.getPageIndex(), param.getPageSize());
+        }else{
+            Pager.reset();
         }
         RDBTableMetaData tableMetaData = createMeta(tableName, resultMapId);
         RDBDatabaseMetaData databaseMetaDate = getActiveDatabase();
