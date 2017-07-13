@@ -1,5 +1,6 @@
 package org.hswebframework.web.service.form.simple;
 
+import org.hsweb.ezorm.core.Trigger;
 import org.hsweb.ezorm.rdb.executor.SqlExecutor;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.entity.form.DynamicFormColumnEntity;
@@ -41,6 +42,12 @@ public class SimpleDynamicFormServiceTest extends SimpleWebApplicationTests {
         DynamicFormEntity form = entityFactory.newInstance(DynamicFormEntity.class);
         form.setName("test");
         form.setDatabaseTableName("f_test");
+        form.setTriggers("[" +
+                "{\"trigger\":\"select.wrapper.done\"" +
+                ",\"language\":\"groovy\"" +
+                ",\"script\":\"println('wrapper done:'+instance);return true;\"" +
+                "}" +
+                "]");
         String id = dynamicFormService.insert(form);
         DynamicFormColumnEntity column_id = entityFactory.newInstance(DynamicFormColumnEntity.class);
         column_id.setFormId(id);

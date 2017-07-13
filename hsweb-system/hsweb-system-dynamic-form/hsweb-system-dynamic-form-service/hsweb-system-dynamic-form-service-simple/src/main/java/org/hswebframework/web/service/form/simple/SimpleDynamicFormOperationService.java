@@ -18,9 +18,11 @@ import org.hswebframework.web.service.form.DynamicFormService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Objects;
 
 @Service("dynamicFormOperationService")
 @Transactional
@@ -41,13 +43,12 @@ public class SimpleDynamicFormOperationService implements DynamicFormOperationSe
     }
 
     protected <T> RDBTable<T> getTable(String formId){
-        DynamicFormEntity entity= dynamicFormService.selectByPk(formId);
-        if(null==entity)throw new NotFoundException("表单不存在");
+        DynamicFormEntity form= dynamicFormService.selectByPk(formId);
+        if(null==form)throw new NotFoundException("表单不存在");
 
-        RDBDatabase database=entity.getDataSourceId()!=null?
-                databaseRepository.getDatabase(entity.getDataSourceId()):
-                databaseRepository.getDefaultDatabase();
-        return database.getTable(entity.getDatabaseTableName());
+        RDBDatabase database= StringUtils.isEmpty(form.getDataSourceId())?
+                databaseRepository.getDefaultDatabase():databaseRepository.getDatabase(form.getDataSourceId());
+        return database.getTable(form.getDatabaseTableName());
     };
     @Override
     public <T> PagerResult<T> selectPager(String formId, QueryParamEntity paramEntity) {
@@ -109,6 +110,9 @@ public class SimpleDynamicFormOperationService implements DynamicFormOperationSe
 
     @Override
     public <T> int update(String formId, UpdateParamEntity<T> paramEntity) {
+        if(Objects.requireNonNull(paramEntity).getTerms().isEmpty()){
+            throw new UnsupportedOperationException("can not use empty condition for update");
+        }
         RDBTable table=getTable(formId);
         try {
             Update<T> update=table.createUpdate();
@@ -134,6 +138,9 @@ public class SimpleDynamicFormOperationService implements DynamicFormOperationSe
 
     @Override
     public int delete(String formId, DeleteParamEntity paramEntity) {
+        if(Objects.requireNonNull(paramEntity).getTerms().isEmpty()){
+            throw new UnsupportedOperationException("can not use empty condition for delete");
+        }
         RDBTable table=getTable(formId);
         try {
             Delete delete=table.createDelete();
