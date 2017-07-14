@@ -53,7 +53,7 @@ public class SimpleDictionaryParserService extends GenericEntityService<Dictiona
     }
 
     @Override
-    public <V> DictionaryParser<V> getParser(DictionaryEntity<? extends DictionaryItemEntity> dict, String parserId) {
+    public <V> DictionaryParser<V> getParser(DictionaryEntity dict, String parserId) {
         DictionaryParserEntity entity = selectByPk(parserId);
         assertNotNull(entity);
         SimpleDictionaryParser<V> parser = new SimpleDictionaryParser<>();

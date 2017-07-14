@@ -26,7 +26,7 @@ import java.util.List;
  *
  * @author hsweb-generator-online
  */
-public interface DictionaryEntity<ITEM extends DictionaryItemEntity> extends GenericEntity<String>, RecordCreationEntity {
+public interface DictionaryEntity extends GenericEntity<String>, RecordCreationEntity {
  /*-------------------------------------------
     |               属性名常量               |
     ===========================================*/
@@ -95,8 +95,8 @@ public interface DictionaryEntity<ITEM extends DictionaryItemEntity> extends Gen
      */
     void setStatus(Byte enabled);
 
-    List<ITEM> getItems();
+    List<DictionaryItemEntity> getItems();
 
-    void setItems(List<ITEM> items);
+    void setItems(List<DictionaryItemEntity> items);
 
 }

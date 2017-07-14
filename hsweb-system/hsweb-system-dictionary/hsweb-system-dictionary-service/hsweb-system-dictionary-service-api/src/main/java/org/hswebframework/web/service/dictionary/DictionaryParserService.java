@@ -28,7 +28,7 @@ import org.hswebframework.web.service.CrudService;
  */
 public interface DictionaryParserService extends CrudService<DictionaryParserEntity, String> {
 
-    <V> DictionaryParser<V> getParser(DictionaryEntity<? extends DictionaryItemEntity> dict, String parserId);
+    <V> DictionaryParser<V> getParser(DictionaryEntity dict, String parserId);
 
 
 }

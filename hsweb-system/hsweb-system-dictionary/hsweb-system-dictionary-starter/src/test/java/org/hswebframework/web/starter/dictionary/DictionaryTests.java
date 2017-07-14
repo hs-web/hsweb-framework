@@ -45,7 +45,7 @@ public class DictionaryTests extends SimpleWebApplicationTests {
 
     @Test
     public void testCrud() throws Exception {
-        DictionaryEntity<DictionaryItemEntity> entity = entityFactory.newInstance(DictionaryEntity.class);
+        DictionaryEntity entity = entityFactory.newInstance(DictionaryEntity.class);
         //todo 设置测试属性
         entity.setName("test");
         entity.setCreatorId("admin");
@@ -72,7 +72,7 @@ public class DictionaryTests extends SimpleWebApplicationTests {
                 ",{'value':'2','text':'蔬菜'}" +
                 "]";
 
-        List<DictionaryItemEntity> itemEntities = (List) JSON.parseArray(json, SimpleDictionaryItemEntity.class);
+        List<DictionaryItemEntity> itemEntities = JSON.parseArray(json, DictionaryItemEntity.class);
         entity.setItems(itemEntities);
         // test add data
         String requestBody = JSON.toJSONString(entity);

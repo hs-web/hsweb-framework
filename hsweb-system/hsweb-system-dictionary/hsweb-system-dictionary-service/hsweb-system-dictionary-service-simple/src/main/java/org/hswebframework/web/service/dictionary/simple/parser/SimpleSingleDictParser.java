@@ -27,7 +27,7 @@ public class SimpleSingleDictParser implements SingleDictParser {
     private DictParserFormatter formatter = new SimpleDictParserFormatter();
 
     //设置DictionaryEntity作为配置
-    public void setDict(DictionaryEntity<? extends DictionaryItemEntity> dict,
+    public void setDict(DictionaryEntity dict,
                         Function<DictionaryItemEntity, String> keyGetter,
                         Function<DictionaryItemEntity, String> valueGetter,
                         Function<DictionaryItemEntity, String> expressionGetter) {
