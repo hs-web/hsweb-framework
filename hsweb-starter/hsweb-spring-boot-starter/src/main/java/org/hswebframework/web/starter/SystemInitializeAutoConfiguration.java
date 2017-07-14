@@ -65,7 +65,7 @@ public class SystemInitializeAutoConfiguration implements CommandLineRunner {
         Connection connection = null;
         String jdbcUserName;
         try {
-            connection = DataSourceHolder.currentDataSource().getConnection();
+            connection = DataSourceHolder.currentDataSource().getNative().getConnection();
             jdbcUserName = connection.getMetaData().getUserName();
         } finally {
             if (null != connection) connection.close();
