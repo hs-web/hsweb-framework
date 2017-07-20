@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  ~ Copyright 2016 http://www.hswebframework.org
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~       http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  ~
+  -->
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.hswebframework.web.dao.authorization.UserRoleDao">
+    <resultMap id="UserRoleResultMap" type="org.hswebframework.web.entity.authorization.SimpleUserRoleEntity">
+        <result property="roleId" column="role_id" javaType="string" jdbcType="VARCHAR"/>
+        <result property="userId" column="user_id" javaType="string" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!--用于动态生成sql所需的配置-->
+    <sql id="config">
+        <bind name="resultMapId" value="'UserRoleResultMap'"/>
+        <bind name="tableName" value="'s_user_role'"/>
+    </sql>
+
+    <insert id="insert" parameterType="org.hswebframework.web.entity.authorization.SimpleUserRoleEntity">
+        <include refid="config"/>
+        <include refid="BasicMapper.buildInsertSql"/>
+    </insert>
+
+    <delete id="deleteByRoleId" parameterType="String">
+        delete from s_user_role where role_id =#{id}
+    </delete>
+
+    <delete id="deleteByUserId" parameterType="String">
+        delete from s_user_role where user_id =#{id}
+    </delete>
+
+    <select id="selectByUserId" parameterType="string" resultMap="UserRoleResultMap">
+        select * from s_user_role where user_id=#{id}
+    </select>
+
+    <select id="selectByRoleId" parameterType="String" resultMap="UserRoleResultMap">
+        select * from s_user_role where role_id=#{id}
+    </select>
+
+</mapper>

@@ -1,0 +1,4 @@
+# Auto Configure
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+org.hswebframework.web.datasource.jta.AtomikosDataSourceAutoConfiguration,\
+org.hswebframework.web.datasource.jta.JtaJdbcSqlExecutorAutoConfiguration

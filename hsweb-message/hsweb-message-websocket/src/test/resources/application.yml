@@ -1,0 +1,13 @@
+spring:
+    activemq:
+        broker-url: tcp://localhost:61616
+        in-memory: false
+    jms:
+      pub-sub-domain: true
+
+hsweb:
+    app:
+      name: websocket测试
+      version: 3.0.0
+server:
+  port: 8081

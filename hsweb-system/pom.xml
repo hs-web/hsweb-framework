@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>hsweb-framework</artifactId>
+        <groupId>org.hswebframework.web</groupId>
+        <version>3.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <packaging>pom</packaging>
+    <modules>
+        <module>hsweb-system-authorization</module>
+        <module>hsweb-system-dynamic-form</module>
+        <module>hsweb-system-config</module>
+        <module>hsweb-system-database-manager</module>
+        <module>hsweb-system-monitor</module>
+        <module>hsweb-system-datasource</module>
+        <module>hsweb-system-workflow</module>
+        <module>hsweb-system-schedule</module>
+        <module>hsweb-system-cli</module>
+        <module>hsweb-system-all</module>
+        <module>hsweb-system-organizational</module>
+        <module>hsweb-system-classified</module>
+        <module>hsweb-system-file</module>
+        <module>hsweb-system-template</module>
+        <module>hsweb-system-script</module>
+        <module>hsweb-system-history</module>
+        <module>hsweb-system-dictionary</module>
+        <module>hsweb-system-document</module>
+        <module>hsweb-system-crawler</module>
+        <module>hsweb-system-oauth2-server</module>
+        <module>hsweb-system-oauth2-client</module>
+    </modules>
+    <artifactId>hsweb-system</artifactId>
+
+</project>

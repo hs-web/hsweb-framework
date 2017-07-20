@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  ~ /*
+  ~  * Copyright 2016 http://www.hswebframework.org
+  ~  *
+  ~  * Licensed under the Apache License, Version 2.0 (the "License");
+  ~  * you may not use this file except in compliance with the License.
+  ~  * You may obtain a copy of the License at
+  ~  *
+  ~  *     http://www.apache.org/licenses/LICENSE-2.0
+  ~  *
+  ~  * Unless required by applicable law or agreed to in writing, software
+  ~  * distributed under the License is distributed on an "AS IS" BASIS,
+  ~  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  * See the License for the specific language governing permissions and
+  ~  * limitations under the License.
+  ~  */
+  -->
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="BasicMapper">
+    <!--通用查询条件-->
+    <sql id="buildWhere">
+        ${@org.hswebframework.web.dao.mybatis.builder.SqlBuilder@current().buildWhere(resultMapId,tableName,#this['_parameter'].terms)}
+    </sql>
+    <sql id="buildWhereForUpdate">
+        ${@org.hswebframework.web.dao.mybatis.builder.SqlBuilder@current().buildWhereForUpdate(resultMapId,tableName,#this['_parameter'].terms)}
+    </sql>
+    <!--生成查询字段-->
+    <sql id="buildSelectField">
+        ${@org.hswebframework.web.dao.mybatis.builder.SqlBuilder@current().buildSelectFields(resultMapId,tableName,#this['_parameter'])}
+    </sql>
+
+    <!--生成修改字段-->
+    <sql id="buildUpdateField">
+        <set>
+            ${@org.hswebframework.web.dao.mybatis.builder.SqlBuilder@current().buildUpdateFields(resultMapId,tableName,#this['_parameter'])}
+        </set>
+    </sql>
+
+    <!--生成排序字段-->
+    <sql id="buildSortField">
+        ${@org.hswebframework.web.dao.mybatis.builder.SqlBuilder@current().buildOrder(resultMapId,tableName,#this['_parameter'])}
+    </sql>
+
+    <!--生成查询sql-->
+    <sql id="buildSelectSql">
+        <trim>
+            select
+            <include refid="BasicMapper.buildSelectField"/>
+            from ${tableName}
+            <where>
+                <include refid="BasicMapper.buildWhere"/>
+            </where>
+            <include refid="BasicMapper.buildSortField"/>
+        </trim>
+    </sql>
+
+    <!--生成删除sql-->
+    <sql id="buildDeleteSql">
+        <trim>
+            delete from ${tableName}
+            <where>
+                <include refid="BasicMapper.buildWhereForUpdate"/>
+            </where>
+        </trim>
+    </sql>
+
+    <!--生成InsertSql-->
+    <sql id="buildInsertSql">
+        ${@org.hswebframework.web.dao.mybatis.builder.SqlBuilder@current().buildInsertSql(resultMapId,tableName,#this['_parameter'])}
+    </sql>
+
+    <!--生成UpdateSql-->
+    <sql id="buildUpdateSql">
+        <trim>
+            update ${tableName}
+            <include refid="BasicMapper.buildUpdateField"/>
+            <where>
+                <include refid="BasicMapper.buildWhereForUpdate"/>
+                <if test="terms.size()==0">
+                    u_id=#{data.id}
+                </if>
+            </where>
+        </trim>
+    </sql>
+
+    <!--生成查询数量sql-->
+    <sql id="buildTotalSql">
+        <trim>
+            select count(0) as total from ${tableName}
+            <where>
+                <include refid="BasicMapper.buildWhere"/>
+            </where>
+        </trim>
+    </sql>
+</mapper>

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  ~ Copyright 2016 http://www.hswebframework.org
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~       http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  ~
+  -->
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.hswebframework.web.dao.authorization.MenuGroupBindDao">
+    <resultMap id="MenuGroupBindResultMap" type="org.hswebframework.web.entity.authorization.SimpleMenuGroupBindEntity">
+        <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
+        <result property="path" column="path" javaType="String" jdbcType="VARCHAR"/>
+        <result property="parentId" column="parent_id" javaType="String" jdbcType="VARCHAR"/>
+        <result property="level" column="level" javaType="Integer" jdbcType="DECIMAL"/>
+        <result property="sortIndex" column="sort_index" javaType="Long" jdbcType="DECIMAL"/>
+        <result property="status" column="status" javaType="Byte" jdbcType="DECIMAL"/>
+        <result property="menuId" column="menu_id" javaType="String" jdbcType="VARCHAR"/>
+        <result property="groupId" column="group_id" javaType="String" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!--用于动态生成sql所需的配置-->
+    <sql id="config">
+        <bind name="resultMapId" value="'MenuGroupBindResultMap'"/>
+        <bind name="tableName" value="'s_menu_group_bind'"/>
+    </sql>
+
+    <insert id="insert" parameterType="org.hswebframework.web.entity.authorization.SimpleMenuGroupBindEntity">
+        <include refid="config"/>
+        <include refid="BasicMapper.buildInsertSql"/>
+    </insert>
+
+    <delete id="deleteByPk" parameterType="String">
+        delete from s_menu_group_bind where u_id =#{id}
+    </delete>
+
+    <delete id="delete" parameterType="org.hswebframework.web.commons.entity.Entity">
+        <include refid="config"/>
+        <include refid="BasicMapper.buildDeleteSql"/>
+    </delete>
+
+    <update id="update" parameterType="org.hswebframework.web.commons.entity.Entity">
+        <include refid="config"/>
+        <include refid="BasicMapper.buildUpdateSql"/>
+    </update>
+
+    <select id="queryByGroupId" parameterType="String" resultMap="MenuGroupBindResultMap">
+        select * from s_menu_group_bind where group_id =#{id}
+    </select>
+
+    <select id="query" parameterType="org.hswebframework.web.commons.entity.Entity" resultMap="MenuGroupBindResultMap">
+        <include refid="config"/>
+        <include refid="BasicMapper.buildSelectSql"/>
+    </select>
+
+    <select id="count" parameterType="org.hswebframework.web.commons.entity.Entity" resultType="int">
+        <include refid="config"/>
+        <include refid="BasicMapper.buildTotalSql"/>
+    </select>
+</mapper>

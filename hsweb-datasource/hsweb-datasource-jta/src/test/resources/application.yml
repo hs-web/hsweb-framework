@@ -1,0 +1,47 @@
+
+spring:
+  jta:
+    status: true
+    atomikos:
+      datasource:
+        xa-data-source-class-name: com.alibaba.druid.pool.xa.DruidXADataSource
+        xa-properties:
+          url : jdbc:h2:mem:core;DB_CLOSE_ON_EXIT=FALSE
+          username : sa
+          password :
+        max-pool-size: 20
+        borrow-connection-timeout: 1000
+      connectionfactory:
+        max-pool-size: 20
+        local-transaction-mode: true
+  activemq:
+#    broker-url: tcp://localhost:61616
+    in-memory: true
+
+logging:
+  level:
+      com.atomikos: WARN
+hsweb:
+  dynamic:
+    datasource:
+        test_ds:
+            xa-data-source-class-name: com.alibaba.druid.pool.xa.DruidXADataSource
+            xa-properties:
+              url: jdbc:h2:mem:test;DB_CLOSE_ON_EXIT=FALSE
+              username: sa
+              password:
+            max-pool-size: 20
+            borrow-connection-timeout: 1000
+        test_ds2:
+          xa-data-source-class-name: com.alibaba.druid.pool.xa.DruidXADataSource
+          xa-properties:
+#            url: jdbc:mysql://localhost:3306/hsweb?pinGlobalTxToPhysicalConnection=true&useSSL=false&useUnicode=true&characterEncoding=utf-8&autoReconnect=true&failOverReadOnly=false
+            url: jdbc:h2:mem:test2;DB_CLOSE_ON_EXIT=FALSE
+            username: sa
+            password:
+          max-pool-size: 20
+          borrow-connection-timeout: 1000
+          init-timeout: 20
+
+config:
+    test: 123
