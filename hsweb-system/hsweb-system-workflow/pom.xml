@@ -10,6 +10,15 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>hsweb-system-workflow</artifactId>
+    <packaging>pom</packaging>
+    <properties>
+        <batik.version>1.7</batik.version>
+        <flowable.version>6.1.0</flowable.version>
+    </properties>
+    <modules>
+        <module>hsweb-system-workflow-flowable</module>
+        <module>hsweb-system-workflow-flowable-modeler</module>
+    </modules>
 
 
 </project>
