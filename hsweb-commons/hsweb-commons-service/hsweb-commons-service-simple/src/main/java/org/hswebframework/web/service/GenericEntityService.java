@@ -22,10 +22,10 @@ import org.hswebframework.web.commons.entity.GenericEntity;
 import org.hswebframework.web.commons.entity.RecordCreationEntity;
 import org.hswebframework.web.dao.CrudDao;
 import org.hswebframework.web.id.IDGenerator;
-import org.hswebframework.utils.ClassUtils;
 import org.hswebframework.web.validator.group.CreateGroup;
 import org.hswebframework.web.validator.group.UpdateGroup;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,6 +58,7 @@ public abstract class GenericEntityService<E extends GenericEntity<PK>, PK>
 
     @Override
     public int deleteByPk(PK pk) {
+        Assert.notNull(pk, "parameter can not be null");
         return createDelete()
                 .where(GenericEntity.id, pk)
                 .exec();
@@ -65,11 +66,13 @@ public abstract class GenericEntityService<E extends GenericEntity<PK>, PK>
 
     @Override
     public int updateByPk(PK pk, E entity) {
+        Assert.notNull(pk, "primary key can not be null");
+        Assert.notNull(entity, "entity can not be null");
         entity.setId(pk);
         tryValidate(entity, UpdateGroup.class);
         return createUpdate(entity)
                 //如果是RecordCreationEntity则不修改creator_id和creator_time
-                .when(ClassUtils.instanceOf(getEntityType(), RecordCreationEntity.class),
+                .when(entity instanceof RecordCreationEntity,
                         update -> update.and().excludes(RecordCreationEntity.creatorId, RecordCreationEntity.createTime))
                 .where(GenericEntity.id, pk)
                 .exec();
