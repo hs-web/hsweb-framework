@@ -36,4 +36,6 @@ public class SimpleTemplateService extends GenericEntityService<TemplateEntity, 
         entity.setVersion(old.getVersion() + 1);
         return super.updateByPk(id, entity);
     }
+
+
 }
