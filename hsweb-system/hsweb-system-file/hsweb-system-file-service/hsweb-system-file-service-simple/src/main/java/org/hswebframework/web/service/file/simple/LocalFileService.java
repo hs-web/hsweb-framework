@@ -73,13 +73,13 @@ public class LocalFileService implements FileService {
     }
 
     @Override
-    public InputStream readFile(String fileId) {
-        FileInfoEntity fileInfo = fileInfoService.selectByMd5(fileId);
+    public InputStream readFile(String fileIdOrMd5) {
+        FileInfoEntity fileInfo = fileInfoService.selectByIdOrMd5(fileIdOrMd5);
         if (fileInfo == null || !DataStatus.STATUS_ENABLED.equals(fileInfo.getStatus())) {
             throw new NotFoundException("file not found or disabled");
         }
         //配置中的文件上传根路径
-        String filePath = fileInfo.getLocation();
+        String filePath =getFilePath()+"/"+ fileInfo.getLocation();
         File file = new File(filePath);
         if (!file.exists()) {
             throw new NotFoundException("file not found");
