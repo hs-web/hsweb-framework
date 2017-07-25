@@ -15,12 +15,12 @@ import java.io.OutputStream;
 public interface FileService {
 
     /**
-     * 根据文件id获取文件流,如果文件不存在,将抛出{@link org.hswebframework.web.NotFoundException}
+     * 根据文件id或者md5获取文件流,如果文件不存在,将抛出{@link org.hswebframework.web.NotFoundException}
      *
-     * @param fileId 文件id
+     * @param fileIdOrMd5 文件id或者md5值
      * @return 文件流
      */
-    InputStream readFile(String fileId);
+    InputStream readFile(String fileIdOrMd5);
 
     /**
      * 保存文件,并返回文件信息,如果存在相同的文件,则不会保存,而是返回已保存的文件
