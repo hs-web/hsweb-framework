@@ -30,7 +30,7 @@ import org.hswebframework.web.organizational.authorization.TreeNode;
 import org.hswebframework.web.organizational.authorization.simple.SimplePersonnel;
 import org.hswebframework.web.organizational.authorization.simple.SimplePersonnelAuthorization;
 import org.hswebframework.web.service.DefaultDSLQueryService;
-import org.hswebframework.web.service.EnableCacheGernericEntityService;
+import org.hswebframework.web.service.EnableCacheGenericEntityService;
 import org.hswebframework.web.service.authorization.AuthorizationSettingTypeSupplier;
 import org.hswebframework.web.service.authorization.UserService;
 import org.hswebframework.web.service.organizational.PersonService;
@@ -56,7 +56,7 @@ import static org.springframework.util.StringUtils.isEmpty;
  */
 @Service("personService")
 @CacheConfig(cacheNames = "person")
-public class SimplePersonService extends EnableCacheGernericEntityService<PersonEntity, String>
+public class SimplePersonService extends EnableCacheGenericEntityService<PersonEntity, String>
         implements PersonService, PersonnelAuthorizationManager, AuthorizationSettingTypeSupplier {
 
     private static String SETTING_TYPE_PERSON   = "person";
