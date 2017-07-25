@@ -1,12 +1,15 @@
-package org.hswebframework.web.service.file;
+package org.hswebframework.web.service.file.simple;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.hswebframework.utils.time.DateFormatter;
 import org.hswebframework.web.NotFoundException;
 import org.hswebframework.web.commons.entity.DataStatus;
 import org.hswebframework.web.entity.file.FileInfoEntity;
+import org.hswebframework.web.service.file.FileInfoService;
+import org.hswebframework.web.service.file.FileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 import org.springframework.util.StreamUtils;
 
 import java.io.*;
@@ -18,6 +21,7 @@ import java.util.Date;
  * @author zhouhao
  * @since 3.0
  */
+@Service("fileService")
 public class LocalFileService implements FileService {
     private FileInfoService fileInfoService;
 
@@ -36,17 +40,17 @@ public class LocalFileService implements FileService {
      */
     private String filePath = "./upload";
 
-    @Value("${hsweb.web.upload.staticFilePath:./static}")
+    @Value("${hsweb.web.upload.static-file-path:./static}")
     public void setStaticFilePath(String staticFilePath) {
         this.staticFilePath = staticFilePath;
     }
 
-    @Value("${hsweb.web.upload.staticLocation:/}")
+    @Value("${hsweb.web.upload.static-location:/upload/static}")
     public void setStaticLocation(String staticLocation) {
         this.staticLocation = staticLocation;
     }
 
-    @Value("${hsweb.web.upload.filePath:./upload}")
+    @Value("${hsweb.web.upload.file-path:./upload/file}")
     public void setFilePath(String filePath) {
         this.filePath = filePath;
     }
@@ -71,7 +75,7 @@ public class LocalFileService implements FileService {
     @Override
     public InputStream readFile(String fileId) {
         FileInfoEntity fileInfo = fileInfoService.selectByMd5(fileId);
-        if (fileInfo == null || DataStatus.STATUS_ENABLED.equals(fileInfo.getStatus())) {
+        if (fileInfo == null || !DataStatus.STATUS_ENABLED.equals(fileInfo.getStatus())) {
             throw new NotFoundException("file not found or disabled");
         }
         //配置中的文件上传根路径
@@ -98,7 +102,7 @@ public class LocalFileService implements FileService {
         String filePath = DateFormatter.toString(new Date(), "yyyyMMdd");
 
         //创建目录
-        new File(filePath).mkdirs();
+        new File(getStaticFilePath()+"/"+filePath).mkdirs();
 
         // 存储的文件名
         String realFileName = System.nanoTime() + suffix;
@@ -116,9 +120,9 @@ public class LocalFileService implements FileService {
         //配置中的文件上传根路径
         String fileBasePath = getFilePath();
         //文件存储的相对路径，以日期分隔，每天创建一个新的目录
-        String filePath = "/file/".concat(DateFormatter.toString(new Date(), "yyyyMMdd"));
+        String filePath = DateFormatter.toString(new Date(), "yyyyMMdd");
         //文件存储绝对路径
-        String absPath = fileBasePath.concat(filePath);
+        String absPath = fileBasePath.concat("/").concat(filePath);
         File path = new File(absPath);
         if (!path.exists()) path.mkdirs(); //创建目录
         String newName = String.valueOf(System.nanoTime()); //临时文件名 ,纳秒的md5值
