@@ -9,8 +9,8 @@
         <result property="location" column="location" javaType="String" jdbcType="VARCHAR"/>
         <result property="type" column="type" javaType="String" jdbcType="VARCHAR"/>
         <result property="md5" column="md5" javaType="String" jdbcType="VARCHAR"/>
-        <result property="size" column="size" javaType="Byte" jdbcType="DECIMAL"/>
-        <result property="status" column="status" javaType="Long" jdbcType="DECIMAL"/>
+        <result property="size" column="size" javaType="Long" jdbcType="DECIMAL"/>
+        <result property="status" column="status" javaType="Byte" jdbcType="DECIMAL"/>
         <result property="classified" column="classified" javaType="String" jdbcType="VARCHAR"/>
         <result property="createTime" column="create_time" javaType="Long" jdbcType="NUMERIC"/>
         <result property="creatorId" column="creator_id" javaType="String" jdbcType="VARCHAR"/>
