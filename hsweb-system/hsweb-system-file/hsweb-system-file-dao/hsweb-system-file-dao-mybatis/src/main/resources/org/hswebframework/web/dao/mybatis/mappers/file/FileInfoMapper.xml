@@ -6,7 +6,7 @@
     <resultMap id="FileInfoResultMap" type="org.hswebframework.web.entity.file.FileInfoEntity">
         <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
         <result property="name" column="name" javaType="String" jdbcType="VARCHAR"/>
-        <result property="location" column="path" javaType="String" jdbcType="VARCHAR"/>
+        <result property="location" column="location" javaType="String" jdbcType="VARCHAR"/>
         <result property="type" column="type" javaType="String" jdbcType="VARCHAR"/>
         <result property="md5" column="md5" javaType="String" jdbcType="VARCHAR"/>
         <result property="size" column="size" javaType="Long" jdbcType="DECIMAL"/>
