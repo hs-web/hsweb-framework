@@ -10,4 +10,6 @@ import org.hswebframework.web.service.CrudService;
  */
 public interface FileInfoService extends CrudService<FileInfoEntity, String> {
     FileInfoEntity selectByMd5(String md5);
+
+    FileInfoEntity selectByIdOrMd5(String idOrMd5);
 }
