@@ -51,7 +51,6 @@ public class HswebResponseConvertSupport implements ResponseConvertForProviderDe
 
     @Override
     public <T> T convert(OAuth2Response response, Class<T> type) {
-
         String json = response.asString();
         if (type == Authentication.class) {
             if (authenticationBuilderFactory != null) {
@@ -59,8 +58,6 @@ public class HswebResponseConvertSupport implements ResponseConvertForProviderDe
             } else {
                 throw new UnsupportedOperationException("authenticationBuilderFactory not ready");
             }
-        }else if(type == AccessTokenInfo.class){
-            Map<String,Object> jsonMap = JSON.parseObject(json);
         }
         return JSON.parseObject(json, type);
     }
