@@ -123,11 +123,17 @@ public class MapperEntityFactory implements EntityFactory {
 
     @Override
     public <T> T newInstance(Class<T> beanClass) {
+        return newInstance(beanClass, null);
+    }
+
+    @Override
+    public <T> T newInstance(Class<T> beanClass, Class<T> defaultClass) {
         if (beanClass == null) return null;
         Mapper<T> mapper = realTypeMapper.get(beanClass);
         if (mapper != null) return mapper.getInstanceGetter().get();
         mapper = initCache(beanClass);
         if (mapper != null) return mapper.getInstanceGetter().get();
+        if (defaultClass != null) return newInstance(defaultClass);
 
         throw new NotFoundException("can't create instance for " + beanClass);
     }

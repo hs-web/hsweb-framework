@@ -30,13 +30,34 @@ import org.hswebframework.web.commons.entity.Entity;
  */
 public interface EntityFactory {
     /**
-     * 根据类型创建实体,类型必须为{@link Entity}的子类。
+     * 根据类型创建实例
+     * <p>
+     * e.g.
+     * <pre>
+     *  entityFactory.newInstance(UserEntity.class);
+     * </pre>
      *
-     * @param entityClass 类型
-     * @param <T>         泛型,需实现{@link Entity}
+     * @param entityClass 要创建的class
+     * @param <T>         类型
      * @return 创建结果
      */
     <T> T newInstance(Class<T> entityClass);
+
+
+    /**
+     * 根据类型创建实例,如果类型无法创建,则使用默认类型进行创建
+     * <p>
+     * e.g.
+     * <pre>
+     *  entityFactory.newInstance(UserEntity.class,SimpleUserEntity.class);
+     * </pre>
+     *
+     * @param entityClass  要创建的class
+     * @param defaultClass 默认class,当{@code entityClass}无法创建时使用此类型进行创建
+     * @param <T>          类型
+     * @return 实例
+     */
+    <T> T newInstance(Class<T> entityClass, Class<T> defaultClass);
 
     /**
      * 创建实体并设置默认的属性
