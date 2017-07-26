@@ -1,6 +1,7 @@
 package org.hswebframework.web.organizational.authorization;
 
 import org.hswebframework.web.authorization.Authentication;
+import org.hswebframework.web.organizational.authorization.relation.Relations;
 
 import java.io.Serializable;
 import java.util.List;
@@ -32,6 +33,12 @@ public interface PersonnelAuthorization extends Serializable {
      * @return 人员的基本信息
      */
     Personnel getPersonnel();
+
+    /**
+     *
+     * @return 人员关系信息
+     */
+    Relations getPersonRelations();
 
     /**
      * @return 人员所在行政区域ID, 只返回根节点, 永远不会返回{@code null}

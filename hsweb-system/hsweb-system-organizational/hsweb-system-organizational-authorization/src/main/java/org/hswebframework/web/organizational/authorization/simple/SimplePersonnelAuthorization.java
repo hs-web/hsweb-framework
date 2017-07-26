@@ -3,6 +3,7 @@ package org.hswebframework.web.organizational.authorization.simple;
 import org.hswebframework.web.organizational.authorization.Personnel;
 import org.hswebframework.web.organizational.authorization.PersonnelAuthorization;
 import org.hswebframework.web.organizational.authorization.TreeNode;
+import org.hswebframework.web.organizational.authorization.relation.Relations;
 
 import java.util.Collections;
 import java.util.Set;
@@ -36,6 +37,13 @@ public class SimplePersonnelAuthorization implements PersonnelAuthorization {
 
     public void setDistrictIds(Set<TreeNode<String>> districtIds) {
         this.districtIds = districtIds;
+    }
+
+    @Override
+    public Relations getPersonRelations() {
+        // TODO: 2017/7/26
+        throw new  UnsupportedOperationException("not support yet");
+
     }
 
     @Override
