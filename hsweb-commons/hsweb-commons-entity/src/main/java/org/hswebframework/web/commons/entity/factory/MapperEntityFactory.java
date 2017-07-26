@@ -19,6 +19,7 @@
 package org.hswebframework.web.commons.entity.factory;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import org.hswebframework.web.NotFoundException;
 import org.hswebframework.utils.ClassUtils;
 import org.slf4j.Logger;
@@ -80,6 +81,10 @@ public class MapperEntityFactory implements EntityFactory {
             PropertyCopier<S, T> copier = copierCache.<S, T>get(getCopierCacheKey(source.getClass(), target.getClass()));
             if (null != copier) return copier.copyProperties(source, target);
 
+            Object sourcePar = JSON.toJSON(source);
+            if (sourcePar instanceof JSONObject) {
+                return ((JSONObject) sourcePar).toJavaObject((Class<T>) target.getClass());
+            }
             return JSON.parseObject(JSON.toJSONString(source), (Class<T>) target.getClass());
         } catch (Exception e) {
             logger.warn("copy properties error", e);
