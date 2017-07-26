@@ -30,6 +30,18 @@
        ],"status":200
     }
 ```
+上传静态文件:
+```bash
+    POST: /file/upload-static
+    Content-Disposition: form-data; name="file"; filename="test.zip"
+```
+返回:
+```json
+    {
+      "result":"文件的访问路径",
+      "status":200
+    }
+```
 
 下载文件
 ```bash
