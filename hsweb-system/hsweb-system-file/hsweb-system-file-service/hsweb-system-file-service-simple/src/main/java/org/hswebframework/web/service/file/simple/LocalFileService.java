@@ -33,7 +33,7 @@ public class LocalFileService implements FileService {
     /**
      * 静态文件访问地址,上传静态文件后,将返回此地址+文件相对地址,以/结尾
      */
-    private String staticLocation = "/upload";
+    private String staticLocation = "/upload/";
 
     /**
      * 文件上传目录
@@ -45,7 +45,7 @@ public class LocalFileService implements FileService {
         this.staticFilePath = staticFilePath;
     }
 
-    @Value("${hsweb.web.upload.static-location:/upload}")
+    @Value("${hsweb.web.upload.static-location:/upload/}")
     public void setStaticLocation(String staticLocation) {
         this.staticLocation = staticLocation;
     }
@@ -127,17 +127,10 @@ public class LocalFileService implements FileService {
         if (!path.exists()) path.mkdirs(); //创建目录
         String newName = String.valueOf(System.nanoTime()); //临时文件名 ,纳秒的md5值
         String fileAbsName = absPath.concat("/").concat(newName);
-        //try with resource
-        long fileLength = 0;
+        long fileLength;
         try (BufferedInputStream in = new BufferedInputStream(fileStream);
-             BufferedOutputStream os = new BufferedOutputStream(new FileOutputStream(fileAbsName))) {
-            byte[] buffer = new byte[2048 * 10];
-            int len;
-            while ((len = in.read(buffer)) != -1) {
-                fileLength += len;
-                os.write(buffer, 0, len);
-            }
-            os.flush();
+             FileOutputStream os = new FileOutputStream(fileAbsName)) {
+            fileLength = StreamUtils.copy(in, os);
         }
         File newFile = new File(fileAbsName);
         //获取文件的md5值
@@ -146,13 +139,16 @@ public class LocalFileService implements FileService {
             md5 = DigestUtils.md5Hex(inputStream);
         }
         //  判断文件是否已经存在
-        FileInfoEntity resources = fileInfoService.selectByMd5(md5);
-        if (resources != null) {
-            newFile.delete();//文件已存在则删除临时文件不做处理
-            return resources;
+        FileInfoEntity fileInfo = fileInfoService.selectByMd5(md5);
+        if (fileInfo != null) {
+            if (new File(getFilePath() + "/" + fileInfo.getLocation()).exists()) {
+                newFile.delete();//文件已存在则删除临时文件不做处理
+            } else {
+                newFile.renameTo(new File(absPath.concat("/").concat(md5)));
+            }
+            return fileInfo;
         } else {
-            newName = md5;
-            newFile.renameTo(new File(absPath.concat("/").concat(newName)));
+            newFile.renameTo(new File(absPath.concat("/").concat(md5)));
         }
         FileInfoEntity infoEntity = fileInfoService.createEntity();
         infoEntity.setCreateTimeNow();
@@ -170,13 +166,8 @@ public class LocalFileService implements FileService {
     @Override
     public void writeFile(String fileId, OutputStream out, long skip) throws IOException {
         try (InputStream inputStream = readFile(fileId)) {
-            BufferedOutputStream outputStream = out instanceof BufferedOutputStream ? ((BufferedOutputStream) out) : new BufferedOutputStream(out);
             if (skip > 0) inputStream.skip(skip);
-            byte b[] = new byte[2048 * 10];
-            while ((inputStream.read(b)) != -1) {
-                outputStream.write(b);
-            }
-            outputStream.flush();
+            StreamUtils.copy(inputStream, out);
         }
     }
 

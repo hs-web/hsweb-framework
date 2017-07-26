@@ -43,7 +43,20 @@ public class SimpleFileInfoService extends GenericEntityService<FileInfoEntity, 
     @Override
     @Caching(evict = {
             @CacheEvict(key = "'md5:'+#entity.md5"),
-            @CacheEvict(key = "'id:'+#entity.id")
+            @CacheEvict(key = "'id:'+#result"),
+            @CacheEvict(key = "'id-or-md5:'+#result"),
+            @CacheEvict(key = "'id-or-md5:'+#result")
+    })
+    public String insert(FileInfoEntity entity) {
+        return super.insert(entity);
+    }
+
+    @Override
+    @Caching(evict = {
+            @CacheEvict(key = "'md5:'+#entity.md5"),
+            @CacheEvict(key = "'id:'+#entity.id"),
+            @CacheEvict(key = "'id-or-md5:'+#entity.id"),
+            @CacheEvict(key = "'id-or-md5:'+#entity.id")
     })
     protected int updateByPk(FileInfoEntity entity) {
         return super.updateByPk(entity);
@@ -52,7 +65,9 @@ public class SimpleFileInfoService extends GenericEntityService<FileInfoEntity, 
     @Override
     @Caching(evict = {
             @CacheEvict(key = "'md5:'+#target.selectByPk(#id).md5"),
-            @CacheEvict(key = "'id:'+#id")
+            @CacheEvict(key = "'id:'+#id"),
+            @CacheEvict(key = "'id-or-md5:'+#id"),
+            @CacheEvict(key = "'id-or-md5:'+#id")
     })
     public int deleteByPk(String id) {
         return super.deleteByPk(id);
@@ -81,6 +96,6 @@ public class SimpleFileInfoService extends GenericEntityService<FileInfoEntity, 
     @Cacheable(key = "'id-or-md5:'+#idOrMd5", condition = "#idOrMd5!=null")
     public FileInfoEntity selectByIdOrMd5(String idOrMd5) {
         if (null == idOrMd5) return null;
-        return createQuery().where(FileInfoEntity.md5,idOrMd5).or(FileInfoEntity.id,idOrMd5).single();
+        return createQuery().where(FileInfoEntity.md5, idOrMd5).or(FileInfoEntity.id, idOrMd5).single();
     }
 }
