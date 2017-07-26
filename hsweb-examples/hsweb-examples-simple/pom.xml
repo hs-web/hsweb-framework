@@ -90,8 +90,18 @@
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-spring-boot-starter</artifactId>
             <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-tomcat</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-undertow</artifactId>
+        </dependency>
         <!--权限管理-->
         <dependency>
             <groupId>org.hswebframework.web</groupId>
@@ -100,15 +110,21 @@
         </dependency>
         <!--使用shiro实现权限控制-->
         <!--<dependency>-->
-            <!--<groupId>org.hswebframework.web</groupId>-->
-            <!--<artifactId>hsweb-authorization-shiro</artifactId>-->
-            <!--<version>${project.version}</version>-->
+        <!--<groupId>org.hswebframework.web</groupId>-->
+        <!--<artifactId>hsweb-authorization-shiro</artifactId>-->
+        <!--<version>${project.version}</version>-->
         <!--</dependency>-->
 
         <!--组织架构-->
         <dependency>
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-system-organizational-starter</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.hswebframework.web</groupId>
+            <artifactId>hsweb-system-file-starter</artifactId>
             <version>${project.version}</version>
         </dependency>
 

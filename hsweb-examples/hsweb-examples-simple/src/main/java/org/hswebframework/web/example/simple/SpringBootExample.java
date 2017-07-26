@@ -89,10 +89,12 @@ public class SpringBootExample
                 ServletResponse.class,
                 InputStream.class,
                 OutputStream.class,
-                MultipartFile.class
+                MultipartFile.class,
+                MultipartFile[].class
         };
         return loggerInfo -> System.out.println("有请求啦:" + JSON.toJSONString(loggerInfo.toSimpleMap(obj -> {
-            if (Stream.of(excludes).anyMatch(aClass -> aClass.isInstance(obj))) return obj.getClass().getName();
+            if (Stream.of(excludes).anyMatch(aClass -> aClass.isInstance(obj)))
+                return obj.getClass().getName();
             return JSON.toJSONString(obj);
         })));
     }
@@ -118,7 +120,6 @@ public class SpringBootExample
                 .version("3.0")
                 .build();
     }
-
 
 
     @Autowired

@@ -10,6 +10,11 @@ spring:
        driver-class-name : org.h2.Driver
     cache:
        type: simple
+    http:
+      multipart:
+        enabled: true
+        max-file-size: 100Mb
+
 hsweb:
     authorize:
 #      filters:
