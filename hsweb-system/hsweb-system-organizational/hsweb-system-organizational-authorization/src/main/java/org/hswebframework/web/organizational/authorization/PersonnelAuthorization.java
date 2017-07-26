@@ -34,9 +34,9 @@ public interface PersonnelAuthorization extends Serializable {
     Personnel getPersonnel();
 
     /**
-     * @return 人员所在地区ID, 只返回根节点, 永远不会返回{@code null}
+     * @return 人员所在行政区域ID, 只返回根节点, 永远不会返回{@code null}
      */
-    Set<TreeNode<String>> getAreaIds();
+    Set<TreeNode<String>> getDistrictIds();
 
     /**
      * @return 人员所在机构ID, 只返回根节点, 永远不会返回{@code null}
@@ -56,8 +56,8 @@ public interface PersonnelAuthorization extends Serializable {
     /**
      * @return 根地区ID
      */
-    default Set<String> getRootAreaId() {
-        return getAreaIds().stream().map(TreeNode::getValue).collect(Collectors.toSet());
+    default Set<String> getRootDistrictId() {
+        return getDistrictIds().stream().map(TreeNode::getValue).collect(Collectors.toSet());
     }
 
     /**
@@ -84,8 +84,8 @@ public interface PersonnelAuthorization extends Serializable {
     /**
      * @return 所有地区ID
      */
-    default Set<String> getAllAreaId() {
-        return getAreaIds().stream().map(TreeNode::getAllValue).flatMap(List::stream).collect(Collectors.toSet());
+    default Set<String> getAllDistrictId() {
+        return getDistrictIds().stream().map(TreeNode::getAllValue).flatMap(List::stream).collect(Collectors.toSet());
     }
 
     /**

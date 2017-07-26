@@ -14,7 +14,7 @@ import java.util.Set;
  */
 public class SimplePersonnelAuthorization implements PersonnelAuthorization {
     private Personnel             personnel;
-    private Set<TreeNode<String>> areaIds;
+    private Set<TreeNode<String>> districtIds;
     private Set<TreeNode<String>> orgIds;
     private Set<TreeNode<String>> positionIds;
     private Set<TreeNode<String>> departmentIds;
@@ -29,13 +29,13 @@ public class SimplePersonnelAuthorization implements PersonnelAuthorization {
     }
 
     @Override
-    public Set<TreeNode<String>> getAreaIds() {
-        if (areaIds == null) areaIds = Collections.emptySet();
-        return areaIds;
+    public Set<TreeNode<String>> getDistrictIds() {
+        if (districtIds == null) districtIds = Collections.emptySet();
+        return districtIds;
     }
 
-    public void setAreaIds(Set<TreeNode<String>> areaIds) {
-        this.areaIds = areaIds;
+    public void setDistrictIds(Set<TreeNode<String>> districtIds) {
+        this.districtIds = districtIds;
     }
 
     @Override
