@@ -24,10 +24,10 @@ import org.hswebframework.web.entity.authorization.UserEntity;
 import org.hswebframework.web.entity.authorization.bind.BindRoleUserEntity;
 import org.hswebframework.web.entity.organizational.*;
 import org.hswebframework.web.id.IDGenerator;
+import org.hswebframework.web.organizational.authorization.Personnel;
 import org.hswebframework.web.organizational.authorization.PersonnelAuthorization;
 import org.hswebframework.web.organizational.authorization.PersonnelAuthorizationManager;
 import org.hswebframework.web.organizational.authorization.TreeNode;
-import org.hswebframework.web.organizational.authorization.simple.SimplePersonnel;
 import org.hswebframework.web.organizational.authorization.simple.SimplePersonnelAuthorization;
 import org.hswebframework.web.service.DefaultDSLQueryService;
 import org.hswebframework.web.service.EnableCacheGenericEntityService;
@@ -219,12 +219,14 @@ public class SimplePersonService extends EnableCacheGenericEntityService<PersonE
         PersonEntity entity = selectByPk(personId);
         assertNotNull(entity);
 
-        SimplePersonnel personnel = new SimplePersonnel();
-        personnel.setId(entity.getId());
-        personnel.setEmail(entity.getEmail());
-        personnel.setName(entity.getName());
-        personnel.setPhone(entity.getPhone());
-        personnel.setPhoto(entity.getPhoto());
+//        SimplePersonnel personnel = new SimplePersonnel();
+//        personnel.setId(entity.getId());
+//        personnel.setEmail(entity.getEmail());
+//        personnel.setName(entity.getName());
+//        personnel.setPhone(entity.getPhone());
+//        personnel.setPhoto(entity.getPhoto());
+        Personnel personnel = entityFactory.newInstance(Personnel.class, SimplePositionEntity.class);
+        entityFactory.copyProperties(entity, personnel);
         authorization.setPersonnel(personnel);
 
         // 获取用户的职位ID集合(多个职位)

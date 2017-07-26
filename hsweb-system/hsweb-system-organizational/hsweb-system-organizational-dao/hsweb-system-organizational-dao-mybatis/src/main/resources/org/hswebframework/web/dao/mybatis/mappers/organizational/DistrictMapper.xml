@@ -1,50 +1,35 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!--
-  ~ Copyright 2016 http://www.hswebframework.org
-  ~
-  ~ Licensed under the Apache License, Version 2.0 (the "License");
-  ~ you may not use this file except in compliance with the License.
-  ~ You may obtain a copy of the License at
-  ~
-  ~       http://www.apache.org/licenses/LICENSE-2.0
-  ~
-  ~ Unless required by applicable law or agreed to in writing, software
-  ~ distributed under the License is distributed on an "AS IS" BASIS,
-  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  ~  See the License for the specific language governing permissions and
-  ~  limitations under the License.
-  ~
-  -->
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="org.hswebframework.web.dao.organizational.OrganizationalDao">
-    <resultMap id="OrganizationalResultMap" type="org.hswebframework.web.entity.organizational.OrganizationalEntity">
+<mapper namespace="org.hswebframework.web.dao.organizational.DistrictDao">
+    <resultMap id="DistrictResultMap" type="org.hswebframework.web.entity.organizational.DistrictEntity">
         <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
         <result property="name" column="name" javaType="String" jdbcType="VARCHAR"/>
         <result property="fullName" column="full_name" javaType="String" jdbcType="VARCHAR"/>
+        <result property="levelName" column="level_name" javaType="String" jdbcType="VARCHAR"/>
+        <result property="levelCode" column="level_code" javaType="String" jdbcType="VARCHAR"/>
         <result property="code" column="code" javaType="String" jdbcType="VARCHAR"/>
-        <result property="optionalRoles" column="optional_roles" javaType="java.util.List" jdbcType="CLOB"/>
         <result property="parentId" column="parent_id" javaType="String" jdbcType="VARCHAR"/>
         <result property="path" column="path" javaType="String" jdbcType="VARCHAR"/>
-        <result property="sortIndex" column="sort_index" javaType="Long" jdbcType="DECIMAL"/>
+        <result property="describe" column="describe" javaType="String" jdbcType="VARCHAR"/>
         <result property="status" column="status" javaType="Byte" jdbcType="DECIMAL"/>
-        <result property="level" column="level" javaType="Integer" jdbcType="DECIMAL"/>
+        <result property="sortIndex" column="sort_index" javaType="Long" jdbcType="DECIMAL"/>
     </resultMap>
 
     <!--用于动态生成sql所需的配置-->
     <sql id="config">
-        <bind name="resultMapId" value="'OrganizationalResultMap'"/>
-        <bind name="tableName" value="'S_ORGANIZATION'"/>
+        <bind name="resultMapId" value="'DistrictResultMap'"/>
+        <bind name="tableName" value="'s_district'"/>
     </sql>
 
-    <insert id="insert" parameterType="org.hswebframework.web.entity.organizational.OrganizationalEntity">
+    <insert id="insert" parameterType="org.hswebframework.web.entity.organizational.DistrictEntity">
         <include refid="config"/>
         <include refid="BasicMapper.buildInsertSql"/>
     </insert>
 
     <delete id="deleteByPk" parameterType="String">
-        delete from S_ORGANIZATION where u_id =#{id}
+        delete from s_district where u_id =#{id}
     </delete>
 
     <delete id="delete" parameterType="org.hswebframework.web.commons.entity.Entity">
@@ -57,7 +42,7 @@
         <include refid="BasicMapper.buildUpdateSql"/>
     </update>
 
-    <select id="query" parameterType="org.hswebframework.web.commons.entity.Entity" resultMap="OrganizationalResultMap">
+    <select id="query" parameterType="org.hswebframework.web.commons.entity.Entity" resultMap="DistrictResultMap">
         <include refid="config"/>
         <include refid="BasicMapper.buildSelectSql"/>
     </select>

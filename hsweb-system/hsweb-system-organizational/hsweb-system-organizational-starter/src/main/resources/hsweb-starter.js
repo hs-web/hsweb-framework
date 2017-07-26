@@ -36,11 +36,26 @@ var versions = [
 var JDBCType = java.sql.JDBCType;
 function install(context) {
     var database = context.database;
+    database.createOrAlter("s_district")
+        .addColumn().name("u_id").alias("id").comment("ID").jdbcType(java.sql.JDBCType.VARCHAR).length(32).primaryKey().commit()
+        .addColumn().name("name").alias("name").comment("区域名称,如重庆市").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
+        .addColumn().name("full_name").alias("fullName").comment("区域全程,如重庆市江津区").jdbcType(java.sql.JDBCType.VARCHAR).length(512).commit()
+        .addColumn().name("level_name").alias("levelName").comment("区域级别名称,如:省").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
+        .addColumn().name("level_code").alias("levelCode").comment("区域级别编码,如:province").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
+        .addColumn().name("code").alias("code").comment("行政区域代码,如:500000").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
+        .addColumn().name("parent_id").alias("parentId").comment("父级行政区域").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
+        .addColumn().name("path").alias("path").comment("树路径,如: asb3-lsat").jdbcType(java.sql.JDBCType.VARCHAR).length(3000).commit()
+        .addColumn().name("describe").alias("describe").comment("说明").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
+        .addColumn().name("status").alias("status").comment("状态").jdbcType(java.sql.JDBCType.DECIMAL).length(65535, 32767).commit()
+        .addColumn().name("sort_index").alias("sortIndex").comment("排序索引").jdbcType(java.sql.JDBCType.DECIMAL).length(65535, 32767).commit()
+        .comment("行政区域").commit();
+
     database.createOrAlter("s_organization")
         .addColumn().name("u_id").alias("id").comment("ID").jdbcType(java.sql.JDBCType.VARCHAR).length(32).primaryKey().commit()
         .addColumn().name("name").alias("name").comment("名称").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
         .addColumn().name("full_name").alias("fullName").comment("全称").jdbcType(java.sql.JDBCType.VARCHAR).length(256).commit()
         .addColumn().name("code").alias("code").comment("机构编码").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
+        .addColumn().name("district_id").alias("districtId").comment("所在行政区域ID").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
         .addColumn().name("optional_roles").alias("optionalRoles").comment("可选角色").jdbcType(java.sql.JDBCType.CLOB).commit()
         .addColumn().name("parent_id").alias("parentId").comment("上级机构id").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
         .addColumn().name("path").alias("path").comment("树定位码").jdbcType(java.sql.JDBCType.VARCHAR).length(1024).commit()

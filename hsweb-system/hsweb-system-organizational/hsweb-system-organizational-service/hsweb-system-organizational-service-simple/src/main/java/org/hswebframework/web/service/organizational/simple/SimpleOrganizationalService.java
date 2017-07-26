@@ -16,9 +16,11 @@
  */
 package org.hswebframework.web.service.organizational.simple;
 
+import com.alibaba.fastjson.JSON;
 import org.hswebframework.web.commons.entity.GenericEntity;
 import org.hswebframework.web.dao.organizational.OrganizationalDao;
 import org.hswebframework.web.entity.organizational.OrganizationalEntity;
+import org.hswebframework.web.entity.organizational.SimpleOrganizationalEntity;
 import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.service.AbstractTreeSortService;
 import org.hswebframework.web.service.GenericEntityService;

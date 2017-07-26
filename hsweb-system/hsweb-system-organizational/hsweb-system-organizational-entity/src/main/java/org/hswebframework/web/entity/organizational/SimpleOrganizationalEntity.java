@@ -42,13 +42,13 @@ public class SimpleOrganizationalEntity extends SimpleTreeSortSupportEntity<Stri
     private String areaId;
 
     @Override
-    public String getAreaId() {
+    public String getDistrictId() {
         return areaId;
     }
 
     @Override
-    public void setAreaId(String areaId) {
-        this.areaId = areaId;
+    public void setDistrictId(String districtId) {
+        this.areaId = districtId;
     }
 
     /**
