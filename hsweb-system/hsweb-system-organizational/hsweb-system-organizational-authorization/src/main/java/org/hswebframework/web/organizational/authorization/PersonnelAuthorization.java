@@ -35,7 +35,6 @@ public interface PersonnelAuthorization extends Serializable {
     Personnel getPersonnel();
 
     /**
-     *
      * @return 人员关系信息
      */
     Relations getRelations();
