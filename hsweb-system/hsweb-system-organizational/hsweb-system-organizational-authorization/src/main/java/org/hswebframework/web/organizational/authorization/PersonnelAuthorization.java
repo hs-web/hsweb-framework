@@ -38,7 +38,7 @@ public interface PersonnelAuthorization extends Serializable {
      *
      * @return 人员关系信息
      */
-    Relations getPersonRelations();
+    Relations getRelations();
 
     /**
      * @return 人员所在行政区域ID, 只返回根节点, 永远不会返回{@code null}
