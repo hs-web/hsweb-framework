@@ -28,6 +28,9 @@ import org.hswebframework.web.organizational.authorization.Personnel;
 import org.hswebframework.web.organizational.authorization.PersonnelAuthorization;
 import org.hswebframework.web.organizational.authorization.PersonnelAuthorizationManager;
 import org.hswebframework.web.organizational.authorization.TreeNode;
+import org.hswebframework.web.organizational.authorization.relation.Relation;
+import org.hswebframework.web.organizational.authorization.relation.SimpleRelation;
+import org.hswebframework.web.organizational.authorization.relation.SimpleRelations;
 import org.hswebframework.web.organizational.authorization.simple.SimplePersonnelAuthorization;
 import org.hswebframework.web.service.DefaultDSLQueryService;
 import org.hswebframework.web.service.EnableCacheGenericEntityService;
@@ -79,6 +82,9 @@ public class SimplePersonService extends EnableCacheGenericEntityService<PersonE
 
     @Autowired(required = false)
     private UserService userService;
+
+    @Autowired
+    private RelationInfoDao relationInfoDao;
 
     @Override
     protected IDGenerator<String> getIDGenerator() {
@@ -219,12 +225,6 @@ public class SimplePersonService extends EnableCacheGenericEntityService<PersonE
         PersonEntity entity = selectByPk(personId);
         assertNotNull(entity);
 
-//        SimplePersonnel personnel = new SimplePersonnel();
-//        personnel.setId(entity.getId());
-//        personnel.setEmail(entity.getEmail());
-//        personnel.setName(entity.getName());
-//        personnel.setPhone(entity.getPhone());
-//        personnel.setPhoto(entity.getPhoto());
         Personnel personnel = entityFactory.newInstance(Personnel.class, SimplePositionEntity.class);
         entityFactory.copyProperties(entity, personnel);
         authorization.setPersonnel(personnel);
@@ -256,6 +256,27 @@ public class SimplePersonService extends EnableCacheGenericEntityService<PersonE
             }
         });
         authorization.setPositionIds(transformationTreeNode(null, positionEntities));
+
+        //获取关系
+        List<RelationInfoEntity> relationInfoList = DefaultDSLQueryService.createQuery(relationInfoDao)
+                .where(RelationInfoEntity.relationFrom, personId)
+                .or(RelationInfoEntity.relationTo, personId)
+                .listNoPaging();
+        List<Relation> relations = relationInfoList.stream()
+                .map(info -> {
+                    SimpleRelation relation = new SimpleRelation();
+                    relation.setType(info.getRelationTypeFrom());
+                    relation.setTarget(info.getRelationTo());
+                    //info.getRelationId() ->
+                    //relation.setName(info.getRelationId());
+                    if (personId.equals(info.getRelationFrom())) {
+                        relation.setDirection(Relation.Direction.POSITIVE);
+                    } else {
+                        relation.setDirection(Relation.Direction.REVERSE);
+                    }
+                    return relation;
+                }).collect(Collectors.toList());
+        authorization.setRelations(new SimpleRelations(relations));
         return authorization;
     }
 

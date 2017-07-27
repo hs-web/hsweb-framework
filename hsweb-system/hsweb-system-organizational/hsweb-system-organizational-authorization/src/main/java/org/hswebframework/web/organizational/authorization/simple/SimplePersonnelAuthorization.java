@@ -19,6 +19,7 @@ public class SimplePersonnelAuthorization implements PersonnelAuthorization {
     private Set<TreeNode<String>> orgIds;
     private Set<TreeNode<String>> positionIds;
     private Set<TreeNode<String>> departmentIds;
+    private Relations             relations;
 
     @Override
     public Personnel getPersonnel() {
@@ -41,9 +42,11 @@ public class SimplePersonnelAuthorization implements PersonnelAuthorization {
 
     @Override
     public Relations getRelations() {
-        // TODO: 2017/7/26
-        throw new  UnsupportedOperationException("not support yet");
+        return relations;
+    }
 
+    public void setRelations(Relations relations) {
+        this.relations = relations;
     }
 
     @Override
