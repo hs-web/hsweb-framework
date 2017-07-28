@@ -105,6 +105,23 @@ function install(context) {
         .addColumn().name("position_id").alias("positionId").comment("职位id").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
         .comment("人员职位关联").commit();
 
+    database.createOrAlter("s_relation_define")
+        .addColumn().name("u_id").alias("id").comment("ID").jdbcType(java.sql.JDBCType.VARCHAR).length(32).primaryKey().commit()
+        .addColumn().name("name").alias("name").comment("关系名称").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
+        .addColumn().name("type_id").alias("typeId").comment("关系类型").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
+        .addColumn().name("status").alias("status").comment("状态").jdbcType(java.sql.JDBCType.NUMERIC).commit()
+        .comment("关系定义").commit();
+
+    database.createOrAlter("s_relation_info")
+        .addColumn().name("u_id").alias("id").comment("ID").jdbcType(java.sql.JDBCType.VARCHAR).length(32).primaryKey().commit()
+        .addColumn().name("relation_id").alias("relationId").comment("关系定义id").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
+        .addColumn().name("relation_from").alias("relationFrom").comment("关系从").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
+        .addColumn().name("relation_to").alias("relationTo").comment("关系至").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
+        .addColumn().name("relation_type_from").alias("relationTypeFrom").comment("关系类型从,如:人员").jdbcType(java.sql.JDBCType.VARCHAR).length(64).commit()
+        .addColumn().name("relation_type_to").alias("relationTypeTo").comment("关系类型至,如:部门").jdbcType(java.sql.JDBCType.VARCHAR).length(64).commit()
+        .addColumn().name("status").alias("status").comment("状态").jdbcType(java.sql.JDBCType.NUMERIC).commit()
+        .comment("关系信息").commit();
+
 }
 
 //设置依赖
