@@ -147,6 +147,7 @@ public class SpringBootExample
         SpringApplication.run(SpringBootExample.class);
     }
 
+    // main
     //    @Override
     public void run(String... strings) throws Exception {
         //只能查询自己创建的数据
