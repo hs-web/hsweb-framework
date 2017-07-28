@@ -31,6 +31,7 @@ import org.hswebframework.web.organizational.authorization.TreeNode;
 import org.hswebframework.web.organizational.authorization.relation.Relation;
 import org.hswebframework.web.organizational.authorization.relation.SimpleRelation;
 import org.hswebframework.web.organizational.authorization.relation.SimpleRelations;
+import org.hswebframework.web.organizational.authorization.simple.SimplePersonnel;
 import org.hswebframework.web.organizational.authorization.simple.SimplePersonnelAuthorization;
 import org.hswebframework.web.service.DefaultDSLQueryService;
 import org.hswebframework.web.service.EnableCacheGenericEntityService;
@@ -225,7 +226,7 @@ public class SimplePersonService extends EnableCacheGenericEntityService<PersonE
         PersonEntity entity = selectByPk(personId);
         assertNotNull(entity);
 
-        Personnel personnel = entityFactory.newInstance(Personnel.class, SimplePositionEntity.class);
+        Personnel personnel = entityFactory.newInstance(Personnel.class, SimplePersonnel.class);
         entityFactory.copyProperties(entity, personnel);
         authorization.setPersonnel(personnel);
 
@@ -268,7 +269,7 @@ public class SimplePersonService extends EnableCacheGenericEntityService<PersonE
                     relation.setType(info.getRelationTypeFrom());
                     relation.setTarget(info.getRelationTo());
                     //info.getRelationId() ->
-                    //relation.setName(info.getRelationId());
+                    relation.setRelation(info.getRelationId());
                     if (personId.equals(info.getRelationFrom())) {
                         relation.setDirection(Relation.Direction.POSITIVE);
                     } else {

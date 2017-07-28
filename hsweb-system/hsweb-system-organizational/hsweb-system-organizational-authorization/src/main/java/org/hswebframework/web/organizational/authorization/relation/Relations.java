@@ -35,10 +35,24 @@ public interface Relations extends Serializable {
      * @return 是否存在关系
      */
     default boolean has(String relation, String type, String to, Relation.Direction direction) {
-        return getAllRelations().stream().anyMatch(rel ->
+        return getAll().stream().anyMatch(rel ->
                 rel.getRelation().equals(relation)
                         && rel.getType().equals(type)
                         && rel.getTarget().equals(to)
+                        && rel.matchDirection(direction));
+    }
+
+    default boolean has(String relation, String type, Relation.Direction direction) {
+        return getAll().stream().anyMatch(rel ->
+                rel.getRelation().equals(relation)
+                        && rel.getType().equals(type)
+                        && rel.matchDirection(direction));
+    }
+
+
+    default boolean has(String relation, Relation.Direction direction) {
+        return getAll().stream().anyMatch(rel ->
+                rel.getRelation().equals(relation)
                         && rel.matchDirection(direction));
     }
 
@@ -54,19 +68,63 @@ public interface Relations extends Serializable {
      *
      * @see this#has(String, String, String, Relation.Direction)
      */
-    default boolean has(String relation, String type, String to) {
+    default boolean has(String relation) {
+        return !findAll(relation).isEmpty();
+    }
+
+    default boolean hasRev(String relation, String type, String to) {
+        return has(relation, type, to, Relation.Direction.REVERSE);
+    }
+
+    default boolean hasPos(String relation, String type, String to) {
         return has(relation, type, to, Relation.Direction.POSITIVE);
+    }
+
+    default boolean hasRev(String relation, String type) {
+        return has(relation, type, Relation.Direction.REVERSE);
+    }
+
+    default boolean hasPos(String relation, String type) {
+        return has(relation, type, Relation.Direction.POSITIVE);
+    }
+
+    default boolean hasPos(String relation) {
+        return has(relation, Relation.Direction.POSITIVE);
+    }
+
+    default boolean hasRev(String relation) {
+        return has(relation, Relation.Direction.REVERSE);
     }
 
     /**
      * 获取指定关系的全部关系信息
      *
-     * @param relation 关系标识
+     * @param relation 关系标识,如: leader
      * @return 关系信息集合，如果关系不存在，返回空集合
-     * @see this#findRelations(Predicate)
+     * @see this#find(Predicate)
      */
-    default List<Relation> getRelations(String relation) {
-        return findRelations(rel -> rel.getRelation().equals(relation));
+    default List<Relation> findAll(String relation) {
+        return find(rel -> rel.getRelation().equals(relation));
+    }
+
+    /**
+     * 获取正向关系,如: 我是xxx的relation
+     *
+     * @param relation 关系标识,如: leader
+     * @return 关系信息集合，如果关系不存在，返回空集合
+     */
+    default List<Relation> findRev(String relation) {
+        return find(relation, Relation.Direction.REVERSE);
+    }
+
+    /**
+     * 获取反向关系,如: xxx是我的relation
+     *
+     * @param relation 关系标识,如: leader
+     * @return 关系信息集合，如果关系不存在，返回空集合
+     */
+    default List<Relation> findPos(String relation) {
+        return find(relation, Relation.Direction.REVERSE);
     }
 
     /**
@@ -76,8 +134,8 @@ public interface Relations extends Serializable {
      * @param direction 关系方向
      * @return 关系信息集合，如果关系不存在，返回空集合
      */
-    default List<Relation> getRelations(String relation, Relation.Direction direction) {
-        return findRelations(rel -> rel.getRelation().equals(relation) && rel.matchDirection(direction));
+    default List<Relation> find(String relation, Relation.Direction direction) {
+        return find(rel -> rel.getRelation().equals(relation) && rel.matchDirection(direction));
     }
 
     /**
@@ -86,10 +144,34 @@ public interface Relations extends Serializable {
      * @param relation 关系标识，例如: leader
      * @param type     关系类型,例如：person
      * @return 关系信息集合，如果关系不存在，返回空集合
-     * @see this#findRelations(Predicate)
+     * @see this#find(Predicate)
      */
-    default List<Relation> getRelations(String relation, String type) {
-        return findRelations(rel -> rel.getRelation().equals(relation) && rel.getType().equals(type));
+    default List<Relation> findAll(String relation, String type) {
+        return find(rel -> rel.getRelation().equals(relation) && rel.getType().equals(type));
+    }
+
+    /**
+     * 获取指定关系和类型以及方向<b>反向关系</b>
+     *
+     * @param relation 关系标识，例如: leader
+     * @param type     关系类型,例如：person
+     * @return 关系信息集合，如果关系不存在，返回空集合
+     * @see this#find(String, String, Relation.Direction)
+     */
+    default List<Relation> findRev(String relation, String type) {
+        return find(relation, type, Relation.Direction.REVERSE);
+    }
+
+    /**
+     * 获取指定关系和类型以及方向<b>正向关系</b>
+     *
+     * @param relation 关系标识，例如: leader
+     * @param type     关系类型,例如：person
+     * @return 关系信息集合，如果关系不存在，返回空集合
+     * @see this#find(String, String, Relation.Direction)
+     */
+    default List<Relation> findPos(String relation, String type) {
+        return find(relation, type, Relation.Direction.POSITIVE);
     }
 
     /**
@@ -99,38 +181,37 @@ public interface Relations extends Serializable {
      * @param type      关系类型,例如：person
      * @param direction 关系方向
      * @return 关系信息集合，如果关系不存在，返回空集合
-     * @see this#findRelations(Predicate)
+     * @see this#find(Predicate)
      */
-    default List<Relation> getRelations(String relation, String type, Relation.Direction direction) {
-        return findRelations(rel ->
+    default List<Relation> find(String relation, String type, Relation.Direction direction) {
+        return find(rel ->
                 rel.getRelation().equals(relation)
                         && rel.getType().equals(type)
                         && rel.matchDirection(direction));
     }
 
     /**
-     * @see this#getRelations(String, String, Relation.Direction)
+     * @see this#find(String, String, Relation.Direction)
      */
-    default List<Relation> getRelations(String relation, String type,String direction) {
-        return getRelations(relation,type, Relation.Direction.fromString(direction));
+    default List<Relation> find(String relation, String type, String direction) {
+        return find(relation, type, Relation.Direction.fromString(direction));
     }
 
     /**
      * 查找关系
      * <pre>
-     *     findRelations(rel->rel.getType().equals("person"))
+     *     findAll(rel->rel.getType().equals("person"))
      * </pre>
      *
      * @param predicate 查找的判断逻辑
      * @return 满足条件的关系信息集合，如果全部不满足则返回空集合
      */
-    default List<Relation> findRelations(Predicate<Relation> predicate) {
-        return getAllRelations().stream().filter(predicate).collect(Collectors.toList());
+    default List<Relation> find(Predicate<Relation> predicate) {
+        return getAll().stream().filter(predicate).collect(Collectors.toList());
     }
 
     /**
-     *
      * @return 全部关系信息，如果一个也没有返回空集合
      */
-    List<Relation> getAllRelations();
+    List<Relation> getAll();
 }

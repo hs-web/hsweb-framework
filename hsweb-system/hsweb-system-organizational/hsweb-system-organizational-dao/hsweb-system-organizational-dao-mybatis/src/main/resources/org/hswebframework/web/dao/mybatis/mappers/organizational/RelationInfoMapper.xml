@@ -3,14 +3,14 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.hswebframework.web.dao.organizational.RelationInfoDao">
-    <resultMap id="RelationInfoResultMap" type="org.hswebframework.web.entity.organizational.SimpleRelationInfoEntity">
-              <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
-            <result property="relationFrom" column="relation_from" javaType="String" jdbcType="VARCHAR"/>
-            <result property="relationId" column="relation_id" javaType="String" jdbcType="VARCHAR"/>
-            <result property="relationTo" column="relation_to" javaType="String" jdbcType="VARCHAR"/>
-            <result property="relationTypeFrom" column="relation_type_from" javaType="String" jdbcType="VARCHAR"/>
-            <result property="relationTypeTo" column="relation_type_to" javaType="String" jdbcType="VARCHAR"/>
-            <result property="status" column="status" javaType="Byte" jdbcType="DECIMAL"/>
+    <resultMap id="RelationInfoResultMap" type="org.hswebframework.web.entity.organizational.RelationInfoEntity">
+        <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
+        <result property="relationFrom" column="relation_from" javaType="String" jdbcType="VARCHAR"/>
+        <result property="relationId" column="relation_id" javaType="String" jdbcType="VARCHAR"/>
+        <result property="relationTo" column="relation_to" javaType="String" jdbcType="VARCHAR"/>
+        <result property="relationTypeFrom" column="relation_type_from" javaType="String" jdbcType="VARCHAR"/>
+        <result property="relationTypeTo" column="relation_type_to" javaType="String" jdbcType="VARCHAR"/>
+        <result property="status" column="status" javaType="Byte" jdbcType="DECIMAL"/>
     </resultMap>
 
     <!--用于动态生成sql所需的配置-->
@@ -18,8 +18,8 @@
         <bind name="resultMapId" value="'RelationInfoResultMap'"/>
         <bind name="tableName" value="'s_relation_info'"/>
     </sql>
-  
-    <insert id="insert" parameterType="org.hswebframework.web.entity.organizational.SimpleRelationInfoEntity" >
+
+    <insert id="insert" parameterType="org.hswebframework.web.entity.organizational.RelationInfoEntity">
         <include refid="config"/>
         <include refid="BasicMapper.buildInsertSql"/>
     </insert>

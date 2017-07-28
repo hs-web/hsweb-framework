@@ -37,7 +37,12 @@ public class TestController implements QueryController<UserEntity, String, Query
     @GetMapping("/test1")
     @Authorize(action = "query")
     public ResponseMessage testSimple(Authentication authentication) {
-        return ResponseMessage.ok(authentication).exclude(Authentication.class, "attributes");
+        return ResponseMessage.ok(
+                PersonnelAuthorization.current()
+                        //查找人员关系
+                        .map(PersonnelAuthorization::getRelations)
+                        .map(relations -> relations.findPos("leader"))
+                        .orElse(null));
     }
 
     @GetMapping("/test2")

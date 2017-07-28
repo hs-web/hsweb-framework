@@ -35,7 +35,29 @@ public interface PersonnelAuthorization extends Serializable {
     Personnel getPersonnel();
 
     /**
+     * 获取人员的关系信息
+     * <pre>
+     *     boolean isLeader = PersonnelAuthorization
+     *     .current().get()
+     *     .getRelations()
+     *     // 和张三的人员为leader关系, 我是张三的leader
+     *     .has("leader","人员","张三");
+     *     //我是开发部的leader
+     *     //.has("leader","部门","开发部");
+     *     //反转关系: 张三是我的leader
+     *     //.has("leader","人员","张三","PRE");
+     * </pre>
+     * <pre>
+     *     List<Relation> relations= PersonnelAuthorization.current()
+     *     //查找用户关系
+     *     .map(PersonnelAuthorization::getRelations)
+     *     .map(relations -> relations.findAll("leader"))
+     *     .orElse(null)
+     * </pre>
+     *
      * @return 人员关系信息
+     * @see Relations
+     * @see org.hswebframework.web.organizational.authorization.relation.Relation
      */
     Relations getRelations();
 

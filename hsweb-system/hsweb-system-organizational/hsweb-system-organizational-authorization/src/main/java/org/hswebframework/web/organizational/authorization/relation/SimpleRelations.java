@@ -8,23 +8,23 @@ import java.util.Objects;
  * @author zhouhao
  */
 public class SimpleRelations implements Relations {
-    private List<Relation> relations;
+    private List<Relation> all;
 
     @Override
-    public List<Relation> getAllRelations() {
-        if (null == relations) relations = new ArrayList<>();
-        return relations;
+    public List<Relation> getAll() {
+        if (null == all) all = new ArrayList<>();
+        return all;
     }
 
-    public void setRelations(List<Relation> relations) {
-        Objects.requireNonNull(relations);
-        this.relations = relations;
+    public void setAll(List<Relation> all) {
+        Objects.requireNonNull(all);
+        this.all = all;
     }
 
     public SimpleRelations() {
     }
 
-    public SimpleRelations(List<Relation> relations) {
-        this.relations = relations;
+    public SimpleRelations(List<Relation> all) {
+        this.all = all;
     }
 }
