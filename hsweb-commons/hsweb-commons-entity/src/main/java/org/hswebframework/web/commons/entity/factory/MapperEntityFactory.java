@@ -127,7 +127,7 @@ public class MapperEntityFactory implements EntityFactory {
     }
 
     @Override
-    public <T> T newInstance(Class<T> beanClass, Class<T> defaultClass) {
+    public <T> T newInstance(Class<T> beanClass, Class<? extends T> defaultClass) {
         if (beanClass == null) return null;
         Mapper<T> mapper = realTypeMapper.get(beanClass);
         if (mapper != null) return mapper.getInstanceGetter().get();

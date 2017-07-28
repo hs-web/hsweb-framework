@@ -57,7 +57,7 @@ public interface EntityFactory {
      * @param <T>          类型
      * @return 实例
      */
-    <T> T newInstance(Class<T> entityClass, Class<T> defaultClass);
+    <T> T newInstance(Class<T> entityClass, Class<? extends T> defaultClass);
 
     /**
      * 创建实体并设置默认的属性
