@@ -8,17 +8,16 @@ import org.flowable.bpmn.converter.BpmnXMLConverter;
 import org.flowable.bpmn.model.BpmnModel;
 import org.flowable.editor.constants.ModelDataJsonConstants;
 import org.flowable.editor.language.json.converter.BpmnJsonConverter;
+import org.flowable.engine.impl.persistence.entity.ProcessDefinitionEntity;
 import org.flowable.engine.repository.DeploymentBuilder;
 import org.flowable.engine.repository.ProcessDefinition;
 import org.flowable.engine.repository.ProcessDefinitionQuery;
 import org.hsweb.ezorm.core.PropertyWrapper;
 import org.hsweb.ezorm.core.SimplePropertyWrapper;
 import org.hsweb.ezorm.core.param.TermType;
-import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.commons.entity.PagerResult;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.controller.message.ResponseMessage;
-import org.hswebframework.web.logging.AccessLogger;
 import org.hswebframework.web.workflow.flowable.utils.FlowableAbstract;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -79,7 +78,8 @@ public class BpmDeploymentController extends FlowableAbstract {
         int total = (int) processDefinitionQuery.count();
         param.rePaging(total);
         List<ProcessDefinition> models = processDefinitionQuery.listPage(param.getPageIndex(), param.getPageSize() * (param.getPageIndex() + 1));
-        return ResponseMessage.ok(new PagerResult<>(total, models)).exclude("identityLinks");
+        return ResponseMessage.ok(new PagerResult<>(total, models))
+                .exclude(ProcessDefinitionEntity.class,"identityLinks");
     }
 
     /**
