@@ -1,7 +1,7 @@
 package org.hswebframework.web.workflow.flowable.utils;
 
-import org.flowable.engine.ProcessEngineConfiguration;
-import org.flowable.engine.impl.cfg.StandaloneProcessEngineConfiguration;
+import org.activiti.engine.ProcessEngineConfiguration;
+import org.activiti.engine.impl.cfg.StandaloneProcessEngineConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -15,6 +15,7 @@ public class FlowableAutoConfiguration {
     public ProcessEngineConfiguration processEngineConfiguration(){
         ProcessEngineConfiguration processEngineConfiguration = new StandaloneProcessEngineConfiguration()
                 .setAsyncExecutorActivate(false)
+                .setJobExecutorActivate(false)
                 .setActivityFontName("宋体")
                 .setLabelFontName("宋体")
                 .setAnnotationFontName("宋体");
