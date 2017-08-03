@@ -48,7 +48,7 @@ public class CustomUserEntityManager extends UserEntityManager {
 
     @Override
     public List<org.activiti.engine.identity.User> findUserByQueryCriteria(UserQueryImpl query, Page page) {
-        throw new RuntimeException("not implement method.");
+        throw new RuntimeException("not implement method..");
     }
 
     @Override
