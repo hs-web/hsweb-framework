@@ -16,13 +16,14 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Service
 public class CustomUserEntityManager extends UserEntityManager {
     protected Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    @SuppressWarnings("all")
-    @Autowired
     private UserService userService;
+
+    public CustomUserEntityManager(UserService userService) {
+        this.userService = userService;
+    }
 
     @Override
     public UserEntity findUserById(final String userId) {
@@ -42,7 +43,7 @@ public class CustomUserEntityManager extends UserEntityManager {
             return null;
 
         List<RoleEntity> sysRoles = userService.getUserRole(userId);
-        return  ActivitiUserUtil.toActivitiGroups(sysRoles);
+        return ActivitiUserUtil.toActivitiGroups(sysRoles);
 
     }
 

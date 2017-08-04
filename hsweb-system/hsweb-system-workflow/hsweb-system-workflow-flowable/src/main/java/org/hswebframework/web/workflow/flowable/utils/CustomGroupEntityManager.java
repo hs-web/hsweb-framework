@@ -16,11 +16,13 @@ import java.util.List;
 /**
  * Created by Administrator on 2016/3/19 0019.
  */
-@Service
 public class CustomGroupEntityManager extends GroupEntityManager {
 
-    @Autowired
     private UserService userService;
+
+    public CustomGroupEntityManager(UserService userService) {
+        this.userService = userService;
+    }
 
     public GroupEntity findGroupById(final String id) {
         if (id == null)

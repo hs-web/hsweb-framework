@@ -89,18 +89,24 @@
         <dependency>
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-authorization-api</artifactId>
-            <version>3.0-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-commons-entity</artifactId>
-            <version>3.0-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-commons-controller</artifactId>
-            <version>3.0-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.hswebframework.web</groupId>
+            <artifactId>hsweb-system-authorization-service-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
@@ -126,18 +132,15 @@
         <dependency>
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-spring-boot-starter</artifactId>
-            <version>3.0-SNAPSHOT</version>
+            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-system-authorization-entity</artifactId>
-            <version>3.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-system-authorization-service-api</artifactId>
-            <version>3.0-SNAPSHOT</version>
+            <artifactId>hsweb-system-authorization-starter</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>
