@@ -58,10 +58,10 @@ public class ControllerTest extends SimpleWebApplicationTests {
         }
         ProcessDefinitionEntity processDefinitionEntity = ((BpmActivityServiceImp)bpmProcessService).getProcessDefinition(processInstance.getProcessDefinitionId());
         ActivityImpl activity = bpmActivityService.getActivityByProcInstId(processInstance.getProcessDefinitionId(), processInstance.getId());
-        System.out.println("=========");
+        System.out.println("流程节点读取");
         System.out.println(processDefinitionEntity.getActivities());
         System.out.println(activity);
-        System.out.println("=========");
+        System.out.println("=========>>>");
     }
 
     @Configuration
