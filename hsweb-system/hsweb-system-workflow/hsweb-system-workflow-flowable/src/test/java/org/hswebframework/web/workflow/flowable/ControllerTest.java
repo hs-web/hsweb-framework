@@ -5,12 +5,15 @@ import org.activiti.engine.*;
 import org.activiti.engine.impl.RepositoryServiceImpl;
 import org.activiti.engine.impl.interceptor.SessionFactory;
 import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity;
+import org.activiti.engine.impl.pvm.process.ActivityImpl;
 import org.activiti.engine.impl.pvm.process.ProcessDefinitionImpl;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.spring.boot.ProcessEngineConfigurationConfigurer;
 import org.hswebframework.web.tests.SimpleWebApplicationTests;
+import org.hswebframework.web.workflow.flowable.service.BpmActivityService;
 import org.hswebframework.web.workflow.flowable.service.BpmProcessService;
+import org.hswebframework.web.workflow.flowable.service.imp.BpmActivityServiceImp;
 import org.hswebframework.web.workflow.flowable.utils.FlowableAbstract;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,8 +33,8 @@ import java.util.Map;
  */
 public class ControllerTest extends SimpleWebApplicationTests {
 
-    @Resource
-    protected RepositoryService repositoryService;
+    @Autowired
+    BpmActivityService bpmActivityService;
     @Autowired
     BpmProcessService bpmProcessService;
 
@@ -44,21 +47,20 @@ public class ControllerTest extends SimpleWebApplicationTests {
     @Test
     public void test() {
         ProcessInstance processInstance = null;
-        String aid = "";
         try {
             processInstance = start();
             System.out.println("流程已启动:" + processInstance.toString());
             int i = bpmProcessService.getProcessInstances(0, 10, "test").size();
             System.out.println("当前活动流程数:" + i);
-            aid = processInstance.getActivityId();
-            System.out.println("当前流程节点ID_" + aid);
+            System.out.println("当前流程节点ID_" + processInstance.getActivityId());
         } catch (Exception e) {
             System.out.println("启动流程失败" + e);
         }
-        ProcessDefinitionEntity processDefinitionEntity = (ProcessDefinitionEntity) ((RepositoryServiceImpl) repositoryService).getDeployedProcessDefinition(repositoryService.createProcessDefinitionQuery().processDefinitionKey("test").singleResult().getId());
+        ProcessDefinitionEntity processDefinitionEntity = ((BpmActivityServiceImp)bpmProcessService).getProcessDefinition(processInstance.getProcessDefinitionId());
+        ActivityImpl activity = bpmActivityService.getActivityByProcInstId(processInstance.getProcessDefinitionId(), processInstance.getId());
         System.out.println("=========");
         System.out.println(processDefinitionEntity.getActivities());
-        System.out.println(processDefinitionEntity.findActivity(aid));
+        System.out.println(activity);
         System.out.println("=========");
     }
 
