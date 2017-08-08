@@ -142,5 +142,10 @@
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.hswebframework.web</groupId>
+            <artifactId>hsweb-tests</artifactId>
+            <version>3.0-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 </project>

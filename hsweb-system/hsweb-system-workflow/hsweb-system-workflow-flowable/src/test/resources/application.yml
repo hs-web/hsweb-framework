@@ -1,4 +1,3 @@
-
 spring:
     aop:
         auto: true
@@ -14,7 +13,6 @@ spring:
 
 logging:
   level:
-      org.hsweb: debug
       org.flowable: debug
 mybatis:
   dynamic-datasource: false

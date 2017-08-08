@@ -39,16 +39,7 @@ public class FlowableAutoConfiguration {
                 configuration.setCustomSessionFactories(sessionFactories);
             }
         };
-
-//        ProcessEngineConfiguration processEngineConfiguration = new StandaloneProcessEngineConfiguration()
-//                .setAsyncExecutorActivate(false)
-//                .setJobExecutorActivate(false)
-//                .setActivityFontName("宋体")
-//                .setLabelFontName("宋体")
-//                .setAnnotationFontName("宋体");
-//        return processEngineConfiguration;
     }
-
 
     @ConditionalOnBean(UserService.class)
     @Configuration
