@@ -59,10 +59,10 @@ function install(context) {
     database.createOrAlter("s_dyn_form_log")
         .addColumn().name("u_id").alias("id").comment("ID").jdbcType(java.sql.JDBCType.VARCHAR).length(32).primaryKey().commit()
         .addColumn().name("form_id").alias("formId").comment("表单ID").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
-        .addColumn().name("version").alias("version").comment("发布的版本").jdbcType(java.sql.JDBCType.NUMERIC).length(32).commit()
-        .addColumn().name("deploy_time").alias("deployTime").comment("发布时间").jdbcType(java.sql.JDBCType.DECIMAL).commit()
+        .addColumn().name("version").alias("version").comment("发布的版本").jdbcType(java.sql.JDBCType.NUMERIC).length(32,0).commit()
+        .addColumn().name("deploy_time").alias("deployTime").comment("发布时间").jdbcType(java.sql.JDBCType.DECIMAL).length(32,0).commit()
         .addColumn().name("meta_data").alias("metaData").comment("部署的元数据").jdbcType(java.sql.JDBCType.CLOB).commit()
-        .addColumn().name("status").alias("status").comment("状态").jdbcType(java.sql.JDBCType.NUMERIC).length(4).commit()
+        .addColumn().name("status").alias("status").comment("状态").jdbcType(java.sql.JDBCType.NUMERIC).length(4,0).commit()
         .comment("表单发布日志").commit();
 }
 //设置依赖
