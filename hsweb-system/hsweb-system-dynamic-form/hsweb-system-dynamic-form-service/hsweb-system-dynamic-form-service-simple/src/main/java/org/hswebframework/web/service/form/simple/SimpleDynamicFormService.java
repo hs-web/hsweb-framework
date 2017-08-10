@@ -32,6 +32,9 @@ import org.hswebframework.web.service.form.DatabaseRepository;
 import org.hswebframework.web.service.form.DynamicFormDeployLogService;
 import org.hswebframework.web.service.form.DynamicFormService;
 import org.hswebframework.web.service.form.OptionalConvertBuilder;
+import org.hswebframework.web.service.form.initialize.ColumnInitializeContext;
+import org.hswebframework.web.service.form.initialize.DynamicFormInitializeCustomer;
+import org.hswebframework.web.service.form.initialize.TableInitializeContext;
 import org.hswebframework.web.validator.group.CreateGroup;
 import org.hswebframework.web.validator.group.UpdateGroup;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,8 +42,11 @@ import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.JDBCType;
 import java.sql.SQLException;
 import java.util.*;
@@ -69,6 +75,9 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
 
     @Autowired(required = false)
     private OptionalConvertBuilder optionalConvertBuilder;
+
+    @Autowired(required = false)
+    private List<DynamicFormInitializeCustomer> initializeCustomers;
 
     @Override
     protected IDGenerator<String> getIDGenerator() {
@@ -305,10 +314,10 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
         }
     }
 
-    protected Set<Correlation> buildCorrelations(String correlations){
-        if(StringUtils.isEmpty(correlations))return new LinkedHashSet<>();
+    protected Set<Correlation> buildCorrelations(String correlations) {
+        if (StringUtils.isEmpty(correlations)) return new LinkedHashSet<>();
         JSONArray correlationsConfig = JSON.parseArray(correlations);
-        Set<Correlation> correlations1=new LinkedHashSet<>();
+        Set<Correlation> correlations1 = new LinkedHashSet<>();
         for (int i = 0; i < correlationsConfig.size(); i++) {
             JSONObject single = correlationsConfig.getJSONObject(i);
 
@@ -317,11 +326,11 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
             String condition = single.getString("condition");
             Objects.requireNonNull(target);
             Objects.requireNonNull(condition);
-            Correlation correlation=new Correlation(target,alias,condition);
-            correlation.setJoin(Correlation.JOIN.valueOf(String.valueOf(single.getOrDefault("join","LEFT")).toUpperCase()));
-            JSONObject properties= single.getJSONObject("properties");
+            Correlation correlation = new Correlation(target, alias, condition);
+            correlation.setJoin(Correlation.JOIN.valueOf(String.valueOf(single.getOrDefault("join", "LEFT")).toUpperCase()));
+            JSONObject properties = single.getJSONObject("properties");
 
-            if(properties!=null){
+            if (properties != null) {
                 properties.forEach(correlation::setProperty);
             }
             correlations1.add(correlation);
@@ -331,10 +340,10 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
 
     }
 
-    protected Map<String,Trigger> buildTrigger(String config){
-        if(StringUtils.isEmpty(config))return new HashMap<>();
+    protected Map<String, Trigger> buildTrigger(String config) {
+        if (StringUtils.isEmpty(config)) return new HashMap<>();
         JSONArray triggerConfig = JSON.parseArray(config);
-        Map<String,Trigger> triggers=new HashMap<>();
+        Map<String, Trigger> triggers = new HashMap<>();
         for (int i = 0; i < triggerConfig.size(); i++) {
             JSONObject single = triggerConfig.getJSONObject(i);
             String trigger = single.getString("trigger");
@@ -343,16 +352,16 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
             String scriptId = DigestUtils.md5Hex(script);
             try {
                 DynamicScriptEngine engine = DynamicScriptEngineFactory.getEngine(language);
-                if(engine==null){
-                    throw new UnsupportedOperationException("not support script language : "+language);
+                if (engine == null) {
+                    throw new UnsupportedOperationException("not support script language : " + language);
                 }
                 if (!engine.compiled(scriptId)) {
                     engine.compile(scriptId, script);
                 }
-                Trigger singleTrigger = new ScriptTraggerSupport(engine,scriptId);
-                triggers.put(trigger,singleTrigger);
-            }catch (Exception e){
-                throw new BusinessException("compile script error :"+e.getMessage(),e);
+                Trigger singleTrigger = new ScriptTraggerSupport(engine, scriptId);
+                triggers.put(trigger, singleTrigger);
+            } catch (Exception e) {
+                throw new BusinessException("compile script error :" + e.getMessage(), e);
             }
         }
         return triggers;
@@ -385,8 +394,8 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
                 columnMeta.setDataType(column.getDataType());
             }
             columnMeta.setValueConverter(initColumnValueConvert(columnMeta.getJdbcType(), columnMeta.getJavaType()));
-            if (!StringUtils.isEmpty(column.getDictId()) && optionalConvertBuilder != null) {
-                columnMeta.setOptionConverter(optionalConvertBuilder.buildFromDict(column.getDictId(), column.getDictParserId()));
+            if (optionalConvertBuilder != null) {
+                columnMeta.setOptionConverter(optionalConvertBuilder.build(column));
             }
             customColumnSetting(database, form, metaData, column, columnMeta);
             metaData.addColumn(columnMeta);
@@ -398,7 +407,25 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
     protected void customTableSetting(RDBDatabase database
             , DynamicFormEntity formEntity
             , RDBTableMetaData table) {
+        TableInitializeContext context = new TableInitializeContext() {
+            @Override
+            public RDBDatabase getDatabase() {
+                return database;
+            }
 
+            @Override
+            public DynamicFormEntity getFormEntity() {
+                return formEntity;
+            }
+
+            @Override
+            public RDBTableMetaData getTable() {
+                return table;
+            }
+        };
+        if (!CollectionUtils.isEmpty(initializeCustomers)) {
+            initializeCustomers.forEach(customer -> customer.customTableSetting(context));
+        }
     }
 
     protected void customColumnSetting(RDBDatabase database
@@ -406,7 +433,35 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
             , RDBTableMetaData table
             , DynamicFormColumnEntity columnEntity
             , RDBColumnMetaData column) {
+        ColumnInitializeContext context = new ColumnInitializeContext() {
+            @Override
+            public DynamicFormColumnEntity getColumnEntity() {
+                return columnEntity;
+            }
 
+            @Override
+            public RDBColumnMetaData getColumn() {
+                return column;
+            }
+
+            @Override
+            public RDBDatabase getDatabase() {
+                return database;
+            }
+
+            @Override
+            public DynamicFormEntity getFormEntity() {
+                return formEntity;
+            }
+
+            @Override
+            public RDBTableMetaData getTable() {
+                return table;
+            }
+        };
+        if (!CollectionUtils.isEmpty(initializeCustomers)) {
+            initializeCustomers.forEach(customer -> customer.customTableColumnSetting(context));
+        }
     }
 
     protected ValueConverter initColumnValueConvert(JDBCType jdbcType, Class javaType) {
@@ -455,7 +510,7 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
 
     }
 
-    static final Map<String, Class> classMapping = new HashMap<>();
+    private static final Map<String, Class> classMapping = new HashMap<>();
 
     static {
         classMapping.put("string", String.class);
@@ -464,6 +519,10 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
         classMapping.put("Integer", Integer.class);
         classMapping.put("byte", Byte.class);
         classMapping.put("Byte", Byte.class);
+
+        classMapping.put("byte[]", Byte[].class);
+        classMapping.put("Byte[]", Byte[].class);
+
         classMapping.put("short", Short.class);
         classMapping.put("Short", Short.class);
         classMapping.put("boolean", Boolean.class);
@@ -476,7 +535,14 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
         classMapping.put("Long", Long.class);
         classMapping.put("char", Character.class);
         classMapping.put("Char", Character.class);
+        classMapping.put("char[]", Character[].class);
+        classMapping.put("Char[]", Character[].class);
+
         classMapping.put("Character", Character.class);
+
+        classMapping.put("BigDecimal", BigDecimal.class);
+        classMapping.put("BigInteger", BigInteger.class);
+
         classMapping.put("map", Map.class);
         classMapping.put("Map", Map.class);
         classMapping.put("list", List.class);
