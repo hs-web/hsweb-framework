@@ -169,8 +169,7 @@ public class BpmTaskServiceImp extends FlowableAbstract implements BpmTaskServic
 
     @Override
     public Map<String,Object> getUserTasksByProcDefKey(String procDefKey){
-        String definitionId = repositoryService.createProcessDefinitionQuery().processDefinitionKey(procDefKey).orderByProcessDefinitionVersion().desc().list().get(0).getId();
-        List<ActivityImpl> activitiList = bpmActivityService.getUserTasks(definitionId);
+        List<ActivityImpl> activitiList = bpmActivityService.getUserTasksByProcDefKey(procDefKey);
         Map<String,Object> map = new HashMap<>();
         for(ActivityImpl activity:activitiList){
             map.put(activity.getId(),activity.getProperty("name"));
@@ -181,7 +180,7 @@ public class BpmTaskServiceImp extends FlowableAbstract implements BpmTaskServic
     @Override
     public Map<String, Object> getUserTasksByProcInstId(String procInstId) {
         String definitionId = runtimeService.createProcessInstanceQuery().processInstanceId(procInstId).singleResult().getProcessDefinitionId();
-        List<ActivityImpl> activitiList = bpmActivityService.getUserTasks(definitionId);
+        List<ActivityImpl> activitiList = bpmActivityService.getUserTasksByProcDefId(definitionId);
         Map<String,Object> map = new HashMap<>();
         for(ActivityImpl activity:activitiList){
             map.put(activity.getId(),activity.getProperty("name"));

@@ -60,7 +60,17 @@ public interface BpmProcessService{
      * @return 流程定义实例
      * @throws Exception 异常信息
      */
-    ProcessDefinition getProcessDefinition(String procDefId);
+    ProcessDefinition getProcessDefinitionById(String procDefId);
+
+    /**
+     * 根据流程定义id获取流程定义实例<br/>
+     * 此方法使用了缓存，返回的{@link org.activiti.engine.repository.ProcessDefinition}实例不为activity默认的实例，而是{@link ProcessDefinitionCache},以保证缓存时正常序列化
+     *
+     * @param procDefKey 流程定义id
+     * @return 流程定义实例
+     * @throws Exception 异常信息
+     */
+    ProcessDefinition getProcessDefinitionByKey(String procDefKey);
 
     /***
      * 获取job事件
