@@ -16,8 +16,7 @@
         <result property="length" column="length" javaType="Integer" jdbcType="DECIMAL"/>
         <result property="precision" column="precision" javaType="Integer" jdbcType="DECIMAL"/>
         <result property="scale" column="scale" javaType="Integer" jdbcType="DECIMAL"/>
-        <result property="dictId" column="dict_id" javaType="String" jdbcType="VARCHAR"/>
-        <result property="dictParserId" column="dict_parser_id" javaType="String" jdbcType="VARCHAR"/>
+        <result property="dictConfig" column="dict_config" javaType="String" jdbcType="CLOB"/>
         <result property="properties" column="properties" javaType="java.util.Map" jdbcType="CLOB"/>
     </resultMap>
 

@@ -1,12 +1,12 @@
 package org.hswebframework.web.service.form;
 
 import org.hsweb.ezorm.core.OptionConverter;
+import org.hswebframework.web.entity.form.DynamicFormColumnEntity;
 
 /**
- * TODO 完成注释
  *
  * @author zhouhao
  */
 public interface OptionalConvertBuilder {
-    OptionConverter buildFromDict(String dictId, String dictParserId);
+    OptionConverter build(DynamicFormColumnEntity columnEntity);
 }
