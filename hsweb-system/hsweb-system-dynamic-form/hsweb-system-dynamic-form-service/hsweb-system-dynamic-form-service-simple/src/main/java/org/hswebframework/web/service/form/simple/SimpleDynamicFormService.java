@@ -222,6 +222,23 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
     }
 
     @Override
+    @CacheEvict(key = "'form-columns:'+#result")
+    public String saveOrUpdate(DynamicFormColumnBindEntity bindEntity) {
+        DynamicFormEntity formEntity = bindEntity.getForm();
+
+        List<DynamicFormColumnEntity> columnEntities = bindEntity.getColumns();
+        //保存表单
+        saveOrUpdate(formEntity);
+
+        //保存表单列
+        columnEntities.stream()
+                .peek(column -> column.setFormId(formEntity.getId()))
+                .forEach(this::saveOrUpdate0);
+
+        return formEntity.getId();
+    }
+
+    @Override
     @CacheEvict(key = "'form-columns:'+#formId")
     public DynamicFormColumnEntity deleteColumn(String formId) {
         DynamicFormColumnEntity oldColumn = DefaultDSLQueryService

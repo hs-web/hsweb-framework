@@ -21,6 +21,8 @@ public interface DynamicFormService extends CrudService<DynamicFormEntity, Strin
 
     void unDeploy(String formId);
 
+    String saveOrUpdate(DynamicFormColumnBindEntity bindEntity);
+
     String saveOrUpdateColumn(DynamicFormColumnEntity columnEntity);
 
     List<String> saveOrUpdateColumn(List<DynamicFormColumnEntity> columnEntities);
