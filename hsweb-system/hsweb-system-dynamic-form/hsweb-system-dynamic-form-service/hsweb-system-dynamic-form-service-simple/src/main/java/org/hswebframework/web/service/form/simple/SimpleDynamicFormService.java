@@ -41,6 +41,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -250,6 +251,21 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
                 .where(DynamicFormDeployLogEntity.id, formId)
                 .exec();
         return oldColumn;
+    }
+
+    @Override
+    @Caching(
+            evict = {
+                    @CacheEvict(key = "'form-columns:'+#id"),
+                    @CacheEvict(key = "'form_id:'+#id")
+            })
+    public int deleteByPk(String id) {
+        Objects.requireNonNull(id, "id can not be null");
+
+        DefaultDSLDeleteService.createDelete(formColumnDao)
+                .where(DynamicFormColumnEntity.formId, id)
+                .exec();
+        return super.deleteByPk(id);
     }
 
     @Override
