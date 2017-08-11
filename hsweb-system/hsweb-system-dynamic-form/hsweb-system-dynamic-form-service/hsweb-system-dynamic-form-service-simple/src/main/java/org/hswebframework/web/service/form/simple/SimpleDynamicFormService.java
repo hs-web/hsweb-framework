@@ -177,6 +177,7 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
                 ? databaseRepository.getDefaultDatabase()
                 : databaseRepository.getDatabase(form.getDataSourceId());
         database.removeTable(form.getDatabaseTableName());
+        createUpdate().set(DynamicFormEntity.deployed, false).where(DynamicFormEntity.id, formId).exec();
     }
 
     private String saveOrUpdate0(DynamicFormColumnEntity columnEntity) {
@@ -319,10 +320,14 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
     public void deploy(String formId) {
         DynamicFormEntity formEntity = selectByPk(formId);
         assertNotNull(formEntity);
+        if (Boolean.TRUE.equals(formEntity.isDeployed())) {
+            dynamicFormDeployLogService.cancelDeployed(formId);
+        }
         List<DynamicFormColumnEntity> columns = DefaultDSLQueryService.createQuery(formColumnDao)
                 .where(DynamicFormColumnEntity.formId, formId)
                 .listNoPaging();
         deploy(formEntity, columns);
+        createUpdate().set(DynamicFormEntity.deployed, true).where(DynamicFormEntity.id, formId).exec();
         try {
             dynamicFormDeployLogService.insert(createDeployLog(formEntity, columns));
         } catch (Exception e) {
@@ -404,7 +409,8 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
         RDBTableMetaData metaData = new RDBTableMetaData();
         metaData.setComment(form.getDescribe());
         metaData.setName(form.getDatabaseTableName());
-        metaData.setProperties(form.getProperties());
+        if (null != form.getProperties())
+            metaData.setProperties(form.getProperties());
         metaData.setAlias(form.getAlias());
         metaData.setCorrelations(buildCorrelations(form.getCorrelations()));
         buildTrigger(form.getTriggers()).forEach(metaData::on);
