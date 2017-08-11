@@ -14,77 +14,24 @@
     <dependencies>
         <dependency>
             <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-authorization-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-commons-controller</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-system-workflow-flowable</artifactId>
             <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>commons-io</artifactId>
+                    <groupId>commons-io</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
-
-        <!--<dependency>-->
-            <!--<groupId>org.flowable</groupId>-->
-            <!--<artifactId>flowable-ui-modeler-conf</artifactId>-->
-            <!--<version>${flowable.version}</version>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>org.flowable</groupId>-->
-            <!--<artifactId>flowable-ui-modeler-rest</artifactId>-->
-            <!--<version>${flowable.version}</version>-->
-            <!--<exclusions>-->
-                <!--&lt;!&ndash;<exclusion>&ndash;&gt;-->
-                    <!--&lt;!&ndash;<groupId>org.flowable</groupId>&ndash;&gt;-->
-                    <!--&lt;!&ndash;<artifactId>flowable-ui-modeler-logic</artifactId>&ndash;&gt;-->
-                <!--&lt;!&ndash;</exclusion>&ndash;&gt;-->
-                <!--<exclusion>-->
-                    <!--<groupId>org.mybatis</groupId>-->
-                    <!--<artifactId>mybatis</artifactId>-->
-                <!--</exclusion>-->
-                <!--<exclusion>-->
-                    <!--<groupId>org.mybatis</groupId>-->
-                    <!--<artifactId>mybatis-spring</artifactId>-->
-                <!--</exclusion>-->
-                <!--<exclusion>-->
-                    <!--<groupId>org.springframework.security</groupId>-->
-                    <!--<artifactId>spring-security-core</artifactId>-->
-                <!--</exclusion>-->
-                <!--<exclusion>-->
-                    <!--<groupId>org.springframework.security</groupId>-->
-                    <!--<artifactId>spring-security-config</artifactId>-->
-                <!--</exclusion>-->
-                <!--<exclusion>-->
-                    <!--<groupId>org.springframework.security</groupId>-->
-                    <!--<artifactId>spring-security-crypto</artifactId>-->
-                <!--</exclusion>-->
-                <!--<exclusion>-->
-                    <!--<groupId>org.springframework.security</groupId>-->
-                    <!--<artifactId>spring-security-web</artifactId>-->
-                <!--</exclusion>-->
-            <!--</exclusions>-->
-        <!--</dependency>-->
-
-        <!--<dependency>-->
-            <!--<groupId>org.hswebframework.web</groupId>-->
-            <!--<artifactId>hsweb-spring-boot-starter</artifactId>-->
-            <!--<version>${project.version}</version>-->
-        <!--</dependency>-->
-
         <dependency>
-            <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-commons-dao-mybatis</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.flowable</groupId>
+            <artifactId>flowable-spring-boot-starter-basic</artifactId>
+            <version>${flowable.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.flowable</groupId>
-            <artifactId>flowable-bpmn-model</artifactId>
+            <artifactId>flowable-json-converter</artifactId>
             <version>${flowable.version}</version>
         </dependency>
         <dependency>
@@ -94,41 +41,28 @@
         </dependency>
         <dependency>
             <groupId>org.flowable</groupId>
-            <artifactId>flowable-json-converter</artifactId>
+            <artifactId>flowable-explorer</artifactId>
             <version>${flowable.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>vaadin</artifactId>
+                    <groupId>com.vaadin</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>dcharts-widget</artifactId>
+                    <groupId>org.vaadin.addons</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>slf4j-log4j12</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.flowable</groupId>
-            <artifactId>flowable-bpmn-layout</artifactId>
+            <artifactId>flowable-simple-workflow</artifactId>
             <version>${flowable.version}</version>
         </dependency>
-        <!--<dependency>-->
-            <!--<groupId>org.flowable</groupId>-->
-            <!--<artifactId>flowable-form-model</artifactId>-->
-            <!--<version>${flowable.version}</version>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>org.flowable</groupId>-->
-            <!--<artifactId>flowable-form-json-converter</artifactId>-->
-            <!--<version>${flowable.version}</version>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>org.flowable</groupId>-->
-            <!--<artifactId>flowable-dmn-model</artifactId>-->
-            <!--<version>${flowable.version}</version>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>org.flowable</groupId>-->
-            <!--<artifactId>flowable-dmn-xml-converter</artifactId>-->
-            <!--<version>${flowable.version}</version>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>org.flowable</groupId>-->
-            <!--<artifactId>flowable-dmn-json-converter</artifactId>-->
-            <!--<version>${flowable.version}</version>-->
-        <!--</dependency>-->
-
-
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
@@ -140,15 +74,15 @@
             <version>1.0.26</version>
             <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-            <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-logging</artifactId>
-            <scope>test</scope>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+            <version>3.0-alpha-1</version>
         </dependency>
     </dependencies>
 

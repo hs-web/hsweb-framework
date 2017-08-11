@@ -1,5 +1,6 @@
 package org.hswebframework.web.workflow.flowable.service.imp;
 
+import org.activiti.engine.delegate.Expression;
 import org.activiti.engine.impl.RepositoryServiceImpl;
 import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity;
 import org.activiti.engine.impl.pvm.PvmTransition;
@@ -11,10 +12,7 @@ import org.hswebframework.web.workflow.flowable.service.BpmActivityService;
 import org.hswebframework.web.workflow.flowable.utils.FlowableAbstract;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 /**
  * @Author wangwei
@@ -96,8 +94,42 @@ public class BpmActivityServiceImp extends FlowableAbstract implements BpmActivi
     }
 
     @Override
-    public ActivityImpl getStartEvent(String procDefKey) {
-        List<ActivityImpl> activities = getActivityByKey("test",null);
+    public List<ActivityImpl> getNextActivitys(String procDefId, String activityId) {
+        ActivityImpl activity;
+        if(activityId!=null)
+            activity = getActivityById(procDefId, activityId);
+        else
+            activity = getStartEvent(procDefId);
+        List<PvmTransition> pvmTransitions = activity.getOutgoingTransitions();
+        List<ActivityImpl> activities = new ArrayList<>();
+        for(PvmTransition pvmTransition : pvmTransitions){
+            activities.add((ActivityImpl)pvmTransition.getDestination());
+        }
+        return activities;
+    }
+
+    @Override
+    public Map<String, List<String>> getNextClaim(String procDefId, String activityId) {
+        List<ActivityImpl> activities = getNextActivitys(procDefId, activityId);
+        Map<String, List<String>> map = new HashMap<>();
+        for(ActivityImpl activity : activities){
+            List<String> list = new ArrayList<>();
+            TaskDefinition taskDefinition = (TaskDefinition) activity.getProperty("taskDefinition");
+            if(taskDefinition.getAssigneeExpression()!=null)
+                list.add(taskDefinition.getAssigneeExpression().getExpressionText());
+            else if(taskDefinition.getCandidateUserIdExpressions()!=null){
+                for(Expression expression : taskDefinition.getCandidateUserIdExpressions()){
+                    list.add(expression.getExpressionText());
+                }
+            }
+            map.put(activity.getId(),list);
+        }
+        return map;
+    }
+
+    @Override
+    public ActivityImpl getStartEvent(String procDefId) {
+        List<ActivityImpl> activities = getActivitysById(procDefId,null);
         ActivityImpl activity = null;
         for (ActivityImpl a: activities) {
             if(a.getProperty("type").equals("startEvent")){
