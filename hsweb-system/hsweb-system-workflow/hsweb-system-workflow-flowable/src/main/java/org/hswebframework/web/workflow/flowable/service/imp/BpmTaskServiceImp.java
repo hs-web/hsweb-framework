@@ -159,8 +159,8 @@ public class BpmTaskServiceImp extends FlowableAbstract implements BpmTaskServic
     @Override
     public void endProcess(String procInstId) {
         ProcessInstance processInstance = runtimeService.createProcessInstanceQuery().processInstanceId(procInstId).singleResult();
-        ActivityImpl activity = bpmActivityService.getEndActivityImpl(processInstance.getProcessDefinitionId());
-        jumpTask(procInstId, activity.getId(), null);
+        ActivityImpl activity = bpmActivityService.getEndEvent(processInstance.getProcessDefinitionId());
+        jumpTask(procInstId,activity.getId(),null);
     }
 
     @Override
@@ -174,12 +174,12 @@ public class BpmTaskServiceImp extends FlowableAbstract implements BpmTaskServic
     }
 
     @Override
-    public Map<String, Object> getUserTasksByProcDefKey(String procDefKey) {
+    public Map<String,Object> getUserTasksByProcDefKey(String procDefKey){
         String definitionId = repositoryService.createProcessDefinitionQuery().processDefinitionKey(procDefKey).orderByProcessDefinitionVersion().desc().list().get(0).getId();
-        List<ActivityImpl> activitiList = bpmActivityService.getUserTasks(definitionId);
-        Map<String, Object> map = new HashMap<>();
-        for (ActivityImpl activity : activitiList) {
-            map.put(activity.getId(), activity.getProperty("name"));
+        List<ActivityImpl> activitiList = bpmActivityService.getUserTasksByProcDefId(definitionId);
+        Map<String,Object> map = new HashMap<>();
+        for(ActivityImpl activity:activitiList){
+            map.put(activity.getId(),activity.getProperty("name"));
         }
         return map;
     }
@@ -187,10 +187,10 @@ public class BpmTaskServiceImp extends FlowableAbstract implements BpmTaskServic
     @Override
     public Map<String, Object> getUserTasksByProcInstId(String procInstId) {
         String definitionId = runtimeService.createProcessInstanceQuery().processInstanceId(procInstId).singleResult().getProcessDefinitionId();
-        List<ActivityImpl> activitiList = bpmActivityService.getUserTasks(definitionId);
-        Map<String, Object> map = new HashMap<>();
-        for (ActivityImpl activity : activitiList) {
-            map.put(activity.getId(), activity.getProperty("name"));
+        List<ActivityImpl> activitiList = bpmActivityService.getUserTasksByProcDefId(definitionId);
+        Map<String,Object> map = new HashMap<>();
+        for(ActivityImpl activity:activitiList){
+            map.put(activity.getId(),activity.getProperty("name"));
         }
         return map;
     }

@@ -88,13 +88,18 @@ public class BpmProcessServiceImp extends FlowableAbstract implements BpmProcess
     }
 
     @Override
-    public ProcessDefinition getProcessDefinition(String processDefinitionId){
+    public ProcessDefinition getProcessDefinitionById(String processDefinitionId){
         return repositoryService.createProcessDefinitionQuery().processDefinitionId(processDefinitionId).singleResult();
     }
 
     @Override
+    public ProcessDefinition getProcessDefinitionByKey(String procDefKey) {
+        return repositoryService.createProcessDefinitionQuery().processDefinitionKey(procDefKey).orderByProcessDefinitionVersion().desc().list().get(0);
+    }
+
+    @Override
     public InputStream findProcessPic(String procDefId) {
-        ProcessDefinition definition = getProcessDefinition(procDefId);
+        ProcessDefinition definition = getProcessDefinitionById(procDefId);
         String source = definition.getDiagramResourceName();
         InputStream inputStream = repositoryService.getResourceAsStream(definition.getDeploymentId(),source);
         return inputStream;
