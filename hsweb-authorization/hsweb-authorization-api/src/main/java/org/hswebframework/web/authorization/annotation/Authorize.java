@@ -29,6 +29,7 @@ import java.lang.annotation.*;
  *
  * @author zhouhao
  * @see org.hswebframework.web.authorization.Authentication
+ * @see org.hswebframework.web.authorization.define.AuthorizeDefinition
  * @since 3.0
  */
 @Target({ElementType.TYPE, ElementType.METHOD})
