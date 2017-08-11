@@ -3,6 +3,7 @@ package org.hswebframework.web.workflow.flowable.service;
 import org.activiti.engine.impl.pvm.process.ActivityImpl;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 流程节点操作的接口
@@ -13,17 +14,17 @@ public interface BpmActivityService {
     /**
      * 获取指定节点
      *
-     * @param procDefId        流程定义ID
-     * @return ActivityImpl       指定的节点资源
+             * @param procDefId        流程定义ID
+     * @return ActivityImpl       指定的节点资源,未指定返回第一节点
      */
     ActivityImpl getActivityById(String procDefId, String activityId);
 
     /**
-     * 获取指定节点
+     * 获取所有节点
      *
      * @param procDefKey        流程定义Key
      * @param activityId        图元ID
-     * @return ActivityImpl       指定的节点,未指定返回当前节点
+     * @return ActivityImpl       指定的节点,未指定返回所有
      */
     List<ActivityImpl> getActivityByKey(String procDefKey, String activityId);
 
@@ -51,6 +52,24 @@ public interface BpmActivityService {
      * @return List<ActivityImpl>  当前流程的所有userTask资源
      */
     List<ActivityImpl> getUserTasksByProcDefKey(String procDefKey);
+
+    /**
+     * 获取下一环节
+     *
+     * @param procDefId        流程定义ID
+     * @param activityId        图元ID
+     * @return List<ActivityImpl>  当前流程的所有节点资源
+     */
+    List<ActivityImpl> getNextActivitys(String procDefId, String activityId);
+
+    /**
+     * 获取下一环节办理人
+     *
+     * @param procDefId        流程定义ID
+     * @param activityId        图元ID
+     * @return   节点id对应的办理人
+     */
+    Map<String, List<String>> getNextClaim(String procDefId, String activityId);
 
     /**
      * 获取开始节点

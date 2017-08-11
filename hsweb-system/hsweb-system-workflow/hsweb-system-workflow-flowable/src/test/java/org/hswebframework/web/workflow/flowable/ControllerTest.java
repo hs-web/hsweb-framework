@@ -62,7 +62,8 @@ public class ControllerTest extends SimpleWebApplicationTests {
                 System.out.println(a);
                 List<PvmTransition> pvmTransitions = a.getOutgoingTransitions();
                 Assert.assertEquals(pvmTransitions.size(), 1);
-                System.out.println("流程第一节点办理人:"+((TaskDefinition)pvmTransitions.get(0).getDestination().getProperty("taskDefinition")).getAssigneeExpression());
+                TaskDefinition taskDefinition = (TaskDefinition)pvmTransitions.get(0).getDestination().getProperty("taskDefinition");
+                System.out.println("流程第一节点办理人:"+taskDefinition.getAssigneeExpression());
             }
         }
     }
