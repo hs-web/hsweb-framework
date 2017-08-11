@@ -16,15 +16,12 @@
  *
  */
 
-package org.hswebframework.web.authorization.container;
+package org.hswebframework.web.authorization.token;
 
-import org.hswebframework.web.authorization.AuthenticationManager;
-import org.hswebframework.web.authorization.container.event.UserSignInEvent;
+import org.hswebframework.web.authorization.token.event.UserSignInEvent;
 import org.hswebframework.web.authorization.listener.AuthorizationListenerDispatcher;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
@@ -35,20 +32,18 @@ import java.util.stream.Collectors;
  * @author zhouhao
  * @since 3.0
  */
-public class MemeoryAuthenticationContainer implements AuthenticationContainer {
+public class MemeoryUserTokenManager implements UserTokenManager {
 
-    private ConcurrentMap<String, SimpleUserToken> tokenUserStorage = new ConcurrentHashMap<>(256);
+    private final ConcurrentMap<String, SimpleUserToken> tokenUserStorage = new ConcurrentHashMap<>(256);
 
-    private AuthenticationManager authenticationManager;
-
-    // timeout seconds
+    //令牌超时事件,默认3600秒
     private long timeout = 3600;
 
-    private AuthorizationListenerDispatcher authorizationListenerDispatcher;
+    //异地登录模式，默认运行异地登录
+    private AllopatricLoginMode allopatricLoginMode=AllopatricLoginMode.allow;
 
-    public void setAuthenticationManager(AuthenticationManager authenticationManager) {
-        this.authenticationManager = authenticationManager;
-    }
+    //事件转发器
+    private AuthorizationListenerDispatcher authorizationListenerDispatcher;
 
     public void setAuthorizationListenerDispatcher(AuthorizationListenerDispatcher authorizationListenerDispatcher) {
         this.authorizationListenerDispatcher = authorizationListenerDispatcher;
@@ -62,17 +57,26 @@ public class MemeoryAuthenticationContainer implements AuthenticationContainer {
         return timeout;
     }
 
-    private UserToken checkTimeout(UserToken detail) {
+    public void setAllopatricLoginMode(AllopatricLoginMode allopatricLoginMode) {
+        this.allopatricLoginMode = allopatricLoginMode;
+    }
+
+    public AllopatricLoginMode getAllopatricLoginMode() {
+        return allopatricLoginMode;
+    }
+
+    private SimpleUserToken checkTimeout(SimpleUserToken detail) {
         if (null == detail) return null;
         if (System.currentTimeMillis() - detail.getLastRequestTime() > timeout * 1000) {
-            logoutByToken(detail.getToken());
-            return null;
+            detail.setState(TokenState.expired);
+           // logoutByToken(detail.getToken());
+            return detail;
         }
         return detail;
     }
 
     @Override
-    public UserToken getByToken(String token) {
+    public SimpleUserToken getByToken(String token) {
         return checkTimeout(tokenUserStorage.get(token));
     }
 
@@ -85,29 +89,45 @@ public class MemeoryAuthenticationContainer implements AuthenticationContainer {
 
     @Override
     public boolean userIsLoggedIn(String userId) {
-        return getByUserId(userId).size() > 0;
+        for (UserToken userToken : getByUserId(userId)) {
+            if(userToken.isEffective())return true;
+        }
+        return false;
     }
 
     @Override
     public boolean tokenIsLoggedIn(String token) {
-        return getByToken(token) != null;
+        UserToken userToken=getByToken(token);
+
+        return userToken != null&&userToken.isEffective();
     }
 
     @Override
-    public int totalUser() {
-        return tokenUserStorage.values().stream().map(UserToken::getUserId).distinct().mapToInt(userId->1).sum();
+    public long totalUser() {
+        return tokenUserStorage.values()
+                .stream()
+                .peek(this::checkTimeout)//检查是否已经超时
+                .filter(UserToken::isEffective)//只返回有效的
+                .map(UserToken::getUserId)
+                .distinct()//去重复
+                .count();
     }
 
     @Override
-    public int totalToken() {
-        return tokenUserStorage.size();
+    public long totalToken() {
+        return tokenUserStorage.values()
+                .stream()
+                .peek(this::checkTimeout)//检查是否已经超时
+                .filter(UserToken::isEffective)//只返回有效的
+                .count();
     }
 
     @Override
     public List<UserToken> allLoggedUser() {
-        return tokenUserStorage.values().stream()
+        return tokenUserStorage.values()
+                .stream()
                 .map(this::checkTimeout)
-                .filter(Objects::nonNull)
+                .filter(UserToken::isEffective)
                 .collect(Collectors.toList());
     }
 
@@ -126,6 +146,18 @@ public class MemeoryAuthenticationContainer implements AuthenticationContainer {
         SimpleUserToken detail = new SimpleUserToken(userId, token);
         if (null != authorizationListenerDispatcher)
             authorizationListenerDispatcher.doEvent(new UserSignInEvent(detail));
+        if(allopatricLoginMode==AllopatricLoginMode.deny){
+            detail.setState(TokenState.deny);
+        }else if (allopatricLoginMode==AllopatricLoginMode.offlineOther){
+            detail.setState(TokenState.effective);
+            SimpleUserToken oldToken =(SimpleUserToken) getByUserId(userId);
+            if(oldToken!=null){
+                //踢下线
+                oldToken.setState(TokenState.offline);
+            }
+        }else{
+            detail.setState(TokenState.effective);
+        }
         tokenUserStorage.put(token, detail);
         return detail;
     }

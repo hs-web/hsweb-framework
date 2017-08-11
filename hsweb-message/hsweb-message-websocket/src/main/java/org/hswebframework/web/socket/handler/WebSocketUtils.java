@@ -1,12 +1,11 @@
 package org.hswebframework.web.socket.handler;
 
 import org.hswebframework.web.authorization.Authentication;
-import org.hswebframework.web.authorization.container.AuthenticationContainer;
+import org.hswebframework.web.authorization.token.UserTokenManager;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.util.*;
-import java.util.function.Function;
 
 /**
  * TODO 完成注释
@@ -16,7 +15,7 @@ import java.util.function.Function;
 public class WebSocketUtils {
 
 
-    public static Authentication getAuthentication(AuthenticationContainer container, WebSocketSession session) {
+    public static Authentication getAuthentication(UserTokenManager container, WebSocketSession session) {
         Authentication authentication = Authentication
                 .current()
                 .orElseGet(() -> ((Authentication) session.getAttributes().get(Authentication.class.getName())));
@@ -40,7 +39,7 @@ public class WebSocketUtils {
         throw new UnsupportedOperationException();
 //        Function<Set<String>, Optional<Authentication>> userGetter = set ->
 //                set == null ? Optional.empty() : set.stream()
-//                        .map(container::getByToken)
+//                        .map(token::getByToken)
 //                        .filter(Objects::nonNull)
 //                        .findFirst();
 //

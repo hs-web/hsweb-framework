@@ -16,28 +16,28 @@
  *
  */
 
-package org.hswebframework.web.authorization.container;
+package org.hswebframework.web.authorization.token;
 
 import java.util.List;
 
 /**
- * 授权容器,用来操作所有已经授权的用户
+ * 用户授权容器,用来操作所有已经授权的用户
  *
  * @author zhouhao
  * @since 3.0
  */
-public interface AuthenticationContainer {
+public interface UserTokenManager {
 
     /**
-     * 根据token获取权限信息
+     * 根据token获取用户令牌信息
      *
-     * @param token
-     * @return 权限信息, 未授权时返回null
+     * @param token token
+     * @return 令牌信息, 未授权时返回null
      */
     UserToken getByToken(String token);
 
     /**
-     * 根据用户id，获取全部授权信息，如果设置了不能跨地点登陆，返回值只可能是{@code null}或者size为1的list
+     * 根据用户id，获取全部令牌信息，如果设置了不能跨地点登陆，返回值只可能是{@code null}或者size为1的list
      * @param userId 用户id
      * @return 授权信息
      */
@@ -49,18 +49,24 @@ public interface AuthenticationContainer {
      */
     boolean userIsLoggedIn(String userId);
 
+    /**
+     *
+     * @param token token
+     * @return token是否已登记
+     */
     boolean tokenIsLoggedIn(String token);
 
     /**
      * @return 总用户数量，一个用户多个地方登陆数量算1
      */
-    int totalUser();
+    long totalUser();
 
     /**
      *
      * @return 总token数量
      */
-    int totalToken();
+    long totalToken();
+
     /**
      * @return 所有被授权的用户
      */
@@ -80,11 +86,15 @@ public interface AuthenticationContainer {
     void logoutByToken(String token);
 
     /**
-     * @param token
-     * @param userId
+     * 登记一个用户的token
+     * @param token token
+     * @param userId 用户id
      */
     UserToken signIn(String token, String userId);
 
-
+    /**
+     * 更新token,使其不过期
+     * @param token token
+     */
     void touch(String token);
 }

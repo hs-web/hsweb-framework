@@ -1,6 +1,6 @@
-package org.hswebframework.web.authorization.container.event;
+package org.hswebframework.web.authorization.token.event;
 
-import org.hswebframework.web.authorization.container.UserToken;
+import org.hswebframework.web.authorization.token.UserToken;
 import org.hswebframework.web.authorization.listener.event.AuthorizationEvent;
 
 /**

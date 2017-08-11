@@ -1,4 +1,4 @@
-package org.hswebframework.web.authorization.container;
+package org.hswebframework.web.authorization.token;
 
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -10,6 +10,8 @@ public class SimpleUserToken implements UserToken {
     private String userId;
 
     private String token;
+
+    private TokenState state;
 
     private AtomicLong requestTimesCounter=new AtomicLong(0);
 
@@ -52,6 +54,15 @@ public class SimpleUserToken implements UserToken {
         return token;
     }
 
+    @Override
+    public TokenState getState() {
+        return state;
+    }
+
+    public void setState(TokenState state) {
+        this.state = state;
+    }
+
     public void setUserId(String userId) {
         this.userId = userId;
     }
@@ -73,7 +84,7 @@ public class SimpleUserToken implements UserToken {
         requestTimesCounter.set(requestTimes);
     }
 
-    public  synchronized void touch(){
+    public  void touch(){
         requestTimesCounter.addAndGet(1);
         lastRequestTime=System.currentTimeMillis();
     }

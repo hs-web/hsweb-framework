@@ -3,7 +3,7 @@ package org.hswebframework.web.socket.handler;
 import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.core.JsonParseException;
 import org.hswebframework.web.authorization.Authentication;
-import org.hswebframework.web.authorization.container.AuthenticationContainer;
+import org.hswebframework.web.authorization.token.UserTokenManager;
 import org.hswebframework.web.socket.CommandRequest;
 import org.hswebframework.web.socket.WebSocketSessionListener;
 import org.hswebframework.web.socket.message.WebSocketMessage;
@@ -25,7 +25,7 @@ public class CommandWebSocketMessageDispatcher extends TextWebSocketHandler {
 
     private CommandProcessorContainer processorContainer;
 
-    private AuthenticationContainer authenticationContainer;
+    private UserTokenManager userTokenManager;
 
     private List<WebSocketSessionListener> webSocketSessionListeners;
 
@@ -33,8 +33,8 @@ public class CommandWebSocketMessageDispatcher extends TextWebSocketHandler {
         this.webSocketSessionListeners = webSocketSessionListeners;
     }
 
-    public void setAuthenticationContainer(AuthenticationContainer authenticationContainer) {
-        this.authenticationContainer = authenticationContainer;
+    public void setUserTokenManager(UserTokenManager userTokenManager) {
+        this.userTokenManager = userTokenManager;
     }
 
     public void setProcessorContainer(CommandProcessorContainer processorContainer) {
@@ -67,8 +67,8 @@ public class CommandWebSocketMessageDispatcher extends TextWebSocketHandler {
     }
 
     private Authentication getAuthenticationFromSession(WebSocketSession socketSession) {
-        if (null == authenticationContainer) return null;
-        return WebSocketUtils.getAuthentication(authenticationContainer, socketSession);
+        if (null == userTokenManager) return null;
+        return WebSocketUtils.getAuthentication(userTokenManager, socketSession);
     }
 
     private CommandRequest buildCommand(WebSocketCommandRequest request, WebSocketSession socketSession) {
