@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Service("dynamicFormOperationService")
-@Transactional
+@Transactional(rollbackFor = Throwable.class)
 public class SimpleDynamicFormOperationService implements DynamicFormOperationService {
 
     private DynamicFormService dynamicFormService;
@@ -42,113 +42,110 @@ public class SimpleDynamicFormOperationService implements DynamicFormOperationSe
         this.databaseRepository = databaseRepository;
     }
 
-    protected <T> RDBTable<T> getTable(String formId){
-        DynamicFormEntity form= dynamicFormService.selectByPk(formId);
-        if(null==form)throw new NotFoundException("表单不存在");
+    protected <T> RDBTable<T> getTable(String formId) {
+        DynamicFormEntity form = dynamicFormService.selectByPk(formId);
+        if (null == form) throw new NotFoundException("表单不存在");
 
-        RDBDatabase database= StringUtils.isEmpty(form.getDataSourceId())?
-                databaseRepository.getDefaultDatabase():databaseRepository.getDatabase(form.getDataSourceId());
+        RDBDatabase database = StringUtils.isEmpty(form.getDataSourceId()) ?
+                databaseRepository.getDefaultDatabase() : databaseRepository.getDatabase(form.getDataSourceId());
         return database.getTable(form.getDatabaseTableName());
-    };
-    @Override
-    public <T> PagerResult<T> selectPager(String formId, QueryParamEntity paramEntity) {
-        RDBTable<T> table=getTable(formId);
-        try {
-            RDBQuery<T> query=table.createQuery();
+    }
 
-            int total= query.setParam(paramEntity).total();
-            if(total==0){
+    @Override
+    @Transactional(readOnly = true)
+    public <T> PagerResult<T> selectPager(String formId, QueryParamEntity paramEntity) {
+        RDBTable<T> table = getTable(formId);
+        try {
+            RDBQuery<T> query = table.createQuery();
+            int total = query.setParam(paramEntity).total();
+            if (total == 0) {
                 return PagerResult.empty();
             }
             paramEntity.rePaging(total);
-            List<T> list =query.setParam(paramEntity).list();
-            return PagerResult.of(total,list);
+            List<T> list = query.setParam(paramEntity).list();
+            return PagerResult.of(total, list);
         } catch (SQLException e) {
-            //todo custom exception
-            throw new RuntimeException(e);
+            throw new DynamicFormException("selectPager fail", e);
         }
 
     }
 
     @Override
+    @Transactional(readOnly = true)
     public <T> List<T> select(String formId, QueryParamEntity paramEntity) {
-        RDBTable<T> table=getTable(formId);
+        RDBTable<T> table = getTable(formId);
         try {
-            RDBQuery<T> query=table.createQuery();
+            RDBQuery<T> query = table.createQuery();
             return query.setParam(paramEntity).list();
         } catch (SQLException e) {
-            //todo custom exception
-            throw new RuntimeException(e);
+            throw new DynamicFormException("select fail", e);
         }
     }
 
     @Override
+    @Transactional(readOnly = true)
     public <T> T selectSingle(String formId, QueryParamEntity paramEntity) {
-        RDBTable<T> table=getTable(formId);
+        RDBTable<T> table = getTable(formId);
         try {
-            RDBQuery<T> query=table.createQuery();
+            RDBQuery<T> query = table.createQuery();
 
             return query.setParam(paramEntity).single();
         } catch (SQLException e) {
-            //todo custom exception
-            throw new RuntimeException(e);
+            throw new DynamicFormException("selectSingle fail", e);
         }
     }
 
     @Override
+    @Transactional(readOnly = true)
     public int count(String formId, QueryParamEntity paramEntity) {
-        RDBTable table=getTable(formId);
+        RDBTable table = getTable(formId);
         try {
-            RDBQuery query=table.createQuery();
+            RDBQuery query = table.createQuery();
 
             return query.setParam(paramEntity).total();
         } catch (SQLException e) {
-            //todo custom exception
-            throw new RuntimeException(e);
+            throw new DynamicFormException("count fail", e);
         }
     }
 
     @Override
     public <T> int update(String formId, UpdateParamEntity<T> paramEntity) {
-        if(Objects.requireNonNull(paramEntity).getTerms().isEmpty()){
+        if (Objects.requireNonNull(paramEntity).getTerms().isEmpty()) {
             throw new UnsupportedOperationException("can not use empty condition for update");
         }
-        RDBTable table=getTable(formId);
+        RDBTable<T> table = getTable(formId);
         try {
-            Update<T> update=table.createUpdate();
+            Update<T> update = table.createUpdate();
 
             return update.setParam(paramEntity).exec();
         } catch (SQLException e) {
-            //todo custom exception
-            throw new RuntimeException(e);
+            throw new DynamicFormException("update fail", e);
         }
     }
 
     @Override
     public <T> void insert(String formId, T entity) {
-        RDBTable table=getTable(formId);
+        RDBTable<T> table = getTable(formId);
         try {
-           Insert<T> insert=table.createInsert();
+            Insert<T> insert = table.createInsert();
             insert.value(entity).exec();
         } catch (SQLException e) {
-            //todo custom exception
-            throw new RuntimeException(e);
+            throw new DynamicFormException("insert fail", e);
         }
     }
 
     @Override
     public int delete(String formId, DeleteParamEntity paramEntity) {
-        if(Objects.requireNonNull(paramEntity).getTerms().isEmpty()){
+        if (Objects.requireNonNull(paramEntity).getTerms().isEmpty()) {
             throw new UnsupportedOperationException("can not use empty condition for delete");
         }
-        RDBTable table=getTable(formId);
+        RDBTable table = getTable(formId);
         try {
-            Delete delete=table.createDelete();
+            Delete delete = table.createDelete();
 
             return delete.setParam(paramEntity).exec();
         } catch (SQLException e) {
-            //todo custom exception
-            throw new RuntimeException(e);
+            throw new DynamicFormException("delete fail", e);
         }
     }
 }
