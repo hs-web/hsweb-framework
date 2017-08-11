@@ -3,7 +3,9 @@ package org.hswebframework.web.authorization.token;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Created by zhouhao on 2017/7/7.
+ * 用户令牌信息
+ * @since 3.0
+ * @author zhouhao
  */
 public class SimpleUserToken implements UserToken {
 
@@ -19,7 +21,7 @@ public class SimpleUserToken implements UserToken {
 
     private volatile long firstRequestTime=System.currentTimeMillis();
 
-    private long requestTimes;
+    private volatile long requestTimes;
 
     public SimpleUserToken(String userId, String token) {
         this.userId = userId;
@@ -84,7 +86,7 @@ public class SimpleUserToken implements UserToken {
         requestTimesCounter.set(requestTimes);
     }
 
-    public  void touch(){
+    void touch(){
         requestTimesCounter.addAndGet(1);
         lastRequestTime=System.currentTimeMillis();
     }

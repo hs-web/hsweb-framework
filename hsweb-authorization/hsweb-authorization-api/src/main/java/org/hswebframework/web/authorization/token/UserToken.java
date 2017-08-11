@@ -42,16 +42,32 @@ public interface UserToken extends Serializable, Comparable<UserToken> {
      */
     long getSignInTime();
 
+    /**
+     *
+     * @return 令牌状态
+     */
     TokenState getState();
 
+    /**
+     *
+     * @return 是否正常
+     */
     default boolean isEffective(){
         return getState()==TokenState.effective;
     }
 
+    /**
+     *
+     * @return 是否已过期
+     */
     default boolean isExpired(){
         return getState()==TokenState.expired;
     }
 
+    /**
+     *
+     * @return 是否离线
+     */
     default boolean isOffline(){
         return getState()==TokenState.offline;
     }
