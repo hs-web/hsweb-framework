@@ -79,6 +79,11 @@ public interface DynamicFormColumnEntity extends GenericEntity<String> {
     String properties = "properties";
 
     /**
+     * 排序序号
+     */
+    String sortIndex = "sortIndex";
+
+    /**
      * @return 表单ID
      */
     @NotBlank(groups = CreateGroup.class)
@@ -208,4 +213,8 @@ public interface DynamicFormColumnEntity extends GenericEntity<String> {
     void setDictConfig(String dictConfig);
 
     String getDictConfig();
+
+    Long getSortIndex();
+
+    void setSortIndex(Long sortIndex);
 }
