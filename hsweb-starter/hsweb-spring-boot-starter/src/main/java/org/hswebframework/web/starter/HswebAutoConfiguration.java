@@ -80,6 +80,7 @@ public class HswebAutoConfiguration {
     public FastJsonHttpMessageConverter fastJsonHttpMessageConverter(@Autowired(required = false) EntityFactory entityFactory) {
         return new FastJsonHttpMessageConverter();
     }
+
     @Bean
     @Primary
     @ConfigurationProperties(prefix = "fastjson")
@@ -101,6 +102,9 @@ public class HswebAutoConfiguration {
                 }
                 if (type instanceof Class) {
                     Class classType = ((Class) type);
+                    if (classType.isEnum()) {
+                        return super.getDeserializer(type);
+                    }
                     if (Modifier.isAbstract(classType.getModifiers()) || Modifier.isInterface(classType.getModifiers())) {
                         if (entityFactory != null && (Entity.class.isAssignableFrom(classType) || Model.class.isAssignableFrom(classType))) {
                             return new JavaBeanDeserializer(this, entityFactory.getInstanceType(classType), type);
