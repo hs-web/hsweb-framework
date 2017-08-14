@@ -51,16 +51,17 @@ public class BpmProcessServiceImp extends FlowableAbstract implements BpmProcess
             //获取流程实例ID
             String processInstanceId = processInstance.getId();
             logger.debug("流程启动成功,流程ID:{}",processInstanceId);
-            Task task = bpmTaskService.selectTaskByProcessId(processInstanceId);
+            List<Task> tasks = bpmTaskService.selectTaskByProcessId(processInstanceId);
             //如果指定了下一步执行环节，则将流程跳转到指定环节,并删除当前未执行的环节历史信息
             if(!StringUtils.isNullOrEmpty(activity)){
                 bpmTaskService.jumpTask(processInstanceId,activity,StringUtils.isNullOrEmpty(next_claim)?"":next_claim);
-                bpmTaskService.removeHiTask(task.getId());
-            }else{
-                //流程签收，签收人为指定办理人
-                if(!StringUtils.isNullOrEmpty(next_claim))
-                    bpmTaskService.claim(task.getId(), next_claim);
+                bpmTaskService.removeHiTask(tasks.get(0).getId());
             }
+//            else{
+//                //流程签收，签收人为指定办理人
+//                if(!StringUtils.isNullOrEmpty(next_claim))
+//                    bpmTaskService.claim(task.getId(), next_claim);
+//            }
 
             if (logger.isDebugEnabled())
                 logger.debug("start process of {key={}, bkey={}, pid={}, variables={}}", new Object[]{procDefKey, businessKey, processInstanceId, variables});
