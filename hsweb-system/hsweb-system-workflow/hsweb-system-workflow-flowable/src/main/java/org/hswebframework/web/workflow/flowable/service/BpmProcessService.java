@@ -21,7 +21,7 @@ public interface BpmProcessService{
      * @param creator_id     流程创建人
      * @param procDefKey  流程定义key
      * @param activity       下一环节id
-     * @param next_claim     下一步执行人
+     * @param next_claim     下一步执行人（预留）
      * @param businessKey    业务数据ID
      * @param variables     启动参数（流程变量,流程未结束前任意环节都可以使用）
      * @return 启动后的流程实例
