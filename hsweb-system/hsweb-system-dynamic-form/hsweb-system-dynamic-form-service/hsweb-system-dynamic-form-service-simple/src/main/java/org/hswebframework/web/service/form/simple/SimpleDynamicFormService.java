@@ -291,6 +291,7 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
         Objects.requireNonNull(formId);
         return DefaultDSLQueryService.createQuery(formColumnDao)
                 .where(DynamicFormColumnEntity.formId, formId)
+                .orderByAsc(DynamicFormColumnEntity.sortIndex)
                 .listNoPaging();
     }
 
@@ -323,9 +324,7 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
         if (Boolean.TRUE.equals(formEntity.isDeployed())) {
             dynamicFormDeployLogService.cancelDeployed(formId);
         }
-        List<DynamicFormColumnEntity> columns = DefaultDSLQueryService.createQuery(formColumnDao)
-                .where(DynamicFormColumnEntity.formId, formId)
-                .listNoPaging();
+        List<DynamicFormColumnEntity> columns = selectColumnsByFormId(formId);
         deploy(formEntity, columns);
         createUpdate().set(DynamicFormEntity.deployed, true).where(DynamicFormEntity.id, formId).exec();
         try {
