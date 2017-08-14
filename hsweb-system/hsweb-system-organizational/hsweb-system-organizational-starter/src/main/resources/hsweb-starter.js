@@ -119,7 +119,7 @@ function install(context) {
         .addColumn().name("relation_to").alias("relationTo").comment("关系至").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
         .addColumn().name("relation_type_from").alias("relationTypeFrom").comment("关系类型从,如:人员").jdbcType(java.sql.JDBCType.VARCHAR).length(64).commit()
         .addColumn().name("relation_type_to").alias("relationTypeTo").comment("关系类型至,如:部门").jdbcType(java.sql.JDBCType.VARCHAR).length(64).commit()
-        .addColumn().name("status").alias("status").comment("状态").jdbcType(java.sql.JDBCType.NUMERIC).commit()
+        .addColumn().name("status").alias("status").comment("状态").jdbcType(java.sql.JDBCType.NUMERIC).length(4,0).commit()
         .comment("关系信息").commit();
 
 }
