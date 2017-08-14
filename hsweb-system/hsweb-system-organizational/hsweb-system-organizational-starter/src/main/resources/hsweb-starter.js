@@ -46,8 +46,8 @@ function install(context) {
         .addColumn().name("parent_id").alias("parentId").comment("父级行政区域").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
         .addColumn().name("path").alias("path").comment("树路径,如: asb3-lsat").jdbcType(java.sql.JDBCType.VARCHAR).length(3000).commit()
         .addColumn().name("describe").alias("describe").comment("说明").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
-        .addColumn().name("status").alias("status").comment("状态").jdbcType(java.sql.JDBCType.DECIMAL).length(65535, 32767).commit()
-        .addColumn().name("sort_index").alias("sortIndex").comment("排序索引").jdbcType(java.sql.JDBCType.DECIMAL).length(65535, 32767).commit()
+        .addColumn().name("status").alias("status").comment("状态").jdbcType(java.sql.JDBCType.DECIMAL).length(4, 0).commit()
+        .addColumn().name("sort_index").alias("sortIndex").comment("排序索引").jdbcType(java.sql.JDBCType.DECIMAL).length(32, 0).commit()
         .comment("行政区域").commit();
 
     database.createOrAlter("s_organization")
