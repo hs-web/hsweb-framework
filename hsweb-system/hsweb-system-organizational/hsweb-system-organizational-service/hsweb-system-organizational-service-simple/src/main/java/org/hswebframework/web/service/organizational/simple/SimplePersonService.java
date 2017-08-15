@@ -42,7 +42,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -81,6 +83,9 @@ public class SimplePersonService extends EnableCacheGenericEntityService<PersonE
     @Autowired
     private OrganizationalDao organizationalDao;
 
+    @Autowired
+    private DistrictDao districtDao;
+
     @Autowired(required = false)
     private UserService userService;
 
@@ -98,7 +103,10 @@ public class SimplePersonService extends EnableCacheGenericEntityService<PersonE
     }
 
     @Override
-    @CacheEvict(allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(key = "'id:'+#result"),
+            @CacheEvict(key = "'auth-bind'+#result")
+    })
     public String insert(PersonAuthBindEntity authBindEntity) {
         authBindEntity.setStatus(DataStatus.STATUS_ENABLED);
         // TODO: 17-6-1 应该使用锁,防止并发同步用户,导致多个人员使用相同的用户
@@ -113,7 +121,10 @@ public class SimplePersonService extends EnableCacheGenericEntityService<PersonE
     }
 
     @Override
-    @CacheEvict(allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(key = "'id:'+#authBindEntity.id"),
+            @CacheEvict(key = "'auth-bind'+#authBindEntity.id")
+    })
     public int updateByPk(PersonAuthBindEntity authBindEntity) {
         // TODO: 17-6-1 应该使用锁,防止并发同步用户,导致多个人员使用相同的用户
         if (authBindEntity.getPositionIds() != null) {
@@ -240,15 +251,21 @@ public class SimplePersonService extends EnableCacheGenericEntityService<PersonE
         List<PositionEntity> positionEntities = getAllChildrenAndReturnRootNode(positionDao, positionIds, PositionEntity::setChildren, rootPosList -> {
             //根据职位获取部门
             Set<String> departmentIds = rootPosList.stream().map(PositionEntity::getDepartmentId).collect(Collectors.toSet());
-            if (null != departmentIds && !departmentIds.isEmpty()) {
+            if (!CollectionUtils.isEmpty(departmentIds)) {
                 List<DepartmentEntity> departmentEntities = getAllChildrenAndReturnRootNode(departmentDao, departmentIds, DepartmentEntity::setChildren, rootDepList -> {
                     //根据部门获取机构
                     Set<String> orgIds = rootDepList.stream().map(DepartmentEntity::getOrgId).collect(Collectors.toSet());
-                    if (null != orgIds && !orgIds.isEmpty()) {
+                    if (!CollectionUtils.isEmpty(orgIds)) {
                         List<OrganizationalEntity> orgEntities = getAllChildrenAndReturnRootNode(organizationalDao, orgIds, OrganizationalEntity::setChildren, rootOrgList -> {
-                            //根据机构获取地区
-                            // TODO: 17-5-25
+                            //根据机构获取行政区域
+                            Set<String> districtIds = rootOrgList.stream().map(OrganizationalEntity::getDistrictId).filter(Objects::nonNull).collect(Collectors.toSet());
+                            if (!CollectionUtils.isEmpty(districtIds)) {
+                                List<DistrictEntity> districtEntities =
+                                        getAllChildrenAndReturnRootNode(districtDao, districtIds, DistrictEntity::setChildren, rootDistrictList -> {
 
+                                        });
+                                authorization.setDistrictIds(transformationTreeNode(null, districtEntities));
+                            }
                         });
                         authorization.setOrgIds(transformationTreeNode(null, orgEntities));
                     }
@@ -268,7 +285,6 @@ public class SimplePersonService extends EnableCacheGenericEntityService<PersonE
                     SimpleRelation relation = new SimpleRelation();
                     relation.setType(info.getRelationTypeFrom());
                     relation.setTarget(info.getRelationTo());
-                    //info.getRelationId() ->
                     relation.setRelation(info.getRelationId());
                     if (personId.equals(info.getRelationFrom())) {
                         relation.setDirection(Relation.Direction.POSITIVE);

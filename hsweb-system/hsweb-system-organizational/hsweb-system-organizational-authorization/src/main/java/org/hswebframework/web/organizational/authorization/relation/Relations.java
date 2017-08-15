@@ -113,8 +113,8 @@ public interface Relations extends Serializable {
      * @param relation 关系标识,如: leader
      * @return 关系信息集合，如果关系不存在，返回空集合
      */
-    default List<Relation> findRev(String relation) {
-        return find(relation, Relation.Direction.REVERSE);
+    default List<Relation> findPos(String relation) {
+        return find(relation, Relation.Direction.POSITIVE);
     }
 
     /**
@@ -123,7 +123,7 @@ public interface Relations extends Serializable {
      * @param relation 关系标识,如: leader
      * @return 关系信息集合，如果关系不存在，返回空集合
      */
-    default List<Relation> findPos(String relation) {
+    default List<Relation> findRev(String relation) {
         return find(relation, Relation.Direction.REVERSE);
     }
 

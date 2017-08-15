@@ -20,6 +20,8 @@ import org.hswebframework.web.entity.organizational.PersonAuthBindEntity;
 import org.hswebframework.web.entity.organizational.PersonEntity;
 import org.hswebframework.web.service.CrudService;
 
+import java.util.List;
+
 /**
  * 人员 服务类
  *

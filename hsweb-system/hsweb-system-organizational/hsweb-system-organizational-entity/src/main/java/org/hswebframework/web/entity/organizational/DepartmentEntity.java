@@ -38,6 +38,7 @@ public interface DepartmentEntity extends TreeSortSupportEntity<String>, OrgAtta
     /**
      * 所在组织id
      */
+    @Deprecated
     String orgId     = "orgId";
     /**
      * 部门编码

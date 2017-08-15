@@ -64,26 +64,31 @@ public interface PersonnelAuthorization extends Serializable {
     /**
      * @return 人员所在行政区域ID, 只返回根节点, 永远不会返回{@code null}
      */
+    @Deprecated
     Set<TreeNode<String>> getDistrictIds();
 
     /**
      * @return 人员所在机构ID, 只返回根节点, 永远不会返回{@code null}
      */
+    @Deprecated
     Set<TreeNode<String>> getOrgIds();
 
     /**
      * @return 人员职务ID, 只返回根节点, 永远不会返回{@code null}
      */
+    @Deprecated
     Set<TreeNode<String>> getPositionIds();
 
     /**
      * @return 人员所在部门ID, 只返回根节点, 永远不会返回{@code null}
      */
+    @Deprecated
     Set<TreeNode<String>> getDepartmentIds();
 
     /**
      * @return 根地区ID
      */
+    @Deprecated
     default Set<String> getRootDistrictId() {
         return getDistrictIds().stream().map(TreeNode::getValue).collect(Collectors.toSet());
     }
@@ -91,6 +96,7 @@ public interface PersonnelAuthorization extends Serializable {
     /**
      * @return 根机构ID
      */
+    @Deprecated
     default Set<String> getRootOrgId() {
         return getOrgIds().stream().map(TreeNode::getValue).collect(Collectors.toSet());
     }
@@ -98,6 +104,7 @@ public interface PersonnelAuthorization extends Serializable {
     /**
      * @return 根职位ID
      */
+    @Deprecated
     default Set<String> getRootPositionId() {
         return getPositionIds().stream().map(TreeNode::getValue).collect(Collectors.toSet());
     }
@@ -105,6 +112,7 @@ public interface PersonnelAuthorization extends Serializable {
     /**
      * @return 根部门ID
      */
+    @Deprecated
     default Set<String> getRootDepartmentId() {
         return getDepartmentIds().stream().map(TreeNode::getValue).collect(Collectors.toSet());
     }
@@ -112,6 +120,7 @@ public interface PersonnelAuthorization extends Serializable {
     /**
      * @return 所有地区ID
      */
+    @Deprecated
     default Set<String> getAllDistrictId() {
         return getDistrictIds().stream().map(TreeNode::getAllValue).flatMap(List::stream).collect(Collectors.toSet());
     }
@@ -119,6 +128,7 @@ public interface PersonnelAuthorization extends Serializable {
     /**
      * @return 所有机构ID
      */
+    @Deprecated
     default Set<String> getAllOrgId() {
         return getOrgIds().stream().map(TreeNode::getAllValue).flatMap(List::stream).collect(Collectors.toSet());
     }
@@ -126,6 +136,7 @@ public interface PersonnelAuthorization extends Serializable {
     /**
      * @return 所有职位ID
      */
+    @Deprecated
     default Set<String> getAllPositionId() {
         return getPositionIds().stream().map(TreeNode::getAllValue).flatMap(List::stream).collect(Collectors.toSet());
     }
@@ -133,6 +144,7 @@ public interface PersonnelAuthorization extends Serializable {
     /**
      * @return 所有部门ID
      */
+    @Deprecated
     default Set<String> getAllDepartmentId() {
         return getDepartmentIds().stream().map(TreeNode::getAllValue).flatMap(List::stream).collect(Collectors.toSet());
     }
