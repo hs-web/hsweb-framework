@@ -38,8 +38,8 @@ public class BpmTaskServiceImp extends FlowableAbstract implements BpmTaskServic
     }
 
     @Override
-    public Task selectTaskByProcessId(String procInstId) {
-        return taskService.createTaskQuery().processInstanceId(procInstId).singleResult();
+    public List<Task> selectTaskByProcessId(String procInstId) {
+        return taskService.createTaskQuery().processInstanceId(procInstId).list();
     }
 
     @Override
@@ -111,44 +111,46 @@ public class BpmTaskServiceImp extends FlowableAbstract implements BpmTaskServic
     }
 
     @Override
-    public void complete(String workFlowId, String userId, String activityId, String next_claim) {
-        String taskId = selectNowTaskId(workFlowId);
+    public void complete(String taskId, String userId, String activityId, String next_claim) {
         Task task = taskService.createTaskQuery().taskId(taskId).includeProcessVariables().singleResult();
         if (task == null) {
             logger.warn("任务不存在!");
             throw new NotFoundException("task not found");
         }
         String assignee = task.getAssignee();
-        if (null == assignee)
+        if (null == assignee){
             logger.warn("请先签收任务!");
+            throw new NotFoundException("Please sign for the task first");
+        }
         if (!userId.equals(assignee)) {
             logger.warn("只能完成自己的任务");
+            throw new NotFoundException("You can only do your own work");
         }
         //完成此任务
         if (activityId == null) {
             taskService.complete(taskId);
         } else {
-            jumpTask(workFlowId, activityId, next_claim);
+            jumpTask(taskId, activityId, next_claim);
         }
 
-        //根据流程ID查找执行计划，存在则进行下一步,没有则结束工单
-        List<Execution> execution = runtimeService.createExecutionQuery().processInstanceId(workFlowId).list();
-        if (execution.size() > 0) {
-            String tasknow = selectNowTaskId(workFlowId);
-            // 自定义下一执行人
-            if (!StringUtils.isNullOrEmpty(next_claim))
-                claim(tasknow, next_claim);
-        }
+        //根据流程ID查找执行计划，存在则进行下一步,没有则结束（定制化流程预留）
+//        List<Execution> execution = runtimeService.createExecutionQuery().processInstanceId(workFlowId).list();
+//        if (execution.size() > 0) {
+//            String tasknow = selectNowTaskId(workFlowId);
+//            // 自定义下一执行人
+//            if (!StringUtils.isNullOrEmpty(next_claim))
+//                claim(tasknow, next_claim);
+//        }
     }
 
     @Override
-    public void jumpTask(String procInstId, String activity, String next_claim) {
-        Task task = selectTaskByProcessId(procInstId);
+    public void jumpTask(String taskId, String activity, String next_claim) {
+        Task task = selectTaskByTaskId(taskId);
         TaskServiceImpl taskServiceImpl = (TaskServiceImpl) taskService;
         taskServiceImpl.getCommandExecutor().execute(new JumpTaskCmd(task.getExecutionId(), activity));
-        task = selectTaskByProcessId(procInstId);
-        if (null != task && !StringUtils.isNullOrEmpty(next_claim))
-            claim(task.getId(), next_claim);
+//        task = selectTaskByTaskId(taskId);
+//        if (null != task && !StringUtils.isNullOrEmpty(next_claim))
+//            claim(task.getId(), next_claim);
     }
 
     @Override

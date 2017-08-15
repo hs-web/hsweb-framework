@@ -17,7 +17,7 @@ public interface BpmTaskService{
 
     List<Task> selectNowTask(String procInstId);
 
-    Task selectTaskByProcessId(String procInstId);
+    List<Task> selectTaskByProcessId(String procInstId);
 
     Task selectTaskByTaskId(String taskId);
 
@@ -59,7 +59,7 @@ public interface BpmTaskService{
      * 完成任务（环节）并指定下一环节办理人
      *
      * @param taskId    任务id
-     * @param userId    用户id
+     * @param userId    当前办理人用户id
      * @param activityId 人为指定下一执行环节（预留）
      * @param next_claim 人为指定下一步执行人（预留）
      * @throws Exception 异常信息
@@ -70,7 +70,7 @@ public interface BpmTaskService{
      * 流程任意跳转
      * @param procInstId  流程实例ID
      * @param activity           流程环节ID
-     * @param next_claim         下一步执行人
+     * @param next_claim         人为指定下一步执行人（预留）
      */
     void jumpTask(String procInstId, String activity, String next_claim);
 

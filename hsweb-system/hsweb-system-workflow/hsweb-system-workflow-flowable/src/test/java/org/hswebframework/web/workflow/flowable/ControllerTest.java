@@ -80,14 +80,29 @@ public class ControllerTest extends SimpleWebApplicationTests {
             Assert.assertEquals(i,1);
             System.out.println("当前活动流程数:" + i);
             System.out.println("当前流程节点ID_" + processInstance.getActivityId());
-            Task task = bpmTaskService.selectTaskByProcessId(processInstance.getId());
-            Assert.assertNotNull(task);
-            System.out.println("当前环节:"+task.getName()+"__办理人:"+task.getAssignee());
         } catch (Exception e) {
             System.out.println("启动流程失败" + e);
         }
-        ProcessDefinitionEntity processDefinitionEntity = ((BpmActivityServiceImp)bpmActivityService).getProcessDefinition(processInstance.getProcessDefinitionId());
+        System.out.println("=========>>>");
+        List<Task> tasks = bpmTaskService.selectTaskByProcessId(processInstance.getId());
+        Assert.assertNotNull(tasks);
+        System.out.println("当前环节:"+tasks.get(0).getName()+"__办理人:"+tasks.get(0).getAssignee());
+        System.out.println("=========>>>");
         ActivityImpl activity = bpmActivityService.getActivityByProcInstId(processInstance.getProcessDefinitionId(), processInstance.getId());
+        System.out.println("当前流程图元");
+        System.out.println(activity);
+        System.out.println("=========>>>");
+        System.out.println("=========流程流转下一步，下一步为并行网关。>>>");
+        for (Task task:tasks) {
+            bpmTaskService.complete(task.getId(), "zhangsan",null,null);
+        }
+        tasks = bpmTaskService.selectTaskByProcessId(processInstance.getId());
+        Assert.assertNotNull(tasks);
+        for (Task task:tasks) {
+            System.out.println("当前环节:"+task.getName()+"__办理人:"+task.getAssignee());
+        }
+        System.out.println("=========>>>");
+        activity = bpmActivityService.getActivityByProcInstId(processInstance.getProcessDefinitionId(), processInstance.getId());
         System.out.println("当前流程图元");
         System.out.println(activity);
         System.out.println("=========>>>");

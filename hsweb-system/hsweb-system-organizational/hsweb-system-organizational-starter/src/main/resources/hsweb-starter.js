@@ -46,8 +46,8 @@ function install(context) {
         .addColumn().name("parent_id").alias("parentId").comment("父级行政区域").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
         .addColumn().name("path").alias("path").comment("树路径,如: asb3-lsat").jdbcType(java.sql.JDBCType.VARCHAR).length(3000).commit()
         .addColumn().name("describe").alias("describe").comment("说明").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
-        .addColumn().name("status").alias("status").comment("状态").jdbcType(java.sql.JDBCType.DECIMAL).length(65535, 32767).commit()
-        .addColumn().name("sort_index").alias("sortIndex").comment("排序索引").jdbcType(java.sql.JDBCType.DECIMAL).length(65535, 32767).commit()
+        .addColumn().name("status").alias("status").comment("状态").jdbcType(java.sql.JDBCType.DECIMAL).length(4, 0).commit()
+        .addColumn().name("sort_index").alias("sortIndex").comment("排序索引").jdbcType(java.sql.JDBCType.DECIMAL).length(32, 0).commit()
         .comment("行政区域").commit();
 
     database.createOrAlter("s_organization")
@@ -60,7 +60,7 @@ function install(context) {
         .addColumn().name("parent_id").alias("parentId").comment("上级机构id").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
         .addColumn().name("path").alias("path").comment("树定位码").jdbcType(java.sql.JDBCType.VARCHAR).length(1024).commit()
         .addColumn().name("sort_index").alias("sortIndex").comment("树结构编码").jdbcType(java.sql.JDBCType.DECIMAL).length(32, 0).commit()
-        .addColumn().name("status").alias("status").comment("状态").jdbcType(java.sql.JDBCType.DECIMAL).length(32, 0).commit()
+        .addColumn().name("status").alias("status").comment("状态").jdbcType(java.sql.JDBCType.DECIMAL).length(4, 0).commit()
         .addColumn().name("level").alias("level").comment("级别").jdbcType(java.sql.JDBCType.DECIMAL).length(32, 0).commit()
         .comment("组织").commit();
 
@@ -72,7 +72,7 @@ function install(context) {
         .addColumn().name("parent_id").alias("parentId").comment("父级id").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
         .addColumn().name("path").alias("path").comment("树结构编码").jdbcType(java.sql.JDBCType.VARCHAR).length(3000).commit()
         .addColumn().name("sort_index").alias("sortIndex").comment("排序序号").jdbcType(java.sql.JDBCType.DECIMAL).length(32, 0).commit()
-        .addColumn().name("status").alias("status").comment("状态").jdbcType(java.sql.JDBCType.DECIMAL).length(32, 0).commit()
+        .addColumn().name("status").alias("status").comment("状态").jdbcType(java.sql.JDBCType.DECIMAL).length(4, 0).commit()
         .addColumn().name("level").alias("level").comment("级别").jdbcType(java.sql.JDBCType.DECIMAL).length(32, 0).commit()
         .comment("部门").commit();
 
@@ -96,7 +96,7 @@ function install(context) {
         .addColumn().name("phone").alias("phone").comment("联系电话").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
         .addColumn().name("photo").alias("photo").comment("照片").jdbcType(java.sql.JDBCType.VARCHAR).length(128).commit()
         .addColumn().name("user_id").alias("userId").comment("关联用户id").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
-        .addColumn().name("status").alias("status").comment("状态").jdbcType(java.sql.JDBCType.DECIMAL).length(32, 0).commit()
+        .addColumn().name("status").alias("status").comment("状态").jdbcType(java.sql.JDBCType.DECIMAL).length(4, 0).commit()
         .addColumn().name("remark").alias("remark").comment("备注").jdbcType(java.sql.JDBCType.VARCHAR).length(256).commit()
         .comment("人员").commit();
 
@@ -109,7 +109,7 @@ function install(context) {
         .addColumn().name("u_id").alias("id").comment("ID").jdbcType(java.sql.JDBCType.VARCHAR).length(32).primaryKey().commit()
         .addColumn().name("name").alias("name").comment("关系名称").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
         .addColumn().name("type_id").alias("typeId").comment("关系类型").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
-        .addColumn().name("status").alias("status").comment("状态").jdbcType(java.sql.JDBCType.NUMERIC).commit()
+        .addColumn().name("status").alias("status").comment("状态").jdbcType(java.sql.JDBCType.NUMERIC).length(4,0).commit()
         .comment("关系定义").commit();
 
     database.createOrAlter("s_relation_info")
@@ -119,7 +119,7 @@ function install(context) {
         .addColumn().name("relation_to").alias("relationTo").comment("关系至").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
         .addColumn().name("relation_type_from").alias("relationTypeFrom").comment("关系类型从,如:人员").jdbcType(java.sql.JDBCType.VARCHAR).length(64).commit()
         .addColumn().name("relation_type_to").alias("relationTypeTo").comment("关系类型至,如:部门").jdbcType(java.sql.JDBCType.VARCHAR).length(64).commit()
-        .addColumn().name("status").alias("status").comment("状态").jdbcType(java.sql.JDBCType.NUMERIC).commit()
+        .addColumn().name("status").alias("status").comment("状态").jdbcType(java.sql.JDBCType.NUMERIC).length(4,0).commit()
         .comment("关系信息").commit();
 
 }

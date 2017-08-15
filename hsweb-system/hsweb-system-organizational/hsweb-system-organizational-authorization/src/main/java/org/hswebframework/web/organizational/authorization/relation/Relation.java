@@ -12,6 +12,26 @@ import java.io.Serializable;
 public interface Relation extends Serializable {
 
     /**
+     * 默认类型:机构
+     */
+    String TYPE_ORG = "org";
+
+    /**
+     * 默认类型:部门
+     */
+    String TYPE_DEPARTMENT = "department";
+
+    /**
+     * 默认类型:岗位
+     */
+    String TYPE_POSITION = "position";
+
+    /**
+     * 默认类型:人员
+     */
+    String TYPE_PERSON = "person";
+
+    /**
      * @return 关系类型，如:person,department
      */
     String getType();

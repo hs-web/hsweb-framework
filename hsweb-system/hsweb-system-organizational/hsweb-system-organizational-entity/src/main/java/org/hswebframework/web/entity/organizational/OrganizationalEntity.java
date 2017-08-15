@@ -101,11 +101,13 @@ public interface OrganizationalEntity extends TreeSortSupportEntity<String>, Dis
     /**
      * @return 可选角色
      */
+    @Deprecated
     java.util.List<String> getOptionalRoles();
 
     /**
      * 设置 可选角色
      */
+    @Deprecated
     void setOptionalRoles(java.util.List<String> optionalRoles);
 
     void setChildren(List<OrganizationalEntity> children);

@@ -38,6 +38,8 @@ public class SimpleDynamicFormColumnEntity extends SimpleGenericEntity<String> i
     //数据字典配置
     private String dictConfig;
 
+    private Long sortIndex;
+
     /**
      * @return 表单ID
      */
@@ -216,5 +218,16 @@ public class SimpleDynamicFormColumnEntity extends SimpleGenericEntity<String> i
     @Override
     public void setDictConfig(String dictConfig) {
         this.dictConfig = dictConfig;
+    }
+
+
+    @Override
+    public Long getSortIndex() {
+        return sortIndex;
+    }
+
+    @Override
+    public void setSortIndex(Long sortIndex) {
+        this.sortIndex = sortIndex;
     }
 }

@@ -16,15 +16,16 @@
  */
 package org.hswebframework.web.entity.organizational;
 
-import org.hswebframework.web.commons.entity.Entity;
 import org.hswebframework.web.entity.organizational.authorization.PersonAttachEntity;
 import org.hswebframework.web.entity.organizational.authorization.PositionAttachEntity;
 
 /**
  * 人员职位关联 实体
+ * 即将使用 {@link RelationInfoEntity} 进行替代
  *
  * @author hsweb-generator-online
  */
+@Deprecated
 public interface PersonPositionEntity extends PersonAttachEntity, PositionAttachEntity {
  /*-------------------------------------------
     |               属性名常量               |
