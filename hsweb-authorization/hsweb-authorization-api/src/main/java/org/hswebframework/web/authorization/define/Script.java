@@ -1,6 +1,5 @@
 package org.hswebframework.web.authorization.define;
 
-import java.util.Map;
 
 /**
  * 使用脚本进行权限控制

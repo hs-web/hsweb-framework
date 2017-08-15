@@ -11,7 +11,7 @@ import java.util.Set;
  * 权限控制定义,定义权限控制的方式
  *
  * @author zhouhao
- * @see AuthorizeDefinitionParser
+ * @see AopMethodAuthorizeDefinitionParser
  * @since 3.0
  */
 public interface AuthorizeDefinition {
@@ -26,7 +26,7 @@ public interface AuthorizeDefinition {
      * @return 是否进行数据权限控制
      * @see org.hswebframework.web.authorization.access.DataAccessController
      */
-    boolean isDataAccessControll();
+    boolean isDataAccessControl();
 
     /**
      * @return 要控制的权限
@@ -74,4 +74,6 @@ public interface AuthorizeDefinition {
      * @return 当存在多个配置, 如:配置了多个permission或者actions. 进行判断的逻辑(或者,并且)
      */
     Logical getLogical();
+
+    DataAccessDefinition getDataAccessDefinition();
 }
