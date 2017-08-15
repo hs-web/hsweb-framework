@@ -1,5 +1,6 @@
-package org.hswebframework.web.authorization.define;
+package org.hswebframework.web.authorization.basic.define;
 
+import org.hswebframework.web.authorization.define.AuthorizeDefinition;
 import org.hswebframework.web.boost.aop.context.MethodInterceptorParamContext;
 
 /**
@@ -8,7 +9,7 @@ import org.hswebframework.web.boost.aop.context.MethodInterceptorParamContext;
  * @author zhouhao
  * @see AuthorizeDefinition
  */
-public interface AuthorizeDefinitionParser {
+public interface AopMethodAuthorizeDefinitionParser {
 
     /**
      * 解析权限控制定义
