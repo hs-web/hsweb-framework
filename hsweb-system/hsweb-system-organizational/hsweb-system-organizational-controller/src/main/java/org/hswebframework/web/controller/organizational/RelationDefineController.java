@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
  * @author hsweb-generator-online
  */
 @RestController
-@RequestMapping("${hsweb.web.mappings.relationDefine:relationDefine}")
-@Authorize(permission = "relationDefine")
+@RequestMapping("${hsweb.web.mappings.relationDefine:relation/define}")
+@Authorize(permission = "relation-define")
 @AccessLogger("关系定义")
 public class RelationDefineController implements SimpleGenericEntityController<RelationDefineEntity, String, QueryParamEntity> {
 

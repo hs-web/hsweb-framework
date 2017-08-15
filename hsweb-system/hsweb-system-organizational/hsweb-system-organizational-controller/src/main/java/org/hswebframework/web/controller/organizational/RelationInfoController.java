@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
  * @author hsweb-generator-online
  */
 @RestController
-@RequestMapping("${hsweb.web.mappings.relationInfo:relationInfo}")
-@Authorize(permission = "relationInfo")
+@RequestMapping("${hsweb.web.mappings.relationInfo:relation/info}")
+@Authorize(permission = "relation/info")
 @AccessLogger("关系信息")
 public class RelationInfoController implements SimpleGenericEntityController<RelationInfoEntity, String, QueryParamEntity> {
 
