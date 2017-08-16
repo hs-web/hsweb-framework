@@ -77,13 +77,13 @@ public interface UserTokenManager {
      *
      * @param userId 用户ID
      */
-    void logoutByUserId(String userId);
+    void signOutByUserId(String userId);
 
     /**
      * 根据token删除
      * @param token
      */
-    void logoutByToken(String token);
+    void signOutByToken(String token);
 
     /**
      * 登记一个用户的token

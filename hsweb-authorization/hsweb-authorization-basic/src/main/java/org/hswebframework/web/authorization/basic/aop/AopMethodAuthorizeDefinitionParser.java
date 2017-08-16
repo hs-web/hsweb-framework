@@ -1,4 +1,4 @@
-package org.hswebframework.web.authorization.basic.define;
+package org.hswebframework.web.authorization.basic.aop;
 
 import org.hswebframework.web.authorization.define.AuthorizeDefinition;
 import org.hswebframework.web.boost.aop.context.MethodInterceptorParamContext;

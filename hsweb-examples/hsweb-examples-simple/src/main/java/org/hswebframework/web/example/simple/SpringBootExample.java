@@ -21,6 +21,7 @@ import com.alibaba.fastjson.JSON;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.access.DataAccessConfig;
+import org.hswebframework.web.authorization.basic.configuration.EnableAopAuthorize;
 import org.hswebframework.web.authorization.simple.SimpleFieldFilterDataAccessConfig;
 import org.hswebframework.web.commons.entity.DataStatus;
 import org.hswebframework.web.commons.entity.factory.EntityFactory;
@@ -76,6 +77,7 @@ import java.util.stream.Stream;
 @EnableCaching
 @EnableAspectJAutoProxy
 @EnableAccessLogger
+@EnableAopAuthorize
 public class SpringBootExample
         implements CommandLineRunner {
 

@@ -121,7 +121,8 @@ public class DefaultBasicAuthorizeDefinition implements AuthorizeDefinition {
         this.user = user;
     }
 
-    void put(Authorize authorize) {
+    public void put(Authorize authorize) {
+        if (null == authorize || authorize.ignore()) return;
         permissions.addAll(Arrays.asList(authorize.permission()));
         actions.addAll(Arrays.asList(authorize.action()));
         roles.addAll(Arrays.asList(authorize.role()));
@@ -132,11 +133,13 @@ public class DefaultBasicAuthorizeDefinition implements AuthorizeDefinition {
         message = authorize.message();
     }
 
-    void put(RequiresExpression expression) {
+    public void put(RequiresExpression expression) {
+        if (null == expression) return;
         script = new DefaultScript(expression.language(), expression.value());
     }
 
-    void put(RequiresDataAccess dataAccess) {
+    public void put(RequiresDataAccess dataAccess) {
+        if (null == dataAccess) return;
         if (!dataAccess.permission().equals("")) {
             permissions.add(dataAccess.permission());
         }
@@ -148,7 +151,7 @@ public class DefaultBasicAuthorizeDefinition implements AuthorizeDefinition {
         } else if (DataAccessController.class != dataAccess.controllerClass()) {
             definition.setController(dataAccess.getClass().getName());
         }
-        dataAccessDefinition=definition;
+        dataAccessDefinition = definition;
     }
 
 

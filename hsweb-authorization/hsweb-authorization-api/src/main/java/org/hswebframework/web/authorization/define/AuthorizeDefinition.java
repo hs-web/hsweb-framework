@@ -11,7 +11,6 @@ import java.util.Set;
  * 权限控制定义,定义权限控制的方式
  *
  * @author zhouhao
- * @see AopMethodAuthorizeDefinitionParser
  * @since 3.0
  */
 public interface AuthorizeDefinition {

@@ -5,7 +5,7 @@ import org.hswebframework.web.authorization.define.AuthorizeDefinition;
 import org.hswebframework.web.boost.aop.context.MethodInterceptorParamContext;
 
 /**
- * Created by zhouhao on 2017/8/15.
+ * 权限控制上下文
  */
 public class AuthorizingContext {
     private AuthorizeDefinition definition;

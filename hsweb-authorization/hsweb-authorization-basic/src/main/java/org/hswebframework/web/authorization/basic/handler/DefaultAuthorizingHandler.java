@@ -27,7 +27,14 @@ public class DefaultAuthorizingHandler implements AuthorizingHandler {
 
     private DataAccessController dataAccessController;
 
-    private Logger logger= LoggerFactory.getLogger(this.getClass());
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
+
+    public DefaultAuthorizingHandler(DataAccessController dataAccessController) {
+        this.dataAccessController = dataAccessController;
+    }
+
+    public DefaultAuthorizingHandler() {
+    }
 
     public void setDataAccessController(DataAccessController dataAccessController) {
         this.dataAccessController = dataAccessController;
@@ -36,29 +43,31 @@ public class DefaultAuthorizingHandler implements AuthorizingHandler {
     @Override
     public void handle(AuthorizingContext context) {
 
-        handleRdac(context.getAuthentication(),context.getDefinition());
+        //进行rdac权限控制
+        handleRdac(context.getAuthentication(), context.getDefinition());
 
-        handleDataAccess(context.getAuthentication(),context.getDefinition(),context.getParamContext());
+        //进行数据权限控制
+        handleDataAccess(context.getAuthentication(), context.getDefinition(), context.getParamContext());
 
-        handleExpression(context.getAuthentication(),context.getDefinition(),context.getParamContext());
+        //表达式权限控制
+        handleExpression(context.getAuthentication(), context.getDefinition(), context.getParamContext());
 
     }
 
-    protected void handleDataAccess(Authentication authentication, AuthorizeDefinition definition, MethodInterceptorParamContext paramContext){
-
-        if(dataAccessController==null){
+    protected void handleDataAccess(Authentication authentication, AuthorizeDefinition definition, MethodInterceptorParamContext paramContext) {
+        if (dataAccessController == null) {
             logger.warn("dataAccessController is null,skip data access control!");
             return;
         }
-        List<Permission> permission=authentication.getPermissions()
+        List<Permission> permission = authentication.getPermissions()
                 .stream()
-                .filter(per->definition.getPermissions().contains(per.getId()))
+                .filter(per -> definition.getPermissions().contains(per.getId()))
                 .collect(Collectors.toList());
 
-        DataAccessController finalAccessController=dataAccessController;
+        DataAccessController finalAccessController = dataAccessController;
 
         //取得当前登录用户持有的控制规则
-        Set<DataAccessConfig> accesses =permission
+        Set<DataAccessConfig> accesses = permission
                 .stream().map(Permission::getDataAccesses)
                 .flatMap(Collection::stream)
                 .filter(access -> definition.getActions().contains(access.getAction()))
@@ -76,9 +85,10 @@ public class DefaultAuthorizingHandler implements AuthorizingHandler {
         }
 
     }
-    protected void handleExpression(Authentication authentication,AuthorizeDefinition definition, MethodInterceptorParamContext paramContext){
-        if(definition.getScript()!=null){
-            String scriptId= DigestUtils.md5Hex(definition.getScript().getScript());
+
+    protected void handleExpression(Authentication authentication, AuthorizeDefinition definition, MethodInterceptorParamContext paramContext) {
+        if (definition.getScript() != null) {
+            String scriptId = DigestUtils.md5Hex(definition.getScript().getScript());
 
             DynamicScriptEngine engine = DynamicScriptEngineFactory.getEngine(definition.getScript().getLanguage());
             if (null == engine) {
@@ -86,7 +96,7 @@ public class DefaultAuthorizingHandler implements AuthorizingHandler {
             }
             if (!engine.compiled(scriptId)) {
                 try {
-                    engine.compile(scriptId,definition.getScript().getScript());
+                    engine.compile(scriptId, definition.getScript().getScript());
                 } catch (Exception e) {
                     logger.error("express compile error", e);
                     throw new AuthorizationException("{expression_error}");
@@ -101,20 +111,20 @@ public class DefaultAuthorizingHandler implements AuthorizingHandler {
         }
     }
 
-    protected void handleRdac(Authentication authentication,AuthorizeDefinition definition){
+    protected void handleRdac(Authentication authentication, AuthorizeDefinition definition) {
         boolean access = true;
         Logical logical = definition.getLogical() == Logical.DEFAULT ? Logical.OR : definition.getLogical();
         boolean logicalIsOr = logical == Logical.OR;
-        Set<String> permissionsDef=definition.getPermissions();
-        Set<String> actionsDef=definition.getActions();
-        Set<String> rolesDef=definition.getRoles();
-        Set<String> usersDef=definition.getUser();
+        Set<String> permissionsDef = definition.getPermissions();
+        Set<String> actionsDef = definition.getActions();
+        Set<String> rolesDef = definition.getRoles();
+        Set<String> usersDef = definition.getUser();
 
 
         // 控制权限
         if (!definition.getPermissions().isEmpty()) {
-            if(logger.isInfoEnabled()){
-                logger.info("do permission access handle : permissions{},actions{} ",permissionsDef,actionsDef);
+            if (logger.isInfoEnabled()) {
+                logger.info("do permission access handle : permissions{},actions{} ", permissionsDef, actionsDef);
             }
             List<Permission> permissions = authentication.getPermissions().stream()
                     .filter(permission -> {
@@ -126,7 +136,7 @@ public class DefaultAuthorizingHandler implements AuthorizingHandler {
                         //判断action
                         List<String> actions = permission.getActions()
                                 .stream()
-                                .filter(rolesDef::contains)
+                                .filter(actionsDef::contains)
                                 .collect(Collectors.toList());
 
                         if (actions.isEmpty()) return false;
@@ -141,8 +151,8 @@ public class DefaultAuthorizingHandler implements AuthorizingHandler {
         }
         //控制角色
         if (!rolesDef.isEmpty()) {
-            if(logger.isInfoEnabled()){
-                logger.info("do role access handle : roles{} ",rolesDef);
+            if (logger.isInfoEnabled()) {
+                logger.info("do role access handle : roles{} ", rolesDef);
             }
             Function<Predicate<Role>, Boolean> func = logicalIsOr
                     ? authentication.getRoles().stream()::anyMatch
@@ -151,8 +161,8 @@ public class DefaultAuthorizingHandler implements AuthorizingHandler {
         }
         //控制用户
         if (!usersDef.isEmpty()) {
-            if(logger.isInfoEnabled()){
-                logger.info("do user access handle : users{} ",usersDef);
+            if (logger.isInfoEnabled()) {
+                logger.info("do user access handle : users{} ", usersDef);
             }
             Function<Predicate<String>, Boolean> func = logicalIsOr
                     ? usersDef.stream()::anyMatch

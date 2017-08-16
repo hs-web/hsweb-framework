@@ -245,8 +245,8 @@ public class SimplePersonService extends EnableCacheGenericEntityService<PersonE
         PersonEntity entity = selectByPk(personId);
         assertNotNull(entity);
 
-        Personnel personnel = entityFactory.newInstance(Personnel.class, SimplePersonnel.class);
-        entityFactory.copyProperties(entity, personnel);
+        Personnel personnel = entityFactory.newInstance(Personnel.class, SimplePersonnel.class, entity);
+
         authorization.setPersonnel(personnel);
 
         // 获取用户的职位ID集合(多个职位)
