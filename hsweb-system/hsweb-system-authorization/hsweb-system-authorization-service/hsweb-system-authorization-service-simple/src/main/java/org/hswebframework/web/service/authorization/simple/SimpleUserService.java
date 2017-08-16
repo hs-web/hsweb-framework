@@ -24,6 +24,7 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
@@ -74,15 +75,14 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
     @Override
     @Transactional(readOnly = true)
     public UserEntity selectByUsername(String username) {
-        tryValidateProperty(StringUtils.hasLength(username), UserEntity.username, "id:{not_be_null}");
-        Assert.notNull(username, "username:{not_be_null}");
+        if (null == username) return null;
         return createQuery().where("username", username).single();
     }
 
     @Override
     @Transactional(readOnly = true)
     public UserEntity selectByPk(String id) {
-        tryValidateProperty(StringUtils.hasLength(id), UserEntity.id, "id:{not_be_null}");
+        if (null == id) return null;
         UserEntity userEntity = createQuery().where(UserEntity.id, id).single();
         if (null != userEntity) {
             List<String> roleId = userRoleDao.selectByUserId(id).stream().map(UserRoleEntity::getRoleId).collect(Collectors.toList());
@@ -95,7 +95,7 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
 
     @Override
     public List<UserEntity> selectByPk(List<String> id) {
-        tryValidateProperty(id != null && !id.isEmpty(), UserEntity.id, "id:{not_be_null}");
+        if (CollectionUtils.isEmpty(id)) return new ArrayList<>();
         return createQuery().where().in(UserEntity.id, id).listNoPaging();
     }
 
