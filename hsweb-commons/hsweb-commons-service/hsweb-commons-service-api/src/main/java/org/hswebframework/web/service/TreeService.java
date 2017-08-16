@@ -23,16 +23,42 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * TODO 完成注释
+ * 树结构实体服务,提供对树结果实体的常用操作
  *
  * @author zhouhao
+ * @since 3.0
  */
 public interface TreeService<E extends TreeSupportEntity, PK> extends Service {
+
+    /**
+     * 根据父节点id获取子节点数据
+     *
+     * @param parentId 父节点ID
+     * @return 子节点数据
+     */
     List<E> selectChildNode(PK parentId);
 
+    /**
+     * 根据父节点id,获取所有子节点的数据,包含字节点的字节点
+     *
+     * @param parentId 父节点ID
+     * @return 所有子节点的数据
+     */
     List<E> selectAllChildNode(PK parentId);
 
+    /**
+     * 批量修改数据,如果集合中的数据不存在,则将会进行新增
+     *
+     * @param data 数据集合
+     * @return 修改的数量
+     */
     int updateBatch(Collection<E> data);
 
+    /**
+     * 批量添加数据
+     *
+     * @param data 数据集合
+     * @return 被添加数据集合的主键
+     */
     List<PK> insertBatch(Collection<E> data);
 }
