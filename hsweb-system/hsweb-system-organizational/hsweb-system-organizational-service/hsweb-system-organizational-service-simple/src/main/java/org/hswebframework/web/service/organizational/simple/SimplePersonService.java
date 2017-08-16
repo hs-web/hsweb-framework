@@ -166,6 +166,12 @@ public class SimplePersonService extends EnableCacheGenericEntityService<PersonE
         return bindEntity;
     }
 
+    @Override
+    public List<PersonEntity> selectByPositionId(String positionId) {
+        Objects.requireNonNull(positionId);
+        return personDao.selectByPositionId(positionId);
+    }
+
     protected void syncPositionInfo(String personId, Set<String> positionIds) {
         for (String positionId : positionIds) {
             PersonPositionEntity positionEntity = entityFactory.newInstance(PersonPositionEntity.class);

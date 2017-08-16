@@ -35,6 +35,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * 人员
  *
@@ -85,5 +87,12 @@ public class PersonController implements SimpleGenericEntityController<PersonEnt
         bindEntity.setId(id);
         personService.updateByPk(bindEntity);
         return ResponseMessage.ok();
+    }
+
+    @PostMapping("/in-position/{positionId}")
+    @AccessLogger("获取指定岗位的人员")
+    @Authorize(action = Permission.ACTION_GET)
+    public ResponseMessage<List<PersonEntity>> getByPositionId(@PathVariable String positionId) {
+        return ResponseMessage.ok(personService.selectByPositionId(positionId));
     }
 }
