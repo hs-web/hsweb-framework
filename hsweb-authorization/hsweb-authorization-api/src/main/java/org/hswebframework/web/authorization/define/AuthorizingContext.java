@@ -1,7 +1,6 @@
-package org.hswebframework.web.authorization.basic.handler;
+package org.hswebframework.web.authorization.define;
 
 import org.hswebframework.web.authorization.Authentication;
-import org.hswebframework.web.authorization.define.AuthorizeDefinition;
 import org.hswebframework.web.boost.aop.context.MethodInterceptorParamContext;
 
 /**
@@ -13,7 +12,6 @@ public class AuthorizingContext {
     private Authentication authentication;
 
     private MethodInterceptorParamContext paramContext;
-
 
     public AuthorizeDefinition getDefinition() {
         return definition;
