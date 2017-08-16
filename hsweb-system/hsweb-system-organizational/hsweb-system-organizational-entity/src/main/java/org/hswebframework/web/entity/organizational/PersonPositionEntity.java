@@ -25,7 +25,6 @@ import org.hswebframework.web.entity.organizational.authorization.PositionAttach
  *
  * @author hsweb-generator-online
  */
-@Deprecated
 public interface PersonPositionEntity extends PersonAttachEntity, PositionAttachEntity {
  /*-------------------------------------------
     |               属性名常量               |
