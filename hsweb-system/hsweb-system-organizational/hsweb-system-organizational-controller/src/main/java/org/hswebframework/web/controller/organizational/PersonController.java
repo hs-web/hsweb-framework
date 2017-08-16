@@ -17,6 +17,7 @@
 
 package org.hswebframework.web.controller.organizational;
 
+import org.hswebframework.web.NotFoundException;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.annotation.RequiresDataAccess;
@@ -30,6 +31,7 @@ import org.hswebframework.web.entity.organizational.PersonAuthBindEntity;
 import org.hswebframework.web.entity.organizational.PersonEntity;
 import org.hswebframework.web.entity.organizational.PositionEntity;
 import org.hswebframework.web.logging.AccessLogger;
+import org.hswebframework.web.organizational.authorization.PersonnelAuthorization;
 import org.hswebframework.web.service.organizational.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -63,6 +65,26 @@ public class PersonController implements SimpleGenericEntityController<PersonEnt
     @Override
     public ResponseMessage<PagerResult<PersonEntity>> list(QueryParamEntity param) {
         return SimpleGenericEntityController.super.list(param);
+    }
+
+    @GetMapping("/me")
+    @AccessLogger("查看当前登录用户的人员信息")
+    @Authorize(merge = false)
+    public ResponseMessage<PersonAuthBindEntity> getLoginUserPerson() {
+        PersonnelAuthorization authorization = PersonnelAuthorization
+                .current()
+                .orElseThrow(NotFoundException::new);
+        return getDetail(authorization.getPersonnel().getId());
+    }
+
+    @GetMapping("/me/authorization")
+    @AccessLogger("查看当前登录用户的人员权限信息")
+    @Authorize(merge = false)
+    public ResponseMessage<PersonnelAuthorization> getLoginUserPersonDetail() {
+        PersonnelAuthorization authorization = PersonnelAuthorization
+                .current()
+                .orElseThrow(NotFoundException::new);
+        return ResponseMessage.ok(authorization);
     }
 
     @GetMapping("/{id}/detail")
