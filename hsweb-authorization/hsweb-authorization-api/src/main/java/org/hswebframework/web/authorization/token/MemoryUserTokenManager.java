@@ -32,15 +32,15 @@ import java.util.stream.Collectors;
  * @author zhouhao
  * @since 3.0
  */
-public class MemeoryUserTokenManager implements UserTokenManager {
+public class MemoryUserTokenManager implements UserTokenManager {
 
     private final ConcurrentMap<String, SimpleUserToken> tokenUserStorage = new ConcurrentHashMap<>(256);
 
     //令牌超时事件,默认3600秒
     private long timeout = 3600;
 
-    //异地登录模式，默认运行异地登录
-    private AllopatricLoginMode allopatricLoginMode=AllopatricLoginMode.allow;
+    //异地登录模式，默认允许异地登录
+    private AllopatricLoginMode allopatricLoginMode = AllopatricLoginMode.allow;
 
     //事件转发器
     private AuthorizationListenerDispatcher authorizationListenerDispatcher;
@@ -69,7 +69,7 @@ public class MemeoryUserTokenManager implements UserTokenManager {
         if (null == detail) return null;
         if (System.currentTimeMillis() - detail.getLastRequestTime() > timeout * 1000) {
             detail.setState(TokenState.expired);
-           // logoutByToken(detail.getToken());
+            // signOutByToken(detail.getToken());
             return detail;
         }
         return detail;
@@ -90,16 +90,16 @@ public class MemeoryUserTokenManager implements UserTokenManager {
     @Override
     public boolean userIsLoggedIn(String userId) {
         for (UserToken userToken : getByUserId(userId)) {
-            if(userToken.isEffective())return true;
+            if (userToken.isEffective()) return true;
         }
         return false;
     }
 
     @Override
     public boolean tokenIsLoggedIn(String token) {
-        UserToken userToken=getByToken(token);
+        UserToken userToken = getByToken(token);
 
-        return userToken != null&&userToken.isEffective();
+        return userToken != null && userToken.isEffective();
     }
 
     @Override
@@ -132,12 +132,12 @@ public class MemeoryUserTokenManager implements UserTokenManager {
     }
 
     @Override
-    public void logoutByUserId(String userId) {
-        getByUserId(userId).forEach(detail -> logoutByToken(detail.getToken()));
+    public void signOutByUserId(String userId) {
+        getByUserId(userId).forEach(detail -> signOutByToken(detail.getToken()));
     }
 
     @Override
-    public void logoutByToken(String token) {
+    public void signOutByToken(String token) {
         tokenUserStorage.remove(token);
     }
 
@@ -146,16 +146,16 @@ public class MemeoryUserTokenManager implements UserTokenManager {
         SimpleUserToken detail = new SimpleUserToken(userId, token);
         if (null != authorizationListenerDispatcher)
             authorizationListenerDispatcher.doEvent(new UserSignInEvent(detail));
-        if(allopatricLoginMode==AllopatricLoginMode.deny){
+        if (allopatricLoginMode == AllopatricLoginMode.deny) {
             detail.setState(TokenState.deny);
-        }else if (allopatricLoginMode==AllopatricLoginMode.offlineOther){
+        } else if (allopatricLoginMode == AllopatricLoginMode.offlineOther) {
             detail.setState(TokenState.effective);
-            SimpleUserToken oldToken =(SimpleUserToken) getByUserId(userId);
-            if(oldToken!=null){
+            SimpleUserToken oldToken = (SimpleUserToken) getByUserId(userId);
+            if (oldToken != null) {
                 //踢下线
                 oldToken.setState(TokenState.offline);
             }
-        }else{
+        } else {
             detail.setState(TokenState.effective);
         }
         tokenUserStorage.put(token, detail);
@@ -168,4 +168,5 @@ public class MemeoryUserTokenManager implements UserTokenManager {
         if (null != detail)
             detail.touch();
     }
+
 }
