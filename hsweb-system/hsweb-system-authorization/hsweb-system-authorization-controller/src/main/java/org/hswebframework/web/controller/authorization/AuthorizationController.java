@@ -66,7 +66,7 @@ public class AuthorizationController {
     @Autowired
     private AuthorizationListenerDispatcher authorizationListenerDispatcher;
 
-    @GetMapping("/login-out")
+    @GetMapping({"/login-out","/sign-out","/exit"})
     @Authorize
     @ApiOperation("退出当前登录")
     public ResponseMessage exit(@ApiParam(hidden = true) Authentication authentication) {

@@ -5,12 +5,15 @@ import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.access.DataAccessConfig;
 import org.hswebframework.web.authorization.access.DataAccessHandler;
 import org.hswebframework.web.authorization.access.FieldFilterDataAccessConfig;
+import org.hswebframework.web.authorization.define.AuthorizingContext;
 import org.hswebframework.web.boost.aop.context.MethodInterceptorParamContext;
 import org.hswebframework.web.commons.entity.Entity;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.commons.model.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Map;
 
 /**
  * 数据权限字段过滤处理,目前仅支持deny. {@link DataAccessConfig.DefaultType#DENY_FIELDS}
@@ -22,11 +25,11 @@ public class FieldFilterDataAccessHandler implements DataAccessHandler {
 
     @Override
     public boolean isSupport(DataAccessConfig access) {
-        return access instanceof FieldFilterDataAccessConfig && DataAccessConfig.DefaultType.DENY_FIELDS.equals(access.getType());
+        return access instanceof FieldFilterDataAccessConfig;
     }
 
     @Override
-    public boolean handle(DataAccessConfig access, MethodInterceptorParamContext context) {
+    public boolean handle(DataAccessConfig access, AuthorizingContext context) {
         FieldFilterDataAccessConfig filterDataAccessConfig = ((FieldFilterDataAccessConfig) access);
 
         switch (access.getAction()) {
@@ -48,10 +51,11 @@ public class FieldFilterDataAccessHandler implements DataAccessHandler {
      * @see BeanUtilsBean
      * @see org.apache.commons.beanutils.PropertyUtilsBean
      */
-    protected boolean doUpdateAccess(FieldFilterDataAccessConfig accesses, MethodInterceptorParamContext params) {
-        Object supportParam = params.getParams().values().stream()
-                .filter(param -> (param instanceof Entity) | (param instanceof Model))
-                .findAny().orElse(null);
+    protected boolean doUpdateAccess(FieldFilterDataAccessConfig accesses, AuthorizingContext params) {
+        Object supportParam = params.getParamContext().getParams().values().stream()
+                .filter(param -> (param instanceof Entity) || (param instanceof Model)||(param instanceof Map))
+                .findAny()
+                .orElse(null);
         if (null != supportParam) {
             for (String field : accesses.getFields()) {
                 try {
@@ -64,14 +68,14 @@ public class FieldFilterDataAccessHandler implements DataAccessHandler {
                 }
             }
         } else {
-            logger.warn("doUpdateAccess skip ,because can not found any entity in param!");
+            logger.warn("doUpdateAccess skip ,because can not found any support entity in param!");
         }
         return true;
     }
 
 
-    protected boolean doQueryAccess(FieldFilterDataAccessConfig access, MethodInterceptorParamContext context) {
-        QueryParamEntity entity = context.getParams()
+    protected boolean doQueryAccess(FieldFilterDataAccessConfig access, AuthorizingContext context) {
+        QueryParamEntity entity = context.getParamContext().getParams()
                 .values().stream()
                 .filter(QueryParamEntity.class::isInstance)
                 .map(QueryParamEntity.class::cast)

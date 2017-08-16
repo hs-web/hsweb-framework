@@ -7,6 +7,7 @@ import org.hswebframework.web.authorization.access.DataAccessConfig;
 import org.hswebframework.web.authorization.access.DataAccessHandler;
 import org.hswebframework.web.authorization.access.ScopeDataAccessConfig;
 import org.hswebframework.web.authorization.annotation.RequiresDataAccess;
+import org.hswebframework.web.authorization.define.AuthorizingContext;
 import org.hswebframework.web.boost.aop.context.MethodInterceptorHolder;
 import org.hswebframework.web.boost.aop.context.MethodInterceptorParamContext;
 import org.hswebframework.web.commons.entity.Entity;
@@ -43,7 +44,7 @@ public abstract class AbstractScopeDataAccessHandler<E> implements DataAccessHan
 
     protected abstract void applyScopeProperty(E entity, String value);
 
-    protected abstract Term createQueryTerm(Set<String> scope);
+    protected abstract Term createQueryTerm(Set<String> scope,AuthorizingContext context);
 
     protected abstract Set<String> getTryOperationScope(String scopeType, PersonnelAuthorization authorization);
 
@@ -53,7 +54,7 @@ public abstract class AbstractScopeDataAccessHandler<E> implements DataAccessHan
     }
 
     @Override
-    public boolean handle(DataAccessConfig access, MethodInterceptorParamContext context) {
+    public boolean handle(DataAccessConfig access, AuthorizingContext context) {
         ScopeDataAccessConfig accessConfig = ((ScopeDataAccessConfig) access);
         switch (accessConfig.getAction()) {
             case Permission.ACTION_QUERY:
@@ -73,7 +74,7 @@ public abstract class AbstractScopeDataAccessHandler<E> implements DataAccessHan
                 .orElseThrow(UnsupportedOperationException::new); // TODO: 17-5-23 其他异常?
     }
 
-    protected boolean handleAdd(ScopeDataAccessConfig access, MethodInterceptorParamContext context) {
+    protected boolean handleAdd(ScopeDataAccessConfig access, AuthorizingContext context) {
         PersonnelAuthorization authorization = getPersonnelAuthorization();
         Set<String> scopes = authorization.getRootOrgId();
         String scope = null;
@@ -86,7 +87,7 @@ public abstract class AbstractScopeDataAccessHandler<E> implements DataAccessHan
         }
         if (scope != null) {
             String finalScopeId = scope;
-            context.getParams().values().stream()
+            context.getParamContext().getParams().values().stream()
                     .filter(getEntityClass()::isInstance)
                     .map(getEntityClass()::cast)
                     .forEach(entity -> applyScopeProperty(entity, finalScopeId));
@@ -96,11 +97,16 @@ public abstract class AbstractScopeDataAccessHandler<E> implements DataAccessHan
         return defaultSuccessOnError;
     }
 
-    protected boolean handleRW(ScopeDataAccessConfig access, MethodInterceptorParamContext context) {
+    protected boolean handleRW(ScopeDataAccessConfig access, AuthorizingContext context) {
         //获取注解
-        RequiresDataAccess dataAccess = context.getAnnotation(RequiresDataAccess.class);
-        Object id = context.<String>getParameter(dataAccess.idParamName()).orElse(null);
-        Object controller = context.getTarget();
+        Object id = context.getParamContext()
+                .<String>getParameter(
+                        context.getDefinition()
+                                .getDataAccessDefinition()
+                                .getIdParameterName())
+                .orElse(null);
+
+        Object controller = context.getParamContext().getTarget();
         Set<String> ids = getTryOperationScope(access);
         String errorMsg;
         //通过QueryController获取QueryService
@@ -133,8 +139,8 @@ public abstract class AbstractScopeDataAccessHandler<E> implements DataAccessHan
         return getTryOperationScope(access.getScopeType(), getPersonnelAuthorization());
     }
 
-    protected boolean handleQuery(ScopeDataAccessConfig access, MethodInterceptorParamContext context) {
-        Entity entity = context.getParams()
+    protected boolean handleQuery(ScopeDataAccessConfig access, AuthorizingContext context) {
+        Entity entity = context.getParamContext().getParams()
                 .values().stream()
                 .filter(Entity.class::isInstance)
                 .map(Entity.class::cast)
@@ -160,7 +166,7 @@ public abstract class AbstractScopeDataAccessHandler<E> implements DataAccessHan
             queryParamEntity.setTerms(new ArrayList<>());
             //添加一个查询条件
             queryParamEntity
-                    .addTerm(createQueryTerm(scope))
+                    .addTerm(createQueryTerm(scope,context))
                     //客户端提交的参数 作为嵌套参数
                     .nest().setTerms(oldParam);
         } else {
@@ -169,9 +175,8 @@ public abstract class AbstractScopeDataAccessHandler<E> implements DataAccessHan
         return true;
     }
 
-    protected boolean genericTypeInstanceOf(Class type) {
-        MethodInterceptorHolder holder = MethodInterceptorHolder.current();
-        Class entity = ClassUtils.getGenericType(holder.getTarget().getClass());
+    protected boolean genericTypeInstanceOf(Class type, AuthorizingContext context) {
+        Class entity = ClassUtils.getGenericType(context.getParamContext().getTarget().getClass());
         return null != entity && ClassUtils.instanceOf(entity, type);
     }
 }

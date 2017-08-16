@@ -3,10 +3,11 @@ package org.hswebframework.web.authorization.basic.aop;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.hswebframework.web.AopUtils;
 import org.hswebframework.web.authorization.Authentication;
-import org.hswebframework.web.authorization.basic.handler.AuthorizingContext;
+import org.hswebframework.web.authorization.define.AuthorizingContext;
 import org.hswebframework.web.authorization.basic.handler.AuthorizingHandler;
 import org.hswebframework.web.authorization.define.AuthorizeDefinition;
 import org.hswebframework.web.authorization.exception.AuthorizationException;
+import org.hswebframework.web.authorization.exception.UnAuthorizedException;
 import org.hswebframework.web.boost.aop.context.MethodInterceptorHolder;
 import org.hswebframework.web.boost.aop.context.MethodInterceptorParamContext;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
@@ -31,7 +32,7 @@ public class AopAuthorizingController extends StaticMethodMatcherPointcutAdvisor
 
             if (null != definition) {
                 AuthorizingContext context = new AuthorizingContext();
-                context.setAuthentication(Authentication.current().orElseThrow(AuthorizationException::new));
+                context.setAuthentication(Authentication.current().orElseThrow(UnAuthorizedException::new));
                 context.setDefinition(definition);
                 context.setParamContext(paramContext);
                 authorizingHandler.handle(context);

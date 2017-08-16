@@ -8,6 +8,7 @@ import org.hswebframework.web.BusinessException;
 import org.hswebframework.web.authorization.access.DataAccessConfig;
 import org.hswebframework.web.authorization.access.DataAccessHandler;
 import org.hswebframework.web.authorization.access.ScriptDataAccessConfig;
+import org.hswebframework.web.authorization.define.AuthorizingContext;
 import org.hswebframework.web.boost.aop.context.MethodInterceptorParamContext;
 
 /**
@@ -22,7 +23,7 @@ public class ScriptDataAccessHandler implements DataAccessHandler {
     }
 
     @Override
-    public boolean handle(DataAccessConfig access, MethodInterceptorParamContext context) {
+    public boolean handle(DataAccessConfig access, AuthorizingContext context) {
         ScriptDataAccessConfig dataAccess = ((ScriptDataAccessConfig) access);
         DynamicScriptEngine engine = DynamicScriptEngineFactory.getEngine(dataAccess.getScriptLanguage());
         if (engine == null) throw new UnsupportedOperationException(dataAccess.getScriptLanguage() + " {not_support}");
@@ -31,7 +32,7 @@ public class ScriptDataAccessHandler implements DataAccessHandler {
             if (!engine.compiled(scriptId)) {
                 engine.compile(scriptId, dataAccess.getScript());
             }
-            Object success = engine.execute(scriptId, context.getParams()).getIfSuccess();
+            Object success = engine.execute(scriptId, context.getParamContext().getParams()).getIfSuccess();
             return StringUtils.isTrue(success);
         } catch (Exception e) {
             throw new BusinessException("{script_error}", e);

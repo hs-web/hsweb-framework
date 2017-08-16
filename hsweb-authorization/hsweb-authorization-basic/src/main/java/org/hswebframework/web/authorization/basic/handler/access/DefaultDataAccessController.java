@@ -3,6 +3,7 @@ package org.hswebframework.web.authorization.basic.handler.access;
 import org.hswebframework.web.authorization.access.DataAccessConfig;
 import org.hswebframework.web.authorization.access.DataAccessController;
 import org.hswebframework.web.authorization.access.DataAccessHandler;
+import org.hswebframework.web.authorization.define.AuthorizingContext;
 import org.hswebframework.web.boost.aop.context.MethodInterceptorParamContext;
 
 import java.util.LinkedList;
@@ -36,12 +37,12 @@ public final class DefaultDataAccessController implements DataAccessController {
     }
 
     @Override
-    public boolean doAccess(DataAccessConfig access, MethodInterceptorParamContext params) {
-        if (parent != null) parent.doAccess(access, params);
+    public boolean doAccess(DataAccessConfig access, AuthorizingContext context) {
+        if (parent != null) parent.doAccess(access, context);
         return handlers.stream()
                 // TODO: 17-3-28 可以换成access对应的handler以提高效率
                 .filter(handler -> handler.isSupport(access))
-                .allMatch(handler -> handler.handle(access, params));
+                .allMatch(handler -> handler.handle(access, context));
     }
 
     public DefaultDataAccessController addHandler(DataAccessHandler handler) {

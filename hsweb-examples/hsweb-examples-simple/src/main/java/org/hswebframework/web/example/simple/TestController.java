@@ -1,11 +1,11 @@
 package org.hswebframework.web.example.simple;
 
 import io.swagger.annotations.ApiOperation;
-import org.hswebframework.web.AuthorizeException;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.annotation.RequiresDataAccess;
+import org.hswebframework.web.authorization.exception.UnAuthorizedException;
 import org.hswebframework.web.commons.entity.Entity;
 import org.hswebframework.web.commons.entity.PagerResult;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
@@ -94,7 +94,7 @@ public class TestController implements QueryController<UserEntity, String, Query
         public UserEntity selectByPk(String id) {
             SimpleUserEntity userEntity = new SimpleUserEntity();
             // 同一个用户
-            userEntity.setCreatorId(Authentication.current().orElseThrow(AuthorizeException::new).getUser().getId());
+            userEntity.setCreatorId(Authentication.current().orElseThrow(UnAuthorizedException::new).getUser().getId());
             return userEntity;
         }
 

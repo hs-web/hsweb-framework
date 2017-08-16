@@ -17,11 +17,9 @@
 
 package org.hswebframework.web.starter.resolver;
 
-import org.hswebframework.web.AuthorizeException;
 import org.hswebframework.web.authorization.Authentication;
-import org.hswebframework.web.authorization.AuthenticationSupplier;
+import org.hswebframework.web.authorization.exception.UnAuthorizedException;
 import org.springframework.core.MethodParameter;
-import org.springframework.util.Assert;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -51,6 +49,6 @@ public class AuthorizationArgumentResolver implements HandlerMethodArgumentResol
 
     @Override
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
-        return Authentication.current().orElseThrow(AuthorizeException::new);
+        return Authentication.current().orElseThrow(UnAuthorizedException::new);
     }
 }

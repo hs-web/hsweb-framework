@@ -10,6 +10,7 @@ import org.hswebframework.web.authorization.access.DataAccessConfig;
 import org.hswebframework.web.authorization.access.DataAccessController;
 import org.hswebframework.web.authorization.annotation.Logical;
 import org.hswebframework.web.authorization.define.AuthorizeDefinition;
+import org.hswebframework.web.authorization.define.AuthorizingContext;
 import org.hswebframework.web.authorization.exception.AuthorizationException;
 import org.hswebframework.web.boost.aop.context.MethodInterceptorParamContext;
 import org.slf4j.Logger;
@@ -47,21 +48,21 @@ public class DefaultAuthorizingHandler implements AuthorizingHandler {
         handleRdac(context.getAuthentication(), context.getDefinition());
 
         //进行数据权限控制
-        handleDataAccess(context.getAuthentication(), context.getDefinition(), context.getParamContext());
+        handleDataAccess(context);
 
         //表达式权限控制
         handleExpression(context.getAuthentication(), context.getDefinition(), context.getParamContext());
 
     }
 
-    protected void handleDataAccess(Authentication authentication, AuthorizeDefinition definition, MethodInterceptorParamContext paramContext) {
+    protected void handleDataAccess(AuthorizingContext context) {
         if (dataAccessController == null) {
             logger.warn("dataAccessController is null,skip data access control!");
             return;
         }
-        List<Permission> permission = authentication.getPermissions()
+        List<Permission> permission = context.getAuthentication().getPermissions()
                 .stream()
-                .filter(per -> definition.getPermissions().contains(per.getId()))
+                .filter(per -> context.getDefinition().getPermissions().contains(per.getId()))
                 .collect(Collectors.toList());
 
         DataAccessController finalAccessController = dataAccessController;
@@ -70,18 +71,16 @@ public class DefaultAuthorizingHandler implements AuthorizingHandler {
         Set<DataAccessConfig> accesses = permission
                 .stream().map(Permission::getDataAccesses)
                 .flatMap(Collection::stream)
-                .filter(access -> definition.getActions().contains(access.getAction()))
+                .filter(access -> context.getDefinition().getActions().contains(access.getAction()))
                 .collect(Collectors.toSet());
         //无规则,则代表不进行控制
         if (accesses.isEmpty()) return;
         //单个规则验证函数
-        Function<Predicate<DataAccessConfig>, Boolean> function =
-                definition.getLogical() == Logical.AND ?
-                        accesses.stream()::allMatch : accesses.stream()::anyMatch;
+        Function<Predicate<DataAccessConfig>, Boolean> function = accesses.stream()::allMatch;
         //调用控制器进行验证
-        boolean isAccess = function.apply(access -> finalAccessController.doAccess(access, paramContext));
+        boolean isAccess = function.apply(access -> finalAccessController.doAccess(access, context));
         if (!isAccess) {
-            throw new AuthorizationException(definition.getMessage());
+            throw new AuthorizationException(context.getDefinition().getMessage());
         }
 
     }
@@ -113,8 +112,10 @@ public class DefaultAuthorizingHandler implements AuthorizingHandler {
 
     protected void handleRdac(Authentication authentication, AuthorizeDefinition definition) {
         boolean access = true;
+        //多个设置时的判断逻辑
         Logical logical = definition.getLogical() == Logical.DEFAULT ? Logical.OR : definition.getLogical();
         boolean logicalIsOr = logical == Logical.OR;
+
         Set<String> permissionsDef = definition.getPermissions();
         Set<String> actionsDef = definition.getActions();
         Set<String> rolesDef = definition.getRoles();

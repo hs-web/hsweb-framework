@@ -2,6 +2,7 @@ package org.hswebframework.web.organizational.authorization.simple.handler;
 
 import org.hsweb.ezorm.core.param.Term;
 import org.hsweb.ezorm.core.param.TermType;
+import org.hswebframework.web.authorization.define.AuthorizingContext;
 import org.hswebframework.web.entity.organizational.authorization.DistrictAttachEntity;
 import org.hswebframework.web.organizational.authorization.PersonnelAuthorization;
 
@@ -49,7 +50,7 @@ public class AreaScopeDataAccessHandler extends AbstractScopeDataAccessHandler<D
     }
 
     @Override
-    protected Term createQueryTerm(Set<String> scope) {
+    protected Term createQueryTerm(Set<String> scope, AuthorizingContext context) {
         Term term = new Term();
         term.setColumn(DistrictAttachEntity.districtId);
         term.setTermType(TermType.in);
