@@ -25,6 +25,8 @@ import org.hswebframework.web.service.organizational.OrganizationalService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
+
 /**
  * 默认的服务实现
  *
@@ -50,5 +52,23 @@ public class SimpleOrganizationalService extends AbstractTreeSortService<Organiz
     public String insert(OrganizationalEntity entity) {
         entity.setStatus(DataStatus.STATUS_ENABLED);
         return super.insert(entity);
+    }
+
+    @Override
+    public void disable(String id) {
+        Objects.requireNonNull(id);
+        createUpdate()
+                .set(OrganizationalEntity.status, DataStatus.STATUS_DISABLED)
+                .where(OrganizationalEntity.id, id)
+                .exec();
+    }
+
+    @Override
+    public void enable(String id) {
+        Objects.requireNonNull(id);
+        createUpdate()
+                .set(OrganizationalEntity.status, DataStatus.STATUS_ENABLED)
+                .where(OrganizationalEntity.id, id)
+                .exec();
     }
 }

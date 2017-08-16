@@ -31,4 +31,7 @@ public interface OrganizationalService extends
         TreeService<OrganizationalEntity, String>
         , CrudService<OrganizationalEntity, String> {
 
+    void disable(String id);
+
+    void enable(String id);
 }
