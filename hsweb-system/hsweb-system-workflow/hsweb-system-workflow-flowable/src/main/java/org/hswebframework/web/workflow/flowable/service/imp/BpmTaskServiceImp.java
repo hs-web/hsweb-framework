@@ -1,8 +1,13 @@
 package org.hswebframework.web.workflow.flowable.service.imp;
 
 import org.activiti.engine.history.HistoricProcessInstance;
+import org.activiti.engine.impl.RepositoryServiceImpl;
 import org.activiti.engine.impl.TaskServiceImpl;
+import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
+import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity;
 import org.activiti.engine.impl.pvm.process.ActivityImpl;
+import org.activiti.engine.impl.task.TaskDefinition;
+import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
@@ -173,6 +178,20 @@ public class BpmTaskServiceImp extends FlowableAbstract implements BpmTaskServic
     @Override
     public HistoricProcessInstance selectHisProInst(String procInstId) {
         return historyService.createHistoricProcessInstanceQuery().processInstanceId(procInstId).singleResult();
+    }
+
+    @Override
+    public ActivityImpl selectActivityImplByTask(String taskId) {
+        Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
+        ProcessDefinitionEntity entity = (ProcessDefinitionEntity) ((RepositoryServiceImpl) repositoryService).getDeployedProcessDefinition(task.getProcessDefinitionId());
+        List<ActivityImpl> activities = entity.getActivities();
+        ActivityImpl activity = null;
+        for(ActivityImpl activity1 : activities){
+            if(activity1.getProperty("name").equals(task.getName())){
+                activity = activity1;
+            }
+        }
+        return activity;
     }
 
     @Override

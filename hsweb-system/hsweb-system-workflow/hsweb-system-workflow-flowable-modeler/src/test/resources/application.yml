@@ -3,7 +3,7 @@ spring:
         auto: true
         proxy-target-class: true
     datasource:
-       url : jdbc:h2:mem:example
+       url: jdbc:h2:file:F:\working\hsweb-framework\hsweb-system\hsweb-system-workflow\hsweb-system-workflow-flowable\src\main\resources\db\act
        username : sa
        password :
        type: com.alibaba.druid.pool.DruidDataSource
@@ -14,6 +14,6 @@ spring:
 logging:
   level:
       org.flowable: debug
-      org.activiti: debug
+#      org.activiti: debug
 mybatis:
   dynamic-datasource: false
