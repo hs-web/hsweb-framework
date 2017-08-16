@@ -106,6 +106,13 @@ public class ControllerTest extends SimpleWebApplicationTests {
         System.out.println("当前流程图元");
         System.out.println(activity);
         System.out.println("=========>>>");
+
+    }
+
+    @Test
+    public void task(){
+        List<Task> task = bpmTaskService.selectTaskByProcessId("5");
+        System.out.println(task);
     }
 
     @Configuration

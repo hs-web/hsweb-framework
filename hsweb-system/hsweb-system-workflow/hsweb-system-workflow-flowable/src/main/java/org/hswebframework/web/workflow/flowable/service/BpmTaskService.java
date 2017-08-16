@@ -1,6 +1,8 @@
 package org.hswebframework.web.workflow.flowable.service;
 
 import org.activiti.engine.history.HistoricProcessInstance;
+import org.activiti.engine.impl.pvm.process.ActivityImpl;
+import org.activiti.engine.impl.task.TaskDefinition;
 import org.activiti.engine.task.Task;
 import org.hswebframework.web.workflow.flowable.entity.TaskInfo;
 
@@ -26,6 +28,13 @@ public interface BpmTaskService{
     String selectNowTaskId(String procInstId);
 
     HistoricProcessInstance selectHisProInst(String procInstId);
+
+    /**
+     * 根据taskId获取流程图对应的图元
+     * @param taskId
+     * @return
+     */
+    ActivityImpl selectActivityImplByTask(String taskId);
 
     /**
      * 领取（签收）任务
@@ -81,6 +90,7 @@ public interface BpmTaskService{
      * @param userId 用户ID
      */
     void setAssignee(String taskId, String userId);
+
     /**
      * 结束流程
      * @param procInstId   流程实例ID
