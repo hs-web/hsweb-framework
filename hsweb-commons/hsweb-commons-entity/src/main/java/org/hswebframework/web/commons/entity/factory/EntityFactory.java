@@ -74,6 +74,22 @@ public interface EntityFactory {
     }
 
     /**
+     * 创建实体并设置默认的属性
+     *
+     * @param entityClass       实体类型
+     * @param defaultClass      默认class
+     * @param defaultProperties 默认属性
+     * @param <S>               默认属性的类型
+     * @param <T>               实体类型
+     * @return 创建结果
+     * @see EntityFactory#copyProperties(Object, Object)
+     */
+    default <S, T> T newInstance(Class<T> entityClass, Class<? extends T> defaultClass, S defaultProperties) {
+        return copyProperties(defaultProperties, newInstance(entityClass, defaultClass));
+    }
+
+
+    /**
      * 根据类型获取实体的真实的实体类型,
      * 可通过此方法获取获取已拓展的实体类型，如:<br>
      * <code>
