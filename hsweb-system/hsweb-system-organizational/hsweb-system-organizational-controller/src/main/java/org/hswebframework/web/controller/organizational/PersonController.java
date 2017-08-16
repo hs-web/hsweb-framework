@@ -80,7 +80,7 @@ public class PersonController implements SimpleGenericEntityController<PersonEnt
         return ResponseMessage.ok(personService.insert(bindEntity));
     }
 
-    @PostMapping("/{id}/detail")
+    @PutMapping("/{id}/detail")
     @AccessLogger("修改人员信息,并关联用户信息")
     @Authorize(action = Permission.ACTION_UPDATE)
     public ResponseMessage<String> getDetail(@PathVariable String id, @RequestBody PersonAuthBindEntity bindEntity) {
@@ -89,7 +89,7 @@ public class PersonController implements SimpleGenericEntityController<PersonEnt
         return ResponseMessage.ok();
     }
 
-    @PostMapping("/in-position/{positionId}")
+    @GetMapping("/in-position/{positionId}")
     @AccessLogger("获取指定岗位的人员")
     @Authorize(action = Permission.ACTION_GET)
     public ResponseMessage<List<PersonEntity>> getByPositionId(@PathVariable String positionId) {
