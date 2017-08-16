@@ -145,8 +145,7 @@ public class SimplePersonService extends EnableCacheGenericEntityService<PersonE
 
         if (personEntity instanceof PersonAuthBindEntity) return ((PersonAuthBindEntity) personEntity);
 
-        PersonAuthBindEntity bindEntity = entityFactory.newInstance(PersonAuthBindEntity.class);
-        entityFactory.copyProperties(personEntity, bindEntity);
+        PersonAuthBindEntity bindEntity = entityFactory.newInstance(PersonAuthBindEntity.class, personEntity);
         Set<String> positionIds = DefaultDSLQueryService.createQuery(personPositionDao)
                 .where(PersonPositionEntity.personId, id)
                 .listNoPaging().stream()
@@ -155,8 +154,8 @@ public class SimplePersonService extends EnableCacheGenericEntityService<PersonE
 
         bindEntity.setPositionIds(positionIds);
 
-        if (null != userService) {
-            UserEntity userEntity = userService.selectByPk(bindEntity.getUserId());
+        if (null != userService && null != personEntity.getUserId()) {
+            UserEntity userEntity = userService.selectByPk(personEntity.getUserId());
             if (null != userEntity) {
                 PersonUserEntity entity = entityFactory.newInstance(PersonUserEntity.class);
                 entity.setUsername(userEntity.getUsername());
@@ -182,7 +181,10 @@ public class SimplePersonService extends EnableCacheGenericEntityService<PersonE
     }
 
     protected void syncUserInfo(PersonAuthBindEntity bindEntity) {
-        if (isEmpty(bindEntity.getPersonUser().getUsername())) return;
+        if (isEmpty(bindEntity.getPersonUser().getUsername())) {
+            bindEntity.setUserId("");
+            return;
+        }
         //获取所有职位
         Set<String> positionIds = bindEntity.getPositionIds();
         if (positionIds.isEmpty()) return;
