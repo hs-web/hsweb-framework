@@ -1,6 +1,7 @@
 package org.hswebframework.web.workflow.flowable.service;
 
 import org.activiti.engine.impl.pvm.process.ActivityImpl;
+import org.activiti.engine.impl.task.TaskDefinition;
 
 import java.util.List;
 import java.util.Map;
@@ -58,9 +59,17 @@ public interface BpmActivityService {
      *
      * @param procDefId        流程定义ID
      * @param activityId        图元ID
-     * @return List<ActivityImpl>  当前流程的所有节点资源
+     * @return List<TaskDefinition>  当前流程的所有下一环节资源
      */
-    List<ActivityImpl> getNextActivitys(String procDefId, String activityId);
+    List<TaskDefinition> getNextActivitys(String procDefId, String activityId);
+
+    /**
+     * 根据图元获取办理环节数据
+     * @param activityImpl
+     * @param elString 根据连线条件conditionText获取输出节点，主要用于网关分支（预留）
+     * @return
+     */
+    List<TaskDefinition> getTaskDefinition(ActivityImpl activityImpl, String elString);
 
     /**
      * 获取下一环节办理人

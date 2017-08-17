@@ -182,12 +182,15 @@ public class BpmTaskServiceImp extends FlowableAbstract implements BpmTaskServic
 
     @Override
     public ActivityImpl selectActivityImplByTask(String taskId) {
+        if(StringUtils.isNullOrEmpty(taskId)){
+            return new ActivityImpl(null,null);
+        }
         Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
         ProcessDefinitionEntity entity = (ProcessDefinitionEntity) ((RepositoryServiceImpl) repositoryService).getDeployedProcessDefinition(task.getProcessDefinitionId());
         List<ActivityImpl> activities = entity.getActivities();
         ActivityImpl activity = null;
         for(ActivityImpl activity1 : activities){
-            if(activity1.getProperty("name").equals(task.getName())){
+            if(activity1.getProperty("type").equals("userTask") && activity1.getProperty("name").equals(task.getName())){
                 activity = activity1;
             }
         }

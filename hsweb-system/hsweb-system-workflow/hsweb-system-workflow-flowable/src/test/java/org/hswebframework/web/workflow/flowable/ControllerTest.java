@@ -48,7 +48,10 @@ public class ControllerTest extends SimpleWebApplicationTests {
     public ProcessInstance start() throws Exception {
         Map<String, Object> map = new HashMap<>();
         map.put("username", "admin");
-        return bpmProcessService.startProcessInstance("1", "test", null, null, "流程名", map);
+        map.put("leader", "zhangsan");
+        map.put("team", "lisi");
+        map.put("people", "wangwu");
+        return bpmProcessService.startProcessInstance("1", "testid", null, null, "流程名", map);
     }
 
     // 流程图元数据test
@@ -93,13 +96,20 @@ public class ControllerTest extends SimpleWebApplicationTests {
         System.out.println(activity);
         System.out.println("=========>>>");
         System.out.println("=========流程流转下一步，下一步为并行网关。>>>");
-        for (Task task:tasks) {
-            bpmTaskService.complete(task.getId(), "zhangsan",null,null);
-        }
+//        for (Task task:tasks) {
+//            bpmTaskService.complete(task.getId(), "zhangsan",null,null);
+//        }
         tasks = bpmTaskService.selectTaskByProcessId(processInstance.getId());
         Assert.assertNotNull(tasks);
         for (Task task:tasks) {
-            System.out.println("当前环节:"+task.getName()+"__办理人:"+task.getAssignee());
+            System.out.println("当前环节:"+task.getName()+"__id:"+task.getId()+"__办理人:"+task.getAssignee());
+
+            activity = bpmTaskService.selectActivityImplByTask(task.getId());
+            System.out.println("当前节点图元id:"+activity.getId());
+            System.out.println(activity);
+            System.out.println("=========>>>");
+            Map<String, List<String>> map = bpmActivityService.getNextClaim(task.getProcessDefinitionId(),activity.getId());
+            System.out.println("下一步执行json:"+JSON.toJSONString(map));
         }
         System.out.println("=========>>>");
         activity = bpmActivityService.getActivityByProcInstId(processInstance.getProcessDefinitionId(), processInstance.getId());
@@ -109,10 +119,17 @@ public class ControllerTest extends SimpleWebApplicationTests {
 
     }
 
+    @Autowired
+    RepositoryService repositoryService;
+
     @Test
     public void task(){
-        List<Task> task = bpmTaskService.selectTaskByProcessId("5");
-        System.out.println(task);
+        ActivityImpl activity = bpmTaskService.selectActivityImplByTask("");
+        ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery().processDefinitionKey("testid").orderByProcessDefinitionVersion().desc().singleResult();
+        Map<String, List<String>> map = bpmActivityService.getNextClaim(processDefinition.getId(),activity.getId());
+        System.out.println("=========>>>");
+        System.out.println(JSON.toJSONString(map));
+        System.out.println("=========>>>");
     }
 
     @Configuration
