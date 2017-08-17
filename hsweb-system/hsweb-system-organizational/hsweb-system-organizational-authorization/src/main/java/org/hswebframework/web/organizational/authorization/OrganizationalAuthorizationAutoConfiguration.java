@@ -18,9 +18,9 @@ import org.springframework.context.annotation.Configuration;
 public class OrganizationalAuthorizationAutoConfiguration implements BeanPostProcessor {
 
     @Bean
-    @ConditionalOnMissingBean(AreaScopeDataAccessHandler.class)
-    public AreaScopeDataAccessHandler areaScopeDataAccessHandler() {
-        return new AreaScopeDataAccessHandler();
+    @ConditionalOnMissingBean(DistrictScopeDataAccessHandler.class)
+    public DistrictScopeDataAccessHandler areaScopeDataAccessHandler() {
+        return new DistrictScopeDataAccessHandler();
     }
 
 

@@ -16,7 +16,7 @@ import static org.hswebframework.web.organizational.authorization.access.DataAcc
  *
  * @author zhouhao
  */
-public class AreaScopeDataAccessHandler extends AbstractScopeDataAccessHandler<DistrictAttachEntity> {
+public class DistrictScopeDataAccessHandler extends AbstractScopeDataAccessHandler<DistrictAttachEntity> {
     @Override
     protected Class<DistrictAttachEntity> getEntityClass() {
         return DistrictAttachEntity.class;

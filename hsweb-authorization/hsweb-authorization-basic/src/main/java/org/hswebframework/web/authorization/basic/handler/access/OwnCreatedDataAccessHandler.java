@@ -82,7 +82,7 @@ public class OwnCreatedDataAccessHandler implements DataAccessHandler {
                 QueryService<RecordCreationEntity, Object> queryService =
                         ((QueryController<RecordCreationEntity, Object, Entity>) controller).getService();
                 RecordCreationEntity oldData = queryService.selectByPk(id);
-                if (oldData != null &&context.getAuthentication().getUser().getId().equals(oldData.getCreatorId())) {
+                if (oldData != null && !context.getAuthentication().getUser().getId().equals(oldData.getCreatorId())) {
                     return false;
                 }
             }
