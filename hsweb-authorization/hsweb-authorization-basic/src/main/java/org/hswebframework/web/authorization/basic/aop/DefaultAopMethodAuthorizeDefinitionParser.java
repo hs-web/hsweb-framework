@@ -8,8 +8,11 @@ import org.hswebframework.web.authorization.basic.define.DefaultBasicAuthorizeDe
 import org.hswebframework.web.authorization.basic.define.EmptyAuthorizeDefinition;
 import org.hswebframework.web.authorization.define.AuthorizeDefinition;
 import org.hswebframework.web.boost.aop.context.MethodInterceptorParamContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
 
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -25,12 +28,31 @@ public class DefaultAopMethodAuthorizeDefinitionParser implements AopMethodAutho
 
     private Map<Method, AuthorizeDefinition> cache = new ConcurrentHashMap<>();
 
+
+    private List<AopMethodAuthorizeDefinitionParserCustomer> parserCustomers;
+
+
+    @Autowired(required = false)
+    public void setParserCustomers(List<AopMethodAuthorizeDefinitionParserCustomer> parserCustomers) {
+        this.parserCustomers = parserCustomers;
+    }
+
     @Override
     public AuthorizeDefinition parse(MethodInterceptorParamContext paramContext) {
 
         AuthorizeDefinition definition = cache.get(paramContext.getMethod());
         if (definition != null) return definition instanceof EmptyAuthorizeDefinition ? null : definition;
 
+        //使用自定义
+        if(!CollectionUtils.isEmpty(parserCustomers)){
+            definition=parserCustomers.stream()
+                    .map(customer->customer.parse(paramContext))
+                    .findAny().orElse(null);
+            if(definition!=null){
+               // cache.put(paramContext.getMethod(), definition);
+                return definition;
+            }
+        }
 
         Authorize classAuth = AopUtils.findAnnotation(paramContext.getTarget().getClass(), Authorize.class);
         Authorize methodAuth = AopUtils.findMethodAnnotation(paramContext.getTarget().getClass(), paramContext.getMethod(), Authorize.class);
