@@ -2,7 +2,9 @@ package org.hswebframework.web.workflow.flowable.service.imp;
 
 import org.activiti.engine.delegate.Expression;
 import org.activiti.engine.impl.RepositoryServiceImpl;
+import org.activiti.engine.impl.bpmn.behavior.UserTaskActivityBehavior;
 import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity;
+import org.activiti.engine.impl.pvm.PvmActivity;
 import org.activiti.engine.impl.pvm.PvmTransition;
 import org.activiti.engine.impl.pvm.process.ActivityImpl;
 import org.activiti.engine.impl.task.TaskDefinition;
@@ -94,35 +96,72 @@ public class BpmActivityServiceImp extends FlowableAbstract implements BpmActivi
     }
 
     @Override
-    public List<ActivityImpl> getNextActivitys(String procDefId, String activityId) {
+    public List<TaskDefinition> getNextActivitys(String procDefId, String activityId) {
         ActivityImpl activity;
         if(activityId!=null)
             activity = getActivityById(procDefId, activityId);
         else
             activity = getStartEvent(procDefId);
         List<PvmTransition> pvmTransitions = activity.getOutgoingTransitions();
-        List<ActivityImpl> activities = new ArrayList<>();
+        List<TaskDefinition> taskDefinitions = new ArrayList<>();
         for(PvmTransition pvmTransition : pvmTransitions){
-            activities.add((ActivityImpl)pvmTransition.getDestination());
+            PvmActivity pvmActivity = pvmTransition.getDestination();
+            taskDefinitions.addAll(getTaskDefinition((ActivityImpl)pvmActivity,""));
         }
-        return activities;
+        return taskDefinitions;
+    }
+
+    @Override
+    public List<TaskDefinition> getTaskDefinition(ActivityImpl activityImpl, String elString) {
+        List<TaskDefinition> taskDefinitionList = new ArrayList<>();
+        List<TaskDefinition> nextTaskDefinition;
+        if("userTask".equals(activityImpl.getProperty("type"))){
+            TaskDefinition taskDefinition = ((UserTaskActivityBehavior)activityImpl.getActivityBehavior()).getTaskDefinition();
+            taskDefinitionList.add(taskDefinition);
+        }else{
+            List<PvmTransition> pvmTransitions = activityImpl.getOutgoingTransitions();
+            List<PvmTransition> outTransitionsTemp;
+            for(PvmTransition tr:pvmTransitions){
+                PvmActivity pvmActivity = tr.getDestination(); //获取线路的终点节点
+                if("exclusiveGateway".equals(pvmActivity.getProperty("type"))||"parallelGateway".equals(pvmActivity.getProperty("type"))){
+                    outTransitionsTemp = pvmActivity.getOutgoingTransitions();
+                    if(outTransitionsTemp.size() == 1){
+                        nextTaskDefinition =getTaskDefinition((ActivityImpl)outTransitionsTemp.get(0).getDestination(), elString);
+                        taskDefinitionList.addAll(nextTaskDefinition);
+                    }else if(outTransitionsTemp.size() > 1){
+                        for(PvmTransition tr1 : outTransitionsTemp){
+                            Object s = tr1.getProperty("conditionText");
+                            if(elString.equals(s.toString().trim())){
+                                nextTaskDefinition = getTaskDefinition((ActivityImpl)tr1.getDestination(), elString);
+                                taskDefinitionList.addAll(nextTaskDefinition);
+                            }
+                        }
+                    }
+                }else if("userTask".equals(pvmActivity.getProperty("type"))){
+                    taskDefinitionList.add(((UserTaskActivityBehavior)((ActivityImpl)pvmActivity).getActivityBehavior()).getTaskDefinition());
+                }
+            }
+        }
+        return taskDefinitionList;
     }
 
     @Override
     public Map<String, List<String>> getNextClaim(String procDefId, String activityId) {
-        List<ActivityImpl> activities = getNextActivitys(procDefId, activityId);
+        List<TaskDefinition> taskDefinitions = getNextActivitys(procDefId, activityId);
         Map<String, List<String>> map = new HashMap<>();
-        for(ActivityImpl activity : activities){
+        for(TaskDefinition taskDefinition : taskDefinitions){
             List<String> list = new ArrayList<>();
-            TaskDefinition taskDefinition = (TaskDefinition) activity.getProperty("taskDefinition");
-            if(taskDefinition.getAssigneeExpression()!=null)
+            if(taskDefinition!=null && taskDefinition.getAssigneeExpression()!=null)
                 list.add(taskDefinition.getAssigneeExpression().getExpressionText());
-            else if(taskDefinition.getCandidateUserIdExpressions()!=null){
+            else if(taskDefinition!=null && taskDefinition.getCandidateUserIdExpressions()!=null){
                 for(Expression expression : taskDefinition.getCandidateUserIdExpressions()){
                     list.add(expression.getExpressionText());
                 }
             }
-            map.put(activity.getId(),list);
+            if(taskDefinition.getNameExpression()!=null)
+                map.put(taskDefinition.getNameExpression().getExpressionText(),list);
+            else
+                map.put(taskDefinition.getKey(),list);
         }
         return map;
     }
