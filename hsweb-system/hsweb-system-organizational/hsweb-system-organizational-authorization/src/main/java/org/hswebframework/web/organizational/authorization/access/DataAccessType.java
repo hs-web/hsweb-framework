@@ -40,6 +40,6 @@ public interface DataAccessType extends Serializable {
     /**
      * 自定义范围
      */
-    String SCOPE_TYPE_CUSTOM    = "CUSTOM";
+    String SCOPE_TYPE_CUSTOM    = "CUSTOM_SCOPE";
 
 }

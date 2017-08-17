@@ -80,7 +80,7 @@ public abstract class AbstractScopeDataAccessHandler<E> implements DataAccessHan
         if (scopes.size() == 0) return true;
         else if (scopes.size() == 1) scope = scopes.iterator().next();
         else logger.warn("existing many scope :{} , try use config.", scopes);
-        scopes = access.getScope().stream().map(String::valueOf).collect(Collectors.toSet());
+        scopes = getTryOperationScope(access).stream().map(String::valueOf).collect(Collectors.toSet());
         if (scope == null && scopes.size() == 1) {
             scope = scopes.iterator().next();
         }
@@ -109,14 +109,10 @@ public abstract class AbstractScopeDataAccessHandler<E> implements DataAccessHan
             //判断是否满足条件(泛型为 getEntityClass)
             Class entityType = ClassUtils.getGenericType(controller.getClass(), 0);
             if (ClassUtils.instanceOf(entityType, getEntityClass())) {
-                QueryService<E, Object> queryService =
-                        ((QueryController<E, Object, Entity>) controller).getService();
+                @SuppressWarnings("unchecked")
+                QueryService<E, Object> queryService = ((QueryController<E, Object, Entity>) controller).getService();
                 E oldData = queryService.selectByPk(id);
-                if (oldData != null && ids.contains(getOperationScope(oldData))) {
-                    return false;
-                } else {
-                    return true;
-                }
+                return !(oldData != null && !ids.contains(getOperationScope(oldData)));
             } else {
                 errorMsg = "GenericType[0] not instance of " + getEntityClass();
             }
