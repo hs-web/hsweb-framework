@@ -23,6 +23,13 @@ public class OrganizationalAuthorizationAutoConfiguration implements BeanPostPro
         return new AreaScopeDataAccessHandler();
     }
 
+
+    @Bean
+    @ConditionalOnMissingBean(CustomScopeHandler.class)
+    public CustomScopeHandler customScopeHandler() {
+        return new CustomScopeHandler();
+    }
+
     @Bean
     @ConditionalOnMissingBean(DepartmentScopeDataAccessHandler.class)
     public DepartmentScopeDataAccessHandler departmentScopeDataAccessHandler() {
@@ -51,6 +58,12 @@ public class OrganizationalAuthorizationAutoConfiguration implements BeanPostPro
     @ConditionalOnMissingBean(ScopeDataAccessConfigConvert.class)
     public ScopeDataAccessConfigConvert scopeDataAccessConfigConvert() {
         return new ScopeDataAccessConfigConvert();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(CustomScopeDataAccessConfigConvert.class)
+    public CustomScopeDataAccessConfigConvert customScopeDataAccessConfigConvert() {
+        return new CustomScopeDataAccessConfigConvert();
     }
 
     @Override
