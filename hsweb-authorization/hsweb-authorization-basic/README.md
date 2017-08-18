@@ -15,13 +15,13 @@
 6. 如果授权未通过,则抛出`AccessDenyException`异常
 
 ## 授权
-使用`hsweb-authorization-api`提供的授权方式:类`UserOnSignIn`监听用户授权事件`AuthorizationSuccessEvent`
-当用户完成授权,授权的方式可自行处理,或者使用框架默认的授权方式.授权通过后会触发该事件.流程如下
+使用`hsweb-authorization-api`提供的监听器,类`UserOnSignIn`监听用户授权事件`AuthorizationSuccessEvent`
+当用户完成授权(授权方式可自行实现或者使用框架默认的授权方式,主要触发该事件即可).授权通过后会触发该事件.流程如下
 
-1. 授权接口完成授权,触发AuthorizationSuccessEvent
-2. `UserOnSignIn` 收到事件,获取参数`token_type`(默认为`sessionId`)
+1. 完成授权,触发`AuthorizationSuccessEvent`
+2. `UserOnSignIn` 收到`AuthorizationSuccessEvent`事件,获取参数`token_type`(默认为`sessionId`),以及授权信息
 3. 根据`token_type` 生成token.
-4. 将token信息注册到`UserTokenManager`
+4. 将token和授权信息中的userId注册到`UserTokenManager`
 5. 将token返回给授权接口
 
 ## 注销
