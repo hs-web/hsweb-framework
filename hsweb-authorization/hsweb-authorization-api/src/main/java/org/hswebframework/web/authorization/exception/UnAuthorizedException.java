@@ -18,6 +18,12 @@
 
 package org.hswebframework.web.authorization.exception;
 
+/**
+ * 未授权异常
+ *
+ * @author zhouhao
+ * @since 3.0
+ */
 public class UnAuthorizedException extends RuntimeException {
     private static final long serialVersionUID = 2422918455013900645L;
 
@@ -29,4 +35,7 @@ public class UnAuthorizedException extends RuntimeException {
         super(message);
     }
 
+    public UnAuthorizedException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }
