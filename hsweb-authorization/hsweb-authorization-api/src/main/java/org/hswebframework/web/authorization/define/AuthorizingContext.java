@@ -1,7 +1,7 @@
 package org.hswebframework.web.authorization.define;
 
 import org.hswebframework.web.authorization.Authentication;
-import org.hswebframework.web.boost.aop.context.MethodInterceptorParamContext;
+import org.hswebframework.web.boost.aop.context.MethodInterceptorContext;
 
 /**
  * 权限控制上下文
@@ -11,7 +11,7 @@ public class AuthorizingContext {
 
     private Authentication authentication;
 
-    private MethodInterceptorParamContext paramContext;
+    private MethodInterceptorContext paramContext;
 
     public AuthorizeDefinition getDefinition() {
         return definition;
@@ -29,11 +29,11 @@ public class AuthorizingContext {
         this.authentication = authentication;
     }
 
-    public MethodInterceptorParamContext getParamContext() {
+    public MethodInterceptorContext getParamContext() {
         return paramContext;
     }
 
-    public void setParamContext(MethodInterceptorParamContext paramContext) {
+    public void setParamContext(MethodInterceptorContext paramContext) {
         this.paramContext = paramContext;
     }
 }

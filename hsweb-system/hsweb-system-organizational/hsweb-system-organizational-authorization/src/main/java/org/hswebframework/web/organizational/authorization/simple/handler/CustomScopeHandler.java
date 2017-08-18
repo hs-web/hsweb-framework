@@ -3,7 +3,6 @@ package org.hswebframework.web.organizational.authorization.simple.handler;
 import org.hswebframework.web.authorization.access.DataAccessConfig;
 import org.hswebframework.web.authorization.access.DataAccessHandler;
 import org.hswebframework.web.authorization.define.AuthorizingContext;
-import org.hswebframework.web.boost.aop.context.MethodInterceptorParamContext;
 import org.hswebframework.web.organizational.authorization.access.DataAccessType;
 import org.hswebframework.web.organizational.authorization.simple.SimpleCustomScopeDataAccessConfig;
 import org.hswebframework.web.organizational.authorization.simple.SimpleScopeDataAccessConfig;

@@ -7,7 +7,7 @@ import org.hswebframework.web.authorization.annotation.RequiresExpression;
 import org.hswebframework.web.authorization.basic.define.DefaultBasicAuthorizeDefinition;
 import org.hswebframework.web.authorization.basic.define.EmptyAuthorizeDefinition;
 import org.hswebframework.web.authorization.define.AuthorizeDefinition;
-import org.hswebframework.web.boost.aop.context.MethodInterceptorParamContext;
+import org.hswebframework.web.boost.aop.context.MethodInterceptorContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 
@@ -29,16 +29,16 @@ public class DefaultAopMethodAuthorizeDefinitionParser implements AopMethodAutho
     private Map<Method, AuthorizeDefinition> cache = new ConcurrentHashMap<>();
 
 
-    private List<AopMethodAuthorizeDefinitionParserCustomer> parserCustomers;
+    private List<AopMethodAuthorizeDefinitionCustomizerParser> parserCustomers;
 
 
     @Autowired(required = false)
-    public void setParserCustomers(List<AopMethodAuthorizeDefinitionParserCustomer> parserCustomers) {
+    public void setParserCustomers(List<AopMethodAuthorizeDefinitionCustomizerParser> parserCustomers) {
         this.parserCustomers = parserCustomers;
     }
 
     @Override
-    public AuthorizeDefinition parse(MethodInterceptorParamContext paramContext) {
+    public AuthorizeDefinition parse(MethodInterceptorContext paramContext) {
 
         AuthorizeDefinition definition = cache.get(paramContext.getMethod());
         if (definition != null) return definition instanceof EmptyAuthorizeDefinition ? null : definition;

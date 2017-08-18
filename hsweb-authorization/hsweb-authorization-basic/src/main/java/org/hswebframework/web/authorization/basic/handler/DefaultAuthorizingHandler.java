@@ -12,7 +12,7 @@ import org.hswebframework.web.authorization.annotation.Logical;
 import org.hswebframework.web.authorization.define.AuthorizeDefinition;
 import org.hswebframework.web.authorization.define.AuthorizingContext;
 import org.hswebframework.web.authorization.exception.AccessDenyException;
-import org.hswebframework.web.boost.aop.context.MethodInterceptorParamContext;
+import org.hswebframework.web.boost.aop.context.MethodInterceptorContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,7 +85,7 @@ public class DefaultAuthorizingHandler implements AuthorizingHandler {
 
     }
 
-    protected void handleExpression(Authentication authentication, AuthorizeDefinition definition, MethodInterceptorParamContext paramContext) {
+    protected void handleExpression(Authentication authentication, AuthorizeDefinition definition, MethodInterceptorContext paramContext) {
         if (definition.getScript() != null) {
             String scriptId = DigestUtils.md5Hex(definition.getScript().getScript());
 

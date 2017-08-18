@@ -6,7 +6,6 @@ import org.hswebframework.web.authorization.access.DataAccessConfig;
 import org.hswebframework.web.authorization.access.DataAccessHandler;
 import org.hswebframework.web.authorization.access.FieldFilterDataAccessConfig;
 import org.hswebframework.web.authorization.define.AuthorizingContext;
-import org.hswebframework.web.boost.aop.context.MethodInterceptorParamContext;
 import org.hswebframework.web.commons.entity.Entity;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.commons.model.Model;

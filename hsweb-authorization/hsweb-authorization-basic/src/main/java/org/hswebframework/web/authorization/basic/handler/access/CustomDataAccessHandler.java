@@ -22,7 +22,6 @@ import org.hswebframework.web.authorization.access.CustomDataAccessConfig;
 import org.hswebframework.web.authorization.access.DataAccessConfig;
 import org.hswebframework.web.authorization.access.DataAccessHandler;
 import org.hswebframework.web.authorization.define.AuthorizingContext;
-import org.hswebframework.web.boost.aop.context.MethodInterceptorParamContext;
 
 /**
  * 当配置为自定义处理器时(实现{@link CustomDataAccessConfig }接口),此处理器生效

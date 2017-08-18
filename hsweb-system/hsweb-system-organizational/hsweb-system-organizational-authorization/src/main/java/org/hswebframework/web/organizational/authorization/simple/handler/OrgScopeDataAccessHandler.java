@@ -2,12 +2,8 @@ package org.hswebframework.web.organizational.authorization.simple.handler;
 
 import org.hsweb.ezorm.core.param.Term;
 import org.hsweb.ezorm.core.param.TermType;
-import org.hswebframework.utils.ClassUtils;
 import org.hswebframework.web.authorization.define.AuthorizingContext;
-import org.hswebframework.web.boost.aop.context.MethodInterceptorHolder;
-import org.hswebframework.web.boost.aop.context.MethodInterceptorParamContext;
 import org.hswebframework.web.entity.organizational.OrganizationalEntity;
-import org.hswebframework.web.entity.organizational.SimpleOrganizationalEntity;
 import org.hswebframework.web.entity.organizational.authorization.OrgAttachEntity;
 import org.hswebframework.web.organizational.authorization.PersonnelAuthorization;
 import org.hswebframework.web.organizational.authorization.access.DataAccessType;

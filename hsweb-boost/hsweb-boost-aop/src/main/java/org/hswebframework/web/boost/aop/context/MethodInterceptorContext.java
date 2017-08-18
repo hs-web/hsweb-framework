@@ -30,7 +30,7 @@ import java.util.Optional;
  * @author zhouhao
  * @see 3.0
  */
-public interface MethodInterceptorParamContext extends Serializable {
+public interface MethodInterceptorContext extends Serializable {
 
     /**
      * 获取当前类实例
