@@ -11,7 +11,7 @@ import org.hswebframework.web.authorization.access.DataAccessController;
 import org.hswebframework.web.authorization.annotation.Logical;
 import org.hswebframework.web.authorization.define.AuthorizeDefinition;
 import org.hswebframework.web.authorization.define.AuthorizingContext;
-import org.hswebframework.web.authorization.exception.AuthorizationException;
+import org.hswebframework.web.authorization.exception.AccessDenyException;
 import org.hswebframework.web.boost.aop.context.MethodInterceptorParamContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,7 +80,7 @@ public class DefaultAuthorizingHandler implements AuthorizingHandler {
         //调用控制器进行验证
         boolean isAccess = function.apply(access -> finalAccessController.doAccess(access, context));
         if (!isAccess) {
-            throw new AuthorizationException(context.getDefinition().getMessage());
+            throw new AccessDenyException(context.getDefinition().getMessage());
         }
 
     }
@@ -91,21 +91,21 @@ public class DefaultAuthorizingHandler implements AuthorizingHandler {
 
             DynamicScriptEngine engine = DynamicScriptEngineFactory.getEngine(definition.getScript().getLanguage());
             if (null == engine) {
-                throw new AuthorizationException("{unknown_engine}:" + definition.getScript().getLanguage());
+                throw new AccessDenyException("{unknown_engine}:" + definition.getScript().getLanguage());
             }
             if (!engine.compiled(scriptId)) {
                 try {
                     engine.compile(scriptId, definition.getScript().getScript());
                 } catch (Exception e) {
                     logger.error("express compile error", e);
-                    throw new AuthorizationException("{expression_error}");
+                    throw new AccessDenyException("{expression_error}");
                 }
             }
             Map<String, Object> var = new HashMap<>(paramContext.getParams());
             var.put("auth", authentication);
             Object success = engine.execute(scriptId, var).get();
             if (!(success instanceof Boolean) || !((Boolean) success)) {
-                throw new AuthorizationException(definition.getMessage());
+                throw new AccessDenyException(definition.getMessage());
             }
         }
     }
@@ -171,7 +171,7 @@ public class DefaultAuthorizingHandler implements AuthorizingHandler {
             access = func.apply(authentication.getUser().getUsername()::equals);
         }
         if (!access) {
-            throw new AuthorizationException(definition.getMessage());
+            throw new AccessDenyException(definition.getMessage());
         }
     }
 }

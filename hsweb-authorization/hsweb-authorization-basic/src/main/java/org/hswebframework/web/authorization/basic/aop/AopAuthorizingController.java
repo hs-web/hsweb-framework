@@ -6,7 +6,6 @@ import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.define.AuthorizingContext;
 import org.hswebframework.web.authorization.basic.handler.AuthorizingHandler;
 import org.hswebframework.web.authorization.define.AuthorizeDefinition;
-import org.hswebframework.web.authorization.exception.AuthorizationException;
 import org.hswebframework.web.authorization.exception.UnAuthorizedException;
 import org.hswebframework.web.boost.aop.context.MethodInterceptorHolder;
 import org.hswebframework.web.boost.aop.context.MethodInterceptorParamContext;

@@ -20,7 +20,7 @@ package org.hswebframework.web.starter;
 import com.alibaba.fastjson.JSONException;
 import org.hswebframework.web.BusinessException;
 import org.hswebframework.web.NotFoundException;
-import org.hswebframework.web.authorization.exception.AuthorizationException;
+import org.hswebframework.web.authorization.exception.AccessDenyException;
 import org.hswebframework.web.authorization.exception.UnAuthorizedException;
 import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.validate.SimpleValidateResults;
@@ -83,10 +83,10 @@ public class RestControllerExceptionTranslator {
         return ResponseMessage.error(401, exception.getMessage());
     }
 
-    @ExceptionHandler(AuthorizationException.class)
+    @ExceptionHandler(AccessDenyException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     @ResponseBody
-    ResponseMessage handleException(AuthorizationException exception) {
+    ResponseMessage handleException(AccessDenyException exception) {
         return ResponseMessage.error(403, exception.getMessage());
     }
 
