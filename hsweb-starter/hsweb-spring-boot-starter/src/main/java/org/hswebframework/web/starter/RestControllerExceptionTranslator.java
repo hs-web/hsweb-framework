@@ -55,7 +55,7 @@ public class RestControllerExceptionTranslator {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
     ResponseMessage<Object> handleException(org.hsweb.ezorm.rdb.exception.ValidationException exception) {
-        return ResponseMessage.error(400, exception.getMessage()).data(exception.getValidateResult());
+        return ResponseMessage.error(400, exception.getMessage()).result(exception.getValidateResult());
     }
 
     @ExceptionHandler(ValidationException.class)
@@ -63,7 +63,7 @@ public class RestControllerExceptionTranslator {
     @ResponseBody
     ResponseMessage<List<ValidateResults.Result>> handleException(ValidationException exception) {
         return ResponseMessage.<List<ValidateResults.Result>>error(400, exception.getMessage())
-                .data(exception.getResults());
+                .result(exception.getResults());
     }
 
     @ExceptionHandler(BusinessException.class)
@@ -80,7 +80,7 @@ public class RestControllerExceptionTranslator {
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ResponseBody
     ResponseMessage handleException(UnAuthorizedException exception) {
-        return ResponseMessage.error(401, exception.getMessage());
+        return ResponseMessage.error(401, exception.getMessage()).result(exception.getState());
     }
 
     @ExceptionHandler(AccessDenyException.class)
@@ -108,7 +108,7 @@ public class RestControllerExceptionTranslator {
                 .map(FieldError.class::cast)
                 .forEach(fieldError -> results.addResult(fieldError.getField(), fieldError.getDefaultMessage()));
 
-        return ResponseMessage.error(400, results.getResults().size() == 0 ? e.getMessage() : results.getResults().get(0).getMessage()).data(results.getResults());
+        return ResponseMessage.error(400, results.getResults().size() == 0 ? e.getMessage() : results.getResults().get(0).getMessage()).result(results.getResults());
     }
 //    @ExceptionHandler(Throwable.class)
 //    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)

@@ -23,7 +23,6 @@ import io.swagger.annotations.ApiParam;
 import org.hswebframework.web.BusinessException;
 import org.hswebframework.web.NotFoundException;
 import org.hswebframework.web.authorization.Authentication;
-//import org.hswebframework.web.authorization.AuthenticationInitializeService;
 import org.hswebframework.web.authorization.AuthenticationManager;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.listener.AuthorizationListenerDispatcher;
@@ -58,15 +57,13 @@ public class AuthorizationController {
     @Autowired
     private UserService userService;
 
-//    @Autowired
-//    private AuthenticationInitializeService authenticationInitializeService;
-
     @Autowired
-    private AuthenticationManager           authenticationManager;
+    private AuthenticationManager authenticationManager;
+
     @Autowired
     private AuthorizationListenerDispatcher authorizationListenerDispatcher;
 
-    @GetMapping({"/login-out","/sign-out","/exit"})
+    @GetMapping({"/login-out", "/sign-out", "/exit"})
     @Authorize
     @ApiOperation("退出当前登录")
     public ResponseMessage exit(@ApiParam(hidden = true) Authentication authentication) {

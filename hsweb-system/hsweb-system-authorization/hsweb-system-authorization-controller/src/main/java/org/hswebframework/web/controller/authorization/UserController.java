@@ -23,6 +23,9 @@ import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.exception.UnAuthorizedException;
+import org.hswebframework.web.authorization.token.TokenState;
+import org.hswebframework.web.authorization.token.UserToken;
+import org.hswebframework.web.authorization.token.UserTokenManager;
 import org.hswebframework.web.commons.entity.PagerResult;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.controller.CreateController;
@@ -36,10 +39,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 
+import java.util.List;
+
 import static org.hswebframework.web.controller.message.ResponseMessage.ok;
 
 /**
  * 用户管理控制器
+ *
  * @author zhouhao
  */
 @RestController
@@ -53,6 +59,8 @@ public class UserController implements
 
     private UserService userService;
 
+    private UserTokenManager userTokenManager;
+
     @Override
     @SuppressWarnings("unchecked")
     public UserService getService() {
@@ -62,6 +70,26 @@ public class UserController implements
     @Autowired
     public void setUserService(UserService userService) {
         this.userService = userService;
+    }
+
+    @Autowired
+    public void setUserTokenManager(UserTokenManager userTokenManager) {
+        this.userTokenManager = userTokenManager;
+    }
+
+    @GetMapping("/tokens")
+    @Authorize(action = Permission.ACTION_QUERY)
+    @AccessLogger("获取所有已登录用户的信息")
+    public ResponseMessage<List<UserToken>> userTokens() {
+        return ok(userTokenManager.allLoggedUser());
+    }
+
+    @PutMapping("/tokens/{token}/{state}")
+    @Authorize(action = "change-state")
+    @AccessLogger("修改token的状态")
+    public ResponseMessage<List<UserToken>> makeOffline(@PathVariable String token, @PathVariable TokenState state) {
+        userTokenManager.changeTokenState(token, state);
+        return ok();
     }
 
     @Override

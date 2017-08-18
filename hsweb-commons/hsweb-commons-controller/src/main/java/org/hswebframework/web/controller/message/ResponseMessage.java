@@ -82,9 +82,9 @@ public class ResponseMessage<T> implements Serializable {
         return this;
     }
 
-    public static <T> ResponseMessage<T> ok(T data) {
+    public static <T> ResponseMessage<T> ok(T result) {
         return new ResponseMessage<T>()
-                .data(data)
+                .result(result)
                 .putTimeStamp()
                 .status(200);
     }
@@ -94,8 +94,8 @@ public class ResponseMessage<T> implements Serializable {
 //        return this;
 //    }
 
-    public ResponseMessage<T> data(T data) {
-        this.result = data;
+    public ResponseMessage<T> result(T result) {
+        this.result = result;
         return this;
     }
 

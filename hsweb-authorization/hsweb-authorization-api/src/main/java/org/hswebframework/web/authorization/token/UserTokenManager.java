@@ -38,6 +38,7 @@ public interface UserTokenManager {
 
     /**
      * 根据用户id，获取全部令牌信息，如果设置了不能跨地点登陆，返回值只可能是{@code null}或者size为1的list
+     *
      * @param userId 用户id
      * @return 授权信息
      */
@@ -50,7 +51,6 @@ public interface UserTokenManager {
     boolean userIsLoggedIn(String userId);
 
     /**
-     *
      * @param token token
      * @return token是否已登记
      */
@@ -62,7 +62,6 @@ public interface UserTokenManager {
     long totalUser();
 
     /**
-     *
      * @return 总token数量
      */
     long totalToken();
@@ -81,19 +80,38 @@ public interface UserTokenManager {
 
     /**
      * 根据token删除
+     *
      * @param token
      */
     void signOutByToken(String token);
 
     /**
-     * 登记一个用户的token
+     * 修改userId的状态
+     *
+     * @param userId userId
+     * @param state  状态
+     */
+    void changeUserState(String userId, TokenState state);
+
+    /**
+     * 修改token的状态
+     *
      * @param token token
+     * @param state 状态
+     */
+    void changeTokenState(String token, TokenState state);
+
+    /**
+     * 登记一个用户的token
+     *
+     * @param token  token
      * @param userId 用户id
      */
     UserToken signIn(String token, String userId);
 
     /**
      * 更新token,使其不过期
+     *
      * @param token token
      */
     void touch(String token);

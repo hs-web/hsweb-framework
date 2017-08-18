@@ -57,7 +57,7 @@ public class DefaultAuthorizingHandler implements AuthorizingHandler {
 
     protected void handleDataAccess(AuthorizingContext context) {
         if (dataAccessController == null) {
-            logger.warn("dataAccessController is null,skip data access control!");
+            logger.warn("dataAccessController is null,skip result access control!");
             return;
         }
         List<Permission> permission = context.getAuthentication().getPermissions()

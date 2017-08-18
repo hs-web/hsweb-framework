@@ -18,6 +18,8 @@
 
 package org.hswebframework.web.authorization.exception;
 
+import org.hswebframework.web.authorization.token.TokenState;
+
 /**
  * 未授权异常
  *
@@ -27,15 +29,27 @@ package org.hswebframework.web.authorization.exception;
 public class UnAuthorizedException extends RuntimeException {
     private static final long serialVersionUID = 2422918455013900645L;
 
+    private TokenState state;
+
     public UnAuthorizedException() {
-        this("{un_authorization}");
+        this(TokenState.expired);
     }
 
-    public UnAuthorizedException(String message) {
+    public UnAuthorizedException(TokenState state) {
+        this("{un_authorization}", state);
+    }
+
+    public UnAuthorizedException(String message, TokenState state) {
         super(message);
+        this.state = state;
     }
 
-    public UnAuthorizedException(String message, Throwable cause) {
+    public UnAuthorizedException(String message, TokenState state, Throwable cause) {
         super(message, cause);
+        this.state = state;
+    }
+
+    public TokenState getState() {
+        return state;
     }
 }

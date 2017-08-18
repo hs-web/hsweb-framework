@@ -44,7 +44,7 @@ public class OwnCreatedDataAccessHandler implements DataAccessHandler {
                 case Permission.ACTION_UPDATE:
                     return doRWAccess(own, context,controller);
                 case Permission.ACTION_ADD:
-                    //put creator_id to data
+                    //put creator_id to result
                     return putCreatorId(own, context);
                 default:
                     logger.warn("action: {} not support now!", access.getAction());
