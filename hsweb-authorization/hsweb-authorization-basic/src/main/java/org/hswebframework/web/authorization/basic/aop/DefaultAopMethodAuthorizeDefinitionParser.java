@@ -72,7 +72,7 @@ public class DefaultAopMethodAuthorizeDefinitionParser implements AopMethodAutho
 
         DefaultBasicAuthorizeDefinition authorizeDefinition = new DefaultBasicAuthorizeDefinition();
 
-        if (methodAuth == null || !methodAuth.ignore())
+        if (methodAuth == null || !methodAuth.merge())
             authorizeDefinition.put(classAuth);
 
         authorizeDefinition.put(methodAuth);
