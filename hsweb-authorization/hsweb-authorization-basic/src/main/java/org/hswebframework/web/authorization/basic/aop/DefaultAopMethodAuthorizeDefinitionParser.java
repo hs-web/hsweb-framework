@@ -9,9 +9,11 @@ import org.hswebframework.web.authorization.basic.define.EmptyAuthorizeDefinitio
 import org.hswebframework.web.authorization.define.AuthorizeDefinition;
 import org.hswebframework.web.boost.aop.context.MethodInterceptorContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,11 +28,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class DefaultAopMethodAuthorizeDefinitionParser implements AopMethodAuthorizeDefinitionParser {
 
-    private Map<Method, AuthorizeDefinition> cache = new ConcurrentHashMap<>();
+    private Map<CacheKey, AuthorizeDefinition> cache = new ConcurrentHashMap<>();
 
 
     private List<AopMethodAuthorizeDefinitionCustomizerParser> parserCustomers;
-
 
     @Autowired(required = false)
     public void setParserCustomers(List<AopMethodAuthorizeDefinitionCustomizerParser> parserCustomers) {
@@ -39,8 +40,9 @@ public class DefaultAopMethodAuthorizeDefinitionParser implements AopMethodAutho
 
     @Override
     public AuthorizeDefinition parse(MethodInterceptorContext paramContext) {
+        CacheKey key = buildCacheKey(paramContext);
 
-        AuthorizeDefinition definition = cache.get(paramContext.getMethod());
+        AuthorizeDefinition definition = cache.get(key);
         if (definition != null) return definition instanceof EmptyAuthorizeDefinition ? null : definition;
         //使用自定义
         if (!CollectionUtils.isEmpty(parserCustomers)) {
@@ -48,7 +50,6 @@ public class DefaultAopMethodAuthorizeDefinitionParser implements AopMethodAutho
                     .map(customer -> customer.parse(paramContext))
                     .findAny().orElse(null);
             if (definition != null) {
-                // cache.put(paramContext.getMethod(), definition);
                 return definition;
             }
         }
@@ -61,18 +62,18 @@ public class DefaultAopMethodAuthorizeDefinitionParser implements AopMethodAutho
         RequiresExpression expression = AopUtils.findAnnotation(paramContext.getTarget().getClass(), RequiresExpression.class);
 
         if (classAuth == null && methodAuth == null && classDataAccess == null && methodDataAccess == null && expression == null) {
-            cache.put(paramContext.getMethod(), EmptyAuthorizeDefinition.instance);
+            cache.put(key, EmptyAuthorizeDefinition.instance);
             return null;
         }
 
         if ((methodAuth != null && methodAuth.ignore()) || (classAuth != null && classAuth.ignore())) {
-            cache.put(paramContext.getMethod(), EmptyAuthorizeDefinition.instance);
+            cache.put(key, EmptyAuthorizeDefinition.instance);
             return null;
         }
 
         DefaultBasicAuthorizeDefinition authorizeDefinition = new DefaultBasicAuthorizeDefinition();
 
-        if (methodAuth == null || !methodAuth.merge())
+        if (methodAuth == null || methodAuth.merge())
             authorizeDefinition.put(classAuth);
 
         authorizeDefinition.put(methodAuth);
@@ -83,8 +84,32 @@ public class DefaultAopMethodAuthorizeDefinitionParser implements AopMethodAutho
 
         authorizeDefinition.put(methodDataAccess);
 
-        cache.put(paramContext.getMethod(), authorizeDefinition);
+        cache.put(key, authorizeDefinition);
         return authorizeDefinition;
+    }
+
+    public CacheKey buildCacheKey(MethodInterceptorContext context) {
+        return new CacheKey(ClassUtils.getUserClass(context.getTarget()), context.getMethod());
+    }
+
+    class CacheKey {
+        private Class  type;
+        private Method method;
+
+        public CacheKey(Class type, Method method) {
+            this.type = type;
+            this.method = method;
+        }
+
+        @Override
+        public int hashCode() {
+            return Arrays.asList(type, method).hashCode();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            return obj != null && this.hashCode() == obj.hashCode();
+        }
     }
 
 }
