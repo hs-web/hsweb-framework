@@ -30,11 +30,15 @@ public class AopAuthorizingController extends StaticMethodMatcherPointcutAdvisor
             AuthorizeDefinition definition = aopMethodAuthorizeDefinitionParser.parse(paramContext);
 
             if (null != definition) {
-                AuthorizingContext context = new AuthorizingContext();
-                context.setAuthentication(Authentication.current().orElseThrow(UnAuthorizedException::new));
-                context.setDefinition(definition);
-                context.setParamContext(paramContext);
-                authorizingHandler.handle(context);
+                Authentication authentication = Authentication.current().orElseThrow(UnAuthorizedException::new);
+
+                if (!definition.isEmpty()) {
+                    AuthorizingContext context = new AuthorizingContext();
+                    context.setAuthentication(authentication);
+                    context.setDefinition(definition);
+                    context.setParamContext(paramContext);
+                    authorizingHandler.handle(context);
+                }
             }
             return methodInvocation.proceed();
         });

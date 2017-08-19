@@ -42,14 +42,13 @@ public class DefaultAopMethodAuthorizeDefinitionParser implements AopMethodAutho
 
         AuthorizeDefinition definition = cache.get(paramContext.getMethod());
         if (definition != null) return definition instanceof EmptyAuthorizeDefinition ? null : definition;
-
         //使用自定义
-        if(!CollectionUtils.isEmpty(parserCustomers)){
-            definition=parserCustomers.stream()
-                    .map(customer->customer.parse(paramContext))
+        if (!CollectionUtils.isEmpty(parserCustomers)) {
+            definition = parserCustomers.stream()
+                    .map(customer -> customer.parse(paramContext))
                     .findAny().orElse(null);
-            if(definition!=null){
-               // cache.put(paramContext.getMethod(), definition);
+            if (definition != null) {
+                // cache.put(paramContext.getMethod(), definition);
                 return definition;
             }
         }
@@ -66,24 +65,25 @@ public class DefaultAopMethodAuthorizeDefinitionParser implements AopMethodAutho
             return null;
         }
 
-        if (methodAuth != null && methodAuth.ignore()) {
+        if ((methodAuth != null && methodAuth.ignore()) || (classAuth != null && classAuth.ignore())) {
             cache.put(paramContext.getMethod(), EmptyAuthorizeDefinition.instance);
             return null;
         }
 
-
         DefaultBasicAuthorizeDefinition authorizeDefinition = new DefaultBasicAuthorizeDefinition();
 
-        authorizeDefinition.put(classAuth);
+        if (methodAuth == null || !methodAuth.ignore())
+            authorizeDefinition.put(classAuth);
+
         authorizeDefinition.put(methodAuth);
 
         authorizeDefinition.put(expression);
 
         authorizeDefinition.put(classDataAccess);
+
         authorizeDefinition.put(methodDataAccess);
 
         cache.put(paramContext.getMethod(), authorizeDefinition);
-
         return authorizeDefinition;
     }
 

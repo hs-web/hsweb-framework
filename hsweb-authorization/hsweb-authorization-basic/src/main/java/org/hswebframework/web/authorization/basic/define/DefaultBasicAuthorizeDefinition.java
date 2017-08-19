@@ -80,6 +80,10 @@ public class DefaultBasicAuthorizeDefinition implements AuthorizeDefinition {
         return logical;
     }
 
+    public boolean isEmpty() {
+        return permissions.isEmpty() && roles.isEmpty() && user.isEmpty() && script == null && dataAccessDefinition == null;
+    }
+
     @Override
     public DataAccessDefinition getDataAccessDefinition() {
         return dataAccessDefinition;

@@ -12,11 +12,14 @@ import java.util.Set;
  */
 public class EmptyAuthorizeDefinition implements AuthorizeDefinition {
 
-    public static final EmptyAuthorizeDefinition instance=new EmptyAuthorizeDefinition();
-    private EmptyAuthorizeDefinition(){}
+    public static final EmptyAuthorizeDefinition instance = new EmptyAuthorizeDefinition();
+
+    private EmptyAuthorizeDefinition() {
+    }
+
     @Override
     public int getPriority() {
-       throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -57,6 +60,11 @@ public class EmptyAuthorizeDefinition implements AuthorizeDefinition {
     @Override
     public Logical getLogical() {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return true;
     }
 
     @Override
