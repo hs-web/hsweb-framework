@@ -54,13 +54,23 @@ public abstract class AbstractTreeSortService<E extends TreeSortSupportEntity<PK
         return createQuery().where(TreeSupportEntity.parentId, parentId).noPaging().list();
     }
 
+    //当父节点不存在时,创建parentId
+    @SuppressWarnings("unchecked")
+    protected PK createParentIdOnExists() {
+        if (getPrimaryKeyType() == String.class) {
+            return (PK) "-1";
+        }
+        return null;
+    }
+
     protected void applyPath(E entity) {
         if (!StringUtils.isEmpty(entity.getParentId())) return;
         if (!StringUtils.isEmpty(entity.getPath())) return;
 
         TreeSortSupportEntity<PK> parent = selectByPk(entity.getParentId());
         if (null == parent) {
-            entity.setParentId(null);
+            entity.setParentId(createParentIdOnExists());
+            entity.setPath(RandomUtil.randomChar(4));
         } else {
             entity.setPath(parent.getPath() + "-" + RandomUtil.randomChar(4));
         }
