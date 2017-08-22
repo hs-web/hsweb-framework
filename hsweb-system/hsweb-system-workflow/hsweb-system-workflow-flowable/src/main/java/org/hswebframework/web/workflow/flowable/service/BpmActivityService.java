@@ -75,7 +75,7 @@ public interface BpmActivityService {
      * 获取下一环节办理人
      *
      * @param procDefId        流程定义ID
-     * @param activityId        图元ID
+     * @param activityId       图元ID
      * @return   节点id对应的办理人
      */
     Map<String, List<String>> getNextClaim(String procDefId, String activityId);

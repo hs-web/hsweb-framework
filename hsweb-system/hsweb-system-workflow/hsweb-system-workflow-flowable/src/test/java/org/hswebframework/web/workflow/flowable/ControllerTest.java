@@ -57,18 +57,12 @@ public class ControllerTest extends SimpleWebApplicationTests {
     // 流程图元数据test
     @Test
     public void activityImplTest() {
-        List<ActivityImpl> activities = bpmActivityService.getActivityByKey("test",null);
-        Assert.assertNotNull(activities);
-        System.out.println("获取到的流程节点:"+activities);
-        for (ActivityImpl a: activities) {
-            if(a.getProperty("type").equals("startEvent")){
-                System.out.println(a);
-                List<PvmTransition> pvmTransitions = a.getOutgoingTransitions();
-                Assert.assertEquals(pvmTransitions.size(), 1);
-                TaskDefinition taskDefinition = (TaskDefinition)pvmTransitions.get(0).getDestination().getProperty("taskDefinition");
-                System.out.println("流程第一节点办理人:"+taskDefinition.getAssigneeExpression());
-            }
-        }
+        ActivityImpl activity = bpmTaskService.selectActivityImplByTask("");
+        ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery().processDefinitionKey("testid").latestVersion().active().singleResult();
+        Map<String, List<String>> map = bpmActivityService.getNextClaim(processDefinition.getId(),activity.getId());
+        System.out.println("=========>>>");
+        System.out.println(JSON.toJSONString(map));
+        System.out.println("=========>>>");
     }
 
     // 流程流转test
