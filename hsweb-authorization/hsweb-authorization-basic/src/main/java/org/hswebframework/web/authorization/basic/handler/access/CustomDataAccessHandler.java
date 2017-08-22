@@ -21,7 +21,7 @@ package org.hswebframework.web.authorization.basic.handler.access;
 import org.hswebframework.web.authorization.access.CustomDataAccessConfig;
 import org.hswebframework.web.authorization.access.DataAccessConfig;
 import org.hswebframework.web.authorization.access.DataAccessHandler;
-import org.hswebframework.web.boost.aop.context.MethodInterceptorParamContext;
+import org.hswebframework.web.authorization.define.AuthorizingContext;
 
 /**
  * 当配置为自定义处理器时(实现{@link CustomDataAccessConfig }接口),此处理器生效
@@ -37,7 +37,7 @@ public class CustomDataAccessHandler implements DataAccessHandler {
     }
 
     @Override
-    public boolean handle(DataAccessConfig access, MethodInterceptorParamContext context) {
+    public boolean handle(DataAccessConfig access, AuthorizingContext context) {
         CustomDataAccessConfig custom = ((CustomDataAccessConfig) access);
         return custom.getController().doAccess(access, context);
     }

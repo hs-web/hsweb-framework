@@ -18,10 +18,10 @@
 package org.hswebframework.web.starter;
 
 import com.alibaba.fastjson.JSONException;
-import org.hswebframework.web.AuthorizeException;
-import org.hswebframework.web.AuthorizeForbiddenException;
 import org.hswebframework.web.BusinessException;
 import org.hswebframework.web.NotFoundException;
+import org.hswebframework.web.authorization.exception.AccessDenyException;
+import org.hswebframework.web.authorization.exception.UnAuthorizedException;
 import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.validate.SimpleValidateResults;
 import org.hswebframework.web.validate.ValidateResults;
@@ -29,10 +29,7 @@ import org.hswebframework.web.validate.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.BindingResultUtils;
 import org.springframework.validation.FieldError;
-import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -58,7 +55,7 @@ public class RestControllerExceptionTranslator {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
     ResponseMessage<Object> handleException(org.hsweb.ezorm.rdb.exception.ValidationException exception) {
-        return ResponseMessage.error(400, exception.getMessage()).data(exception.getValidateResult());
+        return ResponseMessage.error(400, exception.getMessage()).result(exception.getValidateResult());
     }
 
     @ExceptionHandler(ValidationException.class)
@@ -66,7 +63,7 @@ public class RestControllerExceptionTranslator {
     @ResponseBody
     ResponseMessage<List<ValidateResults.Result>> handleException(ValidationException exception) {
         return ResponseMessage.<List<ValidateResults.Result>>error(400, exception.getMessage())
-                .data(exception.getResults());
+                .result(exception.getResults());
     }
 
     @ExceptionHandler(BusinessException.class)
@@ -79,20 +76,19 @@ public class RestControllerExceptionTranslator {
         return ResponseMessage.error(exception.getStatus(), exception.getMessage());
     }
 
-    @ExceptionHandler(AuthorizeException.class)
+    @ExceptionHandler(UnAuthorizedException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ResponseBody
-    ResponseMessage handleException(AuthorizeException exception) {
-        return ResponseMessage.error(exception.getStatus(), exception.getMessage());
+    ResponseMessage handleException(UnAuthorizedException exception) {
+        return ResponseMessage.error(401, exception.getMessage()).result(exception.getState());
     }
 
-    @ExceptionHandler(AuthorizeForbiddenException.class)
+    @ExceptionHandler(AccessDenyException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     @ResponseBody
-    ResponseMessage handleException(AuthorizeForbiddenException exception) {
-        return ResponseMessage.error(exception.getStatus(), exception.getMessage());
+    ResponseMessage handleException(AccessDenyException exception) {
+        return ResponseMessage.error(403, exception.getMessage());
     }
-
 
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
@@ -112,7 +108,7 @@ public class RestControllerExceptionTranslator {
                 .map(FieldError.class::cast)
                 .forEach(fieldError -> results.addResult(fieldError.getField(), fieldError.getDefaultMessage()));
 
-        return ResponseMessage.error(400, results.getResults().size() == 0 ? e.getMessage() : results.getResults().get(0).getMessage()).data(results.getResults());
+        return ResponseMessage.error(400, results.getResults().size() == 0 ? e.getMessage() : results.getResults().get(0).getMessage()).result(results.getResults());
     }
 //    @ExceptionHandler(Throwable.class)
 //    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)

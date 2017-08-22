@@ -18,16 +18,12 @@
 package org.hswebframework.web.starter.authorization;
 
 import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.codec.binary.Base64;
-import org.hswebframework.expands.security.Encrypt;
-import org.hswebframework.expands.security.rsa.RSAPublicEncrypt;
 import org.hswebframework.web.entity.authorization.UserEntity;
 import org.hswebframework.web.service.authorization.UserService;
 import org.hswebframework.web.tests.SimpleWebApplicationTests;
 import org.junit.After;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.Assert;
 
 import java.sql.SQLException;
 
@@ -61,6 +57,7 @@ public class LoginTests extends SimpleWebApplicationTests {
             builder.param("password", "password_1234");
         }).exec().resultAsJson();
 
-        org.junit.Assert.assertEquals(json.get("result"), userEntity.getId());
+        org.junit.Assert.assertEquals(userEntity.getId(), json.getJSONObject("result").getString("userId"));
+
     }
 }

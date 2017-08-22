@@ -119,8 +119,8 @@ public class MethodInterceptorHolder {
         return AopUtils.findAnnotation(target.getClass(), method, annClass);
     }
 
-    public MethodInterceptorParamContext createParamContext() {
-        return new MethodInterceptorParamContext() {
+    public MethodInterceptorContext createParamContext() {
+        return new MethodInterceptorContext() {
             @Override
             public Object getTarget() {
                 return target;

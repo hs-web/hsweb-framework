@@ -10,8 +10,9 @@ import org.hswebframework.web.authorization.access.DataAccessConfig;
 import org.hswebframework.web.authorization.access.DataAccessController;
 import org.hswebframework.web.authorization.annotation.Logical;
 import org.hswebframework.web.authorization.define.AuthorizeDefinition;
-import org.hswebframework.web.authorization.exception.AuthorizationException;
-import org.hswebframework.web.boost.aop.context.MethodInterceptorParamContext;
+import org.hswebframework.web.authorization.define.AuthorizingContext;
+import org.hswebframework.web.authorization.exception.AccessDenyException;
+import org.hswebframework.web.boost.aop.context.MethodInterceptorContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,21 +48,21 @@ public class DefaultAuthorizingHandler implements AuthorizingHandler {
         handleRdac(context.getAuthentication(), context.getDefinition());
 
         //进行数据权限控制
-        handleDataAccess(context.getAuthentication(), context.getDefinition(), context.getParamContext());
+        handleDataAccess(context);
 
         //表达式权限控制
         handleExpression(context.getAuthentication(), context.getDefinition(), context.getParamContext());
 
     }
 
-    protected void handleDataAccess(Authentication authentication, AuthorizeDefinition definition, MethodInterceptorParamContext paramContext) {
+    protected void handleDataAccess(AuthorizingContext context) {
         if (dataAccessController == null) {
-            logger.warn("dataAccessController is null,skip data access control!");
+            logger.warn("dataAccessController is null,skip result access control!");
             return;
         }
-        List<Permission> permission = authentication.getPermissions()
+        List<Permission> permission = context.getAuthentication().getPermissions()
                 .stream()
-                .filter(per -> definition.getPermissions().contains(per.getId()))
+                .filter(per -> context.getDefinition().getPermissions().contains(per.getId()))
                 .collect(Collectors.toList());
 
         DataAccessController finalAccessController = dataAccessController;
@@ -70,51 +71,51 @@ public class DefaultAuthorizingHandler implements AuthorizingHandler {
         Set<DataAccessConfig> accesses = permission
                 .stream().map(Permission::getDataAccesses)
                 .flatMap(Collection::stream)
-                .filter(access -> definition.getActions().contains(access.getAction()))
+                .filter(access -> context.getDefinition().getActions().contains(access.getAction()))
                 .collect(Collectors.toSet());
         //无规则,则代表不进行控制
         if (accesses.isEmpty()) return;
         //单个规则验证函数
-        Function<Predicate<DataAccessConfig>, Boolean> function =
-                definition.getLogical() == Logical.AND ?
-                        accesses.stream()::allMatch : accesses.stream()::anyMatch;
+        Function<Predicate<DataAccessConfig>, Boolean> function = accesses.stream()::allMatch;
         //调用控制器进行验证
-        boolean isAccess = function.apply(access -> finalAccessController.doAccess(access, paramContext));
+        boolean isAccess = function.apply(access -> finalAccessController.doAccess(access, context));
         if (!isAccess) {
-            throw new AuthorizationException(definition.getMessage());
+            throw new AccessDenyException(context.getDefinition().getMessage());
         }
 
     }
 
-    protected void handleExpression(Authentication authentication, AuthorizeDefinition definition, MethodInterceptorParamContext paramContext) {
+    protected void handleExpression(Authentication authentication, AuthorizeDefinition definition, MethodInterceptorContext paramContext) {
         if (definition.getScript() != null) {
             String scriptId = DigestUtils.md5Hex(definition.getScript().getScript());
 
             DynamicScriptEngine engine = DynamicScriptEngineFactory.getEngine(definition.getScript().getLanguage());
             if (null == engine) {
-                throw new AuthorizationException("{unknown_engine}:" + definition.getScript().getLanguage());
+                throw new AccessDenyException("{unknown_engine}:" + definition.getScript().getLanguage());
             }
             if (!engine.compiled(scriptId)) {
                 try {
                     engine.compile(scriptId, definition.getScript().getScript());
                 } catch (Exception e) {
                     logger.error("express compile error", e);
-                    throw new AuthorizationException("{expression_error}");
+                    throw new AccessDenyException("{expression_error}");
                 }
             }
             Map<String, Object> var = new HashMap<>(paramContext.getParams());
             var.put("auth", authentication);
             Object success = engine.execute(scriptId, var).get();
             if (!(success instanceof Boolean) || !((Boolean) success)) {
-                throw new AuthorizationException(definition.getMessage());
+                throw new AccessDenyException(definition.getMessage());
             }
         }
     }
 
     protected void handleRdac(Authentication authentication, AuthorizeDefinition definition) {
         boolean access = true;
+        //多个设置时的判断逻辑
         Logical logical = definition.getLogical() == Logical.DEFAULT ? Logical.OR : definition.getLogical();
         boolean logicalIsOr = logical == Logical.OR;
+
         Set<String> permissionsDef = definition.getPermissions();
         Set<String> actionsDef = definition.getActions();
         Set<String> rolesDef = definition.getRoles();
@@ -170,7 +171,7 @@ public class DefaultAuthorizingHandler implements AuthorizingHandler {
             access = func.apply(authentication.getUser().getUsername()::equals);
         }
         if (!access) {
-            throw new AuthorizationException(definition.getMessage());
+            throw new AccessDenyException(definition.getMessage());
         }
     }
 }

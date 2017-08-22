@@ -28,6 +28,13 @@ public class SimpleScopeDataAccessConfig extends AbstractDataAccessConfig implem
         this.scope = scope;
     }
 
+    public SimpleScopeDataAccessConfig(String type, String scopeType, String action, Set<Object> scope) {
+        this.scopeType = scopeType;
+        this.scope = scope;
+        this.type = type;
+        setAction(action);
+    }
+
     @Override
     public String getScopeType() {
         return scopeType;

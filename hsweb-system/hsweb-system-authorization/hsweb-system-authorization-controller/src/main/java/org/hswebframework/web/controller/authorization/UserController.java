@@ -19,10 +19,13 @@ package org.hswebframework.web.controller.authorization;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.hswebframework.web.AuthorizeException;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.annotation.Authorize;
+import org.hswebframework.web.authorization.exception.UnAuthorizedException;
+import org.hswebframework.web.authorization.token.TokenState;
+import org.hswebframework.web.authorization.token.UserToken;
+import org.hswebframework.web.authorization.token.UserTokenManager;
 import org.hswebframework.web.commons.entity.PagerResult;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.controller.CreateController;
@@ -31,16 +34,17 @@ import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.entity.authorization.UserEntity;
 import org.hswebframework.web.entity.authorization.bind.BindRoleUserEntity;
 import org.hswebframework.web.logging.AccessLogger;
-import org.hswebframework.web.model.authorization.UserModel;
 import org.hswebframework.web.service.authorization.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 
+import java.util.List;
+
 import static org.hswebframework.web.controller.message.ResponseMessage.ok;
 
 /**
- * TODO 完成注释
+ * 用户管理控制器
  *
  * @author zhouhao
  */
@@ -55,6 +59,8 @@ public class UserController implements
 
     private UserService userService;
 
+    private UserTokenManager userTokenManager;
+
     @Override
     @SuppressWarnings("unchecked")
     public UserService getService() {
@@ -64,6 +70,29 @@ public class UserController implements
     @Autowired
     public void setUserService(UserService userService) {
         this.userService = userService;
+    }
+
+    @Autowired(required = false)
+    public void setUserTokenManager(UserTokenManager userTokenManager) {
+        this.userTokenManager = userTokenManager;
+    }
+
+    @GetMapping("/tokens")
+    @Authorize(action = Permission.ACTION_QUERY)
+    @AccessLogger("获取所有已登录用户的信息")
+    public ResponseMessage<List<UserToken>> userTokens() {
+        if (userTokenManager == null) throw new UnsupportedOperationException("userTokenManager is null");
+
+        return ok(userTokenManager.allLoggedUser());
+    }
+
+    @PutMapping("/tokens/{token}/{state}")
+    @Authorize(action = "change-state")
+    @AccessLogger("修改token的状态")
+    public ResponseMessage<List<UserToken>> makeOffline(@PathVariable String token, @PathVariable TokenState state) {
+        if (userTokenManager == null) throw new UnsupportedOperationException("userTokenManager is null");
+        userTokenManager.changeTokenState(token, state);
+        return ok();
     }
 
     @Override
@@ -96,7 +125,7 @@ public class UserController implements
     public ResponseMessage<Void> updateLoginUserPassword(@RequestParam String password,
                                                          @RequestParam String oldPassword) {
 
-        Authentication authentication = Authentication.current().orElseThrow(AuthorizeException::new);
+        Authentication authentication = Authentication.current().orElseThrow(UnAuthorizedException::new);
         getService().updatePassword(authentication.getUser().getId(), oldPassword, password);
         return ok();
     }

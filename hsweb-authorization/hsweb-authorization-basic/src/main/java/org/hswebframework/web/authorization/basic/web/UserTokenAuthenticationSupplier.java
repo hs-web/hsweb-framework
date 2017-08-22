@@ -31,6 +31,10 @@ public class UserTokenAuthenticationSupplier implements AuthenticationSupplier {
 
     @Override
     public Authentication get() {
-        return ThreadLocalUtils.get(Authentication.class.getName(), () -> get(Optional.ofNullable(getCurrentUserToken()).map(UserToken::getUserId).orElse(null)));
+        return ThreadLocalUtils.get(Authentication.class.getName(), () ->
+                get(Optional.ofNullable(getCurrentUserToken())
+                        .filter(UserToken::validate) //验证token,如果不是正常状态,将会抛出异常
+                        .map(UserToken::getUserId)
+                        .orElse(null)));
     }
 }

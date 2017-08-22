@@ -105,6 +105,7 @@ public class SimplePersonService extends EnableCacheGenericEntityService<PersonE
     @Override
     @Caching(evict = {
             @CacheEvict(key = "'id:'+#result"),
+            @CacheEvict(key = "'auth:persion-id'+#result"),
             @CacheEvict(key = "'auth-bind'+#result")
     })
     public String insert(PersonAuthBindEntity authBindEntity) {
@@ -123,6 +124,7 @@ public class SimplePersonService extends EnableCacheGenericEntityService<PersonE
     @Override
     @Caching(evict = {
             @CacheEvict(key = "'id:'+#authBindEntity.id"),
+            @CacheEvict(key = "'auth:persion-id'+#authBindEntity.id"),
             @CacheEvict(key = "'auth-bind'+#authBindEntity.id")
     })
     public int updateByPk(PersonAuthBindEntity authBindEntity) {

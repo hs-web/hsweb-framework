@@ -18,10 +18,12 @@
 package org.hswebframework.web.example.simple;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.access.DataAccessConfig;
 import org.hswebframework.web.authorization.basic.configuration.EnableAopAuthorize;
+import org.hswebframework.web.authorization.basic.web.UserTokenHolder;
 import org.hswebframework.web.authorization.simple.SimpleFieldFilterDataAccessConfig;
 import org.hswebframework.web.commons.entity.DataStatus;
 import org.hswebframework.web.commons.entity.factory.EntityFactory;
@@ -64,6 +66,7 @@ import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.stream.Stream;
 
 /**
@@ -91,11 +94,17 @@ public class SpringBootExample
                 MultipartFile.class,
                 MultipartFile[].class
         };
-        return loggerInfo -> System.out.println("有请求啦:" + JSON.toJSONString(loggerInfo.toSimpleMap(obj -> {
-            if (Stream.of(excludes).anyMatch(aClass -> aClass.isInstance(obj)))
-                return obj.getClass().getName();
-            return JSON.toJSONString(obj);
-        })));
+        return loggerInfo -> {
+            Map<String, Object> loggerMap = loggerInfo.toSimpleMap(obj -> {
+                if (Stream.of(excludes).anyMatch(aClass -> aClass.isInstance(obj)))
+                    return obj.getClass().getName();
+                return JSON.toJSONString(obj);
+            });
+            loggerMap.put("userToken", UserTokenHolder.currentToken());
+
+            System.out.println(JSON.toJSONString(loggerMap, SerializerFeature.SortField, SerializerFeature.PrettyFormat));
+
+        };
     }
 
     @Bean

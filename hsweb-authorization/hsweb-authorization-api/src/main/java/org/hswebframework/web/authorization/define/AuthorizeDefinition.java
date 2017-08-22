@@ -74,5 +74,7 @@ public interface AuthorizeDefinition {
      */
     Logical getLogical();
 
+    boolean isEmpty();
+
     DataAccessDefinition getDataAccessDefinition();
 }

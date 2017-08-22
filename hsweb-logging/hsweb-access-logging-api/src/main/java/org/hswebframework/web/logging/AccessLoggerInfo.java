@@ -4,7 +4,6 @@ import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.StringJoiner;
@@ -198,7 +197,10 @@ public class AccessLoggerInfo {
     }
 
     public Map<String, Object> toSimpleMap(Function<Object, Serializable> noSerialExchange) {
-        Map<String, Object> map = new HashMap<>(16);
+        return toSimpleMap(noSerialExchange, new LinkedHashMap<>());
+    }
+
+    public Map<String, Object> toSimpleMap(Function<Object, Serializable> objectFilter, Map<String, Object> map) {
         map.put("action", action);
         map.put("describe", describe);
         if (method != null) {
@@ -215,7 +217,7 @@ public class AccessLoggerInfo {
         Map<String, Object> newParameter = new LinkedHashMap<>(parameters);
         newParameter.entrySet().forEach(entry -> {
             if (entry.getValue() != null) {
-                entry.setValue(noSerialExchange.apply(entry.getValue()));
+                entry.setValue(objectFilter.apply(entry.getValue()));
             }
         });
 
@@ -224,11 +226,7 @@ public class AccessLoggerInfo {
         map.put("httpMethod", httpMethod);
         map.put("ip", ip);
         map.put("url", url);
-        if (response instanceof Serializable) {
-            map.put("response", response);
-        } else {
-            map.put("response", noSerialExchange.apply(response));
-        }
+        map.put("response", objectFilter.apply(response));
         map.put("requestTime", requestTime);
         map.put("responseTime", responseTime);
         map.put("useTime", responseTime - requestTime);
@@ -237,8 +235,6 @@ public class AccessLoggerInfo {
             exception.printStackTrace(new PrintWriter(writer));
             map.put("exception", writer.toString());
         }
-
-
         return map;
     }
 }

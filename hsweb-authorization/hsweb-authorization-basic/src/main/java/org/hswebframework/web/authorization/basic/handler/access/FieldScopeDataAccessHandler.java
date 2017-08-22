@@ -8,8 +8,7 @@ import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.access.DataAccessConfig;
 import org.hswebframework.web.authorization.access.DataAccessHandler;
 import org.hswebframework.web.authorization.access.FieldScopeDataAccessConfig;
-import org.hswebframework.web.authorization.annotation.RequiresDataAccess;
-import org.hswebframework.web.boost.aop.context.MethodInterceptorParamContext;
+import org.hswebframework.web.authorization.define.AuthorizingContext;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.controller.QueryController;
 import org.hswebframework.web.service.QueryService;
@@ -33,9 +32,9 @@ public class FieldScopeDataAccessHandler implements DataAccessHandler {
     }
 
     @Override
-    public boolean handle(DataAccessConfig access, MethodInterceptorParamContext context) {
+    public boolean handle(DataAccessConfig access, AuthorizingContext context) {
         FieldScopeDataAccessConfig own = ((FieldScopeDataAccessConfig) access);
-        Object controller = context.getTarget();
+        Object controller = context.getParamContext().getTarget();
         if (controller != null) {
             switch (access.getAction()) {
                 case Permission.ACTION_QUERY:
@@ -55,10 +54,9 @@ public class FieldScopeDataAccessHandler implements DataAccessHandler {
     }
 
     @SuppressWarnings("unchecked")
-    protected boolean doRWAccess(FieldScopeDataAccessConfig access, MethodInterceptorParamContext context, Object controller) {
+    protected boolean doRWAccess(FieldScopeDataAccessConfig access, AuthorizingContext context, Object controller) {
         //获取注解
-        RequiresDataAccess dataAccess = context.getAnnotation(RequiresDataAccess.class);
-        Object id = context.<String>getParameter(dataAccess.idParamName()).orElse(null);
+        Object id = context.getParamContext().<String>getParameter(context.getDefinition().getDataAccessDefinition().getIdParameterName()).orElse(null);
         //通过QueryController获取QueryService
         //然后调用selectByPk 查询旧的数据,进行对比
         if (controller instanceof QueryController) {
@@ -80,8 +78,8 @@ public class FieldScopeDataAccessHandler implements DataAccessHandler {
     }
 
 
-    protected boolean doQueryAccess(FieldScopeDataAccessConfig access, MethodInterceptorParamContext context) {
-        QueryParamEntity entity = context.getParams()
+    protected boolean doQueryAccess(FieldScopeDataAccessConfig access, AuthorizingContext context) {
+        QueryParamEntity entity = context.getParamContext().getParams()
                 .values().stream()
                 .filter(QueryParamEntity.class::isInstance)
                 .map(QueryParamEntity.class::cast)

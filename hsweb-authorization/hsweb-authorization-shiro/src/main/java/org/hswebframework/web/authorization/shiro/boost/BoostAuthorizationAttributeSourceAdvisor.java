@@ -51,9 +51,7 @@ public class BoostAuthorizationAttributeSourceAdvisor extends StaticMethodMatche
                     RequiresGuest.class,
                     RequiresAuthentication.class,
                     //自定义
-                    RequiresExpression.class,
-                    Authorize.class,
-                    RequiresDataAccess.class
+                    Authorize.class
             };
 
     protected SecurityManager securityManager = null;
@@ -73,12 +71,6 @@ public class BoostAuthorizationAttributeSourceAdvisor extends StaticMethodMatche
                     }
                 };
         AnnotationResolver resolver = new SpringAnnotationResolver();
-        // @RequiresExpression support
-        interceptor.getMethodInterceptors().add(new ExpressionAnnotationMethodInterceptor(resolver));
-        // @RequiresDataAccess support
-        interceptor.getMethodInterceptors().add(new DataAccessAnnotationMethodInterceptor(dataAccessController, resolver));
-        // @Authorize support
-        interceptor.getMethodInterceptors().add(new SimpleAuthorizeMethodInterceptor(resolver));
         setAdvice(interceptor);
     }
 
