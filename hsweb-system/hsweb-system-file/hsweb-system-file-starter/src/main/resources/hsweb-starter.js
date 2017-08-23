@@ -29,7 +29,7 @@ function install(context) {
         .addColumn().name("size").alias("size").comment("文件大小").jdbcType(java.sql.JDBCType.DECIMAL).length(32, 0).commit()
         .addColumn().name("status").alias("status").comment("状态").jdbcType(java.sql.JDBCType.DECIMAL).length(4, 0).commit()
         .addColumn().name("classified").alias("classified").comment("分类").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
-        .addColumn().name("create_time").alias("create_time").comment("创建时间").jdbcType(java.sql.JDBCType.NUMERIC).length(32).commit()
+        .addColumn().name("create_time").alias("create_time").comment("创建时间").jdbcType(java.sql.JDBCType.NUMERIC).length(32,0).commit()
         .addColumn().name("creator_id").alias("creatorId").comment("创建人").jdbcType(java.sql.JDBCType.VARCHAR).length(256).commit()
         .comment("文件信息").commit();
 }
