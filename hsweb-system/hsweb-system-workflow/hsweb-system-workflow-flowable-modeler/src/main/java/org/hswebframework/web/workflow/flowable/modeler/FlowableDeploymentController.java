@@ -43,7 +43,7 @@ import java.util.zip.ZipInputStream;
  * @Date 2017/8/10.
  */
 @RestController
-@RequestMapping("/workflow/procDef")
+@RequestMapping("/workflow/proc-def")
 public class FlowableDeploymentController extends FlowableAbstract {
 
     private final static String MODEL_ID = "modelId";
