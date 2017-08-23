@@ -1,16 +1,25 @@
 package org.hswebframework.web.workflow.flowable.service.imp;
 
+import org.activiti.engine.TaskService;
 import org.activiti.engine.history.HistoricProcessInstance;
+import org.activiti.engine.history.HistoricTaskInstance;
 import org.activiti.engine.impl.RepositoryServiceImpl;
 import org.activiti.engine.impl.TaskServiceImpl;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
+import org.activiti.engine.impl.persistence.entity.JobEntity;
 import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity;
+import org.activiti.engine.impl.pvm.PvmActivity;
+import org.activiti.engine.impl.pvm.PvmTransition;
 import org.activiti.engine.impl.pvm.process.ActivityImpl;
+import org.activiti.engine.impl.pvm.process.ProcessDefinitionImpl;
+import org.activiti.engine.impl.pvm.process.TransitionImpl;
+import org.activiti.engine.impl.pvm.runtime.ExecutionImpl;
 import org.activiti.engine.impl.task.TaskDefinition;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
+import org.hswebframework.utils.ClassUtils;
 import org.hswebframework.utils.StringUtils;
 import org.hswebframework.web.NotFoundException;
 import org.hswebframework.web.workflow.flowable.entity.TaskInfo;
@@ -131,21 +140,97 @@ public class BpmTaskServiceImp extends FlowableAbstract implements BpmTaskServic
             logger.warn("只能完成自己的任务");
             throw new NotFoundException("You can only do your own work");
         }
+        Map<String,Object> map = new HashMap<>();
+        map.put("oldTaskId",task.getId());
         //完成此任务
         if (activityId == null) {
-            taskService.complete(taskId);
+            taskService.complete(taskId, map);
         } else {
             jumpTask(taskId, activityId, next_claim);
         }
 
         //根据流程ID查找执行计划，存在则进行下一步,没有则结束（定制化流程预留）
-//        List<Execution> execution = runtimeService.createExecutionQuery().processInstanceId(workFlowId).list();
-//        if (execution.size() > 0) {
-//            String tasknow = selectNowTaskId(workFlowId);
-//            // 自定义下一执行人
-//            if (!StringUtils.isNullOrEmpty(next_claim))
-//                claim(tasknow, next_claim);
-//        }
+        List<Execution> execution = runtimeService.createExecutionQuery().processInstanceId(task.getProcessInstanceId()).list();
+        if (execution.size() > 0) {
+            String tasknow = selectNowTaskId(task.getProcessInstanceId());
+            // 自定义下一执行人
+            if (!StringUtils.isNullOrEmpty(next_claim))
+                claim(tasknow, next_claim);
+        }
+    }
+
+    @Override
+    public void reject(String taskId) {
+        // 先判定是否存在历史环节
+        String oldTaskId = selectVariableLocalByTaskId(taskId,"oldTaskId").toString();
+        HistoricTaskInstance taskInstance = historyService.createHistoricTaskInstanceQuery().taskId(oldTaskId).singleResult();
+        if(taskInstance==null){
+            logger.error("历史任务环节不存在,taskId:"+oldTaskId);
+        }
+
+        Task task = selectTaskByTaskId(taskId);
+
+        ProcessInstance processInstance = runtimeService.createProcessInstanceQuery().processInstanceId(task.getProcessInstanceId()).singleResult();
+        if (processInstance == null) {
+            logger.error("流程已经结束");
+        }
+
+        Map<String, Object> variables = processInstance.getProcessVariables();
+
+                ProcessDefinitionEntity definition = (ProcessDefinitionEntity) ((RepositoryServiceImpl) repositoryService).getDeployedProcessDefinition(task.getProcessDefinitionId());
+        if (definition == null) {
+            logger.error("流程定义未找到");
+        }
+
+        ExecutionEntity execution = (ExecutionEntity) runtimeService.createExecutionQuery().executionId(task.getExecutionId()).singleResult();
+        // 是否并行节点
+        if(execution.isConcurrent()){
+            logger.error("并行节点不允许驳回,taskId:"+task.getId());
+        }
+
+        // 是否存在定时任务
+        long num = managementService.createJobQuery().executionId(task.getExecutionId()).count();
+        if(num>0) throw new NotFoundException("当前环节不允许驳回");
+
+        // 驳回
+
+
+        // 取得上一步活动
+        ActivityImpl currActivity = ((ProcessDefinitionImpl) definition).findActivity(task.getTaskDefinitionKey());
+        List<PvmTransition> nextTransitionList = currActivity.getIncomingTransitions();
+        // 清除当前活动的出口
+        List<PvmTransition> oriPvmTransitionList = new ArrayList<PvmTransition>();
+        List<PvmTransition> pvmTransitionList = currActivity.getOutgoingTransitions();
+        for (PvmTransition pvmTransition : pvmTransitionList) {
+            oriPvmTransitionList.add(pvmTransition);
+        }
+        pvmTransitionList.clear();
+
+        // 建立新出口
+        List<TransitionImpl> newTransitions = new ArrayList<TransitionImpl>();
+        for (PvmTransition nextTransition : nextTransitionList) {
+            PvmActivity nextActivity = nextTransition.getSource();
+            ActivityImpl nextActivityImpl = ((ProcessDefinitionImpl) definition).findActivity(nextActivity.getId());
+            TransitionImpl newTransition = currActivity.createOutgoingTransition();
+            newTransition.setDestination(nextActivityImpl);
+            newTransitions.add(newTransition);
+        }
+        // 完成任务
+        List<Task> tasks = taskService.createTaskQuery()
+                .processInstanceId(processInstance.getId())
+                .taskDefinitionKey(task.getTaskDefinitionKey()).list();
+        for (Task t : tasks) {
+            taskService.complete(t.getId(), variables);
+            historyService.deleteHistoricTaskInstance(t.getId());
+        }
+        // 恢复方向
+        for (TransitionImpl transitionImpl : newTransitions) {
+            currActivity.getOutgoingTransitions().remove(transitionImpl);
+        }
+        for (PvmTransition pvmTransition : oriPvmTransitionList) {
+            pvmTransitionList.add(pvmTransition);
+        }
+
     }
 
     @Override
@@ -173,6 +258,16 @@ public class BpmTaskServiceImp extends FlowableAbstract implements BpmTaskServic
     @Override
     public void removeHiTask(String taskId) {
         historyService.deleteHistoricTaskInstance(taskId);
+    }
+
+    @Override
+    public Map<String, Object> selectVariableLocalByTaskId(String taskId) {
+        return taskService.getVariablesLocal(taskId);
+    }
+
+    @Override
+    public Object selectVariableLocalByTaskId(String taskId, String variableName) {
+        return taskService.getVariableLocal(taskId, variableName);
     }
 
     @Override

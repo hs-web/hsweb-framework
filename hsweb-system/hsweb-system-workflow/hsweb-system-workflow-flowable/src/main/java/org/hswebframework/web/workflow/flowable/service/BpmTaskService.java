@@ -30,6 +30,21 @@ public interface BpmTaskService{
     HistoricProcessInstance selectHisProInst(String procInstId);
 
     /**
+     * 获取环节变量
+     * @param taskId
+     * @return
+     */
+    Map<String, Object> selectVariableLocalByTaskId(String taskId);
+
+    /**
+     * 获取环节变量
+     * @param taskId
+     * @param variableName
+     * @return
+     */
+    Object selectVariableLocalByTaskId(String taskId, String variableName);
+
+    /**
      * 根据taskId获取流程图对应的图元
      * @param taskId
      * @return
@@ -82,6 +97,12 @@ public interface BpmTaskService{
      * @param next_claim         人为指定下一步执行人（预留）
      */
     void jumpTask(String procInstId, String activity, String next_claim);
+
+    /**
+     * 驳回
+     * @param taskId
+     */
+    void reject(String taskId);
 
     /**
      * 设置办理人

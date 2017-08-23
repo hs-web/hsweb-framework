@@ -90,9 +90,9 @@ public class ControllerTest extends SimpleWebApplicationTests {
         System.out.println(activity);
         System.out.println("=========>>>");
         System.out.println("=========流程流转下一步，下一步为并行网关。>>>");
-//        for (Task task:tasks) {
-//            bpmTaskService.complete(task.getId(), "zhangsan",null,null);
-//        }
+        for (Task task:tasks) {
+            bpmTaskService.complete(task.getId(), "zhangsan",null,null);
+        }
         tasks = bpmTaskService.selectTaskByProcessId(processInstance.getId());
         Assert.assertNotNull(tasks);
         for (Task task:tasks) {
