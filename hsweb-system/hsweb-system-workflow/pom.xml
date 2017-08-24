@@ -17,7 +17,6 @@
     </properties>
     <modules>
         <module>hsweb-system-workflow-flowable</module>
-        <module>hsweb-system-workflow-flowable-modeler</module>
     </modules>
 
 
