@@ -13,9 +13,9 @@ import java.util.List;
  * @Date 2017/8/3.
  */
 public class ActivitiUserUtil {
-    public static UserEntity toActivitiUser(org.hswebframework.web.entity.authorization.UserEntity bUser){
+    public static UserEntity toActivitiUser(org.hswebframework.web.entity.authorization.UserEntity bUser) {
         UserEntity userEntity = new UserEntity();
-        userEntity.setId(bUser.getName());
+        userEntity.setId(bUser.getId());
         userEntity.setFirstName(bUser.getUsername());
         userEntity.setLastName(bUser.getName());
         userEntity.setPassword(bUser.getPassword());
@@ -24,15 +24,16 @@ public class ActivitiUserUtil {
         return userEntity;
     }
 
-    public static GroupEntity toActivitiGroup(RoleEntity sysRole){
+    public static GroupEntity toActivitiGroup(RoleEntity sysRole) {
         GroupEntity groupEntity = new GroupEntity();
+        groupEntity.setId(sysRole.getId());
         groupEntity.setRevision(1);
         groupEntity.setType("assignment");
         groupEntity.setName(sysRole.getName());
         return groupEntity;
     }
 
-    public static List<Group> toActivitiGroups(List<RoleEntity> roleEntities){
+    public static List<Group> toActivitiGroups(List<RoleEntity> roleEntities) {
         List<Group> groups = new ArrayList<Group>();
         for (RoleEntity roleEntity : roleEntities) {
             GroupEntity groupEntity = toActivitiGroup(roleEntity);
