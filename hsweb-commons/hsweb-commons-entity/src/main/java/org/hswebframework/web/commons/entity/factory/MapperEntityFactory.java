@@ -20,6 +20,7 @@ package org.hswebframework.web.commons.entity.factory;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import org.hswebframework.web.NotFoundException;
 import org.hswebframework.utils.ClassUtils;
 import org.slf4j.Logger;
@@ -54,7 +55,7 @@ public class MapperEntityFactory implements EntityFactory {
         if (sourcePar instanceof JSONObject) {
             return ((JSONObject) sourcePar).toJavaObject(target.getClass());
         }
-        return JSON.parseObject(JSON.toJSONString(source), target.getClass());
+        return JSON.parseObject(JSON.toJSONString(source, SerializerFeature.DisableCircularReferenceDetect), target.getClass());
     };
 
     private DefaultMapperFactory defaultMapperFactory = DEFAULT_MAPPER_FACTORY;
