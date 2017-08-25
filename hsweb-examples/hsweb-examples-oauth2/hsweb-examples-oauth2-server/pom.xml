@@ -94,7 +94,7 @@
         </dependency>
         <dependency>
             <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-authorization-shiro</artifactId>
+            <artifactId>hsweb-authorization-basic</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
