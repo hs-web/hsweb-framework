@@ -16,7 +16,8 @@
         <module>hsweb-system-datasource-dao</module>
         <module>hsweb-system-datasource-entity</module>
         <module>hsweb-system-datasource-service</module>
-        <module>hsweb-system-datasource-service</module>
+        <module>hsweb-system-datasource-starter</module>
+
     </modules>
 
 </project>
