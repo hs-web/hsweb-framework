@@ -25,7 +25,7 @@ function install(context) {
         .addColumn().name("u_id").alias("id").comment("ID").jdbcType(java.sql.JDBCType.VARCHAR).length(32).primaryKey().commit()
         .addColumn().name("name").alias("name").comment("任务名称").jdbcType(java.sql.JDBCType.VARCHAR).length(128).commit()
         .addColumn().name("remark").alias("remark").comment("备注").jdbcType(java.sql.JDBCType.VARCHAR).length(512).commit()
-        .addColumn().name("quartz_config").alias("quartz_config").comment("定时调度配置").jdbcType(java.sql.JDBCType.clob).commit()
+        .addColumn().name("quartz_config").alias("quartz_config").comment("定时调度配置").jdbcType(java.sql.JDBCType.CLOB).commit()
         .addColumn().name("script").alias("script").comment("执行脚本").jdbcType(java.sql.JDBCType.CLOB).commit()
         .addColumn().name("language").alias("language").comment("脚本语言").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
         .addColumn().name("enabled").alias("enabled").comment("是否启用").jdbcType(java.sql.JDBCType.DECIMAL).length(4,0).commit()
