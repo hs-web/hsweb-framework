@@ -4,16 +4,16 @@
         "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.hswebframework.web.dao.schedule.ScheduleJobDao">
     <resultMap id="ScheduleJobResultMap" type="org.hswebframework.web.entity.schedule.SimpleScheduleJobEntity">
-              <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
-            <result property="name" column="name" javaType="String" jdbcType="VARCHAR"/>
-            <result property="remark" column="remark" javaType="String" jdbcType="VARCHAR"/>
-            <result property="quartz_config" column="quartz_config" javaType="String" jdbcType="clob"/>
-            <result property="script" column="script" javaType="String" jdbcType="CLOB"/>
-            <result property="language" column="language" javaType="String" jdbcType="VARCHAR"/>
-            <result property="enabled" column="enabled" javaType="Long" jdbcType="DECIMAL"/>
-            <result property="parameters" column="parameters" javaType="String" jdbcType="CLOB"/>
-            <result property="type" column="type" javaType="String" jdbcType="VARCHAR"/>
-            <result property="tags" column="tags" javaType="String" jdbcType="VARCHAR"/>
+        <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
+        <result property="name" column="name" javaType="String" jdbcType="VARCHAR"/>
+        <result property="remark" column="remark" javaType="String" jdbcType="VARCHAR"/>
+        <result property="quartzConfig" column="quartz_config" javaType="String" jdbcType="CLOB"/>
+        <result property="script" column="script" javaType="String" jdbcType="CLOB"/>
+        <result property="language" column="language" javaType="String" jdbcType="VARCHAR"/>
+        <result property="status" column="status" javaType="Byte" jdbcType="DECIMAL"/>
+        <result property="parameters" column="parameters" javaType="String" jdbcType="CLOB"/>
+        <result property="type" column="type" javaType="String" jdbcType="VARCHAR"/>
+        <result property="tags" column="tags" javaType="String" jdbcType="VARCHAR"/>
     </resultMap>
 
     <!--用于动态生成sql所需的配置-->
@@ -21,8 +21,8 @@
         <bind name="resultMapId" value="'ScheduleJobResultMap'"/>
         <bind name="tableName" value="'s_schedule_job'"/>
     </sql>
-  
-    <insert id="insert" parameterType="org.hswebframework.web.entity.schedule.SimpleScheduleJobEntity" >
+
+    <insert id="insert" parameterType="org.hswebframework.web.entity.schedule.SimpleScheduleJobEntity">
         <include refid="config"/>
         <include refid="BasicMapper.buildInsertSql"/>
     </insert>

@@ -11,13 +11,13 @@ public class SimpleScheduleJobEntity extends SimpleGenericEntity<String> impleme
   		//备注
         private String remark;
   		//定时调度配置
-        private String quartz_config;
+        private String quartzConfig;
   		//执行脚本
         private String script;
   		//脚本语言
         private String language;
   		//是否启用
-        private Long enabled;
+        private Byte   status;
   		//启动参数
         private String parameters;
   		//任务类型
@@ -54,15 +54,15 @@ public class SimpleScheduleJobEntity extends SimpleGenericEntity<String> impleme
         /**
         * @return  定时调度配置
         */
-        public String getQuartz_config(){
-			return this.quartz_config;
+        public String getQuartzConfig(){
+			return this.quartzConfig;
         }
 
         /**
-        * @param  quartz_config  定时调度配置
+        * @param  quartzConfig  定时调度配置
         */
-        public void setQuartz_config(String quartz_config){
-        	this.quartz_config=quartz_config;
+        public void setQuartzConfig(String quartzConfig){
+        	this.quartzConfig = quartzConfig;
         }
         /**
         * @return  执行脚本
@@ -93,15 +93,15 @@ public class SimpleScheduleJobEntity extends SimpleGenericEntity<String> impleme
         /**
         * @return  是否启用
         */
-        public Long getEnabled(){
-			return this.enabled;
+        public Byte getStatus(){
+			return this.status;
         }
 
         /**
-        * @param  enabled  是否启用
+        * @param  status  是否启用
         */
-        public void setEnabled(Long enabled){
-        	this.enabled=enabled;
+        public void setStatus(Byte status){
+        	this.status = status;
         }
         /**
         * @return  启动参数

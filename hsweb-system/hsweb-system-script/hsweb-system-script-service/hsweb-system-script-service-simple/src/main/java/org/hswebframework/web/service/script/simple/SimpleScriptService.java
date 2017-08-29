@@ -18,10 +18,12 @@ public class SimpleScriptService extends GenericEntityService<ScriptEntity, Stri
         implements ScriptService {
     @Autowired
     private ScriptDao scriptDao;
-   @Override
+
+    @Override
     protected IDGenerator<String> getIDGenerator() {
         return IDGenerator.MD5;
     }
+
     @Override
     public ScriptDao getDao() {
         return scriptDao;
