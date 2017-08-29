@@ -15,13 +15,13 @@
 |[hsweb-system-document](hsweb-system-document)|文档管理功能| 0%|
 |[hsweb-system-dynamic-form](hsweb-system-dynamic-form)|动态表单| 80%|
 |[hsweb-system-explorer](hsweb-system-menu)|**系统菜单**| 80%|
-|[hsweb-system-file](hsweb-system-file)|文件管理| 0%|
+|[hsweb-system-file](hsweb-system-file)|文件管理| 100%|
 |[hsweb-system-history](hsweb-system-history)|历史记录管理| 0%|
 |[hsweb-system-oauth2-client](hsweb-system-oauth2-client)|OAuth2 客户端| 60%|
 |[hsweb-system-oauth2-server](hsweb-system-oauth2-server)|OAuth2 服务端| 60%|
 |[hsweb-system-monitor](hsweb-system-monitor)|系统监控| 0%|
 |[hsweb-system-organizational](hsweb-system-organizational)|组织架构| 70%|
-|[hsweb-system-schedule](hsweb-system-schedule)|任务调度| 0%|
+|[hsweb-system-schedule](hsweb-system-schedule)|任务调度| 80%|
 |[hsweb-system-script](hsweb-system-script)|动态脚本| 0%|
 |[hsweb-system-template](hsweb-system-template)|模板管理| 60%|
-|[hsweb-system-workflow](hsweb-system-workflow)|工作流| 0%|
+|[hsweb-system-workflow](hsweb-system-workflow)|工作流| 40%|
