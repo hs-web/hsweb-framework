@@ -1,35 +1,29 @@
 package org.hswebframework.web.workflow.flowable.service.imp;
 
-import org.activiti.engine.TaskService;
 import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.history.HistoricTaskInstance;
 import org.activiti.engine.impl.RepositoryServiceImpl;
 import org.activiti.engine.impl.TaskServiceImpl;
-import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
-import org.activiti.engine.impl.persistence.entity.JobEntity;
 import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity;
 import org.activiti.engine.impl.pvm.PvmActivity;
 import org.activiti.engine.impl.pvm.PvmTransition;
+import org.activiti.engine.impl.pvm.delegate.ActivityExecution;
 import org.activiti.engine.impl.pvm.process.ActivityImpl;
-import org.activiti.engine.impl.pvm.process.ProcessDefinitionImpl;
 import org.activiti.engine.impl.pvm.process.TransitionImpl;
-import org.activiti.engine.impl.pvm.runtime.ExecutionImpl;
-import org.activiti.engine.impl.task.TaskDefinition;
-import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
-import org.hswebframework.utils.ClassUtils;
 import org.hswebframework.utils.StringUtils;
 import org.hswebframework.web.NotFoundException;
 import org.hswebframework.web.workflow.flowable.entity.TaskInfo;
-import org.hswebframework.web.workflow.flowable.service.BpmTaskService;
 import org.hswebframework.web.workflow.flowable.service.BpmActivityService;
+import org.hswebframework.web.workflow.flowable.service.BpmTaskService;
 import org.hswebframework.web.workflow.flowable.utils.FlowableAbstract;
 import org.hswebframework.web.workflow.flowable.utils.JumpTaskCmd;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.*;
@@ -39,12 +33,13 @@ import java.util.*;
  * @Date 2017/8/7.
  */
 @Service
+@Transactional(rollbackFor = Throwable.class)
 public class BpmTaskServiceImp extends FlowableAbstract implements BpmTaskService {
 
     protected Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Resource
-    BpmActivityService bpmActivityService;
+    private BpmActivityService bpmActivityService;
 
     @Override
     public List<Task> selectNowTask(String procInstId) {
@@ -112,7 +107,11 @@ public class BpmTaskServiceImp extends FlowableAbstract implements BpmTaskServic
     public List<TaskInfo> claimList(String userId) {
         List<TaskInfo> list = new ArrayList<>();
         // 等待签收的任务
-        List<Task> todoList = taskService.createTaskQuery().taskCandidateUser(userId).includeProcessVariables().active().list();
+        List<Task> todoList = taskService.createTaskQuery()
+                .taskCandidateUser(userId)
+                .includeProcessVariables()
+                .active()
+                .list();
         return list;
     }
 
@@ -120,19 +119,23 @@ public class BpmTaskServiceImp extends FlowableAbstract implements BpmTaskServic
     public List<TaskInfo> todoList(String userId) {
         List<TaskInfo> list = new ArrayList<>();
         // 已经签收的任务
-        List<Task> todoList = taskService.createTaskQuery().taskAssignee(userId).includeProcessVariables().active().list();
+        List<Task> todoList = taskService.createTaskQuery()
+                .taskAssignee(userId)
+                .includeProcessVariables()
+                .active()
+                .list();
         return list;
     }
 
     @Override
-    public void complete(String taskId, String userId, String activityId, String next_claim) {
+    public void complete(String taskId, String userId, String activityId, String nextClaim) {
         Task task = taskService.createTaskQuery().taskId(taskId).includeProcessVariables().singleResult();
         if (task == null) {
             logger.warn("任务不存在!");
             throw new NotFoundException("task not found");
         }
         String assignee = task.getAssignee();
-        if (null == assignee){
+        if (null == assignee) {
             logger.warn("请先签收任务!");
             throw new NotFoundException("Please sign for the task first");
         }
@@ -140,13 +143,13 @@ public class BpmTaskServiceImp extends FlowableAbstract implements BpmTaskServic
             logger.warn("只能完成自己的任务");
             throw new NotFoundException("You can only do your own work");
         }
-        Map<String,Object> map = new HashMap<>();
-        map.put("oldTaskId",task.getId());
+        Map<String, Object> map = new HashMap<>();
+        map.put("oldTaskId", task.getId());
         //完成此任务
         if (activityId == null) {
             taskService.complete(taskId, map);
         } else {
-            jumpTask(taskId, activityId, next_claim);
+            jumpTask(taskId, activityId, nextClaim);
         }
 
         //根据流程ID查找执行计划，存在则进行下一步,没有则结束（定制化流程预留）
@@ -154,63 +157,62 @@ public class BpmTaskServiceImp extends FlowableAbstract implements BpmTaskServic
         if (execution.size() > 0) {
             String tasknow = selectNowTaskId(task.getProcessInstanceId());
             // 自定义下一执行人
-            if (!StringUtils.isNullOrEmpty(next_claim))
-                claim(tasknow, next_claim);
+            if (!StringUtils.isNullOrEmpty(nextClaim))
+                claim(tasknow, nextClaim);
         }
     }
 
     @Override
     public void reject(String taskId) {
         // 先判定是否存在历史环节
-        String oldTaskId = selectVariableLocalByTaskId(taskId,"oldTaskId").toString();
+        String oldTaskId = selectVariableLocalByTaskId(taskId, "oldTaskId").toString();
         HistoricTaskInstance taskInstance = historyService.createHistoricTaskInstanceQuery().taskId(oldTaskId).singleResult();
-        if(taskInstance==null){
-            logger.error("历史任务环节不存在,taskId:"+oldTaskId);
+        if (taskInstance == null) {
+            throw new NotFoundException("历史任务环节不存在,taskId:" + oldTaskId);
         }
 
         Task task = selectTaskByTaskId(taskId);
 
         ProcessInstance processInstance = runtimeService.createProcessInstanceQuery().processInstanceId(task.getProcessInstanceId()).singleResult();
         if (processInstance == null) {
-            logger.error("流程已经结束");
+            throw new NotFoundException("流程已经结束");
         }
 
         Map<String, Object> variables = processInstance.getProcessVariables();
 
-                ProcessDefinitionEntity definition = (ProcessDefinitionEntity) ((RepositoryServiceImpl) repositoryService).getDeployedProcessDefinition(task.getProcessDefinitionId());
+        ProcessDefinitionEntity definition = (ProcessDefinitionEntity) ((RepositoryServiceImpl) repositoryService).getDeployedProcessDefinition(task.getProcessDefinitionId());
         if (definition == null) {
-            logger.error("流程定义未找到");
+            throw new NotFoundException("流程定义未找到");
         }
 
-        ExecutionEntity execution = (ExecutionEntity) runtimeService.createExecutionQuery().executionId(task.getExecutionId()).singleResult();
+        ActivityExecution execution = (ActivityExecution) runtimeService.createExecutionQuery()
+                .executionId(task.getExecutionId()).singleResult();
         // 是否并行节点
-        if(execution.isConcurrent()){
-            logger.error("并行节点不允许驳回,taskId:"+task.getId());
+        if (execution.isConcurrent()) {
+            throw new NotFoundException("并行节点不允许驳回,taskId:" + task.getId());
         }
 
         // 是否存在定时任务
         long num = managementService.createJobQuery().executionId(task.getExecutionId()).count();
-        if(num>0) throw new NotFoundException("当前环节不允许驳回");
+        if (num > 0) throw new NotFoundException("当前环节不允许驳回");
 
         // 驳回
 
 
         // 取得上一步活动
-        ActivityImpl currActivity = ((ProcessDefinitionImpl) definition).findActivity(task.getTaskDefinitionKey());
+        ActivityImpl currActivity = definition.findActivity(task.getTaskDefinitionKey());
         List<PvmTransition> nextTransitionList = currActivity.getIncomingTransitions();
         // 清除当前活动的出口
-        List<PvmTransition> oriPvmTransitionList = new ArrayList<PvmTransition>();
+        List<PvmTransition> oriPvmTransitionList = new ArrayList<>();
         List<PvmTransition> pvmTransitionList = currActivity.getOutgoingTransitions();
-        for (PvmTransition pvmTransition : pvmTransitionList) {
-            oriPvmTransitionList.add(pvmTransition);
-        }
+        oriPvmTransitionList.addAll(pvmTransitionList);
         pvmTransitionList.clear();
 
         // 建立新出口
-        List<TransitionImpl> newTransitions = new ArrayList<TransitionImpl>();
+        List<TransitionImpl> newTransitions = new ArrayList<>();
         for (PvmTransition nextTransition : nextTransitionList) {
             PvmActivity nextActivity = nextTransition.getSource();
-            ActivityImpl nextActivityImpl = ((ProcessDefinitionImpl) definition).findActivity(nextActivity.getId());
+            ActivityImpl nextActivityImpl = definition.findActivity(nextActivity.getId());
             TransitionImpl newTransition = currActivity.createOutgoingTransition();
             newTransition.setDestination(nextActivityImpl);
             newTransitions.add(newTransition);
@@ -227,9 +229,7 @@ public class BpmTaskServiceImp extends FlowableAbstract implements BpmTaskServic
         for (TransitionImpl transitionImpl : newTransitions) {
             currActivity.getOutgoingTransitions().remove(transitionImpl);
         }
-        for (PvmTransition pvmTransition : oriPvmTransitionList) {
-            pvmTransitionList.add(pvmTransition);
-        }
+        pvmTransitionList.addAll(oriPvmTransitionList);
 
     }
 
@@ -252,7 +252,7 @@ public class BpmTaskServiceImp extends FlowableAbstract implements BpmTaskServic
     public void endProcess(String procInstId) {
         ProcessInstance processInstance = runtimeService.createProcessInstanceQuery().processInstanceId(procInstId).singleResult();
         ActivityImpl activity = bpmActivityService.getEndEvent(processInstance.getProcessDefinitionId());
-        jumpTask(procInstId,activity.getId(),null);
+        jumpTask(procInstId, activity.getId(), null);
     }
 
     @Override
@@ -277,15 +277,16 @@ public class BpmTaskServiceImp extends FlowableAbstract implements BpmTaskServic
 
     @Override
     public ActivityImpl selectActivityImplByTask(String taskId) {
-        if(StringUtils.isNullOrEmpty(taskId)){
-            return new ActivityImpl(null,null);
+        if (StringUtils.isNullOrEmpty(taskId)) {
+            return new ActivityImpl(null, null);
         }
         Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
         ProcessDefinitionEntity entity = (ProcessDefinitionEntity) ((RepositoryServiceImpl) repositoryService).getDeployedProcessDefinition(task.getProcessDefinitionId());
         List<ActivityImpl> activities = entity.getActivities();
         ActivityImpl activity = null;
-        for(ActivityImpl activity1 : activities){
-            if(activity1.getProperty("type").equals("userTask") && activity1.getProperty("name").equals(task.getName())){
+        for (ActivityImpl activity1 : activities) {
+            if ("userTask".equals(activity1.getProperty("type")) &&
+                    activity1.getProperty("name").equals(task.getName())) {
                 activity = activity1;
             }
         }
@@ -293,12 +294,12 @@ public class BpmTaskServiceImp extends FlowableAbstract implements BpmTaskServic
     }
 
     @Override
-    public Map<String,Object> getUserTasksByProcDefKey(String procDefKey){
+    public Map<String, Object> getUserTasksByProcDefKey(String procDefKey) {
         String definitionId = repositoryService.createProcessDefinitionQuery().processDefinitionKey(procDefKey).orderByProcessDefinitionVersion().desc().list().get(0).getId();
-        List<ActivityImpl> activitiList = bpmActivityService.getUserTasksByProcDefId(definitionId);
-        Map<String,Object> map = new HashMap<>();
-        for(ActivityImpl activity:activitiList){
-            map.put(activity.getId(),activity.getProperty("name"));
+        List<ActivityImpl> activities = bpmActivityService.getUserTasksByProcDefId(definitionId);
+        Map<String, Object> map = new HashMap<>();
+        for (ActivityImpl activity : activities) {
+            map.put(activity.getId(), activity.getProperty("name"));
         }
         return map;
     }
@@ -306,10 +307,10 @@ public class BpmTaskServiceImp extends FlowableAbstract implements BpmTaskServic
     @Override
     public Map<String, Object> getUserTasksByProcInstId(String procInstId) {
         String definitionId = runtimeService.createProcessInstanceQuery().processInstanceId(procInstId).singleResult().getProcessDefinitionId();
-        List<ActivityImpl> activitiList = bpmActivityService.getUserTasksByProcDefId(definitionId);
-        Map<String,Object> map = new HashMap<>();
-        for(ActivityImpl activity:activitiList){
-            map.put(activity.getId(),activity.getProperty("name"));
+        List<ActivityImpl> activities = bpmActivityService.getUserTasksByProcDefId(definitionId);
+        Map<String, Object> map = new HashMap<>();
+        for (ActivityImpl activity : activities) {
+            map.put(activity.getId(), activity.getProperty("name"));
         }
         return map;
     }

@@ -8,6 +8,7 @@ import org.hswebframework.web.commons.entity.DataStatus;
 import org.hswebframework.web.dao.schedule.ScheduleJobDao;
 import org.hswebframework.web.entity.schedule.ScheduleJobEntity;
 import org.hswebframework.web.id.IDGenerator;
+import org.hswebframework.web.service.EnableCacheGenericEntityService;
 import org.hswebframework.web.service.GenericEntityService;
 import org.hswebframework.web.service.schedule.ScheduleJobService;
 import org.hswebframework.web.service.schedule.ScheduleTriggerBuilder;
@@ -15,12 +16,14 @@ import org.quartz.*;
 import org.quartz.spi.MutableTrigger;
 import org.quartz.spi.OperableTrigger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 默认的服务实现
@@ -28,6 +31,7 @@ import java.util.List;
  * @author hsweb-generator-online
  */
 @Service("scheduleJobService")
+//@CacheConfig(cacheNames = "schedule-job")
 public class SimpleScheduleJobService extends GenericEntityService<ScheduleJobEntity, String>
         implements ScheduleJobService {
     @Autowired
@@ -78,6 +82,8 @@ public class SimpleScheduleJobService extends GenericEntityService<ScheduleJobEn
     }
 
     protected void startJob(ScheduleJobEntity jobEntity) {
+        try {
+        if(scheduler.checkExists(createJobKey(jobEntity)))return;
         JobDetail jobDetail = JobBuilder
                 .newJob(DynamicJob.class)
                 .withIdentity(createJobKey(jobEntity))
@@ -87,7 +93,7 @@ public class SimpleScheduleJobService extends GenericEntityService<ScheduleJobEn
                 .build();
         MutableTrigger trigger = scheduleTriggerBuilder.buildTrigger(jobEntity.getQuartzConfig());
         trigger.setKey(createTriggerKey(jobEntity));
-        try {
+
             scheduler.scheduleJob(jobDetail, trigger);
         } catch (SchedulerException e) {
             throw new BusinessException("启动定时调度失败", e);
@@ -120,8 +126,10 @@ public class SimpleScheduleJobService extends GenericEntityService<ScheduleJobEn
 
     @Override
     public void enable(String id) {
-        createUpdate().set(ScheduleJobEntity.status, DataStatus.STATUS_ENABLED)
+        Objects.requireNonNull(id);
+      int size=  createUpdate().set(ScheduleJobEntity.status, DataStatus.STATUS_ENABLED)
                 .where(ScheduleJobEntity.id, id).exec();
+      if(size>0)
         startJob(selectByPk(id));
     }
 
@@ -138,8 +146,10 @@ public class SimpleScheduleJobService extends GenericEntityService<ScheduleJobEn
 
     @Override
     public void disable(String id) {
-        createUpdate().set(ScheduleJobEntity.status, DataStatus.STATUS_DISABLED)
+        Objects.requireNonNull(id);
+       int size =  createUpdate().set(ScheduleJobEntity.status, DataStatus.STATUS_DISABLED)
                 .where(ScheduleJobEntity.id, id).exec();
+       if(size>0)
         deleteJob(selectByPk(id));
     }
 }

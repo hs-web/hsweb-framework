@@ -111,11 +111,10 @@ public class FlowableDeploymentController extends FlowableAbstract {
      * 加载ZIP文件中的流程
      */
     @PostMapping(value = "/deploy")
-    public ResponseMessage<Object> deploy(@RequestParam(value = "file") MultipartFile file) {
+    public ResponseMessage<Object> deploy(@RequestParam(value = "file") MultipartFile file) throws IOException {
         // 获取上传的文件名
         String fileName = file.getOriginalFilename();
 
-        try {
             // 得到输入流（字节流）对象
             InputStream fileInputStream = file.getInputStream();
 
@@ -132,9 +131,6 @@ public class FlowableDeploymentController extends FlowableAbstract {
                 deployment.addInputStream(fileName, fileInputStream);
             }
             deployment.deploy();
-        } catch (Exception e) {
-//            logger.error("部署流程错误,获取文件流失败");
-        }
 
         return ResponseMessage.ok();
     }

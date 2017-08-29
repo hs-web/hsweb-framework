@@ -1,12 +1,12 @@
 package org.hswebframework.web.workflow.flowable.utils;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.engine.*;
 
 import javax.annotation.Resource;
 
 /**
- * Created by Administrator on 2017/7/26.
+ * @author wangwei
+ * @author zhouhao
  */
 public abstract class FlowableAbstract {
     @Resource
@@ -25,6 +25,4 @@ public abstract class FlowableAbstract {
     protected ManagementService managementService;
     @Resource
     protected FormService bpmFormService;
-    @Resource
-    protected ObjectMapper objectMapper;
 }

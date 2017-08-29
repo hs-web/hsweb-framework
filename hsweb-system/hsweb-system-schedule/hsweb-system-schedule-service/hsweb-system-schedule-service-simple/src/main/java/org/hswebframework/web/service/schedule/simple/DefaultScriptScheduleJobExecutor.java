@@ -35,7 +35,7 @@ public class DefaultScriptScheduleJobExecutor implements ScheduleJobExecutor {
 
             String jobMd5 = DigestUtils.md5Hex(jobEntity.getScript());
             //脚本发生变化，重新编译执行
-            if (!jobMd5.equals(engine.getContext(jobId).getMd5())) {
+            if (engine.getContext(jobId)==null||!jobMd5.equals(engine.getContext(jobId).getMd5())) {
                 engine.compile(jobId, jobEntity.getScript());
             }
             return engine.execute(jobId, parameter).getIfSuccess();

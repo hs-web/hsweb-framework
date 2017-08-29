@@ -134,6 +134,11 @@
             <version>${project.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.hswebframework.web</groupId>
+            <artifactId>hsweb-system-schedule-starter</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!--动态表单-->
         <dependency>
             <groupId>org.hswebframework.web</groupId>

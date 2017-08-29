@@ -29,7 +29,7 @@ public class TaskInfo extends SimpleGenericEntity<String> {
 
     private Object mainFormData;
 
-    private String pid;
+    private String parentId;
 
     private String processInstanceId;
 
@@ -59,12 +59,12 @@ public class TaskInfo extends SimpleGenericEntity<String> {
         this.definition = definition;
     }
 
-    public String getPid() {
-        return pid;
+    public String getParentId() {
+        return parentId;
     }
 
-    public void setPid(String pid) {
-        this.pid = pid;
+    public void setParentId(String parentId) {
+        this.parentId = parentId;
     }
 
     public String getType() {
@@ -88,7 +88,7 @@ public class TaskInfo extends SimpleGenericEntity<String> {
         this.setName(task.getName());
         this.setCreateDate(task.getCreateTime());
         this.setProcessInstanceId(task.getProcessInstanceId());
-        this.setPid(task.getParentTaskId());
+        this.setParentId(task.getParentTaskId());
         Map<String, Object> var = task.getProcessVariables();
         this.setFormId((String) var.get("mainFormId"));
         this.setDataId((String) var.get("mainFormDataId"));
