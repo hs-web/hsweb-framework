@@ -1,6 +1,7 @@
 package org.hswebframework.web.example.simple;
 
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.annotation.Authorize;
@@ -20,6 +21,7 @@ import org.hswebframework.web.service.QueryByEntityService;
 import org.hswebframework.web.service.QueryService;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Base64;
 import java.util.List;
 
 
@@ -132,5 +134,10 @@ public class TestController implements QueryController<UserEntity, String, Query
         public UserEntity selectSingle(Entity param) {
             return null;
         }
+    }
+
+    public static void main(String[] args) {
+        String id =org.apache.commons.codec.binary.Base64.encodeBase64String("test".getBytes());
+        System.out.println(id);
     }
 }

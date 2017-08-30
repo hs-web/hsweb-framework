@@ -120,6 +120,12 @@
             <artifactId>hsweb-authorization-basic</artifactId>
             <version>${project.version}</version>
         </dependency>
+        
+        <dependency>
+            <groupId>org.hswebframework.web</groupId>
+            <artifactId>hsweb-authorization-jwt</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <!--组织架构-->
         <dependency>

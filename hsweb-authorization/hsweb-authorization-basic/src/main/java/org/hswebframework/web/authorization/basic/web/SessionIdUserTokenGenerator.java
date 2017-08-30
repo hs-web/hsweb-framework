@@ -24,7 +24,7 @@ public class SessionIdUserTokenGenerator implements UserTokenGenerator ,Serializ
         if(null==request)throw new UnsupportedOperationException();
 
 
-        int timeout =request.getSession().getMaxInactiveInterval();
+        int timeout =request.getSession().getMaxInactiveInterval()*1000;
 
         String sessionId = request.getSession().getId();
 

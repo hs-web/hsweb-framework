@@ -17,6 +17,9 @@ spring:
 
 hsweb:
     authorize:
+      jwt:
+        id: test
+        secret: dGVzdA==
 #      filters:
 #           "/swagger-ui.html": "authc"
     app:

@@ -11,20 +11,18 @@ import org.hswebframework.web.authorization.basic.web.UserTokenGenerator;
 import org.hswebframework.web.id.IDGenerator;
 
 import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by zhouhao on 2017/8/30.
+ *
  */
-public class JwtTokenGenarator implements UserTokenGenerator {
+public class JwtTokenGenerator implements UserTokenGenerator {
 
     private JwtConfig jwtConfig;
 
-    public JwtTokenGenarator(JwtConfig jwtConfig) {
+    public JwtTokenGenerator(JwtConfig jwtConfig) {
         this.jwtConfig = jwtConfig;
     }
 
@@ -43,6 +41,7 @@ public class JwtTokenGenarator implements UserTokenGenerator {
         String jwtToken = createJWT(jwtConfig.getId(),token,jwtConfig.getTtl());
 
         String refreshToken = createJWT(jwtConfig.getId(),token,jwtConfig.getRefreshTtl());
+
         int timeout = jwtConfig.getTtl();
 
         return new TokenResult() {
