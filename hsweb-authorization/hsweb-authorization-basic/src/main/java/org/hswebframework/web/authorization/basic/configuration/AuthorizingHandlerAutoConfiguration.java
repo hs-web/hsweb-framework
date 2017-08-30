@@ -13,7 +13,6 @@ import org.hswebframework.web.authorization.token.UserTokenManager;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -21,6 +20,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+
+import java.util.List;
 
 /**
  * TODO 完成注释
@@ -48,7 +49,12 @@ public class AuthorizingHandlerAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(UserTokenParser.class)
     public UserTokenParser userTokenParser() {
-        return new DefaultUserTokenParser();
+        return new SessionIdUserTokenParser();
+    }
+
+    @Bean
+    public SessionIdUserTokenGenerator sessionIdUserTokenGenerator(){
+        return new SessionIdUserTokenGenerator();
     }
 
     @Bean
@@ -60,7 +66,7 @@ public class AuthorizingHandlerAutoConfiguration {
 
     @Bean
     public WebMvcConfigurer webUserTokenInterceptorConfigurer(UserTokenManager userTokenManager,
-                                                              UserTokenParser userTokenParser) {
+                                                              List<UserTokenParser> userTokenParser) {
         return new WebMvcConfigurerAdapter() {
             @Override
             public void addInterceptors(InterceptorRegistry registry) {

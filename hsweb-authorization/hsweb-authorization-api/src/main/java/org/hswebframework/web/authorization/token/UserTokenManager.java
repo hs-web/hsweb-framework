@@ -107,7 +107,7 @@ public interface UserTokenManager {
      * @param token  token
      * @param userId 用户id
      */
-    UserToken signIn(String token, String userId);
+    UserToken signIn(String token, String userId,long maxInactiveInterval);
 
     /**
      * 更新token,使其不过期

@@ -44,6 +44,9 @@ public interface UserToken extends Serializable, Comparable<UserToken> {
      */
     TokenState getState();
 
+
+    long getMaxInactiveInterval();
+
     /**
      * @return 是否正常
      */

@@ -1,12 +1,13 @@
 package org.hswebframework.web.authorization.basic.web;
 
-import org.hswebframework.web.authorization.exception.UnAuthorizedException;
 import org.hswebframework.web.authorization.token.UserToken;
 import org.hswebframework.web.authorization.token.UserTokenManager;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * TODO 完成注释
@@ -17,16 +18,22 @@ public class WebUserTokenInterceptor extends HandlerInterceptorAdapter {
 
     private UserTokenManager userTokenManager;
 
-    private UserTokenParser userTokenParser;
+    private List<UserTokenParser> userTokenParser;
 
-    public WebUserTokenInterceptor(UserTokenManager userTokenManager, UserTokenParser userTokenParser) {
+    public WebUserTokenInterceptor(UserTokenManager userTokenManager, List<UserTokenParser> userTokenParser) {
         this.userTokenManager = userTokenManager;
         this.userTokenParser = userTokenParser;
     }
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        String token = userTokenParser.parseToken(request, userTokenManager::tokenIsLoggedIn);
+        String token = userTokenParser.stream()
+                .map(parser->parser.parseToken(request))
+                .filter(Objects::nonNull)
+                .filter(userTokenManager::tokenIsLoggedIn)
+                .findFirst()
+                .orElse(null);
+
         if (null == token) {
             return true;
         }

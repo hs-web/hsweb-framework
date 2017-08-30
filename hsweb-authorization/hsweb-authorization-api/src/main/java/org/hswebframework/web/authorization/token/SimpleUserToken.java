@@ -24,6 +24,17 @@ public class SimpleUserToken implements UserToken {
 
     private volatile long requestTimes;
 
+    private long maxInactiveInterval;
+
+    @Override
+    public long getMaxInactiveInterval() {
+        return maxInactiveInterval;
+    }
+
+    public void setMaxInactiveInterval(long maxInactiveInterval) {
+        this.maxInactiveInterval = maxInactiveInterval;
+    }
+
     public SimpleUserToken(String userId, String token) {
         this.userId = userId;
         this.token = token;

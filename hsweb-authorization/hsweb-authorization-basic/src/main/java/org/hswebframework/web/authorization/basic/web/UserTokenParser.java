@@ -9,5 +9,6 @@ import java.util.function.Predicate;
  * @author zhouhao
  */
 public interface UserTokenParser {
-    String parseToken(HttpServletRequest request, Predicate<String> tokenValidate);
+
+    String parseToken(HttpServletRequest request);
 }

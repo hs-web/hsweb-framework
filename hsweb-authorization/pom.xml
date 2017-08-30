@@ -17,6 +17,7 @@
         <module>hsweb-authorization-shiro</module>
         <module>hsweb-authorization-security</module>
         <module>hsweb-authorization-basic</module>
+        <module>hsweb-authorization-jwt</module>
     </modules>
 
 
