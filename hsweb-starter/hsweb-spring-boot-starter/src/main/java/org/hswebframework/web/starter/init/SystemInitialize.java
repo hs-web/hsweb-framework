@@ -27,8 +27,6 @@ import java.util.stream.Collectors;
 import static org.hswebframework.web.starter.SystemVersion.Property.*;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public class SystemInitialize {
@@ -54,6 +52,7 @@ public class SystemInitialize {
         this.targetVersion = targetVersion;
         scriptContext.put("sqlExecutor", sqlExecutor);
         scriptContext.put("database", database);
+        scriptContext.put("logger", logger);
     }
 
     public void addScriptContext(String var, Object val) {
