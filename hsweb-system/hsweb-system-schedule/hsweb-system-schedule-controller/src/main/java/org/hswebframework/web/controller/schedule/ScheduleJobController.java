@@ -7,15 +7,15 @@ import org.hswebframework.web.controller.SimpleGenericEntityController;
 import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.entity.schedule.ScheduleJobEntity;
 import org.hswebframework.web.logging.AccessLogger;
-import  org.hswebframework.web.service.schedule.ScheduleJobService;
+import org.hswebframework.web.service.schedule.ScheduleJobExecutor;
+import org.hswebframework.web.service.schedule.ScheduleJobService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 /**
- *  调度任务
+ * 调度任务
  *
  * @author hsweb-generator-online
  */
@@ -26,12 +26,19 @@ import org.springframework.web.bind.annotation.RestController;
 public class ScheduleJobController implements SimpleGenericEntityController<ScheduleJobEntity, String, QueryParamEntity> {
 
     private ScheduleJobService scheduleJobService;
-  
+
+    private ScheduleJobExecutor scheduleJobExecutor;
+
+    @Autowired
+    public void setScheduleJobExecutor(ScheduleJobExecutor scheduleJobExecutor) {
+        this.scheduleJobExecutor = scheduleJobExecutor;
+    }
+
     @Autowired
     public void setScheduleJobService(ScheduleJobService scheduleJobService) {
         this.scheduleJobService = scheduleJobService;
     }
-  
+
     @Override
     public ScheduleJobService getService() {
         return scheduleJobService;
@@ -40,7 +47,7 @@ public class ScheduleJobController implements SimpleGenericEntityController<Sche
     @PutMapping("/{id}/enable")
     @Authorize(action = Permission.ACTION_ENABLE)
     @AccessLogger("启用")
-    public ResponseMessage<Void> enable(@PathVariable String id){
+    public ResponseMessage<Void> enable(@PathVariable String id) {
         scheduleJobService.enable(id);
         return ResponseMessage.ok();
     }
@@ -48,8 +55,15 @@ public class ScheduleJobController implements SimpleGenericEntityController<Sche
     @PutMapping("/{id}/disable")
     @Authorize(action = Permission.ACTION_DISABLE)
     @AccessLogger("禁用")
-    public ResponseMessage<Void> disable(@PathVariable String id){
+    public ResponseMessage<Void> disable(@PathVariable String id) {
         scheduleJobService.disable(id);
         return ResponseMessage.ok();
+    }
+
+    @PostMapping("/{id}/execute")
+    @Authorize(action = "execute")
+    @AccessLogger("执行")
+    public ResponseMessage<Object> execute(@PathVariable String id, @RequestBody Map<String, Object> args) {
+        return ResponseMessage.ok(scheduleJobExecutor.doExecuteJob(id, args));
     }
 }
