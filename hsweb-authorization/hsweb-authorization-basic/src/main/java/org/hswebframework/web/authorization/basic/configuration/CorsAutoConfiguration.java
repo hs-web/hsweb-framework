@@ -15,10 +15,10 @@ import org.springframework.web.filter.CorsFilter;
  * @since 1.0
  */
 @Configuration
-@ConditionalOnProperty(prefix = "hsweb.web.cors", name = "enabled", havingValue = "true")
+@ConditionalOnProperty(prefix = "hsweb.cors", name = "enable", havingValue = "true")
 public class CorsAutoConfiguration {
 
-    @ConfigurationProperties(prefix = "hsweb.web.cors")
+    @ConfigurationProperties(prefix = "hsweb.cors")
     @Bean
     public CorsConfiguration corsConfiguration() {
         return new CorsConfiguration();
