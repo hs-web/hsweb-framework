@@ -14,8 +14,12 @@ spring:
       multipart:
         enabled: true
         max-file-size: 100Mb
-
 hsweb:
+    cors:
+      enable: on
+      allowed-origins: "*"
+      allowed-methods: "*"
+      allowed-headers: "*"
     authorize:
       jwt:
         id: test

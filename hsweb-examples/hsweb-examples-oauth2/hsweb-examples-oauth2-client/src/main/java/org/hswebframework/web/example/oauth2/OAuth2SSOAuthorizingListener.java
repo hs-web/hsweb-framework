@@ -70,7 +70,9 @@ public class OAuth2SSOAuthorizingListener
                 .get().onError(OAuth2Response.throwOnError)
                 .as(Authentication.class);
 
-        HttpSession httpSession = WebUtil.getHttpServletRequest().getSession();
+        HttpSession httpSession = WebUtil
+                .getHttpServletRequest()
+                .getSession();
 
         userTokenManager.signIn(httpSession.getId(), authentication.getUser().getId(), 60 * 60 * 1000);
 

@@ -47,3 +47,18 @@ where name like ? or full_name like
 --u_id in (用户可访问的机构id)
 where u_id in(?,?,?) and (name like ? or full_name like)
 ```
+
+# 会话状态
+此模块默认使用sessionId绑定用户信息。还可以使用 [jwt](../hsweb-authorization-jwt) 方式
+
+# 跨域设置
+修改application.yml
+```yaml
+hsweb: 
+    cors: 
+      enabled: on
+      allowed-origins: "*"
+      allowed-methods: "*"
+      allowed-headers: "*" 
+      
+```
