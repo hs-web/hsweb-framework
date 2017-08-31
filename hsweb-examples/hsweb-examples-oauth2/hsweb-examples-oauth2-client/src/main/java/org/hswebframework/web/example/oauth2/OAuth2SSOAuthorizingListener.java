@@ -44,10 +44,10 @@ public class OAuth2SSOAuthorizingListener
 
     private String userAuthInfoApi = "oauth2/user-auth-info";
 
-    public OAuth2SSOAuthorizingListener(OAuth2RequestService oAuth2RequestService, String userCenterServerId,UserTokenManager userTokenManager) {
+    public OAuth2SSOAuthorizingListener(OAuth2RequestService oAuth2RequestService, String userCenterServerId, UserTokenManager userTokenManager) {
         this.oAuth2RequestService = oAuth2RequestService;
         this.userCenterServerId = userCenterServerId;
-        this.userTokenManager=userTokenManager;
+        this.userTokenManager = userTokenManager;
     }
 
     public void setUserAuthInfoApi(String userAuthInfoApi) {
@@ -70,9 +70,9 @@ public class OAuth2SSOAuthorizingListener
                 .get().onError(OAuth2Response.throwOnError)
                 .as(Authentication.class);
 
-        HttpSession httpSession= WebUtil.getHttpServletRequest().getSession();
+        HttpSession httpSession = WebUtil.getHttpServletRequest().getSession();
 
-        userTokenManager.signIn(httpSession.getId(),authentication.getUser().getId());
+        userTokenManager.signIn(httpSession.getId(), authentication.getUser().getId(), 60 * 60 * 1000);
 
 
     }
