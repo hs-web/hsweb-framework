@@ -6,7 +6,7 @@ import java.util.Map;
 /**
  * Created by zhouhao on 2017/8/30.
  */
-public interface TokenResult extends Serializable {
+public interface GeneratedToken extends Serializable {
     Map<String,Object> getResponse();
 
     String getToken();

@@ -47,7 +47,7 @@ public class UserOnSignIn implements AuthorizationListener<AuthorizationSuccessE
             userTokenManager.signOutByToken(token.getToken());
         }
         //创建token
-        TokenResult newToken = userTokenGenerators.stream()
+        GeneratedToken newToken = userTokenGenerators.stream()
                 .filter(generator->generator.getSupportTokenType().equals(tokenType))
                 .findFirst()
                 .orElseThrow(()->new UnsupportedOperationException(tokenType))
@@ -55,22 +55,8 @@ public class UserOnSignIn implements AuthorizationListener<AuthorizationSuccessE
         //登入
         userTokenManager.signIn(newToken.getToken(), event.getAuthentication().getUser().getId(),newToken.getTimeout());
 
-
         //响应结果
         event.getResult().putAll(newToken.getResponse());
-
-    }
-
-    protected String createToken(String type) {
-        switch (type) {
-            case "simple":
-                return DigestUtils.md5Hex(UUID.randomUUID().toString().concat(String.valueOf(Math.random())));
-            default:
-                return Optional.ofNullable(WebUtil.getHttpServletRequest())
-                        .orElseThrow(UnsupportedOperationException::new)
-                        .getSession()
-                        .getId();
-        }
 
     }
 }

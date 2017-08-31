@@ -9,12 +9,12 @@ import java.util.function.Predicate;
  */
 public class SessionIdUserTokenParser implements UserTokenParser {
     @Override
-    public String parseToken(HttpServletRequest request) {
+    public ParsedToken parseToken(HttpServletRequest request) {
 
         HttpSession session = request.getSession(false);
 
         if (session != null) {
-            return session.getId();
+            return session::getId;
         }
 
         return null;

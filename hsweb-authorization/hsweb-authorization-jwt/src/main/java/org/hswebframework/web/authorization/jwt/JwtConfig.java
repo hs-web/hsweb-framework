@@ -10,13 +10,13 @@ import javax.crypto.spec.SecretKeySpec;
  */
 public class JwtConfig {
 
-    private String id;
+    private String id = "hsweb-jwt";
 
-    private String secret;
+    private String secret = Base64.encodeBase64String("hsweb.jwt.secret".getBytes());
 
-    private int ttl=60*60*1000;
+    private int ttl = 60 * 60 * 1000;
 
-    private int refreshTtl=12*60*60*1000;
+    private int refreshTtl = 12 * 60 * 60 * 1000;
 
     public String getSecret() {
         return secret;
@@ -42,7 +42,7 @@ public class JwtConfig {
         this.refreshTtl = refreshTtl;
     }
 
-    public SecretKey generalKey(){
+    public SecretKey generalKey() {
         byte[] encodedKey = Base64.decodeBase64(secret);
         return new SecretKeySpec(encodedKey, 0, encodedKey.length, "AES");
     }

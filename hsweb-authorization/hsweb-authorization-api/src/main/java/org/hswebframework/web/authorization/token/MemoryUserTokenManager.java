@@ -67,10 +67,10 @@ public class MemoryUserTokenManager implements UserTokenManager {
 
     private SimpleUserToken checkTimeout(SimpleUserToken detail) {
         if (null == detail) return null;
-        if(detail.getMaxInactiveInterval()<=0){
+        if (detail.getMaxInactiveInterval() <= 0) {
             return detail;
         }
-        if (System.currentTimeMillis() - detail.getLastRequestTime() >detail.getMaxInactiveInterval()) {
+        if (System.currentTimeMillis() - detail.getLastRequestTime() > detail.getMaxInactiveInterval()) {
             detail.setState(TokenState.expired);
             return detail;
         }
@@ -155,7 +155,7 @@ public class MemoryUserTokenManager implements UserTokenManager {
     }
 
     @Override
-    public UserToken signIn(String token, String userId,long maxInactiveInterval) {
+    public UserToken signIn(String token, String userId, long maxInactiveInterval) {
         SimpleUserToken detail = new SimpleUserToken(userId, token);
         if (null != authorizationListenerDispatcher)
             authorizationListenerDispatcher.doEvent(new UserSignInEvent(detail));

@@ -19,7 +19,7 @@ public class SessionIdUserTokenGenerator implements UserTokenGenerator ,Serializ
     }
 
     @Override
-    public TokenResult generate(Authentication authentication) {
+    public GeneratedToken generate(Authentication authentication) {
         HttpServletRequest request= WebUtil.getHttpServletRequest();
         if(null==request)throw new UnsupportedOperationException();
 
@@ -28,7 +28,7 @@ public class SessionIdUserTokenGenerator implements UserTokenGenerator ,Serializ
 
         String sessionId = request.getSession().getId();
 
-        return new TokenResult() {
+        return new GeneratedToken() {
             @Override
             public Map<String, Object> getResponse() {
                 return Collections.emptyMap();

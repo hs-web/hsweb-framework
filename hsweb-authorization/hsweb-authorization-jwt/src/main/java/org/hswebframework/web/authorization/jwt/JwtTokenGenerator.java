@@ -1,12 +1,11 @@
 package org.hswebframework.web.authorization.jwt;
 
+import com.alibaba.fastjson.JSON;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import org.apache.commons.codec.binary.Base64;
-import org.hswebframework.web.Maps;
 import org.hswebframework.web.authorization.Authentication;
-import org.hswebframework.web.authorization.basic.web.TokenResult;
+import org.hswebframework.web.authorization.basic.web.GeneratedToken;
 import org.hswebframework.web.authorization.basic.web.UserTokenGenerator;
 import org.hswebframework.web.id.IDGenerator;
 
@@ -31,25 +30,29 @@ public class JwtTokenGenerator implements UserTokenGenerator {
         return "jwt";
     }
 
-    private String createToken(){
+    private String createToken() {
         return IDGenerator.MD5.generate();
     }
+
     @Override
-    public TokenResult generate(Authentication authentication) {
+    public GeneratedToken generate(Authentication authentication) {
         String token = createToken();
+        String userId = authentication.getUser().getId();
 
-        String jwtToken = createJWT(jwtConfig.getId(),token,jwtConfig.getTtl());
+        String subject = JSON.toJSONString(new DefaultAuthorizedToken(token, userId));
 
-        String refreshToken = createJWT(jwtConfig.getId(),token,jwtConfig.getRefreshTtl());
+        String jwtToken = createJWT(jwtConfig.getId(), subject, jwtConfig.getTtl());
+
+//        String refreshToken = createJWT(jwtConfig.getId(), userId, jwtConfig.getRefreshTtl());
 
         int timeout = jwtConfig.getTtl();
 
-        return new TokenResult() {
+        return new GeneratedToken() {
             @Override
             public Map<String, Object> getResponse() {
-                Map<String,Object> map = new HashMap<>();
-                map.put("token",jwtToken);
-                map.put("refreshToken",refreshToken);
+                Map<String, Object> map = new HashMap<>();
+                map.put("token", jwtToken);
+//                map.put("refreshToken", refreshToken);
                 return map;
             }
 
@@ -66,10 +69,10 @@ public class JwtTokenGenerator implements UserTokenGenerator {
     }
 
 
-    public String createJWT(String id, String subject, long ttlMillis){
+    public String createJWT(String id, String subject, long ttlMillis) {
         SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
         long nowMillis = System.currentTimeMillis();
-        Date now = new Date();
+        Date now = new Date(nowMillis);
         SecretKey key = jwtConfig.generalKey();
         JwtBuilder builder = Jwts.builder()
                 .setId(id)

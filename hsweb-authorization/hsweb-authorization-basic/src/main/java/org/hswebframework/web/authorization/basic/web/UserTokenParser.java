@@ -10,5 +10,5 @@ import java.util.function.Predicate;
  */
 public interface UserTokenParser {
 
-    String parseToken(HttpServletRequest request);
+    ParsedToken parseToken(HttpServletRequest request);
 }

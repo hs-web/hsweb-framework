@@ -11,5 +11,5 @@ import org.hswebframework.web.authorization.Authentication;
 public interface UserTokenGenerator {
     String getSupportTokenType();
 
-    TokenResult generate(Authentication authentication);
+    GeneratedToken generate(Authentication authentication);
 }
