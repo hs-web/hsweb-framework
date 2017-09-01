@@ -7,8 +7,6 @@ import java.util.concurrent.Callable;
  *
  * @author zhouhao
  */
-public interface TranslationSupportJob<V> extends Callable<V> {
-
-    void rollBack();
-
+public interface TransactionSupportJobWrapper {
+    <V> TransactionSupportJob<V> wrapper(Callable<V> callable);
 }
