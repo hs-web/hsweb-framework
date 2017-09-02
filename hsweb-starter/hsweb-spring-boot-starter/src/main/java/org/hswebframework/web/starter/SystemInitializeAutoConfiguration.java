@@ -92,7 +92,12 @@ public class SystemInitializeAutoConfiguration implements CommandLineRunner, Bea
     }
 
     protected void addGlobalVariable(String var, Object val) {
-        engines.forEach(engine -> engine.addGlobalVariable(Collections.singletonMap(var, val)));
+        engines.forEach(engine ->{
+            try{
+                engine.addGlobalVariable(Collections.singletonMap(var, val));
+            }catch (Exception ignore){}
+            }
+        );
     }
 
     @Override
