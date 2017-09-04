@@ -49,7 +49,7 @@ import java.util.zip.ZipInputStream;
  * @Date 2017/8/10.
  */
 @RestController
-@RequestMapping("/workflow/process/definition")
+@RequestMapping("/workflow/process/definition/")
 public class FlowableDeploymentController extends FlowableAbstract {
 
     private final static String MODEL_ID          = "modelId";
@@ -68,7 +68,7 @@ public class FlowableDeploymentController extends FlowableAbstract {
     /**
      * 流程定义列表
      */
-    @GetMapping
+    @GetMapping("/processList")
     public ResponseMessage<PagerResult<ProcessDefinition>> processList(QueryParamEntity param) {
         ProcessDefinitionQuery processDefinitionQuery = repositoryService.createProcessDefinitionQuery();
         param.getTerms().forEach((term) -> {
