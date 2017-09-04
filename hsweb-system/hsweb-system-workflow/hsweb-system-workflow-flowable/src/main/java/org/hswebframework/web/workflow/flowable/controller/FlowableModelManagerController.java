@@ -29,7 +29,7 @@ import java.net.URLEncoder;
 import java.util.List;
 
 @RestController
-@RequestMapping("/workflow/model")
+@RequestMapping("/workflow/model/")
 public class FlowableModelManagerController {
 
     @Autowired
@@ -41,7 +41,7 @@ public class FlowableModelManagerController {
     private final static String MODEL_DESCRIPTION = "description";
     private final static String MODEL_KEY         = "key";
 
-    @GetMapping
+    @GetMapping("getModelList")
     public ResponseMessage<PagerResult<Model>> getModelList(QueryParamEntity param) {
         ModelQuery modelQuery = repositoryService.createModelQuery();
         param.getTerms().forEach((term) -> {
@@ -87,7 +87,7 @@ public class FlowableModelManagerController {
                 .exclude(Model.class, "metaInfo", "persistentState");
     }
 
-    @PostMapping
+    @PostMapping("createModel")
     @ResponseStatus(value = HttpStatus.CREATED)
     public ResponseMessage createModel(@RequestBody JSONObject model) throws Exception {
         JSONObject stencilset = new JSONObject();
@@ -112,7 +112,7 @@ public class FlowableModelManagerController {
         return ResponseMessage.ok(modelData);
     }
 
-    @PutMapping("/{modelId}/deploy")
+    @PutMapping("{modelId}/deploy")
     public ResponseMessage deployModel(@PathVariable String modelId) throws Exception {
         Model modelData = repositoryService.getModel(modelId);
         if (modelData == null) throw new NotFoundException("模型不存在!");
