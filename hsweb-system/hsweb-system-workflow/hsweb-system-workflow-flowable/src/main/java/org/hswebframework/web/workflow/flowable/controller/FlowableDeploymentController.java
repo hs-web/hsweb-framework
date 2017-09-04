@@ -21,6 +21,7 @@ import org.hswebframework.web.NotFoundException;
 import org.hswebframework.web.commons.entity.PagerResult;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.controller.message.ResponseMessage;
+import org.hswebframework.web.workflow.flowable.entity.SimpleProcessDefinition;
 import org.hswebframework.web.workflow.flowable.service.BpmActivityService;
 import org.hswebframework.web.workflow.flowable.service.BpmProcessService;
 import org.hswebframework.web.workflow.flowable.service.BpmTaskService;
@@ -42,6 +43,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.zip.ZipInputStream;
 
 /**
@@ -101,9 +103,17 @@ public class FlowableDeploymentController extends FlowableAbstract {
         });
         int total = (int) processDefinitionQuery.count();
         param.rePaging(total);
-        List<ProcessDefinition> models = processDefinitionQuery.listPage(param.getPageIndex(), param.getPageSize() * (param.getPageIndex() + 1));
-        return ResponseMessage.ok(new PagerResult<>(total, models))
-                .exclude(ProcessDefinitionEntity.class, "identityLinks");
+        if (total == 0) {
+            return ResponseMessage.ok(PagerResult.empty());
+        }
+        List<ProcessDefinition> models = processDefinitionQuery
+                .listPage(param.getPageIndex(), param.getPageSize() * (param.getPageIndex() + 1))
+                .stream()
+                .map(SimpleProcessDefinition::new)
+                .collect(Collectors.toList());
+
+
+        return ResponseMessage.ok(new PagerResult<>(total, models));
     }
 
     /**
@@ -115,22 +125,22 @@ public class FlowableDeploymentController extends FlowableAbstract {
         // 获取上传的文件名
         String fileName = file.getOriginalFilename();
 
-            // 得到输入流（字节流）对象
-            InputStream fileInputStream = file.getInputStream();
+        // 得到输入流（字节流）对象
+        InputStream fileInputStream = file.getInputStream();
 
-            // 文件的扩展名
-            String extension = FilenameUtils.getExtension(fileName);
+        // 文件的扩展名
+        String extension = FilenameUtils.getExtension(fileName);
 
-            // zip或者bar类型的文件用ZipInputStream方式部署
-            DeploymentBuilder deployment = repositoryService.createDeployment();
-            if (extension.equals("zip") || extension.equals("bar")) {
-                ZipInputStream zip = new ZipInputStream(fileInputStream);
-                deployment.addZipInputStream(zip);
-            } else {
-                // 其他类型的文件直接部署
-                deployment.addInputStream(fileName, fileInputStream);
-            }
-            deployment.deploy();
+        // zip或者bar类型的文件用ZipInputStream方式部署
+        DeploymentBuilder deployment = repositoryService.createDeployment();
+        if (extension.equals("zip") || extension.equals("bar")) {
+            ZipInputStream zip = new ZipInputStream(fileInputStream);
+            deployment.addZipInputStream(zip);
+        } else {
+            // 其他类型的文件直接部署
+            deployment.addInputStream(fileName, fileInputStream);
+        }
+        deployment.deploy();
 
         return ResponseMessage.ok();
     }
