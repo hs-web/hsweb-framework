@@ -1,4 +1,7 @@
 spring:
+    http:
+      converters:
+        preferred-json-mapper: fastjson
     aop:
         auto: true
         proxy-target-class: true
