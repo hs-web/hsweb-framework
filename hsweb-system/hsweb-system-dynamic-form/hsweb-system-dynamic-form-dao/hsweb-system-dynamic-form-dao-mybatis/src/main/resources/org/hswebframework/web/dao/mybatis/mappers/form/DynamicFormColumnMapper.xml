@@ -24,7 +24,7 @@
     <!--用于动态生成sql所需的配置-->
     <sql id="config">
         <bind name="resultMapId" value="'DynamicFormColumnResultMap'"/>
-        <bind name="tableName" value="'S_DYN_FORM_COLUMN'"/>
+        <bind name="tableName" value="'s_dyn_form_column'"/>
     </sql>
 
     <insert id="insert" parameterType="org.hswebframework.web.entity.form.DynamicFormColumnEntity">

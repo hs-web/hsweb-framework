@@ -35,7 +35,7 @@
     <!--用于动态生成sql所需的配置-->
     <sql id="config">
         <bind name="resultMapId" value="'OrganizationalResultMap'"/>
-        <bind name="tableName" value="'S_ORGANIZATION'"/>
+        <bind name="tableName" value="'s_organization'"/>
     </sql>
 
     <insert id="insert" parameterType="org.hswebframework.web.entity.organizational.OrganizationalEntity">
