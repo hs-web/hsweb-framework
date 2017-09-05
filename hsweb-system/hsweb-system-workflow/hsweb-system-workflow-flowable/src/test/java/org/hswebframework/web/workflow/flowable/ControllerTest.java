@@ -55,15 +55,15 @@ public class ControllerTest extends SimpleWebApplicationTests {
     }
 
     // 流程图元数据test
-    @Test
-    public void activityImplTest() {
-        ActivityImpl activity = bpmTaskService.selectActivityImplByTask("");
-        ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery().processDefinitionKey("testid").latestVersion().active().singleResult();
-        Map<String, List<String>> map = bpmActivityService.getNextClaim(processDefinition.getId(), activity.getId());
-        System.out.println("=========>>>");
-        System.out.println(JSON.toJSONString(map));
-        System.out.println("=========>>>");
-    }
+//    @Test
+//    public void activityImplTest() {
+//        ActivityImpl activity = bpmTaskService.selectActivityImplByTask("");
+//        ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery().processDefinitionKey("testid").latestVersion().active().singleResult();
+//        Map<String, List<String>> map = bpmActivityService.getNextClaim(processDefinition.getId(), activity.getId());
+//        System.out.println("=========>>>");
+//        System.out.println(JSON.toJSONString(map));
+//        System.out.println("=========>>>");
+//    }
 
     // 流程流转test
     @Test
@@ -113,18 +113,18 @@ public class ControllerTest extends SimpleWebApplicationTests {
 
     }
 
-    @Autowired
-    RepositoryService repositoryService;
-
-    @Test
-    public void task() {
-        ActivityImpl activity = bpmTaskService.selectActivityImplByTask("");
-        ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery().processDefinitionKey("testid").orderByProcessDefinitionVersion().desc().singleResult();
-        Map<String, List<String>> map = bpmActivityService.getNextClaim(processDefinition.getId(), activity.getId());
-        System.out.println("=========>>>");
-        System.out.println(JSON.toJSONString(map));
-        System.out.println("=========>>>");
-    }
+//    @Autowired
+//    RepositoryService repositoryService;
+//
+//    @Test
+//    public void task() {
+//        ActivityImpl activity = bpmTaskService.selectActivityImplByTask("");
+//        ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery().processDefinitionKey("testid").orderByProcessDefinitionVersion().desc().singleResult();
+//        Map<String, List<String>> map = bpmActivityService.getNextClaim(processDefinition.getId(), activity.getId());
+//        System.out.println("=========>>>");
+//        System.out.println(JSON.toJSONString(map));
+//        System.out.println("=========>>>");
+//    }
 
     @Configuration
     public static class config {
@@ -137,6 +137,7 @@ public class ControllerTest extends SimpleWebApplicationTests {
                 configuration
                         .setAsyncExecutorActivate(false)
                         .setJobExecutorActivate(false)
+                        .setDatabaseSchemaUpdate("false")
                         .setActivityFontName("宋体")
                         .setLabelFontName("宋体")
                         .setAnnotationFontName("宋体");
