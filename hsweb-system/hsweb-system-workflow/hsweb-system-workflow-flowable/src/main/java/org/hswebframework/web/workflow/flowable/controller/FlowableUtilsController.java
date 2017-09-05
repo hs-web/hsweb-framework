@@ -1,13 +1,9 @@
 package org.hswebframework.web.workflow.flowable.controller;
 
 import org.activiti.engine.impl.pvm.process.ActivityImpl;
-import org.hswebframework.web.commons.entity.DataStatus;
-import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.controller.message.ResponseMessage;
-import org.hswebframework.web.entity.organizational.RelationDefineEntity;
-import org.hswebframework.web.entity.organizational.SimpleRelationDefineEntity;
-import org.hswebframework.web.service.organizational.RelationDefineService;
-import org.hswebframework.web.service.organizational.RelationInfoService;
+import org.hswebframework.web.entity.workflow.ActDefEntity;
+import org.hswebframework.web.service.workflow.ActDefService;
 import org.hswebframework.web.workflow.flowable.service.BpmActivityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -26,10 +22,9 @@ public class FlowableUtilsController {
 
     @Autowired
     BpmActivityService    bpmActivityService;
+
     @Autowired
-    RelationDefineService relationDefineService;
-    @Autowired
-    RelationInfoService   relationInfoService;
+    ActDefService actDefService;
 
     @GetMapping("{procDefId}/acts")
     public ResponseMessage<Map<String, Object>> acts(@PathVariable String procDefId) {
@@ -40,15 +35,14 @@ public class FlowableUtilsController {
         }
         return ResponseMessage.ok(map);
     }
-// see hsweb-system-organizational-controller
-//    @GetMapping("relation-define")
-//    public ResponseMessage<List<RelationDefineEntity>> getRelationDefines() {
-//        List<RelationDefineEntity> list = relationDefineService
-//                .select(single(RelationDefineEntity.status, DataStatus.STATUS_ENABLED));
-//
-//        return ResponseMessage.ok(list);
-//    }
 
-//    @PostMapping("act/{actId}-{defineId}")
-//    public ResponseMessage
+    @PostMapping("act/{actId}-{defId}")
+    public ResponseMessage<Map<String, Object>> setActClaimDef(@PathVariable String actId, @PathVariable String defId){
+        Map<String, Object> map = new HashMap<>();
+        ActDefEntity actDefEntity = actDefService.createEntity();
+        actDefEntity.setActId(actId);
+        actDefEntity.setDefId(defId);
+        actDefService.insert(actDefEntity);
+        return ResponseMessage.ok(map);
+    }
 }

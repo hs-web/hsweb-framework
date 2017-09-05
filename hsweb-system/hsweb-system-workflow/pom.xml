@@ -17,6 +17,9 @@
     </properties>
     <modules>
         <module>hsweb-system-workflow-flowable</module>
+        <module>hsweb-system-workflow-dao</module>
+        <module>hsweb-system-workflow-entity</module>
+        <module>hsweb-system-workflow-service</module>
     </modules>
 
 
