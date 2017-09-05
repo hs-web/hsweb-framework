@@ -105,7 +105,7 @@ function install(context) {
         .addColumn().name("position_id").alias("positionId").comment("职位id").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
         .comment("人员职位关联").commit();
 
-    database.createOrAlter("s_relation_define")
+    database.createOrAlter("s_relation_def")
         .addColumn().name("u_id").alias("id").comment("ID").jdbcType(java.sql.JDBCType.VARCHAR).length(32).primaryKey().commit()
         .addColumn().name("name").alias("name").comment("关系名称").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
         .addColumn().name("type_id").alias("typeId").comment("关系类型").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
