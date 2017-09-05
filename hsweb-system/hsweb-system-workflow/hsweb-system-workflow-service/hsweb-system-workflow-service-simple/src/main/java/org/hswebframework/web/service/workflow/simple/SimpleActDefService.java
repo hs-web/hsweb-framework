@@ -7,11 +7,13 @@ import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.service.GenericEntityService;
 import org.hswebframework.web.service.workflow.ActDefService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * @Author wangwei
  * @Date 2017/9/5.
  */
+@Service
 public class SimpleActDefService extends GenericEntityService<ActDefEntity,String> implements ActDefService {
 
     @Autowired
