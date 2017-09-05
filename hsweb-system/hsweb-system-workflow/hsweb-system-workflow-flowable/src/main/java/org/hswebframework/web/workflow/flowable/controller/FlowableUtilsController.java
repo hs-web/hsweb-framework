@@ -2,6 +2,7 @@ package org.hswebframework.web.workflow.flowable.controller;
 
 import org.activiti.engine.impl.pvm.process.ActivityImpl;
 import org.hswebframework.web.commons.entity.DataStatus;
+import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.entity.organizational.RelationDefineEntity;
 import org.hswebframework.web.entity.organizational.SimpleRelationDefineEntity;
@@ -24,30 +25,29 @@ import java.util.Map;
 public class FlowableUtilsController {
 
     @Autowired
-    BpmActivityService bpmActivityService;
+    BpmActivityService    bpmActivityService;
     @Autowired
     RelationDefineService relationDefineService;
     @Autowired
-    RelationInfoService relationInfoService;
+    RelationInfoService   relationInfoService;
 
     @GetMapping("{procDefId}/acts")
-    public ResponseMessage<Map<String, Object>> acts(@PathVariable String procDefId){
+    public ResponseMessage<Map<String, Object>> acts(@PathVariable String procDefId) {
         Map<String, Object> map = new HashMap<>();
-        List<ActivityImpl> activities = bpmActivityService.getActivitiesById(procDefId,null);
-        for (ActivityImpl activity: activities) {
-            if(activity.getProperty("type").equals("userTask")) map.put(activity.getId(), activity.getProperty("name"));
+        List<ActivityImpl> activities = bpmActivityService.getActivitiesById(procDefId, null);
+        for (ActivityImpl activity : activities) {
+            if (activity.getProperty("type").equals("userTask")) map.put(activity.getId(), activity.getProperty("name"));
         }
         return ResponseMessage.ok(map);
     }
-
-    @GetMapping("relation-define")
-    public ResponseMessage<List<RelationDefineEntity>> getRelationDefines(){
-        SimpleRelationDefineEntity entity = new SimpleRelationDefineEntity();
-        entity.setStatus(DataStatus.STATUS_ENABLED);
-        List<RelationDefineEntity> list = relationDefineService.select(entity);
-
-        return ResponseMessage.ok(list);
-    }
+// see hsweb-system-organizational-controller
+//    @GetMapping("relation-define")
+//    public ResponseMessage<List<RelationDefineEntity>> getRelationDefines() {
+//        List<RelationDefineEntity> list = relationDefineService
+//                .select(single(RelationDefineEntity.status, DataStatus.STATUS_ENABLED));
+//
+//        return ResponseMessage.ok(list);
+//    }
 
 //    @PostMapping("act/{actId}-{defineId}")
 //    public ResponseMessage

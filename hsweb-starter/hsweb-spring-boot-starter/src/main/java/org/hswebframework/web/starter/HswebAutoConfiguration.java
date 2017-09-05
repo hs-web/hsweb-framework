@@ -78,7 +78,9 @@ public class HswebAutoConfiguration {
     @Primary
     @ConfigurationProperties(prefix = "fastjson")
     public FastJsonHttpMessageConverter fastJsonHttpMessageConverter(@Autowired(required = false) EntityFactory entityFactory) {
-        return new FastJsonHttpMessageConverter();
+        FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();
+        converter.setEntityFactory(entityFactory);
+        return converter;
     }
 
     @Bean

@@ -101,9 +101,49 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.hswebframework.web</groupId>
+            <artifactId>hsweb-system-dynamic-form-service-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.hswebframework.web</groupId>
+            <artifactId>hsweb-access-logging-aop</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hswebframework.web</groupId>
+            <artifactId>hsweb-system-organizational-service-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hswebframework.web</groupId>
+            <artifactId>hsweb-system-organizational-authorization</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+       <!---->
+        <!--<dependency>-->
+            <!--<groupId>org.mybatis</groupId>-->
+            <!--<artifactId>mybatis-spring</artifactId>-->
+            <!--<version>RELEASE</version>-->
+        <!--</dependency>-->
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+
+        <!--               test             -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <scope>runtime</scope>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
@@ -128,20 +168,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.mybatis</groupId>
-            <artifactId>mybatis-spring</artifactId>
-            <version>RELEASE</version>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-spring-boot-starter</artifactId>
             <version>${project.version}</version>
@@ -156,28 +182,25 @@
         </dependency>
         <dependency>
             <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-tests</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-system-dynamic-form-service-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-authorization-basic</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-access-logging-aop</artifactId>
-            <version>${project.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-system-organizational-starter</artifactId>
             <version>${project.version}</version>
+            <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.hswebframework.web</groupId>
+            <artifactId>hsweb-tests</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <!--               test             -->
+
+
     </dependencies>
 </project>

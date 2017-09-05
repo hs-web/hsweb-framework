@@ -7,7 +7,6 @@ spring:
        username : sa
        password :
        type: com.alibaba.druid.pool.DruidDataSource
-       driver-class-name : org.h2.Driver
     cache:
        type: simple
 
@@ -18,4 +17,4 @@ logging:
 mybatis:
   dynamic-datasource: false
 server:
-  port: 8080
+  port: 8088

@@ -89,12 +89,12 @@ public class FastJsonHttpMessageConverter extends AbstractHttpMessageConverter<O
     }
 
     public Object readByBytes(Class<?> clazz, byte[] bytes) {
-        if (clazz == String.class) return new String(bytes, charset);
-        if (entityFactory != null && (Entity.class.isAssignableFrom(clazz) || Model.class.isAssignableFrom(clazz))) {
-            @SuppressWarnings("unchecked")
-            Class tmp = entityFactory.getInstanceType(clazz);
-            if (tmp != null) clazz = tmp;
-        }
+//        if (clazz == String.class) return new String(bytes, charset);
+//        if (entityFactory != null && (Entity.class.isAssignableFrom(clazz) || Model.class.isAssignableFrom(clazz))) {
+//            @SuppressWarnings("unchecked")
+//            Class tmp = entityFactory.getInstanceType(clazz);
+//            if (tmp != null) clazz = tmp;
+//        }
         return JSON.parseObject(bytes, 0, bytes.length, charset.newDecoder(), clazz);
     }
 

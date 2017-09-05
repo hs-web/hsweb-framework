@@ -30,7 +30,7 @@ public class FlowableAutoConfiguration {
         return configuration -> {
             configuration
                     .setAsyncExecutorActivate(false)
-                    .setDatabaseSchemaUpdate("false")
+//                    .setDatabaseSchemaUpdate("false")
                     .setJobExecutorActivate(false)
                     .setActivityFontName("宋体")
                     .setLabelFontName("宋体")
