@@ -265,12 +265,14 @@ public class BpmTaskServiceImp extends FlowableAbstract implements BpmTaskServic
             // 获取节点配置信息
             ActDefEntity actDefEntity = actDefService.selectSingle(single(ActDefEntity.actId,actId));
             // 获取矩阵信息
-            RelationDefineEntity relationDefineEntity = relationDefineService.selectByPk(actDefEntity.getDefId());
+//            RelationDefineEntity relationDefineEntity = relationDefineService.selectByPk(actDefEntity.getDefId());
             // 获取人员信息
-            List<Relation> relations = relationInfoService.getRelations("person",userId).findRev(relationDefineEntity.getName());
+            List<Relation> relations = relationInfoService
+                    .getRelations("person",userId)
+                    .findRev(actDefEntity.getDefId());
             // 设置待办人
             for(Relation relation : relations){
-                taskService.addCandidateUser(taskId,relation.getTarget() );
+                taskService.addCandidateUser(taskId,relation.getTarget());
             }
         }else {
             taskService.addCandidateUser(taskId, userId);
