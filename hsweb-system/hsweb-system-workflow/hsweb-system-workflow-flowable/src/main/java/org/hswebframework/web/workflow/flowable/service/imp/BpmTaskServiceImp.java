@@ -17,6 +17,7 @@ import org.hswebframework.utils.StringUtils;
 import org.hswebframework.web.NotFoundException;
 import org.hswebframework.web.entity.organizational.RelationDefineEntity;
 import org.hswebframework.web.entity.workflow.ActDefEntity;
+import org.hswebframework.web.organizational.authorization.relation.Relation;
 import org.hswebframework.web.organizational.authorization.relation.Relations;
 import org.hswebframework.web.service.organizational.RelationDefineService;
 import org.hswebframework.web.service.organizational.RelationInfoService;
@@ -259,19 +260,26 @@ public class BpmTaskServiceImp extends FlowableAbstract implements BpmTaskServic
     }
 
     @Override
-    public void setAssignee(String taskId, String actId, String userId) {
+    public void addCandidateUser(String taskId, String actId, String userId) {
         if(!StringUtils.isNullOrEmpty(actId)){
             // 获取节点配置信息
             ActDefEntity actDefEntity = actDefService.selectSingle(single(ActDefEntity.actId,actId));
             // 获取矩阵信息
             RelationDefineEntity relationDefineEntity = relationDefineService.selectByPk(actDefEntity.getDefId());
             // 获取人员信息
-            Relations relations = relationInfoService.getRelations(relationDefineEntity.getName(),userId);
+            List<Relation> relations = relationInfoService.getRelations("person",userId).findRev(relationDefineEntity.getName());
             // 设置待办人
-            taskService.setAssignee(taskId, userId);
+            for(Relation relation : relations){
+                taskService.addCandidateUser(taskId,relation.getTarget() );
+            }
         }else {
-            taskService.setAssignee(taskId, userId);
+            taskService.addCandidateUser(taskId, userId);
         }
+    }
+
+    @Override
+    public void setAssignee(String taskId, String userId) {
+        taskService.setAssignee(taskId, userId);
     }
 
     @Override

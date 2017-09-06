@@ -105,13 +105,21 @@ public interface BpmTaskService{
     void reject(String taskId);
 
     /**
-     * 设置办理人
+     * 设置待办人
      *
      * @param taskId   当前环节ID
      * @param actId   当前环节图元ID
      * @param userId 用户ID
      */
-    void setAssignee(String taskId, String actId, String userId);
+    void addCandidateUser(String taskId, String actId, String userId);
+
+    /**
+     * 设置办理人
+     *
+     * @param taskId   当前环节ID
+     * @param userId 用户ID
+     */
+    void setAssignee(String taskId, String userId);
 
     /**
      * 结束流程
