@@ -7,6 +7,7 @@ import org.hswebframework.web.authorization.access.DataAccessConfig;
 import org.hswebframework.web.authorization.access.DataAccessHandler;
 import org.hswebframework.web.authorization.access.ScopeDataAccessConfig;
 import org.hswebframework.web.authorization.define.AuthorizingContext;
+import org.hswebframework.web.authorization.exception.AccessDenyException;
 import org.hswebframework.web.commons.entity.Entity;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.controller.QueryController;
@@ -22,7 +23,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * TODO 完成注释
  *
  * @author zhouhao
  */
@@ -39,7 +39,7 @@ public abstract class AbstractScopeDataAccessHandler<E> implements DataAccessHan
 
     protected abstract void applyScopeProperty(E entity, String value);
 
-    protected abstract Term createQueryTerm(Set<String> scope,AuthorizingContext context);
+    protected abstract Term createQueryTerm(Set<String> scope, AuthorizingContext context);
 
     protected abstract Set<String> getTryOperationScope(String scopeType, PersonnelAuthorization authorization);
 
@@ -51,6 +51,9 @@ public abstract class AbstractScopeDataAccessHandler<E> implements DataAccessHan
     @Override
     public boolean handle(DataAccessConfig access, AuthorizingContext context) {
         ScopeDataAccessConfig accessConfig = ((ScopeDataAccessConfig) access);
+        if (PersonnelAuthorization.current().isPresent()) {
+            return false;
+        }
         switch (accessConfig.getAction()) {
             case Permission.ACTION_QUERY:
                 return handleQuery(accessConfig, context);
@@ -60,22 +63,27 @@ public abstract class AbstractScopeDataAccessHandler<E> implements DataAccessHan
                 return handleRW(accessConfig, context);
             case Permission.ACTION_ADD:
                 return handleAdd(accessConfig, context);
+            default:
+                return false;
         }
-        return false;
     }
 
     protected PersonnelAuthorization getPersonnelAuthorization() {
         return PersonnelAuthorization.current()
-                .orElseThrow(UnsupportedOperationException::new); // TODO: 17-5-23 其他异常?
+                .orElseThrow(AccessDenyException::new);
     }
 
     protected boolean handleAdd(ScopeDataAccessConfig access, AuthorizingContext context) {
         PersonnelAuthorization authorization = getPersonnelAuthorization();
         Set<String> scopes = authorization.getRootOrgId();
         String scope = null;
-        if (scopes.size() == 0) return true;
-        else if (scopes.size() == 1) scope = scopes.iterator().next();
-        else logger.warn("existing many scope :{} , try use config.", scopes);
+        if (scopes.isEmpty()) {
+            return true;
+        } else if (scopes.size() == 1) {
+            scope = scopes.iterator().next();
+        } else {
+            logger.warn("existing many scope :{} , try use config.", scopes);
+        }
         scopes = getTryOperationScope(access).stream().map(String::valueOf).collect(Collectors.toSet());
         if (scope == null && scopes.size() == 1) {
             scope = scopes.iterator().next();
@@ -157,7 +165,7 @@ public abstract class AbstractScopeDataAccessHandler<E> implements DataAccessHan
             queryParamEntity.setTerms(new ArrayList<>());
             //添加一个查询条件
             queryParamEntity
-                    .addTerm(createQueryTerm(scope,context))
+                    .addTerm(createQueryTerm(scope, context))
                     //客户端提交的参数 作为嵌套参数
                     .nest().setTerms(oldParam);
         } else {
