@@ -2,27 +2,26 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="org.hswebframework.web.dao.workflow.ActDefDao">
-    <resultMap id="ActDefResultMap" type="org.hswebframework.web.entity.workflow.SimpleActDefEntity">
-        <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
-        <result property="actId" column="act_id" javaType="String" jdbcType="VARCHAR"/>
-        <result property="formId" column="form_id" javaType="String" jdbcType="VARCHAR"/>
-        <result property="defId" column="def_id" javaType="String" jdbcType="VARCHAR"/>
+<mapper namespace="org.hswebframework.web.dao.workflow.ProcDefFormDao">
+    <resultMap id="ProcDefFormResultMap" type="org.hswebframework.web.entity.workflow.SimpleProcDefFormEntity">
+              <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
+            <result property="defKey" column="def_key" javaType="String" jdbcType="VARCHAR"/>
+            <result property="formId" column="form_id" javaType="String" jdbcType="VARCHAR"/>
     </resultMap>
 
     <!--用于动态生成sql所需的配置-->
     <sql id="config">
-        <bind name="resultMapId" value="'ActDefResultMap'"/>
-        <bind name="tableName" value="'s_act_def'"/>
+        <bind name="resultMapId" value="'ProcDefFormResultMap'"/>
+        <bind name="tableName" value="'s_def_form'"/>
     </sql>
-
-    <insert id="insert" parameterType="org.hswebframework.web.entity.workflow.SimpleActDefEntity">
+  
+    <insert id="insert" parameterType="org.hswebframework.web.entity.workflow.SimpleProcDefFormEntity" >
         <include refid="config"/>
         <include refid="BasicMapper.buildInsertSql"/>
     </insert>
 
     <delete id="deleteByPk" parameterType="String">
-        delete from s_act_def where u_id =#{id}
+        delete from s_def_form where u_id =#{id}
     </delete>
 
     <delete id="delete" parameterType="org.hswebframework.web.commons.entity.Entity">
@@ -35,7 +34,7 @@
         <include refid="BasicMapper.buildUpdateSql"/>
     </update>
 
-    <select id="query" parameterType="org.hswebframework.web.commons.entity.Entity" resultMap="ActDefResultMap">
+    <select id="query" parameterType="org.hswebframework.web.commons.entity.Entity" resultMap="ProcDefFormResultMap">
         <include refid="config"/>
         <include refid="BasicMapper.buildSelectSql"/>
     </select>

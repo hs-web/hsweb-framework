@@ -108,9 +108,10 @@ public interface BpmTaskService{
      * 设置办理人
      *
      * @param taskId   当前环节ID
+     * @param actId   当前环节图元ID
      * @param userId 用户ID
      */
-    void setAssignee(String taskId, String userId);
+    void setAssignee(String taskId, String actId, String userId);
 
     /**
      * 结束流程

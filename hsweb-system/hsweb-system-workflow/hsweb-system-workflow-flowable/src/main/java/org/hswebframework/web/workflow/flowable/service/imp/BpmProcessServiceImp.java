@@ -31,6 +31,11 @@ public class BpmProcessServiceImp extends FlowableAbstract implements BpmProcess
    private BpmTaskService bpmTaskService;
 
     @Override
+    public List<ProcessDefinition> getAllProcessDefinition() {
+        return repositoryService.createProcessDefinitionQuery().latestVersion().active().list();
+    }
+
+    @Override
     public ProcessInstance startProcessInstance(String creatorId,
                                                 String procDefKey,
                                                 String activity,

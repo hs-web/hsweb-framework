@@ -6,32 +6,24 @@ import org.hswebframework.web.commons.entity.GenericEntity;
  * @Author wangwei
  * @Date 2017/9/5.
  */
-public interface ActDefEntity extends GenericEntity<String> {
+public interface ProcDefFormEntity extends GenericEntity<String>{
  /*-------------------------------------------
     |               属性名常量               |
     ===========================================*/
     /**
-     * 节点ID
+     * 流程定义Key
      */
-    String actId = "actId";
+    String defKey = "defKey";
     /**
-     * 表单ID
+     * 动态表单ID
      */
     String formId = "formId";
-    /**
-     * 矩阵ID
-     */
-    String defId = "defId";
 
-    String getActId();
+    String getDefKey();
 
-    void setActId(String actId);
+    void setDefKey(String defKey);
 
     String getFormId();
 
     void setFormId(String formId);
-
-    String getDefId();
-
-    void setDefId(String defId);
 }

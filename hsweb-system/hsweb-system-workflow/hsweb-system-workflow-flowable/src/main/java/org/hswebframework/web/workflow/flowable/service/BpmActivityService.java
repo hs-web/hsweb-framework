@@ -85,10 +85,10 @@ public interface BpmActivityService {
     /**
      * 获取开始节点
      *
-     * @param procDefKey 流程定义Key
+     * @param procDefId 流程定义ID
      * @return ActivityImpl       当前流程的结束资源
      */
-    ActivityImpl getStartEvent(String procDefKey);
+    ActivityImpl getStartEvent(String procDefId);
 
     /**
      * 获取结束节点

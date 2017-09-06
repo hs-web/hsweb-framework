@@ -15,6 +15,12 @@ import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.hswebframework.utils.StringUtils;
 import org.hswebframework.web.NotFoundException;
+import org.hswebframework.web.entity.organizational.RelationDefineEntity;
+import org.hswebframework.web.entity.workflow.ActDefEntity;
+import org.hswebframework.web.organizational.authorization.relation.Relations;
+import org.hswebframework.web.service.organizational.RelationDefineService;
+import org.hswebframework.web.service.organizational.RelationInfoService;
+import org.hswebframework.web.service.workflow.ActDefService;
 import org.hswebframework.web.workflow.flowable.entity.TaskInfo;
 import org.hswebframework.web.workflow.flowable.service.BpmActivityService;
 import org.hswebframework.web.workflow.flowable.service.BpmTaskService;
@@ -22,11 +28,14 @@ import org.hswebframework.web.workflow.flowable.utils.FlowableAbstract;
 import org.hswebframework.web.workflow.flowable.utils.JumpTaskCmd;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.*;
+
+import static org.hswebframework.web.commons.entity.param.QueryParamEntity.single;
 
 /**
  * @Author wangwei
@@ -40,6 +49,12 @@ public class BpmTaskServiceImp extends FlowableAbstract implements BpmTaskServic
 
     @Resource
     private BpmActivityService bpmActivityService;
+    @Autowired
+    ActDefService actDefService;
+    @Autowired
+    RelationDefineService relationDefineService;
+    @Autowired
+    RelationInfoService relationInfoService;
 
     @Override
     public List<Task> selectNowTask(String procInstId) {
@@ -244,8 +259,19 @@ public class BpmTaskServiceImp extends FlowableAbstract implements BpmTaskServic
     }
 
     @Override
-    public void setAssignee(String taskId, String userId) {
-        taskService.setAssignee(taskId, userId);
+    public void setAssignee(String taskId, String actId, String userId) {
+        if(!StringUtils.isNullOrEmpty(actId)){
+            // 获取节点配置信息
+            ActDefEntity actDefEntity = actDefService.selectSingle(single(ActDefEntity.actId,actId));
+            // 获取矩阵信息
+            RelationDefineEntity relationDefineEntity = relationDefineService.selectByPk(actDefEntity.getDefId());
+            // 获取人员信息
+            Relations relations = relationInfoService.getRelations(relationDefineEntity.getName(),userId);
+            // 设置待办人
+            taskService.setAssignee(taskId, userId);
+        }else {
+            taskService.setAssignee(taskId, userId);
+        }
     }
 
     @Override

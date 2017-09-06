@@ -225,12 +225,6 @@ public class BpmActivityServiceImp extends FlowableAbstract implements BpmActivi
     @Override
     public ActivityImpl getEndEvent(String procDefId) {
         return findActivity(procDefId, activity -> "endEvent".equals(activity.getProperty("type")));
-
-//        for (ActivityImpl activity : pde.getActivities()) {
-//            if (activity.getProperty("type").equals("endEvent"))
-//                return activity;
-//        }
-//        return null;
     }
 
     /**
