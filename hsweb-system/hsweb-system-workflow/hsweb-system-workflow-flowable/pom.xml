@@ -100,11 +100,6 @@
             <artifactId>hsweb-datasource-api</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-system-dynamic-form-service-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
 
         <dependency>
             <groupId>org.hswebframework.web</groupId>
@@ -209,6 +204,11 @@
             <artifactId>hsweb-system-workflow-dao-mybatis</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hswebframework.web</groupId>
+            <artifactId>hsweb-system-dynamic-form-service-simple</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <!--               test             -->

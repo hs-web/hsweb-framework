@@ -9,6 +9,7 @@ import org.hswebframework.web.commons.entity.SimpleGenericEntity;
 public class SimpleActDefEntity extends SimpleGenericEntity<String> implements ActDefEntity {
 
     private String actId;
+    private String formId;
     private String defId;
 
     @Override
@@ -19,6 +20,16 @@ public class SimpleActDefEntity extends SimpleGenericEntity<String> implements A
     @Override
     public void setActId(String actId) {
         this.actId = actId;
+    }
+
+    @Override
+    public String getFormId() {
+        return formId;
+    }
+
+    @Override
+    public void setFormId(String formId) {
+        this.formId = formId;
     }
 
     @Override

@@ -1,41 +1,45 @@
 package org.hswebframework.web.workflow.flowable.test;
 
-import org.activiti.engine.history.HistoricTaskInstance;
-import org.activiti.engine.impl.pvm.process.ActivityImpl;
-import org.activiti.engine.repository.ProcessDefinition;
-import org.activiti.engine.task.Task;
-import org.hswebframework.web.workflow.flowable.service.BpmActivityService;
-import org.hswebframework.web.workflow.flowable.utils.FlowableAbstract;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
+import com.alibaba.fastjson.JSON;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by zhouhao on 2017/7/20.
  */
-@RunWith(SpringRunner.class)
-@SpringBootTest
-public class ServiceTest extends FlowableAbstract {
-
-    @Autowired
-    BpmActivityService bpmActivityService;
-
-    @Test
-    public void getProcessDefinition(){
-        ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery().processDefinitionKey("test").singleResult();
-        System.out.println(processDefinition);
+public class ServiceTest {
+    public static void main(String[] args) {
+        p();
     }
 
-    @Test
-    public void getHiTask(){
-        //查出历史信息
-        HistoricTaskInstance historicTaskInstance = historyService.createHistoricTaskInstanceQuery().processInstanceId("5").taskAssignee("admin").singleResult();
-
-        Task task = taskService.createTaskQuery().taskId("123456").singleResult();
-
+    public static void p(){
+        String s = "[{\"name\":\"a\",\"key\":\"1\"},{\"name\":\"b\",\"key\":\"2\"},{\"name\":\"c\",\"key\":\"3\"}]";
+        List<Map> list = JSON.parseArray(s,Map.class);
+        System.out.println(list);
     }
+
+    public static void s(){
+        Map<String, String> map1 = new HashMap<>();
+        Map<String, String> map2 = new HashMap<>();
+        Map<String, String> map3 = new HashMap<>();
+
+        map1.put("key","1");
+        map1.put("name","a");
+        map2.put("key","2");
+        map2.put("name","b");
+        map3.put("key","3");
+        map3.put("name","c");
+
+        List<Map<String,String>> list = new ArrayList<>();
+
+        list.add(map1);
+        list.add(map2);
+        list.add(map3);
+
+        System.out.println(JSON.toJSONString(list));
+    }
+
 }

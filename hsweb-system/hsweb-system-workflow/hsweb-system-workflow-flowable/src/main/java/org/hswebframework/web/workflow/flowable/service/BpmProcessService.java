@@ -16,6 +16,12 @@ import java.util.Map;
 public interface BpmProcessService{
 
     /**
+     * 获取所有可以启动的流程
+     * @return
+     */
+    List<ProcessDefinition> getAllProcessDefinition();
+
+    /**
      * 启动一个流程，并初始化自定义主表单数据
      *
      * @param creator_id     流程创建人
