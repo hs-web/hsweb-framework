@@ -51,6 +51,7 @@ import static java.util.Optional.ofNullable;
 @RequestMapping("${hsweb.web.mappings.file:file}")
 @Authorize(permission = "file")
 @AccessLogger("文件")
+@SuppressWarnings("all")
 public class FileController {
 
     private FileService fileService;
@@ -87,6 +88,7 @@ public class FileController {
                             @RequestParam("data") String dataStr,
                             HttpServletResponse response) throws IOException {
         response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
+
         response.setHeader("Content-disposition", "attachment;filename=" + URLEncoder.encode(name, "utf-8"));
         ZIPWriter writer = Compress.zip();
         List<Map<String, String>> data = (List) JSON.parseArray(dataStr, Map.class);
@@ -245,7 +247,7 @@ public class FileController {
         if (params.get("charset") == null) {
             try {
                 fileName = new String(file.getOriginalFilename().getBytes("ISO-8859-1"), "utf-8");
-            } catch (UnsupportedEncodingException ignore) {
+            } catch (@SuppressWarnings("all")UnsupportedEncodingException ignore) {
             }
         }
         if (logger.isInfoEnabled())

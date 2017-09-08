@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 public class ApplicationContextHolder {
     private static ApplicationContext context;
 
-    public static final ApplicationContext get() {
+    public static ApplicationContext get() {
         if (null == context) {
             throw new UnsupportedOperationException("ApplicationContext not ready!");
         }
@@ -22,7 +22,8 @@ public class ApplicationContextHolder {
 
     @Autowired
     public void setContext(ApplicationContext context) {
-        if (null == ApplicationContextHolder.context)
+        if (null == ApplicationContextHolder.context) {
             ApplicationContextHolder.context = context;
+        }
     }
 }

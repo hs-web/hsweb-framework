@@ -24,7 +24,7 @@ import java.util.List;
 @RequestMapping("${hsweb.web.mappings.dynamic/form/column:dynamic/form/column}")
 @Authorize(permission = "dynamic-form")
 @AccessLogger("动态表单")
-@Api(tags = "dynamic-form", description = "动态表单")
+@Api(tags = "dynamic-form", value = "动态表单")
 public class DynamicFormColumnController {
 
     private DynamicFormService dynamicFormService;

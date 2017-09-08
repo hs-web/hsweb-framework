@@ -302,5 +302,8 @@ public class SpringBootExample
         relationInfo.setRelationId("leader");
         relationInfoService.insert(relationInfo);
 
+//        relationInfoService
+//                .getRelations("person","王伟")
+//                .findRev("直属上级");
     }
 }

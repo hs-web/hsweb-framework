@@ -10,7 +10,6 @@ import org.hswebframework.web.authorization.basic.handler.access.DefaultDataAcce
 import org.hswebframework.web.authorization.basic.web.*;
 import org.hswebframework.web.authorization.token.MemoryUserTokenManager;
 import org.hswebframework.web.authorization.token.UserTokenManager;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -24,9 +23,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 import java.util.List;
 
 /**
- * TODO 完成注释
+ * 权限控制自动配置类
  *
  * @author zhouhao
+ * @since 3.0
  */
 @Configuration
 public class AuthorizingHandlerAutoConfiguration {
@@ -53,7 +53,7 @@ public class AuthorizingHandlerAutoConfiguration {
     }
 
     @Bean
-    public SessionIdUserTokenGenerator sessionIdUserTokenGenerator(){
+    public SessionIdUserTokenGenerator sessionIdUserTokenGenerator() {
         return new SessionIdUserTokenGenerator();
     }
 
@@ -93,12 +93,12 @@ public class AuthorizingHandlerAutoConfiguration {
         private DefaultDataAccessController defaultDataAccessController;
 
         @Override
-        public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+        public Object postProcessBeforeInitialization(Object bean, String beanName) {
             return bean;
         }
 
         @Override
-        public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+        public Object postProcessAfterInitialization(Object bean, String beanName) {
             if (bean instanceof DataAccessHandler) {
                 defaultDataAccessController.addHandler(((DataAccessHandler) bean));
             }
