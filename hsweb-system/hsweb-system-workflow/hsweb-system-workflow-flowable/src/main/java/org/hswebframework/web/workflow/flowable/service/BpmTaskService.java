@@ -2,9 +2,7 @@ package org.hswebframework.web.workflow.flowable.service;
 
 import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.impl.pvm.process.ActivityImpl;
-import org.activiti.engine.impl.task.TaskDefinition;
 import org.activiti.engine.task.Task;
-import org.hswebframework.web.workflow.flowable.entity.TaskInfo;
 
 import java.util.Collection;
 import java.util.List;
@@ -68,7 +66,7 @@ public interface BpmTaskService{
      * @return 任务信息
      * @throws Exception
      */
-    List<TaskInfo> claimList(String userId);
+    List<Task> claimList(String userId);
 
     /**
      * 已签收待办理的任务
@@ -77,7 +75,7 @@ public interface BpmTaskService{
      * @return 任务信息
      * @throws Exception
      */
-    List<TaskInfo> todoList(String userId);
+    List<Task> todoList(String userId);
 
     /**
      * 完成任务（环节）并指定下一环节办理人

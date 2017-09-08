@@ -59,13 +59,18 @@ public class BpmProcessServiceImp extends FlowableAbstract implements BpmProcess
             //如果指定了下一步执行环节，则将流程跳转到指定环节,并删除当前未执行的环节历史信息
             if(!StringUtils.isNullOrEmpty(activity)){
                 bpmTaskService.jumpTask(processInstanceId,activity,StringUtils.isNullOrEmpty(nextClaim)?"":nextClaim);
-                bpmTaskService.removeHiTask(tasks.get(0).getId());
+                for(Task task:tasks){
+                    bpmTaskService.removeHiTask(task.getId());
+                }
+            }else{
+                // 设置待办人（单环节并且设定办理人可直接签收）
+                if(tasks.size()==1 && !StringUtils.isNullOrEmpty(nextClaim)) bpmTaskService.claim(tasks.get(0).getId(), nextClaim);
+                else {
+                    for(Task task:tasks){
+                        bpmTaskService.addCandidateUser(task.getId(), task.getTaskDefinitionKey(), creatorId);
+                    }
+                }
             }
-//            else{
-//                //流程签收，签收人为指定办理人
-//                if(!StringUtils.isNullOrEmpty(nextClaim))
-//                    bpmTaskService.claim(task.getId(), nextClaim);
-//            }
 
             if (logger.isDebugEnabled())
                 logger.debug("start process of {key={}, bkey={}, pid={}, variables={}}", procDefKey, businessKey, processInstanceId, variables);

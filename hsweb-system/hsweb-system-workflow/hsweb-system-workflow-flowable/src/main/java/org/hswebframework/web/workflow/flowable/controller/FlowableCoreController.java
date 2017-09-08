@@ -2,7 +2,9 @@ package org.hswebframework.web.workflow.flowable.controller;
 
 import org.activiti.engine.impl.pvm.process.ActivityImpl;
 import org.activiti.engine.repository.ProcessDefinition;
+import org.activiti.engine.task.Task;
 import org.hswebframework.web.commons.entity.PagerResult;
+import org.hswebframework.web.commons.entity.param.UpdateParamEntity;
 import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.entity.workflow.ActDefEntity;
 import org.hswebframework.web.service.form.DynamicFormOperationService;
@@ -69,14 +71,39 @@ public class FlowableCoreController {
     /**
      * 保存表单，启动流程
      * @param formId
-     * @param defKey
+     * @param defId
      * @param data
      * @return
      */
-    @PostMapping("start/{formId}-{defKey}")
-    public ResponseMessage<Map<String, Object>> startProc(@PathVariable String formId,@PathVariable String defKey, @RequestBody Map<String, Object> data) {
+    @PostMapping("start/{formId}-{defId}")
+    public ResponseMessage<Map<String, Object>> startProc(@PathVariable String formId,@PathVariable String defId, @RequestBody Map<String, Object> data) {
         dynamicFormOperationService.insert(formId, data);
-        bpmProcessService.startProcessInstance("admin",defKey,null,null,formId,null);
+        ProcessDefinition processDefinition = bpmProcessService.getProcessDefinitionById(defId);
+        bpmProcessService.startProcessInstance("4291d7da9005377ec9aec4a71ea837f",processDefinition.getKey(),null,null,formId,null);
         return ResponseMessage.ok(data);
+    }
+
+    /**
+     * 获取待办任务
+     * @return
+     */
+    @GetMapping("tasks")
+    public ResponseMessage<List<Task>> getMyTasks() {
+        String userId = "e5141bc62f1837c41a4ac40c0e253595";
+        List<Task> tasks = bpmTaskService.claimList(userId);
+        return ResponseMessage.ok(tasks).include(Task.class, "id", "name", "createTime", "executionId"
+                , "parentTaskId", "processInstanceId", "processDefinitionId", "taskDefinitionKey")
+                .exclude(Task.class, "definition", "mainFormData");
+    }
+
+    @PutMapping("complete/{formId}-{taskId}")
+    public ResponseMessage<Map<String,Object>> complete(@PathVariable String formId,@PathVariable String taskId, @RequestBody UpdateParamEntity<Map<String, Object>> paramEntity){
+        dynamicFormOperationService.update(formId,paramEntity);
+        // 认领
+        String userId = "e5141bc62f1837c41a4ac40c0e253595";
+        bpmTaskService.claim(taskId,userId);
+        // 办理
+        bpmTaskService.complete(taskId, userId, null, null);
+        return ResponseMessage.ok();
     }
 }

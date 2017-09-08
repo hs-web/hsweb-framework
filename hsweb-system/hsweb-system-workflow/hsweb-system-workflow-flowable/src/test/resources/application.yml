@@ -13,6 +13,7 @@ spring:
 logging:
   level:
       org.flowable: debug
+      org.hswebframework.web: debug
 #      org.activiti: debug
 mybatis:
   dynamic-datasource: false
