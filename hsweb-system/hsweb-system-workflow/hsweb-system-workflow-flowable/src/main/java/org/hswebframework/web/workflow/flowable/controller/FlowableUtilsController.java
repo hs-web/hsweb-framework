@@ -72,6 +72,7 @@ public class FlowableUtilsController {
                 actDefEntity.setActId(map.get("act_id").toString());
                 actDefEntity.setFormId(map.get("form_id").toString());
                 actDefEntity.setDefId(map.get("def_id").toString());
+                actDefEntity.setType(map.get("type").toString());
                 actDefService.saveOrUpdate(actDefEntity);
             }
             return ResponseMessage.ok("保存成功");
