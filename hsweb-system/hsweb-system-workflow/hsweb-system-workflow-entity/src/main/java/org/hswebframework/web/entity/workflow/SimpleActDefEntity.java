@@ -11,6 +11,7 @@ public class SimpleActDefEntity extends SimpleGenericEntity<String> implements A
     private String actId;
     private String formId;
     private String defId;
+    private String type;
 
     @Override
     public String getActId() {
@@ -40,5 +41,15 @@ public class SimpleActDefEntity extends SimpleGenericEntity<String> implements A
     @Override
     public void setDefId(String defId) {
         this.defId = defId;
+    }
+
+    @Override
+    public String getType() {
+        return type;
+    }
+
+    @Override
+    public void setType(String type) {
+        this.type = type;
     }
 }
