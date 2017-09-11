@@ -15,14 +15,11 @@ import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.hswebframework.utils.StringUtils;
 import org.hswebframework.web.NotFoundException;
-import org.hswebframework.web.entity.organizational.RelationDefineEntity;
 import org.hswebframework.web.entity.workflow.ActDefEntity;
 import org.hswebframework.web.organizational.authorization.relation.Relation;
-import org.hswebframework.web.organizational.authorization.relation.Relations;
 import org.hswebframework.web.service.organizational.RelationDefineService;
 import org.hswebframework.web.service.organizational.RelationInfoService;
 import org.hswebframework.web.service.workflow.ActDefService;
-import org.hswebframework.web.workflow.flowable.entity.TaskInfo;
 import org.hswebframework.web.workflow.flowable.service.BpmActivityService;
 import org.hswebframework.web.workflow.flowable.service.BpmTaskService;
 import org.hswebframework.web.workflow.flowable.utils.FlowableAbstract;
@@ -59,17 +56,17 @@ public class BpmTaskServiceImp extends FlowableAbstract implements BpmTaskServic
 
     @Override
     public List<Task> selectNowTask(String procInstId) {
-        return taskService.createTaskQuery().processInstanceId(procInstId).list();
+        return taskService.createTaskQuery().processInstanceId(procInstId).active().list();
     }
 
     @Override
     public List<Task> selectTaskByProcessId(String procInstId) {
-        return taskService.createTaskQuery().processInstanceId(procInstId).list();
+        return taskService.createTaskQuery().processInstanceId(procInstId).active().list();
     }
 
     @Override
     public Task selectTaskByTaskId(String taskId) {
-        return taskService.createTaskQuery().taskId(taskId).singleResult();
+        return taskService.createTaskQuery().taskId(taskId).active().singleResult();
     }
 
     @Override
@@ -107,7 +104,7 @@ public class BpmTaskServiceImp extends FlowableAbstract implements BpmTaskServic
 
     @Override
     public void claim(String taskId, String userId) {
-        Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
+        Task task = taskService.createTaskQuery().taskId(taskId).taskCandidateUser(userId).active().singleResult();
         if (task == null) {
             logger.warn("获取任务失败!");
             throw new NotFoundException("task not found");
@@ -120,38 +117,36 @@ public class BpmTaskServiceImp extends FlowableAbstract implements BpmTaskServic
 
 
     @Override
-    public List<TaskInfo> claimList(String userId) {
-        List<TaskInfo> list = new ArrayList<>();
+    public List<Task> claimList(String userId) {
         // 等待签收的任务
-        List<Task> todoList = taskService.createTaskQuery()
+        List<Task> claimList = taskService.createTaskQuery()
                 .taskCandidateUser(userId)
                 .includeProcessVariables()
                 .active()
                 .list();
-        return list;
+        return claimList;
     }
 
     @Override
-    public List<TaskInfo> todoList(String userId) {
-        List<TaskInfo> list = new ArrayList<>();
+    public List<Task> todoList(String userId) {
         // 已经签收的任务
         List<Task> todoList = taskService.createTaskQuery()
                 .taskAssignee(userId)
                 .includeProcessVariables()
                 .active()
                 .list();
-        return list;
+        return todoList;
     }
 
     @Override
     public void complete(String taskId, String userId, String activityId, String nextClaim) {
-        Task task = taskService.createTaskQuery().taskId(taskId).includeProcessVariables().singleResult();
-        if (task == null) {
+        Task task = taskService.createTaskQuery().taskId(taskId).includeProcessVariables().active().singleResult();
+        if (StringUtils.isNullOrEmpty(task)) {
             logger.warn("任务不存在!");
             throw new NotFoundException("task not found");
         }
         String assignee = task.getAssignee();
-        if (null == assignee) {
+        if (StringUtils.isNullOrEmpty(assignee)) {
             logger.warn("请先签收任务!");
             throw new NotFoundException("Please sign for the task first");
         }
@@ -162,19 +157,22 @@ public class BpmTaskServiceImp extends FlowableAbstract implements BpmTaskServic
         Map<String, Object> map = new HashMap<>();
         map.put("oldTaskId", task.getId());
         //完成此任务
-        if (activityId == null) {
+        if (StringUtils.isNullOrEmpty(activityId)) {
             taskService.complete(taskId, map);
         } else {
             jumpTask(taskId, activityId, nextClaim);
         }
-
         //根据流程ID查找执行计划，存在则进行下一步,没有则结束（定制化流程预留）
         List<Execution> execution = runtimeService.createExecutionQuery().processInstanceId(task.getProcessInstanceId()).list();
         if (execution.size() > 0) {
-            String tasknow = selectNowTaskId(task.getProcessInstanceId());
+            List<Task> tasks = selectNowTask(task.getProcessInstanceId());
             // 自定义下一执行人
-            if (!StringUtils.isNullOrEmpty(nextClaim))
-                claim(tasknow, nextClaim);
+            if (tasks.size()==0 && !StringUtils.isNullOrEmpty(nextClaim)) claim(tasks.get(0).getId(), nextClaim);
+            else {
+                for(Task t:tasks){
+                    addCandidateUser(t.getId(), t.getTaskDefinitionKey(), userId);
+                }
+            }
         }
     }
 
@@ -268,8 +266,8 @@ public class BpmTaskServiceImp extends FlowableAbstract implements BpmTaskServic
 //            RelationDefineEntity relationDefineEntity = relationDefineService.selectByPk(actDefEntity.getDefId());
             // 获取人员信息
             List<Relation> relations = relationInfoService
-                    .getRelations("person",userId)
-                    .findRev(actDefEntity.getDefId());
+                    .getRelations(actDefEntity.getType(),userId)
+                    .findPos(actDefEntity.getDefId());
             // 设置待办人
             for(Relation relation : relations){
                 taskService.addCandidateUser(taskId,relation.getTarget());
