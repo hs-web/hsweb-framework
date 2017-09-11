@@ -23,6 +23,11 @@ public interface ActDefEntity extends GenericEntity<String> {
      */
     String defId = "defId";
 
+    /**
+     * 关系类型
+     */
+    String type = "type";
+
     String getActId();
 
     void setActId(String actId);
@@ -34,4 +39,8 @@ public interface ActDefEntity extends GenericEntity<String> {
     String getDefId();
 
     void setDefId(String defId);
+
+    String getType();
+
+    void setType(String type);
 }
