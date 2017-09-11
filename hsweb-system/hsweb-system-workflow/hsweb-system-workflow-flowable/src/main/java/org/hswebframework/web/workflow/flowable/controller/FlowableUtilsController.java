@@ -27,13 +27,14 @@ import static org.hswebframework.web.commons.entity.param.QueryParamEntity.singl
 public class FlowableUtilsController {
 
     @Autowired
-    BpmActivityService    bpmActivityService;
+    BpmActivityService bpmActivityService;
 
     @Autowired
     ActDefService actDefService;
 
     /**
      * 获取流程所有配置节点
+     *
      * @param procDefId
      * @return
      */
@@ -42,43 +43,30 @@ public class FlowableUtilsController {
         List<Map<String, Object>> list = new ArrayList<>();
         List<ActivityImpl> activities = bpmActivityService.getActivitiesById(procDefId, null);
         for (ActivityImpl activity : activities) {
-            Map<String,Object> map = new HashMap<>();
-            if(activity.getProperty("type").equals("startEvent")){
+            Map<String, Object> map = new HashMap<>();
+            if (activity.getProperty("type").equals("startEvent")) {
                 map.put("id", activity.getId());
                 map.put("name", "流程发起者");
                 map.put("info", actDefService.selectSingle(single(ActDefEntity.actId, activity.getId())));
-            }else if (activity.getProperty("type").equals("userTask")){
+            } else if (activity.getProperty("type").equals("userTask")) {
                 map.put("id", activity.getId());
                 map.put("name", activity.getProperty("name").toString());
                 map.put("info", actDefService.selectSingle(single(ActDefEntity.actId, activity.getId())));
             }
-            if(map.size()>0) list.add(map);
+            if (map.size() > 0) list.add(map);
         }
         return ResponseMessage.ok(list);
     }
 
     /**
      * 给流程节点配置表单与人员矩阵
-     * @param entity
+     *
+     * @param actDefEntity
      * @return
      */
-    @PostMapping("act/{entity}")
-    public ResponseMessage<String> setActClaimDef(@PathVariable String entity){
-        try{
-            List<Map> list = JSON.parseArray(entity,Map.class);
-            for(Map map : list){
-                ActDefEntity actDefEntity = actDefService.selectSingle(single(ActDefEntity.actId,map.get("act_id").toString()));
-                if(actDefEntity==null) actDefEntity = actDefService.createEntity();
-                actDefEntity.setActId(map.get("act_id").toString());
-                actDefEntity.setFormId(map.get("form_id").toString());
-                actDefEntity.setDefId(map.get("def_id").toString());
-                actDefEntity.setType(map.get("type").toString());
-                actDefService.saveOrUpdate(actDefEntity);
-            }
-            return ResponseMessage.ok("保存成功");
-        }catch (Exception e){
-            return ResponseMessage.ok("保存失败");
-        }
+    @PostMapping("act")
+    public ResponseMessage<String> setActClaimDef(@RequestBody ActDefEntity actDefEntity) {
+        return ResponseMessage.ok(actDefService.saveOrUpdate(actDefEntity));
     }
 
 }
