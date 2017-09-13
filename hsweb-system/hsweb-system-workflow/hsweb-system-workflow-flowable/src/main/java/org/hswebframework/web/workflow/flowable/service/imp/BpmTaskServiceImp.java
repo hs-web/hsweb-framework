@@ -271,9 +271,7 @@ public class BpmTaskServiceImp extends FlowableAbstract implements BpmTaskServic
             // 根据配置类型  获取人员信息 设置待办人
             if (actDefEntity!=null) {
                 List<String> list = bpmUtilsService.selectUserIdsBy(userId,actDefEntity);
-                for (String uId: list) {
-                    taskService.addCandidateUser(taskId, uId);
-                }
+                list.forEach(uId -> taskService.addCandidateUser(taskId,uId));
             } else {
                 taskService.addCandidateUser(taskId,
                         runtimeService.getIdentityLinksForProcessInstance(selectTaskByTaskId(taskId).getProcessInstanceId())
