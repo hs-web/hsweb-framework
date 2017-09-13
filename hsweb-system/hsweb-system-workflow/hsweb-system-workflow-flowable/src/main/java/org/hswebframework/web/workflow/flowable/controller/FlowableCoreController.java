@@ -3,10 +3,12 @@ package org.hswebframework.web.workflow.flowable.controller;
 import org.activiti.engine.impl.pvm.process.ActivityImpl;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.task.Task;
+import org.hswebframework.web.NotFoundException;
 import org.hswebframework.web.commons.entity.PagerResult;
 import org.hswebframework.web.commons.entity.param.UpdateParamEntity;
 import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.entity.workflow.ActDefEntity;
+import org.hswebframework.web.organizational.authorization.PersonnelAuthorization;
 import org.hswebframework.web.service.form.DynamicFormOperationService;
 import org.hswebframework.web.service.workflow.ActDefService;
 import org.hswebframework.web.workflow.flowable.service.BpmActivityService;
@@ -77,9 +79,12 @@ public class FlowableCoreController {
      */
     @PostMapping("start/{formId}-{defId}")
     public ResponseMessage<Map<String, Object>> startProc(@PathVariable String formId,@PathVariable String defId, @RequestBody Map<String, Object> data) {
+        PersonnelAuthorization authorization = PersonnelAuthorization
+                .current()
+                .orElseThrow(NotFoundException::new);
         dynamicFormOperationService.insert(formId, data);
         ProcessDefinition processDefinition = bpmProcessService.getProcessDefinitionById(defId);
-        bpmProcessService.startProcessInstance("4291d7da9005377ec9aec4a71ea837f",processDefinition.getKey(),null,null,formId,null);
+        bpmProcessService.startProcessInstance(authorization.getPersonnel().getId(),processDefinition.getKey(),null,null,formId,null);
         return ResponseMessage.ok(data);
     }
 
@@ -89,18 +94,31 @@ public class FlowableCoreController {
      */
     @GetMapping("tasks")
     public ResponseMessage<List<Task>> getMyTasks() {
-        String userId = "e5141bc62f1837c41a4ac40c0e253595";
+        PersonnelAuthorization authorization = PersonnelAuthorization
+                .current()
+                .orElseThrow(NotFoundException::new);
+        String userId = authorization.getPersonnel().getId();
         List<Task> tasks = bpmTaskService.claimList(userId);
         return ResponseMessage.ok(tasks).include(Task.class, "id", "name", "createTime", "executionId"
                 , "parentTaskId", "processInstanceId", "processDefinitionId", "taskDefinitionKey")
                 .exclude(Task.class, "definition", "mainFormData");
     }
 
+    /**
+     * 办理
+     * @param formId
+     * @param taskId
+     * @param paramEntity
+     * @return
+     */
     @PutMapping("complete/{formId}-{taskId}")
     public ResponseMessage<Map<String,Object>> complete(@PathVariable String formId,@PathVariable String taskId, @RequestBody UpdateParamEntity<Map<String, Object>> paramEntity){
+        PersonnelAuthorization authorization = PersonnelAuthorization
+                .current()
+                .orElseThrow(NotFoundException::new);
+        String userId = authorization.getPersonnel().getId();
         dynamicFormOperationService.update(formId,paramEntity);
         // 认领
-        String userId = "e5141bc62f1837c41a4ac40c0e253595";
         bpmTaskService.claim(taskId,userId);
         // 办理
         bpmTaskService.complete(taskId, userId, null, null);

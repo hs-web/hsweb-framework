@@ -19,7 +19,7 @@ public interface ActDefEntity extends GenericEntity<String> {
      */
     String formId = "formId";
     /**
-     * 矩阵ID
+     * 关系ID
      */
     String defId = "defId";
 

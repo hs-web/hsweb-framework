@@ -173,6 +173,12 @@ public class SimplePersonService extends GenericEntityService<PersonEntity, Stri
         return personDao.selectByPositionId(positionId);
     }
 
+    @Override
+    public List<PersonEntity> selectByRoleId(String roleId) {
+        Objects.requireNonNull(roleId);
+        return personDao.selectByRoleId(roleId);
+    }
+
     protected void syncPositionInfo(String personId, Set<String> positionIds) {
         for (String positionId : positionIds) {
             PersonPositionEntity positionEntity = entityFactory.newInstance(PersonPositionEntity.class);

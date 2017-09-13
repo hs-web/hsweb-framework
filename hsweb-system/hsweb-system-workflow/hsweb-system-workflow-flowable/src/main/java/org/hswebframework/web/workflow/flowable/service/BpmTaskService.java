@@ -170,6 +170,12 @@ public interface BpmTaskService{
      * 获取流程变量
      * @param procInstId  流程实例ID
      */
-    Map<String,Object> getVariables(String procInstId);
+    Map<String,Object> getVariablesByProcInstId(String procInstId);
 
+    /**
+     * 获取流程变量
+     * @param taskId
+     * @return
+     */
+    Map<String,Object> getVariablesByTaskId(String taskId);
 }
