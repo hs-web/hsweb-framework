@@ -28,4 +28,6 @@ import java.util.List;
  */
 public interface PersonDao extends CrudDao<PersonEntity, String> {
     List<PersonEntity> selectByPositionId(String positionId);
+
+    List<PersonEntity> selectByRoleId(String positionId);
 }

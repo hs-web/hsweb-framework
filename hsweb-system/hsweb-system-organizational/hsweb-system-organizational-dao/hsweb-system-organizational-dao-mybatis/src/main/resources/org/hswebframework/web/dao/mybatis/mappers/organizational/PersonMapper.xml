@@ -60,6 +60,10 @@
         select * from s_person where u_id in (select person_id from s_person_position where position_id=#{positionId})
     </select>
 
+    <select id="selectByRoleId" parameterType="String" resultMap="PersonResultMap">
+        select * from s_person where u_id in (select user_id from s_user_role where role_id=#{roleId})
+    </select>
+
     <select id="query" parameterType="org.hswebframework.web.commons.entity.Entity" resultMap="PersonResultMap">
         <include refid="config"/>
         <include refid="BasicMapper.buildSelectSql"/>
