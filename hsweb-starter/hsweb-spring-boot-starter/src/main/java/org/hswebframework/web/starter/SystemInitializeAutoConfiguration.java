@@ -69,10 +69,10 @@ public class SystemInitializeAutoConfiguration implements CommandLineRunner, Bea
     private AppProperties appProperties;
 
     @Autowired
-    DataSource dataSource;
+    private DataSource dataSource;
 
     @Autowired
-    SqlExecutor sqlExecutor;
+    private SqlExecutor sqlExecutor;
 
     @Autowired
     private ApplicationContext applicationContext;
@@ -92,11 +92,12 @@ public class SystemInitializeAutoConfiguration implements CommandLineRunner, Bea
     }
 
     protected void addGlobalVariable(String var, Object val) {
-        engines.forEach(engine ->{
-            try{
-                engine.addGlobalVariable(Collections.singletonMap(var, val));
-            }catch (Exception ignore){}
-            }
+        engines.forEach(engine -> {
+                    try {
+                        engine.addGlobalVariable(Collections.singletonMap(var, val));
+                    } catch (Exception ignore) {
+                    }
+                }
         );
     }
 
@@ -123,7 +124,6 @@ public class SystemInitializeAutoConfiguration implements CommandLineRunner, Bea
                 metaData.setParser(new MysqlTableMetaParser(sqlExecutor));
                 break;
             default:
-                h2:
                 metaData = new H2RDBDatabaseMetaData();
                 metaData.setParser(new H2TableMetaParser(sqlExecutor));
                 break;
