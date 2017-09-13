@@ -28,5 +28,10 @@
 
     <artifactId>hsweb-concurrent-cache</artifactId>
 
-
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+        </dependency>
+    </dependencies>
 </project>
