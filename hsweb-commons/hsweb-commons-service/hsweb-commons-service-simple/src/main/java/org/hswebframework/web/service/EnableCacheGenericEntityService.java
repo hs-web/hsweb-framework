@@ -3,6 +3,7 @@ package org.hswebframework.web.service;
 import org.hswebframework.web.commons.entity.GenericEntity;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 
 import java.util.List;
 
@@ -31,33 +32,74 @@ public abstract class EnableCacheGenericEntityService<E extends GenericEntity<PK
     }
 
     @Override
-    @CacheEvict(key = "'id:'+#pk")
+    @Caching(
+            evict = {
+                    @CacheEvict(key = "'id:'+#pk"),
+                    @CacheEvict(key = "'all'"),
+                    @CacheEvict(key = "'count'")
+            }
+    )
     public int updateByPk(PK pk, E entity) {
         return super.updateByPk(pk, entity);
     }
 
     @Override
-    @CacheEvict(key = "'id:'+#entity.id")
+    @Caching(
+            evict = {
+                    @CacheEvict(key = "'id:'+#entity.id"),
+                    @CacheEvict(key = "'all'"),
+                    @CacheEvict(key = "'count'")
+            }
+    )
     protected int updateByPk(E entity) {
         return super.updateByPk(entity);
     }
 
     @Override
-    @CacheEvict(key = "'id:'+#result")
+    @Caching(
+            evict = {
+                    @CacheEvict(key = "'id:'+#result"),
+                    @CacheEvict(key = "'all'"),
+                    @CacheEvict(key = "'count'")
+            }
+    )
     public PK insert(E entity) {
         return super.insert(entity);
     }
 
     @Override
-    @CacheEvict(key = "'id:'+#pk")
+    @Caching(
+            evict = {
+                    @CacheEvict(key = "'id:'+#pk"),
+                    @CacheEvict(key = "'all'"),
+                    @CacheEvict(key = "'count'")
+            }
+    )
     public int deleteByPk(PK pk) {
         return super.deleteByPk(pk);
     }
 
     @Override
-    @CacheEvict(key = "'id:'+#result")
+    @Caching(
+            evict = {
+                    @CacheEvict(key = "'id:'+#result"),
+                    @CacheEvict(key = "'all'"),
+                    @CacheEvict(key = "'count'")
+            }
+    )
     public PK saveOrUpdate(E entity) {
         return super.saveOrUpdate(entity);
     }
 
+    @Override
+    @Cacheable(key = "'all'")
+    public List<E> select() {
+        return super.select();
+    }
+
+    @Override
+    @Cacheable(key = "'count'")
+    public int count() {
+        return super.count();
+    }
 }
