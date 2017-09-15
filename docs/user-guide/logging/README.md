@@ -1,4 +1,31 @@
-## 使用步骤
+## 声明记录访问日志
+
+1. 如果你是maven工程
+    * 引入私服配置
+    
+            <repositories>
+                <repository>
+                    <id>hsweb-nexus</id>
+                    <name>Nexus Release Repository</name>
+                    <url>http://nexus.hsweb.me/content/groups/public/</url>
+                    <snapshots>
+                        <enabled>true</enabled>
+                    </snapshots>
+                </repository>
+            </repositories>
+    
+    * 直接引入依赖
+
+            <dependency>
+                <groupId>org.hswebframework.web</groupId>
+                <artifactId>hsweb-access-logging-aop</artifactId>
+                <version>3.0-SNAPSHOT</version>
+            </dependency>
+		
+	
+2. 如果你是非maven工程，[请自行去以下地址](http://nexus.hsweb.me/)下载jar包
+		
+## 监听访问日志
 
 1. 开启访问日志
     * 在启动类中注解@EnableAccessLogger
@@ -32,3 +59,5 @@
                 }
             }
     
+ 
+## 日志序列化
