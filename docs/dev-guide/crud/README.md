@@ -18,7 +18,7 @@ hsweb 中提供了一套通用的增删改查封装([hsweb-commons](../../../hsw
 ### Service中使用dsl进行动态条件
 继承`GenericEntityService`后可获得dsl方式动态条件功能:
 
-```bash
+```java
     public void method(){
        //where name=? or name = ?
        createQuery().where("name","张三").or("name","李四").list();
