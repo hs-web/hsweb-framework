@@ -4,7 +4,7 @@
 [![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg?style=flat-square)](https://www.apache.org/licenses/LICENSE-2.0.html)
 [![Insight.io](https://www.insight.io/repoBadge/github.com/hs-web/hsweb-framework)](https://insight.io/github.com/hs-web/hsweb-framework)
 
-[Features](FEATURES.md)  [Contributing](CONTRIBUTING.md)  [UserGuide](https://github.com/hs-web/hsweb-framework/blob/master/docs/user-guide/index.md)
+[Features](FEATURES.md)  [Contributing](CONTRIBUTING.md)  [UserGuide](https://github.com/hs-web/hsweb-framework/blob/master/docs/user-guide)
 
 ## 模块简介
 
