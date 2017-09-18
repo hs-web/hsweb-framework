@@ -18,7 +18,6 @@
 
 package org.hswebframework.web.starter;
 
-import org.hsweb.ezorm.rdb.RDBDatabase;
 import org.hsweb.ezorm.rdb.executor.SqlExecutor;
 import org.hsweb.ezorm.rdb.meta.RDBDatabaseMetaData;
 import org.hsweb.ezorm.rdb.meta.parser.H2TableMetaParser;
@@ -36,7 +35,6 @@ import org.hswebframework.web.datasource.DatabaseType;
 import org.hswebframework.web.service.Service;
 import org.hswebframework.web.starter.init.SystemInitialize;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.CommandLineRunner;
@@ -69,10 +67,10 @@ public class SystemInitializeAutoConfiguration implements CommandLineRunner, Bea
     private AppProperties appProperties;
 
     @Autowired
-    DataSource dataSource;
+    private DataSource dataSource;
 
     @Autowired
-    SqlExecutor sqlExecutor;
+    private SqlExecutor sqlExecutor;
 
     @Autowired
     private ApplicationContext applicationContext;
@@ -91,12 +89,14 @@ public class SystemInitializeAutoConfiguration implements CommandLineRunner, Bea
         addGlobalVariable("spring", applicationContext);
     }
 
+    @SuppressWarnings("all")
     protected void addGlobalVariable(String var, Object val) {
-        engines.forEach(engine ->{
-            try{
-                engine.addGlobalVariable(Collections.singletonMap(var, val));
-            }catch (Exception ignore){}
-            }
+        engines.forEach(engine -> {
+                    try {
+                        engine.addGlobalVariable(Collections.singletonMap(var, val));
+                    } catch (NullPointerException ignore) {
+                    }
+                }
         );
     }
 
@@ -123,12 +123,12 @@ public class SystemInitializeAutoConfiguration implements CommandLineRunner, Bea
                 metaData.setParser(new MysqlTableMetaParser(sqlExecutor));
                 break;
             default:
-                h2:
                 metaData = new H2RDBDatabaseMetaData();
                 metaData.setParser(new H2TableMetaParser(sqlExecutor));
                 break;
         }
-        RDBDatabase database = new SimpleDatabase(metaData, sqlExecutor);
+        SimpleDatabase database = new SimpleDatabase(metaData, sqlExecutor);
+        database.setAutoParse(true);
         SystemInitialize initialize = new SystemInitialize(sqlExecutor, database, version);
 
         initialize.addScriptContext("db", jdbcUserName);
@@ -139,12 +139,12 @@ public class SystemInitializeAutoConfiguration implements CommandLineRunner, Bea
 
 
     @Override
-    public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+    public Object postProcessBeforeInitialization(Object bean, String beanName) {
         return bean;
     }
 
     @Override
-    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+    public Object postProcessAfterInitialization(Object bean, String beanName)  {
         ScriptScope scope;
         if (bean instanceof Service) {
             addGlobalVariable(beanName, bean);

@@ -64,6 +64,15 @@ public class SystemInitialize {
         if (installed == null) {
             rdbTable.createInsert().value(targetVersion).exec();
         } else {
+            //合并已安装的依赖
+            //修复如果删掉了依赖，再重启会丢失依赖信息的问题
+            for (SystemVersion.Dependency dependency : installed.getDependencies()) {
+                SystemVersion.Dependency target = targetVersion.getDependency(dependency.getGroupId(), dependency.getArtifactId());
+                if (target == null) {
+                    targetVersion.getDependencies().add(dependency);
+                }
+            }
+
             rdbTable.createUpdate().set(targetVersion).where().sql("1=1").exec();
         }
     }

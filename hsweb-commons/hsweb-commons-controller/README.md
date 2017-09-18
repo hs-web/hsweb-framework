@@ -1,6 +1,17 @@
 # 通用Controller
 提供增删改查的restful接口
 
+ 以`RequestMapping("/user)`为例
+ 
+| 功能      | http方法&url    |  响应   |   说明 |
+| ------------- | -------------| ------------- | ----|
+|查询|GET /user|HTTP Status:200 {"status":200,"result":{"data":[],"total":0}} |可进行[动态查询](#动态查询)|
+|获取指定id的数据|GET /user/id|HTTP Status:200 {"status":200,"result":{"name":""} |可进行[动态查询](#动态查询)|
+|新增|POST /user|HTTP Status:201 {"status":201,"result":"{id}"} |contentType='application/json' |
+|更新|PUT /user/{id}|HTTP Status:200 {"status":200} |contentType='application/json'|
+|新增或者更新|PATCH /user|HTTP Status:200 {"status":200,"result":"{id}"} |contentType='application/json' |
+|删除|DELETE /user/{id}|HTTP Status:200 {"status":200} | |
+
 # 动态查询
 
 目前支持动态查询条件类 `QueryParamEntity`:

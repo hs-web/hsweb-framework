@@ -52,7 +52,7 @@ function install(context) {
 
     database.createOrAlter("s_organization")
         .addColumn().name("u_id").alias("id").comment("ID").jdbcType(java.sql.JDBCType.VARCHAR).length(32).primaryKey().commit()
-        .addColumn().name("name").alias("name").comment("名称").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
+        .addColumn().name("name").alias("name").comment("名称").jdbcType(java.sql.JDBCType.VARCHAR).length(256).commit()
         .addColumn().name("full_name").alias("fullName").comment("全称").jdbcType(java.sql.JDBCType.VARCHAR).length(256).commit()
         .addColumn().name("code").alias("code").comment("机构编码").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
         .addColumn().name("district_id").alias("districtId").comment("所在行政区域ID").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
