@@ -173,7 +173,7 @@ public class BpmTaskServiceImp extends FlowableAbstract implements BpmTaskServic
         if (execution.size() > 0) {
             List<Task> tasks = selectNowTask(task.getProcessInstanceId());
             // 自定义下一执行人
-            if (tasks.size() == 0 && !StringUtils.isNullOrEmpty(nextClaim)) claim(tasks.get(0).getId(), nextClaim);
+            if (tasks.size() == 1 && !StringUtils.isNullOrEmpty(nextClaim)) claim(tasks.get(0).getId(), nextClaim);
             else {
                 for (Task t : tasks) {
                     addCandidateUser(t.getId(), t.getTaskDefinitionKey(), userId);
@@ -258,9 +258,11 @@ public class BpmTaskServiceImp extends FlowableAbstract implements BpmTaskServic
         Task task = selectTaskByTaskId(taskId);
         TaskServiceImpl taskServiceImpl = (TaskServiceImpl) taskService;
         taskServiceImpl.getCommandExecutor().execute(new JumpTaskCmd(task.getExecutionId(), activity));
-//        task = selectTaskByTaskId(taskId);
-//        if (null != task && !StringUtils.isNullOrEmpty(next_claim))
-//            claim(task.getId(), next_claim);
+        if(!StringUtils.isNullOrEmpty(next_claim)){
+            task = selectTaskByTaskId(taskId);
+            if (null != task)
+                claim(task.getId(), next_claim);
+        }
     }
 
     @Override
@@ -325,14 +327,11 @@ public class BpmTaskServiceImp extends FlowableAbstract implements BpmTaskServic
         Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
         ProcessDefinitionEntity entity = (ProcessDefinitionEntity) ((RepositoryServiceImpl) repositoryService).getDeployedProcessDefinition(task.getProcessDefinitionId());
         List<ActivityImpl> activities = entity.getActivities();
-        ActivityImpl activity = null;
-        for (ActivityImpl activity1 : activities) {
-            if ("userTask".equals(activity1.getProperty("type")) &&
-                    activity1.getProperty("name").equals(task.getName())) {
-                activity = activity1;
-            }
-        }
-        return activity;
+        return activities
+                .stream()
+                .filter(activity -> "userTask".equals(activity.getProperty("type")) && activity.getProperty("name").equals(task.getName()))
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException("获取节点信息失败"));
     }
 
     @Override
