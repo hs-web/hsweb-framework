@@ -52,7 +52,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- *  使用easyorm 动态构建 sql
+ * 使用easyorm 动态构建 sql
+ *
  * @author zhouhao
  * @since 2.0
  */
@@ -149,10 +150,11 @@ public class EasyOrmSqlBuilder {
                     column.setAlias(resultMapping.getProperty());
                 column.setJavaType(resultMapping.getJavaType());
                 column.setProperty("resultMapping", resultMapping);
-                if (column.getJdbcType() == JDBCType.DATE || column.getJdbcType() == JDBCType.TIME) {
+                if (column.getJdbcType() == JDBCType.DATE) {
+                    column.setValueConverter(new DateTimeConverter("yyyy-MM-dd", column.getJavaType()));
+                } else if (column.getJdbcType() == JDBCType.TIMESTAMP) {
                     column.setValueConverter(new DateTimeConverter("yyyy-MM-dd HH:mm:ss", column.getJavaType()));
-                }
-                if (column.getJdbcType() == JDBCType.NUMERIC) {
+                } else if (column.getJdbcType() == JDBCType.NUMERIC) {
                     column.setValueConverter(new NumberValueConverter(column.getJavaType()));
                 }
                 rdbTableMetaData.addColumn(column);
@@ -227,7 +229,7 @@ public class EasyOrmSqlBuilder {
         }
         if (param.isPaging() && Pager.get() == null) {
             Pager.doPaging(param.getPageIndex(), param.getPageSize());
-        }else{
+        } else {
             Pager.reset();
         }
         RDBTableMetaData tableMetaData = createMeta(tableName, resultMapId);
