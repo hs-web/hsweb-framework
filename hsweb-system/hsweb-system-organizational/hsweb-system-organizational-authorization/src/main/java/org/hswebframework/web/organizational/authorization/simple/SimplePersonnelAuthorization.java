@@ -3,6 +3,7 @@ package org.hswebframework.web.organizational.authorization.simple;
 import org.hswebframework.web.organizational.authorization.Personnel;
 import org.hswebframework.web.organizational.authorization.PersonnelAuthorization;
 import org.hswebframework.web.organizational.authorization.TreeNode;
+import org.hswebframework.web.organizational.authorization.relation.Relations;
 
 import java.util.Collections;
 import java.util.Set;
@@ -14,10 +15,11 @@ import java.util.Set;
  */
 public class SimplePersonnelAuthorization implements PersonnelAuthorization {
     private Personnel             personnel;
-    private Set<TreeNode<String>> areaIds;
+    private Set<TreeNode<String>> districtIds;
     private Set<TreeNode<String>> orgIds;
     private Set<TreeNode<String>> positionIds;
     private Set<TreeNode<String>> departmentIds;
+    private Relations             relations;
 
     @Override
     public Personnel getPersonnel() {
@@ -29,13 +31,22 @@ public class SimplePersonnelAuthorization implements PersonnelAuthorization {
     }
 
     @Override
-    public Set<TreeNode<String>> getAreaIds() {
-        if (areaIds == null) areaIds = Collections.emptySet();
-        return areaIds;
+    public Set<TreeNode<String>> getDistrictIds() {
+        if (districtIds == null) districtIds = Collections.emptySet();
+        return districtIds;
     }
 
-    public void setAreaIds(Set<TreeNode<String>> areaIds) {
-        this.areaIds = areaIds;
+    public void setDistrictIds(Set<TreeNode<String>> districtIds) {
+        this.districtIds = districtIds;
+    }
+
+    @Override
+    public Relations getRelations() {
+        return relations;
+    }
+
+    public void setRelations(Relations relations) {
+        this.relations = relations;
     }
 
     @Override

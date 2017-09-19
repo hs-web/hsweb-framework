@@ -18,7 +18,7 @@
 
 package org.hswebframework.web.boost.validator;
 
-import org.hswebframework.web.boost.aop.context.MethodInterceptorParamContext;
+import org.hswebframework.web.boost.aop.context.MethodInterceptorContext;
 
 /**
  * 重复数据验证器,验证数据是否重复
@@ -26,7 +26,7 @@ import org.hswebframework.web.boost.aop.context.MethodInterceptorParamContext;
  * @author zhouhao
  */
 public interface DuplicateValidator {
-    Result doValidate(DuplicateValidatorConfig validator, MethodInterceptorParamContext context);
+    Result doValidate(DuplicateValidatorConfig validator, MethodInterceptorContext context);
 
     /**
      * 验证结果

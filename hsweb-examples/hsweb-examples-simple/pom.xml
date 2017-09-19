@@ -90,8 +90,18 @@
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-spring-boot-starter</artifactId>
             <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-tomcat</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-undertow</artifactId>
+        </dependency>
         <!--权限管理-->
         <dependency>
             <groupId>org.hswebframework.web</groupId>
@@ -104,6 +114,18 @@
             <!--<artifactId>hsweb-authorization-shiro</artifactId>-->
             <!--<version>${project.version}</version>-->
         <!--</dependency>-->
+        <!--使用基础权限控制-->
+        <dependency>
+            <groupId>org.hswebframework.web</groupId>
+            <artifactId>hsweb-authorization-basic</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.hswebframework.web</groupId>
+            <artifactId>hsweb-authorization-jwt</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <!--组织架构-->
         <dependency>
@@ -112,6 +134,17 @@
             <version>${project.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.hswebframework.web</groupId>
+            <artifactId>hsweb-system-file-starter</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.hswebframework.web</groupId>
+            <artifactId>hsweb-system-schedule-starter</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!--动态表单-->
         <dependency>
             <groupId>org.hswebframework.web</groupId>

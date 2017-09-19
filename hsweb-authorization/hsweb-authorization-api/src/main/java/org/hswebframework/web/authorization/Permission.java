@@ -84,6 +84,7 @@ public interface Permission extends Serializable {
     /**
      * @return 用户对此权限持有的数据权限信息, 用于数据级别的控制
      * @see DataAccessConfig
+     * @see org.hswebframework.web.authorization.access.DataAccessController
      */
     Set<DataAccessConfig> getDataAccesses();
 }

@@ -17,7 +17,7 @@
 package org.hswebframework.web.entity.organizational;
 
 import org.hswebframework.web.commons.entity.TreeSortSupportEntity;
-import org.hswebframework.web.entity.organizational.authorization.AreaAttachEntity;
+import org.hswebframework.web.entity.organizational.authorization.DistrictAttachEntity;
 import org.hswebframework.web.entity.organizational.authorization.OrgAttachEntity;
 
 import java.util.List;
@@ -27,7 +27,7 @@ import java.util.List;
  *
  * @author hsweb-generator-online
  */
-public interface OrganizationalEntity extends TreeSortSupportEntity<String>, AreaAttachEntity, OrgAttachEntity {
+public interface OrganizationalEntity extends TreeSortSupportEntity<String>, DistrictAttachEntity, OrgAttachEntity {
  /*-------------------------------------------
     |               属性名常量               |
     ===========================================*/
@@ -101,11 +101,13 @@ public interface OrganizationalEntity extends TreeSortSupportEntity<String>, Are
     /**
      * @return 可选角色
      */
+    @Deprecated
     java.util.List<String> getOptionalRoles();
 
     /**
      * 设置 可选角色
      */
+    @Deprecated
     void setOptionalRoles(java.util.List<String> optionalRoles);
 
     void setChildren(List<OrganizationalEntity> children);

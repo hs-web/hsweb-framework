@@ -59,6 +59,11 @@ public interface DynamicFormColumnEntity extends GenericEntity<String> {
     String scale      = "scale";
 
     /**
+     * 数据字典配置
+     */
+    String dictConfig = "dictConfig";
+
+    /**
      * 字典ID
      */
     String dictId = "dictId";
@@ -72,6 +77,11 @@ public interface DynamicFormColumnEntity extends GenericEntity<String> {
      * 其他配置
      */
     String properties = "properties";
+
+    /**
+     * 排序序号
+     */
+    String sortIndex = "sortIndex";
 
     /**
      * @return 表单ID
@@ -188,11 +198,23 @@ public interface DynamicFormColumnEntity extends GenericEntity<String> {
      */
     void setScale(Integer scale);
 
+    @Deprecated
     String getDictId();
 
+    @Deprecated
     void setDictId(String dictId);
 
+    @Deprecated
     String getDictParserId();
 
+    @Deprecated
     void setDictParserId(String dictParserId);
+
+    void setDictConfig(String dictConfig);
+
+    String getDictConfig();
+
+    Long getSortIndex();
+
+    void setSortIndex(Long sortIndex);
 }

@@ -23,7 +23,7 @@ import org.hswebframework.web.authorization.AuthenticationManager;
 import org.hswebframework.web.authorization.oauth2.client.OAuth2RequestService;
 import org.hswebframework.web.authorization.oauth2.client.request.OAuth2Session;
 import org.hswebframework.web.authorization.oauth2.client.response.OAuth2Response;
-import org.hswebframework.web.authorization.shiro.oauth2sso.OAuth2SSOAuthorizingListener;
+import org.hswebframework.web.authorization.token.UserTokenManager;
 import org.hswebframework.web.commons.entity.DataStatus;
 import org.hswebframework.web.commons.entity.factory.EntityFactory;
 import org.hswebframework.web.entity.oauth2.client.OAuth2ServerConfigEntity;
@@ -89,6 +89,8 @@ public class OAuth2ClientApplication implements CommandLineRunner {
     @Autowired
     OAuth2RequestService      oAuth2RequestService;
 
+    @Autowired
+    UserTokenManager userTokenManager;
     @Override
     public void run(String... strings) throws Exception {
         OAuth2ServerConfigEntity entity = entityFactory.newInstance(OAuth2ServerConfigEntity.class);
@@ -108,7 +110,7 @@ public class OAuth2ClientApplication implements CommandLineRunner {
         //add
         serverConfigService.insert(entity);
 
-        OAuth2SSOAuthorizingListener listener = new OAuth2SSOAuthorizingListener(oAuth2RequestService, entity.getId());
+        OAuth2SSOAuthorizingListener listener = new OAuth2SSOAuthorizingListener(oAuth2RequestService, entity.getId(),userTokenManager);
 
         oAuth2RequestService.registerListener(entity.getId(), listener);
     }

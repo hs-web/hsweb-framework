@@ -39,6 +39,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -53,6 +55,7 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.sql.DataSource;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
@@ -78,8 +81,11 @@ public class HswebAutoConfiguration {
     @Primary
     @ConfigurationProperties(prefix = "fastjson")
     public FastJsonHttpMessageConverter fastJsonHttpMessageConverter(@Autowired(required = false) EntityFactory entityFactory) {
-        return new FastJsonHttpMessageConverter();
+        FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();
+        converter.setEntityFactory(entityFactory);
+        return converter;
     }
+
     @Bean
     @Primary
     @ConfigurationProperties(prefix = "fastjson")
@@ -101,6 +107,11 @@ public class HswebAutoConfiguration {
                 }
                 if (type instanceof Class) {
                     Class classType = ((Class) type);
+                    if (classType.isEnum()) {
+                        return super.getDeserializer(type);
+                    }
+                    checkAutoType(type.getTypeName(), ((Class) type));
+
                     if (Modifier.isAbstract(classType.getModifiers()) || Modifier.isInterface(classType.getModifiers())) {
                         if (entityFactory != null && (Entity.class.isAssignableFrom(classType) || Model.class.isAssignableFrom(classType))) {
                             return new JavaBeanDeserializer(this, entityFactory.getInstanceType(classType), type);
@@ -112,9 +123,10 @@ public class HswebAutoConfiguration {
                 return super.getDeserializer(type);
             }
         };
-        ParserConfig.getGlobalInstance().addAccept("org.hswebframework.web.entity.");
-        ParserConfig.getGlobalInstance().addAccept("org.hsweb.");
-        ParserConfig.getGlobalInstance().addDeny("org.hsweb.ezorm.core.param.SqlTerm");
+
+        //fastjson.parser.autoTypeAccept
+        ParserConfig.global.addAccept("org.hswebframework.web.entity.");
+        ParserConfig.global.addDeny("org.hsweb.ezorm.core.param.SqlTerm");
         return converter;
     }
 
@@ -168,4 +180,15 @@ public class HswebAutoConfiguration {
     public EntityFactoryInitConfiguration entityFactoryInitConfiguration() {
         return new EntityFactoryInitConfiguration();
     }
+
+    @ConditionalOnMissingBean(DataSource.class)
+    @ConditionalOnProperty(name = "spring.datasource.type")
+    static class DataSourceAutoConfiguration {
+        @Bean
+        @ConfigurationProperties("spring.datasource")
+        public DataSource dataSource(DataSourceProperties properties) {
+            return properties.initializeDataSourceBuilder().build();
+        }
+    }
+
 }

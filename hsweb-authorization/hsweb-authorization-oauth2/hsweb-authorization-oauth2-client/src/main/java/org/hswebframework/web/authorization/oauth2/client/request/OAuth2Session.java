@@ -18,7 +18,6 @@
 
 package org.hswebframework.web.authorization.oauth2.client.request;
 
-import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.oauth2.client.AccessTokenInfo;
 
 import java.io.Serializable;

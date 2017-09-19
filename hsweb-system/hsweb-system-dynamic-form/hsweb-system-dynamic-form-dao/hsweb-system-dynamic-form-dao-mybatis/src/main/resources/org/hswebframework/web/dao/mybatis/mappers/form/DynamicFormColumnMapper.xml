@@ -3,7 +3,7 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.hswebframework.web.dao.form.DynamicFormColumnDao">
-    <resultMap id="DynamicFormColumnResultMap" type="org.hswebframework.web.entity.form.SimpleDynamicFormColumnEntity">
+    <resultMap id="DynamicFormColumnResultMap" type="org.hswebframework.web.entity.form.DynamicFormColumnEntity">
         <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
         <result property="formId" column="form_id" javaType="String" jdbcType="VARCHAR"/>
         <result property="name" column="name" javaType="String" jdbcType="VARCHAR"/>
@@ -16,15 +16,15 @@
         <result property="length" column="length" javaType="Integer" jdbcType="DECIMAL"/>
         <result property="precision" column="precision" javaType="Integer" jdbcType="DECIMAL"/>
         <result property="scale" column="scale" javaType="Integer" jdbcType="DECIMAL"/>
-        <result property="dictId" column="dict_id" javaType="String" jdbcType="VARCHAR"/>
-        <result property="dictParserId" column="dict_parser_id" javaType="String" jdbcType="VARCHAR"/>
+        <result property="dictConfig" column="dict_config" javaType="String" jdbcType="CLOB"/>
+        <result property="sortIndex" column="sort_index" javaType="Long" jdbcType="DECIMAL"/>
         <result property="properties" column="properties" javaType="java.util.Map" jdbcType="CLOB"/>
     </resultMap>
 
     <!--用于动态生成sql所需的配置-->
     <sql id="config">
         <bind name="resultMapId" value="'DynamicFormColumnResultMap'"/>
-        <bind name="tableName" value="'S_DYN_FORM_COLUMN'"/>
+        <bind name="tableName" value="'s_dyn_form_column'"/>
     </sql>
 
     <insert id="insert" parameterType="org.hswebframework.web.entity.form.DynamicFormColumnEntity">

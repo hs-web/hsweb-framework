@@ -1,6 +1,6 @@
 package org.hswebframework.web.authorization.access;
 
-import org.hswebframework.web.boost.aop.context.MethodInterceptorParamContext;
+import org.hswebframework.web.authorization.define.AuthorizingContext;
 
 /**
  * 数据级别权限控制处理器接口,负责处理支持的权限控制配置
@@ -24,5 +24,5 @@ public interface DataAccessHandler {
      * @param context 参数上下文
      * @return 处理结果
      */
-    boolean handle(DataAccessConfig access, MethodInterceptorParamContext context);
+    boolean handle(DataAccessConfig access, AuthorizingContext context);
 }

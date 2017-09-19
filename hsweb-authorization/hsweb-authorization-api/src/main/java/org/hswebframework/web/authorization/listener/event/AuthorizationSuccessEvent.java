@@ -20,6 +20,8 @@ package org.hswebframework.web.authorization.listener.event;
 
 import org.hswebframework.web.authorization.Authentication;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -33,7 +35,9 @@ import java.util.function.Function;
 public class AuthorizationSuccessEvent implements AuthorizationEvent {
     private Authentication authentication;
 
-    private Function<String,Object> parameterGetter;
+    private Function<String, Object> parameterGetter;
+
+    private Map<String, Object> result = new HashMap<>();
 
     public AuthorizationSuccessEvent(Authentication authentication, Function<String, Object> parameterGetter) {
         this.authentication = authentication;
@@ -45,8 +49,15 @@ public class AuthorizationSuccessEvent implements AuthorizationEvent {
     }
 
     @SuppressWarnings("unchecked")
-    public  <T> Optional<T> getParameter(String name) {
+    public <T> Optional<T> getParameter(String name) {
         return Optional.ofNullable((T) parameterGetter.apply(name));
     }
 
+    public Map<String, Object> getResult() {
+        return result;
+    }
+
+    public void setResult(Map<String, Object> result) {
+        this.result = result;
+    }
 }

@@ -16,22 +16,16 @@
  */
 package org.hswebframework.web.service.organizational.simple;
 
-import org.hswebframework.web.commons.entity.GenericEntity;
+import org.hswebframework.web.commons.entity.DataStatus;
 import org.hswebframework.web.dao.organizational.OrganizationalDao;
 import org.hswebframework.web.entity.organizational.OrganizationalEntity;
 import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.service.AbstractTreeSortService;
-import org.hswebframework.web.service.GenericEntityService;
 import org.hswebframework.web.service.organizational.OrganizationalService;
-import org.hswebframework.utils.ListUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
 
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
 /**
  * 默认的服务实现
@@ -55,18 +49,26 @@ public class SimpleOrganizationalService extends AbstractTreeSortService<Organiz
     }
 
     @Override
-    public List<String> getAllCanUseRoleIds() {
-        // TODO: 17-3-1
-        return null;
+    public String insert(OrganizationalEntity entity) {
+        entity.setStatus(DataStatus.STATUS_ENABLED);
+        return super.insert(entity);
     }
 
     @Override
-    public List<String> getCanUseRoleIds(List<String> orgIds) {
-        if (orgIds == null || orgIds.isEmpty()) return new ArrayList<>();
-        return createQuery().where().in(GenericEntity.id, orgIds).listNoPaging()
-                .stream().map(OrganizationalEntity::getOptionalRoles) //得到机构可选角色id集合
-                .filter(Objects::nonNull)
-                .flatMap(List::stream)
-                .collect(Collectors.toList());
+    public void disable(String id) {
+        Objects.requireNonNull(id);
+        createUpdate()
+                .set(OrganizationalEntity.status, DataStatus.STATUS_DISABLED)
+                .where(OrganizationalEntity.id, id)
+                .exec();
+    }
+
+    @Override
+    public void enable(String id) {
+        Objects.requireNonNull(id);
+        createUpdate()
+                .set(OrganizationalEntity.status, DataStatus.STATUS_ENABLED)
+                .where(OrganizationalEntity.id, id)
+                .exec();
     }
 }

@@ -18,6 +18,7 @@
 
 package org.hswebframework.web.dao.mybatis;
 
+import org.hswebframework.web.datasource.DataSourceHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -44,9 +45,9 @@ public class MybatisProperties extends org.mybatis.spring.boot.autoconfigure.Myb
     private static final String   defaultMapperLocation  = "classpath*:org/hswebframework/web/dao/mybatis/mappers/**/*.xml";
     /**
      * 是否启用动态数据源
-     * 启用后调用{@link org.hswebframework.web.dao.datasource.DynamicDataSource#use(String)},mybatis也会进行数据源切换
+     * 启用后调用{@link DataSourceHolder#switcher()},mybatis也会进行数据源切换
      *
-     * @see org.hswebframework.web.dao.datasource.DynamicDataSource
+     * @see DataSourceHolder#switcher()
      */
     private              boolean  dynamicDatasource      = false;
     /**

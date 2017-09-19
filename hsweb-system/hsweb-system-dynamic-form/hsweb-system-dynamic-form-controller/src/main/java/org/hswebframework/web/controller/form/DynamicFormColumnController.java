@@ -2,6 +2,7 @@ package org.hswebframework.web.controller.form;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.controller.message.ResponseMessage;
@@ -11,6 +12,7 @@ import org.hswebframework.web.service.form.DynamicFormService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -22,7 +24,7 @@ import java.util.List;
 @RequestMapping("${hsweb.web.mappings.dynamic/form/column:dynamic/form/column}")
 @Authorize(permission = "dynamic-form")
 @AccessLogger("动态表单")
-@Api(tags = "dynamic-form", description = "动态表单")
+@Api(tags = "dynamic-form", value = "动态表单")
 public class DynamicFormColumnController {
 
     private DynamicFormService dynamicFormService;
@@ -52,16 +54,9 @@ public class DynamicFormColumnController {
     @Authorize(action = Permission.ACTION_DELETE)
     @AccessLogger("删除列")
     @ApiOperation("删除列")
-    public ResponseMessage<DynamicFormColumnEntity> delete(String id) {
-        return ResponseMessage.ok(dynamicFormService.deleteColumn(id));
-    }
-
-    @DeleteMapping("/batch")
-    @Authorize(action = Permission.ACTION_DELETE)
-    @AccessLogger("删除多列")
-    @ApiOperation("删除多列")
-    public ResponseMessage<List<DynamicFormColumnEntity>> delete(List<String> id) {
-        return ResponseMessage.ok(dynamicFormService.deleteColumn(id));
+    public ResponseMessage<List<DynamicFormColumnEntity>> delete(@ApiParam(value = "要删除的列id,多个列以,分割", example = "1,2,3")
+                                                                 @RequestParam String ids) {
+        return ResponseMessage.ok(dynamicFormService.deleteColumn(Arrays.asList(ids.split(","))));
     }
 
     @GetMapping("/{formId}")

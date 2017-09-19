@@ -6,14 +6,11 @@ import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.access.DataAccessConfig;
 import org.hswebframework.web.authorization.access.DataAccessHandler;
 import org.hswebframework.web.authorization.access.ScopeDataAccessConfig;
-import org.hswebframework.web.authorization.annotation.RequiresDataAccess;
-import org.hswebframework.web.boost.aop.context.MethodInterceptorHolder;
-import org.hswebframework.web.boost.aop.context.MethodInterceptorParamContext;
+import org.hswebframework.web.authorization.define.AuthorizingContext;
+import org.hswebframework.web.authorization.exception.AccessDenyException;
 import org.hswebframework.web.commons.entity.Entity;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.controller.QueryController;
-import org.hswebframework.web.entity.organizational.OrganizationalEntity;
-import org.hswebframework.web.entity.organizational.authorization.OrgAttachEntity;
 import org.hswebframework.web.organizational.authorization.PersonnelAuthorization;
 import org.hswebframework.web.organizational.authorization.access.DataAccessType;
 import org.hswebframework.web.service.QueryService;
@@ -26,7 +23,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * TODO 完成注释
  *
  * @author zhouhao
  */
@@ -43,7 +39,7 @@ public abstract class AbstractScopeDataAccessHandler<E> implements DataAccessHan
 
     protected abstract void applyScopeProperty(E entity, String value);
 
-    protected abstract Term createQueryTerm(Set<String> scope);
+    protected abstract Term createQueryTerm(Set<String> scope, AuthorizingContext context);
 
     protected abstract Set<String> getTryOperationScope(String scopeType, PersonnelAuthorization authorization);
 
@@ -53,8 +49,11 @@ public abstract class AbstractScopeDataAccessHandler<E> implements DataAccessHan
     }
 
     @Override
-    public boolean handle(DataAccessConfig access, MethodInterceptorParamContext context) {
+    public boolean handle(DataAccessConfig access, AuthorizingContext context) {
         ScopeDataAccessConfig accessConfig = ((ScopeDataAccessConfig) access);
+        if (PersonnelAuthorization.current().isPresent()) {
+            return false;
+        }
         switch (accessConfig.getAction()) {
             case Permission.ACTION_QUERY:
                 return handleQuery(accessConfig, context);
@@ -64,29 +63,34 @@ public abstract class AbstractScopeDataAccessHandler<E> implements DataAccessHan
                 return handleRW(accessConfig, context);
             case Permission.ACTION_ADD:
                 return handleAdd(accessConfig, context);
+            default:
+                return false;
         }
-        return false;
     }
 
     protected PersonnelAuthorization getPersonnelAuthorization() {
         return PersonnelAuthorization.current()
-                .orElseThrow(UnsupportedOperationException::new); // TODO: 17-5-23 其他异常?
+                .orElseThrow(AccessDenyException::new);
     }
 
-    protected boolean handleAdd(ScopeDataAccessConfig access, MethodInterceptorParamContext context) {
+    protected boolean handleAdd(ScopeDataAccessConfig access, AuthorizingContext context) {
         PersonnelAuthorization authorization = getPersonnelAuthorization();
         Set<String> scopes = authorization.getRootOrgId();
         String scope = null;
-        if (scopes.size() == 0) return true;
-        else if (scopes.size() == 1) scope = scopes.iterator().next();
-        else logger.warn("existing many scope :{} , try use config.", scopes);
-        scopes = access.getScope().stream().map(String::valueOf).collect(Collectors.toSet());
+        if (scopes.isEmpty()) {
+            return true;
+        } else if (scopes.size() == 1) {
+            scope = scopes.iterator().next();
+        } else {
+            logger.warn("existing many scope :{} , try use config.", scopes);
+        }
+        scopes = getTryOperationScope(access).stream().map(String::valueOf).collect(Collectors.toSet());
         if (scope == null && scopes.size() == 1) {
             scope = scopes.iterator().next();
         }
         if (scope != null) {
             String finalScopeId = scope;
-            context.getParams().values().stream()
+            context.getParamContext().getParams().values().stream()
                     .filter(getEntityClass()::isInstance)
                     .map(getEntityClass()::cast)
                     .forEach(entity -> applyScopeProperty(entity, finalScopeId));
@@ -96,11 +100,16 @@ public abstract class AbstractScopeDataAccessHandler<E> implements DataAccessHan
         return defaultSuccessOnError;
     }
 
-    protected boolean handleRW(ScopeDataAccessConfig access, MethodInterceptorParamContext context) {
+    protected boolean handleRW(ScopeDataAccessConfig access, AuthorizingContext context) {
         //获取注解
-        RequiresDataAccess dataAccess = context.getAnnotation(RequiresDataAccess.class);
-        Object id = context.<String>getParameter(dataAccess.idParamName()).orElse(null);
-        Object controller = context.getTarget();
+        Object id = context.getParamContext()
+                .<String>getParameter(
+                        context.getDefinition()
+                                .getDataAccessDefinition()
+                                .getIdParameterName())
+                .orElse(null);
+
+        Object controller = context.getParamContext().getTarget();
         Set<String> ids = getTryOperationScope(access);
         String errorMsg;
         //通过QueryController获取QueryService
@@ -109,14 +118,10 @@ public abstract class AbstractScopeDataAccessHandler<E> implements DataAccessHan
             //判断是否满足条件(泛型为 getEntityClass)
             Class entityType = ClassUtils.getGenericType(controller.getClass(), 0);
             if (ClassUtils.instanceOf(entityType, getEntityClass())) {
-                QueryService<E, Object> queryService =
-                        ((QueryController<E, Object, Entity>) controller).getService();
+                @SuppressWarnings("unchecked")
+                QueryService<E, Object> queryService = ((QueryController<E, Object, Entity>) controller).getService();
                 E oldData = queryService.selectByPk(id);
-                if (oldData != null && ids.contains(getOperationScope(oldData))) {
-                    return false;
-                } else {
-                    return true;
-                }
+                return !(oldData != null && !ids.contains(getOperationScope(oldData)));
             } else {
                 errorMsg = "GenericType[0] not instance of " + getEntityClass();
             }
@@ -133,8 +138,8 @@ public abstract class AbstractScopeDataAccessHandler<E> implements DataAccessHan
         return getTryOperationScope(access.getScopeType(), getPersonnelAuthorization());
     }
 
-    protected boolean handleQuery(ScopeDataAccessConfig access, MethodInterceptorParamContext context) {
-        Entity entity = context.getParams()
+    protected boolean handleQuery(ScopeDataAccessConfig access, AuthorizingContext context) {
+        Entity entity = context.getParamContext().getParams()
                 .values().stream()
                 .filter(Entity.class::isInstance)
                 .map(Entity.class::cast)
@@ -160,7 +165,7 @@ public abstract class AbstractScopeDataAccessHandler<E> implements DataAccessHan
             queryParamEntity.setTerms(new ArrayList<>());
             //添加一个查询条件
             queryParamEntity
-                    .addTerm(createQueryTerm(scope))
+                    .addTerm(createQueryTerm(scope, context))
                     //客户端提交的参数 作为嵌套参数
                     .nest().setTerms(oldParam);
         } else {
@@ -169,9 +174,8 @@ public abstract class AbstractScopeDataAccessHandler<E> implements DataAccessHan
         return true;
     }
 
-    protected boolean genericTypeInstanceOf(Class type) {
-        MethodInterceptorHolder holder = MethodInterceptorHolder.current();
-        Class entity = ClassUtils.getGenericType(holder.getTarget().getClass());
+    protected boolean genericTypeInstanceOf(Class type, AuthorizingContext context) {
+        Class entity = ClassUtils.getGenericType(context.getParamContext().getTarget().getClass());
         return null != entity && ClassUtils.instanceOf(entity, type);
     }
 }

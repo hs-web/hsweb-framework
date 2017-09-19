@@ -27,8 +27,6 @@ import java.util.stream.Collectors;
 import static org.hswebframework.web.starter.SystemVersion.Property.*;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public class SystemInitialize {
@@ -54,6 +52,7 @@ public class SystemInitialize {
         this.targetVersion = targetVersion;
         scriptContext.put("sqlExecutor", sqlExecutor);
         scriptContext.put("database", database);
+        scriptContext.put("logger", logger);
     }
 
     public void addScriptContext(String var, Object val) {
@@ -65,6 +64,15 @@ public class SystemInitialize {
         if (installed == null) {
             rdbTable.createInsert().value(targetVersion).exec();
         } else {
+            //合并已安装的依赖
+            //修复如果删掉了依赖，再重启会丢失依赖信息的问题
+            for (SystemVersion.Dependency dependency : installed.getDependencies()) {
+                SystemVersion.Dependency target = targetVersion.getDependency(dependency.getGroupId(), dependency.getArtifactId());
+                if (target == null) {
+                    targetVersion.getDependencies().add(dependency);
+                }
+            }
+
             rdbTable.createUpdate().set(targetVersion).where().sql("1=1").exec();
         }
     }
@@ -135,11 +143,11 @@ public class SystemInitialize {
     protected void initInstallInfo() throws SQLException {
         boolean tableInstall = sqlExecutor.tableExists("s_system");
         database.createOrAlter("s_system")
-                .addColumn().name("name").varchar(128).notNull().comment("系统名称").commit()
-                .addColumn().name("major_version").alias(majorVersion).number(32).javaType(Integer.class).notNull().comment("主版本号").commit()
-                .addColumn().name("minor_version").alias(minorVersion).number(32).javaType(Integer.class).notNull().comment("次版本号").commit()
-                .addColumn().name("revision_version").alias(revisionVersion).number(32).javaType(Integer.class).notNull().comment("修订版").commit()
-                .addColumn().name("snapshot").number(1).javaType(Boolean.class).notNull().comment("是否快照版").commit()
+                .addColumn().name("name").varchar(128).comment("系统名称").commit()
+                .addColumn().name("major_version").alias(majorVersion).number(32).javaType(Integer.class).comment("主版本号").commit()
+                .addColumn().name("minor_version").alias(minorVersion).number(32).javaType(Integer.class).comment("次版本号").commit()
+                .addColumn().name("revision_version").alias(revisionVersion).number(32).javaType(Integer.class).comment("修订版").commit()
+                .addColumn().name("snapshot").number(1).javaType(Boolean.class).comment("是否快照版").commit()
                 .addColumn().name("comment").varchar(2000).comment("系统说明").commit()
                 .addColumn().name("website").varchar(2000).comment("系统网址").commit()
                 .addColumn().name("framework_version").notNull().alias(frameworkVersion).clob()

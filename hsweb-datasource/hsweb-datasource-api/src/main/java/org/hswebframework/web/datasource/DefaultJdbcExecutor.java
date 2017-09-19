@@ -17,13 +17,27 @@ import java.util.Objects;
 @Transactional(rollbackFor = Throwable.class)
 public class DefaultJdbcExecutor extends AbstractJdbcSqlExecutor {
 
+    protected String getDatasourceId() {
+        String id = DataSourceHolder.switcher().currentDataSourceId();
+        return id == null ? "default" : id;
+    }
+
     @Override
     public Connection getConnection() {
-        return DataSourceUtils.getConnection(DataSourceHolder.currentDataSource().getNative());
+        DataSource dataSource = DataSourceHolder.currentDataSource().getNative();
+        Connection connection = DataSourceUtils.getConnection(dataSource);
+        boolean isConnectionTransactional = DataSourceUtils.isConnectionTransactional(connection, dataSource);
+        if (logger.isDebugEnabled()) {
+            logger.debug("DataSource ({}) JDBC Connection [{}] will {}be managed by Spring", getDatasourceId(), connection, (isConnectionTransactional ? "" : "not "));
+        }
+        return connection;
     }
 
     @Override
     public void releaseConnection(Connection connection) throws SQLException {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Releasing DataSource ({}) JDBC Connection [{}]", getDatasourceId(), connection);
+        }
         DataSourceUtils.releaseConnection(connection, DataSourceHolder.currentDataSource().getNative());
     }
 

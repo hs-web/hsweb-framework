@@ -1,6 +1,5 @@
 package org.hswebframework.web.service.form;
 
-import org.hsweb.ezorm.core.dsl.Query;
 import org.hswebframework.web.commons.entity.PagerResult;
 import org.hswebframework.web.commons.entity.param.DeleteParamEntity;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;

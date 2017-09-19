@@ -13,6 +13,10 @@
     <packaging>pom</packaging>
     <modules>
         <module>hsweb-system-file-service</module>
+        <module>hsweb-system-file-controller</module>
+        <module>hsweb-system-file-dao</module>
+        <module>hsweb-system-file-entity</module>
+        <module>hsweb-system-file-starter</module>
     </modules>
 
 

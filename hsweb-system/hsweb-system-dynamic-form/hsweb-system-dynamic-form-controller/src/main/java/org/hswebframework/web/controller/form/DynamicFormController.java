@@ -2,7 +2,9 @@ package org.hswebframework.web.controller.form;
 
 import io.swagger.annotations.Api;
 import org.hswebframework.web.authorization.Authentication;
+import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.annotation.Authorize;
+import org.hswebframework.web.authorization.annotation.Logical;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.controller.SimpleGenericEntityController;
 import org.hswebframework.web.controller.message.ResponseMessage;
@@ -13,6 +15,8 @@ import org.hswebframework.web.service.form.DynamicFormService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Objects;
+
 /**
  * 动态表单
  *
@@ -22,7 +26,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("${hsweb.web.mappings.dynamic/form:dynamic/form}")
 @Authorize(permission = "dynamic-form")
 @AccessLogger("动态表单")
-@Api(tags = "dynamic-form", description = "动态表单")
+@Api(tags = "dynamic-form", value = "动态表单")
 public class DynamicFormController implements SimpleGenericEntityController<DynamicFormEntity, String, QueryParamEntity> {
 
     private DynamicFormService dynamicFormService;
@@ -35,6 +39,23 @@ public class DynamicFormController implements SimpleGenericEntityController<Dyna
     @Override
     public DynamicFormService getService() {
         return dynamicFormService;
+    }
+
+
+    @PatchMapping("/bind")
+    @AccessLogger("同时保存表单和字段")
+    @Authorize(action = {Permission.ACTION_ADD, Permission.ACTION_UPDATE}, logical = Logical.OR)
+    public ResponseMessage<String> saveOrUpdateFormAndColumn(@RequestBody DynamicFormColumnBindEntity bindEntity) {
+        Authentication authentication = Authentication.current().orElse(null);
+        Objects.requireNonNull(bindEntity.getForm(), "form can not be null");
+        Objects.requireNonNull(bindEntity.getColumns(), "columns can not be null");
+
+        if (null != authentication) {
+            bindEntity.getForm().setCreatorId(authentication.getUser().getId());
+        }
+        bindEntity.getForm().setCreateTime(System.currentTimeMillis());
+
+        return ResponseMessage.ok(dynamicFormService.saveOrUpdate(bindEntity));
     }
 
     @Override

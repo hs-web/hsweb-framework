@@ -18,10 +18,7 @@
 package org.hswebframework.web.authorization;
 
 import java.io.Serializable;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * 用户授权信息,当前登录用户的权限信息,包括用户的基本信息,角色,权限集合等常用信息<br>
@@ -96,6 +93,27 @@ public interface Authentication extends Serializable {
         return getPermissions().parallelStream()
                 .filter(permission -> permission.getId().equals(id))
                 .findAny();
+    }
+
+    /**
+     * 判断是否持有某权限以及对权限的可操作事件
+     *
+     * @param permissionId 权限id {@link Permission#getId()}
+     * @param actions      可操作事件 {@link Permission#getActions()} 如果为空,则不判断action,只判断permissionId
+     * @return 是否持有权限
+     */
+    default boolean hasPermission(String permissionId, String... actions) {
+        return !getPermission(permissionId)
+                .filter(permission -> actions.length == 0 || permission.getActions().containsAll(Arrays.asList(actions)))
+                .isPresent();
+    }
+
+    /**
+     * @param roleId 角色id {@link Role#getId()}
+     * @return 是否拥有某个角色
+     */
+    default boolean hasRole(String roleId) {
+        return !getRole(roleId).isPresent();
     }
 
     /**

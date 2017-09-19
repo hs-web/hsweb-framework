@@ -35,6 +35,11 @@ public class SimpleDynamicFormColumnEntity extends SimpleGenericEntity<String> i
     //字典解析器ID
     private String  dictParserId;
 
+    //数据字典配置
+    private String dictConfig;
+
+    private Long sortIndex;
+
     /**
      * @return 表单ID
      */
@@ -203,5 +208,26 @@ public class SimpleDynamicFormColumnEntity extends SimpleGenericEntity<String> i
 
     public void setDictParserId(String dictParserId) {
         this.dictParserId = dictParserId;
+    }
+
+    @Override
+    public String getDictConfig() {
+        return dictConfig;
+    }
+
+    @Override
+    public void setDictConfig(String dictConfig) {
+        this.dictConfig = dictConfig;
+    }
+
+
+    @Override
+    public Long getSortIndex() {
+        return sortIndex;
+    }
+
+    @Override
+    public void setSortIndex(Long sortIndex) {
+        this.sortIndex = sortIndex;
     }
 }

@@ -24,5 +24,5 @@ import org.hswebframework.web.entity.dictionary.DictionaryItemEntity;
 *  数据字典 DAO接口
 *  @author hsweb-generator-online
  */
-public interface DictionaryDao extends CrudDao<DictionaryEntity<DictionaryItemEntity>,String> {
+public interface DictionaryDao extends CrudDao<DictionaryEntity,String> {
 }

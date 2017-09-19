@@ -317,13 +317,18 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
                 detail.setDataAccesses(detail
                         .getDataAccesses()
                         .stream()
-                        .filter(access -> entity.getSupportDataAccessTypes().contains(access.getType()))
+                        .filter(access ->
+                                //以设置支持的权限开头就认为拥有该权限
+                                //比如支持的权限为CUSTOM_SCOPE_ORG_SCOPE
+                                //设置的权限为CUSTOM_SCOPE 则通过检验
+                                entity.getSupportDataAccessTypes().stream()
+                                        .anyMatch(type -> type.startsWith(access.getType())))
                         .collect(Collectors.toList()));
             }
             return true;
         }).collect(Collectors.toList());
 
-        //权限
+        //全部权限设置
         Map<String, List<AuthorizationSettingDetailEntity>> settings = detailList
                 .stream()
                 .collect(Collectors.groupingBy(AuthorizationSettingDetailEntity::getPermissionId));

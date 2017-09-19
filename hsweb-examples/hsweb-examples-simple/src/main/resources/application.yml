@@ -10,8 +10,20 @@ spring:
        driver-class-name : org.h2.Driver
     cache:
        type: simple
+    http:
+      multipart:
+        enabled: true
+        max-file-size: 100Mb
 hsweb:
+    cors:
+      enable: on
+      allowed-origins: "*"
+      allowed-methods: "*"
+      allowed-headers: "*"
     authorize:
+      jwt:
+        id: test
+        secret: dGVzdA==
 #      filters:
 #           "/swagger-ui.html": "authc"
     app:

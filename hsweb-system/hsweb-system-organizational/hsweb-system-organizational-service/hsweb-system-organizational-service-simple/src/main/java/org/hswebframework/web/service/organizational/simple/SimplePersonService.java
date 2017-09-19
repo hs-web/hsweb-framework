@@ -24,13 +24,17 @@ import org.hswebframework.web.entity.authorization.UserEntity;
 import org.hswebframework.web.entity.authorization.bind.BindRoleUserEntity;
 import org.hswebframework.web.entity.organizational.*;
 import org.hswebframework.web.id.IDGenerator;
+import org.hswebframework.web.organizational.authorization.Personnel;
 import org.hswebframework.web.organizational.authorization.PersonnelAuthorization;
 import org.hswebframework.web.organizational.authorization.PersonnelAuthorizationManager;
 import org.hswebframework.web.organizational.authorization.TreeNode;
+import org.hswebframework.web.organizational.authorization.relation.Relation;
+import org.hswebframework.web.organizational.authorization.relation.SimpleRelation;
+import org.hswebframework.web.organizational.authorization.relation.SimpleRelations;
 import org.hswebframework.web.organizational.authorization.simple.SimplePersonnel;
 import org.hswebframework.web.organizational.authorization.simple.SimplePersonnelAuthorization;
 import org.hswebframework.web.service.DefaultDSLQueryService;
-import org.hswebframework.web.service.EnableCacheGernericEntityService;
+import org.hswebframework.web.service.GenericEntityService;
 import org.hswebframework.web.service.authorization.AuthorizationSettingTypeSupplier;
 import org.hswebframework.web.service.authorization.UserService;
 import org.hswebframework.web.service.organizational.PersonService;
@@ -38,7 +42,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -56,7 +62,7 @@ import static org.springframework.util.StringUtils.isEmpty;
  */
 @Service("personService")
 @CacheConfig(cacheNames = "person")
-public class SimplePersonService extends EnableCacheGernericEntityService<PersonEntity, String>
+public class SimplePersonService extends GenericEntityService<PersonEntity, String>
         implements PersonService, PersonnelAuthorizationManager, AuthorizationSettingTypeSupplier {
 
     private static String SETTING_TYPE_PERSON   = "person";
@@ -77,8 +83,14 @@ public class SimplePersonService extends EnableCacheGernericEntityService<Person
     @Autowired
     private OrganizationalDao organizationalDao;
 
+    @Autowired
+    private DistrictDao districtDao;
+
     @Autowired(required = false)
     private UserService userService;
+
+    @Autowired
+    private RelationInfoDao relationInfoDao;
 
     @Override
     protected IDGenerator<String> getIDGenerator() {
@@ -91,7 +103,11 @@ public class SimplePersonService extends EnableCacheGernericEntityService<Person
     }
 
     @Override
-    @CacheEvict(allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(key = "'id:'+#result"),
+            @CacheEvict(key = "'auth:persion-id'+#result"),
+            @CacheEvict(key = "'auth-bind'+#result")
+    })
     public String insert(PersonAuthBindEntity authBindEntity) {
         authBindEntity.setStatus(DataStatus.STATUS_ENABLED);
         // TODO: 17-6-1 应该使用锁,防止并发同步用户,导致多个人员使用相同的用户
@@ -106,7 +122,11 @@ public class SimplePersonService extends EnableCacheGernericEntityService<Person
     }
 
     @Override
-    @CacheEvict(allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(key = "'id:'+#authBindEntity.id"),
+            @CacheEvict(key = "'auth:persion-id'+#authBindEntity.id"),
+            @CacheEvict(key = "'auth-bind'+#authBindEntity.id")
+    })
     public int updateByPk(PersonAuthBindEntity authBindEntity) {
         // TODO: 17-6-1 应该使用锁,防止并发同步用户,导致多个人员使用相同的用户
         if (authBindEntity.getPositionIds() != null) {
@@ -127,8 +147,7 @@ public class SimplePersonService extends EnableCacheGernericEntityService<Person
 
         if (personEntity instanceof PersonAuthBindEntity) return ((PersonAuthBindEntity) personEntity);
 
-        PersonAuthBindEntity bindEntity = entityFactory.newInstance(PersonAuthBindEntity.class);
-        entityFactory.copyProperties(personEntity, bindEntity);
+        PersonAuthBindEntity bindEntity = entityFactory.newInstance(PersonAuthBindEntity.class, personEntity);
         Set<String> positionIds = DefaultDSLQueryService.createQuery(personPositionDao)
                 .where(PersonPositionEntity.personId, id)
                 .listNoPaging().stream()
@@ -137,8 +156,8 @@ public class SimplePersonService extends EnableCacheGernericEntityService<Person
 
         bindEntity.setPositionIds(positionIds);
 
-        if (null != userService) {
-            UserEntity userEntity = userService.selectByPk(bindEntity.getUserId());
+        if (null != userService && null != personEntity.getUserId()) {
+            UserEntity userEntity = userService.selectByPk(personEntity.getUserId());
             if (null != userEntity) {
                 PersonUserEntity entity = entityFactory.newInstance(PersonUserEntity.class);
                 entity.setUsername(userEntity.getUsername());
@@ -146,6 +165,18 @@ public class SimplePersonService extends EnableCacheGernericEntityService<Person
             }
         }
         return bindEntity;
+    }
+
+    @Override
+    public List<PersonEntity> selectByPositionId(String positionId) {
+        Objects.requireNonNull(positionId);
+        return personDao.selectByPositionId(positionId);
+    }
+
+    @Override
+    public List<PersonEntity> selectByRoleId(String roleId) {
+        Objects.requireNonNull(roleId);
+        return personDao.selectByRoleId(roleId);
     }
 
     protected void syncPositionInfo(String personId, Set<String> positionIds) {
@@ -158,7 +189,10 @@ public class SimplePersonService extends EnableCacheGernericEntityService<Person
     }
 
     protected void syncUserInfo(PersonAuthBindEntity bindEntity) {
-        if (isEmpty(bindEntity.getPersonUser().getUsername())) return;
+        if (isEmpty(bindEntity.getPersonUser().getUsername())) {
+            bindEntity.setUserId("");
+            return;
+        }
         //获取所有职位
         Set<String> positionIds = bindEntity.getPositionIds();
         if (positionIds.isEmpty()) return;
@@ -219,12 +253,8 @@ public class SimplePersonService extends EnableCacheGernericEntityService<Person
         PersonEntity entity = selectByPk(personId);
         assertNotNull(entity);
 
-        SimplePersonnel personnel = new SimplePersonnel();
-        personnel.setId(entity.getId());
-        personnel.setEmail(entity.getEmail());
-        personnel.setName(entity.getName());
-        personnel.setPhone(entity.getPhone());
-        personnel.setPhoto(entity.getPhoto());
+        Personnel personnel = entityFactory.newInstance(Personnel.class, SimplePersonnel.class, entity);
+
         authorization.setPersonnel(personnel);
 
         // 获取用户的职位ID集合(多个职位)
@@ -237,15 +267,21 @@ public class SimplePersonService extends EnableCacheGernericEntityService<Person
         List<PositionEntity> positionEntities = getAllChildrenAndReturnRootNode(positionDao, positionIds, PositionEntity::setChildren, rootPosList -> {
             //根据职位获取部门
             Set<String> departmentIds = rootPosList.stream().map(PositionEntity::getDepartmentId).collect(Collectors.toSet());
-            if (null != departmentIds && !departmentIds.isEmpty()) {
+            if (!CollectionUtils.isEmpty(departmentIds)) {
                 List<DepartmentEntity> departmentEntities = getAllChildrenAndReturnRootNode(departmentDao, departmentIds, DepartmentEntity::setChildren, rootDepList -> {
                     //根据部门获取机构
                     Set<String> orgIds = rootDepList.stream().map(DepartmentEntity::getOrgId).collect(Collectors.toSet());
-                    if (null != orgIds && !orgIds.isEmpty()) {
+                    if (!CollectionUtils.isEmpty(orgIds)) {
                         List<OrganizationalEntity> orgEntities = getAllChildrenAndReturnRootNode(organizationalDao, orgIds, OrganizationalEntity::setChildren, rootOrgList -> {
-                            //根据机构获取地区
-                            // TODO: 17-5-25
+                            //根据机构获取行政区域
+                            Set<String> districtIds = rootOrgList.stream().map(OrganizationalEntity::getDistrictId).filter(Objects::nonNull).collect(Collectors.toSet());
+                            if (!CollectionUtils.isEmpty(districtIds)) {
+                                List<DistrictEntity> districtEntities =
+                                        getAllChildrenAndReturnRootNode(districtDao, districtIds, DistrictEntity::setChildren, rootDistrictList -> {
 
+                                        });
+                                authorization.setDistrictIds(transformationTreeNode(null, districtEntities));
+                            }
                         });
                         authorization.setOrgIds(transformationTreeNode(null, orgEntities));
                     }
@@ -254,6 +290,26 @@ public class SimplePersonService extends EnableCacheGernericEntityService<Person
             }
         });
         authorization.setPositionIds(transformationTreeNode(null, positionEntities));
+
+        //获取关系
+        List<RelationInfoEntity> relationInfoList = DefaultDSLQueryService.createQuery(relationInfoDao)
+                .where(RelationInfoEntity.relationFrom, personId)
+                .or(RelationInfoEntity.relationTo, personId)
+                .listNoPaging();
+        List<Relation> relations = relationInfoList.stream()
+                .map(info -> {
+                    SimpleRelation relation = new SimpleRelation();
+                    relation.setType(info.getRelationTypeFrom());
+                    relation.setTarget(info.getRelationTo());
+                    relation.setRelation(info.getRelationId());
+                    if (personId.equals(info.getRelationFrom())) {
+                        relation.setDirection(Relation.Direction.POSITIVE);
+                    } else {
+                        relation.setDirection(Relation.Direction.REVERSE);
+                    }
+                    return relation;
+                }).collect(Collectors.toList());
+        authorization.setRelations(new SimpleRelations(relations));
         return authorization;
     }
 
@@ -316,7 +372,9 @@ public class SimplePersonService extends EnableCacheGernericEntityService<Person
     @Cacheable(cacheNames = "person", key = "'auth:user-id'+#userId")
     public PersonnelAuthorization getPersonnelAuthorizationByUserId(String userId) {
         PersonEntity entity = createQuery().where(PersonEntity.userId, userId).single();
-        assertNotNull(entity);
+        if (entity == null) {
+            return null;
+        }
         return getPersonnelAuthorizationByPersonId(entity.getId());
     }
 

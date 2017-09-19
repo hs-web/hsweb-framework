@@ -18,10 +18,17 @@
 package org.hswebframework.web.example.simple;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.access.DataAccessConfig;
+import org.hswebframework.web.authorization.basic.aop.AopMethodAuthorizeDefinitionCustomizerParser;
+import org.hswebframework.web.authorization.basic.configuration.EnableAopAuthorize;
+import org.hswebframework.web.authorization.basic.define.EmptyAuthorizeDefinition;
+import org.hswebframework.web.authorization.basic.web.UserTokenHolder;
+import org.hswebframework.web.authorization.define.AuthorizeDefinition;
 import org.hswebframework.web.authorization.simple.SimpleFieldFilterDataAccessConfig;
+import org.hswebframework.web.boost.aop.context.MethodInterceptorContext;
 import org.hswebframework.web.commons.entity.DataStatus;
 import org.hswebframework.web.commons.entity.factory.EntityFactory;
 import org.hswebframework.web.entity.authorization.*;
@@ -35,10 +42,7 @@ import org.hswebframework.web.service.authorization.AuthorizationSettingService;
 import org.hswebframework.web.service.authorization.PermissionService;
 import org.hswebframework.web.service.authorization.RoleService;
 import org.hswebframework.web.service.authorization.UserService;
-import org.hswebframework.web.service.organizational.DepartmentService;
-import org.hswebframework.web.service.organizational.OrganizationalService;
-import org.hswebframework.web.service.organizational.PersonService;
-import org.hswebframework.web.service.organizational.PositionService;
+import org.hswebframework.web.service.organizational.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -66,6 +70,7 @@ import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.stream.Stream;
 
 /**
@@ -79,8 +84,15 @@ import java.util.stream.Stream;
 @EnableCaching
 @EnableAspectJAutoProxy
 @EnableAccessLogger
+@EnableAopAuthorize
 public class SpringBootExample
         implements CommandLineRunner {
+
+    @Bean
+    public AopMethodAuthorizeDefinitionCustomizerParser customizerParser(){
+        //自定义权限声明
+        return context -> EmptyAuthorizeDefinition.instance;
+    }
 
     @Bean
     public AccessLoggerListener accessLoggerListener() {
@@ -89,12 +101,20 @@ public class SpringBootExample
                 ServletResponse.class,
                 InputStream.class,
                 OutputStream.class,
-                MultipartFile.class
+                MultipartFile.class,
+                MultipartFile[].class
         };
-        return loggerInfo -> System.out.println("有请求啦:" + JSON.toJSONString(loggerInfo.toSimpleMap(obj -> {
-            if (Stream.of(excludes).anyMatch(aClass -> aClass.isInstance(obj))) return obj.getClass().getName();
-            return JSON.toJSONString(obj);
-        })));
+        return loggerInfo -> {
+            Map<String, Object> loggerMap = loggerInfo.toSimpleMap(obj -> {
+                if (Stream.of(excludes).anyMatch(aClass -> aClass.isInstance(obj)))
+                    return obj.getClass().getName();
+                return JSON.toJSONString(obj);
+            });
+//            loggerMap.put("userToken", UserTokenHolder.currentToken());
+
+            System.out.println(JSON.toJSONString(loggerMap, SerializerFeature.SortField, SerializerFeature.PrettyFormat));
+
+        };
     }
 
     @Bean
@@ -120,7 +140,6 @@ public class SpringBootExample
     }
 
 
-
     @Autowired
     UserService       userService;
     @Autowired
@@ -142,10 +161,14 @@ public class SpringBootExample
     @Autowired
     AuthorizationSettingService authorizationSettingService;
 
+    @Autowired
+    RelationInfoService relationInfoService;
+
     public static void main(String[] args) {
         SpringApplication.run(SpringBootExample.class);
     }
 
+    // main
     //    @Override
     public void run(String... strings) throws Exception {
         //只能查询自己创建的数据
@@ -268,5 +291,19 @@ public class SpringBootExample
         personEntity.setPersonUser(personUserEntity);
 
         personService.insert(personEntity);
+
+        RelationInfoEntity relationInfo = relationInfoService.createEntity();
+
+        relationInfo.setRelationFrom(personEntity.getId());
+        relationInfo.setRelationTo("zhangsan");
+        relationInfo.setRelationTypeFrom("person");
+        relationInfo.setRelationTypeTo("person");
+        relationInfo.setStatus(DataStatus.STATUS_ENABLED);
+        relationInfo.setRelationId("leader");
+        relationInfoService.insert(relationInfo);
+
+//        relationInfoService
+//                .getRelations("person","王伟")
+//                .findRev("直属上级");
     }
 }

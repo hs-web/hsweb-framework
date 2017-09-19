@@ -17,9 +17,11 @@
 
 package org.hswebframework.web.service;
 
+import org.hswebframework.utils.RandomUtil;
 import org.hswebframework.web.commons.entity.TreeSortSupportEntity;
 import org.hswebframework.web.commons.entity.TreeSupportEntity;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -52,9 +54,32 @@ public abstract class AbstractTreeSortService<E extends TreeSortSupportEntity<PK
         return createQuery().where(TreeSupportEntity.parentId, parentId).noPaging().list();
     }
 
+    //当父节点不存在时,创建parentId
+    @SuppressWarnings("unchecked")
+    protected PK createParentIdOnExists() {
+        if (getPrimaryKeyType() == String.class) {
+            return (PK) "-1";
+        }
+        return null;
+    }
+
+    protected void applyPath(E entity) {
+        if (!StringUtils.isEmpty(entity.getParentId())) return;
+        if (!StringUtils.isEmpty(entity.getPath())) return;
+
+        TreeSortSupportEntity<PK> parent = selectByPk(entity.getParentId());
+        if (null == parent) {
+            entity.setParentId(createParentIdOnExists());
+            entity.setPath(RandomUtil.randomChar(4));
+        } else {
+            entity.setPath(parent.getPath() + "-" + RandomUtil.randomChar(4));
+        }
+    }
+
     @Override
     public PK insert(E entity) {
         if (entity.getId() == null) entity.setId(getIDGenerator().generate());
+        applyPath(entity);
         List<E> childrenList = new ArrayList<>();
         TreeSupportEntity.expandTree2List(entity, childrenList, getIDGenerator());
         super.insert(entity);
@@ -87,6 +112,7 @@ public abstract class AbstractTreeSortService<E extends TreeSortSupportEntity<PK
     public PK saveOrUpdateForSingle(E entity) {
         assertNotNull(entity);
         PK id = entity.getId();
+        applyPath(entity);
         if (null == id || this.selectByPk(id) == null) {
             if (null == id)
                 entity.setId(getIDGenerator().generate());

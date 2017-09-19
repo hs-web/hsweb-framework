@@ -4,7 +4,7 @@
 [![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg?style=flat-square)](https://www.apache.org/licenses/LICENSE-2.0.html)
 [![Insight.io](https://www.insight.io/repoBadge/github.com/hs-web/hsweb-framework)](https://insight.io/github.com/hs-web/hsweb-framework)
 
-[Features](FEATURES.md)
+ [贡献代码](CONTRIBUTING.md)  [开发手册](https://github.com/hs-web/hsweb-framework/wiki/开发手册)
 
 ## 模块简介
 
@@ -22,6 +22,3 @@
 |[hsweb-starter](hsweb-starter)|模块启动器| 90%|
 |[hsweb-system](hsweb-system)|**系统功能**| 40%|
 |[hsweb-tests](hsweb-tests)|测试| 80%|
-
-
-![](./docs/hsweb3.png)
