@@ -1,6 +1,6 @@
 package org.hswebframework.web.schedule.configuration;
 
-import org.hsweb.ezorm.rdb.executor.SqlExecutor;
+import org.hswebframework.ezorm.rdb.executor.SqlExecutor;
 import org.hswebframework.utils.file.FileUtils;
 import org.hswebframework.web.Sqls;
 import org.hswebframework.web.datasource.DataSourceHolder;

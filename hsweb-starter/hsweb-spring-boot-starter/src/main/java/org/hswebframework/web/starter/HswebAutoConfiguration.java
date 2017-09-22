@@ -126,7 +126,7 @@ public class HswebAutoConfiguration {
 
         //fastjson.parser.autoTypeAccept
         ParserConfig.global.addAccept("org.hswebframework.web.entity.");
-        ParserConfig.global.addDeny("org.hsweb.ezorm.core.param.SqlTerm");
+        ParserConfig.global.addDeny("org.hswebframework.ezorm.core.param.SqlTerm");
         return converter;
     }
 

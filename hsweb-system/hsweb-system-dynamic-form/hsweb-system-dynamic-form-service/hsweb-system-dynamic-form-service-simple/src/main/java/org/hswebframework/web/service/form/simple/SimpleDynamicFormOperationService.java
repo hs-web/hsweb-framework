@@ -1,11 +1,11 @@
 package org.hswebframework.web.service.form.simple;
 
-import org.hsweb.ezorm.core.Delete;
-import org.hsweb.ezorm.core.Insert;
-import org.hsweb.ezorm.core.Update;
-import org.hsweb.ezorm.rdb.RDBDatabase;
-import org.hsweb.ezorm.rdb.RDBQuery;
-import org.hsweb.ezorm.rdb.RDBTable;
+import org.hswebframework.ezorm.core.Delete;
+import org.hswebframework.ezorm.core.Insert;
+import org.hswebframework.ezorm.core.Update;
+import org.hswebframework.ezorm.rdb.RDBDatabase;
+import org.hswebframework.ezorm.rdb.RDBQuery;
+import org.hswebframework.ezorm.rdb.RDBTable;
 import org.hswebframework.web.NotFoundException;
 import org.hswebframework.web.commons.entity.PagerResult;
 import org.hswebframework.web.commons.entity.param.DeleteParamEntity;

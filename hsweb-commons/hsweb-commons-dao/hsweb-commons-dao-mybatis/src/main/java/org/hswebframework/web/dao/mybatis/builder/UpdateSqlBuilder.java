@@ -18,13 +18,13 @@
 
 package org.hswebframework.web.dao.mybatis.builder;
 
-import org.hsweb.ezorm.core.param.UpdateParam;
-import org.hsweb.ezorm.rdb.executor.SQL;
-import org.hsweb.ezorm.rdb.meta.RDBColumnMetaData;
-import org.hsweb.ezorm.rdb.meta.RDBTableMetaData;
-import org.hsweb.ezorm.rdb.render.SqlAppender;
-import org.hsweb.ezorm.rdb.render.dialect.Dialect;
-import org.hsweb.ezorm.rdb.render.support.simple.SimpleUpdateSqlRender;
+import org.hswebframework.ezorm.core.param.UpdateParam;
+import org.hswebframework.ezorm.rdb.executor.SQL;
+import org.hswebframework.ezorm.rdb.meta.RDBColumnMetaData;
+import org.hswebframework.ezorm.rdb.meta.RDBTableMetaData;
+import org.hswebframework.ezorm.rdb.render.SqlAppender;
+import org.hswebframework.ezorm.rdb.render.dialect.Dialect;
+import org.hswebframework.ezorm.rdb.render.support.simple.SimpleUpdateSqlRender;
 
 /**
  * @author zhouhao

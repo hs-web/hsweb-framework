@@ -18,15 +18,15 @@
 
 package org.hswebframework.web.starter;
 
-import org.hsweb.ezorm.rdb.executor.SqlExecutor;
-import org.hsweb.ezorm.rdb.meta.RDBDatabaseMetaData;
-import org.hsweb.ezorm.rdb.meta.parser.H2TableMetaParser;
-import org.hsweb.ezorm.rdb.meta.parser.MysqlTableMetaParser;
-import org.hsweb.ezorm.rdb.meta.parser.OracleTableMetaParser;
-import org.hsweb.ezorm.rdb.render.dialect.H2RDBDatabaseMetaData;
-import org.hsweb.ezorm.rdb.render.dialect.MysqlRDBDatabaseMetaData;
-import org.hsweb.ezorm.rdb.render.dialect.OracleRDBDatabaseMetaData;
-import org.hsweb.ezorm.rdb.simple.SimpleDatabase;
+import org.hswebframework.ezorm.rdb.executor.SqlExecutor;
+import org.hswebframework.ezorm.rdb.meta.RDBDatabaseMetaData;
+import org.hswebframework.ezorm.rdb.meta.parser.H2TableMetaParser;
+import org.hswebframework.ezorm.rdb.meta.parser.MysqlTableMetaParser;
+import org.hswebframework.ezorm.rdb.meta.parser.OracleTableMetaParser;
+import org.hswebframework.ezorm.rdb.render.dialect.H2RDBDatabaseMetaData;
+import org.hswebframework.ezorm.rdb.render.dialect.MysqlRDBDatabaseMetaData;
+import org.hswebframework.ezorm.rdb.render.dialect.OracleRDBDatabaseMetaData;
+import org.hswebframework.ezorm.rdb.simple.SimpleDatabase;
 import org.hswebframework.expands.script.engine.DynamicScriptEngine;
 import org.hswebframework.expands.script.engine.DynamicScriptEngineFactory;
 import org.hswebframework.web.ScriptScope;
