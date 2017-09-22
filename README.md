@@ -1,5 +1,5 @@
 ## hsweb  3.0
-[![Join the chat at https://gitter.im/hs-web/hsweb-framework](https://badges.gitter.im/hs-web/hsweb-framework.svg)](https://gitter.im/hs-web/hsweb-framework?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Maven Central](https://img.shields.io/maven-central/v/org.hswebframework/hsweb-framework.svg?style=plastic)](http://search.maven.org/#search%7Cga%7C1%7Chswebframework)
 [![Build Status](https://travis-ci.org/hs-web/hsweb-framework.svg?branch=master)](https://travis-ci.org/hs-web/hsweb-framework)
 [![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg?style=flat-square)](https://www.apache.org/licenses/LICENSE-2.0.html)
 [![Insight.io](https://www.insight.io/repoBadge/github.com/hs-web/hsweb-framework)](https://insight.io/github.com/hs-web/hsweb-framework)
