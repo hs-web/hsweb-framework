@@ -34,4 +34,7 @@ public interface OrganizationalService extends
     void disable(String id);
 
     void enable(String id);
+
+    OrganizationalEntity selectByCode(String code);
+
 }
