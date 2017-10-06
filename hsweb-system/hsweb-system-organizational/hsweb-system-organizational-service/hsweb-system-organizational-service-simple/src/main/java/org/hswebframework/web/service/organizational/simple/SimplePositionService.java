@@ -20,7 +20,6 @@ import org.hswebframework.web.dao.organizational.PositionDao;
 import org.hswebframework.web.entity.organizational.PositionEntity;
 import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.service.AbstractTreeSortService;
-import org.hswebframework.web.service.GenericEntityService;
 import org.hswebframework.web.service.organizational.PositionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

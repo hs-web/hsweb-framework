@@ -19,6 +19,7 @@
 package org.hswebframework.web.starter.dictionary;
 
 import com.alibaba.fastjson.JSON;
+import org.hswebframework.web.entity.dictionary.DictionaryItemEntity;
 import org.hswebframework.web.entity.dictionary.SimpleDictionaryEntity;
 import org.hswebframework.web.entity.dictionary.SimpleDictionaryItemEntity;
 import org.hswebframework.web.service.dictionary.DictionaryParser;
@@ -56,7 +57,7 @@ public class DictionaryParserTests {
                 ",{'value':'2','text':'蔬菜'}" +
                 "]";
 
-        List<SimpleDictionaryItemEntity> itemEntities = JSON.parseArray(json, SimpleDictionaryItemEntity.class);
+        List<DictionaryItemEntity> itemEntities = JSON.parseArray(json, DictionaryItemEntity.class);
         dictionaryEntity.setItems(itemEntities);
         this.parser = new SimpleDictionaryParser<String>()
                 .addToTextExpression("10105", "${#value}[${#context[otherApple]}]")

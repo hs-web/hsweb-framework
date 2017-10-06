@@ -23,7 +23,7 @@ function install(context) {
     database.createOrAlter("s_dyn_form")
         .addColumn().name("u_id").alias("id").comment("ID").jdbcType(java.sql.JDBCType.VARCHAR).length(32).primaryKey().commit()
         .addColumn().name("name").alias("name").comment("表单名称").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
-        .addColumn().name("table_name").alias("tableName").comment("数据库表名").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
+        .addColumn().name("t_name").alias("tableName").comment("数据库表名").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
         .addColumn().name("describe").alias("describe").comment("备注").jdbcType(java.sql.JDBCType.VARCHAR).length(512).commit()
         .addColumn().name("type").alias("type").comment("表单类型").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
         .addColumn().name("version").alias("version").comment("版本").jdbcType(java.sql.JDBCType.DECIMAL).length(32, 0).commit()
@@ -52,7 +52,19 @@ function install(context) {
         .addColumn().name("precision").alias("precision").comment("精度").jdbcType(java.sql.JDBCType.DECIMAL).length(4, 0).commit()
         .addColumn().name("scale").alias("scale").comment("小数点位数").jdbcType(java.sql.JDBCType.DECIMAL).length(4, 0).commit()
         .addColumn().name("properties").alias("properties").comment("其他配置").jdbcType(java.sql.JDBCType.CLOB).commit()
+        .addColumn().name("dict_config").alias("dictConfig").comment("字典配置").jdbcType(java.sql.JDBCType.CLOB).commit()
+        .addColumn().name("sort_index").alias("sortIndex").comment("排序序号").jdbcType(java.sql.JDBCType.DECIMAL).length(32, 0).commit()
+
         .comment("动态表单列").commit();
+
+    database.createOrAlter("s_dyn_form_log")
+        .addColumn().name("u_id").alias("id").comment("ID").jdbcType(java.sql.JDBCType.VARCHAR).length(32).primaryKey().commit()
+        .addColumn().name("form_id").alias("formId").comment("表单ID").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
+        .addColumn().name("version").alias("version").comment("发布的版本").jdbcType(java.sql.JDBCType.NUMERIC).length(32, 0).commit()
+        .addColumn().name("deploy_time").alias("deployTime").comment("发布时间").jdbcType(java.sql.JDBCType.DECIMAL).length(32, 0).commit()
+        .addColumn().name("meta_data").alias("metaData").comment("部署的元数据").jdbcType(java.sql.JDBCType.CLOB).commit()
+        .addColumn().name("status").alias("status").comment("状态").jdbcType(java.sql.JDBCType.NUMERIC).length(4, 0).commit()
+        .comment("表单发布日志").commit();
 }
 //设置依赖
 dependency.setup(info)

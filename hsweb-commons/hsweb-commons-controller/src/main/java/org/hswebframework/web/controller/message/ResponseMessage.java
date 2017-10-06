@@ -34,11 +34,11 @@ import java.util.*;
 public class ResponseMessage<T> implements Serializable {
     private static final long serialVersionUID = 8992436576262574064L;
 
-    private String message;
+    protected String message;
 
-    private T result;
+    protected T result;
 
-    private int status;
+    protected int status;
 
     private Long timestamp;
 
@@ -82,20 +82,15 @@ public class ResponseMessage<T> implements Serializable {
         return this;
     }
 
-    public static <T> ResponseMessage<T> ok(T data) {
+    public static <T> ResponseMessage<T> ok(T result) {
         return new ResponseMessage<T>()
-                .data(data)
+                .result(result)
                 .putTimeStamp()
                 .status(200);
     }
 
-//    public ResponseMessage and(String key, Object value) {
-//        put(key, value);
-//        return this;
-//    }
-
-    public ResponseMessage<T> data(T data) {
-        this.result = data;
+    public ResponseMessage<T> result(T result) {
+        this.result = result;
         return this;
     }
 

@@ -1,6 +1,6 @@
 package org.hswebframework.web.commons.entity.param;
 
-import org.hsweb.ezorm.core.param.Param;
+import org.hswebframework.ezorm.core.param.Param;
 import org.hswebframework.web.commons.entity.Entity;
 
 /**

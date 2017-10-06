@@ -1,7 +1,8 @@
 package org.hswebframework.web.organizational.authorization.simple.handler;
 
-import org.hsweb.ezorm.core.param.Term;
-import org.hsweb.ezorm.core.param.TermType;
+import org.hswebframework.ezorm.core.param.Term;
+import org.hswebframework.ezorm.core.param.TermType;
+import org.hswebframework.web.authorization.define.AuthorizingContext;
 import org.hswebframework.web.entity.organizational.PositionEntity;
 import org.hswebframework.web.entity.organizational.authorization.PositionAttachEntity;
 import org.hswebframework.web.organizational.authorization.PersonnelAuthorization;
@@ -52,9 +53,9 @@ public class PositionScopeDataAccessHandler extends AbstractScopeDataAccessHandl
     }
 
     @Override
-    protected Term createQueryTerm(Set<String> scope) {
+    protected Term createQueryTerm(Set<String> scope, AuthorizingContext context) {
         Term term = new Term();
-        if (genericTypeInstanceOf(PositionEntity.class)) {
+        if (genericTypeInstanceOf(PositionEntity.class,context)) {
             term.setColumn(PositionEntity.id);
         } else {
             term.setColumn(PositionAttachEntity.positionId);

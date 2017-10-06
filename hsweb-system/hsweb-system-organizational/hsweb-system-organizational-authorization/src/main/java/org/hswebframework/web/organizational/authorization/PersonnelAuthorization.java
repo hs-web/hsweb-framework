@@ -1,6 +1,7 @@
 package org.hswebframework.web.organizational.authorization;
 
 import org.hswebframework.web.authorization.Authentication;
+import org.hswebframework.web.organizational.authorization.relation.Relations;
 
 import java.io.Serializable;
 import java.util.List;
@@ -34,9 +35,36 @@ public interface PersonnelAuthorization extends Serializable {
     Personnel getPersonnel();
 
     /**
-     * @return 人员所在地区ID, 只返回根节点, 永远不会返回{@code null}
+     * 获取人员的关系信息
+     * <pre>
+     *     boolean isLeader = PersonnelAuthorization
+     *     .current().get()
+     *     .getRelations()
+     *     // 和张三的人员为leader关系, 我是张三的leader
+     *     .has("leader","人员","张三");
+     *     //我是开发部的leader
+     *     //.has("leader","部门","开发部");
+     *     //反转关系: 张三是我的leader
+     *     //.has("leader","人员","张三","PRE");
+     * </pre>
+     * <pre>
+     *     List<Relation> relations= PersonnelAuthorization.current()
+     *     //查找用户关系
+     *     .map(PersonnelAuthorization::getRelations)
+     *     .map(relations -> relations.findAll("leader"))
+     *     .orElse(null)
+     * </pre>
+     *
+     * @return 人员关系信息
+     * @see Relations
+     * @see org.hswebframework.web.organizational.authorization.relation.Relation
      */
-    Set<TreeNode<String>> getAreaIds();
+    Relations getRelations();
+
+    /**
+     * @return 人员所在行政区域ID, 只返回根节点, 永远不会返回{@code null}
+     */
+    Set<TreeNode<String>> getDistrictIds();
 
     /**
      * @return 人员所在机构ID, 只返回根节点, 永远不会返回{@code null}
@@ -56,8 +84,8 @@ public interface PersonnelAuthorization extends Serializable {
     /**
      * @return 根地区ID
      */
-    default Set<String> getRootAreaId() {
-        return getAreaIds().stream().map(TreeNode::getValue).collect(Collectors.toSet());
+    default Set<String> getRootDistrictId() {
+        return getDistrictIds().stream().map(TreeNode::getValue).collect(Collectors.toSet());
     }
 
     /**
@@ -84,8 +112,8 @@ public interface PersonnelAuthorization extends Serializable {
     /**
      * @return 所有地区ID
      */
-    default Set<String> getAllAreaId() {
-        return getAreaIds().stream().map(TreeNode::getAllValue).flatMap(List::stream).collect(Collectors.toSet());
+    default Set<String> getAllDistrictId() {
+        return getDistrictIds().stream().map(TreeNode::getAllValue).flatMap(List::stream).collect(Collectors.toSet());
     }
 
     /**

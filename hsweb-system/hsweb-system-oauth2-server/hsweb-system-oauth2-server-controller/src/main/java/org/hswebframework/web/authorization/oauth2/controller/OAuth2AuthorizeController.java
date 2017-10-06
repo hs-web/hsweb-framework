@@ -20,9 +20,9 @@ package org.hswebframework.web.authorization.oauth2.controller;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.hswebframework.web.AuthorizeException;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.annotation.Authorize;
+import org.hswebframework.web.authorization.exception.UnAuthorizedException;
 import org.hswebframework.web.authorization.oauth2.server.OAuth2AccessToken;
 import org.hswebframework.web.authorization.oauth2.server.support.OAuth2Granter;
 import org.hswebframework.web.authorization.oauth2.server.support.code.AuthorizationCodeRequest;
@@ -62,7 +62,7 @@ public class OAuth2AuthorizeController {
             @RequestParam("redirect_uri") String redirectUri,
             @RequestParam(value = "state", required = false) String state,
             HttpServletRequest request) {
-        Authentication authentication = Authentication.current().orElseThrow(AuthorizeException::new);
+        Authentication authentication = Authentication.current().orElseThrow(UnAuthorizedException::new);
 
         AuthorizationCodeRequest codeRequest = new HttpAuthorizationCodeRequest(authentication.getUser().getId(), request);
 

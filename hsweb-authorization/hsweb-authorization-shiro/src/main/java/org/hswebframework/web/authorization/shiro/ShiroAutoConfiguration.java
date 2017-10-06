@@ -34,9 +34,7 @@ import org.hswebframework.web.authorization.AuthenticationHolder;
 import org.hswebframework.web.authorization.AuthenticationManager;
 import org.hswebframework.web.authorization.AuthenticationSupplier;
 import org.hswebframework.web.authorization.access.DataAccessController;
-import org.hswebframework.web.authorization.access.DataAccessHandler;
 import org.hswebframework.web.authorization.shiro.boost.BoostAuthorizationAttributeSourceAdvisor;
-import org.hswebframework.web.authorization.shiro.boost.DefaultDataAccessController;
 import org.hswebframework.web.authorization.shiro.cache.SpringCacheManagerWrapper;
 import org.hswebframework.web.authorization.shiro.remember.SimpleRememberMeManager;
 import org.hswebframework.web.controller.message.ResponseMessage;
@@ -143,31 +141,6 @@ public class ShiroAutoConfiguration {
         securityManager.setSessionManager(new DefaultSessionManager());
         SecurityUtils.setSecurityManager(securityManager);
         return securityManager;
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public DefaultDataAccessController defaultDataAccessController() {
-        return new DefaultDataAccessController();
-    }
-
-    @Bean
-    @ConditionalOnBean(DefaultDataAccessController.class)
-    public BeanPostProcessor dataAccessControllerProcessor(DefaultDataAccessController defaultDataAccessController) {
-        return new BeanPostProcessor() {
-            @Override
-            public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-                return bean;
-            }
-
-            @Override
-            public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-                if (bean instanceof DataAccessHandler) {
-                    defaultDataAccessController.addHandler(((DataAccessHandler) bean));
-                }
-                return bean;
-            }
-        };
     }
 
 

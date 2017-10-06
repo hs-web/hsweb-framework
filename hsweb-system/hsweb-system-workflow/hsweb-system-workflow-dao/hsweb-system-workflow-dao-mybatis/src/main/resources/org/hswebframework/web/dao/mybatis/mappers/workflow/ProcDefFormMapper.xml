@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.hswebframework.web.dao.workflow.ProcDefFormDao">
+    <resultMap id="ProcDefFormResultMap" type="org.hswebframework.web.entity.workflow.SimpleProcDefFormEntity">
+              <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
+            <result property="defKey" column="def_key" javaType="String" jdbcType="VARCHAR"/>
+            <result property="formId" column="form_id" javaType="String" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!--用于动态生成sql所需的配置-->
+    <sql id="config">
+        <bind name="resultMapId" value="'ProcDefFormResultMap'"/>
+        <bind name="tableName" value="'s_def_form'"/>
+    </sql>
+  
+    <insert id="insert" parameterType="org.hswebframework.web.entity.workflow.SimpleProcDefFormEntity" >
+        <include refid="config"/>
+        <include refid="BasicMapper.buildInsertSql"/>
+    </insert>
+
+    <delete id="deleteByPk" parameterType="String">
+        delete from s_def_form where u_id =#{id}
+    </delete>
+
+    <delete id="delete" parameterType="org.hswebframework.web.commons.entity.Entity">
+        <include refid="config"/>
+        <include refid="BasicMapper.buildDeleteSql"/>
+    </delete>
+
+    <update id="update" parameterType="org.hswebframework.web.commons.entity.Entity">
+        <include refid="config"/>
+        <include refid="BasicMapper.buildUpdateSql"/>
+    </update>
+
+    <select id="query" parameterType="org.hswebframework.web.commons.entity.Entity" resultMap="ProcDefFormResultMap">
+        <include refid="config"/>
+        <include refid="BasicMapper.buildSelectSql"/>
+    </select>
+
+    <select id="count" parameterType="org.hswebframework.web.commons.entity.Entity" resultType="int">
+        <include refid="config"/>
+        <include refid="BasicMapper.buildTotalSql"/>
+    </select>
+</mapper>

@@ -18,9 +18,16 @@ import org.springframework.context.annotation.Configuration;
 public class OrganizationalAuthorizationAutoConfiguration implements BeanPostProcessor {
 
     @Bean
-    @ConditionalOnMissingBean(AreaScopeDataAccessHandler.class)
-    public AreaScopeDataAccessHandler areaScopeDataAccessHandler() {
-        return new AreaScopeDataAccessHandler();
+    @ConditionalOnMissingBean(DistrictScopeDataAccessHandler.class)
+    public DistrictScopeDataAccessHandler areaScopeDataAccessHandler() {
+        return new DistrictScopeDataAccessHandler();
+    }
+
+
+    @Bean
+    @ConditionalOnMissingBean(CustomScopeHandler.class)
+    public CustomScopeHandler customScopeHandler() {
+        return new CustomScopeHandler();
     }
 
     @Bean
@@ -51,6 +58,12 @@ public class OrganizationalAuthorizationAutoConfiguration implements BeanPostPro
     @ConditionalOnMissingBean(ScopeDataAccessConfigConvert.class)
     public ScopeDataAccessConfigConvert scopeDataAccessConfigConvert() {
         return new ScopeDataAccessConfigConvert();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(CustomScopeDataAccessConfigConvert.class)
+    public CustomScopeDataAccessConfigConvert customScopeDataAccessConfigConvert() {
+        return new CustomScopeDataAccessConfigConvert();
     }
 
     @Override

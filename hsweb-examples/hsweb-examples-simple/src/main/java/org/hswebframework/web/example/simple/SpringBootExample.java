@@ -18,16 +18,19 @@
 package org.hswebframework.web.example.simple;
 
 import com.alibaba.fastjson.JSON;
-import org.hsweb.ezorm.rdb.executor.AbstractJdbcSqlExecutor;
-import org.hsweb.ezorm.rdb.executor.SqlExecutor;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.access.DataAccessConfig;
+import org.hswebframework.web.authorization.basic.aop.AopMethodAuthorizeDefinitionCustomizerParser;
+import org.hswebframework.web.authorization.basic.configuration.EnableAopAuthorize;
+import org.hswebframework.web.authorization.basic.define.EmptyAuthorizeDefinition;
+import org.hswebframework.web.authorization.basic.web.UserTokenHolder;
+import org.hswebframework.web.authorization.define.AuthorizeDefinition;
 import org.hswebframework.web.authorization.simple.SimpleFieldFilterDataAccessConfig;
+import org.hswebframework.web.boost.aop.context.MethodInterceptorContext;
 import org.hswebframework.web.commons.entity.DataStatus;
 import org.hswebframework.web.commons.entity.factory.EntityFactory;
-import org.hswebframework.web.dao.datasource.DataSourceHolder;
-import org.hswebframework.web.dao.datasource.DatabaseType;
 import org.hswebframework.web.entity.authorization.*;
 import org.hswebframework.web.entity.authorization.bind.BindRoleUserEntity;
 import org.hswebframework.web.entity.organizational.*;
@@ -39,20 +42,15 @@ import org.hswebframework.web.service.authorization.AuthorizationSettingService;
 import org.hswebframework.web.service.authorization.PermissionService;
 import org.hswebframework.web.service.authorization.RoleService;
 import org.hswebframework.web.service.authorization.UserService;
-import org.hswebframework.web.service.organizational.DepartmentService;
-import org.hswebframework.web.service.organizational.OrganizationalService;
-import org.hswebframework.web.service.organizational.PersonService;
-import org.hswebframework.web.service.organizational.PositionService;
+import org.hswebframework.web.service.organizational.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
-import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
@@ -67,14 +65,12 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import javax.sql.DataSource;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.stream.Stream;
 
 /**
@@ -88,8 +84,15 @@ import java.util.stream.Stream;
 @EnableCaching
 @EnableAspectJAutoProxy
 @EnableAccessLogger
+@EnableAopAuthorize
 public class SpringBootExample
         implements CommandLineRunner {
+
+    @Bean
+    public AopMethodAuthorizeDefinitionCustomizerParser customizerParser(){
+        //自定义权限声明
+        return context -> EmptyAuthorizeDefinition.instance;
+    }
 
     @Bean
     public AccessLoggerListener accessLoggerListener() {
@@ -98,12 +101,20 @@ public class SpringBootExample
                 ServletResponse.class,
                 InputStream.class,
                 OutputStream.class,
-                MultipartFile.class
+                MultipartFile.class,
+                MultipartFile[].class
         };
-        return loggerInfo -> System.out.println("有请求啦:" + JSON.toJSONString(loggerInfo.toSimpleMap(obj -> {
-            if (Stream.of(excludes).anyMatch(aClass -> aClass.isInstance(obj))) return obj.getClass().getName();
-            return JSON.toJSONString(obj);
-        })));
+        return loggerInfo -> {
+            Map<String, Object> loggerMap = loggerInfo.toSimpleMap(obj -> {
+                if (Stream.of(excludes).anyMatch(aClass -> aClass.isInstance(obj)))
+                    return obj.getClass().getName();
+                return JSON.toJSONString(obj);
+            });
+//            loggerMap.put("userToken", UserTokenHolder.currentToken());
+
+            System.out.println(JSON.toJSONString(loggerMap, SerializerFeature.SortField, SerializerFeature.PrettyFormat));
+
+        };
     }
 
     @Bean
@@ -129,24 +140,6 @@ public class SpringBootExample
     }
 
 
-    @Bean
-    @ConditionalOnMissingBean(SqlExecutor.class)
-    public SqlExecutor sqlExecutor(DataSource dataSource) {
-        DataSourceHolder.install(dataSource, DatabaseType.h2);
-        return new AbstractJdbcSqlExecutor() {
-            @Override
-            public Connection getConnection() {
-                return DataSourceUtils.getConnection(dataSource);
-            }
-
-            @Override
-            public void releaseConnection(Connection connection) throws SQLException {
-                DataSourceUtils.releaseConnection(connection, dataSource);
-            }
-        };
-
-    }
-
     @Autowired
     UserService       userService;
     @Autowired
@@ -168,10 +161,14 @@ public class SpringBootExample
     @Autowired
     AuthorizationSettingService authorizationSettingService;
 
+    @Autowired
+    RelationInfoService relationInfoService;
+
     public static void main(String[] args) {
         SpringApplication.run(SpringBootExample.class);
     }
 
+    // main
     //    @Override
     public void run(String... strings) throws Exception {
         //只能查询自己创建的数据
@@ -294,5 +291,19 @@ public class SpringBootExample
         personEntity.setPersonUser(personUserEntity);
 
         personService.insert(personEntity);
+
+        RelationInfoEntity relationInfo = relationInfoService.createEntity();
+
+        relationInfo.setRelationFrom(personEntity.getId());
+        relationInfo.setRelationTo("zhangsan");
+        relationInfo.setRelationTypeFrom("person");
+        relationInfo.setRelationTypeTo("person");
+        relationInfo.setStatus(DataStatus.STATUS_ENABLED);
+        relationInfo.setRelationId("leader");
+        relationInfoService.insert(relationInfo);
+
+//        relationInfoService
+//                .getRelations("person","王伟")
+//                .findRev("直属上级");
     }
 }

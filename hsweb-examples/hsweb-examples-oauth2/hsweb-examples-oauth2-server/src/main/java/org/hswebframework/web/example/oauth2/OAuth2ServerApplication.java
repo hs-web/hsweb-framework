@@ -19,16 +19,12 @@
 package org.hswebframework.web.example.oauth2;
 
 import com.alibaba.fastjson.JSON;
-import org.hsweb.ezorm.rdb.executor.AbstractJdbcSqlExecutor;
-import org.hsweb.ezorm.rdb.executor.SqlExecutor;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.access.DataAccessConfig;
 import org.hswebframework.web.authorization.oauth2.server.entity.OAuth2ClientEntity;
 import org.hswebframework.web.authorization.simple.SimpleFieldFilterDataAccessConfig;
 import org.hswebframework.web.commons.entity.DataStatus;
 import org.hswebframework.web.commons.entity.factory.EntityFactory;
-import org.hswebframework.web.dao.datasource.DataSourceHolder;
-import org.hswebframework.web.dao.datasource.DatabaseType;
 import org.hswebframework.web.dao.oauth2.OAuth2ClientDao;
 import org.hswebframework.web.entity.authorization.*;
 import org.hswebframework.web.entity.authorization.bind.BindRoleUserEntity;
@@ -40,18 +36,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.jdbc.datasource.DataSourceUtils;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+
 
 /**
  * TODO 完成注释
@@ -178,21 +169,4 @@ public class OAuth2ServerApplication implements CommandLineRunner {
         oAuth2ClientDao.insert(clientEntity);
     }
 
-    @Bean
-    @ConditionalOnMissingBean(SqlExecutor.class)
-    public SqlExecutor sqlExecutor(DataSource dataSource) {
-        DataSourceHolder.install(dataSource, DatabaseType.h2);
-        return new AbstractJdbcSqlExecutor() {
-            @Override
-            public Connection getConnection() {
-                return DataSourceUtils.getConnection(dataSource);
-            }
-
-            @Override
-            public void releaseConnection(Connection connection) throws SQLException {
-                DataSourceUtils.releaseConnection(connection, dataSource);
-            }
-        };
-
-    }
 }

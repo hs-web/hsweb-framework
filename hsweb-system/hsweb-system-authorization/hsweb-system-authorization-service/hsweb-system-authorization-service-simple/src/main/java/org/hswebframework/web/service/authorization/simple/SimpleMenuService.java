@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -60,7 +61,23 @@ public class SimpleMenuService
     }
 
     @Override
-    @CacheEvict(allEntries = true)
+    @Caching(
+            evict = {
+                    @CacheEvict(allEntries = true),
+                    @CacheEvict(cacheNames = CacheConstants.MENU_CACHE_NAME, allEntries = true)
+            }
+    )
+    public int updateByPk(String id, MenuEntity entity) {
+        return super.updateByPk(id, entity);
+    }
+
+    @Override
+    @Caching(
+            evict = {
+                    @CacheEvict(allEntries = true),
+                    @CacheEvict(cacheNames = CacheConstants.MENU_CACHE_NAME, allEntries = true)
+            }
+    )
     public int updateByPk(List<MenuEntity> data) {
         return super.updateByPk(data);
     }
@@ -80,7 +97,12 @@ public class SimpleMenuService
     }
 
     @Override
-    @CacheEvict(allEntries = true)
+    @Caching(
+            evict = {
+                    @CacheEvict(allEntries = true),
+                    @CacheEvict(cacheNames = CacheConstants.MENU_CACHE_NAME, allEntries = true)
+            }
+    )
     public int deleteByPk(String id) {
         return super.deleteByPk(id);
     }

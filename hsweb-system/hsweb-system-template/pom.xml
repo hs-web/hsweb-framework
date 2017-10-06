@@ -10,6 +10,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>hsweb-system-template</artifactId>
+    <packaging>pom</packaging>
 
-
+    <modules>
+        <module>hsweb-system-template-controller</module>
+        <module>hsweb-system-template-dao</module>
+        <module>hsweb-system-template-entity</module>
+        <module>hsweb-system-template-service</module>
+        <module>hsweb-system-template-starter</module>
+    </modules>
 </project>

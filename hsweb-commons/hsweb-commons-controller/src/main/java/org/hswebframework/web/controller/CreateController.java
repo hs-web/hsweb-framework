@@ -54,7 +54,7 @@ public interface CreateController<E, PK, M> {
     @PostMapping
     @AccessLogger("{action_add}")
     @ResponseStatus(HttpStatus.CREATED)
-    @ApiOperation(value = "创建数据")
+    @ApiOperation(value = "创建数据", responseReference = "add")
     @ApiResponses({
             @ApiResponse(code = 201, message = "创建成功,返回创建数据的ID"),
             @ApiResponse(code = 401, message = "未授权"),

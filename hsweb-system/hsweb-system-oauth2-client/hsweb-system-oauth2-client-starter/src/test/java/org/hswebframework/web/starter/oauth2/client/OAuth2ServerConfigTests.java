@@ -21,16 +21,13 @@ package org.hswebframework.web.starter.oauth2.client;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.hswebframework.web.authorization.oauth2.client.OAuth2RequestService;
-import org.hswebframework.web.authorization.oauth2.client.exception.OAuth2RequestException;
 import org.hswebframework.web.entity.oauth2.client.OAuth2ServerConfigEntity;
-import org.hswebframework.web.starter.convert.FastJsonHttpMessageConverter;
+import org.hswebframework.web.starter.convert.FastJsonGenericHttpMessageConverter;
 import org.hswebframework.web.tests.SimpleWebApplicationTests;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-
-import java.util.Map;
 
 /**
  * TODO 完善单元测试
@@ -40,7 +37,7 @@ import java.util.Map;
 public class OAuth2ServerConfigTests extends SimpleWebApplicationTests {
 
     @Autowired
-    private FastJsonHttpMessageConverter fastJsonHttpMessageConverter;
+    private FastJsonGenericHttpMessageConverter fastJsonHttpMessageConverter;
 
 
     @Autowired

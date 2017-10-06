@@ -196,6 +196,9 @@ class Version implements Comparable<Version> {
     }
 
     public void setVersion(String version) {
+        if (null == version) {
+            return;
+        }
         boolean snapshot = version.toLowerCase().contains("snapshot");
         version = version.toLowerCase().replace(".snapshot", "").replace("-snapshot", "");
         String[] ver = version.split("[.]");

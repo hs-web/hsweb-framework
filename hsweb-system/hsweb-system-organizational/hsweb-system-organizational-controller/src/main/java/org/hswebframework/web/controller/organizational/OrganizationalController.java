@@ -31,8 +31,9 @@ import org.hswebframework.web.entity.organizational.PersonEntity;
 import org.hswebframework.web.logging.AccessLogger;
 import org.hswebframework.web.service.organizational.OrganizationalService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * 组织
@@ -58,4 +59,27 @@ public class OrganizationalController implements SimpleGenericEntityController<O
         return organizationalService;
     }
 
+    @PatchMapping("/batch")
+    @Authorize(action = Permission.ACTION_UPDATE)
+    @AccessLogger("批量修改数据")
+    public ResponseMessage<Void> updateBatch(@RequestBody List<OrganizationalEntity> batch) {
+        organizationalService.updateBatch(batch);
+        return ResponseMessage.ok();
+    }
+
+    @PutMapping("/{id}/disable")
+    @Authorize(action = Permission.ACTION_DISABLE)
+    @AccessLogger("禁用机构")
+    public ResponseMessage<Boolean> disable(@PathVariable String id) {
+        organizationalService.disable(id);
+        return ResponseMessage.ok();
+    }
+
+    @PutMapping("/{id}/enable")
+    @Authorize(action = Permission.ACTION_ENABLE)
+    @AccessLogger("启用机构")
+    public ResponseMessage<Boolean> enable(@PathVariable String id) {
+        organizationalService.enable(id);
+        return ResponseMessage.ok();
+    }
 }

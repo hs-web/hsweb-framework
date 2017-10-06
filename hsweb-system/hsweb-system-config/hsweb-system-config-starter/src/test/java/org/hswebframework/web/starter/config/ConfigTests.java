@@ -2,7 +2,7 @@ package org.hswebframework.web.starter.config;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import org.hsweb.ezorm.rdb.executor.SqlExecutor;
+import org.hswebframework.ezorm.rdb.executor.SqlExecutor;
 import org.hswebframework.web.entity.config.ConfigEntity;
 import org.hswebframework.web.entity.config.SimpleConfigEntity;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;

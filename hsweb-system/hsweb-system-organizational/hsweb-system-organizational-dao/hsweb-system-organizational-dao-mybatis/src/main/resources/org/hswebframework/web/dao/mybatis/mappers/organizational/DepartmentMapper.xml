@@ -30,7 +30,7 @@
             <result property="status" column="status" javaType="Byte" jdbcType="DECIMAL"/>
             <result property="level" column="level" javaType="Integer" jdbcType="DECIMAL"/>
     </resultMap>
-
+ 
     <!--用于动态生成sql所需的配置-->
     <sql id="config">
         <bind name="resultMapId" value="'DepartmentResultMap'"/>

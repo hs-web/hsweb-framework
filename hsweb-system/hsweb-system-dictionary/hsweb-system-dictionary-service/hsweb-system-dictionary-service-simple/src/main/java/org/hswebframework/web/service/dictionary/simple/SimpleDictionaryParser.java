@@ -80,7 +80,7 @@ public class SimpleDictionaryParser<V> implements DictionaryParser<V> {
     }
 
     //设置DictionaryEntity作为配置
-    public SimpleDictionaryParser<V> setDict(DictionaryEntity<? extends DictionaryItemEntity> dict) {
+    public SimpleDictionaryParser<V> setDict(DictionaryEntity dict) {
         SimpleSingleDictParser toTextParser = new SimpleSingleDictParser();
         toTextParser.setDict(dict, DictionaryItemEntity::getValue
                 , DictionaryItemEntity::getText

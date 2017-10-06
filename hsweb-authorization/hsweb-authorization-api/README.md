@@ -1,6 +1,10 @@
 # 权限控制API
 用于权限控制的API接口,支持RBAC权限控制,支持数据级（控制到行,列）权限控制.
 
+[用户令牌管理](token.md)
+
+[权限控制配置](define.md)
+
 # 介绍
 
 以下讲到的类都是基于包:org.hswebframework.web.authorization
@@ -53,3 +57,4 @@ public class CustomAuthorizationSuccessListener implements AuthorizationListener
         }
 }
 ```
+

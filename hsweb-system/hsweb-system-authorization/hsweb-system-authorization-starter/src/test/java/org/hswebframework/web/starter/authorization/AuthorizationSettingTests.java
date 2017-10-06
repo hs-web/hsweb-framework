@@ -21,13 +21,11 @@ package org.hswebframework.web.starter.authorization;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.hswebframework.web.entity.authorization.AuthorizationSettingEntity;
-import org.hswebframework.web.entity.authorization.SimpleAuthorizationSettingEntity;
 import org.hswebframework.web.service.authorization.AuthorizationSettingTypeSupplier;
-import org.hswebframework.web.starter.convert.FastJsonHttpMessageConverter;
+import org.hswebframework.web.starter.convert.FastJsonGenericHttpMessageConverter;
 import org.hswebframework.web.tests.SimpleWebApplicationTests;
 import org.junit.Assert;
 import org.junit.Test;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 
@@ -39,7 +37,7 @@ import org.springframework.http.MediaType;
 public class AuthorizationSettingTests extends SimpleWebApplicationTests {
 
     @Autowired
-    private FastJsonHttpMessageConverter fastJsonHttpMessageConverter;
+    private FastJsonGenericHttpMessageConverter fastJsonHttpMessageConverter;
 
     @Test
     public void testCrud() throws Exception {

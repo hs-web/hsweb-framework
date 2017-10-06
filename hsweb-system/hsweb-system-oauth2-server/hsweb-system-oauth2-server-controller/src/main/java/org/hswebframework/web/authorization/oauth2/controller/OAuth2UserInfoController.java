@@ -20,9 +20,9 @@ package org.hswebframework.web.authorization.oauth2.controller;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.hswebframework.web.AuthorizeException;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.AuthenticationHolder;
+import org.hswebframework.web.authorization.exception.UnAuthorizedException;
 import org.hswebframework.web.authorization.oauth2.server.OAuth2AccessToken;
 import org.hswebframework.web.authorization.oauth2.server.token.AccessTokenService;
 import org.springframework.web.bind.annotation.*;
@@ -48,7 +48,7 @@ public class OAuth2UserInfoController {
     public Authentication getLoginUser(@RequestParam("access_token") String access_token) {
         OAuth2AccessToken auth2AccessEntity = accessTokenService.getTokenByAccessToken(access_token);
         if (null == auth2AccessEntity) {
-            throw new AuthorizeException();
+            throw new UnAuthorizedException();
         }
         return AuthenticationHolder.get(auth2AccessEntity.getOwnerId());
     }
@@ -60,7 +60,7 @@ public class OAuth2UserInfoController {
             @RequestParam("access_token") String access_token) {
         OAuth2AccessToken auth2AccessEntity = accessTokenService.getTokenByAccessToken(access_token);
         if (null == auth2AccessEntity) {
-            throw new AuthorizeException();
+            throw new UnAuthorizedException();
         }
         return AuthenticationHolder.get(userId);
     }

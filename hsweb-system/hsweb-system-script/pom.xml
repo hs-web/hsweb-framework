@@ -10,6 +10,14 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>hsweb-system-script</artifactId>
+    <packaging>pom</packaging>
+    <modules>
+        <module>hsweb-system-script-dao</module>
+        <module>hsweb-system-script-service</module>
+        <module>hsweb-system-script-controller</module>
+        <module>hsweb-system-script-entity</module>
+        <module>hsweb-system-script-starter</module>
+    </modules>
 
 
 </project>

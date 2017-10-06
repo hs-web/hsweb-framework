@@ -18,7 +18,7 @@
 
 package org.hswebframework.web.service;
 
-import org.hsweb.ezorm.core.dsl.Query;
+import org.hswebframework.ezorm.core.dsl.Query;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.dao.dynamic.QueryByEntityDao;
 
@@ -46,7 +46,7 @@ public interface DefaultDSLQueryService<E, PK>
      *
      * @return {@link Query}
      * @see Query
-     * @see org.hsweb.ezorm.core.Conditional
+     * @see org.hswebframework.ezorm.core.Conditional
      * @since 3.0
      */
     default Query<E, QueryParamEntity> createQuery() {
@@ -69,7 +69,7 @@ public interface DefaultDSLQueryService<E, PK>
      * @param <PO> PO泛型
      * @return {@link Query}
      * @see Query
-     * @see org.hsweb.ezorm.core.Conditional
+     * @see org.hswebframework.ezorm.core.Conditional
      * @since 3.0
      */
     static <PO> Query<PO, QueryParamEntity> createQuery(QueryByEntityDao<PO> dao) {

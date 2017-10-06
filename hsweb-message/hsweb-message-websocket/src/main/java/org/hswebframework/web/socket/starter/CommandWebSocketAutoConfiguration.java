@@ -1,6 +1,6 @@
 package org.hswebframework.web.socket.starter;
 
-import org.hswebframework.web.authorization.container.AuthenticationContainer;
+import org.hswebframework.web.authorization.token.UserTokenManager;
 import org.hswebframework.web.concurrent.counter.CounterManager;
 import org.hswebframework.web.message.Messager;
 import org.hswebframework.web.socket.WebSocketSessionListener;
@@ -60,7 +60,7 @@ public class CommandWebSocketAutoConfiguration {
     @Configuration
     public static class HandlerConfigruation extends WebSocketConfigurationSupport {
         @Autowired(required = false)
-        private AuthenticationContainer authenticationContainer;
+        private UserTokenManager userTokenManager;
 
         @Autowired(required = false)
         private List<WebSocketSessionListener> webSocketSessionListeners;
@@ -72,7 +72,7 @@ public class CommandWebSocketAutoConfiguration {
         protected void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
             CommandWebSocketMessageDispatcher dispatcher = new CommandWebSocketMessageDispatcher();
             dispatcher.setProcessorContainer(commandProcessorContainer);
-            dispatcher.setAuthenticationContainer(authenticationContainer);
+            dispatcher.setUserTokenManager(userTokenManager);
             dispatcher.setWebSocketSessionListeners(webSocketSessionListeners);
             registry.addHandler(dispatcher, "/sockjs")
                     .withSockJS()

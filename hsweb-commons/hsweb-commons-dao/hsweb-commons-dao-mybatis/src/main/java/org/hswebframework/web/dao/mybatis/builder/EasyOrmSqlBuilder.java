@@ -22,29 +22,29 @@ import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.beanutils.PropertyUtilsBean;
 import org.apache.ibatis.mapping.ResultMap;
 import org.apache.ibatis.mapping.ResultMapping;
-import org.hsweb.ezorm.core.param.InsertParam;
-import org.hsweb.ezorm.core.param.QueryParam;
-import org.hsweb.ezorm.core.param.Term;
-import org.hsweb.ezorm.core.param.UpdateParam;
-import org.hsweb.ezorm.rdb.meta.RDBColumnMetaData;
-import org.hsweb.ezorm.rdb.meta.RDBDatabaseMetaData;
-import org.hsweb.ezorm.rdb.meta.RDBTableMetaData;
-import org.hsweb.ezorm.rdb.meta.converter.DateTimeConverter;
-import org.hsweb.ezorm.rdb.meta.converter.NumberValueConverter;
-import org.hsweb.ezorm.rdb.render.SqlAppender;
-import org.hsweb.ezorm.rdb.render.SqlRender;
-import org.hsweb.ezorm.rdb.render.dialect.Dialect;
-import org.hsweb.ezorm.rdb.render.dialect.H2RDBDatabaseMetaData;
-import org.hsweb.ezorm.rdb.render.dialect.MysqlRDBDatabaseMetaData;
-import org.hsweb.ezorm.rdb.render.dialect.OracleRDBDatabaseMetaData;
-import org.hsweb.ezorm.rdb.render.support.simple.CommonSqlRender;
-import org.hsweb.ezorm.rdb.render.support.simple.SimpleWhereSqlBuilder;
+import org.hswebframework.ezorm.core.param.InsertParam;
+import org.hswebframework.ezorm.core.param.QueryParam;
+import org.hswebframework.ezorm.core.param.Term;
+import org.hswebframework.ezorm.core.param.UpdateParam;
+import org.hswebframework.ezorm.rdb.meta.RDBColumnMetaData;
+import org.hswebframework.ezorm.rdb.meta.RDBDatabaseMetaData;
+import org.hswebframework.ezorm.rdb.meta.RDBTableMetaData;
+import org.hswebframework.ezorm.rdb.meta.converter.DateTimeConverter;
+import org.hswebframework.ezorm.rdb.meta.converter.NumberValueConverter;
+import org.hswebframework.ezorm.rdb.render.SqlAppender;
+import org.hswebframework.ezorm.rdb.render.SqlRender;
+import org.hswebframework.ezorm.rdb.render.dialect.Dialect;
+import org.hswebframework.ezorm.rdb.render.dialect.H2RDBDatabaseMetaData;
+import org.hswebframework.ezorm.rdb.render.dialect.MysqlRDBDatabaseMetaData;
+import org.hswebframework.ezorm.rdb.render.dialect.OracleRDBDatabaseMetaData;
+import org.hswebframework.ezorm.rdb.render.support.simple.CommonSqlRender;
+import org.hswebframework.ezorm.rdb.render.support.simple.SimpleWhereSqlBuilder;
 import org.hswebframework.web.BusinessException;
-import org.hswebframework.web.dao.datasource.DataSourceHolder;
-import org.hswebframework.web.dao.datasource.DatabaseType;
 import org.hswebframework.web.dao.mybatis.plgins.pager.Pager;
 import org.hswebframework.web.dao.mybatis.utils.ResultMapsUtils;
 import org.hswebframework.utils.StringUtils;
+import org.hswebframework.web.datasource.DataSourceHolder;
+import org.hswebframework.web.datasource.DatabaseType;
 
 import java.sql.JDBCType;
 import java.util.*;
@@ -52,8 +52,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
+ * 使用easyorm 动态构建 sql
+ *
  * @author zhouhao
- * @TODO
+ * @since 2.0
  */
 public class EasyOrmSqlBuilder {
 
@@ -112,7 +114,7 @@ public class EasyOrmSqlBuilder {
     };
 
     public RDBDatabaseMetaData getActiveDatabase() {
-        DatabaseType type = DataSourceHolder.getActiveDatabaseType();
+        DatabaseType type = DataSourceHolder.currentDatabaseType();
         switch (type) {
             case h2:
                 return h2;
@@ -148,10 +150,11 @@ public class EasyOrmSqlBuilder {
                     column.setAlias(resultMapping.getProperty());
                 column.setJavaType(resultMapping.getJavaType());
                 column.setProperty("resultMapping", resultMapping);
-                if (column.getJdbcType() == JDBCType.DATE || column.getJdbcType() == JDBCType.TIME) {
+                if (column.getJdbcType() == JDBCType.DATE) {
+                    column.setValueConverter(new DateTimeConverter("yyyy-MM-dd", column.getJavaType()));
+                } else if (column.getJdbcType() == JDBCType.TIMESTAMP) {
                     column.setValueConverter(new DateTimeConverter("yyyy-MM-dd HH:mm:ss", column.getJavaType()));
-                }
-                if (column.getJdbcType() == JDBCType.NUMERIC) {
+                } else if (column.getJdbcType() == JDBCType.NUMERIC) {
                     column.setValueConverter(new NumberValueConverter(column.getJavaType()));
                 }
                 rdbTableMetaData.addColumn(column);
@@ -172,8 +175,8 @@ public class EasyOrmSqlBuilder {
         SqlAppender appender = new SqlAppender();
         columns.forEach(column -> {
             RDBColumnMetaData columnMetaData = column.getRDBColumnMetaData();
-            if (columnMetaData.getName().contains(".")) return;
             if (columnMetaData == null) return;
+            if (columnMetaData.getName().contains(".")) return;
             try {
                 Object tmp = propertyUtils.getProperty(param.getData(), columnMetaData.getAlias());
                 if (tmp == null) return;
@@ -226,6 +229,8 @@ public class EasyOrmSqlBuilder {
         }
         if (param.isPaging() && Pager.get() == null) {
             Pager.doPaging(param.getPageIndex(), param.getPageSize());
+        } else {
+            Pager.reset();
         }
         RDBTableMetaData tableMetaData = createMeta(tableName, resultMapId);
         RDBDatabaseMetaData databaseMetaDate = getActiveDatabase();
@@ -305,7 +310,7 @@ public class EasyOrmSqlBuilder {
         public OracleMeta() {
             super();
             renderMap.put(SqlRender.TYPE.INSERT, new InsertSqlBuilder());
-            renderMap.put(SqlRender.TYPE.UPDATE, new UpdateSqlBuilder(Dialect.MYSQL));
+            renderMap.put(SqlRender.TYPE.UPDATE, new UpdateSqlBuilder(Dialect.ORACLE));
         }
     }
 
@@ -313,7 +318,7 @@ public class EasyOrmSqlBuilder {
         public H2Meta() {
             super();
             renderMap.put(SqlRender.TYPE.INSERT, new InsertSqlBuilder());
-            renderMap.put(SqlRender.TYPE.UPDATE, new UpdateSqlBuilder(Dialect.MYSQL));
+            renderMap.put(SqlRender.TYPE.UPDATE, new UpdateSqlBuilder(Dialect.H2));
         }
     }
 }

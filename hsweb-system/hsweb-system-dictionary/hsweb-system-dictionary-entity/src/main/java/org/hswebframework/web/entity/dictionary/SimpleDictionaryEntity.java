@@ -25,7 +25,7 @@ import java.util.List;
  *
  * @author hsweb-generator-online
  */
-public class SimpleDictionaryEntity extends SimpleGenericEntity<String> implements DictionaryEntity<SimpleDictionaryItemEntity> {
+public class SimpleDictionaryEntity extends SimpleGenericEntity<String> implements DictionaryEntity {
     //字典名称
     private String                           name;
     //分类id
@@ -39,7 +39,7 @@ public class SimpleDictionaryEntity extends SimpleGenericEntity<String> implemen
     //状态
     private Byte                             status;
     //字段选项
-    private List<SimpleDictionaryItemEntity> items;
+    private List<DictionaryItemEntity> items;
 
     /**
      * @return 字典名称
@@ -126,12 +126,12 @@ public class SimpleDictionaryEntity extends SimpleGenericEntity<String> implemen
     }
 
     @Override
-    public List<SimpleDictionaryItemEntity> getItems() {
+    public List<DictionaryItemEntity> getItems() {
         return items;
     }
 
     @Override
-    public void setItems(List<SimpleDictionaryItemEntity> items) {
+    public void setItems(List<DictionaryItemEntity> items) {
         this.items = items;
     }
 }

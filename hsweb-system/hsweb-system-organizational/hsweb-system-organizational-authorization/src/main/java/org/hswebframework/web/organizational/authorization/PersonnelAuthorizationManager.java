@@ -1,7 +1,7 @@
 package org.hswebframework.web.organizational.authorization;
 
 /**
- * TODO 完成注释
+ * 人员权限信息管理器
  *
  * @author zhouhao
  */

@@ -19,9 +19,15 @@ package org.hswebframework.web.dao.organizational;
 import org.hswebframework.web.dao.CrudDao;
 import org.hswebframework.web.entity.organizational.PersonEntity;
 
+import java.util.List;
+
 /**
-*  人员 DAO接口
-*  @author hsweb-generator-online
+ * 人员 DAO接口
+ *
+ * @author hsweb-generator-online
  */
-public interface PersonDao extends CrudDao<PersonEntity,String> {
+public interface PersonDao extends CrudDao<PersonEntity, String> {
+    List<PersonEntity> selectByPositionId(String positionId);
+
+    List<PersonEntity> selectByRoleId(String positionId);
 }

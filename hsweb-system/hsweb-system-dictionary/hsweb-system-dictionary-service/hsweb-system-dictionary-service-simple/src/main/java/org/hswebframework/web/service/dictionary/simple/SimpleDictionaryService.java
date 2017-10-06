@@ -31,7 +31,7 @@ import org.springframework.stereotype.Service;
  * @author hsweb-generator-online
  */
 @Service("dictionaryService")
-public class SimpleDictionaryService extends GenericEntityService<DictionaryEntity<DictionaryItemEntity>, String>
+public class SimpleDictionaryService extends GenericEntityService<DictionaryEntity, String>
         implements DictionaryService {
     @Autowired
     private DictionaryDao dictionaryDao;

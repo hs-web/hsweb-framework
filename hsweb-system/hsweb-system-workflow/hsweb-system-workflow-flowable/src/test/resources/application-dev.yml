@@ -1,0 +1,6 @@
+spring:
+    datasource:
+       url : jdbc:mysql://localhost:3306/hsweb?useSSL=false&useUnicode=true&characterEncoding=utf8&autoReconnect=true&failOverReadOnly=false
+       username : root
+       password : root
+       type: com.alibaba.druid.pool.DruidDataSource

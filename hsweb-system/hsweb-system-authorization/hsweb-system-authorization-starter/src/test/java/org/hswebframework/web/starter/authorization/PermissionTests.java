@@ -17,7 +17,7 @@
 
 package org.hswebframework.web.starter.authorization;
 
-import org.hsweb.ezorm.rdb.executor.SqlExecutor;
+import org.hswebframework.ezorm.rdb.executor.SqlExecutor;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.access.DataAccessConfig;
 import org.hswebframework.web.entity.authorization.ActionEntity;

@@ -20,6 +20,8 @@ import org.hswebframework.web.entity.organizational.PersonAuthBindEntity;
 import org.hswebframework.web.entity.organizational.PersonEntity;
 import org.hswebframework.web.service.CrudService;
 
+import java.util.List;
+
 /**
  * 人员 服务类
  *
@@ -32,4 +34,8 @@ public interface PersonService extends CrudService<PersonEntity, String> {
     int updateByPk(PersonAuthBindEntity authBindEntity);
 
     PersonAuthBindEntity selectAuthBindByPk(String id);
+
+    List<PersonEntity> selectByPositionId(String positionId);
+
+    List<PersonEntity> selectByRoleId(String roleId);
 }

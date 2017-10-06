@@ -14,6 +14,8 @@ import org.hswebframework.web.commons.entity.factory.EntityFactory;
 import org.hswebframework.web.commons.model.Model;
 import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.utils.StringUtils;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
@@ -33,7 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class FastJsonHttpMessageConverter extends AbstractHttpMessageConverter<Object> {
+public class FastJsonHttpMessageConverter extends AbstractHttpMessageConverter<Object> implements Ordered {
 
     public final static Charset UTF8 = Charset.forName("UTF-8");
 
@@ -54,6 +56,11 @@ public class FastJsonHttpMessageConverter extends AbstractHttpMessageConverter<O
 
     public EntityFactory getEntityFactory() {
         return entityFactory;
+    }
+
+    @Override
+    public int getOrder() {
+        return Ordered.LOWEST_PRECEDENCE;
     }
 
     @Override
@@ -82,12 +89,12 @@ public class FastJsonHttpMessageConverter extends AbstractHttpMessageConverter<O
     }
 
     public Object readByBytes(Class<?> clazz, byte[] bytes) {
-        if (clazz == String.class) return new String(bytes, charset);
-        if (entityFactory != null && (Entity.class.isAssignableFrom(clazz) || Model.class.isAssignableFrom(clazz))) {
-            @SuppressWarnings("unchecked")
-            Class tmp = entityFactory.getInstanceType(clazz);
-            if (tmp != null) clazz = tmp;
-        }
+//        if (clazz == String.class) return new String(bytes, charset);
+//        if (entityFactory != null && (Entity.class.isAssignableFrom(clazz) || Model.class.isAssignableFrom(clazz))) {
+//            @SuppressWarnings("unchecked")
+//            Class tmp = entityFactory.getInstanceType(clazz);
+//            if (tmp != null) clazz = tmp;
+//        }
         return JSON.parseObject(bytes, 0, bytes.length, charset.newDecoder(), clazz);
     }
 

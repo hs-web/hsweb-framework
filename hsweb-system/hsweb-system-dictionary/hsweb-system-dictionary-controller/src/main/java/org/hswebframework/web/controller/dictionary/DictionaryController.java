@@ -37,12 +37,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("${hsweb.web.mappings.dictionary:dictionary}")
 @Authorize(permission = "dictionary")
 @AccessLogger("数据字典")
-public class DictionaryController implements GenericEntityController<DictionaryEntity<DictionaryItemEntity>, String, QueryParamEntity, DictionaryEntity> {
+public class DictionaryController implements GenericEntityController<DictionaryEntity, String, QueryParamEntity, DictionaryEntity> {
 
     private DictionaryService dictionaryService;
 
     @Override
-    public DictionaryEntity<DictionaryItemEntity> modelToEntity(DictionaryEntity model, DictionaryEntity entity) {
+    public DictionaryEntity modelToEntity(DictionaryEntity model, DictionaryEntity entity) {
         return model;
     }
 

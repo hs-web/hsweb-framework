@@ -115,7 +115,7 @@ function install(context) {
         .addColumn().name("u_id").varchar(32).notNull().primaryKey().comment("uid").commit()
         .addColumn().name("name").varchar(64).notNull().comment("名称").commit()
         .addColumn().name("parent_id").varchar(32).comment("父级ID").commit()
-        .addColumn().name("permission_id").varchar(32).comment("权限ID").commit()
+        .addColumn().name("permission_id").varchar(2048).comment("权限ID").commit()
         .addColumn().name("path").varchar(2048).notNull().comment("树编码").commit()
         .addColumn().name("sort_index").number(32).notNull().comment("树编码").commit()
         .addColumn().name("describe").varchar(128).comment("备注").commit()
