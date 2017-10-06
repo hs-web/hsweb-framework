@@ -43,15 +43,13 @@ public class DynamicScheduleTests extends SimpleWebApplicationTests {
         entity.setScript("" +
                 "org.hswebframework.web.schedule.test.DynamicScheduleTests.counter.incrementAndGet()\n" +
                 "java.lang.System.out.println('job running...')");
-        entity.setQuartzConfig("{\"type\":\"cron\",\"config\":\"0/5 * * * * ?\"}");
+        entity.setQuartzConfig("{\"type\":\"cron\",\"config\":\"0/1 * * * * ?\"}");
         return entity;
     }
 
     @Test
     public void testCreateJob() throws InterruptedException {
-
-
-        Thread.sleep(10000);
+        Thread.sleep(20000);
         Assert.assertTrue(counter.get()>0);
     }
 }

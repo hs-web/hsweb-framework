@@ -18,7 +18,7 @@
 
 package org.hswebframework.web.tests;
 
-import org.hsweb.ezorm.rdb.executor.SqlExecutor;
+import org.hswebframework.ezorm.rdb.executor.SqlExecutor;
 import org.hswebframework.web.commons.entity.factory.EntityFactory;
 import org.junit.Before;
 import org.junit.runner.RunWith;

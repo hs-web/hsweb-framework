@@ -18,12 +18,12 @@
 
 package org.hswebframework.web.dao.mybatis.builder;
 
-import org.hsweb.ezorm.core.param.InsertParam;
-import org.hsweb.ezorm.rdb.executor.SQL;
-import org.hsweb.ezorm.rdb.meta.RDBColumnMetaData;
-import org.hsweb.ezorm.rdb.meta.RDBTableMetaData;
-import org.hsweb.ezorm.rdb.render.SqlAppender;
-import org.hsweb.ezorm.rdb.render.support.simple.SimpleInsertSqlRender;
+import org.hswebframework.ezorm.core.param.InsertParam;
+import org.hswebframework.ezorm.rdb.executor.SQL;
+import org.hswebframework.ezorm.rdb.meta.RDBColumnMetaData;
+import org.hswebframework.ezorm.rdb.meta.RDBTableMetaData;
+import org.hswebframework.ezorm.rdb.render.SqlAppender;
+import org.hswebframework.ezorm.rdb.render.support.simple.SimpleInsertSqlRender;
 
 /**
  * @author zhouhao

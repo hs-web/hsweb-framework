@@ -1,6 +1,6 @@
 package org.hswebframework.web.datasource.jta;
 
-import org.hsweb.ezorm.rdb.executor.SQL;
+import org.hswebframework.ezorm.rdb.executor.SQL;
 import org.hswebframework.web.datasource.DefaultJdbcExecutor;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;

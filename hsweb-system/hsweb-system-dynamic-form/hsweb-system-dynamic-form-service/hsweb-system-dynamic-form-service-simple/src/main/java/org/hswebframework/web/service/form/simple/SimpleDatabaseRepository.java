@@ -1,13 +1,13 @@
 package org.hswebframework.web.service.form.simple;
 
-import org.hsweb.ezorm.rdb.RDBDatabase;
-import org.hsweb.ezorm.rdb.executor.SqlExecutor;
-import org.hsweb.ezorm.rdb.meta.parser.H2TableMetaParser;
-import org.hsweb.ezorm.rdb.meta.parser.MysqlTableMetaParser;
-import org.hsweb.ezorm.rdb.meta.parser.OracleTableMetaParser;
-import org.hsweb.ezorm.rdb.meta.parser.SqlServer2012TableMetaParser;
-import org.hsweb.ezorm.rdb.render.dialect.*;
-import org.hsweb.ezorm.rdb.simple.SimpleDatabase;
+import org.hswebframework.ezorm.rdb.RDBDatabase;
+import org.hswebframework.ezorm.rdb.executor.SqlExecutor;
+import org.hswebframework.ezorm.rdb.meta.parser.H2TableMetaParser;
+import org.hswebframework.ezorm.rdb.meta.parser.MysqlTableMetaParser;
+import org.hswebframework.ezorm.rdb.meta.parser.OracleTableMetaParser;
+import org.hswebframework.ezorm.rdb.meta.parser.SqlServer2012TableMetaParser;
+import org.hswebframework.ezorm.rdb.render.dialect.*;
+import org.hswebframework.ezorm.rdb.simple.SimpleDatabase;
 import org.hswebframework.web.datasource.DataSourceHolder;
 import org.hswebframework.web.datasource.DatabaseType;
 import org.hswebframework.web.datasource.DynamicDataSource;

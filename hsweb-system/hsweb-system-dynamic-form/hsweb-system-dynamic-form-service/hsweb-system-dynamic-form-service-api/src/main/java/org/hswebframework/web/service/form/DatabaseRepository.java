@@ -1,6 +1,6 @@
 package org.hswebframework.web.service.form;
 
-import org.hsweb.ezorm.rdb.RDBDatabase;
+import org.hswebframework.ezorm.rdb.RDBDatabase;
 
 /**
  * 数据库仓库,用于获取默认数据库信息,指定数据源的信息以及当前激活的数据库信息

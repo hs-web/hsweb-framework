@@ -1,6 +1,6 @@
 package org.hswebframework.web.datasource;
 
-import org.hsweb.ezorm.rdb.executor.SqlExecutor;
+import org.hswebframework.ezorm.rdb.executor.SqlExecutor;
 import org.hswebframework.web.datasource.starter.AopDataSourceSwitcherAutoConfiguration;
 import org.hswebframework.web.datasource.switcher.DataSourceSwitcher;
 import org.springframework.beans.BeansException;

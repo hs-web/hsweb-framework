@@ -1,0 +1,21 @@
+spring:
+    aop:
+        auto: true
+        proxy-target-class: true
+    datasource:
+       url : jdbc:h2:file:./target/script-test
+       username : sa
+       password :
+       type: com.alibaba.druid.pool.DruidDataSource
+    cache:
+       type: simple
+
+logging:
+  level:
+      org.flowable: debug
+      org.hswebframework.web: debug
+#      org.activiti: debug
+mybatis:
+  dynamic-datasource: false
+server:
+  port: 8088

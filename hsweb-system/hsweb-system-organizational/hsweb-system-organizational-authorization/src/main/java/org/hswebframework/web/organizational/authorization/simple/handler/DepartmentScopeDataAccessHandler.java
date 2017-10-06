@@ -1,7 +1,7 @@
 package org.hswebframework.web.organizational.authorization.simple.handler;
 
-import org.hsweb.ezorm.core.param.Term;
-import org.hsweb.ezorm.core.param.TermType;
+import org.hswebframework.ezorm.core.param.Term;
+import org.hswebframework.ezorm.core.param.TermType;
 import org.hswebframework.web.authorization.define.AuthorizingContext;
 import org.hswebframework.web.entity.organizational.DepartmentEntity;
 import org.hswebframework.web.entity.organizational.OrganizationalEntity;

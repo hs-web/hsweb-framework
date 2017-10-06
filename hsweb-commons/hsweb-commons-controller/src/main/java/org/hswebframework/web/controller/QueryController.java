@@ -69,25 +69,23 @@ public interface QueryController<E, PK, Q extends Entity> {
     @GetMapping
     @AccessLogger("{dynamic_query}")
     @ApiOperation(value = "根据动态条件查询数据", responseReference = "get")
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "查询成功"),
-            @ApiResponse(code = 401, message = "未授权"),
-            @ApiResponse(code = 403, message = "无权限")
-    })
     default ResponseMessage<PagerResult<E>> list(Q param) {
         return ok(getService().selectPager(param));
     }
+
+    @Authorize(action = Permission.ACTION_QUERY)
+    @GetMapping("/count")
+    @AccessLogger("{dynamic_query}")
+    @ApiOperation(value = "根据动态条件统计数据", responseReference = "get")
+    default ResponseMessage<Integer> count(Q param) {
+        return ok(getService().count(param));
+    }
+
 
     @Authorize(action = Permission.ACTION_GET)
     @GetMapping(path = "/{id:.+}")
     @AccessLogger("{get_by_id}")
     @ApiOperation("根据主键查询数据")
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "查询成功"),
-            @ApiResponse(code = 401, message = "未授权"),
-            @ApiResponse(code = 403, message = "无权限"),
-            @ApiResponse(code = 404, message = "数据不存在")
-    })
     default ResponseMessage<E> getByPrimaryKey(@PathVariable PK id) {
         return ok(assertNotNull(getService().selectByPk(id)));
     }

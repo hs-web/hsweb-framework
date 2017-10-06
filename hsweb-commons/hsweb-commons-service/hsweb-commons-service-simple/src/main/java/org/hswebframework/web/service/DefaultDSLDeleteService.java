@@ -18,7 +18,7 @@
 
 package org.hswebframework.web.service;
 
-import org.hsweb.ezorm.core.dsl.Delete;
+import org.hswebframework.ezorm.core.dsl.Delete;
 import org.hswebframework.web.commons.entity.param.DeleteParamEntity;
 import org.hswebframework.web.dao.dynamic.DeleteByEntityDao;
 

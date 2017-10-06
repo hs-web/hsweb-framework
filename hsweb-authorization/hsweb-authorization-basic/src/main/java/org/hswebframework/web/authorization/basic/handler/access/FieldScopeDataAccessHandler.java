@@ -2,8 +2,8 @@ package org.hswebframework.web.authorization.basic.handler.access;
 
 import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.beanutils.PropertyUtilsBean;
-import org.hsweb.ezorm.core.param.Term;
-import org.hsweb.ezorm.core.param.TermType;
+import org.hswebframework.ezorm.core.param.Term;
+import org.hswebframework.ezorm.core.param.TermType;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.access.DataAccessConfig;
 import org.hswebframework.web.authorization.access.DataAccessHandler;

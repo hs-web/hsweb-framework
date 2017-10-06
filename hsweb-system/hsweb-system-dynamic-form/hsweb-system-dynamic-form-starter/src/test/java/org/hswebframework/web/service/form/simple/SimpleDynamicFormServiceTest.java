@@ -1,6 +1,6 @@
 package org.hswebframework.web.service.form.simple;
 
-import org.hsweb.ezorm.rdb.executor.SqlExecutor;
+import org.hswebframework.ezorm.rdb.executor.SqlExecutor;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.entity.form.DynamicFormColumnBindEntity;
 import org.hswebframework.web.entity.form.DynamicFormColumnEntity;

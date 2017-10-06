@@ -18,7 +18,7 @@
 
 package org.hswebframework.web.service;
 
-import org.hsweb.ezorm.core.dsl.Update;
+import org.hswebframework.ezorm.core.dsl.Update;
 import org.hswebframework.web.dao.dynamic.UpdateByEntityDao;
 import org.hswebframework.web.commons.entity.param.UpdateParamEntity;
 
