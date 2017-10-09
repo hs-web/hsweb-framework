@@ -14,8 +14,6 @@
     <modules>
         <module>hsweb-authorization-api</module>
         <module>hsweb-authorization-oauth2</module>
-        <module>hsweb-authorization-shiro</module>
-        <module>hsweb-authorization-security</module>
         <module>hsweb-authorization-basic</module>
         <module>hsweb-authorization-jwt</module>
     </modules>
