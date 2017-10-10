@@ -16,54 +16,54 @@ import java.util.List;
 public interface FeignUserTokenManager extends UserTokenManager {
 
     @Override
-    @GetMapping("/user-token/token/{token}")
-    UserToken getByToken(@PathVariable String token);
+    @RequestMapping(value = "/user-token/token/{token}",method = RequestMethod.GET)
+    UserToken getByToken(@PathVariable("token") String token);
 
     @Override
-    @GetMapping("/user-token/user/{userId}")
-    List<UserToken> getByUserId(@PathVariable String userId);
+    @RequestMapping(value = "/user-token/user/{userId}",method = RequestMethod.GET)
+    List<UserToken> getByUserId(@PathVariable("userId") String userId);
 
     @Override
-    @GetMapping("/user-token/user/{userId}/logged")
-    boolean userIsLoggedIn(@PathVariable String userId);
+    @RequestMapping(value = "/user-token/user/{userId}/logged",method = RequestMethod.GET)
+    boolean userIsLoggedIn(@PathVariable("userId") String userId);
 
     @Override
-    @GetMapping("/user-token/token/{token}/logged")
-    boolean tokenIsLoggedIn(@PathVariable String token);
+    @RequestMapping(value = "/user-token/token/{token}/logged",method = RequestMethod.GET)
+    boolean tokenIsLoggedIn(@PathVariable("token") String token);
 
     @Override
-    @GetMapping("/user-token/user/total")
+    @RequestMapping(value = "/user-token/user/total",method = RequestMethod.GET)
     long totalUser();
 
     @Override
-    @GetMapping("/user-token/token/total")
+    @RequestMapping(value = "/user-token/token/total",method = RequestMethod.GET)
     long totalToken();
 
     @Override
-    @GetMapping("/user-token}")
+    @RequestMapping(value = "/user-token",method = RequestMethod.GET)
     List<UserToken> allLoggedUser();
 
     @Override
-    @DeleteMapping("/user-token/user/{userId}")
-    void signOutByUserId(@PathVariable String userId);
+    @RequestMapping(value = "/user-token/user/{userId}",method = RequestMethod.DELETE)
+    void signOutByUserId(@PathVariable("userId") String userId);
 
     @Override
-    @DeleteMapping("/user-token/token/{token}")
-    void signOutByToken(@PathVariable String token);
+    @RequestMapping(value = "/user-token/token/{token}",method = RequestMethod.DELETE)
+    void signOutByToken(@PathVariable("token") String token);
 
     @Override
-    @PutMapping("/user-token/user/{userId}/{state}")
-    void changeUserState(@PathVariable String userId, @PathVariable TokenState state);
+    @RequestMapping(value = "/user-token/user/{userId}/{state}",method = RequestMethod.PUT)
+    void changeUserState(@PathVariable("userId") String userId, @PathVariable("state") TokenState state);
 
     @Override
-    @PutMapping("/user-token/token/{token}/{state}")
-    void changeTokenState(String token, TokenState state);
+    @RequestMapping(value = "/user-token/token/{token}/{state}",method = RequestMethod.PUT)
+    void changeTokenState(@PathVariable("token") String token, @PathVariable("state") TokenState state);
 
     @Override
-    @PostMapping("/user-token/{token}/{userId}/{maxInactiveInterval}")
-    UserToken signIn(@PathVariable String token, @PathVariable String userId, @PathVariable long maxInactiveInterval);
+    @RequestMapping(value = "/user-token/{token}/{userId}/{maxInactiveInterval}",method = RequestMethod.POST)
+    UserToken signIn(@PathVariable("token") String token, @PathVariable("userId") String userId, @PathVariable("maxInactiveInterval") long maxInactiveInterval);
 
     @Override
-    @GetMapping("/user-token/{token}/touch")
-    void touch(String token);
+    @RequestMapping(value = "/user-token/{token}/touch",method = RequestMethod.GET)
+    void touch(@PathVariable("token") String token);
 }

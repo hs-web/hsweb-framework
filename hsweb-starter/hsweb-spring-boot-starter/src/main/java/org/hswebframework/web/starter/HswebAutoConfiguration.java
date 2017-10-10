@@ -111,15 +111,16 @@ public class HswebAutoConfiguration {
                         return super.getDeserializer(type);
                     }
                     checkAutoType(type.getTypeName(), ((Class) type));
-
                     if (Modifier.isAbstract(classType.getModifiers()) || Modifier.isInterface(classType.getModifiers())) {
-                        if (entityFactory != null && (Entity.class.isAssignableFrom(classType) || Model.class.isAssignableFrom(classType))) {
-                            return new JavaBeanDeserializer(this, entityFactory.getInstanceType(classType), type);
+                        Class realType;
+                        if (entityFactory != null&& (realType=entityFactory.getInstanceType(classType))!=null) {
+                            return new JavaBeanDeserializer(this, realType, type);
                         }
                     } else {
                         return new JavaBeanDeserializer(this, classType);
                     }
                 }
+
                 return super.getDeserializer(type);
             }
         };

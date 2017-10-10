@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: service01
+  cloud:
+    discovery:
+      client:
+        simple:
+          local:
+            service-id: service01

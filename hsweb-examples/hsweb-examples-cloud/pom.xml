@@ -14,6 +14,7 @@
     <modules>
         <module>hsweb-examples-cloud-gateway</module>
         <module>hsweb-examples-cloud-user-center</module>
+        <module>hsweb-examples-cloud-service01</module>
     </modules>
 
     <dependencyManagement>

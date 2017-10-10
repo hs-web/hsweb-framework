@@ -12,6 +12,10 @@ zuul:
     user-center:
       path: /user-center/**
       service-id: user-center
+    service-1:
+      path: /service-1/**
+      service-id: service01
+  add-host-header: true
 ribbon:
   eureka:
     enabled: true
