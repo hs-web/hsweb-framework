@@ -16,6 +16,7 @@
         <module>hsweb-authorization-oauth2</module>
         <module>hsweb-authorization-basic</module>
         <module>hsweb-authorization-jwt</module>
+        <module>hsweb-authorization-cloud</module>
     </modules>
 
 

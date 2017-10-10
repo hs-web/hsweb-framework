@@ -95,6 +95,7 @@ public class SimpleDatabaseManagerService implements DatabaseManagerService {
 
     @Override
     public Map<ObjectMetadata.ObjectType, List<ObjectMetadata>> getMetas(String datasourceId) {
+
         return null;
     }
 }

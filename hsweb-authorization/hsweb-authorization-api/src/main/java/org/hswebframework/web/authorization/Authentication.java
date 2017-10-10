@@ -43,7 +43,7 @@ public interface Authentication extends Serializable {
      *   //如果权限信息不存在将抛出{@link NoSuchElementException}建议使用下面的方式获取
      *   Authentication auth=Authentication.current().orElse(null);
      *   //或者
-     *   Authentication auth=Authentication.current().orElseThrow(AuthorizeException::new);
+     *   Authentication auth=Authentication.current().orElseThrow(UnAuthorizedException::new);
      * </pre>
      *
      * @return 返回Optional对象进行操作

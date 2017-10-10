@@ -6,8 +6,6 @@ import org.hswebframework.web.database.manager.SqlExecuteResult;
 import java.util.List;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public interface TransactionExecutor extends Runnable {
