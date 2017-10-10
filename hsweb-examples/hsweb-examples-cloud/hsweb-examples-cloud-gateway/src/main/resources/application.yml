@@ -1,0 +1,23 @@
+server:
+  compression:
+    enabled: true
+  port: 8761
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+zuul:
+  prefix: /api
+  routes:
+    user-center:
+      path: /user-center/**
+      service-id: user-center
+ribbon:
+  eureka:
+    enabled: true
+spring:
+  application:
+    name: gateway
+#user-center:
+#  ribbon:
+#    listOfServers: 127.0.0.1:9001

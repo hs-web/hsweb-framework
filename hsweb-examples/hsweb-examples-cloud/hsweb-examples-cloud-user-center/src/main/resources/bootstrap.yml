@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: user-center
+  cloud:
+    discovery:
+      client:
+        simple:
+          local:
+            service-id: user-center
