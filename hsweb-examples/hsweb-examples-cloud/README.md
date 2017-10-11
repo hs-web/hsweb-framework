@@ -18,7 +18,7 @@
 
 分别进入3个模块,执行`mvn spring-boot:run`
 
-## 2. docker
+## 3. docker
 
 1. 执行 `./build-docker.sh` 构建docker镜像
 
