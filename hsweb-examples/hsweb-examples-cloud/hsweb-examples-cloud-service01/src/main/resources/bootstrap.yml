@@ -7,3 +7,7 @@ spring:
         simple:
           local:
             service-id: service01
+eureka:
+  client:
+    service-url:
+        defaultZone: http://${eureka-host:localhost}:${eureka-port:8761}/eureka/

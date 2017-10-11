@@ -4,8 +4,8 @@ server:
   port: 8761
 eureka:
   client:
-    register-with-eureka: true
     fetch-registry: true
+    register-with-eureka: true
 zuul:
   prefix: /api
   routes:
@@ -15,7 +15,9 @@ zuul:
     service-1:
       path: /service-1/**
       service-id: service01
-  add-host-header: true
+  sensitive-headers: Cookies
+  host:
+    connect-timeout-millis: 10000
 ribbon:
   eureka:
     enabled: true

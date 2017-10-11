@@ -1,12 +1,12 @@
 package org.hswebframework.web.examples.cloud.user;
 
-import org.h2.command.Command;
 import org.hswebframework.web.entity.authorization.UserEntity;
 import org.hswebframework.web.service.authorization.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.netflix.hystrix.EnableHystrix;
 import org.springframework.context.annotation.Configuration;
@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Configuration;
 @EnableDiscoveryClient
 @EnableHystrix
 @Configuration
+@EnableCaching
 public class UserCenterApplication implements CommandLineRunner{
     public static void main(String[] args) {
         SpringApplication.run(UserCenterApplication.class, args);
