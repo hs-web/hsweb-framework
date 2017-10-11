@@ -14,7 +14,7 @@
 2. 执行`hsweb-examples-cloud-service01`模块中的 `Service01Application`
 3. 执行`hsweb-examples-cloud-user-center`模块中的 `UserCenterApplication`
 
-##2. 使用spring-boot插件启动
+## 2. 使用spring-boot插件启动
 
 分别进入3个模块,执行`mvn spring-boot:run`
 
