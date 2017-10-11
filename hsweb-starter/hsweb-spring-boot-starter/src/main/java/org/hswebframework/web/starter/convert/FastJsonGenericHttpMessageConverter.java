@@ -9,11 +9,9 @@ import com.alibaba.fastjson.serializer.SerializeFilter;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.serializer.SimplePropertyPreFilter;
 import org.hswebframework.web.ThreadLocalUtils;
-import org.hswebframework.web.commons.entity.Entity;
-import org.hswebframework.web.commons.entity.factory.EntityFactory;
-import org.hswebframework.web.commons.model.Model;
 import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.utils.StringUtils;
+import org.hswebframework.web.convert.CustomMessageConverter;
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
@@ -36,7 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class FastJsonGenericHttpMessageConverter extends AbstractGenericHttpMessageConverter<Object> implements Ordered{
+public class FastJsonGenericHttpMessageConverter extends AbstractGenericHttpMessageConverter<Object> implements Ordered {
 
     public final static Charset UTF8 = Charset.forName("UTF-8");
 
@@ -44,24 +42,20 @@ public class FastJsonGenericHttpMessageConverter extends AbstractGenericHttpMess
 
     private SerializerFeature[] features = new SerializerFeature[0];
 
-    private EntityFactory entityFactory;
+    private List<CustomMessageConverter> converters;
 
     public FastJsonGenericHttpMessageConverter() {
         super(new MediaType("application", "json", UTF8),
                 new MediaType("application", "*+json", UTF8));
     }
 
+    public void setConverters(List<CustomMessageConverter> converters) {
+        this.converters = converters;
+    }
+
     @Override
     public int getOrder() {
         return Ordered.HIGHEST_PRECEDENCE;
-    }
-
-    public void setEntityFactory(EntityFactory entityFactory) {
-        this.entityFactory = entityFactory;
-    }
-
-    public EntityFactory getEntityFactory() {
-        return entityFactory;
     }
 
     @Override
@@ -72,7 +66,7 @@ public class FastJsonGenericHttpMessageConverter extends AbstractGenericHttpMess
 
     @Override
     public boolean canRead(Type type, Class<?> contextClass, MediaType mediaType) {
-        return  type instanceof ParameterizedType&& super.canRead(type, contextClass, mediaType);
+        return type instanceof ParameterizedType && super.canRead(type, contextClass, mediaType);
     }
 
     @Override
@@ -103,14 +97,18 @@ public class FastJsonGenericHttpMessageConverter extends AbstractGenericHttpMess
 
     public Object readByBytes(Type type, byte[] bytes) {
         if (type == String.class) return new String(bytes, charset);
-//        if (type instanceof Class) {
-//            Class typeClass = ((Class) type);
-//            if (entityFactory != null && (Entity.class.isAssignableFrom(typeClass) || Model.class.isAssignableFrom(typeClass))) {
-//                @SuppressWarnings("unchecked")
-//                Class tmp = entityFactory.getInstanceType(typeClass);
-//                if (tmp != null) type = tmp;
-//            }
-//        }
+        if (type instanceof Class) {
+            Class clazz = ((Class) type);
+            if (null != converters) {
+                CustomMessageConverter converter = converters.stream()
+                        .filter(cvt -> cvt.support(clazz))
+                        .findFirst()
+                        .orElse(null);
+                if (converter != null) {
+                    return converter.convert(clazz, bytes);
+                }
+            }
+        }
         return JSON.parseObject(bytes, 0, bytes.length, charset.newDecoder(), type);
     }
 

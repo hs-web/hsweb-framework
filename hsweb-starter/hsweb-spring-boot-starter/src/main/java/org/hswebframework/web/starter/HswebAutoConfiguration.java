@@ -25,10 +25,9 @@ import com.alibaba.fastjson.parser.deserializer.JavaBeanDeserializer;
 import com.alibaba.fastjson.parser.deserializer.ObjectDeserializer;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import org.hswebframework.web.ThreadLocalUtils;
-import org.hswebframework.web.commons.entity.Entity;
 import org.hswebframework.web.commons.entity.factory.EntityFactory;
 import org.hswebframework.web.commons.entity.factory.MapperEntityFactory;
-import org.hswebframework.web.commons.model.Model;
+import org.hswebframework.web.convert.CustomMessageConverter;
 import org.hswebframework.web.starter.convert.FastJsonGenericHttpMessageConverter;
 import org.hswebframework.web.starter.convert.FastJsonHttpMessageConverter;
 import org.hswebframework.web.starter.entity.EntityFactoryInitConfiguration;
@@ -77,19 +76,27 @@ public class HswebAutoConfiguration {
     @Autowired
     private EntityProperties entityProperties;
 
+    @Autowired(required = false)
+    private List<CustomMessageConverter> converters;
+
     @Bean
     @Primary
     @ConfigurationProperties(prefix = "fastjson")
-    public FastJsonHttpMessageConverter fastJsonHttpMessageConverter(@Autowired(required = false) EntityFactory entityFactory) {
+    public FastJsonHttpMessageConverter fastJsonHttpMessageConverter() {
         FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();
-        converter.setEntityFactory(entityFactory);
+        converter.setFeatures(
+                SerializerFeature.WriteNullListAsEmpty,
+                SerializerFeature.WriteNullNumberAsZero,
+                SerializerFeature.WriteNullBooleanAsFalse
+        );
+        converter.setConverters(converters);
         return converter;
     }
 
     @Bean
     @Primary
     @ConfigurationProperties(prefix = "fastjson")
-    public FastJsonGenericHttpMessageConverter fastJsonGenericHttpMessageConverter(@Autowired(required = false) EntityFactory entityFactory) {
+    public FastJsonGenericHttpMessageConverter fastJsonGenericHttpMessageConverter(EntityFactory entityFactory) {
         JSON.DEFAULT_PARSER_FEATURE |= Feature.DisableFieldSmartMatch.getMask();
         FastJsonGenericHttpMessageConverter converter = new FastJsonGenericHttpMessageConverter();
         converter.setFeatures(
@@ -97,7 +104,7 @@ public class HswebAutoConfiguration {
                 SerializerFeature.WriteNullNumberAsZero,
                 SerializerFeature.WriteNullBooleanAsFalse
         );
-        converter.setEntityFactory(entityFactory);
+        converter.setConverters(converters);
         ParserConfig.global = new ParserConfig() {
             @Override
             public ObjectDeserializer getDeserializer(Type type) {
@@ -113,7 +120,7 @@ public class HswebAutoConfiguration {
                     checkAutoType(type.getTypeName(), ((Class) type));
                     if (Modifier.isAbstract(classType.getModifiers()) || Modifier.isInterface(classType.getModifiers())) {
                         Class realType;
-                        if (entityFactory != null&& (realType=entityFactory.getInstanceType(classType))!=null) {
+                        if (entityFactory != null && (realType = entityFactory.getInstanceType(classType)) != null) {
                             return new JavaBeanDeserializer(this, realType, type);
                         }
                     } else {

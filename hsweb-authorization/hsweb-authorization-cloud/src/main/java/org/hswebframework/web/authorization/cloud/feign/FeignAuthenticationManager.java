@@ -8,16 +8,13 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-/**
- * Created by zhouhao on 2017/10/10.
- */
 @FeignClient(name = "${hsweb.cloud.user-center.name:user-center}")
 public interface FeignAuthenticationManager extends AuthenticationManager {
     @Override
-    @RequestMapping(value = "/user-auth/{userId}",method = RequestMethod.GET)
-     Authentication getByUserId(@PathVariable("userId") String userId);
+    @RequestMapping(value = "/user-auth/{userId}", method = RequestMethod.GET)
+    Authentication getByUserId(@PathVariable("userId") String userId);
 
     @Override
-    @RequestMapping(value = "/user-auth",method = RequestMethod.PUT)
-     Authentication sync(Authentication authentication);
+    @RequestMapping(value = "/user-auth", method = RequestMethod.PUT)
+    Authentication sync(Authentication authentication);
 }

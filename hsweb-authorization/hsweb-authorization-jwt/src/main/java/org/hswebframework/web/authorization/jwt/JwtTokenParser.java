@@ -2,6 +2,7 @@ package org.hswebframework.web.authorization.jwt;
 
 import com.alibaba.fastjson.JSON;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import org.hswebframework.web.authorization.basic.web.ParsedToken;
 import org.hswebframework.web.authorization.basic.web.UserTokenParser;
@@ -47,6 +48,8 @@ public class JwtTokenParser implements UserTokenParser {
                     return null;
                 }
                 return JSON.parseObject(claims.getSubject(), DefaultAuthorizedToken.class);
+            } catch (ExpiredJwtException e) {
+                return null;
             } catch (Exception e) {
                 logger.error("parse token [{}] error", headerToken, e);
                 return null;
