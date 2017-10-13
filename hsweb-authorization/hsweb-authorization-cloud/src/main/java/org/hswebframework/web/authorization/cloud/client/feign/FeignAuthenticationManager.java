@@ -10,10 +10,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @FeignClient(name = "${hsweb.cloud.user-center.name:user-center}")
 public interface FeignAuthenticationManager extends AuthenticationManager {
     @Override
-    @RequestMapping(value = "/user-auth/{userId}", method = RequestMethod.GET)
+    @RequestMapping(value = "${hsweb.cloud.user-center.prefix:/}user-auth/{userId}", method = RequestMethod.GET)
     Authentication getByUserId(@PathVariable("userId") String userId);
 
     @Override
-    @RequestMapping(value = "/user-auth", method = RequestMethod.PUT)
+    @RequestMapping(value = "${hsweb.cloud.user-center.prefix:/}user-auth", method = RequestMethod.PUT)
     Authentication sync(Authentication authentication);
 }

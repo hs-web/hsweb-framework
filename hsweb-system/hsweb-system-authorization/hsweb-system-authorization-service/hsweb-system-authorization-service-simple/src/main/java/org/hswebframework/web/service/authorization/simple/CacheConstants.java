@@ -18,6 +18,8 @@
 
 package org.hswebframework.web.service.authorization.simple;
 
+import org.hswebframework.web.authorization.AuthenticationManager;
+
 /**
  * 缓存所需常量
  *
@@ -28,6 +30,6 @@ public interface CacheConstants {
 
     String USER_CACHE_NAME = "user-";
 
-    String USER_AUTH_CACHE_NAME = "user-auth-";
+    String USER_AUTH_CACHE_NAME = AuthenticationManager.USER_AUTH_CACHE_NAME;
 
 }

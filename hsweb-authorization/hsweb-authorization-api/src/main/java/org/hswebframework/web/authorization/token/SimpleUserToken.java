@@ -98,7 +98,7 @@ public class SimpleUserToken implements UserToken {
         requestTimesCounter.set(requestTimes);
     }
 
-    void touch() {
+    public void touch() {
         requestTimesCounter.addAndGet(1);
         lastRequestTime = System.currentTimeMillis();
     }

@@ -8,7 +8,7 @@ import org.hswebframework.web.authorization.access.DataAccessHandler;
 import org.hswebframework.web.authorization.basic.handler.DefaultAuthorizingHandler;
 import org.hswebframework.web.authorization.basic.handler.access.DefaultDataAccessController;
 import org.hswebframework.web.authorization.basic.web.*;
-import org.hswebframework.web.authorization.token.MemoryUserTokenManager;
+import org.hswebframework.web.authorization.token.DefaultUserTokenManager;
 import org.hswebframework.web.authorization.token.UserTokenManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -61,7 +61,7 @@ public class AuthorizingHandlerAutoConfiguration {
     @ConditionalOnMissingBean(UserTokenManager.class)
     @ConfigurationProperties(prefix = "hsweb.authorize")
     public UserTokenManager userTokenManager() {
-        return new MemoryUserTokenManager();
+        return new DefaultUserTokenManager();
     }
 
     @Bean

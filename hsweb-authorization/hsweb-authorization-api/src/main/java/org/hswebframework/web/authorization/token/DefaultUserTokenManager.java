@@ -32,9 +32,17 @@ import java.util.stream.Collectors;
  * @author zhouhao
  * @since 3.0
  */
-public class MemoryUserTokenManager implements UserTokenManager {
+public class DefaultUserTokenManager implements UserTokenManager {
 
-    private final ConcurrentMap<String, SimpleUserToken> tokenUserStorage = new ConcurrentHashMap<>(256);
+    protected final ConcurrentMap<String, SimpleUserToken> tokenUserStorage;
+
+    public DefaultUserTokenManager() {
+        this(new ConcurrentHashMap<>(256));
+    }
+
+    public DefaultUserTokenManager(ConcurrentMap<String, SimpleUserToken> storage) {
+        tokenUserStorage = storage;
+    }
 
     //令牌超时事件,默认3600秒
     private long timeout = 3600;
@@ -178,9 +186,9 @@ public class MemoryUserTokenManager implements UserTokenManager {
 
     @Override
     public void touch(String token) {
-        SimpleUserToken detail = tokenUserStorage.get(token);
-        if (null != detail)
-            detail.touch();
+        SimpleUserToken userToken = tokenUserStorage.get(token);
+        if (null != userToken)
+            userToken.touch();
     }
 
 }

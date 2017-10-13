@@ -11,10 +11,10 @@ hsweb:
     app:
       name: 权限管理测试
       version: 3.0.0
-#    cloud:
-#      user-center:
-#        name: gateway
-#        prefix: /api/user-center/
+    cloud:
+      user-center:
+        name: gateway
+        prefix: /api/user-center/
 server:
     port: 9001
 logging:

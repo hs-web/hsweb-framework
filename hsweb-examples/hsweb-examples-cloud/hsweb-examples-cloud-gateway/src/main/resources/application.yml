@@ -18,6 +18,7 @@ zuul:
   sensitive-headers: Cookies
   host:
     connect-timeout-millis: 10000
+
 ribbon:
   eureka:
     enabled: true

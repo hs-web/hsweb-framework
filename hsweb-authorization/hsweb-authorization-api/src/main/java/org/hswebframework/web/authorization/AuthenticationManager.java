@@ -28,6 +28,8 @@ import java.util.Map;
  * @see 3.0
  */
 public interface AuthenticationManager {
+    String USER_AUTH_CACHE_NAME = "user-auth-";
+
     /**
      * 根据用户ID获取权限信息
      *
