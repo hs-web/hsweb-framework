@@ -22,14 +22,11 @@
         <module>hsweb-system-cli</module>
         <module>hsweb-system-all</module>
         <module>hsweb-system-organizational</module>
-        <module>hsweb-system-classified</module>
         <module>hsweb-system-file</module>
         <module>hsweb-system-template</module>
         <module>hsweb-system-script</module>
         <module>hsweb-system-history</module>
         <module>hsweb-system-dictionary</module>
-        <module>hsweb-system-document</module>
-        <module>hsweb-system-crawler</module>
         <module>hsweb-system-oauth2-server</module>
         <module>hsweb-system-oauth2-client</module>
     </modules>
