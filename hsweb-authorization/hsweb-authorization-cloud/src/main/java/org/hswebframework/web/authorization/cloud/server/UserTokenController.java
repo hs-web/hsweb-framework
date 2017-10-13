@@ -100,4 +100,5 @@ public class UserTokenController {
     public Authentication userAuthInfo(@PathVariable String userId){
         return authenticationManager.getByUserId(userId);
     }
+
 }

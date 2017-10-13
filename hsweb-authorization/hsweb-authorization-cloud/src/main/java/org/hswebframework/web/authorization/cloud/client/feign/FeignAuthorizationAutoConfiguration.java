@@ -11,5 +11,5 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @EnableFeignClients("org.hswebframework.web.authorization.cloud.client.feign")
-public class FeignAutoConfiguration {
+public class FeignAuthorizationAutoConfiguration {
 }

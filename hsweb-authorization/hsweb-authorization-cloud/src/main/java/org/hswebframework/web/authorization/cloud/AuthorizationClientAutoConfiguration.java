@@ -28,8 +28,6 @@ public class AuthorizationClientAutoConfiguration implements ImportSelector {
                 case Feign:
                     classNames.add("org.hswebframework.web.authorization.cloud.client.feign.FeignAutoConfiguration");
                     break;
-                case Redis:
-                    throw new UnsupportedOperationException("redis not support yet");
                 case Auto:
                 default:
                     try {
@@ -37,7 +35,7 @@ public class AuthorizationClientAutoConfiguration implements ImportSelector {
                         classNames.add("org.hswebframework.web.authorization.cloud.client.feign.FeignAutoConfiguration");
                     } catch (ClassNotFoundException e) {
                         // load redis not support yet
-                        throw new UnsupportedOperationException("feign client ");
+                        throw new UnsupportedOperationException("please import and config feign");
                     }
                     break;
             }

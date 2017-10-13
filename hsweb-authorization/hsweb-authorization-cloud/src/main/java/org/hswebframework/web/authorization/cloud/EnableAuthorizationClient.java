@@ -19,6 +19,6 @@ public @interface EnableAuthorizationClient {
     Type value() default Type.Auto;
 
     enum Type {
-        Auto, Feign, Redis
+        Auto, Feign
     }
 }
