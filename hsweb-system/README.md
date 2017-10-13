@@ -8,11 +8,9 @@
 |[hsweb-system-authorization](hsweb-system-authorization) |权限管理| 90%|
 |[hsweb-system-cli](hsweb-system-cli)|在线命令行功能,在线执行命令| 0%|
 |[hsweb-system-config](hsweb-system-config)|系统配置功能| 60%|
-|[hsweb-system-crawler](hsweb-system-crawler)|爬虫功能| 0%|
 |[hsweb-system-database-manager](hsweb-system-database-manager)|在线数据库维护| 0%|
 |[hsweb-system-datasource](hsweb-system-datasource)|动态数据源管理| 0%|
 |[hsweb-system-dictionary](hsweb-system-dictionary)| 数据字典功能|  80%|
-|[hsweb-system-document](hsweb-system-document)|文档管理功能| 0%|
 |[hsweb-system-dynamic-form](hsweb-system-dynamic-form)|动态表单| 80%|
 |[hsweb-system-explorer](hsweb-system-menu)|**系统菜单**| 80%|
 |[hsweb-system-file](hsweb-system-file)|文件管理| 100%|

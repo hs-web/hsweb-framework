@@ -68,7 +68,7 @@ import java.util.List;
  * @author zhouhao
  */
 @Configuration
-@ComponentScan("org.hswebframework.web")
+//@ComponentScan("org.hswebframework.web")
 @EnableConfigurationProperties(EntityProperties.class)
 @ImportAutoConfiguration(EntityFactoryInitConfiguration.class)
 public class HswebAutoConfiguration {
@@ -197,6 +197,11 @@ public class HswebAutoConfiguration {
         public DataSource dataSource(DataSourceProperties properties) {
             return properties.initializeDataSourceBuilder().build();
         }
+    }
+
+    @Bean
+    public RestControllerExceptionTranslator restControllerExceptionTranslator(){
+        return new RestControllerExceptionTranslator();
     }
 
 }

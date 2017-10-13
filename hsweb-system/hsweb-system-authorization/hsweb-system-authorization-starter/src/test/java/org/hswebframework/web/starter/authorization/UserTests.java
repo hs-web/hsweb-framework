@@ -32,14 +32,16 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 import java.sql.SQLException;
 
 /**
- * TODO 完成注释
  *
  * @author zhouhao
  */
+@Configuration
+@Import(UserTests.Config.class)
 public class UserTests extends SimpleWebApplicationTests {
 
     @Configuration

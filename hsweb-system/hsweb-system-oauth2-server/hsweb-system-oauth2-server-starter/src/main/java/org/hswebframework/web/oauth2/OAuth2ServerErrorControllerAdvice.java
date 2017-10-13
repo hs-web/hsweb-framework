@@ -8,8 +8,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 @RestControllerAdvice

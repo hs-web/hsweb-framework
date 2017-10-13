@@ -26,6 +26,7 @@ import org.hswebframework.web.service.oauth2.client.simple.request.builder.Simpl
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 
@@ -34,6 +35,8 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @ConditionalOnMissingBean(OAuth2RequestBuilderFactory.class)
+@ComponentScan({"org.hswebframework.web.service.oauth2.client.simple"
+        , "org.hswebframework.web.authorization.oauth2.controller"})
 public class OAuth2ClientAutoConfiguration {
 
     @Bean

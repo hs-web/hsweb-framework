@@ -36,14 +36,14 @@ import org.hswebframework.web.commons.entity.factory.EntityFactory;
 import org.hswebframework.web.dao.oauth2.AuthorizationCodeDao;
 import org.hswebframework.web.dao.oauth2.OAuth2AccessDao;
 import org.hswebframework.web.dao.oauth2.OAuth2ClientDao;
-import org.hswebframework.web.oauth2.server.simple.*;
 import org.hswebframework.web.service.authorization.UserService;
+import org.hswebframework.web.service.oauth2.server.simple.*;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 
@@ -53,6 +53,8 @@ import org.springframework.context.annotation.Configuration;
  * @author zhouhao
  */
 @Configuration
+@ComponentScan({"org.hswebframework.web.service.oauth2.server.simple"
+        , "org.hswebframework.web.authorization.oauth2.controller"})
 public class OAuth2GranterAutoConfiguration {
 
     @Autowired(required = false)
@@ -65,7 +67,6 @@ public class OAuth2GranterAutoConfiguration {
     public OAuth2ServerErrorControllerAdvice oAuth2ServerErrorControllerAdvice() {
         return new OAuth2ServerErrorControllerAdvice();
     }
-
 
     @ConditionalOnMissingBean(AuthorizationCodeService.class)
     @Bean

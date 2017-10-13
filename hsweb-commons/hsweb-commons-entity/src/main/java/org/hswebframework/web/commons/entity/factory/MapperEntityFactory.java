@@ -178,7 +178,10 @@ public class MapperEntityFactory implements EntityFactory {
         mapper = initCache(beanClass);
         if (mapper != null)
             return mapper.getTarget();
-        return beanClass;
+
+        return Modifier.isAbstract(beanClass.getModifiers())
+                || Modifier.isInterface(beanClass.getModifiers())
+                ? null : beanClass;
     }
 
     public void setDefaultMapperFactory(DefaultMapperFactory defaultMapperFactory) {

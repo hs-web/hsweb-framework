@@ -1,6 +1,7 @@
 package org.hswebframework.web.examples.cloud.service;
 
 
+import org.hswebframework.web.authorization.cloud.EnableAuthorizationClient;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
@@ -12,7 +13,8 @@ import org.springframework.context.annotation.Configuration;
 @EnableDiscoveryClient
 @EnableHystrix
 @Configuration
-@EnableFeignClients("org.hswebframework.web.authorization.cloud.feign")
+@EnableFeignClients("org.hswebframework.web.authorization.cloud.client.feign")
+@EnableAuthorizationClient
 public class Service01Application {
 
     public static void main(String[] args) {

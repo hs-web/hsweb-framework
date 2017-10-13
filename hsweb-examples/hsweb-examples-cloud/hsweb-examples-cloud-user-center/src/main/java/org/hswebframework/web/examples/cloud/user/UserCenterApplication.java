@@ -1,5 +1,6 @@
 package org.hswebframework.web.examples.cloud.user;
 
+import org.hswebframework.web.authorization.cloud.EnableAuthorizationServer;
 import org.hswebframework.web.entity.authorization.UserEntity;
 import org.hswebframework.web.service.authorization.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import org.springframework.context.annotation.Configuration;
 @EnableHystrix
 @Configuration
 @EnableCaching
+@EnableAuthorizationServer
 public class UserCenterApplication implements CommandLineRunner{
     public static void main(String[] args) {
         SpringApplication.run(UserCenterApplication.class, args);

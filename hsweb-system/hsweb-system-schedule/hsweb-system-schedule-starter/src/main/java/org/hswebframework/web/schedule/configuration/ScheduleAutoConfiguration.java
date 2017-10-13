@@ -1,7 +1,5 @@
 package org.hswebframework.web.schedule.configuration;
 
-import org.hswebframework.web.datasource.DataSourceHolder;
-import org.hswebframework.web.datasource.DatabaseType;
 import org.hswebframework.web.service.schedule.simple.DynamicJobFactory;
 import org.quartz.Calendar;
 import org.quartz.Scheduler;
@@ -13,6 +11,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.quartz.AdaptableJobFactory;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
@@ -22,13 +21,13 @@ import javax.sql.DataSource;
 import java.util.Map;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 @Configuration
 @EnableConfigurationProperties(SchedulerProperties.class)
 @ConditionalOnMissingBean({Scheduler.class, SchedulerFactoryBean.class})
+@ComponentScan({"org.hswebframework.web.service.schedule.simple"
+        , "org.hswebframework.web.controller.schedule"})
 public class ScheduleAutoConfiguration {
     @Autowired
     private SchedulerProperties schedulerProperties;

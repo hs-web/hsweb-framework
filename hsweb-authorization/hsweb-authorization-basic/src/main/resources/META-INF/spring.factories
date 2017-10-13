@@ -1,3 +1,5 @@
 # Auto Configure
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-org.hswebframework.web.authorization.basic.configuration.CorsAutoConfiguration
+org.hswebframework.web.authorization.basic.configuration.CorsAutoConfiguration,\
+org.hswebframework.web.authorization.basic.configuration.AopAuthorizeAutoConfiguration,\
+org.hswebframework.web.authorization.basic.configuration.AuthorizingHandlerAutoConfiguration
