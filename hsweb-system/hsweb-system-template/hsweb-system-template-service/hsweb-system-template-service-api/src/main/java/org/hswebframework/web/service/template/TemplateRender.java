@@ -1,4 +1,4 @@
-package org.hswebframework.web.service.tempalte;
+package org.hswebframework.web.service.template;
 
 /**
  * 模板渲染器

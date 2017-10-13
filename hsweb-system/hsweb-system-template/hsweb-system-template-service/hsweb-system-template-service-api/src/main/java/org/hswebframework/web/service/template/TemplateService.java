@@ -1,6 +1,6 @@
-package org.hswebframework.web.service.tempalte;
+package org.hswebframework.web.service.template;
 
-import org.hswebframework.web.entity.tempalte.TemplateEntity;
+import org.hswebframework.web.entity.template.TemplateEntity;
 import org.hswebframework.web.service.CrudService;
 
 /**

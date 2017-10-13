@@ -1,10 +1,10 @@
-package org.hswebframework.web.service.tempalte.simple;
+package org.hswebframework.web.service.template.simple;
 
-import org.hswebframework.web.dao.tempalte.TemplateDao;
-import org.hswebframework.web.entity.tempalte.TemplateEntity;
+import org.hswebframework.web.dao.template.TemplateDao;
+import org.hswebframework.web.entity.template.TemplateEntity;
 import org.hswebframework.web.service.GenericEntityService;
 import org.hswebframework.web.id.IDGenerator;
-import org.hswebframework.web.service.tempalte.TemplateService;
+import org.hswebframework.web.service.template.TemplateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

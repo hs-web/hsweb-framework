@@ -1,7 +1,7 @@
-package org.hswebframework.web.dao.tempalte;
+package org.hswebframework.web.dao.template;
 
 import org.hswebframework.web.dao.CrudDao;
-import org.hswebframework.web.entity.tempalte.TemplateEntity;
+import org.hswebframework.web.entity.template.TemplateEntity;
 
 /**
 *  模板 DAO接口

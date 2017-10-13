@@ -1,4 +1,4 @@
-package org.hswebframework.web.entity.tempalte;
+package org.hswebframework.web.entity.template;
 import org.hswebframework.web.commons.entity.SimpleGenericEntity;
 
 /**
