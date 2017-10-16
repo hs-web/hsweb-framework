@@ -67,15 +67,17 @@ public class TreeNode<V> implements Serializable {
     public List<V> getAllValue() {
         List<V> values = new ArrayList<>(children != null ? children.size() + 1 : 1);
         values.add(value);
-        if (null != children)
+        if (null != children) {
             children.stream().map(TreeNode::getAllValue).flatMap(List::stream).forEach(values::add);
+        }
         return values;
     }
 
     @Override
     public int hashCode() {
-        if (value != null)
+        if (value != null) {
             return value.hashCode();
+        }
         return 0;
     }
 
@@ -89,8 +91,9 @@ public class TreeNode<V> implements Serializable {
 
     public List<V> getAllValue(Predicate<TreeNode<V>> filter) {
         List<V> values = new ArrayList<>(getChildren().size() + 1);
-        if (filter.test(this))
+        if (filter.test(this)) {
             values.add(value);
+        }
         children.stream().filter(filter).map(val -> val.getAllValue(filter)).flatMap(List::stream).forEach(values::add);
         return values;
     }

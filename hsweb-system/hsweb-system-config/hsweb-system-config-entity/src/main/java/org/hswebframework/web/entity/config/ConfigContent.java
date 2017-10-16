@@ -46,24 +46,32 @@ public class ConfigContent implements CloneableEntity {
 
     public Number getNumber(Number defaultValue) {
         Object val = getValue();
-        if (null == val) return defaultValue;
-        if (val instanceof Number) return ((Number) val);
-        if (val instanceof String)
+        if (null == val) {
+            return defaultValue;
+        }
+        if (val instanceof Number) {
+            return ((Number) val);
+        }
+        if (val instanceof String) {
             return new BigDecimal(((String) val));
+        }
         return defaultValue;
     }
 
     public Object getValue(Object defaultValue) {
         Object val = getValue();
-        if (val == null) return defaultValue;
+        if (val == null) {
+            return defaultValue;
+        }
         return val;
     }
 
     @Override
     public ConfigContent clone() {
         Object val = value;
-        if (val instanceof CloneableEntity)
+        if (val instanceof CloneableEntity) {
             val = ((CloneableEntity) val).clone();
+        }
         return new ConfigContent(key, val, comment);
     }
 }

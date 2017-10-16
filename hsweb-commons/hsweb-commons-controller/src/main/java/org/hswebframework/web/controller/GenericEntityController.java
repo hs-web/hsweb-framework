@@ -33,6 +33,7 @@ import org.hswebframework.web.service.CrudService;
 public interface GenericEntityController<E extends GenericEntity<PK>, PK, Q extends Entity, M>
         extends CrudController<E, PK, Q, M> {
 
+    @Override
     CrudService<E, PK> getService();
 
 }

@@ -57,14 +57,17 @@ public class SimpleDictionaryItemEntity extends SimpleTreeSortSupportEntity<Stri
         return children;
     }
 
+    @Override
     public void setChildren(List<DictionaryItemEntity> children) {
         this.children = children;
     }
 
+    @Override
     public String getTextExpression() {
         return textExpression;
     }
 
+    @Override
     public void setTextExpression(String textExpression) {
         this.textExpression = textExpression;
     }
@@ -82,6 +85,7 @@ public class SimpleDictionaryItemEntity extends SimpleTreeSortSupportEntity<Stri
     /**
      * @return 字典id
      */
+    @Override
     public String getDictId() {
         return this.dictId;
     }
@@ -89,6 +93,7 @@ public class SimpleDictionaryItemEntity extends SimpleTreeSortSupportEntity<Stri
     /**
      * 设置 字典id
      */
+    @Override
     public void setDictId(String dictId) {
         this.dictId = dictId;
     }
@@ -96,6 +101,7 @@ public class SimpleDictionaryItemEntity extends SimpleTreeSortSupportEntity<Stri
     /**
      * @return 名称
      */
+    @Override
     public String getName() {
         return this.name;
     }
@@ -103,6 +109,7 @@ public class SimpleDictionaryItemEntity extends SimpleTreeSortSupportEntity<Stri
     /**
      * 设置 名称
      */
+    @Override
     public void setName(String name) {
         this.name = name;
     }
@@ -110,6 +117,7 @@ public class SimpleDictionaryItemEntity extends SimpleTreeSortSupportEntity<Stri
     /**
      * @return 字典值
      */
+    @Override
     public String getValue() {
         return this.value;
     }
@@ -117,6 +125,7 @@ public class SimpleDictionaryItemEntity extends SimpleTreeSortSupportEntity<Stri
     /**
      * 设置 字典值
      */
+    @Override
     public void setValue(String value) {
         this.value = value;
     }
@@ -124,6 +133,7 @@ public class SimpleDictionaryItemEntity extends SimpleTreeSortSupportEntity<Stri
     /**
      * @return 字典文本
      */
+    @Override
     public String getText() {
         return this.text;
     }
@@ -131,6 +141,7 @@ public class SimpleDictionaryItemEntity extends SimpleTreeSortSupportEntity<Stri
     /**
      * 设置 字典文本
      */
+    @Override
     public void setText(String text) {
         this.text = text;
     }
@@ -138,6 +149,7 @@ public class SimpleDictionaryItemEntity extends SimpleTreeSortSupportEntity<Stri
     /**
      * @return 字典值类型
      */
+    @Override
     public String getValueType() {
         return this.valueType;
     }
@@ -145,6 +157,7 @@ public class SimpleDictionaryItemEntity extends SimpleTreeSortSupportEntity<Stri
     /**
      * 设置 字典值类型
      */
+    @Override
     public void setValueType(String valueType) {
         this.valueType = valueType;
     }
@@ -152,6 +165,7 @@ public class SimpleDictionaryItemEntity extends SimpleTreeSortSupportEntity<Stri
     /**
      * @return 是否启用
      */
+    @Override
     public Byte getStatus() {
         return this.status;
     }
@@ -159,6 +173,7 @@ public class SimpleDictionaryItemEntity extends SimpleTreeSortSupportEntity<Stri
     /**
      * 设置 是否启用
      */
+    @Override
     public void setStatus(Byte enabled) {
         this.status = enabled;
     }
@@ -166,6 +181,7 @@ public class SimpleDictionaryItemEntity extends SimpleTreeSortSupportEntity<Stri
     /**
      * @return 说明
      */
+    @Override
     public String getDescribe() {
         return this.describe;
     }
@@ -173,6 +189,7 @@ public class SimpleDictionaryItemEntity extends SimpleTreeSortSupportEntity<Stri
     /**
      * 设置 说明
      */
+    @Override
     public void setDescribe(String describe) {
         this.describe = describe;
     }
@@ -180,6 +197,7 @@ public class SimpleDictionaryItemEntity extends SimpleTreeSortSupportEntity<Stri
     /**
      * @return 快速搜索码
      */
+    @Override
     public String getSearchCode() {
         return this.searchCode;
     }
@@ -187,6 +205,7 @@ public class SimpleDictionaryItemEntity extends SimpleTreeSortSupportEntity<Stri
     /**
      * 设置 快速搜索码
      */
+    @Override
     public void setSearchCode(String searchCode) {
         this.searchCode = searchCode;
     }

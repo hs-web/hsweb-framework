@@ -30,26 +30,32 @@ public class SimplePermissionEntity extends SimpleGenericEntity<String> implemen
 
     private List<OptionalField> optionalFields;
 
+    @Override
     public String getName() {
         return this.name;
     }
 
+    @Override
     public void setName(String name) {
         this.name = name;
     }
 
+    @Override
     public String getDescribe() {
         return describe;
     }
 
+    @Override
     public void setDescribe(String describe) {
         this.describe = describe;
     }
 
+    @Override
     public Byte getStatus() {
         return status;
     }
 
+    @Override
     public void setStatus(Byte status) {
         this.status = status;
     }
@@ -77,8 +83,9 @@ public class SimplePermissionEntity extends SimpleGenericEntity<String> implemen
     @Override
     public SimplePermissionEntity clone() {
         SimplePermissionEntity target = (SimplePermissionEntity) super.clone();
-        if (actions != null)
+        if (actions != null) {
             target.setActions(getActions().stream().map(ActionEntity::clone).collect(Collectors.toList()));
+        }
         if (optionalFields != null) {
             target.setOptionalFields(getOptionalFields().stream().map(OptionalField::clone).collect(Collectors.toList()));
         }
@@ -98,10 +105,12 @@ public class SimplePermissionEntity extends SimpleGenericEntity<String> implemen
         this.type = type;
     }
 
+    @Override
     public List<String> getSupportDataAccessTypes() {
         return supportDataAccessTypes;
     }
 
+    @Override
     public void setSupportDataAccessTypes(List<String> supportDataAccessTypes) {
         this.supportDataAccessTypes = supportDataAccessTypes;
     }

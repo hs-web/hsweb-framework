@@ -38,6 +38,7 @@ public class SimpleDynamicFormEntity extends SimpleGenericEntity<String> impleme
     /**
      * @return 表单名称
      */
+    @Override
     public String getName() {
         return this.name;
     }
@@ -45,6 +46,7 @@ public class SimpleDynamicFormEntity extends SimpleGenericEntity<String> impleme
     /**
      * @param name 表单名称
      */
+    @Override
     public void setName(String name) {
         this.name = name;
     }
@@ -52,6 +54,7 @@ public class SimpleDynamicFormEntity extends SimpleGenericEntity<String> impleme
     /**
      * @return 数据库表名
      */
+    @Override
     public String getDatabaseTableName() {
         return this.databaseTableName;
     }
@@ -59,6 +62,7 @@ public class SimpleDynamicFormEntity extends SimpleGenericEntity<String> impleme
     /**
      * @param databaseTableName 数据库表名
      */
+    @Override
     public void setDatabaseTableName(String databaseTableName) {
         this.databaseTableName = databaseTableName;
     }
@@ -66,6 +70,7 @@ public class SimpleDynamicFormEntity extends SimpleGenericEntity<String> impleme
     /**
      * @return 备注
      */
+    @Override
     public String getDescribe() {
         return this.describe;
     }
@@ -73,6 +78,7 @@ public class SimpleDynamicFormEntity extends SimpleGenericEntity<String> impleme
     /**
      * @param describe 备注
      */
+    @Override
     public void setDescribe(String describe) {
         this.describe = describe;
     }
@@ -80,6 +86,7 @@ public class SimpleDynamicFormEntity extends SimpleGenericEntity<String> impleme
     /**
      * @return 版本
      */
+    @Override
     public Long getVersion() {
         return this.version;
     }
@@ -87,6 +94,7 @@ public class SimpleDynamicFormEntity extends SimpleGenericEntity<String> impleme
     /**
      * @param version 版本
      */
+    @Override
     public void setVersion(Long version) {
         this.version = version;
     }
@@ -94,6 +102,7 @@ public class SimpleDynamicFormEntity extends SimpleGenericEntity<String> impleme
     /**
      * @return 创建人id
      */
+    @Override
     public String getCreatorId() {
         return this.creatorId;
     }
@@ -101,6 +110,7 @@ public class SimpleDynamicFormEntity extends SimpleGenericEntity<String> impleme
     /**
      * @param creatorId 创建人id
      */
+    @Override
     public void setCreatorId(String creatorId) {
         this.creatorId = creatorId;
     }
@@ -108,6 +118,7 @@ public class SimpleDynamicFormEntity extends SimpleGenericEntity<String> impleme
     /**
      * @return 创建时间
      */
+    @Override
     public Long getCreateTime() {
         return this.createTime;
     }
@@ -115,6 +126,7 @@ public class SimpleDynamicFormEntity extends SimpleGenericEntity<String> impleme
     /**
      * @param createTime 创建时间
      */
+    @Override
     public void setCreateTime(Long createTime) {
         this.createTime = createTime;
     }
@@ -122,6 +134,7 @@ public class SimpleDynamicFormEntity extends SimpleGenericEntity<String> impleme
     /**
      * @return 修改时间
      */
+    @Override
     public Long getUpdateTime() {
         return this.updateTime;
     }
@@ -129,6 +142,7 @@ public class SimpleDynamicFormEntity extends SimpleGenericEntity<String> impleme
     /**
      * @param updateTime 修改时间
      */
+    @Override
     public void setUpdateTime(Long updateTime) {
         this.updateTime = updateTime;
     }
@@ -136,6 +150,7 @@ public class SimpleDynamicFormEntity extends SimpleGenericEntity<String> impleme
     /**
      * @return 是否已发布
      */
+    @Override
     public Boolean isDeployed() {
         return this.deployed;
     }
@@ -143,6 +158,7 @@ public class SimpleDynamicFormEntity extends SimpleGenericEntity<String> impleme
     /**
      * @param deployed 是否已发布
      */
+    @Override
     public void setDeployed(Boolean deployed) {
         this.deployed = deployed;
     }
@@ -150,6 +166,7 @@ public class SimpleDynamicFormEntity extends SimpleGenericEntity<String> impleme
     /**
      * @return 别名
      */
+    @Override
     public String getAlias() {
         return this.alias;
     }
@@ -157,6 +174,7 @@ public class SimpleDynamicFormEntity extends SimpleGenericEntity<String> impleme
     /**
      * @param alias 别名
      */
+    @Override
     public void setAlias(String alias) {
         this.alias = alias;
     }
@@ -164,6 +182,7 @@ public class SimpleDynamicFormEntity extends SimpleGenericEntity<String> impleme
     /**
      * @return 触发器
      */
+    @Override
     public String getTriggers() {
         return this.triggers;
     }
@@ -171,6 +190,7 @@ public class SimpleDynamicFormEntity extends SimpleGenericEntity<String> impleme
     /**
      * @param triggers 触发器
      */
+    @Override
     public void setTriggers(String triggers) {
         this.triggers = triggers;
     }
@@ -178,6 +198,7 @@ public class SimpleDynamicFormEntity extends SimpleGenericEntity<String> impleme
     /**
      * @return 表链接
      */
+    @Override
     public String getCorrelations() {
         return this.correlations;
     }
@@ -185,6 +206,7 @@ public class SimpleDynamicFormEntity extends SimpleGenericEntity<String> impleme
     /**
      * @param correlations 表链接
      */
+    @Override
     public void setCorrelations(String correlations) {
         this.correlations = correlations;
     }
@@ -192,6 +214,7 @@ public class SimpleDynamicFormEntity extends SimpleGenericEntity<String> impleme
     /**
      * @return 数据源id, 为空使用默认数据源
      */
+    @Override
     public String getDataSourceId() {
         return this.dataSourceId;
     }
@@ -199,6 +222,7 @@ public class SimpleDynamicFormEntity extends SimpleGenericEntity<String> impleme
     /**
      * @param dataSourceId 数据源id,为空使用默认数据源
      */
+    @Override
     public void setDataSourceId(String dataSourceId) {
         this.dataSourceId = dataSourceId;
     }
@@ -206,6 +230,7 @@ public class SimpleDynamicFormEntity extends SimpleGenericEntity<String> impleme
     /**
      * @return 表单类型
      */
+    @Override
     public String getType() {
         return this.type;
     }
@@ -213,6 +238,7 @@ public class SimpleDynamicFormEntity extends SimpleGenericEntity<String> impleme
     /**
      * @param type 表单类型
      */
+    @Override
     public void setType(String type) {
         this.type = type;
     }

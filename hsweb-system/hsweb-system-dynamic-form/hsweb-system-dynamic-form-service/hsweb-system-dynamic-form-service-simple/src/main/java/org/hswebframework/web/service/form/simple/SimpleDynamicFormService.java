@@ -273,7 +273,9 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
     @CacheEvict(allEntries = true)
     public List<DynamicFormColumnEntity> deleteColumn(List<String> ids) {
         Objects.requireNonNull(ids);
-        if (ids.isEmpty()) return Collections.emptyList();
+        if (ids.isEmpty()) {
+            return Collections.emptyList();
+        }
         List<DynamicFormColumnEntity> oldColumns = DefaultDSLQueryService
                 .createQuery(formColumnDao)
                 .where()
@@ -317,6 +319,7 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
         return new DynamicFormColumnBindEntity(selectByPk(formId), selectColumnsByFormId(formId));
     }
 
+    @Override
     @CacheEvict(value = "dyn-form-deploy", key = "'form-deploy:'+#formId+':latest'")
     public void deploy(String formId) {
         DynamicFormEntity formEntity = selectByPk(formId);
@@ -352,7 +355,9 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
     }
 
     protected Set<Correlation> buildCorrelations(String correlations) {
-        if (StringUtils.isEmpty(correlations)) return new LinkedHashSet<>();
+        if (StringUtils.isEmpty(correlations)) {
+            return new LinkedHashSet<>();
+        }
         JSONArray correlationsConfig = JSON.parseArray(correlations);
         Set<Correlation> correlations1 = new LinkedHashSet<>();
         for (int i = 0; i < correlationsConfig.size(); i++) {
@@ -378,7 +383,9 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
     }
 
     protected Map<String, Trigger> buildTrigger(String config) {
-        if (StringUtils.isEmpty(config)) return new HashMap<>();
+        if (StringUtils.isEmpty(config)) {
+            return new HashMap<>();
+        }
         JSONArray triggerConfig = JSON.parseArray(config);
         Map<String, Trigger> triggers = new HashMap<>();
         for (int i = 0; i < triggerConfig.size(); i++) {
@@ -408,8 +415,9 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
         RDBTableMetaData metaData = new RDBTableMetaData();
         metaData.setComment(form.getDescribe());
         metaData.setName(form.getDatabaseTableName());
-        if (null != form.getProperties())
+        if (null != form.getProperties()) {
             metaData.setProperties(form.getProperties());
+        }
         metaData.setAlias(form.getAlias());
         metaData.setCorrelations(buildCorrelations(form.getCorrelations()));
         buildTrigger(form.getTriggers()).forEach(metaData::on);
@@ -592,7 +600,9 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
     }
 
     private Class getJavaType(String type) {
-        if (StringUtils.isEmpty(type)) return String.class;
+        if (StringUtils.isEmpty(type)) {
+            return String.class;
+        }
         Class clazz = classMapping.get(type);
         if (clazz == null) {
             try {

@@ -76,7 +76,9 @@ public interface Authentication extends Serializable {
      * @return 角色信息
      */
     default Optional<Role> getRole(String id) {
-        if (null == id) return null;
+        if (null == id) {
+            return Optional.empty();
+        }
         return getRoles().stream()
                 .filter(role -> role.getId().equals(id))
                 .findAny();
@@ -89,7 +91,9 @@ public interface Authentication extends Serializable {
      * @return 权限信息
      */
     default Optional<Permission> getPermission(String id) {
-        if (null == id) return null;
+        if (null == id) {
+            return Optional.empty();
+        }
         return getPermissions().parallelStream()
                 .filter(permission -> permission.getId().equals(id))
                 .findAny();

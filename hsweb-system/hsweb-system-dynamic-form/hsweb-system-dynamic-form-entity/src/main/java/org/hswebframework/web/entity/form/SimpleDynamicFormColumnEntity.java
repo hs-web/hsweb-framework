@@ -43,6 +43,7 @@ public class SimpleDynamicFormColumnEntity extends SimpleGenericEntity<String> i
     /**
      * @return 表单ID
      */
+    @Override
     public String getFormId() {
         return this.formId;
     }
@@ -50,6 +51,7 @@ public class SimpleDynamicFormColumnEntity extends SimpleGenericEntity<String> i
     /**
      * @param formId 表单ID
      */
+    @Override
     public void setFormId(String formId) {
         this.formId = formId;
     }
@@ -57,6 +59,7 @@ public class SimpleDynamicFormColumnEntity extends SimpleGenericEntity<String> i
     /**
      * @return 字段名称
      */
+    @Override
     public String getName() {
         return this.name;
     }
@@ -64,6 +67,7 @@ public class SimpleDynamicFormColumnEntity extends SimpleGenericEntity<String> i
     /**
      * @param name 字段名称
      */
+    @Override
     public void setName(String name) {
         this.name = name;
     }
@@ -71,6 +75,7 @@ public class SimpleDynamicFormColumnEntity extends SimpleGenericEntity<String> i
     /**
      * @return 数据库列
      */
+    @Override
     public String getColumnName() {
         return this.columnName;
     }
@@ -78,6 +83,7 @@ public class SimpleDynamicFormColumnEntity extends SimpleGenericEntity<String> i
     /**
      * @param columnName 数据库列
      */
+    @Override
     public void setColumnName(String columnName) {
         this.columnName = columnName;
     }
@@ -85,6 +91,7 @@ public class SimpleDynamicFormColumnEntity extends SimpleGenericEntity<String> i
     /**
      * @return 备注
      */
+    @Override
     public String getDescribe() {
         return this.describe;
     }
@@ -92,6 +99,7 @@ public class SimpleDynamicFormColumnEntity extends SimpleGenericEntity<String> i
     /**
      * @param describe 备注
      */
+    @Override
     public void setDescribe(String describe) {
         this.describe = describe;
     }
@@ -99,6 +107,7 @@ public class SimpleDynamicFormColumnEntity extends SimpleGenericEntity<String> i
     /**
      * @return 别名
      */
+    @Override
     public String getAlias() {
         return this.alias;
     }
@@ -106,6 +115,7 @@ public class SimpleDynamicFormColumnEntity extends SimpleGenericEntity<String> i
     /**
      * @param alias 别名
      */
+    @Override
     public void setAlias(String alias) {
         this.alias = alias;
     }
@@ -113,6 +123,7 @@ public class SimpleDynamicFormColumnEntity extends SimpleGenericEntity<String> i
     /**
      * @return java类型
      */
+    @Override
     public String getJavaType() {
         return this.javaType;
     }
@@ -120,6 +131,7 @@ public class SimpleDynamicFormColumnEntity extends SimpleGenericEntity<String> i
     /**
      * @param javaType java类型
      */
+    @Override
     public void setJavaType(String javaType) {
         this.javaType = javaType;
     }
@@ -127,6 +139,7 @@ public class SimpleDynamicFormColumnEntity extends SimpleGenericEntity<String> i
     /**
      * @return jdbc类型
      */
+    @Override
     public String getJdbcType() {
         return this.jdbcType;
     }
@@ -134,6 +147,7 @@ public class SimpleDynamicFormColumnEntity extends SimpleGenericEntity<String> i
     /**
      * @param jdbcType jdbc类型
      */
+    @Override
     public void setJdbcType(String jdbcType) {
         this.jdbcType = jdbcType;
     }
@@ -141,6 +155,7 @@ public class SimpleDynamicFormColumnEntity extends SimpleGenericEntity<String> i
     /**
      * @return 数据类型
      */
+    @Override
     public String getDataType() {
         return this.dataType;
     }
@@ -148,6 +163,7 @@ public class SimpleDynamicFormColumnEntity extends SimpleGenericEntity<String> i
     /**
      * @param dataType 数据类型
      */
+    @Override
     public void setDataType(String dataType) {
         this.dataType = dataType;
     }
@@ -155,6 +171,7 @@ public class SimpleDynamicFormColumnEntity extends SimpleGenericEntity<String> i
     /**
      * @return 长度
      */
+    @Override
     public Integer getLength() {
         return this.length;
     }
@@ -162,6 +179,7 @@ public class SimpleDynamicFormColumnEntity extends SimpleGenericEntity<String> i
     /**
      * @param length 长度
      */
+    @Override
     public void setLength(Integer length) {
         this.length = length;
     }
@@ -169,6 +187,7 @@ public class SimpleDynamicFormColumnEntity extends SimpleGenericEntity<String> i
     /**
      * @return 精度
      */
+    @Override
     public Integer getPrecision() {
         return this.precision;
     }
@@ -176,6 +195,7 @@ public class SimpleDynamicFormColumnEntity extends SimpleGenericEntity<String> i
     /**
      * @param precision 精度
      */
+    @Override
     public void setPrecision(Integer precision) {
         this.precision = precision;
     }
@@ -183,6 +203,7 @@ public class SimpleDynamicFormColumnEntity extends SimpleGenericEntity<String> i
     /**
      * @return 小数点位数
      */
+    @Override
     public Integer getScale() {
         return this.scale;
     }
@@ -190,22 +211,27 @@ public class SimpleDynamicFormColumnEntity extends SimpleGenericEntity<String> i
     /**
      * @param scale 小数点位数
      */
+    @Override
     public void setScale(Integer scale) {
         this.scale = scale;
     }
 
+    @Override
     public String getDictId() {
         return dictId;
     }
 
+    @Override
     public void setDictId(String dictId) {
         this.dictId = dictId;
     }
 
+    @Override
     public String getDictParserId() {
         return dictParserId;
     }
 
+    @Override
     public void setDictParserId(String dictParserId) {
         this.dictParserId = dictParserId;
     }

@@ -101,6 +101,7 @@ public interface PositionEntity extends TreeSortSupportEntity<String>, Departmen
         return getId();
     }
 
+    @Override
     default void setPositionId(String positionId) {
         setId(positionId);
     }

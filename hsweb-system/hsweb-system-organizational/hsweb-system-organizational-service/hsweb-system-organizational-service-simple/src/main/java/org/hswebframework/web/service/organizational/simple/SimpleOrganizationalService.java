@@ -126,7 +126,9 @@ public class SimpleOrganizationalService extends AbstractTreeSortService<Organiz
     @Transactional(readOnly = true)
     @Cacheable(key = "'code:'+#code")
     public OrganizationalEntity selectByCode(String code) {
-        if (StringUtils.isEmpty(code)) return null;
+        if (StringUtils.isEmpty(code)) {
+            return null;
+        }
         return createQuery().where(OrganizationalEntity.code, code).single();
     }
 }

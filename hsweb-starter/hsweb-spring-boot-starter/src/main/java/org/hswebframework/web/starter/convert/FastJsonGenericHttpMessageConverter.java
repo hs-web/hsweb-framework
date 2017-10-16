@@ -96,7 +96,9 @@ public class FastJsonGenericHttpMessageConverter extends AbstractGenericHttpMess
 
 
     public Object readByBytes(Type type, byte[] bytes) {
-        if (type == String.class) return new String(bytes, charset);
+        if (type == String.class) {
+            return new String(bytes, charset);
+        }
         if (type instanceof Class) {
             Class clazz = ((Class) type);
             if (null != converters) {
@@ -131,7 +133,9 @@ public class FastJsonGenericHttpMessageConverter extends AbstractGenericHttpMess
     }
 
     public String converter(Object obj) {
-        if (obj instanceof String) return (String) obj;
+        if (obj instanceof String) {
+            return (String) obj;
+        }
         String text;
         String callback = ThreadLocalUtils.getAndRemove("jsonp-callback");
         if (obj instanceof ResponseMessage) {
@@ -159,18 +163,20 @@ public class FastJsonGenericHttpMessageConverter extends AbstractGenericHttpMess
 
     protected static SerializeFilter[] parseFilter(ResponseMessage<?> responseMessage) {
         List<SerializeFilter> filters = new ArrayList<>();
-        if (responseMessage.getIncludes() != null)
+        if (responseMessage.getIncludes() != null) {
             for (Map.Entry<Class<?>, Set<String>> classSetEntry : responseMessage.getIncludes().entrySet()) {
                 SimplePropertyPreFilter filter = new SimplePropertyPreFilter(classSetEntry.getKey());
                 filter.getIncludes().addAll(classSetEntry.getValue());
                 filters.add(filter);
             }
-        if (responseMessage.getExcludes() != null)
+        }
+        if (responseMessage.getExcludes() != null) {
             for (Map.Entry<Class<?>, Set<String>> classSetEntry : responseMessage.getExcludes().entrySet()) {
                 SimplePropertyPreFilter filter = new SimplePropertyPreFilter(classSetEntry.getKey());
                 filter.getExcludes().addAll(classSetEntry.getValue());
                 filters.add(filter);
             }
+        }
         PropertyFilter responseMessageFilter = (object, name, value) ->
                 !(object instanceof ResponseMessage) || value != null;
         filters.add(responseMessageFilter);

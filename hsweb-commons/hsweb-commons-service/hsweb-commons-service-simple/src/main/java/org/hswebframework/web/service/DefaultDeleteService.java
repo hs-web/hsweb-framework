@@ -28,5 +28,6 @@ public interface DefaultDeleteService<PK> extends DeleteService<PK> {
      * @param pk 主键
      * @return 影响记录数
      */
+    @Override
     int deleteByPk(PK pk);
 }

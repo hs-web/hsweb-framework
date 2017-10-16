@@ -75,7 +75,9 @@ public class ExpressionUtils {
     public static String analytical(String expression, Map<String, Object> vars, String language) throws Exception {
         Matcher matcher = PATTERN.matcher(expression);
         DynamicScriptEngine engine = DynamicScriptEngineFactory.getEngine(language);
-        if (engine == null) return expression;
+        if (engine == null) {
+            return expression;
+        }
         vars = new HashMap<>(vars);
         vars.putAll(getDefaultVar());
         while (matcher.find()) {
@@ -85,8 +87,9 @@ public class ExpressionUtils {
                 engine.compile(e_id, real_expression);
             }
             ExecuteResult result = engine.execute(e_id, vars);
-            if (!result.isSuccess())
+            if (!result.isSuccess()) {
                 throw new RuntimeException(result.getMessage(), result.getException());
+            }
             String obj = String.valueOf(result.get());
             // expression = matcher.replaceFirst(obj);
             expression = expression.replace("${" + real_expression + "}", obj);

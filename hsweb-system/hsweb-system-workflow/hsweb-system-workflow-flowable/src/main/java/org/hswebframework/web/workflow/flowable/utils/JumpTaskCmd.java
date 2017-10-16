@@ -22,6 +22,7 @@ public class JumpTaskCmd implements Command<Comment> {
         this.activityId = activityId;
     }
 
+    @Override
     public Comment execute(CommandContext commandContext) {
         for (TaskEntity taskEntity : Context.getCommandContext().getTaskEntityManager().findTasksByExecutionId(executionId)) {
             Context.getCommandContext().getTaskEntityManager().deleteTask(taskEntity, "jump", false);

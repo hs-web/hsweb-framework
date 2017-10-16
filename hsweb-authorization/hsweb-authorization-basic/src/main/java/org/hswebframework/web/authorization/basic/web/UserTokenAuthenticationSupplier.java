@@ -21,7 +21,9 @@ public class UserTokenAuthenticationSupplier implements AuthenticationSupplier {
 
     @Override
     public Authentication get(String userId) {
-        if (userId == null) return null;
+        if (userId == null) {
+            return null;
+        }
         return authenticationManager.getByUserId(userId);
     }
 

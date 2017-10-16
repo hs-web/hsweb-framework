@@ -39,6 +39,7 @@ public interface SimpleCrudController<E, PK, Q extends Entity>
         , CreateController<E, PK, E>
         , DeleteController<PK> {
 
+    @Override
     @SuppressWarnings("unchecked")
     CrudService<E, PK> getService();
 

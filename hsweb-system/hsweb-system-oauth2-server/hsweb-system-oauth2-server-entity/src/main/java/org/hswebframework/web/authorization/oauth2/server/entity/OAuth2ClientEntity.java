@@ -33,16 +33,19 @@ public interface OAuth2ClientEntity extends GenericEntity<String>, OAuth2Client,
     @Override
     String getId();
 
+    @Override
     String getName();
 
     void setName(String name);
 
     // client_secret
+    @Override
     String getSecret();
 
     void setSecret(String secret);
 
     //redirect_uri
+    @Override
     String getRedirectUri();
 
     void setRedirectUri(String redirectUri);
@@ -51,6 +54,7 @@ public interface OAuth2ClientEntity extends GenericEntity<String>, OAuth2Client,
      * @return 客户端所有者
      * @see org.hswebframework.web.authorization.User#getId()
      */
+    @Override
     String getOwnerId();
 
     void setOwnerId(String ownerId);
@@ -63,8 +67,10 @@ public interface OAuth2ClientEntity extends GenericEntity<String>, OAuth2Client,
 
     void setType(String type);
 
+    @Override
     Set<String> getSupportGrantTypes();
 
+    @Override
     Set<String> getDefaultGrantScope();
 
     void setDefaultGrantScope(Set<String> defaultGrantScope);

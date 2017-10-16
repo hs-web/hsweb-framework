@@ -103,8 +103,9 @@ public class SpringBootExample
         };
         return loggerInfo -> {
             Map<String, Object> loggerMap = loggerInfo.toSimpleMap(obj -> {
-                if (Stream.of(excludes).anyMatch(aClass -> aClass.isInstance(obj)))
+                if (Stream.of(excludes).anyMatch(aClass -> aClass.isInstance(obj))) {
                     return obj.getClass().getName();
+                }
                 return JSON.toJSONString(obj);
             });
 //            loggerMap.put("userToken", UserTokenHolder.currentToken());
@@ -167,6 +168,7 @@ public class SpringBootExample
 
     // main
     //    @Override
+    @Override
     public void run(String... strings) throws Exception {
         //只能查询自己创建的数据
         DataAccessEntity accessEntity = new DataAccessEntity();

@@ -54,7 +54,9 @@ public class SimpleOAuth2RequestService implements OAuth2RequestService {
     @Override
     public OAuth2SessionBuilder create(String serverId) {
         OAuth2ServerConfigEntity configEntity = oAuth2ServerConfigService.selectByPk(serverId);
-        if (null == configEntity || !DataStatus.STATUS_ENABLED.equals(configEntity.getStatus())) throw new NotFoundException("server not found!");
+        if (null == configEntity || !DataStatus.STATUS_ENABLED.equals(configEntity.getStatus())) {
+            throw new NotFoundException("server not found!");
+        }
         return new SimpleOAuth2SessionBuilder(oAuth2UserTokenService, configEntity, oAuth2RequestBuilderFactory);
     }
 

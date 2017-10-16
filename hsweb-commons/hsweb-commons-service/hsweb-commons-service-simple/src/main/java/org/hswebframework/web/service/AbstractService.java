@@ -56,6 +56,7 @@ public abstract class AbstractService<E extends Entity, PK> implements CreateEnt
         return null != entityFactory;
     }
 
+    @Override
     public Class<E> getEntityInstanceType() {
         return entityFactory.getInstanceType(getEntityType());
     }
@@ -118,8 +119,9 @@ public abstract class AbstractService<E extends Entity, PK> implements CreateEnt
         SimpleValidateResults results = new SimpleValidateResults();
         validatorSetFunction.get()
                 .forEach(violation -> results.addResult(violation.getPropertyPath().toString(), violation.getMessage()));
-        if (!results.isSuccess())
+        if (!results.isSuccess()) {
             throw new ValidationException(results);
+        }
     }
 
     public static void assertNotNull(Object data) {
@@ -127,7 +129,9 @@ public abstract class AbstractService<E extends Entity, PK> implements CreateEnt
     }
 
     public static void assertNotNull(Object data, String message) {
-        if (null == data) throw new NotFoundException(message);
+        if (null == data) {
+            throw new NotFoundException(message);
+        }
     }
 
 

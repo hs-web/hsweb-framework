@@ -62,6 +62,7 @@ public class SimpleAuthorizationSettingEntity extends SimpleGenericEntity<String
     /**
      * @return 类型
      */
+    @Override
     public String getType() {
         return this.type;
     }
@@ -69,6 +70,7 @@ public class SimpleAuthorizationSettingEntity extends SimpleGenericEntity<String
     /**
      * 设置 类型
      */
+    @Override
     public void setType(String type) {
         this.type = type;
     }
@@ -76,6 +78,7 @@ public class SimpleAuthorizationSettingEntity extends SimpleGenericEntity<String
     /**
      * @return 设置给谁
      */
+    @Override
     public String getSettingFor() {
         return this.settingFor;
     }
@@ -83,6 +86,7 @@ public class SimpleAuthorizationSettingEntity extends SimpleGenericEntity<String
     /**
      * 设置 设置给谁
      */
+    @Override
     public void setSettingFor(String settingFor) {
         this.settingFor = settingFor;
     }
@@ -90,6 +94,7 @@ public class SimpleAuthorizationSettingEntity extends SimpleGenericEntity<String
     /**
      * @return 状态
      */
+    @Override
     public Byte getStatus() {
         return this.status;
     }
@@ -97,6 +102,7 @@ public class SimpleAuthorizationSettingEntity extends SimpleGenericEntity<String
     /**
      * 设置 状态
      */
+    @Override
     public void setStatus(Byte status) {
         this.status = status;
     }
@@ -104,6 +110,7 @@ public class SimpleAuthorizationSettingEntity extends SimpleGenericEntity<String
     /**
      * @return 备注
      */
+    @Override
     public String getDescribe() {
         return this.describe;
     }
@@ -111,6 +118,7 @@ public class SimpleAuthorizationSettingEntity extends SimpleGenericEntity<String
     /**
      * 设置 备注
      */
+    @Override
     public void setDescribe(String describe) {
         this.describe = describe;
     }

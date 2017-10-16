@@ -85,10 +85,12 @@ public class SimpleOAuth2AccessEntity implements OAuth2AccessEntity {
         this.refreshToken = refreshToken;
     }
 
+    @Override
     public Integer getExpiresIn() {
         return expiresIn;
     }
 
+    @Override
     public void setExpiresIn(Integer expiresIn) {
         this.expiresIn = expiresIn;
     }

@@ -74,7 +74,9 @@ public class DefaultUserTokenManager implements UserTokenManager {
     }
 
     private SimpleUserToken checkTimeout(SimpleUserToken detail) {
-        if (null == detail) return null;
+        if (null == detail) {
+            return null;
+        }
         if (detail.getMaxInactiveInterval() <= 0) {
             return detail;
         }
@@ -100,7 +102,9 @@ public class DefaultUserTokenManager implements UserTokenManager {
     @Override
     public boolean userIsLoggedIn(String userId) {
         for (UserToken userToken : getByUserId(userId)) {
-            if (userToken.isEffective()) return true;
+            if (userToken.isEffective()) {
+                return true;
+            }
         }
         return false;
     }
@@ -153,8 +157,9 @@ public class DefaultUserTokenManager implements UserTokenManager {
     @Override
     public void changeTokenState(String token, TokenState state) {
         SimpleUserToken userToken = getByToken(token);
-        if (null != userToken)
+        if (null != userToken) {
             userToken.setState(state);
+        }
     }
 
     @Override
@@ -165,8 +170,9 @@ public class DefaultUserTokenManager implements UserTokenManager {
     @Override
     public UserToken signIn(String token, String userId, long maxInactiveInterval) {
         SimpleUserToken detail = new SimpleUserToken(userId, token);
-        if (null != authorizationListenerDispatcher)
+        if (null != authorizationListenerDispatcher) {
             authorizationListenerDispatcher.doEvent(new UserSignInEvent(detail));
+        }
         if (allopatricLoginMode == AllopatricLoginMode.deny) {
             detail.setState(TokenState.deny);
         } else if (allopatricLoginMode == AllopatricLoginMode.offlineOther) {
@@ -187,8 +193,9 @@ public class DefaultUserTokenManager implements UserTokenManager {
     @Override
     public void touch(String token) {
         SimpleUserToken userToken = tokenUserStorage.get(token);
-        if (null != userToken)
+        if (null != userToken) {
             userToken.touch();
+        }
     }
 
 }

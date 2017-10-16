@@ -50,10 +50,11 @@ public class FlowableModelManagerController {
             String stringValue = valueWrapper.toString();
             switch (term.getColumn()) {
                 case "name":
-                    if (term.getTermType().equals(TermType.like))
+                    if (term.getTermType().equals(TermType.like)) {
                         modelQuery.modelNameLike(stringValue);
-                    else
+                    } else {
                         modelQuery.modelName(stringValue);
+                    }
                     break;
                 case "key":
                     modelQuery.modelKey(stringValue);
@@ -63,20 +64,26 @@ public class FlowableModelManagerController {
                         modelQuery.modelCategoryLike(stringValue);
                     } else if (term.getTermType().equals(TermType.not)) {
                         modelQuery.modelCategoryNotEquals(stringValue);
-                    } else
+                    } else {
                         modelQuery.modelCategory(stringValue);
+                    }
                     break;
                 case "tenantId":
-                    if (term.getTermType().equals(TermType.like))
+                    if (term.getTermType().equals(TermType.like)) {
                         modelQuery.modelTenantIdLike(stringValue);
-                    else
+                    } else {
                         modelQuery.modelTenantId(stringValue);
+                    }
                     break;
                 case "version":
-                    if ("latest".equals(stringValue))
+                    if ("latest".equals(stringValue)) {
                         modelQuery.latestVersion();
-                    else
+                    } else {
                         modelQuery.modelVersion(valueWrapper.toInt());
+                    }
+                    break;
+                default:
+                    break;
             }
         });
         modelQuery.orderByCreateTime().desc();
@@ -115,7 +122,9 @@ public class FlowableModelManagerController {
     @PutMapping("{modelId}/deploy")
     public ResponseMessage deployModel(@PathVariable String modelId) throws Exception {
         Model modelData = repositoryService.getModel(modelId);
-        if (modelData == null) throw new NotFoundException("模型不存在!");
+        if (modelData == null) {
+            throw new NotFoundException("模型不存在!");
+        }
         ObjectNode modelNode = (ObjectNode) new ObjectMapper().readTree(repositoryService.getModelEditorSource(modelData.getId()));
         BpmnModel model = new BpmnJsonConverter().convertToBpmnModel(modelNode);
         byte[] bpmnBytes = new BpmnXMLConverter().convertToXML(model);
@@ -158,13 +167,13 @@ public class FlowableModelManagerController {
 
             String mainProcessId = bpmnModel.getMainProcess().getId();
 
-            if (type.equals("bpmn")) {
+            if ("bpmn".equals(type)) {
 
                 BpmnXMLConverter xmlConverter = new BpmnXMLConverter();
                 exportBytes = xmlConverter.convertToXML(bpmnModel);
 
                 filename = mainProcessId + ".bpmn20.xml";
-            } else if (type.equals("json")) {
+            } else if ("json".equals(type)) {
 
                 exportBytes = modelEditorSource;
                 filename = mainProcessId + ".json";

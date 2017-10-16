@@ -26,6 +26,7 @@ package org.hswebframework.web.message.support;
 public interface UserMessageSubject extends QueueMessageSubject {
     String getUserId();
 
+    @Override
     default String getQueueName() {
         return "queue_for_user:" + getUserId();
     }

@@ -48,13 +48,16 @@ public class BpmActivityServiceImp extends FlowableAbstract implements BpmActivi
         return getActivitiesById(definition.getId(), activityId);
     }
 
+    @Override
     public List<ActivityImpl> getActivitiesById(String processDefId, String activityId) {
         ProcessDefinitionEntity pde = getProcessDefinition(processDefId);
         if (activityId == null) {
             return pde.getActivities();
         } else {
             ActivityImpl activity = pde.findActivity(activityId);
-            if (null == activity) return Collections.emptyList();
+            if (null == activity) {
+                return Collections.emptyList();
+            }
             return Collections.singletonList(activity);
         }
     }
@@ -91,17 +94,20 @@ public class BpmActivityServiceImp extends FlowableAbstract implements BpmActivi
 //            if (activity.getProperty("type").equals("userTask"))
 //                activities.add(activity);
 //        }
-        if (null != activities)
+        if (null != activities) {
             activities.sort(Comparator.comparing(ProcessElementImpl::getId));
+        }
         return activities;
     }
 
+    @Override
     public List<TaskDefinition> getNextActivities(String procDefId, String activityId) {
         ActivityImpl activity;
-        if (activityId != null)
+        if (activityId != null) {
             activity = getActivityById(procDefId, activityId);
-        else
+        } else {
             activity = getStartEvent(procDefId);
+        }
 
         List<PvmTransition> pvmTransitions = activity.getOutgoingTransitions();
 
@@ -161,17 +167,18 @@ public class BpmActivityServiceImp extends FlowableAbstract implements BpmActivi
         Map<String, List<String>> map = new HashMap<>();
         for (TaskDefinition taskDefinition : taskDefinitions) {
             List<String> list = new ArrayList<>();
-            if (taskDefinition.getAssigneeExpression() != null)
+            if (taskDefinition.getAssigneeExpression() != null) {
                 list.add(taskDefinition.getAssigneeExpression().getExpressionText());
-            else if (taskDefinition.getCandidateUserIdExpressions() != null) {
+            } else if (taskDefinition.getCandidateUserIdExpressions() != null) {
                 for (Expression expression : taskDefinition.getCandidateUserIdExpressions()) {
                     list.add(expression.getExpressionText());
                 }
             }
-            if (taskDefinition.getNameExpression() != null)
+            if (taskDefinition.getNameExpression() != null) {
                 map.put(taskDefinition.getNameExpression().getExpressionText(), list);
-            else
+            } else {
                 map.put(taskDefinition.getKey(), list);
+            }
         }
         return map;
     }
@@ -192,7 +199,9 @@ public class BpmActivityServiceImp extends FlowableAbstract implements BpmActivi
 
     private List<ActivityImpl> findActivities(String procDefId, Predicate<ActivityImpl> predicate) {
         ProcessDefinitionEntity pde = getProcessDefinition(procDefId);
-        if (pde == null) return null;
+        if (pde == null) {
+            return null;
+        }
         return pde.getActivities()
                 .stream()
                 .filter(predicate)
@@ -201,7 +210,9 @@ public class BpmActivityServiceImp extends FlowableAbstract implements BpmActivi
 
     private ActivityImpl findActivity(String procDefId, Predicate<ActivityImpl> predicate) {
         ProcessDefinitionEntity pde = getProcessDefinition(procDefId);
-        if (pde == null) return null;
+        if (pde == null) {
+            return null;
+        }
         return pde.getActivities()
                 .stream()
                 .filter(predicate)

@@ -14,26 +14,32 @@ public class SimpleRoleEntity extends SimpleGenericEntity<String> implements Rol
 
     private Byte status;
 
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public void setName(String name) {
         this.name = name;
     }
 
+    @Override
     public String getDescribe() {
         return describe;
     }
 
+    @Override
     public void setDescribe(String describe) {
         this.describe = describe;
     }
 
+    @Override
     public Byte getStatus() {
         return status;
     }
 
+    @Override
     public void setStatus(Byte status) {
         this.status = status;
     }

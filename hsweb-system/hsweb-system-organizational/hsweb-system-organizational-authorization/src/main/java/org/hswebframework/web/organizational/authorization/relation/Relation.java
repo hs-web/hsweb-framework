@@ -133,11 +133,14 @@ public interface Relation extends Serializable {
         ALL;
 
         public static Direction fromString(String direction) {
-            if (direction == null) return null;
+            if (direction == null) {
+                return null;
+            }
             for (Direction dir : values()) {
                 //以名称开头则认为是同一个方向
-                if (dir.name().startsWith(direction.toUpperCase()))
+                if (dir.name().startsWith(direction.toUpperCase())) {
                     return dir;
+                }
             }
             return null;
         }

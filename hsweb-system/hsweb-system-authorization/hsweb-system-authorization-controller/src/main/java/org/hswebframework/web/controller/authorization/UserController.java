@@ -81,7 +81,9 @@ public class UserController implements
     @Authorize(action = Permission.ACTION_QUERY)
     @AccessLogger("获取所有已登录用户的信息")
     public ResponseMessage<List<UserToken>> userTokens() {
-        if (userTokenManager == null) throw new UnsupportedOperationException("userTokenManager is null");
+        if (userTokenManager == null) {
+            throw new UnsupportedOperationException("userTokenManager is null");
+        }
 
         return ok(userTokenManager.allLoggedUser());
     }
@@ -90,7 +92,9 @@ public class UserController implements
     @Authorize(action = "change-state")
     @AccessLogger("修改token的状态")
     public ResponseMessage<List<UserToken>> makeOffline(@PathVariable String token, @PathVariable TokenState state) {
-        if (userTokenManager == null) throw new UnsupportedOperationException("userTokenManager is null");
+        if (userTokenManager == null) {
+            throw new UnsupportedOperationException("userTokenManager is null");
+        }
         userTokenManager.changeTokenState(token, state);
         return ok();
     }

@@ -183,8 +183,9 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
                         .collect(Collectors.groupingBy(SettingInfo::getType));
         Stream<Map.Entry<String, List<SettingInfo>>> settingInfoStream = settingInfo.entrySet().stream();
         //大于1 使用并行处理
-        if (settingInfo.size() > 1)
+        if (settingInfo.size() > 1) {
             settingInfoStream.parallel();
+        }
         return settingInfoStream
                 .map(entry ->
                         createQuery()
@@ -200,9 +201,13 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
     @Override
     @Cacheable(key = "'user-menu-list:'+#userId")
     public List<UserMenuEntity> getUserMenuAsList(String userId) {
-        if (null == userId) return null;
+        if (null == userId) {
+            return null;
+        }
         UserEntity userEntity = userService.selectByPk(userId);
-        if (userEntity == null) return null;
+        if (userEntity == null) {
+            return null;
+        }
         List<AuthorizationSettingEntity> entities = getUserSetting(userId);
         //用户持有的权限设置id集合
         List<String> settingIdList = entities.stream()
@@ -216,7 +221,9 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
                 .map(AuthorizationSettingMenuEntity::getMenuId)
                 .distinct()
                 .collect(Collectors.toList());
-        if (menuIdList.isEmpty()) return new ArrayList<>();
+        if (menuIdList.isEmpty()) {
+            return new ArrayList<>();
+        }
         //获取全部菜单,并创建缓存备用
         Map<String, MenuEntity> menuCache = menuService
                 .selectByPk(menuIdList)
@@ -262,9 +269,13 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
 
     @Override
     public Authentication initUserAuthorization(String userId) {
-        if (null == userId) return null;
+        if (null == userId) {
+            return null;
+        }
         UserEntity userEntity = userService.selectByPk(userId);
-        if (userEntity == null) return null;
+        if (userEntity == null) {
+            return null;
+        }
         SimpleAuthentication authentication = new SimpleAuthentication();
         // 用户信息
         authentication.setUser(new SimpleUser(userId, userEntity.getUsername(), userEntity.getName()));

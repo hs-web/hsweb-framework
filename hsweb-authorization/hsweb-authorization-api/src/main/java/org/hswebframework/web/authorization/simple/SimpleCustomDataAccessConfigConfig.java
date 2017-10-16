@@ -24,12 +24,13 @@ public class SimpleCustomDataAccessConfigConfig extends AbstractDataAccessConfig
         if (instance == null) {
             synchronized (this) {
                 // TODO: 17-2-8  spring bean not support now!
-                if (instance == null)
+                if (instance == null) {
                     try {
                         instance = (DataAccessController) Class.forName(classOrBeanName).newInstance();
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
+                }
             }
         }
         return instance;

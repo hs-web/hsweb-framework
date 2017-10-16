@@ -57,7 +57,9 @@ public interface TreeSupportEntity<PK> extends GenericEntity<PK> {
      * @return 父节点path
      */
     static String getParentPath(String path) {
-        if (path == null || path.length() < 4) return null;
+        if (path == null || path.length() < 4) {
+            return null;
+        }
         return path.substring(0, path.length() - 5);
     }
 
@@ -85,8 +87,9 @@ public interface TreeSupportEntity<PK> extends GenericEntity<PK> {
         List<T> children = parent.getChildren();
         if (parent.getPath() == null) {
             parent.setPath(RandomUtil.randomChar(4));
-            if (parent.getPath() != null)
+            if (parent.getPath() != null) {
                 parent.setLevel(parent.getPath().split("-").length);
+            }
             if (parent instanceof SortSupportEntity) {
                 Long index = ((SortSupportEntity) parent).getSortIndex();
                 if (null == index) {

@@ -25,8 +25,9 @@ public class CustomGroupEntityManager extends GroupEntityManager {
     }
 
     public GroupEntity findGroupById(final String id) {
-        if (id == null)
+        if (id == null) {
             return null;
+        }
         try {
             List<RoleEntity> sysRoles = userService.getUserRole(id);
             return ActivitiUserUtil.toActivitiGroup(sysRoles.get(0));
@@ -37,8 +38,9 @@ public class CustomGroupEntityManager extends GroupEntityManager {
 
     @Override
     public List<Group> findGroupsByUser(final String id) {
-        if (id == null)
+        if (id == null) {
             return null;
+        }
         try {
             List<RoleEntity> sysRoles = userService.getUserRole(id);
             return ActivitiUserUtil.toActivitiGroups(sysRoles);

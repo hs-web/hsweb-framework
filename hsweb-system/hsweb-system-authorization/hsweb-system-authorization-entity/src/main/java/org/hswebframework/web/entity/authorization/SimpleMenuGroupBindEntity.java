@@ -36,10 +36,12 @@ public class SimpleMenuGroupBindEntity extends SimpleTreeSortSupportEntity<Strin
     //子节点
     private List<MenuGroupBindEntity> children;
 
+    @Override
     public Byte getStatus() {
         return status;
     }
 
+    @Override
     public void setStatus(Byte status) {
         this.status = status;
     }
@@ -47,6 +49,7 @@ public class SimpleMenuGroupBindEntity extends SimpleTreeSortSupportEntity<Strin
     /**
      * @return 菜单id
      */
+    @Override
     public String getMenuId() {
         return this.menuId;
     }
@@ -54,6 +57,7 @@ public class SimpleMenuGroupBindEntity extends SimpleTreeSortSupportEntity<Strin
     /**
      * 设置 菜单id
      */
+    @Override
     public void setMenuId(String menuId) {
         this.menuId = menuId;
     }
@@ -61,6 +65,7 @@ public class SimpleMenuGroupBindEntity extends SimpleTreeSortSupportEntity<Strin
     /**
      * @return 分组id
      */
+    @Override
     public String getGroupId() {
         return this.groupId;
     }
@@ -68,11 +73,13 @@ public class SimpleMenuGroupBindEntity extends SimpleTreeSortSupportEntity<Strin
     /**
      * 设置 分组id
      */
+    @Override
     public void setGroupId(String groupId) {
         this.groupId = groupId;
     }
 
 
+    @Override
     public List<MenuGroupBindEntity> getChildren() {
         return children;
     }

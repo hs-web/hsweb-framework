@@ -28,6 +28,7 @@ public class SimpleScheduleJobEntity extends SimpleGenericEntity<String> impleme
         /**
         * @return  任务名称
         */
+        @Override
         public String getName(){
 			return this.name;
         }
@@ -35,12 +36,14 @@ public class SimpleScheduleJobEntity extends SimpleGenericEntity<String> impleme
         /**
         * @param  name  任务名称
         */
+        @Override
         public void setName(String name){
         	this.name=name;
         }
         /**
         * @return  备注
         */
+        @Override
         public String getRemark(){
 			return this.remark;
         }
@@ -48,12 +51,14 @@ public class SimpleScheduleJobEntity extends SimpleGenericEntity<String> impleme
         /**
         * @param  remark  备注
         */
+        @Override
         public void setRemark(String remark){
         	this.remark=remark;
         }
         /**
         * @return  定时调度配置
         */
+        @Override
         public String getQuartzConfig(){
 			return this.quartzConfig;
         }
@@ -61,12 +66,14 @@ public class SimpleScheduleJobEntity extends SimpleGenericEntity<String> impleme
         /**
         * @param  quartzConfig  定时调度配置
         */
+        @Override
         public void setQuartzConfig(String quartzConfig){
         	this.quartzConfig = quartzConfig;
         }
         /**
         * @return  执行脚本
         */
+        @Override
         public String getScript(){
 			return this.script;
         }
@@ -74,12 +81,14 @@ public class SimpleScheduleJobEntity extends SimpleGenericEntity<String> impleme
         /**
         * @param  script  执行脚本
         */
+        @Override
         public void setScript(String script){
         	this.script=script;
         }
         /**
         * @return  脚本语言
         */
+        @Override
         public String getLanguage(){
 			return this.language;
         }
@@ -87,12 +96,14 @@ public class SimpleScheduleJobEntity extends SimpleGenericEntity<String> impleme
         /**
         * @param  language  脚本语言
         */
+        @Override
         public void setLanguage(String language){
         	this.language=language;
         }
         /**
         * @return  是否启用
         */
+        @Override
         public Byte getStatus(){
 			return this.status;
         }
@@ -100,12 +111,14 @@ public class SimpleScheduleJobEntity extends SimpleGenericEntity<String> impleme
         /**
         * @param  status  是否启用
         */
+        @Override
         public void setStatus(Byte status){
         	this.status = status;
         }
         /**
         * @return  启动参数
         */
+        @Override
         public String getParameters(){
 			return this.parameters;
         }
@@ -113,12 +126,14 @@ public class SimpleScheduleJobEntity extends SimpleGenericEntity<String> impleme
         /**
         * @param  parameters  启动参数
         */
+        @Override
         public void setParameters(String parameters){
         	this.parameters=parameters;
         }
         /**
         * @return  任务类型
         */
+        @Override
         public String getType(){
 			return this.type;
         }
@@ -126,12 +141,14 @@ public class SimpleScheduleJobEntity extends SimpleGenericEntity<String> impleme
         /**
         * @param  type  任务类型
         */
+        @Override
         public void setType(String type){
         	this.type=type;
         }
         /**
         * @return  标签
         */
+        @Override
         public String getTags(){
 			return this.tags;
         }
@@ -139,6 +156,7 @@ public class SimpleScheduleJobEntity extends SimpleGenericEntity<String> impleme
         /**
         * @param  tags  标签
         */
+        @Override
         public void setTags(String tags){
         	this.tags=tags;
         }

@@ -83,7 +83,9 @@ public class SimpleScheduleJobService extends GenericEntityService<ScheduleJobEn
 
     protected void startJob(ScheduleJobEntity jobEntity) {
         try {
-        if(scheduler.checkExists(createJobKey(jobEntity)))return;
+        if(scheduler.checkExists(createJobKey(jobEntity))) {
+            return;
+        }
         JobDetail jobDetail = JobBuilder
                 .newJob(DynamicJob.class)
                 .withIdentity(createJobKey(jobEntity))
@@ -129,8 +131,9 @@ public class SimpleScheduleJobService extends GenericEntityService<ScheduleJobEn
         Objects.requireNonNull(id);
       int size=  createUpdate().set(ScheduleJobEntity.status, DataStatus.STATUS_ENABLED)
                 .where(ScheduleJobEntity.id, id).exec();
-      if(size>0)
-        startJob(selectByPk(id));
+      if(size>0) {
+          startJob(selectByPk(id));
+      }
     }
 
     private void deleteJob(ScheduleJobEntity jobEntity) {
@@ -149,7 +152,8 @@ public class SimpleScheduleJobService extends GenericEntityService<ScheduleJobEn
         Objects.requireNonNull(id);
        int size =  createUpdate().set(ScheduleJobEntity.status, DataStatus.STATUS_DISABLED)
                 .where(ScheduleJobEntity.id, id).exec();
-       if(size>0)
-        deleteJob(selectByPk(id));
+       if(size>0) {
+           deleteJob(selectByPk(id));
+       }
     }
 }

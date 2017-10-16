@@ -133,7 +133,9 @@ public class MethodInterceptorHolder {
 
             @Override
             public <T> Optional<T> getParameter(String name) {
-                if (args == null) return Optional.empty();
+                if (args == null) {
+                    return Optional.empty();
+                }
                 return Optional.of((T) args.get(name));
             }
 

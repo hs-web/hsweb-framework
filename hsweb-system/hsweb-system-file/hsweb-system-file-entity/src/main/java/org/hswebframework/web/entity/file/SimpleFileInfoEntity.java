@@ -30,6 +30,7 @@ public class SimpleFileInfoEntity extends SimpleGenericEntity<String> implements
     /**
      * @return 文件名称
      */
+    @Override
     public String getName() {
         return this.name;
     }
@@ -37,6 +38,7 @@ public class SimpleFileInfoEntity extends SimpleGenericEntity<String> implements
     /**
      * @param name 文件名称
      */
+    @Override
     public void setName(String name) {
         this.name = name;
     }
@@ -54,6 +56,7 @@ public class SimpleFileInfoEntity extends SimpleGenericEntity<String> implements
     /**
      * @return 类型
      */
+    @Override
     public String getType() {
         return this.type;
     }
@@ -61,6 +64,7 @@ public class SimpleFileInfoEntity extends SimpleGenericEntity<String> implements
     /**
      * @param type 类型
      */
+    @Override
     public void setType(String type) {
         this.type = type;
     }
@@ -68,6 +72,7 @@ public class SimpleFileInfoEntity extends SimpleGenericEntity<String> implements
     /**
      * @return md5校验值
      */
+    @Override
     public String getMd5() {
         return this.md5;
     }
@@ -75,6 +80,7 @@ public class SimpleFileInfoEntity extends SimpleGenericEntity<String> implements
     /**
      * @param md5 md5校验值
      */
+    @Override
     public void setMd5(String md5) {
         this.md5 = md5;
     }
@@ -82,6 +88,7 @@ public class SimpleFileInfoEntity extends SimpleGenericEntity<String> implements
     /**
      * @return 文件大小
      */
+    @Override
     public Long getSize() {
         return this.size;
     }
@@ -89,6 +96,7 @@ public class SimpleFileInfoEntity extends SimpleGenericEntity<String> implements
     /**
      * @param size 文件大小
      */
+    @Override
     public void setSize(Long size) {
         this.size = size;
     }
@@ -96,6 +104,7 @@ public class SimpleFileInfoEntity extends SimpleGenericEntity<String> implements
     /**
      * @return 状态
      */
+    @Override
     public Byte getStatus() {
         return this.status;
     }
@@ -103,6 +112,7 @@ public class SimpleFileInfoEntity extends SimpleGenericEntity<String> implements
     /**
      * @param status 状态
      */
+    @Override
     public void setStatus(Byte status) {
         this.status = status;
     }
@@ -110,6 +120,7 @@ public class SimpleFileInfoEntity extends SimpleGenericEntity<String> implements
     /**
      * @return 分类
      */
+    @Override
     public String getClassified() {
         return this.classified;
     }
@@ -117,6 +128,7 @@ public class SimpleFileInfoEntity extends SimpleGenericEntity<String> implements
     /**
      * @param classified 分类
      */
+    @Override
     public void setClassified(String classified) {
         this.classified = classified;
     }
@@ -124,6 +136,7 @@ public class SimpleFileInfoEntity extends SimpleGenericEntity<String> implements
     /**
      * @return 创建人
      */
+    @Override
     public String getCreatorId() {
         return this.creatorId;
     }
@@ -141,6 +154,7 @@ public class SimpleFileInfoEntity extends SimpleGenericEntity<String> implements
     /**
      * @param creatorId 创建人
      */
+    @Override
     public void setCreatorId(String creatorId) {
         this.creatorId = creatorId;
     }

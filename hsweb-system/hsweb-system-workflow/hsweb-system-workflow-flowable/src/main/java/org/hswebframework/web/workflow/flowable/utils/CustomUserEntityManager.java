@@ -27,8 +27,9 @@ public class CustomUserEntityManager extends UserEntityManager {
 
     @Override
     public UserEntity findUserById(final String userId) {
-        if (userId == null)
+        if (userId == null) {
             return null;
+        }
         try {
             org.hswebframework.web.entity.authorization.UserEntity user = userService.selectByPk(userId);
             return ActivitiUserUtil.toActivitiUser(user);
@@ -39,8 +40,9 @@ public class CustomUserEntityManager extends UserEntityManager {
 
     @Override
     public List<Group> findGroupsByUser(final String userId) {
-        if (userId == null)
+        if (userId == null) {
             return null;
+        }
 
         List<RoleEntity> sysRoles = userService.getUserRole(userId);
         return ActivitiUserUtil.toActivitiGroups(sysRoles);

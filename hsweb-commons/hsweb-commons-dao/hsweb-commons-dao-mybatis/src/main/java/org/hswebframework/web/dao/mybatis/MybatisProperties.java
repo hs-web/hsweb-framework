@@ -80,14 +80,16 @@ public class MybatisProperties extends org.mybatis.spring.boot.autoconfigure.Myb
         this.dynamicDatasource = dynamicDatasource;
     }
 
+    @Override
     public Resource[] resolveMapperLocations() {
         Map<String, Resource> resources = new HashMap<>();
         Set<String> locations;
 
-        if (this.getMapperLocations() == null)
+        if (this.getMapperLocations() == null) {
             locations = new HashSet<>();
-        else
+        } else {
             locations = Arrays.stream(getMapperLocations()).collect(Collectors.toSet());
+        }
 
         locations.add(defaultMapperLocation);
 

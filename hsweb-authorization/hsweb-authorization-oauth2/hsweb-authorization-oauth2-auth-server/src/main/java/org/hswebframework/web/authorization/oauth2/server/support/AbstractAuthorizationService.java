@@ -76,7 +76,7 @@ public abstract class AbstractAuthorizationService {
         if (client == null) {
             throw new GrantTokenException(CLIENT_NOT_EXIST);
         }
-        if (DataStatus.STATUS_ENABLED != client.getStatus()) {
+        if (!DataStatus.STATUS_ENABLED.equals(client.getStatus())) {
             throw new GrantTokenException(CLIENT_DISABLED);
         }
         return client;

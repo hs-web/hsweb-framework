@@ -27,6 +27,7 @@ public class SimpleUserEntity extends SimpleGenericEntity<String> implements Use
         return name;
     }
 
+    @Override
     public void setName(String name) {
         this.name = name;
     }
@@ -36,6 +37,7 @@ public class SimpleUserEntity extends SimpleGenericEntity<String> implements Use
         return username;
     }
 
+    @Override
     public void setUsername(String username) {
         this.username = username;
     }
@@ -45,6 +47,7 @@ public class SimpleUserEntity extends SimpleGenericEntity<String> implements Use
         return password;
     }
 
+    @Override
     public void setPassword(String password) {
         this.password = password;
     }
@@ -54,6 +57,7 @@ public class SimpleUserEntity extends SimpleGenericEntity<String> implements Use
         return salt;
     }
 
+    @Override
     public void setSalt(String salt) {
         this.salt = salt;
     }
@@ -78,10 +82,12 @@ public class SimpleUserEntity extends SimpleGenericEntity<String> implements Use
         this.creatorId = creatorId;
     }
 
+    @Override
     public Byte getStatus() {
         return status;
     }
 
+    @Override
     public void setStatus(Byte status) {
         this.status = status;
     }

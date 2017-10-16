@@ -72,24 +72,27 @@ public class SimpleDatabaseManagerService implements DatabaseManagerService {
     @Override
     public void commit(String transactionId) {
         TransactionExecutor executor = transactionExecutorMap.get(transactionId);
-        if (executor != null)
+        if (executor != null) {
             executor.commit();
+        }
         transactionExecutorMap.remove(transactionId);
     }
 
     @Override
     public void rollback(String transactionId) {
         TransactionExecutor executor = transactionExecutorMap.get(transactionId);
-        if (executor != null)
+        if (executor != null) {
             executor.rollback();
+        }
         transactionExecutorMap.remove(transactionId);
     }
 
     @Override
     public List<SqlExecuteResult> execute(String transactionId, SqlExecuteRequest request) {
         TransactionExecutor executor = transactionExecutorMap.get(transactionId);
-        if (executor != null)
+        if (executor != null) {
             return executor.execute(request);
+        }
         return null;
     }
 

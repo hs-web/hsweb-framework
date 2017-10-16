@@ -112,8 +112,9 @@ public class LockProcessor<A extends Annotation, L> {
     public void doUnlock() {
         for (L lock : successLock) {
             Throwable error = unlockAccepter.apply(lock);
-            if (null != error)
+            if (null != error) {
                 logger.error("unlock {} error", interceptorHolder.getMethod(), error);
+            }
         }
     }
 

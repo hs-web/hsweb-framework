@@ -30,7 +30,9 @@ public class ScriptSingleDictParser implements SingleDictParser {
                 engine.compile(scriptId, language);
             }
             Object result = engine.execute(scriptId, vars).getIfSuccess();
-            if (result == null) return null;
+            if (result == null) {
+                return null;
+            }
             return Optional.of(String.valueOf(result));
         } catch (Exception e) {
             throw new RuntimeException(e);

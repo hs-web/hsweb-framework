@@ -42,10 +42,12 @@ public abstract class SimpleTreeSortSupportEntity<PK> extends SimpleGenericEntit
 
     private Integer level;
 
+    @Override
     public String getPath() {
         return path;
     }
 
+    @Override
     public void setPath(String path) {
         this.path = path;
     }

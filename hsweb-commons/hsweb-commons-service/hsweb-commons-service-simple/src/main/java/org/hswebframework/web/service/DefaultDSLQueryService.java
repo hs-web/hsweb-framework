@@ -79,8 +79,11 @@ public interface DefaultDSLQueryService<E, PK>
         query.setSingleExecutor((param) -> {
             param.doPaging(0, 1);
             List<PO> list = dao.query(param);
-            if (null == list || list.size() == 0) return null;
-            else return list.get(0);
+            if (null == list || list.size() == 0) {
+                return null;
+            } else {
+                return list.get(0);
+            }
         });
         query.noPaging();
         return query;

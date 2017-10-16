@@ -20,6 +20,7 @@ public class SimpleDataSourceConfigEntity extends SimpleGenericEntity<String> im
     /**
      * @return 数据源名称
      */
+    @Override
     public String getName() {
         return this.name;
     }
@@ -27,6 +28,7 @@ public class SimpleDataSourceConfigEntity extends SimpleGenericEntity<String> im
     /**
      * @param name 数据源名称
      */
+    @Override
     public void setName(String name) {
         this.name = name;
     }
@@ -34,6 +36,7 @@ public class SimpleDataSourceConfigEntity extends SimpleGenericEntity<String> im
     /**
      * @return 是否启用
      */
+    @Override
     public Long getEnabled() {
         return this.enabled;
     }
@@ -41,6 +44,7 @@ public class SimpleDataSourceConfigEntity extends SimpleGenericEntity<String> im
     /**
      * @param enabled 是否启用
      */
+    @Override
     public void setEnabled(Long enabled) {
         this.enabled = enabled;
     }
@@ -48,6 +52,7 @@ public class SimpleDataSourceConfigEntity extends SimpleGenericEntity<String> im
     /**
      * @return 创建日期
      */
+    @Override
     public java.util.Date getCreateDate() {
         return this.createDate;
     }
@@ -55,6 +60,7 @@ public class SimpleDataSourceConfigEntity extends SimpleGenericEntity<String> im
     /**
      * @param createDate 创建日期
      */
+    @Override
     public void setCreateDate(java.util.Date createDate) {
         this.createDate = createDate;
     }
@@ -62,6 +68,7 @@ public class SimpleDataSourceConfigEntity extends SimpleGenericEntity<String> im
     /**
      * @return 备注
      */
+    @Override
     public String getDescribe() {
         return this.describe;
     }
@@ -69,6 +76,7 @@ public class SimpleDataSourceConfigEntity extends SimpleGenericEntity<String> im
     /**
      * @param describe 备注
      */
+    @Override
     public void setDescribe(String describe) {
         this.describe = describe;
     }

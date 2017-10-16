@@ -24,6 +24,7 @@ package org.hswebframework.web.boost.validator;
  * @author zhouhao
  */
 public interface ScriptDuplicateValidatorConfig extends DuplicateValidatorConfig {
+    @Override
     default String getType() {
         return DefaultType.SCRIPT;
     }

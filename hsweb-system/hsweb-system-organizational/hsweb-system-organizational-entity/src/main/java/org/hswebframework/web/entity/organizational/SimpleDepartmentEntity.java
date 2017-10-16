@@ -40,6 +40,7 @@ public class SimpleDepartmentEntity extends SimpleTreeSortSupportEntity<String> 
     /**
      * @return 名称
      */
+    @Override
     public String getName() {
         return this.name;
     }
@@ -47,6 +48,7 @@ public class SimpleDepartmentEntity extends SimpleTreeSortSupportEntity<String> 
     /**
      * 设置 名称
      */
+    @Override
     public void setName(String name) {
         this.name = name;
     }
@@ -54,6 +56,7 @@ public class SimpleDepartmentEntity extends SimpleTreeSortSupportEntity<String> 
     /**
      * @return 所在组织id
      */
+    @Override
     public String getOrgId() {
         return this.orgId;
     }
@@ -61,6 +64,7 @@ public class SimpleDepartmentEntity extends SimpleTreeSortSupportEntity<String> 
     /**
      * 设置 所在组织id
      */
+    @Override
     public void setOrgId(String orgId) {
         this.orgId = orgId;
     }
@@ -68,6 +72,7 @@ public class SimpleDepartmentEntity extends SimpleTreeSortSupportEntity<String> 
     /**
      * @return 部门编码
      */
+    @Override
     public String getCode() {
         return this.code;
     }
@@ -75,6 +80,7 @@ public class SimpleDepartmentEntity extends SimpleTreeSortSupportEntity<String> 
     /**
      * 设置 部门编码
      */
+    @Override
     public void setCode(String code) {
         this.code = code;
     }
@@ -95,6 +101,7 @@ public class SimpleDepartmentEntity extends SimpleTreeSortSupportEntity<String> 
         return children;
     }
 
+    @Override
     public void setChildren(List<DepartmentEntity> children) {
         this.children = children;
     }

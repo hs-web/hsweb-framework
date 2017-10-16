@@ -43,7 +43,9 @@ public abstract class AbstractAuthorizationEvent implements AuthorizationEvent {
      * @param parameterGetter 参数获取函数,用户获取授权时传入的参数
      */
     public AbstractAuthorizationEvent(String username, String password, Function<String, Object> parameterGetter) {
-        if (username == null || password == null || parameterGetter == null) throw new NullPointerException();
+        if (username == null || password == null || parameterGetter == null) {
+            throw new NullPointerException();
+        }
         this.username = username;
         this.password = password;
         this.parameterGetter = parameterGetter;

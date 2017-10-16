@@ -14,7 +14,9 @@ public class RegexUtils {
     static Set<Character> SPECIAL_WORDS = new HashSet<>(Arrays.asList('\\', '$', '(', ')', '*', '+', '.', '[', ']', '?', '^', '{', '}', '|'));
 
     public static String escape(String regex) {
-        if (regex == null || regex.isEmpty()) return regex;
+        if (regex == null || regex.isEmpty()) {
+            return regex;
+        }
         char[] chars = regex.toCharArray();
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < chars.length; i++) {

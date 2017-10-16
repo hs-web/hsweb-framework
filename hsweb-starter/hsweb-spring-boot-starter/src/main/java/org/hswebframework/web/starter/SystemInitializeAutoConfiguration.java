@@ -110,7 +110,9 @@ public class SystemInitializeAutoConfiguration implements CommandLineRunner, Bea
             connection = DataSourceHolder.currentDataSource().getNative().getConnection();
             jdbcUserName = connection.getMetaData().getUserName();
         } finally {
-            if (null != connection) connection.close();
+            if (null != connection) {
+                connection.close();
+            }
         }
         RDBDatabaseMetaData metaData;
         switch (type) {

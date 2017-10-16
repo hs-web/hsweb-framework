@@ -124,7 +124,9 @@ public class LocalFileService implements FileService {
         //文件存储绝对路径
         String absPath = fileBasePath.concat("/").concat(filePath);
         File path = new File(absPath);
-        if (!path.exists()) path.mkdirs(); //创建目录
+        if (!path.exists()) {
+            path.mkdirs(); //创建目录
+        }
         String newName = String.valueOf(System.nanoTime()); //临时文件名 ,纳秒的md5值
         String fileAbsName = absPath.concat("/").concat(newName);
         long fileLength;
@@ -166,7 +168,9 @@ public class LocalFileService implements FileService {
     @Override
     public void writeFile(String fileId, OutputStream out, long skip) throws IOException {
         try (InputStream inputStream = readFile(fileId)) {
-            if (skip > 0) inputStream.skip(skip);
+            if (skip > 0) {
+                inputStream.skip(skip);
+            }
             StreamUtils.copy(inputStream, out);
         }
     }

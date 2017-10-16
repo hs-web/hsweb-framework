@@ -12,7 +12,9 @@ public class SimpleRelations implements Relations {
 
     @Override
     public List<Relation> getAll() {
-        if (null == all) all = new ArrayList<>();
+        if (null == all) {
+            all = new ArrayList<>();
+        }
         return all;
     }
 

@@ -45,8 +45,9 @@ public class SimpleAuthorizationCodeService implements AuthorizationCodeService 
     }
 
     public SimpleAuthorizationCodeService setCodeGenerator(CodeGenerator codeGenerator) {
-        if (codeGenerator != null)
+        if (codeGenerator != null) {
             this.codeGenerator = codeGenerator;
+        }
         return this;
     }
 

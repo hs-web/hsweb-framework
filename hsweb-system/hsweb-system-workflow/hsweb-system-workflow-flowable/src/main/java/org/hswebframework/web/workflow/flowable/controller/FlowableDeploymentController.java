@@ -81,20 +81,23 @@ public class FlowableDeploymentController extends FlowableAbstract {
                 case "name":
                     if (term.getTermType().equals(TermType.like)) {
                         processDefinitionQuery.processDefinitionNameLike(stringValue);
-                    } else
+                    } else {
                         processDefinitionQuery.processDefinitionName(stringValue);
+                    }
                     break;
                 case "key":
                     if (term.getTermType().equals(TermType.like)) {
                         processDefinitionQuery.processDefinitionKeyLike(stringValue);
-                    } else
+                    } else {
                         processDefinitionQuery.processDefinitionKey(stringValue);
+                    }
                     break;
                 case "category":
-                    if (term.getTermType().equals(TermType.like))
+                    if (term.getTermType().equals(TermType.like)) {
                         processDefinitionQuery.processDefinitionCategoryLike(stringValue);
-                    else
+                    } else {
                         processDefinitionQuery.processDefinitionCategory(stringValue);
+                    }
                     break;
                 case "deploymentId":
                     processDefinitionQuery.deploymentId(stringValue);
@@ -133,7 +136,7 @@ public class FlowableDeploymentController extends FlowableAbstract {
 
         // zip或者bar类型的文件用ZipInputStream方式部署
         DeploymentBuilder deployment = repositoryService.createDeployment();
-        if (extension.equals("zip") || extension.equals("bar")) {
+        if ("zip".equals(extension) || "bar".equals(extension)) {
             ZipInputStream zip = new ZipInputStream(fileInputStream);
             deployment.addZipInputStream(zip);
         } else {
@@ -182,8 +185,9 @@ public class FlowableDeploymentController extends FlowableAbstract {
             throws UnsupportedEncodingException, XMLStreamException {
         ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery()
                 .processDefinitionId(processDefinitionId).singleResult();
-        if (null == processDefinition)
+        if (null == processDefinition) {
             throw new NotFoundException();
+        }
         InputStream bpmnStream = repositoryService.getResourceAsStream(processDefinition.getDeploymentId(),
                 processDefinition.getResourceName());
         XMLInputFactory xif = XMLInputFactory.newInstance();

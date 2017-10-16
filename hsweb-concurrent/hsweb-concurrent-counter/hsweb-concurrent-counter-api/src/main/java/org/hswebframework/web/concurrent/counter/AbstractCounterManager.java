@@ -13,8 +13,9 @@ public abstract class AbstractCounterManager implements CounterManager {
     @Override
     public Counter getCounter(String name) {
         Counter counter = counterStore.get(name);
-        if (counter != null)
+        if (counter != null) {
             return counter;
+        }
         synchronized (counterStore) {
             return counterStore.computeIfAbsent(name, this::createCount);
         }

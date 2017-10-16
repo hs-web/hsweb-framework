@@ -48,10 +48,12 @@ public class SimpleOAuth2ClientEntity extends SimpleGenericEntity<String> implem
 
     private Byte status;
 
+    @Override
     public String getDescribe() {
         return describe;
     }
 
+    @Override
     public void setDescribe(String describe) {
         this.describe = describe;
     }
@@ -61,6 +63,7 @@ public class SimpleOAuth2ClientEntity extends SimpleGenericEntity<String> implem
         return name;
     }
 
+    @Override
     public void setName(String name) {
         this.name = name;
     }
@@ -70,6 +73,7 @@ public class SimpleOAuth2ClientEntity extends SimpleGenericEntity<String> implem
         return secret;
     }
 
+    @Override
     public void setSecret(String secret) {
         this.secret = secret;
     }
@@ -79,6 +83,7 @@ public class SimpleOAuth2ClientEntity extends SimpleGenericEntity<String> implem
         return redirectUri;
     }
 
+    @Override
     public void setRedirectUri(String redirectUri) {
         this.redirectUri = redirectUri;
     }
@@ -88,6 +93,7 @@ public class SimpleOAuth2ClientEntity extends SimpleGenericEntity<String> implem
         return ownerId;
     }
 
+    @Override
     public void setOwnerId(String ownerId) {
         this.ownerId = ownerId;
     }
@@ -112,10 +118,12 @@ public class SimpleOAuth2ClientEntity extends SimpleGenericEntity<String> implem
         this.createTime = createTime;
     }
 
+    @Override
     public String getType() {
         return type;
     }
 
+    @Override
     public void setType(String type) {
         this.type = type;
     }
@@ -145,6 +153,7 @@ public class SimpleOAuth2ClientEntity extends SimpleGenericEntity<String> implem
         return status;
     }
 
+    @Override
     public void setStatus(Byte status) {
         this.status = status;
     }

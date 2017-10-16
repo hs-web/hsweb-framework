@@ -225,8 +225,9 @@ public class DefaultLocalTransactionExecutor implements TransactionExecutor {
         executionQueue.add(execution);
         try {
             //当前没有在执行sql,说明现在正在等待新的sql进入,唤醒之
-            if (!running)
+            if (!running) {
                 waitToReady.await();
+            }
             //等待sql执行完毕
             countDownLatch.await();
             //判断是否有异常

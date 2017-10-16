@@ -1,9 +1,6 @@
 package org.hswebframework.web.workflow.flowable.controller;
 
-import com.alibaba.fastjson.JSON;
 import org.activiti.engine.impl.pvm.process.ActivityImpl;
-import org.hswebframework.utils.ClassUtils;
-import org.hswebframework.utils.StringUtils;
 import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.entity.workflow.ActDefEntity;
 import org.hswebframework.web.service.workflow.ActDefService;
@@ -44,16 +41,18 @@ public class FlowableUtilsController {
         List<ActivityImpl> activities = bpmActivityService.getActivitiesById(procDefId, null);
         for (ActivityImpl activity : activities) {
             Map<String, Object> map = new HashMap<>();
-            if (activity.getProperty("type").equals("startEvent")) {
+            if ("startEvent".equals(activity.getProperty("type"))) {
                 map.put("id", activity.getId());
                 map.put("name", "流程发起者");
                 map.put("info", actDefService.selectSingle(single(ActDefEntity.actId, activity.getId())));
-            } else if (activity.getProperty("type").equals("userTask")) {
+            } else if ("userTask".equals(activity.getProperty("type"))) {
                 map.put("id", activity.getId());
                 map.put("name", activity.getProperty("name").toString());
                 map.put("info", actDefService.selectSingle(single(ActDefEntity.actId, activity.getId())));
             }
-            if (map.size() > 0) list.add(map);
+            if (map.size() > 0) {
+                list.add(map);
+            }
         }
         return ResponseMessage.ok(list);
     }

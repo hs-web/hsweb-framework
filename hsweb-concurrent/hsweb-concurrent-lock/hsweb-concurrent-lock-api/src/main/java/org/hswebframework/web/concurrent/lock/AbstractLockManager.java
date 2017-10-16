@@ -17,7 +17,9 @@ public abstract class AbstractLockManager implements LockManager {
     @Override
     public Lock getLock(String lockName) {
         Lock lock = lockStore.get(lockName);
-        if (lock != null) return lock;
+        if (lock != null) {
+            return lock;
+        }
         synchronized (lockStore) {
             return lockStore.computeIfAbsent(lockName, this::createLock);
         }
@@ -26,7 +28,9 @@ public abstract class AbstractLockManager implements LockManager {
     @Override
     public ReadWriteLock getReadWriteLock(String lockName) {
         ReadWriteLock lock = readWriteLockStore.get(lockName);
-        if (lock != null) return lock;
+        if (lock != null) {
+            return lock;
+        }
         synchronized (readWriteLockStore) {
             return readWriteLockStore.computeIfAbsent(lockName, this::createReadWriteLock);
         }

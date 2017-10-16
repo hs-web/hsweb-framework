@@ -26,7 +26,9 @@ public final class DefaultDataAccessController implements DataAccessController {
     }
 
     public DefaultDataAccessController(DataAccessController parent) {
-        if (parent == this) throw new UnsupportedOperationException();
+        if (parent == this) {
+            throw new UnsupportedOperationException();
+        }
         this.parent = parent;
         addHandler(new CustomDataAccessHandler());
         addHandler(new OwnCreatedDataAccessHandler());
@@ -37,7 +39,9 @@ public final class DefaultDataAccessController implements DataAccessController {
 
     @Override
     public boolean doAccess(DataAccessConfig access, AuthorizingContext context) {
-        if (parent != null) parent.doAccess(access, context);
+        if (parent != null) {
+            parent.doAccess(access, context);
+        }
         return handlers.stream()
                 // TODO: 17-3-28 可以换成access对应的handler以提高效率
                 .filter(handler -> handler.isSupport(access))

@@ -46,6 +46,7 @@ public class SimpleDictionaryParserEntity extends SimpleGenericEntity<String> im
     /**
      * @return 值到文本转换方式
      */
+    @Override
     public String getValueToTextParser() {
         return this.valueToTextParser;
     }
@@ -53,6 +54,7 @@ public class SimpleDictionaryParserEntity extends SimpleGenericEntity<String> im
     /**
      * 设置 值到文本转换方式
      */
+    @Override
     public void setValueToTextParser(String valueToTextParser) {
         this.valueToTextParser = valueToTextParser;
     }
@@ -60,6 +62,7 @@ public class SimpleDictionaryParserEntity extends SimpleGenericEntity<String> im
     /**
      * @return 文本到值转换方式
      */
+    @Override
     public String getTextToValueParser() {
         return this.textToValueParser;
     }
@@ -67,6 +70,7 @@ public class SimpleDictionaryParserEntity extends SimpleGenericEntity<String> im
     /**
      * 设置 文本到值转换方式
      */
+    @Override
     public void setTextToValueParser(String textToValueParser) {
         this.textToValueParser = textToValueParser;
     }
@@ -74,6 +78,7 @@ public class SimpleDictionaryParserEntity extends SimpleGenericEntity<String> im
     /**
      * @return 转换失败时的操作
      */
+    @Override
     public String getOnError() {
         return this.onError;
     }
@@ -81,6 +86,7 @@ public class SimpleDictionaryParserEntity extends SimpleGenericEntity<String> im
     /**
      * 设置 转换失败时的操作
      */
+    @Override
     public void setOnError(String onError) {
         this.onError = onError;
     }
@@ -88,6 +94,7 @@ public class SimpleDictionaryParserEntity extends SimpleGenericEntity<String> im
     /**
      * @return 创建时间
      */
+    @Override
     public Long getCreateTime() {
         return this.createTime;
     }
@@ -95,6 +102,7 @@ public class SimpleDictionaryParserEntity extends SimpleGenericEntity<String> im
     /**
      * 设置 创建时间
      */
+    @Override
     public void setCreateTime(Long createTime) {
         this.createTime = createTime;
     }
@@ -102,6 +110,7 @@ public class SimpleDictionaryParserEntity extends SimpleGenericEntity<String> im
     /**
      * @return 创建人id
      */
+    @Override
     public String getCreatorId() {
         return this.creatorId;
     }
@@ -109,6 +118,7 @@ public class SimpleDictionaryParserEntity extends SimpleGenericEntity<String> im
     /**
      * 设置 创建人id
      */
+    @Override
     public void setCreatorId(String creatorId) {
         this.creatorId = creatorId;
     }
@@ -116,6 +126,7 @@ public class SimpleDictionaryParserEntity extends SimpleGenericEntity<String> im
     /**
      * @return 更新时间
      */
+    @Override
     public Long getUpdateTime() {
         return this.updateTime;
     }
@@ -123,6 +134,7 @@ public class SimpleDictionaryParserEntity extends SimpleGenericEntity<String> im
     /**
      * 设置 更新时间
      */
+    @Override
     public void setUpdateTime(Long updateTime) {
         this.updateTime = updateTime;
     }
@@ -130,6 +142,7 @@ public class SimpleDictionaryParserEntity extends SimpleGenericEntity<String> im
     /**
      * @return 名称
      */
+    @Override
     public String getName() {
         return this.name;
     }
@@ -137,6 +150,7 @@ public class SimpleDictionaryParserEntity extends SimpleGenericEntity<String> im
     /**
      * 设置 名称
      */
+    @Override
     public void setName(String name) {
         this.name = name;
     }
@@ -144,6 +158,7 @@ public class SimpleDictionaryParserEntity extends SimpleGenericEntity<String> im
     /**
      * @return 说明
      */
+    @Override
     public String getDescribe() {
         return this.describe;
     }
@@ -151,6 +166,7 @@ public class SimpleDictionaryParserEntity extends SimpleGenericEntity<String> im
     /**
      * 设置 说明
      */
+    @Override
     public void setDescribe(String describe) {
         this.describe = describe;
     }
@@ -158,6 +174,7 @@ public class SimpleDictionaryParserEntity extends SimpleGenericEntity<String> im
     /**
      * @return 分类id
      */
+    @Override
     public String getClassifiedId() {
         return this.classifiedId;
     }
@@ -165,6 +182,7 @@ public class SimpleDictionaryParserEntity extends SimpleGenericEntity<String> im
     /**
      * 设置 分类id
      */
+    @Override
     public void setClassifiedId(String classifiedId) {
         this.classifiedId = classifiedId;
     }

@@ -91,7 +91,9 @@ public interface QueryController<E, PK, Q extends Entity> {
     }
 
     static <T> T assertNotNull(T obj) {
-        if (null == obj) throw new NotFoundException("{data_not_exist}");
+        if (null == obj) {
+            throw new NotFoundException("{data_not_exist}");
+        }
         return obj;
     }
 

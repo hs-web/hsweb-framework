@@ -70,13 +70,17 @@ public class SimpleSingleDictParser implements SingleDictParser {
 
     @Override
     public Optional<String> parse(String value, Object context) {
-        if (value == null) return Optional.empty();
+        if (value == null) {
+            return Optional.empty();
+        }
         StringJoiner joiner = targetFormat.createJoiner();
 
         List<DictMapping> dictMappings = formatter
                 .format(sourceFormat, value, (key, pattern) -> {
                     DictMapping dictMapping = mapping.get(key);
-                    if (dictMapping == null) return null;
+                    if (dictMapping == null) {
+                        return null;
+                    }
                     dictMapping = dictMapping.clone();
                     dictMapping.setDefaultVar(Collections.singletonMap("pattern", pattern));
                     return dictMapping;
@@ -95,10 +99,12 @@ public class SimpleSingleDictParser implements SingleDictParser {
                     notAppendList.add(strVal); //子节点不拼接
                     int index = dictMappings.indexOf(mappingOfValue(strVal));
                     DictMapping tmp = null;
-                    if (-1 != index)
+                    if (-1 != index) {
                         tmp = dictMappings.get(index);
-                    if (null != tmp)
+                    }
+                    if (null != tmp) {
                         mapping.setDefaultVar(tmp.getDefaultVar());
+                    }
                     return null != tmp;
                 })))
                 .filter(mapping -> !notAppendList.contains(mapping.getValue()))
@@ -138,13 +144,17 @@ public class SimpleSingleDictParser implements SingleDictParser {
 
         @Override
         public int hashCode() {
-            if (value == null) return 0;
+            if (value == null) {
+                return 0;
+            }
             return value.hashCode();
         }
 
         @Override
         public boolean equals(Object obj) {
-            if (obj == null) return false;
+            if (obj == null) {
+                return false;
+            }
             return obj == this || hashCode() == obj.hashCode();
         }
 
@@ -181,7 +191,9 @@ public class SimpleSingleDictParser implements SingleDictParser {
         }
 
         public String getExpressionLanguage() {
-            if (expressionLanguage == null) expressionLanguage = "spel";
+            if (expressionLanguage == null) {
+                expressionLanguage = "spel";
+            }
             return expressionLanguage;
         }
 
@@ -196,7 +208,9 @@ public class SimpleSingleDictParser implements SingleDictParser {
                 String childrenString = String.join(targetFormat.getChildSplitter(), children.stream()
                         .map(mapping -> mapping.toString(getter)).collect(Collectors.toList()));
 
-                if (childrenString.isEmpty()) return stringBuilder.toString();
+                if (childrenString.isEmpty()) {
+                    return stringBuilder.toString();
+                }
                 //拼接子节点
                 stringBuilder.append(targetFormat.getChildStartChar())
                         .append(childrenString)
@@ -209,11 +223,14 @@ public class SimpleSingleDictParser implements SingleDictParser {
             Function<DictMapping, String> textGetter =
                     context == null ? DictMapping::getValue :
                             dictMapping -> {
-                                if (dictMapping.getExpression() == null || dictMapping.getExpression().isEmpty())
+                                if (dictMapping.getExpression() == null || dictMapping.getExpression().isEmpty()) {
                                     return dictMapping.getValue();
+                                }
                                 // 解析表达式
                                 Map<String, Object> var = new HashMap<>();
-                                if (dictMapping.getDefaultVar() != null) var.putAll(dictMapping.getDefaultVar());
+                                if (dictMapping.getDefaultVar() != null) {
+                                    var.putAll(dictMapping.getDefaultVar());
+                                }
                                 var.put("value", dictMapping.getValue());
                                 var.put("key", dictMapping.getKey());
                                 var.put("context", context);
@@ -235,6 +252,7 @@ public class SimpleSingleDictParser implements SingleDictParser {
             return toString(mapping -> String.valueOf(mapping.getValue()));
         }
 
+        @Override
         public DictMapping clone() {
             DictMapping clone = new DictMapping();
             clone.value = value;

@@ -30,6 +30,7 @@ import java.util.List;
  */
 public interface PermissionEntity extends GenericEntity<String> {
 
+    @Override
     @Pattern(regexp = "[a-zA-Z0-9_\\-]+")
     String getId();
 

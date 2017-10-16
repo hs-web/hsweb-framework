@@ -22,6 +22,7 @@ public class SimpleDynamicFormDeployLogEntity extends SimpleGenericEntity<String
     /**
      * @return 表单ID
      */
+    @Override
     public String getFormId() {
         return this.formId;
     }
@@ -29,6 +30,7 @@ public class SimpleDynamicFormDeployLogEntity extends SimpleGenericEntity<String
     /**
      * @param formId 表单ID
      */
+    @Override
     public void setFormId(String formId) {
         this.formId = formId;
     }
@@ -36,6 +38,7 @@ public class SimpleDynamicFormDeployLogEntity extends SimpleGenericEntity<String
     /**
      * @return 发布的版本
      */
+    @Override
     public Long getVersion() {
         return this.version;
     }
@@ -43,6 +46,7 @@ public class SimpleDynamicFormDeployLogEntity extends SimpleGenericEntity<String
     /**
      * @param version 发布的版本
      */
+    @Override
     public void setVersion(Long version) {
         this.version = version;
     }
@@ -50,6 +54,7 @@ public class SimpleDynamicFormDeployLogEntity extends SimpleGenericEntity<String
     /**
      * @return 发布时间
      */
+    @Override
     public Long getDeployTime() {
         return this.deployTime;
     }
@@ -57,6 +62,7 @@ public class SimpleDynamicFormDeployLogEntity extends SimpleGenericEntity<String
     /**
      * @param deployTime 发布时间
      */
+    @Override
     public void setDeployTime(Long deployTime) {
         this.deployTime = deployTime;
     }
@@ -64,6 +70,7 @@ public class SimpleDynamicFormDeployLogEntity extends SimpleGenericEntity<String
     /**
      * @return 部署的元数据
      */
+    @Override
     public String getMetaData() {
         return this.metaData;
     }
@@ -71,14 +78,17 @@ public class SimpleDynamicFormDeployLogEntity extends SimpleGenericEntity<String
     /**
      * @param metaData 部署的元数据
      */
+    @Override
     public void setMetaData(String metaData) {
         this.metaData = metaData;
     }
 
+    @Override
     public Byte getStatus() {
         return status;
     }
 
+    @Override
     public void setStatus(Byte status) {
         this.status = status;
     }

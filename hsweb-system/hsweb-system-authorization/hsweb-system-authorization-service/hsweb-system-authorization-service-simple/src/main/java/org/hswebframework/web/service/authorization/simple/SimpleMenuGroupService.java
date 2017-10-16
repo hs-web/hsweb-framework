@@ -69,16 +69,20 @@ public class SimpleMenuGroupService
         return menuGroupDao;
     }
 
+    @Override
     @Cacheable(key = "'group-id-list:'+#groupId==null?0:#groupId.hashCode()")
     public List<MenuEntity> getMenuByGroupId(List<String> groupId) {
         List<MenuGroupBindEntity> bindEntities = menuGroupBindService.selectByPk(groupId);
-        if (bindEntities == null || bindEntities.isEmpty()) return new LinkedList<>();
+        if (bindEntities == null || bindEntities.isEmpty()) {
+            return new LinkedList<>();
+        }
         return menuService.selectByPk(bindEntities.stream()
                 .map(MenuGroupBindEntity::getMenuId)
                 .distinct()
                 .collect(Collectors.toList()));
     }
 
+    @Override
     @CacheEvict(allEntries = true)
     public String insert(MenuGroupEntity entity) {
         entity.setStatus((byte) 1);

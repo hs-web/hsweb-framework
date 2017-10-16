@@ -74,7 +74,9 @@ public class DefaultAuthorizingHandler implements AuthorizingHandler {
                 .filter(access -> context.getDefinition().getActions().contains(access.getAction()))
                 .collect(Collectors.toSet());
         //无规则,则代表不进行控制
-        if (accesses.isEmpty()) return;
+        if (accesses.isEmpty()) {
+            return;
+        }
         //单个规则验证函数
         Function<Predicate<DataAccessConfig>, Boolean> function = accesses.stream()::allMatch;
         //调用控制器进行验证
@@ -130,17 +132,22 @@ public class DefaultAuthorizingHandler implements AuthorizingHandler {
             List<Permission> permissions = authentication.getPermissions().stream()
                     .filter(permission -> {
                         // 未持有任何一个权限
-                        if (!permissionsDef.contains(permission.getId())) return false;
+                        if (!permissionsDef.contains(permission.getId())) {
+                            return false;
+                        }
                         //未配置action
-                        if (actionsDef.isEmpty())
+                        if (actionsDef.isEmpty()) {
                             return true;
+                        }
                         //判断action
                         List<String> actions = permission.getActions()
                                 .stream()
                                 .filter(actionsDef::contains)
                                 .collect(Collectors.toList());
 
-                        if (actions.isEmpty()) return false;
+                        if (actions.isEmpty()) {
+                            return false;
+                        }
 
                         //如果 控制逻辑是or,则只要过滤结果数量不为0.否则过滤结果数量必须和配置的数量相同
                         return logicalIsOr ? actions.size() > 0 : permission.getActions().containsAll(actions);

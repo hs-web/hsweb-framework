@@ -32,7 +32,9 @@ public class AopUtils {
     public static <T extends Annotation> T findMethodAnnotation(Class targetClass, Method method, Class<T> annClass) {
         Method m = method;
         T a = AnnotationUtils.findAnnotation(m, annClass);
-        if (a != null) return a;
+        if (a != null) {
+            return a;
+        }
         m = ClassUtils.getMostSpecificMethod(m, targetClass);
         a = AnnotationUtils.findAnnotation(m, annClass);
         return a;
@@ -44,7 +46,9 @@ public class AopUtils {
 
     public static <T extends Annotation> T findAnnotation(Class targetClass, Method method, Class<T> annClass) {
         T a = findMethodAnnotation(targetClass, method, annClass);
-        if (a != null) return a;
+        if (a != null) {
+            return a;
+        }
         return findAnnotation(targetClass, annClass);
     }
 
@@ -61,7 +65,9 @@ public class AopUtils {
         String[] names = signature.getParameterNames();
         Class[] args = signature.getParameterTypes();
         for (int i = 0, len = args.length; i < len; i++) {
-            if (i != 0) methodName.append(",");
+            if (i != 0) {
+                methodName.append(",");
+            }
             methodName.append(args[i].getSimpleName()).append(" ").append(names[i]);
         }
         return methodName.append(")").toString();

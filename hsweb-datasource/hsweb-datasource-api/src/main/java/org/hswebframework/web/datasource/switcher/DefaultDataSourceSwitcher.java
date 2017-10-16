@@ -35,9 +35,11 @@ public class DefaultDataSourceSwitcher implements DataSourceSwitcher {
         getUsedHistoryQueue().removeLast();
         if (logger.isDebugEnabled()) {
             String current = currentDataSourceId();
-            if (null != current)
+            if (null != current) {
                 logger.debug("try use last data source : {}", currentDataSourceId());
-            else logger.debug("try use default data source");
+            } else {
+                logger.debug("try use default data source");
+            }
         }
     }
 
@@ -60,7 +62,9 @@ public class DefaultDataSourceSwitcher implements DataSourceSwitcher {
 
     @Override
     public String currentDataSourceId() {
-        if (getUsedHistoryQueue().size() == 0) return null;
+        if (getUsedHistoryQueue().size() == 0) {
+            return null;
+        }
 
         String activeId = getUsedHistoryQueue().getLast();
         if (DEFAULT_DATASOURCE_ID.equals(activeId)) {

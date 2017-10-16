@@ -60,6 +60,7 @@ public class SimpleOAuth2UserTokenEntity extends SimpleGenericEntity<String> imp
     /**
      * @return 客户端用户id
      */
+    @Override
     public String getClientUserId() {
         return this.clientUserId;
     }
@@ -67,6 +68,7 @@ public class SimpleOAuth2UserTokenEntity extends SimpleGenericEntity<String> imp
     /**
      * 设置 客户端用户id
      */
+    @Override
     public void setClientUserId(String clientUserId) {
         this.clientUserId = clientUserId;
     }
@@ -74,6 +76,7 @@ public class SimpleOAuth2UserTokenEntity extends SimpleGenericEntity<String> imp
     /**
      * @return 服务端用户id
      */
+    @Override
     public String getServerUserId() {
         return this.serverUserId;
     }
@@ -81,6 +84,7 @@ public class SimpleOAuth2UserTokenEntity extends SimpleGenericEntity<String> imp
     /**
      * 设置 服务端用户id
      */
+    @Override
     public void setServerUserId(String serverUserId) {
         this.serverUserId = serverUserId;
     }
@@ -88,6 +92,7 @@ public class SimpleOAuth2UserTokenEntity extends SimpleGenericEntity<String> imp
     /**
      * @return 服务端id
      */
+    @Override
     public String getServerId() {
         return this.serverId;
     }
@@ -95,6 +100,7 @@ public class SimpleOAuth2UserTokenEntity extends SimpleGenericEntity<String> imp
     /**
      * 设置 服务端id
      */
+    @Override
     public void setServerId(String serverId) {
         this.serverId = serverId;
     }
@@ -102,6 +108,7 @@ public class SimpleOAuth2UserTokenEntity extends SimpleGenericEntity<String> imp
     /**
      * @return 客户端id
      */
+    @Override
     public String getClientId() {
         return this.clientId;
     }
@@ -109,6 +116,7 @@ public class SimpleOAuth2UserTokenEntity extends SimpleGenericEntity<String> imp
     /**
      * 设置 客户端id
      */
+    @Override
     public void setClientId(String clientId) {
         this.clientId = clientId;
     }
@@ -116,6 +124,7 @@ public class SimpleOAuth2UserTokenEntity extends SimpleGenericEntity<String> imp
     /**
      * @return 授权码
      */
+    @Override
     public String getAccessToken() {
         return this.accessToken;
     }
@@ -123,6 +132,7 @@ public class SimpleOAuth2UserTokenEntity extends SimpleGenericEntity<String> imp
     /**
      * 设置 授权码
      */
+    @Override
     public void setAccessToken(String accessToken) {
         this.accessToken = accessToken;
     }
@@ -130,6 +140,7 @@ public class SimpleOAuth2UserTokenEntity extends SimpleGenericEntity<String> imp
     /**
      * @return 更新码
      */
+    @Override
     public String getRefreshToken() {
         return this.refreshToken;
     }
@@ -137,6 +148,7 @@ public class SimpleOAuth2UserTokenEntity extends SimpleGenericEntity<String> imp
     /**
      * 设置 更新码
      */
+    @Override
     public void setRefreshToken(String refreshToken) {
         this.refreshToken = refreshToken;
     }
@@ -144,6 +156,7 @@ public class SimpleOAuth2UserTokenEntity extends SimpleGenericEntity<String> imp
     /**
      * @return 有效期
      */
+    @Override
     public Integer getExpiresIn() {
         return this.expiresIn;
     }
@@ -151,6 +164,7 @@ public class SimpleOAuth2UserTokenEntity extends SimpleGenericEntity<String> imp
     /**
      * 设置 有效期
      */
+    @Override
     public void setExpiresIn(Integer expiresIn) {
         this.expiresIn = expiresIn;
     }
@@ -158,6 +172,7 @@ public class SimpleOAuth2UserTokenEntity extends SimpleGenericEntity<String> imp
     /**
      * @return 授权范围
      */
+    @Override
     public String getScope() {
         return this.scope;
     }
@@ -165,6 +180,7 @@ public class SimpleOAuth2UserTokenEntity extends SimpleGenericEntity<String> imp
     /**
      * 设置 授权范围
      */
+    @Override
     public void setScope(String scope) {
         this.scope = scope;
     }
@@ -172,6 +188,7 @@ public class SimpleOAuth2UserTokenEntity extends SimpleGenericEntity<String> imp
     /**
      * @return 创建时间
      */
+    @Override
     public Long getCreateTime() {
         return this.createTime;
     }
@@ -179,6 +196,7 @@ public class SimpleOAuth2UserTokenEntity extends SimpleGenericEntity<String> imp
     /**
      * 设置 创建时间
      */
+    @Override
     public void setCreateTime(Long createTime) {
         this.createTime = createTime;
     }
@@ -186,6 +204,7 @@ public class SimpleOAuth2UserTokenEntity extends SimpleGenericEntity<String> imp
     /**
      * @return 更新时间
      */
+    @Override
     public Long getUpdateTime() {
         return this.updateTime;
     }
@@ -193,6 +212,7 @@ public class SimpleOAuth2UserTokenEntity extends SimpleGenericEntity<String> imp
     /**
      * 设置 更新时间
      */
+    @Override
     public void setUpdateTime(Long updateTime) {
         this.updateTime = updateTime;
     }

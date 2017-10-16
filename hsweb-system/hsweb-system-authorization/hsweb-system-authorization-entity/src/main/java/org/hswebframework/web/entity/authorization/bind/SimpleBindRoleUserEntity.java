@@ -20,6 +20,7 @@ public class SimpleBindRoleUserEntity extends SimpleUserEntity implements BindRo
         return roles;
     }
 
+    @Override
     public void setRoles(List<String> roles) {
         this.roles = roles;
     }
@@ -27,10 +28,12 @@ public class SimpleBindRoleUserEntity extends SimpleUserEntity implements BindRo
     @Override
     public SimpleBindRoleUserEntity clone() {
         SimpleBindRoleUserEntity target = ((SimpleBindRoleUserEntity) super.clone());
-        if (roles != null)
+        if (roles != null) {
             target.setRoles(new ArrayList<>(getRoles()));
-        if (getProperties() != null)
+        }
+        if (getProperties() != null) {
             target.setProperties(new HashMap<>(getProperties()));
+        }
         return target;
     }
 }

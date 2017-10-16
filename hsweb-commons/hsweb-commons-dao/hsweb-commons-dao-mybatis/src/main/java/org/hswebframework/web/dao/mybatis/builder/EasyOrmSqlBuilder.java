@@ -93,7 +93,9 @@ public class EasyOrmSqlBuilder {
 
     public static String getJavaType(Class type) {
         String javaType = simpleName.get(type);
-        if (javaType == null) javaType = type.getName();
+        if (javaType == null) {
+            javaType = type.getName();
+        }
         return javaType;
     }
 
@@ -146,8 +148,9 @@ public class EasyOrmSqlBuilder {
                 RDBColumnMetaData column = new RDBColumnMetaData();
                 column.setJdbcType(JDBCType.valueOf(resultMapping.getJdbcType().name()));
                 column.setName(resultMapping.getColumn());
-                if (!StringUtils.isNullOrEmpty(resultMapping.getProperty()))
+                if (!StringUtils.isNullOrEmpty(resultMapping.getProperty())) {
                     column.setAlias(resultMapping.getProperty());
+                }
                 column.setJavaType(resultMapping.getJavaType());
                 column.setProperty("resultMapping", resultMapping);
                 if (column.getJdbcType() == JDBCType.DATE) {
@@ -175,11 +178,17 @@ public class EasyOrmSqlBuilder {
         SqlAppender appender = new SqlAppender();
         columns.forEach(column -> {
             RDBColumnMetaData columnMetaData = column.getRDBColumnMetaData();
-            if (columnMetaData == null) return;
-            if (columnMetaData.getName().contains(".")) return;
+            if (columnMetaData == null) {
+                return;
+            }
+            if (columnMetaData.getName().contains(".")) {
+                return;
+            }
             try {
                 Object tmp = propertyUtils.getProperty(param.getData(), columnMetaData.getAlias());
-                if (tmp == null) return;
+                if (tmp == null) {
+                    return;
+                }
             } catch (Exception e) {
                 return;
             }
@@ -189,8 +198,11 @@ public class EasyOrmSqlBuilder {
                     ",jdbcType=", columnMetaData.getJdbcType(),
                     "}");
         });
-        if (!appender.isEmpty()) appender.removeFirst();
-        else throw new UnsupportedOperationException("{no_columns_will_be_update}");
+        if (!appender.isEmpty()) {
+            appender.removeFirst();
+        } else {
+            throw new UnsupportedOperationException("{no_columns_will_be_update}");
+        }
         return appender.toString();
     }
 
@@ -206,10 +218,11 @@ public class EasyOrmSqlBuilder {
     public String buildInsertSql(String resultMapId, String tableName, Object param) {
         Pager.reset();
         InsertParam insertParam;
-        if (param instanceof InsertParam)
+        if (param instanceof InsertParam) {
             insertParam = ((InsertParam) param);
-        else
+        } else {
             insertParam = new InsertParam<>(param);
+        }
         RDBTableMetaData tableMetaData = createMeta(tableName, resultMapId);
         SqlRender<InsertParam> render = tableMetaData.getDatabaseMetaData().getRenderer(SqlRender.TYPE.INSERT);
         String sql = render.render(tableMetaData, insertParam).getSql();
@@ -240,9 +253,13 @@ public class EasyOrmSqlBuilder {
         SqlAppender appender = new SqlAppender();
         columns.forEach(column -> {
             RDBColumnMetaData columnMetaData = column.getRDBColumnMetaData();
-            if (columnMetaData == null) return;
+            if (columnMetaData == null) {
+                return;
+            }
             String cname = columnMetaData.getName();
-            if (!cname.contains(".")) cname = tableName.concat(".").concat(cname);
+            if (!cname.contains(".")) {
+                cname = tableName.concat(".").concat(cname);
+            }
             appender.add(",", encodeColumn(dialect, cname)
                     , " AS "
                     , dialect.getQuoteStart()
@@ -250,7 +267,9 @@ public class EasyOrmSqlBuilder {
                     , dialect.getQuoteEnd());
         });
         param.getIncludes().remove("*");
-        if (appender.isEmpty()) return "*";
+        if (appender.isEmpty()) {
+            return "*";
+        }
         appender.removeFirst();
         return appender.toString();
     }
@@ -264,14 +283,21 @@ public class EasyOrmSqlBuilder {
         param.getSorts()
                 .forEach(sort -> {
                     RDBColumnMetaData column = tableMetaData.getColumn(sort.getName());
-                    if (column == null)
+                    if (column == null) {
                         column = tableMetaData.findColumn(sort.getName());
-                    if (column == null) return;
+                    }
+                    if (column == null) {
+                        return;
+                    }
                     String cname = column.getName();
-                    if (!cname.contains(".")) cname = tableName.concat(".").concat(cname);
+                    if (!cname.contains(".")) {
+                        cname = tableName.concat(".").concat(cname);
+                    }
                     appender.add(encodeColumn(tableMetaData.getDatabaseMetaData().getDialect(), cname), " ", sort.getOrder(), ",");
                 });
-        if (appender.isEmpty()) return "";
+        if (appender.isEmpty()) {
+            return "";
+        }
         appender.removeLast();
         return appender.toString();
     }

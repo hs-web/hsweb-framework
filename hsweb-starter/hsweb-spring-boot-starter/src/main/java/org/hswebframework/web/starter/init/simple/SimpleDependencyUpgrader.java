@@ -40,11 +40,17 @@ public class SimpleDependencyUpgrader implements DependencyUpgrader {
         shouldUpdateVersionList = versions.stream()
                 .filter(map -> {
                     String ver = (String) map.get("version");
-                    if (null == ver) return false;
+                    if (null == ver) {
+                        return false;
+                    }
                     //首次安装
-                    if (firstInstall) return true;
+                    if (firstInstall) {
+                        return true;
+                    }
                     //相同版本
-                    if (installed.compareTo(dependency) == 0) return false;
+                    if (installed.compareTo(dependency) == 0) {
+                        return false;
+                    }
 
                     return installed.compareTo(new SystemVersion(ver)) < 0;
                 })
@@ -56,9 +62,12 @@ public class SimpleDependencyUpgrader implements DependencyUpgrader {
     @Override
     public void upgrade(UpgradeCallBack callBack) {
         shouldUpdateVersionList.forEach(context -> {
-            if (this.context != null) context.putAll(context);
-            if (logger.isInfoEnabled())
+            if (this.context != null) {
+                context.putAll(context);
+            }
+            if (logger.isInfoEnabled()) {
                 logger.info("upgrade [{}/{}] to version:{} {}", dependency.getGroupId(), dependency.getArtifactId(), context.get("version"), dependency.getWebsite());
+            }
             callBack.execute(context);
         });
     }

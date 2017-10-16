@@ -76,7 +76,9 @@ public enum ErrorType {
     }
 
     public String message() {
-        if (message == null) return this.name();
+        if (message == null) {
+            return this.name();
+        }
         return message;
     }
 

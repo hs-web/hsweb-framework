@@ -32,7 +32,9 @@ public class SimplePersonnelAuthorization implements PersonnelAuthorization {
 
     @Override
     public Set<TreeNode<String>> getDistrictIds() {
-        if (districtIds == null) districtIds = Collections.emptySet();
+        if (districtIds == null) {
+            districtIds = Collections.emptySet();
+        }
         return districtIds;
     }
 
@@ -51,7 +53,9 @@ public class SimplePersonnelAuthorization implements PersonnelAuthorization {
 
     @Override
     public Set<TreeNode<String>> getOrgIds() {
-        if (orgIds == null) orgIds = Collections.emptySet();
+        if (orgIds == null) {
+            orgIds = Collections.emptySet();
+        }
         return orgIds;
     }
 
@@ -61,7 +65,9 @@ public class SimplePersonnelAuthorization implements PersonnelAuthorization {
 
     @Override
     public Set<TreeNode<String>> getPositionIds() {
-        if (positionIds == null) positionIds = Collections.emptySet();
+        if (positionIds == null) {
+            positionIds = Collections.emptySet();
+        }
         return positionIds;
     }
 
@@ -71,7 +77,9 @@ public class SimplePersonnelAuthorization implements PersonnelAuthorization {
 
     @Override
     public Set<TreeNode<String>> getDepartmentIds() {
-        if (departmentIds == null) departmentIds = Collections.emptySet();
+        if (departmentIds == null) {
+            departmentIds = Collections.emptySet();
+        }
         return departmentIds;
     }
 

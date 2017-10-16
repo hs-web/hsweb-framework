@@ -51,7 +51,9 @@ public class JtaDynamicDataSourceService extends AbstractDynamicDataSourceServic
     @Override
     protected int getHash(String id) {
         AtomikosDataSourceConfig config = jtaDataSourceRepository.getConfig(id);
-        if (null == config) return 0;
+        if (null == config) {
+            return 0;
+        }
         return config.hashCode();
     }
 
@@ -106,8 +108,9 @@ public class JtaDynamicDataSourceService extends AbstractDynamicDataSourceServic
                         // 初始化超时,认定为失败
                         logger.error("init timeout ({}ms)", config.getInitTimeout());
                         cache.closeDataSource();
-                        if (downLatch.getCount() > 0)
+                        if (downLatch.getCount() > 0) {
                             downLatch.countDown();
+                        }
                     }
                 }
             });

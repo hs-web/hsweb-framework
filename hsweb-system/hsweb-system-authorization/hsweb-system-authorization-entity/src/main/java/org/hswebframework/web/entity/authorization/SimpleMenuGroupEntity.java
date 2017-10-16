@@ -44,6 +44,7 @@ public class SimpleMenuGroupEntity extends SimpleTreeSortSupportEntity<String> i
     /**
      * @return 分组名称
      */
+    @Override
     public String getName() {
         return this.name;
     }
@@ -51,6 +52,7 @@ public class SimpleMenuGroupEntity extends SimpleTreeSortSupportEntity<String> i
     /**
      * 设置 分组名称
      */
+    @Override
     public void setName(String name) {
         this.name = name;
     }
@@ -58,6 +60,7 @@ public class SimpleMenuGroupEntity extends SimpleTreeSortSupportEntity<String> i
     /**
      * @return 分组描述
      */
+    @Override
     public String getDescribe() {
         return this.describe;
     }
@@ -65,6 +68,7 @@ public class SimpleMenuGroupEntity extends SimpleTreeSortSupportEntity<String> i
     /**
      * 设置 分组描述
      */
+    @Override
     public void setDescribe(String describe) {
         this.describe = describe;
     }
@@ -72,6 +76,7 @@ public class SimpleMenuGroupEntity extends SimpleTreeSortSupportEntity<String> i
     /**
      * @return 是否默认
      */
+    @Override
     public Boolean isDefaultGroup() {
         return this.defaultGroup;
     }
@@ -79,6 +84,7 @@ public class SimpleMenuGroupEntity extends SimpleTreeSortSupportEntity<String> i
     /**
      * 设置 是否默认
      */
+    @Override
     public void setDefaultGroup(Boolean defaultGroup) {
         this.defaultGroup = defaultGroup;
     }
@@ -94,8 +100,9 @@ public class SimpleMenuGroupEntity extends SimpleTreeSortSupportEntity<String> i
 
     @Override
     public List<MenuGroupBindEntity> getBindInfo() {
-        if (bindInfo == null)
+        if (bindInfo == null) {
             return Collections.emptyList();
+        }
         return new LinkedList<>(bindInfo);
     }
 
@@ -104,10 +111,12 @@ public class SimpleMenuGroupEntity extends SimpleTreeSortSupportEntity<String> i
         this.bindInfo = new LinkedList(bindInfo);
     }
 
+    @Override
     public Byte getStatus() {
         return status;
     }
 
+    @Override
     public void setStatus(Byte status) {
         this.status = status;
     }

@@ -49,14 +49,18 @@ public class SimpleDependencyInstaller implements DependencyInstaller {
     }
 
     public void doUnInstall(Map<String, Object> context) {
-        if (unInstaller != null) installer.execute(context);
+        if (unInstaller != null) {
+            installer.execute(context);
+        }
     }
 
     public void doUpgrade(Map<String, Object> context, SystemVersion.Dependency installed) {
         SimpleDependencyUpgrader simpleDependencyUpgrader =
                 new SimpleDependencyUpgrader(installed, dependency, context);
         context.put("upgrader", simpleDependencyUpgrader);
-        if (unInstaller != null) upgrader.execute(context);
+        if (unInstaller != null) {
+            upgrader.execute(context);
+        }
     }
 
     @Override

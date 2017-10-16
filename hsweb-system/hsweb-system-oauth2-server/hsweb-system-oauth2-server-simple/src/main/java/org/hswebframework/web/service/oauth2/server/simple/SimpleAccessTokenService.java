@@ -48,8 +48,9 @@ public class SimpleAccessTokenService implements AccessTokenService {
     }
 
     public SimpleAccessTokenService setTokenGenerator(TokenGenerator tokenGenerator) {
-        if (tokenGenerator != null)
+        if (tokenGenerator != null) {
             this.tokenGenerator = tokenGenerator;
+        }
         return this;
     }
 

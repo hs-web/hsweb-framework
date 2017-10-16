@@ -4,10 +4,7 @@ import org.hswebframework.web.entity.organizational.PersonEntity;
 import org.hswebframework.web.entity.workflow.ActDefEntity;
 import org.hswebframework.web.organizational.authorization.relation.Relation;
 import org.hswebframework.web.service.organizational.PersonService;
-import org.hswebframework.web.service.organizational.RelationDefineService;
 import org.hswebframework.web.service.organizational.RelationInfoService;
-import org.hswebframework.web.service.workflow.ActDefService;
-import org.hswebframework.web.workflow.flowable.service.BpmActivityService;
 import org.hswebframework.web.workflow.flowable.service.BpmUtilsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,17 +34,17 @@ public class BpmUtilsServiceImp implements BpmUtilsService {
     public List<String> selectUserIdsBy(String userId, ActDefEntity actDefEntity) {
         List<String> list = new ArrayList<>();
         // 根据配置类型  获取人员信息 设置待办人
-        if (actDefEntity.getType().equals("person")) { // 矩阵
+        if ("person".equals(actDefEntity.getType())) { // 矩阵
             List<Relation> relations = relationInfoService.getRelations(actDefEntity.getType(), userId).findPos(actDefEntity.getDefId());
             for (Relation relation : relations) {
                 list.add(relation.getTarget());
             }
-        } else if (actDefEntity.getType().equals("position")) { // 岗位
+        } else if ("position".equals(actDefEntity.getType())) { // 岗位
             List<PersonEntity> personEntities = personService.selectByPositionId(actDefEntity.getDefId());
             for(PersonEntity personEntity:personEntities){
                 list.add(personEntity.getUserId());
             }
-        } else if (actDefEntity.getType().equals("role")) {  // 角色
+        } else if ("role".equals(actDefEntity.getType())) {  // 角色
             List<PersonEntity> personEntities = personService.selectByRoleId(actDefEntity.getDefId());
             for(PersonEntity personEntity:personEntities){
                 list.add(personEntity.getUserId());

@@ -57,8 +57,9 @@ public class DefaultPasswordGranter extends AbstractAuthorizationService impleme
 
         OAuth2Client client = getClientByOwnerId(userId);
         assertGrantTypeSupport(client, GrantType.implicit);
-        if (scope == null || scope.isEmpty())
+        if (scope == null || scope.isEmpty()) {
             scope = client.getDefaultGrantScope();
+        }
         if (!client.getDefaultGrantScope().containsAll(scope)) {
             throw new GrantTokenException(SCOPE_OUT_OF_RANGE);
         }

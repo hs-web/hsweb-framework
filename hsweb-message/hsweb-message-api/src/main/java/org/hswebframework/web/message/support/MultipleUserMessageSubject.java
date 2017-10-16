@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 public interface MultipleUserMessageSubject extends MultipleQueueMessageSubject {
     Set<String> getUserIdList();
 
+    @Override
     default Set<String> getQueueName() {
         return getUserIdList().stream()
                 .map(id -> "queue_for_user:" + id)

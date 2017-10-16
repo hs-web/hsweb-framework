@@ -78,13 +78,14 @@ public class BpmTaskServiceImp extends FlowableAbstract implements BpmTaskServic
     @Override
     public String selectNowTaskName(String procInstId) {
         List<Task> tasks = selectNowTask(procInstId);
-        if (tasks.size() == 1)
+        if (tasks.size() == 1) {
             return tasks.get(0).getName();
-        else {
+        } else {
             StringBuilder builder = new StringBuilder();
             for (int i = 0; i < tasks.size(); i++) {
-                if (i != 0)
+                if (i != 0) {
                     builder.append(",");
+                }
                 builder.append(tasks.get(i).getName());
             }
             return builder.toString();
@@ -95,13 +96,14 @@ public class BpmTaskServiceImp extends FlowableAbstract implements BpmTaskServic
     @Override
     public String selectNowTaskId(String procInstId) {
         List<Task> tasks = selectNowTask(procInstId);
-        if (tasks.size() == 1)
+        if (tasks.size() == 1) {
             return tasks.get(0).getId();
-        else {
+        } else {
             StringBuilder builder = new StringBuilder();
             for (int i = 0; i < tasks.size(); i++) {
-                if (i != 0)
+                if (i != 0) {
                     builder.append(",");
+                }
                 builder.append(tasks.get(i).getId());
             }
             return builder.toString();
@@ -118,7 +120,9 @@ public class BpmTaskServiceImp extends FlowableAbstract implements BpmTaskServic
         }
         if (!StringUtils.isNullOrEmpty(task.getAssignee())) {
             logger.warn("该任务已被签收!");
-        } else taskService.claim(taskId, userId);
+        } else {
+            taskService.claim(taskId, userId);
+        }
     }
 
 
@@ -173,8 +177,9 @@ public class BpmTaskServiceImp extends FlowableAbstract implements BpmTaskServic
         if (execution.size() > 0) {
             List<Task> tasks = selectNowTask(task.getProcessInstanceId());
             // 自定义下一执行人
-            if (tasks.size() == 1 && !StringUtils.isNullOrEmpty(nextClaim)) claim(tasks.get(0).getId(), nextClaim);
-            else {
+            if (tasks.size() == 1 && !StringUtils.isNullOrEmpty(nextClaim)) {
+                claim(tasks.get(0).getId(), nextClaim);
+            } else {
                 for (Task t : tasks) {
                     addCandidateUser(t.getId(), t.getTaskDefinitionKey(), userId);
                 }
@@ -214,7 +219,9 @@ public class BpmTaskServiceImp extends FlowableAbstract implements BpmTaskServic
 
         // 是否存在定时任务
         long num = managementService.createJobQuery().executionId(task.getExecutionId()).count();
-        if (num > 0) throw new NotFoundException("当前环节不允许驳回");
+        if (num > 0) {
+            throw new NotFoundException("当前环节不允许驳回");
+        }
 
         // 驳回
 
@@ -260,8 +267,9 @@ public class BpmTaskServiceImp extends FlowableAbstract implements BpmTaskServic
         taskServiceImpl.getCommandExecutor().execute(new JumpTaskCmd(task.getExecutionId(), activity));
         if(!StringUtils.isNullOrEmpty(next_claim)){
             task = selectTaskByTaskId(taskId);
-            if (null != task)
+            if (null != task) {
                 claim(task.getId(), next_claim);
+            }
         }
     }
 
@@ -278,7 +286,7 @@ public class BpmTaskServiceImp extends FlowableAbstract implements BpmTaskServic
                 taskService.addCandidateUser(taskId,
                         runtimeService.getIdentityLinksForProcessInstance(selectTaskByTaskId(taskId).getProcessInstanceId())
                         .stream()
-                        .filter(linkEntity -> linkEntity.getType().equals("starter"))
+                        .filter(linkEntity -> "starter".equals(linkEntity.getType()))
                         .findFirst().orElseThrow(()-> new NotFoundException("发起人获取失败")).getUserId()
                 );
             }

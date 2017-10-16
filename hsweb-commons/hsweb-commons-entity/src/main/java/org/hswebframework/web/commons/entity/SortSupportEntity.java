@@ -26,8 +26,11 @@ public interface SortSupportEntity extends Comparable<SortSupportEntity>, Entity
 
     void setSortIndex(Long sortIndex);
 
+    @Override
     default int compareTo(SortSupportEntity support) {
-        if (support == null) return -1;
+        if (support == null) {
+            return -1;
+        }
         
         return Long.compare(getSortIndex() == null ? 0 : getSortIndex(), support.getSortIndex() == null ? 0 : support.getSortIndex());
     }

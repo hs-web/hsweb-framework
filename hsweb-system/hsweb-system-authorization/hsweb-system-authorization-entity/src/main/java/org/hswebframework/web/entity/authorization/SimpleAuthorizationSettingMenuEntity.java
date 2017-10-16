@@ -40,6 +40,7 @@ public class SimpleAuthorizationSettingMenuEntity extends SimpleTreeSortSupportE
     /**
      * @return 菜单id
      */
+    @Override
     public String getMenuId() {
         return this.menuId;
     }
@@ -47,6 +48,7 @@ public class SimpleAuthorizationSettingMenuEntity extends SimpleTreeSortSupportE
     /**
      * 设置 菜单id
      */
+    @Override
     public void setMenuId(String menuId) {
         this.menuId = menuId;
     }
@@ -54,6 +56,7 @@ public class SimpleAuthorizationSettingMenuEntity extends SimpleTreeSortSupportE
     /**
      * @return 设置id
      */
+    @Override
     public String getSettingId() {
         return this.settingId;
     }
@@ -61,6 +64,7 @@ public class SimpleAuthorizationSettingMenuEntity extends SimpleTreeSortSupportE
     /**
      * 设置 设置id
      */
+    @Override
     public void setSettingId(String settingId) {
         this.settingId = settingId;
     }
@@ -69,6 +73,7 @@ public class SimpleAuthorizationSettingMenuEntity extends SimpleTreeSortSupportE
     /**
      * @return 状态
      */
+    @Override
     public Byte getStatus() {
         return this.status;
     }
@@ -76,6 +81,7 @@ public class SimpleAuthorizationSettingMenuEntity extends SimpleTreeSortSupportE
     /**
      * 设置 状态
      */
+    @Override
     public void setStatus(Byte status) {
         this.status = status;
     }
@@ -83,6 +89,7 @@ public class SimpleAuthorizationSettingMenuEntity extends SimpleTreeSortSupportE
     /**
      * @return 其他配置内容
      */
+    @Override
     public String getConfig() {
         return this.config;
     }
@@ -90,6 +97,7 @@ public class SimpleAuthorizationSettingMenuEntity extends SimpleTreeSortSupportE
     /**
      * 设置 其他配置内容
      */
+    @Override
     public void setConfig(String config) {
         this.config = config;
     }

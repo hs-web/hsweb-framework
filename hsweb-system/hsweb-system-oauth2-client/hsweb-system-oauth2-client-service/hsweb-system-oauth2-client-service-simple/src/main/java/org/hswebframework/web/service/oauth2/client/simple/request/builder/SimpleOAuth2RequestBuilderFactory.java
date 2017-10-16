@@ -81,13 +81,17 @@ public class SimpleOAuth2RequestBuilderFactory implements OAuth2RequestBuilderFa
 
     protected ResponseConvertHandler getConvertHandler(String id, String provider) {
         ResponseConvertHandler convertHandler = convertHandlerMap.get("serverId:" + id);
-        if (convertHandler == null) convertHandler = convertHandlerMap.getOrDefault("provider:" + provider, defaultConvertHandler);
+        if (convertHandler == null) {
+            convertHandler = convertHandlerMap.getOrDefault("provider:" + provider, defaultConvertHandler);
+        }
         return convertHandler;
     }
 
     protected ResponseJudge getResponseJudge(String id, String provider) {
         ResponseJudge judge = judgeMap.get("serverId:" + id);
-        if (judge == null) judge = judgeMap.getOrDefault("provider:" + provider, defaultResponseJudge);
+        if (judge == null) {
+            judge = judgeMap.getOrDefault("provider:" + provider, defaultResponseJudge);
+        }
         return judge;
     }
 

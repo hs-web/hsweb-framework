@@ -64,16 +64,18 @@ public class BpmProcessServiceImp extends FlowableAbstract implements BpmProcess
                 }
             }else{
                 // 设置待办人（单环节并且设定办理人可直接签收）
-                if(tasks.size()==1 && !StringUtils.isNullOrEmpty(nextClaim)) bpmTaskService.claim(tasks.get(0).getId(), nextClaim);
-                else {
+                if(tasks.size()==1 && !StringUtils.isNullOrEmpty(nextClaim)) {
+                    bpmTaskService.claim(tasks.get(0).getId(), nextClaim);
+                } else {
                     for(Task task:tasks){
                         bpmTaskService.addCandidateUser(task.getId(), task.getTaskDefinitionKey(), creatorId);
                     }
                 }
             }
 
-            if (logger.isDebugEnabled())
+            if (logger.isDebugEnabled()) {
                 logger.debug("start process of {key={}, bkey={}, pid={}, variables={}}", procDefKey, businessKey, processInstanceId, variables);
+            }
         }catch (Exception e){
             logger.warn("工作流启动失败，请联系管理员!");
         }finally {

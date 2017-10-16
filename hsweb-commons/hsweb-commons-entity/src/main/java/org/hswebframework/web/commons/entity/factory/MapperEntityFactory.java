@@ -103,7 +103,9 @@ public class MapperEntityFactory implements EntityFactory {
         Objects.requireNonNull(target);
         try {
             PropertyCopier<S, T> copier = copierCache.<S, T>get(getCopierCacheKey(source.getClass(), target.getClass()));
-            if (null != copier) return copier.copyProperties(source, target);
+            if (null != copier) {
+                return copier.copyProperties(source, target);
+            }
 
             return (T) defaultPropertyCopier.copyProperties(source, target);
 //
@@ -141,8 +143,9 @@ public class MapperEntityFactory implements EntityFactory {
             realType = beanClass;
         }
         if (mapper == null && realType != null) {
-            if (logger.isDebugEnabled())
+            if (logger.isDebugEnabled()) {
                 logger.debug("use instance {} for {}", realType, beanClass);
+            }
             mapper = new Mapper<>(realType, new DefaultInstanceGetter(realType));
         }
         if (mapper != null) {
@@ -158,12 +161,20 @@ public class MapperEntityFactory implements EntityFactory {
 
     @Override
     public <T> T newInstance(Class<T> beanClass, Class<? extends T> defaultClass) {
-        if (beanClass == null) return null;
+        if (beanClass == null) {
+            return null;
+        }
         Mapper<T> mapper = realTypeMapper.get(beanClass);
-        if (mapper != null) return mapper.getInstanceGetter().get();
+        if (mapper != null) {
+            return mapper.getInstanceGetter().get();
+        }
         mapper = initCache(beanClass);
-        if (mapper != null) return mapper.getInstanceGetter().get();
-        if (defaultClass != null) return newInstance(defaultClass);
+        if (mapper != null) {
+            return mapper.getInstanceGetter().get();
+        }
+        if (defaultClass != null) {
+            return newInstance(defaultClass);
+        }
 
         throw new NotFoundException("can't create instance for " + beanClass);
     }
@@ -176,8 +187,9 @@ public class MapperEntityFactory implements EntityFactory {
             return mapper.getTarget();
         }
         mapper = initCache(beanClass);
-        if (mapper != null)
+        if (mapper != null) {
             return mapper.getTarget();
+        }
 
         return Modifier.isAbstract(beanClass.getModifiers())
                 || Modifier.isInterface(beanClass.getModifiers())

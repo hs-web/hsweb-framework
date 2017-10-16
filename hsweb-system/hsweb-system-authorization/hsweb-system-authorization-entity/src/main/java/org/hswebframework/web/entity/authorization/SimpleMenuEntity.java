@@ -65,50 +65,62 @@ public class SimpleMenuEntity extends SimpleTreeSortSupportEntity<String>
         this.children = children;
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public void setName(String name) {
         this.name = name;
     }
 
+    @Override
     public String getDescribe() {
         return describe;
     }
 
+    @Override
     public void setDescribe(String describe) {
         this.describe = describe;
     }
 
+    @Override
     public String getPermissionId() {
         return permissionId;
     }
 
+    @Override
     public void setPermissionId(String permissionId) {
         this.permissionId = permissionId;
     }
 
+    @Override
     public String getUrl() {
         return url;
     }
 
+    @Override
     public void setUrl(String url) {
         this.url = url;
     }
 
+    @Override
     public String getIcon() {
         return icon;
     }
 
+    @Override
     public void setIcon(String icon) {
         this.icon = icon;
     }
 
+    @Override
     public Byte getStatus() {
         return status;
     }
 
+    @Override
     public void setStatus(Byte status) {
         this.status = status;
     }

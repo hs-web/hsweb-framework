@@ -37,8 +37,9 @@ public class FieldFilterDataAccessHandler implements DataAccessHandler {
             case Permission.ACTION_UPDATE:
                 return doUpdateAccess(filterDataAccessConfig, context);
             default:
-                if (logger.isDebugEnabled())
+                if (logger.isDebugEnabled()) {
                     logger.debug("field filter not support for {}", access.getAction());
+                }
                 return true;
         }
     }

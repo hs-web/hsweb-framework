@@ -6,6 +6,9 @@ eureka:
   client:
     fetch-registry: true
     register-with-eureka: true
+  server:
+    enable-self-preservation: false
+    eviction-interval-timer-in-ms: 1000
 zuul:
   prefix: /api
   routes:

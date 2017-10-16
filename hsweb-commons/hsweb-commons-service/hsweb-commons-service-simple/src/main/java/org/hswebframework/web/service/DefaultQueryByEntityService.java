@@ -57,8 +57,9 @@ public interface DefaultQueryByEntityService<E>
             pagerResult.setData(Collections.emptyList());
         } else {
             //根据实际记录数量重新指定分页参数
-            if (param instanceof QueryParamEntity)
+            if (param instanceof QueryParamEntity) {
                 ((QueryParamEntity) param).rePaging(total);
+            }
             pagerResult.setData(getDao().query(param));
         }
         return pagerResult;
@@ -74,7 +75,9 @@ public interface DefaultQueryByEntityService<E>
     @Override
     @Transactional(readOnly = true)
     default List<E> select(Entity param) {
-        if (param == null) param = QueryParamEntity.empty();
+        if (param == null) {
+            param = QueryParamEntity.empty();
+        }
         return getDao().query(param);
     }
 
@@ -88,7 +91,9 @@ public interface DefaultQueryByEntityService<E>
     @Override
     @Transactional(readOnly = true)
     default int count(Entity param) {
-        if (param == null) param = QueryParamEntity.empty();
+        if (param == null) {
+            param = QueryParamEntity.empty();
+        }
         return getDao().count(param);
     }
 
@@ -101,11 +106,15 @@ public interface DefaultQueryByEntityService<E>
     @Override
     @Transactional(readOnly = true)
     default E selectSingle(Entity param) {
-        if (param instanceof QueryParamEntity)
+        if (param instanceof QueryParamEntity) {
             ((QueryParamEntity) param).doPaging(0, 1);
+        }
         List<E> list = this.select(param);
-        if (list.size() == 0) return null;
-        else return list.get(0);
+        if (list.size() == 0) {
+            return null;
+        } else {
+            return list.get(0);
+        }
     }
 
 }

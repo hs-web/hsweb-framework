@@ -54,7 +54,9 @@ public class EntityProperties {
     }
 
     public Map<Class<Entity>, MapperEntityFactory.Mapper> createMappers() {
-        if (mappings == null || mappings.isEmpty()) return Collections.emptyMap();
+        if (mappings == null || mappings.isEmpty()) {
+            return Collections.emptyMap();
+        }
         return mappings.stream()
                 .map(Mapping::create)
                 .reduce(MapUtils::merge)
@@ -67,7 +69,9 @@ public class EntityProperties {
         Map<String, String> mapping;
 
         Map<Class<Entity>, MapperEntityFactory.Mapper> create() {
-            if (mapping == null || mapping.isEmpty()) return Collections.emptyMap();
+            if (mapping == null || mapping.isEmpty()) {
+                return Collections.emptyMap();
+            }
             return mapping.entrySet().stream()
                     .collect(Collectors.toMap(
                             entry -> getSourceClass(entry.getKey()),
@@ -75,8 +79,9 @@ public class EntityProperties {
         }
 
         protected Class<Entity> getClass(String basePackage, String name) {
-            if (!StringUtils.isNullOrEmpty(basePackage))
+            if (!StringUtils.isNullOrEmpty(basePackage)) {
                 name = basePackage.concat(".").concat(name);
+            }
             return classForName(name);
         }
 

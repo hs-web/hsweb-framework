@@ -83,6 +83,7 @@ public class DefaultBasicAuthorizeDefinition implements AuthorizeDefinition {
         return logical;
     }
 
+    @Override
     public boolean isEmpty() {
         return permissions.isEmpty() && roles.isEmpty() && user.isEmpty() && script == null && dataAccessDefinition == null;
     }
@@ -129,7 +130,9 @@ public class DefaultBasicAuthorizeDefinition implements AuthorizeDefinition {
     }
 
     public void put(Authorize authorize) {
-        if (null == authorize || authorize.ignore()) return;
+        if (null == authorize || authorize.ignore()) {
+            return;
+        }
         permissions.addAll(Arrays.asList(authorize.permission()));
         actions.addAll(Arrays.asList(authorize.action()));
         roles.addAll(Arrays.asList(authorize.role()));
@@ -141,13 +144,17 @@ public class DefaultBasicAuthorizeDefinition implements AuthorizeDefinition {
     }
 
     public void put(RequiresExpression expression) {
-        if (null == expression) return;
+        if (null == expression) {
+            return;
+        }
         script = new DefaultScript(expression.language(), expression.value());
     }
 
     public void put(RequiresDataAccess dataAccess) {
-        if (null == dataAccess) return;
-        if (!dataAccess.permission().equals("")) {
+        if (null == dataAccess) {
+            return;
+        }
+        if (!"".equals(dataAccess.permission())) {
             permissions.add(dataAccess.permission());
         }
         actions.addAll(Arrays.asList(dataAccess.action()));

@@ -44,7 +44,9 @@ public class SimpleDynamicFormOperationService implements DynamicFormOperationSe
 
     protected <T> RDBTable<T> getTable(String formId) {
         DynamicFormEntity form = dynamicFormService.selectByPk(formId);
-        if (null == form) throw new NotFoundException("表单不存在");
+        if (null == form) {
+            throw new NotFoundException("表单不存在");
+        }
 
         RDBDatabase database = StringUtils.isEmpty(form.getDataSourceId()) ?
                 databaseRepository.getDefaultDatabase() : databaseRepository.getDatabase(form.getDataSourceId());

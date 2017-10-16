@@ -171,11 +171,13 @@ public class FileController {
                 MimetypesFileTypeMap.getDefaultFileTypeMap().getContentType(fileName) :
                 fileInfo.getType();
         //未自定义文件名，则使用上传时的文件名
-        if (StringUtils.isNullOrEmpty(name))
+        if (StringUtils.isNullOrEmpty(name)) {
             name = fileInfo.getName();
+        }
         //如果未指定文件拓展名，则追加默认的文件拓展名
-        if (!name.contains("."))
+        if (!name.contains(".")) {
             name = name.concat(".").concat(suffix);
+        }
         //关键字剔除
         name = fileNameKeyWordPattern.matcher(name).replaceAll("");
         int skip = 0;
@@ -250,8 +252,9 @@ public class FileController {
             } catch (@SuppressWarnings("all")UnsupportedEncodingException ignore) {
             }
         }
-        if (logger.isInfoEnabled())
+        if (logger.isInfoEnabled()) {
             logger.info("start write file:{}", fileName);
+        }
 
         FileInfoEntity fileInfo;
         try {
@@ -272,7 +275,9 @@ public class FileController {
     @AccessLogger("上传静态文件")
     @Authorize(action = "static")
     public ResponseMessage<String> uploadStatic(@RequestParam("file") MultipartFile file) throws IOException {
-        if (file.isEmpty()) return ResponseMessage.ok();
+        if (file.isEmpty()) {
+            return ResponseMessage.ok();
+        }
         return ResponseMessage.ok(fileService.saveStaticFile(file.getInputStream(), file.getOriginalFilename()));
     }
 

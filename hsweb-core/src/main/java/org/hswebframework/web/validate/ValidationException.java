@@ -41,7 +41,9 @@ public class ValidationException extends BusinessException {
     }
 
     public List<ValidateResults.Result> getResults() {
-        if (results == null) return null;
+        if (results == null) {
+            return null;
+        }
         return results.getResults();
     }
 }

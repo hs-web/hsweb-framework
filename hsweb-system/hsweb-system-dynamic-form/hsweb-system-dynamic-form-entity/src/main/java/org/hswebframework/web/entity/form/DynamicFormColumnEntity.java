@@ -198,16 +198,12 @@ public interface DynamicFormColumnEntity extends GenericEntity<String> {
      */
     void setScale(Integer scale);
 
-    @Deprecated
     String getDictId();
 
-    @Deprecated
     void setDictId(String dictId);
 
-    @Deprecated
     String getDictParserId();
 
-    @Deprecated
     void setDictParserId(String dictParserId);
 
     void setDictConfig(String dictConfig);

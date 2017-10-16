@@ -106,12 +106,16 @@ public class SystemInitialize {
     }
 
     private SystemVersion.Dependency getInstalledDependency(String groupId, String artifactId) {
-        if (installed == null) return null;
+        if (installed == null) {
+            return null;
+        }
         return installed.getDependency(groupId, artifactId);
     }
 
     private SimpleDependencyInstaller getReadyToInstallDependency(String groupId, String artifactId) {
-        if (readyToInstall == null) return null;
+        if (readyToInstall == null) {
+            return null;
+        }
         return readyToInstall.stream()
                 .filter(installer -> installer.getDependency().isSameDependency(groupId, artifactId))
                 .findFirst().orElse(null);

@@ -6,6 +6,7 @@ package org.hswebframework.web.authorization.access;
  * @author zhouhao
  */
 public interface ScriptDataAccessConfig extends DataAccessConfig {
+    @Override
     default String getType() {
         return DefaultType.SCRIPT;
     }

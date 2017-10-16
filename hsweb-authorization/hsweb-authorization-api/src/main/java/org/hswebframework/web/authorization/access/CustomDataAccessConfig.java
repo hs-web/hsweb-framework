@@ -13,6 +13,7 @@ public interface CustomDataAccessConfig extends DataAccessConfig {
      */
     DataAccessController getController();
 
+    @Override
     default String getType() {
         return DefaultType.CUSTOM;
     }

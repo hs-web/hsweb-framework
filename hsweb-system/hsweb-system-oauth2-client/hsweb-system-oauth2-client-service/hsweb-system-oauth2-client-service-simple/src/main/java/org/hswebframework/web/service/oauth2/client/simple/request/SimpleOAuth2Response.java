@@ -52,7 +52,9 @@ public class SimpleOAuth2Response implements OAuth2Response {
         if (errorType == ErrorType.EXPIRED_TOKEN) {
             //尝试执行认证过时回调进行重试,并返回重试的结果
             OAuth2Response retryRes = expiredCallBack.get();
-            if (retryRes == null) return;
+            if (retryRes == null) {
+                return;
+            }
             proxy = retryRes;
             proxy.onError((retryResponse, type) -> {
                 if (type == ErrorType.EXPIRED_TOKEN) {
@@ -78,7 +80,9 @@ public class SimpleOAuth2Response implements OAuth2Response {
 
     @Override
     public String asString() {
-        if (asBytes() == null) return null;
+        if (asBytes() == null) {
+            return null;
+        }
         return new String(asBytes());
     }
 

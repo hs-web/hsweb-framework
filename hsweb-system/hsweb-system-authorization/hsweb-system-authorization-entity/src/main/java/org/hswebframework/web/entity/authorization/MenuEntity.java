@@ -54,5 +54,6 @@ public interface MenuEntity
 
     void setChildren(List<MenuEntity> children);
 
+    @Override
     MenuEntity clone();
 }

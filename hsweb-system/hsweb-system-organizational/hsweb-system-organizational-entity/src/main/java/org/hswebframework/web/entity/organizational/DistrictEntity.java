@@ -120,6 +120,7 @@ public interface DistrictEntity extends TreeSortSupportEntity<String> {
 
     void setChildren(List<DistrictEntity> children);
 
+    @Override
     List<DistrictEntity> getChildren();
 
 }

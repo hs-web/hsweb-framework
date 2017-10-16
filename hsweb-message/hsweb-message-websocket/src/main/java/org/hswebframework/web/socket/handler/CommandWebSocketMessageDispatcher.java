@@ -48,7 +48,9 @@ public class CommandWebSocketMessageDispatcher extends TextWebSocketHandler {
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         String payload = message.getPayload();
-        if (StringUtils.isEmpty(payload)) return;
+        if (StringUtils.isEmpty(payload)) {
+            return;
+        }
         try {
             WebSocketCommandRequest request = JSON.parseObject(payload, WebSocketCommandRequest.class);
             CommandRequest command = buildCommand(request, session);
@@ -67,7 +69,9 @@ public class CommandWebSocketMessageDispatcher extends TextWebSocketHandler {
     }
 
     private Authentication getAuthenticationFromSession(WebSocketSession socketSession) {
-        if (null == userTokenManager) return null;
+        if (null == userTokenManager) {
+            return null;
+        }
         return WebSocketUtils.getAuthentication(userTokenManager, socketSession);
     }
 
@@ -92,13 +96,17 @@ public class CommandWebSocketMessageDispatcher extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-        if (webSocketSessionListeners != null) webSocketSessionListeners.forEach(webSocketSessionListener ->
-                webSocketSessionListener.onSessionConnect(session));
+        if (webSocketSessionListeners != null) {
+            webSocketSessionListeners.forEach(webSocketSessionListener ->
+                    webSocketSessionListener.onSessionConnect(session));
+        }
     }
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-        if (webSocketSessionListeners != null) webSocketSessionListeners.forEach(webSocketSessionListener ->
-                webSocketSessionListener.onSessionClose(session));
+        if (webSocketSessionListeners != null) {
+            webSocketSessionListeners.forEach(webSocketSessionListener ->
+                    webSocketSessionListener.onSessionClose(session));
+        }
     }
 }

@@ -116,6 +116,7 @@ public interface OrganizationalEntity extends TreeSortSupportEntity<String>, Dis
 
     void setStatus(Byte status);
 
+    @Override
     default String getOrgId() {
         return getId();
     }

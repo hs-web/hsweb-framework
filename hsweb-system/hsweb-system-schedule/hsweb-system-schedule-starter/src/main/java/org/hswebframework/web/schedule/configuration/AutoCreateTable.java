@@ -28,7 +28,9 @@ public class AutoCreateTable implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        if (sqlExecutor.tableExists("QRTZ_LOCKS")) return;
+        if (sqlExecutor.tableExists("QRTZ_LOCKS")) {
+            return;
+        }
 
         DatabaseType databaseType = DataSourceHolder.currentDatabaseType();
         String databaseTypeName = databaseType.name();

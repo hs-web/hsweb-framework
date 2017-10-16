@@ -108,7 +108,9 @@ public abstract class GenericEntityService<E extends GenericEntity<PK>, PK>
             }
             tryValidateProperty(selectByPk(entity.getId()) == null, "id", entity.getId() + "已存在");
         }
-        if (entity.getId() == null) entity.setId(getIDGenerator().generate());
+        if (entity.getId() == null) {
+            entity.setId(getIDGenerator().generate());
+        }
         tryValidate(entity, CreateGroup.class);
         getDao().insert(entity);
         return entity.getId();
@@ -117,13 +119,17 @@ public abstract class GenericEntityService<E extends GenericEntity<PK>, PK>
     @Override
     @Transactional(readOnly = true)
     public E selectByPk(PK pk) {
-        if (null == pk) return null;
+        if (null == pk) {
+            return null;
+        }
         return createQuery().where(GenericEntity.id, pk).single();
     }
 
     @Override
     public List<E> selectByPk(List<PK> id) {
-        if (id == null || id.isEmpty()) return new ArrayList<>();
+        if (id == null || id.isEmpty()) {
+            return new ArrayList<>();
+        }
         return createQuery().where().in(GenericEntity.id, id).listNoPaging();
     }
 }

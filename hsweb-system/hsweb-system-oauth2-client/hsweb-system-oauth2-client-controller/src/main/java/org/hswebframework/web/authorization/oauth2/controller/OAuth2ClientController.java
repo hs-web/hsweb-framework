@@ -74,7 +74,9 @@ public class OAuth2ClientController {
                              HttpServletRequest request,
                              HttpSession session) throws UnsupportedEncodingException {
         OAuth2ServerConfigEntity entity = oAuth2ServerConfigService.selectByPk(serverId);
-        if (entity == null) return new RedirectView("/401.html");
+        if (entity == null) {
+            return new RedirectView("/401.html");
+        }
         String callback = WebUtil.getBasePath(request)
                 .concat("oauth2/callback/")
                 .concat(serverId).concat("/?redirect=")

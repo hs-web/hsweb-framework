@@ -53,9 +53,12 @@ public class SimpleOAuth2SessionBuilder implements OAuth2SessionBuilder {
     }
 
     protected String getRealUrl(String url) {
-        if (url.startsWith("http")) return url;
-        if (!configEntity.getApiBaseUrl().endsWith("/") && !url.startsWith("/"))
+        if (url.startsWith("http")) {
+            return url;
+        }
+        if (!configEntity.getApiBaseUrl().endsWith("/") && !url.startsWith("/")) {
             return configEntity.getApiBaseUrl().concat("/").concat(url);
+        }
         return configEntity.getApiBaseUrl() + url;
     }
 
@@ -147,7 +150,9 @@ public class SimpleOAuth2SessionBuilder implements OAuth2SessionBuilder {
     public OAuth2Session byAccessToken(String accessToken) {
         Supplier<OAuth2UserTokenEntity> supplier = () -> oAuth2UserTokenService.selectByAccessToken(accessToken);
         OAuth2UserTokenEntity tokenEntity = supplier.get();
-        if (tokenEntity == null) throw new NotFoundException("access_token not found");
+        if (tokenEntity == null) {
+            throw new NotFoundException("access_token not found");
+        }
 
         AccessTokenInfo tokenInfo = new AccessTokenInfo();
         entity2token(tokenEntity, tokenInfo);

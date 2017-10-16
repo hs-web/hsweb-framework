@@ -76,8 +76,9 @@ public class RedissionMessageSubscribe<M extends Message> implements MessageSubs
                         countDownLatch.await();
                         consumers.forEach(cons -> {
                             M message = queue.poll();
-                            if (null != message)
+                            if (null != message) {
                                 cons.accept(message);
+                            }
                         });
                     } catch (InterruptedException e) {
                         running = false;

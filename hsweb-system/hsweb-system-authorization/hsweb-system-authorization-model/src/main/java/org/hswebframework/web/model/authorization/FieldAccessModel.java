@@ -58,7 +58,9 @@ public class FieldAccessModel implements Model {
 //            example = "[{\"action\":\"query\"}]",
             required = true, dataType = "ActionModel")
     public List<ActionModel> getActions() {
-        if (actions == null) actions = Collections.emptyList();
+        if (actions == null) {
+            actions = Collections.emptyList();
+        }
         return actions;
     }
 

@@ -18,11 +18,13 @@ public class CustomGroupEntityManagerFactory implements SessionFactory {
         this.customGroupEntityManager = customGroupEntityManager;
     }
 
+    @Override
     public Class<?> getSessionType() {
         // 返回原始的GroupEntityManager类型
         return GroupEntityManager.class;
     }
 
+    @Override
     public Session openSession() {
         // 返回自定义的GroupEntityManager实例
         return customGroupEntityManager;

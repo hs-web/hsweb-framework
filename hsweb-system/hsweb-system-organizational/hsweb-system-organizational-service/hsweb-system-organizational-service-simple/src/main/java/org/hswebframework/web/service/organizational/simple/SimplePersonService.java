@@ -143,9 +143,13 @@ public class SimplePersonService extends GenericEntityService<PersonEntity, Stri
     @Cacheable(key = "'auth-bind'+#id")
     public PersonAuthBindEntity selectAuthBindByPk(String id) {
         PersonEntity personEntity = this.selectByPk(id);
-        if (personEntity == null) return null;
+        if (personEntity == null) {
+            return null;
+        }
 
-        if (personEntity instanceof PersonAuthBindEntity) return ((PersonAuthBindEntity) personEntity);
+        if (personEntity instanceof PersonAuthBindEntity) {
+            return ((PersonAuthBindEntity) personEntity);
+        }
 
         PersonAuthBindEntity bindEntity = entityFactory.newInstance(PersonAuthBindEntity.class, personEntity);
         Set<String> positionIds = DefaultDSLQueryService.createQuery(personPositionDao)
@@ -195,7 +199,9 @@ public class SimplePersonService extends GenericEntityService<PersonEntity, Stri
         }
         //获取所有职位
         Set<String> positionIds = bindEntity.getPositionIds();
-        if (positionIds.isEmpty()) return;
+        if (positionIds.isEmpty()) {
+            return;
+        }
         //是否使用了权限管理的userService.
         if (null == userService) {
             logger.warn("userService not ready!");
@@ -205,7 +211,9 @@ public class SimplePersonService extends GenericEntityService<PersonEntity, Stri
         List<PositionEntity> positionEntities = DefaultDSLQueryService.createQuery(positionDao)
                 .where().in(PositionEntity.id, positionIds)
                 .listNoPaging();
-        if (positionEntities.isEmpty()) return;
+        if (positionEntities.isEmpty()) {
+            return;
+        }
         //获取用户是否存在
         UserEntity oldUser = userService.selectByUsername(bindEntity.getPersonUser().getUsername());
         if (null != oldUser) {
@@ -382,7 +390,9 @@ public class SimplePersonService extends GenericEntityService<PersonEntity, Stri
     public Set<SettingInfo> get(String userId) {
         //支持职位和人员 设置权限
         PersonEntity entity = createQuery().where(PersonEntity.userId, userId).single();
-        if (entity == null) return new HashSet<>();
+        if (entity == null) {
+            return new HashSet<>();
+        }
         Set<SettingInfo> settingInfo = new HashSet<>();
         //岗位设置
         //TODO 2017/06/08 是否将子级岗位的设置也放进来??

@@ -54,6 +54,7 @@ public class SimpleOrganizationalEntity extends SimpleTreeSortSupportEntity<Stri
     /**
      * @return 名称
      */
+    @Override
     public String getName() {
         return this.name;
     }
@@ -61,6 +62,7 @@ public class SimpleOrganizationalEntity extends SimpleTreeSortSupportEntity<Stri
     /**
      * 设置 名称
      */
+    @Override
     public void setName(String name) {
         this.name = name;
     }
@@ -68,6 +70,7 @@ public class SimpleOrganizationalEntity extends SimpleTreeSortSupportEntity<Stri
     /**
      * @return 全称
      */
+    @Override
     public String getFullName() {
         return this.fullName;
     }
@@ -75,6 +78,7 @@ public class SimpleOrganizationalEntity extends SimpleTreeSortSupportEntity<Stri
     /**
      * 设置 全称
      */
+    @Override
     public void setFullName(String fullName) {
         this.fullName = fullName;
     }
@@ -82,6 +86,7 @@ public class SimpleOrganizationalEntity extends SimpleTreeSortSupportEntity<Stri
     /**
      * @return 机构编码
      */
+    @Override
     public String getCode() {
         return this.code;
     }
@@ -89,6 +94,7 @@ public class SimpleOrganizationalEntity extends SimpleTreeSortSupportEntity<Stri
     /**
      * 设置 机构编码
      */
+    @Override
     public void setCode(String code) {
         this.code = code;
     }
@@ -96,6 +102,7 @@ public class SimpleOrganizationalEntity extends SimpleTreeSortSupportEntity<Stri
     /**
      * @return 可选角色
      */
+    @Override
     public java.util.List<String> getOptionalRoles() {
         return this.optionalRoles;
     }
@@ -103,6 +110,7 @@ public class SimpleOrganizationalEntity extends SimpleTreeSortSupportEntity<Stri
     /**
      * 设置 可选角色
      */
+    @Override
     public void setOptionalRoles(java.util.List<String> optionalRoles) {
         this.optionalRoles = optionalRoles;
     }
@@ -113,6 +121,7 @@ public class SimpleOrganizationalEntity extends SimpleTreeSortSupportEntity<Stri
         return children;
     }
 
+    @Override
     public void setChildren(List<OrganizationalEntity> children) {
         this.children = children;
     }

@@ -21,7 +21,9 @@ public class DefaultCommandProcessorContainer implements CommandProcessorContain
     @Override
     public CommandProcessor uninstall(String name) {
         CommandProcessor processor = processorStore.remove(name);
-        if (null != processor) processor.destroy();
+        if (null != processor) {
+            processor.destroy();
+        }
         return processor;
     }
 

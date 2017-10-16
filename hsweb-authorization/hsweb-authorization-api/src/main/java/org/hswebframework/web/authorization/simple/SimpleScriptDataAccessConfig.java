@@ -29,6 +29,7 @@ public class SimpleScriptDataAccessConfig extends AbstractDataAccessConfig imple
         this.scriptLanguage = scriptLanguage;
     }
 
+    @Override
     public String getScript() {
         return script;
     }

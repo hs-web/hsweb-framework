@@ -50,6 +50,7 @@ public class SimplePersonEntity extends SimpleGenericEntity<String> implements P
     /**
      * @return 姓名
      */
+    @Override
     public String getName() {
         return this.name;
     }
@@ -57,6 +58,7 @@ public class SimplePersonEntity extends SimpleGenericEntity<String> implements P
     /**
      * 设置 姓名
      */
+    @Override
     public void setName(String name) {
         this.name = name;
     }
@@ -64,6 +66,7 @@ public class SimplePersonEntity extends SimpleGenericEntity<String> implements P
     /**
      * @return 性别
      */
+    @Override
     public Byte getSex() {
         return this.sex;
     }
@@ -71,6 +74,7 @@ public class SimplePersonEntity extends SimpleGenericEntity<String> implements P
     /**
      * 设置 性别
      */
+    @Override
     public void setSex(Byte sex) {
         this.sex = sex;
     }
@@ -78,6 +82,7 @@ public class SimplePersonEntity extends SimpleGenericEntity<String> implements P
     /**
      * @return 电子邮箱
      */
+    @Override
     public String getEmail() {
         return this.email;
     }
@@ -85,6 +90,7 @@ public class SimplePersonEntity extends SimpleGenericEntity<String> implements P
     /**
      * 设置 电子邮箱
      */
+    @Override
     public void setEmail(String email) {
         this.email = email;
     }
@@ -92,6 +98,7 @@ public class SimplePersonEntity extends SimpleGenericEntity<String> implements P
     /**
      * @return 联系电话
      */
+    @Override
     public String getPhone() {
         return this.phone;
     }
@@ -99,6 +106,7 @@ public class SimplePersonEntity extends SimpleGenericEntity<String> implements P
     /**
      * 设置 联系电话
      */
+    @Override
     public void setPhone(String phone) {
         this.phone = phone;
     }
@@ -106,6 +114,7 @@ public class SimplePersonEntity extends SimpleGenericEntity<String> implements P
     /**
      * @return 照片
      */
+    @Override
     public String getPhoto() {
         return this.photo;
     }
@@ -113,6 +122,7 @@ public class SimplePersonEntity extends SimpleGenericEntity<String> implements P
     /**
      * 设置 照片
      */
+    @Override
     public void setPhoto(String photo) {
         this.photo = photo;
     }
@@ -120,6 +130,7 @@ public class SimplePersonEntity extends SimpleGenericEntity<String> implements P
     /**
      * @return 关联用户id
      */
+    @Override
     public String getUserId() {
         return this.userId;
     }
@@ -127,6 +138,7 @@ public class SimplePersonEntity extends SimpleGenericEntity<String> implements P
     /**
      * 设置 关联用户id
      */
+    @Override
     public void setUserId(String userId) {
         this.userId = userId;
     }
@@ -134,6 +146,7 @@ public class SimplePersonEntity extends SimpleGenericEntity<String> implements P
     /**
      * @return 状态
      */
+    @Override
     public Byte getStatus() {
         return this.status;
     }
@@ -141,6 +154,7 @@ public class SimplePersonEntity extends SimpleGenericEntity<String> implements P
     /**
      * 设置 状态
      */
+    @Override
     public void setStatus(Byte status) {
         this.status = status;
     }
@@ -148,6 +162,7 @@ public class SimplePersonEntity extends SimpleGenericEntity<String> implements P
     /**
      * @return 备注
      */
+    @Override
     public String getRemark() {
         return this.remark;
     }
@@ -155,6 +170,7 @@ public class SimplePersonEntity extends SimpleGenericEntity<String> implements P
     /**
      * 设置 备注
      */
+    @Override
     public void setRemark(String remark) {
         this.remark = remark;
     }

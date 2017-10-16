@@ -21,7 +21,9 @@ public class SessionIdUserTokenGenerator implements UserTokenGenerator ,Serializ
     @Override
     public GeneratedToken generate(Authentication authentication) {
         HttpServletRequest request= WebUtil.getHttpServletRequest();
-        if(null==request)throw new UnsupportedOperationException();
+        if(null==request) {
+            throw new UnsupportedOperationException();
+        }
 
 
         int timeout =request.getSession().getMaxInactiveInterval()*1000;

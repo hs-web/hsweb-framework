@@ -85,8 +85,9 @@ public class SimpleMenuService
     @Override
     @CacheEvict(allEntries = true)
     public String insert(MenuEntity entity) {
-        if (entity.getStatus() == null)
+        if (entity.getStatus() == null) {
             entity.setStatus((byte) 1);
+        }
         return super.insert(entity);
     }
 

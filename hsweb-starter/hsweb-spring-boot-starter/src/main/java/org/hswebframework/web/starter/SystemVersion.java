@@ -67,7 +67,9 @@ public class SystemVersion extends Version {
     }
 
     public Dependency getDependency(String groupId, String artifactId) {
-        if (depCache == null) initDepCache();
+        if (depCache == null) {
+            initDepCache();
+        }
         return depCache.get(getDepKey(groupId, artifactId));
     }
 
@@ -230,7 +232,9 @@ class Version implements Comparable<Version> {
     }
 
     public String getWebsite() {
-        if (website == null) website = "";
+        if (website == null) {
+            website = "";
+        }
         return website;
     }
 
@@ -272,13 +276,23 @@ class Version implements Comparable<Version> {
 
     @Override
     public int compareTo(Version o) {
-        if (null == o) return -1;
-        if (o.getMajorVersion() > this.getMajorVersion()) return -1;
+        if (null == o) {
+            return -1;
+        }
+        if (o.getMajorVersion() > this.getMajorVersion()) {
+            return -1;
+        }
         if (o.getMajorVersion() == this.getMajorVersion()) {
-            if (o.getMinorVersion() > this.getMinorVersion()) return -1;
+            if (o.getMinorVersion() > this.getMinorVersion()) {
+                return -1;
+            }
             if (o.getMinorVersion() == this.getMinorVersion()) {
-                if (o.getRevisionVersion() > this.getRevisionVersion()) return -1;
-                if (o.getRevisionVersion() == this.getRevisionVersion()) return 0;
+                if (o.getRevisionVersion() > this.getRevisionVersion()) {
+                    return -1;
+                }
+                if (o.getRevisionVersion() == this.getRevisionVersion()) {
+                    return 0;
+                }
                 return 1;
             } else {
                 return 1;

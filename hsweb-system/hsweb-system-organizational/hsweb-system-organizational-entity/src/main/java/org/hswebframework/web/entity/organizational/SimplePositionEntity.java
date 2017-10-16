@@ -43,6 +43,7 @@ public class SimplePositionEntity extends SimpleTreeSortSupportEntity<String> im
         return children;
     }
 
+    @Override
     public void setChildren(List<PositionEntity> children) {
         this.children = children;
     }
@@ -50,6 +51,7 @@ public class SimplePositionEntity extends SimpleTreeSortSupportEntity<String> im
     /**
      * @return 职位名称
      */
+    @Override
     public String getName() {
         return this.name;
     }
@@ -57,6 +59,7 @@ public class SimplePositionEntity extends SimpleTreeSortSupportEntity<String> im
     /**
      * 设置 职位名称
      */
+    @Override
     public void setName(String name) {
         this.name = name;
     }
@@ -64,6 +67,7 @@ public class SimplePositionEntity extends SimpleTreeSortSupportEntity<String> im
     /**
      * @return 部门id
      */
+    @Override
     public String getDepartmentId() {
         return this.departmentId;
     }
@@ -71,6 +75,7 @@ public class SimplePositionEntity extends SimpleTreeSortSupportEntity<String> im
     /**
      * 设置 部门id
      */
+    @Override
     public void setDepartmentId(String departmentId) {
         this.departmentId = departmentId;
     }
@@ -88,6 +93,7 @@ public class SimplePositionEntity extends SimpleTreeSortSupportEntity<String> im
     /**
      * @return 备注
      */
+    @Override
     public String getRemark() {
         return this.remark;
     }
@@ -95,6 +101,7 @@ public class SimplePositionEntity extends SimpleTreeSortSupportEntity<String> im
     /**
      * 设置 备注
      */
+    @Override
     public void setRemark(String remark) {
         this.remark = remark;
     }

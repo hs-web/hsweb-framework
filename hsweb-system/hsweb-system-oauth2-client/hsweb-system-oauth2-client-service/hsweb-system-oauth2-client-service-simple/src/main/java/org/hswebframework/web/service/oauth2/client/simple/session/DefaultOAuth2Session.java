@@ -95,9 +95,12 @@ public class DefaultOAuth2Session implements OAuth2Session {
     }
 
     protected String getRealUrl(String url) {
-        if (url.startsWith("http")) return url;
-        if (!configEntity.getApiBaseUrl().endsWith("/") && !url.startsWith("/"))
+        if (url.startsWith("http")) {
+            return url;
+        }
+        if (!configEntity.getApiBaseUrl().endsWith("/") && !url.startsWith("/")) {
             return configEntity.getApiBaseUrl().concat("/").concat(url);
+        }
         return configEntity.getApiBaseUrl() + url;
     }
 
@@ -114,7 +117,9 @@ public class DefaultOAuth2Session implements OAuth2Session {
 
     @Override
     public OAuth2Request request(String uriOrUrl) {
-        if (accessTokenInfo == null) authorize();
+        if (accessTokenInfo == null) {
+            authorize();
+        }
         OAuth2Request request = createRequest(getRealUrl(uriOrUrl));
         request.onTokenExpired(retry -> {
             refreshToken(); //刷新token
@@ -132,7 +137,9 @@ public class DefaultOAuth2Session implements OAuth2Session {
     }
 
     protected void refreshToken() {
-        if (accessTokenInfo == null) return;
+        if (accessTokenInfo == null) {
+            return;
+        }
         OAuth2Request request = createRequest(getRealUrl(configEntity.getAccessTokenUrl()));
         applyBasicAuthParam(request);
         AccessTokenInfo tokenInfo = request
@@ -165,13 +172,19 @@ public class DefaultOAuth2Session implements OAuth2Session {
 
     @Override
     public AccessTokenInfo getAccessToken() {
-        if (accessTokenInfo == null) return null;
-        if (accessTokenInfo.isExpire()) refreshToken();
+        if (accessTokenInfo == null) {
+            return null;
+        }
+        if (accessTokenInfo.isExpire()) {
+            refreshToken();
+        }
         return accessTokenInfo;
     }
 
     private void setAccessTokenInfo(AccessTokenInfo accessTokenInfo) {
         this.accessTokenInfo = accessTokenInfo;
-        if (onTokenChange != null) onTokenChange.accept(accessTokenInfo);
+        if (onTokenChange != null) {
+            onTokenChange.accept(accessTokenInfo);
+        }
     }
 }

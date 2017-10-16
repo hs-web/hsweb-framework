@@ -20,7 +20,9 @@ public class WebSocketUtils {
                 .current()
                 .orElseGet(() -> ((Authentication) session.getAttributes().get(Authentication.class.getName())));
 
-        if (authentication != null) return authentication;
+        if (authentication != null) {
+            return authentication;
+        }
         HttpHeaders headers = session.getHandshakeHeaders();
         List<String> cookies = headers.get("Cookie");
         if (cookies == null || cookies.isEmpty()) {
@@ -30,9 +32,10 @@ public class WebSocketUtils {
         Map<String, Set<String>> sessionId = new HashMap<>();
         for (String aCookie : cookie) {
             String[] tmp = aCookie.split("[=]");
-            if (tmp.length == 2)
+            if (tmp.length == 2) {
                 sessionId.computeIfAbsent(tmp[0].trim(), k -> new HashSet<>())
                         .add(tmp[1].trim());
+            }
         }
 
         // TODO: 2017/7/12  修改权限获取方式

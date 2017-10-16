@@ -131,7 +131,9 @@ public class DynamicSpringManagedTransaction implements Transaction {
             }
         }
         connectionMap.clear();
-        if (null != tmp) throw tmp;
+        if (null != tmp) {
+            throw tmp;
+        }
     }
 
     @Override

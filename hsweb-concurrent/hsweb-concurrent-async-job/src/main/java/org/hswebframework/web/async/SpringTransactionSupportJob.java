@@ -46,7 +46,9 @@ public class SpringTransactionSupportJob<V> implements TransactionSupportJob<V> 
     @Override
     public V call() throws Exception {
         transactionStatus = transactionTemplate.getTransactionManager().getTransaction(transactionTemplate);
-        if (rollback) transactionStatus.setRollbackOnly();
+        if (rollback) {
+            transactionStatus.setRollbackOnly();
+        }
         return target.call();
     }
 }

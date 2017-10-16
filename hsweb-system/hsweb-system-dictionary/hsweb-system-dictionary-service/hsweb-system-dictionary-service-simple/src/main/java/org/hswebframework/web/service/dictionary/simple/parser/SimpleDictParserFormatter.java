@@ -35,10 +35,13 @@ public class SimpleDictParserFormatter implements DictParserFormatter {
     public <T> List<FormatterResult<T>> format(DictParserFormat format
             , Object value
             , BiFunction<String, String, T> mapping) {
-        if (value == null) return Collections.emptyList();
+        if (value == null) {
+            return Collections.emptyList();
+        }
         String stringValue = String.valueOf(value);
-        if (!needParse(stringValue, format))
+        if (!needParse(stringValue, format)) {
             return Collections.singletonList(createResult(mapping.apply(stringValue, stringValue), stringValue));
+        }
 
         String splitter = "[" + RegexUtils.escape(format.getSplitter() +
                 " " + format.getChildStartChar() +
@@ -55,7 +58,9 @@ public class SimpleDictParserFormatter implements DictParserFormatter {
                             tmp.append(arr[i]);
                             if (i >= smartLevel) {
                                 v = mapping.apply(tmp.toString(), val);
-                                if (null != v) break;
+                                if (null != v) {
+                                    break;
+                                }
                             }
                         }
                     }

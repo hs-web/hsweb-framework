@@ -54,7 +54,9 @@ public abstract class SimpleGenericEntity<PK> implements GenericEntity<PK> {
     @Override
     @SuppressWarnings("unchecked")
     public <T> T getProperty(String propertyName, T defaultValue) {
-        if (null == properties) return defaultValue;
+        if (null == properties) {
+            return defaultValue;
+        }
         return (T) properties.getOrDefault(propertyName, defaultValue);
     }
 
@@ -65,7 +67,9 @@ public abstract class SimpleGenericEntity<PK> implements GenericEntity<PK> {
 
     @Override
     public void setProperty(String propertyName, Object value) {
-        if (null == properties) properties = new LinkedHashMap<>();
+        if (null == properties) {
+            properties = new LinkedHashMap<>();
+        }
         properties.put(propertyName, value);
     }
 

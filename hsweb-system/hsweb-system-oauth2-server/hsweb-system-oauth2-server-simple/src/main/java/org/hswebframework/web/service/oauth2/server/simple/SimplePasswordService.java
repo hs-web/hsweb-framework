@@ -37,7 +37,9 @@ public class SimplePasswordService implements PasswordService {
     @Override
     public String getUserIdByUsernameAndPassword(String username, String password) {
         UserEntity userEntity = userService.selectByUsername(username);
-        if (userEntity == null) return null;
+        if (userEntity == null) {
+            return null;
+        }
         if (!userService.encodePassword(password, userEntity.getSalt()).equals(userEntity.getPassword())) {
             return null;
         }

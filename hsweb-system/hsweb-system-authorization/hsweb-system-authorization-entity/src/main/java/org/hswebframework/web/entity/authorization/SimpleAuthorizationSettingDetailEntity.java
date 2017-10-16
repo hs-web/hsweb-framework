@@ -45,6 +45,7 @@ public class SimpleAuthorizationSettingDetailEntity extends SimpleGenericEntity<
     /**
      * @return 权限id
      */
+    @Override
     public String getPermissionId() {
         return this.permissionId;
     }
@@ -52,6 +53,7 @@ public class SimpleAuthorizationSettingDetailEntity extends SimpleGenericEntity<
     /**
      * 设置 权限id
      */
+    @Override
     public void setPermissionId(String permissionId) {
         this.permissionId = permissionId;
     }
@@ -59,6 +61,7 @@ public class SimpleAuthorizationSettingDetailEntity extends SimpleGenericEntity<
     /**
      * @return 设置id
      */
+    @Override
     public String getSettingId() {
         return this.settingId;
     }
@@ -66,6 +69,7 @@ public class SimpleAuthorizationSettingDetailEntity extends SimpleGenericEntity<
     /**
      * 设置 设置id
      */
+    @Override
     public void setSettingId(String settingId) {
         this.settingId = settingId;
     }
@@ -73,6 +77,7 @@ public class SimpleAuthorizationSettingDetailEntity extends SimpleGenericEntity<
     /**
      * @return 可操作类型
      */
+    @Override
     public Set<String> getActions() {
         return this.actions;
     }
@@ -80,6 +85,7 @@ public class SimpleAuthorizationSettingDetailEntity extends SimpleGenericEntity<
     /**
      * 设置 可操作类型
      */
+    @Override
     public void setActions(Set<String> actions) {
         this.actions = actions;
     }
@@ -87,6 +93,7 @@ public class SimpleAuthorizationSettingDetailEntity extends SimpleGenericEntity<
     /**
      * @return 数据权限控制
      */
+    @Override
     public List<DataAccessEntity> getDataAccesses() {
         return this.dataAccesses;
     }
@@ -94,6 +101,7 @@ public class SimpleAuthorizationSettingDetailEntity extends SimpleGenericEntity<
     /**
      * 设置 数据权限控制
      */
+    @Override
     public void setDataAccesses(List<DataAccessEntity> dataAccesses) {
         this.dataAccesses = dataAccesses;
     }
@@ -101,6 +109,7 @@ public class SimpleAuthorizationSettingDetailEntity extends SimpleGenericEntity<
     /**
      * @return 状态
      */
+    @Override
     public Byte getStatus() {
         return this.status;
     }
@@ -108,6 +117,7 @@ public class SimpleAuthorizationSettingDetailEntity extends SimpleGenericEntity<
     /**
      * 设置 状态
      */
+    @Override
     public void setStatus(Byte status) {
         this.status = status;
     }
@@ -122,6 +132,7 @@ public class SimpleAuthorizationSettingDetailEntity extends SimpleGenericEntity<
         this.priority = priority;
     }
 
+    @Override
     public Boolean isMerge() {
         return merge;
     }

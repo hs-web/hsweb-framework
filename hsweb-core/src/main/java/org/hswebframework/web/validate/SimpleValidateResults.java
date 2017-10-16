@@ -75,7 +75,9 @@ public class SimpleValidateResults implements ValidateResults {
 
     @Override
     public String toString() {
-        if (isSuccess()) return "success";
+        if (isSuccess()) {
+            return "success";
+        }
         return results.toString();
     }
 }

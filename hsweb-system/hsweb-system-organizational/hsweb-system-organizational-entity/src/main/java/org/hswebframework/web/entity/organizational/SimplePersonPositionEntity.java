@@ -32,6 +32,7 @@ public class SimplePersonPositionEntity extends SimpleGenericEntity<String> impl
     /**
      * @return 人员id
      */
+    @Override
     public String getPersonId() {
         return this.personId;
     }
@@ -39,6 +40,7 @@ public class SimplePersonPositionEntity extends SimpleGenericEntity<String> impl
     /**
      * 设置 人员id
      */
+    @Override
     public void setPersonId(String personId) {
         this.personId = personId;
     }
@@ -46,6 +48,7 @@ public class SimplePersonPositionEntity extends SimpleGenericEntity<String> impl
     /**
      * @return 职位id
      */
+    @Override
     public String getPositionId() {
         return this.positionId;
     }
@@ -53,6 +56,7 @@ public class SimplePersonPositionEntity extends SimpleGenericEntity<String> impl
     /**
      * 设置 职位id
      */
+    @Override
     public void setPositionId(String positionId) {
         this.positionId = positionId;
     }

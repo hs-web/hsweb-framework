@@ -94,7 +94,9 @@ public class DynamicSqlSessionFactory implements SqlSessionFactory {
             final Environment environment = getConfiguration().getEnvironment();
             final TransactionFactory transactionFactory = getTransactionFactoryFromEnvironment(environment);
             DataSource ds = DataSourceHolder.currentDataSource().getNative();
-            if (ds == null) ds = environment.getDataSource();
+            if (ds == null) {
+                ds = environment.getDataSource();
+            }
             tx = transactionFactory.newTransaction(ds, level, autoCommit);
             final Executor executor = getConfiguration().newExecutor(tx, execType);
             return new DefaultSqlSession(getConfiguration(), executor, autoCommit);

@@ -22,6 +22,7 @@ public class SimpleRelationInfoEntity extends SimpleGenericEntity<String> implem
         /**
         * @return  关系从
         */
+        @Override
         public String getRelationFrom(){
 			return this.relationFrom;
         }
@@ -29,12 +30,14 @@ public class SimpleRelationInfoEntity extends SimpleGenericEntity<String> implem
         /**
         * @param  relationFrom  关系从
         */
+        @Override
         public void setRelationFrom(String relationFrom){
         	this.relationFrom=relationFrom;
         }
         /**
         * @return  关系定义id
         */
+        @Override
         public String getRelationId(){
 			return this.relationId;
         }
@@ -42,12 +45,14 @@ public class SimpleRelationInfoEntity extends SimpleGenericEntity<String> implem
         /**
         * @param  relationId  关系定义id
         */
+        @Override
         public void setRelationId(String relationId){
         	this.relationId=relationId;
         }
         /**
         * @return  关系至
         */
+        @Override
         public String getRelationTo(){
 			return this.relationTo;
         }
@@ -55,12 +60,14 @@ public class SimpleRelationInfoEntity extends SimpleGenericEntity<String> implem
         /**
         * @param  relationTo  关系至
         */
+        @Override
         public void setRelationTo(String relationTo){
         	this.relationTo=relationTo;
         }
         /**
         * @return  关系类型从,如:人员
         */
+        @Override
         public String getRelationTypeFrom(){
 			return this.relationTypeFrom;
         }
@@ -68,12 +75,14 @@ public class SimpleRelationInfoEntity extends SimpleGenericEntity<String> implem
         /**
         * @param  relationTypeFrom  关系类型从,如:人员
         */
+        @Override
         public void setRelationTypeFrom(String relationTypeFrom){
         	this.relationTypeFrom=relationTypeFrom;
         }
         /**
         * @return  关系类型至,如:部门
         */
+        @Override
         public String getRelationTypeTo(){
 			return this.relationTypeTo;
         }
@@ -81,12 +90,14 @@ public class SimpleRelationInfoEntity extends SimpleGenericEntity<String> implem
         /**
         * @param  relationTypeTo  关系类型至,如:部门
         */
+        @Override
         public void setRelationTypeTo(String relationTypeTo){
         	this.relationTypeTo=relationTypeTo;
         }
         /**
         * @return  状态
         */
+        @Override
         public Byte getStatus(){
 			return this.status;
         }
@@ -94,6 +105,7 @@ public class SimpleRelationInfoEntity extends SimpleGenericEntity<String> implem
         /**
         * @param  status  状态
         */
+        @Override
         public void setStatus(Byte status){
         	this.status=status;
         }

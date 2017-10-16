@@ -113,9 +113,12 @@ public class ResponseMessage<T> implements Serializable {
     }
 
     public ResponseMessage<T> include(Class<?> type, Collection<String> fields) {
-        if (includes == null)
+        if (includes == null) {
             includes = new HashMap<>();
-        if (fields == null || fields.isEmpty()) return this;
+        }
+        if (fields == null || fields.isEmpty()) {
+            return this;
+        }
         fields.forEach(field -> {
             if (field.contains(".")) {
                 String tmp[] = field.split("[.]", 2);
@@ -134,9 +137,12 @@ public class ResponseMessage<T> implements Serializable {
     }
 
     public ResponseMessage<T> exclude(Class type, Collection<String> fields) {
-        if (excludes == null)
+        if (excludes == null) {
             excludes = new HashMap<>();
-        if (fields == null || fields.isEmpty()) return this;
+        }
+        if (fields == null || fields.isEmpty()) {
+            return this;
+        }
         fields.forEach(field -> {
             if (field.contains(".")) {
                 String tmp[] = field.split("[.]", 2);
@@ -155,23 +161,35 @@ public class ResponseMessage<T> implements Serializable {
     }
 
     public ResponseMessage<T> exclude(Collection<String> fields) {
-        if (excludes == null)
+        if (excludes == null) {
             excludes = new HashMap<>();
-        if (fields == null || fields.isEmpty()) return this;
+        }
+        if (fields == null || fields.isEmpty()) {
+            return this;
+        }
         Class type;
-        if (getResult() != null) type = getResult().getClass();
-        else return this;
+        if (getResult() != null) {
+            type = getResult().getClass();
+        } else {
+            return this;
+        }
         exclude(type, fields);
         return this;
     }
 
     public ResponseMessage<T> include(Collection<String> fields) {
-        if (includes == null)
+        if (includes == null) {
             includes = new HashMap<>();
-        if (fields == null || fields.isEmpty()) return this;
+        }
+        if (fields == null || fields.isEmpty()) {
+            return this;
+        }
         Class type;
-        if (getResult() != null) type = getResult().getClass();
-        else return this;
+        if (getResult() != null) {
+            type = getResult().getClass();
+        } else {
+            return this;
+        }
         include(type, fields);
         return this;
     }

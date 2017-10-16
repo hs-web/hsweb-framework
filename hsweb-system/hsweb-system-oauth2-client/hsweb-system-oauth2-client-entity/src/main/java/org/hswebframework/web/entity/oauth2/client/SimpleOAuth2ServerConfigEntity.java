@@ -46,10 +46,12 @@ public class SimpleOAuth2ServerConfigEntity extends SimpleGenericEntity<String> 
     //服务提供商
     private String provider;
 
+    @Override
     public String getProvider() {
         return provider;
     }
 
+    @Override
     public void setProvider(String provider) {
         this.provider = provider;
     }
@@ -67,6 +69,7 @@ public class SimpleOAuth2ServerConfigEntity extends SimpleGenericEntity<String> 
     /**
      * @return 服务名称
      */
+    @Override
     public String getName() {
         return this.name;
     }
@@ -74,6 +77,7 @@ public class SimpleOAuth2ServerConfigEntity extends SimpleGenericEntity<String> 
     /**
      * 设置 服务名称
      */
+    @Override
     public void setName(String name) {
         this.name = name;
     }
@@ -81,6 +85,7 @@ public class SimpleOAuth2ServerConfigEntity extends SimpleGenericEntity<String> 
     /**
      * @return 备注
      */
+    @Override
     public String getDescribe() {
         return this.describe;
     }
@@ -88,6 +93,7 @@ public class SimpleOAuth2ServerConfigEntity extends SimpleGenericEntity<String> 
     /**
      * 设置 备注
      */
+    @Override
     public void setDescribe(String describe) {
         this.describe = describe;
     }
@@ -95,6 +101,7 @@ public class SimpleOAuth2ServerConfigEntity extends SimpleGenericEntity<String> 
     /**
      * @return api根地址
      */
+    @Override
     public String getApiBaseUrl() {
         return this.apiBaseUrl;
     }
@@ -102,6 +109,7 @@ public class SimpleOAuth2ServerConfigEntity extends SimpleGenericEntity<String> 
     /**
      * 设置 api根地址
      */
+    @Override
     public void setApiBaseUrl(String apiBaseUrl) {
         this.apiBaseUrl = apiBaseUrl;
     }
@@ -109,6 +117,7 @@ public class SimpleOAuth2ServerConfigEntity extends SimpleGenericEntity<String> 
     /**
      * @return 认证地址
      */
+    @Override
     public String getAuthUrl() {
         return this.authUrl;
     }
@@ -116,6 +125,7 @@ public class SimpleOAuth2ServerConfigEntity extends SimpleGenericEntity<String> 
     /**
      * 设置 认证地址
      */
+    @Override
     public void setAuthUrl(String authUrl) {
         this.authUrl = authUrl;
     }
@@ -123,6 +133,7 @@ public class SimpleOAuth2ServerConfigEntity extends SimpleGenericEntity<String> 
     /**
      * @return token获取地址
      */
+    @Override
     public String getAccessTokenUrl() {
         return this.accessTokenUrl;
     }
@@ -130,6 +141,7 @@ public class SimpleOAuth2ServerConfigEntity extends SimpleGenericEntity<String> 
     /**
      * 设置 token获取地址
      */
+    @Override
     public void setAccessTokenUrl(String accessTokenUrl) {
         this.accessTokenUrl = accessTokenUrl;
     }
@@ -137,6 +149,7 @@ public class SimpleOAuth2ServerConfigEntity extends SimpleGenericEntity<String> 
     /**
      * @return 客户端id
      */
+    @Override
     public String getClientId() {
         return this.clientId;
     }
@@ -144,6 +157,7 @@ public class SimpleOAuth2ServerConfigEntity extends SimpleGenericEntity<String> 
     /**
      * 设置 客户端id
      */
+    @Override
     public void setClientId(String clientId) {
         this.clientId = clientId;
     }
@@ -151,6 +165,7 @@ public class SimpleOAuth2ServerConfigEntity extends SimpleGenericEntity<String> 
     /**
      * @return 客户端密钥
      */
+    @Override
     public String getClientSecret() {
         return this.clientSecret;
     }
@@ -158,6 +173,7 @@ public class SimpleOAuth2ServerConfigEntity extends SimpleGenericEntity<String> 
     /**
      * 设置 客户端密钥
      */
+    @Override
     public void setClientSecret(String clientSecret) {
         this.clientSecret = clientSecret;
     }
@@ -165,6 +181,7 @@ public class SimpleOAuth2ServerConfigEntity extends SimpleGenericEntity<String> 
     /**
      * @return 是否启用
      */
+    @Override
     public Byte getStatus() {
         return this.status;
     }
@@ -172,6 +189,7 @@ public class SimpleOAuth2ServerConfigEntity extends SimpleGenericEntity<String> 
     /**
      * 设置 是否启用
      */
+    @Override
     public void setStatus(Byte status) {
         this.status = status;
     }

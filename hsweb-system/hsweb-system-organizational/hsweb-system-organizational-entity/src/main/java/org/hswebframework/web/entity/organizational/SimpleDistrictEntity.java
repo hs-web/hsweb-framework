@@ -31,6 +31,7 @@ public class SimpleDistrictEntity extends SimpleTreeSortSupportEntity<String> im
     /**
      * @return 区域名称, 如重庆市
      */
+    @Override
     public String getName() {
         return this.name;
     }
@@ -38,6 +39,7 @@ public class SimpleDistrictEntity extends SimpleTreeSortSupportEntity<String> im
     /**
      * @param name 区域名称,如重庆市
      */
+    @Override
     public void setName(String name) {
         this.name = name;
     }
@@ -45,6 +47,7 @@ public class SimpleDistrictEntity extends SimpleTreeSortSupportEntity<String> im
     /**
      * @return 区域全称, 如重庆市江津区
      */
+    @Override
     public String getFullName() {
         return this.fullName;
     }
@@ -52,6 +55,7 @@ public class SimpleDistrictEntity extends SimpleTreeSortSupportEntity<String> im
     /**
      * @param fullName 区域全称,如重庆市江津区
      */
+    @Override
     public void setFullName(String fullName) {
         this.fullName = fullName;
     }
@@ -59,6 +63,7 @@ public class SimpleDistrictEntity extends SimpleTreeSortSupportEntity<String> im
     /**
      * @return 区域级别名称, 如:省
      */
+    @Override
     public String getLevelName() {
         return this.levelName;
     }
@@ -66,6 +71,7 @@ public class SimpleDistrictEntity extends SimpleTreeSortSupportEntity<String> im
     /**
      * @param levelName 区域级别名称,如:省
      */
+    @Override
     public void setLevelName(String levelName) {
         this.levelName = levelName;
     }
@@ -73,6 +79,7 @@ public class SimpleDistrictEntity extends SimpleTreeSortSupportEntity<String> im
     /**
      * @return 区域级别编码, 如:province
      */
+    @Override
     public String getLevelCode() {
         return this.levelCode;
     }
@@ -80,6 +87,7 @@ public class SimpleDistrictEntity extends SimpleTreeSortSupportEntity<String> im
     /**
      * @param levelCode 区域级别编码,如:province
      */
+    @Override
     public void setLevelCode(String levelCode) {
         this.levelCode = levelCode;
     }
@@ -87,6 +95,7 @@ public class SimpleDistrictEntity extends SimpleTreeSortSupportEntity<String> im
     /**
      * @return 行政区域代码, 如:500000
      */
+    @Override
     public String getCode() {
         return this.code;
     }
@@ -94,6 +103,7 @@ public class SimpleDistrictEntity extends SimpleTreeSortSupportEntity<String> im
     /**
      * @param code 行政区域代码,如:500000
      */
+    @Override
     public void setCode(String code) {
         this.code = code;
     }
@@ -101,6 +111,7 @@ public class SimpleDistrictEntity extends SimpleTreeSortSupportEntity<String> im
     /**
      * @return 说明
      */
+    @Override
     public String getDescribe() {
         return this.describe;
     }
@@ -108,6 +119,7 @@ public class SimpleDistrictEntity extends SimpleTreeSortSupportEntity<String> im
     /**
      * @param describe 说明
      */
+    @Override
     public void setDescribe(String describe) {
         this.describe = describe;
     }
@@ -115,6 +127,7 @@ public class SimpleDistrictEntity extends SimpleTreeSortSupportEntity<String> im
     /**
      * @return 状态
      */
+    @Override
     public Byte getStatus() {
         return this.status;
     }
@@ -122,6 +135,7 @@ public class SimpleDistrictEntity extends SimpleTreeSortSupportEntity<String> im
     /**
      * @param status 状态
      */
+    @Override
     public void setStatus(Byte status) {
         this.status = status;
     }

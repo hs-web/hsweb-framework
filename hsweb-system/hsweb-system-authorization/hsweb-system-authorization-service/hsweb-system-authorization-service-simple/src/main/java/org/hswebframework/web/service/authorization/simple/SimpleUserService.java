@@ -75,14 +75,18 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
     @Override
     @Transactional(readOnly = true)
     public UserEntity selectByUsername(String username) {
-        if (null == username) return null;
+        if (null == username) {
+            return null;
+        }
         return createQuery().where("username", username).single();
     }
 
     @Override
     @Transactional(readOnly = true)
     public UserEntity selectByPk(String id) {
-        if (null == id) return null;
+        if (null == id) {
+            return null;
+        }
         UserEntity userEntity = createQuery().where(UserEntity.id, id).single();
         if (null != userEntity) {
             List<String> roleId = userRoleDao.selectByUserId(id).stream().map(UserRoleEntity::getRoleId).collect(Collectors.toList());
@@ -95,7 +99,9 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
 
     @Override
     public List<UserEntity> selectByPk(List<String> id) {
-        if (CollectionUtils.isEmpty(id)) return new ArrayList<>();
+        if (CollectionUtils.isEmpty(id)) {
+            return new ArrayList<>();
+        }
         return createQuery().where().in(UserEntity.id, id).listNoPaging();
     }
 
@@ -213,7 +219,9 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
     public List<RoleEntity> getUserRole(String userId) {
         Objects.requireNonNull(userId);
         List<UserRoleEntity> roleEntities = userRoleDao.selectByUserId(userId);
-        if (roleEntities.isEmpty()) return new ArrayList<>();
+        if (roleEntities.isEmpty()) {
+            return new ArrayList<>();
+        }
         List<String> roleIdList = roleEntities.stream().map(UserRoleEntity::getRoleId).collect(Collectors.toList());
         return DefaultDSLQueryService
                 .createQuery(roleDao).where()
@@ -230,7 +238,9 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
     @Override
     public Set<SettingInfo> get(String userId) {
         UserEntity userEntity = selectByPk(userId);
-        if (null == userEntity) return new HashSet<>();
+        if (null == userEntity) {
+            return new HashSet<>();
+        }
         List<UserRoleEntity> roleEntities = userRoleDao.selectByUserId(userId);
         //使用角色配置
         Set<SettingInfo> settingInfo = roleEntities.stream()

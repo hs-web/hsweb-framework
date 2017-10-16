@@ -80,7 +80,9 @@ public class SimpleConfigEntity extends SimpleGenericEntity<String> implements C
 
     @Override
     public ConfigEntity addContent(String key, Object value, String comment) {
-        if (content == null) content = new ArrayList<>();
+        if (content == null) {
+            content = new ArrayList<>();
+        }
         content.add(new ConfigContent(key, value, comment));
         return this;
     }
@@ -111,6 +113,7 @@ public class SimpleConfigEntity extends SimpleGenericEntity<String> implements C
         return createTime;
     }
 
+    @Override
     public void setCreateTime(Long createTime) {
         this.createTime = createTime;
     }
@@ -120,6 +123,7 @@ public class SimpleConfigEntity extends SimpleGenericEntity<String> implements C
         return updateTime;
     }
 
+    @Override
     public void setUpdateTime(Long updateTime) {
         this.updateTime = updateTime;
     }
