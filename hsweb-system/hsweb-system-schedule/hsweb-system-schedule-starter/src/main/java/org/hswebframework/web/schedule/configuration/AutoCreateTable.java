@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.util.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -45,6 +46,7 @@ public class AutoCreateTable implements CommandLineRunner {
                 String str = FileUtils.reader2String(reader);
                 List<String> sqlList = Sqls.parse(str);
                 for (String sql : sqlList) {
+                    if (StringUtils.isEmpty(sql)) return;
                     sqlExecutor.exec(sql);
                 }
             }
