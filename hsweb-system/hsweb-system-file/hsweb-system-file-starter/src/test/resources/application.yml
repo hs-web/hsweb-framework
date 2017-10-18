@@ -13,6 +13,13 @@ hsweb:
       version: 3.0.0
     web:
       upload:
+#        fdfs:
+#          enable: true
         static-file-path: target/static
         static-location: http://localhost:8080/
         file-path: target/file
+fdfs:
+  connect-timeout: 2000
+  so-timeout: 3000
+  tracker-list:
+    - localhost:22122

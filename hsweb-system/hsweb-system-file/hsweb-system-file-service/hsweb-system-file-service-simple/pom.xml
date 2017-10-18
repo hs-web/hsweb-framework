@@ -22,5 +22,11 @@
             <artifactId>hsweb-system-file-service-api</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.luhuiguo</groupId>
+            <artifactId>fastdfs-spring-boot-starter</artifactId>
+            <version>0.2.0</version>
+            <optional>true</optional>
+        </dependency>
     </dependencies>
 </project>

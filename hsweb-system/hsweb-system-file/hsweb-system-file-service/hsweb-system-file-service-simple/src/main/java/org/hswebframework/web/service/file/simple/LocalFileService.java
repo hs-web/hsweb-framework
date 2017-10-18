@@ -21,7 +21,7 @@ import java.util.Date;
  * @author zhouhao
  * @since 3.0
  */
-@Service("fileService")
+//@Service("fileService")
 public class LocalFileService implements FileService {
     private FileInfoService fileInfoService;
 

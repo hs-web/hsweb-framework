@@ -8,11 +8,6 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import static org.junit.Assert.*;
-
-/**
- * Created by zhouhao on 2017/7/25.
- */
 public class FileUploadTests extends SimpleWebApplicationTests {
 
     @Test
@@ -26,26 +21,26 @@ public class FileUploadTests extends SimpleWebApplicationTests {
                                 MediaType.TEXT_PLAIN_VALUE, "test".getBytes()))
                         .file(new MockMultipartFile("files", "test2.txt",
                                 MediaType.TEXT_PLAIN_VALUE, "test2".getBytes()))
-                ).andReturn()
+        ).andReturn()
                 .getResponse()
                 .getContentAsString();
 
 
-        Assert.assertEquals(JSON.parseObject(result).getJSONArray("result").size(),2);
+        Assert.assertEquals(JSON.parseObject(result).getJSONArray("result").size(), 2);
         System.out.println(result);
-        String fileId=JSON.parseObject(result)
+        String fileId = JSON.parseObject(result)
                 .getJSONArray("result")
                 .getJSONObject(0)
                 .getString("id");
-        String fileMd5 =JSON.parseObject(result)
+        String fileMd5 = JSON.parseObject(result)
                 .getJSONArray("result")
                 .getJSONObject(0)
                 .getString("md5");
 
-        result=testGet("/file/md5/"+fileMd5).exec().resultAsString();
+        result = testGet("/file/md5/" + fileMd5).exec().resultAsString();
         System.out.println(result);
 
-        result=  mvc.perform(MockMvcRequestBuilders.get("/file/download/"+fileId))
+        result = mvc.perform(MockMvcRequestBuilders.get("/file/download/" + fileId))
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
@@ -62,7 +57,6 @@ public class FileUploadTests extends SimpleWebApplicationTests {
 
         System.out.println(result);
         Assert.assertNotNull(JSON.parseObject(result).getString("result"));
-
 
 
     }
