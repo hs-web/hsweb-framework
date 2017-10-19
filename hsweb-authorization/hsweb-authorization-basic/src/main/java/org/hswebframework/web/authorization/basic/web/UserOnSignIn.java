@@ -1,17 +1,14 @@
 package org.hswebframework.web.authorization.basic.web;
 
-import org.apache.commons.codec.digest.DigestUtils;
-import org.hswebframework.web.WebUtil;
 import org.hswebframework.web.authorization.listener.AuthorizationListener;
 import org.hswebframework.web.authorization.listener.event.AuthorizationSuccessEvent;
 import org.hswebframework.web.authorization.token.UserToken;
+import org.hswebframework.web.authorization.token.UserTokenHolder;
 import org.hswebframework.web.authorization.token.UserTokenManager;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
 /**
  * @author zhouhao

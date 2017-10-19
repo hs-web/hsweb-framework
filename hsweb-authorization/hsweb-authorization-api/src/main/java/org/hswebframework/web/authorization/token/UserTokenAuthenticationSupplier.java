@@ -1,10 +1,11 @@
-package org.hswebframework.web.authorization.basic.web;
+package org.hswebframework.web.authorization.token;
 
 import org.hswebframework.web.ThreadLocalUtils;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.AuthenticationManager;
 import org.hswebframework.web.authorization.AuthenticationSupplier;
 import org.hswebframework.web.authorization.token.UserToken;
+import org.hswebframework.web.authorization.token.UserTokenHolder;
 
 import java.util.Optional;
 

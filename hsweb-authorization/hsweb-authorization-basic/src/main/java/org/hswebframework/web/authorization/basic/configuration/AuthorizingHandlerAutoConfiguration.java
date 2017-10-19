@@ -9,6 +9,7 @@ import org.hswebframework.web.authorization.basic.handler.DefaultAuthorizingHand
 import org.hswebframework.web.authorization.basic.handler.access.DefaultDataAccessController;
 import org.hswebframework.web.authorization.basic.web.*;
 import org.hswebframework.web.authorization.token.DefaultUserTokenManager;
+import org.hswebframework.web.authorization.token.UserTokenAuthenticationSupplier;
 import org.hswebframework.web.authorization.token.UserTokenManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
