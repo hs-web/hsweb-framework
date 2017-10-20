@@ -11,7 +11,7 @@ import java.util.Map;
 /**
  * @author zhouhao
  */
-public class SessionIdUserTokenGenerator implements UserTokenGenerator ,Serializable {
+public class SessionIdUserTokenGenerator implements UserTokenGenerator, Serializable {
 
     @Override
     public String getSupportTokenType() {
@@ -20,13 +20,12 @@ public class SessionIdUserTokenGenerator implements UserTokenGenerator ,Serializ
 
     @Override
     public GeneratedToken generate(Authentication authentication) {
-        HttpServletRequest request= WebUtil.getHttpServletRequest();
-        if(null==request) {
+        HttpServletRequest request = WebUtil.getHttpServletRequest();
+        if (null == request) {
             throw new UnsupportedOperationException();
         }
 
-
-        int timeout =request.getSession().getMaxInactiveInterval()*1000;
+        int timeout = request.getSession().getMaxInactiveInterval() * 1000;
 
         String sessionId = request.getSession().getId();
 
@@ -39,6 +38,11 @@ public class SessionIdUserTokenGenerator implements UserTokenGenerator ,Serializ
             @Override
             public String getToken() {
                 return sessionId;
+            }
+
+            @Override
+            public String getType() {
+                return "session-id-default";
             }
 
             @Override

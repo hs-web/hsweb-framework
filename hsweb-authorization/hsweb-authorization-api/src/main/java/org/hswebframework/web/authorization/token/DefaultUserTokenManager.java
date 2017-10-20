@@ -168,8 +168,9 @@ public class DefaultUserTokenManager implements UserTokenManager {
     }
 
     @Override
-    public UserToken signIn(String token, String userId, long maxInactiveInterval) {
+    public UserToken signIn(String token, String type, String userId, long maxInactiveInterval) {
         SimpleUserToken detail = new SimpleUserToken(userId, token);
+        detail.setType(type);
         if (null != authorizationListenerDispatcher) {
             authorizationListenerDispatcher.doEvent(new UserSignInEvent(detail));
         }

@@ -105,9 +105,10 @@ public interface UserTokenManager {
      * 登记一个用户的token
      *
      * @param token  token
+     * @param type   令牌类型
      * @param userId 用户id
      */
-    UserToken signIn(String token, String userId,long maxInactiveInterval);
+    UserToken signIn(String token, String type, String userId, long maxInactiveInterval);
 
     /**
      * 更新token,使其不过期

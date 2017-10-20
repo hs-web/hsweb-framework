@@ -7,4 +7,6 @@ package org.hswebframework.web.authorization.basic.web;
  */
 public interface ParsedToken {
     String getToken();
+
+    String getType();
 }

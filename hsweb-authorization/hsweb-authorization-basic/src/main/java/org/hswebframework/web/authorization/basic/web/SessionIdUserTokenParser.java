@@ -14,9 +14,18 @@ public class SessionIdUserTokenParser implements UserTokenParser {
         HttpSession session = request.getSession(false);
 
         if (session != null) {
-            return session::getId;
-        }
+            return new ParsedToken() {
+                @Override
+                public String getToken() {
+                    return session.getId();
+                }
 
+                @Override
+                public String getType() {
+                    return "session-id-default";
+                }
+            };
+        }
         return null;
     }
 }

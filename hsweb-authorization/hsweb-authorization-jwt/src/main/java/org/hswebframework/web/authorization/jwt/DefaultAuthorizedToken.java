@@ -36,4 +36,9 @@ public class DefaultAuthorizedToken implements AuthorizedToken {
     public void setUserId(String userId) {
         this.userId = userId;
     }
+
+    @Override
+    public String getType() {
+        return "jwt-default";
+    }
 }

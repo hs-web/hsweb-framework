@@ -43,9 +43,10 @@ public class WebUserTokenInterceptor extends HandlerInterceptorAdapter {
             if (userTokenManager.tokenIsLoggedIn(token)) {
                 userToken = userTokenManager.getByToken(token);
             }
-//            if ((userToken == null || userToken.isExpired()) && parsedToken instanceof AuthorizedToken) {
-//                userToken = userTokenManager.signIn(parsedToken.getToken(), ((AuthorizedToken) parsedToken).getUserId(), -1);
-//            }
+            if ((userToken == null || userToken.isExpired()) && parsedToken instanceof AuthorizedToken) {
+                userToken = userTokenManager
+                        .signIn(parsedToken.getToken(), parsedToken.getType(), ((AuthorizedToken) parsedToken).getUserId(), ((AuthorizedToken) parsedToken).getMaxInactiveInterval());
+            }
             if (null != userToken) {
                 userTokenManager.touch(token);
                 UserTokenHolder.setCurrent(userToken);

@@ -14,6 +14,8 @@ public class SimpleUserToken implements UserToken {
 
     private String token;
 
+    private String type = "default";
+
     private volatile TokenState state;
 
     private AtomicLong requestTimesCounter = new AtomicLong(0);
@@ -101,5 +103,13 @@ public class SimpleUserToken implements UserToken {
     public void touch() {
         requestTimesCounter.addAndGet(1);
         lastRequestTime = System.currentTimeMillis();
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }

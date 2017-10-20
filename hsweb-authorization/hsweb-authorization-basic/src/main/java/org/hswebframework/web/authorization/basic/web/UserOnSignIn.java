@@ -15,11 +15,11 @@ import java.util.List;
  */
 public class UserOnSignIn implements AuthorizationListener<AuthorizationSuccessEvent> {
 
-    private String defaultTokenType="sessionId";
+    private String defaultTokenType = "sessionId";
 
     private UserTokenManager userTokenManager;
 
-    private List<UserTokenGenerator> userTokenGenerators=new ArrayList<>();
+    private List<UserTokenGenerator> userTokenGenerators = new ArrayList<>();
 
     public UserOnSignIn(UserTokenManager userTokenManager) {
         this.userTokenManager = userTokenManager;
@@ -45,12 +45,12 @@ public class UserOnSignIn implements AuthorizationListener<AuthorizationSuccessE
         }
         //创建token
         GeneratedToken newToken = userTokenGenerators.stream()
-                .filter(generator->generator.getSupportTokenType().equals(tokenType))
+                .filter(generator -> generator.getSupportTokenType().equals(tokenType))
                 .findFirst()
-                .orElseThrow(()->new UnsupportedOperationException(tokenType))
+                .orElseThrow(() -> new UnsupportedOperationException(tokenType))
                 .generate(event.getAuthentication());
         //登入
-        userTokenManager.signIn(newToken.getToken(), event.getAuthentication().getUser().getId(),newToken.getTimeout());
+        userTokenManager.signIn(newToken.getToken(), newToken.getType(), event.getAuthentication().getUser().getId(), newToken.getTimeout());
 
         //响应结果
         event.getResult().putAll(newToken.getResponse());

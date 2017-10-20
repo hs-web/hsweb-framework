@@ -36,59 +36,58 @@ public class UserTokenController {
     }
 
     @GetMapping("/user-token/user/{userId}")
-    public List<UserToken> getByUserId(@PathVariable String userId){
+    public List<UserToken> getByUserId(@PathVariable String userId) {
         return userTokenManager.getByUserId(userId);
     }
 
     @GetMapping("/user-token/user/{userId}/logged")
-    public boolean userIsLoggedIn(@PathVariable String userId){
+    public boolean userIsLoggedIn(@PathVariable String userId) {
         return userTokenManager.userIsLoggedIn(userId);
     }
 
     @GetMapping("/user-token/token/{token}/logged")
-    public  boolean tokenIsLoggedIn(@PathVariable String token){
+    public boolean tokenIsLoggedIn(@PathVariable String token) {
         return userTokenManager.tokenIsLoggedIn(token);
     }
 
     @GetMapping("/user-token/user/total")
-    public  long totalUser(){
+    public long totalUser() {
         return userTokenManager.totalUser();
     }
 
     @GetMapping("/user-token/token/total")
-    public long totalToken(){
+    public long totalToken() {
         return userTokenManager.totalToken();
     }
 
     @GetMapping("/user-token}")
-    public List<UserToken> allLoggedUser(){
+    public List<UserToken> allLoggedUser() {
         return userTokenManager.allLoggedUser();
     }
 
     @DeleteMapping("/user-token/user/{userId}")
-    public  void signOutByUserId(@PathVariable String userId){
+    public void signOutByUserId(@PathVariable String userId) {
         userTokenManager.signOutByUserId(userId);
     }
 
     @DeleteMapping("/user-token/token/{token}")
-    public void signOutByToken(@PathVariable String token){
+    public void signOutByToken(@PathVariable String token) {
         userTokenManager.signOutByToken(token);
     }
 
     @PutMapping("/user-token/user/{userId}/{state}")
-    public void changeUserState(@PathVariable String userId, @PathVariable TokenState state){
+    public void changeUserState(@PathVariable String userId, @PathVariable TokenState state) {
         userTokenManager.changeUserState(userId, state);
     }
 
     @PutMapping("/user-token/token/{token}/{state}")
-    public  void changeTokenState(String token, TokenState state){
-         userTokenManager.changeTokenState(token,state);
+    public void changeTokenState(String token, TokenState state) {
+        userTokenManager.changeTokenState(token, state);
     }
 
-    @PostMapping("/user-token/{token}/{userId}/{maxInactiveInterval}")
-    public  UserToken signIn(@PathVariable String token, @PathVariable String userId, @PathVariable long maxInactiveInterval)
-    {
-        return userTokenManager.signIn(token,userId,maxInactiveInterval);
+    @PostMapping("/user-token/{token}/{type}/{userId}/{maxInactiveInterval}")
+    public UserToken signIn(@PathVariable String token, @PathVariable String type, @PathVariable String userId, @PathVariable long maxInactiveInterval) {
+        return userTokenManager.signIn(token, type, userId, maxInactiveInterval);
     }
 
     @GetMapping("/user-token/{token}/touch")
@@ -97,7 +96,7 @@ public class UserTokenController {
     }
 
     @GetMapping("/user-auth/{userId}")
-    public Authentication userAuthInfo(@PathVariable String userId){
+    public Authentication userAuthInfo(@PathVariable String userId) {
         return authenticationManager.getByUserId(userId);
     }
 

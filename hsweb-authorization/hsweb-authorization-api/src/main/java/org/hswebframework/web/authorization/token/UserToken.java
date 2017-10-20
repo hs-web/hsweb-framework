@@ -44,6 +44,10 @@ public interface UserToken extends Serializable, Comparable<UserToken> {
      */
     TokenState getState();
 
+    /**
+     * @return 令牌类型, 默认:default
+     */
+    String getType();
 
     long getMaxInactiveInterval();
 

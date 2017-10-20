@@ -62,6 +62,11 @@ public class JwtTokenGenerator implements UserTokenGenerator {
             }
 
             @Override
+            public String getType() {
+                return "jwt-default";
+            }
+
+            @Override
             public int getTimeout() {
                 return timeout;
             }
