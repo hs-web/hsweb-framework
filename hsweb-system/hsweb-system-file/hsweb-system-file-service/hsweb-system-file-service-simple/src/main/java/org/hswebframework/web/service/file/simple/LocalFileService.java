@@ -121,6 +121,7 @@ public class LocalFileService implements FileService {
     }
 
     @Override
+    @SuppressWarnings("all")
     public FileInfoEntity saveFile(InputStream fileStream, String fileName, String type, String creatorId) throws IOException {
         //配置中的文件上传根路径
         String fileBasePath = getFilePath();
