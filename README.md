@@ -1,5 +1,6 @@
 ## hsweb  3.0
 [![Maven Central](https://img.shields.io/maven-central/v/org.hswebframework/hsweb-framework.svg?style=plastic)](http://search.maven.org/#search%7Cga%7C1%7Chswebframework)
+[![Coverage Status](https://coveralls.io/repos/github/hs-web/hsweb-framework/badge.svg?branch=master)](https://coveralls.io/github/hs-web/hsweb-framework?branch=master)
 [![Build Status](https://travis-ci.org/hs-web/hsweb-framework.svg?branch=master)](https://travis-ci.org/hs-web/hsweb-framework)
 [![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg?style=flat-square)](https://www.apache.org/licenses/LICENSE-2.0.html)
 [![Insight.io](https://www.insight.io/repoBadge/github.com/hs-web/hsweb-framework)](https://insight.io/github.com/hs-web/hsweb-framework)
