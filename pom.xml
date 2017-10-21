@@ -184,9 +184,6 @@
                 <groupId>org.eluder.coveralls</groupId>
                 <artifactId>coveralls-maven-plugin</artifactId>
                 <version>4.3.0</version>
-                <configuration>
-                    <repoToken>cWL9JBVesOJatx690o81AkOtujERogRXv</repoToken>
-                </configuration>
             </plugin>
 
             <plugin>
@@ -442,14 +439,14 @@
     </distributionManagement>
 
     <pluginRepositories>
-        <pluginRepository>
-            <id>hsweb-nexus</id>
-            <name>Nexus Release Repository</name>
-            <url>http://nexus.hsweb.me/content/groups/public/</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </pluginRepository>
+        <!--<pluginRepository>-->
+            <!--<id>hsweb-nexus</id>-->
+            <!--<name>Nexus Release Repository</name>-->
+            <!--<url>http://nexus.hsweb.me/content/groups/public/</url>-->
+            <!--<snapshots>-->
+                <!--<enabled>true</enabled>-->
+            <!--</snapshots>-->
+        <!--</pluginRepository>-->
         <pluginRepository>
             <id>aliyun-nexus</id>
             <name>aliyun</name>

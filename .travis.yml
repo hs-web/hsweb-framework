@@ -2,4 +2,6 @@ language: java
 jdk: oraclejdk8
 sudo: false
 install: false
-script: mvn cobertura:cobertura coveralls:report
+#script: mvn test
+after_success:
+  - mvn clean cobertura:cobertura coveralls:report
