@@ -45,7 +45,9 @@
 
     <name>hsweb framework</name>
     <url>http://www.hswebframework.org</url>
-    <description>hsweb (haʊs wɛb) 是一个用于快速搭建企业后台管理系统的基础项目,集成一揽子便捷功能如:通用增删改查，在线代码生成，权限管理(可控制到列和行)，动态多数据源分布式事务，动态脚本，动态定时任务，在线数据库维护等等</description>
+    <description>hsweb (haʊs wɛb)
+        是一个用于快速搭建企业后台管理系统的基础项目,集成一揽子便捷功能如:通用增删改查，在线代码生成，权限管理(可控制到列和行)，动态多数据源分布式事务，动态脚本，动态定时任务，在线数据库维护等等
+    </description>
 
     <licenses>
         <license>
@@ -175,17 +177,18 @@
     </profiles>
 
     <build>
+
+
         <plugins>
             <plugin>
-              <groupId>org.eluder.coveralls</groupId>
-              <artifactId>coveralls-maven-plugin</artifactId>
-              <version>4.3.0</version>
-              <configuration>
-                  <repoToken>cWL9JBVesOJatx690o81AkOtujERogRXv</repoToken>
-              </configuration>
-          </plugin>
-          
-          <plugins>
+                <groupId>org.eluder.coveralls</groupId>
+                <artifactId>coveralls-maven-plugin</artifactId>
+                <version>4.3.0</version>
+                <configuration>
+                    <repoToken>cWL9JBVesOJatx690o81AkOtujERogRXv</repoToken>
+                </configuration>
+            </plugin>
+
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>cobertura-maven-plugin</artifactId>
@@ -214,7 +217,7 @@
                     </execution>
                 </executions>
             </plugin>
-            
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-scm-plugin</artifactId>
