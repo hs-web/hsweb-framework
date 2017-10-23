@@ -16,15 +16,14 @@
  *
  */
 
-package org.hswebframework.web.service.oauth2.client.request.definition;
+package org.hswebframework.web.authorization.oauth2.client.request.definition;
 
-import org.hswebframework.web.service.oauth2.client.request.ResponseJudge;
+
+import org.hswebframework.web.authorization.oauth2.client.request.ResponseConvertHandler;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
-public interface ResponseJudgeForServerIdDefinition extends ResponseJudge {
+public interface ResponseConvertForServerIdDefinition extends ResponseConvertHandler {
     String getServerId();
 }

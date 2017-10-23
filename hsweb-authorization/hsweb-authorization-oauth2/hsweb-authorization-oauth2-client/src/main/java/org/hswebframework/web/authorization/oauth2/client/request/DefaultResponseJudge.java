@@ -16,18 +16,16 @@
  *
  */
 
-package org.hswebframework.web.service.oauth2.client.starter;
+package org.hswebframework.web.authorization.oauth2.client.request;
 
 import org.hswebframework.web.authorization.oauth2.client.response.OAuth2Response;
 import org.hswebframework.web.oauth2.core.ErrorType;
-import org.hswebframework.web.service.oauth2.client.request.ResponseJudge;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * TODO 完成注释
  *
  * @author zhouhao
  */

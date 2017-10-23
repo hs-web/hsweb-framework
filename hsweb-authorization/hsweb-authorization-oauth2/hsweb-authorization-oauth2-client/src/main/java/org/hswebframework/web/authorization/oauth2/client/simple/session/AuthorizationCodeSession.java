@@ -16,7 +16,7 @@
  *
  */
 
-package org.hswebframework.web.service.oauth2.client.simple.session;
+package org.hswebframework.web.authorization.oauth2.client.simple.session;
 
 import org.hswebframework.web.authorization.oauth2.client.GrantType;
 import org.hswebframework.web.authorization.oauth2.client.OAuth2Constants;

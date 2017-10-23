@@ -16,27 +16,19 @@
  *
  */
 
-package org.hswebframework.web.service.oauth2.client.simple.provider;
+package org.hswebframework.web.authorization.oauth2.client.simple.provider;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.parser.Feature;
-import com.alibaba.fastjson.parser.ParserConfig;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.builder.AuthenticationBuilderFactory;
-import org.hswebframework.web.authorization.oauth2.client.AccessTokenInfo;
+import org.hswebframework.web.authorization.oauth2.client.request.definition.ResponseConvertForProviderDefinition;
 import org.hswebframework.web.authorization.oauth2.client.response.OAuth2Response;
-import org.hswebframework.web.service.oauth2.client.request.ProviderSupport;
-import org.hswebframework.web.service.oauth2.client.request.definition.ResponseConvertForProviderDefinition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 @Component
@@ -70,6 +62,6 @@ public class HswebResponseConvertSupport implements ResponseConvertForProviderDe
 
     @Override
     public String getProvider() {
-        return ProviderSupport.hsweb;
+        return "hsweb";
     }
 }

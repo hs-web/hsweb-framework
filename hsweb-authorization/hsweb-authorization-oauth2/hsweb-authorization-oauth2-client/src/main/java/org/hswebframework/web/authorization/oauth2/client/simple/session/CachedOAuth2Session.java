@@ -16,21 +16,25 @@
  *
  */
 
-package org.hswebframework.web.service.oauth2.client.request.definition;
+package org.hswebframework.web.authorization.oauth2.client.simple.session;
 
-import org.hswebframework.web.service.oauth2.client.request.ProviderSupport;
-import org.hswebframework.web.service.oauth2.client.request.ResponseConvertHandler;
+import org.hswebframework.web.authorization.oauth2.client.AccessTokenInfo;
+import org.hswebframework.web.authorization.oauth2.client.request.OAuth2Session;
 
 /**
- * TODO 完成注释
  *
  * @author zhouhao
  */
-public interface ResponseConvertForProviderDefinition extends ResponseConvertHandler {
+public class CachedOAuth2Session extends DefaultOAuth2Session {
 
-    /**
-     * @return 支持的厂商标识
-     * @see ProviderSupport
-     */
-    String getProvider();
+
+    public CachedOAuth2Session(AccessTokenInfo tokenInfo) {
+        super.accessTokenInfo = tokenInfo;
+    }
+
+    @Override
+    public OAuth2Session authorize() {
+        // do no thing
+        return this;
+    }
 }

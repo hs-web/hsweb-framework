@@ -16,17 +16,13 @@
  *
  */
 
-package org.hswebframework.web.service.oauth2.client.simple.session;
+package org.hswebframework.web.authorization.oauth2.client.simple.session;
 
 import org.apache.commons.codec.binary.Base64;
-import org.hswebframework.web.authorization.oauth2.client.AccessTokenInfo;
-import org.hswebframework.web.authorization.oauth2.client.GrantType;
-import org.hswebframework.web.authorization.oauth2.client.OAuth2Constants;
-import org.hswebframework.web.authorization.oauth2.client.OAuth2RequestBuilderFactory;
+import org.hswebframework.web.authorization.oauth2.client.*;
 import org.hswebframework.web.authorization.oauth2.client.request.OAuth2Request;
 import org.hswebframework.web.authorization.oauth2.client.request.OAuth2Session;
 import org.hswebframework.web.authorization.oauth2.client.response.OAuth2Response;
-import org.hswebframework.web.entity.oauth2.client.OAuth2ServerConfigEntity;
 import org.springframework.util.Assert;
 
 import java.util.function.Consumer;
@@ -40,7 +36,7 @@ public class DefaultOAuth2Session implements OAuth2Session {
 
     protected OAuth2RequestBuilderFactory requestBuilderFactory;
 
-    protected OAuth2ServerConfigEntity configEntity;
+    protected OAuth2ServerConfig serverConfig;
 
     protected boolean closed = false;
 
@@ -56,20 +52,20 @@ public class DefaultOAuth2Session implements OAuth2Session {
         this.requestBuilderFactory = requestBuilderFactory;
     }
 
-    public void setConfigEntity(OAuth2ServerConfigEntity configEntity) {
-        this.configEntity = configEntity;
+    public void setServerConfig(OAuth2ServerConfig serverConfig) {
+        this.serverConfig = serverConfig;
     }
 
     public void init() {
         Assert.notNull(requestBuilderFactory, "requestBuilderFactory can not be null!");
-        Assert.notNull(configEntity, "configEntity can not be null!");
-        accessTokenRequest = createRequest(configEntity.getAccessTokenUrl());
+        Assert.notNull(serverConfig, "configEntity can not be null!");
+        accessTokenRequest = createRequest(serverConfig.getAccessTokenUrl());
         applyBasicAuthParam(accessTokenRequest);
     }
 
     protected OAuth2Request createRequest(String uriOrUrl) {
         return requestBuilderFactory
-                .create(configEntity.getId(), configEntity.getProvider())
+                .create(serverConfig.getId(), serverConfig.getProvider())
                 .url(getRealUrl(uriOrUrl))
                 .build();
     }
@@ -83,10 +79,10 @@ public class DefaultOAuth2Session implements OAuth2Session {
     }
 
     protected void applyBasicAuthParam(OAuth2Request request) {
-        request.param(client_id, configEntity.getClientId());
-        request.param(client_secret, configEntity.getClientSecret());
-        request.param(redirect_uri, configEntity.getRedirectUri());
-        request.header(authorization, encodeAuthorization(configEntity.getClientId().concat(":").concat(configEntity.getClientSecret())));
+        request.param(client_id, serverConfig.getClientId());
+        request.param(client_secret, serverConfig.getClientSecret());
+        request.param(redirect_uri, serverConfig.getRedirectUri());
+        request.header(authorization, encodeAuthorization(serverConfig.getClientId().concat(":").concat(serverConfig.getClientSecret())));
     }
 
     protected void applyTokenParam(OAuth2Request request) {
@@ -98,10 +94,10 @@ public class DefaultOAuth2Session implements OAuth2Session {
         if (url.startsWith("http")) {
             return url;
         }
-        if (!configEntity.getApiBaseUrl().endsWith("/") && !url.startsWith("/")) {
-            return configEntity.getApiBaseUrl().concat("/").concat(url);
+        if (!serverConfig.getApiBaseUrl().endsWith("/") && !url.startsWith("/")) {
+            return serverConfig.getApiBaseUrl().concat("/").concat(url);
         }
-        return configEntity.getApiBaseUrl() + url;
+        return serverConfig.getApiBaseUrl() + url;
     }
 
     @Override
@@ -140,7 +136,7 @@ public class DefaultOAuth2Session implements OAuth2Session {
         if (accessTokenInfo == null) {
             return;
         }
-        OAuth2Request request = createRequest(getRealUrl(configEntity.getAccessTokenUrl()));
+        OAuth2Request request = createRequest(getRealUrl(serverConfig.getAccessTokenUrl()));
         applyBasicAuthParam(request);
         AccessTokenInfo tokenInfo = request
                 .param(OAuth2Constants.scope, scope)

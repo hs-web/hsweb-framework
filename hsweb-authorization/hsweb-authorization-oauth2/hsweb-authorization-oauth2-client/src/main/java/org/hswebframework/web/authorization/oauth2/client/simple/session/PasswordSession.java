@@ -16,15 +16,13 @@
  *
  */
 
-package org.hswebframework.web.service.oauth2.client.simple.session;
+package org.hswebframework.web.authorization.oauth2.client.simple.session;
 
 import org.hswebframework.web.authorization.oauth2.client.GrantType;
 import org.hswebframework.web.authorization.oauth2.client.OAuth2Constants;
 import org.hswebframework.web.authorization.oauth2.client.request.OAuth2Request;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public class PasswordSession extends DefaultOAuth2Session {
@@ -40,7 +38,7 @@ public class PasswordSession extends DefaultOAuth2Session {
     protected void applyBasicAuthParam(OAuth2Request request) {
         request.param(OAuth2Constants.grant_type, GrantType.password);
         request.param("username", username);
-        request.param("password", configEntity.getClientSecret());
+        request.param("password", serverConfig.getClientSecret());
         request.header(OAuth2Constants.authorization, encodeAuthorization(username.concat(":").concat(password)));
     }
 }

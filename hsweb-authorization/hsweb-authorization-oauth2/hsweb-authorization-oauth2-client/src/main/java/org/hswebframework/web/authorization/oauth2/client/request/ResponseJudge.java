@@ -16,16 +16,14 @@
  *
  */
 
-package org.hswebframework.web.service.oauth2.client.simple.request;
+package org.hswebframework.web.authorization.oauth2.client.request;
 
-interface UnCheck<T> {
-        T call() throws Exception;
+import org.hswebframework.web.authorization.oauth2.client.response.OAuth2Response;
+import org.hswebframework.web.oauth2.core.ErrorType;
 
-        static <T> T unCheck(UnCheck<T> unCheck) {
-            try {
-                return unCheck.call();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
+/**
+ * @author zhouhao
+ */
+public interface ResponseJudge {
+    ErrorType judge(OAuth2Response response);
+}

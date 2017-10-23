@@ -27,7 +27,4 @@ import java.util.List;
  * @author hsweb-generator-online
  */
 public interface OAuth2UserTokenService extends CrudService<OAuth2UserTokenEntity, String> {
-    List<OAuth2UserTokenEntity> selectByServerIdAndGrantType(String serverId, String grantType);
-
-    OAuth2UserTokenEntity selectByAccessToken(String accessToken);
 }

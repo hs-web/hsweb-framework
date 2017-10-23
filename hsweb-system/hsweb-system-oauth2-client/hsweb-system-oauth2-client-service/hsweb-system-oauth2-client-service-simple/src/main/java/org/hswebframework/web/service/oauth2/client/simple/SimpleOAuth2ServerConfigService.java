@@ -16,6 +16,8 @@
  */
 package org.hswebframework.web.service.oauth2.client.simple;
 
+import org.hswebframework.web.authorization.oauth2.client.OAuth2ServerConfig;
+import org.hswebframework.web.authorization.oauth2.client.simple.OAuth2ServerConfigRepository;
 import org.hswebframework.web.dao.oauth2.client.OAuth2ServerConfigDao;
 import org.hswebframework.web.entity.oauth2.client.OAuth2ServerConfigEntity;
 import org.hswebframework.web.id.IDGenerator;
@@ -31,10 +33,11 @@ import org.springframework.stereotype.Service;
  */
 @Service("oAuth2ServerConfigService")
 public class SimpleOAuth2ServerConfigService extends GenericEntityService<OAuth2ServerConfigEntity, String>
-        implements OAuth2ServerConfigService {
+        implements OAuth2ServerConfigService, OAuth2ServerConfigRepository {
     @Autowired
     private OAuth2ServerConfigDao oAuth2ServerConfigDao;
-   @Override
+
+    @Override
     protected IDGenerator<String> getIDGenerator() {
         return IDGenerator.MD5;
     }
@@ -44,4 +47,12 @@ public class SimpleOAuth2ServerConfigService extends GenericEntityService<OAuth2
         return oAuth2ServerConfigDao;
     }
 
+    @Override
+    public OAuth2ServerConfig findById(String id) {
+        OAuth2ServerConfigEntity entity = selectByPk(id);
+        if (null == entity) {
+            return null;
+        }
+        return entityFactory.newInstance(OAuth2ServerConfig.class, entity);
+    }
 }

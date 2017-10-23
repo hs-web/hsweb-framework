@@ -16,16 +16,14 @@
  *
  */
 
-package org.hswebframework.web.service.oauth2.client.request;
+package org.hswebframework.web.authorization.oauth2.client.request.definition;
+
+
+import org.hswebframework.web.authorization.oauth2.client.request.ResponseJudge;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
-public interface ProviderSupport {
-    String hsweb      = "hsweb";
-
-    String tencent_qq = "QQ";
-    String sina       = "sina";
+public interface ResponseJudgeForServerIdDefinition extends ResponseJudge {
+    String getServerId();
 }

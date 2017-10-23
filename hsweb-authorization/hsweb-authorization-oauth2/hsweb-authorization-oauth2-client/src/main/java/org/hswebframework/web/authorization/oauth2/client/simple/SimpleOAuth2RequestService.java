@@ -16,45 +16,42 @@
  *
  */
 
-package org.hswebframework.web.service.oauth2.client.simple;
+package org.hswebframework.web.authorization.oauth2.client.simple;
 
+import org.hswebframework.utils.ClassUtils;
 import org.hswebframework.web.NotFoundException;
-import org.hswebframework.web.authorization.listener.AuthorizationListener;
-import org.hswebframework.web.authorization.listener.event.AuthorizationEvent;
 import org.hswebframework.web.authorization.oauth2.client.OAuth2RequestBuilderFactory;
 import org.hswebframework.web.authorization.oauth2.client.OAuth2RequestService;
+import org.hswebframework.web.authorization.oauth2.client.OAuth2ServerConfig;
 import org.hswebframework.web.authorization.oauth2.client.OAuth2SessionBuilder;
 import org.hswebframework.web.authorization.oauth2.client.listener.OAuth2Event;
 import org.hswebframework.web.authorization.oauth2.client.listener.OAuth2Listener;
-import org.hswebframework.web.commons.entity.DataStatus;
-import org.hswebframework.web.entity.oauth2.client.OAuth2ServerConfigEntity;
-import org.hswebframework.web.service.oauth2.client.OAuth2ServerConfigService;
-import org.hswebframework.web.service.oauth2.client.OAuth2UserTokenService;
-import org.hswebframework.utils.ClassUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.util.*;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
-@Service("oAuth2RequestService")
 public class SimpleOAuth2RequestService implements OAuth2RequestService {
 
-    private OAuth2ServerConfigService oAuth2ServerConfigService;
+    private OAuth2ServerConfigRepository oAuth2ServerConfigService;
 
-    private OAuth2UserTokenService oAuth2UserTokenService;
+    private OAuth2UserTokenRepository oAuth2UserTokenService;
 
     private OAuth2RequestBuilderFactory oAuth2RequestBuilderFactory;
+
     private Map<String, Map<Class, List<OAuth2Listener>>> listenerStore = new HashMap<>();
+
+    public SimpleOAuth2RequestService(OAuth2ServerConfigRepository oAuth2ServerConfigService, OAuth2UserTokenRepository oAuth2UserTokenService, OAuth2RequestBuilderFactory oAuth2RequestBuilderFactory) {
+        this.oAuth2ServerConfigService = oAuth2ServerConfigService;
+        this.oAuth2UserTokenService = oAuth2UserTokenService;
+        this.oAuth2RequestBuilderFactory = oAuth2RequestBuilderFactory;
+    }
 
     @Override
     public OAuth2SessionBuilder create(String serverId) {
-        OAuth2ServerConfigEntity configEntity = oAuth2ServerConfigService.selectByPk(serverId);
-        if (null == configEntity || !DataStatus.STATUS_ENABLED.equals(configEntity.getStatus())) {
+        OAuth2ServerConfig configEntity = oAuth2ServerConfigService.findById(serverId);
+        if (null == configEntity || !Byte.valueOf((byte) 1).equals(configEntity.getStatus())) {
             throw new NotFoundException("server not found!");
         }
         return new SimpleOAuth2SessionBuilder(oAuth2UserTokenService, configEntity, oAuth2RequestBuilderFactory);
@@ -81,18 +78,4 @@ public class SimpleOAuth2RequestService implements OAuth2RequestService {
                 .forEach(listener -> listener.on(event));
     }
 
-    @Autowired
-    public void setoAuth2ServerConfigService(OAuth2ServerConfigService oAuth2ServerConfigService) {
-        this.oAuth2ServerConfigService = oAuth2ServerConfigService;
-    }
-
-    @Autowired
-    public void setoAuth2UserTokenService(OAuth2UserTokenService oAuth2UserTokenService) {
-        this.oAuth2UserTokenService = oAuth2UserTokenService;
-    }
-
-    @Autowired
-    public void setoAuth2RequestBuilderFactory(OAuth2RequestBuilderFactory oAuth2RequestBuilderFactory) {
-        this.oAuth2RequestBuilderFactory = oAuth2RequestBuilderFactory;
-    }
 }

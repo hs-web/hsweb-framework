@@ -16,14 +16,14 @@
  *
  */
 
-package org.hswebframework.web.service.oauth2.client.simple.request.builder;
+package org.hswebframework.web.authorization.oauth2.client.simple.request.builder;
 
 import org.hswebframework.expands.request.RequestBuilder;
 import org.hswebframework.web.authorization.oauth2.client.OAuth2RequestBuilder;
 import org.hswebframework.web.authorization.oauth2.client.request.OAuth2Request;
-import org.hswebframework.web.service.oauth2.client.request.ResponseConvertHandler;
-import org.hswebframework.web.service.oauth2.client.request.ResponseJudge;
-import org.hswebframework.web.service.oauth2.client.simple.request.SimpleOAuth2Request;
+import org.hswebframework.web.authorization.oauth2.client.request.ResponseConvertHandler;
+import org.hswebframework.web.authorization.oauth2.client.request.ResponseJudge;
+import org.hswebframework.web.authorization.oauth2.client.simple.request.SimpleOAuth2Request;
 
 /**
  * @author zhouhao

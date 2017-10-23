@@ -14,10 +14,8 @@
  *  limitations under the License.
  *  
  */
-package org.hswebframework.web.service.oauth2.client.simple;
+package org.hswebframework.web.authorization.oauth2.client.simple;
 
-import org.hswebframework.web.authorization.oauth2.client.AccessTokenInfo;
-import org.hswebframework.web.authorization.oauth2.client.simple.OAuth2UserTokenRepository;
 import org.hswebframework.web.dao.oauth2.client.OAuth2UserTokenDao;
 import org.hswebframework.web.entity.oauth2.client.OAuth2UserTokenEntity;
 import org.hswebframework.web.id.IDGenerator;
@@ -29,9 +27,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * 默认的服务实现
@@ -40,7 +35,7 @@ import java.util.stream.Collectors;
  */
 @Service("oAuth2UserTokenService")
 public class SimpleOAuth2UserTokenService extends GenericEntityService<OAuth2UserTokenEntity, String>
-        implements OAuth2UserTokenService, OAuth2UserTokenRepository {
+        implements OAuth2UserTokenService {
     @Autowired
     private OAuth2UserTokenDao oAuth2UserTokenDao;
 
@@ -55,39 +50,7 @@ public class SimpleOAuth2UserTokenService extends GenericEntityService<OAuth2Use
     }
 
     @Override
-    public AccessTokenInfo createToken() {
-        return entityFactory.newInstance(AccessTokenInfo.class);
-    }
-
-    @Override
     @Cacheable(cacheNames = "oauth2-user-token", key = "'s-g-t:'+#serverId+':'+#grantType")
-    public List<AccessTokenInfo> findByServerIdAndGrantType(String serverId, String grantType) {
-        return selectByServerIdAndGrantType(serverId, grantType).stream()
-                .map(tokenInfoMapping())
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    @Cacheable(cacheNames = "oauth2-user-token", key = "'a-t:'+#accessToken")
-    public AccessTokenInfo findByAccessToken(String accessToken) {
-        return Optional.ofNullable(selectByAccessToken(accessToken)).map(tokenInfoMapping()).orElse(null);
-    }
-
-    protected Function<OAuth2UserTokenEntity, AccessTokenInfo> tokenInfoMapping() {
-        return entity ->
-                entityFactory.newInstance(AccessTokenInfo.class, entity);
-    }
-
-    @Override
-    public AccessTokenInfo update(String id, AccessTokenInfo tokenInfo) {
-        return null;
-    }
-
-    @Override
-    public AccessTokenInfo insert(AccessTokenInfo accessTokenInfo) {
-        return null;
-    }
-
     public List<OAuth2UserTokenEntity> selectByServerIdAndGrantType(String serverId, String grantType) {
         Assert.notNull(serverId, "serverId can not be null!");
         Assert.notNull(grantType, "grantType can not be null!");
@@ -97,6 +60,8 @@ public class SimpleOAuth2UserTokenService extends GenericEntityService<OAuth2Use
                 .listNoPaging();
     }
 
+    @Override
+    @Cacheable(cacheNames = "oauth2-user-token", key = "'a-t:'+#serverId+':'+#grantType")
     public OAuth2UserTokenEntity selectByAccessToken(String accessToken) {
         Assert.notNull(accessToken, "token can not be null!");
         return createQuery().where(OAuth2UserTokenEntity.accessToken, accessToken)

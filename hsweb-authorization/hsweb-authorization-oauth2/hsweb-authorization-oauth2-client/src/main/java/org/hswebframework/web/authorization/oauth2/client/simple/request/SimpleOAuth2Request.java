@@ -16,15 +16,15 @@
  *
  */
 
-package org.hswebframework.web.service.oauth2.client.simple.request;
+package org.hswebframework.web.authorization.oauth2.client.simple.request;
 
 import org.hswebframework.expands.request.http.HttpRequest;
 import org.hswebframework.expands.request.http.Response;
 import org.hswebframework.web.authorization.oauth2.client.request.OAuth2Request;
+import org.hswebframework.web.authorization.oauth2.client.request.ResponseConvertHandler;
+import org.hswebframework.web.authorization.oauth2.client.request.ResponseJudge;
 import org.hswebframework.web.authorization.oauth2.client.request.TokenExpiredCallBack;
 import org.hswebframework.web.authorization.oauth2.client.response.OAuth2Response;
-import org.hswebframework.web.service.oauth2.client.request.ResponseConvertHandler;
-import org.hswebframework.web.service.oauth2.client.request.ResponseJudge;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;

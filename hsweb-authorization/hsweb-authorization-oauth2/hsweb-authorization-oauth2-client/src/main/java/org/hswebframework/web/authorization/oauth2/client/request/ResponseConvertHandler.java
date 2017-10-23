@@ -16,14 +16,17 @@
  *
  */
 
-package org.hswebframework.web.service.oauth2.client.request;
+package org.hswebframework.web.authorization.oauth2.client.request;
 
 import org.hswebframework.web.authorization.oauth2.client.response.OAuth2Response;
-import org.hswebframework.web.oauth2.core.ErrorType;
+
+import java.util.List;
 
 /**
  * @author zhouhao
  */
-public interface ResponseJudge {
-    ErrorType judge(OAuth2Response response);
+public interface ResponseConvertHandler {
+    <T> T convert(OAuth2Response response, Class<T> type);
+
+    <T> List<T> convertList(OAuth2Response response, Class<T> type);
 }

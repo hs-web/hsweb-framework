@@ -25,6 +25,7 @@ import com.alibaba.fastjson.annotation.JSONField;
  * @author zhouhao
  */
 public class AccessTokenInfo {
+    private String  id;
     //授权码
     @JSONField(name = "access_token")
     private String  accessToken;
@@ -43,6 +44,10 @@ public class AccessTokenInfo {
 
     @JSONField(name = "token_type")
     private String tokenType;
+
+    private String grantType;
+
+    private String serverId;
 
     public boolean isExpire() {
         return updateTime != null && System.currentTimeMillis() - updateTime > expiresIn * 1000;
@@ -126,5 +131,29 @@ public class AccessTokenInfo {
 
     public void setUpdateTime(Long updateTime) {
         this.updateTime = updateTime;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setGrantType(String grantType) {
+        this.grantType = grantType;
+    }
+
+    public String getGrantType() {
+        return grantType;
+    }
+
+    public String getServerId() {
+        return serverId;
+    }
+
+    public void setServerId(String serverId) {
+        this.serverId = serverId;
     }
 }

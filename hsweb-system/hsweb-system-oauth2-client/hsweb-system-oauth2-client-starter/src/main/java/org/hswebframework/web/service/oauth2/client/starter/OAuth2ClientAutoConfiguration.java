@@ -18,16 +18,9 @@
 
 package org.hswebframework.web.service.oauth2.client.starter;
 
-import org.hswebframework.expands.request.RequestBuilder;
-import org.hswebframework.expands.request.SimpleRequestBuilder;
 import org.hswebframework.web.authorization.oauth2.client.OAuth2RequestBuilderFactory;
-import org.hswebframework.web.authorization.oauth2.client.response.OAuth2Response;
-import org.hswebframework.web.service.oauth2.client.simple.request.builder.SimpleOAuth2RequestBuilderFactory;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -39,17 +32,4 @@ import org.springframework.context.annotation.Configuration;
         , "org.hswebframework.web.authorization.oauth2.controller"})
 public class OAuth2ClientAutoConfiguration {
 
-    @Bean
-    @ConditionalOnMissingBean(RequestBuilder.class)
-    public RequestBuilder requestBuilder() {
-        return new SimpleRequestBuilder();
-    }
-
-    @Bean
-    public SimpleOAuth2RequestBuilderFactory simpleOAuth2RequestBuilderFactory(RequestBuilder requestBuilder) {
-        SimpleOAuth2RequestBuilderFactory builderFactory = new SimpleOAuth2RequestBuilderFactory();
-        builderFactory.setRequestBuilder(requestBuilder);
-        builderFactory.setDefaultResponseJudge(new DefaultResponseJudge());
-        return builderFactory;
-    }
 }

@@ -16,25 +16,14 @@
  *
  */
 
-package org.hswebframework.web.service.oauth2.client.simple.session;
+package org.hswebframework.web.authorization.oauth2.client.request.definition;
 
-import org.hswebframework.web.authorization.oauth2.client.AccessTokenInfo;
-import org.hswebframework.web.authorization.oauth2.client.request.OAuth2Session;
+
+import org.hswebframework.web.authorization.oauth2.client.request.ResponseJudge;
 
 /**
- *
  * @author zhouhao
  */
-public class CachedOAuth2Session extends DefaultOAuth2Session {
-
-
-    public CachedOAuth2Session(AccessTokenInfo tokenInfo) {
-        super.accessTokenInfo = tokenInfo;
-    }
-
-    @Override
-    public OAuth2Session authorize() {
-        // do no thing
-        return this;
-    }
+public interface ResponseJudgeForProviderDefinition extends ResponseJudge {
+    String getProvider();
 }

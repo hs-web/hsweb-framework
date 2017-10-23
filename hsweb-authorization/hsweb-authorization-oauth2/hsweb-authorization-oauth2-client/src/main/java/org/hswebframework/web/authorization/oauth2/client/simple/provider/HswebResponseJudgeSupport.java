@@ -16,22 +16,16 @@
  *
  */
 
-package org.hswebframework.web.service.oauth2.client.simple.provider;
+package org.hswebframework.web.authorization.oauth2.client.simple.provider;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import org.hswebframework.web.authorization.oauth2.client.request.definition.ResponseJudgeForProviderDefinition;
 import org.hswebframework.web.authorization.oauth2.client.response.OAuth2Response;
 import org.hswebframework.web.oauth2.core.ErrorType;
-import org.hswebframework.web.service.oauth2.client.request.ProviderSupport;
-import org.hswebframework.web.service.oauth2.client.request.definition.ResponseJudgeForProviderDefinition;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 @Component
@@ -39,7 +33,7 @@ public class HswebResponseJudgeSupport implements ResponseJudgeForProviderDefini
 
     @Override
     public String getProvider() {
-        return ProviderSupport.hsweb;
+        return "hsweb";
     }
 
     @Override

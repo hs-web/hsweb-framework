@@ -16,14 +16,16 @@
  *
  */
 
-package org.hswebframework.web.service.oauth2.client.request.definition;
+package org.hswebframework.web.authorization.oauth2.client.simple.request;
 
-import org.hswebframework.web.service.oauth2.client.request.ResponseJudge;
+interface UnCheck<T> {
+        T call() throws Exception;
 
-/**
- *
- * @author zhouhao
- */
-public interface ResponseJudgeForProviderDefinition extends ResponseJudge {
-    String getProvider();
-}
+        static <T> T unCheck(UnCheck<T> unCheck) {
+            try {
+                return unCheck.call();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }

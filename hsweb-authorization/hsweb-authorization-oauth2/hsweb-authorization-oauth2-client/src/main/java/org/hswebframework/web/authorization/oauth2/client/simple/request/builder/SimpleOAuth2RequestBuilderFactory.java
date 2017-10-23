@@ -16,17 +16,17 @@
  *
  */
 
-package org.hswebframework.web.service.oauth2.client.simple.request.builder;
+package org.hswebframework.web.authorization.oauth2.client.simple.request.builder;
 
 import org.hswebframework.expands.request.RequestBuilder;
 import org.hswebframework.web.authorization.oauth2.client.OAuth2RequestBuilder;
 import org.hswebframework.web.authorization.oauth2.client.OAuth2RequestBuilderFactory;
-import org.hswebframework.web.service.oauth2.client.request.definition.ResponseConvertForProviderDefinition;
-import org.hswebframework.web.service.oauth2.client.request.definition.ResponseConvertForServerIdDefinition;
-import org.hswebframework.web.service.oauth2.client.request.ResponseConvertHandler;
-import org.hswebframework.web.service.oauth2.client.request.ResponseJudge;
-import org.hswebframework.web.service.oauth2.client.request.definition.ResponseJudgeForProviderDefinition;
-import org.hswebframework.web.service.oauth2.client.request.definition.ResponseJudgeForServerIdDefinition;
+import org.hswebframework.web.authorization.oauth2.client.request.ResponseConvertHandler;
+import org.hswebframework.web.authorization.oauth2.client.request.ResponseJudge;
+import org.hswebframework.web.authorization.oauth2.client.request.definition.ResponseConvertForProviderDefinition;
+import org.hswebframework.web.authorization.oauth2.client.request.definition.ResponseConvertForServerIdDefinition;
+import org.hswebframework.web.authorization.oauth2.client.request.definition.ResponseJudgeForProviderDefinition;
+import org.hswebframework.web.authorization.oauth2.client.request.definition.ResponseJudgeForServerIdDefinition;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 
@@ -39,6 +39,7 @@ import java.util.Map;
 public class SimpleOAuth2RequestBuilderFactory implements OAuth2RequestBuilderFactory, BeanPostProcessor {
 
     private final Map<String, ResponseJudge>          judgeMap          = new HashMap<>();
+
     private final Map<String, ResponseConvertHandler> convertHandlerMap = new HashMap<>();
 
     ResponseConvertHandler defaultConvertHandler;
