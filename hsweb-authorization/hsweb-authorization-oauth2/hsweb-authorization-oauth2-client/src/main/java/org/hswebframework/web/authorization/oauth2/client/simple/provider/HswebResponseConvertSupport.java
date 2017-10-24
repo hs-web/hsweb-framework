@@ -31,13 +31,11 @@ import java.util.List;
 /**
  * @author zhouhao
  */
-@Component
 public class HswebResponseConvertSupport implements ResponseConvertForProviderDefinition {
 
     private AuthenticationBuilderFactory authenticationBuilderFactory;
 
-    @Autowired(required = false)
-    public void setAuthenticationBuilderFactory(AuthenticationBuilderFactory authenticationBuilderFactory) {
+    public HswebResponseConvertSupport(AuthenticationBuilderFactory authenticationBuilderFactory) {
         this.authenticationBuilderFactory = authenticationBuilderFactory;
     }
 
