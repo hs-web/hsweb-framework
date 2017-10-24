@@ -128,6 +128,7 @@ public interface Authentication extends Serializable {
      * @param <T>  属性值类型
      * @return Optional属性值
      */
+    @Deprecated
     <T extends Serializable> Optional<T> getAttribute(String name);
 
     /**
@@ -138,6 +139,7 @@ public interface Authentication extends Serializable {
      * @param object 属性值
      * @see AuthenticationManager#sync(Authentication)
      */
+    @Deprecated
     void setAttribute(String name, Serializable object);
 
     /**
@@ -146,6 +148,7 @@ public interface Authentication extends Serializable {
      * @param attributes 属性值map
      * @see AuthenticationManager#sync(Authentication)
      */
+    @Deprecated
     void setAttributes(Map<String, Serializable> attributes);
 
     /**
@@ -156,6 +159,7 @@ public interface Authentication extends Serializable {
      * @return 被删除的值
      * @see AuthenticationManager#sync(Authentication)
      */
+    @Deprecated
     <T extends Serializable> T removeAttributes(String name);
 
     /**
@@ -163,6 +167,7 @@ public interface Authentication extends Serializable {
      *
      * @return 全部属性集合
      */
+    @Deprecated
     Map<String, Serializable> getAttributes();
 
 }

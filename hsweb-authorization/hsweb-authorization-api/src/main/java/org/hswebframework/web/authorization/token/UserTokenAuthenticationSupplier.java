@@ -39,6 +39,16 @@ public class UserTokenAuthenticationSupplier implements AuthenticationSupplier {
         return get(this.defaultAuthenticationManager, userId);
     }
 
+    protected Authentication get(ThirdPartAuthenticationManager authenticationManager, String userId) {
+        if (null == userId) {
+            return null;
+        }
+        if (null == authenticationManager) {
+            return this.defaultAuthenticationManager.getByUserId(userId);
+        }
+        return authenticationManager.getByUserId(userId);
+    }
+
     protected Authentication get(AuthenticationManager authenticationManager, String userId) {
         if (null == userId) {
             return null;
