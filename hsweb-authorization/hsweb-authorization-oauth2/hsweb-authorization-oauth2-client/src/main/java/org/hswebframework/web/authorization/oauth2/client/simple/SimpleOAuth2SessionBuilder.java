@@ -70,14 +70,14 @@ public class SimpleOAuth2SessionBuilder implements OAuth2SessionBuilder {
         return token -> {
             AccessTokenInfo tokenInfo = tokenGetter.get();
             if (tokenInfo != null) {
+                token.setId(tokenInfo.getId());
                 tokenInfo.setUpdateTime(System.currentTimeMillis());
-                oAuth2UserTokenRepository.update(tokenInfo.getId(), tokenInfo);
+                oAuth2UserTokenRepository.update(tokenInfo.getId(), token);
             } else {
-                tokenInfo = oAuth2UserTokenRepository.createToken();
-                tokenInfo.setGrantType(grantType);
-                tokenInfo.setCreateTime(System.currentTimeMillis());
-                tokenInfo.setServerId(serverConfig.getId());
-                oAuth2UserTokenRepository.insert(tokenInfo);
+                token.setGrantType(grantType);
+                token.setCreateTime(System.currentTimeMillis());
+                token.setServerId(serverConfig.getId());
+                oAuth2UserTokenRepository.insert(token);
             }
         };
     }
