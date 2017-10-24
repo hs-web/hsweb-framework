@@ -43,7 +43,7 @@ public class OAuth2ClientAutoConfiguration {
 
     @ConditionalOnMissingBean(OAuth2ServerConfigRepository.class)
     @Bean
-    @ConfigurationProperties(prefix = "hsweb.oauth2.server")
+    @ConfigurationProperties(prefix = "hsweb.oauth2")
     public MemoryOAuth2ServerConfigRepository memoryOAuth2ServerConfigRepository() {
         return new MemoryOAuth2ServerConfigRepository();
     }

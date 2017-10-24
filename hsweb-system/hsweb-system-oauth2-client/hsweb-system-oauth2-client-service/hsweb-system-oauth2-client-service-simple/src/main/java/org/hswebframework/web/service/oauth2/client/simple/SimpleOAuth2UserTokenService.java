@@ -24,7 +24,10 @@ import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.service.GenericEntityService;
 import org.hswebframework.web.service.oauth2.client.OAuth2UserTokenService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -60,7 +63,7 @@ public class SimpleOAuth2UserTokenService extends GenericEntityService<OAuth2Use
     }
 
     @Override
-    @Cacheable(cacheNames = "oauth2-user-token", key = "'s-g-t:'+#serverId+':'+#grantType")
+    @Cacheable(cacheNames = "oauth2-user-token-list", key = "'s-g-t:'+#serverId+':'+#grantType")
     public List<AccessTokenInfo> findByServerIdAndGrantType(String serverId, String grantType) {
         return selectByServerIdAndGrantType(serverId, grantType).stream()
                 .map(tokenInfoMapping())
@@ -74,18 +77,58 @@ public class SimpleOAuth2UserTokenService extends GenericEntityService<OAuth2Use
     }
 
     protected Function<OAuth2UserTokenEntity, AccessTokenInfo> tokenInfoMapping() {
-        return entity ->
-                entityFactory.newInstance(AccessTokenInfo.class, entity);
+        return entity -> {
+
+            AccessTokenInfo info = entityFactory.newInstance(AccessTokenInfo.class, entity);
+            info.setExpiresIn(entity.getExpiresIn());
+            info.setAccessToken(entity.getAccessToken());
+            info.setRefreshToken(entity.getRefreshToken());
+            return info;
+        };
+    }
+
+    protected Function<AccessTokenInfo, OAuth2UserTokenEntity> entityTokenInfoMapping() {
+        return info ->
+        {
+            OAuth2UserTokenEntity entity = entityFactory.newInstance(OAuth2UserTokenEntity.class, info);
+            entity.setExpiresIn(info.getExpiresIn());
+            entity.setAccessToken(info.getAccessToken());
+            entity.setRefreshToken(info.getRefreshToken());
+            return entity;
+        };
     }
 
     @Override
+    @Caching(
+            put = {
+                    @CachePut(cacheNames = "oauth2-user-token", key = "'a-t:'+#tokenInfo.accessToken"),
+            },
+            evict = @CacheEvict(cacheNames = "oauth2-user-token-list", allEntries = true)
+    )
     public AccessTokenInfo update(String id, AccessTokenInfo tokenInfo) {
-        return null;
+        OAuth2UserTokenEntity entity = entityTokenInfoMapping().apply(tokenInfo);
+        entity.setUpdateTime(System.currentTimeMillis());
+        updateByPk(id, entity);
+        return tokenInfo;
     }
 
     @Override
-    public AccessTokenInfo insert(AccessTokenInfo accessTokenInfo) {
-        return null;
+    @Caching(
+            put = {
+                    @CachePut(cacheNames = "oauth2-user-token", key = "'a-t:'+#tokenInfo.accessToken"),
+            },
+            evict = @CacheEvict(cacheNames = "oauth2-user-token-list", allEntries = true)
+    )
+    public AccessTokenInfo insert(AccessTokenInfo tokenInfo) {
+        if (tokenInfo.getId() == null) {
+            tokenInfo.setId(getIDGenerator().generate());
+        }
+        OAuth2UserTokenEntity entity = entityTokenInfoMapping().apply(tokenInfo);
+
+        entity.setUpdateTime(System.currentTimeMillis());
+
+        insert(entity);
+        return tokenInfo;
     }
 
     public List<OAuth2UserTokenEntity> selectByServerIdAndGrantType(String serverId, String grantType) {
