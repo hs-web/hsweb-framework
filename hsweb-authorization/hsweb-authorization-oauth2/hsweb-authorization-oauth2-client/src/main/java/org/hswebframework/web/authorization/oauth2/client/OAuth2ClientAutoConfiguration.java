@@ -6,6 +6,7 @@ import org.hswebframework.web.authorization.builder.AuthenticationBuilderFactory
 import org.hswebframework.web.authorization.oauth2.client.request.DefaultResponseJudge;
 import org.hswebframework.web.authorization.oauth2.client.simple.*;
 import org.hswebframework.web.authorization.oauth2.client.simple.provider.HswebResponseConvertSupport;
+import org.hswebframework.web.authorization.oauth2.client.simple.provider.HswebResponseJudgeSupport;
 import org.hswebframework.web.authorization.oauth2.client.simple.request.builder.SimpleOAuth2RequestBuilderFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -23,6 +24,10 @@ public class OAuth2ClientAutoConfiguration {
         return new SimpleRequestBuilder();
     }
 
+    @Bean
+    public HswebResponseJudgeSupport hswebResponseJudgeSupport() {
+        return new HswebResponseJudgeSupport();
+    }
 
     @Bean
     @ConditionalOnMissingBean(OAuth2RequestBuilderFactory.class)

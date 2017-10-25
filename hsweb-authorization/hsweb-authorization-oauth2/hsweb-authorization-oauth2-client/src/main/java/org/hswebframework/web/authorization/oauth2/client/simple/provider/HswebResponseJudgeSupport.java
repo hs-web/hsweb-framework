@@ -28,7 +28,6 @@ import org.springframework.stereotype.Component;
 /**
  * @author zhouhao
  */
-@Component
 public class HswebResponseJudgeSupport implements ResponseJudgeForProviderDefinition {
 
     @Override
