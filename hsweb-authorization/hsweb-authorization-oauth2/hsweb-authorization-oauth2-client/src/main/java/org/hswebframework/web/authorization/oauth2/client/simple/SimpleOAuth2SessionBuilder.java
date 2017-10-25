@@ -27,6 +27,8 @@ import org.hswebframework.web.authorization.oauth2.client.simple.session.Default
 import org.hswebframework.web.authorization.oauth2.client.simple.session.PasswordSession;
 
 import java.util.List;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -40,6 +42,8 @@ public class SimpleOAuth2SessionBuilder implements OAuth2SessionBuilder {
     private OAuth2ServerConfig serverConfig;
 
     private OAuth2RequestBuilderFactory requestBuilderFactory;
+
+    private ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
 
     public SimpleOAuth2SessionBuilder(OAuth2UserTokenRepository oAuth2UserTokenRepository,
                                       OAuth2ServerConfig oAuth2ServerConfig,
@@ -61,23 +65,33 @@ public class SimpleOAuth2SessionBuilder implements OAuth2SessionBuilder {
 
 
     protected AccessTokenInfo getClientCredentialsToken() {
-        List<AccessTokenInfo> list = oAuth2UserTokenRepository
-                .findByServerIdAndGrantType(serverConfig.getId(), GrantType.client_credentials);
-        return list.isEmpty() ? null : list.get(0);
+        readWriteLock.readLock().lock();
+        try {
+            List<AccessTokenInfo> list = oAuth2UserTokenRepository
+                    .findByServerIdAndGrantType(serverConfig.getId(), GrantType.client_credentials);
+            return list.isEmpty() ? null : list.get(0);
+        } finally {
+            readWriteLock.readLock().unlock();
+        }
     }
 
     protected Consumer<AccessTokenInfo> createOnTokenChanged(Supplier<AccessTokenInfo> tokenGetter, String grantType) {
         return token -> {
             AccessTokenInfo tokenInfo = tokenGetter.get();
-            if (tokenInfo != null) {
-                token.setId(tokenInfo.getId());
-                tokenInfo.setUpdateTime(System.currentTimeMillis());
-                oAuth2UserTokenRepository.update(tokenInfo.getId(), token);
-            } else {
-                token.setGrantType(grantType);
-                token.setCreateTime(System.currentTimeMillis());
-                token.setServerId(serverConfig.getId());
-                oAuth2UserTokenRepository.insert(token);
+            readWriteLock.writeLock().lock();
+            try {
+                if (tokenInfo != null) {
+                    token.setId(tokenInfo.getId());
+                    tokenInfo.setUpdateTime(System.currentTimeMillis());
+                    oAuth2UserTokenRepository.update(tokenInfo.getId(), token);
+                } else {
+                    token.setGrantType(grantType);
+                    token.setCreateTime(System.currentTimeMillis());
+                    token.setServerId(serverConfig.getId());
+                    oAuth2UserTokenRepository.insert(token);
+                }
+            } finally {
+                readWriteLock.writeLock().unlock();
             }
         };
     }

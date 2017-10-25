@@ -21,8 +21,10 @@ package org.hswebframework.web.authorization.oauth2.client.simple.provider;
 import com.alibaba.fastjson.JSON;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.builder.AuthenticationBuilderFactory;
+import org.hswebframework.web.authorization.oauth2.client.exception.OAuth2RequestException;
 import org.hswebframework.web.authorization.oauth2.client.request.definition.ResponseConvertForProviderDefinition;
 import org.hswebframework.web.authorization.oauth2.client.response.OAuth2Response;
+import org.hswebframework.web.oauth2.core.ErrorType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -42,6 +44,9 @@ public class HswebResponseConvertSupport implements ResponseConvertForProviderDe
     @Override
     public <T> T convert(OAuth2Response response, Class<T> type) {
         String json = response.asString();
+        if (response.status() != 200) {
+            throw new OAuth2RequestException(ErrorType.OTHER, response);
+        }
         if (type == Authentication.class) {
             if (authenticationBuilderFactory != null) {
                 return (T) authenticationBuilderFactory.create().json(json).build();
