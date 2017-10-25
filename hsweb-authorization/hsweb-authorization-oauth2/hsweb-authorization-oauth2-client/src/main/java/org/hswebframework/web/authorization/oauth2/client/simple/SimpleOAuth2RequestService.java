@@ -26,6 +26,7 @@ import org.hswebframework.web.authorization.oauth2.client.OAuth2ServerConfig;
 import org.hswebframework.web.authorization.oauth2.client.OAuth2SessionBuilder;
 import org.hswebframework.web.authorization.oauth2.client.listener.OAuth2Event;
 import org.hswebframework.web.authorization.oauth2.client.listener.OAuth2Listener;
+import org.hswebframework.web.concurrent.lock.LockManager;
 
 import java.util.*;
 
@@ -42,10 +43,22 @@ public class SimpleOAuth2RequestService implements OAuth2RequestService {
 
     private Map<String, Map<Class, List<OAuth2Listener>>> listenerStore = new HashMap<>();
 
-    public SimpleOAuth2RequestService(OAuth2ServerConfigRepository oAuth2ServerConfigService, OAuth2UserTokenRepository oAuth2UserTokenService, OAuth2RequestBuilderFactory oAuth2RequestBuilderFactory) {
+    private LockManager lockManager;
+
+
+    public SimpleOAuth2RequestService(
+            OAuth2ServerConfigRepository oAuth2ServerConfigService
+            , OAuth2UserTokenRepository oAuth2UserTokenService
+            , OAuth2RequestBuilderFactory oAuth2RequestBuilderFactory
+            , LockManager lockManager) {
         this.oAuth2ServerConfigService = oAuth2ServerConfigService;
         this.oAuth2UserTokenService = oAuth2UserTokenService;
         this.oAuth2RequestBuilderFactory = oAuth2RequestBuilderFactory;
+        this.lockManager = lockManager;
+    }
+
+    public void setLockManager(LockManager lockManager) {
+        this.lockManager = lockManager;
     }
 
     @Override
@@ -54,7 +67,8 @@ public class SimpleOAuth2RequestService implements OAuth2RequestService {
         if (null == configEntity || !Byte.valueOf((byte) 1).equals(configEntity.getStatus())) {
             throw new NotFoundException("server not found!");
         }
-        return new SimpleOAuth2SessionBuilder(oAuth2UserTokenService, configEntity, oAuth2RequestBuilderFactory);
+        return new SimpleOAuth2SessionBuilder(oAuth2UserTokenService, configEntity, oAuth2RequestBuilderFactory,
+                lockManager.getReadWriteLock("oauth2-server-lock." + serverId));
     }
 
     @Override

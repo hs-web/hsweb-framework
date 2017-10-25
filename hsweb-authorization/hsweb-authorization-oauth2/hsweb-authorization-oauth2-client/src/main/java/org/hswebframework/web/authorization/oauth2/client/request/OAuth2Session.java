@@ -67,6 +67,8 @@ public interface OAuth2Session extends Serializable {
      */
     boolean isClosed();
 
+    AccessTokenInfo requestAccessToken();
+
     AccessTokenInfo getAccessToken();
 
 }

@@ -8,6 +8,7 @@ import org.hswebframework.web.authorization.oauth2.client.simple.*;
 import org.hswebframework.web.authorization.oauth2.client.simple.provider.HswebResponseConvertSupport;
 import org.hswebframework.web.authorization.oauth2.client.simple.provider.HswebResponseJudgeSupport;
 import org.hswebframework.web.authorization.oauth2.client.simple.request.builder.SimpleOAuth2RequestBuilderFactory;
+import org.hswebframework.web.concurrent.lock.LockManager;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -42,8 +43,12 @@ public class OAuth2ClientAutoConfiguration {
 
     @ConditionalOnMissingBean(OAuth2RequestService.class)
     @Bean
-    public SimpleOAuth2RequestService simpleOAuth2RequestService(OAuth2ServerConfigRepository configRepository, OAuth2UserTokenRepository userTokenRepository, OAuth2RequestBuilderFactory builderFactory) {
-        return new SimpleOAuth2RequestService(configRepository, userTokenRepository, builderFactory);
+    public SimpleOAuth2RequestService simpleOAuth2RequestService(OAuth2ServerConfigRepository configRepository
+            , OAuth2UserTokenRepository userTokenRepository
+            , OAuth2RequestBuilderFactory builderFactory
+            , LockManager lockManager) {
+
+        return new SimpleOAuth2RequestService(configRepository, userTokenRepository, builderFactory,lockManager);
     }
 
     @ConditionalOnMissingBean(OAuth2ServerConfigRepository.class)

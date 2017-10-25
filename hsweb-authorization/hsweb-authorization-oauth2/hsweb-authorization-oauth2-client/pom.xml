@@ -33,6 +33,11 @@
     <dependencies>
         <dependency>
             <groupId>org.hswebframework.web</groupId>
+            <artifactId>hsweb-concurrent-lock-starter</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-authorization-api</artifactId>
             <version>${project.version}</version>
         </dependency>
