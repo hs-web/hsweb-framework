@@ -41,6 +41,9 @@ public class HswebResponseJudgeSupport implements ResponseJudgeForProviderDefini
         if (result == null) {
             return ErrorType.OTHER;
         }
+        if (!result.trim().startsWith("{")) {
+            return null;
+        }
         JSONObject jsonRes = JSON.parseObject(result);
         Integer status = jsonRes.getInteger("status");
         if (status == null && response.status() == 200) {
