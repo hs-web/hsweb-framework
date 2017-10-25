@@ -21,9 +21,12 @@ import org.hswebframework.web.authorization.oauth2.client.simple.OAuth2ServerCon
 import org.hswebframework.web.dao.oauth2.client.OAuth2ServerConfigDao;
 import org.hswebframework.web.entity.oauth2.client.OAuth2ServerConfigEntity;
 import org.hswebframework.web.id.IDGenerator;
+import org.hswebframework.web.service.EnableCacheGenericEntityService;
 import org.hswebframework.web.service.GenericEntityService;
 import org.hswebframework.web.service.oauth2.client.OAuth2ServerConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 /**
@@ -32,7 +35,8 @@ import org.springframework.stereotype.Service;
  * @author hsweb-generator-online
  */
 @Service("oAuth2ServerConfigService")
-public class SimpleOAuth2ServerConfigService extends GenericEntityService<OAuth2ServerConfigEntity, String>
+@CacheConfig(cacheNames = "oauth2-server-config")
+public class SimpleOAuth2ServerConfigService extends EnableCacheGenericEntityService<OAuth2ServerConfigEntity, String>
         implements OAuth2ServerConfigService, OAuth2ServerConfigRepository {
     @Autowired
     private OAuth2ServerConfigDao oAuth2ServerConfigDao;
@@ -48,6 +52,7 @@ public class SimpleOAuth2ServerConfigService extends GenericEntityService<OAuth2
     }
 
     @Override
+    @Cacheable(key = "'id:'+#pk")
     public OAuth2ServerConfig findById(String id) {
         OAuth2ServerConfigEntity entity = selectByPk(id);
         if (null == entity) {

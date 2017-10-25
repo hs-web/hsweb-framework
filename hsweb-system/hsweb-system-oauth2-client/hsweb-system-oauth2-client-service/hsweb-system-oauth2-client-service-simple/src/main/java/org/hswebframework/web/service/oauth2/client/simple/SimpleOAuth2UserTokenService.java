@@ -82,6 +82,8 @@ public class SimpleOAuth2UserTokenService extends GenericEntityService<OAuth2Use
             AccessTokenInfo info = entityFactory.newInstance(AccessTokenInfo.class, entity);
             info.setExpiresIn(entity.getExpiresIn());
             info.setAccessToken(entity.getAccessToken());
+            info.setCreateTime(entity.getCreateTime());
+            info.setUpdateTime(entity.getUpdateTime());
             info.setRefreshToken(entity.getRefreshToken());
             return info;
         };
