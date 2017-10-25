@@ -23,8 +23,6 @@ import org.hswebframework.web.authorization.oauth2.server.TokenRequest;
 import java.util.Set;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public interface ImplicitRequest extends TokenRequest {

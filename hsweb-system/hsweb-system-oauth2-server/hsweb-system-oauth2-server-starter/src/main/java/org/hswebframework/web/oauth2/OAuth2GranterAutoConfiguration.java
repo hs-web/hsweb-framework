@@ -31,6 +31,8 @@ import org.hswebframework.web.authorization.oauth2.server.support.implicit.Impli
 import org.hswebframework.web.authorization.oauth2.server.support.password.DefaultPasswordGranter;
 import org.hswebframework.web.authorization.oauth2.server.support.password.PasswordGranter;
 import org.hswebframework.web.authorization.oauth2.server.support.password.PasswordService;
+import org.hswebframework.web.authorization.oauth2.server.support.refresh.DefaultRefreshTokenGranter;
+import org.hswebframework.web.authorization.oauth2.server.support.refresh.RefreshTokenGranter;
 import org.hswebframework.web.authorization.oauth2.server.token.AccessTokenService;
 import org.hswebframework.web.commons.entity.factory.EntityFactory;
 import org.hswebframework.web.dao.oauth2.AuthorizationCodeDao;
@@ -42,14 +44,13 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 @Configuration
@@ -136,6 +137,12 @@ public class OAuth2GranterAutoConfiguration {
             return setProperty(new DefaultImplicitGranter());
         }
 
+        @Bean
+        @ConditionalOnMissingBean(RefreshTokenGranter.class)
+        @ConfigurationProperties(prefix = "hsweb.oauth2.server")
+        public RefreshTokenGranter refreshTokenGranter() {
+            return setProperty(new DefaultRefreshTokenGranter());
+        }
     }
 
     @Bean
@@ -157,6 +164,9 @@ public class OAuth2GranterAutoConfiguration {
             }
             if (bean instanceof ImplicitGranter) {
                 addImplicitSupport(((ImplicitGranter) bean));
+            }
+            if (bean instanceof RefreshTokenGranter) {
+                addRefreshTokenSupport(((RefreshTokenGranter) bean));
             }
             return bean;
         }

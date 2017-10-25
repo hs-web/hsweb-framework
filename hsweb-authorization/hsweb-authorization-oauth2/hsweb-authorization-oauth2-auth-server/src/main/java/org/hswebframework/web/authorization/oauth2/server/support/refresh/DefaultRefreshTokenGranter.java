@@ -34,8 +34,6 @@ import java.util.Set;
 import static org.hswebframework.web.oauth2.core.ErrorType.*;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public class DefaultRefreshTokenGranter extends AbstractAuthorizationService implements RefreshTokenGranter {

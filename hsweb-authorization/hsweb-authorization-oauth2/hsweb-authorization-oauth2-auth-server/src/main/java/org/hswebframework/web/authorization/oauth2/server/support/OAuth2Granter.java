@@ -22,8 +22,6 @@ import org.hswebframework.web.authorization.oauth2.server.TokenRequest;
 import org.hswebframework.web.authorization.oauth2.server.OAuth2AccessToken;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public interface OAuth2Granter {
