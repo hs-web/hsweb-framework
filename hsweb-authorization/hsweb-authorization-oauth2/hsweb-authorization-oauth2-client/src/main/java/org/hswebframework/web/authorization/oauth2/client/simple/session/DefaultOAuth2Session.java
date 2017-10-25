@@ -44,7 +44,7 @@ public class DefaultOAuth2Session implements OAuth2Session {
 
     protected AccessTokenInfo accessTokenInfo;
 
-    protected String scope;
+    protected String scope = "";
 
     private Consumer<AccessTokenInfo> onTokenChange;
 
