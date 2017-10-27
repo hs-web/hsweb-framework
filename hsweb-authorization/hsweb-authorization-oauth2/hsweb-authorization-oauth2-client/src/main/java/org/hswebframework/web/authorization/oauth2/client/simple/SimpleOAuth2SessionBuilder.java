@@ -68,9 +68,11 @@ public class SimpleOAuth2SessionBuilder implements OAuth2SessionBuilder {
 
 
     protected AccessTokenInfo getClientCredentialsToken() {
-        List<AccessTokenInfo> list = oAuth2UserTokenRepository
-                .findByServerIdAndGrantType(serverConfig.getId(), GrantType.client_credentials);
-        return list.isEmpty() ? null : list.get(0);
+        return oAuth2UserTokenRepository
+                .findByServerIdAndGrantType(serverConfig.getId(), GrantType.client_credentials)
+                .stream()
+                .findAny()
+                .orElse(null);
     }
 
     protected Consumer<AccessTokenInfo> createOnTokenChanged(Supplier<AccessTokenInfo> tokenGetter, String grantType) {
@@ -107,17 +109,19 @@ public class SimpleOAuth2SessionBuilder implements OAuth2SessionBuilder {
     }
 
 
+    Supplier<AccessTokenInfo> tokenGetter = () -> {
+        readWriteLock.readLock().lock();
+        try {
+            return getClientCredentialsToken();
+        } finally {
+            readWriteLock.readLock().unlock();
+        }
+    };
+
     @Override
     public OAuth2Session byClientCredentials() {
         DefaultOAuth2Session session;
-        Supplier<AccessTokenInfo> tokenGetter = () -> {
-            readWriteLock.readLock().lock();
-            try {
-                return getClientCredentialsToken();
-            } finally {
-                readWriteLock.readLock().unlock();
-            }
-        };
+
         AccessTokenInfo info = tokenGetter.get();
         if (null != info) {
             session = new CachedOAuth2Session(info);

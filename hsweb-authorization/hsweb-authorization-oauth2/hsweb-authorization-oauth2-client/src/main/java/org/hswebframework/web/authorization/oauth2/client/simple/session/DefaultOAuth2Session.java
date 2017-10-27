@@ -113,6 +113,9 @@ public class DefaultOAuth2Session implements OAuth2Session {
         if (accessTokenInfo == null) {
             authorize();
         }
+        if(accessTokenInfo.isExpire()){
+            refreshToken();
+        }
         OAuth2Request request = createRequest(getRealUrl(uriOrUrl));
         request.onTokenExpired(retry -> {
             refreshToken(); //刷新token

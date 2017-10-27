@@ -29,6 +29,8 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import java.util.List;
@@ -107,6 +109,7 @@ public class SimpleOAuth2UserTokenService extends GenericEntityService<OAuth2Use
             },
             evict = @CacheEvict(cacheNames = "oauth2-user-token-list", allEntries = true)
     )
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public AccessTokenInfo update(String id, AccessTokenInfo tokenInfo) {
         OAuth2UserTokenEntity entity = entityTokenInfoMapping().apply(tokenInfo);
         entity.setUpdateTime(System.currentTimeMillis());
@@ -121,6 +124,7 @@ public class SimpleOAuth2UserTokenService extends GenericEntityService<OAuth2Use
             },
             evict = @CacheEvict(cacheNames = "oauth2-user-token-list", allEntries = true)
     )
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public AccessTokenInfo insert(AccessTokenInfo tokenInfo) {
         if (tokenInfo.getId() == null) {
             tokenInfo.setId(getIDGenerator().generate());
