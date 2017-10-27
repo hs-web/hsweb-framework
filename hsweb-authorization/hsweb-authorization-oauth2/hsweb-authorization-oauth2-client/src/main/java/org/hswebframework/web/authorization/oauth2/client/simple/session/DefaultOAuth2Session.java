@@ -23,6 +23,7 @@ import org.hswebframework.web.authorization.oauth2.client.*;
 import org.hswebframework.web.authorization.oauth2.client.request.OAuth2Request;
 import org.hswebframework.web.authorization.oauth2.client.request.OAuth2Session;
 import org.hswebframework.web.authorization.oauth2.client.response.OAuth2Response;
+import org.hswebframework.web.oauth2.core.ErrorType;
 import org.springframework.util.Assert;
 
 import java.util.concurrent.locks.ReadWriteLock;
@@ -122,6 +123,12 @@ public class DefaultOAuth2Session implements OAuth2Session {
             applyTokenParam(request); //重设请求参数
             retry.doReTry(); //执行重试
         });
+        request.onRefreshTokenExpired(reTry -> {
+            //重新请求token
+           setAccessTokenInfo(requestAccessToken());
+           applyTokenParam(request);
+           reTry.doReTry();
+        });
         applyTokenParam(request);
         return request;
     }
@@ -139,6 +146,7 @@ public class DefaultOAuth2Session implements OAuth2Session {
                 .post().onError(OAuth2Response.throwOnError)
                 .as(AccessTokenInfo.class);
         accessTokenInfo.setCreateTime(System.currentTimeMillis());
+        accessTokenInfo.setUpdateTime(System.currentTimeMillis());
         return accessTokenInfo;
     }
 
@@ -147,13 +155,31 @@ public class DefaultOAuth2Session implements OAuth2Session {
             return;
         }
         OAuth2Request request = createRequest(getRealUrl(serverConfig.getAccessTokenUrl()));
+        request.onRefreshTokenExpired(reTry -> {
+            //重新请求token
+            setAccessTokenInfo(requestAccessToken());
+            applyTokenParam(request);
+            reTry.doReTry();
+        });
         applyBasicAuthParam(request);
+        boolean[] skip = new boolean[1];
         AccessTokenInfo tokenInfo = request
                 .param(OAuth2Constants.scope, scope)
                 .param(OAuth2Constants.grant_type, GrantType.refresh_token)
                 .param(GrantType.refresh_token, accessTokenInfo.getRefreshToken())
-                .post().onError(OAuth2Response.throwOnError)
+                .post().onError((oAuth2Response, type) -> {
+                    if(type== ErrorType.EXPIRED_REFRESH_TOKEN){
+                        setAccessTokenInfo(requestAccessToken());
+                        skip[0]=true;
+                        return;
+                    }
+                    OAuth2Response.throwOnError.accept(oAuth2Response,type);
+                })
                 .as(AccessTokenInfo.class);
+
+        if(skip[0]){
+            return;
+        }
         tokenInfo.setCreateTime(accessTokenInfo.getCreateTime());
         tokenInfo.setUpdateTime(System.currentTimeMillis());
         setAccessTokenInfo(tokenInfo);

@@ -37,6 +37,9 @@ public class HswebResponseJudgeSupport implements ResponseJudgeForProviderDefini
 
     @Override
     public ErrorType judge(OAuth2Response response) {
+        if(response.status()!=500){
+            return null;
+        }
         String result = response.asString();
         if (result == null) {
             return ErrorType.OTHER;

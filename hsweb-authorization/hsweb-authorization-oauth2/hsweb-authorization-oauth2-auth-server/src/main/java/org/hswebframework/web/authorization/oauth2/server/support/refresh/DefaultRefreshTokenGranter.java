@@ -59,7 +59,7 @@ public class DefaultRefreshTokenGranter extends AbstractAuthorizationService imp
 
         OAuth2AccessToken accessToken = accessTokenService.getTokenByRefreshToken(refreshToken);
         if (accessToken == null) {
-            throw new GrantTokenException(ILLEGAL_REFRESH_TOKEN);
+            throw new GrantTokenException(EXPIRED_REFRESH_TOKEN);
         }
         if (System.currentTimeMillis() - accessToken.getCreateTime() > refreshTokenTimeOut) {
             throw new GrantTokenException(EXPIRED_REFRESH_TOKEN);

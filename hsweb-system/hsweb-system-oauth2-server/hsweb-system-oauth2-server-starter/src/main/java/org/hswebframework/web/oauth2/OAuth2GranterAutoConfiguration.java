@@ -64,11 +64,6 @@ public class OAuth2GranterAutoConfiguration {
     @Autowired(required = false)
     private TokenGenerator tokenGenerator;
 
-    @Bean
-    public OAuth2ServerErrorControllerAdvice oAuth2ServerErrorControllerAdvice() {
-        return new OAuth2ServerErrorControllerAdvice();
-    }
-
     @ConditionalOnMissingBean(AuthorizationCodeService.class)
     @Bean
     public SimpleAuthorizationCodeService simpleAuthorizationCodeService(AuthorizationCodeDao authorizationCodeDao,

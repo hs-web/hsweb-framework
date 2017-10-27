@@ -60,5 +60,10 @@
             <artifactId>hsweb-expands-request</artifactId>
             <version>${hsweb.expands.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.hswebframework.web</groupId>
+            <artifactId>hsweb-commons-controller</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 </project>

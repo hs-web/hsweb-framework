@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
+import static org.hswebframework.web.oauth2.core.ErrorType.ILLEGAL_REFRESH_TOKEN;
+
 /**
  * @author zhouhao
  */
@@ -48,8 +50,10 @@ public class SimpleOAuth2Response implements OAuth2Response {
 
     private OAuth2Response proxy = this;
 
-    public void judgeExpired(Supplier<OAuth2Response> expiredCallBack) {
-        if (errorType == ErrorType.EXPIRED_TOKEN) {
+
+    public void judgeError(ErrorType ifError,Supplier<OAuth2Response> expiredCallBack) {
+
+        if (errorType == ifError) {
             //尝试执行认证过时回调进行重试,并返回重试的结果
             OAuth2Response retryRes = expiredCallBack.get();
             if (retryRes == null) {
@@ -57,9 +61,10 @@ public class SimpleOAuth2Response implements OAuth2Response {
             }
             proxy = retryRes;
             proxy.onError((retryResponse, type) -> {
-                if (type == ErrorType.EXPIRED_TOKEN) {
-                    //重试后依然是认证过时,可能是错误类型判断错误或者服务端的问题?
-                    logger.warn("still error [expired_token], maybe judge error or auth server error！ ");
+
+                if (type == ifError) {
+                    //重试后依然是相同的错误,可能是错误类型判断错误或者服务端的问题?
+                    logger.warn("still error [{}], maybe judge error or auth server error！ ",ifError);
                 } else {
                     errorType = type;
                 }
@@ -119,4 +124,7 @@ public class SimpleOAuth2Response implements OAuth2Response {
         return proxy;
     }
 
+    public ErrorType getErrorType() {
+        return errorType;
+    }
 }

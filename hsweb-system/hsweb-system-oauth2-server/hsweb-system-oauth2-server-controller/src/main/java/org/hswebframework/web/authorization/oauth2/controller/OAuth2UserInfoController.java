@@ -24,14 +24,15 @@ import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.AuthenticationHolder;
 import org.hswebframework.web.authorization.exception.UnAuthorizedException;
 import org.hswebframework.web.authorization.oauth2.server.OAuth2AccessToken;
+import org.hswebframework.web.authorization.oauth2.server.exception.GrantTokenException;
 import org.hswebframework.web.authorization.oauth2.server.token.AccessTokenService;
+import org.hswebframework.web.controller.message.ResponseMessage;
+import org.hswebframework.web.oauth2.core.ErrorType;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 @RestController
@@ -45,24 +46,24 @@ public class OAuth2UserInfoController {
 
     @GetMapping
     @ApiOperation("根据accessToken获取用户信息")
-    public Authentication getLoginUser(@RequestParam("access_token") String access_token) {
+    public ResponseMessage<Authentication> getLoginUser(@RequestParam("access_token") String access_token) {
         OAuth2AccessToken auth2AccessEntity = accessTokenService.getTokenByAccessToken(access_token);
         if (null == auth2AccessEntity) {
-            throw new UnAuthorizedException();
+            throw new GrantTokenException(ErrorType.EXPIRED_TOKEN);
         }
-        return AuthenticationHolder.get(auth2AccessEntity.getOwnerId());
+        return ResponseMessage.ok(AuthenticationHolder.get(auth2AccessEntity.getOwnerId()));
     }
 
     @GetMapping("/{userId}")
     @ApiOperation("根据accessToken获取用户信息")
-    public Authentication getUserById(
+    public ResponseMessage<Authentication> getUserById(
             @PathVariable("userId") String userId,
             @RequestParam("access_token") String access_token) {
         OAuth2AccessToken auth2AccessEntity = accessTokenService.getTokenByAccessToken(access_token);
         if (null == auth2AccessEntity) {
-            throw new UnAuthorizedException();
+            throw new GrantTokenException(ErrorType.EXPIRED_TOKEN);
         }
-        return AuthenticationHolder.get(userId);
+        return ResponseMessage.ok(AuthenticationHolder.get(userId));
     }
 
 }

@@ -29,6 +29,8 @@ import java.util.function.Consumer;
  */
 public interface OAuth2Request {
 
+    OAuth2Request onRefreshTokenExpired(TokenExpiredCallBack refreshTokenExpiredCallBack);
+
     OAuth2Request onTokenExpired(TokenExpiredCallBack callback);
 
     /**

@@ -25,6 +25,7 @@ import org.hswebframework.web.authorization.oauth2.client.request.ResponseConver
 import org.hswebframework.web.authorization.oauth2.client.request.ResponseJudge;
 import org.hswebframework.web.authorization.oauth2.client.request.TokenExpiredCallBack;
 import org.hswebframework.web.authorization.oauth2.client.response.OAuth2Response;
+import org.hswebframework.web.oauth2.core.ErrorType;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -42,6 +43,8 @@ public class SimpleOAuth2Request implements OAuth2Request {
 
     private TokenExpiredCallBack expiredCallBack;
 
+    private TokenExpiredCallBack refreshTokenExpiredCallBack;
+
     public SimpleOAuth2Request(HttpRequest request) {
         this.request = request;
     }
@@ -52,6 +55,12 @@ public class SimpleOAuth2Request implements OAuth2Request {
 
     public void setResponseJudge(ResponseJudge responseJudge) {
         this.responseJudge = responseJudge;
+    }
+
+    @Override
+    public OAuth2Request onRefreshTokenExpired(TokenExpiredCallBack refreshTokenExpiredCallBack){
+        this.refreshTokenExpiredCallBack=refreshTokenExpiredCallBack;
+        return this;
     }
 
     @Override
@@ -104,16 +113,29 @@ public class SimpleOAuth2Request implements OAuth2Request {
     private volatile SimpleOAuth2Response auth2Response;
 
     protected SimpleOAuth2Response createNativeResponse(Supplier<Response> responseSupplier) {
-        return auth2Response = new SimpleOAuth2Response(responseSupplier.get(), convertHandler, responseJudge);
+        SimpleOAuth2Response response=  new SimpleOAuth2Response(responseSupplier.get(), convertHandler, responseJudge);
+
+
+        return auth2Response =response;
     }
 
     protected OAuth2Response createResponse(Supplier<Response> responseSupplier) {
         createNativeResponse(responseSupplier);
         if (null != expiredCallBack) {
             //判定token是否过期,过期后先执行回调进行操作如更新token,并尝试重新请求
-            auth2Response.judgeExpired(() -> {
+            auth2Response.judgeError(ErrorType.EXPIRED_TOKEN,() -> {
                 //调用回调,并指定重试的操作(重新请求)
                 expiredCallBack.call(() -> createNativeResponse(responseSupplier));
+
+                //返回重试后的response
+                return auth2Response;
+            });
+        }
+        if (null != refreshTokenExpiredCallBack) {
+            //判定refresh_token是否过期,过期后先执行回调进行操作如更新token,并尝试重新请求
+            auth2Response.judgeError(ErrorType.EXPIRED_REFRESH_TOKEN,() -> {
+                //调用回调,并指定重试的操作(重新请求)
+                refreshTokenExpiredCallBack.call(() -> createNativeResponse(responseSupplier));
                 //返回重试后的response
                 return auth2Response;
             });

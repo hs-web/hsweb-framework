@@ -21,6 +21,8 @@ package org.hswebframework.web.authorization.oauth2.client.exception;
 import org.hswebframework.web.authorization.oauth2.client.response.OAuth2Response;
 import org.hswebframework.web.oauth2.core.ErrorType;
 
+import java.io.PrintStream;
+
 /**
  * @author zhouhao
  */
@@ -35,6 +37,12 @@ public class OAuth2RequestException extends RuntimeException {
         this.response = response;
     }
 
+    public OAuth2RequestException(String message,ErrorType errorType, OAuth2Response response) {
+        super(message);
+        this.errorType = errorType;
+        this.response = response;
+    }
+
     public ErrorType getErrorType() {
         return errorType;
     }
@@ -42,4 +50,5 @@ public class OAuth2RequestException extends RuntimeException {
     public OAuth2Response getResponse() {
         return response;
     }
+
 }

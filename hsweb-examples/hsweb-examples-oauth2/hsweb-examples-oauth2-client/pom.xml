@@ -105,5 +105,10 @@
             <version>${project.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.hswebframework.web</groupId>
+            <artifactId>hsweb-concurrent-cache</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 </project>
