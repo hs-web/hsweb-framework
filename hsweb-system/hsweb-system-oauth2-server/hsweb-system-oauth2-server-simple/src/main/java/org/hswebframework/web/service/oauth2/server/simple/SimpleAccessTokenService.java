@@ -27,11 +27,11 @@ import org.hswebframework.web.dao.oauth2.OAuth2AccessDao;
 import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.service.DefaultDSLQueryService;
 import org.hswebframework.web.service.DefaultDSLUpdateService;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public class SimpleAccessTokenService implements AccessTokenService {
@@ -64,6 +64,7 @@ public class SimpleAccessTokenService implements AccessTokenService {
     }
 
     @Override
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public OAuth2AccessToken getTokenByRefreshToken(String refreshToken) {
         Assert.notNull(refreshToken, "refreshToken can not be null!");
         return DefaultDSLQueryService.createQuery(oAuth2AccessDao)
@@ -71,6 +72,7 @@ public class SimpleAccessTokenService implements AccessTokenService {
     }
 
     @Override
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public OAuth2AccessToken getTokenByAccessToken(String accessToken) {
         Assert.notNull(accessToken, "accessToken can not be null!");
         return DefaultDSLQueryService.createQuery(oAuth2AccessDao)
@@ -78,6 +80,7 @@ public class SimpleAccessTokenService implements AccessTokenService {
     }
 
     @Override
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public OAuth2AccessToken saveOrUpdateToken(OAuth2AccessToken token) {
         Assert.notNull(token, "token can not be null!");
         int total = DefaultDSLQueryService

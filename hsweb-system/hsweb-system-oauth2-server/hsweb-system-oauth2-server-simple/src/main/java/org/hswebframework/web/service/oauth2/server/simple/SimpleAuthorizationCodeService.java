@@ -27,6 +27,8 @@ import org.hswebframework.web.dao.oauth2.AuthorizationCodeDao;
 import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.service.DefaultDSLDeleteService;
 import org.hswebframework.web.service.DefaultDSLQueryService;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 
 /**
@@ -65,6 +67,7 @@ public class SimpleAuthorizationCodeService implements AuthorizationCodeService 
     }
 
     @Override
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public AuthorizationCode consumeAuthorizationCode(String code) {
         AuthorizationCodeEntity codeEntity = DefaultDSLQueryService
                 .createQuery(authorizationCodeDao)
