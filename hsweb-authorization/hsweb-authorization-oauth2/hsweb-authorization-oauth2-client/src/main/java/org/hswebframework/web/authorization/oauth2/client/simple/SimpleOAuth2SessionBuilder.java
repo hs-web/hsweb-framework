@@ -87,6 +87,7 @@ public class SimpleOAuth2SessionBuilder implements OAuth2SessionBuilder {
                 } else {
                     token.setGrantType(grantType);
                     token.setCreateTime(System.currentTimeMillis());
+                    token.setUpdateTime(System.currentTimeMillis());
                     token.setServerId(serverConfig.getId());
                     oAuth2UserTokenRepository.insert(token);
                 }
@@ -123,8 +124,10 @@ public class SimpleOAuth2SessionBuilder implements OAuth2SessionBuilder {
         DefaultOAuth2Session session;
 
         AccessTokenInfo info = tokenGetter.get();
+
         if (null != info) {
             session = new CachedOAuth2Session(info);
+
         } else {
             readWriteLock.writeLock().lock();
             try {

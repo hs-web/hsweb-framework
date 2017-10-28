@@ -26,8 +26,6 @@ import org.hswebframework.web.oauth2.core.GrantType;
 import static org.hswebframework.web.oauth2.core.ErrorType.*;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public class DefaultClientCredentialGranter extends AbstractAuthorizationService implements ClientCredentialGranter {
@@ -50,6 +48,14 @@ public class DefaultClientCredentialGranter extends AbstractAuthorizationService
         accessToken.setScope(client.getDefaultGrantScope());
         accessToken.setClientId(client.getId());
         accessToken.setGrantType(GrantType.client_credentials);
+
+        OAuth2AccessToken old = accessTokenService.tryGetOldToken(accessToken);
+        //如果已存在token并且距离上次更新时间小于10秒
+        if(old!=null&&System.currentTimeMillis()-old.getUpdateTime()<10000){
+
+            return old;
+        }
+
 
         //保存token
         return accessTokenService.saveOrUpdateToken(accessToken);

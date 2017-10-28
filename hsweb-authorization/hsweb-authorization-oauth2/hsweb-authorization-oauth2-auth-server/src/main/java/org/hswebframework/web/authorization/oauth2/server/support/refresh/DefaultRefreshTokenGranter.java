@@ -64,6 +64,10 @@ public class DefaultRefreshTokenGranter extends AbstractAuthorizationService imp
         if (System.currentTimeMillis() - accessToken.getCreateTime() > refreshTokenTimeOut) {
             throw new GrantTokenException(EXPIRED_REFRESH_TOKEN);
         }
+        //更新间隔小于10秒 返回原始token
+        if(System.currentTimeMillis()-accessToken.getUpdateTime()<10000){
+            return accessToken;
+        }
         Set<String> newRange = request.getScope() != null ? request.getScope() : accessToken.getScope();
         if (!accessToken.getScope().containsAll(newRange)) {
             throw new GrantTokenException(ErrorType.SCOPE_OUT_OF_RANGE);

@@ -124,6 +124,7 @@ public class SimpleOAuth2Request implements OAuth2Request {
         if (null != expiredCallBack) {
             //判定token是否过期,过期后先执行回调进行操作如更新token,并尝试重新请求
             auth2Response.judgeError(ErrorType.EXPIRED_TOKEN,() -> {
+
                 //调用回调,并指定重试的操作(重新请求)
                 expiredCallBack.call(() -> createNativeResponse(responseSupplier));
 

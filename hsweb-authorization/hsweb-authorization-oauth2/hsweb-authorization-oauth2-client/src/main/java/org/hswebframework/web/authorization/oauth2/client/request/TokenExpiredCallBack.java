@@ -19,8 +19,6 @@
 package org.hswebframework.web.authorization.oauth2.client.request;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public interface TokenExpiredCallBack {

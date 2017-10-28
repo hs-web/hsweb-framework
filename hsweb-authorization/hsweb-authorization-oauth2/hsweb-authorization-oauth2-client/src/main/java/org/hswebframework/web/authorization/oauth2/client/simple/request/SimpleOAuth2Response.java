@@ -64,7 +64,7 @@ public class SimpleOAuth2Response implements OAuth2Response {
 
                 if (type == ifError) {
                     //重试后依然是相同的错误,可能是错误类型判断错误或者服务端的问题?
-                    logger.warn("still error [{}], maybe judge error or auth server error！ ",ifError);
+                    logger.error("still error [{}], maybe judge error or auth server error！ ",ifError);
                 } else {
                     errorType = type;
                 }

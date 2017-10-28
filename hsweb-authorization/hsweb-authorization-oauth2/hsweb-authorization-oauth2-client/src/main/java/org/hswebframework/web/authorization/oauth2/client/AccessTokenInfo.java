@@ -25,18 +25,18 @@ import com.alibaba.fastjson.annotation.JSONField;
  * @author zhouhao
  */
 public class AccessTokenInfo {
-    private String  id;
+    private String id;
     //授权码
     @JSONField(name = "access_token")
-    private String  accessToken;
+    private String accessToken;
     //更新码
     @JSONField(name = "refresh_token")
-    private String  refreshToken;
+    private String refreshToken;
     //有效期
     @JSONField(name = "expires_in")
     private Integer expiresIn;
     //授权范围
-    private String  scope;
+    private String scope;
 
     private Long createTime;
 
@@ -50,7 +50,12 @@ public class AccessTokenInfo {
     private String serverId;
 
     public boolean isExpire() {
-        return updateTime != null && System.currentTimeMillis() - updateTime > expiresIn * 1000;
+        if (expiresIn == null) {
+            return true;
+        }
+        long time = updateTime==null?createTime:updateTime;
+
+        return System.currentTimeMillis() - time > expiresIn * 1000;
     }
 
     public String getTokenType() {

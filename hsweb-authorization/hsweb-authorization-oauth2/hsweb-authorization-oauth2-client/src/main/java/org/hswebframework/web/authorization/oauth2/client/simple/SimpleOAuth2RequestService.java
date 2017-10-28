@@ -45,7 +45,6 @@ public class SimpleOAuth2RequestService implements OAuth2RequestService {
 
     private LockManager lockManager;
 
-
     public SimpleOAuth2RequestService(
             OAuth2ServerConfigRepository oAuth2ServerConfigService
             , OAuth2UserTokenRepository oAuth2UserTokenService

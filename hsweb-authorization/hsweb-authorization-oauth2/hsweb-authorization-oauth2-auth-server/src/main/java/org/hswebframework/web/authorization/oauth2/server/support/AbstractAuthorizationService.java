@@ -28,8 +28,6 @@ import org.hswebframework.web.oauth2.core.ErrorType;
 import static org.hswebframework.web.oauth2.core.ErrorType.*;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public abstract class AbstractAuthorizationService {

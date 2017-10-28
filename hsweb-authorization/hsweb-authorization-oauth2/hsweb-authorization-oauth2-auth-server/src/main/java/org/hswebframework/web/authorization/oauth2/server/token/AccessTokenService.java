@@ -21,12 +21,12 @@ package org.hswebframework.web.authorization.oauth2.server.token;
 import org.hswebframework.web.authorization.oauth2.server.OAuth2AccessToken;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public interface AccessTokenService {
     OAuth2AccessToken createToken();
+
+    OAuth2AccessToken tryGetOldToken(OAuth2AccessToken token);
 
     OAuth2AccessToken getTokenByRefreshToken(String refreshToken);
 
