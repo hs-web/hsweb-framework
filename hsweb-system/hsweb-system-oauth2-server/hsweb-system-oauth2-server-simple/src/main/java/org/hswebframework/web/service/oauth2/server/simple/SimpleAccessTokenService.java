@@ -88,6 +88,7 @@ public class SimpleAccessTokenService implements AccessTokenService {
                 .where("clientId", token.getClientId())
                 .and("grantType", token.getGrantType())
                 .and("ownerId", token.getOwnerId()).total();
+        token.setUpdateTime(System.currentTimeMillis());
         if (total > 0) {
             DefaultDSLUpdateService
                     .createUpdate(oAuth2AccessDao, token)
@@ -96,6 +97,7 @@ public class SimpleAccessTokenService implements AccessTokenService {
                     .and("ownerId", token.getOwnerId())
                     .exec();
         } else {
+            token.setCreateTime(System.currentTimeMillis());
             oAuth2AccessDao.insert(((OAuth2AccessEntity) token));
         }
 
