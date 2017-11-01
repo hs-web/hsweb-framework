@@ -7,8 +7,13 @@ import org.hswebframework.web.boost.aop.context.MethodInterceptorHolder;
 import org.hswebframework.web.logging.AccessLogger;
 import org.hswebframework.web.logging.AccessLoggerInfo;
 import org.hswebframework.web.logging.AccessLoggerListener;
+import org.hswebframework.web.logging.LoggerDefine;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
 import org.springframework.core.Ordered;
+import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.stereotype.Controller;
+import org.springframework.util.ClassUtils;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
@@ -27,8 +32,15 @@ public class AopAccessLoggerSupport extends StaticMethodMatcherPointcutAdvisor {
 
     private final List<AccessLoggerListener> listeners = new ArrayList<>();
 
+    private final List<AccessLoggerParser> loggerParsers=new ArrayList<>();
+
     public AopAccessLoggerSupport addListener(AccessLoggerListener loggerListener) {
         listeners.add(loggerListener);
+        return this;
+    }
+
+    public AopAccessLoggerSupport addParser(AccessLoggerParser parser) {
+        loggerParsers.add(parser);
         return this;
     }
 
@@ -56,23 +68,17 @@ public class AopAccessLoggerSupport extends StaticMethodMatcherPointcutAdvisor {
         AccessLoggerInfo info = new AccessLoggerInfo();
         info.setRequestTime(System.currentTimeMillis());
 
-        AccessLogger methodAnn = holder.findMethodAnnotation(AccessLogger.class);
-        AccessLogger classAnn = holder.findClassAnnotation(AccessLogger.class);
 
-        String action = Stream.of(classAnn, methodAnn)
-                .filter(Objects::nonNull)
-                .map(AccessLogger::value)
-                .reduce((c, m) -> c.concat("-").concat(m))
-                .orElse("");
-        String describe = Stream.of(classAnn, methodAnn)
-                .filter(Objects::nonNull)
-                .map(AccessLogger::describe)
-                .flatMap(Stream::of)
-                .reduce((c, s) -> c.concat("\n").concat(s))
-                .orElse("");
+        LoggerDefine define=loggerParsers.stream()
+                .filter(parser->parser.support(ClassUtils.getUserClass(holder.getTarget()),holder.getMethod()))
+                .findAny()
+                .map(parser->parser.parse(holder))
+                .orElse(null);
 
-        info.setAction(action);
-        info.setDescribe(describe);
+        if(define!=null) {
+            info.setAction(define.getAction());
+            info.setDescribe(define.getDescribe());
+        }
         info.setParameters(holder.getArgs());
         info.setTarget(holder.getTarget().getClass());
         info.setMethod(holder.getMethod());
@@ -95,8 +101,10 @@ public class AopAccessLoggerSupport extends StaticMethodMatcherPointcutAdvisor {
 
     @Override
     public boolean matches(Method method, Class<?> aClass) {
-        AccessLogger ann = AopUtils.findAnnotation(aClass, method, AccessLogger.class);
-        //注解了并且未取消
-        return null != ann && !ann.ignore();
+        RequestMapping mapping= AopUtils.findAnnotation(aClass,method, RequestMapping.class);
+        return mapping!=null;
+//        AccessLogger ann = AopUtils.findAnnotation(aClass, method, AccessLogger.class);
+//        //注解了并且未取消
+//        return null != ann && !ann.ignore();
     }
 }

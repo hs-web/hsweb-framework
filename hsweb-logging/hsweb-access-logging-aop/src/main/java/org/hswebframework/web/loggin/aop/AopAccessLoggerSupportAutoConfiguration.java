@@ -26,6 +26,16 @@ public class AopAccessLoggerSupportAutoConfiguration {
     }
 
     @Bean
+    public DefaultAccessLoggerParser defaultAccessLoggerParser(){
+        return new DefaultAccessLoggerParser();
+    }
+
+    @Bean
+    @ConditionalOnClass(name = "io.swagger.annotations.Api")
+    public SwaggerAccessLoggerParser swaggerAccessLoggerParser(){
+        return new SwaggerAccessLoggerParser();
+    }
+    @Bean
     public ListenerProcessor listenerProcessor() {
         return new ListenerProcessor();
     }
@@ -44,6 +54,8 @@ public class AopAccessLoggerSupportAutoConfiguration {
         public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
             if (bean instanceof AccessLoggerListener) {
                 aopAccessLoggerSupport.addListener(((AccessLoggerListener) bean));
+            }  if (bean instanceof AccessLoggerParser) {
+                aopAccessLoggerSupport.addParser(((AccessLoggerParser) bean));
             }
             return bean;
         }
