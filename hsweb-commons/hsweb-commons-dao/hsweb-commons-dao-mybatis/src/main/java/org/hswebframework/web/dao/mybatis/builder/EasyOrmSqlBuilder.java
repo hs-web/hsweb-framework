@@ -22,6 +22,7 @@ import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.beanutils.PropertyUtilsBean;
 import org.apache.ibatis.mapping.ResultMap;
 import org.apache.ibatis.mapping.ResultMapping;
+import org.hswebframework.ezorm.core.ValueConverter;
 import org.hswebframework.ezorm.core.param.InsertParam;
 import org.hswebframework.ezorm.core.param.QueryParam;
 import org.hswebframework.ezorm.core.param.Term;
@@ -145,7 +146,14 @@ public class EasyOrmSqlBuilder {
         resultMappings.addAll(resultMaps.getIdResultMappings());
         resultMappings.forEach(resultMapping -> {
             if (resultMapping.getNestedQueryId() == null) {
-                RDBColumnMetaData column = new RDBColumnMetaData();
+                RDBColumnMetaData column = new RDBColumnMetaData(){
+                    @Override
+                    public RDBColumnMetaData clone() {
+                        RDBColumnMetaData target = super.clone();
+                        target.setValueConverter(getValueConverter());
+                        return target;
+                    }
+                };
                 column.setJdbcType(JDBCType.valueOf(resultMapping.getJdbcType().name()));
                 column.setName(resultMapping.getColumn());
                 if (!StringUtils.isNullOrEmpty(resultMapping.getProperty())) {
@@ -153,10 +161,19 @@ public class EasyOrmSqlBuilder {
                 }
                 column.setJavaType(resultMapping.getJavaType());
                 column.setProperty("resultMapping", resultMapping);
+                ValueConverter dateConvert=new DateTimeConverter("yyyy-MM-dd HH:mm:ss", column.getJavaType()){
+                    @Override
+                    public Object getData(Object value) {
+                        if(value instanceof Number){
+                            return new Date(((Number) value).longValue());
+                        }
+                        return super.getData(value);
+                    }
+                };
                 if (column.getJdbcType() == JDBCType.DATE) {
-                    column.setValueConverter(new DateTimeConverter("yyyy-MM-dd", column.getJavaType()));
+                    column.setValueConverter(dateConvert);
                 } else if (column.getJdbcType() == JDBCType.TIMESTAMP) {
-                    column.setValueConverter(new DateTimeConverter("yyyy-MM-dd HH:mm:ss", column.getJavaType()));
+                    column.setValueConverter(dateConvert);
                 } else if (column.getJdbcType() == JDBCType.NUMERIC) {
                     column.setValueConverter(new NumberValueConverter(column.getJavaType()));
                 }
