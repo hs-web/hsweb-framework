@@ -19,6 +19,11 @@ import java.util.function.Function;
 public class AccessLoggerInfo {
 
     /**
+     * 日志id
+     */
+    private String id;
+
+    /**
      * 访问的操作
      *
      * @see AccessLogger#value()
@@ -229,6 +234,7 @@ public class AccessLoggerInfo {
         map.put("response", objectFilter.apply(response));
         map.put("requestTime", requestTime);
         map.put("responseTime", responseTime);
+        map.put("id",id);
         map.put("useTime", responseTime - requestTime);
         if (exception != null) {
             StringWriter writer = new StringWriter();
@@ -236,5 +242,13 @@ public class AccessLoggerInfo {
             map.put("exception", writer.toString());
         }
         return map;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }

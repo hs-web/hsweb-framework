@@ -14,4 +14,6 @@ public interface AccessLoggerListener {
      * @param loggerInfo 产生的日志信息
      */
     void onLogger(AccessLoggerInfo loggerInfo);
+
+    default void onLogBefore(AccessLoggerInfo loggerInfo){}
 }
