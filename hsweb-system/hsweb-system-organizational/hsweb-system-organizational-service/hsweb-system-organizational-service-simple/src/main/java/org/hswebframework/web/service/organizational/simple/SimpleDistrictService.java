@@ -79,12 +79,6 @@ public class SimpleDistrictService extends AbstractTreeSortService<DistrictEntit
     }
 
     @Override
-    @Cacheable(key = "'all'")
-    public List<DistrictEntity> select(Entity param) {
-        return createQuery().where().orderByAsc(DistrictEntity.sortIndex).listNoPaging();
-    }
-
-    @Override
     @CacheEvict(allEntries = true)
     public int updateBatch(Collection<DistrictEntity> data) {
         return super.updateBatch(data);
@@ -93,7 +87,7 @@ public class SimpleDistrictService extends AbstractTreeSortService<DistrictEntit
     @Override
     @Cacheable(key = "'all'")
     public List<DistrictEntity> select() {
-        return super.select();
+        return  createQuery().where().orderByAsc(DistrictEntity.sortIndex).listNoPaging();
     }
 
     @Override
