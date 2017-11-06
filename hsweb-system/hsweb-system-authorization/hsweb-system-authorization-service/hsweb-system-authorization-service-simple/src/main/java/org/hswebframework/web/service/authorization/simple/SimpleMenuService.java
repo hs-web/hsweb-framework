@@ -92,7 +92,7 @@ public class SimpleMenuService
     }
 
     @Override
-    @Cacheable(key = "'ids:'+#id==null?'0':#id.hashCode()")
+    @Cacheable(key = "'ids:'+(#id==null?'0':#id.hashCode())")
     public List<MenuEntity> selectByPk(List<String> id) {
         return super.selectByPk(id);
     }
@@ -109,7 +109,7 @@ public class SimpleMenuService
     }
 
     @Override
-    @Cacheable(key = "'permission-ids:'+#permissionId==null?'0':#permissionId.hashCode()")
+    @Cacheable(key = "'permission-ids:'+(#permissionId==null?'0':#permissionId.hashCode())")
     public List<MenuEntity> getByPermissionId(List<String> permissionId) {
         return createQuery().noPaging().where().in("permissionId", permissionId).list();
     }

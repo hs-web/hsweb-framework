@@ -70,7 +70,7 @@ public class SimpleMenuGroupService
     }
 
     @Override
-    @Cacheable(key = "'group-id-list:'+#groupId==null?0:#groupId.hashCode()")
+    @Cacheable(key = "'group-id-list:'+(#groupId==null?0:#groupId.hashCode())")
     public List<MenuEntity> getMenuByGroupId(List<String> groupId) {
         List<MenuGroupBindEntity> bindEntities = menuGroupBindService.selectByPk(groupId);
         if (bindEntities == null || bindEntities.isEmpty()) {
