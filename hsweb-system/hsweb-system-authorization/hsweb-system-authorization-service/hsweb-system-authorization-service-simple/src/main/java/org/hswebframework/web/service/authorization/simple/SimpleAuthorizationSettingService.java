@@ -209,6 +209,9 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
             return null;
         }
         List<AuthorizationSettingEntity> entities = getUserSetting(userId);
+        if(entities.isEmpty()){
+            return Collections.emptyList();
+        }
         //用户持有的权限设置id集合
         List<String> settingIdList = entities.stream()
                 .map(AuthorizationSettingEntity::getId)
