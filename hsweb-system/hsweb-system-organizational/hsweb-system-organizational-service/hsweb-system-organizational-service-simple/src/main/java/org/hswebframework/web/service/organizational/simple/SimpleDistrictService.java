@@ -1,6 +1,7 @@
 package org.hswebframework.web.service.organizational.simple;
 
 import org.hswebframework.web.commons.entity.DataStatus;
+import org.hswebframework.web.commons.entity.Entity;
 import org.hswebframework.web.dao.organizational.DistrictDao;
 import org.hswebframework.web.entity.organizational.DistrictEntity;
 import org.hswebframework.web.entity.organizational.OrganizationalEntity;
@@ -75,6 +76,12 @@ public class SimpleDistrictService extends AbstractTreeSortService<DistrictEntit
     @Cacheable(key = "'code:'+#code")
     public DistrictEntity selectByCode(String code) {
         return createQuery().where(DistrictEntity.code, code).single();
+    }
+
+    @Override
+    @Cacheable(key = "'all'")
+    public List<DistrictEntity> select(Entity param) {
+        return createQuery().where().orderByAsc(DistrictEntity.sortIndex).listNoPaging();
     }
 
     @Override
