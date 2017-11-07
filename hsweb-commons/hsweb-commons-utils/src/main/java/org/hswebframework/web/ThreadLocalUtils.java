@@ -41,6 +41,13 @@ public class ThreadLocalUtils {
     private static final ThreadLocal<Map<String, Object>> local = ThreadLocal.withInitial(HashMap::new);
 
     /**
+     * @return threadLocal中的全部值
+     */
+    public static Map<String, Object> getAll(){
+        return local.get();
+    }
+
+    /**
      * 设置一个值到ThreadLocal
      *
      * @param key   键
