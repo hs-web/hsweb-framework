@@ -73,9 +73,13 @@ public abstract class AbstractTreeSortService<E extends TreeSortSupportEntity<PK
 
         TreeSortSupportEntity<PK> parent = selectByPk(entity.getParentId());
         if (null == parent) {
+            if (entity.getSortIndex() == null)
+                entity.setSortIndex(0L);
             entity.setParentId(createParentIdOnExists());
             entity.setPath(RandomUtil.randomChar(4));
         } else {
+            if (entity.getSortIndex() == null&&parent.getSortIndex()!=null)
+                entity.setSortIndex(parent.getSortIndex() * 10);
             entity.setPath(parent.getPath() + "-" + RandomUtil.randomChar(4));
         }
     }
