@@ -54,10 +54,6 @@ public class HswebResponseConvertSupport implements ResponseConvertForProviderDe
         this.authenticationBuilderFactory = authenticationBuilderFactory;
     }
 
-    public static void main(String[] args) {
-        System.out.println(ResponseMessage.class.isAssignableFrom(new ResponseMessage().getClass()));
-    }
-
     public Object tryConvertToObject(String json, Class type) {
         if (json.startsWith("{")) {
             if(ResponseMessage.class.isAssignableFrom(type)){

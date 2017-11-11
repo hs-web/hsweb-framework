@@ -230,4 +230,20 @@ public class ResponseMessage<T> implements Serializable {
         return includes;
     }
 
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public void setResult(T result) {
+        this.result = result;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    public void setTimestamp(Long timestamp) {
+        this.timestamp = timestamp;
+    }
+
 }
