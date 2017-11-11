@@ -22,6 +22,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.parser.Feature;
+import org.hswebframework.web.BusinessException;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.builder.AuthenticationBuilderFactory;
 import org.hswebframework.web.authorization.oauth2.client.exception.OAuth2RequestException;
@@ -53,13 +54,24 @@ public class HswebResponseConvertSupport implements ResponseConvertForProviderDe
         this.authenticationBuilderFactory = authenticationBuilderFactory;
     }
 
+    public static void main(String[] args) {
+        System.out.println(ResponseMessage.class.isAssignableFrom(new ResponseMessage().getClass()));
+    }
+
     public Object tryConvertToObject(String json, Class type) {
         if (json.startsWith("{")) {
+            if(ResponseMessage.class.isAssignableFrom(type)){
+                return JSON.parseObject(json,type);
+            }
             JSONObject message = JSON.parseObject(json, Feature.DisableFieldSmartMatch);
             //判断是否响应的为ResponseMessage
             if(message.size()<=responseMessageFieldSize
                     &&message.get("status")!=null&&message.get("timestamp")!=null){
 
+                Integer status=message.getInteger("status");
+                if(status!=200){
+                    throw new BusinessException(message.getString("message"));
+                }
                 Object data = message.get("result");
                 if(data==null){
                     return null;
@@ -111,6 +123,7 @@ public class HswebResponseConvertSupport implements ResponseConvertForProviderDe
         }
 
         if (data instanceof ResponseMessage) {
+
             //maybe error
             throw new OAuth2RequestException(((ResponseMessage) data).getMessage(),ErrorType.SERVICE_ERROR, response);
         }
