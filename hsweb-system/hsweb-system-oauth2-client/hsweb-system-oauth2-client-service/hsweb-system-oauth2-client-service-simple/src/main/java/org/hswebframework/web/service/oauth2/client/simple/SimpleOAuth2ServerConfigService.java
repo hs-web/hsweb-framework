@@ -52,7 +52,7 @@ public class SimpleOAuth2ServerConfigService extends EnableCacheGenericEntitySer
     }
 
     @Override
-    @Cacheable(key = "'id:'+#pk")
+    @Cacheable(key = "'id:'+#id")
     public OAuth2ServerConfig findById(String id) {
         OAuth2ServerConfigEntity entity = selectByPk(id);
         if (null == entity) {
