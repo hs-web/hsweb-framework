@@ -203,25 +203,25 @@ public class SimplePersonService extends GenericEntityService<PersonEntity, Stri
             logger.warn("userService not ready!");
             return;
         }
-        //获取所有职位
-        Set<String> positionIds = bindEntity.getPositionIds();
-        Set<String> roleIds;
-
-        if (positionIds == null) {
-            roleIds = null;
-        } else if (positionIds.isEmpty()) {
-            roleIds = new HashSet<>();
-        } else {
-            //获取职位实体
-            List<PositionEntity> positionEntities = DefaultDSLQueryService.createQuery(positionDao)
-                    .where().in(PositionEntity.id, positionIds)
-                    .listNoPaging();
-            roleIds = positionEntities.stream()
-                    .map(PositionEntity::getRoles)
-                    .filter(Objects::nonNull)
-                    .flatMap(List::stream)
-                    .collect(Collectors.toSet());
-        }
+//        //获取所有职位
+//        Set<String> positionIds = bindEntity.getPositionIds();
+//        Set<String> roleIds;
+//
+//        if (positionIds == null) {
+//            roleIds = null;
+//        } else if (positionIds.isEmpty()) {
+//            roleIds = new HashSet<>();
+//        } else {
+//            //获取职位实体
+//            List<PositionEntity> positionEntities = DefaultDSLQueryService.createQuery(positionDao)
+//                    .where().in(PositionEntity.id, positionIds)
+//                    .listNoPaging();
+//            roleIds = positionEntities.stream()
+//                    .map(PositionEntity::getRoles)
+//                    .filter(Objects::nonNull)
+//                    .flatMap(List::stream)
+//                    .collect(Collectors.toSet());
+//        }
         //获取用户是否存在
         UserEntity oldUser = userService.selectByUsername(bindEntity.getPersonUser().getUsername());
         if (null != oldUser) {
@@ -239,15 +239,15 @@ public class SimplePersonService extends GenericEntityService<PersonEntity, Stri
                             userService.update(oldUser.getId(), user);
                             return oldUser.getId();
                         };
-        UserEntity userEntity;
-
-        if (roleIds != null) {
-            BindRoleUserEntity tmp = entityFactory.newInstance(BindRoleUserEntity.class);
-            tmp.setRoles(new ArrayList<>(roleIds));
-            userEntity = tmp;
-        } else {
-            userEntity = entityFactory.newInstance(UserEntity.class);
-        }
+        UserEntity userEntity=entityFactory.newInstance(UserEntity.class);
+//
+//        if (roleIds != null) {
+//            BindRoleUserEntity tmp = entityFactory.newInstance(BindRoleUserEntity.class);
+//            tmp.setRoles(new ArrayList<>(roleIds));
+//            userEntity = tmp;
+//        } else {
+//            userEntity = entityFactory.newInstance(UserEntity.class);
+//        }
 
         userEntity.setUsername(bindEntity.getPersonUser().getUsername());
         userEntity.setPassword(bindEntity.getPersonUser().getPassword());
