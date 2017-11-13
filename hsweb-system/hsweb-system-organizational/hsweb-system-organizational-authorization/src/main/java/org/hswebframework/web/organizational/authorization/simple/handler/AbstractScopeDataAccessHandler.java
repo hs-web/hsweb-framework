@@ -51,7 +51,7 @@ public abstract class AbstractScopeDataAccessHandler<E> implements DataAccessHan
     @Override
     public boolean handle(DataAccessConfig access, AuthorizingContext context) {
         ScopeDataAccessConfig accessConfig = ((ScopeDataAccessConfig) access);
-        if (PersonnelAuthorization.current().isPresent()) {
+        if (!PersonnelAuthorization.current().isPresent()) {
             return false;
         }
         switch (accessConfig.getAction()) {
