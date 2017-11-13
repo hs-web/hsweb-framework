@@ -21,8 +21,6 @@ package org.hswebframework.web.entity.organizational;
 import java.util.Set;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public interface PersonAuthBindEntity extends PersonEntity {

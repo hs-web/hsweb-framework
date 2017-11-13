@@ -77,6 +77,28 @@ public class PersonController implements SimpleGenericEntityController<PersonEnt
         return getDetail(authorization.getPersonnel().getId());
     }
 
+    @PutMapping("/me")
+    @AccessLogger("修改个人信息")
+    @Authorize(merge = false)
+    public ResponseMessage<String> updateMePersonInfo(@RequestBody PersonAuthBindEntity bindEntity) {
+        PersonnelAuthorization authorization = PersonnelAuthorization
+                .current()
+                .orElseThrow(NotFoundException::new);
+        PersonAuthBindEntity old = personService
+                .selectAuthBindByPk(authorization.getPersonnel().getId());
+
+        bindEntity.setUserId(old.getUserId());
+        bindEntity.setId(old.getId());
+        bindEntity.setPositionIds(null);
+
+        if (bindEntity.getPersonUser() != null) {
+            bindEntity.getPersonUser().setUsername(old.getPersonUser().getUsername());
+        }
+
+        personService.updateByPk(bindEntity);
+        return ResponseMessage.ok();
+    }
+
     @GetMapping("/me/authorization")
     @AccessLogger("查看当前登录用户的人员权限信息")
     @Authorize(merge = false)

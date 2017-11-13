@@ -65,7 +65,7 @@ import static org.springframework.util.StringUtils.isEmpty;
 public class SimplePersonService extends GenericEntityService<PersonEntity, String>
         implements PersonService, PersonnelAuthorizationManager, AuthorizationSettingTypeSupplier {
 
-    private static String SETTING_TYPE_PERSON   = "person";
+    private static String SETTING_TYPE_PERSON = "person";
     private static String SETTING_TYPE_POSITION = "position";
 
     @Autowired
@@ -197,22 +197,30 @@ public class SimplePersonService extends GenericEntityService<PersonEntity, Stri
             bindEntity.setUserId("");
             return;
         }
-        //获取所有职位
-        Set<String> positionIds = bindEntity.getPositionIds();
-        if (positionIds.isEmpty()) {
-            return;
-        }
+
         //是否使用了权限管理的userService.
         if (null == userService) {
             logger.warn("userService not ready!");
             return;
         }
-        //获取职位实体
-        List<PositionEntity> positionEntities = DefaultDSLQueryService.createQuery(positionDao)
-                .where().in(PositionEntity.id, positionIds)
-                .listNoPaging();
-        if (positionEntities.isEmpty()) {
-            return;
+        //获取所有职位
+        Set<String> positionIds = bindEntity.getPositionIds();
+        Set<String> roleIds;
+
+        if (positionIds == null) {
+            roleIds = null;
+        } else if (positionIds.isEmpty()) {
+            roleIds = new HashSet<>();
+        } else {
+            //获取职位实体
+            List<PositionEntity> positionEntities = DefaultDSLQueryService.createQuery(positionDao)
+                    .where().in(PositionEntity.id, positionIds)
+                    .listNoPaging();
+            roleIds = positionEntities.stream()
+                    .map(PositionEntity::getRoles)
+                    .filter(Objects::nonNull)
+                    .flatMap(List::stream)
+                    .collect(Collectors.toSet());
         }
         //获取用户是否存在
         UserEntity oldUser = userService.selectByUsername(bindEntity.getPersonUser().getUsername());
@@ -231,18 +239,20 @@ public class SimplePersonService extends GenericEntityService<PersonEntity, Stri
                             userService.update(oldUser.getId(), user);
                             return oldUser.getId();
                         };
-        //初始化用户信息
-        //全部角色信息
-        Set<String> roleIds = positionEntities.stream()
-                .map(PositionEntity::getRoles)
-                .filter(Objects::nonNull)
-                .flatMap(List::stream)
-                .collect(Collectors.toSet());
-        BindRoleUserEntity userEntity = entityFactory.newInstance(BindRoleUserEntity.class);
+        UserEntity userEntity;
+
+        if (roleIds != null) {
+            BindRoleUserEntity tmp = entityFactory.newInstance(BindRoleUserEntity.class);
+            tmp.setRoles(new ArrayList<>(roleIds));
+            userEntity = tmp;
+        } else {
+            userEntity = entityFactory.newInstance(UserEntity.class);
+        }
+
         userEntity.setUsername(bindEntity.getPersonUser().getUsername());
         userEntity.setPassword(bindEntity.getPersonUser().getPassword());
         userEntity.setName(bindEntity.getName());
-        userEntity.setRoles(new ArrayList<>(roleIds));
+
         String userId = userOperationFunction.apply(userEntity);
         bindEntity.setUserId(userId);
     }
