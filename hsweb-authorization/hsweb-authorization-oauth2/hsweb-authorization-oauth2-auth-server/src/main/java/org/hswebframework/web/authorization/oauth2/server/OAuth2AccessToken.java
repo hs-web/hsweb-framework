@@ -21,13 +21,13 @@ package org.hswebframework.web.authorization.oauth2.server;
 import org.hibernate.validator.constraints.NotBlank;
 
 import javax.validation.constraints.NotNull;
+import java.io.Serializable;
 import java.util.Set;
 
 /**
- *
  * @author zhouhao
  */
-public interface OAuth2AccessToken {
+public interface OAuth2AccessToken extends Serializable {
 
     @NotBlank
     String getClientId();

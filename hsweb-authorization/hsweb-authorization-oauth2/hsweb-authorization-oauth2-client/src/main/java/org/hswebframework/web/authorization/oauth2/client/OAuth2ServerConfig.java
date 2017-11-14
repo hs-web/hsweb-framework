@@ -1,10 +1,13 @@
 package org.hswebframework.web.authorization.oauth2.client;
 
+import java.io.Serializable;
+
 /**
  * @author zhouhao
  * @since
  */
-public class OAuth2ServerConfig {
+public class OAuth2ServerConfig implements Serializable{
+
     private String id;
     //服务名称
     private String name;

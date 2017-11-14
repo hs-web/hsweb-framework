@@ -19,12 +19,14 @@ package org.hswebframework.web.authorization.oauth2.client;
 
 import com.alibaba.fastjson.annotation.JSONField;
 
+import java.io.Serializable;
+
 /**
  * 默认的服务实现
  *
  * @author zhouhao
  */
-public class AccessTokenInfo {
+public class AccessTokenInfo implements Serializable {
     private String id;
     //授权码
     @JSONField(name = "access_token")

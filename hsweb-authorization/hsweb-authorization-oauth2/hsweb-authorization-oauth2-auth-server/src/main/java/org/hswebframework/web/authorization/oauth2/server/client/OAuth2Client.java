@@ -18,14 +18,13 @@
 
 package org.hswebframework.web.authorization.oauth2.server.client;
 
+import java.io.Serializable;
 import java.util.Set;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
-public interface OAuth2Client {
+public interface OAuth2Client extends Serializable {
     String getId();
 
     String getSecret();
