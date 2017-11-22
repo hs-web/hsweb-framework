@@ -58,9 +58,6 @@ public class DefaultUserTokenManager implements UserTokenManager {
 
     }
 
-    //令牌超时事件,默认3600秒
-    private long timeout = 3600;
-
     //异地登录模式，默认允许异地登录
     private AllopatricLoginMode allopatricLoginMode = AllopatricLoginMode.allow;
 
@@ -70,14 +67,6 @@ public class DefaultUserTokenManager implements UserTokenManager {
     @Autowired(required = false)
     public void setEventPublisher(ApplicationEventPublisher eventPublisher) {
         this.eventPublisher = eventPublisher;
-    }
-
-    public void setTimeout(long timeout) {
-        this.timeout = timeout;
-    }
-
-    public long getTimeout() {
-        return timeout;
     }
 
     public void setAllopatricLoginMode(AllopatricLoginMode allopatricLoginMode) {

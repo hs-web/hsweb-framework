@@ -3,11 +3,12 @@ package org.hswebframework.web.authorization.simple;
 import org.hswebframework.web.authorization.Role;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public class SimpleRole implements Role {
+
+    private static final long serialVersionUID = 7460859165231311347L;
+
     private String id;
 
     private String name;
