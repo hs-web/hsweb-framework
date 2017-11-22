@@ -19,16 +19,18 @@
 package org.hswebframework.web.authorization.listener.event;
 
 import org.hswebframework.web.authorization.Authentication;
+import org.springframework.context.ApplicationEvent;
 
 /**
  * 退出登录事件
  *
  * @author zhouhao
  */
-public class AuthorizationExitEvent implements AuthorizationEvent {
+public class AuthorizationExitEvent extends ApplicationEvent implements AuthorizationEvent {
     private Authentication authentication;
 
     public AuthorizationExitEvent(Authentication authentication) {
+        super(authentication);
         this.authentication = authentication;
     }
 

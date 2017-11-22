@@ -27,6 +27,7 @@ package org.hswebframework.web.authorization.listener.event;
  * @see AuthorizationBeforeEvent
  * @see AuthorizationDecodeEvent
  * @see AuthorizationExitEvent
+ * @see org.springframework.context.ApplicationEvent
  * @since 3.0
  */
 public interface AuthorizationEvent {

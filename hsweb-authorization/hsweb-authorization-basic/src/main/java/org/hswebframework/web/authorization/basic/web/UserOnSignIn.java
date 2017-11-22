@@ -6,6 +6,7 @@ import org.hswebframework.web.authorization.token.UserToken;
 import org.hswebframework.web.authorization.token.UserTokenHolder;
 import org.hswebframework.web.authorization.token.UserTokenManager;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +14,8 @@ import java.util.List;
 /**
  * @author zhouhao
  */
-public class UserOnSignIn implements AuthorizationListener<AuthorizationSuccessEvent> {
+public class UserOnSignIn implements AuthorizationListener<AuthorizationSuccessEvent>
+        ,ApplicationListener<AuthorizationSuccessEvent>{
 
     private String defaultTokenType = "sessionId";
 
@@ -36,6 +38,11 @@ public class UserOnSignIn implements AuthorizationListener<AuthorizationSuccessE
 
     @Override
     public void on(AuthorizationSuccessEvent event) {
+       onApplicationEvent(event);
+    }
+
+    @Override
+    public void onApplicationEvent(AuthorizationSuccessEvent event) {
         UserToken token = UserTokenHolder.currentToken();
         String tokenType = (String) event.getParameter("token_type").orElse(defaultTokenType);
 

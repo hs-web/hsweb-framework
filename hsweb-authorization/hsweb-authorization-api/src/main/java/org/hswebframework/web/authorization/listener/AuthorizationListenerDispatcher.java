@@ -19,13 +19,21 @@
 package org.hswebframework.web.authorization.listener;
 
 import org.hswebframework.web.authorization.listener.event.AuthorizationEvent;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.*;
 
 /**
+ * {@link org.springframework.context.ApplicationEventPublisher}
  * @author zhouhao
  */
+@Deprecated
 public class AuthorizationListenerDispatcher {
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
+
 
     private Map<Class<? extends AuthorizationEvent>, List<AuthorizationListener>> listenerStore = new HashMap<>();
 
@@ -36,16 +44,19 @@ public class AuthorizationListenerDispatcher {
 
     @SuppressWarnings("unchecked")
     public <E extends AuthorizationEvent> int doEvent(Class<E> eventType, E event) {
-        List<AuthorizationListener<E>> store = (List) listenerStore.get(eventType);
-        if (null != store) {
-            store.forEach(listener -> listener.on(event));
-            return store.size();
-        }
-        return 0;
+        eventPublisher.publishEvent(event);
+//        List<AuthorizationListener<E>> store = (List) listenerStore.get(eventType);
+//        if (null != store) {
+//            store.forEach(listener -> listener.on(event));
+//            return store.size();
+//        }
+        return 1;
     }
 
     @SuppressWarnings("unchecked")
     public <E extends AuthorizationEvent> int doEvent(E event) {
-        return doEvent((Class<E>) event.getClass(), event);
+        eventPublisher.publishEvent(event);
+        return 1;
+        //return doEvent((Class<E>) event.getClass(), event);
     }
 }

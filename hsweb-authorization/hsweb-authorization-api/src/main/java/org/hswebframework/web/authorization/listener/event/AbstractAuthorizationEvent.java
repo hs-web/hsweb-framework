@@ -19,6 +19,8 @@
 package org.hswebframework.web.authorization.listener.event;
 
 
+import org.springframework.context.ApplicationEvent;
+
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -28,7 +30,7 @@ import java.util.function.Function;
  * @author zhouhao
  * @since 3.0
  */
-public abstract class AbstractAuthorizationEvent implements AuthorizationEvent {
+public abstract class AbstractAuthorizationEvent extends ApplicationEvent implements AuthorizationEvent {
     protected String username;
 
     protected String password;
@@ -43,6 +45,7 @@ public abstract class AbstractAuthorizationEvent implements AuthorizationEvent {
      * @param parameterGetter 参数获取函数,用户获取授权时传入的参数
      */
     public AbstractAuthorizationEvent(String username, String password, Function<String, Object> parameterGetter) {
+        super(username + "/" + password);
         if (username == null || password == null || parameterGetter == null) {
             throw new NullPointerException();
         }

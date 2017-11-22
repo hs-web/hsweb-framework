@@ -35,6 +35,7 @@ import org.hswebframework.web.service.authorization.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -61,13 +62,13 @@ public class AuthorizationController {
     private AuthenticationManager authenticationManager;
 
     @Autowired
-    private AuthorizationListenerDispatcher authorizationListenerDispatcher;
+    private ApplicationEventPublisher eventPublisher;
 
     @GetMapping({"/login-out", "/sign-out", "/exit"})
     @Authorize
     @ApiOperation("退出当前登录")
     public ResponseMessage exit(@ApiParam(hidden = true) Authentication authentication) {
-        authorizationListenerDispatcher.doEvent(new AuthorizationExitEvent(authentication));
+        eventPublisher.publishEvent(new AuthorizationExitEvent(authentication));
         return ok();
     }
 
@@ -88,12 +89,12 @@ public class AuthorizationController {
         Function<String, Object> parameterGetter = request::getParameter;
         try {
             AuthorizationDecodeEvent decodeEvent = new AuthorizationDecodeEvent(username, password, parameterGetter);
-            authorizationListenerDispatcher.doEvent(decodeEvent);
+            eventPublisher.publishEvent(decodeEvent);
             username = decodeEvent.getUsername();
             password = decodeEvent.getPassword();
 
             AuthorizationBeforeEvent beforeEvent = new AuthorizationBeforeEvent(username, password, parameterGetter);
-            authorizationListenerDispatcher.doEvent(beforeEvent);
+            eventPublisher.publishEvent(beforeEvent);
             UserEntity entity = userService.selectByUsername(username);
             if (entity == null) {
                 reason = AuthorizationFailedEvent.Reason.USER_NOT_EXISTS;
@@ -110,17 +111,15 @@ public class AuthorizationController {
             }
             // 验证通过
             Authentication authentication = authenticationManager.getByUserId(entity.getId());
+            //触发授权成功事件
             AuthorizationSuccessEvent event = new AuthorizationSuccessEvent(authentication, parameterGetter);
             event.getResult().put("userId", entity.getId());
-            int size = authorizationListenerDispatcher.doEvent(event);
-            if (size == 0) {
-                logger.warn("not found any AuthorizationSuccessEvent,access control maybe disabled!");
-            }
+            eventPublisher.publishEvent(event);
             return ok(event.getResult());
         } catch (Exception e) {
             AuthorizationFailedEvent failedEvent = new AuthorizationFailedEvent(username, password, parameterGetter, reason);
             failedEvent.setException(e);
-            authorizationListenerDispatcher.doEvent(failedEvent);
+            eventPublisher.publishEvent(failedEvent);
             throw e;
         }
     }

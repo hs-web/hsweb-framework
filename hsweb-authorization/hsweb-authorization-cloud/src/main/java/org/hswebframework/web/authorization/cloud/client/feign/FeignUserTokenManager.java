@@ -66,4 +66,8 @@ public interface FeignUserTokenManager extends UserTokenManager {
     @Override
     @RequestMapping(value = "${hsweb.cloud.user-center.prefix:/}user-token/{token}/touch", method = RequestMethod.GET)
     void touch(@PathVariable("token") String token);
+
+    @Override
+    @RequestMapping(value = "${hsweb.cloud.user-center.prefix:/}user-token/check-expired-token", method = RequestMethod.PUT)
+    void checkExpiredToken();
 }

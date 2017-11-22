@@ -10,6 +10,8 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class SimpleUserToken implements UserToken {
 
+    private static final long serialVersionUID = 1L;
+
     private String userId;
 
     private String token;
@@ -111,5 +113,28 @@ public class SimpleUserToken implements UserToken {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public SimpleUserToken copy() {
+        SimpleUserToken userToken = new SimpleUserToken();
+        userToken.firstRequestTime = firstRequestTime;
+        userToken.lastRequestTime = lastRequestTime;
+        userToken.requestTimesCounter = new AtomicLong(requestTimesCounter.get());
+        userToken.token = token;
+        userToken.userId = userId;
+        userToken.state = state;
+        userToken.maxInactiveInterval = maxInactiveInterval;
+        userToken.type = type;
+        return userToken;
+    }
+
+    @Override
+    public int hashCode() {
+        return token.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj != null && hashCode() == obj.hashCode();
     }
 }

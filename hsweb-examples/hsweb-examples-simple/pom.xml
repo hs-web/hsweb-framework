@@ -108,12 +108,6 @@
             <artifactId>hsweb-system-authorization-starter</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <!--使用shiro实现权限控制-->
-        <!--<dependency>-->
-            <!--<groupId>org.hswebframework.web</groupId>-->
-            <!--<artifactId>hsweb-authorization-shiro</artifactId>-->
-            <!--<version>${project.version}</version>-->
-        <!--</dependency>-->
         <!--使用基础权限控制-->
         <dependency>
             <groupId>org.hswebframework.web</groupId>

@@ -1,5 +1,7 @@
 package org.hswebframework.web.authorization.basic.web;
 
+import org.hswebframework.web.authorization.exception.UnAuthorizedException;
+import org.hswebframework.web.authorization.token.TokenState;
 import org.hswebframework.web.authorization.token.UserToken;
 import org.hswebframework.web.authorization.token.UserTokenHolder;
 import org.hswebframework.web.authorization.token.UserTokenManager;
@@ -54,4 +56,5 @@ public class WebUserTokenInterceptor extends HandlerInterceptorAdapter {
         }
         return true;
     }
+
 }

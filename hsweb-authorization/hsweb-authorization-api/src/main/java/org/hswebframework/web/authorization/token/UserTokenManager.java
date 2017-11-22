@@ -19,6 +19,7 @@
 package org.hswebframework.web.authorization.token;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * 用户授权容器,用来操作所有已经授权的用户
@@ -37,7 +38,7 @@ public interface UserTokenManager {
     UserToken getByToken(String token);
 
     /**
-     * 根据用户id，获取全部令牌信息，如果设置了不能跨地点登陆，返回值只可能是{@code null}或者size为1的list
+     * 根据用户id，获取全部令牌信息，如果没有则返回空集合而不是<code>null</code>
      *
      * @param userId 用户id
      * @return 授权信息
@@ -71,6 +72,7 @@ public interface UserTokenManager {
      */
     List<UserToken> allLoggedUser();
 
+    void allLoggedUser(Consumer<UserToken> consumer);
     /**
      * 删除用户授权信息
      *
@@ -116,4 +118,11 @@ public interface UserTokenManager {
      * @param token token
      */
     void touch(String token);
+
+    /**
+     * 检查已过期的token,并将其remove
+     *
+     * @see this#signOutByToken(String)
+     */
+    void checkExpiredToken();
 }

@@ -88,6 +88,7 @@ public class SpringBootExample
     @Bean
     public AopMethodAuthorizeDefinitionCustomizerParser customizerParser(){
         //自定义权限声明
+        //所有控制都通过
         return context -> EmptyAuthorizeDefinition.instance;
     }
 
