@@ -19,7 +19,6 @@
 package org.hswebframework.web.authorization.token;
 
 import org.hswebframework.web.authorization.exception.AccessDenyException;
-import org.hswebframework.web.authorization.exception.UnAuthorizedException;
 import org.hswebframework.web.authorization.token.event.UserTokenChangedEvent;
 import org.hswebframework.web.authorization.token.event.UserTokenCreatedEvent;
 import org.hswebframework.web.authorization.token.event.UserTokenRemovedEvent;
@@ -41,7 +40,7 @@ import java.util.stream.Collectors;
  */
 public class DefaultUserTokenManager implements UserTokenManager {
 
-    protected final ConcurrentMap<String, SimpleUserToken> tokenUserStorage;
+    protected final ConcurrentMap<String, SimpleUserToken> tokenStorage;
 
     protected final ConcurrentMap<String, Set<String>> userStorage;
 
@@ -50,12 +49,12 @@ public class DefaultUserTokenManager implements UserTokenManager {
 
     }
 
-    public DefaultUserTokenManager(ConcurrentMap<String, SimpleUserToken> storage) {
-        this(storage, new ConcurrentHashMap<>());
+    public DefaultUserTokenManager(ConcurrentMap<String, SimpleUserToken> tokenStorage) {
+        this(tokenStorage, new ConcurrentHashMap<>());
     }
 
-    public DefaultUserTokenManager(ConcurrentMap<String, SimpleUserToken> storage, ConcurrentMap<String, Set<String>> userStorage) {
-        this.tokenUserStorage = storage;
+    public DefaultUserTokenManager(ConcurrentMap<String, SimpleUserToken> tokenStorage, ConcurrentMap<String, Set<String>> userStorage) {
+        this.tokenStorage = tokenStorage;
         this.userStorage = userStorage;
     }
 
@@ -98,14 +97,14 @@ public class DefaultUserTokenManager implements UserTokenManager {
 
     @Override
     public SimpleUserToken getByToken(String token) {
-        return checkTimeout(tokenUserStorage.get(token));
+        return checkTimeout(tokenStorage.get(token));
     }
 
     @Override
     public List<UserToken> getByUserId(String userId) {
         return getUserToken(userId)
                 .stream()
-                .map(tokenUserStorage::get)
+                .map(tokenStorage::get)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
@@ -130,29 +129,21 @@ public class DefaultUserTokenManager implements UserTokenManager {
     @Override
     public long totalUser() {
         return userStorage.size();
-
-//        return tokenUserStorage.values()
-//                .parallelStream()
-//                .peek(this::checkTimeout)//检查是否已经超时
-//                .filter(UserToken::isEffective)//只返回有效的
-//                .map(UserToken::getUserId)
-//                .distinct()//去重复
-//                .count();
     }
 
     @Override
     public long totalToken() {
-        return tokenUserStorage.size();
+        return tokenStorage.size();
     }
 
     @Override
     public void allLoggedUser(Consumer<UserToken> consumer) {
-        tokenUserStorage.values().forEach(consumer);
+        tokenStorage.values().forEach(consumer);
     }
 
     @Override
     public List<UserToken> allLoggedUser() {
-        return new ArrayList<>(tokenUserStorage.values());
+        return new ArrayList<>(tokenStorage.values());
     }
 
     @Override
@@ -167,7 +158,7 @@ public class DefaultUserTokenManager implements UserTokenManager {
     }
 
     private void signOutByToken(String token, boolean removeUserToken) {
-        SimpleUserToken tokenObject = tokenUserStorage.remove(token);
+        SimpleUserToken tokenObject = tokenStorage.remove(token);
         if (tokenObject != null) {
             String userId = tokenObject.getUserId();
             if (removeUserToken) {
@@ -238,7 +229,7 @@ public class DefaultUserTokenManager implements UserTokenManager {
             }
         }
         detail.setState(TokenState.effective);
-        tokenUserStorage.put(token, detail);
+        tokenStorage.put(token, detail);
 
         getUserToken(userId).add(token);
 
@@ -248,7 +239,7 @@ public class DefaultUserTokenManager implements UserTokenManager {
 
     @Override
     public void touch(String token) {
-        SimpleUserToken userToken = tokenUserStorage.get(token);
+        SimpleUserToken userToken = tokenStorage.get(token);
         if (null != userToken) {
             userToken.touch();
             syncToken(userToken);
@@ -257,7 +248,7 @@ public class DefaultUserTokenManager implements UserTokenManager {
 
     @Override
     public void checkExpiredToken() {
-        for (SimpleUserToken token : tokenUserStorage.values()) {
+        for (SimpleUserToken token : tokenStorage.values()) {
             checkTimeout(token);
             if (token.isExpired()) {
                 signOutByToken(token.getToken());
@@ -266,7 +257,7 @@ public class DefaultUserTokenManager implements UserTokenManager {
     }
 
     /**
-     * 同步令牌信息,如果使用redisson等来存储token，应该重写此方法并调用{@link this#tokenUserStorage}.put
+     * 同步令牌信息,如果使用redisson等来存储token，应该重写此方法并调用{@link this#tokenStorage}.put
      *
      * @param userToken 令牌
      */
