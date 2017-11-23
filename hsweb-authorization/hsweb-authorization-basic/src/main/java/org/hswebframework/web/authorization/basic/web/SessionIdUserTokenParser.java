@@ -8,6 +8,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.function.Predicate;
 
+import static org.hswebframework.web.authorization.basic.web.UserTokenGenerator.TOKEN_TYPE_SESSION_ID;
+
 /**
  * @author zhouhao
  */
@@ -46,7 +48,7 @@ public class SessionIdUserTokenParser implements UserTokenParser {
 
                     @Override
                     public String getType() {
-                        return "session-id-default";
+                        return TOKEN_TYPE_SESSION_ID;
                     }
 
                     @Override
@@ -63,7 +65,7 @@ public class SessionIdUserTokenParser implements UserTokenParser {
 
                 @Override
                 public String getType() {
-                    return "session-id-default";
+                    return TOKEN_TYPE_SESSION_ID;
                 }
             };
         }

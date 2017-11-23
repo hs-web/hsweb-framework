@@ -6,8 +6,15 @@ package org.hswebframework.web.authorization.basic.web;
  * @author zhouhao
  */
 public interface AuthorizedToken extends ParsedToken {
+
+    /**
+     * @return 令牌绑定的用户id
+     */
     String getUserId();
 
+    /**
+     * @return 令牌有效期，单位毫秒，-1为长期有效
+     */
     default long getMaxInactiveInterval() {
         return -1;
     }

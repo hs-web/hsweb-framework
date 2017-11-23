@@ -25,7 +25,6 @@ import org.hswebframework.web.NotFoundException;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.AuthenticationManager;
 import org.hswebframework.web.authorization.annotation.Authorize;
-import org.hswebframework.web.authorization.listener.AuthorizationListenerDispatcher;
 import org.hswebframework.web.authorization.listener.event.*;
 import org.hswebframework.web.commons.entity.DataStatus;
 import org.hswebframework.web.controller.message.ResponseMessage;

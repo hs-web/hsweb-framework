@@ -4,8 +4,6 @@ import org.hswebframework.web.ThreadLocalUtils;
 import org.hswebframework.web.authorization.token.UserToken;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public final class UserTokenHolder {

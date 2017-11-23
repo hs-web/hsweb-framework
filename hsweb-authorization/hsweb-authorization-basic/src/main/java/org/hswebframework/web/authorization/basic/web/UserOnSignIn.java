@@ -12,13 +12,28 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * 监听授权成功事件,授权成功后,生成token并注册到{@link UserTokenManager}
+ *
  * @author zhouhao
+ * @see org.springframework.context.ApplicationEvent
+ * @see org.hswebframework.web.authorization.listener.event.AuthorizationEvent
+ * @see UserTokenManager
+ * @see UserTokenGenerator
+ * @since 3.0
  */
 public class UserOnSignIn implements AuthorizationListener<AuthorizationSuccessEvent>
-        ,ApplicationListener<AuthorizationSuccessEvent>{
+        , ApplicationListener<AuthorizationSuccessEvent> {
 
+    /**
+     * 默认到令牌类型
+     * @see UserToken#getType()
+     * @see SessionIdUserTokenGenerator#getSupportTokenType()
+     */
     private String defaultTokenType = "sessionId";
 
+    /**
+     * 令牌管理器
+     */
     private UserTokenManager userTokenManager;
 
     private List<UserTokenGenerator> userTokenGenerators = new ArrayList<>();
@@ -38,7 +53,7 @@ public class UserOnSignIn implements AuthorizationListener<AuthorizationSuccessE
 
     @Override
     public void on(AuthorizationSuccessEvent event) {
-       onApplicationEvent(event);
+        onApplicationEvent(event);
     }
 
     @Override

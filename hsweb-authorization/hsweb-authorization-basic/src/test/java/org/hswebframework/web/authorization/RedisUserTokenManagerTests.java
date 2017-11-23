@@ -1,9 +1,6 @@
 package org.hswebframework.web.authorization;
 
-import org.hswebframework.web.authorization.token.DefaultUserTokenManager;
-import org.hswebframework.web.authorization.token.SimpleUserToken;
-import org.hswebframework.web.authorization.token.UserToken;
-import org.hswebframework.web.authorization.token.UserTokenManager;
+import org.hswebframework.web.authorization.token.*;
 import org.hswebframework.web.id.IDGenerator;
 import org.junit.Assert;
 import org.redisson.Redisson;
@@ -15,12 +12,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 
 public class RedisUserTokenManagerTests {
 
-    static UserTokenManager userTokenManager;
+    static DefaultUserTokenManager userTokenManager;
 
     static String token = IDGenerator.MD5.generate();
 
@@ -31,26 +30,28 @@ public class RedisUserTokenManagerTests {
 
         try {
             ConcurrentMap<String, SimpleUserToken> repo = client.getMap("hsweb.user-token", new SerializationCodec());
-            ConcurrentMap<String, List<String>> userRepo = client.getMap("hsweb.user-token-u", new SerializationCodec());
+            ConcurrentMap<String, Set<String>> userRepo = client.getMap("hsweb.user-token-u", new SerializationCodec());
 
             userTokenManager = new DefaultUserTokenManager(repo, userRepo) {
                 @Override
-                protected List<String> getUserToken(String userId) {
-                    userRepo.computeIfAbsent(userId,u->new ArrayList<>());
+                protected Set<String> getUserToken(String userId) {
+                    userRepo.computeIfAbsent(userId,u->new HashSet<>());
 
-                    return client.getList("hsweb.user-token-"+userId, new SerializationCodec());
+                    return client.getSet("hsweb.user-token-"+userId, new SerializationCodec());
                 }
 
             };
+
+            userTokenManager.setAllopatricLoginMode(AllopatricLoginMode.deny);
 //            userTokenManager=new DefaultUserTokenManager();
 
 
-            userRepo.clear();
-            repo.clear();
-            for (int i = 0; i < 1000; i++) {
-                userTokenManager.signIn(IDGenerator.MD5.generate(), "sessionId", "admin", 60*3600*1000);
-            }
-            userTokenManager.signIn(IDGenerator.MD5.generate(), "sessionId", "admin2", 60*3600*1000);
+//            userRepo.clear();
+//            repo.clear();
+//            for (int i = 0; i < 1000; i++) {
+//                userTokenManager.signIn(IDGenerator.MD5.generate(), "sessionId", "admin", 60*3600*1000);
+//            }
+//            userTokenManager.signIn(IDGenerator.MD5.generate(), "sessionId", "admin2", 60*3600*1000);
 
             testGet();
             testGetAll();

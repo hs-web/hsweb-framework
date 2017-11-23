@@ -18,6 +18,8 @@
 
 package org.hswebframework.web.authorization.token;
 
+import org.hswebframework.web.authorization.exception.AccessDenyException;
+import org.hswebframework.web.authorization.exception.UnAuthorizedException;
 import org.hswebframework.web.authorization.token.event.UserTokenChangedEvent;
 import org.hswebframework.web.authorization.token.event.UserTokenCreatedEvent;
 import org.hswebframework.web.authorization.token.event.UserTokenRemovedEvent;
@@ -32,7 +34,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
- * 授权容器,用来操作所有已经授权的用户
+ * 默认到用户令牌管理器，使用ConcurrentMap来存储令牌信息
  *
  * @author zhouhao
  * @since 3.0
@@ -41,7 +43,7 @@ public class DefaultUserTokenManager implements UserTokenManager {
 
     protected final ConcurrentMap<String, SimpleUserToken> tokenUserStorage;
 
-    protected ConcurrentMap<String, List<String>> userStorage;
+    protected final ConcurrentMap<String, Set<String>> userStorage;
 
     public DefaultUserTokenManager() {
         this(new ConcurrentHashMap<>(256));
@@ -52,10 +54,9 @@ public class DefaultUserTokenManager implements UserTokenManager {
         this(storage, new ConcurrentHashMap<>());
     }
 
-    public DefaultUserTokenManager(ConcurrentMap<String, SimpleUserToken> storage, ConcurrentMap<String, List<String>> userStorage) {
+    public DefaultUserTokenManager(ConcurrentMap<String, SimpleUserToken> storage, ConcurrentMap<String, Set<String>> userStorage) {
         this.tokenUserStorage = storage;
         this.userStorage = userStorage;
-
     }
 
     //异地登录模式，默认允许异地登录
@@ -77,8 +78,8 @@ public class DefaultUserTokenManager implements UserTokenManager {
         return allopatricLoginMode;
     }
 
-    protected List<String> getUserToken(String userId) {
-        return userStorage.computeIfAbsent(userId, key -> new ArrayList<>());
+    protected Set<String> getUserToken(String userId) {
+        return userStorage.computeIfAbsent(userId, key -> new HashSet<>());
     }
 
     private SimpleUserToken checkTimeout(SimpleUserToken detail) {
@@ -159,18 +160,18 @@ public class DefaultUserTokenManager implements UserTokenManager {
         if (null == userId) {
             return;
         }
-        List<String> tokens =  getUserToken(userId);
-        tokens.forEach(token->signOutByToken(token,false));
+        Set<String> tokens = getUserToken(userId);
+        tokens.forEach(token -> signOutByToken(token, false));
         tokens.clear();
         userStorage.remove(userId);
     }
 
-    private void signOutByToken(String token,boolean removeUserToken) {
+    private void signOutByToken(String token, boolean removeUserToken) {
         SimpleUserToken tokenObject = tokenUserStorage.remove(token);
         if (tokenObject != null) {
             String userId = tokenObject.getUserId();
-            if(removeUserToken) {
-                List<String> tokens = getUserToken(userId);
+            if (removeUserToken) {
+                Set<String> tokens = getUserToken(userId);
                 if (tokens.size() > 0) {
                     tokens.remove(token);
                 }
@@ -184,7 +185,7 @@ public class DefaultUserTokenManager implements UserTokenManager {
 
     @Override
     public void signOutByToken(String token) {
-       signOutByToken(token,true);
+        signOutByToken(token, true);
     }
 
     protected void publishEvent(ApplicationEvent event) {
@@ -221,17 +222,22 @@ public class DefaultUserTokenManager implements UserTokenManager {
         detail.setMaxInactiveInterval(maxInactiveInterval);
 
         if (allopatricLoginMode == AllopatricLoginMode.deny) {
-            changeTokenState(detail.getToken(), TokenState.deny);
+            boolean hasAnotherToken = getByUserId(userId)
+                    .stream()
+                    .map(SimpleUserToken.class::cast)
+                    .peek(this::checkTimeout)
+                    .anyMatch(UserToken::isEffective);
+            if (hasAnotherToken) {
+                throw new AccessDenyException("该用户已在其他地方登陆");
+            }
         } else if (allopatricLoginMode == AllopatricLoginMode.offlineOther) {
-            detail.setState(TokenState.effective);
-            //将已经登录的用户设置为离线
+            //将在其他地方登录的用户设置为离线
             List<UserToken> oldToken = getByUserId(userId);
             for (UserToken userToken : oldToken) {
                 changeTokenState(userToken.getToken(), TokenState.offline);
             }
-        } else {
-            detail.setState(TokenState.effective);
         }
+        detail.setState(TokenState.effective);
         tokenUserStorage.put(token, detail);
 
         getUserToken(userId).add(token);
@@ -259,6 +265,11 @@ public class DefaultUserTokenManager implements UserTokenManager {
         }
     }
 
+    /**
+     * 同步令牌信息,如果使用redisson等来存储token，应该重写此方法并调用{@link this#tokenUserStorage}.put
+     *
+     * @param userToken 令牌
+     */
     protected void syncToken(UserToken userToken) {
         //do noting
     }
