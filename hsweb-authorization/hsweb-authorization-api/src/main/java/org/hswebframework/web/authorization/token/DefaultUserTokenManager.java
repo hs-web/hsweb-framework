@@ -97,11 +97,17 @@ public class DefaultUserTokenManager implements UserTokenManager {
 
     @Override
     public SimpleUserToken getByToken(String token) {
+        if (token == null) {
+            return null;
+        }
         return checkTimeout(tokenStorage.get(token));
     }
 
     @Override
     public List<UserToken> getByUserId(String userId) {
+        if (userId == null) {
+            return Collections.emptyList();
+        }
         return getUserToken(userId)
                 .stream()
                 .map(tokenStorage::get)
@@ -111,6 +117,9 @@ public class DefaultUserTokenManager implements UserTokenManager {
 
     @Override
     public boolean userIsLoggedIn(String userId) {
+        if (userId == null) {
+            return false;
+        }
         for (UserToken userToken : getByUserId(userId)) {
             if (userToken.isEffective()) {
                 return true;
@@ -121,6 +130,9 @@ public class DefaultUserTokenManager implements UserTokenManager {
 
     @Override
     public boolean tokenIsLoggedIn(String token) {
+        if (token == null) {
+            return false;
+        }
         UserToken userToken = getByToken(token);
 
         return userToken != null && !userToken.isExpired();
@@ -158,6 +170,9 @@ public class DefaultUserTokenManager implements UserTokenManager {
     }
 
     private void signOutByToken(String token, boolean removeUserToken) {
+        if (token == null) {
+            return;
+        }
         SimpleUserToken tokenObject = tokenStorage.remove(token);
         if (tokenObject != null) {
             String userId = tokenObject.getUserId();
