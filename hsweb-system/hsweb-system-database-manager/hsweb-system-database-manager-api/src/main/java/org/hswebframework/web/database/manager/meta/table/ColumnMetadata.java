@@ -4,11 +4,11 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * TODO 完成注释
  *
  * @author zhouhao
  */
 public class ColumnMetadata implements Serializable {
+    private static final long serialVersionUID = 2068679809718583039L;
     private String name;
 
     private String comment;

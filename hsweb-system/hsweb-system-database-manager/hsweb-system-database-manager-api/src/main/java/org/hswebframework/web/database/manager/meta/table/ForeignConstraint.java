@@ -1,11 +1,10 @@
 package org.hswebframework.web.database.manager.meta.table;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public class ForeignConstraint extends Constraint {
+    private static final long serialVersionUID = -7146549641064694467L;
     private String targetTable;
 
     private String targetColumn;

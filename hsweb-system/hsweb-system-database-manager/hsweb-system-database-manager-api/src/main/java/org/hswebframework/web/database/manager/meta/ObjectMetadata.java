@@ -3,11 +3,11 @@ package org.hswebframework.web.database.manager.meta;
 import java.io.Serializable;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public abstract class ObjectMetadata implements Serializable {
+
+    private static final long serialVersionUID = -5672781818170734240L;
 
     protected String name;
 

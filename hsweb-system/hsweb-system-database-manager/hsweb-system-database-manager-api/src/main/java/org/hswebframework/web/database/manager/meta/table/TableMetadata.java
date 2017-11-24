@@ -5,11 +5,11 @@ import org.hswebframework.web.database.manager.meta.ObjectMetadata;
 import java.util.List;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public class TableMetadata extends ObjectMetadata {
+    private static final long serialVersionUID = 1762059989615865556L;
+
     private String comment;
 
     private List<Constraint> constraints;

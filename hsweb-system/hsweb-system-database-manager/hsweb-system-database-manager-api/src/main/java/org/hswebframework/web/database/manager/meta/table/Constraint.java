@@ -3,11 +3,10 @@ package org.hswebframework.web.database.manager.meta.table;
 import java.io.Serializable;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public class Constraint implements Serializable {
+    private static final long serialVersionUID = 6594361915290310179L;
     private String table;
 
     private String column;
