@@ -4,6 +4,9 @@ import org.hswebframework.web.authorization.token.UserTokenManager;
 import org.hswebframework.web.concurrent.counter.CounterManager;
 import org.hswebframework.web.message.Messager;
 import org.hswebframework.web.socket.WebSocketSessionListener;
+import org.hswebframework.web.socket.authorize.AuthorizeCommandProcessor;
+import org.hswebframework.web.socket.authorize.SessionIdWebSocketTokenParser;
+import org.hswebframework.web.socket.authorize.XAccessTokenParser;
 import org.hswebframework.web.socket.handler.CommandWebSocketMessageDispatcher;
 import org.hswebframework.web.socket.message.DefaultWebSocketMessager;
 import org.hswebframework.web.socket.message.WebSocketMessager;
@@ -27,6 +30,22 @@ import java.util.List;
  */
 @Configuration
 public class CommandWebSocketAutoConfiguration {
+
+    @Bean
+    public SessionIdWebSocketTokenParser sessionIdWebSocketTokenParser(){
+        return new SessionIdWebSocketTokenParser();
+    }
+
+    @Bean
+    public XAccessTokenParser xAccessTokenParser(){
+        return new XAccessTokenParser();
+    }
+
+    @Bean
+    @ConditionalOnBean(UserTokenManager.class)
+    public AuthorizeCommandProcessor authorizeCommandProcessor(UserTokenManager userTokenManager){
+        return new AuthorizeCommandProcessor(userTokenManager);
+    }
 
     @Configuration
     @ConditionalOnMissingBean(CommandProcessorContainer.class)

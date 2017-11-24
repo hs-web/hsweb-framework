@@ -8,18 +8,22 @@ import java.io.Serializable;
  * @author zhouhao
  */
 public class WebSocketMessage implements Serializable {
-    private int code;
+    private static final long serialVersionUID = -1173161338949028545L;
+
+    private String command;
+
+    private int status;
 
     private String message;
 
-    private Object data;
+    private Object result;
 
-    public int getCode() {
-        return code;
+    public int getStatus() {
+        return status;
     }
 
-    public void setCode(int code) {
-        this.code = code;
+    public void setStatus(int status) {
+        this.status = status;
     }
 
     public String getMessage() {
@@ -30,12 +34,20 @@ public class WebSocketMessage implements Serializable {
         this.message = message;
     }
 
-    public Object getData() {
-        return data;
+    public Object getResult() {
+        return result;
     }
 
-    public void setData(Object data) {
-        this.data = data;
+    public void setResult(Object result) {
+        this.result = result;
+    }
+
+    public String getCommand() {
+        return command;
+    }
+
+    public void setCommand(String command) {
+        this.command = command;
     }
 
     @Override
@@ -46,14 +58,14 @@ public class WebSocketMessage implements Serializable {
     public WebSocketMessage() {
     }
 
-    public WebSocketMessage(int code, String message) {
-        this.code = code;
+    public WebSocketMessage(int status, String message) {
+        this.status = status;
         this.message = message;
     }
 
-    public WebSocketMessage(int code, String message, Object data) {
-        this.code = code;
+    public WebSocketMessage(int status, String message, Object result) {
+        this.status = status;
         this.message = message;
-        this.data = data;
+        this.result = result;
     }
 }

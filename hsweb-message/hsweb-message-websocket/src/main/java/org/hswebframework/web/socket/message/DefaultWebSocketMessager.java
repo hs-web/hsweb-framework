@@ -27,6 +27,7 @@ import static org.hswebframework.web.message.builder.StaticMessageSubjectBuilder
 public class DefaultWebSocketMessager implements WebSocketMessager {
 
     private Messager messager;
+    private CounterManager counterManager;
 
     public DefaultWebSocketMessager(Messager messager) {
         this(messager, new SimpleCounterManager());
@@ -34,13 +35,12 @@ public class DefaultWebSocketMessager implements WebSocketMessager {
 
     public DefaultWebSocketMessager(Messager messager, CounterManager counterManager) {
         this.messager = messager;
-        this.counterManager = counterManager == null ? new SimpleCounterManager() : counterManager;
+        this.counterManager = counterManager;
     }
 
     //              command,   type,     sessionId
     private final Map<String, Map<String, Map<String, MessageSubscribeSession>>> store = new ConcurrentHashMap<>(32);
 
-    private CounterManager counterManager = new SimpleCounterManager();
 
 
     @Override

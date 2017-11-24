@@ -5,6 +5,7 @@ import org.hswebframework.web.concurrent.counter.CounterManager;
 import org.hswebframework.web.counter.redis.RedissonCounterManager;
 import org.hswebframework.web.message.Messager;
 import org.hswebframework.web.message.jms.JmsMessager;
+import org.hswebframework.web.message.redis.RedissonMessager;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
@@ -30,8 +31,15 @@ public class WebSocketServerTests {
     }
 
     @Bean
-    public Messager messager(JmsTemplate template) {
-        return new JmsMessager(template);
+    public Messager messager(RedissonClient client) {
+        return new RedissonMessager(client);
+    }
+
+    @Bean(destroyMethod = "shutdown")
+    public RedissonClient redissonClient(){
+        Config config = new Config();
+        config.useSingleServer().setAddress("redis://127.0.0.1:6379");
+        return Redisson.create(config);
     }
 
     @Bean
@@ -40,10 +48,7 @@ public class WebSocketServerTests {
     }
 
     @Bean
-    public CounterManager counterManager() {
-        Config config = new Config();
-        config.useSingleServer().setAddress("127.0.0.1:6379");
-        RedissonClient client = Redisson.create(config);
+    public CounterManager counterManager(RedissonClient client) {
         return new RedissonCounterManager(client);
     }
 

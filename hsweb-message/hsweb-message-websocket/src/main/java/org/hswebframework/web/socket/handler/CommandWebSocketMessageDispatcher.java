@@ -2,13 +2,21 @@ package org.hswebframework.web.socket.handler;
 
 import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.core.JsonParseException;
+import org.hswebframework.web.ThreadLocalUtils;
 import org.hswebframework.web.authorization.Authentication;
+import org.hswebframework.web.authorization.AuthenticationHolder;
+import org.hswebframework.web.authorization.token.UserToken;
+import org.hswebframework.web.authorization.token.UserTokenHolder;
 import org.hswebframework.web.authorization.token.UserTokenManager;
 import org.hswebframework.web.socket.CommandRequest;
 import org.hswebframework.web.socket.WebSocketSessionListener;
+import org.hswebframework.web.socket.authorize.WebSocketTokenParser;
 import org.hswebframework.web.socket.message.WebSocketMessage;
 import org.hswebframework.web.socket.processor.CommandProcessor;
 import org.hswebframework.web.socket.processor.CommandProcessorContainer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -17,6 +25,7 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author zhouhao
@@ -28,6 +37,11 @@ public class CommandWebSocketMessageDispatcher extends TextWebSocketHandler {
     private UserTokenManager userTokenManager;
 
     private List<WebSocketSessionListener> webSocketSessionListeners;
+
+    @Autowired(required = false)
+    private List<WebSocketTokenParser> tokenParsers;
+
+    private Logger logger= LoggerFactory.getLogger(this.getClass());
 
     public void setWebSocketSessionListeners(List<WebSocketSessionListener> webSocketSessionListeners) {
         this.webSocketSessionListeners = webSocketSessionListeners;
@@ -72,7 +86,7 @@ public class CommandWebSocketMessageDispatcher extends TextWebSocketHandler {
         if (null == userTokenManager) {
             return null;
         }
-        return WebSocketUtils.getAuthentication(userTokenManager, socketSession);
+        return Authentication.current().orElse(null);
     }
 
     private CommandRequest buildCommand(WebSocketCommandRequest request, WebSocketSession socketSession) {
@@ -96,6 +110,25 @@ public class CommandWebSocketMessageDispatcher extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+        if (tokenParsers != null) {
+            String token = tokenParsers.stream()
+                    .map(parser -> parser.parseToken(session))
+                    .filter(Objects::nonNull)
+                    .findFirst()
+                    .orElse(null);
+            if (null != token) {
+                UserToken userToken = userTokenManager.getByToken(token);
+                if (null != userToken) {
+                    UserTokenHolder.setCurrent(userToken);
+                    Authentication authentication = Authentication.current().orElse(null);
+                    if (null != authentication) {
+                        logger.debug("websocket authentication init ok!");
+                    }else{
+                        logger.debug("websocket authentication init fail!");
+                    }
+                }
+            }
+        }
         if (webSocketSessionListeners != null) {
             webSocketSessionListeners.forEach(webSocketSessionListener ->
                     webSocketSessionListener.onSessionConnect(session));
@@ -104,6 +137,7 @@ public class CommandWebSocketMessageDispatcher extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
+        ThreadLocalUtils.clear();
         if (webSocketSessionListeners != null) {
             webSocketSessionListeners.forEach(webSocketSessionListener ->
                     webSocketSessionListener.onSessionClose(session));

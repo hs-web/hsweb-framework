@@ -3,8 +3,6 @@ package org.hswebframework.web.socket.handler;
 import java.util.Map;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public class WebSocketCommandRequest {
