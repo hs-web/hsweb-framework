@@ -3,6 +3,7 @@ package org.hswebframework.web.authorization.basic.aop;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.hswebframework.web.AopUtils;
 import org.hswebframework.web.authorization.Authentication;
+import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.define.AuthorizingContext;
 import org.hswebframework.web.authorization.basic.handler.AuthorizingHandler;
 import org.hswebframework.web.authorization.define.AuthorizeDefinition;
@@ -48,6 +49,7 @@ public class AopAuthorizingController extends StaticMethodMatcherPointcutAdvisor
     public boolean matches(Method method, Class<?> aClass) {
         //对controller进行控制
         return AopUtils.findAnnotation(aClass, Controller.class) != null
-                || AopUtils.findAnnotation(aClass, RestController.class) != null;
+                || AopUtils.findAnnotation(aClass, RestController.class) != null
+                || AopUtils.findAnnotation(aClass, method, Authorize.class) != null;
     }
 }
