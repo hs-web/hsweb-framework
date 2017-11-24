@@ -12,7 +12,9 @@ public interface CommandProcessor {
 
     void execute(CommandRequest command);
 
-    void init();
+    default void init() {
+    }
 
-    void destroy();
+    default void destroy() {
+    }
 }

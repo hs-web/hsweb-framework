@@ -4,8 +4,6 @@ import org.hswebframework.web.socket.WebSocketSessionListener;
 import org.springframework.web.socket.WebSocketSession;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public interface WebSocketMessager extends WebSocketSessionListener {

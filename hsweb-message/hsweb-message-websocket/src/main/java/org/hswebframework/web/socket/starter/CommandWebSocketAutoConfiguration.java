@@ -24,8 +24,6 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 import java.util.List;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 @Configuration
