@@ -36,8 +36,11 @@ public class AuthorizeCommandProcessor extends AbstractCommandProcessor {
             if (token != null) {
                 UserTokenHolder.setCurrent(token);
                 success = Authentication.current().orElse(null) != null;
+                if (success) {
+                    command.getSession().getAttributes().put("user_token", accessToken);
+                }
             }
-            sendMessage(command.getSession(),new WebSocketMessage(200, callback, success));
+            sendMessage(command.getSession(), new WebSocketMessage(200, callback, success));
         }
     }
 }

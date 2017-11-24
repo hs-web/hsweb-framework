@@ -6,6 +6,7 @@ import org.hswebframework.web.message.Messager;
 import org.hswebframework.web.socket.WebSocketSessionListener;
 import org.hswebframework.web.socket.authorize.AuthorizeCommandProcessor;
 import org.hswebframework.web.socket.authorize.SessionIdWebSocketTokenParser;
+import org.hswebframework.web.socket.authorize.WebSocketTokenParser;
 import org.hswebframework.web.socket.authorize.XAccessTokenParser;
 import org.hswebframework.web.socket.handler.CommandWebSocketMessageDispatcher;
 import org.hswebframework.web.socket.message.DefaultWebSocketMessager;
@@ -82,6 +83,9 @@ public class CommandWebSocketAutoConfiguration {
         @Autowired(required = false)
         private List<WebSocketSessionListener> webSocketSessionListeners;
 
+        @Autowired(required = false)
+        private List<WebSocketTokenParser> webSocketTokenParsers;
+
         @Autowired
         private CommandProcessorContainer commandProcessorContainer;
 
@@ -91,6 +95,7 @@ public class CommandWebSocketAutoConfiguration {
             dispatcher.setProcessorContainer(commandProcessorContainer);
             dispatcher.setUserTokenManager(userTokenManager);
             dispatcher.setWebSocketSessionListeners(webSocketSessionListeners);
+            dispatcher.setTokenParsers(webSocketTokenParsers);
             registry.addHandler(dispatcher, "/sockjs")
                     .withSockJS()
                     .setSessionCookieNeeded(true);
