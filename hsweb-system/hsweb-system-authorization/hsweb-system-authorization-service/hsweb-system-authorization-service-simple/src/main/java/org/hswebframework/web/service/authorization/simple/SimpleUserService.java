@@ -149,6 +149,8 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
     @Caching(evict = {
             @CacheEvict(value = USER_CACHE_NAME, key = "#userId"),
             @CacheEvict(value = USER_AUTH_CACHE_NAME, key = "#userId"),
+            @CacheEvict(value = USER_AUTH_CACHE_NAME,key = "'user-menu-list:'+#userId"),
+            @CacheEvict(value = USER_AUTH_CACHE_NAME,key = "'menu-tree:'+#userId")
     })
     public void update(String userId, UserEntity userEntity) {
         userEntity.setId(userId);
