@@ -1,35 +1,22 @@
 package org.hswebframework.web.entity.authorization;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
+@Getter
+@Setter
+@NoArgsConstructor
 public class SimpleUserRoleEntity implements UserRoleEntity {
+
+    private static final long serialVersionUID = -8831232608833695774L;
 
     private String userId;
 
     private String roleId;
-
-    @Override
-    public String getUserId() {
-        return userId;
-    }
-
-    @Override
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
-    @Override
-    public String getRoleId() {
-        return roleId;
-    }
-
-    @Override
-    public void setRoleId(String roleId) {
-        this.roleId = roleId;
-    }
 
     @Override
     public SimpleUserRoleEntity clone() {

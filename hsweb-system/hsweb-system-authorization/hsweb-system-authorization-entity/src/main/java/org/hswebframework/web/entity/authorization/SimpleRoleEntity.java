@@ -1,13 +1,18 @@
 package org.hswebframework.web.entity.authorization;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hswebframework.web.commons.entity.SimpleGenericEntity;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
+@Getter
+@Setter
+@NoArgsConstructor
 public class SimpleRoleEntity extends SimpleGenericEntity<String> implements RoleEntity {
+    private static final long serialVersionUID = -2857131363164004807L;
     private String name;
 
     private String describe;
@@ -15,38 +20,7 @@ public class SimpleRoleEntity extends SimpleGenericEntity<String> implements Rol
     private Byte status;
 
     @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    @Override
-    public String getDescribe() {
-        return describe;
-    }
-
-    @Override
-    public void setDescribe(String describe) {
-        this.describe = describe;
-    }
-
-    @Override
-    public Byte getStatus() {
-        return status;
-    }
-
-    @Override
-    public void setStatus(Byte status) {
-        this.status = status;
-    }
-
-    @Override
     public SimpleRoleEntity clone() {
-        SimpleRoleEntity target = ((SimpleRoleEntity) super.clone());
-        return target;
+        return ((SimpleRoleEntity) super.clone());
     }
 }

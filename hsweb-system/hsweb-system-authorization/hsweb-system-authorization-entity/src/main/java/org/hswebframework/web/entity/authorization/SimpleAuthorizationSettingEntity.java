@@ -16,6 +16,9 @@
  */
 package org.hswebframework.web.entity.authorization;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hswebframework.web.commons.entity.SimpleGenericEntity;
 
 import java.util.List;
@@ -25,7 +28,11 @@ import java.util.List;
  *
  * @author hsweb-generator-online
  */
+@Getter
+@Setter
+@NoArgsConstructor
 public class SimpleAuthorizationSettingEntity extends SimpleGenericEntity<String> implements AuthorizationSettingEntity {
+    private static final long serialVersionUID = -6036823477895044483L;
     //类型
     private String type;
     //设置给谁
@@ -39,87 +46,5 @@ public class SimpleAuthorizationSettingEntity extends SimpleGenericEntity<String
 
     private List<AuthorizationSettingDetailEntity> details;
 
-    @Override
-    public List<AuthorizationSettingDetailEntity> getDetails() {
-        return details;
-    }
 
-    @Override
-    public void setDetails(List<AuthorizationSettingDetailEntity> details) {
-        this.details = details;
-    }
-
-    @Override
-    public List<AuthorizationSettingMenuEntity> getMenus() {
-        return menus;
-    }
-
-    @Override
-    public void setMenus(List<AuthorizationSettingMenuEntity> menus) {
-        this.menus = menus;
-    }
-
-    /**
-     * @return 类型
-     */
-    @Override
-    public String getType() {
-        return this.type;
-    }
-
-    /**
-     * 设置 类型
-     */
-    @Override
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    /**
-     * @return 设置给谁
-     */
-    @Override
-    public String getSettingFor() {
-        return this.settingFor;
-    }
-
-    /**
-     * 设置 设置给谁
-     */
-    @Override
-    public void setSettingFor(String settingFor) {
-        this.settingFor = settingFor;
-    }
-
-    /**
-     * @return 状态
-     */
-    @Override
-    public Byte getStatus() {
-        return this.status;
-    }
-
-    /**
-     * 设置 状态
-     */
-    @Override
-    public void setStatus(Byte status) {
-        this.status = status;
-    }
-
-    /**
-     * @return 备注
-     */
-    @Override
-    public String getDescribe() {
-        return this.describe;
-    }
-
-    /**
-     * 设置 备注
-     */
-    @Override
-    public void setDescribe(String describe) {
-        this.describe = describe;
-    }
 }

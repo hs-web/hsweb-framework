@@ -112,7 +112,7 @@ public interface AuthorizationSettingDetailEntity extends GenericEntity<String>,
 
     void setPriority(Long priority);
 
-    Boolean isMerge();
+    Boolean getMerge();
 
     void setMerge(Boolean merge);
 

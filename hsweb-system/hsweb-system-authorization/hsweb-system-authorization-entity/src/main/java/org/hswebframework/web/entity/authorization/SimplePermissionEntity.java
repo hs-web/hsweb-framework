@@ -1,5 +1,8 @@
 package org.hswebframework.web.entity.authorization;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.validator.constraints.NotBlank;
 import org.hswebframework.web.commons.entity.SimpleGenericEntity;
 
@@ -8,11 +11,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
+@Getter
+@Setter
+@NoArgsConstructor
 public class SimplePermissionEntity extends SimpleGenericEntity<String> implements PermissionEntity {
+    private static final long serialVersionUID = -5505339187716888516L;
     @NotBlank
     private String name;
 
@@ -31,56 +36,6 @@ public class SimplePermissionEntity extends SimpleGenericEntity<String> implemen
     private List<OptionalField> optionalFields;
 
     @Override
-    public String getName() {
-        return this.name;
-    }
-
-    @Override
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    @Override
-    public String getDescribe() {
-        return describe;
-    }
-
-    @Override
-    public void setDescribe(String describe) {
-        this.describe = describe;
-    }
-
-    @Override
-    public Byte getStatus() {
-        return status;
-    }
-
-    @Override
-    public void setStatus(Byte status) {
-        this.status = status;
-    }
-
-    @Override
-    public List<ActionEntity> getActions() {
-        return actions;
-    }
-
-    @Override
-    public void setActions(List<ActionEntity> actions) {
-        this.actions = actions;
-    }
-
-    @Override
-    public void setOptionalFields(List<OptionalField> optionalFields) {
-        this.optionalFields = optionalFields;
-    }
-
-    @Override
-    public List<OptionalField> getOptionalFields() {
-        return optionalFields;
-    }
-
-    @Override
     public SimplePermissionEntity clone() {
         SimplePermissionEntity target = (SimplePermissionEntity) super.clone();
         if (actions != null) {
@@ -95,23 +50,4 @@ public class SimplePermissionEntity extends SimpleGenericEntity<String> implemen
         return target;
     }
 
-    @Override
-    public String getType() {
-        return type;
-    }
-
-    @Override
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    @Override
-    public List<String> getSupportDataAccessTypes() {
-        return supportDataAccessTypes;
-    }
-
-    @Override
-    public void setSupportDataAccessTypes(List<String> supportDataAccessTypes) {
-        this.supportDataAccessTypes = supportDataAccessTypes;
-    }
 }

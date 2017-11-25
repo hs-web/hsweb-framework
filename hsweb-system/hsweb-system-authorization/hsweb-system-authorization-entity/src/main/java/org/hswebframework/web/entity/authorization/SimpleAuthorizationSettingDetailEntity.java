@@ -16,6 +16,9 @@
  */
 package org.hswebframework.web.entity.authorization;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hswebframework.web.commons.entity.SimpleGenericEntity;
 
 import java.util.List;
@@ -26,7 +29,11 @@ import java.util.Set;
  *
  * @author hsweb-generator-online
  */
+@Getter
+@Setter
+@NoArgsConstructor
 public class SimpleAuthorizationSettingDetailEntity extends SimpleGenericEntity<String> implements AuthorizationSettingDetailEntity {
+    private static final long serialVersionUID = -4284551748747749521L;
     //权限id
     private String                 permissionId;
     //设置id
@@ -41,104 +48,4 @@ public class SimpleAuthorizationSettingDetailEntity extends SimpleGenericEntity<
     private Long                   priority;
     //是否合并
     private Boolean                merge;
-
-    /**
-     * @return 权限id
-     */
-    @Override
-    public String getPermissionId() {
-        return this.permissionId;
-    }
-
-    /**
-     * 设置 权限id
-     */
-    @Override
-    public void setPermissionId(String permissionId) {
-        this.permissionId = permissionId;
-    }
-
-    /**
-     * @return 设置id
-     */
-    @Override
-    public String getSettingId() {
-        return this.settingId;
-    }
-
-    /**
-     * 设置 设置id
-     */
-    @Override
-    public void setSettingId(String settingId) {
-        this.settingId = settingId;
-    }
-
-    /**
-     * @return 可操作类型
-     */
-    @Override
-    public Set<String> getActions() {
-        return this.actions;
-    }
-
-    /**
-     * 设置 可操作类型
-     */
-    @Override
-    public void setActions(Set<String> actions) {
-        this.actions = actions;
-    }
-
-    /**
-     * @return 数据权限控制
-     */
-    @Override
-    public List<DataAccessEntity> getDataAccesses() {
-        return this.dataAccesses;
-    }
-
-    /**
-     * 设置 数据权限控制
-     */
-    @Override
-    public void setDataAccesses(List<DataAccessEntity> dataAccesses) {
-        this.dataAccesses = dataAccesses;
-    }
-
-    /**
-     * @return 状态
-     */
-    @Override
-    public Byte getStatus() {
-        return this.status;
-    }
-
-    /**
-     * 设置 状态
-     */
-    @Override
-    public void setStatus(Byte status) {
-        this.status = status;
-    }
-
-    @Override
-    public Long getPriority() {
-        return priority;
-    }
-
-    @Override
-    public void setPriority(Long priority) {
-        this.priority = priority;
-    }
-
-    @Override
-    public Boolean isMerge() {
-        return merge;
-    }
-
-    @Override
-    public void setMerge(Boolean merge) {
-        this.merge = merge;
-    }
 }

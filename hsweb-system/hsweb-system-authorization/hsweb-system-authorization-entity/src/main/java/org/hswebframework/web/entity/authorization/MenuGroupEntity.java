@@ -85,7 +85,7 @@ public interface MenuGroupEntity extends TreeSortSupportEntity<String> {
     /**
      * @return 是否默认
      */
-    Boolean isDefaultGroup();
+    Boolean getDefaultGroup();
 
     /**
      * 设置 是否默认

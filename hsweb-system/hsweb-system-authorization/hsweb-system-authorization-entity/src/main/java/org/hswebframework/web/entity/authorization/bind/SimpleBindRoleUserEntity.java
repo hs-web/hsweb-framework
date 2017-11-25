@@ -1,5 +1,8 @@
 package org.hswebframework.web.entity.authorization.bind;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hswebframework.web.entity.authorization.SimpleUserEntity;
 
 import java.util.ArrayList;
@@ -7,23 +10,14 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
+@Getter
+@Setter
+@NoArgsConstructor
 public class SimpleBindRoleUserEntity extends SimpleUserEntity implements BindRoleUserEntity {
 
     private List<String> roles;
-
-    @Override
-    public List<String> getRoles() {
-        return roles;
-    }
-
-    @Override
-    public void setRoles(List<String> roles) {
-        this.roles = roles;
-    }
 
     @Override
     public SimpleBindRoleUserEntity clone() {

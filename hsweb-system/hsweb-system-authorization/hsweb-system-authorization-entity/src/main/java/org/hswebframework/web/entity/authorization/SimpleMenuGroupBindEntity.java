@@ -16,6 +16,9 @@
  */
 package org.hswebframework.web.entity.authorization;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hswebframework.web.commons.entity.SimpleTreeSortSupportEntity;
 
 import java.util.ArrayList;
@@ -26,7 +29,11 @@ import java.util.List;
  *
  * @author hsweb-generator-online
  */
+@Getter
+@Setter
+@NoArgsConstructor
 public class SimpleMenuGroupBindEntity extends SimpleTreeSortSupportEntity<String> implements MenuGroupBindEntity {
+    private static final long serialVersionUID = -8671671135008425741L;
     //状态
     private Byte                      status;
     //菜单id
@@ -35,57 +42,4 @@ public class SimpleMenuGroupBindEntity extends SimpleTreeSortSupportEntity<Strin
     private String                    groupId;
     //子节点
     private List<MenuGroupBindEntity> children;
-
-    @Override
-    public Byte getStatus() {
-        return status;
-    }
-
-    @Override
-    public void setStatus(Byte status) {
-        this.status = status;
-    }
-
-    /**
-     * @return 菜单id
-     */
-    @Override
-    public String getMenuId() {
-        return this.menuId;
-    }
-
-    /**
-     * 设置 菜单id
-     */
-    @Override
-    public void setMenuId(String menuId) {
-        this.menuId = menuId;
-    }
-
-    /**
-     * @return 分组id
-     */
-    @Override
-    public String getGroupId() {
-        return this.groupId;
-    }
-
-    /**
-     * 设置 分组id
-     */
-    @Override
-    public void setGroupId(String groupId) {
-        this.groupId = groupId;
-    }
-
-
-    @Override
-    public List<MenuGroupBindEntity> getChildren() {
-        return children;
-    }
-
-    @Override
-    public void setChildren(List<MenuGroupBindEntity> children) {
-        this.children = children;
-    }
 }

@@ -16,6 +16,9 @@
  */
 package org.hswebframework.web.entity.authorization;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hswebframework.web.commons.entity.SimpleTreeSortSupportEntity;
 
 import java.util.List;
@@ -25,7 +28,11 @@ import java.util.List;
  *
  * @author hsweb-generator-online
  */
+@Getter
+@Setter
+@NoArgsConstructor
 public class SimpleAuthorizationSettingMenuEntity extends SimpleTreeSortSupportEntity<String> implements AuthorizationSettingMenuEntity {
+    private static final long serialVersionUID = 4311480526446922229L;
     //菜单id
     private String menuId;
     //设置id
@@ -34,81 +41,6 @@ public class SimpleAuthorizationSettingMenuEntity extends SimpleTreeSortSupportE
     private Byte   status;
     //其他配置内容
     private String config;
-
     private List<AuthorizationSettingMenuEntity> children;
 
-    /**
-     * @return 菜单id
-     */
-    @Override
-    public String getMenuId() {
-        return this.menuId;
-    }
-
-    /**
-     * 设置 菜单id
-     */
-    @Override
-    public void setMenuId(String menuId) {
-        this.menuId = menuId;
-    }
-
-    /**
-     * @return 设置id
-     */
-    @Override
-    public String getSettingId() {
-        return this.settingId;
-    }
-
-    /**
-     * 设置 设置id
-     */
-    @Override
-    public void setSettingId(String settingId) {
-        this.settingId = settingId;
-    }
-
-
-    /**
-     * @return 状态
-     */
-    @Override
-    public Byte getStatus() {
-        return this.status;
-    }
-
-    /**
-     * 设置 状态
-     */
-    @Override
-    public void setStatus(Byte status) {
-        this.status = status;
-    }
-
-    /**
-     * @return 其他配置内容
-     */
-    @Override
-    public String getConfig() {
-        return this.config;
-    }
-
-    /**
-     * 设置 其他配置内容
-     */
-    @Override
-    public void setConfig(String config) {
-        this.config = config;
-    }
-
-    @Override
-    public List<AuthorizationSettingMenuEntity> getChildren() {
-        return children;
-    }
-
-    @Override
-    public void setChildren(List<AuthorizationSettingMenuEntity> children) {
-        this.children = children;
-    }
 }

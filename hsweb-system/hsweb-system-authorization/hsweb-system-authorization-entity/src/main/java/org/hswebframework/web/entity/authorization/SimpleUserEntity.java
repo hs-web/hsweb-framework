@@ -1,13 +1,19 @@
 package org.hswebframework.web.entity.authorization;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hswebframework.web.commons.entity.SimpleGenericEntity;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
+@Getter
+@Setter
+@NoArgsConstructor
 public class SimpleUserEntity extends SimpleGenericEntity<String> implements UserEntity {
+    private static final long serialVersionUID = -2625681326256009807L;
+
     private String name;
 
     private String username;
@@ -21,76 +27,6 @@ public class SimpleUserEntity extends SimpleGenericEntity<String> implements Use
     private String creatorId;
 
     private Byte status;
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    @Override
-    public String getUsername() {
-        return username;
-    }
-
-    @Override
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    @Override
-    public String getPassword() {
-        return password;
-    }
-
-    @Override
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    @Override
-    public String getSalt() {
-        return salt;
-    }
-
-    @Override
-    public void setSalt(String salt) {
-        this.salt = salt;
-    }
-
-    @Override
-    public Long getCreateTime() {
-        return createTime;
-    }
-
-    @Override
-    public void setCreateTime(Long createTime) {
-        this.createTime = createTime;
-    }
-
-    @Override
-    public String getCreatorId() {
-        return creatorId;
-    }
-
-    @Override
-    public void setCreatorId(String creatorId) {
-        this.creatorId = creatorId;
-    }
-
-    @Override
-    public Byte getStatus() {
-        return status;
-    }
-
-    @Override
-    public void setStatus(Byte status) {
-        this.status = status;
-    }
 
     @Override
     public SimpleUserEntity clone() {

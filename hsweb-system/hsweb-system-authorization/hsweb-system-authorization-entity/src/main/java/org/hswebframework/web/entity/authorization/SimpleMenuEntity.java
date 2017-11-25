@@ -18,6 +18,9 @@
 
 package org.hswebframework.web.entity.authorization;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hswebframework.web.commons.entity.SimpleTreeSortSupportEntity;
 
 import java.util.ArrayList;
@@ -30,10 +33,13 @@ import java.util.stream.Collectors;
  * @author zhouhao
  * @since 3.0
  */
-@SuppressWarnings("unchecked")
+@Getter
+@Setter
+@NoArgsConstructor
 public class SimpleMenuEntity extends SimpleTreeSortSupportEntity<String>
         implements MenuEntity {
 
+    private static final long serialVersionUID = 6942822850955576468L;
     //菜单名称
     private String name;
 
@@ -54,76 +60,6 @@ public class SimpleMenuEntity extends SimpleTreeSortSupportEntity<String>
 
     //子菜单
     private List<MenuEntity> children;
-
-    @Override
-    public List<MenuEntity> getChildren() {
-        return children;
-    }
-
-    @Override
-    public void setChildren(List<MenuEntity> children) {
-        this.children = children;
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    @Override
-    public String getDescribe() {
-        return describe;
-    }
-
-    @Override
-    public void setDescribe(String describe) {
-        this.describe = describe;
-    }
-
-    @Override
-    public String getPermissionId() {
-        return permissionId;
-    }
-
-    @Override
-    public void setPermissionId(String permissionId) {
-        this.permissionId = permissionId;
-    }
-
-    @Override
-    public String getUrl() {
-        return url;
-    }
-
-    @Override
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
-    @Override
-    public String getIcon() {
-        return icon;
-    }
-
-    @Override
-    public void setIcon(String icon) {
-        this.icon = icon;
-    }
-
-    @Override
-    public Byte getStatus() {
-        return status;
-    }
-
-    @Override
-    public void setStatus(Byte status) {
-        this.status = status;
-    }
 
     @Override
     public SimpleMenuEntity clone() {

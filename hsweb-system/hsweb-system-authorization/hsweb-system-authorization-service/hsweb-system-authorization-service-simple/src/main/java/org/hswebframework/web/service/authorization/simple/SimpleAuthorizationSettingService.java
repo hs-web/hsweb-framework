@@ -358,7 +358,7 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
             Collections.sort(details);
             for (AuthorizationSettingDetailEntity detail : details) {
                 //如果指定不合并相同的配置,则清空之前的配置
-                if (!Boolean.TRUE.equals(detail.isMerge())) {
+                if (!Boolean.TRUE.equals(detail.getMerge())) {
                     actions.clear();
                     dataAccessConfigs.clear();
                 }

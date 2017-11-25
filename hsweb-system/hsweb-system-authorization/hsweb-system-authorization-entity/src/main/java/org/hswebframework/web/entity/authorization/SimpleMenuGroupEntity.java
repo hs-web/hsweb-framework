@@ -16,6 +16,9 @@
  */
 package org.hswebframework.web.entity.authorization;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hswebframework.web.commons.entity.SimpleTreeSortSupportEntity;
 
 import java.util.Collections;
@@ -27,7 +30,11 @@ import java.util.List;
  *
  * @author hsweb-generator-online
  */
+@Getter
+@Setter
+@NoArgsConstructor
 public class SimpleMenuGroupEntity extends SimpleTreeSortSupportEntity<String> implements MenuGroupEntity {
+    private static final long serialVersionUID = 349586524046467254L;
     //分组名称
     private String  name;
     //分组描述
@@ -37,87 +44,7 @@ public class SimpleMenuGroupEntity extends SimpleTreeSortSupportEntity<String> i
     //状态
     private Byte    status;
 
-    private List<SimpleMenuGroupEntity> children;
+    private List<MenuGroupEntity> children;
 
-    private List<SimpleMenuGroupBindEntity> bindInfo;
-
-    /**
-     * @return 分组名称
-     */
-    @Override
-    public String getName() {
-        return this.name;
-    }
-
-    /**
-     * 设置 分组名称
-     */
-    @Override
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    /**
-     * @return 分组描述
-     */
-    @Override
-    public String getDescribe() {
-        return this.describe;
-    }
-
-    /**
-     * 设置 分组描述
-     */
-    @Override
-    public void setDescribe(String describe) {
-        this.describe = describe;
-    }
-
-    /**
-     * @return 是否默认
-     */
-    @Override
-    public Boolean isDefaultGroup() {
-        return this.defaultGroup;
-    }
-
-    /**
-     * 设置 是否默认
-     */
-    @Override
-    public void setDefaultGroup(Boolean defaultGroup) {
-        this.defaultGroup = defaultGroup;
-    }
-
-    @Override
-    public List<SimpleMenuGroupEntity> getChildren() {
-        return children;
-    }
-
-    public void setChildren(List<SimpleMenuGroupEntity> children) {
-        this.children = children;
-    }
-
-    @Override
-    public List<MenuGroupBindEntity> getBindInfo() {
-        if (bindInfo == null) {
-            return Collections.emptyList();
-        }
-        return new LinkedList<>(bindInfo);
-    }
-
-    @Override
-    public void setBindInfo(List<MenuGroupBindEntity> bindInfo) {
-        this.bindInfo = new LinkedList(bindInfo);
-    }
-
-    @Override
-    public Byte getStatus() {
-        return status;
-    }
-
-    @Override
-    public void setStatus(Byte status) {
-        this.status = status;
-    }
+    private List<MenuGroupBindEntity> bindInfo;
 }
