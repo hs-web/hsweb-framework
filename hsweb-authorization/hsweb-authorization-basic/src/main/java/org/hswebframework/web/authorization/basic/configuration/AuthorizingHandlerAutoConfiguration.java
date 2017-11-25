@@ -43,10 +43,6 @@ public class AuthorizingHandlerAutoConfiguration {
         return new DefaultAuthorizingHandler(dataAccessController);
     }
 
-    @Bean
-    public UserTokenAuthenticationSupplier userTokenAuthenticationSupplier(AuthenticationManager authenticationManager) {
-        return new UserTokenAuthenticationSupplier(authenticationManager);
-    }
 
     @Bean
     @ConditionalOnMissingBean(UserTokenParser.class)
@@ -59,12 +55,6 @@ public class AuthorizingHandlerAutoConfiguration {
         return new SessionIdUserTokenGenerator();
     }
 
-    @Bean
-    @ConditionalOnMissingBean(UserTokenManager.class)
-    @ConfigurationProperties(prefix = "hsweb.authorize")
-    public UserTokenManager userTokenManager() {
-        return new DefaultUserTokenManager();
-    }
 
     @Bean
     public WebMvcConfigurer webUserTokenInterceptorConfigurer(UserTokenManager userTokenManager,

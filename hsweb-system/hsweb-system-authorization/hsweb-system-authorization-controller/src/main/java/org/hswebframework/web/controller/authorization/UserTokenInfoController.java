@@ -17,7 +17,7 @@ import java.util.List;
 @RequestMapping("${hsweb.web.mappings.user-token:user-token}")
 @AccessLogger("token信息")
 @Authorize(permission = "user-token")
-public class UserTokenController {
+public class UserTokenInfoController {
 
     @Autowired
     private UserTokenManager userTokenManager;

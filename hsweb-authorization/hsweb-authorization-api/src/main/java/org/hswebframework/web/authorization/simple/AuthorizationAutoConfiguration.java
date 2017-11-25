@@ -1,13 +1,18 @@
 package org.hswebframework.web.authorization.simple;
 
 import org.hswebframework.web.authorization.Authentication;
+import org.hswebframework.web.authorization.AuthenticationManager;
 import org.hswebframework.web.authorization.builder.AuthenticationBuilderFactory;
 import org.hswebframework.web.authorization.builder.DataAccessConfigBuilderFactory;
 import org.hswebframework.web.authorization.simple.builder.DataAccessConfigConvert;
 import org.hswebframework.web.authorization.simple.builder.SimpleAuthenticationBuilderFactory;
 import org.hswebframework.web.authorization.simple.builder.SimpleDataAccessConfigBuilderFactory;
+import org.hswebframework.web.authorization.token.DefaultUserTokenManager;
+import org.hswebframework.web.authorization.token.UserTokenAuthenticationSupplier;
+import org.hswebframework.web.authorization.token.UserTokenManager;
 import org.hswebframework.web.convert.CustomMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -16,8 +21,6 @@ import org.springframework.context.annotation.Configuration;
 import java.util.List;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 @Configuration
@@ -25,6 +28,19 @@ public class AuthorizationAutoConfiguration {
 
     @Autowired(required = false)
     private List<DataAccessConfigConvert> dataAccessConfigConverts;
+
+    @Bean
+    @ConditionalOnMissingBean(UserTokenManager.class)
+    @ConfigurationProperties(prefix = "hsweb.authorize")
+    public UserTokenManager userTokenManager() {
+        return new DefaultUserTokenManager();
+    }
+
+    @Bean
+    @ConditionalOnBean(AuthenticationManager.class)
+    public UserTokenAuthenticationSupplier userTokenAuthenticationSupplier(AuthenticationManager authenticationManager) {
+        return new UserTokenAuthenticationSupplier(authenticationManager);
+    }
 
     @Bean
     @ConditionalOnMissingBean(DataAccessConfigBuilderFactory.class)
