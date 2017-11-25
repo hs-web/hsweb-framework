@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
  */
 public class TransactionBatchAsyncJobContainer implements BatchAsyncJobContainer {
 
-    private ExecutorService              executorService;
+    private ExecutorService executorService;
     private TransactionSupportJobWrapper translationSupportJobWrapper;
     private static final Logger logger = LoggerFactory.getLogger(TransactionBatchAsyncJobContainer.class);
 
@@ -100,8 +100,20 @@ public class TransactionBatchAsyncJobContainer implements BatchAsyncJobContainer
         if (!exceptions.isEmpty()) {
             throw new AsyncJobException(exceptions);
         }
+        List<Object> result = new ArrayList<>();
 
-        return futures.stream().map(this::getValue).collect(Collectors.toList());
+        List<Exception> errors = new ArrayList<>();
+        for (Future future : futures) {
+            try {
+                result.add(future.get());
+            } catch (Exception e) {
+                errors.add(e);
+            }
+        }
+        if (errors.size() > 0) {
+            throw errors.get(0);
+        }
+        return result;
     }
 
     private Object getValue(Future future) {
