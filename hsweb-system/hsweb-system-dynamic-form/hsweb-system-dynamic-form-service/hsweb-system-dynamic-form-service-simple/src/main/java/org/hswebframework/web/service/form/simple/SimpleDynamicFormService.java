@@ -324,7 +324,7 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
     public void deploy(String formId) {
         DynamicFormEntity formEntity = selectByPk(formId);
         assertNotNull(formEntity);
-        if (Boolean.TRUE.equals(formEntity.isDeployed())) {
+        if (Boolean.TRUE.equals(formEntity.getDeployed())) {
             dynamicFormDeployLogService.cancelDeployed(formId);
         }
         List<DynamicFormColumnEntity> columns = selectColumnsByFormId(formId);

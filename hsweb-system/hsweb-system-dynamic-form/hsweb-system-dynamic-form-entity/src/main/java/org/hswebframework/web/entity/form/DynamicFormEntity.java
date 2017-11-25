@@ -150,7 +150,7 @@ public interface DynamicFormEntity extends GenericEntity<String> {
      * @return 是否已发布
      */
     @ApiModelProperty(value = "是否已发布,发布时自动设置.", example = "false")
-    Boolean isDeployed();
+    Boolean getDeployed();
 
     /**
      * @param deployed 是否已发布

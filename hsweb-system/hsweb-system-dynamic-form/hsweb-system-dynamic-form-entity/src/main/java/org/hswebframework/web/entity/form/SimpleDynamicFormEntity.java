@@ -151,7 +151,7 @@ public class SimpleDynamicFormEntity extends SimpleGenericEntity<String> impleme
      * @return 是否已发布
      */
     @Override
-    public Boolean isDeployed() {
+    public Boolean getDeployed() {
         return this.deployed;
     }
 
