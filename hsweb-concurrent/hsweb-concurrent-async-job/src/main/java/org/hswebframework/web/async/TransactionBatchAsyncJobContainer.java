@@ -27,7 +27,7 @@ public class TransactionBatchAsyncJobContainer implements BatchAsyncJobContainer
 
     private AtomicInteger failCounter = new AtomicInteger();
 
-    private AtomicInteger transactionJobOverCounter = new AtomicInteger();
+    private AtomicInteger transactionJobOverCounter = new AtomicInteger(0);
 
     private CountDownLatch countDownLatch = new CountDownLatch(1);
 
@@ -97,30 +97,26 @@ public class TransactionBatchAsyncJobContainer implements BatchAsyncJobContainer
             Thread.sleep(50);
         }
         countDownLatch.countDown();
+
+        List<Object> results = futures.stream().map(this::getValue).collect(Collectors.toList());
         if (!exceptions.isEmpty()) {
             throw new AsyncJobException(exceptions);
         }
-        List<Object> result = new ArrayList<>();
-
-        List<Exception> errors = new ArrayList<>();
-        for (Future future : futures) {
-            try {
-                result.add(future.get());
-            } catch (Exception e) {
-                errors.add(e);
-            }
-        }
-        if (errors.size() > 0) {
-            throw errors.get(0);
-        }
-        return result;
+        return results;
     }
 
     private Object getValue(Future future) {
         try {
             return future.get();
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            exceptions.add(e);
         }
+        return null;
+    }
+
+    @Override
+    public BatchAsyncJobContainer cancel() {
+        failCounter.incrementAndGet();
+        return this;
     }
 }

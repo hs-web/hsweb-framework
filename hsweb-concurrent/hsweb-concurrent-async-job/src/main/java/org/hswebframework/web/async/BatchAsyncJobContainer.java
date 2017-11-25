@@ -17,4 +17,6 @@ public interface BatchAsyncJobContainer {
 
 
     List<Object> getResult() throws Exception;
+
+    BatchAsyncJobContainer cancel();
 }
