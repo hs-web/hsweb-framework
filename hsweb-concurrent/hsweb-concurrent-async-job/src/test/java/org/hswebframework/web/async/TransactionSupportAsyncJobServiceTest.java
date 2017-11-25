@@ -50,17 +50,42 @@ public class TransactionSupportAsyncJobServiceTest extends SimpleWebApplicationT
 
         try {
             BatchAsyncJobContainer jobContainer = asyncJobService.batch();
-
+            jobContainer.submit(() -> {
+                Thread.sleep(50);
+                throw new RuntimeException();
+            }, true);
             for (int i = 0; i < 100; i++) {
                 jobContainer.submit(() -> sqlExecutor.insert("insert into test values('test')", null), true);
             }
-            jobContainer.submit(() -> {
-                Thread.sleep(200);
-                throw new RuntimeException();
-            }, true);
+
             System.out.println(jobContainer.getResult().size());
         } catch (Exception ignore) {
+            ignore.printStackTrace();
         }
         Assert.assertTrue(sqlExecutor.list("select * from test").isEmpty());
+    }
+
+    @Test
+    public void testSimple() throws Exception {
+
+        sqlExecutor.exec("create table test(id varchar(32))");
+
+        try {
+            BatchAsyncJobContainer jobContainer = asyncJobService.batch();
+            jobContainer.submit(() -> {
+                Thread.sleep(10);
+                jobContainer.cancel();
+                throw new RuntimeException();
+            }, false);
+            for (int i = 0; i < 100; i++) {
+                jobContainer.submit(() -> sqlExecutor.insert("insert into test values('test')", null), false);
+            }
+
+            System.out.println(jobContainer.getResult().size());
+
+        } catch (Exception ignore) {
+            ignore.printStackTrace();
+        }
+        Assert.assertTrue(sqlExecutor.list("select * from test").size()>0);
     }
 }

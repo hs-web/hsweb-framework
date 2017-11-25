@@ -33,7 +33,9 @@ public class TransactionBatchAsyncJobContainer implements BatchAsyncJobContainer
 
     private List<Future> futures = new ArrayList<>();
 
-    private int transactionJobNumber = 0;
+    private AtomicInteger transactionJobNumber = new AtomicInteger(0);
+
+    private volatile boolean shutdown = false;
 
     public void setExecutorService(ExecutorService executorService) {
         this.executorService = executorService;
@@ -41,24 +43,34 @@ public class TransactionBatchAsyncJobContainer implements BatchAsyncJobContainer
 
     @Override
     public <V> BatchAsyncJobContainer submit(Callable<V> callable, boolean enableTransaction) {
-        if (!enableTransaction) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("submit not transaction support job {}", transactionJobNumber);
-            }
-            futures.add(executorService.submit(callable));
+        if (shutdown) {
+            logger.warn("TransactionBatchAsyncJobContainer is shutdown, fail job number :{}", failCounter.get());
             return this;
         }
-        transactionJobNumber++;
+        if (!enableTransaction) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("submit not transaction support job");
+            }
+            futures.add(executorService.submit(() -> {
+                if (shutdown) {
+                    return null;
+                }
+                return callable.call();
+            }));
+            return this;
+        }
+
+        int tmpJobFlag = transactionJobNumber.incrementAndGet();
+
         if (logger.isDebugEnabled()) {
             logger.debug("submit transaction support job {}", transactionJobNumber);
         }
-        int tmpJobFlag = transactionJobNumber;
 
         TransactionSupportJob<V> translationJob = translationSupportJobWrapper.wrapper(callable);
         Callable<V> proxy = () -> {
             V value = null;
             try {
-                if (failCounter.get() > 0) {
+                if (failCounter.get() > 0 || shutdown) {
                     return null;
                 }
                 value = translationJob.call();
@@ -82,8 +94,9 @@ public class TransactionBatchAsyncJobContainer implements BatchAsyncJobContainer
             } catch (Exception e) {
                 exceptions.add(e);
                 failCounter.incrementAndGet();
-                transactionJobOverCounter.incrementAndGet();
                 logger.warn("transaction support job {} fail.", tmpJobFlag, e);
+            }finally {
+                transactionJobOverCounter.incrementAndGet();
             }
             return value;
         };
@@ -93,7 +106,7 @@ public class TransactionBatchAsyncJobContainer implements BatchAsyncJobContainer
 
     @Override
     public List<Object> getResult() throws Exception {
-        while (transactionJobOverCounter.get() != transactionJobNumber) {
+        while (transactionJobOverCounter.get() != transactionJobNumber.get() && failCounter.get() == 0) {
             Thread.sleep(50);
         }
         countDownLatch.countDown();
@@ -116,7 +129,7 @@ public class TransactionBatchAsyncJobContainer implements BatchAsyncJobContainer
 
     @Override
     public BatchAsyncJobContainer cancel() {
-        failCounter.incrementAndGet();
+        shutdown = true;
         return this;
     }
 }
