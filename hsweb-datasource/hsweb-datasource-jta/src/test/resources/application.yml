@@ -21,6 +21,7 @@ spring:
 logging:
   level:
       com.atomikos: WARN
+      org.hswebframework: DEBUG
 hsweb:
   dynamic:
     datasource:

@@ -1,6 +1,5 @@
 package org.hswebframework.web.datasource.jta;
 
-import org.hswebframework.web.datasource.DynamicDataSourceService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.jta.atomikos.AtomikosDataSourceBean;
 import org.springframework.context.annotation.Bean;
@@ -11,8 +10,6 @@ import javax.sql.DataSource;
 import java.sql.SQLException;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 @Configuration
@@ -32,7 +29,6 @@ public class AtomikosDataSourceAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(DynamicDataSourceService.class)
     public JtaDynamicDataSourceService jtaDynamicDataSourceService(JtaDataSourceRepository jtaDataSourceRepository, DataSource dataSource) throws SQLException {
         return new JtaDynamicDataSourceService(jtaDataSourceRepository, dataSource);
     }
