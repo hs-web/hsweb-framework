@@ -19,18 +19,22 @@
 package org.hswebframework.web.authorization.oauth2.client.listener;
 
 
+import org.springframework.context.ApplicationEvent;
+
 import java.util.Optional;
 import java.util.function.Function;
 
 /**
  * @author zhouhao
  */
-public class OAuth2CodeAuthBeforeEvent implements OAuth2Event {
+public class OAuth2CodeAuthBeforeEvent extends ApplicationEvent implements OAuth2Event {
+    private static final long serialVersionUID = -2106764405363442985L;
     private String                   code;
     private String                   state;
     private Function<String, String> parameterGetter;
 
     public OAuth2CodeAuthBeforeEvent(String code, String state, Function<String, String> parameterGetter) {
+        super(code);
         this.code = code;
         this.state = state;
         this.parameterGetter = parameterGetter;
