@@ -29,8 +29,10 @@ import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.jms.Message;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -60,9 +62,9 @@ public class SimpleAtomikosTests {
         }
 
         public class DynDatabaseMeta extends RDBDatabaseMetaData {
-            private Map<DatabaseType, Dialect>             dialectMap;
+            private Map<DatabaseType, Dialect> dialectMap;
             private Map<DatabaseType, RDBDatabaseMetaData> metaDataMap;
-            private Map<DatabaseType, TableMetaParser>     parserMap;
+            private Map<DatabaseType, TableMetaParser> parserMap;
 
             public DynDatabaseMeta(SqlExecutor sqlExecutor) {
                 dialectMap = new HashMap<>();
@@ -121,6 +123,10 @@ public class SimpleAtomikosTests {
     @Test
     @Rollback(false)
     public void test() throws SQLException, InterruptedException {
+        new Thread(() -> {
+            Object message = jmsTemplate.receiveAndConvert("test");
+            System.out.println(message);
+        }).start();
         DataSourceHolder.switcher().reset();
 
         dynDsTest.testCreateTable();
@@ -152,9 +158,11 @@ public class SimpleAtomikosTests {
     public static class DynDsTest {
         private RDBDatabase database;
 
+        @Transactional(propagation = Propagation.NOT_SUPPORTED)
         public void testCreateTable() throws SQLException {
             database.createOrAlter("s_user")
                     .addColumn().name("name").varchar(32).commit()
+                    .addColumn().name("test").varchar(32).commit()
                     .commit();
         }
 
