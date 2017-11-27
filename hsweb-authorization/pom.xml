@@ -17,6 +17,7 @@
         <module>hsweb-authorization-basic</module>
         <module>hsweb-authorization-jwt</module>
         <module>hsweb-authorization-cloud</module>
+        <module>hsweb-authorization-ldap</module>
     </modules>
 
 
