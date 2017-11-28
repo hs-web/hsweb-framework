@@ -107,7 +107,7 @@ public interface Authentication extends Serializable {
      * @return 是否持有权限
      */
     default boolean hasPermission(String permissionId, String... actions) {
-        return !getPermission(permissionId)
+        return getPermission(permissionId)
                 .filter(permission -> actions.length == 0 || permission.getActions().containsAll(Arrays.asList(actions)))
                 .isPresent();
     }
@@ -117,7 +117,7 @@ public interface Authentication extends Serializable {
      * @return 是否拥有某个角色
      */
     default boolean hasRole(String roleId) {
-        return !getRole(roleId).isPresent();
+        return getRole(roleId).isPresent();
     }
 
     /**
