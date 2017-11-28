@@ -32,6 +32,9 @@ import org.hswebframework.web.service.QueryByEntityService;
 import org.hswebframework.web.service.QueryService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.List;
 
 import static org.hswebframework.web.controller.message.ResponseMessage.ok;
 
@@ -88,6 +91,14 @@ public interface QueryController<E, PK, Q extends Entity> {
     @ApiOperation("根据主键查询数据")
     default ResponseMessage<E> getByPrimaryKey(@PathVariable PK id) {
         return ok(assertNotNull(getService().selectByPk(id)));
+    }
+
+    @Authorize(action = Permission.ACTION_GET)
+    @GetMapping(path = "/ids")
+    @AccessLogger("{get_by_id}")
+    @ApiOperation("根据主键查询多个数据")
+    default ResponseMessage<List<E>> getByPrimaryKey(@RequestParam List<PK> ids) {
+        return ok(assertNotNull(getService().selectByPk(ids)));
     }
 
     static <T> T assertNotNull(T obj) {

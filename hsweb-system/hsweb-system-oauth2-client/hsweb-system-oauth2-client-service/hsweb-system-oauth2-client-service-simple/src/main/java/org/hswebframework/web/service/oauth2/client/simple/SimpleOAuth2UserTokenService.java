@@ -104,10 +104,8 @@ public class SimpleOAuth2UserTokenService extends GenericEntityService<OAuth2Use
 
     @Override
     @Caching(
-            put = {
-                    @CachePut(cacheNames = "oauth2-user-token", key = "'a-t:'+#tokenInfo.accessToken"),
-            },
-            evict = @CacheEvict(cacheNames = "oauth2-user-token-list", allEntries = true)
+            put = @CachePut(cacheNames = "oauth2-user-token", key = "'a-t:'+#tokenInfo.accessToken"),
+            evict = @CacheEvict(cacheNames = "oauth2-user-token-list", key = "'s-g-t:'+#result.serverId+':'+#result.grantType")
     )
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public AccessTokenInfo update(String id, AccessTokenInfo tokenInfo) {
@@ -119,10 +117,8 @@ public class SimpleOAuth2UserTokenService extends GenericEntityService<OAuth2Use
 
     @Override
     @Caching(
-            put = {
-                    @CachePut(cacheNames = "oauth2-user-token", key = "'a-t:'+#tokenInfo.accessToken"),
-            },
-            evict = @CacheEvict(cacheNames = "oauth2-user-token-list", allEntries = true)
+            put = @CachePut(cacheNames = "oauth2-user-token", key = "'a-t:'+#tokenInfo.accessToken"),
+            evict = @CacheEvict(cacheNames = "oauth2-user-token-list", key = "'s-g-t:'+#result.serverId+':'+#result.grantType")
     )
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public AccessTokenInfo insert(AccessTokenInfo tokenInfo) {

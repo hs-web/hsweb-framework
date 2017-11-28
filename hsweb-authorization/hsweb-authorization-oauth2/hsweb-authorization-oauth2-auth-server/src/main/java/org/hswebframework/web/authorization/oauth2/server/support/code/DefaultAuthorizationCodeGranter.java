@@ -28,14 +28,14 @@ import org.hswebframework.web.oauth2.core.GrantType;
 import static org.hswebframework.web.oauth2.core.ErrorType.*;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
+ * @see AuthorizationCodeGranter
+ * @since 3.0
  */
 public class DefaultAuthorizationCodeGranter extends AbstractAuthorizationService implements AuthorizationCodeGranter {
 
     //默认有效时间为10分钟
-    private long codeTimeOut = 10 * 60 * 1000;
+    private long codeTimeOut = 10 * 60 * 1000L;
 
     private AuthorizationCodeService authorizationCodeService;
 
@@ -71,9 +71,9 @@ public class DefaultAuthorizationCodeGranter extends AbstractAuthorizationServic
         }
         // TODO: 17-5-3  验证redirect_uri
         //验证redirect_uri
-        if (!redirectUri.equals(authorizationCode.getRedirectUri())) {
+        //if (!redirectUri.equals(authorizationCode.getRedirectUri())) {
             //   throw new GrantTokenException(ILLEGAL_REDIRECT_URI);
-        }
+       // }
 
         OAuth2AccessToken accessToken = accessTokenService.createToken();
         accessToken.setGrantType(GrantType.authorization_code);

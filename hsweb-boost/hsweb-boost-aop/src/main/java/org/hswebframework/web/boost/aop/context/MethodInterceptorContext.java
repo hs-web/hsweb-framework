@@ -73,4 +73,6 @@ public interface MethodInterceptorContext extends Serializable {
      * @see this#getParameter(String)
      */
     Map<String, Object> getParams();
+
+    Object getInvokeResult();
 }

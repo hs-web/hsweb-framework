@@ -209,7 +209,7 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
             return null;
         }
         List<AuthorizationSettingEntity> entities = getUserSetting(userId);
-        if(entities.isEmpty()){
+        if (entities.isEmpty()) {
             return Collections.emptyList();
         }
         //用户持有的权限设置id集合
@@ -281,7 +281,12 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
         }
         SimpleAuthentication authentication = new SimpleAuthentication();
         // 用户信息
-        authentication.setUser(new SimpleUser(userId, userEntity.getUsername(), userEntity.getName()));
+        authentication.setUser(SimpleUser.builder()
+                .id(userId)
+                .username(userEntity.getUsername())
+                .name(userEntity.getName())
+                .type("default")
+                .build());
         //角色
         authentication.setRoles(userService.getUserRole(userId)
                 .stream()

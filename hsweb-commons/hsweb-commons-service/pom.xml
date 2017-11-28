@@ -32,6 +32,7 @@
     <modules>
         <module>hsweb-commons-service-simple</module>
         <module>hsweb-commons-service-api</module>
+        <module>hsweb-commons-service-oauth2</module>
     </modules>
 
     <dependencies>
