@@ -5,11 +5,12 @@ import org.hswebframework.web.authorization.access.FieldScopeDataAccessConfig;
 import java.util.Set;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
+ * @since 3.0
  */
 public class SimpleFiledScopeDataAccessConfig extends AbstractDataAccessConfig implements FieldScopeDataAccessConfig {
+
+    private static final long serialVersionUID = -2562713900619774139L;
 
     private String scopeType;
 

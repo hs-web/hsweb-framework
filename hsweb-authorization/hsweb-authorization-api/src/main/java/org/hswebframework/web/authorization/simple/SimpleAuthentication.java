@@ -24,6 +24,8 @@ import java.util.*;
 
 public class SimpleAuthentication implements Authentication {
 
+    private static final long serialVersionUID = -2898863220255336528L;
+
     private User user;
 
     private List<Role> roles;

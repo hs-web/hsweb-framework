@@ -51,7 +51,12 @@ public class SimpleAuthenticationBuilder implements AuthenticationBuilder {
     @Override
     public AuthenticationBuilder user(Map<String, String> user) {
         Objects.requireNonNull(user.get("id"));
-        user(new SimpleUser(user.get("id"), user.get("username"), user.get("name")));
+        user(SimpleUser.builder()
+                .id(user.get("id"))
+                .username(user.get("username"))
+                .name(user.get("name"))
+                .type(user.get("type"))
+                .build());
         return this;
     }
 

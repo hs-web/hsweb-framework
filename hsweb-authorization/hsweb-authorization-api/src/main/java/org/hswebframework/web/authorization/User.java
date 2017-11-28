@@ -40,4 +40,6 @@ public interface User extends Serializable {
      * @return 姓名
      */
     String getName();
+
+    String getType();
 }
