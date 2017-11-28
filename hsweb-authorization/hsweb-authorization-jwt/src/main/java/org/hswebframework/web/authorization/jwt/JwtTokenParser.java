@@ -14,7 +14,8 @@ import javax.crypto.SecretKey;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * Created by zhouhao on 2017/8/30.
+ * @see UserTokenParser
+ * @since 3.0
  */
 public class JwtTokenParser implements UserTokenParser {
 
@@ -47,7 +48,7 @@ public class JwtTokenParser implements UserTokenParser {
 
                     return null;
                 }
-                return JSON.parseObject(claims.getSubject(), DefaultAuthorizedToken.class);
+                return JSON.parseObject(claims.getSubject(), JwtAuthorizedToken.class);
             } catch (ExpiredJwtException e) {
                 return null;
             } catch (Exception e) {

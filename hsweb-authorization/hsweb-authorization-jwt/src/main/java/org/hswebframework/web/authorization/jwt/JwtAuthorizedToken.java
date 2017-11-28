@@ -6,15 +6,18 @@ import org.hswebframework.web.authorization.basic.web.AuthorizedToken;
  *
  * @author zhouhao
  */
-public class DefaultAuthorizedToken implements AuthorizedToken {
+public class JwtAuthorizedToken implements AuthorizedToken {
+
+    public static final String token_type = "jwt";
+
     private String token;
 
     private String userId;
 
-    public DefaultAuthorizedToken() {
+    public JwtAuthorizedToken() {
     }
 
-    public DefaultAuthorizedToken(String token, String userId) {
+    public JwtAuthorizedToken(String token, String userId) {
         this.token = token;
         this.userId = userId;
     }
@@ -39,6 +42,6 @@ public class DefaultAuthorizedToken implements AuthorizedToken {
 
     @Override
     public String getType() {
-        return "jwt-default";
+        return token_type;
     }
 }
