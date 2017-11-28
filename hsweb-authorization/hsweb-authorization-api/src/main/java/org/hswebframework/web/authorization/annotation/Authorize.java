@@ -36,7 +36,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
-public @interface  Authorize {
+public @interface Authorize {
 
     /**
      * 对角色授权,当使用按角色授权时，对模块以及操作级别授权方式失效
@@ -92,13 +92,17 @@ public @interface  Authorize {
     Logical logical() default Logical.DEFAULT;
 
     /**
+     * @return 验证时机，在方法调用前还是调用后s
+     */
+    Phased phased() default Phased.before;
+
+    /**
      * @return 是否忽略, 忽略后将不进行权限控制
      */
     boolean ignore() default false;
 
     /**
-     *
      * @return 数据权限控制
      */
-    RequiresDataAccess[] dataAccess()default {};
+    RequiresDataAccess[] dataAccess() default {};
 }
