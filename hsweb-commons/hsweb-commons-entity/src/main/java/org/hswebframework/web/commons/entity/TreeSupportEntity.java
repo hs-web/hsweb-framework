@@ -72,19 +72,27 @@ public interface TreeSupportEntity<PK> extends GenericEntity<PK> {
         });
     }
 
-    /**
-     * 将树形结构转为列表结构，并填充对应的数据。<br>
-     * 如树结构数据： {name:'父节点',children:[{name:'子节点1'},{name:'子节点2'}]}<br>
-     * 解析后:[{id:'id1',name:'父节点',path:'<b>aoSt</b>'},{id:'id2',name:'子节点1',path:'<b>aoSt</b>-oS5a'},{id:'id3',name:'子节点2',path:'<b>aoSt</b>-uGpM'}]
-     *
-     * @param parent      树结构的根节点
-     * @param target      目标集合,转换后的数据将直接添加({@link List#add(Object)})到这个集合.
-     * @param <T>         继承{@link TreeSupportEntity}的类型
-     * @param idGenerator ID生成策略
-     * @param <PK>        主键类型
-     */
-    static <T extends TreeSupportEntity<PK>, PK> void expandTree2List(TreeSupportEntity<PK> parent, List<T> target, IDGenerator<PK> idGenerator) {
+    static <T extends TreeSupportEntity<PK>, PK> void expandTree2List(T parent, List<T> target, IDGenerator<PK> idGenerator) {
+        expandTree2List(parent,target,idGenerator,null);
+    }
+        /**
+         * 将树形结构转为列表结构，并填充对应的数据。<br>
+         * 如树结构数据： {name:'父节点',children:[{name:'子节点1'},{name:'子节点2'}]}<br>
+         * 解析后:[{id:'id1',name:'父节点',path:'<b>aoSt</b>'},{id:'id2',name:'子节点1',path:'<b>aoSt</b>-oS5a'},{id:'id3',name:'子节点2',path:'<b>aoSt</b>-uGpM'}]
+         *
+         * @param parent      树结构的根节点
+         * @param target      目标集合,转换后的数据将直接添加({@link List#add(Object)})到这个集合.
+         * @param <T>         继承{@link TreeSupportEntity}的类型
+         * @param idGenerator ID生成策略
+         * @param <PK>        主键类型
+         */
+    static <T extends TreeSupportEntity<PK>, PK> void expandTree2List(T parent, List<T> target, IDGenerator<PK> idGenerator, BiConsumer<T, List<T>> childConsumer) {
+
         List<T> children = parent.getChildren();
+        if(childConsumer!=null){
+            childConsumer.accept(parent,new ArrayList<>());
+        }
+        target.add(parent);
         if (parent.getPath() == null) {
             parent.setPath(RandomUtil.randomChar(4));
             if (parent.getPath() != null) {
@@ -115,8 +123,8 @@ public interface TreeSupportEntity<PK> extends GenericEntity<PK> {
                 child.setParentId(pid);
                 child.setPath(parent.getPath() + "-" + RandomUtil.randomChar(4));
                 child.setLevel(child.getPath().split("-").length);
-                target.add(child);
-                expandTree2List(child, target, idGenerator);
+
+                expandTree2List(child, target, idGenerator,childConsumer);
             }
         }
     }
