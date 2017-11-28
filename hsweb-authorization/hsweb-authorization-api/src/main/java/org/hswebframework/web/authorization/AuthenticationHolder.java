@@ -52,13 +52,11 @@ public final class AuthenticationHolder {
     private static Authentication get(Function<AuthenticationSupplier, Authentication> function) {
         lock.readLock().lock();
         try {
-            Authentication authentication = suppliers.stream()
+            return suppliers.stream()
                     .map(function)
                     .filter(Objects::nonNull)
                     .findFirst()
                     .orElse(null);
-
-            return authentication;
         } finally {
             lock.readLock().unlock();
         }

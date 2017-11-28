@@ -27,6 +27,9 @@ import org.springframework.context.ApplicationEvent;
  * @author zhouhao
  */
 public class AuthorizationExitEvent extends ApplicationEvent implements AuthorizationEvent {
+
+    private static final long serialVersionUID = -4590245933665047280L;
+
     private Authentication authentication;
 
     public AuthorizationExitEvent(Authentication authentication) {

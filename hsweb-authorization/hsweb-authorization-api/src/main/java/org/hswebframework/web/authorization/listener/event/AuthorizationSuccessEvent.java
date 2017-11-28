@@ -34,9 +34,10 @@ import java.util.function.Function;
  * @since 3.0
  */
 public class AuthorizationSuccessEvent extends ApplicationEvent implements AuthorizationEvent {
+    private static final long serialVersionUID = -2452116314154155058L;
     private Authentication authentication;
 
-    private Function<String, Object> parameterGetter;
+    private transient Function<String, Object> parameterGetter;
 
     private Map<String, Object> result = new HashMap<>();
 

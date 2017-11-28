@@ -27,6 +27,7 @@ import java.util.function.Function;
  */
 public class AuthorizationFailedEvent extends AbstractAuthorizationEvent {
 
+    private static final long serialVersionUID = -101792832265740828L;
     /**
      * 失败原因
      */

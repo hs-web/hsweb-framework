@@ -31,11 +31,13 @@ import java.util.function.Function;
  * @since 3.0
  */
 public abstract class AbstractAuthorizationEvent extends ApplicationEvent implements AuthorizationEvent {
+    private static final long serialVersionUID = -3027505108916079214L;
+
     protected String username;
 
     protected String password;
 
-    private Function<String, Object> parameterGetter;
+    private transient Function<String, Object> parameterGetter;
 
     /**
      * 带参构造方法,所有参数不能为null

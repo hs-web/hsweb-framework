@@ -28,6 +28,8 @@ import java.util.function.Function;
  */
 public class AuthorizationDecodeEvent extends AbstractAuthorizationEvent {
 
+    private static final long serialVersionUID = 5418501934490174251L;
+
     public AuthorizationDecodeEvent(String username, String password, Function<String, Object> parameterGetter) {
         super(username, password, parameterGetter);
     }
