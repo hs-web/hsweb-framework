@@ -9,14 +9,18 @@ import org.hswebframework.web.authorization.access.DataAccessConfig;
 import org.hswebframework.web.authorization.access.DataAccessHandler;
 import org.hswebframework.web.authorization.access.FieldScopeDataAccessConfig;
 import org.hswebframework.web.authorization.define.AuthorizingContext;
+import org.hswebframework.web.authorization.define.Phased;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.controller.QueryController;
 import org.hswebframework.web.service.QueryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author zhouhao
@@ -38,8 +42,8 @@ public class FieldScopeDataAccessHandler implements DataAccessHandler {
         if (controller != null) {
             switch (access.getAction()) {
                 case Permission.ACTION_QUERY:
-                    return doQueryAccess(own, context);
                 case Permission.ACTION_GET:
+                    return doQueryAccess(own, context);
                 case Permission.ACTION_DELETE:
                 case Permission.ACTION_UPDATE:
                     return doRWAccess(own, context, controller);
@@ -78,27 +82,56 @@ public class FieldScopeDataAccessHandler implements DataAccessHandler {
     }
 
 
+    @SuppressWarnings("all")
     protected boolean doQueryAccess(FieldScopeDataAccessConfig access, AuthorizingContext context) {
-        QueryParamEntity entity = context.getParamContext().getParams()
-                .values().stream()
-                .filter(QueryParamEntity.class::isInstance)
-                .map(QueryParamEntity.class::cast)
-                .findAny().orElse(null);
-        if (entity == null) {
-            logger.warn("try validate query access, but query entity is null or not instance of org.hswebframework.web.commons.entity.Entity");
-            return true;
+        if (context.getDefinition().getPhased() == Phased.before) {
+            QueryParamEntity entity = context.getParamContext().getParams()
+                    .values().stream()
+                    .filter(QueryParamEntity.class::isInstance)
+                    .map(QueryParamEntity.class::cast)
+                    .findAny().orElse(null);
+            if (entity == null) {
+                logger.warn("try validate query access, but query entity is null or not instance of org.hswebframework.web.commons.entity.Entity");
+                return true;
+            }
+            //重构查询条件
+            //如: 旧的条件为 where column =? or column = ?
+            //重构后为: where creatorId=? and (column = ? or column = ?)
+            List<Term> oldParam = entity.getTerms();
+            //清空旧的查询条件
+            entity.setTerms(new ArrayList<>());
+            //添加一个查询条件
+            entity.addTerm(createQueryTerm(access))
+                    //客户端提交的参数 作为嵌套参数
+                    .nest().setTerms(oldParam);
+        } else {
+            Object result = InvokeResultUtils.convertRealResult(context.getParamContext().getInvokeResult());
+            if (result == null) {
+                return true;
+            }
+            if (result instanceof Collection) {
+                return ((Collection) result).stream().allMatch(obj -> propertyInScope(obj, access.getField(), access.getScope()));
+            } else {
+                return propertyInScope(result, access.getField(), access.getScope());
+            }
         }
-        //重构查询条件
-        //如: 旧的条件为 where column =? or column = ?
-        //重构后为: where creatorId=? and (column = ? or column = ?)
-        List<Term> oldParam = entity.getTerms();
-        //清空旧的查询条件
-        entity.setTerms(new ArrayList<>());
-        //添加一个查询条件
-        entity.addTerm(createQueryTerm(access))
-                //客户端提交的参数 作为嵌套参数
-                .nest().setTerms(oldParam);
         return true;
+    }
+
+    protected boolean propertyInScope(Object obj, String property, Set<Object> scope) {
+        if (null == obj) {
+            return false;
+        }
+        try {
+            Object value = BeanUtilsBean.getInstance().getProperty(obj, property);
+            if (null != value) {
+                return scope.contains(value);
+            }
+        } catch (Exception ignore) {
+            logger.warn("can not get property {} from {},{}", property, obj, ignore.getMessage());
+        }
+        return true;
+
     }
 
     protected Term createQueryTerm(FieldScopeDataAccessConfig access) {

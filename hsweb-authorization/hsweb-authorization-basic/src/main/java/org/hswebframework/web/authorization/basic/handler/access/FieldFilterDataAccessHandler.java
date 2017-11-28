@@ -6,13 +6,19 @@ import org.hswebframework.web.authorization.access.DataAccessConfig;
 import org.hswebframework.web.authorization.access.DataAccessHandler;
 import org.hswebframework.web.authorization.access.FieldFilterDataAccessConfig;
 import org.hswebframework.web.authorization.define.AuthorizingContext;
+import org.hswebframework.web.authorization.define.Phased;
 import org.hswebframework.web.commons.entity.Entity;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.commons.model.Model;
+import org.hswebframework.web.controller.message.ResponseMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * 数据权限字段过滤处理,目前仅支持deny. {@link DataAccessConfig.DefaultType#DENY_FIELDS}
@@ -33,6 +39,7 @@ public class FieldFilterDataAccessHandler implements DataAccessHandler {
 
         switch (access.getAction()) {
             case Permission.ACTION_QUERY:
+            case Permission.ACTION_GET:
                 return doQueryAccess(filterDataAccessConfig, context);
             case Permission.ACTION_UPDATE:
                 return doUpdateAccess(filterDataAccessConfig, context);
@@ -53,7 +60,7 @@ public class FieldFilterDataAccessHandler implements DataAccessHandler {
      */
     protected boolean doUpdateAccess(FieldFilterDataAccessConfig accesses, AuthorizingContext params) {
         Object supportParam = params.getParamContext().getParams().values().stream()
-                .filter(param -> (param instanceof Entity) || (param instanceof Model)||(param instanceof Map))
+                .filter(param -> (param instanceof Entity) || (param instanceof Model) || (param instanceof Map))
                 .findAny()
                 .orElse(null);
         if (null != supportParam) {
@@ -73,18 +80,40 @@ public class FieldFilterDataAccessHandler implements DataAccessHandler {
         return true;
     }
 
-
+    @SuppressWarnings("all")
     protected boolean doQueryAccess(FieldFilterDataAccessConfig access, AuthorizingContext context) {
-        QueryParamEntity entity = context.getParamContext().getParams()
-                .values().stream()
-                .filter(QueryParamEntity.class::isInstance)
-                .map(QueryParamEntity.class::cast)
-                .findAny().orElse(null);
-        if (entity == null) {
-            logger.warn("try validate query access, but query entity is null or not instance of org.hswebframework.web.commons.entity.Entity");
-            return true;
+        if (context.getDefinition().getPhased() == Phased.before) {
+            QueryParamEntity entity = context.getParamContext().getParams()
+                    .values().stream()
+                    .filter(QueryParamEntity.class::isInstance)
+                    .map(QueryParamEntity.class::cast)
+                    .findAny().orElse(null);
+            if (entity == null) {
+                logger.warn("try validate query access, but query entity is null or not instance of org.hswebframework.web.commons.entity.Entity");
+                return true;
+            }
+            entity.excludes(access.getFields().toArray(new String[access.getFields().size()]));
+        } else {
+            Object result = InvokeResultUtils.convertRealResult(context.getParamContext().getInvokeResult());
+            if (result instanceof Collection) {
+                ((Collection) result).forEach(o -> setObjectPropertyNull(o, access.getFields()));
+            } else {
+                setObjectPropertyNull(result, access.getFields());
+            }
         }
-        entity.excludes(access.getFields().toArray(new String[access.getFields().size()]));
         return true;
+    }
+
+    protected void setObjectPropertyNull(Object obj, Set<String> fields) {
+        if (null == obj) {
+            return;
+        }
+        for (String field : fields) {
+            try {
+                BeanUtilsBean.getInstance().getPropertyUtils().setProperty(obj, field, null);
+            } catch (Exception ignore) {
+
+            }
+        }
     }
 }

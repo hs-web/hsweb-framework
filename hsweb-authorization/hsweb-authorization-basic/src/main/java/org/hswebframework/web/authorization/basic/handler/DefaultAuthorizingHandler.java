@@ -52,7 +52,6 @@ public class DefaultAuthorizingHandler implements AuthorizingHandler {
 
         //表达式权限控制
         handleExpression(context.getAuthentication(), context.getDefinition(), context.getParamContext());
-
     }
 
     protected void handleDataAccess(AuthorizingContext context) {

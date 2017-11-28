@@ -3,6 +3,7 @@ package org.hswebframework.web.authorization.basic.define;
 import org.hswebframework.web.authorization.annotation.Logical;
 import org.hswebframework.web.authorization.define.AuthorizeDefinition;
 import org.hswebframework.web.authorization.define.DataAccessDefinition;
+import org.hswebframework.web.authorization.define.Phased;
 import org.hswebframework.web.authorization.define.Script;
 
 import java.util.Set;
@@ -15,6 +16,11 @@ public class EmptyAuthorizeDefinition implements AuthorizeDefinition {
     public static final EmptyAuthorizeDefinition instance = new EmptyAuthorizeDefinition();
 
     private EmptyAuthorizeDefinition() {
+    }
+
+    @Override
+    public Phased getPhased() {
+        throw new UnsupportedOperationException();
     }
 
     @Override

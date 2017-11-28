@@ -30,11 +30,11 @@ public final class DefaultDataAccessController implements DataAccessController {
             throw new UnsupportedOperationException();
         }
         this.parent = parent;
-        addHandler(new CustomDataAccessHandler());
-        addHandler(new OwnCreatedDataAccessHandler());
-        addHandler(new ScriptDataAccessHandler());
-        addHandler(new FieldFilterDataAccessHandler());
-        addHandler(new FieldScopeDataAccessHandler());
+        addHandler(new CustomDataAccessHandler()).
+                addHandler(new OwnCreatedDataAccessHandler()).
+                addHandler(new ScriptDataAccessHandler()).
+                addHandler(new FieldFilterDataAccessHandler()).
+                addHandler(new FieldScopeDataAccessHandler());
     }
 
     @Override
@@ -43,7 +43,6 @@ public final class DefaultDataAccessController implements DataAccessController {
             parent.doAccess(access, context);
         }
         return handlers.stream()
-                // TODO: 17-3-28 可以换成access对应的handler以提高效率
                 .filter(handler -> handler.isSupport(access))
                 .allMatch(handler -> handler.handle(access, context));
     }
