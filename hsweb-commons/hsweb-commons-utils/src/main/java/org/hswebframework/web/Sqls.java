@@ -30,8 +30,10 @@ public class Sqls {
                             tmp.add(s1);
                     }
                 });
-        sqlList.add(String.join("\n", tmp.toArray(new String[tmp.size()])));
-        tmp.clear();
+        if (!tmp.isEmpty()) {
+            sqlList.add(String.join("\n", tmp.toArray(new String[tmp.size()])));
+            tmp.clear();
+        }
         return sqlList;
     }
 }

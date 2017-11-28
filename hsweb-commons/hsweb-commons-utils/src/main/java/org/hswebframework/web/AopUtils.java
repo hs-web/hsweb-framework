@@ -27,7 +27,10 @@ import java.lang.reflect.Method;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class AopUtils {
+public final class AopUtils {
+
+    private AopUtils() {
+    }
 
     public static <T extends Annotation> T findMethodAnnotation(Class targetClass, Method method, Class<T> annClass) {
         Method m = method;
@@ -59,7 +62,7 @@ public class AopUtils {
         return findAnnotation(targetClass, m, annClass);
     }
 
-    public static final String getMethodBody(JoinPoint pjp) {
+    public static String getMethodBody(JoinPoint pjp) {
         StringBuilder methodName = new StringBuilder(pjp.getSignature().getName()).append("(");
         MethodSignature signature = (MethodSignature) pjp.getSignature();
         String[] names = signature.getParameterNames();
@@ -73,7 +76,7 @@ public class AopUtils {
         return methodName.append(")").toString();
     }
 
-    public static final Map<String, Object> getArgsMap(JoinPoint pjp) {
+    public static Map<String, Object> getArgsMap(JoinPoint pjp) {
         MethodSignature signature = (MethodSignature) pjp.getSignature();
         Map<String, Object> args = new LinkedHashMap<>();
         String names[] = signature.getParameterNames();

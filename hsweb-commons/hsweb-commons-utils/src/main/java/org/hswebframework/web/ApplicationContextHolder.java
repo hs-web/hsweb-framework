@@ -5,8 +5,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 @Component
