@@ -14,6 +14,8 @@ import java.util.Set;
  * @since 3.0
  */
 public interface AuthorizeDefinition {
+
+    Phased getPhased();
     /**
      * 优先级,如果获取到多个权限控制定义是,则先判断优先级高的
      *

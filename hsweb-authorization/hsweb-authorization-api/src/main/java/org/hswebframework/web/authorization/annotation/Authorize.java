@@ -21,6 +21,7 @@ package org.hswebframework.web.authorization.annotation;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.Role;
 import org.hswebframework.web.authorization.User;
+import org.hswebframework.web.authorization.define.Phased;
 
 import java.lang.annotation.*;
 
