@@ -55,7 +55,7 @@ public class OAuth2TokenController {
     @ApiOperation(value = "申请token", notes = "具体请求方式请参照: http://www.ruanyifeng.com/blog/2014/05/oauth_2_0.html")
     @ApiImplicitParams(
             {
-                    @ApiImplicitParam(paramType = "query", name = OAuth2Constants.client_id),
+                    @ApiImplicitParam(paramType = "query", name = OAuth2Constants.client_id,required = true),
                     @ApiImplicitParam(paramType = "query", name = OAuth2Constants.client_secret),
                     @ApiImplicitParam(paramType = "query", name = OAuth2Constants.refresh_token),
                     @ApiImplicitParam(paramType = "query", name = OAuth2Constants.code),
