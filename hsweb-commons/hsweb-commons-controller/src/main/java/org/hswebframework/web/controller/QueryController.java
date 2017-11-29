@@ -77,6 +77,14 @@ public interface QueryController<E, PK, Q extends Entity> {
     }
 
     @Authorize(action = Permission.ACTION_QUERY)
+    @GetMapping("/no-paging")
+    @AccessLogger("{dynamic_query}")
+    @ApiOperation(value = "不分页动态查询数据", responseReference = "get")
+    default ResponseMessage<List<E>> listNoPaging(Q param) {
+        return ok(getService().select(param));
+    }
+
+    @Authorize(action = Permission.ACTION_QUERY)
     @GetMapping("/count")
     @AccessLogger("{dynamic_query}")
     @ApiOperation(value = "根据动态条件统计数据", responseReference = "get")
