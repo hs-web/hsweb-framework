@@ -27,8 +27,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Set;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public class HttpImplicitRequest extends HttpTokenRequest implements ImplicitRequest {
@@ -40,7 +38,7 @@ public class HttpImplicitRequest extends HttpTokenRequest implements ImplicitReq
     @Override
     public String getClientId() {
         return getParameter(OAuth2Constants.client_id)
-                .orElseThrow(ErrorType.ILLEGAL_CLIENT_ID.throwThis(GrantTokenException::new));
+                .orElseThrow(()->ErrorType.ILLEGAL_CLIENT_ID.throwThis(GrantTokenException::new));
     }
 
     @Override
