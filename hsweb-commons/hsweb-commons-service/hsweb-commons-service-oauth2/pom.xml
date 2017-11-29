@@ -22,5 +22,6 @@
             <artifactId>hsweb-authorization-oauth2-client</artifactId>
             <version>${project.version}</version>
         </dependency>
+
     </dependencies>
 </project>
