@@ -100,7 +100,7 @@
         <hsweb.utils.version>3.0.2</hsweb.utils.version>
         <hsweb.expands.version>3.0.0</hsweb.expands.version>
 
-        <swagger.version>2.6.1</swagger.version>
+        <swagger.version>2.7.0</swagger.version>
     </properties>
 
     <profiles>
