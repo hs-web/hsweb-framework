@@ -27,6 +27,7 @@ import org.hswebframework.web.authorization.oauth2.client.request.TokenExpiredCa
 import org.hswebframework.web.authorization.oauth2.client.response.OAuth2Response;
 import org.hswebframework.web.oauth2.core.ErrorType;
 
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -66,6 +67,12 @@ public class SimpleOAuth2Request implements OAuth2Request {
     @Override
     public OAuth2Request onTokenExpired(TokenExpiredCallBack callback) {
         this.expiredCallBack = callback;
+        return this;
+    }
+
+    @Override
+    public OAuth2Request params(Map<String, String> params) {
+        request.params(params);
         return this;
     }
 
