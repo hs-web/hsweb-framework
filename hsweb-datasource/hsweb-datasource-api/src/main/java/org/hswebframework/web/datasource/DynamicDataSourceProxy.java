@@ -17,7 +17,7 @@ public class DynamicDataSourceProxy implements DynamicDataSource {
 
     private String id;
 
-    private DatabaseType databaseType;
+    private volatile DatabaseType databaseType;
 
     private DataSource proxy;
 

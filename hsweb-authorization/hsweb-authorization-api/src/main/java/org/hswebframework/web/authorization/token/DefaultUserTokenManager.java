@@ -265,7 +265,7 @@ public class DefaultUserTokenManager implements UserTokenManager {
     public void checkExpiredToken() {
         for (SimpleUserToken token : tokenStorage.values()) {
             checkTimeout(token);
-            if (token.isExpired()) {
+            if (token!=null&&token.isExpired()) {
                 signOutByToken(token.getToken());
             }
         }

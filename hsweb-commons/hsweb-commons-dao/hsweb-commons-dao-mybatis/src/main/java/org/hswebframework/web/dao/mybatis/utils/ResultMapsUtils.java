@@ -22,17 +22,22 @@ import org.apache.ibatis.mapping.ResultMap;
 import org.apache.ibatis.session.SqlSession;
 import org.mybatis.spring.SqlSessionTemplate;
 
+import java.util.concurrent.CountDownLatch;
+
 /**
- * Created by zhouhao on 16-6-3.
+ * @since 2.0
  */
 public class ResultMapsUtils {
     private static SqlSession sqlSession;
 
+    private static CountDownLatch countDownLatch = new CountDownLatch(1);
+
     public static ResultMap getResultMap(String id) {
-        while (sqlSession == null) {
+        if (sqlSession == null) {
             try {
-                Thread.sleep(100);
+                countDownLatch.await();
             } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
         }
         return sqlSession.getConfiguration().getResultMap(id);
@@ -40,5 +45,8 @@ public class ResultMapsUtils {
 
     public static void setSqlSession(SqlSessionTemplate sqlSession) {
         ResultMapsUtils.sqlSession = sqlSession;
+        if (countDownLatch.getCount() != 0) {
+            countDownLatch.countDown();
+        }
     }
 }

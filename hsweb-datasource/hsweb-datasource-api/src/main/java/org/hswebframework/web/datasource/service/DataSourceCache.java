@@ -1,5 +1,6 @@
 package org.hswebframework.web.datasource.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.web.datasource.DynamicDataSource;
 import org.hswebframework.web.datasource.exception.DataSourceClosedException;
 
@@ -10,6 +11,7 @@ import java.util.concurrent.CountDownLatch;
  *
  * @author zhouhao
  */
+@Slf4j
 public class DataSourceCache {
     private long hash;
 
@@ -29,6 +31,7 @@ public class DataSourceCache {
                 //等待初始化完成
                 initLatch.await();
             } catch (InterruptedException ignored) {
+                log.warn(ignored.getMessage(),ignored);
             } finally {
                 initLatch = null;
             }

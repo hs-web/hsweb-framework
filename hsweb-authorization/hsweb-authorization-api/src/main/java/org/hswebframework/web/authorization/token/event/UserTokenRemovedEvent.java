@@ -5,14 +5,14 @@ import org.hswebframework.web.authorization.token.UserToken;
 import org.springframework.context.ApplicationEvent;
 
 public class UserTokenRemovedEvent extends ApplicationEvent implements AuthorizationEvent {
-    private UserToken detail;
+
+    private static final long serialVersionUID = -6662943150068863177L;
 
     public UserTokenRemovedEvent(UserToken token) {
         super(token);
-        this.detail = detail;
     }
 
     public UserToken getDetail() {
-        return detail;
+        return ((UserToken) getSource());
     }
 }

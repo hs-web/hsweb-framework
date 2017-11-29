@@ -21,8 +21,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public class JtaDynamicDataSourceService extends AbstractDynamicDataSourceService {
@@ -101,8 +99,9 @@ public class JtaDynamicDataSourceService extends AbstractDynamicDataSourceServic
             //初始化状态判断
             executor.execute(() -> {
                 try {
-                    Thread.sleep(config.getInitTimeout() * 1000);
+                    Thread.sleep(config.getInitTimeout() * 1000L);
                 } catch (InterruptedException ignored) {
+                    logger.warn(ignored.getMessage(), ignored);
                 } finally {
                     if (successCounter.get() == 0) {
                         // 初始化超时,认定为失败

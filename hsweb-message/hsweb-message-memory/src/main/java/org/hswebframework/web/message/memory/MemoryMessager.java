@@ -1,5 +1,6 @@
 package org.hswebframework.web.message.memory;
 
+import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.web.message.*;
 import org.hswebframework.web.message.support.QueueMessageSubject;
 import org.hswebframework.web.message.support.TopicMessageSubject;
@@ -14,10 +15,11 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
 
 /**
- * TODO 完成注释
  *
  * @author zhouhao
  */
+
+@Slf4j
 public class MemoryMessager implements Messager {
 
     private Map<String, MemoryTopic<? extends Message>> topicStore = new ConcurrentHashMap<>(256);
@@ -85,6 +87,7 @@ public class MemoryMessager implements Messager {
                         queue.lock.writeLock().tryLock(5, TimeUnit.SECONDS);
                     } catch (InterruptedException e) {
                         lockSuccess = false;
+                        log.warn(e.getMessage(),e);
                     }
                     try {
                         queue.consumers.remove(consumer);

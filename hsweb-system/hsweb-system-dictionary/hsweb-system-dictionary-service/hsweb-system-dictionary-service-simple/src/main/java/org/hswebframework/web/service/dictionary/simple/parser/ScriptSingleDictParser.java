@@ -10,8 +10,6 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public class ScriptSingleDictParser implements SingleDictParser {
@@ -31,7 +29,7 @@ public class ScriptSingleDictParser implements SingleDictParser {
             }
             Object result = engine.execute(scriptId, vars).getIfSuccess();
             if (result == null) {
-                return null;
+                return Optional.empty();
             }
             return Optional.of(String.valueOf(result));
         } catch (Exception e) {

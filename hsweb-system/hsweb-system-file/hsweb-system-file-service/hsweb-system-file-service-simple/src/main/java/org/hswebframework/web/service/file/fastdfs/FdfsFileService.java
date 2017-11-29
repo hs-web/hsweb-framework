@@ -1,11 +1,10 @@
 package org.hswebframework.web.service.file.fastdfs;
 
-import com.luhuiguo.fastdfs.domain.MetaData;
 import com.luhuiguo.fastdfs.domain.StorePath;
 import com.luhuiguo.fastdfs.service.FastFileStorageClient;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.hswebframework.utils.time.DateFormatter;
 import org.hswebframework.web.commons.entity.DataStatus;
 import org.hswebframework.web.entity.file.FileInfoEntity;
 import org.hswebframework.web.service.file.FileInfoService;
@@ -17,15 +16,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.MessageDigest;
-import java.util.Arrays;
 import java.util.HashSet;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
- * @since
+ * @since 3.0
  */
+@Slf4j
 public class FdfsFileService implements FileService {
     private FastFileStorageClient fastFileStorageClient;
 
@@ -124,7 +121,8 @@ public class FdfsFileService implements FileService {
     public void writeFile(String fileId, OutputStream out, long skip) throws IOException {
         try (InputStream inputStream = readFile(fileId)) {
             if (skip > 0) {
-                inputStream.skip(skip);
+                long len = inputStream.skip(skip);
+                log.info("skip write {} len:{}", skip, len);
             }
             StreamUtils.copy(inputStream, out);
         }

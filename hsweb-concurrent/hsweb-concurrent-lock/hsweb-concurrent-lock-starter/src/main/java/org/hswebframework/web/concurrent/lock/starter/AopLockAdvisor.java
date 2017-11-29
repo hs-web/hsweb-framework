@@ -1,5 +1,6 @@
 package org.hswebframework.web.concurrent.lock.starter;
 
+import lombok.extern.slf4j.Slf4j;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.hswebframework.web.AopUtils;
@@ -18,10 +19,9 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
+@Slf4j
 public class AopLockAdvisor extends StaticMethodMatcherPointcutAdvisor {
 
     public AopLockAdvisor(LockManager lockManager) {
@@ -68,21 +68,7 @@ public class AopLockAdvisor extends StaticMethodMatcherPointcutAdvisor {
     }
 
     protected <A extends Annotation> LockProcessor<A, java.util.concurrent.locks.Lock> initLockInfo(long timeout, TimeUnit timeUnit, LockProcessor<A, java.util.concurrent.locks.Lock> lockProcessor) {
-        return lockProcessor.lock(lock -> {
-            try {
-                lock.tryLock(timeout, timeUnit);
-                return null;
-            } catch (InterruptedException e) {
-                return e;
-            }
-        }).unlock(lock -> {
-            try {
-                lock.unlock();
-                return null;
-            } catch (Throwable e) {
-                return e;
-            }
-        }).init();
+        return lockProcessor.lock(lock -> lock.tryLock(timeout, timeUnit)).unlock(java.util.concurrent.locks.Lock::unlock).init();
     }
 
 

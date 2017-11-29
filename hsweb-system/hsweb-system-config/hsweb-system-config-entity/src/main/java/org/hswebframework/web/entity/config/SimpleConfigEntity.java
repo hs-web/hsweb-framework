@@ -26,8 +26,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public class SimpleConfigEntity extends SimpleGenericEntity<String> implements ConfigEntity {
@@ -51,7 +49,7 @@ public class SimpleConfigEntity extends SimpleGenericEntity<String> implements C
     @NotNull
     private String creatorId;
 
-    private Map<String, ConfigContent> cache;
+    private volatile Map<String, ConfigContent> cache;
 
     @Override
     public String getCreatorId() {
