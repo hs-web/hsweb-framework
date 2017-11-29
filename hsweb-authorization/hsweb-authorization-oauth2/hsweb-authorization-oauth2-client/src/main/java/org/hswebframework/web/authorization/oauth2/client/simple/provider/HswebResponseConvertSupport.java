@@ -41,35 +41,37 @@ import java.util.stream.Collectors;
 /**
  * @author zhouhao
  */
+@SuppressWarnings("unchecked")
 public class HswebResponseConvertSupport implements ResponseConvertForProviderDefinition {
 
     private AuthenticationBuilderFactory authenticationBuilderFactory;
 
-    private  static int responseMessageFieldSize = 4;
+    private static int responseMessageFieldSize = 4;
 
-    Function<Object,Authentication> autzParser=obj-> convertAuthentication(JSON.toJSONString(obj));
+    Function<Object, Authentication> autzParser = obj -> convertAuthentication(JSON.toJSONString(obj));
 
 
     public HswebResponseConvertSupport(AuthenticationBuilderFactory authenticationBuilderFactory) {
         this.authenticationBuilderFactory = authenticationBuilderFactory;
     }
 
+
     public Object tryConvertToObject(String json, Class type) {
         if (json.startsWith("{")) {
-            if(ResponseMessage.class.isAssignableFrom(type)){
-                return JSON.parseObject(json,type);
+            if (ResponseMessage.class.isAssignableFrom(type)) {
+                return JSON.parseObject(json, type);
             }
             JSONObject message = JSON.parseObject(json, Feature.DisableFieldSmartMatch);
             //判断是否响应的为ResponseMessage
-            if(message.size()<=responseMessageFieldSize
-                    &&message.get("status")!=null&&message.get("timestamp")!=null){
+            if (message.size() <= responseMessageFieldSize
+                    && message.get("status") != null && message.get("timestamp") != null) {
 
-                Integer status=message.getInteger("status");
-                if(status!=200){
-                    throw new BusinessException(message.getString("message"));
+                Integer status = message.getInteger("status");
+                if (status != 200) {
+                    throw new BusinessException(message.getString("message"),status);
                 }
                 Object data = message.get("result");
-                if(data==null){
+                if (data == null) {
                     return null;
                 }
                 //返回的是对象
@@ -86,7 +88,7 @@ public class HswebResponseConvertSupport implements ResponseConvertForProviderDe
                     }
                     return ((JSONArray) data).toJavaList(type);
                 }
-                return data;
+                return message.getObject("result", type);
             }
             return message.toJavaObject(type);
         } else if (json.startsWith("[")) {
@@ -112,16 +114,15 @@ public class HswebResponseConvertSupport implements ResponseConvertForProviderDe
         String json = response.asString();
 
         Object data = tryConvertToObject(json, type);
-        if(null==data)return null;
+        if (null == data) return null;
         if (type.isInstance(data)) {
             //success
             return ((T) data);
         }
-
         if (data instanceof ResponseMessage) {
 
             //maybe error
-            throw new OAuth2RequestException(((ResponseMessage) data).getMessage(),ErrorType.SERVICE_ERROR, response);
+            throw new OAuth2RequestException(((ResponseMessage) data).getMessage(), ErrorType.SERVICE_ERROR, response);
         }
 
         throw new OAuth2RequestException(ErrorType.PARSE_RESPONSE_ERROR, response);
@@ -133,14 +134,14 @@ public class HswebResponseConvertSupport implements ResponseConvertForProviderDe
         String json = response.asString();
 
         Object data = tryConvertToObject(json, type);
-        if(null==data)return null;
+        if (null == data) return null;
         if (data instanceof List) {
             //success
             return ((List) data);
         }
         if (data instanceof ResponseMessage) {
             //maybe error
-            throw new OAuth2RequestException(((ResponseMessage) data).getMessage(),ErrorType.SERVICE_ERROR, response);
+            throw new OAuth2RequestException(((ResponseMessage) data).getMessage(), ErrorType.SERVICE_ERROR, response);
         }
 
         throw new OAuth2RequestException(ErrorType.PARSE_RESPONSE_ERROR, response);
