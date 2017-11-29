@@ -14,4 +14,6 @@ public interface DataAccessDefinition extends Serializable {
 
     String getIdParameterName();
 
+    Phased getPhased();
+
 }

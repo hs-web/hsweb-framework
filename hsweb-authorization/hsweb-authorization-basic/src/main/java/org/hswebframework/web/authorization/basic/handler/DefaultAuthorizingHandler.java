@@ -42,21 +42,21 @@ public class DefaultAuthorizingHandler implements AuthorizingHandler {
     }
 
     @Override
-    public void handle(AuthorizingContext context) {
+    public void handRDAC(AuthorizingContext context) {
 
         //进行rdac权限控制
         handleRdac(context.getAuthentication(), context.getDefinition());
-
-        //进行数据权限控制
-        handleDataAccess(context);
-
         //表达式权限控制
         handleExpression(context.getAuthentication(), context.getDefinition(), context.getParamContext());
-    }
 
-    protected void handleDataAccess(AuthorizingContext context) {
+
+    }
+    public void handleDataAccess(AuthorizingContext context) {
         if (dataAccessController == null) {
             logger.warn("dataAccessController is null,skip result access control!");
+            return;
+        }
+        if(context.getDefinition().getDataAccessDefinition()==null){
             return;
         }
         List<Permission> permission = context.getAuthentication().getPermissions()

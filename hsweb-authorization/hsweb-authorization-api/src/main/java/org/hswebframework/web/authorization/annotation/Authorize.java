@@ -105,5 +105,6 @@ public @interface Authorize {
     /**
      * @return 数据权限控制
      */
-    RequiresDataAccess[] dataAccess() default {};
+    RequiresDataAccess dataAccess() default @RequiresDataAccess(ignore = true);
+
 }

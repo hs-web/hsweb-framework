@@ -4,21 +4,18 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.hswebframework.web.AopUtils;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.annotation.Authorize;
-import org.hswebframework.web.authorization.define.AuthorizingContext;
 import org.hswebframework.web.authorization.basic.handler.AuthorizingHandler;
 import org.hswebframework.web.authorization.define.AuthorizeDefinition;
+import org.hswebframework.web.authorization.define.AuthorizingContext;
 import org.hswebframework.web.authorization.define.Phased;
 import org.hswebframework.web.authorization.exception.UnAuthorizedException;
-import org.hswebframework.web.boost.aop.context.MethodInterceptorHolder;
 import org.hswebframework.web.boost.aop.context.MethodInterceptorContext;
-import org.hswebframework.web.controller.message.ResponseMessage;
+import org.hswebframework.web.boost.aop.context.MethodInterceptorHolder;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.lang.reflect.Method;
-import java.util.Map;
 
 /**
  * @author zhouhao
@@ -45,13 +42,42 @@ public class AopAuthorizingController extends StaticMethodMatcherPointcutAdvisor
                     context.setDefinition(definition);
                     context.setParamContext(paramContext);
                     isControl = true;
+
+                    Phased dataAccessPhased = null;
+                    if (definition.getDataAccessDefinition() != null) {
+                        dataAccessPhased = definition.getDataAccessDefinition().getPhased();
+                    }
                     if (definition.getPhased() == Phased.before) {
-                        authorizingHandler.handle(context);
+                        //RDAC before
+                        authorizingHandler.handRDAC(context);
+
+                        //方法调用前验证数据权限
+                        if (dataAccessPhased == Phased.before) {
+                            authorizingHandler.handleDataAccess(context);
+                        }
+
                         result = methodInvocation.proceed();
+
+                        //方法调用后验证数据权限
+                        if (dataAccessPhased == Phased.after) {
+                            context.setParamContext(holder.createParamContext(result));
+                            authorizingHandler.handleDataAccess(context);
+                        }
                     } else {
+                        //方法调用前验证数据权限
+                        if (dataAccessPhased == Phased.before) {
+                            authorizingHandler.handleDataAccess(context);
+                        }
+
                         result = methodInvocation.proceed();
                         context.setParamContext(holder.createParamContext(result));
-                        authorizingHandler.handle(context);
+
+                        authorizingHandler.handRDAC(context);
+
+                        //方法调用后验证数据权限
+                        if (dataAccessPhased == Phased.after) {
+                            authorizingHandler.handleDataAccess(context);
+                        }
                     }
                 }
             }
@@ -62,8 +88,6 @@ public class AopAuthorizingController extends StaticMethodMatcherPointcutAdvisor
             return result;
         });
     }
-
-
 
     @Override
     public boolean matches(Method method, Class<?> aClass) {

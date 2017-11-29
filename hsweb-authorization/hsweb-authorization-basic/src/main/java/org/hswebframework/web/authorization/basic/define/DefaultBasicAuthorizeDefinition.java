@@ -73,7 +73,7 @@ public class DefaultBasicAuthorizeDefinition implements AuthorizeDefinition {
             logical = authorize.logical();
         }
         message = authorize.message();
-        phased=authorize.phased();
+        phased = authorize.phased();
     }
 
     public void put(RequiresExpression expression) {
@@ -84,7 +84,7 @@ public class DefaultBasicAuthorizeDefinition implements AuthorizeDefinition {
     }
 
     public void put(RequiresDataAccess dataAccess) {
-        if (null == dataAccess) {
+        if (null == dataAccess || dataAccess.ignore()) {
             return;
         }
         if (!"".equals(dataAccess.permission())) {
@@ -92,7 +92,7 @@ public class DefaultBasicAuthorizeDefinition implements AuthorizeDefinition {
         }
         actions.addAll(Arrays.asList(dataAccess.action()));
         DefaultDataAccessDefinition definition = new DefaultDataAccessDefinition();
-
+        definition.setPhased(dataAccess.phased());
         if (!"".equals(dataAccess.controllerBeanName())) {
             definition.setController(dataAccess.controllerBeanName());
         } else if (DataAccessController.class != dataAccess.controllerClass()) {

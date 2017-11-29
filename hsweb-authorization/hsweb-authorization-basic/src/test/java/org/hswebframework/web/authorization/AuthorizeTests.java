@@ -31,7 +31,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AuthorizeDefinitionTests {
+public class AuthorizeTests {
 
     @Mock
     private MethodInterceptorContext queryById;
@@ -42,7 +42,6 @@ public class AuthorizeDefinitionTests {
     private Authentication authentication;
 
     AopMethodAuthorizeDefinitionParser parser = new DefaultAopMethodAuthorizeDefinitionParser();
-
 
     @Before
     public void init() throws NoSuchMethodException {
@@ -112,7 +111,7 @@ public class AuthorizeDefinitionTests {
         authorizingContext.setDefinition(definition);
         authorizingContext.setParamContext(queryById);
 
-        handler.handle(authorizingContext);
+        handler.handRDAC(authorizingContext);
 
 
     }
@@ -139,7 +138,7 @@ public class AuthorizeDefinitionTests {
         authorizingContext.setDefinition(definition);
         authorizingContext.setParamContext(dynamicQuery);
 
-        handler.handle(authorizingContext);
+        handler.handleDataAccess(authorizingContext);
 
         System.out.println(JSON.toJSONString(entity, SerializerFeature.PrettyFormat));
 
@@ -171,7 +170,7 @@ public class AuthorizeDefinitionTests {
         authorizingContext.setDefinition(definition);
         authorizingContext.setParamContext(queryById);
 
-         handler.handle(authorizingContext);
+        handler.handleDataAccess(authorizingContext);
 
         System.out.println(JSON.toJSONString(response, SerializerFeature.PrettyFormat));
         Assert.assertTrue(response instanceof ResponseMessage);
