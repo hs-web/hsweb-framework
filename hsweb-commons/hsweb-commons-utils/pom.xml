@@ -60,5 +60,14 @@
             <artifactId>hsweb-expands-script</artifactId>
             <optional>true</optional>
         </dependency>
+        <dependency>
+            <groupId>commons-beanutils</groupId>
+            <artifactId>commons-beanutils</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hswebframework</groupId>
+            <artifactId>hsweb-easy-orm-core</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>
