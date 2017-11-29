@@ -1,5 +1,6 @@
 package org.hswebframework.web.authorization.basic.aop;
 
+import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.web.AopUtils;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.annotation.RequiresDataAccess;
@@ -13,10 +14,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -26,13 +24,14 @@ import java.util.concurrent.ConcurrentHashMap;
  * @see AopMethodAuthorizeDefinitionParser
  * @see AuthorizeDefinition
  */
-
+@Slf4j
 public class DefaultAopMethodAuthorizeDefinitionParser implements AopMethodAuthorizeDefinitionParser {
 
     private Map<CacheKey, AuthorizeDefinition> cache = new ConcurrentHashMap<>();
 
-
     private List<AopMethodAuthorizeDefinitionCustomizerParser> parserCustomers;
+
+    private static Set<String> excludeMethodName = new HashSet<>(Arrays.asList("toString", "clone", "hashCode", "getClass"));
 
     @Autowired(required = false)
     public void setParserCustomers(List<AopMethodAuthorizeDefinitionCustomizerParser> parserCustomers) {
@@ -40,9 +39,17 @@ public class DefaultAopMethodAuthorizeDefinitionParser implements AopMethodAutho
     }
 
     @Override
+    public List<AuthorizeDefinition> getAllParsed() {
+        return new ArrayList<>(cache.values());
+    }
+
+    @Override
     @SuppressWarnings("all")
-    public AuthorizeDefinition parse(MethodInterceptorContext paramContext) {
-        CacheKey key = buildCacheKey(paramContext);
+    public AuthorizeDefinition parse(Class target, Method method, MethodInterceptorContext context) {
+        if (excludeMethodName.contains(method.getName())) {
+            return null;
+        }
+        CacheKey key = buildCacheKey(target, method);
 
         AuthorizeDefinition definition = cache.get(key);
         if (definition != null && (definition instanceof EmptyAuthorizeDefinition)) {
@@ -51,7 +58,7 @@ public class DefaultAopMethodAuthorizeDefinitionParser implements AopMethodAutho
         //使用自定义
         if (!CollectionUtils.isEmpty(parserCustomers)) {
             definition = parserCustomers.stream()
-                    .map(customer -> customer.parse(paramContext))
+                    .map(customer -> customer.parse(target, method, context))
                     .filter(Objects::nonNull)
                     .findAny().orElse(null);
             if (definition == null || definition instanceof EmptyAuthorizeDefinition) {
@@ -60,14 +67,14 @@ public class DefaultAopMethodAuthorizeDefinitionParser implements AopMethodAutho
 
         }
 
-        Authorize classAuth = AopUtils.findAnnotation(paramContext.getTarget().getClass(), Authorize.class);
-        Authorize methodAuth = AopUtils.findMethodAnnotation(paramContext.getTarget().getClass(), paramContext.getMethod(), Authorize.class);
+        Authorize classAuth = AopUtils.findAnnotation(target, Authorize.class);
+        Authorize methodAuth = AopUtils.findMethodAnnotation(target, method, Authorize.class);
 
-        RequiresDataAccess classDataAccess = AopUtils.findAnnotation(paramContext.getTarget().getClass(), RequiresDataAccess.class);
+        RequiresDataAccess classDataAccess = AopUtils.findAnnotation(target, RequiresDataAccess.class);
 
-        RequiresDataAccess methodDataAccess = AopUtils.findMethodAnnotation(paramContext.getTarget().getClass(), paramContext.getMethod(), RequiresDataAccess.class);
+        RequiresDataAccess methodDataAccess = AopUtils.findMethodAnnotation(target, method, RequiresDataAccess.class);
 
-        RequiresExpression expression = AopUtils.findAnnotation(paramContext.getTarget().getClass(), RequiresExpression.class);
+        RequiresExpression expression = AopUtils.findAnnotation(target, RequiresExpression.class);
 
         if (classAuth == null && methodAuth == null && classDataAccess == null && methodDataAccess == null && expression == null) {
             cache.put(key, EmptyAuthorizeDefinition.instance);
@@ -78,7 +85,6 @@ public class DefaultAopMethodAuthorizeDefinitionParser implements AopMethodAutho
             cache.put(key, EmptyAuthorizeDefinition.instance);
             return null;
         }
-
         DefaultBasicAuthorizeDefinition authorizeDefinition = new DefaultBasicAuthorizeDefinition();
 
         if (methodAuth == null || methodAuth.merge()) {
@@ -89,18 +95,43 @@ public class DefaultAopMethodAuthorizeDefinitionParser implements AopMethodAutho
 
         authorizeDefinition.put(expression);
 
-        authorizeDefinition.put(methodAuth.dataAccess());
-
+        if (methodAuth != null) {
+            authorizeDefinition.put(methodAuth.dataAccess());
+        }
         authorizeDefinition.put(classDataAccess);
 
         authorizeDefinition.put(methodDataAccess);
 
+        if (authorizeDefinition.getPermissionDescription().length == 0) {
+            if (classAuth != null) {
+                String[] desc = classAuth.description();
+                if (desc.length > 0) {
+                    authorizeDefinition.setPermissionDescription(desc);
+                }
+            }
+        }
+
+        if (authorizeDefinition.getActionDescription().length == 0) {
+            if (methodAuth != null) {
+                if (methodAuth.description().length != 0) {
+                    authorizeDefinition.setActionDescription(methodAuth.description());
+                }
+            }
+        }
+
+        log.info("parsed authorizeDefinition {}.{} => {}.{} permission:{} actions:{}",
+                target.getSimpleName(),
+                method.getName(),
+                authorizeDefinition.getPermissionDescription(),
+                authorizeDefinition.getActionDescription(),
+                authorizeDefinition.getPermissions(),
+                authorizeDefinition.getActions());
         cache.put(key, authorizeDefinition);
         return authorizeDefinition;
     }
 
-    public CacheKey buildCacheKey(MethodInterceptorContext context) {
-        return new CacheKey(ClassUtils.getUserClass(context.getTarget()), context.getMethod());
+    public CacheKey buildCacheKey(Class target, Method method) {
+        return new CacheKey(ClassUtils.getUserClass(target), method);
     }
 
     class CacheKey {
@@ -121,6 +152,10 @@ public class DefaultAopMethodAuthorizeDefinitionParser implements AopMethodAutho
         public boolean equals(Object obj) {
             return obj != null && this.hashCode() == obj.hashCode();
         }
+    }
+
+    public void destroy() {
+        cache.clear();
     }
 
 }

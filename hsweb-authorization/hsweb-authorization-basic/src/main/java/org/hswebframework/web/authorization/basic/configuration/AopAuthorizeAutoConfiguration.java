@@ -6,6 +6,7 @@ import org.hswebframework.web.authorization.basic.aop.DefaultAopMethodAuthorizeD
 import org.hswebframework.web.authorization.basic.handler.AuthorizingHandler;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -24,8 +25,10 @@ public class AopAuthorizeAutoConfiguration {
 
 
     @Bean
+    @ConfigurationProperties(prefix = "hsweb.authorize")
     public AopAuthorizingController aopAuthorizingController(AuthorizingHandler authorizingHandler,
                                                              AopMethodAuthorizeDefinitionParser aopMethodAuthorizeDefinitionParser) {
-        return new AopAuthorizingController(authorizingHandler, aopMethodAuthorizeDefinitionParser);
+
+        return  new AopAuthorizingController(authorizingHandler, aopMethodAuthorizeDefinitionParser);
     }
 }

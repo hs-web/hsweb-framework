@@ -39,6 +39,16 @@ public class EmptyAuthorizeDefinition implements AuthorizeDefinition {
     }
 
     @Override
+    public String[] getPermissionDescription() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String[] getActionDescription() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public Set<String> getActions() {
         throw new UnsupportedOperationException();
     }

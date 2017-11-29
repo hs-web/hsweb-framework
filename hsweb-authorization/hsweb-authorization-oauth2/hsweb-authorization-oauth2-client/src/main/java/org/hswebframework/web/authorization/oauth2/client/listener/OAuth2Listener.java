@@ -19,8 +19,6 @@
 package org.hswebframework.web.authorization.oauth2.client.listener;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public interface OAuth2Listener<T extends OAuth2Event> {

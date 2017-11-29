@@ -92,7 +92,7 @@ public class AuthorizeTests {
 
     @Test
     public void testParseAuthorizeDefinition() {
-        AuthorizeDefinition definition = parser.parse(queryById);
+        AuthorizeDefinition definition = parser.parse(queryById.getTarget().getClass(),queryById.getMethod());
 
         Assert.assertNotNull(definition);
         Assert.assertEquals(definition.getPermissions().size(), 1);
@@ -104,7 +104,7 @@ public class AuthorizeTests {
     public void testAuthorizingHandler() {
         DefaultAuthorizingHandler handler = new DefaultAuthorizingHandler();
 
-        AuthorizeDefinition definition = parser.parse(queryById);
+        AuthorizeDefinition definition = parser.parse(queryById.getTarget().getClass(),queryById.getMethod());
 
         AuthorizingContext authorizingContext = new AuthorizingContext();
         authorizingContext.setAuthentication(authentication);
@@ -127,7 +127,7 @@ public class AuthorizeTests {
         handler.setDataAccessController(controller);
 
 
-        AuthorizeDefinition definition = parser.parse(dynamicQuery);
+        AuthorizeDefinition definition = parser.parse(dynamicQuery.getTarget().getClass(),dynamicQuery.getMethod());
 
         //获取到请求参数
         QueryParamEntity entity = dynamicQuery.<QueryParamEntity>getParameter("paramEntity").orElseThrow(NullPointerException::new);
@@ -158,7 +158,7 @@ public class AuthorizeTests {
         handler.setDataAccessController(controller);
 
 
-        AuthorizeDefinition definition = parser.parse(queryById);
+        AuthorizeDefinition definition = parser.parse(queryById.getTarget().getClass(),queryById.getMethod());
 
         //响应结果
         Object response = queryById.getInvokeResult();

@@ -38,7 +38,7 @@ public class HttpImplicitRequest extends HttpTokenRequest implements ImplicitReq
     @Override
     public String getClientId() {
         return getParameter(OAuth2Constants.client_id)
-                .orElseThrow(()->ErrorType.ILLEGAL_CLIENT_ID.throwThis(GrantTokenException::new));
+                .orElseGet(()->ErrorType.ILLEGAL_CLIENT_ID.throwThis(GrantTokenException::new));
     }
 
     @Override

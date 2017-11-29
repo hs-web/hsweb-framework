@@ -107,4 +107,5 @@ public @interface Authorize {
      */
     RequiresDataAccess dataAccess() default @RequiresDataAccess(ignore = true);
 
+    String[] description() default {};
 }

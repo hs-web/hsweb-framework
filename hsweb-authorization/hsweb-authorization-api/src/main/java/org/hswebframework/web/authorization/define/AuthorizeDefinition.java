@@ -15,6 +15,9 @@ import java.util.Set;
  */
 public interface AuthorizeDefinition {
 
+    /**
+     * @return 验证时机
+     */
     Phased getPhased();
 
     /**
@@ -34,6 +37,10 @@ public interface AuthorizeDefinition {
      * @return 要控制的权限
      */
     Set<String> getPermissions();
+
+    String[] getPermissionDescription();
+
+    String[] getActionDescription();
 
     /**
      * 要控制的权限事件,仅当{@link this#getPermissions()}不为空的时候生效

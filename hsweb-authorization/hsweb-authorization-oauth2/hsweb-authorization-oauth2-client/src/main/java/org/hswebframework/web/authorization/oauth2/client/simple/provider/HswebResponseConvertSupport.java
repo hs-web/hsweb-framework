@@ -50,7 +50,6 @@ public class HswebResponseConvertSupport implements ResponseConvertForProviderDe
 
     Function<Object, Authentication> autzParser = obj -> convertAuthentication(JSON.toJSONString(obj));
 
-
     public HswebResponseConvertSupport(AuthenticationBuilderFactory authenticationBuilderFactory) {
         this.authenticationBuilderFactory = authenticationBuilderFactory;
     }
@@ -68,7 +67,7 @@ public class HswebResponseConvertSupport implements ResponseConvertForProviderDe
 
                 Integer status = message.getInteger("status");
                 if (status != 200) {
-                    throw new BusinessException(message.getString("message"),status);
+                    throw new BusinessException(message.getString("message"), status);
                 }
                 Object data = message.get("result");
                 if (data == null) {
@@ -88,6 +87,7 @@ public class HswebResponseConvertSupport implements ResponseConvertForProviderDe
                     }
                     return ((JSONArray) data).toJavaList(type);
                 }
+                //return data;
                 return message.getObject("result", type);
             }
             return message.toJavaObject(type);
@@ -107,7 +107,6 @@ public class HswebResponseConvertSupport implements ResponseConvertForProviderDe
             throw new UnsupportedOperationException("authenticationBuilderFactory not ready");
         }
     }
-
 
     @Override
     public <T> T convert(OAuth2Response response, Class<T> type) {

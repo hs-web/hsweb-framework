@@ -25,8 +25,13 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class DefaultBasicAuthorizeDefinition implements AuthorizeDefinition {
     private boolean dataAccessControl;
+
+    private String[] permissionDescription = {};
+
+    private String[] actionDescription = {};
 
     private Set<String> permissions = new HashSet<>();
 
