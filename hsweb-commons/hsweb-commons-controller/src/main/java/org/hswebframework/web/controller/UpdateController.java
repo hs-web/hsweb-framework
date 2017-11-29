@@ -43,8 +43,7 @@ public interface UpdateController<E, PK, M> {
 
     @Authorize(action = Permission.ACTION_UPDATE)
     @PutMapping(path = "/{id}")
-    @AccessLogger("{update_by_primary_key}")
-    @ApiOperation("根据ID修改数据")
+    @ApiOperation("修改数据")
     default ResponseMessage<Integer> updateByPrimaryKey(@PathVariable PK id, @RequestBody M data) {
         E entity = getService().createEntity();
         return ResponseMessage.ok(getService().updateByPk(id, modelToEntity(data, entity)));
@@ -52,13 +51,11 @@ public interface UpdateController<E, PK, M> {
 
     @Authorize(action = {Permission.ACTION_UPDATE, Permission.ACTION_ADD}, logical = Logical.AND)
     @PatchMapping
-    @AccessLogger("{save_or_update}")
-    @ApiOperation("保存数据,如果数据不存在则新增一条数据")
+    @ApiOperation("新增或者修改")
     default ResponseMessage<PK> saveOrUpdate(@RequestBody M data) {
         E entity = getService().createEntity();
         return ResponseMessage.ok(getService().saveOrUpdate(modelToEntity(data, entity)));
     }
-
 
     /**
      * 将model转为entity
@@ -69,5 +66,6 @@ public interface UpdateController<E, PK, M> {
      * @see org.hswebframework.web.commons.model.Model
      * @see org.hswebframework.web.commons.entity.Entity
      */
+    @Authorize(ignore = true)
     E modelToEntity(M model, E entity);
 }

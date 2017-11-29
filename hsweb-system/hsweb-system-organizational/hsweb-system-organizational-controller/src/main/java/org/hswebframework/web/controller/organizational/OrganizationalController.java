@@ -17,6 +17,8 @@
 
 package org.hswebframework.web.controller.organizational;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.annotation.RequiresDataAccess;
@@ -42,9 +44,8 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("${hsweb.web.mappings.organizational:organizational}")
-@Authorize(permission = "organizational")
-@RequiresDataAccess
-@AccessLogger("组织管理")
+@Authorize(permission = "organizational",description = "机构管理",dataAccess = @RequiresDataAccess)
+@Api(value = "机构管理",tags = "组织架构-机构管理")
 public class OrganizationalController implements SimpleGenericEntityController<OrganizationalEntity, String, QueryParamEntity> {
 
     private OrganizationalService organizationalService;
@@ -61,7 +62,7 @@ public class OrganizationalController implements SimpleGenericEntityController<O
 
     @PatchMapping("/batch")
     @Authorize(action = Permission.ACTION_UPDATE)
-    @AccessLogger("批量修改数据")
+    @ApiOperation("批量修改数据")
     public ResponseMessage<Void> updateBatch(@RequestBody List<OrganizationalEntity> batch) {
         organizationalService.updateBatch(batch);
         return ResponseMessage.ok();
@@ -69,7 +70,7 @@ public class OrganizationalController implements SimpleGenericEntityController<O
 
     @PutMapping("/{id}/disable")
     @Authorize(action = Permission.ACTION_DISABLE)
-    @AccessLogger("禁用机构")
+    @ApiOperation("禁用机构")
     public ResponseMessage<Boolean> disable(@PathVariable String id) {
         organizationalService.disable(id);
         return ResponseMessage.ok();
@@ -77,7 +78,7 @@ public class OrganizationalController implements SimpleGenericEntityController<O
 
     @PutMapping("/{id}/enable")
     @Authorize(action = Permission.ACTION_ENABLE)
-    @AccessLogger("启用机构")
+    @ApiOperation("启用机构")
     public ResponseMessage<Boolean> enable(@PathVariable String id) {
         organizationalService.enable(id);
         return ResponseMessage.ok();

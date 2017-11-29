@@ -39,12 +39,10 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 @RestController
-@Api(tags = "hsweb-oauth2", description = "OAuth2授权", hidden = true)
+@Api(tags = "OAuth2.0-授权", value = "OAuth2.0")
 @RequestMapping("${hsweb.web.mappings.authorize-oauth2:oauth2/authorize}")
 public class OAuth2AuthorizeController {
 
@@ -54,9 +52,8 @@ public class OAuth2AuthorizeController {
     @Resource
     private OAuth2Granter oAuth2Granter;
 
-
     @GetMapping(params = "response_type=code")
-    @ApiOperation("登录用户获取OAuth2.0授权码")
+    @ApiOperation("获取当前登录用户OAuth2.0授权码")
     @Authorize
     public AuthorizationCodeModel requestCode(
             @RequestParam("redirect_uri") String redirectUri,
@@ -77,7 +74,7 @@ public class OAuth2AuthorizeController {
 
 
     @GetMapping(params = "response_type=token")
-    @ApiOperation("implicit方式授权")
+    @ApiOperation(value = "implicit方式授权",tags = "OAuth2.0-申请token")
     public ImplicitAccessTokenModel authorizeByImplicit(
             @RequestParam(value = "redirect_uri") String redirect_uri,
             @RequestParam(value = "state") String state,

@@ -1,6 +1,6 @@
 package org.hswebframework.web.entity.organizational;
 
-import org.hswebframework.web.commons.entity.SimpleGenericEntity;
+import lombok.*;
 import org.hswebframework.web.commons.entity.SimpleTreeSortSupportEntity;
 
 import java.util.List;
@@ -10,6 +10,10 @@ import java.util.List;
  *
  * @author hsweb-generator-online
  */
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class SimpleDistrictEntity extends SimpleTreeSortSupportEntity<String> implements DistrictEntity {
     //区域名称,如重庆市
     private String name;
@@ -24,129 +28,7 @@ public class SimpleDistrictEntity extends SimpleTreeSortSupportEntity<String> im
     //说明
     private String describe;
     //状态
-    private Byte   status;
-
+    private Byte status;
     private List<DistrictEntity> children;
 
-    /**
-     * @return 区域名称, 如重庆市
-     */
-    @Override
-    public String getName() {
-        return this.name;
-    }
-
-    /**
-     * @param name 区域名称,如重庆市
-     */
-    @Override
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    /**
-     * @return 区域全称, 如重庆市江津区
-     */
-    @Override
-    public String getFullName() {
-        return this.fullName;
-    }
-
-    /**
-     * @param fullName 区域全称,如重庆市江津区
-     */
-    @Override
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
-    }
-
-    /**
-     * @return 区域级别名称, 如:省
-     */
-    @Override
-    public String getLevelName() {
-        return this.levelName;
-    }
-
-    /**
-     * @param levelName 区域级别名称,如:省
-     */
-    @Override
-    public void setLevelName(String levelName) {
-        this.levelName = levelName;
-    }
-
-    /**
-     * @return 区域级别编码, 如:province
-     */
-    @Override
-    public String getLevelCode() {
-        return this.levelCode;
-    }
-
-    /**
-     * @param levelCode 区域级别编码,如:province
-     */
-    @Override
-    public void setLevelCode(String levelCode) {
-        this.levelCode = levelCode;
-    }
-
-    /**
-     * @return 行政区域代码, 如:500000
-     */
-    @Override
-    public String getCode() {
-        return this.code;
-    }
-
-    /**
-     * @param code 行政区域代码,如:500000
-     */
-    @Override
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    /**
-     * @return 说明
-     */
-    @Override
-    public String getDescribe() {
-        return this.describe;
-    }
-
-    /**
-     * @param describe 说明
-     */
-    @Override
-    public void setDescribe(String describe) {
-        this.describe = describe;
-    }
-
-    /**
-     * @return 状态
-     */
-    @Override
-    public Byte getStatus() {
-        return this.status;
-    }
-
-    /**
-     * @param status 状态
-     */
-    @Override
-    public void setStatus(Byte status) {
-        this.status = status;
-    }
-
-    @Override
-    public List<DistrictEntity> getChildren() {
-        return children;
-    }
-
-    @Override
-    public void setChildren(List<DistrictEntity> children) {
-        this.children = children;
-    }
 }

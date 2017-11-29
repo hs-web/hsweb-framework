@@ -15,21 +15,5 @@
   
 ```
 
-3. 测试
-使用Postman之类的http测试工具请求: 
-```bash
-  # 登录
-  HTTP POST : http://localhost:8081/authorize/login?username=admin&password=admin
-  # 测试数据权限控制-查询
-  HTTP GET :  http://localhost:8081/test/testQuery
-```
-
-如果不想使用权限控制,请注释掉 pom.xml的
-```xml
-<dependency>
-    <groupId>org.hswebframework.web</groupId>
-    <artifactId>hsweb-authorization-shiro</artifactId>
-    <version>${project.version}</version>
-</dependency>
-
-```
+## 测试
+打开页面: `http://localhost:8081/swagger-ui.html`

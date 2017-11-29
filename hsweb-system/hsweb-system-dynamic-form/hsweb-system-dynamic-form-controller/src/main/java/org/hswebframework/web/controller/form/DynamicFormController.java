@@ -1,6 +1,7 @@
 package org.hswebframework.web.controller.form;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.annotation.Authorize;
@@ -24,9 +25,8 @@ import java.util.Objects;
  */
 @RestController
 @RequestMapping("${hsweb.web.mappings.dynamic/form:dynamic/form}")
-@Authorize(permission = "dynamic-form")
-@AccessLogger("动态表单")
-@Api(tags = "dynamic-form", value = "动态表单")
+@Authorize(permission = "dynamic-form", description = "动态表单管理")
+@Api(value = "动态表单管理",tags = "动态表单-表单管理")
 public class DynamicFormController implements SimpleGenericEntityController<DynamicFormEntity, String, QueryParamEntity> {
 
     private DynamicFormService dynamicFormService;
@@ -43,7 +43,7 @@ public class DynamicFormController implements SimpleGenericEntityController<Dyna
 
 
     @PatchMapping("/bind")
-    @AccessLogger("同时保存表单和字段")
+    @ApiOperation("同时保存表单和字段")
     @Authorize(action = {Permission.ACTION_ADD, Permission.ACTION_UPDATE}, logical = Logical.OR)
     public ResponseMessage<String> saveOrUpdateFormAndColumn(@RequestBody DynamicFormColumnBindEntity bindEntity) {
         Authentication authentication = Authentication.current().orElse(null);
@@ -69,38 +69,38 @@ public class DynamicFormController implements SimpleGenericEntityController<Dyna
     }
 
     @PutMapping("/{id}/deploy")
-    @Authorize(action = "deploy")
-    @AccessLogger("发布表单")
+    @Authorize(action = "deploy", description = "发布表单")
+    @ApiOperation("发布表单")
     public ResponseMessage<Void> deploy(@PathVariable String id) {
         dynamicFormService.deploy(id);
         return ResponseMessage.ok();
     }
 
     @PutMapping("/{id}/un-deploy")
-    @Authorize(action = "deploy")
-    @AccessLogger("取消发布表单")
+    @Authorize(action = "deploy", description = "发布表单")
+    @ApiOperation("取消发布表单")
     public ResponseMessage<Void> unDeploy(@PathVariable String id) {
         dynamicFormService.unDeploy(id);
         return ResponseMessage.ok();
     }
 
     @GetMapping("/{id}/editing")
-    @Authorize(action = "get")
-    @AccessLogger("获取当前正在编辑的表单")
+    @Authorize(action = Permission.ACTION_GET)
+    @ApiOperation("获取当前正在编辑的表单")
     public ResponseMessage<DynamicFormColumnBindEntity> getEditing(@PathVariable String id) {
         return ResponseMessage.ok(dynamicFormService.selectEditing(id));
     }
 
     @GetMapping("/{id}/latest")
-    @Authorize(action = "get")
-    @AccessLogger("获取最新发布的表单")
+    @Authorize(action = Permission.ACTION_GET)
+    @ApiOperation("获取最新发布的表单")
     public ResponseMessage<DynamicFormColumnBindEntity> selectDeployed(@PathVariable String id) {
         return ResponseMessage.ok(dynamicFormService.selectLatestDeployed(id));
     }
 
     @GetMapping("/{id}/{version:\\d+}")
-    @Authorize(action = "get")
-    @AccessLogger("获取指定版本的表单")
+    @Authorize(action = Permission.ACTION_GET)
+    @ApiOperation("获取指定版本的表单")
     public ResponseMessage<DynamicFormColumnBindEntity> selectDeployed(@PathVariable String id, @PathVariable int version) {
         return ResponseMessage.ok(dynamicFormService.selectDeployed(id, version));
     }

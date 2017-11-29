@@ -21,11 +21,10 @@ package org.hswebframework.web.oauth2.model;
 import org.hswebframework.web.commons.model.Model;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public class ImplicitAccessTokenModel implements Model {
+    private static final long serialVersionUID = -8797158129087670407L;
     private String access_token;
 
     private String token_type;

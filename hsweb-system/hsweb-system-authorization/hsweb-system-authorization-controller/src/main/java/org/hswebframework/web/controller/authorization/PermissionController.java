@@ -36,9 +36,8 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("${hsweb.web.mappings.permission:permission}")
-@AccessLogger("{permission_manager}")
-@Authorize(permission = "permission")
-@Api(tags = "permission-manager", description = "权限管理")
+@Authorize(permission = "permission", description = "权限管理")
+@Api(value = "权限管理",tags = "权限-权限管理")
 public class PermissionController implements SimpleGenericEntityController<PermissionEntity, String, QueryParamEntity> {
 
     private PermissionService permissionService;

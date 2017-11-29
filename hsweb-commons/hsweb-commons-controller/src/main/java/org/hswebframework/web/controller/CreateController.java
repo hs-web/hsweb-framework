@@ -48,22 +48,18 @@ import static org.hswebframework.web.controller.message.ResponseMessage.ok;
  */
 public interface CreateController<E, PK, M> {
 
+    @Authorize(ignore = true)
     <S extends InsertService<E, PK> & CreateEntityService<E>> S getService();
 
     @Authorize(action = Permission.ACTION_ADD)
     @PostMapping
-    @AccessLogger("{action_add}")
     @ResponseStatus(HttpStatus.CREATED)
-    @ApiOperation(value = "创建数据", responseReference = "add")
-    @ApiResponses({
-            @ApiResponse(code = 201, message = "创建成功,返回创建数据的ID"),
-            @ApiResponse(code = 401, message = "未授权"),
-            @ApiResponse(code = 403, message = "无权限")
-    })
+    @ApiOperation(value = "新增")
     default ResponseMessage<PK> add(@RequestBody M data) {
         E entity = getService().createEntity();
         return ok(getService().insert(modelToEntity(data, entity)));
     }
 
+    @Authorize(ignore = true)
     E modelToEntity(M model, E entity);
 }

@@ -22,9 +22,8 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("${hsweb.web.mappings.dynamic/form/column:dynamic/form/column}")
-@Authorize(permission = "dynamic-form")
-@AccessLogger("动态表单")
-@Api(tags = "dynamic-form", value = "动态表单")
+@Authorize(permission = "dynamic-form", description = "动态表单管理")
+@Api(value = "动态表单管理",tags = "动态表单-表单管理")
 public class DynamicFormColumnController {
 
     private DynamicFormService dynamicFormService;
@@ -36,7 +35,6 @@ public class DynamicFormColumnController {
 
     @PatchMapping("/batch")
     @Authorize(action = Permission.ACTION_ADD)
-    @AccessLogger("保存多个表单列")
     @ApiOperation("保存多个表单列")
     public ResponseMessage<List<String>> add(@RequestBody List<DynamicFormColumnEntity> columnEntities) {
         return ResponseMessage.ok(dynamicFormService.saveOrUpdateColumn(columnEntities));
@@ -44,7 +42,6 @@ public class DynamicFormColumnController {
 
     @PatchMapping
     @Authorize(action = Permission.ACTION_ADD)
-    @AccessLogger("保存表单列")
     @ApiOperation("保存表单列")
     public ResponseMessage<String> add(@RequestBody DynamicFormColumnEntity columnEntity) {
         return ResponseMessage.ok(dynamicFormService.saveOrUpdateColumn(columnEntity));
@@ -52,7 +49,6 @@ public class DynamicFormColumnController {
 
     @DeleteMapping
     @Authorize(action = Permission.ACTION_DELETE)
-    @AccessLogger("删除列")
     @ApiOperation("删除列")
     public ResponseMessage<List<DynamicFormColumnEntity>> delete(@ApiParam(value = "要删除的列id,多个列以,分割", example = "1,2,3")
                                                                  @RequestParam String ids) {
@@ -61,7 +57,6 @@ public class DynamicFormColumnController {
 
     @GetMapping("/{formId}")
     @Authorize(action = Permission.ACTION_GET)
-    @AccessLogger("获取表单的所有列")
     @ApiOperation("获取表单的所有列")
     public ResponseMessage<List<DynamicFormColumnEntity>> getByFormId(@PathVariable String formId) {
         return ResponseMessage.ok(dynamicFormService.selectColumnsByFormId(formId));

@@ -17,6 +17,8 @@
 
 package org.hswebframework.web.controller.authorization;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.controller.GenericEntityController;
@@ -32,10 +34,10 @@ import org.springframework.web.bind.annotation.RestController;
  *
  * @author hsweb-generator-online
  */
-@RestController
-@RequestMapping("${hsweb.web.mappings.menu-group:menu-group}")
-@Authorize(permission = "menu-group")
-@AccessLogger("菜单分组")
+//@RestController
+//@RequestMapping("${hsweb.web.mappings.menu-group:menu-group}")
+//@Authorize(permission = "menu-group",description = "菜单分组管理")
+//@Api(tags = "权限-菜单分组",value = "菜单分组")
 public class MenuGroupController implements GenericEntityController<MenuGroupEntity, String, QueryParamEntity, MenuGroupEntity> {
 
     private MenuGroupService menuGroupService;

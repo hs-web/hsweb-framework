@@ -16,6 +16,10 @@
  */
 package org.hswebframework.web.entity.organizational;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hswebframework.web.commons.entity.SimpleTreeSortSupportEntity;
 
 import java.util.List;
@@ -25,21 +29,27 @@ import java.util.List;
  *
  * @author hsweb-generator-online
  */
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class SimpleOrganizationalEntity extends SimpleTreeSortSupportEntity<String> implements OrganizationalEntity {
+    private static final long serialVersionUID = -1610547249282278768L;
     //名称
-    private String                     name;
+    private String name;
     //全称
-    private String                     fullName;
+    private String fullName;
     //机构编码
-    private String                     code;
+    private String code;
     //可选角色
-    private java.util.List<String>     optionalRoles;
+    private java.util.List<String> optionalRoles;
     //是否启用
-    private Byte                       status;
+    private Byte status;
     //子级组织
     private List<OrganizationalEntity> children;
 
     private String areaId;
+
 
     @Override
     public String getDistrictId() {
@@ -48,91 +58,6 @@ public class SimpleOrganizationalEntity extends SimpleTreeSortSupportEntity<Stri
 
     @Override
     public void setDistrictId(String districtId) {
-        this.areaId = districtId;
-    }
-
-    /**
-     * @return 名称
-     */
-    @Override
-    public String getName() {
-        return this.name;
-    }
-
-    /**
-     * 设置 名称
-     */
-    @Override
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    /**
-     * @return 全称
-     */
-    @Override
-    public String getFullName() {
-        return this.fullName;
-    }
-
-    /**
-     * 设置 全称
-     */
-    @Override
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
-    }
-
-    /**
-     * @return 机构编码
-     */
-    @Override
-    public String getCode() {
-        return this.code;
-    }
-
-    /**
-     * 设置 机构编码
-     */
-    @Override
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    /**
-     * @return 可选角色
-     */
-    @Override
-    public java.util.List<String> getOptionalRoles() {
-        return this.optionalRoles;
-    }
-
-    /**
-     * 设置 可选角色
-     */
-    @Override
-    public void setOptionalRoles(java.util.List<String> optionalRoles) {
-        this.optionalRoles = optionalRoles;
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public List<OrganizationalEntity> getChildren() {
-        return children;
-    }
-
-    @Override
-    public void setChildren(List<OrganizationalEntity> children) {
-        this.children = children;
-    }
-
-    @Override
-    public Byte getStatus() {
-        return status;
-    }
-
-    @Override
-    public void setStatus(Byte status) {
-        this.status = status;
+        setAreaId(districtId);
     }
 }

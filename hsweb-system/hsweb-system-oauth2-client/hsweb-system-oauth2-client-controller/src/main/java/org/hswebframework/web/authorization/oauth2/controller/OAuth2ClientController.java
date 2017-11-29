@@ -18,6 +18,8 @@
 
 package org.hswebframework.web.authorization.oauth2.controller;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.hswebframework.web.WebUtil;
 import org.hswebframework.web.authorization.oauth2.client.OAuth2Constants;
 import org.hswebframework.web.authorization.oauth2.client.OAuth2RequestService;
@@ -42,6 +44,7 @@ import java.net.URLEncoder;
  */
 @Controller
 @RequestMapping("${hsweb.web.mappings.oauth2-client-callback:oauth2}")
+@Api(tags = "OAuth2.0-客户端请求", value = "OAuth2.0客户端")
 public class OAuth2ClientController {
 
     private OAuth2RequestService oAuth2RequestService;
@@ -62,6 +65,7 @@ public class OAuth2ClientController {
 
     @GetMapping("/state")
     @ResponseBody
+    @ApiOperation("申请一个state")
     public ResponseMessage<String> requestState(HttpSession session) {
         String state = IDGenerator.RANDOM.generate();
         session.setAttribute(STATE_SESSION_KEY, state);
@@ -69,6 +73,7 @@ public class OAuth2ClientController {
     }
 
     @GetMapping("/boot/{serverId}")
+    @ApiOperation("跳转至OAuth2.0服务授权页面")
     public RedirectView boot(@PathVariable String serverId,
                              @RequestParam(defaultValue = "/") String redirect,
                              HttpServletRequest request,
@@ -90,6 +95,7 @@ public class OAuth2ClientController {
     }
 
     @GetMapping("/callback/{serverId}")
+    @ApiOperation(value = "OAuth2.0授权完成后回调", hidden = true)
     public RedirectView callback(@RequestParam(defaultValue = "/") String redirect,
                                  @PathVariable String serverId,
                                  @RequestParam String code,
@@ -98,9 +104,9 @@ public class OAuth2ClientController {
                                  HttpSession session) throws UnsupportedEncodingException {
         try {
             String cachedState = (String) session.getAttribute(STATE_SESSION_KEY);
+            // TODO: 2017/11/29 未验证state
             //  if (!state.equals(cachedState)) throw new BusinessException("state error");
             oAuth2RequestService.doEvent(serverId, new OAuth2CodeAuthBeforeEvent(code, state, request::getParameter));
-            // TODO: 17-4-7 验证并解码redirect
             return new RedirectView(URLDecoder.decode(redirect, "UTF-8"));
         } finally {
             session.removeAttribute(STATE_SESSION_KEY);

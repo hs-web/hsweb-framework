@@ -1,11 +1,14 @@
 package org.hswebframework.web.controller.form;
 
+import io.swagger.annotations.Api;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
+import org.hswebframework.web.controller.QueryController;
 import org.hswebframework.web.controller.SimpleGenericEntityController;
 import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.entity.form.DynamicFormDeployLogEntity;
 import org.hswebframework.web.logging.AccessLogger;
+import org.hswebframework.web.service.QueryByEntityService;
 import  org.hswebframework.web.service.form.DynamicFormDeployLogService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,9 +25,9 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("${hsweb.web.mappings.dynamicFormDeployLog:dynamic/form-deploy-log}")
-@Authorize(permission = "form-deploy-log")
-@AccessLogger("表单发布日志")
-public class DynamicFormDeployLogController implements SimpleGenericEntityController<DynamicFormDeployLogEntity, String, QueryParamEntity> {
+@Authorize(permission = "form-deploy-log",description = "表单发布日志")
+@Api(value = "表单发布日志",tags = "动态表单-发布日志")
+public class DynamicFormDeployLogController implements QueryController<DynamicFormDeployLogEntity, String, QueryParamEntity> {
 
     private DynamicFormDeployLogService dynamicFormDeployLogService;
   
@@ -34,6 +37,7 @@ public class DynamicFormDeployLogController implements SimpleGenericEntityContro
     }
   
     @Override
+    @SuppressWarnings("unchecked")
     public DynamicFormDeployLogService getService() {
         return dynamicFormDeployLogService;
     }

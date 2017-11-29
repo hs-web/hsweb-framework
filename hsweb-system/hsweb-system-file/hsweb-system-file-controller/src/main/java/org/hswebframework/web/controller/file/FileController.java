@@ -1,6 +1,8 @@
 package org.hswebframework.web.controller.file;
 
 import com.alibaba.fastjson.JSON;
+import io.swagger.annotations.*;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.fileupload.ParameterParser;
 import org.hswebframework.expands.compress.Compress;
 import org.hswebframework.expands.compress.zip.ZIPWriter;
@@ -26,6 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.activation.MimetypesFileTypeMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -49,8 +52,8 @@ import static java.util.Optional.ofNullable;
  */
 @RestController
 @RequestMapping("${hsweb.web.mappings.file:file}")
-@Authorize(permission = "file")
-@AccessLogger("文件")
+@Authorize(permission = "file", description = "文件管理")
+@Api(value = "文件管理",tags = "文件管理-文件操作")
 @SuppressWarnings("all")
 public class FileController {
 
@@ -72,6 +75,10 @@ public class FileController {
         this.fileInfoService = fileInfoService;
     }
 
+    public static void main(String[] args) {
+        System.out.println(Base64.encodeBase64String("hello".getBytes()));
+    }
+
     /**
      * 构建并下载zip文件.仅支持POST请求
      *
@@ -82,17 +89,33 @@ public class FileController {
      * @throws RuntimeException 构建zip文件错误
      */
     @RequestMapping(value = "/download-zip/{name:.+}", method = {RequestMethod.POST})
-    @AccessLogger("下载zip文件")
-    @Authorize(action = "download")
-    public void downloadZip(@PathVariable("name") String name,
-                            @RequestParam("data") String dataStr,
+    @ApiOperation("构建zip文件并下载")
+    @Authorize(action = "download", description = "下载文件")
+    public void downloadZip(@ApiParam("zip文件名") @PathVariable("name") String name,
+                            @ApiParam(value = "zip文件内容", example = "[" +
+                                    "{\"name\":\"textFile.txt\",\"text\":\"fileText\"}," +
+                                    "{\"name\":\"uploadedFile.png\",\"file\":\"fileId or file md5\"}" +
+                                    "{\"name\":\"base64File.text\",\"base64\":\"aGVsbG8=\"}" +
+                                    "]") @RequestParam("data") String dataStr,
                             HttpServletResponse response) throws IOException {
         response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
 
         response.setHeader("Content-disposition", "attachment;filename=" + URLEncoder.encode(name, "utf-8"));
         ZIPWriter writer = Compress.zip();
         List<Map<String, String>> data = (List) JSON.parseArray(dataStr, Map.class);
-        data.forEach(map -> writer.addTextFile(map.get("name"), map.get("text")));
+        data.forEach(map -> {
+            String entryName = map.get("name");
+            String text = map.get("text");
+            String file = map.get("file");
+            String fileBase64 = map.get("base64");
+            if (text != null) {
+                writer.addTextFile(map.get("name"), text);
+            } else if (file != null) {
+                writer.addFile(entryName, fileService.readFile(file));
+            } else if (fileBase64 != null) {
+                writer.addFile(entryName, new ByteArrayInputStream(Base64.decodeBase64(fileBase64)));
+            }
+        });
         writer.write(response.getOutputStream());
     }
 
@@ -105,10 +128,10 @@ public class FileController {
      * @throws IOException 写出文本内容错误
      */
     @RequestMapping(value = "/download-text/{name:.+}", method = {RequestMethod.GET, RequestMethod.POST})
-    @AccessLogger("下载text文件")
-    @Authorize(action = "download")
-    public void downloadTxt(@PathVariable("name") String name,
-                            @RequestParam("text") String text,
+    @ApiOperation("构建文本文件并下载")
+    @Authorize(action = "download", description = "下载文件")
+    public void downloadTxt(@ApiParam("文件名") @PathVariable("name") String name,
+                            @ApiParam("文本内容") @RequestParam("text") String text,
                             HttpServletResponse response) throws IOException {
         response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
         response.setHeader("Content-disposition", "attachment;filename=" + URLEncoder.encode(name, "utf-8"));
@@ -128,12 +151,12 @@ public class FileController {
      * @throws NotFoundException 文件不存在
      */
     @RequestMapping(value = "/download/{id}/{name:.+}", method = RequestMethod.GET)
-    @AccessLogger("下载文件")
-    @Authorize(action = "download")
-    public void restDownLoad(@PathVariable("id") String id,
-                             @PathVariable("name") String name,
-                             HttpServletResponse response,
-                             HttpServletRequest request) throws IOException {
+    @ApiOperation("指定文件名下载文件")
+    @Authorize(action = "download", description = "下载文件")
+    public void restDownLoad(@ApiParam("文件的id或者md5") @PathVariable("id") String id,
+                             @ApiParam("文件名") @PathVariable("name") String name,
+                             @ApiParam(hidden = true) HttpServletResponse response,
+                             @ApiParam(hidden = true) HttpServletRequest request) throws IOException {
 
         downLoad(id, name, response, request);
     }
@@ -151,11 +174,11 @@ public class FileController {
      * @throws org.hswebframework.web.NotFoundException 文件不存在
      */
     @GetMapping(value = "/download/{id}")
-    @AccessLogger("下载文件")
-    @Authorize(action = "download")
-    public void downLoad(@PathVariable("id") String idOrMd5,
-                         @RequestParam(value = "name", required = false) String name,
-                         HttpServletResponse response, HttpServletRequest request)
+    @ApiOperation("下载文件")
+    @Authorize(action = "download", description = "下载文件")
+    public void downLoad(@ApiParam("文件的id或者md5") @PathVariable("id") String idOrMd5,
+                         @ApiParam(value = "文件名,如果未指定,默认为上传时的文件名", required = false) @RequestParam(value = "name", required = false) String name,
+                         @ApiParam(hidden = true) HttpServletResponse response, @ApiParam(hidden = true) HttpServletRequest request)
             throws IOException {
         FileInfoEntity fileInfo = fileInfoService.selectByIdOrMd5(idOrMd5);
         if (fileInfo == null || !DataStatus.STATUS_ENABLED.equals(fileInfo.getStatus())) {
@@ -209,8 +232,8 @@ public class FileController {
      * @return 文件上传结果.
      */
     @PostMapping(value = "/upload-multi")
-    @AccessLogger("上传多个文件")
-    @Authorize(action = "upload")
+    @ApiOperation("上传多个文件")
+    @Authorize(action = "upload", description = "上传文件")
     public ResponseMessage<List<FileInfoEntity>> upload(@RequestParam("files") MultipartFile[] files) {
         return ResponseMessage.ok(Stream.of(files)
                 .map(this::upload)
@@ -231,8 +254,8 @@ public class FileController {
      * @return 上传结果
      */
     @PostMapping(value = "/upload")
-    @AccessLogger("上传文件")
-    @Authorize(action = "upload")
+    @AccessLogger("上传单个文件")
+    @Authorize(action = "upload", description = "上传文件")
     public ResponseMessage<FileInfoEntity> upload(@RequestParam("file") MultipartFile file) {
         List<FileInfoEntity> fileInfoList = new LinkedList<>();
         Authentication authentication = Authentication.current().orElse(null);
@@ -249,7 +272,7 @@ public class FileController {
         if (params.get("charset") == null) {
             try {
                 fileName = new String(file.getOriginalFilename().getBytes("ISO-8859-1"), "utf-8");
-            } catch (@SuppressWarnings("all")UnsupportedEncodingException ignore) {
+            } catch (@SuppressWarnings("all") UnsupportedEncodingException ignore) {
             }
         }
         if (logger.isInfoEnabled()) {
@@ -272,8 +295,8 @@ public class FileController {
     }
 
     @PostMapping(value = "/upload-static")
-    @AccessLogger("上传静态文件")
-    @Authorize(action = "static")
+    @ApiOperation(value = "上传静态文件", notes = "上传后响应结果的result字段为文件的访问地址")
+    @Authorize(action = "static", description = "上传静态文件")
     public ResponseMessage<String> uploadStatic(@RequestParam("file") MultipartFile file) throws IOException {
         if (file.isEmpty()) {
             return ResponseMessage.ok();
@@ -282,7 +305,7 @@ public class FileController {
     }
 
     @GetMapping(value = "/md5/{md5}")
-    @AccessLogger("根据MD5获取文件信息")
+    @ApiOperation("根据MD5获取文件信息")
     public ResponseMessage<FileInfoEntity> uploadStatic(@PathVariable String md5) throws IOException {
         return ofNullable(fileInfoService.selectByMd5(md5))
                 .map(ResponseMessage::ok)

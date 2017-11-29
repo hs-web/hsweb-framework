@@ -16,6 +16,10 @@
  */
 package org.hswebframework.web.entity.organizational;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hswebframework.web.commons.entity.SimpleGenericEntity;
 
 /**
@@ -23,42 +27,15 @@ import org.hswebframework.web.commons.entity.SimpleGenericEntity;
  *
  * @author hsweb-generator-online
  */
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class SimplePersonPositionEntity extends SimpleGenericEntity<String> implements PersonPositionEntity {
+    private static final long serialVersionUID = -7102840729564722732L;
     //人员id
     private String personId;
     //职位id
     private String positionId;
-
-    /**
-     * @return 人员id
-     */
-    @Override
-    public String getPersonId() {
-        return this.personId;
-    }
-
-    /**
-     * 设置 人员id
-     */
-    @Override
-    public void setPersonId(String personId) {
-        this.personId = personId;
-    }
-
-    /**
-     * @return 职位id
-     */
-    @Override
-    public String getPositionId() {
-        return this.positionId;
-    }
-
-    /**
-     * 设置 职位id
-     */
-    @Override
-    public void setPositionId(String positionId) {
-        this.positionId = positionId;
-    }
 
 }

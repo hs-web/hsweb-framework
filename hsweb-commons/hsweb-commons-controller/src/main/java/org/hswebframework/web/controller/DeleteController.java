@@ -37,18 +37,12 @@ import static org.hswebframework.web.controller.message.ResponseMessage.ok;
  */
 public interface DeleteController<PK> {
 
+    @Authorize(ignore = true)
     DeleteService<PK> getService();
 
     @Authorize(action = Permission.ACTION_DELETE)
     @DeleteMapping(path = "/{id:.+}")
-    @AccessLogger("{delete_by_primary_key}")
-    @ApiOperation("根据ID删除数据")
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "删除成功"),
-            @ApiResponse(code = 401, message = "未授权"),
-            @ApiResponse(code = 403, message = "无权限"),
-            @ApiResponse(code = 404, message = "要删除的数据不存在")
-    })
+    @ApiOperation("删除数据")
     default ResponseMessage deleteByPrimaryKey(@PathVariable PK id) {
         return ok(getService().deleteByPk(id));
     }

@@ -43,9 +43,8 @@ import static org.hswebframework.web.controller.message.ResponseMessage.ok;
  */
 @RestController
 @RequestMapping("${hsweb.web.mappings.role:role}")
-@AccessLogger("{role_manager}")
-@Authorize(permission = "role")
-@Api(tags = "role-manager", description = "角色管理")
+@Authorize(permission = "role", description = "角色管理")
+@Api(value = "角色管理",tags = "权限-角色管理")
 public class RoleController implements SimpleGenericEntityController<RoleEntity, String, QueryParamEntity> {
 
     @Autowired
@@ -58,7 +57,6 @@ public class RoleController implements SimpleGenericEntityController<RoleEntity,
 
     @PutMapping("/disable/{id:.+}")
     @Authorize(action = Permission.ACTION_DISABLE)
-    @AccessLogger("{disable}")
     @ApiOperation("禁用角色")
     public ResponseMessage disable(@PathVariable String id) {
         roleService.disable(id);
@@ -67,7 +65,6 @@ public class RoleController implements SimpleGenericEntityController<RoleEntity,
 
     @PutMapping("/enable/{id}")
     @Authorize(action = Permission.ACTION_ENABLE)
-    @AccessLogger("{disable}")
     @ApiOperation("启用角色")
     public ResponseMessage enable(@PathVariable String id) {
         roleService.enable(id);

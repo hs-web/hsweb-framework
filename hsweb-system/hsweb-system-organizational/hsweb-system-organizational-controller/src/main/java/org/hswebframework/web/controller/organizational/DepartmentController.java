@@ -17,6 +17,7 @@
 
 package org.hswebframework.web.controller.organizational;
 
+import io.swagger.annotations.Api;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.annotation.RequiresDataAccess;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
@@ -35,9 +36,8 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("${hsweb.web.mappings.department:department}")
-@Authorize(permission = "department")
-@RequiresDataAccess
-@AccessLogger("部门管理")
+@Authorize(permission = "department", description = "部门管理", dataAccess = @RequiresDataAccess)
+@Api(value = "部门管理",tags = "组织架构-部门管理")
 public class DepartmentController implements SimpleGenericEntityController<DepartmentEntity, String, QueryParamEntity> {
 
     private DepartmentService departmentService;

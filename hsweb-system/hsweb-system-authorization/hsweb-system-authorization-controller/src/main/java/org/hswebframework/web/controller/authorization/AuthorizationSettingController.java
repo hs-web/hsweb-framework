@@ -17,6 +17,8 @@
 
 package org.hswebframework.web.controller.authorization;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
@@ -38,8 +40,8 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("${hsweb.web.mappings.autz-setting:autz-setting}")
-@Authorize(permission = "autz-setting")
-@AccessLogger("权限设置")
+@Authorize(permission = "autz-setting",description = "权限设置")
+@Api(tags = "权限-权限设置",value = "权限设置")
 public class AuthorizationSettingController implements SimpleGenericEntityController<AuthorizationSettingEntity, String, QueryParamEntity> {
 
     private AuthorizationSettingService authorizationSettingService;
@@ -56,7 +58,7 @@ public class AuthorizationSettingController implements SimpleGenericEntityContro
 
     @GetMapping("/{type}/{settingFor}")
     @Authorize(action = Permission.ACTION_GET)
-    @AccessLogger("根据type和settingFor获取配置")
+    @ApiOperation("根据type和settingFor获取配置")
     public ResponseMessage<AuthorizationSettingEntity> select(@PathVariable String type, @PathVariable String settingFor) {
         return ResponseMessage.ok(authorizationSettingService.select(type, settingFor));
     }

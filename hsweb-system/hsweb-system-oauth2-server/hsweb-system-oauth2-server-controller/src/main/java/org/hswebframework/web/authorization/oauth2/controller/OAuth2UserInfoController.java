@@ -22,6 +22,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.AuthenticationHolder;
+import org.hswebframework.web.authorization.exception.AccessDenyException;
 import org.hswebframework.web.authorization.exception.UnAuthorizedException;
 import org.hswebframework.web.authorization.oauth2.server.OAuth2AccessToken;
 import org.hswebframework.web.authorization.oauth2.server.exception.GrantTokenException;
@@ -36,7 +37,7 @@ import javax.annotation.Resource;
  * @author zhouhao
  */
 @RestController
-@Api(tags = "hsweb-oauth2", description = "OAuth2授权", hidden = true)
+@Api(tags = "OAuth2.0-获取用户信息", value = "OAuth2.0")
 @RequestMapping("${hsweb.web.mappings.oauth2-auth-info:oauth2/user-auth-info}")
 public class OAuth2UserInfoController {
 
@@ -45,7 +46,7 @@ public class OAuth2UserInfoController {
     private AccessTokenService accessTokenService;
 
     @GetMapping
-    @ApiOperation("根据accessToken获取用户信息")
+    @ApiOperation("根据accessToken获取对应用户信息")
     public ResponseMessage<Authentication> getLoginUser(@RequestParam("access_token") String access_token) {
         OAuth2AccessToken auth2AccessEntity = accessTokenService.getTokenByAccessToken(access_token);
         if (null == auth2AccessEntity) {
@@ -55,13 +56,16 @@ public class OAuth2UserInfoController {
     }
 
     @GetMapping("/{userId}")
-    @ApiOperation("根据accessToken获取用户信息")
+    @ApiOperation("根据accessToken获取特定的用户信息")
     public ResponseMessage<Authentication> getUserById(
             @PathVariable("userId") String userId,
             @RequestParam("access_token") String access_token) {
         OAuth2AccessToken auth2AccessEntity = accessTokenService.getTokenByAccessToken(access_token);
         if (null == auth2AccessEntity) {
             throw new GrantTokenException(ErrorType.EXPIRED_TOKEN);
+        }
+        if (auth2AccessEntity.getScope() == null || !auth2AccessEntity.getScope().contains("user-info")) {
+            throw new GrantTokenException(ErrorType.UNSUPPORTED_GRANT_TYPE);
         }
         return ResponseMessage.ok(AuthenticationHolder.get(userId));
     }

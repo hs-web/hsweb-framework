@@ -50,16 +50,13 @@ import static org.hswebframework.web.controller.message.ResponseMessage.ok;
  */
 @RestController
 @RequestMapping("${hsweb.web.mappings.user:user}")
-@Authorize(permission = "user")
-@AccessLogger("用户管理")
-@Api(tags = "user-manager", description = "用户基本信息管理")
+@Authorize(permission = "user", description = "用户管理")
+@Api(value = "用户管理",tags = "权限-用户管理")
 public class UserController implements
         QueryController<UserEntity, String, QueryParamEntity>,
         CreateController<BindRoleUserEntity, String, BindRoleUserEntity> {
 
     private UserService userService;
-
-    private UserTokenManager userTokenManager;
 
     @Override
     @SuppressWarnings("unchecked")
@@ -70,33 +67,6 @@ public class UserController implements
     @Autowired
     public void setUserService(UserService userService) {
         this.userService = userService;
-    }
-
-    @Autowired(required = false)
-    public void setUserTokenManager(UserTokenManager userTokenManager) {
-        this.userTokenManager = userTokenManager;
-    }
-
-    @GetMapping("/tokens")
-    @Authorize(action = Permission.ACTION_QUERY)
-    @AccessLogger("获取所有已登录用户的信息")
-    public ResponseMessage<List<UserToken>> userTokens() {
-        if (userTokenManager == null) {
-            throw new UnsupportedOperationException("userTokenManager is null");
-        }
-
-        return ok(userTokenManager.allLoggedUser());
-    }
-
-    @PutMapping("/tokens/{token}/{state}")
-    @Authorize(action = "change-state")
-    @AccessLogger("修改token的状态")
-    public ResponseMessage<List<UserToken>> makeOffline(@PathVariable String token, @PathVariable TokenState state) {
-        if (userTokenManager == null) {
-            throw new UnsupportedOperationException("userTokenManager is null");
-        }
-        userTokenManager.changeTokenState(token, state);
-        return ok();
     }
 
     @Override
@@ -112,9 +82,8 @@ public class UserController implements
                 .exclude(UserEntity.class, "password", "salt");
     }
 
-    @Authorize(action = "update")
+    @Authorize(action = Permission.ACTION_UPDATE)
     @PutMapping(path = "/{id:.+}")
-    @AccessLogger("{update_by_primary_key}")
     @ApiOperation("根据ID修改用户信息")
     public ResponseMessage<Void> updateByPrimaryKey(@PathVariable String id,
                                                     @RequestBody BindRoleUserEntity userModel) {
@@ -124,8 +93,7 @@ public class UserController implements
 
     @Authorize(merge = false)
     @PutMapping(path = "/password")
-    @AccessLogger("{update_password_login_user}")
-    @ApiOperation("修改当前用户的密码")
+    @ApiOperation("修改当前登录用户的密码")
     public ResponseMessage<Void> updateLoginUserPassword(@RequestParam String password,
                                                          @RequestParam String oldPassword) {
 
@@ -136,7 +104,6 @@ public class UserController implements
 
     @Authorize(action = Permission.ACTION_UPDATE)
     @PutMapping(path = "/password/{id:.+}")
-    @AccessLogger("{update_password_by_id}")
     @ApiOperation("修改指定用户的密码")
     public ResponseMessage<Void> updateByPasswordPrimaryKey(@PathVariable String id,
                                                             @RequestParam String password,
@@ -154,17 +121,15 @@ public class UserController implements
         return CreateController.super.add(data);
     }
 
-    @Authorize(action = "enable")
+    @Authorize(action = Permission.ACTION_ENABLE)
     @PutMapping(path = "/{id}/enable")
-    @AccessLogger("{enable_user}")
     @ApiOperation("启用用户")
     public ResponseMessage<Boolean> enable(@PathVariable String id) {
         return ok(getService().enable(id));
     }
 
-    @Authorize(action = "disable")
+    @Authorize(action = Permission.ACTION_DISABLE)
     @PutMapping(path = "/{id}/disable")
-    @AccessLogger("{disable_user}")
     @ApiOperation("禁用用户")
     public ResponseMessage<Boolean> disable(@PathVariable String id) {
         return ok(getService().disable(id));

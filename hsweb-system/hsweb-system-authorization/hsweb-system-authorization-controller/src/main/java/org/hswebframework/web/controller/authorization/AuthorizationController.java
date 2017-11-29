@@ -49,10 +49,8 @@ import static org.hswebframework.web.controller.message.ResponseMessage.ok;
 @RestController
 @RequestMapping("${hsweb.web.mappings.authorize:authorize}")
 @AccessLogger("授权")
-@Api(tags = "hsweb-authorization", description = "提供基本的授权功能")
+@Api(tags = "权限-用户授权", value = "授权")
 public class AuthorizationController {
-
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     private UserService userService;

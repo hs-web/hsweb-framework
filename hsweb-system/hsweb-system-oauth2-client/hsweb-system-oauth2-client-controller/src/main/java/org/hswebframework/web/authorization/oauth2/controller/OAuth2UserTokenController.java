@@ -18,6 +18,7 @@
 
 package org.hswebframework.web.authorization.oauth2.controller;
 
+import io.swagger.annotations.Api;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.controller.GenericEntityController;
@@ -37,7 +38,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("${hsweb.web.mappings.oauth2-user-token:oauth2-user-token}")
 @Authorize(permission = "oauth2-user-token")
-@AccessLogger("OAuth2用户授权信息")
+@Api(tags = "OAuth2.0-客户端用户授权信息",value = "OAuth2.0客户端授权信息")
 public class OAuth2UserTokenController
         implements QueryController<OAuth2UserTokenEntity, String, QueryParamEntity> {
 

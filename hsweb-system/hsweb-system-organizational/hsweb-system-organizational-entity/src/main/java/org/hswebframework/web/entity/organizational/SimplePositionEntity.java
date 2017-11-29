@@ -16,6 +16,10 @@
  */
 package org.hswebframework.web.entity.organizational;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hswebframework.web.commons.entity.SimpleTreeSortSupportEntity;
 
 import java.util.List;
@@ -25,84 +29,21 @@ import java.util.List;
  *
  * @author hsweb-generator-online
  */
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class SimplePositionEntity extends SimpleTreeSortSupportEntity<String> implements PositionEntity {
+    private static final long serialVersionUID = -8912215943657734192L;
     //职位名称
-    private String       name;
+    private String name;
     //部门id
-    private String       departmentId;
+    private String departmentId;
     //持有的角色
     private List<String> roles;
     //备注
-    private String       remark;
+    private String remark;
 
     private List<PositionEntity> children;
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public List<PositionEntity> getChildren() {
-        return children;
-    }
-
-    @Override
-    public void setChildren(List<PositionEntity> children) {
-        this.children = children;
-    }
-
-    /**
-     * @return 职位名称
-     */
-    @Override
-    public String getName() {
-        return this.name;
-    }
-
-    /**
-     * 设置 职位名称
-     */
-    @Override
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    /**
-     * @return 部门id
-     */
-    @Override
-    public String getDepartmentId() {
-        return this.departmentId;
-    }
-
-    /**
-     * 设置 部门id
-     */
-    @Override
-    public void setDepartmentId(String departmentId) {
-        this.departmentId = departmentId;
-    }
-
-    @Override
-    public List<String> getRoles() {
-        return roles;
-    }
-
-    @Override
-    public void setRoles(List<String> roles) {
-        this.roles = roles;
-    }
-
-    /**
-     * @return 备注
-     */
-    @Override
-    public String getRemark() {
-        return this.remark;
-    }
-
-    /**
-     * 设置 备注
-     */
-    @Override
-    public void setRemark(String remark) {
-        this.remark = remark;
-    }
 }

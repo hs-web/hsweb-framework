@@ -21,6 +21,7 @@ hsweb:
       allowed-methods: "*"
       allowed-headers: "*"
     authorize:
+      auto-parse: true
       jwt:
         id: test
         secret: dGVzdA==

@@ -7,6 +7,7 @@ import org.hswebframework.web.boost.aop.context.MethodInterceptorHolder;
 import org.hswebframework.web.logging.AccessLogger;
 import org.hswebframework.web.logging.LoggerDefine;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Method;
 
@@ -22,10 +23,14 @@ public class SwaggerAccessLoggerParser implements AccessLoggerParser {
 
     @Override
     public LoggerDefine parse(MethodInterceptorHolder holder) {
+        Api api = holder.findAnnotation(Api.class);
         ApiOperation operation = holder.findAnnotation(ApiOperation.class);
         String action = "";
+        if (api != null) {
+            action = action.concat(api.value());
+        }
         if (null != operation) {
-            action = operation.value();
+            action = StringUtils.isEmpty(action) ? operation.value() : action + "-" + operation.value();
         }
         return new LoggerDefine(action, "");
     }

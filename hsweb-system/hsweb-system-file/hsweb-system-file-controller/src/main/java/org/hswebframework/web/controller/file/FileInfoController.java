@@ -1,7 +1,9 @@
 package org.hswebframework.web.controller.file;
 
+import io.swagger.annotations.Api;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
+import org.hswebframework.web.controller.QueryController;
 import org.hswebframework.web.controller.SimpleGenericEntityController;
 import org.hswebframework.web.entity.file.FileInfoEntity;
 import org.hswebframework.web.logging.AccessLogger;
@@ -17,9 +19,9 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("${hsweb.web.mappings.file-info:file-info}")
-@Authorize(permission = "file-info")
-@AccessLogger("文件信息")
-public class FileInfoController implements SimpleGenericEntityController<FileInfoEntity, String, QueryParamEntity> {
+@Authorize(permission = "file-info", description = "文件信息管理")
+@Api(value = "文件信息管理",tags = "文件管理-文件信息管理")
+public class FileInfoController implements QueryController<FileInfoEntity, String, QueryParamEntity> {
 
     private FileInfoService fileInfoService;
 
@@ -29,6 +31,7 @@ public class FileInfoController implements SimpleGenericEntityController<FileInf
     }
 
     @Override
+    @SuppressWarnings("all")
     public FileInfoService getService() {
         return fileInfoService;
     }

@@ -25,6 +25,7 @@ import org.hswebframework.web.authorization.access.DataAccessConfig;
 import org.hswebframework.web.authorization.basic.aop.AopMethodAuthorizeDefinitionCustomizerParser;
 import org.hswebframework.web.authorization.basic.configuration.EnableAopAuthorize;
 import org.hswebframework.web.authorization.basic.define.EmptyAuthorizeDefinition;
+import org.hswebframework.web.authorization.define.AuthorizeDefinitionInitializedEvent;
 import org.hswebframework.web.authorization.simple.SimpleFieldFilterDataAccessConfig;
 import org.hswebframework.web.commons.entity.DataStatus;
 import org.hswebframework.web.commons.entity.factory.EntityFactory;
@@ -45,6 +46,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
@@ -83,13 +85,13 @@ import java.util.stream.Stream;
 @EnableAccessLogger
 @EnableAopAuthorize
 public class SpringBootExample
-        implements CommandLineRunner {
+        implements CommandLineRunner ,ApplicationListener<AuthorizeDefinitionInitializedEvent>{
 
     @Bean
     public AopMethodAuthorizeDefinitionCustomizerParser customizerParser(){
         //自定义权限声明
         //所有控制都通过
-        return context -> EmptyAuthorizeDefinition.instance;
+        return (type,method,context) -> EmptyAuthorizeDefinition.instance;
     }
 
     @Bean
@@ -305,5 +307,10 @@ public class SpringBootExample
 //        relationInfoService
 //                .getRelations("person","王伟")
 //                .findRev("直属上级");
+    }
+
+    @Override
+    public void onApplicationEvent(AuthorizeDefinitionInitializedEvent event) {
+        System.out.println(event.getAllDefinition());
     }
 }

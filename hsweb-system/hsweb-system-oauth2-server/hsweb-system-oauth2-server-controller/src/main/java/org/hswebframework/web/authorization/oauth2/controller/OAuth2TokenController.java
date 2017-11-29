@@ -18,7 +18,7 @@
 
 package org.hswebframework.web.authorization.oauth2.controller;
 
-import io.swagger.annotations.Api;
+import io.swagger.annotations.*;
 import org.hswebframework.web.authorization.oauth2.server.OAuth2AccessToken;
 import org.hswebframework.web.authorization.oauth2.server.exception.GrantTokenException;
 import org.hswebframework.web.authorization.oauth2.server.support.OAuth2Granter;
@@ -29,6 +29,7 @@ import org.hswebframework.web.authorization.oauth2.server.support.password.HttpP
 import org.hswebframework.web.authorization.oauth2.server.support.refresh.HttpRefreshTokenRequest;
 import org.hswebframework.web.oauth2.core.ErrorType;
 import org.hswebframework.web.oauth2.core.GrantType;
+import org.hswebframework.web.oauth2.core.OAuth2Constants;
 import org.hswebframework.web.oauth2.model.AccessTokenModel;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,12 +38,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.Map;
 
 /**
  * @author zhouhao
  */
 @RestController
-@Api(tags = "hsweb-oauth2", description = "OAuth2授权token获取", hidden = true)
+@Api(tags = "OAuth2.0-申请token", value = "OAuth2.0")
 @RequestMapping("${hsweb.web.mappings.authorize-oauth2:oauth2/token}")
 public class OAuth2TokenController {
 
@@ -50,8 +52,20 @@ public class OAuth2TokenController {
     private OAuth2Granter oAuth2Granter;
 
     @PostMapping
+    @ApiOperation(value = "申请token", notes = "具体请求方式请参照: http://www.ruanyifeng.com/blog/2014/05/oauth_2_0.html")
+    @ApiImplicitParams(
+            {
+                    @ApiImplicitParam(paramType = "query", name = OAuth2Constants.client_id),
+                    @ApiImplicitParam(paramType = "query", name = OAuth2Constants.client_secret),
+                    @ApiImplicitParam(paramType = "query", name = OAuth2Constants.refresh_token),
+                    @ApiImplicitParam(paramType = "query", name = OAuth2Constants.code),
+                    @ApiImplicitParam(paramType = "query", name = OAuth2Constants.scope, example = "user-info:get,share:add"),
+                    @ApiImplicitParam(paramType = "header", name = OAuth2Constants.authorization, example = "Basic czZCaGRSa3F0MzpnWDFmQmF0M2JW")
+            }
+    )
     public AccessTokenModel requestToken(
-            @RequestParam("grant_type") String grant_type,
+            @RequestParam("grant_type"
+            ) @ApiParam(allowableValues = GrantType.authorization_code + "," + GrantType.client_credentials + "," + GrantType.password + "," + GrantType.refresh_token + "," + GrantType.implicit) String grant_type,
             HttpServletRequest request) {
         OAuth2AccessToken accessToken = null;
         switch (grant_type) {

@@ -21,8 +21,6 @@ package org.hswebframework.web.oauth2.model;
 import org.hswebframework.web.commons.model.Model;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public class AccessTokenModel implements Model {

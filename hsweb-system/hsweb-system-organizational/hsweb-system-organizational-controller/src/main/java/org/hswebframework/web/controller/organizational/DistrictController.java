@@ -1,5 +1,7 @@
 package org.hswebframework.web.controller.organizational;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
@@ -21,8 +23,8 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("${hsweb.web.mappings.district:district}")
-@Authorize(permission = "district")
-@AccessLogger("行政区域")
+@Authorize(permission = "district", description = "行政区划管理")
+@Api(value = "行政区划管理",tags = "组织架构-行政区划管理")
 public class DistrictController implements SimpleGenericEntityController<DistrictEntity, String, QueryParamEntity> {
 
     private DistrictService districtService;
@@ -39,21 +41,21 @@ public class DistrictController implements SimpleGenericEntityController<Distric
 
     @GetMapping("/code/{code}")
     @Authorize(action = Permission.ACTION_QUERY)
-    @AccessLogger("根据行政区划代码获取")
+    @ApiOperation("根据行政区划代码获取")
     public ResponseMessage<DistrictEntity> getByCode(@PathVariable String code) {
         return ResponseMessage.ok(districtService.selectByCode(code));
     }
 
     @GetMapping("/all")
     @Authorize(action = Permission.ACTION_QUERY)
-    @AccessLogger("获取全部行政区划")
+    @ApiOperation("获取全部行政区划")
     public ResponseMessage<List<DistrictEntity>> all() {
         return ResponseMessage.ok(districtService.select());
     }
 
     @PatchMapping("/batch")
     @Authorize(action = Permission.ACTION_UPDATE)
-    @AccessLogger("批量修改数据")
+    @ApiOperation("批量修改数据")
     public ResponseMessage<Void> updateBatch(@RequestBody List<DistrictEntity> batch) {
         districtService.updateBatch(batch);
         return ResponseMessage.ok();
@@ -61,7 +63,7 @@ public class DistrictController implements SimpleGenericEntityController<Distric
 
     @PutMapping("/{id}/disable")
     @Authorize(action = Permission.ACTION_DISABLE)
-    @AccessLogger("禁用机构")
+    @ApiOperation("禁用机构")
     public ResponseMessage<Boolean> disable(@PathVariable String id) {
         districtService.disable(id);
         return ResponseMessage.ok();
@@ -69,7 +71,7 @@ public class DistrictController implements SimpleGenericEntityController<Distric
 
     @PutMapping("/{id}/enable")
     @Authorize(action = Permission.ACTION_ENABLE)
-    @AccessLogger("启用机构")
+    @ApiOperation("启用机构")
     public ResponseMessage<Boolean> enable(@PathVariable String id) {
         districtService.enable(id);
         return ResponseMessage.ok();

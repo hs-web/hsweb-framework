@@ -3,11 +3,10 @@ package org.hswebframework.web.entity.organizational;
 import org.hswebframework.web.commons.entity.Entity;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public class PersonUserEntity implements Entity {
+    private static final long serialVersionUID = -2619415787107625818L;
     private String username;
 
     private String password;

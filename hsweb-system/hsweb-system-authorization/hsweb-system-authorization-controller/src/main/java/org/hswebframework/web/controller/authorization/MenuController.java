@@ -47,9 +47,8 @@ import static org.hswebframework.web.controller.message.ResponseMessage.ok;
  */
 @RestController
 @RequestMapping("${hsweb.web.mappings.menu:menu}")
-@Authorize(permission = "menu")
-@AccessLogger("菜单")
-@Api(value = "menu-manager", description = "系统菜单管理")
+@Authorize(permission = "menu",description = "菜单管理")
+@Api(value = "系统菜单管理",tags = "权限-菜单管理")
 public class MenuController implements SimpleGenericEntityController<MenuEntity, String, QueryParamEntity> {
 
     private MenuService menuService;

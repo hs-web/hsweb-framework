@@ -17,6 +17,8 @@
 
 package org.hswebframework.web.controller.organizational;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.hswebframework.web.NotFoundException;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.annotation.Authorize;
@@ -46,8 +48,8 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("${hsweb.web.mappings.person:person}")
-@Authorize(permission = "person")
-@AccessLogger("人员")
+@Authorize(permission = "person",description = "人员管理")
+@Api(value = "人员管理",tags = "组织架构-人员管理")
 public class PersonController implements SimpleGenericEntityController<PersonEntity, String, QueryParamEntity> {
 
     private PersonService personService;
@@ -68,7 +70,7 @@ public class PersonController implements SimpleGenericEntityController<PersonEnt
     }
 
     @GetMapping("/me")
-    @AccessLogger("查看当前登录用户的人员信息")
+    @ApiOperation("查看当前登录用户的人员信息")
     @Authorize(merge = false)
     public ResponseMessage<PersonAuthBindEntity> getLoginUserPerson() {
         PersonnelAuthorization authorization = PersonnelAuthorization
@@ -78,7 +80,7 @@ public class PersonController implements SimpleGenericEntityController<PersonEnt
     }
 
     @PutMapping("/me")
-    @AccessLogger("修改个人信息")
+    @ApiOperation("修改个人信息")
     @Authorize(merge = false)
     public ResponseMessage<String> updateMePersonInfo(@RequestBody PersonAuthBindEntity bindEntity) {
         PersonnelAuthorization authorization = PersonnelAuthorization
@@ -100,7 +102,7 @@ public class PersonController implements SimpleGenericEntityController<PersonEnt
     }
 
     @GetMapping("/me/authorization")
-    @AccessLogger("查看当前登录用户的人员权限信息")
+    @ApiOperation("查看当前登录用户的人员权限信息")
     @Authorize(merge = false)
     public ResponseMessage<PersonnelAuthorization> getLoginUserPersonDetail() {
         PersonnelAuthorization authorization = PersonnelAuthorization
@@ -110,14 +112,14 @@ public class PersonController implements SimpleGenericEntityController<PersonEnt
     }
 
     @GetMapping("/{id}/detail")
-    @AccessLogger("查看人员详情")
+    @ApiOperation("查看人员详情")
     @Authorize(action = Permission.ACTION_GET)
     public ResponseMessage<PersonAuthBindEntity> getDetail(@PathVariable String id) {
         return ResponseMessage.ok(personService.selectAuthBindByPk(id));
     }
 
     @PostMapping("/detail")
-    @AccessLogger("新增人员信息,并关联用户信息")
+    @ApiOperation("新增人员信息,并关联用户信息")
     @Authorize(action = Permission.ACTION_ADD)
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseMessage<String> getDetail(@RequestBody PersonAuthBindEntity bindEntity) {
@@ -125,7 +127,7 @@ public class PersonController implements SimpleGenericEntityController<PersonEnt
     }
 
     @PutMapping("/{id}/detail")
-    @AccessLogger("修改人员信息,并关联用户信息")
+    @ApiOperation("修改人员信息,并关联用户信息")
     @Authorize(action = Permission.ACTION_UPDATE)
     public ResponseMessage<String> getDetail(@PathVariable String id, @RequestBody PersonAuthBindEntity bindEntity) {
         bindEntity.setId(id);
@@ -134,7 +136,7 @@ public class PersonController implements SimpleGenericEntityController<PersonEnt
     }
 
     @GetMapping("/in-position/{positionId}")
-    @AccessLogger("获取指定岗位的人员")
+    @ApiOperation("获取指定岗位的人员")
     @Authorize(action = Permission.ACTION_GET)
     public ResponseMessage<List<PersonEntity>> getByPositionId(@PathVariable String positionId) {
         return ResponseMessage.ok(personService.selectByPositionId(positionId));

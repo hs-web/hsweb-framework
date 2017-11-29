@@ -3,8 +3,6 @@ package org.hswebframework.web.entity.organizational;
 import java.util.Set;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public class SimplePersonAuthBindEntity extends SimplePersonEntity implements PersonAuthBindEntity {

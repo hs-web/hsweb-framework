@@ -1,5 +1,6 @@
 package org.hswebframework.web.controller.datasource;
 
+import io.swagger.annotations.Api;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.controller.SimpleGenericEntityController;
@@ -16,9 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
  * @author hsweb-generator-online
  */
 @RestController
-@RequestMapping("${hsweb.web.mappings.dataSourceConfig:dataSourceConfig}")
-@Authorize(permission = "dataSourceConfig")
-@AccessLogger("数据源配置")
+@RequestMapping("datasource/config")
+@Authorize(permission = "data-source-config",description = "动态数据源管理")
+@Api(value = "数据源配置",tags = "动态数据源-数据源配置")
 public class DataSourceConfigController implements SimpleGenericEntityController<DataSourceConfigEntity, String, QueryParamEntity> {
 
     private DataSourceConfigService dataSourceConfigService;

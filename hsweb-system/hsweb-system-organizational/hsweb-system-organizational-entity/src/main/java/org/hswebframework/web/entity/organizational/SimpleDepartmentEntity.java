@@ -16,6 +16,7 @@
  */
 package org.hswebframework.web.entity.organizational;
 
+import lombok.*;
 import org.hswebframework.web.commons.entity.SimpleTreeSortSupportEntity;
 
 import java.util.List;
@@ -25,7 +26,13 @@ import java.util.List;
  *
  * @author hsweb-generator-online
  */
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class SimpleDepartmentEntity extends SimpleTreeSortSupportEntity<String> implements DepartmentEntity {
+    private static final long serialVersionUID = -2137579829759620323L;
     //名称
     private String name;
     //所在组织id
@@ -37,72 +44,4 @@ public class SimpleDepartmentEntity extends SimpleTreeSortSupportEntity<String> 
 
     private List<DepartmentEntity> children;
 
-    /**
-     * @return 名称
-     */
-    @Override
-    public String getName() {
-        return this.name;
-    }
-
-    /**
-     * 设置 名称
-     */
-    @Override
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    /**
-     * @return 所在组织id
-     */
-    @Override
-    public String getOrgId() {
-        return this.orgId;
-    }
-
-    /**
-     * 设置 所在组织id
-     */
-    @Override
-    public void setOrgId(String orgId) {
-        this.orgId = orgId;
-    }
-
-    /**
-     * @return 部门编码
-     */
-    @Override
-    public String getCode() {
-        return this.code;
-    }
-
-    /**
-     * 设置 部门编码
-     */
-    @Override
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    @Override
-    public Byte getStatus() {
-        return status;
-    }
-
-    @Override
-    public void setStatus(Byte status) {
-        this.status = status;
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public List<DepartmentEntity> getChildren() {
-        return children;
-    }
-
-    @Override
-    public void setChildren(List<DepartmentEntity> children) {
-        this.children = children;
-    }
 }

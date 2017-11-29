@@ -16,23 +16,30 @@
  */
 package org.hswebframework.web.entity.organizational;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotBlank;
 import org.hswebframework.web.commons.entity.SimpleGenericEntity;
-
-import java.util.Set;
 
 /**
  * 人员
  *
  * @author hsweb-generator-online
  */
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class SimplePersonEntity extends SimpleGenericEntity<String> implements PersonEntity {
+    private static final long serialVersionUID = -4232153898188508965L;
     //姓名
     @NotBlank
     private String name;
     //性别
-    private Byte   sex;
+    private Byte sex;
     //电子邮箱
     @Email
     private String email;
@@ -43,136 +50,9 @@ public class SimplePersonEntity extends SimpleGenericEntity<String> implements P
     //关联用户id
     private String userId;
     //状态
-    private Byte   status;
+    private Byte status;
     //备注
     private String remark;
 
-    /**
-     * @return 姓名
-     */
-    @Override
-    public String getName() {
-        return this.name;
-    }
-
-    /**
-     * 设置 姓名
-     */
-    @Override
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    /**
-     * @return 性别
-     */
-    @Override
-    public Byte getSex() {
-        return this.sex;
-    }
-
-    /**
-     * 设置 性别
-     */
-    @Override
-    public void setSex(Byte sex) {
-        this.sex = sex;
-    }
-
-    /**
-     * @return 电子邮箱
-     */
-    @Override
-    public String getEmail() {
-        return this.email;
-    }
-
-    /**
-     * 设置 电子邮箱
-     */
-    @Override
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    /**
-     * @return 联系电话
-     */
-    @Override
-    public String getPhone() {
-        return this.phone;
-    }
-
-    /**
-     * 设置 联系电话
-     */
-    @Override
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    /**
-     * @return 照片
-     */
-    @Override
-    public String getPhoto() {
-        return this.photo;
-    }
-
-    /**
-     * 设置 照片
-     */
-    @Override
-    public void setPhoto(String photo) {
-        this.photo = photo;
-    }
-
-    /**
-     * @return 关联用户id
-     */
-    @Override
-    public String getUserId() {
-        return this.userId;
-    }
-
-    /**
-     * 设置 关联用户id
-     */
-    @Override
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
-    /**
-     * @return 状态
-     */
-    @Override
-    public Byte getStatus() {
-        return this.status;
-    }
-
-    /**
-     * 设置 状态
-     */
-    @Override
-    public void setStatus(Byte status) {
-        this.status = status;
-    }
-
-    /**
-     * @return 备注
-     */
-    @Override
-    public String getRemark() {
-        return this.remark;
-    }
-
-    /**
-     * 设置 备注
-     */
-    @Override
-    public void setRemark(String remark) {
-        this.remark = remark;
-    }
 
 }

@@ -17,6 +17,7 @@
 
 package org.hswebframework.web.controller.dictionary;
 
+import io.swagger.annotations.Api;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.controller.GenericEntityController;
@@ -35,8 +36,8 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("${hsweb.web.mappings.dictionary:dictionary}")
-@Authorize(permission = "dictionary")
-@AccessLogger("数据字典")
+@Authorize(permission = "dictionary",description = "数据字典管理")
+@Api(value = "数据字典",tags = "数据字典-字典配置")
 public class DictionaryController implements GenericEntityController<DictionaryEntity, String, QueryParamEntity, DictionaryEntity> {
 
     private DictionaryService dictionaryService;

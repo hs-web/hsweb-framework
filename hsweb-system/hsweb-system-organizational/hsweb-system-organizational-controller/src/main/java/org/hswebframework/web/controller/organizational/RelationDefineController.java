@@ -1,5 +1,6 @@
 package org.hswebframework.web.controller.organizational;
 
+import io.swagger.annotations.Api;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.controller.SimpleGenericEntityController;
@@ -17,8 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("${hsweb.web.mappings.relationDefine:relation/define}")
-@Authorize(permission = "relation-define")
-@AccessLogger("关系定义")
+@Authorize(permission = "relation-define",description = "关系定义管理")
+@Api(value = "关系定义管理",tags = "组织架构-关系定义管理")
 public class RelationDefineController implements SimpleGenericEntityController<RelationDefineEntity, String, QueryParamEntity> {
 
     private RelationDefineService relationDefineService;

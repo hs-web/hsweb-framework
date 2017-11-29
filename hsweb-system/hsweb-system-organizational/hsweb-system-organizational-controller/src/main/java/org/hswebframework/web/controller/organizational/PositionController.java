@@ -17,17 +17,12 @@
 
 package org.hswebframework.web.controller.organizational;
 
-import org.hswebframework.web.authorization.Permission;
+import io.swagger.annotations.Api;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.annotation.RequiresDataAccess;
-import org.hswebframework.web.commons.entity.PagerResult;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
-import org.hswebframework.web.controller.GenericEntityController;
 import org.hswebframework.web.controller.SimpleGenericEntityController;
-import org.hswebframework.web.controller.message.ResponseMessage;
-import org.hswebframework.web.entity.organizational.DepartmentEntity;
 import org.hswebframework.web.entity.organizational.PositionEntity;
-import org.hswebframework.web.logging.AccessLogger;
 import org.hswebframework.web.service.organizational.PositionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,9 +35,8 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("${hsweb.web.mappings.position:position}")
-@Authorize(permission = "position")
-@RequiresDataAccess
-@AccessLogger("职位管理")
+@Authorize(permission = "position",description = "职位管理",dataAccess = @RequiresDataAccess)
+@Api(value = "职位管理",tags = "组织架构-职位管理")
 public class PositionController implements SimpleGenericEntityController<PositionEntity, String, QueryParamEntity> {
 
     private PositionService positionService;

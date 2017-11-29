@@ -1,5 +1,7 @@
 package org.hswebframework.web.controller.script;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.controller.SimpleGenericEntityController;
@@ -21,8 +23,8 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("${hsweb.web.mappings.script:script}")
-@Authorize(permission = "script")
-@AccessLogger("动态脚本")
+@Authorize(permission = "script", description = "动态脚本管理")
+@Api("动态脚本")
 public class ScriptController implements SimpleGenericEntityController<ScriptEntity, String, QueryParamEntity> {
 
     private ScriptService scriptService;
@@ -46,8 +48,8 @@ public class ScriptController implements SimpleGenericEntityController<ScriptEnt
 
 
     @GetMapping("/{id}/execute")
-    @AccessLogger("执行脚本")
-    @Authorize(action = "execute")
+    @ApiOperation("执行脚本")
+    @Authorize(action = "execute", description = "执行脚本")
     public ResponseMessage<Object> executeForGet(@PathVariable String id, @RequestParam(required = false) Map<String, Object> parameters) throws Exception {
         if (parameters == null) {
             parameters = new HashMap<>();
@@ -58,8 +60,8 @@ public class ScriptController implements SimpleGenericEntityController<ScriptEnt
 
 
     @RequestMapping(value = "/{id}/execute", method = {RequestMethod.POST, RequestMethod.PUT})
-    @AccessLogger("执行脚本")
-    @Authorize(action = "execute")
+    @Authorize(action = "execute", description = "执行脚本")
+    @ApiOperation("执行脚本")
     public ResponseMessage<Object> executeFotPostAndPut(@PathVariable String id,
                                                         @RequestBody(required = false) Map<String, Object> parameters) throws Exception {
         return ResponseMessage.ok(executeForGet(id, parameters));

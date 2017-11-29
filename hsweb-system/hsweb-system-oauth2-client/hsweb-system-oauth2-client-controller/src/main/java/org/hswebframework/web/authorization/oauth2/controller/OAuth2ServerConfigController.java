@@ -18,6 +18,7 @@
 
 package org.hswebframework.web.authorization.oauth2.controller;
 
+import io.swagger.annotations.Api;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.controller.GenericEntityController;
@@ -36,7 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("${hsweb.web.mappings.oauth2-server-config:oauth2-server-config}")
 @Authorize(permission = "oauth2-server-config")
-@AccessLogger("OAuth2服务配置")
+@Api(tags = "OAuth2.0-服务配置")
 public class OAuth2ServerConfigController implements GenericEntityController<OAuth2ServerConfigEntity, String, QueryParamEntity, OAuth2ServerConfigEntity> {
 
     private OAuth2ServerConfigService oAuth2ServerConfigService;
