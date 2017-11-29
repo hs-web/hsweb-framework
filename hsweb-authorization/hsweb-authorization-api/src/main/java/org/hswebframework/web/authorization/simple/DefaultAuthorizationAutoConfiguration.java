@@ -1,7 +1,9 @@
 package org.hswebframework.web.authorization.simple;
 
 import org.hswebframework.web.authorization.Authentication;
+import org.hswebframework.web.authorization.AuthenticationHolder;
 import org.hswebframework.web.authorization.AuthenticationManager;
+import org.hswebframework.web.authorization.AuthenticationSupplier;
 import org.hswebframework.web.authorization.builder.AuthenticationBuilderFactory;
 import org.hswebframework.web.authorization.builder.DataAccessConfigBuilderFactory;
 import org.hswebframework.web.authorization.simple.builder.DataAccessConfigConvert;
@@ -24,7 +26,7 @@ import java.util.List;
  * @author zhouhao
  */
 @Configuration
-public class AuthorizationAutoConfiguration {
+public class DefaultAuthorizationAutoConfiguration {
 
     @Autowired(required = false)
     private List<DataAccessConfigConvert> dataAccessConfigConverts;
@@ -39,7 +41,9 @@ public class AuthorizationAutoConfiguration {
     @Bean
     @ConditionalOnBean(AuthenticationManager.class)
     public UserTokenAuthenticationSupplier userTokenAuthenticationSupplier(AuthenticationManager authenticationManager) {
-        return new UserTokenAuthenticationSupplier(authenticationManager);
+        UserTokenAuthenticationSupplier supplier= new UserTokenAuthenticationSupplier(authenticationManager);
+        AuthenticationHolder.addSupplier(supplier);
+        return supplier;
     }
 
     @Bean

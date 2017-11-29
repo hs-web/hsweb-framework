@@ -23,9 +23,11 @@ import org.hswebframework.web.authorization.AuthenticationManager;
 import org.hswebframework.web.authorization.listener.AuthorizationListener;
 import org.hswebframework.web.authorization.listener.AuthorizationListenerDispatcher;
 import org.hswebframework.web.authorization.listener.event.AuthorizationEvent;
+import org.hswebframework.web.authorization.simple.DefaultAuthorizationAutoConfiguration;
 import org.hswebframework.web.service.authorization.simple.SimpleAuthenticationManager;
 import org.hswebframework.utils.ClassUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -40,24 +42,11 @@ import java.util.List;
 @Configuration
 @ComponentScan({"org.hswebframework.web.service.authorization.simple"
         , "org.hswebframework.web.controller.authorization"})
+@AutoConfigureBefore(DefaultAuthorizationAutoConfiguration.class)
 public class AuthorizationAutoConfiguration {
-
-    @Autowired(required = false)
-    private List<AuthorizationListener> listeners;
-
-    @Bean
-    @SuppressWarnings("unchecked")
-    public <E extends AuthorizationEvent> AuthorizationListenerDispatcher authorizationListenerDispatcher() {
-        AuthorizationListenerDispatcher dispatcher = new AuthorizationListenerDispatcher();
-        if (listeners != null) {
-            listeners.forEach(listener -> dispatcher.addListener((Class<E>) ClassUtils.getGenericType(listener.getClass()), listener));
-        }
-        return dispatcher;
-    }
 
     @Bean
     @ConditionalOnMissingBean(AuthenticationManager.class)
-    @ConditionalOnBean(AuthenticationInitializeService.class)
     public AuthenticationManager authenticationManager(AuthenticationInitializeService authenticationInitializeService) {
         return new SimpleAuthenticationManager(authenticationInitializeService);
     }

@@ -10,8 +10,6 @@ import org.springframework.cache.annotation.Cacheable;
 import static org.hswebframework.web.service.authorization.simple.CacheConstants.USER_AUTH_CACHE_NAME;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public class SimpleAuthenticationManager implements AuthenticationManager {

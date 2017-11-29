@@ -99,9 +99,6 @@ public class AuthorizingHandlerAutoConfiguration {
             if (bean instanceof DataAccessHandler) {
                 defaultDataAccessController.addHandler(((DataAccessHandler) bean));
             }
-            if (bean instanceof AuthenticationSupplier) {
-                AuthenticationHolder.addSupplier(((AuthenticationSupplier) bean));
-            }
             return bean;
         }
     }
