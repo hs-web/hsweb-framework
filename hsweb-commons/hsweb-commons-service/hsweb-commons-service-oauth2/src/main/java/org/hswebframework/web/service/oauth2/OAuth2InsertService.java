@@ -2,7 +2,6 @@ package org.hswebframework.web.service.oauth2;
 
 import com.alibaba.fastjson.JSON;
 import org.hswebframework.web.service.InsertService;
-import org.hswebframework.web.service.UpdateService;
 
 public interface OAuth2InsertService<E, PK> extends InsertService<E, PK>, OAuth2ServiceSupport {
     @Override
