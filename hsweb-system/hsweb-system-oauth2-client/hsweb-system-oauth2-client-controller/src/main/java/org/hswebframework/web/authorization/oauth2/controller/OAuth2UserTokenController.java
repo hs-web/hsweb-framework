@@ -38,7 +38,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("${hsweb.web.mappings.oauth2-user-token:oauth2-user-token}")
 @Authorize(permission = "oauth2-user-token")
-@Api(tags = "OAuth2.0-客户端用token信息",value = "OAuth2.0客户端token信息")
+@Api(tags = "OAuth2.0-客户端-token",value = "OAuth2.0-客户端-token")
 public class OAuth2UserTokenController
         implements QueryController<OAuth2UserTokenEntity, String, QueryParamEntity> {
 

@@ -37,7 +37,7 @@ import javax.annotation.Resource;
  * @author zhouhao
  */
 @RestController
-@Api(tags = "OAuth2.0-获取用户信息", value = "OAuth2.0")
+@Api(tags = "OAuth2.0-服务-获取用户信息", value = "OAuth2.0-服务-获取用户信息")
 @RequestMapping("${hsweb.web.mappings.oauth2-auth-info:oauth2/user-auth-info}")
 public class OAuth2UserInfoController {
 

@@ -44,7 +44,7 @@ import javax.servlet.http.HttpServletRequest;
  * @author zhouhao
  */
 @RestController
-@Api(tags = "OAuth2.0-授权", value = "OAuth2.0")
+@Api(tags = "OAuth2.0-服务-授权", value = "OAuth2.0-服务-授权")
 @RequestMapping("${hsweb.web.mappings.authorize-oauth2:oauth2/authorize}")
 public class OAuth2AuthorizeController {
 

@@ -44,7 +44,7 @@ import java.net.URLEncoder;
  */
 @Controller
 @RequestMapping("${hsweb.web.mappings.oauth2-client-callback:oauth2}")
-@Api(tags = "OAuth2.0-客户端", value = "OAuth2.0客户端")
+@Api(tags = "OAuth2.0-客户端-请求服务", value = "OAuth2.0客户端请求服务")
 public class OAuth2ClientController {
 
     private OAuth2RequestService oAuth2RequestService;

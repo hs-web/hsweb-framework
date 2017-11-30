@@ -44,7 +44,7 @@ import java.util.Map;
  * @author zhouhao
  */
 @RestController
-@Api(tags = "OAuth2.0-申请token", value = "OAuth2.0")
+@Api(tags = "OAuth2.0-服务-申请token", value = "OAuth2.0-服务-申请token")
 @RequestMapping("${hsweb.web.mappings.authorize-oauth2:oauth2/token}")
 public class OAuth2TokenController {
 
