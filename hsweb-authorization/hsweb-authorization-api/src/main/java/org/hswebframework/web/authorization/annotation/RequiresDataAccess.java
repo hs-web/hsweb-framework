@@ -53,6 +53,8 @@ public @interface RequiresDataAccess {
      */
     String[] action() default {};
 
+    String[] supportType() default {};
+
     /**
      * @return logical
      */

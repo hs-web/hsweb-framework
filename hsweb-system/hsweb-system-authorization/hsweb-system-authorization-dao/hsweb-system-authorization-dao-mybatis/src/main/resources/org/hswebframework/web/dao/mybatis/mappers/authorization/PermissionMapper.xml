@@ -29,7 +29,8 @@
         <result property="actions" column="actions" javaType="java.util.List" jdbcType="VARCHAR"/>
         <result property="optionalFields" column="optional_fields" javaType="java.util.List" jdbcType="CLOB"/>
         <result property="supportDataAccessTypes" column="spt_da_types" javaType="java.util.List" jdbcType="CLOB"/>
-        <!--<result property="parents" column="parents" javaType="java.util.List" jdbcType="CLOB"/>-->
+        <result property="parents" column="parents" javaType="java.util.List" jdbcType="CLOB"/>
+        <result property="type" column="type" javaType="string" jdbcType="VARCHAR"/>
     </resultMap>
 
     <!--用于动态生成sql所需的配置-->

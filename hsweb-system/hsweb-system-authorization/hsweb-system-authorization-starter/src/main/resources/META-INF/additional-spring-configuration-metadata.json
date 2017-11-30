@@ -1,0 +1,10 @@
+{
+  "properties": [
+    {
+      "name": "hsweb.authorize.sync",
+      "type": "java.lang.Boolean",
+      "defaultValue": "false",
+      "description": "是否自动将解析的权限定义信息同步到数据库,需满足hsweb.authorize.auto-parse=true."
+    }
+  ]
+}

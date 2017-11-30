@@ -39,4 +39,13 @@ public class ActionEntity implements CloneableEntity {
         return Arrays.stream(actions).map(ActionEntity::new).collect(Collectors.toList());
     }
 
+    @Override
+    public int hashCode() {
+        return getAction().hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof ActionEntity && obj.hashCode() == hashCode();
+    }
 }

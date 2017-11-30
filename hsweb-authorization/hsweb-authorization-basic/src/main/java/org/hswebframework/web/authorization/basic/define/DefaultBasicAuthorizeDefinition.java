@@ -13,6 +13,7 @@ import org.hswebframework.web.authorization.define.Script;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
@@ -33,13 +34,13 @@ public class DefaultBasicAuthorizeDefinition implements AuthorizeDefinition {
 
     private String[] actionDescription = {};
 
-    private Set<String> permissions = new HashSet<>();
+    private Set<String> permissions = new LinkedHashSet<>();
 
-    private Set<String> actions = new HashSet<>();
+    private Set<String> actions = new LinkedHashSet<>();
 
-    private Set<String> roles = new HashSet<>();
+    private Set<String> roles = new LinkedHashSet<>();
 
-    private Set<String> user = new HashSet<>();
+    private Set<String> user = new LinkedHashSet<>();
 
     private Script script;
 

@@ -1,0 +1,10 @@
+{
+  "properties": [
+    {
+      "name": "hsweb.authorize.auto-parse",
+      "type": "java.lang.Boolean",
+      "defaultValue": "false",
+      "description": "是否自动解析代码中的权限定义信息并触发AuthorizeDefinitionInitializedEvent事件."
+    }
+  ]
+}
