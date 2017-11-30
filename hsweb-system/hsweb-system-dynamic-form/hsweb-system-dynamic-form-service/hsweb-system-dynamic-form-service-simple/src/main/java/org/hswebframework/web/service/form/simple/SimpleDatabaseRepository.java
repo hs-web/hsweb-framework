@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -27,11 +28,11 @@ import java.util.function.Supplier;
 @Service
 public class SimpleDatabaseRepository implements DatabaseRepository {
 
-    private RDBDatabase defaultDatabase = null;
+    private volatile RDBDatabase defaultDatabase = null;
     private SqlExecutor sqlExecutor     = null;
 
     private final Map<String, RDBDatabase>                                 repository            = new HashMap<>();
-    private final Map<DatabaseType, Supplier<AbstractRDBDatabaseMetaData>> databaseMetaSuppliers = new HashMap<>();
+    private final Map<DatabaseType, Supplier<AbstractRDBDatabaseMetaData>> databaseMetaSuppliers = new EnumMap<>(DatabaseType.class);
 
     @Autowired
     public void setSqlExecutor(SqlExecutor sqlExecutor) {
