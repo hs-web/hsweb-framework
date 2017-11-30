@@ -110,7 +110,7 @@ public class SystemInitializeAutoConfiguration implements CommandLineRunner, Bea
         DatabaseType type = DataSourceHolder.currentDatabaseType();
         SystemVersion version = appProperties.build();
         if(version.getName()==null){
-            return;
+            version.setName("unknown");
         }
         Connection connection = null;
         String jdbcUserName;
