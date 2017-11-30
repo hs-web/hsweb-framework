@@ -18,6 +18,8 @@
 
 package org.hswebframework.web.starter;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import org.hswebframework.ezorm.rdb.RDBDatabase;
 import org.hswebframework.ezorm.rdb.executor.AbstractJdbcSqlExecutor;
 import org.hswebframework.ezorm.rdb.executor.SqlExecutor;
@@ -38,6 +40,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -48,7 +51,7 @@ import java.util.Map;
 public class InstallTests {
     SqlExecutor sqlExecutor;
     RDBDatabase database;
-    Connection  connection;
+    Connection connection;
 
     @Before
     public void setup() throws Exception {
@@ -78,6 +81,7 @@ public class InstallTests {
 
     @Test
     public void testInstall() throws Exception {
+
         SystemVersion version = new SystemVersion();
         version.setName("test");
         version.setVersion("3.0.0");
@@ -85,6 +89,9 @@ public class InstallTests {
                 = new org.hswebframework.web.starter.init.SystemInitialize(sqlExecutor, database, version);
 
         systemInitialize.install();
+
+      //  List systems = database.getTable("s_system").createQuery().list();
+        //System.out.println(JSON.toJSONString(systems, SerializerFeature.PrettyFormat));
     }
 
 }
