@@ -22,15 +22,13 @@ import org.hswebframework.web.commons.entity.GenericEntity;
 import org.hswebframework.web.commons.entity.RecordCreationEntity;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public interface UserEntity extends GenericEntity<String>, RecordCreationEntity {
     String name     = "name";
     String username = "username";
     String salt     = "salt";
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("all")
     String password = "password";
     String status = "status";
 

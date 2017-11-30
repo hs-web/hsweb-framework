@@ -138,7 +138,7 @@ public class LocalFileService implements FileService {
         int fileSize;
         MessageDigest digest = DigestUtils.getMd5Digest();
 
-        try (InputStream in =new InputStream() {
+        try (InputStream in = new InputStream() {
             @Override
             public int read(byte[] b, int off, int len) throws IOException {
                 int l = fileStream.read(b, off, len);
@@ -162,17 +162,17 @@ public class LocalFileService implements FileService {
                 return fileStream.read();
             }
         }; FileOutputStream os = new FileOutputStream(fileAbsName)) {
-            int remainBytes=fileSize= in.available();
-            byte[] buff = new byte[remainBytes>1024*10?1024*10:remainBytes];
+            int remainBytes = fileSize = in.available();
+            byte[] buff = new byte[remainBytes > 1024 * 10 ? 1024 * 10 : remainBytes];
             int bytes;
-            logger.info("开始写出文件:{}到:{}, size: {} bytes",fileName,fileAbsName,fileSize);
+            logger.info("开始写出文件:{}到:{}, size: {} bytes", fileName, fileAbsName, fileSize);
             while (remainBytes > 0) {
-                bytes = in.read(buff, 0, remainBytes > buff.length ? buff.length :  remainBytes);
+                bytes = in.read(buff, 0, remainBytes > buff.length ? buff.length : remainBytes);
                 os.write(buff, 0, bytes);
                 remainBytes -= bytes;
-                logger.info("写出文件:{}:{},剩余数据量: {} bytes",fileName,fileAbsName, remainBytes);
+                logger.info("写出文件:{}:{},剩余数据量: {} bytes", fileName, fileAbsName, remainBytes);
             }
-           // StreamUtils.copy(in, os);
+            // StreamUtils.copy(in, os);
         }
 
         String md5 = Hex.encodeHexString(digest.digest());
@@ -182,7 +182,7 @@ public class LocalFileService implements FileService {
         //判断文件是否已经存在
         FileInfoEntity fileInfo = fileInfoService.selectByMd5(md5);
         if (fileInfo != null) {
-            logger.info("文件:{}已上传过",fileAbsName);
+            logger.info("文件:{}已上传过", fileAbsName);
             if (new File(getFilePath() + "/" + fileInfo.getLocation()).exists()) {
                 newFile.delete();//文件已存在则删除临时文件不做处理
             } else {
@@ -190,7 +190,7 @@ public class LocalFileService implements FileService {
             }
             return fileInfo;
         } else {
-            logger.info("上传文件{}完成:{}->{}",fileName,fileAbsName,absPath.concat("/").concat(md5));
+            logger.info("上传文件{}完成:{}->{}", fileName, fileAbsName, absPath.concat("/").concat(md5));
             newFile.renameTo(new File(absPath.concat("/").concat(md5)));
         }
         FileInfoEntity infoEntity = fileInfoService.createEntity();
@@ -199,7 +199,7 @@ public class LocalFileService implements FileService {
         infoEntity.setLocation(filePath.concat("/").concat(md5));
         infoEntity.setName(fileName);
         infoEntity.setType(type);
-        infoEntity.setSize((long)fileSize);
+        infoEntity.setSize((long) fileSize);
         infoEntity.setMd5(md5);
         infoEntity.setStatus(DataStatus.STATUS_ENABLED);
         fileInfoService.insert(infoEntity);
@@ -210,7 +210,8 @@ public class LocalFileService implements FileService {
     public void writeFile(String fileId, OutputStream out, long skip) throws IOException {
         try (InputStream inputStream = readFile(fileId)) {
             if (skip > 0) {
-                inputStream.skip(skip);
+                long len = inputStream.skip(skip);
+                logger.info("skip write stream {},{}", skip, len);
             }
             StreamUtils.copy(inputStream, out);
         }

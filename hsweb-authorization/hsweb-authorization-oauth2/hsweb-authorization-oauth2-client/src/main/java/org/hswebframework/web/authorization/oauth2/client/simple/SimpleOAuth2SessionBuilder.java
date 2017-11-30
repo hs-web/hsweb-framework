@@ -25,6 +25,8 @@ import org.hswebframework.web.authorization.oauth2.client.simple.session.Authori
 import org.hswebframework.web.authorization.oauth2.client.simple.session.CachedOAuth2Session;
 import org.hswebframework.web.authorization.oauth2.client.simple.session.DefaultOAuth2Session;
 import org.hswebframework.web.authorization.oauth2.client.simple.session.PasswordSession;
+import org.hswebframework.web.oauth2.core.GrantType;
+import org.hswebframework.web.oauth2.core.OAuth2Constants;
 
 import java.util.List;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -110,7 +112,7 @@ public class SimpleOAuth2SessionBuilder implements OAuth2SessionBuilder {
     }
 
 
-    Supplier<AccessTokenInfo> tokenGetter = () -> {
+   private Supplier<AccessTokenInfo> tokenGetter = () -> {
         readWriteLock.readLock().lock();
         try {
             return getClientCredentialsToken();

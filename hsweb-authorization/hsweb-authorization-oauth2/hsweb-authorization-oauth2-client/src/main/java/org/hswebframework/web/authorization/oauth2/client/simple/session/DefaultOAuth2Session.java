@@ -24,13 +24,13 @@ import org.hswebframework.web.authorization.oauth2.client.request.OAuth2Request;
 import org.hswebframework.web.authorization.oauth2.client.request.OAuth2Session;
 import org.hswebframework.web.authorization.oauth2.client.response.OAuth2Response;
 import org.hswebframework.web.oauth2.core.ErrorType;
+import org.hswebframework.web.oauth2.core.OAuth2Constants;
 import org.springframework.util.Assert;
 
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
 
-import static org.hswebframework.web.authorization.oauth2.client.OAuth2Constants.*;
+import static org.hswebframework.web.oauth2.core.OAuth2Constants.*;
+
 
 /**
  * @author zhouhao
@@ -165,8 +165,8 @@ public class DefaultOAuth2Session implements OAuth2Session {
         boolean[] skip = new boolean[1];
         AccessTokenInfo tokenInfo = request
                 .param(OAuth2Constants.scope, scope)
-                .param(OAuth2Constants.grant_type, GrantType.refresh_token)
-                .param(GrantType.refresh_token, accessTokenInfo.getRefreshToken())
+                .param(OAuth2Constants.grant_type, org.hswebframework.web.oauth2.core.GrantType.refresh_token)
+                .param(org.hswebframework.web.oauth2.core.GrantType.refresh_token, accessTokenInfo.getRefreshToken())
                 .post().onError((oAuth2Response, type) -> {
                     if(type== ErrorType.EXPIRED_REFRESH_TOKEN){
                         setAccessTokenInfo(requestAccessToken());

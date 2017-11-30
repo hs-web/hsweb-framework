@@ -93,6 +93,7 @@ public class JtaDynamicDataSourceService extends AbstractDynamicDataSourceServic
                     downLatch.countDown();
                 } catch (Exception e) {
                     logger.error("init datasource {} error", id, e);
+
                     //atomikosDataSourceBean.close();
                 }
             });
@@ -102,6 +103,7 @@ public class JtaDynamicDataSourceService extends AbstractDynamicDataSourceServic
                     Thread.sleep(config.getInitTimeout() * 1000L);
                 } catch (InterruptedException ignored) {
                     logger.warn(ignored.getMessage(), ignored);
+                    Thread.currentThread().interrupt();
                 } finally {
                     if (successCounter.get() == 0) {
                         // 初始化超时,认定为失败

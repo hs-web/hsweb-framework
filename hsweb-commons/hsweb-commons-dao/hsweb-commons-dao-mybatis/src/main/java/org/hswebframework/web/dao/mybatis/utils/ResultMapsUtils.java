@@ -37,9 +37,13 @@ public class ResultMapsUtils {
             try {
                 countDownLatch.await();
             } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+                throw new UnsupportedOperationException(e);
+            }
+            if (sqlSession == null) {
+                throw new UnsupportedOperationException("sqlSession is null");
             }
         }
+
         return sqlSession.getConfiguration().getResultMap(id);
     }
 

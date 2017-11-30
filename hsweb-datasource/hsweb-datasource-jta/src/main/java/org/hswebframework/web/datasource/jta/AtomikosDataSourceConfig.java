@@ -1,30 +1,30 @@
 package org.hswebframework.web.datasource.jta;
 
 import com.atomikos.jdbc.AtomikosDataSourceBean;
+import lombok.extern.slf4j.Slf4j;
 
 import java.sql.SQLException;
 import java.util.Properties;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
+@Slf4j
 public class AtomikosDataSourceConfig {
-    private int        minPoolSize             = 5;
-    private int        maxPoolSize             = 200;
-    private int        borrowConnectionTimeout = 60;
-    private int        reapTimeout             = 0;
-    private int        maxIdleTime             = 60;
-    private int        maintenanceInterval     = 60;
-    private int        defaultIsolationLevel   = -1;
-    private String     xaDataSourceClassName   = null;
-    private int        loginTimeout            = 0;
-    private String     testQuery               = null;
-    private int        maxLifetime             = 0;
-    private Properties xaProperties            = null;
+    private int minPoolSize = 5;
+    private int maxPoolSize = 200;
+    private int borrowConnectionTimeout = 60;
+    private int reapTimeout = 0;
+    private int maxIdleTime = 60;
+    private int maintenanceInterval = 60;
+    private int defaultIsolationLevel = -1;
+    private String xaDataSourceClassName = null;
+    private int loginTimeout = 0;
+    private String testQuery = null;
+    private int maxLifetime = 0;
+    private Properties xaProperties = null;
     //初始化超时时间
-    private int        initTimeout             = 10;
+    private int initTimeout = 10;
 
     @Override
     public int hashCode() {
@@ -169,7 +169,7 @@ public class AtomikosDataSourceConfig {
             try {
                 atomikosDataSourceBean.setLoginTimeout(getLoginTimeout());
             } catch (SQLException e) {
-                e.printStackTrace();
+                log.warn(e.getMessage(), e);
             }
         }
         atomikosDataSourceBean.setMaxIdleTime(getMaxIdleTime());

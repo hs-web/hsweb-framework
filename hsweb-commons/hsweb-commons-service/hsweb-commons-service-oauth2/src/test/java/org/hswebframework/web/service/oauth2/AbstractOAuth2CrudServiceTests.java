@@ -55,23 +55,19 @@ public class AbstractOAuth2CrudServiceTests {
                 createFixedResponseRequest(
                         whenRequest("get", ResponseMessage.ok(entity))
                         , whenRequest("put", ResponseMessage.ok(1))
-                        , whenRequest("delete", ResponseMessage.ok(1)))
-        );
+                        , whenRequest("delete", ResponseMessage.ok(1))));
 
         when(oAuth2Session.request("/test/all")).thenReturn(
                 createFixedResponseRequest(
-                        whenRequest("get", ResponseMessage.ok(Arrays.asList(entity)))
-                ));
+                        whenRequest("get", ResponseMessage.ok(Arrays.asList(entity)))));
 
         when(oAuth2Session.request("/test/ids")).thenReturn(
                 createFixedResponseRequest(
-                        whenRequest("get", ResponseMessage.ok(Arrays.asList(entity)))
-                ));
+                        whenRequest("get", ResponseMessage.ok(Arrays.asList(entity)))));
 
         when(oAuth2Session.request("/test/batch")).thenReturn(
                 createFixedResponseRequest(
-                        whenRequest("put", ResponseMessage.error(400, "名称不能为空"))
-                ));
+                        whenRequest("put", ResponseMessage.error(400, "名称不能为空"))));
 
         when(sessionBuilder.byClientCredentials()).thenReturn(oAuth2Session);
 

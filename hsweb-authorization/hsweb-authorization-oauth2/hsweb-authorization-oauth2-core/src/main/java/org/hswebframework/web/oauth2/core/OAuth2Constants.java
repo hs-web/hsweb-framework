@@ -19,8 +19,6 @@
 package org.hswebframework.web.oauth2.core;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public interface OAuth2Constants {
@@ -36,6 +34,8 @@ public interface OAuth2Constants {
     String state         = "state";
     String code          = "code";
     String username      = "username";
+
+    @SuppressWarnings("all")
     String password      = "password";
 
 }

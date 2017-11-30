@@ -88,7 +88,7 @@ public class DynamicSqlSessionFactory implements SqlSessionFactory {
         return configuration;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("all")
     private SqlSession openSessionFromDataSource(ExecutorType execType, TransactionIsolationLevel level, boolean autoCommit) {
         Transaction tx = null;
         try {

@@ -30,8 +30,9 @@ public class DataSourceCache {
             try {
                 //等待初始化完成
                 initLatch.await();
-            } catch (InterruptedException ignored) {
+            } catch (Exception ignored) {
                 log.warn(ignored.getMessage(),ignored);
+
             } finally {
                 initLatch = null;
             }

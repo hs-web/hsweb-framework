@@ -73,7 +73,7 @@ public class OAuth2SSOAuthorizingListener
         HttpSession httpSession = WebUtil.getHttpServletRequest()
                 .getSession();
 
-        userTokenManager.signIn(httpSession.getId(), "sessionId",authentication.getUser().getId(), 60 * 60 * 1000);
+        userTokenManager.signIn(httpSession.getId(), "sessionId",authentication.getUser().getId(), 60 * 60 * 1000L);
 
 
     }

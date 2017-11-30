@@ -15,7 +15,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
 
 /**
- *
  * @author zhouhao
  */
 
@@ -82,21 +81,17 @@ public class MemoryMessager implements Messager {
 
                 @Override
                 public void cancel() {
-                    boolean lockSuccess = true;
                     try {
                         queue.lock.writeLock().tryLock(5, TimeUnit.SECONDS);
-                    } catch (InterruptedException e) {
-                        lockSuccess = false;
-                        log.warn(e.getMessage(),e);
-                    }
-                    try {
-                        queue.consumers.remove(consumer);
-                    } finally {
                         try {
+                            queue.consumers.remove(consumer);
+                        } finally {
                             queue.lock.writeLock().unlock();
-                        } catch (Exception e) {
                         }
+                    } catch (Exception e) {
+                        log.warn(e.getMessage(), e);
                     }
+
                 }
             };
         } else if (subject instanceof TopicMessageSubject) {
@@ -108,6 +103,6 @@ public class MemoryMessager implements Messager {
 
     class QueueConsumer<M extends Message> {
         final List<Consumer<M>> consumers = new ArrayList<>();
-        final ReadWriteLock     lock      = new ReentrantReadWriteLock();
+        final ReadWriteLock lock = new ReentrantReadWriteLock();
     }
 }
