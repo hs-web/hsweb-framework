@@ -23,6 +23,7 @@ import org.hswebframework.ezorm.rdb.executor.AbstractJdbcSqlExecutor;
 import org.hswebframework.ezorm.rdb.executor.SqlExecutor;
 import org.hswebframework.ezorm.rdb.meta.RDBDatabaseMetaData;
 import org.hswebframework.ezorm.rdb.render.dialect.H2RDBDatabaseMetaData;
+import org.hswebframework.ezorm.rdb.render.dialect.MysqlRDBDatabaseMetaData;
 import org.hswebframework.ezorm.rdb.simple.SimpleDatabase;
 import org.hswebframework.expands.script.engine.DynamicScriptEngine;
 import org.hswebframework.expands.script.engine.DynamicScriptEngineFactory;
@@ -51,6 +52,12 @@ public class InstallTests {
 
     @Before
     public void setup() throws Exception {
+//        Class.forName("com.mysql.jdbc.Driver");
+//        connection = DriverManager.getConnection(
+//                "jdbc:mysql://localhost/test_db1?useSSL=false&useUnicode=true&characterEncoding=utf8&autoReconnect=true&failOverReadOnly=false",
+//                "root", "root");
+//
+
         Class.forName("org.h2.Driver");
         connection = DriverManager.getConnection("jdbc:h2:file:./target/data/h2db;", "sa", "");
         sqlExecutor = new AbstractJdbcSqlExecutor() {
@@ -65,6 +72,7 @@ public class InstallTests {
             }
         };
         RDBDatabaseMetaData databaseMetaData = new H2RDBDatabaseMetaData();
+//        RDBDatabaseMetaData databaseMetaData = new MysqlRDBDatabaseMetaData("MyISAM");
         database = new SimpleDatabase(databaseMetaData, sqlExecutor);
     }
 

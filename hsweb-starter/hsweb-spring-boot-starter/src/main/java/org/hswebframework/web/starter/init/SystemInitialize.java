@@ -73,7 +73,7 @@ public class SystemInitialize {
                 }
             }
 
-            rdbTable.createUpdate().set(targetVersion).where().sql("1=1").exec();
+            rdbTable.createUpdate().set(targetVersion).where().is("name",targetVersion.getName()).exec();
         }
     }
 
@@ -167,7 +167,7 @@ public class SystemInitialize {
             return;
         }
         RDBTable<SystemVersion> rdbTable = database.getTable("s_system");
-        installed = rdbTable.createQuery().single();
+        installed = rdbTable.createQuery().where("name",targetVersion.getName()).single();
     }
 
 
