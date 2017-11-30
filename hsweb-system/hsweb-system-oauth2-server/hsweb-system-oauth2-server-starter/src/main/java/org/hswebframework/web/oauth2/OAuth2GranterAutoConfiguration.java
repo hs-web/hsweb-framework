@@ -18,7 +18,7 @@
 
 package org.hswebframework.web.oauth2;
 
-import org.hswebframework.web.authorization.oauth2.server.client.OAuth2ClientService;
+import org.hswebframework.web.authorization.oauth2.server.client.OAuth2ClientConfigRepository;
 import org.hswebframework.web.authorization.oauth2.server.support.AbstractAuthorizationService;
 import org.hswebframework.web.authorization.oauth2.server.support.DefaultOAuth2Granter;
 import org.hswebframework.web.authorization.oauth2.server.support.client.ClientCredentialGranter;
@@ -72,10 +72,10 @@ public class OAuth2GranterAutoConfiguration {
                 .setCodeGenerator(codeGenerator);
     }
 
-    @ConditionalOnMissingBean(OAuth2ClientService.class)
+    @ConditionalOnMissingBean(OAuth2ClientConfigRepository.class)
     @Bean
-    public SimpleClientService simpleClientService(OAuth2ClientDao oAuth2ClientDao) {
-        return new SimpleClientService(oAuth2ClientDao);
+    public SimpleClientConfigRepository simpleClientService(OAuth2ClientDao oAuth2ClientDao) {
+        return new SimpleClientConfigRepository(oAuth2ClientDao);
     }
 
     @ConditionalOnMissingBean(PasswordService.class)
@@ -96,7 +96,7 @@ public class OAuth2GranterAutoConfiguration {
         @Autowired
         private AuthorizationCodeService authorizationCodeService;
         @Autowired
-        private OAuth2ClientService      oAuth2ClientService;
+        private OAuth2ClientConfigRepository oAuth2ClientConfigRepository;
         @Autowired
         private AccessTokenService       accessTokenService;
         @Autowired
@@ -104,7 +104,7 @@ public class OAuth2GranterAutoConfiguration {
 
         private <T extends AbstractAuthorizationService> T setProperty(T abstractAuthorizationService) {
             abstractAuthorizationService.setAccessTokenService(accessTokenService);
-            abstractAuthorizationService.setClientService(oAuth2ClientService);
+            abstractAuthorizationService.setRepository(oAuth2ClientConfigRepository);
             return abstractAuthorizationService;
         }
 

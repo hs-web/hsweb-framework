@@ -18,13 +18,21 @@
 
 package org.hswebframework.web.authorization.oauth2.server.client;
 
+import java.util.List;
+
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
-public interface OAuth2ClientService {
+public interface OAuth2ClientConfigRepository {
     OAuth2Client getClientById(String id);
 
     OAuth2Client getClientByOwnerId(String ownerId);
+
+    OAuth2Client save(OAuth2Client oAuth2Client);
+
+    OAuth2Client remove(String id);
+
+    OAuth2Client newClient();
+
+    List<OAuth2Client> getAll();
 }

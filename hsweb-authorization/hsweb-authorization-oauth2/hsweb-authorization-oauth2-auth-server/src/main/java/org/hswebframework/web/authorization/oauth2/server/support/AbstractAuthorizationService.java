@@ -19,7 +19,7 @@
 package org.hswebframework.web.authorization.oauth2.server.support;
 
 import org.hswebframework.web.authorization.oauth2.server.client.OAuth2Client;
-import org.hswebframework.web.authorization.oauth2.server.client.OAuth2ClientService;
+import org.hswebframework.web.authorization.oauth2.server.client.OAuth2ClientConfigRepository;
 import org.hswebframework.web.authorization.oauth2.server.exception.GrantTokenException;
 import org.hswebframework.web.authorization.oauth2.server.token.AccessTokenService;
 import org.hswebframework.web.commons.entity.DataStatus;
@@ -32,7 +32,7 @@ import static org.hswebframework.web.oauth2.core.ErrorType.*;
  */
 public abstract class AbstractAuthorizationService {
     protected AccessTokenService  accessTokenService;
-    protected OAuth2ClientService clientService;
+    protected OAuth2ClientConfigRepository repository;
 
     public AccessTokenService getAccessTokenService() {
         return accessTokenService;
@@ -42,12 +42,12 @@ public abstract class AbstractAuthorizationService {
         this.accessTokenService = accessTokenService;
     }
 
-    public OAuth2ClientService getClientService() {
-        return clientService;
+    public OAuth2ClientConfigRepository getRepository() {
+        return repository;
     }
 
-    public void setClientService(OAuth2ClientService clientService) {
-        this.clientService = clientService;
+    public void setRepository(OAuth2ClientConfigRepository repository) {
+        this.repository = repository;
     }
 
     protected void assertGrantTypeSupport(OAuth2Client client, String grantType) {
@@ -81,11 +81,11 @@ public abstract class AbstractAuthorizationService {
     }
 
     protected OAuth2Client getClientByOwnerId(String ownerId) {
-        return checkClient(clientService.getClientByOwnerId(ownerId));
+        return checkClient(repository.getClientByOwnerId(ownerId));
     }
 
     protected OAuth2Client getClient(String clientId) {
-        return checkClient(clientService.getClientById(clientId));
+        return checkClient(repository.getClientById(clientId));
     }
 
 }

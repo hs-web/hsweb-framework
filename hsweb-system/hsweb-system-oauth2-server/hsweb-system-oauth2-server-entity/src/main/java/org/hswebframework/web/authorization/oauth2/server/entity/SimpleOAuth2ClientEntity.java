@@ -18,6 +18,7 @@
 
 package org.hswebframework.web.authorization.oauth2.server.entity;
 
+import lombok.*;
 import org.hswebframework.web.commons.entity.SimpleGenericEntity;
 
 import java.util.Set;
@@ -25,7 +26,13 @@ import java.util.Set;
 /**
  * @author zhouhao
  */
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class SimpleOAuth2ClientEntity extends SimpleGenericEntity<String> implements OAuth2ClientEntity {
+    private static final long serialVersionUID = -8370400980996896599L;
     private String name;
 
     private String secret;
@@ -48,113 +55,4 @@ public class SimpleOAuth2ClientEntity extends SimpleGenericEntity<String> implem
 
     private Byte status;
 
-    @Override
-    public String getDescribe() {
-        return describe;
-    }
-
-    @Override
-    public void setDescribe(String describe) {
-        this.describe = describe;
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    @Override
-    public String getSecret() {
-        return secret;
-    }
-
-    @Override
-    public void setSecret(String secret) {
-        this.secret = secret;
-    }
-
-    @Override
-    public String getRedirectUri() {
-        return redirectUri;
-    }
-
-    @Override
-    public void setRedirectUri(String redirectUri) {
-        this.redirectUri = redirectUri;
-    }
-
-    @Override
-    public String getOwnerId() {
-        return ownerId;
-    }
-
-    @Override
-    public void setOwnerId(String ownerId) {
-        this.ownerId = ownerId;
-    }
-
-    @Override
-    public String getCreatorId() {
-        return creatorId;
-    }
-
-    @Override
-    public void setCreatorId(String creatorId) {
-        this.creatorId = creatorId;
-    }
-
-    @Override
-    public Long getCreateTime() {
-        return createTime;
-    }
-
-    @Override
-    public void setCreateTime(Long createTime) {
-        this.createTime = createTime;
-    }
-
-    @Override
-    public String getType() {
-        return type;
-    }
-
-    @Override
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    @Override
-    public Set<String> getSupportGrantTypes() {
-        return supportGrantTypes;
-    }
-
-    @Override
-    public void setSupportGrantTypes(Set<String> supportGrantType) {
-        this.supportGrantTypes = supportGrantType;
-    }
-
-    @Override
-    public Set<String> getDefaultGrantScope() {
-        return defaultGrantScope;
-    }
-
-    @Override
-    public void setDefaultGrantScope(Set<String> defaultGrantScope) {
-        this.defaultGrantScope = defaultGrantScope;
-    }
-
-    @Override
-    public Byte getStatus() {
-        return status;
-    }
-
-    @Override
-    public void setStatus(Byte status) {
-        this.status = status;
-    }
 }

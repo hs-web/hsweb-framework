@@ -21,12 +21,12 @@ package org.hswebframework.web.authorization.oauth2.controller;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.hswebframework.web.WebUtil;
-import org.hswebframework.web.authorization.oauth2.client.OAuth2Constants;
 import org.hswebframework.web.authorization.oauth2.client.OAuth2RequestService;
 import org.hswebframework.web.authorization.oauth2.client.listener.OAuth2CodeAuthBeforeEvent;
 import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.entity.oauth2.client.OAuth2ServerConfigEntity;
 import org.hswebframework.web.id.IDGenerator;
+import org.hswebframework.web.oauth2.core.OAuth2Constants;
 import org.hswebframework.web.service.oauth2.client.OAuth2ServerConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -44,7 +44,7 @@ import java.net.URLEncoder;
  */
 @Controller
 @RequestMapping("${hsweb.web.mappings.oauth2-client-callback:oauth2}")
-@Api(tags = "OAuth2.0-客户端请求", value = "OAuth2.0客户端")
+@Api(tags = "OAuth2.0-客户端", value = "OAuth2.0客户端")
 public class OAuth2ClientController {
 
     private OAuth2RequestService oAuth2RequestService;
