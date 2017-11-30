@@ -63,6 +63,11 @@ public class DefaultImplicitGranter extends AbstractAuthorizationService impleme
         accessToken.setOwnerId(client.getOwnerId());
         accessToken.setExpiresIn(3600);
         accessToken.setClientId(clientId);
+        OAuth2AccessToken old = accessTokenService.tryGetOldToken(accessToken);
+        //如果已存在token并且距离上次更新时间小于10秒
+        if(old!=null&&System.currentTimeMillis()-old.getUpdateTime()<10000){
+            return old;
+        }
         return accessTokenService.saveOrUpdateToken(accessToken);
     }
 }

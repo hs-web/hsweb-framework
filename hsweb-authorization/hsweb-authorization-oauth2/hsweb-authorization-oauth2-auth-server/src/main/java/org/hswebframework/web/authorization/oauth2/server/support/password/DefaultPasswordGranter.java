@@ -68,6 +68,13 @@ public class DefaultPasswordGranter extends AbstractAuthorizationService impleme
         accessToken.setOwnerId(userId);
         accessToken.setExpiresIn(3600);
         accessToken.setClientId(client.getId());
+        OAuth2AccessToken old = accessTokenService.tryGetOldToken(accessToken);
+        //如果已存在token并且距离上次更新时间小于10秒
+        if(old!=null&&System.currentTimeMillis()-old.getUpdateTime()<10000){
+
+            return old;
+        }
+
         return accessTokenService.saveOrUpdateToken(accessToken);
     }
 }
