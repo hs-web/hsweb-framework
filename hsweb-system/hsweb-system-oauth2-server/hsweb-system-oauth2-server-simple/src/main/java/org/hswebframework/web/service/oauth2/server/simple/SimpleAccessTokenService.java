@@ -101,9 +101,9 @@ public class SimpleAccessTokenService implements AccessTokenService {
     @Override
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     @Caching(put = {
-            @CachePut(cacheNames = "oauth2-access-token", key = "'refresh:'+#token.refreshToken"),
-            @CachePut(cacheNames = "oauth2-access-token", key = "'token:'+#token.accessToken"),
-            @CachePut(cacheNames = "oauth2-access-token", key = "'cgo'+#token.clientId+#token.grantType+#token.ownerId")
+            @CachePut(cacheNames = "oauth2-access-token", key = "'refresh:'+#result.refreshToken"),
+            @CachePut(cacheNames = "oauth2-access-token", key = "'token:'+#result.accessToken"),
+            @CachePut(cacheNames = "oauth2-access-token", key = "'cgo'+#result.clientId+#result.grantType+#result.ownerId")
     })
     public OAuth2AccessToken saveOrUpdateToken(OAuth2AccessToken token) {
         Assert.notNull(token, "token can not be null!");
