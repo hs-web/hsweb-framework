@@ -35,6 +35,9 @@ public class SimplePermissionEntity extends SimpleGenericEntity<String> implemen
 
     private List<OptionalField> optionalFields;
 
+    //直接关联其他权限
+    private List<ParentPermission> parents;
+
     @Override
     public SimplePermissionEntity clone() {
         SimplePermissionEntity target = (SimplePermissionEntity) super.clone();

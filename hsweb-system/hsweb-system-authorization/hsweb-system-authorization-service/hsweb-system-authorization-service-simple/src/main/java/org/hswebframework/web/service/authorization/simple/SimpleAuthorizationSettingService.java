@@ -319,6 +319,7 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
                 permissionService.selectByPk(permissionIds)
                         .stream()
                         .collect(Collectors.toMap(PermissionEntity::getId, Function.identity()));
+
         //防止越权
         detailList = detailList.stream().filter(detail -> {
             PermissionEntity entity = permissionEntityCache.get(detail.getPermissionId());
@@ -353,6 +354,12 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
                 .collect(Collectors.groupingBy(AuthorizationSettingDetailEntity::getPermissionId));
 
         List<Permission> permissions = new ArrayList<>();
+        //获取关联的权限信息
+        Map<String, List<ParentPermission>> parentsPermissions = permissionEntityCache.values().stream()
+                .map(PermissionEntity::getParents)
+                .filter(Objects::nonNull)
+                .flatMap(Collection::stream)
+                .collect(Collectors.groupingBy(ParentPermission::getPermission));
 
         settings.forEach((permissionId, details) -> {
             SimplePermission permission = new SimplePermission();
@@ -379,8 +386,30 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
                             .collect(Collectors.toSet()));
                 }
             }
+            //是否有其他权限关联了此权限
+            List<ParentPermission> parents = parentsPermissions.get(permissionId);
+            if (parents != null) {
+                actions.addAll(parents.stream()
+                        .map(ParentPermission::getActions)
+                        .filter(Objects::nonNull)
+                        .flatMap(Collection::stream)
+                        .collect(Collectors.toSet()));
+                parentsPermissions.remove(permissionId);
+            }
             permission.setActions(actions);
             permission.setDataAccesses(dataAccessConfigs);
+            permissions.add(permission);
+        });
+
+        //关联权限
+        parentsPermissions.forEach((per, all) -> {
+            SimplePermission permission = new SimplePermission();
+            permission.setId(per);
+            permission.setActions(all.stream()
+                    .map(ParentPermission::getActions)
+                    .filter(Objects::nonNull)
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.toSet()));
             permissions.add(permission);
         });
         authentication.setPermissions(permissions);

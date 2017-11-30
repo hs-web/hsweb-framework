@@ -24,8 +24,6 @@ import javax.validation.constraints.Pattern;
 import java.util.List;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public interface PermissionEntity extends GenericEntity<String> {
@@ -61,5 +59,8 @@ public interface PermissionEntity extends GenericEntity<String> {
     void setOptionalFields(List<OptionalField> fields);
 
     List<OptionalField> getOptionalFields();
+
+    //直接关联其他权限
+    List<ParentPermission> getParents();
 
 }

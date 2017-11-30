@@ -14,6 +14,8 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 public class ActionEntity implements CloneableEntity {
 
+    private static final long serialVersionUID = -5756333786703175612L;
+
     private String action;
 
     private String describe;
