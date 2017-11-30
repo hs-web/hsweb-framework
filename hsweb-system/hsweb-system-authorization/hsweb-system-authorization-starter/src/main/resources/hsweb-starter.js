@@ -66,6 +66,7 @@ function install(context) {
         .addColumn().name("spt_da_types").clob().comment("支持的数据权限类型").commit()
         .addColumn().name("optional_fields").clob().comment("可选字段").commit()
         .addColumn().name("parents").clob().comment("关联其他权限").commit()
+        .addColumn().name("type").varchar(128).comment("类型").commit()
         .comment("权限表").commit();
 
     database.createOrAlter("s_permission_role")
