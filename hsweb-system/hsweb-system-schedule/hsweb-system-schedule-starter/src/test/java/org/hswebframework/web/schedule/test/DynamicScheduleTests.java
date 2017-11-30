@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -51,7 +52,7 @@ public class DynamicScheduleTests extends SimpleWebApplicationTests {
 
     @Test
     public void testCreateJob() throws InterruptedException {
-        counter.await();
+        counter.await(100, TimeUnit.SECONDS);
         Assert.assertTrue(value.get()>0);
     }
 }

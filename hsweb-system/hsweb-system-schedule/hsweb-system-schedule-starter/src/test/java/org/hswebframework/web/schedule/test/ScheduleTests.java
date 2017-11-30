@@ -8,6 +8,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -31,7 +32,7 @@ public class ScheduleTests extends SimpleWebApplicationTests {
 
     @Test
     public void test() throws InterruptedException {
-        countDownLatch.await();
+        countDownLatch.await(100, TimeUnit.SECONDS);
         Assert.assertTrue(counter.get() > 0);
     }
 }
