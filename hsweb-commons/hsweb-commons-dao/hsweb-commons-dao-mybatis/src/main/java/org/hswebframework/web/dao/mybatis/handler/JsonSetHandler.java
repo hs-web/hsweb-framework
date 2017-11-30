@@ -20,36 +20,51 @@ package org.hswebframework.web.dao.mybatis.handler;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.type.*;
+import org.springframework.util.StringUtils;
 
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @Alias("jsonSetHandler")
 @MappedTypes({Set.class})
 @MappedJdbcTypes({JdbcType.VARCHAR, JdbcType.CLOB})
+@Slf4j
 public class JsonSetHandler extends BaseTypeHandler<Set> {
+
+    @SuppressWarnings("unchecked")
+    private Set<Object> parseSet(String json) {
+        if (!StringUtils.hasText(json)) {
+            return null;
+        }
+        json = json.trim();
+        if (json.startsWith("{")) {
+            return new HashSet<>(Collections.singletonList(JSON.parseObject(json)));
+        } else if (json.startsWith("[")) {
+            return (Set) JSON.parseArray(json, Set.class);
+        } else {
+            log.warn("parse json array error,maybe it's not json format: {}", json);
+        }
+        return null;
+    }
 
     @Override
     public Set getResult(ResultSet rs, int columnIndex) throws SQLException {
-        String s = rs.getString(columnIndex);
-        return JSON.parseObject(s, Set.class);
+        return parseSet(rs.getString(columnIndex));
     }
 
     @Override
     public Set getResult(ResultSet rs, String columnName) throws SQLException {
-        String s = rs.getString(columnName);
-        return JSON.parseObject(s, Set.class);
+        return parseSet(rs.getString(columnName));
     }
 
     @Override
     public Set getResult(CallableStatement cs, int columnIndex) throws SQLException {
-        String s = cs.getString(columnIndex);
-        return JSON.parseObject(s, Set.class);
+        return parseSet(cs.getString(columnIndex));
     }
 
     @Override

@@ -20,36 +20,53 @@ package org.hswebframework.web.dao.mybatis.handler;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.type.*;
+import org.springframework.util.StringUtils;
 
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @Alias("jsonArrayHandler")
 @MappedTypes({List.class})
 @MappedJdbcTypes({JdbcType.VARCHAR, JdbcType.CLOB})
+@Slf4j
 public class JsonArrayHandler extends BaseTypeHandler<List<Object>> {
+
+    private List<Object> parseArray(String json) {
+        if (!StringUtils.hasText(json)) {
+            return null;
+        }
+        json = json.trim();
+        if (json.startsWith("{")) {
+            return new ArrayList<>(Collections.singletonList(JSON.parseObject(json)));
+        } else if (json.startsWith("[")) {
+            return JSON.parseArray(json);
+        } else {
+            log.warn("parse json array error,maybe it's not json format: {}", json);
+        }
+        return null;
+    }
 
     @Override
     public List<Object> getResult(ResultSet rs, int columnIndex) throws SQLException {
-        String s = rs.getString(columnIndex);
-        return JSON.parseArray(s);
+        return parseArray(rs.getString(columnIndex));
     }
 
     @Override
     public List<Object> getResult(ResultSet rs, String columnName) throws SQLException {
-        String s = rs.getString(columnName);
-        return JSON.parseArray(s);
+        return parseArray(rs.getString(columnName));
     }
 
     @Override
     public List<Object> getResult(CallableStatement cs, int columnIndex) throws SQLException {
-        String s = cs.getString(columnIndex);
-        return JSON.parseArray(s);
+        return parseArray(cs.getString(columnIndex));
     }
 
     @Override
