@@ -9,7 +9,7 @@ addons:
 jdk:
   - oraclejdk8
 script:
-  - mvn clean jacoco:report package sonar:sonar
+  - mvn clean test jacoco:report sonar:sonar -Dmaven.test.failure.ignore=true
 cache:
   directories:
     - '$HOME/.m2/repository'

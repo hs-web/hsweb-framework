@@ -329,6 +329,7 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
             List<String> allActions = entity.getActions().stream().map(ActionEntity::getAction).collect(Collectors.toList());
 
             if (isNotEmpty(entity.getActions()) && isNotEmpty(detail.getActions())) {
+
                 detail.setActions(detail.getActions().stream().filter(allActions::contains).collect(Collectors.toSet()));
             }
             if (isEmpty(entity.getSupportDataAccessTypes())) {
