@@ -109,6 +109,9 @@ public class SystemInitializeAutoConfiguration implements CommandLineRunner, Bea
     public void run(String... args) throws Exception {
         DatabaseType type = DataSourceHolder.currentDatabaseType();
         SystemVersion version = appProperties.build();
+        if(version.getName()==null){
+            return;
+        }
         Connection connection = null;
         String jdbcUserName;
         try {
