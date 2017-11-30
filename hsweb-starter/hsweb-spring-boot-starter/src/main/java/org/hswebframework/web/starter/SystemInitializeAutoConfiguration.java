@@ -44,7 +44,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.env.Environment;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
@@ -76,6 +78,9 @@ public class SystemInitializeAutoConfiguration implements CommandLineRunner, Bea
     private ApplicationContext applicationContext;
 
     private List<DynamicScriptEngine> engines;
+
+    @Autowired
+    private Environment environment;
 
     @PostConstruct
     public void init() {
@@ -121,8 +126,13 @@ public class SystemInitializeAutoConfiguration implements CommandLineRunner, Bea
                 metaData.setParser(new OracleTableMetaParser(sqlExecutor));
                 break;
             case mysql:
+                String engine = environment.getProperty("mysql.engine");
+
                 metaData = new MysqlRDBDatabaseMetaData();
                 metaData.setParser(new MysqlTableMetaParser(sqlExecutor));
+                if (StringUtils.hasText(engine)) {
+                    ((MysqlRDBDatabaseMetaData) metaData).setEngine(engine);
+                }
                 break;
             default:
                 metaData = new H2RDBDatabaseMetaData();
@@ -146,7 +156,7 @@ public class SystemInitializeAutoConfiguration implements CommandLineRunner, Bea
     }
 
     @Override
-    public Object postProcessAfterInitialization(Object bean, String beanName)  {
+    public Object postProcessAfterInitialization(Object bean, String beanName) {
         ScriptScope scope;
         if (bean instanceof Service) {
             addGlobalVariable(beanName, bean);
