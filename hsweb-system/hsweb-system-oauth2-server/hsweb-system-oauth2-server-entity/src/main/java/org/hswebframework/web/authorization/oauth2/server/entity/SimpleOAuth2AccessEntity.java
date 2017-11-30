@@ -18,15 +18,21 @@
 
 package org.hswebframework.web.authorization.oauth2.server.entity;
 
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.Set;
 
 /**
- * TODO 完成注释
  *
  * @author zhouhao
  */
+@Getter
+@Setter
 public class SimpleOAuth2AccessEntity implements OAuth2AccessEntity {
 
+    private static final long serialVersionUID = 2090466474249489203L;
     private String clientId;
 
     private String ownerId;
@@ -45,93 +51,4 @@ public class SimpleOAuth2AccessEntity implements OAuth2AccessEntity {
 
     private String grantType;
 
-    @Override
-    public String getClientId() {
-        return clientId;
-    }
-
-    @Override
-    public void setClientId(String clientId) {
-        this.clientId = clientId;
-    }
-
-    @Override
-    public String getOwnerId() {
-        return ownerId;
-    }
-
-    @Override
-    public void setOwnerId(String ownerId) {
-        this.ownerId = ownerId;
-    }
-
-    @Override
-    public String getAccessToken() {
-        return accessToken;
-    }
-
-    @Override
-    public void setAccessToken(String accessToken) {
-        this.accessToken = accessToken;
-    }
-
-    @Override
-    public String getRefreshToken() {
-        return refreshToken;
-    }
-
-    @Override
-    public void setRefreshToken(String refreshToken) {
-        this.refreshToken = refreshToken;
-    }
-
-    @Override
-    public Integer getExpiresIn() {
-        return expiresIn;
-    }
-
-    @Override
-    public void setExpiresIn(Integer expiresIn) {
-        this.expiresIn = expiresIn;
-    }
-
-    @Override
-    public Long getCreateTime() {
-        return createTime;
-    }
-
-    @Override
-    public void setCreateTime(Long createTime) {
-        this.createTime = createTime;
-    }
-
-    @Override
-    public Long getUpdateTime() {
-        return updateTime;
-    }
-
-    @Override
-    public void setUpdateTime(Long updateTime) {
-        this.updateTime = updateTime;
-    }
-
-    @Override
-    public Set<String> getScope() {
-        return scope;
-    }
-
-    @Override
-    public void setScope(Set<String> scope) {
-        this.scope = scope;
-    }
-
-    @Override
-    public String getGrantType() {
-        return grantType;
-    }
-
-    @Override
-    public void setGrantType(String grantType) {
-        this.grantType = grantType;
-    }
 }

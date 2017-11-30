@@ -31,6 +31,7 @@
         <result property="createTime" column="create_time" javaType="Long" jdbcType="NUMERIC"/>
         <result property="updateTime" column="update_time" javaType="Long" jdbcType="NUMERIC"/>
         <result property="scope" column="scope" javaType="java.util.Set" jdbcType="VARCHAR"/>
+        <result property="grantType" column="grant_type" javaType="String" jdbcType="VARCHAR"/>
     </resultMap>
 
     <!--用于动态生成sql所需的配置-->
