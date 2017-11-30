@@ -43,15 +43,7 @@ public class JsonArrayHandler extends BaseTypeHandler<List<Object>> {
         if (!StringUtils.hasText(json)) {
             return null;
         }
-        json = json.trim();
-        if (json.startsWith("{")) {
-            return new ArrayList<>(Collections.singletonList(JSON.parseObject(json)));
-        } else if (json.startsWith("[")) {
-            return JSON.parseArray(json);
-        } else {
-            log.warn("parse json array error,maybe it's not json format: {}", json);
-        }
-        return null;
+        return JSON.parseArray(json);
     }
 
     @Override

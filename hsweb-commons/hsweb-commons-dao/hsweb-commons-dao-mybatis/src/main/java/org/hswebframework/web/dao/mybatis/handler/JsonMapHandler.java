@@ -40,17 +40,7 @@ public class JsonMapHandler extends BaseTypeHandler<Map<String, Object>> {
         if (!StringUtils.hasText(json)) {
             return null;
         }
-        json = json.trim();
-        if (json.startsWith("{")) {
-            return JSON.parseObject(json);
-        } else if (json.startsWith("[")) {
-            JSONArray obj = JSON.parseArray(json);
-            log.warn("json format is array ,but result type is object!", json);
-            return obj.isEmpty() ? null : obj.getJSONObject(0);
-        } else {
-            log.warn("parse json array error,maybe it's not json format: {}", json);
-        }
-        return null;
+        return JSON.parseObject(json);
     }
 
     @Override

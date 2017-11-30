@@ -41,15 +41,7 @@ public class JsonSetHandler extends BaseTypeHandler<Set> {
         if (!StringUtils.hasText(json)) {
             return null;
         }
-        json = json.trim();
-        if (json.startsWith("{")) {
-            return new HashSet<>(Collections.singletonList(JSON.parseObject(json)));
-        } else if (json.startsWith("[")) {
-            return (Set) JSON.parseArray(json, Set.class);
-        } else {
-            log.warn("parse json array error,maybe it's not json format: {}", json);
-        }
-        return null;
+        return (Set) JSON.parseArray(json, Set.class);
     }
 
     @Override
