@@ -41,7 +41,7 @@ public class JsonSetHandler extends BaseTypeHandler<Set> {
         if (!StringUtils.hasText(json)) {
             return null;
         }
-        return (Set) JSON.parseArray(json, Set.class);
+        return (Set) JSON.parseObject(json, Set.class);
     }
 
     @Override
