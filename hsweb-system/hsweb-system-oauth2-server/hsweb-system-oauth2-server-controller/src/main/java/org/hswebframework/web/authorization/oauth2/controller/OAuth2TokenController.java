@@ -58,6 +58,7 @@ public class OAuth2TokenController {
                     @ApiImplicitParam(paramType = "query", name = OAuth2Constants.client_id,required = true),
                     @ApiImplicitParam(paramType = "query", name = OAuth2Constants.client_secret),
                     @ApiImplicitParam(paramType = "query", name = OAuth2Constants.refresh_token),
+                    @ApiImplicitParam(paramType = "query", name = OAuth2Constants.redirect_uri),
                     @ApiImplicitParam(paramType = "query", name = OAuth2Constants.code),
                     @ApiImplicitParam(paramType = "query", name = OAuth2Constants.scope, example = "user-info:get,share:add"),
                     @ApiImplicitParam(paramType = "header", name = OAuth2Constants.authorization, example = "Basic czZCaGRSa3F0MzpnWDFmQmF0M2JW")

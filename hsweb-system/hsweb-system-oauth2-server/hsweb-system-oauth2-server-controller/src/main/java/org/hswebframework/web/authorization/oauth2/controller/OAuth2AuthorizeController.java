@@ -77,7 +77,7 @@ public class OAuth2AuthorizeController {
 
 
     @GetMapping(params = "response_type=token")
-    @ApiOperation(value = "implicit方式授权", tags = "OAuth2.0-申请token")
+    @ApiOperation(value = "implicit方式申请token", tags = "OAuth2.0-服务-申请token")
     @ApiImplicitParam(paramType = "query",name =  OAuth2Constants.client_id,required = true)
     public ImplicitAccessTokenModel authorizeByImplicit(
             @RequestParam(value = "redirect_uri") String redirect_uri,

@@ -3,6 +3,7 @@ package org.hswebframework.web.authorization.oauth2.controller;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.oauth2.server.client.OAuth2Client;
@@ -50,6 +51,12 @@ public class OAuth2ClientConfigController {
     @Authorize(action = Permission.ACTION_UPDATE)
     @ApiOperation(value = "保存客户端", notes = "如果客户端不存在则自动新增")
     public ResponseMessage<OAuth2Client> saveOrUpdate(@RequestBody OAuth2ClientEntity clientEntity) {
+        Authentication authentication = Authentication.current().orElse(null);
+
+        if (null != authentication) {
+            clientEntity.setCreatorId(authentication.getUser().getId());
+        }
+        clientEntity.setCreateTimeNow();
         return ResponseMessage.ok(repository.save(clientEntity));
     }
 
