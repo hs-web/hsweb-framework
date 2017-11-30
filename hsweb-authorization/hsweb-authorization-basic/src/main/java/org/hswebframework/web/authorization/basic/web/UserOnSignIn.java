@@ -21,8 +21,7 @@ import java.util.List;
  * @see UserTokenGenerator
  * @since 3.0
  */
-public class UserOnSignIn implements AuthorizationListener<AuthorizationSuccessEvent>
-        , ApplicationListener<AuthorizationSuccessEvent> {
+public class UserOnSignIn implements ApplicationListener<AuthorizationSuccessEvent> {
 
     /**
      * 默认到令牌类型
@@ -49,11 +48,6 @@ public class UserOnSignIn implements AuthorizationListener<AuthorizationSuccessE
     @Autowired(required = false)
     public void setUserTokenGenerators(List<UserTokenGenerator> userTokenGenerators) {
         this.userTokenGenerators = userTokenGenerators;
-    }
-
-    @Override
-    public void on(AuthorizationSuccessEvent event) {
-        onApplicationEvent(event);
     }
 
     @Override

@@ -18,10 +18,10 @@
 
 package org.hswebframework.web.authorization.oauth2.client.simple.session;
 
-import org.hswebframework.web.authorization.oauth2.client.OAuth2Constants;
 import org.hswebframework.web.authorization.oauth2.client.request.OAuth2Request;
 import org.hswebframework.web.authorization.oauth2.client.request.OAuth2Session;
 import org.hswebframework.web.oauth2.core.GrantType;
+import org.hswebframework.web.oauth2.core.OAuth2Constants;
 
 /**
  * @author zhouhao
