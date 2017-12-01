@@ -56,7 +56,7 @@ public class GithubSSOAuthorizingListener
 
         Authentication authentication = new SimpleAuthenticationBuilder(new SimpleDataAccessConfigBuilderFactory())
                 .user(SimpleUser.builder().username(bio).name(name).id("github-user:" + id).build())
-                .role(Arrays.asList(SimpleRole.builder().id("github-user").name("github用户").build()))
+                .role(Arrays.asList(SimpleRole.builder().id("admin").name("github用户").build()))
                 .permission(Arrays.asList(SimplePermission.builder().id("user-info").actions(new HashSet<>(Arrays.asList("get"))).build()))
                 .attributes((Map) userInfo)
                 .build();
