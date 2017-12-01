@@ -55,7 +55,8 @@ public class GithubSSOAuthorizingListener
         String bio = String.valueOf(userInfo.get("bio"));
 
         Authentication authentication = new SimpleAuthenticationBuilder(new SimpleDataAccessConfigBuilderFactory())
-                .user(SimpleUser.builder().username(bio).name(name).id("github-user:" + id).build())
+                .user(SimpleUser.builder().username(bio).name(name)
+                        .type("github").id("github-user:" + id).build())
                 .role(Arrays.asList(SimpleRole.builder().id("admin").name("github用户").build()))
                 .permission(Arrays.asList(SimplePermission.builder().id("user-info").actions(new HashSet<>(Arrays.asList("get"))).build()))
                 .attributes((Map) userInfo)
