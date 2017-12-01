@@ -18,6 +18,7 @@
 package org.hswebframework.web.authorization.oauth2.client;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import lombok.*;
 
 import java.io.Serializable;
 
@@ -26,7 +27,13 @@ import java.io.Serializable;
  *
  * @author zhouhao
  */
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class AccessTokenInfo implements Serializable {
+    private static final long serialVersionUID = -6261971233479574076L;
     private String id;
     //授权码
     @JSONField(name = "access_token")
@@ -68,99 +75,4 @@ public class AccessTokenInfo implements Serializable {
         this.tokenType = tokenType;
     }
 
-    /**
-     * @return 授权码
-     */
-    public String getAccessToken() {
-        return this.accessToken;
-    }
-
-    /**
-     * 设置 授权码
-     */
-    public void setAccessToken(String accessToken) {
-        this.accessToken = accessToken;
-    }
-
-    /**
-     * @return 更新码
-     */
-    public String getRefreshToken() {
-        return this.refreshToken;
-    }
-
-    /**
-     * 设置 更新码
-     */
-    public void setRefreshToken(String refreshToken) {
-        this.refreshToken = refreshToken;
-    }
-
-    /**
-     * @return 有效期
-     */
-    public Integer getExpiresIn() {
-        return this.expiresIn;
-    }
-
-    /**
-     * 设置 有效期
-     */
-    public void setExpiresIn(Integer expiresIn) {
-        this.expiresIn = expiresIn;
-    }
-
-    /**
-     * @return 授权范围
-     */
-    public String getScope() {
-        return this.scope;
-    }
-
-    /**
-     * 设置 授权范围
-     */
-    public void setScope(String scope) {
-        this.scope = scope;
-    }
-
-    public Long getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(Long createTime) {
-        this.createTime = createTime;
-    }
-
-    public Long getUpdateTime() {
-        return updateTime;
-    }
-
-    public void setUpdateTime(Long updateTime) {
-        this.updateTime = updateTime;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setGrantType(String grantType) {
-        this.grantType = grantType;
-    }
-
-    public String getGrantType() {
-        return grantType;
-    }
-
-    public String getServerId() {
-        return serverId;
-    }
-
-    public void setServerId(String serverId) {
-        this.serverId = serverId;
-    }
 }
