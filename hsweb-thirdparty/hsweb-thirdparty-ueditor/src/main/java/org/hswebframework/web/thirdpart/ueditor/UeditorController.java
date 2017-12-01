@@ -10,7 +10,6 @@ import io.swagger.annotations.ApiOperation;
 import org.hswebframework.web.service.file.FileInfoService;
 import org.hswebframework.web.service.file.FileService;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -30,7 +29,7 @@ import java.io.IOException;
  */
 @RestController
 @RequestMapping("/ueditor")
-@Api(tags = "第三方-ueditor", value = "ueditor")
+@Api(tags = "第三方应用-ueditor", value = "ueditor")
 public class UeditorController {
 
     @Resource
@@ -40,7 +39,7 @@ public class UeditorController {
     private FileInfoService resourcesService;
 
     @Value("${ueditor.rootPath:/}")
-    private String rootPath = "";
+    private String rootPath = "/";
 
     @PostConstruct
     public void init() {
@@ -69,7 +68,7 @@ public class UeditorController {
 
         String path = fileService.saveStaticFile(file.getInputStream(), System.currentTimeMillis() + suffix);
         State state = new BaseState(true);
-        state.putInfo("size", 0);
+        state.putInfo("size", file.getSize());
         state.putInfo("title", file.getOriginalFilename());
         state.putInfo("url", path);
         state.putInfo("type", suffix);
