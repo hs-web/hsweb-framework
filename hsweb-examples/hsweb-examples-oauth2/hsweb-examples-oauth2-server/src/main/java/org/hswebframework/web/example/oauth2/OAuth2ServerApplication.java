@@ -161,8 +161,7 @@ public class OAuth2ServerApplication implements CommandLineRunner {
         clientEntity.setName("测试");
         clientEntity.setType("test");
         clientEntity.setCreatorId("admin");
-        // 这里与 hsweb-examples-oauth2-client 的回调地址对应
-        clientEntity.setRedirectUri("http://localhost:8808/oauth2/callback/hsweb");
+        clientEntity.setRedirectUri("http://localhost:8808/");
         clientEntity.setCreateTime(System.currentTimeMillis());
         clientEntity.setSupportGrantTypes(new HashSet<>(Collections.singletonList("*")));
         clientEntity.setStatus(DataStatus.STATUS_ENABLED);

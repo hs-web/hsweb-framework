@@ -102,7 +102,7 @@
         param.scope = "public";
         //执行OAuth认证
         doAjax("GET", "/oauth2/authorize", param, function (e, r) {
-            var redirect = unescape(e.redirectUri);
+            var redirect =e.redirectUri;
             var uri = redirect.indexOf("?") != -1 ? "&" : "?";
             uri += "code=" + e.code + "&state=" + e.state;
             window.location.href = (redirect + uri);
