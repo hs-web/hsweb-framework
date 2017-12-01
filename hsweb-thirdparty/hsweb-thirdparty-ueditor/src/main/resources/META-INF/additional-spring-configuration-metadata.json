@@ -1,0 +1,10 @@
+{
+  "properties": [
+    {
+      "name": "ueditor.rootPath",
+      "type": "java.lang.String",
+      "defaultValue": "/",
+      "description": "ueditor访问的根路径，例如:/ , http://file_server/."
+    }
+  ]
+}
