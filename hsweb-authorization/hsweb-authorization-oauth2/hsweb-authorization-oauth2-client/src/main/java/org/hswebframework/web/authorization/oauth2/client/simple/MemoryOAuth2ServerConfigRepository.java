@@ -23,6 +23,12 @@ public class MemoryOAuth2ServerConfigRepository implements OAuth2ServerConfigRep
         return repo.get(id);
     }
 
+    @Override
+    public OAuth2ServerConfig save(OAuth2ServerConfig config) {
+        repo.put(config.getId(), config);
+        return config;
+    }
+
     public void setServers(List<OAuth2ServerConfig> servers) {
         this.servers = servers;
         repo = servers.stream()

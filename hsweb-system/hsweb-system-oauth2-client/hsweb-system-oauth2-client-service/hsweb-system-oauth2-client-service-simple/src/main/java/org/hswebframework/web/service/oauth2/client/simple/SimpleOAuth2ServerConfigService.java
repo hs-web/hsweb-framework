@@ -26,8 +26,11 @@ import org.hswebframework.web.service.GenericEntityService;
 import org.hswebframework.web.service.oauth2.client.OAuth2ServerConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * 默认的服务实现
@@ -59,5 +62,37 @@ public class SimpleOAuth2ServerConfigService extends EnableCacheGenericEntitySer
             return null;
         }
         return entityFactory.newInstance(OAuth2ServerConfig.class, entity);
+    }
+
+    @Override
+    @CacheEvict(key = "'id:'+#id")
+    public int updateByPk(String id, OAuth2ServerConfigEntity entity) {
+        return super.updateByPk(id, entity);
+    }
+
+    @Override
+    @CacheEvict(key = "'id:'+#id")
+    public int deleteByPk(String id) {
+        return super.deleteByPk(id);
+    }
+
+    @Override
+    @CacheEvict(allEntries = true)
+    public int updateByPk(List<OAuth2ServerConfigEntity> data) {
+        return super.updateByPk(data);
+    }
+
+    @Override
+    @CacheEvict(key = "'id:'+#result")
+    public String saveOrUpdate(OAuth2ServerConfigEntity entity) {
+        return super.saveOrUpdate(entity);
+    }
+
+    @Override
+    @CacheEvict(key = "'id:'+#result.id")
+    public OAuth2ServerConfig save(OAuth2ServerConfig config) {
+        OAuth2ServerConfigEntity entity = entityFactory.newInstance(OAuth2ServerConfigEntity.class, config);
+        saveOrUpdate(entity);
+        return config;
     }
 }

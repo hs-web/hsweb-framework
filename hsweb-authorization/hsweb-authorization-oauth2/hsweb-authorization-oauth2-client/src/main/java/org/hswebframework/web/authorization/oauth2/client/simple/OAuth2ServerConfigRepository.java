@@ -8,4 +8,6 @@ import org.hswebframework.web.authorization.oauth2.client.OAuth2ServerConfig;
  */
 public interface OAuth2ServerConfigRepository {
     OAuth2ServerConfig findById(String id);
+
+    OAuth2ServerConfig save(OAuth2ServerConfig config);
 }
