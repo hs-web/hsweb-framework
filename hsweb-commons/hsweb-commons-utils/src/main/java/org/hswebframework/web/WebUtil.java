@@ -23,6 +23,8 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -48,6 +50,20 @@ public class WebUtil {
         return new HttpParameterConverter(object).convert();
     }
 
+    public static Map<String,String> queryStringToMap(String queryString,String charset){
+        try {
+            Map<String,String> map = new HashMap<>();
+
+            String[] decode = URLDecoder.decode(queryString,charset).split("&");
+            for (String keyValue : decode) {
+                String[] kv = keyValue.split("[=]",2);
+                map.put(kv[0],kv.length>1?kv[1]:"");
+            }
+            return map;
+        } catch (UnsupportedEncodingException e) {
+            throw new UnsupportedOperationException(e);
+        }
+    }
     /**
      * 尝试获取当前请求的HttpServletRequest实例
      *
