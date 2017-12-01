@@ -149,7 +149,7 @@ public class DefaultAuthorizingHandler implements AuthorizingHandler {
                         }
 
                         //如果 控制逻辑是or,则只要过滤结果数量不为0.否则过滤结果数量必须和配置的数量相同
-                        return logicalIsOr ? actions.size() > 0 : permission.getActions().containsAll(actions);
+                        return logicalIsOr || permission.getActions().containsAll(actions);
                     }).collect(Collectors.toList());
             access = logicalIsOr ?
                     permissions.size() > 0 :
