@@ -90,7 +90,7 @@ public class OAuth2ClientController {
         view.addStaticAttribute(OAuth2Constants.response_type, "code");
         view.addStaticAttribute(OAuth2Constants.state, requestState(session).getResult());
         view.addStaticAttribute(OAuth2Constants.client_id, entity.getClientId());
-        view.addStaticAttribute(OAuth2Constants.redirect_uri, URLEncoder.encode(callback, "UTF-8"));
+        view.addStaticAttribute(OAuth2Constants.redirect_uri, callback);
         return view;
     }
 
@@ -104,7 +104,6 @@ public class OAuth2ClientController {
                                  HttpSession session) throws UnsupportedEncodingException {
         try {
             String cachedState = (String) session.getAttribute(STATE_SESSION_KEY);
-            // TODO: 2017/11/29 未验证state
             //  if (!state.equals(cachedState)) throw new BusinessException("state error");
             oAuth2RequestService.doEvent(serverId, new OAuth2CodeAuthBeforeEvent(code, state, request::getParameter));
             return new RedirectView(URLDecoder.decode(redirect, "UTF-8"));

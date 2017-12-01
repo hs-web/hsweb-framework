@@ -1,23 +1,20 @@
-package org.hswebframework.web.example.oauth2;
+package org.hswebframework.web.example.oauth2.github;
 
 import org.hswebframework.web.WebUtil;
 import org.hswebframework.web.authorization.Authentication;
-import org.hswebframework.web.authorization.basic.web.SessionIdUserTokenGenerator;
 import org.hswebframework.web.authorization.basic.web.UserTokenGenerator;
 import org.hswebframework.web.authorization.oauth2.client.OAuth2RequestService;
 import org.hswebframework.web.authorization.oauth2.client.listener.OAuth2CodeAuthBeforeEvent;
 import org.hswebframework.web.authorization.oauth2.client.listener.OAuth2Listener;
-import org.hswebframework.web.authorization.oauth2.client.request.OAuth2Session;
-import org.hswebframework.web.authorization.simple.SimpleAuthentication;
 import org.hswebframework.web.authorization.simple.SimplePermission;
 import org.hswebframework.web.authorization.simple.SimpleRole;
 import org.hswebframework.web.authorization.simple.SimpleUser;
 import org.hswebframework.web.authorization.simple.builder.SimpleAuthenticationBuilder;
 import org.hswebframework.web.authorization.simple.builder.SimpleDataAccessConfigBuilderFactory;
 import org.hswebframework.web.authorization.token.UserTokenManager;
+import org.hswebframework.web.example.oauth2.MemoryAuthenticationManager;
 
 import javax.servlet.http.HttpSession;
-import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;

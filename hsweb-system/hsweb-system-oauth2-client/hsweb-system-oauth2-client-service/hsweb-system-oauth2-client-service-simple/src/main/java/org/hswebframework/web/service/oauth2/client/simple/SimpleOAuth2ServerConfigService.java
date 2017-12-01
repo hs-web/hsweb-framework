@@ -39,7 +39,7 @@ import java.util.List;
  */
 @Service("oAuth2ServerConfigService")
 @CacheConfig(cacheNames = "oauth2-server-config")
-public class SimpleOAuth2ServerConfigService extends EnableCacheGenericEntityService<OAuth2ServerConfigEntity, String>
+public class SimpleOAuth2ServerConfigService extends GenericEntityService<OAuth2ServerConfigEntity, String>
         implements OAuth2ServerConfigService, OAuth2ServerConfigRepository {
     @Autowired
     private OAuth2ServerConfigDao oAuth2ServerConfigDao;
@@ -55,7 +55,7 @@ public class SimpleOAuth2ServerConfigService extends EnableCacheGenericEntitySer
     }
 
     @Override
-    @Cacheable(key = "'id:'+#id")
+    @Cacheable(key = "'conf-id:'+#id")
     public OAuth2ServerConfig findById(String id) {
         OAuth2ServerConfigEntity entity = selectByPk(id);
         if (null == entity) {
@@ -65,13 +65,13 @@ public class SimpleOAuth2ServerConfigService extends EnableCacheGenericEntitySer
     }
 
     @Override
-    @CacheEvict(key = "'id:'+#id")
+    @CacheEvict(key = "'conf-id:'+#id")
     public int updateByPk(String id, OAuth2ServerConfigEntity entity) {
         return super.updateByPk(id, entity);
     }
 
     @Override
-    @CacheEvict(key = "'id:'+#id")
+    @CacheEvict(key = "'conf-id:'+#id")
     public int deleteByPk(String id) {
         return super.deleteByPk(id);
     }
@@ -83,13 +83,13 @@ public class SimpleOAuth2ServerConfigService extends EnableCacheGenericEntitySer
     }
 
     @Override
-    @CacheEvict(key = "'id:'+#result")
+    @CacheEvict(key = "'conf-id:'+#result")
     public String saveOrUpdate(OAuth2ServerConfigEntity entity) {
         return super.saveOrUpdate(entity);
     }
 
     @Override
-    @CacheEvict(key = "'id:'+#result.id")
+    @CacheEvict(key = "'conf-id:'+#result.id")
     public OAuth2ServerConfig save(OAuth2ServerConfig config) {
         OAuth2ServerConfigEntity entity = entityFactory.newInstance(OAuth2ServerConfigEntity.class, config);
         saveOrUpdate(entity);

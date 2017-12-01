@@ -39,7 +39,7 @@ public class OAuth2RequestException extends RuntimeException {
     }
 
     public OAuth2RequestException(String message, ErrorType errorType, OAuth2Response response) {
-        super(message);
+        super(errorType+":"+message);
         this.errorType = errorType;
         this.response = response;
     }

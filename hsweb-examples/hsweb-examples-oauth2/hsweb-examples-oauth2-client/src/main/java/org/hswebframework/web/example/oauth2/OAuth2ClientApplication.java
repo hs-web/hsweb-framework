@@ -21,11 +21,12 @@ package org.hswebframework.web.example.oauth2;
 import org.hswebframework.web.authorization.oauth2.client.OAuth2RequestService;
 import org.hswebframework.web.authorization.oauth2.client.OAuth2ServerConfig;
 import org.hswebframework.web.authorization.oauth2.client.simple.OAuth2ServerConfigRepository;
-import org.hswebframework.web.authorization.oauth2.client.simple.provider.github.GithubResponseConvert;
-import org.hswebframework.web.authorization.oauth2.client.simple.provider.github.GithubResponseJudge;
 import org.hswebframework.web.authorization.token.UserTokenManager;
 import org.hswebframework.web.commons.entity.DataStatus;
 import org.hswebframework.web.commons.entity.factory.EntityFactory;
+import org.hswebframework.web.example.oauth2.github.GithubResponseConvert;
+import org.hswebframework.web.example.oauth2.github.GithubResponseJudge;
+import org.hswebframework.web.example.oauth2.github.GithubSSOAuthorizingListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -36,7 +37,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 
 /**
- * TODO 完成注释
  *
  * @author zhouhao
  */
@@ -111,8 +111,7 @@ public class OAuth2ClientApplication implements CommandLineRunner {
 
         OAuth2SSOAuthorizingListener listener = new OAuth2SSOAuthorizingListener(oAuth2RequestService, hsweb.getId(), userTokenManager);
 
-        GithubSSOAuthorizingListener githubSSOAuthorizingListener =
-                new GithubSSOAuthorizingListener(oAuth2RequestService, github.getId(), userTokenManager);
+        GithubSSOAuthorizingListener githubSSOAuthorizingListener = new GithubSSOAuthorizingListener(oAuth2RequestService, github.getId(), userTokenManager);
 
         oAuth2RequestService.registerListener(hsweb.getId(), listener);
         oAuth2RequestService.registerListener(github.getId(), githubSSOAuthorizingListener);
