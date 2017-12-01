@@ -25,25 +25,19 @@
     <script type="application/javascript" src="//cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
 
 </head>
-<body>
-<button onclick="doHswebLogin()">使用hsweb登录</button>
+<body style="text-align: center">
+<button onclick="doOAuth2Login('hsweb-oauth-server')">使用hsweb登录</button>&nbsp;&nbsp;
+<button onclick="doOAuth2Login('github')">使用github登录</button>
 </body>
 </html>
 <script type="text/javascript">
-    function doHswebLogin() {
+
+    function doOAuth2Login(provider) {
         var uri = getRequest()["redirect"];
         if (!uri) uri = "/";
-        window.open('/oauth2/boot/hsweb-oauth-server?redirect=' + uri);
-        var principal = "hsweb_oauth2_example";
-//        var api = "http://localhost:8080/oauth2/login.html";
-//        //申请一个state
-//        doAjax("GET", "/oauth2/state", {}, function (e) {
-//            if (e) {
-//                window.open(api + "?client_id=" + principal + "&response_type=code&state=" + e.result + "&redirect_uri="
-//                    + escape("http://localhost:8808/oauth2/callback/hsweb-oauth-server/?redirect=" + uri))
-//            }
-//        });
+        window.open('/oauth2/boot/' + provider + '?redirect=' + uri);
     }
+
 
     function getRequest() {
         var url = location.search; //获取url中"?"符后的字串
@@ -58,16 +52,4 @@
         return theRequest;
     }
 
-    function doAjax(method, url, data, success, error) {
-        $.ajax({
-            type: method,
-            url: url,
-            data: data,
-            success: success,
-            error: function (e) {
-                error(e.responseJSON);
-            },
-            dataType: "json"
-        });
-    }
 </script>
