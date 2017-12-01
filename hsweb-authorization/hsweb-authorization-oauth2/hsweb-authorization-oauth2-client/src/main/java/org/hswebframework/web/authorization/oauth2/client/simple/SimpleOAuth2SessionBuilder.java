@@ -172,11 +172,10 @@ public class SimpleOAuth2SessionBuilder implements OAuth2SessionBuilder {
     @Override
     public OAuth2Session byAccessToken(String accessToken) {
         Supplier<AccessTokenInfo> supplier = () -> oAuth2UserTokenRepository.findByAccessToken(accessToken);
-        AccessTokenInfo tokenEntity = supplier.get();
-        if (tokenEntity == null) {
+        AccessTokenInfo tokenInfo = supplier.get();
+        if (tokenInfo == null) {
             throw new NotFoundException("access_token not found");
         }
-        AccessTokenInfo tokenInfo = new AccessTokenInfo();
         CachedOAuth2Session session = new CachedOAuth2Session(tokenInfo);
         session.setServerConfig(serverConfig);
         session.setRequestBuilderFactory(requestBuilderFactory);
