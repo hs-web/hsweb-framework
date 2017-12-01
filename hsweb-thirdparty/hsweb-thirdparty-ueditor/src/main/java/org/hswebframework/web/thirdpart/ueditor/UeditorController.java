@@ -43,8 +43,12 @@ public class UeditorController {
     @Resource
     private FileInfoService resourcesService;
 
-    @Value("${ueditor.rootPath:/}")
+    @Value("${ueditor.root-path:/}")
     private String rootPath = "/";
+
+    public void setRootPath(String rootPath) {
+        this.rootPath = rootPath;
+    }
 
     @PostConstruct
     public void init() {
