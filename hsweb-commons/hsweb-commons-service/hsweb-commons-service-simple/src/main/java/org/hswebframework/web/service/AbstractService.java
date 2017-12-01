@@ -103,7 +103,7 @@ public abstract class AbstractService<E extends Entity, PK> implements CreateEnt
         validate(() -> validator.validateProperty(data, property, groups));
     }
 
-    protected void tryValidate(Class type, String property, Object value, Class... groups) {
+    protected <T> void tryValidate(Class<T> type, String property, Object value, Class... groups) {
         validate(() -> validator.validateValue(type, property, value, groups));
     }
 

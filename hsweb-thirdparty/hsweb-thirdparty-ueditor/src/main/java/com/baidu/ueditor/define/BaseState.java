@@ -11,7 +11,7 @@ public class BaseState implements State {
 	private boolean state = false;
 	private String info = null;
 	
-	private Map<String, String> infoMap = new HashMap<String, String>();
+	private Map<String, String> infoMap = new HashMap<>();
 	
 	public BaseState () {
 		this.state = true;
@@ -53,22 +53,13 @@ public class BaseState implements State {
 	
 	public String toString () {
 		
-		String key = null;
 		String stateVal = this.isSuccess() ? AppInfo.getStateInfo(AppInfo.SUCCESS) : this.info;
 		
 		StringBuilder builder = new StringBuilder();
 		
-		builder.append( "{\"state\": \"" + stateVal + "\"" );
-		
-		Iterator<String> iterator = this.infoMap.keySet().iterator();
-		
-		while ( iterator.hasNext() ) {
-			
-			key = iterator.next();
-			
-			builder.append( ",\"" + key + "\": \"" + this.infoMap.get(key) + "\"" );
-			
-		}
+		builder.append("{\"state\": \"").append(stateVal).append("\"");
+
+		this.infoMap.forEach((key,value)-> builder.append(",\"").append(key).append("\": \"").append(value).append("\""));
 		
 		builder.append( "}" );
 

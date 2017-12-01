@@ -179,12 +179,6 @@
     <build>
 
         <plugins>
-            <!--<plugin>-->
-                <!--<groupId>org.eluder.coveralls</groupId>-->
-                <!--<artifactId>coveralls-maven-plugin</artifactId>-->
-                <!--<version>4.3.0</version>-->
-            <!--</plugin>-->
-
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
@@ -204,44 +198,6 @@
                     </execution>
                 </executions>
             </plugin>
-
-
-
-            <!--<plugin>-->
-                <!--<groupId>org.codehaus.mojo</groupId>-->
-                <!--<artifactId>cobertura-maven-plugin</artifactId>-->
-                <!--<version>2.7</version>-->
-                <!--<configuration>-->
-                    <!--<formats>-->
-                        <!--<format>xml</format>-->
-                        <!--<format>html</format>-->
-                    <!--</formats>-->
-                    <!--<aggregate>true</aggregate>-->
-                    <!--<instrumentation>-->
-                        <!--<excludes>-->
-                            <!--<exclude>**/*Test.class</exclude>-->
-                            <!--<exclude>**/*Tests.class</exclude>-->
-                            <!--<exclude>**/*Entity.class</exclude>-->
-                            <!--<exclude>**/*Configuration.class</exclude>-->
-                        <!--</excludes>-->
-                    <!--</instrumentation>-->
-                <!--</configuration>-->
-                <!--<executions>-->
-                    <!--<execution>-->
-                        <!--<phase>package</phase>-->
-                        <!--<goals>-->
-                            <!--<goal>cobertura</goal>-->
-                        <!--</goals>-->
-                    <!--</execution>-->
-                <!--</executions>-->
-                <!--<dependencies>-->
-                    <!--<dependency>-->
-                        <!--<groupId>org.codehaus.javancss</groupId>-->
-                        <!--<artifactId>javancss</artifactId>-->
-                        <!--<version>33.54</version>-->
-                    <!--</dependency>-->
-                <!--</dependencies>-->
-            <!--</plugin>-->
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

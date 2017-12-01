@@ -19,10 +19,7 @@ import java.util.*;
 public final class ConfigManager {
 
     private final String rootPath;
-    private final String originalPath;
-    // private final String contextPath;
-    private static final String configFileName = "config.json";
-    private String parentPath = null;
+    private static final String configFileName = "ueditor-config.json";
     private JSONObject jsonConfig = null;
     // 涂鸦上传filename定义
     private final static String SCRAWL_FILE_NAME = "scrawl";
@@ -36,18 +33,8 @@ public final class ConfigManager {
 
 
         rootPath = rootPath.replace("\\", "/");
-
         this.rootPath = rootPath;
-        // this.contextPath = contextPath;
-
-        if (contextPath.length() > 0) {
-            this.originalPath = this.rootPath + uri.substring(contextPath.length());
-        } else {
-            this.originalPath = this.rootPath + uri;
-        }
-
         this.initEnv();
-
     }
 
     /**
@@ -149,16 +136,12 @@ public final class ConfigManager {
 
     private void initEnv() throws IOException {
         try {
-            this.jsonConfig = JSON.parseObject(FileUtils.reader2String("ueditor-config.json"));
+            this.jsonConfig = JSON.parseObject(FileUtils.reader2String(configFileName));
         } catch (Exception e) {
             log.warn("read ueditor config file error", e);
             this.jsonConfig = null;
         }
 
-    }
-
-    private String getConfigPath() {
-        return this.parentPath + File.separator + ConfigManager.configFileName;
     }
 
     private String[] getArray(String key) {
@@ -171,32 +154,6 @@ public final class ConfigManager {
         }
 
         return result;
-
-    }
-
-    private String readFile(String path) throws IOException {
-        Collection<String> str = Collections.synchronizedCollection(new ArrayList<String>());
-
-        StringBuilder builder = new StringBuilder();
-
-        try {
-
-            InputStreamReader reader = new InputStreamReader(new FileInputStream(path), "UTF-8");
-            BufferedReader bfReader = new BufferedReader(reader);
-
-            String tmpContent = null;
-
-            while ((tmpContent = bfReader.readLine()) != null) {
-                builder.append(tmpContent);
-            }
-
-            bfReader.close();
-
-        } catch (UnsupportedEncodingException e) {
-            // 忽略
-        }
-
-        return this.filter(builder.toString());
 
     }
 

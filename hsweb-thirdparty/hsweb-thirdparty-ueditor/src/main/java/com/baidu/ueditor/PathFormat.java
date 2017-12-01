@@ -63,7 +63,7 @@ public class PathFormat {
 		while ( matcher.find() ) {
 			
 			matchStr = matcher.group( 1 );
-			if ( matchStr.indexOf( "filename" ) != -1 ) {
+			if (matchStr.contains("filename")) {
 				filename = filename.replace( "$", "\\$" ).replaceAll( "[\\/:*?\"<>|]", "" );
 				matcher.appendReplacement(sb, filename );
 			} else {
@@ -82,23 +82,23 @@ public class PathFormat {
 		pattern = pattern.toLowerCase();
 		
 		// time 处理
-		if ( pattern.indexOf( PathFormat.TIME ) != -1 ) {
+		if (pattern.contains(PathFormat.TIME)) {
 			return PathFormat.getTimestamp();
-		} else if ( pattern.indexOf( PathFormat.FULL_YEAR ) != -1 ) {
+		} else if (pattern.contains(PathFormat.FULL_YEAR)) {
 			return PathFormat.getFullYear();
-		} else if ( pattern.indexOf( PathFormat.YEAR ) != -1 ) {
+		} else if (pattern.contains(PathFormat.YEAR)) {
 			return PathFormat.getYear();
-		} else if ( pattern.indexOf( PathFormat.MONTH ) != -1 ) {
+		} else if (pattern.contains(PathFormat.MONTH)) {
 			return PathFormat.getMonth();
-		} else if ( pattern.indexOf( PathFormat.DAY ) != -1 ) {
+		} else if (pattern.contains(PathFormat.DAY)) {
 			return PathFormat.getDay();
-		} else if ( pattern.indexOf( PathFormat.HOUR ) != -1 ) {
+		} else if (pattern.contains(PathFormat.HOUR)) {
 			return PathFormat.getHour();
-		} else if ( pattern.indexOf( PathFormat.MINUTE ) != -1 ) {
+		} else if (pattern.contains(PathFormat.MINUTE)) {
 			return PathFormat.getMinute();
-		} else if ( pattern.indexOf( PathFormat.SECOND ) != -1 ) {
+		} else if (pattern.contains(PathFormat.SECOND)) {
 			return PathFormat.getSecond();
-		} else if ( pattern.indexOf( PathFormat.RAND ) != -1 ) {
+		} else if (pattern.contains(PathFormat.RAND)) {
 			return PathFormat.getRandom(pattern);
 		}
 		
@@ -148,10 +148,4 @@ public class PathFormat {
 		return ( Math.random() + "" ).replace( ".", "" ).substring( 0, length );
 		
 	}
-
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-
-	}
-
 }

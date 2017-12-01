@@ -5,6 +5,7 @@ import com.baidu.ueditor.define.AppInfo;
 import com.baidu.ueditor.define.BaseState;
 import com.baidu.ueditor.define.FileType;
 import com.baidu.ueditor.define.State;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.FileItemStream;
 import org.apache.commons.fileupload.FileUploadException;
@@ -19,6 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 public class BinaryUploader {
 
     public static final State save(HttpServletRequest request, Map<String, Object> conf) {
@@ -74,6 +76,7 @@ public class BinaryUploader {
         } catch (FileUploadException e) {
             return new BaseState(false, AppInfo.PARSE_REQUEST_ERROR);
         } catch (IOException e) {
+            log.error(e.getMessage(),e);
         }
         return new BaseState(false, AppInfo.IO_ERROR);
     }

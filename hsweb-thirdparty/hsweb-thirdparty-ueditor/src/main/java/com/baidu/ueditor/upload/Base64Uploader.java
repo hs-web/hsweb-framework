@@ -24,7 +24,7 @@ public final class Base64Uploader {
         if (!validSize(data, maxSize)) {
             return new BaseState(false, AppInfo.MAX_SIZE);
         }
-        String suffix = FileType.getSuffix("JPG");
+        String suffix = FileType.getSuffix(FileType.JPG);
         try {
             FileService fileService = Context.FILE_SERVICE;
             String path = fileService.saveStaticFile(new ByteArrayInputStream(data), System.currentTimeMillis() + suffix);

@@ -48,7 +48,9 @@ public class AbstractOAuth2CrudServiceTests {
 
         when(oAuth2Session.request("/test/")).thenReturn(
                 createFixedResponseRequest(
-                        whenRequest("get", ResponseMessage.ok(PagerResult.of(1, Arrays.asList(entity))))));
+                        whenRequest("get", ResponseMessage.ok(PagerResult.of(1, Arrays.asList(entity)))),
+                        whenRequest("post", ResponseMessage.ok("test"))
+                ));
 
 
         when(oAuth2Session.request("/test/test")).thenReturn(
@@ -88,6 +90,10 @@ public class AbstractOAuth2CrudServiceTests {
 
     @Test
     public void testCUD() {
+        String id = testEntityService.insert(TestEntity.builder().build());
+        Assert.assertNotNull(id);
+
+
         TestEntity entity = testEntityService.selectByPk("test");
         Assert.assertNotNull(entity);
 
@@ -108,6 +114,7 @@ public class AbstractOAuth2CrudServiceTests {
 
     @Test
     public void testQuery() {
+
         PagerResult<TestEntity> result = testEntityService.selectPager(new QueryParamEntity().where("name", "test"));
         System.out.println(JSON.toJSONString(result));
 

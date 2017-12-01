@@ -6,8 +6,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 public class Uploader {
-	public static String downloadApi = null;
-
 	private HttpServletRequest request = null;
 	private Map<String, Object> conf = null;
 
@@ -18,7 +16,7 @@ public class Uploader {
 
 	public final State doExec() {
 		String filedName = (String) this.conf.get("fieldName");
-		State state = null;
+		State state;
 
 		if ("true".equals(this.conf.get("isBase64"))) {
 			state = Base64Uploader.save(this.request.getParameter(filedName),

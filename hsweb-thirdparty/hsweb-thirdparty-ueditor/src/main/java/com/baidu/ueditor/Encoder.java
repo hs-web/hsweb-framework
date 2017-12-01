@@ -12,7 +12,7 @@ public class Encoder {
 			if ( ch < 256 ) {
 				builder.append( ch );
 			} else {
-				builder.append( "\\u" +  Integer.toHexString(ch & 0xffff) );
+				builder.append("\\u").append(Integer.toHexString(ch & 0xffff));
 			}
 			
 		}

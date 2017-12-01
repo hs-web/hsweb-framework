@@ -7,18 +7,11 @@ import java.io.File;
 import java.util.Map;
 
 public class FileManager {
-
-    private String   dir        = null;
     private String   rootPath   = null;
-    private String[] allowFiles = null;
-    private int      count      = 0;
 
     public FileManager(Map<String, Object> conf) {
 
         this.rootPath = (String) conf.get("rootPath");
-        this.dir = this.rootPath + (String) conf.get("dir");
-        this.allowFiles = this.getAllowFiles(conf.get("allowFiles"));
-        this.count = (Integer) conf.get("count");
 
     }
 
@@ -81,9 +74,4 @@ public class FileManager {
 
     }
 
-    public static void main(String[] args) {
-        int n = 13;
-        System.out.println(n > 9 ? (char) (n - 10 + 'A') : n);
-        System.out.println(n > 9 ? (char) (n - 10 + 'A') : 1);
-    }
 }
