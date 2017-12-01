@@ -4,7 +4,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baidu.ueditor.define.ActionMap;
-import org.hsweb.commons.file.FileUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.hswebframework.utils.file.FileUtils;
 
 import java.io.*;
 import java.util.*;
@@ -14,6 +15,7 @@ import java.util.*;
  *
  * @author hancong03@baidu.com
  */
+@Slf4j
 public final class ConfigManager {
 
     private final String rootPath;
@@ -147,9 +149,9 @@ public final class ConfigManager {
 
     private void initEnv() throws IOException {
         try {
-            JSONObject jsonConfig = JSON.parseObject(FileUtils.reader2String("config/ueditor.json"));
-            this.jsonConfig = jsonConfig;
+            this.jsonConfig = JSON.parseObject(FileUtils.reader2String("ueditor-config.json"));
         } catch (Exception e) {
+            log.warn("read ueditor config file error", e);
             this.jsonConfig = null;
         }
 

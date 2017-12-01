@@ -7,6 +7,8 @@ import com.baidu.ueditor.define.FileType;
 import com.baidu.ueditor.define.State;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.fileupload.ParameterParser;
+import org.hswebframework.web.WebUtil;
 import org.hswebframework.web.service.file.FileInfoService;
 import org.hswebframework.web.service.file.FileService;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +22,9 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * ueditor 服务端实现
@@ -62,8 +67,19 @@ public class UeditorController {
      */
     @RequestMapping(method = RequestMethod.POST, consumes = "multipart/form-data")
     @ApiOperation("上传文件")
-    public String upload(@RequestParam(value = "upfile", required = false) MultipartFile file) throws IOException {
+    public String upload(@RequestParam(value = "upfile", required = false) MultipartFile file,HttpServletRequest request) throws IOException {
         String fileName = file.getOriginalFilename();
+        String contentType = Optional.ofNullable(request)
+                .orElseThrow(UnsupportedOperationException::new)
+                .getContentType();
+        ParameterParser parser = new ParameterParser();
+        Map<String, String> params = parser.parse(contentType, ';');
+        if (params.get("charset") == null) {
+            try {
+                fileName = new String(file.getOriginalFilename().getBytes("ISO-8859-1"), "utf-8");
+            } catch (@SuppressWarnings("all") UnsupportedEncodingException ignore) {
+            }
+        }
         String suffix = FileType.getSuffixByFilename(fileName);
 
         String path = fileService.saveStaticFile(file.getInputStream(), System.currentTimeMillis() + suffix);
