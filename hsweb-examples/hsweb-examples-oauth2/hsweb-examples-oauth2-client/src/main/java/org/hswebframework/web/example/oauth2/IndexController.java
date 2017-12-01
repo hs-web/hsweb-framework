@@ -26,8 +26,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 @RestController
@@ -41,8 +39,8 @@ public class IndexController {
 
     @GetMapping("/test")
     @Authorize(role = "admin")
-    public ResponseMessage auth() {
-        return ResponseMessage.ok("admin角色");
+    public ResponseMessage auth(Authentication authentication) {
+        return ResponseMessage.ok(authentication);
     }
 
     @GetMapping("/test2")
