@@ -23,8 +23,6 @@ import org.hswebframework.web.entity.authorization.UserEntity;
 import org.hswebframework.web.service.authorization.UserService;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public class SimplePasswordService implements PasswordService {
