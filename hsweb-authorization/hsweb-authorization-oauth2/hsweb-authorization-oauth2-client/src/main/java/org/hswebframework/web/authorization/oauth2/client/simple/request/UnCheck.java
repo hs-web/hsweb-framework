@@ -18,14 +18,16 @@
 
 package org.hswebframework.web.authorization.oauth2.client.simple.request;
 
+import org.hswebframework.web.authorization.oauth2.client.exception.UnCheckException;
+
 interface UnCheck<T> {
-        T call() throws Exception;
+        T call() throws UnCheckException;
 
         static <T> T unCheck(UnCheck<T> unCheck) {
             try {
                 return unCheck.call();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+            } catch (UnCheckException e) {
+                throw new UnCheckException(e);
             }
         }
     }
