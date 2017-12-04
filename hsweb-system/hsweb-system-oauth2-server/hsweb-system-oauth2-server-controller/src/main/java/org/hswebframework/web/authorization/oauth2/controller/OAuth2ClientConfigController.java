@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/oauth2/client/config")
+@RequestMapping("/oauth2-client-config")
 @Api(tags = "OAuth2.0-服务-客户端管理", value = "OAuth2.0-服务-客户端管理")
 @Authorize(permission = "oauth2-client-config", description = "OAuth2.0-服务-客户端管理")
 public class OAuth2ClientConfigController {
