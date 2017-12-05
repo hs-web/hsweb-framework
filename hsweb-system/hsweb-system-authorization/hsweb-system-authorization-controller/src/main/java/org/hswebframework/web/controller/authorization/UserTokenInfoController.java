@@ -74,4 +74,12 @@ public class UserTokenInfoController {
         return ResponseMessage.ok();
     }
 
+    @PutMapping("/check")
+    @ApiOperation("检查所有已过期的token并移除")
+    @Authorize(action = Permission.ACTION_UPDATE)
+    public ResponseMessage<Void> checkExpiredToken() {
+        userTokenManager.checkExpiredToken();
+        return ResponseMessage.ok();
+    }
+
 }

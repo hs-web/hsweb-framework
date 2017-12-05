@@ -30,15 +30,13 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 @Service("menuService")
-@CacheConfig(cacheNames = CacheConstants.MENU_CACHE_NAME)
 public class SimpleMenuService
         extends AbstractTreeSortService<MenuEntity, String>
         implements MenuService {
@@ -61,29 +59,36 @@ public class SimpleMenuService
     }
 
     @Override
-    @Caching(
-            evict = {
-                    @CacheEvict(allEntries = true),
-                    @CacheEvict(cacheNames = CacheConstants.MENU_CACHE_NAME, allEntries = true)
-            }
-    )
+    @CacheEvict(cacheNames ={CacheConstants.MENU_CACHE_NAME,CacheConstants.USER_MENU_CACHE_NAME}, allEntries = true)
+    public int updateByPk(MenuEntity entity) {
+        return super.updateByPk(entity);
+    }
+
+    @Override
+    @CacheEvict(cacheNames ={CacheConstants.MENU_CACHE_NAME,CacheConstants.USER_MENU_CACHE_NAME}, allEntries = true)
+    public String saveOrUpdate(MenuEntity entity) {
+        return super.saveOrUpdate(entity);
+    }
+    @Override
+    @CacheEvict(cacheNames ={CacheConstants.MENU_CACHE_NAME,CacheConstants.USER_MENU_CACHE_NAME}, allEntries = true)
+    public int updateBatch(Collection<MenuEntity> data) {
+        return super.updateBatch(data);
+    }
+
+    @Override
+    @CacheEvict(cacheNames ={CacheConstants.MENU_CACHE_NAME,CacheConstants.USER_MENU_CACHE_NAME}, allEntries = true)
     public int updateByPk(String id, MenuEntity entity) {
         return super.updateByPk(id, entity);
     }
 
     @Override
-    @Caching(
-            evict = {
-                    @CacheEvict(allEntries = true),
-                    @CacheEvict(cacheNames = CacheConstants.MENU_CACHE_NAME, allEntries = true)
-            }
-    )
+    @CacheEvict(cacheNames ={CacheConstants.MENU_CACHE_NAME,CacheConstants.USER_MENU_CACHE_NAME}, allEntries = true)
     public int updateByPk(List<MenuEntity> data) {
         return super.updateByPk(data);
     }
 
     @Override
-    @CacheEvict(allEntries = true)
+    @CacheEvict(cacheNames ={CacheConstants.MENU_CACHE_NAME,CacheConstants.USER_MENU_CACHE_NAME}, allEntries = true)
     public String insert(MenuEntity entity) {
         if (entity.getStatus() == null) {
             entity.setStatus((byte) 1);
@@ -92,30 +97,25 @@ public class SimpleMenuService
     }
 
     @Override
-    @Cacheable(key = "'ids:'+(#id==null?'0':#id.hashCode())")
+    @Cacheable(cacheNames =CacheConstants.MENU_CACHE_NAME,key = "'ids:'+(#id==null?'0':#id.hashCode())")
     public List<MenuEntity> selectByPk(List<String> id) {
         return super.selectByPk(id);
     }
 
     @Override
-    @Caching(
-            evict = {
-                    @CacheEvict(allEntries = true),
-                    @CacheEvict(cacheNames = CacheConstants.MENU_CACHE_NAME, allEntries = true)
-            }
-    )
+    @CacheEvict(cacheNames ={CacheConstants.MENU_CACHE_NAME,CacheConstants.USER_MENU_CACHE_NAME}, allEntries = true)
     public int deleteByPk(String id) {
         return super.deleteByPk(id);
     }
 
     @Override
-    @Cacheable(key = "'permission-ids:'+(#permissionId==null?'0':#permissionId.hashCode())")
+    @Cacheable(cacheNames =CacheConstants.MENU_CACHE_NAME,key = "'permission-ids:'+(#permissionId==null?'0':#permissionId.hashCode())")
     public List<MenuEntity> getByPermissionId(List<String> permissionId) {
         return createQuery().noPaging().where().in("permissionId", permissionId).list();
     }
 
     @Override
-    @Cacheable(key = "'permission-id:'+#permissionId")
+    @Cacheable(cacheNames =CacheConstants.MENU_CACHE_NAME,key = "'permission-id:'+#permissionId")
     public MenuEntity getByPermissionId(String permissionId) {
         return createQuery().noPaging().where().is("permissionId", permissionId).single();
     }

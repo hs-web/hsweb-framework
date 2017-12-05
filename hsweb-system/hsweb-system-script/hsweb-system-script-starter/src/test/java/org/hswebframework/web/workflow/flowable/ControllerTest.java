@@ -30,4 +30,5 @@ public class ControllerTest extends SimpleWebApplicationTests {
         Assert.assertEquals(jsonObject.get("result"), "success");
     }
 
+
 }

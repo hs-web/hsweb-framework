@@ -16,17 +16,22 @@ import java.util.Map;
 /**
  * @author zhouhao
  */
-@Service("scriptExecutorService")
 public class DefaultScriptExecutorService implements ScriptExecutorService {
 
     @Autowired
     private ScriptService scriptService;
 
+    public void setScriptService(ScriptService scriptService) {
+        this.scriptService = scriptService;
+    }
+
     @Override
     @Transactional(rollbackFor = Throwable.class)
     public Object execute(String id, Map<String, Object> parameters) throws Exception {
         ScriptEntity scriptEntity = scriptService.selectByPk(id);
-
+        if (scriptEntity==null){
+            return null;
+        }
         DynamicScriptEngine engine = DynamicScriptEngineFactory.getEngine(scriptEntity.getLanguage());
 
         String scriptId = "dynamicScript-" + id;

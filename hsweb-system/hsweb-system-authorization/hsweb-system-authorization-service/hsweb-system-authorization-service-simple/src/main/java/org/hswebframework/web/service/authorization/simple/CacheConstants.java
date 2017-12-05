@@ -28,6 +28,8 @@ import org.hswebframework.web.authorization.AuthenticationManager;
 public interface CacheConstants {
     String MENU_CACHE_NAME = "hsweb-menu-";
 
+    String USER_MENU_CACHE_NAME = "hsweb-user-menu-";
+
     String USER_CACHE_NAME = "user-";
 
     String USER_AUTH_CACHE_NAME = AuthenticationManager.USER_AUTH_CACHE_NAME;

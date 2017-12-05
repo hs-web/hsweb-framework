@@ -24,7 +24,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("${hsweb.web.mappings.script:script}")
 @Authorize(permission = "script", description = "动态脚本管理")
-@Api("动态脚本")
+@Api(value = "动态脚本",tags = "动态脚本管理")
 public class ScriptController implements SimpleGenericEntityController<ScriptEntity, String, QueryParamEntity> {
 
     private ScriptService scriptService;
