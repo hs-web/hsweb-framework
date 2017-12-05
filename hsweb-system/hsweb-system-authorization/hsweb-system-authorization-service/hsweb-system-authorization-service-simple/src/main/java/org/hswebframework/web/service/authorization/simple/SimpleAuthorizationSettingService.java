@@ -64,7 +64,6 @@ import static org.hswebframework.web.service.authorization.simple.CacheConstants
  * @author hsweb-generator-online
  */
 @Service("authorizationSettingService")
-@CacheConfig(cacheNames = USER_AUTH_CACHE_NAME)
 public class SimpleAuthorizationSettingService extends GenericEntityService<AuthorizationSettingEntity, String>
         implements AuthorizationSettingService, AuthenticationInitializeService, UserMenuManagerService {
 
@@ -83,7 +82,6 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
     private List<AuthorizationSettingTypeSupplier> authorizationSettingTypeSuppliers;
 
     private DataAccessFactory dataAccessFactory;
-
 
     @Override
     protected IDGenerator<String> getIDGenerator() {
@@ -105,12 +103,7 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
     }
 
     @Override
-    @Caching(
-            evict = {
-                    @CacheEvict(allEntries = true),
-                    @CacheEvict(cacheNames = USER_MENU_CACHE_NAME,allEntries = true)
-            }
-    )
+    @CacheEvict(cacheNames = {CacheConstants.USER_AUTH_CACHE_NAME,CacheConstants.USER_MENU_CACHE_NAME}, allEntries = true)
     public String saveOrUpdate(AuthorizationSettingEntity entity) {
         AuthorizationSettingEntity old = select(entity.getType(), entity.getSettingFor());
         if (old != null) {
@@ -121,12 +114,7 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
     }
 
     @Override
-    @Caching(
-            evict = {
-                    @CacheEvict(allEntries = true),
-                    @CacheEvict(cacheNames = USER_MENU_CACHE_NAME,allEntries = true)
-            }
-    )
+    @CacheEvict(cacheNames = {CacheConstants.USER_AUTH_CACHE_NAME,CacheConstants.USER_MENU_CACHE_NAME}, allEntries = true)
     public String insert(AuthorizationSettingEntity entity) {
         tryValidateProperty(select(entity.getType(), entity.getSettingFor()) == null, AuthorizationSettingEntity.settingFor, "存在相同的配置!");
         entity.setStatus(STATUS_ENABLED);
@@ -151,12 +139,7 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
     }
 
     @Override
-    @Caching(
-            evict = {
-                    @CacheEvict(allEntries = true),
-                    @CacheEvict(cacheNames = USER_MENU_CACHE_NAME,allEntries = true)
-            }
-    )
+    @CacheEvict(cacheNames = {CacheConstants.USER_AUTH_CACHE_NAME,CacheConstants.USER_MENU_CACHE_NAME}, allEntries = true)
     public int updateByPk(String id, AuthorizationSettingEntity entity) {
         int size = super.updateByPk(id, entity);
         if (entity.getMenus() != null) {
@@ -184,12 +167,7 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
     }
 
     @Override
-    @Caching(
-            evict = {
-                    @CacheEvict(allEntries = true),
-                    @CacheEvict(cacheNames = USER_MENU_CACHE_NAME,allEntries = true)
-            }
-    )
+    @CacheEvict(cacheNames = {CacheConstants.USER_AUTH_CACHE_NAME,CacheConstants.USER_MENU_CACHE_NAME}, allEntries = true)
     public int deleteByPk(String id) {
         Objects.requireNonNull(id, "id can not be null");
         authorizationSettingMenuService.deleteBySettingId(id);

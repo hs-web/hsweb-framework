@@ -8,12 +8,12 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-@ConditionalOnClass(UserTokenParser.class)
-@Configuration
-@AutoConfigureAfter(OAuth2GranterAutoConfiguration.class)
+//@ConditionalOnClass(UserTokenParser.class)
+//@Configuration
+//@AutoConfigureAfter(OAuth2GranterAutoConfiguration.class)
 public class OAuth2AuthorizationAutoConfiguration {
 
-    @Bean
+//    @Bean
     public OAuth2UserTokenParser oAuth2UserTokenParser(AccessTokenService accessTokenService) {
         return new OAuth2UserTokenParser(accessTokenService);
     }
