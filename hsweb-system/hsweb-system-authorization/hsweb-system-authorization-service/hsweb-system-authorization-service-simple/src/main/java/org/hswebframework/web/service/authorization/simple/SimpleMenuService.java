@@ -33,8 +33,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 @Service("menuService")
@@ -64,7 +62,7 @@ public class SimpleMenuService
     @Caching(
             evict = {
                     @CacheEvict(allEntries = true),
-                    @CacheEvict(cacheNames = CacheConstants.MENU_CACHE_NAME, allEntries = true)
+                    @CacheEvict(cacheNames = CacheConstants.USER_MENU_CACHE_NAME, allEntries = true)
             }
     )
     public int updateByPk(String id, MenuEntity entity) {
@@ -75,7 +73,7 @@ public class SimpleMenuService
     @Caching(
             evict = {
                     @CacheEvict(allEntries = true),
-                    @CacheEvict(cacheNames = CacheConstants.MENU_CACHE_NAME, allEntries = true)
+                    @CacheEvict(cacheNames = CacheConstants.USER_MENU_CACHE_NAME, allEntries = true)
             }
     )
     public int updateByPk(List<MenuEntity> data) {
@@ -101,7 +99,7 @@ public class SimpleMenuService
     @Caching(
             evict = {
                     @CacheEvict(allEntries = true),
-                    @CacheEvict(cacheNames = CacheConstants.MENU_CACHE_NAME, allEntries = true)
+                    @CacheEvict(cacheNames = CacheConstants.USER_MENU_CACHE_NAME, allEntries = true)
             }
     )
     public int deleteByPk(String id) {
