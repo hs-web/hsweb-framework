@@ -19,9 +19,11 @@
 package org.hswebframework.web.authorization.oauth2.client.request;
 
 
+
 /**
  * @author zhouhao
  */
+@FunctionalInterface
 public interface ReTry {
     void doReTry();
 }
