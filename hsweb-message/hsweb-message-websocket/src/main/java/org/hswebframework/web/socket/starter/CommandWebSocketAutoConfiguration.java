@@ -110,8 +110,7 @@ public class CommandWebSocketAutoConfiguration {
                     .withSockJS()
                     .setSessionCookieNeeded(true);
             registry.addHandler(dispatcher, "/socket")
-                    .setAllowedOrigins(allowedOrigins)
-                    .setAllowedOrigins("");
+                    .setAllowedOrigins(allowedOrigins);
         }
     }
 
