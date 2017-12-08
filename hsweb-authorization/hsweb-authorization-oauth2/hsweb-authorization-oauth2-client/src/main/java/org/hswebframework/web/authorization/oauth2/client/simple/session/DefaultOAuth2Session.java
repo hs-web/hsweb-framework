@@ -19,7 +19,9 @@
 package org.hswebframework.web.authorization.oauth2.client.simple.session;
 
 import org.apache.commons.codec.binary.Base64;
+import org.hswebframework.web.BusinessException;
 import org.hswebframework.web.authorization.oauth2.client.*;
+import org.hswebframework.web.authorization.oauth2.client.exception.OAuth2RequestException;
 import org.hswebframework.web.authorization.oauth2.client.request.OAuth2Request;
 import org.hswebframework.web.authorization.oauth2.client.request.OAuth2Session;
 import org.hswebframework.web.authorization.oauth2.client.response.OAuth2Response;
@@ -90,6 +92,8 @@ public class DefaultOAuth2Session implements OAuth2Session {
 
     protected void applyTokenParam(OAuth2Request request) {
         request.param(access_token, getAccessToken().getAccessToken());
+        String tokenType = getAccessToken().getTokenType();
+
         request.header(authorization, "Bearer " + getAccessToken().getAccessToken());
     }
 
@@ -114,7 +118,7 @@ public class DefaultOAuth2Session implements OAuth2Session {
         if (accessTokenInfo == null) {
             authorize();
         }
-        if(accessTokenInfo.isExpire()){
+        if (accessTokenInfo.isExpire()) {
             refreshToken();
         }
         OAuth2Request request = createRequest(getRealUrl(uriOrUrl));
@@ -125,9 +129,9 @@ public class DefaultOAuth2Session implements OAuth2Session {
         });
         request.onRefreshTokenExpired(reTry -> {
             //重新请求token
-           setAccessTokenInfo(requestAccessToken());
-           applyTokenParam(request);
-           reTry.doReTry();
+            setAccessTokenInfo(requestAccessToken());
+            applyTokenParam(request);
+            reTry.doReTry();
         });
         applyTokenParam(request);
         return request;
@@ -143,7 +147,8 @@ public class DefaultOAuth2Session implements OAuth2Session {
     public AccessTokenInfo requestAccessToken() {
         AccessTokenInfo accessTokenInfo = accessTokenRequest
                 .param(OAuth2Constants.scope, scope)
-                .post().onError(OAuth2Response.throwOnError)
+                .post()
+                .onError(OAuth2Response.throwOnError)
                 .as(AccessTokenInfo.class);
         accessTokenInfo.setCreateTime(System.currentTimeMillis());
         accessTokenInfo.setUpdateTime(System.currentTimeMillis());
@@ -155,34 +160,43 @@ public class DefaultOAuth2Session implements OAuth2Session {
             return;
         }
         OAuth2Request request = createRequest(getRealUrl(serverConfig.getAccessTokenUrl()));
-        request.onRefreshTokenExpired(reTry -> {
+        //request.onRefreshTokenExpired(reTry -> {
             //重新请求token
-            setAccessTokenInfo(requestAccessToken());
-            applyTokenParam(request);
-            reTry.doReTry();
-        });
+          //  setAccessTokenInfo(requestAccessToken());
+            //applyTokenParam(request);
+            //reTry.doReTry();
+        //});
         applyBasicAuthParam(request);
         boolean[] skip = new boolean[1];
-        AccessTokenInfo tokenInfo = request
-                .param(OAuth2Constants.scope, scope)
-                .param(OAuth2Constants.grant_type, org.hswebframework.web.oauth2.core.GrantType.refresh_token)
-                .param(org.hswebframework.web.oauth2.core.GrantType.refresh_token, accessTokenInfo.getRefreshToken())
-                .post().onError((oAuth2Response, type) -> {
-                    if(type== ErrorType.EXPIRED_REFRESH_TOKEN){
-                        setAccessTokenInfo(requestAccessToken());
-                        skip[0]=true;
-                        return;
-                    }
-                    OAuth2Response.throwOnError.accept(oAuth2Response,type);
-                })
-                .as(AccessTokenInfo.class);
-
-        if(skip[0]){
-            return;
+        try {
+            AccessTokenInfo tokenInfo = request
+                    .param(OAuth2Constants.scope, scope)
+                    .param(OAuth2Constants.grant_type, org.hswebframework.web.oauth2.core.GrantType.refresh_token)
+                    .param(org.hswebframework.web.oauth2.core.GrantType.refresh_token, accessTokenInfo.getRefreshToken())
+                    .post()
+                    .onError((oAuth2Response, type) -> {
+                        if (type == ErrorType.EXPIRED_REFRESH_TOKEN) {
+                            setAccessTokenInfo(requestAccessToken());
+                            skip[0] = true;
+                            return;
+                        }
+                        OAuth2Response.throwOnError.accept(oAuth2Response, type);
+                    })
+                    .as(AccessTokenInfo.class);
+            if (skip[0]) {
+                return;
+            }
+            tokenInfo.setCreateTime(accessTokenInfo.getCreateTime());
+            tokenInfo.setUpdateTime(System.currentTimeMillis());
+            setAccessTokenInfo(tokenInfo);
+        } catch (OAuth2RequestException|BusinessException e) {
+            if (!skip[0]) {
+                //refresh token success
+                throw e;
+            }
         }
-        tokenInfo.setCreateTime(accessTokenInfo.getCreateTime());
-        tokenInfo.setUpdateTime(System.currentTimeMillis());
-        setAccessTokenInfo(tokenInfo);
+
+
     }
 
 

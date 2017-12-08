@@ -154,6 +154,14 @@ public class SimpleOAuth2Request implements OAuth2Request {
                 //返回重试后的response
                 return auth2Response;
             });
+
+            //如果是invalid token 也将重新生成token
+            auth2Response.judgeError(ErrorType.INVALID_TOKEN,() -> {
+                //调用回调,并指定重试的操作(重新请求)
+                refreshTokenExpiredCallBack.call(() -> createNativeResponse(responseSupplier));
+                //返回重试后的response
+                return auth2Response;
+            });
         }
         return auth2Response;
     }

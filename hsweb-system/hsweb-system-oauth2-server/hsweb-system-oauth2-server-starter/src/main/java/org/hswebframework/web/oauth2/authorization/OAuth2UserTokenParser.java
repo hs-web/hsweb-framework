@@ -28,10 +28,14 @@ public class OAuth2UserTokenParser implements UserTokenParser {
 
     @Override
     public ParsedToken parseToken(HttpServletRequest request) {
+        if (request.getRequestURI().contains("oauth2")&&request.getParameter(OAuth2Constants.grant_type) != null) {
+            return null;
+        }
         String accessToken = request.getHeader(OAuth2Constants.authorization);
         if (StringUtils.isEmpty(accessToken)) {
             accessToken = request.getParameter(OAuth2Constants.access_token);
         } else {
+
             String[] arr = accessToken.split("[ ]");
             if (arr.length > 1) {
                 accessToken = arr[1];
