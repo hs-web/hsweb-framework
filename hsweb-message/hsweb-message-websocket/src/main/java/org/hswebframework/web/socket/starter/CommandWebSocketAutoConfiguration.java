@@ -15,8 +15,10 @@ import org.hswebframework.web.socket.processor.DefaultCommandProcessorContainer;
 import org.hswebframework.web.socket.processor.CommandProcessor;
 import org.hswebframework.web.socket.processor.CommandProcessorContainer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurationSupport;
@@ -31,18 +33,18 @@ import java.util.List;
 public class CommandWebSocketAutoConfiguration {
 
     @Bean
-    public SessionIdWebSocketTokenParser sessionIdWebSocketTokenParser(){
+    public SessionIdWebSocketTokenParser sessionIdWebSocketTokenParser() {
         return new SessionIdWebSocketTokenParser();
     }
 
     @Bean
-    public XAccessTokenParser xAccessTokenParser(){
+    public XAccessTokenParser xAccessTokenParser() {
         return new XAccessTokenParser();
     }
 
     @Bean
     @ConditionalOnBean(UserTokenManager.class)
-    public AuthorizeCommandProcessor authorizeCommandProcessor(UserTokenManager userTokenManager){
+    public AuthorizeCommandProcessor authorizeCommandProcessor(UserTokenManager userTokenManager) {
         return new AuthorizeCommandProcessor(userTokenManager);
     }
 
@@ -71,12 +73,19 @@ public class CommandWebSocketAutoConfiguration {
 
         @Bean
         public WebSocketMessager webSocketMessager(Messager messager) {
-            return new DefaultWebSocketMessager(messager,counterManager);
+            return new DefaultWebSocketMessager(messager, counterManager);
         }
     }
 
     @Configuration
+    @ConfigurationProperties(prefix = "hsweb.websocket")
     public static class HandlerConfigruation extends WebSocketConfigurationSupport {
+        private String[] allowedOrigins;
+
+        public void setAllowedOrigins(String[] allowedOrigins) {
+            this.allowedOrigins = allowedOrigins;
+        }
+
         @Autowired(required = false)
         private UserTokenManager userTokenManager;
 
@@ -97,9 +106,11 @@ public class CommandWebSocketAutoConfiguration {
             dispatcher.setWebSocketSessionListeners(webSocketSessionListeners);
             dispatcher.setTokenParsers(webSocketTokenParsers);
             registry.addHandler(dispatcher, "/sockjs")
+                    .setAllowedOrigins(allowedOrigins)
                     .withSockJS()
                     .setSessionCookieNeeded(true);
-            registry.addHandler(dispatcher, "/socket");
+            registry.addHandler(dispatcher, "/socket")
+                    .setAllowedOrigins(allowedOrigins);
         }
     }
 
