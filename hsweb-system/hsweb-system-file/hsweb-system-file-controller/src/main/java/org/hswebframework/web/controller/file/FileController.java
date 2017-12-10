@@ -234,7 +234,7 @@ public class FileController {
     @PostMapping(value = "/upload-multi")
     @ApiOperation("上传多个文件")
     @Authorize(action = "upload", description = "上传文件")
-    public ResponseMessage<List<FileInfoEntity>> upload(@RequestParam("files") MultipartFile[] files) {
+    public ResponseMessage<List<FileInfoEntity>> upload(@RequestPart("files") MultipartFile[] files) {
         return ResponseMessage.ok(Stream.of(files)
                 .map(this::upload)
                 .map(ResponseMessage::getResult)
@@ -256,7 +256,7 @@ public class FileController {
     @PostMapping(value = "/upload")
     @AccessLogger("上传单个文件")
     @Authorize(action = "upload", description = "上传文件")
-    public ResponseMessage<FileInfoEntity> upload(@RequestParam("file") MultipartFile file) {
+    public ResponseMessage<FileInfoEntity> upload(@RequestPart("file") MultipartFile file) {
         List<FileInfoEntity> fileInfoList = new LinkedList<>();
         Authentication authentication = Authentication.current().orElse(null);
         String creator = authentication == null ? null : authentication.getUser().getId();
@@ -297,7 +297,7 @@ public class FileController {
     @PostMapping(value = "/upload-static")
     @ApiOperation(value = "上传静态文件", notes = "上传后响应结果的result字段为文件的访问地址")
     @Authorize(action = "static", description = "上传静态文件")
-    public ResponseMessage<String> uploadStatic(@RequestParam("file") MultipartFile file) throws IOException {
+    public ResponseMessage<String> uploadStatic(@RequestPart("file") MultipartFile file) throws IOException {
         if (file.isEmpty()) {
             return ResponseMessage.ok();
         }
