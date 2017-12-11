@@ -5,6 +5,7 @@ import org.hswebframework.web.authorization.oauth2.client.request.OAuth2Request;
 import org.hswebframework.web.authorization.oauth2.client.request.TokenExpiredCallBack;
 import org.hswebframework.web.authorization.oauth2.client.response.OAuth2Response;
 
+import java.io.InputStream;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -13,10 +14,10 @@ import java.util.function.Function;
 public class MockOAuth2Request implements OAuth2Request {
 
 
-    private Function<String,OAuth2Response> responseGetter;
+    private Function<String, OAuth2Response> responseGetter;
 
 
-    public MockOAuth2Request(Function<String,OAuth2Response> responseGetter) {
+    public MockOAuth2Request(Function<String, OAuth2Response> responseGetter) {
         this.responseGetter = responseGetter;
     }
 
@@ -40,6 +41,16 @@ public class MockOAuth2Request implements OAuth2Request {
     public OAuth2Request params(Map<String, String> params) {
         log.info("set params :{}", params);
         return this;
+    }
+
+    @Override
+    public OAuth2Response upload(String name, InputStream inputStream) {
+        return responseGetter.apply("post");
+    }
+
+    @Override
+    public OAuth2Response upload(String name, InputStream inputStream, String fileName) {
+        return responseGetter.apply("post");
     }
 
     @Override

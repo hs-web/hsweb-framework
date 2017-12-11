@@ -8,6 +8,8 @@ import org.hswebframework.web.authorization.simple.builder.SimpleAuthenticationB
 import org.hswebframework.web.authorization.simple.builder.SimpleDataAccessConfigBuilderFactory;
 import org.hswebframework.web.oauth2.core.ErrorType;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.List;
 import java.util.function.BiConsumer;
 
@@ -17,6 +19,11 @@ public class MockOAuth2Response implements OAuth2Response {
 
     private ResponseConvertHandler handler = new HswebResponseConvertSupport(new SimpleAuthenticationBuilderFactory(new SimpleDataAccessConfigBuilderFactory()));
 
+
+    @Override
+    public InputStream asStream() {
+        return new ByteArrayInputStream(result.getBytes());
+    }
 
     public MockOAuth2Response(String result) {
         this.result = result;

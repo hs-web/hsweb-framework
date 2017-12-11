@@ -99,7 +99,7 @@
 
         <hsweb.ezorm.version>3.0.1-SNAPSHOT</hsweb.ezorm.version>
         <hsweb.utils.version>3.0.2</hsweb.utils.version>
-        <hsweb.expands.version>3.0.0</hsweb.expands.version>
+        <hsweb.expands.version>3.0.2-SNAPSHOTS</hsweb.expands.version>
 
         <swagger.version>2.7.0</swagger.version>
     </properties>
