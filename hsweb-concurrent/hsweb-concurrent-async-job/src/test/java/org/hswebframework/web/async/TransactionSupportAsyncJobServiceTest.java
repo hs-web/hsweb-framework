@@ -52,7 +52,7 @@ public class TransactionSupportAsyncJobServiceTest extends SimpleWebApplicationT
             BatchAsyncJobContainer jobContainer = asyncJobService.batch();
             jobContainer.submit(() -> {
                 Thread.sleep(50);
-                throw new RuntimeException();
+                throw new RuntimeException("1234");
             }, true);
             for (int i = 0; i < 100; i++) {
                 jobContainer.submit(() -> sqlExecutor.insert("insert into test values('test')", null), true);
