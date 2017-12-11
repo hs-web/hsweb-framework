@@ -27,6 +27,8 @@ import org.hswebframework.web.authorization.oauth2.client.request.TokenExpiredCa
 import org.hswebframework.web.authorization.oauth2.client.response.OAuth2Response;
 import org.hswebframework.web.oauth2.core.ErrorType;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -59,8 +61,8 @@ public class SimpleOAuth2Request implements OAuth2Request {
     }
 
     @Override
-    public OAuth2Request onRefreshTokenExpired(TokenExpiredCallBack refreshTokenExpiredCallBack){
-        this.refreshTokenExpiredCallBack=refreshTokenExpiredCallBack;
+    public OAuth2Request onRefreshTokenExpired(TokenExpiredCallBack refreshTokenExpiredCallBack) {
+        this.refreshTokenExpiredCallBack = refreshTokenExpiredCallBack;
         return this;
     }
 
@@ -68,6 +70,16 @@ public class SimpleOAuth2Request implements OAuth2Request {
     public OAuth2Request onTokenExpired(TokenExpiredCallBack callback) {
         this.expiredCallBack = callback;
         return this;
+    }
+
+    @Override
+    public OAuth2Response upload(String name, InputStream inputStream) {
+        return createUnCheckResponse(() -> request.upload(name, inputStream));
+    }
+
+    @Override
+    public OAuth2Response upload(String name, InputStream inputStream, String fileName) {
+        return createUnCheckResponse(() -> request.upload(name, inputStream, fileName));
     }
 
     @Override
@@ -120,17 +132,17 @@ public class SimpleOAuth2Request implements OAuth2Request {
     private volatile SimpleOAuth2Response auth2Response;
 
     protected SimpleOAuth2Response createNativeResponse(Supplier<Response> responseSupplier) {
-        SimpleOAuth2Response response=  new SimpleOAuth2Response(responseSupplier.get(), convertHandler, responseJudge);
+        SimpleOAuth2Response response = new SimpleOAuth2Response(responseSupplier.get(), convertHandler, responseJudge);
 
 
-        return auth2Response =response;
+        return auth2Response = response;
     }
 
     protected OAuth2Response createResponse(Supplier<Response> responseSupplier) {
         createNativeResponse(responseSupplier);
         if (null != expiredCallBack) {
             //判定token是否过期,过期后先执行回调进行操作如更新token,并尝试重新请求
-            auth2Response.judgeError(ErrorType.EXPIRED_TOKEN,() -> {
+            auth2Response.judgeError(ErrorType.EXPIRED_TOKEN, () -> {
 
                 //调用回调,并指定重试的操作(重新请求)
                 expiredCallBack.call(() -> createNativeResponse(responseSupplier));
@@ -141,14 +153,14 @@ public class SimpleOAuth2Request implements OAuth2Request {
         }
         if (null != refreshTokenExpiredCallBack) {
             //判定token是否有效,无效的token将重新申请token
-            auth2Response.judgeError(ErrorType.INVALID_TOKEN,() -> {
+            auth2Response.judgeError(ErrorType.INVALID_TOKEN, () -> {
                 //调用回调,并指定重试的操作(重新请求)
                 refreshTokenExpiredCallBack.call(() -> createNativeResponse(responseSupplier));
                 //返回重试后的response
                 return auth2Response;
             });
             //判定refresh_token是否过期,过期后先执行回调进行操作如更新token,并尝试重新请求
-            auth2Response.judgeError(ErrorType.EXPIRED_REFRESH_TOKEN,() -> {
+            auth2Response.judgeError(ErrorType.EXPIRED_REFRESH_TOKEN, () -> {
                 //调用回调,并指定重试的操作(重新请求)
                 refreshTokenExpiredCallBack.call(() -> createNativeResponse(responseSupplier));
                 //返回重试后的response
@@ -156,7 +168,7 @@ public class SimpleOAuth2Request implements OAuth2Request {
             });
 
             //如果是invalid token 也将重新生成token
-            auth2Response.judgeError(ErrorType.INVALID_TOKEN,() -> {
+            auth2Response.judgeError(ErrorType.INVALID_TOKEN, () -> {
                 //调用回调,并指定重试的操作(重新请求)
                 refreshTokenExpiredCallBack.call(() -> createNativeResponse(responseSupplier));
                 //返回重试后的response

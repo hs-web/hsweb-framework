@@ -19,6 +19,7 @@
 package org.hswebframework.web.authorization.oauth2.client.simple.request;
 
 import org.hswebframework.expands.request.http.Response;
+import org.hswebframework.web.authorization.oauth2.client.exception.OAuth2RequestException;
 import org.hswebframework.web.authorization.oauth2.client.request.ResponseConvertHandler;
 import org.hswebframework.web.authorization.oauth2.client.request.ResponseJudge;
 import org.hswebframework.web.authorization.oauth2.client.response.OAuth2Response;
@@ -26,7 +27,10 @@ import org.hswebframework.web.authorization.oauth2.client.response.ResponseConve
 import org.hswebframework.web.oauth2.core.ErrorType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StreamUtils;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
@@ -50,8 +54,9 @@ public class SimpleOAuth2Response implements OAuth2Response {
 
     private OAuth2Response proxy = this;
 
+    private InputStream inputStream;
 
-    public void judgeError(ErrorType ifError,Supplier<OAuth2Response> expiredCallBack) {
+    public void judgeError(ErrorType ifError, Supplier<OAuth2Response> expiredCallBack) {
 
         if (errorType == ifError) {
             //尝试执行认证过时回调进行重试,并返回重试的结果
@@ -64,7 +69,7 @@ public class SimpleOAuth2Response implements OAuth2Response {
 
                 if (type == ifError) {
                     //重试后依然是相同的错误,可能是错误类型判断错误或者服务端的问题?
-                    logger.error("still error [{}], maybe judge error or auth server error！ {}",ifError,retryResponse,Thread.currentThread().getStackTrace());
+                    logger.error("still error [{}], maybe judge error or auth server error！ {}", ifError, retryResponse, Thread.currentThread().getStackTrace());
                 } else {
                     errorType = type;
                 }
@@ -78,9 +83,13 @@ public class SimpleOAuth2Response implements OAuth2Response {
                                 ResponseConvertHandler convertHandler,
                                 ResponseJudge responseJudge) {
         this.convertHandler = convertHandler;
-        data = UnCheck.unCheck(response::asBytes);
+        inputStream = UnCheck.unCheck(response::asStream);
         status = response.getCode();
         errorType = responseJudge.judge(this);
+    }
+
+    public InputStream asStream() {
+        return inputStream;
     }
 
     @Override
@@ -93,6 +102,9 @@ public class SimpleOAuth2Response implements OAuth2Response {
 
     @Override
     public byte[] asBytes() {
+        if (data == null) {
+            data = UnCheck.unCheck(() -> StreamUtils.copyToByteArray(inputStream));
+        }
         return data;
     }
 
