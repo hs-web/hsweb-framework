@@ -13,9 +13,9 @@ import java.util.function.Function;
 @Slf4j
 public class MockOAuth2Request implements OAuth2Request {
 
-    private Function<String,OAuth2Response> responseGetter;
+    private Function<String, OAuth2Response> responseGetter;
 
-    public MockOAuth2Request(Function<String,OAuth2Response> responseGetter) {
+    public MockOAuth2Request(Function<String, OAuth2Response> responseGetter) {
         this.responseGetter = responseGetter;
     }
 
@@ -42,8 +42,13 @@ public class MockOAuth2Request implements OAuth2Request {
     }
 
     @Override
-    public OAuth2Request upload(String name, InputStream inputStream) {
-        return this;
+    public OAuth2Response upload(String name, InputStream inputStream) {
+        return responseGetter.apply("post");
+    }
+
+    @Override
+    public OAuth2Response upload(String name, InputStream inputStream, String fileName) {
+        return responseGetter.apply("post");
     }
 
     @Override

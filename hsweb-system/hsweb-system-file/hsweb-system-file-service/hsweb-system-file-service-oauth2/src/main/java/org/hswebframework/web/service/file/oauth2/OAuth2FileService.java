@@ -37,15 +37,14 @@ public class OAuth2FileService implements FileService, OAuth2ServiceSupport {
     @Override
     public FileInfoEntity saveFile(InputStream fileStream, String fileName, String type, String creatorId) throws IOException {
         return createRequest("/upload")
-                .upload(fileName, fileStream)
-                .post().as(getEntityType());
+                .upload("file", fileStream,fileName)
+                .as(getEntityType());
     }
 
     @Override
     public String saveStaticFile(InputStream fileStream, String fileName) throws IOException {
         return createRequest("/upload-static")
-                .upload(fileName, fileStream)
-                .post()
+                .upload("file", fileStream,fileName)
                 .as(String.class);
     }
 
