@@ -57,6 +57,13 @@ public class UserTokenInfoController {
         return ResponseMessage.ok(userTokenManager.allLoggedUser());
     }
 
+    @GetMapping("/token/all")
+    @ApiOperation("获取所有用户")
+    @Authorize(action = Permission.ACTION_GET)
+    public ResponseMessage<List<UserToken>> allUserInfo() {
+        return ResponseMessage.ok(userTokenManager.allLoggedUser());
+    }
+
     @PutMapping("/token/{token}/{state}")
     @ApiOperation("修改令牌状态")
     @Authorize(action = Permission.ACTION_UPDATE)
