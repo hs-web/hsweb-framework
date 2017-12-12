@@ -1,4 +1,4 @@
-package org.hswebframework.web.service.oauth2;
+package org.hswebframework.web.service.file.oauth2;
 
 import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.web.authorization.oauth2.client.request.OAuth2Request;
@@ -13,9 +13,7 @@ import java.util.function.Function;
 @Slf4j
 public class MockOAuth2Request implements OAuth2Request {
 
-
     private Function<String, OAuth2Response> responseGetter;
-
 
     public MockOAuth2Request(Function<String, OAuth2Response> responseGetter) {
         this.responseGetter = responseGetter;

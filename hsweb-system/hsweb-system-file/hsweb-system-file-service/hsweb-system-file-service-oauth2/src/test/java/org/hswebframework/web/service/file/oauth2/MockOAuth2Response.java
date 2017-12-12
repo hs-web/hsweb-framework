@@ -1,4 +1,4 @@
-package org.hswebframework.web.service.oauth2;
+package org.hswebframework.web.service.file.oauth2;
 
 import org.hswebframework.web.authorization.oauth2.client.request.ResponseConvertHandler;
 import org.hswebframework.web.authorization.oauth2.client.response.OAuth2Response;
@@ -7,36 +7,41 @@ import org.hswebframework.web.authorization.oauth2.client.simple.provider.HswebR
 import org.hswebframework.web.authorization.simple.builder.SimpleAuthenticationBuilderFactory;
 import org.hswebframework.web.authorization.simple.builder.SimpleDataAccessConfigBuilderFactory;
 import org.hswebframework.web.oauth2.core.ErrorType;
+import org.springframework.util.StreamUtils;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.function.BiConsumer;
 
 public class MockOAuth2Response implements OAuth2Response {
 
-    private String result;
+    private InputStream result;
 
     private ResponseConvertHandler handler = new HswebResponseConvertSupport(new SimpleAuthenticationBuilderFactory(new SimpleDataAccessConfigBuilderFactory()));
 
-
     @Override
     public InputStream asStream() {
-        return new ByteArrayInputStream(result.getBytes());
+        return result;
     }
 
-    public MockOAuth2Response(String result) {
+    public MockOAuth2Response(InputStream result) {
         this.result = result;
     }
 
     @Override
     public String asString() {
-        return result;
+        return new String(asBytes());
     }
 
     @Override
     public byte[] asBytes() {
-        return result.getBytes();
+        try {
+            return StreamUtils.copyToByteArray(result);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
