@@ -99,7 +99,7 @@
 
         <hsweb.ezorm.version>3.0.1-SNAPSHOT</hsweb.ezorm.version>
         <hsweb.utils.version>3.0.2</hsweb.utils.version>
-        <hsweb.expands.version>3.0.2-SNAPSHOTS</hsweb.expands.version>
+        <hsweb.expands.version>3.0.2-SNAPSHOT</hsweb.expands.version>
 
         <swagger.version>2.7.0</swagger.version>
     </properties>
@@ -327,21 +327,27 @@
             </dependency>
 
             <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring.boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
                 <groupId>org.hswebframework</groupId>
-                <artifactId>hsweb-utils</artifactId>
-                <version>${hsweb.utils.version}</version>
+                <artifactId>hsweb-easy-orm</artifactId>
+                <version>${hsweb.ezorm.version}</version>
                 <exclusions>
+                    <exclusion>
+                        <groupId>org.hswebframework</groupId>
+                        <artifactId>hsweb-expands-script</artifactId>
+                    </exclusion>
                     <exclusion>
                         <groupId>com.alibaba</groupId>
                         <artifactId>fastjson</artifactId>
                     </exclusion>
                 </exclusions>
-            </dependency>
-
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-dependencies</artifactId>
-                <version>${spring.boot.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -366,18 +372,15 @@
 
             <dependency>
                 <groupId>org.hswebframework</groupId>
-                <artifactId>hsweb-easy-orm</artifactId>
-                <version>${hsweb.ezorm.version}</version>
+                <artifactId>hsweb-utils</artifactId>
+                <version>${hsweb.utils.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>com.alibaba</groupId>
                         <artifactId>fastjson</artifactId>
                     </exclusion>
                 </exclusions>
-                <type>pom</type>
-                <scope>import</scope>
             </dependency>
-
         </dependencies>
     </dependencyManagement>
 
@@ -415,12 +418,12 @@
 
     <pluginRepositories>
         <!--<pluginRepository>-->
-            <!--<id>hsweb-nexus</id>-->
-            <!--<name>Nexus Release Repository</name>-->
-            <!--<url>http://nexus.hsweb.me/content/groups/public/</url>-->
-            <!--<snapshots>-->
-                <!--<enabled>true</enabled>-->
-            <!--</snapshots>-->
+        <!--<id>hsweb-nexus</id>-->
+        <!--<name>Nexus Release Repository</name>-->
+        <!--<url>http://nexus.hsweb.me/content/groups/public/</url>-->
+        <!--<snapshots>-->
+        <!--<enabled>true</enabled>-->
+        <!--</snapshots>-->
         <!--</pluginRepository>-->
         <pluginRepository>
             <id>aliyun-nexus</id>
