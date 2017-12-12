@@ -10,7 +10,6 @@ import org.hswebframework.web.authorization.token.UserToken;
 import org.hswebframework.web.authorization.token.UserTokenHolder;
 import org.hswebframework.web.authorization.token.UserTokenManager;
 import org.hswebframework.web.controller.message.ResponseMessage;
-import org.hswebframework.web.logging.AccessLogger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -54,13 +53,6 @@ public class UserTokenInfoController {
     @ApiOperation("获取所有令牌")
     @Authorize(action = Permission.ACTION_GET)
     public ResponseMessage<List<UserToken>> allTokenInfo() {
-        return ResponseMessage.ok(userTokenManager.allLoggedUser());
-    }
-
-    @GetMapping("/token/all")
-    @ApiOperation("获取所有用户")
-    @Authorize(action = Permission.ACTION_GET)
-    public ResponseMessage<List<UserToken>> allUserInfo() {
         return ResponseMessage.ok(userTokenManager.allLoggedUser());
     }
 
