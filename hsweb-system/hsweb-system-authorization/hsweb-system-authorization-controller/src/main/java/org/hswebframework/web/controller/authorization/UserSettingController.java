@@ -3,12 +3,11 @@ package org.hswebframework.web.controller.authorization;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.hswebframework.web.authorization.Authentication;
-import org.hswebframework.web.authorization.User;
 import org.hswebframework.web.authorization.annotation.Authorize;
+import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.entity.authorization.UserSettingEntity;
 import org.hswebframework.web.service.authorization.UserSettingService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,24 +29,24 @@ public class UserSettingController {
     @GetMapping("/me/{key}/{id}")
     @Authorize(merge = false)
     @ApiOperation("获取当前用户的配置")
-    public ResponseEntity<UserSettingEntity> get(Authentication authentication,
-                                                 @PathVariable String key,
-                                                 @PathVariable String id) {
-        return ResponseEntity.ok(userSettingService.selectByUser(authentication.getUser().getId(), key, id));
+    public ResponseMessage<UserSettingEntity> get(Authentication authentication,
+                                                  @PathVariable String key,
+                                                  @PathVariable String id) {
+        return ResponseMessage.ok(userSettingService.selectByUser(authentication.getUser().getId(), key, id));
     }
 
     @GetMapping("/me/{key}")
     @Authorize(merge = false)
     @ApiOperation("获取当前用户的配置列表")
-    public ResponseEntity<List<UserSettingEntity>> get(Authentication authentication,
+    public ResponseMessage<List<UserSettingEntity>> get(Authentication authentication,
                                                        @PathVariable String key) {
-        return ResponseEntity.ok(userSettingService.selectByUser(authentication.getUser().getId(), key));
+        return ResponseMessage.ok(userSettingService.selectByUser(authentication.getUser().getId(), key));
     }
 
     @PatchMapping("/me/{key}")
     @Authorize(merge = false)
     @ApiOperation("获取当前用户的配置列表")
-    public ResponseEntity<String> save(Authentication authentication,
+    public ResponseMessage<String> save(Authentication authentication,
                                        @PathVariable String key,
                                        @Validated
                                        @RequestBody UserSettingEntity userSettingEntity) {
@@ -59,6 +58,6 @@ public class UserSettingController {
             userSettingEntity.setId(old.getId());
         }
         String id = userSettingService.saveOrUpdate(userSettingEntity);
-        return ResponseEntity.ok(id);
+        return ResponseMessage.ok(id);
     }
 }
