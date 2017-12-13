@@ -12,6 +12,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -63,6 +64,8 @@ public class SimpleUserSettingService extends EnableCacheGenericEntityService<Us
             }
     )
     public String insert(UserSettingEntity entity) {
+        entity.setCreateTime(new Date());
+        entity.setUpdateTime(new Date());
         return super.insert(entity);
     }
 
@@ -85,6 +88,7 @@ public class SimpleUserSettingService extends EnableCacheGenericEntityService<Us
             }
     )
     public int updateByPk(String id, UserSettingEntity entity) {
+        entity.setUpdateTime(new Date());
         return super.updateByPk(id, entity);
     }
 }

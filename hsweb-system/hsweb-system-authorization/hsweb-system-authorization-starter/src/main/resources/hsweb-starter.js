@@ -150,6 +150,18 @@ function install(context) {
         .addColumn().name("sort_index").alias("sortIndex").comment("排序序号").jdbcType(java.sql.JDBCType.DECIMAL).length(32, 0).commit()
         .addColumn().name("status").alias("status").comment("状态").jdbcType(java.sql.JDBCType.DECIMAL).length(4, 0).commit()
         .comment("菜单分组关联").commit();
+
+    database.createOrAlter("s_user_setting")
+        .addColumn().name("u_id").varchar(32).notNull().primaryKey().comment("uid").commit()
+        .addColumn().name("name").varchar(128).comment("配置名称").commit()
+        .addColumn().name("describe").varchar(512).comment("说明").commit()
+        .addColumn().name("user_id").varchar(32).notNull().comment("用户ID").commit()
+        .addColumn().name("key").varchar(128).notNull().comment("配置标识").commit()
+        .addColumn().name("setting").clob().comment("配置内容").commit()
+        .addColumn().name("setting_id").varchar(32).notNull().comment("自定义配置id").commit()
+        .addColumn().name("create_time").datetime().notNull().comment("创建时间").commit()
+        .addColumn().name("update_time").datetime().comment("创建时间").commit()
+        .comment("角色表").commit();
 }
 
 //设置依赖

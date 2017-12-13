@@ -30,6 +30,10 @@ public class UserSettingEntity extends SimpleGenericEntity<String> {
     @NotBlank(groups = CreateGroup.class)
     private String setting;
 
+    private String describe;
+
+    private String name;
+
     private Date createTime;
 
     private Date updateTime;

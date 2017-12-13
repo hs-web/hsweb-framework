@@ -27,6 +27,8 @@
         <result property="settingId" column="setting_id" javaType="String" jdbcType="VARCHAR"/>
         <result property="userId" column="user_id" javaType="String" jdbcType="VARCHAR"/>
         <result property="setting" column="setting" javaType="String" jdbcType="CLOB"/>
+        <result property="describe" column="describe" javaType="String" jdbcType="VARCHAR"/>
+        <result property="name" column="name" javaType="String" jdbcType="VARCHAR"/>
         <result property="createTime" column="create_time" javaType="Date" jdbcType="TIMESTAMP"/>
         <result property="updateTime" column="update_time" javaType="Date" jdbcType="TIMESTAMP"/>
     </resultMap>
