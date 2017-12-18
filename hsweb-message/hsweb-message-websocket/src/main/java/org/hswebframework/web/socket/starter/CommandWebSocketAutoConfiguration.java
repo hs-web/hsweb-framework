@@ -23,6 +23,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurationSupport;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
+import org.springframework.web.socket.server.standard.ServletServerContainerFactoryBean;
 
 import java.util.List;
 
@@ -75,6 +76,15 @@ public class CommandWebSocketAutoConfiguration {
         public WebSocketMessager webSocketMessager(Messager messager) {
             return new DefaultWebSocketMessager(messager, counterManager);
         }
+    }
+
+    @Bean
+    @ConfigurationProperties(prefix = "hsweb.websocket")
+    public ServletServerContainerFactoryBean createServletServerContainerFactoryBean() {
+        ServletServerContainerFactoryBean container = new ServletServerContainerFactoryBean();
+        container.setMaxTextMessageBufferSize(10_1024_1024);
+        container.setMaxBinaryMessageBufferSize(10_1024_1024);
+        return container;
     }
 
     @Configuration
