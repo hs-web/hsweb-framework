@@ -28,7 +28,7 @@ import java.util.concurrent.CountDownLatch;
  * @since 2.0
  */
 public class ResultMapsUtils {
-    private static SqlSession sqlSession;
+    private volatile static SqlSession sqlSession;
 
     private static CountDownLatch countDownLatch = new CountDownLatch(1);
 
@@ -37,6 +37,7 @@ public class ResultMapsUtils {
             try {
                 countDownLatch.await();
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
                 throw new UnsupportedOperationException(e);
             }
             if (sqlSession == null) {
