@@ -80,6 +80,9 @@ public class FastJsonHttpMessageConverter extends AbstractHttpMessageConverter<O
     }
 
     public Object readByBytes(Class<?> clazz, byte[] bytes) {
+        if(clazz==String.class){
+            return new String(bytes,charset);
+        }
         if (null != converters) {
             CustomMessageConverter converter = converters.stream()
                     .filter(cvt -> cvt.support(clazz))
