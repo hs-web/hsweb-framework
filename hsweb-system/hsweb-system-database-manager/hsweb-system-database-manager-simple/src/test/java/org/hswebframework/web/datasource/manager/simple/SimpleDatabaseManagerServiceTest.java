@@ -27,7 +27,7 @@ public class SimpleDatabaseManagerServiceTest extends SimpleWebApplicationTests 
     private DatabaseManagerService databaseManagerService;
 
     @Test
-    public void testExecuteSql() throws InterruptedException, SQLException {
+    public void testExecuteSql() throws Exception {
         String id = databaseManagerService.newTransaction();
         SqlExecuteRequest request = new SqlExecuteRequest();
         SqlInfo sqlInfo = new SqlInfo();
@@ -47,7 +47,11 @@ public class SimpleDatabaseManagerServiceTest extends SimpleWebApplicationTests 
 
         for (int i = 0; i < total; i++) {
             new Thread(() -> {
-                databaseManagerService.execute(id, request);
+                try {
+                    databaseManagerService.execute(id, request);
+                } catch (Exception e) {
+                    throw new RuntimeException();
+                }
                 countDownLatch.countDown();
             }).start();
         }

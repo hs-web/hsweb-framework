@@ -1,12 +1,19 @@
 package org.hswebframework.web.database.manager.meta.table;
 
+import lombok.*;
 import org.hswebframework.web.database.manager.meta.ObjectMetadata;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 /**
  * @author zhouhao
  */
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class TableMetadata extends ObjectMetadata {
     private static final long serialVersionUID = 1762059989615865556L;
 
@@ -14,19 +21,5 @@ public class TableMetadata extends ObjectMetadata {
 
     private List<Constraint> constraints;
 
-    public String getComment() {
-        return comment;
-    }
-
-    public void setComment(String comment) {
-        this.comment = comment;
-    }
-
-    public List<Constraint> getConstraints() {
-        return constraints;
-    }
-
-    public void setConstraints(List<Constraint> constraints) {
-        this.constraints = constraints;
-    }
+    private List<ColumnMetadata> columns;
 }

@@ -1,29 +1,32 @@
 package org.hswebframework.web.datasource.manager.simple;
 
+import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.ezorm.rdb.executor.SqlExecutor;
 import org.hswebframework.web.database.manager.DatabaseManagerService;
 import org.hswebframework.web.database.manager.SqlExecuteRequest;
 import org.hswebframework.web.database.manager.SqlExecuteResult;
 import org.hswebframework.web.database.manager.meta.ObjectMetadata;
+import org.hswebframework.web.database.manager.meta.table.parser.MetaDataParser;
+import org.hswebframework.web.database.manager.meta.table.parser.MetaDataParserRegister;
+import org.hswebframework.web.datasource.DataSourceHolder;
+import org.hswebframework.web.datasource.DatabaseType;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.PostConstruct;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.sql.SQLException;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 /**
- * TODO 完成注释
  *
  * @author zhouhao
  */
-@Service
-public class SimpleDatabaseManagerService implements DatabaseManagerService {
+@Slf4j
+public class SimpleDatabaseManagerService implements DatabaseManagerService,MetaDataParserRegister {
 
     private Map<String, TransactionExecutor> transactionExecutorMap = new ConcurrentHashMap<>();
 
@@ -33,10 +36,13 @@ public class SimpleDatabaseManagerService implements DatabaseManagerService {
 
     private TransactionTemplate transactionTemplate;
 
+    private Map<DatabaseType,Map<ObjectMetadata.ObjectType,MetaDataParser<? extends ObjectMetadata>>> parserRepo=new HashMap<>();
+
+
     @PostConstruct
     public void init() {
         if (executorService == null) {
-            executorService = Executors.newFixedThreadPool(20);
+            executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()*2);
         }
     }
 
@@ -88,7 +94,7 @@ public class SimpleDatabaseManagerService implements DatabaseManagerService {
     }
 
     @Override
-    public List<SqlExecuteResult> execute(String transactionId, SqlExecuteRequest request) {
+    public List<SqlExecuteResult> execute(String transactionId, SqlExecuteRequest request) throws Exception {
         TransactionExecutor executor = transactionExecutorMap.get(transactionId);
         if (executor != null) {
             return executor.execute(request);
@@ -97,8 +103,29 @@ public class SimpleDatabaseManagerService implements DatabaseManagerService {
     }
 
     @Override
-    public Map<ObjectMetadata.ObjectType, List<ObjectMetadata>> getMetas(String datasourceId) {
+    public List<SqlExecuteResult> execute(SqlExecuteRequest request) throws Exception {
+        return new NonTransactionSqlExecutor(sqlExecutor).execute(request);
+    }
 
-        return null;
+    @Override
+    public Map<ObjectMetadata.ObjectType, List<? extends ObjectMetadata>> getMetas(String datasourceId) {
+        return parserRepo
+                .computeIfAbsent(DataSourceHolder.dataSource(datasourceId).getType(),t->new HashMap<>())
+                .entrySet()
+                .parallelStream()
+                .collect(Collectors.toMap(Map.Entry::getKey, entry->{
+                    try {
+                        return entry.getValue().parseAll();
+                    } catch (SQLException e) {
+                        log.error("parse meta {} error",entry.getKey(),e);
+                        return new ArrayList<>();
+                    }
+                }));
+    }
+
+    @Override
+    public <M extends ObjectMetadata> void registerMetaDataParser(DatabaseType databaseType, ObjectMetadata.ObjectType objectType, MetaDataParser<M> parser) {
+        parserRepo.computeIfAbsent(databaseType,t->new HashMap<>())
+                .put(objectType,parser);
     }
 }

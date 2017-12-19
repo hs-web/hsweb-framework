@@ -3,8 +3,6 @@ package org.hswebframework.web.database.manager;
 import java.io.Serializable;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public class SqlInfo implements Serializable {

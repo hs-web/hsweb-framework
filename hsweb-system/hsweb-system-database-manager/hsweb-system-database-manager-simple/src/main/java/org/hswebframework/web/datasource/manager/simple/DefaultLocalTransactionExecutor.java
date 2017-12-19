@@ -4,14 +4,13 @@ import org.hswebframework.ezorm.rdb.executor.SqlExecutor;
 import org.hswebframework.web.database.manager.SqlExecuteRequest;
 import org.hswebframework.web.database.manager.SqlExecuteResult;
 import org.hswebframework.web.database.manager.SqlInfo;
+import org.hswebframework.web.database.manager.exception.SqlExecuteException;
 import org.hswebframework.web.datasource.DataSourceHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.lang.ref.Reference;
-import java.lang.ref.SoftReference;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -109,28 +108,7 @@ public class DefaultLocalTransactionExecutor implements TransactionExecutor {
     }
 
     protected void buildDefaultSqlRequestExecutor() {
-        sqlRequestExecutor = (executor, sqlInfo) -> {
-            SqlExecuteResult result = new SqlExecuteResult();
-            Object executeResult = null;
-
-            switch (sqlInfo.getType().toUpperCase()) {
-                case "SELECT":
-                    executeResult = executor.list(sqlInfo.getSql());
-                    break;
-                case "INSERT":
-                case "UPDATE":
-                    executeResult = executor.update(sqlInfo.getSql());
-                    break;
-                case "DELETE":
-                    executeResult = executor.delete(sqlInfo.getSql());
-                    break;
-                default:
-                    executor.exec(sqlInfo.getSql());
-            }
-            result.setResult(executeResult);
-            result.setSqlInfo(sqlInfo);
-            return result;
-        };
+        sqlRequestExecutor = (executor, sqlInfo) -> new NonTransactionSqlExecutor(executor).doExecute(sqlInfo);
     }
 
     @Override
@@ -184,7 +162,7 @@ public class DefaultLocalTransactionExecutor implements TransactionExecutor {
                                 //执行sql
                                 return sqlRequestExecutor.apply(sqlExecutor, sqlInfo);
                             } catch (SQLException e) {
-                                throw new RuntimeException(e);
+                                throw new SqlExecuteException(e.getMessage(), e, sqlInfo.getSql());
                             }
                         })
                         .collect(Collectors.toList());
@@ -199,7 +177,7 @@ public class DefaultLocalTransactionExecutor implements TransactionExecutor {
     }
 
     @Override
-    public List<SqlExecuteResult> execute(SqlExecuteRequest request) {
+    public List<SqlExecuteResult> execute(SqlExecuteRequest request) throws Exception {
         if (shutdown) {
             throw new UnsupportedOperationException("transaction is close");
         }
@@ -209,7 +187,6 @@ public class DefaultLocalTransactionExecutor implements TransactionExecutor {
 
         //异常信息
         Exception[] exceptions = new Exception[1];
-
         Execution execution = new Execution();
         execution.request = request;
         execution.callback = sqlExecuteResults -> {
@@ -217,30 +194,22 @@ public class DefaultLocalTransactionExecutor implements TransactionExecutor {
             sqlExecuteResults.clear();
             countDownLatch.countDown();
         };
-        execution.onError = e -> {
+        execution.onError = (e) -> {
             exceptions[0] = e;
             countDownLatch.countDown();
         };
         logger.debug("submit sql execute job {}", transactionId);
         executionQueue.add(execution);
-        try {
-            //当前没有在执行sql,说明现在正在等待新的sql进入,唤醒之
-            if (!running) {
-                waitToReady.await();
-            }
-            //等待sql执行完毕
-            countDownLatch.await();
-            //判断是否有异常
-            Exception exception;
-            if ((exception = exceptions[0]) != null) {
-                if (exception instanceof RuntimeException) {
-                    throw (RuntimeException) exception;
-                } else {
-                    throw new RuntimeException(exception);
-                }
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        //当前没有在执行sql,说明现在正在等待新的sql进入,唤醒之
+        if (!running) {
+            waitToReady.await();
+        }
+        //等待sql执行完毕
+        countDownLatch.await();
+        //判断是否有异常
+        Exception exception;
+        if ((exception = exceptions[0]) != null) {
+            throw exception;
         }
         return results;
     }

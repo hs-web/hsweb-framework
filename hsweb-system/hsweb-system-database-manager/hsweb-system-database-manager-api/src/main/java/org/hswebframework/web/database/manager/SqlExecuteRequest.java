@@ -1,19 +1,21 @@
 package org.hswebframework.web.database.manager;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.io.Serializable;
 import java.util.List;
 
 /**
  * @author zhouhao
  */
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class SqlExecuteRequest implements Serializable{
     private List<SqlInfo> sql;
 
-    public List<SqlInfo> getSql() {
-        return sql;
-    }
-
-    public void setSql(List<SqlInfo> sql) {
-        this.sql = sql;
-    }
 }
