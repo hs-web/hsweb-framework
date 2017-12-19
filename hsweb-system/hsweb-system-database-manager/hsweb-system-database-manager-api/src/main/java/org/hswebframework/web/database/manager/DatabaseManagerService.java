@@ -12,5 +12,5 @@ import java.util.Map;
  * @author zhouhao
  */
 public interface DatabaseManagerService extends SqlExecutor,TransactionSqlExecutor {
-    Map<ObjectMetadata.ObjectType, List<? extends ObjectMetadata>> getMetas(String datasourceId);
+    Map<ObjectMetadata.ObjectType, List<? extends ObjectMetadata>> getMetas();
 }

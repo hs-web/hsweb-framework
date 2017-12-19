@@ -15,6 +15,8 @@
     <modules>
         <module>hsweb-system-database-manager-api</module>
         <module>hsweb-system-database-manager-simple</module>
+        <module>hsweb-system-database-manager-web</module>
+        <module>hsweb-system-database-manager-starter</module>
     </modules>
 
 </project>

@@ -3,6 +3,7 @@ package org.hswebframework.web.database.manager.sql;
 import org.hswebframework.web.database.manager.SqlExecuteRequest;
 import org.hswebframework.web.database.manager.SqlExecuteResult;
 import org.hswebframework.web.datasource.DynamicDataSource;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
@@ -36,6 +37,19 @@ public interface TransactionSqlExecutor {
      */
     void rollback(String transactionId);
 
+    /**
+     * @return 获取全部事务
+     */
+    List<TransactionInfo> allTransaction();
+
+    /**
+     * 执行
+     *
+     * @param transactionId
+     * @param request
+     * @return
+     * @throws Exception
+     */
     List<SqlExecuteResult> execute(String transactionId, SqlExecuteRequest request) throws Exception;
 
 }

@@ -152,6 +152,7 @@ public class DefaultLocalTransactionExecutor implements TransactionExecutor {
     protected void doExecute() {
         Execution execution;
         while ((execution = executionQueue.poll()) != null) {
+            Execution finalE = execution;
             running = true;
             logger.debug("start execute sql {}", transactionId);
             try {
@@ -159,6 +160,11 @@ public class DefaultLocalTransactionExecutor implements TransactionExecutor {
                         .stream()
                         .map(sqlInfo -> {
                             try {
+                                if (finalE.datasourceId != null) {
+                                    DataSourceHolder.switcher().use(finalE.datasourceId);
+                                } else {
+                                    DataSourceHolder.switcher().useDefault();
+                                }
                                 //执行sql
                                 return sqlRequestExecutor.apply(sqlExecutor, sqlInfo);
                             } catch (SQLException e) {
@@ -188,6 +194,8 @@ public class DefaultLocalTransactionExecutor implements TransactionExecutor {
         //异常信息
         Exception[] exceptions = new Exception[1];
         Execution execution = new Execution();
+        execution.datasourceId=DataSourceHolder.switcher().currentDataSourceId();
+
         execution.request = request;
         execution.callback = sqlExecuteResults -> {
             results.addAll(sqlExecuteResults);
@@ -215,6 +223,9 @@ public class DefaultLocalTransactionExecutor implements TransactionExecutor {
     }
 
     protected class Execution {
+
+        protected String datasourceId;
+
         protected SqlExecuteRequest request;
 
         protected Consumer<List<SqlExecuteResult>> callback;
