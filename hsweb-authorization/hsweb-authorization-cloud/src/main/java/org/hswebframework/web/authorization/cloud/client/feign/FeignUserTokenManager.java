@@ -10,7 +10,7 @@ import java.util.List;
 
 /**
  * @author zhouhao
- * @since
+ * @since 3.0
  */
 @FeignClient(name = "${hsweb.cloud.user-center.name:user-center}")
 public interface FeignUserTokenManager extends UserTokenManager {

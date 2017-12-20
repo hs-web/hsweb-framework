@@ -4,10 +4,8 @@ import org.springframework.cloud.netflix.feign.EnableFeignClients;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
- * @since
+ * @since 3.0
  */
 @Configuration
 @EnableFeignClients("org.hswebframework.web.authorization.cloud.client.feign")

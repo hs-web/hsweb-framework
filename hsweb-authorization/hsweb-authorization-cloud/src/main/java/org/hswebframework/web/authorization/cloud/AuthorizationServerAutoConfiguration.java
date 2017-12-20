@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * @author zhouhao
- * @since
+ * @since 3.0
  */
 @Configuration
 public class AuthorizationServerAutoConfiguration {

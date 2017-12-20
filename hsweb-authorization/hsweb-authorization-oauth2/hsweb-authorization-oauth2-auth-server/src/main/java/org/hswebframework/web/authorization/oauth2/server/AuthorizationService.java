@@ -19,9 +19,13 @@
 package org.hswebframework.web.authorization.oauth2.server;
 
 /**
- * TODO 完成注释
- *
+ * 授权服务
  * @author zhouhao
+ * @see org.hswebframework.web.authorization.oauth2.server.support.code.AuthorizationCodeGranter
+ * @see org.hswebframework.web.authorization.oauth2.server.support.client.ClientCredentialGranter
+ * @see org.hswebframework.web.authorization.oauth2.server.support.refresh.RefreshTokenGranter
+ * @see org.hswebframework.web.authorization.oauth2.server.support.implicit.ImplicitGranter
+ * @see org.hswebframework.web.authorization.oauth2.server.support.password.PasswordGranter
  */
 public interface AuthorizationService {
 }

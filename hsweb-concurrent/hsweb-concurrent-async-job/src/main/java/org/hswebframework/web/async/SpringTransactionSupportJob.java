@@ -7,9 +7,10 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.util.concurrent.Callable;
 
 /**
- * TODO 完成注释
+ * 使用spring管理事务的异步任务
  *
  * @author zhouhao
+ * @see TransactionTemplate
  */
 public class SpringTransactionSupportJob<V> implements TransactionSupportJob<V> {
 

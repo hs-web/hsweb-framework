@@ -1,7 +1,5 @@
 package org.hswebframework.web.authorization.basic.web;
 
-import org.hswebframework.web.authorization.exception.UnAuthorizedException;
-import org.hswebframework.web.authorization.token.TokenState;
 import org.hswebframework.web.authorization.token.UserToken;
 import org.hswebframework.web.authorization.token.UserTokenHolder;
 import org.hswebframework.web.authorization.token.UserTokenManager;
@@ -14,7 +12,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
- * TODO 完成注释
+ * 用户令牌拦截器,用于拦截用户请求并从中解析用户令牌信息
  *
  * @author zhouhao
  */

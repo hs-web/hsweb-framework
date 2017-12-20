@@ -5,10 +5,9 @@ import org.springframework.context.annotation.Import;
 import java.lang.annotation.*;
 
 /**
- * TODO 完成注释
- *
+ * 启用权限认证服务端
  * @author zhouhao
- * @since
+ * @since 3.0
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)

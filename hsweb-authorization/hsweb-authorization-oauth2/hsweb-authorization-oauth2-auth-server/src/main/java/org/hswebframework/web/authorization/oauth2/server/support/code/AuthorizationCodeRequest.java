@@ -18,19 +18,38 @@
 
 package org.hswebframework.web.authorization.oauth2.server.support.code;
 
+import org.hswebframework.web.authorization.User;
+import org.hswebframework.web.authorization.oauth2.server.client.OAuth2Client;
+
 import java.util.Set;
 
 /**
- * TODO 完成注释
+ * 授权码请求
  *
  * @author zhouhao
  */
 public interface AuthorizationCodeRequest {
+    /**
+     * @return oauth2客户端id
+     * @see org.hswebframework.web.oauth2.core.OAuth2Constants#client_id
+     * @see OAuth2Client#getId()
+     */
     String getClientId();
 
+    /**
+     * @return 与授权码关联的用户ID
+     * @see User#getId()
+     */
     String getUserId();
 
+    /**
+     * @return 允许授权的范围
+     */
     Set<String> getScope();
 
+    /**
+     * @return 重定向地址
+     * @see org.hswebframework.web.oauth2.core.OAuth2Constants#redirect_uri
+     */
     String getRedirectUri();
 }

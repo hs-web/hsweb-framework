@@ -22,8 +22,7 @@ import org.hswebframework.web.authorization.oauth2.server.AuthorizationService;
 import org.hswebframework.web.authorization.oauth2.server.OAuth2AccessToken;
 
 /**
- * TODO 完成注释
- *
+ * 密码方式授权
  * @author zhouhao
  */
 public interface PasswordGranter extends AuthorizationService {

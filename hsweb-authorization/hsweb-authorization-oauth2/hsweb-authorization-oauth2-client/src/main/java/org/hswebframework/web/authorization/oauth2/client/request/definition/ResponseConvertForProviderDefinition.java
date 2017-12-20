@@ -21,8 +21,6 @@ package org.hswebframework.web.authorization.oauth2.client.request.definition;
 import org.hswebframework.web.authorization.oauth2.client.request.ResponseConvertHandler;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public interface ResponseConvertForProviderDefinition extends ResponseConvertHandler {

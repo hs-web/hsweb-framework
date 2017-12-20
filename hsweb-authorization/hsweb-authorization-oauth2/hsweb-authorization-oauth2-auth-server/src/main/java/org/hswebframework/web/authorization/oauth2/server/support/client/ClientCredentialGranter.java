@@ -20,12 +20,21 @@ package org.hswebframework.web.authorization.oauth2.server.support.client;
 
 import org.hswebframework.web.authorization.oauth2.server.AuthorizationService;
 import org.hswebframework.web.authorization.oauth2.server.OAuth2AccessToken;
+import org.hswebframework.web.authorization.oauth2.server.exception.GrantTokenException;
 
 /**
- * TODO 完成注释
+ * client_credential方式认证器
  *
  * @author zhouhao
+ * @see org.hswebframework.web.oauth2.core.GrantType#client_credentials
  */
 public interface ClientCredentialGranter extends AuthorizationService {
+    /**
+     * 申请token
+     * @param request 请求参数
+     * @return 申请成功的token信息
+     * @throws GrantTokenException
+     * @see org.hswebframework.web.oauth2.core.ErrorType
+     */
     OAuth2AccessToken requestToken(ClientCredentialRequest request);
 }

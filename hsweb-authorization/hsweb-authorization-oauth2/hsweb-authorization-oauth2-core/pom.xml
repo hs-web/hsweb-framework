@@ -31,4 +31,11 @@
     <artifactId>hsweb-authorization-oauth2-core</artifactId>
 
 
+    <dependencies>
+        <dependency>
+            <groupId>org.hswebframework.web</groupId>
+            <artifactId>hsweb-authorization-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 </project>

@@ -22,10 +22,16 @@ import org.hswebframework.web.authorization.oauth2.server.AuthorizationService;
 import org.hswebframework.web.authorization.oauth2.server.OAuth2AccessToken;
 
 /**
- * TODO 完成注释
+ * authorization_code方式申请token
  *
  * @author zhouhao
+ * @see org.hswebframework.web.oauth2.core.GrantType#authorization_code
  */
 public interface AuthorizationCodeGranter extends AuthorizationService {
+    /**
+     * 申请token
+     * @param request
+     * @return
+     */
     OAuth2AccessToken requestToken(AuthorizationCodeTokenRequest request);
 }

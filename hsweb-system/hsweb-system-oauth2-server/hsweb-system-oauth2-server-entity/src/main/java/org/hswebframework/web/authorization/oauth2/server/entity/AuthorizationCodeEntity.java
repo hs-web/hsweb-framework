@@ -22,8 +22,7 @@ import org.hswebframework.web.authorization.oauth2.server.support.code.Authoriza
 import org.hswebframework.web.commons.entity.Entity;
 
 /**
- * TODO 完成注释
- *
+ * 授权码
  * @author zhouhao
  */
 public interface AuthorizationCodeEntity extends AuthorizationCode, Entity {
