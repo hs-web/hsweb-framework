@@ -8,7 +8,7 @@ import org.hswebframework.web.authorization.basic.web.AuthorizedToken;
  */
 public class JwtAuthorizedToken implements AuthorizedToken {
 
-    public static final String token_type = "jwt";
+    public static final String TOKEN_TYPE = "jwt";
 
     private String token;
 
@@ -42,6 +42,6 @@ public class JwtAuthorizedToken implements AuthorizedToken {
 
     @Override
     public String getType() {
-        return token_type;
+        return TOKEN_TYPE;
     }
 }

@@ -14,7 +14,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.hswebframework.web.authorization.jwt.JwtAuthorizedToken.token_type;
+import static org.hswebframework.web.authorization.jwt.JwtAuthorizedToken.TOKEN_TYPE;
 
 public class JwtTokenGenerator implements UserTokenGenerator {
 
@@ -26,7 +26,7 @@ public class JwtTokenGenerator implements UserTokenGenerator {
 
     @Override
     public String getSupportTokenType() {
-        return token_type;
+        return TOKEN_TYPE;
     }
 
     private String createToken() {
@@ -64,7 +64,7 @@ public class JwtTokenGenerator implements UserTokenGenerator {
 
             @Override
             public String getType() {
-                return token_type;
+                return TOKEN_TYPE;
             }
 
             @Override
