@@ -111,12 +111,13 @@ public class AutoSyncPermission implements ApplicationListener<AuthorizeDefiniti
             if (oldPermission == null) {
                 permissionService.insert(permission);
             } else {
-                List<ActionEntity> oldAction = oldPermission.getActions();
-                if (oldAction == null) {
-                    oldAction = new ArrayList<>();
+                Set<ActionEntity> oldAction = new HashSet<>();
+                if (oldPermission.getActions() != null) {
+                    oldAction.addAll(oldPermission.getActions());
                 }
                 Map<String, ActionEntity> actionCache = oldAction
-                        .stream().collect(Collectors.toMap(ActionEntity::getAction, Function.identity()));
+                        .stream()
+                        .collect(Collectors.toMap(ActionEntity::getAction, Function.identity()));
                 boolean permissionChanged = false;
                 for (ActionEntity actionEntity : permission.getActions()) {
                     //添加新的action到旧的action
@@ -126,10 +127,9 @@ public class AutoSyncPermission implements ApplicationListener<AuthorizeDefiniti
                     }
                 }
                 if (permissionChanged) {
-                    oldPermission.setActions(oldAction);
+                    oldPermission.setActions(new ArrayList<>(oldAction));
                     permissionService.updateByPk(oldPermission.getId(), oldPermission);
                 }
-
                 actionCache.clear();
             }
 

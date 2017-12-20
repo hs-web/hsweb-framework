@@ -53,7 +53,7 @@ import static java.util.Optional.ofNullable;
 @RestController
 @RequestMapping("${hsweb.web.mappings.file:file}")
 @Authorize(permission = "file", description = "文件管理")
-@Api(value = "文件管理",tags = "文件管理-文件操作")
+@Api(value = "文件管理", tags = "文件管理-文件操作")
 @SuppressWarnings("all")
 public class FileController {
 
@@ -73,10 +73,6 @@ public class FileController {
     @Autowired
     public void setFileInfoService(FileInfoService fileInfoService) {
         this.fileInfoService = fileInfoService;
-    }
-
-    public static void main(String[] args) {
-        System.out.println(Base64.encodeBase64String("hello".getBytes()));
     }
 
     /**
@@ -133,7 +129,8 @@ public class FileController {
     public void downloadTxt(@ApiParam("文件名") @PathVariable("name") String name,
                             @ApiParam("文本内容") @RequestParam("text") String text,
                             HttpServletResponse response) throws IOException {
-        response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
+        response.setCharacterEncoding("utf-8");
+        response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE + "; charset=utf-8");
         response.setHeader("Content-disposition", "attachment;filename=" + URLEncoder.encode(name, "utf-8"));
         response.getWriter().write(text);
     }

@@ -53,8 +53,8 @@ public abstract class GenericEntityService<E extends GenericEntity<PK>, PK>
      */
     protected abstract IDGenerator<PK> getIDGenerator();
 
-    @Override
-    public abstract CrudDao<E, PK> getDao();
+//    @Override
+//    public abstract CrudDao<E, PK> getDao();
 
     @Override
     public int deleteByPk(PK pk) {
