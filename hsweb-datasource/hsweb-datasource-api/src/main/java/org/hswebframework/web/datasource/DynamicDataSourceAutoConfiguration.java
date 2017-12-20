@@ -1,7 +1,10 @@
 package org.hswebframework.web.datasource;
 
 import org.hswebframework.ezorm.rdb.executor.SqlExecutor;
+import org.hswebframework.web.datasource.config.DynamicDataSourceConfigRepository;
+import org.hswebframework.web.datasource.config.InSpringDynamicDataSourceConfig;
 import org.hswebframework.web.datasource.service.InMemoryDynamicDataSourceService;
+import org.hswebframework.web.datasource.service.InSpringDynamicDataSourceConfigRepository;
 import org.hswebframework.web.datasource.starter.AopDataSourceSwitcherAutoConfiguration;
 import org.hswebframework.web.datasource.switcher.DataSourceSwitcher;
 import org.springframework.beans.BeansException;
@@ -29,41 +32,21 @@ public class DynamicDataSourceAutoConfiguration implements BeanPostProcessor {
     }
 
     @Bean
+    @ConditionalOnMissingBean(DynamicDataSourceConfigRepository.class)
+    public InSpringDynamicDataSourceConfigRepository inSpringDynamicDataSourceConfigRepository() {
+        return new InSpringDynamicDataSourceConfigRepository();
+    }
+
+    @Bean
     @ConditionalOnMissingBean(DynamicDataSourceService.class)
-    public InMemoryDynamicDataSourceService inMemoryDynamicDataSourceService(DataSource dataSource) {
+    public InMemoryDynamicDataSourceService inMemoryDynamicDataSourceService(DynamicDataSourceConfigRepository<InSpringDynamicDataSourceConfig> repository, DataSource dataSource) {
         DynamicDataSourceProxy dataSourceProxy = new DynamicDataSourceProxy(null, dataSource);
-        return new InMemoryDynamicDataSourceService(dataSourceProxy);
+        return new InMemoryDynamicDataSourceService(repository, dataSourceProxy);
     }
 
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
         return bean;
-    }
-
-    @ConditionalOnBean(InMemoryDynamicDataSourceService.class)
-    @Configuration
-    public static class AutoRegisterDataSource implements BeanPostProcessor {
-
-        private InMemoryDynamicDataSourceService dataSourceService;
-
-        @Autowired
-        public void setDataSourceService(InMemoryDynamicDataSourceService dataSourceService) {
-            DataSourceHolder.dynamicDataSourceService = dataSourceService;
-            this.dataSourceService = dataSourceService;
-        }
-
-        @Override
-        public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-            return bean;
-        }
-
-        @Override
-        public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-            if (bean instanceof DataSource) {
-                dataSourceService.registerDataSource(beanName, ((DataSource) bean));
-            }
-            return bean;
-        }
     }
 
     @Override
@@ -76,4 +59,15 @@ public class DynamicDataSourceAutoConfiguration implements BeanPostProcessor {
         }
         return bean;
     }
+
+
+    @Configuration
+    public static class AutoRegisterDataSource {
+        @Autowired
+        public void setDataSourceService(DynamicDataSourceService dataSourceService) {
+            DataSourceHolder.dynamicDataSourceService = dataSourceService;
+        }
+    }
+
+
 }

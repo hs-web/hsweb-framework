@@ -28,4 +28,5 @@ public interface DynamicDataSource {
      * @return 原始数据源
      */
     DataSource getNative();
+
 }

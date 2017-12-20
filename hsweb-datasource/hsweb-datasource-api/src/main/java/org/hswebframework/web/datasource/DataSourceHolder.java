@@ -17,11 +17,11 @@ public final class DataSourceHolder {
     /**
      * 动态数据源切换器
      */
-    static DataSourceSwitcher dataSourceSwitcher = defaultSwitcher;
+    static volatile DataSourceSwitcher dataSourceSwitcher = defaultSwitcher;
     /**
      * 动态数据源服务
      */
-    static DynamicDataSourceService dynamicDataSourceService;
+    static volatile DynamicDataSourceService dynamicDataSourceService;
 
     public static void checkDynamicDataSourceReady() {
         if (dynamicDataSourceService == null) {

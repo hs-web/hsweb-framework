@@ -14,6 +14,7 @@
     <modules>
         <module>hsweb-datasource-api</module>
         <module>hsweb-datasource-jta</module>
+        <module>hsweb-datasource-web</module>
     </modules>
 
 

@@ -2,6 +2,7 @@ package org.hswebframework.web.datasource.jta;
 
 import org.hswebframework.web.datasource.DynamicDataSource;
 import org.hswebframework.web.datasource.DynamicDataSourceProxy;
+import org.hswebframework.web.datasource.config.DynamicDataSourceConfigRepository;
 import org.hswebframework.web.datasource.exception.DataSourceNotFoundException;
 import org.hswebframework.web.datasource.service.AbstractDynamicDataSourceService;
 import org.hswebframework.web.datasource.service.DataSourceCache;
@@ -23,52 +24,38 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * @author zhouhao
  */
-public class JtaDynamicDataSourceService extends AbstractDynamicDataSourceService {
+public class JtaDynamicDataSourceService extends AbstractDynamicDataSourceService<AtomikosDataSourceConfig> {
 
-    private JtaDataSourceRepository jtaDataSourceRepository;
-
-    private Executor executor = Executors.newCachedThreadPool();
+    private Executor executor = Executors.newFixedThreadPool(4);
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
+
+    public JtaDynamicDataSourceService(DynamicDataSourceConfigRepository<AtomikosDataSourceConfig> repository, DynamicDataSource defaultDataSource) {
+        super(repository, defaultDataSource);
+    }
+
+    public JtaDynamicDataSourceService(DynamicDataSourceConfigRepository<AtomikosDataSourceConfig> repository, DataSource dataSource) throws SQLException {
+        super(repository, dataSource);
+    }
 
     @Autowired(required = false)
     public void setExecutor(Executor executor) {
         this.executor = executor;
     }
 
-    public JtaDynamicDataSourceService(JtaDataSourceRepository jtaDataSourceRepository, DynamicDataSource defaultDataSource) {
-        super(defaultDataSource);
-        this.jtaDataSourceRepository = jtaDataSourceRepository;
-    }
 
-    public JtaDynamicDataSourceService(JtaDataSourceRepository jtaDataSourceRepository, DataSource dataSource) throws SQLException {
-        super(dataSource);
-        this.jtaDataSourceRepository = jtaDataSourceRepository;
-    }
+
 
     @Override
-    protected int getHash(String id) {
-        AtomikosDataSourceConfig config = jtaDataSourceRepository.getConfig(id);
-        if (null == config) {
-            return 0;
-        }
-        return config.hashCode();
-    }
-
-    @Override
-    protected DataSourceCache createCache(String id) {
-        AtomikosDataSourceConfig config = jtaDataSourceRepository.getConfig(id);
-        if (config == null) {
-            throw new DataSourceNotFoundException(id);
-        }
+    protected DataSourceCache createCache(AtomikosDataSourceConfig config) {
         AtomikosDataSourceBean atomikosDataSourceBean = new AtomikosDataSourceBean();
         config.putProperties(atomikosDataSourceBean);
-        atomikosDataSourceBean.setBeanName("dynamic_ds_" + id);
-        atomikosDataSourceBean.setUniqueResourceName("dynamic_ds_" + id);
+        atomikosDataSourceBean.setBeanName("dynamic_ds_" + config.getId());
+        atomikosDataSourceBean.setUniqueResourceName("dynamic_ds_" + config.getId());
         AtomicInteger successCounter = new AtomicInteger();
         CountDownLatch downLatch = new CountDownLatch(1);
         try {
-            DataSourceCache cache = new DataSourceCache(config.hashCode(), new DynamicDataSourceProxy(id, atomikosDataSourceBean), downLatch) {
+            DataSourceCache cache = new DataSourceCache(config.hashCode(), new DynamicDataSourceProxy(config.getId(), atomikosDataSourceBean), downLatch, config) {
                 @Override
                 public void closeDataSource() {
                     super.closeDataSource();
@@ -92,7 +79,7 @@ public class JtaDynamicDataSourceService extends AbstractDynamicDataSourceServic
                     successCounter.incrementAndGet();
                     downLatch.countDown();
                 } catch (Exception e) {
-                    logger.error("init datasource {} error", id, e);
+                    logger.error("init datasource {} error", config.getId(), e);
 
                     //atomikosDataSourceBean.close();
                 }

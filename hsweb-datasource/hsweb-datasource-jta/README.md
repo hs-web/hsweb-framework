@@ -21,7 +21,7 @@ spring:
         local-transaction-mode: true
 ```
 
-动态数据源配置,默认提供一个 ``MemoryJtaDataSourceStore``,在application.yml 中进行配置即可:
+动态数据源配置,默认提供一个 ``InMemoryAtomikosDataSourceRepository``,在application.yml 中进行配置即可:
 ```yaml
 hsweb:
   dynamic:
@@ -46,4 +46,4 @@ hsweb:
           init-timeout: 20
 ```
 
-自定义,将数据源配置放到数据库中,实现 ``JtaDataSourceStore`` 接口并注入到spring容器即可
+自定义,将数据源配置放到数据库中,实现 ``DynamicDataSourceConfigRepository<AtomikosDataSourceConfig>`` 接口并注入到spring容器即可

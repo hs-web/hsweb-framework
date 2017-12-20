@@ -1,12 +1,11 @@
 package org.hswebframework.web.datasource.jta;
 
-/**
- * TODO 完成注释
- *
- * @author zhouhao
- */
-public interface JtaDataSourceRepository {
+import org.hswebframework.web.datasource.config.DynamicDataSourceConfigRepository;
 
-    AtomikosDataSourceConfig getConfig(String id);
+/**
+ * @author zhouhao
+ * @see org.hswebframework.web.datasource.config.DynamicDataSourceConfigRepository
+ */
+public interface JtaDataSourceRepository extends DynamicDataSourceConfigRepository<AtomikosDataSourceConfig> {
 
 }

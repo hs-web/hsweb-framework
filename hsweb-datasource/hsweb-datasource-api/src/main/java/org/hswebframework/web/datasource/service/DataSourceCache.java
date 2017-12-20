@@ -2,6 +2,7 @@ package org.hswebframework.web.datasource.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.web.datasource.DynamicDataSource;
+import org.hswebframework.web.datasource.config.DynamicDataSourceConfig;
 import org.hswebframework.web.datasource.exception.DataSourceClosedException;
 
 import java.util.concurrent.CountDownLatch;
@@ -25,6 +26,8 @@ public class DataSourceCache {
         return hash;
     }
 
+    private DynamicDataSourceConfig config;
+
     public DynamicDataSource getDataSource() {
         if (initLatch != null) {
             try {
@@ -43,10 +46,11 @@ public class DataSourceCache {
         return dataSource;
     }
 
-    public DataSourceCache(long hash, DynamicDataSource dataSource, CountDownLatch initLatch) {
+    public DataSourceCache(long hash, DynamicDataSource dataSource, CountDownLatch initLatch,DynamicDataSourceConfig config) {
         this.hash = hash;
         this.dataSource = dataSource;
         this.initLatch = initLatch;
+        this.config=config;
     }
 
     public boolean isClosed() {
@@ -56,5 +60,9 @@ public class DataSourceCache {
 
     public void closeDataSource() {
         closed = true;
+    }
+
+    public DynamicDataSourceConfig getConfig() {
+        return config;
     }
 }
