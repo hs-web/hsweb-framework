@@ -24,9 +24,8 @@ public class StorageManager {
             return state;
         }
 
-        try {
-            BufferedOutputStream bos = new BufferedOutputStream(
-                    new FileOutputStream(file));
+        try (BufferedOutputStream bos = new BufferedOutputStream(
+                new FileOutputStream(file))) {
             bos.write(data);
             bos.flush();
             bos.close();
@@ -46,11 +45,10 @@ public class StorageManager {
         File tmpFile = getTmpFile();
 
         byte[] dataBuf = new byte[2048];
-        BufferedInputStream bis = new BufferedInputStream(is, StorageManager.BUFFER_SIZE);
 
-        try {
-            BufferedOutputStream bos = new BufferedOutputStream(
-                    new FileOutputStream(tmpFile), StorageManager.BUFFER_SIZE);
+        try (BufferedInputStream bis = new BufferedInputStream(is, StorageManager.BUFFER_SIZE);
+             BufferedOutputStream bos = new BufferedOutputStream(
+                     new FileOutputStream(tmpFile), StorageManager.BUFFER_SIZE)) {
 
             int count = 0;
             while ((count = bis.read(dataBuf)) != -1) {
@@ -83,11 +81,10 @@ public class StorageManager {
         File tmpFile = getTmpFile();
 
         byte[] dataBuf = new byte[2048];
-        BufferedInputStream bis = new BufferedInputStream(is, StorageManager.BUFFER_SIZE);
 
-        try {
-            BufferedOutputStream bos = new BufferedOutputStream(
-                    new FileOutputStream(tmpFile), StorageManager.BUFFER_SIZE);
+        try (BufferedInputStream bis = new BufferedInputStream(is, StorageManager.BUFFER_SIZE);
+             BufferedOutputStream bos = new BufferedOutputStream(
+                     new FileOutputStream(tmpFile), StorageManager.BUFFER_SIZE)) {
 
             int count = 0;
             while ((count = bis.read(dataBuf)) != -1) {

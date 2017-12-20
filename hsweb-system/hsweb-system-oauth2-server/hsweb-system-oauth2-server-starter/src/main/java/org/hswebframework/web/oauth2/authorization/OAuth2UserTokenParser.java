@@ -49,7 +49,7 @@ public class OAuth2UserTokenParser implements UserTokenParser {
             throw new GrantTokenException(ErrorType.INVALID_TOKEN);
         }
         Long time = auth2AccessToken.getUpdateTime() != null ? auth2AccessToken.getUpdateTime() : auth2AccessToken.getCreateTime();
-        if (System.currentTimeMillis() - time > auth2AccessToken.getExpiresIn() * 1000) {
+        if (System.currentTimeMillis() - time > auth2AccessToken.getExpiresIn() * 1000L) {
             throw new GrantTokenException(ErrorType.EXPIRED_TOKEN);
         }
 
@@ -71,7 +71,7 @@ public class OAuth2UserTokenParser implements UserTokenParser {
 
             @Override
             public long getMaxInactiveInterval() {
-                return auth2AccessToken.getExpiresIn() * 1000;
+                return auth2AccessToken.getExpiresIn() * 1000L;
             }
         };
     }

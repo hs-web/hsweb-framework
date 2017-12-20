@@ -108,7 +108,6 @@ public class FlowableModelManagerController {
         modelObjectNode.put(MODEL_DESCRIPTION, model.getString(MODEL_DESCRIPTION));
         modelObjectNode.put(MODEL_KEY, model.getString(MODEL_KEY));
         modelObjectNode.put(MODEL_NAME, model.getString(MODEL_NAME));
-        modelObjectNode.put(MODEL_DESCRIPTION, model.getString(MODEL_DESCRIPTION));
 
         Model modelData = repositoryService.newModel();
         modelData.setMetaInfo(modelObjectNode.toJSONString());

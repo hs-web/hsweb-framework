@@ -82,7 +82,7 @@ public class TestController implements QueryController<UserEntity, String, Query
 
     @PutMapping("/test/testPersonnel")
     public ResponseMessage<PersonnelAuthorization> testPersonnel() {
-        return ResponseMessage.ok(PersonnelAuthorization.current().get());
+        return ResponseMessage.ok(PersonnelAuthorization.current().orElseThrow(UnAuthorizedException::new));
     }
 
     @Override
