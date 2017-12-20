@@ -18,10 +18,12 @@ public class SimpleDataSourceConfigService extends GenericEntityService<DataSour
         implements DataSourceConfigService {
     @Autowired
     private DataSourceConfigDao dataSourceConfigDao;
-   @Override
+
+    @Override
     protected IDGenerator<String> getIDGenerator() {
         return IDGenerator.MD5;
     }
+
     @Override
     public DataSourceConfigDao getDao() {
         return dataSourceConfigDao;

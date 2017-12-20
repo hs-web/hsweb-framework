@@ -19,11 +19,14 @@
 package org.hswebframework.web;
 
 /**
- * TODO 完成注释
+ * 业务异常
  *
  * @author zhouhao
+ * @since 2.0
  */
 public class BusinessException extends RuntimeException {
+    private static final long serialVersionUID = 5441923856899380112L;
+
     private int status = 500;
 
     public BusinessException(String message) {
