@@ -16,6 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SqlExecuteRequest implements Serializable{
+    private static final long serialVersionUID = 8640714319329779262L;
     private List<SqlInfo> sql;
 
 }

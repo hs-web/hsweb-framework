@@ -7,5 +7,4 @@ import java.util.List;
 
 public interface SqlExecutor {
     List<SqlExecuteResult> execute(SqlExecuteRequest request)throws Exception;
-
 }

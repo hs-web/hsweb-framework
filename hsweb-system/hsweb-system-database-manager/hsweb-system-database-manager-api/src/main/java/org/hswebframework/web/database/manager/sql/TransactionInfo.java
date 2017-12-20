@@ -10,6 +10,7 @@ import java.util.List;
 
 @Data
 public class TransactionInfo implements Serializable {
+    private static final long serialVersionUID = -4174268983558799472L;
     private String id;
 
     private List<SqlInfo> sqlHistory=new ArrayList<>();
