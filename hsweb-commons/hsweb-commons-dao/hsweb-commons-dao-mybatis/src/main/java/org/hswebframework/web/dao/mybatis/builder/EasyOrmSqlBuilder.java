@@ -194,7 +194,8 @@ public class EasyOrmSqlBuilder {
             if (parseResult != null) {
                 for (RDBColumnMetaData columnMetaData : parseResult.getColumns()) {
                     if (rdbTableMetaData.findColumn(columnMetaData.getName()) == null) {
-                        columnMetaData=columnMetaData.clone();
+                        columnMetaData = columnMetaData.clone();
+                        columnMetaData.setProperty("fromJpa", true);
                         rdbTableMetaData.addColumn(columnMetaData);
                     }
                 }
@@ -296,10 +297,12 @@ public class EasyOrmSqlBuilder {
             if (!cname.contains(".")) {
                 cname = tableName.concat(".").concat(cname);
             }
+            boolean isJpa = columnMetaData.getProperty("fromJpa", false).isTrue();
+
             appender.add(",", encodeColumn(dialect, cname)
                     , " AS "
                     , dialect.getQuoteStart()
-                    , columnMetaData.getName()
+                    , isJpa ? columnMetaData.getAlias() : columnMetaData.getName()
                     , dialect.getQuoteEnd());
         });
         param.getIncludes().remove("*");

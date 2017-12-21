@@ -59,9 +59,7 @@ public class MybatisProperties extends org.mybatis.spring.boot.autoconfigure.Myb
     /**
      * 使用jpa注解来解析表结构，动态生成查询条件
      */
-    private              boolean  useJpa                 = false;
-
-    private Properties                  mybatisProperties;
+    private              boolean  useJpa                 = true;
 
     private List<MybatisMapperCustomer> mybatisMappers;
 

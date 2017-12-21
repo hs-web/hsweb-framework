@@ -65,7 +65,7 @@ public class CustomOrganizationalEntity extends SimpleOrganizationalEntity {
 将新的实体类提供给hsweb有3种方式,第一种:jdk的serviceLoader;第二种:application.yml配置;
 第三种:java类方式配置,选择其中一种即可.
 
-serviceLoader
+serviceLoader方式:
 
 创建文件:`META-INF/services/org.hswebframework.web.entity.organizational.OrganizationalEntity`
 内容:
@@ -211,3 +211,24 @@ public class CustomMybatisMapperCustomer implements MybatisMapperCustomer {
     }
 }
 ```
+
+5. 使用jpa注解方式拓展字段
+依赖jpa-api:
+```xml
+<dependency>
+    <groupId>org.hibernate.javax.persistence</groupId>
+    <artifactId>hibernate-jpa-2.0-api</artifactId>
+    <version>1.0.1.Final</version>
+</dependency>
+```
+
+在拓展的实体类中使用jpa注解:
+```java
+    @Data
+    @Table //此处设置表名是无效的,仅作为一个解析标识
+    public class CustomUserEntity extends SimpleBindRoleUserEntity {
+        @Column(name = "nick_name")
+        private String nickName;
+    }
+```
+注意： 暂时只支持简单的属性。不支持表关联

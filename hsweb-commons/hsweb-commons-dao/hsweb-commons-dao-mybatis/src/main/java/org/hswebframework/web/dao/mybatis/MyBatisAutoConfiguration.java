@@ -43,7 +43,6 @@ import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.StringUtils;
 
-import javax.annotation.Resource;
 import javax.sql.DataSource;
 
 @Configuration
@@ -112,7 +111,11 @@ public class MyBatisAutoConfiguration {
         factory.setMapperLocations(mybatisProperties.resolveMapperLocations());
         SqlSessionFactory sqlSessionFactory = factory.getObject();
         ResultMapsUtils.setSqlSession(sqlSessionFactory);
-        EasyOrmSqlBuilder.getInstance().useJpa = mybatisProperties.isUseJpa();
+        try {
+            Class.forName("javax.persistence.Table");
+            EasyOrmSqlBuilder.getInstance().useJpa = mybatisProperties.isUseJpa();
+        } catch (@SuppressWarnings("all") Exception ignore) {
+        }
         EasyOrmSqlBuilder.getInstance().entityFactory = entityFactory;
         return sqlSessionFactory;
     }
