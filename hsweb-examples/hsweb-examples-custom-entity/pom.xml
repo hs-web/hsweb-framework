@@ -64,6 +64,11 @@
             <artifactId>hsweb-system-organizational-starter</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.hswebframework.web</groupId>
+            <artifactId>hsweb-system-authorization-starter</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
     </dependencies>
 </project>

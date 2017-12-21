@@ -14,14 +14,16 @@ public class CustomMybatisMapperCustomer implements MybatisMapperCustomer {
     @Override
     public String[] getExcludes() {
         return new String[]{
-                "classpath*:org/hswebframework/**/OrganizationalMapper.xml"
+                "classpath*:org/hswebframework/**/OrganizationalMapper.xml",
+                "classpath*:org/hswebframework/**/UserMapper.xml"
         };
     }
 
     @Override
     public String[] getIncludes() {
         return new String[]{
-                "classpath*:custom/mappers/OrganizationalMapper.xml"
+                "classpath*:custom/mappers/OrganizationalMapper.xml",
+                "classpath*:custom/mappers/UserMapper.xml"
         };
     }
 }

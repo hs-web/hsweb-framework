@@ -34,6 +34,7 @@ var versions = [
     // }
 ];
 var JDBCType = java.sql.JDBCType;
+
 function install(context) {
     var database = context.database;
     database.createOrAlter("s_organization")
@@ -42,6 +43,11 @@ function install(context) {
         .addColumn().name("leader").alias("leader").comment("机构负责人").jdbcType(java.sql.JDBCType.VARCHAR).length(256).commit()
         .addColumn().name("other_property").alias("otherProperty").comment("其他属性").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
         .comment("组织机构表").commit();
+
+    database.createOrAlter("s_user")
+        .addColumn().name("u_id").alias("id").comment("ID").jdbcType(java.sql.JDBCType.VARCHAR).length(32).primaryKey().commit()
+        .addColumn().name("nick_name").alias("nickName").comment("昵称").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
+        .comment("用户表").commit();
 }
 
 //设置依赖
