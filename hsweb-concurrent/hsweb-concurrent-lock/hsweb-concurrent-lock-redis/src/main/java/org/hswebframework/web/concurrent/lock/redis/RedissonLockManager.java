@@ -21,7 +21,7 @@ public class RedissonLockManager extends AbstractLockManager {
 
     @Override
     protected Lock createLock(String lockName) {
-        return redisson.getLock(lockName);
+        return redisson.getFairLock(lockName);
     }
 
     @Override

@@ -11,8 +11,6 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.function.Consumer;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public class RedissonLockTest {
@@ -28,7 +26,7 @@ public class RedissonLockTest {
         }
         Config config = new Config();
 //        config.setUseLinuxNativeEpoll(true);
-        config.useSingleServer().setAddress("127.0.0.1:6379");
+        config.useSingleServer().setAddress("redis://127.0.0.1:6379");
         redisson = (Redisson) Redisson.create(config);
         return lockManager = new RedissonLockManager(redisson);
     }
