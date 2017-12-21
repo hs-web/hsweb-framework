@@ -83,6 +83,10 @@ public class AopLockAdvisor extends StaticMethodMatcherPointcutAdvisor {
                 }).init();
     }
 
+    @Override
+    public int getOrder() {
+        return Integer.MIN_VALUE;
+    }
 
     @Override
     public boolean matches(Method method, Class<?> aClass) {
