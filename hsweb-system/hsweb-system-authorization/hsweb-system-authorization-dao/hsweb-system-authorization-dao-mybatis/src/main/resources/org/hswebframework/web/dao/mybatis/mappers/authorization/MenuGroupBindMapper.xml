@@ -19,7 +19,7 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.hswebframework.web.dao.authorization.MenuGroupBindDao">
-    <resultMap id="MenuGroupBindResultMap" type="org.hswebframework.web.entity.authorization.SimpleMenuGroupBindEntity">
+    <resultMap id="MenuGroupBindResultMap" type="org.hswebframework.web.entity.authorization.MenuGroupBindEntity">
         <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
         <result property="path" column="path" javaType="String" jdbcType="VARCHAR"/>
         <result property="parentId" column="parent_id" javaType="String" jdbcType="VARCHAR"/>
@@ -36,7 +36,7 @@
         <bind name="tableName" value="'s_menu_group_bind'"/>
     </sql>
 
-    <insert id="insert" parameterType="org.hswebframework.web.entity.authorization.SimpleMenuGroupBindEntity">
+    <insert id="insert" parameterType="org.hswebframework.web.entity.authorization.MenuGroupBindEntity">
         <include refid="config"/>
         <include refid="BasicMapper.buildInsertSql"/>
     </insert>

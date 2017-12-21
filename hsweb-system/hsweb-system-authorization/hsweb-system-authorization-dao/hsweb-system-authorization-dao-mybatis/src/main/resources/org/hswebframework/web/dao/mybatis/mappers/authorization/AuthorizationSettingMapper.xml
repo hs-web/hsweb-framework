@@ -19,7 +19,7 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.hswebframework.web.dao.authorization.AuthorizationSettingDao">
-    <resultMap id="AuthorizationSettingResultMap" type="org.hswebframework.web.entity.authorization.SimpleAuthorizationSettingEntity">
+    <resultMap id="AuthorizationSettingResultMap" type="org.hswebframework.web.entity.authorization.AuthorizationSettingEntity">
         <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
         <result property="type" column="type" javaType="String" jdbcType="VARCHAR"/>
         <result property="settingFor" column="setting_for" javaType="String" jdbcType="VARCHAR"/>
@@ -35,7 +35,7 @@
         <bind name="tableName" value="'s_autz_setting'"/>
     </sql>
 
-    <insert id="insert" parameterType="org.hswebframework.web.entity.authorization.SimpleAuthorizationSettingEntity">
+    <insert id="insert" parameterType="org.hswebframework.web.entity.authorization.AuthorizationSettingEntity">
         <include refid="config"/>
         <include refid="BasicMapper.buildInsertSql"/>
     </insert>

@@ -41,6 +41,8 @@ import org.hswebframework.ezorm.rdb.render.dialect.OracleRDBDatabaseMetaData;
 import org.hswebframework.ezorm.rdb.render.support.simple.CommonSqlRender;
 import org.hswebframework.ezorm.rdb.render.support.simple.SimpleWhereSqlBuilder;
 import org.hswebframework.web.BusinessException;
+import org.hswebframework.web.commons.entity.factory.EntityFactory;
+import org.hswebframework.web.dao.mybatis.builder.jpa.JpaAnnotationParser;
 import org.hswebframework.web.dao.mybatis.plgins.pager.Pager;
 import org.hswebframework.web.dao.mybatis.utils.ResultMapsUtils;
 import org.hswebframework.utils.StringUtils;
@@ -59,6 +61,10 @@ import java.util.concurrent.ConcurrentMap;
  * @since 2.0
  */
 public class EasyOrmSqlBuilder {
+
+    public volatile boolean useJpa = false;
+
+    public EntityFactory entityFactory;
 
     private static final   EasyOrmSqlBuilder  instance   = new EasyOrmSqlBuilder();
     protected static final Map<Class, String> simpleName = new HashMap<>();
@@ -109,7 +115,7 @@ public class EasyOrmSqlBuilder {
         public Map<String, RDBTableMetaData> get(Object key) {
             Map<String, RDBTableMetaData> map = super.get(key);
             if (map == null) {
-                map = new HashMap<>();
+                map = new ConcurrentHashMap<>();
                 put((RDBDatabaseMetaData) key, map);
             }
             return map;
@@ -139,14 +145,15 @@ public class EasyOrmSqlBuilder {
             return cached;
         }
         RDBTableMetaData rdbTableMetaData = new RDBTableMetaData();
+        ResultMap resultMaps = ResultMapsUtils.getResultMap(resultMapId);
         rdbTableMetaData.setName(tableName);
         rdbTableMetaData.setDatabaseMetaData(active);
-        ResultMap resultMaps = ResultMapsUtils.getResultMap(resultMapId);
+
         List<ResultMapping> resultMappings = new ArrayList<>(resultMaps.getResultMappings());
         resultMappings.addAll(resultMaps.getIdResultMappings());
         resultMappings.forEach(resultMapping -> {
             if (resultMapping.getNestedQueryId() == null) {
-                RDBColumnMetaData column = new RDBColumnMetaData(){
+                RDBColumnMetaData column = new RDBColumnMetaData() {
                     @Override
                     public RDBColumnMetaData clone() {
                         RDBColumnMetaData target = super.clone();
@@ -161,10 +168,10 @@ public class EasyOrmSqlBuilder {
                 }
                 column.setJavaType(resultMapping.getJavaType());
                 column.setProperty("resultMapping", resultMapping);
-                ValueConverter dateConvert=new DateTimeConverter("yyyy-MM-dd HH:mm:ss", column.getJavaType()){
+                ValueConverter dateConvert = new DateTimeConverter("yyyy-MM-dd HH:mm:ss", column.getJavaType()) {
                     @Override
                     public Object getData(Object value) {
-                        if(value instanceof Number){
+                        if (value instanceof Number) {
                             return new Date(((Number) value).longValue());
                         }
                         return super.getData(value);
@@ -181,6 +188,18 @@ public class EasyOrmSqlBuilder {
             }
         });
         cache.put(cacheKey, rdbTableMetaData);
+        if (useJpa) {
+            Class type = entityFactory.getInstanceType(resultMaps.getType());
+            RDBTableMetaData parseResult = JpaAnnotationParser.parseMetaDataFromEntity(type);
+            if (parseResult != null) {
+                for (RDBColumnMetaData columnMetaData : parseResult.getColumns()) {
+                    if (rdbTableMetaData.findColumn(columnMetaData.getName()) == null) {
+                        columnMetaData=columnMetaData.clone();
+                        rdbTableMetaData.addColumn(columnMetaData);
+                    }
+                }
+            }
+        }
         return rdbTableMetaData;
     }
 

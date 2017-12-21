@@ -56,6 +56,12 @@ public class MybatisProperties extends org.mybatis.spring.boot.autoconfigure.Myb
      * 排除使用{@link Resource#getURL()#toString()}进行对比
      */
     private              String[] mapperLocationExcludes = null;
+    /**
+     * 使用jpa注解来解析表结构，动态生成查询条件
+     */
+    private              boolean  useJpa                 = false;
+
+    private Properties                  mybatisProperties;
 
     private List<MybatisMapperCustomer> mybatisMappers;
 
@@ -78,6 +84,14 @@ public class MybatisProperties extends org.mybatis.spring.boot.autoconfigure.Myb
 
     public void setDynamicDatasource(boolean dynamicDatasource) {
         this.dynamicDatasource = dynamicDatasource;
+    }
+
+    public void setUseJpa(boolean useJpa) {
+        this.useJpa = useJpa;
+    }
+
+    public boolean isUseJpa() {
+        return useJpa;
     }
 
     @Override

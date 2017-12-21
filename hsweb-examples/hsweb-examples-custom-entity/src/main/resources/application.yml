@@ -1,3 +1,6 @@
+logging:
+    level:
+      org.hswebframework.web: debug
 spring:
     aop:
         auto: true
@@ -22,3 +25,7 @@ hsweb:
 #                OrganizationalEntity: CustomOrganizationalEntity
 server:
   port: 8081
+mybatis:
+  use-jpa: true
+  configuration:
+    mapUnderscoreToCamelCase: true

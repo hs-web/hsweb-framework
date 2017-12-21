@@ -10,9 +10,10 @@ import org.hswebframework.web.service.QueryService;
 import java.util.List;
 
 /**
- * TODO 完成注释
+ * 用户服务
  *
  * @author zhouhao
+ * @since 3.0
  */
 public interface UserService extends
         CreateEntityService<UserEntity>,

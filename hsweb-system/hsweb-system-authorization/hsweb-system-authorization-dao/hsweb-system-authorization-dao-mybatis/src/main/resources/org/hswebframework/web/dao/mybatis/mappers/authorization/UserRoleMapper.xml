@@ -21,7 +21,7 @@
         "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="org.hswebframework.web.dao.authorization.UserRoleDao">
-    <resultMap id="UserRoleResultMap" type="org.hswebframework.web.entity.authorization.SimpleUserRoleEntity">
+    <resultMap id="UserRoleResultMap" type="org.hswebframework.web.entity.authorization.UserRoleEntity">
         <result property="roleId" column="role_id" javaType="string" jdbcType="VARCHAR"/>
         <result property="userId" column="user_id" javaType="string" jdbcType="VARCHAR"/>
     </resultMap>
@@ -32,7 +32,7 @@
         <bind name="tableName" value="'s_user_role'"/>
     </sql>
 
-    <insert id="insert" parameterType="org.hswebframework.web.entity.authorization.SimpleUserRoleEntity">
+    <insert id="insert" parameterType="org.hswebframework.web.entity.authorization.UserRoleEntity">
         <include refid="config"/>
         <include refid="BasicMapper.buildInsertSql"/>
     </insert>

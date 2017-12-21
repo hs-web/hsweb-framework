@@ -21,7 +21,7 @@
         "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="org.hswebframework.web.dao.authorization.UserDao">
-    <resultMap id="UserResultMap" type="org.hswebframework.web.entity.authorization.SimpleUserEntity">
+    <resultMap id="UserResultMap" type="org.hswebframework.web.entity.authorization.UserEntity">
         <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
         <result property="name" column="name" javaType="string" jdbcType="VARCHAR"/>
         <result property="username" column="username" javaType="string" jdbcType="VARCHAR"/>

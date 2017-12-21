@@ -20,6 +20,7 @@ package org.hswebframework.web.dao.mybatis.utils;
 
 import org.apache.ibatis.mapping.ResultMap;
 import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionTemplate;
 
 import java.util.concurrent.CountDownLatch;
@@ -28,7 +29,7 @@ import java.util.concurrent.CountDownLatch;
  * @since 2.0
  */
 public class ResultMapsUtils {
-    private volatile static SqlSession sqlSession;
+    private volatile static SqlSessionFactory sqlSession;
 
     private static CountDownLatch countDownLatch = new CountDownLatch(1);
 
@@ -48,7 +49,7 @@ public class ResultMapsUtils {
         return sqlSession.getConfiguration().getResultMap(id);
     }
 
-    public static void setSqlSession(SqlSessionTemplate sqlSession) {
+    public static void setSqlSession(SqlSessionFactory sqlSession) {
         ResultMapsUtils.sqlSession = sqlSession;
         if (countDownLatch.getCount() != 0) {
             countDownLatch.countDown();

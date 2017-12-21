@@ -37,11 +37,5 @@ import javax.annotation.PostConstruct;
 @EnableConfigurationProperties(MybatisProperties.class)
 public class MybatisDaoAutoConfiguration {
 
-    @Autowired
-    private SqlSessionTemplate sqlSessionTemplate;
 
-    @PostConstruct
-    public void init() {
-        ResultMapsUtils.setSqlSession(sqlSessionTemplate);
-    }
 }

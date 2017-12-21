@@ -18,7 +18,6 @@
 
 package org.hswebframework.web.authorization.oauth2.server.entity;
 
-import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
