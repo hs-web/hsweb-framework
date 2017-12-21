@@ -1,4 +1,4 @@
-package org.hswebframework.web.datasource.starter;
+package org.hswebframework.web.datasource;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.hswebframework.web.AopUtils;

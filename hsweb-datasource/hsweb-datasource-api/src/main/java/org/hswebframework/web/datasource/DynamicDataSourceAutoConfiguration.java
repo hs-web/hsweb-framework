@@ -3,15 +3,13 @@ package org.hswebframework.web.datasource;
 import org.hswebframework.ezorm.rdb.executor.SqlExecutor;
 import org.hswebframework.web.datasource.config.DynamicDataSourceConfigRepository;
 import org.hswebframework.web.datasource.config.InSpringDynamicDataSourceConfig;
-import org.hswebframework.web.datasource.service.InMemoryDynamicDataSourceService;
+import org.hswebframework.web.datasource.service.InSpringContextDynamicDataSourceService;
 import org.hswebframework.web.datasource.service.InSpringDynamicDataSourceConfigRepository;
-import org.hswebframework.web.datasource.starter.AopDataSourceSwitcherAutoConfiguration;
 import org.hswebframework.web.datasource.switcher.DataSourceSwitcher;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,9 +37,10 @@ public class DynamicDataSourceAutoConfiguration implements BeanPostProcessor {
 
     @Bean
     @ConditionalOnMissingBean(DynamicDataSourceService.class)
-    public InMemoryDynamicDataSourceService inMemoryDynamicDataSourceService(DynamicDataSourceConfigRepository<InSpringDynamicDataSourceConfig> repository, DataSource dataSource) {
+    public InSpringContextDynamicDataSourceService inMemoryDynamicDataSourceService(DynamicDataSourceConfigRepository<InSpringDynamicDataSourceConfig> repository,
+                                                                                    DataSource dataSource) {
         DynamicDataSourceProxy dataSourceProxy = new DynamicDataSourceProxy(null, dataSource);
-        return new InMemoryDynamicDataSourceService(repository, dataSourceProxy);
+        return new InSpringContextDynamicDataSourceService(repository, dataSourceProxy);
     }
 
     @Override
@@ -68,6 +67,5 @@ public class DynamicDataSourceAutoConfiguration implements BeanPostProcessor {
             DataSourceHolder.dynamicDataSourceService = dataSourceService;
         }
     }
-
 
 }
