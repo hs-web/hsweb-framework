@@ -213,6 +213,7 @@ public class CustomMybatisMapperCustomer implements MybatisMapperCustomer {
 ```
 
 5. 使用jpa注解方式拓展字段
+
 依赖jpa-api:
 ```xml
 <dependency>
