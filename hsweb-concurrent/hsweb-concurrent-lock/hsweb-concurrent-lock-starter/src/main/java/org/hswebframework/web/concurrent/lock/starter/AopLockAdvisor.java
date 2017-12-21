@@ -50,25 +50,37 @@ public class AopLockAdvisor extends StaticMethodMatcherPointcutAdvisor {
                                 .lockNameIs(WriteLock::value)
                                 .lockIs(name -> lockManager.getReadWriteLock(name).writeLock())));
             }
-
+            boolean lockError = false;
             try {
                 for (LockProcessor processor : lockProcessors) {
                     Throwable e = processor.doLock();
                     if (e != null) {
+                        lockError = true;
                         throw e;
                     }
                 }
                 return methodInvocation.proceed();
             } finally {
                 for (LockProcessor processor : lockProcessors) {
-                    processor.doUnlock();
+                    try {
+                        processor.doUnlock();
+                    } catch (Exception e) {
+                        if (!lockError) {
+                            log.error("unlock {} error", methodInvocation.getMethod(), e);
+                        }
+                    }
                 }
             }
         });
     }
 
     protected <A extends Annotation> LockProcessor<A, java.util.concurrent.locks.Lock> initLockInfo(long timeout, TimeUnit timeUnit, LockProcessor<A, java.util.concurrent.locks.Lock> lockProcessor) {
-        return lockProcessor.lock(lock -> lock.tryLock(timeout, timeUnit)).unlock(java.util.concurrent.locks.Lock::unlock).init();
+        return lockProcessor
+                .lock(lock -> lock.tryLock(timeout, timeUnit))
+                .unlock(lock -> {
+                    lock.unlock();
+                    return true;
+                }).init();
     }
 
 

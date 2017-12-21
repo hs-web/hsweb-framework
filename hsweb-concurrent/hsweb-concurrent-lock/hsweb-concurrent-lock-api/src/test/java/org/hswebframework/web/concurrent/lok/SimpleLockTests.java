@@ -10,8 +10,6 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.function.Consumer;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public class SimpleLockTests {

@@ -16,7 +16,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConditionalOnClass({RedissonClient.class, RedissonLockManager.class})
 @ConditionalOnBean(RedissonClient.class)
-//@AutoConfigureBefore(LockManagerAutoConfiguration.class)
 public class RedisLockManagerAutoConfiguration {
     @Bean
     public LockManager lockManager(RedissonClient redissonClient) {

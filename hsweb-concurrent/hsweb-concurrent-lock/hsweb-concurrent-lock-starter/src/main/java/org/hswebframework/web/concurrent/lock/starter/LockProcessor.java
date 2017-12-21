@@ -10,6 +10,7 @@ import org.springframework.util.StringUtils;
 
 import java.lang.annotation.Annotation;
 import java.util.*;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 
 /**
@@ -98,7 +99,10 @@ public class LockProcessor<A extends Annotation, L> {
         Throwable lockError = null;
         for (Map.Entry<String, L> lock : lockStore.entrySet()) {
             try {
-                lockAccepter.accept(lock.getValue());
+                boolean success = lockAccepter.accept(lock.getValue());
+                if (!success) {
+                    return new TimeoutException("try lock " + lock.getKey() + " error");
+                }
                 successLock.add(lock.getValue());
             } catch (Throwable throwable) {
                 lockError = throwable;
@@ -118,7 +122,7 @@ public class LockProcessor<A extends Annotation, L> {
     }
 
     public interface LockAccepter<T> {
-        void accept(T t) throws Throwable;
+        boolean accept(T t) throws Throwable;
     }
 
 }
