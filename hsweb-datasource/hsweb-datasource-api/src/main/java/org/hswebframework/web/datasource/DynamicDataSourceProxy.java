@@ -50,10 +50,10 @@ public class DynamicDataSourceProxy implements DynamicDataSource {
     public DatabaseType getType() {
         if (databaseType == null) {
             lock.lock();
-            if (databaseType != null) {
-                return databaseType;
-            }
             try {
+                if (databaseType != null) {
+                    return databaseType;
+                }
                 try (Connection connection = proxy.getConnection()) {
                     databaseType = DatabaseType.fromJdbcUrl(connection.getMetaData().getURL());
                 }
