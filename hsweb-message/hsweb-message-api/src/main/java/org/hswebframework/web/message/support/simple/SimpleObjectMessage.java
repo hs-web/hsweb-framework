@@ -5,8 +5,6 @@ import org.hswebframework.web.message.support.ObjectMessage;
 import java.io.Serializable;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public class SimpleObjectMessage<T extends Serializable> implements ObjectMessage<T> {

@@ -21,8 +21,6 @@ package org.hswebframework.web.message;
 import java.util.function.Consumer;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public interface MessageSubscribe<M extends Message> {
