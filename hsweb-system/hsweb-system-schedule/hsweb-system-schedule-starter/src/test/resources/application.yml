@@ -19,3 +19,6 @@ mybatis:
   dynamic-datasource: false
 server:
   port: 8080
+scheduler:
+  enable-cluster: true
+  execute-tags: core

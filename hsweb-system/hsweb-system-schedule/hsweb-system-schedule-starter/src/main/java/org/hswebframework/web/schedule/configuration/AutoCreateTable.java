@@ -7,6 +7,8 @@ import org.hswebframework.web.datasource.DataSourceHolder;
 import org.hswebframework.web.datasource.DatabaseType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.util.StringUtils;
@@ -18,10 +20,9 @@ import java.io.Reader;
 import java.util.List;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
+@Order(Ordered.HIGHEST_PRECEDENCE)
 public class AutoCreateTable implements CommandLineRunner {
 
     @Autowired
@@ -32,7 +33,6 @@ public class AutoCreateTable implements CommandLineRunner {
         if (sqlExecutor.tableExists("QRTZ_LOCKS")) {
             return;
         }
-
         DatabaseType databaseType = DataSourceHolder.currentDatabaseType();
         String databaseTypeName = databaseType.name();
         if (databaseType == DatabaseType.jtds_sqlserver) {

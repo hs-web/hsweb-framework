@@ -15,10 +15,16 @@ import java.util.Map;
 /**
  * @author zhouhao
  */
-@Service
 public class DefaultScriptScheduleJobExecutor implements ScheduleJobExecutor {
 
     private ScheduleJobService scheduleJobService;
+
+    public DefaultScriptScheduleJobExecutor() {
+    }
+
+    public DefaultScriptScheduleJobExecutor(ScheduleJobService scheduleJobService) {
+        this.scheduleJobService = scheduleJobService;
+    }
 
     @Autowired
     public void setScheduleJobService(ScheduleJobService scheduleJobService) {

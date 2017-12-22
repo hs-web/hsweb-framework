@@ -22,5 +22,10 @@
             <artifactId>hsweb-system-schedule-service-api</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.hswebframework.web</groupId>
+            <artifactId>hsweb-message-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 </project>
