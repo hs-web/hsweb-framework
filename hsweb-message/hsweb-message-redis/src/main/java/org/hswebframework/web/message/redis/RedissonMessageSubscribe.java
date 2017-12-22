@@ -21,7 +21,7 @@ import java.util.function.Consumer;
 /**
  * @author zhouhao
  */
-public class RedissionMessageSubscribe<M extends Message> implements MessageSubscribe<M> {
+public class RedissonMessageSubscribe<M extends Message> implements MessageSubscribe<M> {
     private MessageSubject subject;
     private RedissonClient redisson;
     private boolean           running    = false;
@@ -31,12 +31,12 @@ public class RedissionMessageSubscribe<M extends Message> implements MessageSubs
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    public RedissionMessageSubscribe(MessageSubject subject, RedissonClient redisson) {
+    public RedissonMessageSubscribe(MessageSubject subject, RedissonClient redisson) {
         this.subject = subject;
         this.redisson = redisson;
     }
 
-    public RedissionMessageSubscribe(RedissonClient redisson) {
+    public RedissonMessageSubscribe(RedissonClient redisson) {
         this.redisson = redisson;
     }
 

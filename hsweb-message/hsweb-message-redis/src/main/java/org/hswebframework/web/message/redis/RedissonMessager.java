@@ -25,6 +25,6 @@ public class RedissonMessager implements Messager {
 
     @Override
     public <M extends Message> MessageSubscribe<M> subscribe(MessageSubject subscribe) {
-        return new RedissionMessageSubscribe<>(subscribe, redisson);
+        return new RedissonMessageSubscribe<>(subscribe, redisson);
     }
 }
