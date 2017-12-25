@@ -82,15 +82,15 @@ public class SimpleOAuth2SessionBuilder implements OAuth2SessionBuilder {
             readWriteLock.writeLock().lock();
             AccessTokenInfo tokenInfo = tokenGetter.get();
             try {
+                token.setGrantType(grantType);
+                token.setServerId(serverConfig.getId());
                 if (tokenInfo != null) {
                     token.setId(tokenInfo.getId());
-                    tokenInfo.setUpdateTime(System.currentTimeMillis());
+                    token.setUpdateTime(System.currentTimeMillis());
                     oAuth2UserTokenRepository.update(tokenInfo.getId(), token);
                 } else {
-                    token.setGrantType(grantType);
                     token.setCreateTime(System.currentTimeMillis());
                     token.setUpdateTime(System.currentTimeMillis());
-                    token.setServerId(serverConfig.getId());
                     oAuth2UserTokenRepository.insert(token);
                 }
             } finally {
@@ -112,7 +112,7 @@ public class SimpleOAuth2SessionBuilder implements OAuth2SessionBuilder {
     }
 
 
-   private Supplier<AccessTokenInfo> tokenGetter = () -> {
+    private Supplier<AccessTokenInfo> tokenGetter = () -> {
         readWriteLock.readLock().lock();
         try {
             return getClientCredentialsToken();
