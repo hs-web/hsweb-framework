@@ -57,7 +57,7 @@ public class DynamicDataSourceProperties
     private Properties            properties              = null;
     private ClassLoader           classLoader             = null;
     private DatasourceTypeSupport datasourceTypeSupport   = null;
-    private AtomikosProperties    icatch      = new AtomikosProperties();
+    private AtomikosProperties    icatch                  = new AtomikosProperties();
 
     public int getTransactionTimeout() {
         return transactionTimeout;
@@ -221,7 +221,7 @@ public class DynamicDataSourceProperties
     public void afterPropertiesSet() throws Exception {
         Assert.notNull(url);
         Assert.notNull(username);
-        if (datasourceName == null) {
+        if (datasourceName == null || datasourceTypeSupport == null) {
             datasourceName = lookupSupportDatasourceName();
         }
         if (type == null) {
@@ -241,6 +241,7 @@ public class DynamicDataSourceProperties
                 datasourceTypeSupport = support;
                 return support.className;
             } catch (ClassNotFoundException e) {
+
             }
         }
         return getType().getXaDataSourceClassName();
@@ -290,7 +291,7 @@ public class DynamicDataSourceProperties
                 properties.putIfAbsent("testOnBorrow", false);
                 properties.putIfAbsent("testOnReturn", false);
                 properties.putIfAbsent("poolPreparedStatements", true);
-                properties.putIfAbsent("maxOpenPreparedStatements", 20);
+                properties.putIfAbsent("maxOpenPreparedStatements", 300);
             }
         };
 

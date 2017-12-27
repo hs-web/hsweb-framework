@@ -28,6 +28,7 @@ import org.hsweb.web.service.datasource.DataSourceService;
 import org.hsweb.web.service.datasource.DynamicDataSourceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -130,8 +131,15 @@ public class DynamicDataSourceServiceImpl implements DynamicDataSourceService {
         }
     }
 
+    @Autowired
+    private DynamicDataSourceProperties defaultProperties;
+
     protected javax.sql.DataSource createDataSource(DataSource dataSource) {
         DynamicDataSourceProperties properties = new DynamicDataSourceProperties();
+        try {
+            BeanUtils.copyProperties(defaultProperties, properties);
+        } catch (Exception e) {
+        }
         properties.setName("ds_" + dataSource.getId());
         properties.setBeanClassLoader(this.getClass().getClassLoader());
         properties.setUsername(dataSource.getUsername());
@@ -139,6 +147,7 @@ public class DynamicDataSourceServiceImpl implements DynamicDataSourceService {
         properties.setUrl(dataSource.getUrl());
         properties.setType(DatabaseType.fromJdbcUrl(dataSource.getUrl()));
         properties.setTestQuery(dataSource.getTestSql());
+
         Map<String, Object> otherProperties = dataSource.getProperties();
         int initTimeout = StringUtils.toInt(otherProperties.getOrDefault("initTimeOut", 30 * 1000));
         otherProperties.remove("initTimeOut");

@@ -37,6 +37,7 @@ import java.util.Map;
 /**
  * 动态数据源sql执行器
  */
+@Transactional(rollbackFor = Exception.class)
 public class DynamicDataSourceSqlExecutorService extends AbstractJdbcSqlExecutor implements ExpressionScopeBean {
 
     @Resource
