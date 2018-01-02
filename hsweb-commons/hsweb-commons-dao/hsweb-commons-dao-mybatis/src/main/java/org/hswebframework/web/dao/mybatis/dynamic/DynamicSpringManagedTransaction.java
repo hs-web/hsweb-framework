@@ -89,7 +89,7 @@ public class DynamicSpringManagedTransaction implements Transaction {
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug(
-                    "DataSource (" + dsId + ") JDBC Connection ["
+                    "DataSource (" + (dsId == null ? "default" : dsId) + ") JDBC Connection ["
                             + connection
                             + "] will"
                             + (proxy.isConnectionTransactional ? " " : " not ")
@@ -171,7 +171,7 @@ public class DynamicSpringManagedTransaction implements Transaction {
         public void commit() throws SQLException {
             if (this.connection != null && !this.isConnectionTransactional && !this.autoCommit) {
                 if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("Committing DataSource (" + dataSourceId + ") JDBC Connection [" + this.connection + "]");
+                    LOGGER.debug("Committing DataSource (" + (dataSourceId == null ? "default" : dataSourceId) + ") JDBC Connection [" + this.connection + "]");
                 }
                 this.connection.commit();
             }
