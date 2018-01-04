@@ -82,6 +82,10 @@ public class HttpTokenRequest implements TokenRequest {
         }
         if (authorization != null && !authorization.isEmpty()) {
             String[] decodeCredentials = decodeClientAuthenticationHeader(authorization);
+            //fix #63
+            if (decodeCredentials == null) {
+                return null;
+            }
             if (decodeCredentials.length > 1) {
                 principal = decodeCredentials[0];
                 credentials = decodeCredentials[1];
