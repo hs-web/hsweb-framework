@@ -27,7 +27,7 @@ import java.util.List;
  *
  * @author hsweb-generator-online
  */
-public interface DepartmentEntity extends TreeSortSupportEntity<String>, OrgAttachEntity, DepartmentAttachEntity {
+public interface DepartmentEntity extends  TreeSortSupportEntity<String>, OrgAttachEntity, DepartmentAttachEntity {
  /*-------------------------------------------
     |               属性名常量               |
     ===========================================*/
@@ -38,7 +38,6 @@ public interface DepartmentEntity extends TreeSortSupportEntity<String>, OrgAtta
     /**
      * 所在组织id
      */
-    @Deprecated
     String orgId     = "orgId";
     /**
      * 部门编码

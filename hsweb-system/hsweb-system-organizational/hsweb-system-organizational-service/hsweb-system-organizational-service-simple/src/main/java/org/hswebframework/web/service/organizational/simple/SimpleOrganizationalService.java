@@ -20,19 +20,16 @@ import org.hswebframework.web.commons.entity.DataStatus;
 import org.hswebframework.web.dao.organizational.OrganizationalDao;
 import org.hswebframework.web.entity.organizational.OrganizationalEntity;
 import org.hswebframework.web.id.IDGenerator;
-import org.hswebframework.web.service.AbstractTreeSortService;
+import org.hswebframework.web.service.EnableCacheAllEvictTreeSortService;
 import org.hswebframework.web.service.organizational.OrganizationalService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -42,7 +39,7 @@ import java.util.Objects;
  */
 @Service("organizationalService")
 @CacheConfig(cacheNames = "organizational")
-public class SimpleOrganizationalService extends AbstractTreeSortService<OrganizationalEntity, String>
+public class SimpleOrganizationalService extends EnableCacheAllEvictTreeSortService<OrganizationalEntity, String>
         implements OrganizationalService {
     @Autowired
     private OrganizationalDao organizationalDao;
@@ -58,48 +55,10 @@ public class SimpleOrganizationalService extends AbstractTreeSortService<Organiz
     }
 
     @Override
-    @Caching(evict = {
-            @CacheEvict(key = "'id:'+#result"),
-            @CacheEvict(key = "'code:'+#entity.code"),
-            @CacheEvict(allEntries = true, condition = "#entity.children!=null")
-    })
+    @CacheEvict(allEntries = true)
     public String insert(OrganizationalEntity entity) {
         entity.setStatus(DataStatus.STATUS_ENABLED);
         return super.insert(entity);
-    }
-
-    @Override
-    @Cacheable(key = "'id:'+#id")
-    public OrganizationalEntity selectByPk(String id) {
-        return super.selectByPk(id);
-    }
-
-    @Override
-    @CacheEvict(allEntries = true)
-    public int updateByPk(List<OrganizationalEntity> data) {
-        return super.updateByPk(data);
-    }
-
-    @Caching(evict = {
-            @CacheEvict(key = "'id:'+#id"),
-            @CacheEvict(key = "'code:'+#entity.code"),
-            @CacheEvict(allEntries = true, condition = "#entity.children!=null")
-    })
-    @Override
-    public int updateByPk(String id, OrganizationalEntity entity) {
-        return super.updateByPk(id, entity);
-    }
-
-    @Override
-    @CacheEvict(allEntries = true)
-    public int updateBatch(Collection<OrganizationalEntity> data) {
-        return super.updateBatch(data);
-    }
-
-    @Override
-    @CacheEvict(allEntries = true)
-    public int deleteByPk(String id) {
-        return super.deleteByPk(id);
     }
 
     @Override
@@ -130,5 +89,15 @@ public class SimpleOrganizationalService extends AbstractTreeSortService<Organiz
             return null;
         }
         return createQuery().where(OrganizationalEntity.code, code).single();
+    }
+
+    @Override
+    @Cacheable(key = "'name:'+#name")
+    @Transactional(readOnly = true)
+    public OrganizationalEntity selectByName(String name) {
+        if (StringUtils.isEmpty(name)) {
+            return null;
+        }
+        return createQuery().where(OrganizationalEntity.name, name).single();
     }
 }

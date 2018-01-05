@@ -20,10 +20,17 @@ import org.hswebframework.web.dao.organizational.DepartmentDao;
 import org.hswebframework.web.entity.organizational.DepartmentEntity;
 import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.service.AbstractTreeSortService;
+import org.hswebframework.web.service.EnableCacheAllEvictTreeSortService;
 import org.hswebframework.web.service.GenericEntityService;
 import org.hswebframework.web.service.organizational.DepartmentService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+
+import java.util.Collection;
+import java.util.List;
 
 /**
  * 默认的服务实现
@@ -31,8 +38,9 @@ import org.springframework.stereotype.Service;
  * @author hsweb-generator-online
  */
 @Service("departmentService")
+@CacheConfig(cacheNames = "department")
 public class SimpleDepartmentService
-        extends AbstractTreeSortService<DepartmentEntity, String>
+        extends EnableCacheAllEvictTreeSortService<DepartmentEntity, String>
         implements DepartmentService {
     @Autowired
     private DepartmentDao departmentDao;
@@ -45,5 +53,23 @@ public class SimpleDepartmentService
     @Override
     protected IDGenerator<String> getIDGenerator() {
         return IDGenerator.MD5;
+    }
+
+    @Override
+    @Cacheable(cacheNames = "'org-id:'+#orgId")
+    public List<DepartmentEntity> selectByOrgId(String orgId) {
+        return createQuery().where(DepartmentEntity.orgId, orgId).listNoPaging();
+    }
+
+    @Override
+    @Cacheable(cacheNames = "'name:'+#name")
+    public List<DepartmentEntity> selectByName(String name) {
+        return createQuery().where(DepartmentEntity.name, name).listNoPaging();
+    }
+
+    @Override
+    @Cacheable(cacheNames = "'code:'+#code")
+    public DepartmentEntity selectByCode(String code) {
+        return createQuery().where(DepartmentEntity.code, code).single();
     }
 }

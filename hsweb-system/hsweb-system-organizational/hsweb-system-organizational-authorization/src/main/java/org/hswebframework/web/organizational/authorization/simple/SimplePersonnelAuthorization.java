@@ -2,6 +2,7 @@ package org.hswebframework.web.organizational.authorization.simple;
 
 import org.hswebframework.web.organizational.authorization.Personnel;
 import org.hswebframework.web.organizational.authorization.PersonnelAuthorization;
+import org.hswebframework.web.organizational.authorization.Position;
 import org.hswebframework.web.organizational.authorization.TreeNode;
 import org.hswebframework.web.organizational.authorization.relation.Relations;
 
@@ -9,8 +10,6 @@ import java.util.Collections;
 import java.util.Set;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public class SimplePersonnelAuthorization implements PersonnelAuthorization {
@@ -20,6 +19,16 @@ public class SimplePersonnelAuthorization implements PersonnelAuthorization {
     private Set<TreeNode<String>> positionIds;
     private Set<TreeNode<String>> departmentIds;
     private Relations             relations;
+    private Set<Position>         positions;
+
+    public void setPositions(Set<Position> positions) {
+        this.positions = positions;
+    }
+
+    @Override
+    public Set<Position> getPositions() {
+        return positions;
+    }
 
     @Override
     public Personnel getPersonnel() {

@@ -33,6 +33,8 @@ public interface PersonService extends CrudService<PersonEntity, String> {
 
     int updateByPk(PersonAuthBindEntity authBindEntity);
 
+    List<PersonEntity> selectByName(String name);
+
     PersonAuthBindEntity selectAuthBindByPk(String id);
 
     List<PersonEntity> selectByPositionId(String positionId);

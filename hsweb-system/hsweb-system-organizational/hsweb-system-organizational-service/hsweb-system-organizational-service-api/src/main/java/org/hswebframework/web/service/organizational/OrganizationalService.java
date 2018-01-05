@@ -37,4 +37,6 @@ public interface OrganizationalService extends
 
     OrganizationalEntity selectByCode(String code);
 
+    OrganizationalEntity selectByName(String name);
+
 }

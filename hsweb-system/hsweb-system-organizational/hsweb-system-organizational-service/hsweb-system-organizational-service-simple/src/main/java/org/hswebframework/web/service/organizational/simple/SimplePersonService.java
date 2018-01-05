@@ -24,20 +24,16 @@ import org.hswebframework.web.entity.authorization.UserEntity;
 import org.hswebframework.web.entity.authorization.bind.BindRoleUserEntity;
 import org.hswebframework.web.entity.organizational.*;
 import org.hswebframework.web.id.IDGenerator;
-import org.hswebframework.web.organizational.authorization.Personnel;
-import org.hswebframework.web.organizational.authorization.PersonnelAuthorization;
-import org.hswebframework.web.organizational.authorization.PersonnelAuthorizationManager;
-import org.hswebframework.web.organizational.authorization.TreeNode;
+import org.hswebframework.web.organizational.authorization.*;
 import org.hswebframework.web.organizational.authorization.relation.Relation;
 import org.hswebframework.web.organizational.authorization.relation.SimpleRelation;
 import org.hswebframework.web.organizational.authorization.relation.SimpleRelations;
-import org.hswebframework.web.organizational.authorization.simple.SimplePersonnel;
-import org.hswebframework.web.organizational.authorization.simple.SimplePersonnelAuthorization;
+import org.hswebframework.web.organizational.authorization.simple.*;
 import org.hswebframework.web.service.DefaultDSLQueryService;
 import org.hswebframework.web.service.GenericEntityService;
 import org.hswebframework.web.service.authorization.AuthorizationSettingTypeSupplier;
 import org.hswebframework.web.service.authorization.UserService;
-import org.hswebframework.web.service.organizational.PersonService;
+import org.hswebframework.web.service.organizational.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
@@ -45,6 +41,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -65,7 +62,7 @@ import static org.springframework.util.StringUtils.isEmpty;
 public class SimplePersonService extends GenericEntityService<PersonEntity, String>
         implements PersonService, PersonnelAuthorizationManager, AuthorizationSettingTypeSupplier {
 
-    private static String SETTING_TYPE_PERSON = "person";
+    private static String SETTING_TYPE_PERSON   = "person";
     private static String SETTING_TYPE_POSITION = "position";
 
     @Autowired
@@ -106,11 +103,11 @@ public class SimplePersonService extends GenericEntityService<PersonEntity, Stri
     @Caching(evict = {
             @CacheEvict(key = "'id:'+#result"),
             @CacheEvict(key = "'auth:persion-id'+#result"),
-            @CacheEvict(key = "'auth-bind'+#result")
+            @CacheEvict(key = "'auth-bind'+#result"),
+            @CacheEvict(key = "'person-name'+#authBindEntity.name")
     })
     public String insert(PersonAuthBindEntity authBindEntity) {
         authBindEntity.setStatus(DataStatus.STATUS_ENABLED);
-        // TODO: 17-6-1 应该使用锁,防止并发同步用户,导致多个人员使用相同的用户
         if (authBindEntity.getPersonUser() != null) {
             syncUserInfo(authBindEntity);
         }
@@ -125,10 +122,10 @@ public class SimplePersonService extends GenericEntityService<PersonEntity, Stri
     @Caching(evict = {
             @CacheEvict(key = "'id:'+#authBindEntity.id"),
             @CacheEvict(key = "'auth:persion-id'+#authBindEntity.id"),
-            @CacheEvict(key = "'auth-bind'+#authBindEntity.id")
+            @CacheEvict(key = "'auth-bind'+#authBindEntity.id"),
+            @CacheEvict(key = "'person-name'+#authBindEntity.name")
     })
     public int updateByPk(PersonAuthBindEntity authBindEntity) {
-        // TODO: 17-6-1 应该使用锁,防止并发同步用户,导致多个人员使用相同的用户
         if (authBindEntity.getPositionIds() != null) {
             personPositionDao.deleteByPersonId(authBindEntity.getId());
             syncPositionInfo(authBindEntity.getId(), authBindEntity.getPositionIds());
@@ -137,6 +134,15 @@ public class SimplePersonService extends GenericEntityService<PersonEntity, Stri
             syncUserInfo(authBindEntity);
         }
         return this.updateByPk(((PersonEntity) authBindEntity));
+    }
+
+    @Override
+    @Cacheable(key = "'person-name'+#name")
+    public List<PersonEntity> selectByName(String name) {
+        if (StringUtils.isEmpty(name)) {
+            return new ArrayList<>();
+        }
+        return createQuery().where(PersonEntity.name, name).listNoPaging();
     }
 
     @Override
@@ -239,7 +245,7 @@ public class SimplePersonService extends GenericEntityService<PersonEntity, Stri
                             userService.update(oldUser.getId(), user);
                             return oldUser.getId();
                         };
-        UserEntity userEntity=entityFactory.newInstance(UserEntity.class);
+        UserEntity userEntity = entityFactory.newInstance(UserEntity.class);
 //
 //        if (roleIds != null) {
 //            BindRoleUserEntity tmp = entityFactory.newInstance(BindRoleUserEntity.class);
@@ -259,6 +265,7 @@ public class SimplePersonService extends GenericEntityService<PersonEntity, Stri
 
 
     @Override
+    @CacheEvict(allEntries = true)
     public int deleteByPk(String id) {
         personPositionDao.deleteByPersonId(id);
         return super.deleteByPk(id);
@@ -281,22 +288,31 @@ public class SimplePersonService extends GenericEntityService<PersonEntity, Stri
                 .listNoPaging().stream()
                 .map(PersonPositionEntity::getPositionId)
                 .collect(Collectors.toSet());
+
+        Map<String, DepartmentEntity> departmentCache = new HashMap<>();
+        Map<String, PositionEntity> positionCache = new HashMap<>();
+        Map<String, OrganizationalEntity> orgCache = new HashMap<>();
+        Map<String, DistrictEntity> districtCache = new HashMap<>();
+
         //获取所有职位,并得到根职位(树结构)
         List<PositionEntity> positionEntities = getAllChildrenAndReturnRootNode(positionDao, positionIds, PositionEntity::setChildren, rootPosList -> {
             //根据职位获取部门
             Set<String> departmentIds = rootPosList.stream().map(PositionEntity::getDepartmentId).collect(Collectors.toSet());
+            rootPosList.forEach(positionEntity -> positionCache.put(positionEntity.getId(), positionEntity));
             if (!CollectionUtils.isEmpty(departmentIds)) {
                 List<DepartmentEntity> departmentEntities = getAllChildrenAndReturnRootNode(departmentDao, departmentIds, DepartmentEntity::setChildren, rootDepList -> {
+                    rootDepList.forEach(departmentEntity -> departmentCache.put(departmentEntity.getId(), departmentEntity));
                     //根据部门获取机构
                     Set<String> orgIds = rootDepList.stream().map(DepartmentEntity::getOrgId).collect(Collectors.toSet());
                     if (!CollectionUtils.isEmpty(orgIds)) {
                         List<OrganizationalEntity> orgEntities = getAllChildrenAndReturnRootNode(organizationalDao, orgIds, OrganizationalEntity::setChildren, rootOrgList -> {
+                            rootOrgList.forEach(org -> orgCache.put(org.getId(), org));
                             //根据机构获取行政区域
                             Set<String> districtIds = rootOrgList.stream().map(OrganizationalEntity::getDistrictId).filter(Objects::nonNull).collect(Collectors.toSet());
                             if (!CollectionUtils.isEmpty(districtIds)) {
                                 List<DistrictEntity> districtEntities =
                                         getAllChildrenAndReturnRootNode(districtDao, districtIds, DistrictEntity::setChildren, rootDistrictList -> {
-
+                                            rootDistrictList.forEach(dist -> districtCache.put(dist.getId(), dist));
                                         });
                                 authorization.setDistrictIds(transformationTreeNode(null, districtEntities));
                             }
@@ -309,6 +325,49 @@ public class SimplePersonService extends GenericEntityService<PersonEntity, Stri
         });
         authorization.setPositionIds(transformationTreeNode(null, positionEntities));
 
+        Set<Position> positions = positionEntities.parallelStream()
+                .map(positionEntity -> {
+                    DepartmentEntity departmentEntity = departmentCache.get(positionEntity.getDepartmentId());
+                    if (departmentEntity == null) {
+                        return null;
+                    }
+                    OrganizationalEntity organizationalEntity = orgCache.get(departmentEntity.getOrgId());
+                    if (organizationalEntity == null) {
+                        return null;
+                    }
+                    DistrictEntity districtEntity = districtCache.get(organizationalEntity.getDistrictId());
+                    District district = districtEntity == null ? null : SimpleDistrict.builder()
+                            .code(districtEntity.getCode())
+                            .id(districtEntity.getId())
+                            .name(districtEntity.getName())
+                            .fullName(districtEntity.getFullName())
+                            .build();
+
+                    Organization organization = SimpleOrganization.builder()
+                            .id(organizationalEntity.getId())
+                            .name(organizationalEntity.getName())
+                            .fullName(organizationalEntity.getFullName())
+                            .code(organizationalEntity.getCode())
+                            .district(district)
+                            .build();
+                    Department department = SimpleDepartment
+                            .builder()
+                            .id(departmentEntity.getId())
+                            .name(departmentEntity.getName())
+                            .code(departmentEntity.getCode())
+                            .org(organization)
+                            .build();
+
+                    return SimplePosition
+                            .builder()
+                            .id(positionEntity.getId())
+                            .name(positionEntity.getName())
+                            .department(department)
+                            .code("")
+                            .build();
+                }).filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        authorization.setPositions(positions);
         //获取关系
         List<RelationInfoEntity> relationInfoList = DefaultDSLQueryService.createQuery(relationInfoDao)
                 .where(RelationInfoEntity.relationFrom, personId)
@@ -387,7 +446,7 @@ public class SimplePersonService extends GenericEntityService<PersonEntity, Stri
     }
 
     @Override
-    @Cacheable(cacheNames = "person", key = "'auth:user-id'+#userId")
+    @Cacheable(key = "'auth:user-id'+#userId")
     public PersonnelAuthorization getPersonnelAuthorizationByUserId(String userId) {
         PersonEntity entity = createQuery().where(PersonEntity.userId, userId).single();
         if (entity == null) {

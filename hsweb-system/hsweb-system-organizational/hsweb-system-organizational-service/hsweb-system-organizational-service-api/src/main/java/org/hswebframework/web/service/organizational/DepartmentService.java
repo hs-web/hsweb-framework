@@ -20,6 +20,8 @@ import org.hswebframework.web.entity.organizational.DepartmentEntity;
 import org.hswebframework.web.service.CrudService;
 import org.hswebframework.web.service.TreeService;
 
+import java.util.List;
+
 /**
  * 部门 服务类
  *
@@ -28,5 +30,11 @@ import org.hswebframework.web.service.TreeService;
 public interface DepartmentService extends
         TreeService<DepartmentEntity, String>
         , CrudService<DepartmentEntity, String> {
+
+    List<DepartmentEntity> selectByOrgId(String orgId);
+
+    DepartmentEntity selectByCode(String code);
+
+    List<DepartmentEntity> selectByName(String name);
 
 }

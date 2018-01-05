@@ -81,6 +81,12 @@ public interface PersonnelAuthorization extends Serializable {
      */
     Set<TreeNode<String>> getDepartmentIds();
 
+    Set<Position> getPositions();
+
+    default Optional<Position> getPosition(String id) {
+        return getPositions().stream().filter(position -> position.getId().equals(id)).findFirst();
+    }
+
     /**
      * @return 根地区ID
      */
