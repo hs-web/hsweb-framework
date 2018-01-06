@@ -4,7 +4,7 @@ import org.hswebframework.web.authorization.define.AuthorizingContext;
 import org.hswebframework.web.authorization.define.HandleType;
 import org.springframework.context.ApplicationEvent;
 
-public class AuthorizationHandleBeforeEvent extends ApplicationEvent implements AuthorizationEvent {
+public class AuthorizingHandleBeforeEvent extends ApplicationEvent implements AuthorizationEvent {
 
     private static final long serialVersionUID = -1095765748533721998L;
 
@@ -16,7 +16,7 @@ public class AuthorizationHandleBeforeEvent extends ApplicationEvent implements 
 
     private HandleType handleType;
 
-    public AuthorizationHandleBeforeEvent(AuthorizingContext context, HandleType handleType) {
+    public AuthorizingHandleBeforeEvent(AuthorizingContext context, HandleType handleType) {
         super(context);
         this.handleType = handleType;
     }

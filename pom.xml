@@ -249,11 +249,10 @@
     </build>
 
     <dependencies>
-        <dependency>
-            <groupId>io.reactivex.rxjava2</groupId>
-            <artifactId>rxjava</artifactId>
-            <version>2.1.8</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>io.reactivex.rxjava2</groupId>-->
+            <!--<artifactId>rxjava</artifactId>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -288,7 +287,7 @@
             <dependency>
                 <groupId>io.reactivex.rxjava2</groupId>
                 <artifactId>rxjava</artifactId>
-                <version>2.1.6</version>
+                <version>2.1.8</version>
             </dependency>
             <dependency>
                 <groupId>junit</groupId>

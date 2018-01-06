@@ -13,7 +13,7 @@ import org.hswebframework.web.authorization.define.AuthorizeDefinition;
 import org.hswebframework.web.authorization.define.AuthorizingContext;
 import org.hswebframework.web.authorization.define.HandleType;
 import org.hswebframework.web.authorization.exception.AccessDenyException;
-import org.hswebframework.web.authorization.listener.event.AuthorizationHandleBeforeEvent;
+import org.hswebframework.web.authorization.listener.event.AuthorizingHandleBeforeEvent;
 import org.hswebframework.web.boost.aop.context.MethodInterceptorContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,7 +65,7 @@ public class DefaultAuthorizingHandler implements AuthorizingHandler {
     }
     private boolean handleEvent(AuthorizingContext context,HandleType type){
         if(null!=eventPublisher) {
-            AuthorizationHandleBeforeEvent event = new AuthorizationHandleBeforeEvent(context, type);
+            AuthorizingHandleBeforeEvent event = new AuthorizingHandleBeforeEvent(context, type);
             eventPublisher.publishEvent(event);
             if (!event.isExecute()) {
                 if (event.isAllow()) {
