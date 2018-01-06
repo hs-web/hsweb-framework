@@ -8,12 +8,12 @@ import org.hswebframework.web.authorization.define.AuthorizingContext;
  * @author zhouhao
  */
 public interface AuthorizingHandler {
-    void handRDAC(AuthorizingContext context);
+    void handRBAC(AuthorizingContext context);
 
     void handleDataAccess(AuthorizingContext context);
 
     default void handle(AuthorizingContext context) {
-        handRDAC(context);
+        handRBAC(context);
         handleDataAccess(context);
     }
 }

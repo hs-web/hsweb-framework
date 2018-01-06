@@ -11,10 +11,14 @@ import org.hswebframework.web.authorization.access.DataAccessController;
 import org.hswebframework.web.authorization.annotation.Logical;
 import org.hswebframework.web.authorization.define.AuthorizeDefinition;
 import org.hswebframework.web.authorization.define.AuthorizingContext;
+import org.hswebframework.web.authorization.define.HandleType;
 import org.hswebframework.web.authorization.exception.AccessDenyException;
+import org.hswebframework.web.authorization.listener.event.AuthorizationHandleBeforeEvent;
 import org.hswebframework.web.boost.aop.context.MethodInterceptorContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.*;
 import java.util.function.Function;
@@ -30,6 +34,8 @@ public class DefaultAuthorizingHandler implements AuthorizingHandler {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
+    private ApplicationEventPublisher eventPublisher;
+
     public DefaultAuthorizingHandler(DataAccessController dataAccessController) {
         this.dataAccessController = dataAccessController;
     }
@@ -41,17 +47,40 @@ public class DefaultAuthorizingHandler implements AuthorizingHandler {
         this.dataAccessController = dataAccessController;
     }
 
-    @Override
-    public void handRDAC(AuthorizingContext context) {
+    @Autowired
+    public void setEventPublisher(ApplicationEventPublisher eventPublisher) {
+        this.eventPublisher = eventPublisher;
+    }
 
+    @Override
+    public void handRBAC(AuthorizingContext context) {
+        if(handleEvent(context,HandleType.RBAC)){
+            return;
+        }
         //进行rdac权限控制
         handleRdac(context.getAuthentication(), context.getDefinition());
         //表达式权限控制
         handleExpression(context.getAuthentication(), context.getDefinition(), context.getParamContext());
 
-
+    }
+    private boolean handleEvent(AuthorizingContext context,HandleType type){
+        if(null!=eventPublisher) {
+            AuthorizationHandleBeforeEvent event = new AuthorizationHandleBeforeEvent(context, type);
+            eventPublisher.publishEvent(event);
+            if (!event.isExecute()) {
+                if (event.isAllow()) {
+                    return true;
+                } else {
+                    throw new AccessDenyException(event.getMessage());
+                }
+            }
+        }
+        return false;
     }
     public void handleDataAccess(AuthorizingContext context) {
+        if(handleEvent(context,HandleType.DATA)){
+            return;
+        }
         if (dataAccessController == null) {
             logger.warn("dataAccessController is null,skip result access control!");
             return;

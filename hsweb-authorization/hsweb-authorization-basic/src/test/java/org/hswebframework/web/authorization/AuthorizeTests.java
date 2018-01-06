@@ -26,7 +26,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import java.util.*;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -111,7 +110,7 @@ public class AuthorizeTests {
         authorizingContext.setDefinition(definition);
         authorizingContext.setParamContext(queryById);
 
-        handler.handRDAC(authorizingContext);
+        handler.handRBAC(authorizingContext);
 
 
     }
