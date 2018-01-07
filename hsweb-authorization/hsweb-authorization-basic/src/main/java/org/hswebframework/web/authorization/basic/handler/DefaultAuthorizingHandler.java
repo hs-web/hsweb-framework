@@ -58,7 +58,7 @@ public class DefaultAuthorizingHandler implements AuthorizingHandler {
             return;
         }
         //进行rdac权限控制
-        handleRdac(context.getAuthentication(), context.getDefinition());
+        handleRBAC(context.getAuthentication(), context.getDefinition());
         //表达式权限控制
         handleExpression(context.getAuthentication(), context.getDefinition(), context.getParamContext());
 
@@ -78,9 +78,7 @@ public class DefaultAuthorizingHandler implements AuthorizingHandler {
         return false;
     }
     public void handleDataAccess(AuthorizingContext context) {
-        if(handleEvent(context,HandleType.DATA)){
-            return;
-        }
+
         if (dataAccessController == null) {
             logger.warn("dataAccessController is null,skip result access control!");
             return;
@@ -88,6 +86,10 @@ public class DefaultAuthorizingHandler implements AuthorizingHandler {
         if(context.getDefinition().getDataAccessDefinition()==null){
             return;
         }
+        if(handleEvent(context,HandleType.DATA)){
+            return;
+        }
+
         List<Permission> permission = context.getAuthentication().getPermissions()
                 .stream()
                 .filter(per -> context.getDefinition().getPermissions().contains(per.getId()))
@@ -140,7 +142,7 @@ public class DefaultAuthorizingHandler implements AuthorizingHandler {
         }
     }
 
-    protected void handleRdac(Authentication authentication, AuthorizeDefinition definition) {
+    protected void handleRBAC(Authentication authentication, AuthorizeDefinition definition) {
         boolean access = true;
         //多个设置时的判断逻辑
         Logical logical = definition.getLogical() == Logical.DEFAULT ? Logical.OR : definition.getLogical();
