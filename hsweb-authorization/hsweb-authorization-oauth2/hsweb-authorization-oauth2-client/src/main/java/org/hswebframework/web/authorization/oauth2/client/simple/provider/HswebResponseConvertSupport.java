@@ -33,8 +33,7 @@ import org.hswebframework.web.oauth2.core.ErrorType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -50,12 +49,15 @@ public class HswebResponseConvertSupport implements ResponseConvertForProviderDe
 
     Function<Object, Authentication> autzParser = obj -> convertAuthentication(JSON.toJSONString(obj));
 
+    private static final Set<String> springMvcErrorResponseKeys =
+            new HashSet<>(Arrays.asList("exception", "path", "error", "message", "timestamp", "status"));
+
     public HswebResponseConvertSupport(AuthenticationBuilderFactory authenticationBuilderFactory) {
         this.authenticationBuilderFactory = authenticationBuilderFactory;
     }
 
 
-    public Object tryConvertToObject(String json, Class type) {
+    public Object tryConvertToObject(String json, Class type, OAuth2Response response) {
         if (json.startsWith("{")) {
             if (ResponseMessage.class.isAssignableFrom(type)) {
                 return JSON.parseObject(json, type);
@@ -90,6 +92,9 @@ public class HswebResponseConvertSupport implements ResponseConvertForProviderDe
                 //return data;
                 return message.getObject("result", type);
             }
+            if (springMvcErrorResponseKeys.containsAll(message.keySet())) {
+                throw new OAuth2RequestException(ErrorType.SERVICE_ERROR, response);
+            }
             return message.toJavaObject(type);
         } else if (json.startsWith("[")) {
             if (type == Authentication.class) {
@@ -112,7 +117,7 @@ public class HswebResponseConvertSupport implements ResponseConvertForProviderDe
     public <T> T convert(OAuth2Response response, Class<T> type) {
         String json = response.asString();
 
-        Object data = tryConvertToObject(json, type);
+        Object data = tryConvertToObject(json, type, response);
         if (null == data) return null;
         if (type.isInstance(data)) {
             //success
@@ -132,7 +137,7 @@ public class HswebResponseConvertSupport implements ResponseConvertForProviderDe
     public <T> List<T> convertList(OAuth2Response response, Class<T> type) {
         String json = response.asString();
 
-        Object data = tryConvertToObject(json, type);
+        Object data = tryConvertToObject(json, type, response);
         if (null == data) return null;
         if (data instanceof List) {
             //success

@@ -110,6 +110,16 @@ public class RestControllerExceptionTranslator {
 
         return ResponseMessage.error(400, results.getResults().size() == 0 ? e.getMessage() : results.getResults().get(0).getMessage()).result(results.getResults());
     }
+
+    @ExceptionHandler(RuntimeException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseBody
+    ResponseMessage handleException(RuntimeException exception) {
+        logger.error(exception.getMessage(), exception);
+        return ResponseMessage.error(400, exception.getMessage());
+    }
+
+
 //    @ExceptionHandler(Throwable.class)
 //    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 //    @ResponseBody
