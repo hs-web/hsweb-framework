@@ -20,5 +20,5 @@ mybatis:
 server:
   port: 8080
 scheduler:
-  enable-cluster: true
+  enable-cluster: false
   execute-tags: core
