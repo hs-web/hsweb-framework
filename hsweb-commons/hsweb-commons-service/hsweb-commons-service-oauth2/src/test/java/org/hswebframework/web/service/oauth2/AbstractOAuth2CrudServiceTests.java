@@ -49,9 +49,9 @@ public class AbstractOAuth2CrudServiceTests {
         when(oAuth2Session.request("/test/")).thenReturn(
                 createFixedResponseRequest(
                         whenRequest("get", ResponseMessage.ok(PagerResult.of(1, Arrays.asList(entity)))),
-                        whenRequest("post", ResponseMessage.ok("test"))
+                        whenRequest("post", ResponseMessage.ok("test")),
+                        whenRequest("patch", ResponseMessage.ok("test"))
                 ));
-
 
         when(oAuth2Session.request("/test/test")).thenReturn(
                 createFixedResponseRequest(
@@ -59,9 +59,21 @@ public class AbstractOAuth2CrudServiceTests {
                         , whenRequest("put", ResponseMessage.ok(1))
                         , whenRequest("delete", ResponseMessage.ok(1))));
 
+        when(oAuth2Session.request("/test/no-paging")).thenReturn(
+                createFixedResponseRequest(
+                        whenRequest("get", ResponseMessage.ok(Arrays.asList(entity)))));
+
         when(oAuth2Session.request("/test/all")).thenReturn(
                 createFixedResponseRequest(
                         whenRequest("get", ResponseMessage.ok(Arrays.asList(entity)))));
+
+        when(oAuth2Session.request("/test/single")).thenReturn(
+                createFixedResponseRequest(
+                        whenRequest("get", ResponseMessage.ok(entity))));
+
+        when(oAuth2Session.request("/test/count")).thenReturn(
+                createFixedResponseRequest(
+                        whenRequest("get", ResponseMessage.ok(1))));
 
         when(oAuth2Session.request("/test/ids")).thenReturn(
                 createFixedResponseRequest(
@@ -103,6 +115,8 @@ public class AbstractOAuth2CrudServiceTests {
         i = testEntityService.deleteByPk("test");
         Assert.assertEquals(i, 1);
 
+        String saveId = testEntityService.saveOrUpdate(entity);
+        Assert.assertNotNull(saveId, id);
         try {
             testEntityService.updateByPk(Arrays.asList(entity));
             Assert.assertTrue(false);
@@ -126,8 +140,16 @@ public class AbstractOAuth2CrudServiceTests {
         System.out.println(JSON.toJSONString(entity));
 
         List<TestEntity> all = testEntityService.select();
+        Assert.assertNotNull(all);
 
-        System.out.println(JSON.toJSONString(all));
+        List<TestEntity> noPaging = testEntityService.select(QueryParamEntity.empty());
+        Assert.assertNotNull(noPaging);
+
+        int total = testEntityService.count(QueryParamEntity.empty());
+        Assert.assertEquals(total, 1);
+
+        total = testEntityService.count();
+        Assert.assertEquals(total, 1);
 
     }
 

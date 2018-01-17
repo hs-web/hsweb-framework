@@ -38,12 +38,6 @@ public abstract class AbstractOAuth2CrudService<E, PK> implements CreateEntitySe
     }
 
     @Override
-    public abstract String getServiceId();
-
-    @Override
-    public abstract String getUriPrefix();
-
-    @Override
     public Class<E> getEntityType() {
         return entityType;
     }
