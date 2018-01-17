@@ -1,21 +1,15 @@
 package org.hswebframework.web.authorization.basic.configuration;
 
-import org.hswebframework.web.authorization.AuthenticationHolder;
-import org.hswebframework.web.authorization.AuthenticationManager;
-import org.hswebframework.web.authorization.AuthenticationSupplier;
 import org.hswebframework.web.authorization.access.DataAccessController;
 import org.hswebframework.web.authorization.access.DataAccessHandler;
 import org.hswebframework.web.authorization.basic.handler.DefaultAuthorizingHandler;
 import org.hswebframework.web.authorization.basic.handler.access.DefaultDataAccessController;
 import org.hswebframework.web.authorization.basic.web.*;
 import org.hswebframework.web.authorization.basic.web.session.UserTokenAutoExpiredListener;
-import org.hswebframework.web.authorization.token.DefaultUserTokenManager;
-import org.hswebframework.web.authorization.token.UserTokenAuthenticationSupplier;
 import org.hswebframework.web.authorization.token.UserTokenManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;

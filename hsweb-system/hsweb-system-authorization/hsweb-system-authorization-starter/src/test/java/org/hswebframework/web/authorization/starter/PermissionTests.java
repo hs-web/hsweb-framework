@@ -15,7 +15,7 @@
  *
  */
 
-package org.hswebframework.web.starter.authorization;
+package org.hswebframework.web.authorization.starter;
 
 import org.hswebframework.ezorm.rdb.executor.SqlExecutor;
 import org.hswebframework.web.authorization.Permission;

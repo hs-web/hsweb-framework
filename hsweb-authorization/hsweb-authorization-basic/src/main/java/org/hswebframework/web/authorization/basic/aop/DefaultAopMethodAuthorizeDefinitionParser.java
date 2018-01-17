@@ -55,7 +55,7 @@ public class DefaultAopMethodAuthorizeDefinitionParser implements AopMethodAutho
         if ((definition instanceof EmptyAuthorizeDefinition)) {
             return null;
         }
-        if(null!=definition){
+        if (null != definition) {
             return definition;
         }
         //使用自定义
@@ -88,7 +88,8 @@ public class DefaultAopMethodAuthorizeDefinitionParser implements AopMethodAutho
             return null;
         }
         DefaultBasicAuthorizeDefinition authorizeDefinition = new DefaultBasicAuthorizeDefinition();
-
+        authorizeDefinition.setTargetClass(target);
+        authorizeDefinition.setTargetMethod(method);
         if (methodAuth == null || methodAuth.merge()) {
             authorizeDefinition.put(classAuth);
         }
@@ -137,7 +138,7 @@ public class DefaultAopMethodAuthorizeDefinitionParser implements AopMethodAutho
     }
 
     class CacheKey {
-        private Class type;
+        private Class  type;
         private Method method;
 
         public CacheKey(Class type, Method method) {

@@ -1,4 +1,4 @@
-package org.hswebframework.web.authorization.basic.configuration;
+package org.hswebframework.web.starter;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;

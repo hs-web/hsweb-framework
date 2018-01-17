@@ -15,7 +15,7 @@
  *
  */
 
-package org.hswebframework.web.starter.authorization;
+package org.hswebframework.web.authorization.starter;
 
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.AuthenticationInitializeService;

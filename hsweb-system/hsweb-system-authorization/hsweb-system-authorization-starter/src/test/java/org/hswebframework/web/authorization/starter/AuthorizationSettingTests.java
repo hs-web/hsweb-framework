@@ -16,7 +16,7 @@
  *
  */
 
-package org.hswebframework.web.starter.authorization;
+package org.hswebframework.web.authorization.starter;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;

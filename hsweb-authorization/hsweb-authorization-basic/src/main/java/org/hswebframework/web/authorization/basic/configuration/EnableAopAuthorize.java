@@ -11,7 +11,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
-@ImportAutoConfiguration(AopAuthorizeAutoConfiguration.class)
+@ImportAutoConfiguration({AopAuthorizeAutoConfiguration.class, AuthorizingHandlerAutoConfiguration.class})
 public @interface EnableAopAuthorize {
 
 }
