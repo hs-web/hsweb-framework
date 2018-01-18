@@ -44,6 +44,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
@@ -167,8 +168,18 @@ public class QuartzJobServiceImpl extends AbstractServiceImpl<QuartzJob, String>
     }
 
     @Override
-    @Transactional
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public Object executeNoTx(String id, Map<String, Object> var) {
+        return doExecute(id, var);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
     public Object execute(String id, Map<String, Object> var) {
+        return doExecute(id, var);
+    }
+
+    protected Object doExecute(String id, Map<String, Object> var) {
         Assert.notNull(id, "定时任务ID错误");
         QuartzJob job = selectByPk(id);
         Assert.notNull(job, "任务不存在");

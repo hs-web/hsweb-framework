@@ -36,4 +36,7 @@ public interface QuartzJobService extends GenericService<QuartzJob, String> {
     List<Date> getExecTimes(String cron, int number);
 
     Object execute(String id, Map<String,Object> var);
+
+
+    Object executeNoTx(String id, Map<String,Object> var);
 }

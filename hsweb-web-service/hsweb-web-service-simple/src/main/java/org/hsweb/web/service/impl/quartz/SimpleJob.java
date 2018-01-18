@@ -30,10 +30,10 @@ import java.util.Map;
 @DisallowConcurrentExecution
 public class SimpleJob implements Job {
     protected Logger logger = LoggerFactory.getLogger(this.getClass());
-    protected QuartzJobService        quartzJobService;
+    protected QuartzJobService quartzJobService;
     protected QuartzJobHistoryService quartzJobHistoryService;
-    protected Map<String, Object>     defaultVar;
-    protected User                    defaultUser;
+    protected Map<String, Object> defaultVar;
+    protected User defaultUser;
 
     /**
      * 子类必须实现此构造方法，否则无法创建任务
@@ -52,11 +52,16 @@ public class SimpleJob implements Job {
             WebUtil.setCurrentUser(defaultUser);
             JobDataMap jobDataMap = context.getJobDetail().getJobDataMap();
             String id = jobDataMap.getString(SimpleJobFactory.QUARTZ_ID_KEY);
+            boolean tx = jobDataMap.getBooleanFromString("tx");
             Map<String, Object> var = getVar();
             var.put("context", context);
             var.put("user", defaultUser);
             try {
-                quartzJobService.execute(id, var);
+                if (tx) {
+                    quartzJobService.execute(id, var);
+                } else {
+                    quartzJobService.executeNoTx(id, var);
+                }
             } catch (Throwable e) {
                 throw new JobExecutionException(e);
             }

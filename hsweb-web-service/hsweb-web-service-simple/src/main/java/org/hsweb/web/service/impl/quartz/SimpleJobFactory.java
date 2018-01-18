@@ -41,7 +41,7 @@ import java.util.Map;
 public class SimpleJobFactory implements JobFactory {
 
     public static final String QUARTZ_ID_KEY = "quartz.id";
-    protected           Logger logger        = LoggerFactory.getLogger(this.getClass());
+    protected Logger logger = LoggerFactory.getLogger(this.getClass());
     @Resource
     private QuartzJobService quartzJobService;
 
@@ -62,6 +62,8 @@ public class SimpleJobFactory implements JobFactory {
     @Autowired(required = false)
     private Map<String, ExpressionScopeBean> expressionScopeBeanMap;
 
+    private User user;
+
     @Override
     public Job newJob(TriggerFiredBundle bundle, Scheduler scheduler) throws SchedulerException {
         Map<String, Object> data = bundle.getJobDetail().getJobDataMap();
@@ -70,16 +72,20 @@ public class SimpleJobFactory implements JobFactory {
             String id = (String) data.get(QUARTZ_ID_KEY);
             Assert.notNull(id);
             try {
-                SimpleJob job = (SimpleJob) jobClass.getConstructor(QuartzJobService.class, QuartzJobHistoryService.class).newInstance(quartzJobService, quartzJobHistoryService);
+                SimpleJob job = (SimpleJob) jobClass.getConstructor(QuartzJobService.class, QuartzJobHistoryService.class)
+                        .newInstance(quartzJobService, quartzJobHistoryService);
                 String username = configService.get("quartz", "executeUserName", "admin");
-                User user = userService.selectByUserName(username);
-                if (user != null) {
-                    user.initRoleInfo();
-                    job.setDefaultUser(user);
-                } else {
-                    //未找到用户名
-                    logger.warn("job executor user:{} not found!", username);
+                if (user == null || !user.getUsername().equals(username)) {
+                    user = userService.selectByUserName(username);
+                    if (user != null) {
+                        user.initRoleInfo();
+                        job.setDefaultUser(user);
+                    } else {
+                        //未找到用户名
+                        logger.warn("job executor user:{} not found!", username);
+                    }
                 }
+
                 Map<String, Object> var = new HashMap<>();
                 if (expressionScopeBeanMap != null)
                     var.putAll(expressionScopeBeanMap);
