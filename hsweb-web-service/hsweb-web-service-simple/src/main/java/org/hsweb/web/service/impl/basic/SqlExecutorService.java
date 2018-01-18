@@ -37,7 +37,16 @@ public class SqlExecutorService extends AbstractJdbcSqlExecutor implements Expre
         if (logger.isDebugEnabled()) {
             logger.debug("Releasing JDBC Connection [{}]", connection);
         }
-        DataSourceUtils.releaseConnection(connection, dataSource);
+        try {
+            DataSourceUtils.doReleaseConnection(connection,dataSource);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            try {
+                connection.close();
+            } catch (Exception e2) {
+                logger.error(e2.getMessage(), e2);
+            }
+        }
     }
 
     @Override

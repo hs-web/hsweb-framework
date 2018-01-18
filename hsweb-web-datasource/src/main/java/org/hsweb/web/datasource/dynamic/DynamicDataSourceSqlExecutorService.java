@@ -59,7 +59,16 @@ public class DynamicDataSourceSqlExecutorService extends AbstractJdbcSqlExecutor
         if (logger.isDebugEnabled()) {
             logger.debug("Releasing DataSource ({}) JDBC Connection [{}]", DataSourceHolder.getActiveSourceId(), connection);
         }
-        DataSourceUtils.releaseConnection(connection, dynamicDataSource.getActiveDataSource());
+        try {
+            DataSourceUtils.doReleaseConnection(connection, dynamicDataSource.getActiveDataSource());
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            try {
+                connection.close();
+            } catch (Exception e2) {
+                logger.error(e2.getMessage(), e2);
+            }
+        }
     }
 
     @Override
