@@ -79,12 +79,12 @@ public class SimpleJobFactory implements JobFactory {
                     user = userService.selectByUserName(username);
                     if (user != null) {
                         user.initRoleInfo();
-                        job.setDefaultUser(user);
                     } else {
                         //未找到用户名
                         logger.warn("job executor user:{} not found!", username);
                     }
                 }
+                job.setDefaultUser(user);
 
                 Map<String, Object> var = new HashMap<>();
                 if (expressionScopeBeanMap != null)
