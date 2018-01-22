@@ -1,5 +1,5 @@
 ## hsweb  3.0
-[![Maven Central](https://img.shields.io/maven-central/v/org.hswebframework/hsweb-framework.svg?style=plastic)](http://search.maven.org/#search%7Cga%7C1%7Chswebframework)
+[![Maven metadata URI](https://img.shields.io/maven-metadata/v/http/nexus.hsweb.me/content/groups/public/org/hswebframework/web/hsweb-framework/maven-metadata.xml.svg)](http://nexus.hsweb.me/#nexus-search;quick~hsweb-framework)
 [![Codecov](https://codecov.io/gh/hs-web/hsweb-framework/branch/master/graph/badge.svg)](https://codecov.io/gh/hs-web/hsweb-framework/branch/master)
 [![sonar](https://sonarcloud.io/api/badges/measure?key=org.hswebframework.web:hsweb-framework&metric=bugs)](https://sonarcloud.io/dashboard?id=org.hswebframework.web%3Ahsweb-framework)
 [![Build Status](https://travis-ci.org/hs-web/hsweb-framework.svg?branch=master)](https://travis-ci.org/hs-web/hsweb-framework)
