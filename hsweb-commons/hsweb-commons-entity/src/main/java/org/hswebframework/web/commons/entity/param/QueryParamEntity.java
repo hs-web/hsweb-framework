@@ -2,6 +2,7 @@ package org.hswebframework.web.commons.entity.param;
 
 import org.hswebframework.ezorm.core.param.QueryParam;
 import org.hswebframework.web.commons.entity.Entity;
+import org.hswebframework.web.commons.entity.QueryEntity;
 
 /**
  * 查询参数实体,使用<a href="https://github.com/hs-web/hsweb-easy-orm">easyorm</a>进行动态查询参数构建<br>
@@ -18,7 +19,7 @@ import org.hswebframework.web.commons.entity.Entity;
  * @see Entity
  * @since 3.0
  */
-public class QueryParamEntity extends QueryParam implements Entity {
+public class QueryParamEntity extends QueryParam implements QueryEntity {
 
     /**
      * 创建一个空的查询参数实体,该实体无任何参数.
