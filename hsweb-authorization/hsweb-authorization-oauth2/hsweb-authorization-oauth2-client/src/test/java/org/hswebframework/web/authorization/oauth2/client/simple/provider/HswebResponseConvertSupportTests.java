@@ -20,7 +20,7 @@ import static org.junit.Assert.*;
  * @author zhouhao
  * @since
  */
-public class HswebResponseConvertSupportTest {
+public class HswebResponseConvertSupportTests {
 
     private HswebResponseConvertSupport convertSupport = new HswebResponseConvertSupport(new SimpleAuthenticationBuilderFactory(new SimpleDataAccessConfigBuilderFactory()));
 

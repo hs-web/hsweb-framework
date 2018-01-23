@@ -2,8 +2,13 @@ language: java
 sudo: false
 jdk:
   - oraclejdk8
+addons:
+  sonarcloud:
+    organization: "hsweb"
+    token:
+      secure: "fba01e9fb57104fd0cfbed380e8c90301e35ff09"
 script:
-  - mvn test
+  - mvn test sonar:sonar
 after_success:
   - bash <(curl -s https://codecov.io/bash)
 cache:
