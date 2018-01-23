@@ -1,12 +1,9 @@
 package org.hswebframework.web.counter.redis;
 
-import org.hswebframework.web.concurrent.counter.Counter;
 import org.hswebframework.web.concurrent.counter.CounterManager;
 import org.junit.Assert;
 import org.redisson.Redisson;
 import org.redisson.config.Config;
-
-import static org.junit.Assert.*;
 
 /**
  * TODO 完成注释
@@ -18,7 +15,7 @@ public class RedissonCounterTest {
     public static void main(String[] args) throws InterruptedException {
         Config config = new Config();
 //        config.setUseLinuxNativeEpoll(true);
-        config.useSingleServer().setAddress("127.0.0.1:6379");
+        config.useSingleServer().setAddress("redis://127.0.0.1:6379");
         Redisson redisson = (Redisson) Redisson.create(config);
 
         CounterManager counterManager = new RedissonCounterManager(redisson);
