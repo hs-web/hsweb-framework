@@ -1,23 +1,24 @@
 package org.hswebframework.web.service;
 
 import org.hswebframework.web.commons.entity.PagerResult;
+import org.hswebframework.web.commons.entity.factory.MapperEntityFactory;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.dao.CrudDao;
+import org.hswebframework.web.validate.ValidationException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
+import javax.validation.Validation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 /**
@@ -37,39 +38,96 @@ public class GenericEntityServiceTest {
 
     @Before
     public void init() {
+        entityService.setEntityFactory(new MapperEntityFactory());
+        entityService.setValidator(Validation.buildDefaultValidatorFactory().getValidator());
 
-        when(dao.query(queryParamEntity)).then((Answer<List<TestEntity>>) invocationOnMock -> new ArrayList<>(Arrays.asList(TestEntity.builder()
+        TestEntity entity = TestEntity.builder()
                 .age((byte) 10)
                 .enabled(true)
                 .name("test")
-                .build())));
+                .build();
+        entity.setId("testId");
 
-        when(dao.count(queryParamEntity)).thenReturn(1);
+        when(dao.query(any()))
+                .then((Answer<List<TestEntity>>) invocationOnMock -> new ArrayList<>(Arrays.asList(entity)));
 
-        doAnswer(invocationOnMock -> {
-            Assert.assertNotEquals(invocationOnMock.getArguments().length, 1);
-            Assert.assertNotNull(invocationOnMock.getArguments()[0]);
-            return null;
-        }).when(dao).insert(anyObject());
+        when(dao.count(any())).thenReturn(1);
+
+        when(dao.update(any())).thenReturn(1);
+
+        when(dao.delete(any())).thenReturn(1);
+        when(dao.deleteByPk("test")).thenReturn(1);
+
+        doNothing().when(dao).insert(anyObject());
+
+    }
+
+    @Test
+    public void testSimple() {
+        Assert.assertEquals(entityService.getEntityType(), TestEntity.class);
+
+        Assert.assertEquals(entityService.getEntityInstanceType(), TestEntity.class);
+
+        Assert.assertEquals(entityService.getPrimaryKeyType(), String.class);
     }
 
     @Test
     public void testQuery() {
         PagerResult<TestEntity> result = entityService.selectPager(queryParamEntity);
-
         Assert.assertEquals(result.getTotal(), 1);
         Assert.assertEquals(result.getData().size(), 1);
 
+        TestEntity entity = entityService.selectByPk(result.getData().get(0).getId());
+        Assert.assertNotNull(entity);
+
+        List<TestEntity> testEntities = entityService.selectByPk(Arrays.asList(result.getData().get(0).getId()));
+        Assert.assertTrue(!testEntities.isEmpty());
+    }
+
+
+    @Test
+    public void testInsert() {
+        TestEntity testEntity = TestEntity.builder()
+                .age((byte) 1)
+                .enabled(true)
+//                .name("测试")
+                .build();
+        try {
+            entityService.insert(testEntity);
+            Assert.assertFalse(true);
+        } catch (ValidationException e) {
+            Assert.assertFalse(e.getResults().isEmpty());
+            Assert.assertEquals(e.getResults().get(0).getField(), "name");
+            testEntity.setId(null);
+        }
+        testEntity.setName("测试");
+        String id = entityService.insert(testEntity);
+        Assert.assertNotNull(id);
+    }
+
+    @Test
+    public void testUpdate() {
         TestEntity testEntity = TestEntity.builder()
                 .age((byte) 1)
                 .enabled(true)
                 .name("测试")
                 .build();
+        testEntity.setId("testEntity");
 
-        entityService.insert(testEntity);
-
-        Assert.assertNotNull(testEntity.getId());
-
-        System.out.println(result.getTotal());
+        int i = entityService.updateByPk("testEntity", testEntity);
+        entityService.updateByPk(testEntity);
+        entityService.updateByPk(Arrays.asList(testEntity));
+        String id = entityService.saveOrUpdate(testEntity);
+        Assert.assertEquals(id, testEntity.getId());
+        Assert.assertEquals(i, 1);
     }
+
+    @Test
+    public void testDelete() {
+        int i = entityService.deleteByPk("test");
+        Assert.assertEquals(i, 1);
+        i = entityService.deleteByPk("test2");
+        Assert.assertEquals(i, 0);
+    }
+
 }
