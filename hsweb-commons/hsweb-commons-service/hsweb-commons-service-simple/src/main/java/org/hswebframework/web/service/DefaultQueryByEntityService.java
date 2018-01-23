@@ -110,7 +110,7 @@ public interface DefaultQueryByEntityService<E>
             ((QueryParamEntity) param).doPaging(0, 1);
         }
         List<E> list = this.select(param);
-        if (list.size() == 0) {
+        if (list.isEmpty()) {
             return null;
         } else {
             return list.get(0);

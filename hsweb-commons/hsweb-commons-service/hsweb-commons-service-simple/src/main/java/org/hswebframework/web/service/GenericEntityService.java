@@ -59,9 +59,10 @@ public abstract class GenericEntityService<E extends GenericEntity<PK>, PK>
     @Override
     public int deleteByPk(PK pk) {
         Assert.notNull(pk, "parameter can not be null");
-        return createDelete()
-                .where(GenericEntity.id, pk)
-                .exec();
+       return  getDao().deleteByPk(pk);
+//        return createDelete()
+//                .where(GenericEntity.id, pk)
+//                .exec();
     }
 
     @Override
@@ -108,7 +109,8 @@ public abstract class GenericEntityService<E extends GenericEntity<PK>, PK>
             }
             tryValidateProperty(selectByPk(entity.getId()) == null, "id", entity.getId() + "已存在");
         }
-        if (entity.getId() == null) {
+
+        if (entity.getId() == null && getIDGenerator() != null) {
             entity.setId(getIDGenerator().generate());
         }
         tryValidate(entity, CreateGroup.class);
