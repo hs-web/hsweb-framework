@@ -1,6 +1,7 @@
 package org.hswebframework.web.dict.defaults;
 
 import org.hswebframework.web.dict.*;
+import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -26,11 +27,9 @@ public class DefaultDictDefineRepository implements DictDefineRepository {
         if (type == Object.class) {
             return Collections.emptyList();
         }
-        List<Field> lst = new ArrayList<>();
-        lst.addAll(Arrays.asList(type.getDeclaredFields()));
-        lst.addAll(parseField(type.getSuperclass()));
-
-        return lst;
+        List<Field> fields=new ArrayList<>();
+        ReflectionUtils.doWithFields(type, fields::add);
+        return fields;
     }
 
     @Override

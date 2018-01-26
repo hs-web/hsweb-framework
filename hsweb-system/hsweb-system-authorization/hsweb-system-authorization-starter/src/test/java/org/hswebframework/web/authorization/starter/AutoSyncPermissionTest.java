@@ -8,38 +8,27 @@ import org.hswebframework.web.authorization.basic.aop.AopMethodAuthorizeDefiniti
 import org.hswebframework.web.authorization.basic.aop.DefaultAopMethodAuthorizeDefinitionParser;
 import org.hswebframework.web.authorization.define.AuthorizeDefinition;
 import org.hswebframework.web.authorization.define.AuthorizeDefinitionInitializedEvent;
-import org.hswebframework.web.commons.entity.GenericEntity;
 import org.hswebframework.web.commons.entity.SimpleGenericEntity;
-import org.hswebframework.web.commons.entity.factory.EntityFactory;
 import org.hswebframework.web.commons.entity.factory.MapperEntityFactory;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
-import org.hswebframework.web.controller.GenericEntityController;
 import org.hswebframework.web.controller.SimpleGenericEntityController;
-import org.hswebframework.web.controller.authorization.UserController;
 import org.hswebframework.web.entity.authorization.PermissionEntity;
 import org.hswebframework.web.service.CrudService;
 import org.hswebframework.web.service.authorization.PermissionService;
-import org.hswebframework.web.tests.SimpleWebApplicationTests;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.mockito.stubbing.Answer;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 /**

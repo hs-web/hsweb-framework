@@ -17,6 +17,7 @@ import org.hswebframework.web.entity.authorization.PermissionEntity;
 import org.hswebframework.web.service.authorization.PermissionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
+import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -111,11 +112,12 @@ public class AutoSyncPermission implements ApplicationListener<AuthorizeDefiniti
             if (tmp instanceof AopAuthorizeDefinition) {
                 AopAuthorizeDefinition aopAuthorizeDefinition = ((AopAuthorizeDefinition) tmp);
                 Class type = aopAuthorizeDefinition.getTargetClass();
-                Class genType = ClassUtils.getGenericType(type);
+                Class genType = entityFactory.getInstanceType(ClassUtils.getGenericType(type));
                 List<OptionalField> optionalFields = new ArrayList<>();
                 entity.setOptionalFields(optionalFields);
                 if (genType != Object.class) {
-                    Field[] fields = genType.getDeclaredFields();
+                    List<Field> fields=new ArrayList<>();
+                    ReflectionUtils.doWithFields(genType, fields::add);
                     for (Field field : fields) {
                         if ("id".equals(field.getName())) {
                             continue;
