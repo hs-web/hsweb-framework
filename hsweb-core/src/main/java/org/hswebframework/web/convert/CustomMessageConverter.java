@@ -2,7 +2,7 @@ package org.hswebframework.web.convert;
 
 /**
  * @author zhouhao
- * @since
+ * @since 3.0
  */
 public interface CustomMessageConverter {
     boolean support(Class clazz);
