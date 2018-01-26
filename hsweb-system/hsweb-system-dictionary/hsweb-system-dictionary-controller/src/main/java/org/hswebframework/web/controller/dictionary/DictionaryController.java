@@ -21,6 +21,7 @@ import io.swagger.annotations.Api;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.controller.GenericEntityController;
+import org.hswebframework.web.controller.SimpleGenericEntityController;
 import org.hswebframework.web.entity.dictionary.DictionaryEntity;
 import org.hswebframework.web.entity.dictionary.DictionaryItemEntity;
 import org.hswebframework.web.logging.AccessLogger;
@@ -36,16 +37,11 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("${hsweb.web.mappings.dictionary:dictionary}")
-@Authorize(permission = "dictionary",description = "数据字典管理")
-@Api(value = "数据字典",tags = "数据字典-字典配置")
-public class DictionaryController implements GenericEntityController<DictionaryEntity, String, QueryParamEntity, DictionaryEntity> {
+@Authorize(permission = "dictionary", description = "数据字典管理")
+@Api(value = "数据字典", tags = "数据字典-字典配置")
+public class DictionaryController implements SimpleGenericEntityController<DictionaryEntity, String, QueryParamEntity> {
 
     private DictionaryService dictionaryService;
-
-    @Override
-    public DictionaryEntity modelToEntity(DictionaryEntity model, DictionaryEntity entity) {
-        return model;
-    }
 
     @Autowired
     public void setDictionaryService(DictionaryService dictionaryService) {

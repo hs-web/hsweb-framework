@@ -12,9 +12,8 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
+ * @since 3.0
  */
 public class SimpleSingleDictParser implements SingleDictParser {
 

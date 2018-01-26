@@ -84,7 +84,10 @@ public class TestController implements QueryController<UserEntity, String, Query
     public ResponseMessage<PersonnelAuthorization> testPersonnel() {
         return ResponseMessage.ok(PersonnelAuthorization.current().orElseThrow(UnAuthorizedException::new));
     }
-
+    @PostMapping("/test/testDict")
+    public ResponseMessage<TestEntity> testPersonnel(@RequestBody TestEntity entity) {
+        return ResponseMessage.ok(entity);
+    }
     @Override
     public TestService getService() {
         return new TestService();
@@ -134,10 +137,5 @@ public class TestController implements QueryController<UserEntity, String, Query
         public UserEntity selectSingle(Entity param) {
             return null;
         }
-    }
-
-    public static void main(String[] args) {
-        String id =org.apache.commons.codec.binary.Base64.encodeBase64String("test".getBytes());
-        System.out.println(id);
     }
 }
