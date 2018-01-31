@@ -87,12 +87,12 @@ import java.util.stream.Stream;
 public class SpringBootExample
         implements CommandLineRunner ,ApplicationListener<AuthorizeDefinitionInitializedEvent>{
 
-    @Bean
-    public AopMethodAuthorizeDefinitionCustomizerParser customizerParser(){
-        //自定义权限声明
-        //所有控制都通过
-        return (type,method,context) -> EmptyAuthorizeDefinition.instance;
-    }
+//    @Bean
+//    public AopMethodAuthorizeDefinitionCustomizerParser customizerParser(){
+//        //自定义权限声明
+//        //所有控制都通过
+//        return (type,method,context) -> EmptyAuthorizeDefinition.instance;
+//    }
 
     @Bean
     public AccessLoggerListener accessLoggerListener() {

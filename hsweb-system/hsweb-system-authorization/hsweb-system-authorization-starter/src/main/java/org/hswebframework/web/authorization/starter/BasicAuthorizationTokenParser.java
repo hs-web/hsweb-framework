@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Base64;
 import org.hswebframework.web.authorization.basic.web.AuthorizedToken;
 import org.hswebframework.web.authorization.basic.web.ParsedToken;
+import org.hswebframework.web.authorization.basic.web.UserTokenForTypeParser;
 import org.hswebframework.web.authorization.basic.web.UserTokenParser;
 import org.hswebframework.web.authorization.token.UserToken;
 import org.hswebframework.web.authorization.token.UserTokenManager;
@@ -12,11 +13,16 @@ import org.hswebframework.web.service.authorization.UserService;
 
 import javax.servlet.http.HttpServletRequest;
 
-public class BasicAuthorizationTokenParser implements UserTokenParser {
+public class BasicAuthorizationTokenParser implements UserTokenForTypeParser {
 
     private UserService userService;
 
     private UserTokenManager userTokenManager;
+
+    @Override
+    public String getTokenType() {
+        return "basic";
+    }
 
     public BasicAuthorizationTokenParser(UserService userService, UserTokenManager userTokenManager) {
         this.userService = userService;
@@ -31,7 +37,7 @@ public class BasicAuthorizationTokenParser implements UserTokenParser {
         }
         if (authorization.contains(" ")) {
             String[] info = authorization.split("[ ]");
-            if (info[0].equalsIgnoreCase("Basic")) {
+            if (info[0].equalsIgnoreCase(getTokenType())) {
                 authorization = info[1];
             }
         }
@@ -47,7 +53,7 @@ public class BasicAuthorizationTokenParser implements UserTokenParser {
 
                     @Override
                     public String getType() {
-                        return "basic";
+                        return getTokenType();
                     }
                 };
             }
@@ -68,7 +74,7 @@ public class BasicAuthorizationTokenParser implements UserTokenParser {
 
                         @Override
                         public String getType() {
-                            return "basic";
+                            return getTokenType();
                         }
 
                         @Override

@@ -1,8 +1,12 @@
 package org.hswebframework.web.authorization.basic.web;
 
+import org.hswebframework.web.authorization.basic.aop.AopMethodAuthorizeDefinitionParser;
+import org.hswebframework.web.authorization.define.AuthorizeDefinition;
 import org.hswebframework.web.authorization.token.UserToken;
 import org.hswebframework.web.authorization.token.UserTokenHolder;
 import org.hswebframework.web.authorization.token.UserTokenManager;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import javax.servlet.http.HttpServletRequest;
@@ -22,9 +26,18 @@ public class WebUserTokenInterceptor extends HandlerInterceptorAdapter {
 
     private List<UserTokenParser> userTokenParser;
 
-    public WebUserTokenInterceptor(UserTokenManager userTokenManager, List<UserTokenParser> userTokenParser) {
+    private AopMethodAuthorizeDefinitionParser parser;
+
+    private boolean enableBasicAuthorization = false;
+
+    public WebUserTokenInterceptor(UserTokenManager userTokenManager, List<UserTokenParser> userTokenParser,AopMethodAuthorizeDefinitionParser definitionParser) {
         this.userTokenManager = userTokenManager;
         this.userTokenParser = userTokenParser;
+        this.parser=definitionParser;
+
+        enableBasicAuthorization = userTokenParser.stream()
+                .filter(UserTokenForTypeParser.class::isInstance)
+                .anyMatch(parser -> "basic".equalsIgnoreCase(((UserTokenForTypeParser) parser).getTokenType()));
     }
 
     @Override
@@ -35,6 +48,13 @@ public class WebUserTokenInterceptor extends HandlerInterceptorAdapter {
                 .collect(Collectors.toList());
 
         if (tokens.isEmpty()) {
+            if (enableBasicAuthorization && handler instanceof HandlerMethod) {
+                HandlerMethod method = ((HandlerMethod) handler);
+                AuthorizeDefinition definition = parser.parse(method.getBeanType(), method.getMethod());
+                if (null != definition) {
+                    response.addHeader("WWW-Authenticate", " Basic realm=\"\"");
+                }
+            }
             return true;
         }
         for (ParsedToken parsedToken : tokens) {

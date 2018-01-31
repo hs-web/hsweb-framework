@@ -35,9 +35,11 @@ public class JwtTokenParser implements UserTokenParser {
             if (!StringUtils.isEmpty(headerToken)) {
                 if (headerToken.contains(" ")) {
                     String[] auth = headerToken.split("[ ]");
-                    // if(auth[0].equalsIgnoreCase("jwt")){
-                    headerToken = auth[1];
-                    //}
+                    if (auth[0].equalsIgnoreCase("jwt") || auth[0].equalsIgnoreCase("Bearer")) {
+                        headerToken = auth[1];
+                    }else{
+                        return null;
+                    }
                 }
             }
         }

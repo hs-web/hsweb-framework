@@ -22,6 +22,7 @@ hsweb:
       allowed-headers: "*"
     authorize:
       auto-parse: true # 自动解析所有代码中到权限,并触发 ApplicationListener<AuthorizeDefinitionInitializedEvent>
+      basic-authorization: true #开启basic认证
       sync: true # 自动同步权限信息到数据库
       jwt:
         id: test

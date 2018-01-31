@@ -2,6 +2,7 @@ package org.hswebframework.web.authorization.basic.configuration;
 
 import org.hswebframework.web.authorization.access.DataAccessController;
 import org.hswebframework.web.authorization.access.DataAccessHandler;
+import org.hswebframework.web.authorization.basic.aop.AopMethodAuthorizeDefinitionParser;
 import org.hswebframework.web.authorization.basic.handler.DefaultAuthorizingHandler;
 import org.hswebframework.web.authorization.basic.handler.access.DefaultDataAccessController;
 import org.hswebframework.web.authorization.basic.web.*;
@@ -52,11 +53,13 @@ public class AuthorizingHandlerAutoConfiguration {
 
     @Bean
     public WebMvcConfigurer webUserTokenInterceptorConfigurer(UserTokenManager userTokenManager,
+                                                              AopMethodAuthorizeDefinitionParser parser,
                                                               List<UserTokenParser> userTokenParser) {
+
         return new WebMvcConfigurerAdapter() {
             @Override
             public void addInterceptors(InterceptorRegistry registry) {
-                registry.addInterceptor(new WebUserTokenInterceptor(userTokenManager, userTokenParser));
+                registry.addInterceptor(new WebUserTokenInterceptor(userTokenManager, userTokenParser,parser));
                 super.addInterceptors(registry);
             }
         };
