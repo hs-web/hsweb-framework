@@ -21,6 +21,8 @@ package org.hswebframework.web.authorization.starter;
 import org.hswebframework.web.authorization.AuthenticationInitializeService;
 import org.hswebframework.web.authorization.AuthenticationManager;
 import org.hswebframework.web.authorization.simple.DefaultAuthorizationAutoConfiguration;
+import org.hswebframework.web.authorization.token.UserTokenManager;
+import org.hswebframework.web.service.authorization.UserService;
 import org.hswebframework.web.service.authorization.simple.SimpleAuthenticationManager;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -45,8 +47,14 @@ public class AuthorizationAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnProperty(prefix = "hsweb.authorize",name = "sync",havingValue = "true")
-    public AutoSyncPermission autoSyncPermission(){
+    @ConditionalOnProperty(prefix = "hsweb.authorize", name = "sync", havingValue = "true")
+    public AutoSyncPermission autoSyncPermission() {
         return new AutoSyncPermission();
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = "hsweb.authorize", name = "basic-authorization", havingValue = "true")
+    public BasicAuthorizationTokenParser basicAuthorizationTokenParser(UserService userService, UserTokenManager tokenManager) {
+        return new BasicAuthorizationTokenParser(userService, tokenManager);
     }
 }
