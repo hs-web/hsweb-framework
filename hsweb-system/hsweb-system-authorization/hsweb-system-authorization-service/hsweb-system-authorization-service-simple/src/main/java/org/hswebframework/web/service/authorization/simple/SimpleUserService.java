@@ -83,6 +83,17 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
 
     @Override
     @Transactional(readOnly = true)
+    public UserEntity selectByUserNameAndPassword(String plainUsername, String plainPassword) {
+        Objects.requireNonNull(plainUsername);
+        Objects.requireNonNull(plainPassword);
+
+        return Optional.ofNullable(selectByUsername(plainUsername))
+                .filter(user -> encodePassword(plainPassword, user.getSalt()).equals(user.getPassword()))
+                .orElse(null);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public UserEntity selectByPk(String id) {
         if (null == id) {
             return null;
@@ -149,8 +160,8 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
     @Caching(evict = {
             @CacheEvict(value = USER_CACHE_NAME, key = "#userId"),
             @CacheEvict(value = USER_AUTH_CACHE_NAME, key = "#userId"),
-            @CacheEvict(value = USER_AUTH_CACHE_NAME,key = "'user-menu-list:'+#userId"),
-            @CacheEvict(value = USER_AUTH_CACHE_NAME,key = "'menu-tree:'+#userId")
+            @CacheEvict(value = USER_AUTH_CACHE_NAME, key = "'user-menu-list:'+#userId"),
+            @CacheEvict(value = USER_AUTH_CACHE_NAME, key = "'menu-tree:'+#userId")
     })
     public void update(String userId, UserEntity userEntity) {
         userEntity.setId(userId);
