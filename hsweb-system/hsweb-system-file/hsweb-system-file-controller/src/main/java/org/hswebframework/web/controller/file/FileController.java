@@ -251,7 +251,7 @@ public class FileController {
      * @return 上传结果
      */
     @PostMapping(value = "/upload")
-    @AccessLogger("上传单个文件")
+    @ApiOperation("上传单个文件")
     @Authorize(action = "upload", description = "上传文件")
     public ResponseMessage<FileInfoEntity> upload(@RequestPart("file") MultipartFile file) {
         List<FileInfoEntity> fileInfoList = new LinkedList<>();
