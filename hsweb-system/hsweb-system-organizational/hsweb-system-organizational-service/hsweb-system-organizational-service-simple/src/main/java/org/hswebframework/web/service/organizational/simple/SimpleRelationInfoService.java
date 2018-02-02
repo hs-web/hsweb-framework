@@ -2,10 +2,7 @@ package org.hswebframework.web.service.organizational.simple;
 
 import org.hswebframework.web.dao.organizational.RelationInfoDao;
 import org.hswebframework.web.entity.organizational.RelationInfoEntity;
-import org.hswebframework.web.organizational.authorization.relation.Relation;
-import org.hswebframework.web.organizational.authorization.relation.Relations;
-import org.hswebframework.web.organizational.authorization.relation.SimpleRelation;
-import org.hswebframework.web.organizational.authorization.relation.SimpleRelations;
+import org.hswebframework.web.organizational.authorization.relation.*;
 import org.hswebframework.web.service.DefaultDSLQueryService;
 import org.hswebframework.web.service.GenericEntityService;
 import org.hswebframework.web.id.IDGenerator;
@@ -25,6 +22,7 @@ import java.util.stream.Collectors;
 @Service("relationInfoService")
 public class SimpleRelationInfoService extends GenericEntityService<RelationInfoEntity, String>
         implements RelationInfoService {
+
     @Autowired
     private RelationInfoDao relationInfoDao;
 
@@ -57,8 +55,8 @@ public class SimpleRelationInfoService extends GenericEntityService<RelationInfo
                     SimpleRelation relation = new SimpleRelation();
                     relation.setType(info.getRelationTypeFrom());
                     relation.setTarget(info.getRelationTo());
-                    //TODO 获取关系目标实体
-                    relation.setTargetObject(null);
+                    relation.setTargetObject(RelationTargetHolder
+                            .get(info.getRelationTypeTo(), info.getRelationTo()).orElse(null));
                     relation.setRelation(info.getRelationId());
                     if (target.equals(info.getRelationFrom())) {
                         relation.setDirection(Relation.Direction.POSITIVE);
