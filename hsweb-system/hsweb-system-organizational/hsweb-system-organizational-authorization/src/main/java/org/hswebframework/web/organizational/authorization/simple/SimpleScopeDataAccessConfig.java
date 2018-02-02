@@ -7,11 +7,11 @@ import org.hswebframework.web.authorization.access.ScopeDataAccessConfig;
 import java.util.Set;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
+ * @since 3.0
  */
 public class SimpleScopeDataAccessConfig extends AbstractDataAccessConfig implements ScopeDataAccessConfig {
+    private static final long serialVersionUID = 1_0;
     private String      scopeType;
     private Set<Object> scope;
     private String      type;

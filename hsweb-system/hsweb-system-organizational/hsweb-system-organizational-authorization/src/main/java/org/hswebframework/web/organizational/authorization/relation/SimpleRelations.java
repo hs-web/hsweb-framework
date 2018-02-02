@@ -8,8 +8,8 @@ import java.util.Objects;
  * @author zhouhao
  */
 public class SimpleRelations implements Relations {
+    private static final long serialVersionUID = 1_0;
     private List<Relation> all;
-
     @Override
     public List<Relation> getAll() {
         if (null == all) {

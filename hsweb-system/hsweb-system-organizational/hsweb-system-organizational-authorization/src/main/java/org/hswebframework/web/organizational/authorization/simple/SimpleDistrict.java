@@ -15,6 +15,7 @@ import org.hswebframework.web.organizational.authorization.District;
 @AllArgsConstructor
 @Builder
 public class SimpleDistrict implements District {
+    private static final long serialVersionUID = 1_0;
     private String id;
     private String name;
     private String fullName;

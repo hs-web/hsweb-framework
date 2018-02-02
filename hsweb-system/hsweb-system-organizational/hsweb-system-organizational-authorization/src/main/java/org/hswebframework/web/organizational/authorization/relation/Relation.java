@@ -48,8 +48,9 @@ public interface Relation extends Serializable {
 
     /**
      * @return 关系目标对象，用于获取建立关系对象完整信息，返回值的类型可能随着{@link this#getType()}的不同而变化
+     * @see RelationTargetSupplier
      */
-    Object getTargetObject();
+    Serializable getTargetObject();
 
     /**
      * @return 关系名称，与{@link this#getType()} 对应，如: 经理,员工

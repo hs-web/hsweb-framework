@@ -10,8 +10,6 @@ import java.util.List;
 import static org.hswebframework.web.organizational.authorization.access.DataAccessType.*;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public class ScopeDataAccessConfigConvert implements DataAccessConfigConvert {

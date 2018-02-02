@@ -1,18 +1,20 @@
 package org.hswebframework.web.organizational.authorization.relation;
 
+import java.io.Serializable;
+
 /**
- * TODO 完成注释
  *
  * @author zhouhao
  */
 public class SimpleRelation implements Relation {
+    private static final long serialVersionUID = 1_0;
     private String type;
 
     private String relation;
 
     private String target;
 
-    private Object targetObject;
+    private Serializable targetObject;
 
     private String name;
 
@@ -46,11 +48,11 @@ public class SimpleRelation implements Relation {
     }
 
     @Override
-    public Object getTargetObject() {
+    public Serializable getTargetObject() {
         return targetObject;
     }
 
-    public void setTargetObject(Object targetObject) {
+    public void setTargetObject(Serializable targetObject) {
         this.targetObject = targetObject;
     }
 

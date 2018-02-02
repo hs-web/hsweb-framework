@@ -14,6 +14,7 @@ import java.util.function.Predicate;
  * @since 3.0
  */
 public class TreeNode<V> implements Serializable {
+    private static final long serialVersionUID = 1_0;
 
     /**
      * 父节点,根节点为{@code null}
