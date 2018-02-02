@@ -42,7 +42,6 @@ public class DefaultPersonnelAuthorizationSupplier implements PersonnelAuthoriza
         return ThreadLocalUtils.get(threadLocalCacheKey, () ->
                 Authentication.current().map(authentication ->
                         authentication.getAttribute(PersonAttachEntity.personId)
-                                .filter(Objects::nonNull)
                                 .map(String::valueOf)
                                 .map(this::getByPersonId)
                                 .orElseGet(() -> getByUserId(authentication.getUser().getId())))

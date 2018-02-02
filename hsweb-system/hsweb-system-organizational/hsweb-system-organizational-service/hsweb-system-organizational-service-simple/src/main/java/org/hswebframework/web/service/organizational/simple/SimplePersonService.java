@@ -103,6 +103,7 @@ public class SimplePersonService extends GenericEntityService<PersonEntity, Stri
     @Caching(evict = {
             @CacheEvict(key = "'id:'+#result"),
             @CacheEvict(key = "'auth:persion-id'+#result"),
+            @CacheEvict(key = "'auth:user-id'+#authBindEntity.userId"),
             @CacheEvict(key = "'auth-bind'+#result"),
             @CacheEvict(key = "'person-name'+#authBindEntity.name")
     })
@@ -122,6 +123,7 @@ public class SimplePersonService extends GenericEntityService<PersonEntity, Stri
     @Caching(evict = {
             @CacheEvict(key = "'id:'+#authBindEntity.id"),
             @CacheEvict(key = "'auth:persion-id'+#authBindEntity.id"),
+            @CacheEvict(key = "'auth:user-id'+#authBindEntity.userId"),
             @CacheEvict(key = "'auth-bind'+#authBindEntity.id"),
             @CacheEvict(key = "'person-name'+#authBindEntity.name")
     })
