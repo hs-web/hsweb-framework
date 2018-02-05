@@ -25,6 +25,7 @@ import org.hswebframework.web.authorization.token.UserTokenManager;
 import org.hswebframework.web.service.authorization.UserService;
 import org.hswebframework.web.service.authorization.simple.SimpleAuthenticationManager;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -54,6 +55,7 @@ public class AuthorizationAutoConfiguration {
 
     @Bean
     @ConditionalOnProperty(prefix = "hsweb.authorize", name = "basic-authorization", havingValue = "true")
+    @ConditionalOnClass(name = "org.hswebframework.web.authorization.basic.web.UserTokenForTypeParser")
     public BasicAuthorizationTokenParser basicAuthorizationTokenParser(UserService userService, UserTokenManager tokenManager) {
         return new BasicAuthorizationTokenParser(userService, tokenManager);
     }

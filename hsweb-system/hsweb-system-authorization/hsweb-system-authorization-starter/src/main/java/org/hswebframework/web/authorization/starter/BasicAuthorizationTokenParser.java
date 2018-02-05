@@ -1,11 +1,8 @@
 package org.hswebframework.web.authorization.starter;
-
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Base64;
 import org.hswebframework.web.authorization.basic.web.AuthorizedToken;
 import org.hswebframework.web.authorization.basic.web.ParsedToken;
 import org.hswebframework.web.authorization.basic.web.UserTokenForTypeParser;
-import org.hswebframework.web.authorization.basic.web.UserTokenParser;
 import org.hswebframework.web.authorization.token.UserToken;
 import org.hswebframework.web.authorization.token.UserTokenManager;
 import org.hswebframework.web.entity.authorization.UserEntity;
