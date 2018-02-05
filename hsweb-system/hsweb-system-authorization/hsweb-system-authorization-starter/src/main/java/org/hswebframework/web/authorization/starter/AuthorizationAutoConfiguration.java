@@ -31,6 +31,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 /**
  * @author zhouhao
@@ -39,6 +40,7 @@ import org.springframework.context.annotation.Configuration;
 @ComponentScan({"org.hswebframework.web.service.authorization.simple"
         , "org.hswebframework.web.controller.authorization"})
 @AutoConfigureBefore(DefaultAuthorizationAutoConfiguration.class)
+@Import(BasicAuthorizationConfiguration.class)
 public class AuthorizationAutoConfiguration {
 
     @Bean
@@ -53,10 +55,4 @@ public class AuthorizationAutoConfiguration {
         return new AutoSyncPermission();
     }
 
-    @Bean
-    @ConditionalOnProperty(prefix = "hsweb.authorize", name = "basic-authorization", havingValue = "true")
-    @ConditionalOnClass(name = "org.hswebframework.web.authorization.basic.web.UserTokenForTypeParser")
-    public BasicAuthorizationTokenParser basicAuthorizationTokenParser(UserService userService, UserTokenManager tokenManager) {
-        return new BasicAuthorizationTokenParser(userService, tokenManager);
-    }
 }
