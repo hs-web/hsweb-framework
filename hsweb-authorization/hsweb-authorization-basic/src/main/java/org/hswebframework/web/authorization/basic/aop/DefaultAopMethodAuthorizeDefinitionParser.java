@@ -52,7 +52,7 @@ public class DefaultAopMethodAuthorizeDefinitionParser implements AopMethodAutho
         CacheKey key = buildCacheKey(target, method);
 
         AuthorizeDefinition definition = cache.get(key);
-        if ((definition instanceof EmptyAuthorizeDefinition)) {
+        if (definition instanceof EmptyAuthorizeDefinition) {
             return null;
         }
         if (null != definition) {
@@ -64,10 +64,9 @@ public class DefaultAopMethodAuthorizeDefinitionParser implements AopMethodAutho
                     .map(customer -> customer.parse(target, method, context))
                     .filter(Objects::nonNull)
                     .findAny().orElse(null);
-            if (definition == null || definition instanceof EmptyAuthorizeDefinition) {
-                return null;
+            if (definition != null && !(definition instanceof EmptyAuthorizeDefinition)) {
+                return definition;
             }
-
         }
         Authorize classAuth = AopUtils.findAnnotation(target, Authorize.class);
         Authorize methodAuth = AopUtils.findMethodAnnotation(target, method, Authorize.class);

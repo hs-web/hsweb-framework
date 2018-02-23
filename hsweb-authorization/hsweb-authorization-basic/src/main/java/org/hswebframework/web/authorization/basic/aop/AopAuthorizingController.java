@@ -51,8 +51,8 @@ public class AopAuthorizingController extends StaticMethodMatcherPointcutAdvisor
 
             MethodInterceptorContext paramContext = holder.createParamContext();
 
-            AuthorizeDefinition definition = aopMethodAuthorizeDefinitionParser.parse(methodInvocation.getThis().getClass(), methodInvocation.getMethod());
-            Object result = true;
+            AuthorizeDefinition definition = aopMethodAuthorizeDefinitionParser.parse(methodInvocation.getThis().getClass(), methodInvocation.getMethod(), paramContext);
+            Object result = null;
             boolean isControl = false;
             if (null != definition) {
                 Authentication authentication = Authentication.current().orElseThrow(UnAuthorizedException::new);
