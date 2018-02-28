@@ -41,6 +41,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.function.Function;
@@ -103,7 +104,7 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
     }
 
     @Override
-    @CacheEvict(cacheNames = {CacheConstants.USER_AUTH_CACHE_NAME,CacheConstants.USER_MENU_CACHE_NAME}, allEntries = true)
+    @CacheEvict(cacheNames = {CacheConstants.USER_AUTH_CACHE_NAME, CacheConstants.USER_MENU_CACHE_NAME}, allEntries = true)
     public String saveOrUpdate(AuthorizationSettingEntity entity) {
         AuthorizationSettingEntity old = select(entity.getType(), entity.getSettingFor());
         if (old != null) {
@@ -114,7 +115,7 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
     }
 
     @Override
-    @CacheEvict(cacheNames = {CacheConstants.USER_AUTH_CACHE_NAME,CacheConstants.USER_MENU_CACHE_NAME}, allEntries = true)
+    @CacheEvict(cacheNames = {CacheConstants.USER_AUTH_CACHE_NAME, CacheConstants.USER_MENU_CACHE_NAME}, allEntries = true)
     public String insert(AuthorizationSettingEntity entity) {
         tryValidateProperty(select(entity.getType(), entity.getSettingFor()) == null, AuthorizationSettingEntity.settingFor, "存在相同的配置!");
         entity.setStatus(STATUS_ENABLED);
@@ -139,7 +140,7 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
     }
 
     @Override
-    @CacheEvict(cacheNames = {CacheConstants.USER_AUTH_CACHE_NAME,CacheConstants.USER_MENU_CACHE_NAME}, allEntries = true)
+    @CacheEvict(cacheNames = {CacheConstants.USER_AUTH_CACHE_NAME, CacheConstants.USER_MENU_CACHE_NAME}, allEntries = true)
     public int updateByPk(String id, AuthorizationSettingEntity entity) {
         int size = super.updateByPk(id, entity);
         if (entity.getMenus() != null) {
@@ -167,7 +168,7 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
     }
 
     @Override
-    @CacheEvict(cacheNames = {CacheConstants.USER_AUTH_CACHE_NAME,CacheConstants.USER_MENU_CACHE_NAME}, allEntries = true)
+    @CacheEvict(cacheNames = {CacheConstants.USER_AUTH_CACHE_NAME, CacheConstants.USER_MENU_CACHE_NAME}, allEntries = true)
     public int deleteByPk(String id) {
         Objects.requireNonNull(id, "id can not be null");
         authorizationSettingMenuService.deleteBySettingId(id);
@@ -268,7 +269,7 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
         return TreeSupportEntity.list2tree(getUserMenuAsList(userId), UserMenuEntity::setChildren,
                 (Predicate<UserMenuEntity>) menuEntity ->
                         // parentId为空或者为-1的菜单则认为是根菜单
-                        menuEntity.getParentId() == null || "-1".equals(menuEntity.getParentId()));
+                        StringUtils.isEmpty(menuEntity.getParentId()) || "-1".equals(menuEntity.getParentId()));
     }
 
     @Override
