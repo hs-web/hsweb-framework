@@ -56,9 +56,8 @@ public class DataBaseManagerController {
             @PathVariable @ApiParam("数据源ID") String datasourceId,
             @RequestBody @ApiParam("SQL脚本") String sqlLines) throws Exception {
 
-        DataSourceHolder.switcher().use(datasourceId);
         return ResponseMessage.ok(databaseManagerService.execute(SqlExecuteRequest.builder()
-                .sql(parseSql(sqlLines))
+                .sql(parseSql(sqlLines,datasourceId))
                 .build()));
 
     }
@@ -70,7 +69,7 @@ public class DataBaseManagerController {
                                                            @ApiParam("SQL脚本") String sqlLines) throws Exception {
         return ResponseMessage.ok(databaseManagerService
                 .execute(SqlExecuteRequest.builder()
-                        .sql(parseSql(sqlLines))
+                        .sql(parseSql(sqlLines,null))
                         .build()));
     }
 
@@ -80,7 +79,18 @@ public class DataBaseManagerController {
     public ResponseMessage<List<SqlExecuteResult>> executeTransactional(@PathVariable @ApiParam("事务ID") String transactionalId,
                                                                         @ApiParam("SQL脚本") @RequestBody String sqlLines) throws Exception {
         return ResponseMessage.ok(databaseManagerService.execute(transactionalId, SqlExecuteRequest.builder()
-                .sql(parseSql(sqlLines))
+                .sql(parseSql(sqlLines,null))
+                .build()));
+    }
+
+    @PostMapping(value = "/transactional/execute/{transactionalId}/{dataSourceId}", consumes = MediaType.TEXT_PLAIN_VALUE)
+    @Authorize(action = "execute", description = "执行SQL")
+    @ApiOperation(value = "开启事务执行指定数据源对SQL")
+    public ResponseMessage<List<SqlExecuteResult>> executeTransactional(@PathVariable @ApiParam("事务ID") String transactionalId,
+                                                                        @PathVariable @ApiParam("数据源ID") String dataSourceId,
+                                                                        @ApiParam("SQL脚本") @RequestBody String sqlLines) throws Exception {
+        return ResponseMessage.ok(databaseManagerService.execute(transactionalId, SqlExecuteRequest.builder()
+                .sql(parseSql(sqlLines,dataSourceId))
                 .build()));
     }
 
@@ -90,6 +100,7 @@ public class DataBaseManagerController {
     public ResponseMessage<String> newTransaction() throws Exception {
         return ResponseMessage.ok(databaseManagerService.newTransaction());
     }
+
 
     @GetMapping("/transactional")
     @Authorize(action = "execute", description = "执行SQL")
@@ -114,12 +125,12 @@ public class DataBaseManagerController {
         return ResponseMessage.ok();
     }
 
-    private List<SqlInfo> parseSql(String sqlText) {
+    private List<SqlInfo> parseSql(String sqlText,String datasourceId) {
         List<String> sqlList = Sqls.parse(sqlText);
         return sqlList.stream().map(sql -> {
             SqlInfo sqlInfo = new SqlInfo();
             sqlInfo.setSql(sql);
-            sqlInfo.setDatasourceId(DataSourceHolder.switcher().currentDataSourceId());
+            sqlInfo.setDatasourceId(datasourceId);
             sqlInfo.setType(sql.split("[ ]")[0].toLowerCase());
             return sqlInfo;
         }).collect(Collectors.toList());
