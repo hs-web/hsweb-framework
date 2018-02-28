@@ -171,7 +171,7 @@ public interface DynamicFormEntity extends GenericEntity<String> {
     /**
      * @return 触发器
      */
-    @ApiModelProperty(value = "触发器.", example = "[{\"language\":\"groovy\",\"script\":\" return true;\"}]")
+    @ApiModelProperty(value = "触发器.", example = "[{\"trigger\":\"update.before\",\"language\":\"groovy\",\"script\":\" return true;\"}]")
     String getTriggers();
 
     /**
