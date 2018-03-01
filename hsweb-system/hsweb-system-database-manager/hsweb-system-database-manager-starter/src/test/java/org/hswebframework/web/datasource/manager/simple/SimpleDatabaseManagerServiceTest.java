@@ -8,6 +8,8 @@ import org.hswebframework.web.database.manager.SqlInfo;
 import org.hswebframework.web.tests.SimpleWebApplicationTests;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
 
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -58,7 +60,7 @@ public class SimpleDatabaseManagerServiceTest extends SimpleWebApplicationTests 
         countDownLatch.await();
 
         sqlInfo = new SqlInfo();
-        sqlInfo.setSql("select * from t_test");
+        sqlInfo.setSql("select * from t_test ");
         sqlInfo.setType("select");
 
         request.setSql(Arrays.asList(sqlInfo));

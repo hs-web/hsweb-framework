@@ -9,7 +9,7 @@ spring:
        driver-class-name : org.h2.Driver
 hsweb:
     app:
-      name: 数据字典测试
+      name: 数据库管理测试
       version: 3.0.0
 logging:
   level:
