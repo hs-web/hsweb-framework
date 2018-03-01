@@ -161,10 +161,10 @@ public class DefaultOAuth2Session implements OAuth2Session {
         }
         OAuth2Request request = createRequest(getRealUrl(serverConfig.getAccessTokenUrl()));
         //request.onRefreshTokenExpired(reTry -> {
-            //重新请求token
-          //  setAccessTokenInfo(requestAccessToken());
-            //applyTokenParam(request);
-            //reTry.doReTry();
+        //重新请求token
+        //  setAccessTokenInfo(requestAccessToken());
+        //applyTokenParam(request);
+        //reTry.doReTry();
         //});
         applyBasicAuthParam(request);
         boolean[] skip = new boolean[1];
@@ -189,7 +189,7 @@ public class DefaultOAuth2Session implements OAuth2Session {
             tokenInfo.setCreateTime(accessTokenInfo.getCreateTime());
             tokenInfo.setUpdateTime(System.currentTimeMillis());
             setAccessTokenInfo(tokenInfo);
-        } catch (OAuth2RequestException|BusinessException e) {
+        } catch (OAuth2RequestException | BusinessException e) {
             if (!skip[0]) {
                 //refresh token success
                 throw e;
