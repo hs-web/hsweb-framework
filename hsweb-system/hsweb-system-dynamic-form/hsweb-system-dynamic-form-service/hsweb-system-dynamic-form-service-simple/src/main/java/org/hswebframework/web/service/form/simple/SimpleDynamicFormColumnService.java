@@ -18,10 +18,12 @@ public class SimpleDynamicFormColumnService extends GenericEntityService<Dynamic
         implements DynamicFormColumnService {
     @Autowired
     private DynamicFormColumnDao dynamicFormColumnDao;
-   @Override
+
+    @Override
     protected IDGenerator<String> getIDGenerator() {
         return IDGenerator.MD5;
     }
+
     @Override
     public DynamicFormColumnDao getDao() {
         return dynamicFormColumnDao;
