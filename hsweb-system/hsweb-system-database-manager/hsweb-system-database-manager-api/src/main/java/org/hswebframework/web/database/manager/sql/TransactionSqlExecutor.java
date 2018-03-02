@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface TransactionSqlExecutor {
     /**
-     * 开启一个指定数据源的事务,并返回事务ID,在其他操作的时候,使用事务ID共享同一个事务
+     * 开启一个指定默认数据源的事务,并返回事务ID,在其他操作的时候,使用事务ID共享同一个事务
      *
      * @param datasourceId 数据源ID {@link DynamicDataSource#getId()}
      * @return 事务ID
