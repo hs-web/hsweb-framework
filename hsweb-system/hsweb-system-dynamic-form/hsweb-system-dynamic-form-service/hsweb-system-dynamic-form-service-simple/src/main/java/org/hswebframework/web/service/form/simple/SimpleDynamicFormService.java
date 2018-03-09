@@ -425,7 +425,7 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
             RDBColumnMetaData columnMeta = new RDBColumnMetaData();
             columnMeta.setName(column.getColumnName());
             columnMeta.setAlias(column.getAlias());
-            columnMeta.setComment(column.getName());
+            columnMeta.setComment(column.getDescribe());
             columnMeta.setLength(column.getLength() == null ? 0 : column.getLength());
             columnMeta.setPrecision(column.getPrecision() == null ? 0 : column.getPrecision());
             columnMeta.setScale(column.getScale() == null ? 0 : column.getScale());
