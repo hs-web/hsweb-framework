@@ -67,7 +67,7 @@ public class SimpleDynamicFormOperationService implements DynamicFormOperationSe
             List<T> list = query.setParam(paramEntity).list();
             return PagerResult.of(total, list);
         } catch (SQLException e) {
-            throw new DynamicFormException("selectPager fail", e);
+            throw new DynamicFormException("selectPager fail:" + e.getMessage(), e);
         }
 
     }
@@ -80,7 +80,7 @@ public class SimpleDynamicFormOperationService implements DynamicFormOperationSe
             RDBQuery<T> query = table.createQuery();
             return query.setParam(paramEntity).list();
         } catch (SQLException e) {
-            throw new DynamicFormException("select fail", e);
+            throw new DynamicFormException("select fail:" + e.getMessage(), e);
         }
     }
 
@@ -93,7 +93,7 @@ public class SimpleDynamicFormOperationService implements DynamicFormOperationSe
 
             return query.setParam(paramEntity).single();
         } catch (SQLException e) {
-            throw new DynamicFormException("selectSingle fail", e);
+            throw new DynamicFormException("selectSingle fail:" + e.getMessage(), e);
         }
     }
 
@@ -106,7 +106,7 @@ public class SimpleDynamicFormOperationService implements DynamicFormOperationSe
 
             return query.setParam(paramEntity).total();
         } catch (SQLException e) {
-            throw new DynamicFormException("count fail", e);
+            throw new DynamicFormException("count fail:" + e.getMessage(), e);
         }
     }
 
@@ -121,7 +121,7 @@ public class SimpleDynamicFormOperationService implements DynamicFormOperationSe
 
             return update.setParam(paramEntity).exec();
         } catch (SQLException e) {
-            throw new DynamicFormException("update fail", e);
+            throw new DynamicFormException("update fail:" + e.getMessage(), e);
         }
     }
 
@@ -132,7 +132,7 @@ public class SimpleDynamicFormOperationService implements DynamicFormOperationSe
             Insert<T> insert = table.createInsert();
             insert.value(entity).exec();
         } catch (SQLException e) {
-            throw new DynamicFormException("insert fail", e);
+            throw new DynamicFormException("insert fail:" + e.getMessage(), e);
         }
     }
 
@@ -147,7 +147,7 @@ public class SimpleDynamicFormOperationService implements DynamicFormOperationSe
 
             return delete.setParam(paramEntity).exec();
         } catch (SQLException e) {
-            throw new DynamicFormException("delete fail", e);
+            throw new DynamicFormException("delete fail:" + e.getMessage(), e);
         }
     }
 }

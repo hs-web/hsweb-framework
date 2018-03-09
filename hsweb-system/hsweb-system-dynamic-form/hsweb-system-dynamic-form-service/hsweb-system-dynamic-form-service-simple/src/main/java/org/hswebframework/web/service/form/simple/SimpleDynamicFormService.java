@@ -3,6 +3,7 @@ package org.hswebframework.web.service.form.simple;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import jdk.nashorn.internal.scripts.JD;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.hswebframework.ezorm.core.Trigger;
 import org.hswebframework.ezorm.core.ValueConverter;
@@ -350,7 +351,7 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
                 database.alterTable(metaData);
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new DynamicFormException("部署失败:" + e.getMessage(), e);
         }
     }
 
@@ -432,7 +433,7 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
             columnMeta.setJdbcType(JDBCType.valueOf(column.getJdbcType()));
             columnMeta.setJavaType(getJavaType(column.getJavaType()));
             columnMeta.setProperties(column.getProperties() == null ? new HashMap<>() : column.getProperties());
-            columnMeta.setValidator(columnMeta.getValidator());
+//            columnMeta.setValidator(column.getValidator());
             if (StringUtils.isEmpty(column.getDataType())) {
                 Dialect dialect = database.getMeta().getDialect();
                 columnMeta.setDataType(dialect.buildDataType(columnMeta));
@@ -447,7 +448,27 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
             metaData.addColumn(columnMeta);
         });
         customTableSetting(database, form, metaData);
+        //没有主键并且没有id字段
+        if (metaData.getColumns().stream().noneMatch(RDBColumnMetaData::isPrimaryKey) && metaData.findColumn("id") == null) {
+            RDBColumnMetaData primaryKey = createPrimaryKeyColumn();
+            Dialect dialect = database.getMeta().getDialect();
+            primaryKey.setDataType(dialect.buildDataType(primaryKey));
+            metaData.addColumn(primaryKey);
+        }
         return metaData;
+    }
+
+    protected RDBColumnMetaData createPrimaryKeyColumn() {
+        RDBColumnMetaData id = new RDBColumnMetaData();
+        id.setName("id");
+        id.setJdbcType(JDBCType.VARCHAR);
+        id.setJavaType(String.class);
+        id.setLength(32);
+        id.setDefaultValue(IDGenerator.MD5::generate);
+        id.setComment("主键");
+        id.setPrimaryKey(true);
+        id.setNotNull(true);
+        return id;
     }
 
     protected void customTableSetting(RDBDatabase database
