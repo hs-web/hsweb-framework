@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("${hsweb.web.mappings.template:template}")
 @Authorize(permission = "template")
 @AccessLogger("模板")
-public class TempalteController implements SimpleGenericEntityController<TemplateEntity, String, QueryParamEntity> {
+public class TemplateController implements SimpleGenericEntityController<TemplateEntity, String, QueryParamEntity> {
 
     private TemplateService templateService;
 
