@@ -9,6 +9,8 @@
 
  [贡献代码](CONTRIBUTING.md)  [开发手册](https://github.com/hs-web/hsweb-framework/wiki/开发手册)
 
+本项目是hsweb的核心,不推荐将其直接clone后修改,运行.推荐使用maven依赖的方式使用hsweb.你可以参照[demo](https://github.com/hs-web/hsweb3-demo)进行使用.
+
 ## 模块简介
 
 | 模块       | 说明          |   进度 |
