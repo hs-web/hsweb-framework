@@ -64,7 +64,10 @@ public class DefaultAopMethodAuthorizeDefinitionParser implements AopMethodAutho
                     .map(customer -> customer.parse(target, method, context))
                     .filter(Objects::nonNull)
                     .findAny().orElse(null);
-            if (definition != null && !(definition instanceof EmptyAuthorizeDefinition)) {
+            if (definition instanceof EmptyAuthorizeDefinition) {
+                return null;
+            }
+            if (definition != null) {
                 return definition;
             }
         }
