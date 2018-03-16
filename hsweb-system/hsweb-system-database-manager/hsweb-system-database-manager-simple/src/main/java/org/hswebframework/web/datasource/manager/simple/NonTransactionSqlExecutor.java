@@ -29,7 +29,9 @@ public class NonTransactionSqlExecutor implements SqlExecutor {
         try {
             switch (sqlInfo.getType().toUpperCase()) {
                 case "SELECT":
-                    executeResult = executor.list(sqlInfo.getSql());
+                    QueryResultWrapper wrapper=new QueryResultWrapper();
+                    executor.list(sqlInfo.getSql(),wrapper);
+                    executeResult = wrapper.getResult();
                     break;
                 case "INSERT":
                 case "UPDATE":
