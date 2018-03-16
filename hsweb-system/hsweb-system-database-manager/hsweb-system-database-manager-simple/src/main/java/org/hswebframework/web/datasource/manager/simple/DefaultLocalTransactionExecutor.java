@@ -182,8 +182,12 @@ public class DefaultLocalTransactionExecutor implements TransactionExecutor {
                                 }
                                 //执行sql
                                 return sqlRequestExecutor.apply(sqlExecutor, sqlInfo);
-                            } catch (SQLException e) {
-                                throw new SqlExecuteException(e.getMessage(), e, sqlInfo.getSql());
+                            } catch (Exception e) {
+                                return SqlExecuteResult.builder()
+                                        .result(e.getMessage())
+                                        .sqlInfo(sqlInfo)
+                                        .success(false)
+                                        .build();
                             }
                         })
                         .collect(Collectors.toList());
@@ -207,7 +211,6 @@ public class DefaultLocalTransactionExecutor implements TransactionExecutor {
         List<SqlExecuteResult> results = new ArrayList<>();
 
         //异常信息
-        Exception[] exceptions = new Exception[1];
         Execution execution = new Execution();
         execution.datasourceId = DataSourceHolder.switcher().currentDataSourceId();
 
@@ -218,7 +221,6 @@ public class DefaultLocalTransactionExecutor implements TransactionExecutor {
             countDownLatch.countDown();
         };
         execution.onError = (e) -> {
-            exceptions[0] = e;
             countDownLatch.countDown();
         };
         logger.debug("submit sql execute job {}", transactionId);
@@ -229,13 +231,6 @@ public class DefaultLocalTransactionExecutor implements TransactionExecutor {
         }
         //等待sql执行完毕
         countDownLatch.await();
-        //判断是否有异常
-        Exception exception;
-        if ((exception = exceptions[0]) != null) {
-
-            //rollback();
-            throw exception;
-        }
         return results;
     }
 
