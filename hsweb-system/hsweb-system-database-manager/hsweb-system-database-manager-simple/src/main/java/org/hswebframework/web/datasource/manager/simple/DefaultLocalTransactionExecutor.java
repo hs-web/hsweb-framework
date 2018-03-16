@@ -94,6 +94,10 @@ public class DefaultLocalTransactionExecutor implements TransactionExecutor {
         }
     }
 
+    public boolean isRunning() {
+        return running;
+    }
+
     @Override
     public void rollback() {
         tryRollback();
@@ -228,7 +232,8 @@ public class DefaultLocalTransactionExecutor implements TransactionExecutor {
         //判断是否有异常
         Exception exception;
         if ((exception = exceptions[0]) != null) {
-            rollback();
+
+            //rollback();
             throw exception;
         }
         return results;

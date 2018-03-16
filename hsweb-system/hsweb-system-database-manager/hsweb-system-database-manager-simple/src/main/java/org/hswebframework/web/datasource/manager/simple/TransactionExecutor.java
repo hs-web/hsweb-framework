@@ -17,6 +17,8 @@ public interface TransactionExecutor extends Runnable {
 
     void rollback();
 
+    boolean isRunning();
+
     List<SqlExecuteResult> execute(SqlExecuteRequest request)throws Exception;
 
 }
