@@ -73,7 +73,7 @@ public class DynamicFormOperationController {
     @DeleteMapping("/{formId}")
     @ApiOperation("动态删除")
     @Authorize(action = Permission.ACTION_DELETE)
-    public ResponseMessage<Integer> delete(@PathVariable String formId, DeleteParamEntity paramEntity) {
+    public ResponseMessage<Integer> delete(@PathVariable String formId, @RequestParam DeleteParamEntity paramEntity) {
         return ResponseMessage.ok(dynamicFormOperationService.delete(formId, paramEntity));
     }
 }

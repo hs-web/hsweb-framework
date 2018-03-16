@@ -9,6 +9,9 @@ import org.hswebframework.web.service.template.TemplateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.stereotype.Service;
+import org.springframework.util.AntPathMatcher;
+
+import java.util.regex.Pattern;
 
 /**
  * 默认的服务实现
@@ -38,5 +41,11 @@ public class SimpleTemplateService extends EnableCacheGenericEntityService<Templ
         assertNotNull(old);
         entity.setVersion(old.getVersion() + 1);
         return super.updateByPk(id, entity);
+    }
+
+    @Override
+    public String insert(TemplateEntity entity) {
+        entity.setVersion(1L);
+        return super.insert(entity);
     }
 }

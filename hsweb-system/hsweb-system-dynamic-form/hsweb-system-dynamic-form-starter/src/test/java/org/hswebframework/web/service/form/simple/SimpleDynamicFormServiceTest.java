@@ -59,12 +59,6 @@ public class SimpleDynamicFormServiceTest extends SimpleWebApplicationTests {
                 "{\"target\":\"s_dyn_form\",\"alias\":\"form\",\"condition\":\"form.u_id=f_test.id\"}" +
                 "]");
 
-        DynamicFormColumnEntity column_id = entityFactory.newInstance(DynamicFormColumnEntity.class);
-        column_id.setColumnName("id");
-        column_id.setName("ID");
-        column_id.setJavaType("string");
-        column_id.setJdbcType(JDBCType.VARCHAR.getName());
-        column_id.setLength(32);
         DynamicFormColumnEntity column_name = entityFactory.newInstance(DynamicFormColumnEntity.class);
         column_name.setName("姓名");
         column_name.setColumnName("name");
@@ -84,7 +78,7 @@ public class SimpleDynamicFormServiceTest extends SimpleWebApplicationTests {
         DynamicFormColumnBindEntity bindEntity = new DynamicFormColumnBindEntity();
 
         bindEntity.setForm(form);
-        bindEntity.setColumns(Arrays.asList(column_id, column_name, column_age));
+        bindEntity.setColumns(Arrays.asList(column_name, column_age));
 
         String id = dynamicFormService.saveOrUpdate(bindEntity);
 
@@ -93,7 +87,6 @@ public class SimpleDynamicFormServiceTest extends SimpleWebApplicationTests {
 
         dynamicFormOperationService.insert(form.getId(), new HashMap<String, Object>() {
             {
-                put("id", id);
                 put("name", "张三");
                 put("age", 10);
             }

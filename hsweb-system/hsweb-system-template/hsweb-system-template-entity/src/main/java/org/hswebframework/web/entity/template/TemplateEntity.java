@@ -65,7 +65,6 @@ public interface TemplateEntity extends GenericEntity<String> {
     /**
      * @return 模板内容
      */
-    @NotBlank(groups = CreateGroup.class)
     String getTemplate();
 
     /**
