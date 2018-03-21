@@ -1,22 +1,13 @@
 package org.hswebframework.web.socket;
 
-import org.hswebframework.web.concurrent.counter.Counter;
 import org.hswebframework.web.concurrent.counter.CounterManager;
 import org.hswebframework.web.concurrent.counter.SimpleCounterManager;
-import org.hswebframework.web.counter.redis.RedissonCounterManager;
 import org.hswebframework.web.message.Messager;
-import org.hswebframework.web.message.jms.JmsMessager;
 import org.hswebframework.web.message.memory.MemoryMessager;
-import org.hswebframework.web.message.redis.RedissonMessager;
-import org.redisson.Redisson;
-import org.redisson.api.RedissonClient;
-import org.redisson.config.Config;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.jms.annotation.EnableJms;
-import org.springframework.jms.core.JmsTemplate;
 
 /**
  * TODO 完成注释
@@ -29,7 +20,7 @@ import org.springframework.jms.core.JmsTemplate;
 public class WebSocketServerTests {
 
     static {
-        System.setProperty("org.apache.activemq.SERIALIZABLE_PACKAGES", "*");
+       // System.setProperty("org.apache.activemq.SERIALIZABLE_PACKAGES", "*");
     }
 //
     @Bean
