@@ -2,9 +2,11 @@ package org.hswebframework.web.socket;
 
 import org.hswebframework.web.concurrent.counter.Counter;
 import org.hswebframework.web.concurrent.counter.CounterManager;
+import org.hswebframework.web.concurrent.counter.SimpleCounterManager;
 import org.hswebframework.web.counter.redis.RedissonCounterManager;
 import org.hswebframework.web.message.Messager;
 import org.hswebframework.web.message.jms.JmsMessager;
+import org.hswebframework.web.message.memory.MemoryMessager;
 import org.hswebframework.web.message.redis.RedissonMessager;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
@@ -23,33 +25,33 @@ import org.springframework.jms.core.JmsTemplate;
  */
 @Configuration
 @EnableAutoConfiguration
-@EnableJms
+//@EnableJms
 public class WebSocketServerTests {
 
     static {
         System.setProperty("org.apache.activemq.SERIALIZABLE_PACKAGES", "*");
     }
-
+//
     @Bean
-    public Messager messager(RedissonClient client) {
-        return new RedissonMessager(client);
+    public Messager messager() {
+        return new MemoryMessager();
     }
 
-    @Bean(destroyMethod = "shutdown")
-    public RedissonClient redissonClient(){
-        Config config = new Config();
-        config.useSingleServer().setAddress("redis://127.0.0.1:6379");
-        return Redisson.create(config);
+//    @Bean(destroyMethod = "shutdown")
+//    public RedissonClient redissonClient(){
+//        Config config = new Config();
+//        config.useSingleServer().setAddress("redis://127.0.0.1:6379");
+//        return Redisson.create(config);
+//    }
+
+    @Bean
+    public CounterManager counterManager() {
+        return new SimpleCounterManager();
     }
 
     @Bean
     public TestProcessor testProcessor() {
         return new TestProcessor();
-    }
-
-    @Bean
-    public CounterManager counterManager(RedissonClient client) {
-        return new RedissonCounterManager(client);
     }
 
 //    // 使用redis
