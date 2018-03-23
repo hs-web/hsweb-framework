@@ -40,6 +40,7 @@
         <module>hsweb-examples</module>
         <module>hsweb-boost</module>
         <module>hsweb-thirdparty</module>
+        <module>hsweb-eventbus</module>
     </modules>
 
     <packaging>pom</packaging>
