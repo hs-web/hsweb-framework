@@ -19,17 +19,19 @@ public class NonTransactionSqlExecutor implements SqlExecutor {
     }
 
     @Override
-    public List<SqlExecuteResult> execute(SqlExecuteRequest request)throws Exception {
+    public List<SqlExecuteResult> execute(SqlExecuteRequest request) throws Exception {
         return request.getSql().stream().map(this::doExecute).collect(Collectors.toList());
     }
 
-    public SqlExecuteResult doExecute(SqlInfo sqlInfo)   {
+    public SqlExecuteResult doExecute(SqlInfo sqlInfo) {
         SqlExecuteResult result = new SqlExecuteResult();
         Object executeResult = null;
         try {
             switch (sqlInfo.getType().toUpperCase()) {
                 case "SELECT":
-                    executeResult = executor.list(sqlInfo.getSql());
+                    QueryResultWrapper wrapper = new QueryResultWrapper();
+                    executor.list(sqlInfo.getSql(), wrapper);
+                    executeResult = wrapper.getResult();
                     break;
                 case "INSERT":
                 case "UPDATE":
@@ -41,8 +43,9 @@ public class NonTransactionSqlExecutor implements SqlExecutor {
                 default:
                     executor.exec(sqlInfo.getSql());
             }
-        }catch (SQLException e){
-            throw new SqlExecuteException(e.getMessage(),e,sqlInfo.getSql());
+            result.setSuccess(true);
+        } catch (SQLException e) {
+            throw new SqlExecuteException(e.getMessage(), e, sqlInfo.getSql());
         }
         result.setResult(executeResult);
         result.setSqlInfo(sqlInfo);

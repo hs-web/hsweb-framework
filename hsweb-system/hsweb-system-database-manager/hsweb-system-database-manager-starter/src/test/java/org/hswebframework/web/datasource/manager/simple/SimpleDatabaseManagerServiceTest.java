@@ -60,7 +60,7 @@ public class SimpleDatabaseManagerServiceTest extends SimpleWebApplicationTests 
         countDownLatch.await();
 
         sqlInfo = new SqlInfo();
-        sqlInfo.setSql("select * from t_test ");
+        sqlInfo.setSql("select *,name as \"NAME\",1 as \"\" from t_test ");
         sqlInfo.setType("select");
 
         request.setSql(Arrays.asList(sqlInfo));

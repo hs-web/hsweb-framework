@@ -18,4 +18,6 @@ public class SqlExecuteResult {
 
     private Object result;
 
+    private boolean success;
+
 }
