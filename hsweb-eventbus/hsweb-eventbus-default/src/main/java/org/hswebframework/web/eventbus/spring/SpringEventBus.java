@@ -44,7 +44,7 @@ public class SpringEventBus extends AbstractEventBus implements BeanPostProcesso
     protected void createListener(Subscribe type, Object target, Method method) {
         EventListenerDefine define = EventListenerDefine.builder().eventMode(type.mode())
                 .transaction(type.transaction())
-                .listener(new ReflectListener(target, method))
+                .listener(new FastListener(target, method))
                 .build();
 
         subscribe(method.getParameterTypes()[0], define);

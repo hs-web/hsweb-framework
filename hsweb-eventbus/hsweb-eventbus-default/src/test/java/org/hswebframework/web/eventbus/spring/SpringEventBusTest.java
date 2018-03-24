@@ -5,8 +5,6 @@ import org.hswebframework.web.eventbus.annotation.Subscribe;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.concurrent.BrokenBarrierException;
-import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -22,7 +20,9 @@ public class SpringEventBusTest {
     public void test() throws InterruptedException {
         System.out.println(Thread.currentThread().getName());
         eventBus.postProcessAfterInitialization(new Test2(), "test");
+        long t = System.currentTimeMillis();
         eventBus.publish(eventBus);
+        System.out.println(System.currentTimeMillis() - t);
         Thread.sleep(1000);
         Assert.assertEquals(counter.get(), 3);
     }
@@ -30,22 +30,22 @@ public class SpringEventBusTest {
     public class Test2 {
         @Subscribe(mode = EventMode.SYNC)
         public void test1(SpringEventBus eventBus) {
-            System.out.println(Thread.currentThread().getName());
-            System.out.println(eventBus);
+//            System.out.println(Thread.currentThread().getName());
+//            System.out.println(eventBus);
             counter.addAndGet(1);
         }
 
         @Subscribe(mode = EventMode.ASYNC, transaction = false)
         public void test2(SpringEventBus eventBus) {
-            System.out.println(Thread.currentThread().getName());
-            System.out.println(eventBus);
+//            System.out.println(Thread.currentThread().getName());
+//            System.out.println(eventBus);
             counter.addAndGet(1);
         }
 
         @Subscribe(mode = EventMode.BACKGROUND, transaction = false)
         public void test3(SpringEventBus eventBus) {
-            System.out.println(Thread.currentThread().getName());
-            System.out.println(eventBus);
+//            System.out.println(Thread.currentThread().getName());
+//            System.out.println(eventBus);
             counter.addAndGet(1);
         }
     }
