@@ -58,7 +58,8 @@ public class FastBeanCopier {
     }
 
     public static void copy(Object source, Object target, Converter converter, String... ignore) {
-        getCopier(source, target, true).copy(source, target, (ignore == null || ignore.length == 0) ? new HashSet<>() : new HashSet<>(Arrays.asList(ignore)), converter);
+        getCopier(source, target, true)
+                .copy(source, target, (ignore == null || ignore.length == 0) ? new HashSet<>() : new HashSet<>(Arrays.asList(ignore)), converter);
     }
 
     private static String createCacheKey(Class source, Class target) {
@@ -162,8 +163,12 @@ public class FastBeanCopier {
                         .append(source.getReadMethod().getName())
                         .append("()!=null");
             }
+            String targetTypeName = target.getPropertyType().getName();
+            if (target.getPropertyType().isArray()) {
+                targetTypeName = target.getPropertyType().getComponentType().getName() + "[]";
+            }
             convertCode.append("){\n");
-            convertCode.append(target.getPropertyType().getName())
+            convertCode.append(targetTypeName)
                     .append(" ")
                     .append(target.getName()).append("=");
             String convert = "converter.convert((Object)(" + getReadSourceObjectValueCode() + "),"

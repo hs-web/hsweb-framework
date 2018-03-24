@@ -23,6 +23,7 @@ public class FastBeanCopierTest {
         Source source = new Source();
         source.setAge(100);
         source.setName("测试");
+        source.setIds(new String[]{"1","2","3"});
         NestObject nestObject = new NestObject();
         nestObject.setAge(10);
         nestObject.setName("测试2");
