@@ -32,6 +32,7 @@
     <modules>
         <module>hsweb-boost-validator</module>
         <module>hsweb-boost-aop</module>
+        <module>hsweb-boost-compiler</module>
     </modules>
 
 
