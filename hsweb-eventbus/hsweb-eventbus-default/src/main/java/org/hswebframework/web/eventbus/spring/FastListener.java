@@ -1,5 +1,6 @@
 package org.hswebframework.web.eventbus.spring;
 
+import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.web.boost.Compiler;
 import org.hswebframework.web.eventbus.EventListener;
 import org.springframework.util.ClassUtils;
@@ -10,6 +11,7 @@ import java.lang.reflect.Method;
  * @author zhouhao
  * @since 3.0
  */
+@Slf4j
 public class FastListener implements EventListener {
 
     private Object target;
@@ -41,7 +43,7 @@ public class FastListener implements EventListener {
         try {
             callable.call(target, event);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("执行event[{}]失败", event, e);
         }
     }
 

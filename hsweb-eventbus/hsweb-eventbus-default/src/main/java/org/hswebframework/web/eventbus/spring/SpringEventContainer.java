@@ -25,9 +25,9 @@ public class SpringEventContainer extends AbstractEventContainer {
     protected EventListenerExecutor newExecutor() {
         DefaultEventExecutor eventExecutor = new DefaultEventExecutor();
         List<EventExecuteTaskSupplier> suppliers = new ArrayList<>(this.suppliers);
-        if (hasAsyncTx()) {
-            // TODO: 18-3-24
-        }
+//        if (hasAsyncTx()) {
+//            // TODO: 18-3-24
+//        }
         eventExecutor.setSuppliers(suppliers);
         return eventExecutor;
     }
