@@ -20,6 +20,7 @@
         <module>hsweb-system-workflow-dao</module>
         <module>hsweb-system-workflow-entity</module>
         <module>hsweb-system-workflow-service</module>
+        <module>hsweb-system-workflow-starter</module>
     </modules>
 
 

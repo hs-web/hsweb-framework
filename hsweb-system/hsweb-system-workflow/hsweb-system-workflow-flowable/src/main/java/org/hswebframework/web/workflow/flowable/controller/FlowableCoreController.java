@@ -15,6 +15,7 @@ import org.hswebframework.web.workflow.flowable.service.BpmActivityService;
 import org.hswebframework.web.workflow.flowable.service.BpmProcessService;
 import org.hswebframework.web.workflow.flowable.service.BpmTaskService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -38,9 +39,12 @@ public class FlowableCoreController {
     BpmActivityService bpmActivityService;
     @Autowired
     ActDefService actDefService;
-    @Autowired
+    @Autowired(required = false)
     DynamicFormOperationService dynamicFormOperationService;
 
+    private void assertDynamicFormReady(){
+        Assert.notNull(dynamicFormOperationService,"未引入动态表单依赖");
+    }
     /**
      * 获取所有可用流程（流程配置与流程启动都可用该方法获取）
      * @return
@@ -62,6 +66,7 @@ public class FlowableCoreController {
      */
     @GetMapping("open-form/{id}")
     public ResponseMessage<Map<String,PagerResult<Object>>> openForm(@PathVariable("id") String procDefId){
+        assertDynamicFormReady();
         Map<String,PagerResult<Object>> map = new HashMap<>();
         ActivityImpl activity = bpmActivityService.getStartEvent(procDefId);
         ActDefEntity actDefEntity = actDefService.selectSingle(single(ActDefEntity.actId,activity.getId()));
@@ -79,6 +84,7 @@ public class FlowableCoreController {
      */
     @PostMapping("start/{formId}-{defId}")
     public ResponseMessage<Map<String, Object>> startProc(@PathVariable String formId,@PathVariable String defId, @RequestBody Map<String, Object> data) {
+        assertDynamicFormReady();
         PersonnelAuthorization authorization = PersonnelAuthorization
                 .current()
                 .orElseThrow(NotFoundException::new);
@@ -113,6 +119,7 @@ public class FlowableCoreController {
      */
     @PutMapping("complete/{formId}-{taskId}")
     public ResponseMessage<Map<String,Object>> complete(@PathVariable String formId,@PathVariable String taskId, @RequestBody UpdateParamEntity<Map<String, Object>> paramEntity){
+        assertDynamicFormReady();
         PersonnelAuthorization authorization = PersonnelAuthorization
                 .current()
                 .orElseThrow(NotFoundException::new);

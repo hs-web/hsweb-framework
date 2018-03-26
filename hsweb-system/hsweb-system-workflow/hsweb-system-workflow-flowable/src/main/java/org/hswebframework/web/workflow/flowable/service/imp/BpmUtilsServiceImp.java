@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,13 +26,20 @@ public class BpmUtilsServiceImp implements BpmUtilsService {
 
     protected Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    @Autowired
+    @Autowired(required = false)
     PersonService personService;
-    @Autowired
+    @Autowired(required = false)
     RelationInfoService relationInfoService;
+
+    public void assertOrgModuleReady(){
+        Assert.notNull(personService,"未引入组织架构模块依赖");
+        Assert.notNull(relationInfoService,"未引入组织架构模块依赖");
+
+    }
 
     @Override
     public List<String> selectUserIdsBy(String userId, ActDefEntity actDefEntity) {
+        assertOrgModuleReady();
         List<String> list = new ArrayList<>();
         // 根据配置类型  获取人员信息 设置待办人
         if ("person".equals(actDefEntity.getType())) { // 矩阵
