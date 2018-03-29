@@ -4,6 +4,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import lombok.extern.slf4j.Slf4j;
 import org.activiti.bpmn.converter.BpmnXMLConverter;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.editor.language.json.converter.BpmnJsonConverter;
@@ -16,9 +20,12 @@ import org.hswebframework.ezorm.core.PropertyWrapper;
 import org.hswebframework.ezorm.core.SimplePropertyWrapper;
 import org.hswebframework.ezorm.core.param.TermType;
 import org.hswebframework.web.NotFoundException;
+import org.hswebframework.web.authorization.Permission;
+import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.commons.entity.PagerResult;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.controller.message.ResponseMessage;
+import org.hswebframework.web.workflow.flowable.entity.ModelCreateRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -30,18 +37,23 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/workflow/model/")
+@Api(tags = "工作流-模型管理", description = "工作流模型管理")
+@Authorize(permission = "workflow-model", description = "工作流模型管理")
+@Slf4j
 public class FlowableModelManagerController {
 
     @Autowired
     private RepositoryService repositoryService;
 
-    private final static String MODEL_ID          = "modelId";
-    private final static String MODEL_NAME        = "name";
-    private final static String MODEL_REVISION    = "revision";
+    private final static String MODEL_ID = "modelId";
+    private final static String MODEL_NAME = "name";
+    private final static String MODEL_REVISION = "revision";
     private final static String MODEL_DESCRIPTION = "description";
-    private final static String MODEL_KEY         = "key";
+    private final static String MODEL_KEY = "key";
 
-    @GetMapping("getModelList")
+    @GetMapping
+    @Authorize(action = Permission.ACTION_QUERY)
+    @ApiOperation("获取模型列表")
     public ResponseMessage<PagerResult<Model>> getModelList(QueryParamEntity param) {
         ModelQuery modelQuery = repositoryService.createModelQuery();
         param.getTerms().forEach((term) -> {
@@ -94,9 +106,10 @@ public class FlowableModelManagerController {
                 .exclude(Model.class, "metaInfo", "persistentState");
     }
 
-    @PostMapping("createModel")
+    @PostMapping
     @ResponseStatus(value = HttpStatus.CREATED)
-    public ResponseMessage createModel(@RequestBody JSONObject model) throws Exception {
+    @ApiOperation("创建模型")
+    public ResponseMessage<Model> createModel(@RequestBody ModelCreateRequest model) throws Exception {
         JSONObject stencilset = new JSONObject();
         stencilset.put("namespace", "http://b3mn.org/stencilset/bpmn2.0#");
         JSONObject editorNode = new JSONObject();
@@ -105,21 +118,23 @@ public class FlowableModelManagerController {
         editorNode.put("stencilset", stencilset);
         JSONObject modelObjectNode = new JSONObject();
         modelObjectNode.put(MODEL_REVISION, 1);
-        modelObjectNode.put(MODEL_DESCRIPTION, model.getString(MODEL_DESCRIPTION));
-        modelObjectNode.put(MODEL_KEY, model.getString(MODEL_KEY));
-        modelObjectNode.put(MODEL_NAME, model.getString(MODEL_NAME));
+        modelObjectNode.put(MODEL_DESCRIPTION, model.getDescription());
+        modelObjectNode.put(MODEL_KEY, model.getKey());
+        modelObjectNode.put(MODEL_NAME, model.getName());
 
         Model modelData = repositoryService.newModel();
         modelData.setMetaInfo(modelObjectNode.toJSONString());
-        modelData.setName(model.getString(MODEL_NAME));
-        modelData.setKey(model.getString(MODEL_KEY));
+        modelData.setName(model.getName());
+        modelData.setKey(model.getKey());
         repositoryService.saveModel(modelData);
         repositoryService.addModelEditorSource(modelData.getId(), editorNode.toString().getBytes("utf-8"));
         return ResponseMessage.ok(modelData);
     }
 
-    @PutMapping("{modelId}/deploy")
-    public ResponseMessage deployModel(@PathVariable String modelId) throws Exception {
+    @PostMapping("{modelId}/deploy")
+    @ApiOperation("发布模型")
+    @Authorize(action = "deploy")
+    public ResponseMessage<Deployment> deployModel(@PathVariable String modelId) throws Exception {
         Model modelData = repositoryService.getModel(modelId);
         if (modelData == null) {
             throw new NotFoundException("模型不存在!");
@@ -141,10 +156,12 @@ public class FlowableModelManagerController {
      * @param modelId 模型ID
      * @param type    导出文件类型(bpmn\json)
      */
-    @RequestMapping(value = "export/{modelId}/{type}", method = RequestMethod.GET)
-    public void export(@PathVariable("modelId") String modelId,
-                       @PathVariable("type") String type,
-                       HttpServletResponse response) {
+    @GetMapping(value = "export/{modelId}/{type}")
+    @ApiOperation("导出模型")
+    @Authorize(action = "export")
+    public void export(@PathVariable("modelId") @ApiParam("模型ID") String modelId,
+                       @PathVariable("type") @ApiParam(value = "类型", allowableValues = "bpmn,json", example = "json") String type,
+                       @ApiParam(hidden = true) HttpServletResponse response) {
         try {
             Model modelData = repositoryService.getModel(modelId);
             BpmnJsonConverter jsonConverter = new BpmnJsonConverter();
@@ -190,7 +207,7 @@ public class FlowableModelManagerController {
             response.flushBuffer();
             in.close();
         } catch (Exception e) {
-//            logger.error("导出model的xml文件失败：modelId={}, type={}", modelId, type, e);
+            log.error("导出model的xml文件失败：modelId={}, type={}", modelId, type, e);
         }
     }
 

@@ -1,10 +1,16 @@
 package org.hswebframework.web.workflow.flowable.controller;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
 import org.activiti.engine.impl.pvm.process.ActivityImpl;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.task.Task;
 import org.hswebframework.web.NotFoundException;
+import org.hswebframework.web.authorization.Permission;
+import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.commons.entity.PagerResult;
+import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.commons.entity.param.UpdateParamEntity;
 import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.entity.workflow.ActDefEntity;
@@ -18,9 +24,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.hswebframework.web.commons.entity.param.QueryParamEntity.single;
 
@@ -30,6 +38,8 @@ import static org.hswebframework.web.commons.entity.param.QueryParamEntity.singl
  */
 @RestController
 @RequestMapping("/workflow/proc-def/")
+@Api(tags = "工作流-流程管理",description = "工作流流程管理")
+@Authorize(permission = "workflow-process",description = "工作流流程管理")
 public class FlowableCoreController {
     @Autowired
     BpmTaskService bpmTaskService;
@@ -47,42 +57,42 @@ public class FlowableCoreController {
     }
     /**
      * 获取所有可用流程（流程配置与流程启动都可用该方法获取）
-     * @return
+     * @return key为流程定义的id。value为name
      */
-    @GetMapping("index")
-    public ResponseMessage<Map<String, Object>> index(){
+    @GetMapping("/available")
+    @ApiOperation("获取所有可用流程定义信息")
+    @Authorize(action = Permission.ACTION_QUERY)
+    public ResponseMessage<Map<String, String>> getALlAvailableProcessDefinition(){
         List<ProcessDefinition> list = bpmProcessService.getAllProcessDefinition();
-        Map<String, Object> map = new HashMap<>();
-        for(ProcessDefinition processDefinition : list){
-            map.put(processDefinition.getName(),processDefinition.getId());
-        }
-        return ResponseMessage.ok(map);
+        return ResponseMessage.ok(list
+                .stream()
+                .collect(Collectors.toMap(ProcessDefinition::getId,ProcessDefinition::getName)));
     }
 
     /**
-     * 进入流程表单
-     * @param procDefId
-     * @return
+     * 查询流程表单数据
+     * @param procDefId 流程定义id
      */
-    @GetMapping("open-form/{id}")
-    public ResponseMessage<Map<String,PagerResult<Object>>> openForm(@PathVariable("id") String procDefId){
+    @GetMapping("form/{id}")
+    @ApiOperation("查询流程的表单数据")
+    @Authorize(action = Permission.ACTION_QUERY)
+    public ResponseMessage<PagerResult<Object>> openForm(@PathVariable("id") String procDefId, QueryParamEntity param){
         assertDynamicFormReady();
         Map<String,PagerResult<Object>> map = new HashMap<>();
         ActivityImpl activity = bpmActivityService.getStartEvent(procDefId);
+
         ActDefEntity actDefEntity = actDefService.selectSingle(single(ActDefEntity.actId,activity.getId()));
-        map.put(activity.getProcessDefinition().getKey(),
-                dynamicFormOperationService.selectPager(actDefEntity.getFormId(), null));
-        return ResponseMessage.ok(map);
+        if(actDefEntity!=null){
+            return ResponseMessage.ok(dynamicFormOperationService.selectPager(actDefEntity.getFormId(),param));
+        }
+        throw new NotFoundException("表单不存在");
     }
 
     /**
-     * 保存表单，启动流程
-     * @param formId
-     * @param defId
-     * @param data
-     * @return
+     * 提交表单数据并启动流程
      */
     @PostMapping("start/{formId}-{defId}")
+    @ApiOperation("提交表单数据并启动流程")
     public ResponseMessage<Map<String, Object>> startProc(@PathVariable String formId,@PathVariable String defId, @RequestBody Map<String, Object> data) {
         assertDynamicFormReady();
         PersonnelAuthorization authorization = PersonnelAuthorization
@@ -99,6 +109,7 @@ public class FlowableCoreController {
      * @return
      */
     @GetMapping("tasks")
+    @ApiOperation("获取代办任务")
     public ResponseMessage<List<Task>> getMyTasks() {
         PersonnelAuthorization authorization = PersonnelAuthorization
                 .current()
@@ -111,20 +122,19 @@ public class FlowableCoreController {
     }
 
     /**
-     * 办理
+     * 办理任务
      * @param formId
      * @param taskId
-     * @param paramEntity
      * @return
      */
     @PutMapping("complete/{formId}-{taskId}")
-    public ResponseMessage<Map<String,Object>> complete(@PathVariable String formId,@PathVariable String taskId, @RequestBody UpdateParamEntity<Map<String, Object>> paramEntity){
+    public ResponseMessage<Map<String,Object>> complete(@PathVariable String formId,@PathVariable String taskId){
         assertDynamicFormReady();
         PersonnelAuthorization authorization = PersonnelAuthorization
                 .current()
                 .orElseThrow(NotFoundException::new);
         String userId = authorization.getPersonnel().getId();
-        dynamicFormOperationService.update(formId,paramEntity);
+//        dynamicFormOperationService.update(formId,null);
         // 认领
         bpmTaskService.claim(taskId,userId);
         // 办理

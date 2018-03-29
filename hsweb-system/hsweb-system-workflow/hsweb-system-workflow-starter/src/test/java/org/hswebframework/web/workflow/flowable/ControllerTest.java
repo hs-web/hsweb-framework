@@ -9,23 +9,24 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
 
 /**
- * TODO 完善rest测试
  * @Author wangwei
  * @Date 2017/8/1.
  */
+@Configuration
+@ComponentScan("org.hswebframework.web.workflow")
 public class ControllerTest extends SimpleWebApplicationTests {
 
     @Test
     public void testRest() throws Exception {
         //todo 获取所有可办理流程
-        JSONObject result = testGet("/workflow/proc-def/index").exec().resultAsJson();
-        result = result.getJSONObject("result");
-        Assert.assertNotNull(result);
+        JSONObject result = testGet("/workflow/process/definition").exec().resultAsJson();
+        Assert.assertNotNull( result.getJSONObject("result"));
         Assert.assertEquals(200, result.get("status"));
         System.out.println(result);
     }
