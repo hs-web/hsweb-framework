@@ -1,18 +1,12 @@
 package org.hswebframework.web.eventbus.spring;
 
 import org.hswebframework.web.eventbus.EventBus;
-import org.hswebframework.web.eventbus.annotation.EventMode;
-import org.hswebframework.web.eventbus.annotation.Subscribe;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author zhouhao

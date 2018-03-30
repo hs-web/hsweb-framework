@@ -10,7 +10,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
-public @interface Subscribe {
+public @interface EventListener {
     EventMode mode() default EventMode.SYNC;
 
     boolean transaction() default true;

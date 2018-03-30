@@ -2,7 +2,7 @@ package org.hswebframework.web.eventbus.spring;
 
 import org.hswebframework.web.eventbus.AbstractEventBus;
 import org.hswebframework.web.eventbus.EventListenerDefine;
-import org.hswebframework.web.eventbus.annotation.Subscribe;
+import org.hswebframework.web.eventbus.annotation.EventListener;
 import org.hswebframework.web.eventbus.executor.EventListenerContainer;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -33,15 +33,15 @@ public class SpringEventBus extends AbstractEventBus implements BeanPostProcesso
     protected Object processListener(Object object) {
         Method[] methods = object.getClass().getDeclaredMethods();
         for (Method method : methods) {
-            Subscribe subscribe = method.getAnnotation(Subscribe.class);
-            if (subscribe != null) {
-                createListener(subscribe, object, method);
+            EventListener eventListener = method.getAnnotation(EventListener.class);
+            if (eventListener != null) {
+                createListener(eventListener, object, method);
             }
         }
         return object;
     }
 
-    protected void createListener(Subscribe type, Object target, Method method) {
+    protected void createListener(EventListener type, Object target, Method method) {
         EventListenerDefine define = EventListenerDefine.builder().eventMode(type.mode())
                 .transaction(type.transaction())
                 .listener(new FastListener(target, method))
