@@ -32,6 +32,7 @@ import org.hswebframework.ezorm.rdb.meta.RDBDatabaseMetaData;
 import org.hswebframework.ezorm.rdb.meta.RDBTableMetaData;
 import org.hswebframework.ezorm.rdb.meta.converter.DateTimeConverter;
 import org.hswebframework.ezorm.rdb.meta.converter.NumberValueConverter;
+import org.hswebframework.ezorm.rdb.render.Sql;
 import org.hswebframework.ezorm.rdb.render.SqlAppender;
 import org.hswebframework.ezorm.rdb.render.SqlRender;
 import org.hswebframework.ezorm.rdb.render.dialect.Dialect;
@@ -221,19 +222,25 @@ public class EasyOrmSqlBuilder {
             if (columnMetaData.getName().contains(".")) {
                 return;
             }
+            Object value;
             try {
-                Object tmp = propertyUtils.getProperty(param.getData(), columnMetaData.getAlias());
-                if (tmp == null) {
+                value = propertyUtils.getProperty(param.getData(), columnMetaData.getAlias());
+                if (value == null) {
                     return;
                 }
             } catch (Exception e) {
                 return;
             }
-            appender.add(",", encodeColumn(dialect, columnMetaData.getName())
-                    , "=", "#{data.", columnMetaData.getAlias(),
-                    ",javaType=", EasyOrmSqlBuilder.getJavaType(columnMetaData.getJavaType()),
-                    ",jdbcType=", columnMetaData.getJdbcType(),
-                    "}");
+            if (value instanceof Sql) {
+                appender.add(",", encodeColumn(dialect, columnMetaData.getName())
+                        , "=", ((Sql) value).getSql());
+            } else {
+                appender.add(",", encodeColumn(dialect, columnMetaData.getName())
+                        , "=", "#{data.", columnMetaData.getAlias(),
+                        ",javaType=", EasyOrmSqlBuilder.getJavaType(columnMetaData.getJavaType()),
+                        ",jdbcType=", columnMetaData.getJdbcType(),
+                        "}");
+            }
         });
         if (!appender.isEmpty()) {
             appender.removeFirst();
