@@ -1,8 +1,8 @@
 package org.hswebframework.web.dao.mybatis.builder.jpa;
 
 import org.hswebframework.ezorm.rdb.meta.RDBTableMetaData;
+import org.junit.Assert;
 import org.junit.Test;
-import org.springframework.util.Assert;
 
 import static org.junit.Assert.*;
 
@@ -19,6 +19,7 @@ public class JpaAnnotationParserTest {
     public void testParse() {
         RDBTableMetaData metaData = JpaAnnotationParser.parseMetaDataFromEntity(TestEntity.class);
 
-        Assert.notNull(metaData, "metadata parse error");
+        Assert.assertNotNull(metaData);
+        Assert.assertEquals(metaData.getColumns().size(), 4);
     }
 }

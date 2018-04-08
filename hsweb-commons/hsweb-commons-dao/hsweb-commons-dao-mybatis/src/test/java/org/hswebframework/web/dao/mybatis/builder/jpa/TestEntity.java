@@ -11,9 +11,7 @@ import javax.persistence.Table;
  */
 @Table(name = "s_test")
 @Data
-public class TestEntity {
-    @Column(name = "id")
-    private String id;
+public class TestEntity extends AbstractEntity {
 
     @Column(name = "name")
     private String name;

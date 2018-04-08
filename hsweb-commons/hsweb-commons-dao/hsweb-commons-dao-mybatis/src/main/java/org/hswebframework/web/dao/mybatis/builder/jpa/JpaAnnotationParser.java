@@ -104,6 +104,9 @@ public class JpaAnnotationParser {
             Field field = entityClass.getDeclaredField(descriptor.getName());
             ann = AnnotationUtils.findAnnotation(field, type);
         } catch (@SuppressWarnings("all") NoSuchFieldException ignore) {
+            if (entityClass.getSuperclass() != Object.class) {
+                return getAnnotation(entityClass.getSuperclass(), descriptor, type);
+            }
         }
         Method read = descriptor.getReadMethod(),
                 write = descriptor.getWriteMethod();
