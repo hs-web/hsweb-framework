@@ -56,6 +56,8 @@ public class JpaAnnotationParser {
         jdbcTypeMapping.put(BigInteger.class, JDBCType.INTEGER);
 
         jdbcTypeMapping.put(Date.class, JDBCType.TIMESTAMP);
+        jdbcTypeMapping.put(java.sql.Date.class, JDBCType.TIMESTAMP);
+        jdbcTypeMapping.put(java.sql.Timestamp.class, JDBCType.TIMESTAMP);
 
         jdbcTypeConvert.add((type, property) -> {
             Enumerated enumerated = getAnnotation(type, property, Enumerated.class);
@@ -108,7 +110,7 @@ public class JpaAnnotationParser {
                     return super.getData(value);
                 }
             };
-            
+
             if (columnMetaData.getJdbcType() == JDBCType.DATE) {
                 columnMetaData.setValueConverter(dateConvert);
             } else if (columnMetaData.getJdbcType() == JDBCType.TIMESTAMP) {
