@@ -1,4 +1,4 @@
-package org.hswebframework.web.database.mamager;
+package org.hswebframework.web.database.manager;
 
 import org.hswebframework.ezorm.rdb.executor.SqlExecutor;
 import org.hswebframework.ezorm.rdb.meta.parser.OracleTableMetaParser;

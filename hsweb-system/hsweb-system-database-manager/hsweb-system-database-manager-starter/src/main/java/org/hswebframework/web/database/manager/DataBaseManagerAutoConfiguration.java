@@ -1,6 +1,5 @@
-package org.hswebframework.web.database.mamager;
+package org.hswebframework.web.database.manager;
 
-import org.hswebframework.web.database.manager.DatabaseManagerService;
 import org.hswebframework.web.datasource.manager.simple.SimpleDatabaseManagerService;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
