@@ -2,8 +2,11 @@ package org.hswebframework.web.dao.mybatis.builder.jpa;
 
 
 import org.apache.commons.beanutils.BeanUtilsBean;
+import org.hswebframework.ezorm.core.ValueConverter;
 import org.hswebframework.ezorm.rdb.meta.RDBColumnMetaData;
 import org.hswebframework.ezorm.rdb.meta.RDBTableMetaData;
+import org.hswebframework.ezorm.rdb.meta.converter.DateTimeConverter;
+import org.hswebframework.ezorm.rdb.meta.converter.NumberValueConverter;
 import org.springframework.core.annotation.AnnotationUtils;
 
 import javax.persistence.Column;
@@ -52,6 +55,8 @@ public class JpaAnnotationParser {
         jdbcTypeMapping.put(BigDecimal.class, JDBCType.DECIMAL);
         jdbcTypeMapping.put(BigInteger.class, JDBCType.INTEGER);
 
+        jdbcTypeMapping.put(Date.class, JDBCType.TIMESTAMP);
+
         jdbcTypeConvert.add((type, property) -> {
             Enumerated enumerated = getAnnotation(type, property, Enumerated.class);
             return enumerated != null ? JDBCType.VARCHAR : null;
@@ -84,6 +89,7 @@ public class JpaAnnotationParser {
             columnMetaData.setLength(column.length());
             columnMetaData.setPrecision(column.precision());
             columnMetaData.setJavaType(descriptor.getPropertyType());
+
             JDBCType type = jdbcTypeMapping.get(descriptor.getPropertyType());
             if (type == null) {
                 type = jdbcTypeConvert.stream()
@@ -93,6 +99,25 @@ public class JpaAnnotationParser {
                         .orElse(JDBCType.OTHER);
             }
             columnMetaData.setJdbcType(type);
+            ValueConverter dateConvert = new DateTimeConverter("yyyy-MM-dd HH:mm:ss", columnMetaData.getJavaType()) {
+                @Override
+                public Object getData(Object value) {
+                    if (value instanceof Number) {
+                        return new Date(((Number) value).longValue());
+                    }
+                    return super.getData(value);
+                }
+            };
+            
+            if (columnMetaData.getJdbcType() == JDBCType.DATE) {
+                columnMetaData.setValueConverter(dateConvert);
+            } else if (columnMetaData.getJdbcType() == JDBCType.TIMESTAMP) {
+                columnMetaData.setValueConverter(dateConvert);
+            } else if (columnMetaData.getJdbcType() == JDBCType.NUMERIC) {
+                columnMetaData.setValueConverter(new NumberValueConverter(columnMetaData.getJavaType()));
+            }
+
+
             tableMetaData.addColumn(columnMetaData);
         }
         return tableMetaData;
