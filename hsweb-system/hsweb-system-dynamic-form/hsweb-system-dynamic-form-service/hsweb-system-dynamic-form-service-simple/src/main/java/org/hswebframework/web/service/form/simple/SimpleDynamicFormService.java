@@ -3,7 +3,6 @@ package org.hswebframework.web.service.form.simple;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import jdk.nashorn.internal.scripts.JD;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.hswebframework.ezorm.core.Trigger;
 import org.hswebframework.ezorm.core.ValueConverter;
@@ -92,6 +91,10 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
     }
 
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = "dyn-form-deploy", allEntries = true),
+            @CacheEvict(value = "dyn-form", allEntries = true),
+    })
     public void deployAllFromLog() {
         List<DynamicFormEntity> entities = createQuery()
                 .select(DynamicFormEntity.id)
@@ -109,7 +112,10 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
     }
 
     @Override
-    @CacheEvict(value = "dyn-form-deploy", allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(value = "dyn-form-deploy", allEntries = true),
+            @CacheEvict(value = "dyn-form", allEntries = true),
+    })
     public void deployAll() {
         createQuery()
                 .select(DynamicFormEntity.id)
@@ -167,7 +173,10 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
     }
 
     @Override
-    @CacheEvict(value = "dyn-form-deploy", allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(value = "dyn-form-deploy", allEntries = true),
+            @CacheEvict(value = "dyn-form", allEntries = true),
+    })
     public void unDeploy(String formId) {
         DynamicFormEntity form = selectByPk(formId);
         assertNotNull(form);
@@ -321,7 +330,11 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
     }
 
     @Override
-    @CacheEvict(value = "dyn-form-deploy", key = "'form-deploy:'+#formId+':latest'")
+
+    @Caching(evict = {
+            @CacheEvict(value = "dyn-form-deploy", key = "'form-deploy:'+#formId+':latest'"),
+            @CacheEvict(value = "dyn-form", allEntries = true)
+    })
     public void deploy(String formId) {
         DynamicFormEntity formEntity = selectByPk(formId);
         assertNotNull(formEntity);
