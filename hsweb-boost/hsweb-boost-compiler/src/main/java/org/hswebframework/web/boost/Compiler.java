@@ -46,10 +46,11 @@ public class Compiler<I> {
             ClassPath classPath = new ClassClassPath(this.getClass());
             classPool.insertClassPath(classPath);
         }
-        className = superClass.getSimpleName() + "HSwebBoostGen" + counter.getAndAdd(1);
+        className = superClass.getSimpleName() + "FastBeanCopier" + counter.getAndAdd(1);
         classFullName = superClass.getPackage() + "." + className;
 
         ctClass = classPool.makeClass(classFullName);
+
         if (superClass != Object.class) {
             if (superClass.isInterface()) {
                 ctClass.setInterfaces(new CtClass[]{classPool.get(superClass.getName())});
@@ -57,6 +58,7 @@ public class Compiler<I> {
                 ctClass.setSuperclass(classPool.get(superClass.getName()));
             }
         }
+//        ctClass.debugWriteFile();
         addConstructor("public " + className + "(){}");
     }
 
