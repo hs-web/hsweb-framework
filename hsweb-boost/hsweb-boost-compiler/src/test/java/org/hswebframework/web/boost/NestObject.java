@@ -7,9 +7,14 @@ import lombok.Data;
  * @since
  */
 @Data
-public class NestObject {
+public class NestObject implements Cloneable {
     private String name;
 
     private int age;
 
+
+    @Override
+    public NestObject clone() throws CloneNotSupportedException {
+        return (NestObject)super.clone();
+    }
 }

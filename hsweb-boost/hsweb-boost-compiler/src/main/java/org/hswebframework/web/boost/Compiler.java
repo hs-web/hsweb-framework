@@ -12,15 +12,16 @@ import java.util.concurrent.atomic.AtomicLong;
  * @since 3.0
  */
 public class Compiler<I> {
-    public ClassPool  classPool = new ClassPool(true);
-    public static final AtomicLong counter   = new AtomicLong(1);
+    public ClassPool classPool = new ClassPool(true);
+    public static final AtomicLong counter = new AtomicLong(1);
 
-    private CtClass  ctClass;
+    private CtClass ctClass;
+    @Getter
     private Class<I> superClass;
     @Getter
-    private String   className;
+    private String className;
     @Getter
-    private String   classFullName;
+    private String classFullName;
 
     private Class<I> targetClass;
 
