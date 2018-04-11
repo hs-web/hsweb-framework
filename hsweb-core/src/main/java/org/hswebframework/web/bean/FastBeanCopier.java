@@ -96,7 +96,6 @@ public final class FastBeanCopier {
                 "\n}\n" +
                 "\n}";
         try {
-            System.out.println(method);
             return Proxy.create(Copier.class)
                     .addMethod(method)
                     .newInstance();
