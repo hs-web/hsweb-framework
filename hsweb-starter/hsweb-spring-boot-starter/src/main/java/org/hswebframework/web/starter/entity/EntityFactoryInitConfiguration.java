@@ -1,5 +1,6 @@
 package org.hswebframework.web.starter.entity;
 
+import org.hswebframework.web.commons.entity.factory.DefaultPropertyCopier;
 import org.hswebframework.web.commons.entity.factory.MapperEntityFactory;
 import org.hswebframework.web.commons.entity.factory.PropertyCopier;
 import org.springframework.beans.BeansException;
@@ -18,7 +19,9 @@ public class EntityFactoryInitConfiguration implements BeanPostProcessor {
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        if (bean instanceof PropertyCopier) {
+        if (bean instanceof DefaultPropertyCopier) {
+            mapperEntityFactory.setDefaultPropertyCopier(((DefaultPropertyCopier) bean));
+        } else if (bean instanceof PropertyCopier) {
             mapperEntityFactory.addCopier(((PropertyCopier) bean));
         }
         if (bean instanceof EntityMappingCustomer) {

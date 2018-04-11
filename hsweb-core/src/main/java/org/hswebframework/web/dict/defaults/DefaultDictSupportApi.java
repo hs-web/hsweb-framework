@@ -74,7 +74,7 @@ public class DefaultDictSupportApi implements DictSupportApi {
                 }
                 BeanUtils.setProperty(target, fieldName, getParser(define.getParserId()).parseValue(define, String.valueOf(value)));
             } catch (Exception e) {
-                log.warn("wrap error", e.getMessage());
+                log.warn("unwrap error", e.getMessage());
             }
         }
         return target;

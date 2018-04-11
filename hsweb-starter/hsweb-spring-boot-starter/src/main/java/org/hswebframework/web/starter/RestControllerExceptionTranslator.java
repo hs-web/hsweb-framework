@@ -121,6 +121,15 @@ public class RestControllerExceptionTranslator {
         return ResponseMessage.error(500, exception.getMessage());
     }
 
+    @ExceptionHandler(NullPointerException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseBody
+    ResponseMessage handleException(NullPointerException exception) {
+        logger.error(exception.getMessage(), exception);
+        return ResponseMessage.error(500, "服务器内部错误");
+    }
+
+
     @ExceptionHandler(SQLException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ResponseBody

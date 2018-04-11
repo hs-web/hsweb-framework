@@ -19,6 +19,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DefaultDictDefine implements DictDefine {
+    private static final long serialVersionUID = 20094004707177152L;
     private String           id;
     private String           alias;
     private String           comments;

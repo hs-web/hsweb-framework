@@ -14,6 +14,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.javassist</groupId>
+            <artifactId>javassist</artifactId>
+            <!--<version>3.22.0-GA</version>-->
+        </dependency>
+        <dependency>
             <groupId>org.hswebframework</groupId>
             <artifactId>hsweb-utils</artifactId>
         </dependency>

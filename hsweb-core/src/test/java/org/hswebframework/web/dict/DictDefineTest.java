@@ -3,6 +3,7 @@ package org.hswebframework.web.dict;
 import org.hswebframework.web.dict.defaults.DefaultClassDictDefine;
 import org.hswebframework.web.dict.defaults.DefaultDictDefineRepository;
 import org.hswebframework.web.dict.defaults.DefaultDictSupportApi;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -20,6 +21,17 @@ public class DictDefineTest {
 
     private DictSupportApi api = new DefaultDictSupportApi(repository);
 
+
+    @Test
+    public void testEnumDict() {
+        Assert.assertEquals(UserCode.SIMPLE, EnumDict.findByValue(UserCode.class, UserCode.SIMPLE.getValue()).orElse(null));
+
+        Assert.assertEquals(UserCode.SIMPLE, EnumDict.findByText(UserCode.class, UserCode.SIMPLE.getText()).orElse(null));
+
+        Assert.assertEquals(UserCode.SIMPLE, EnumDict.find(UserCode.class, UserCode.SIMPLE.getText()).orElse(null));
+
+    }
+
     @Test
     public void testParse() {
 
@@ -28,9 +40,19 @@ public class DictDefineTest {
                 .field("code")
                 .build();
         repository.registerDefine(define);
+
+
         List<ClassDictDefine> defines = repository.getDefine(UseDictEntity2.class);
         assertFalse(defines.isEmpty());
         assertEquals(defines.size(), 2);
+
+        defines = repository.getDefine(UserCode.class);
+        assertFalse(defines.isEmpty());
+        assertEquals(defines.size(), 1);
+
+        assertEquals(defines.get(0).getItems().size(), 2);
+
+
     }
 
     @Test
