@@ -23,6 +23,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import org.hswebframework.web.NotFoundException;
 import org.hswebframework.utils.ClassUtils;
+import org.hswebframework.web.bean.FastBeanCopier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,9 +37,9 @@ import java.util.function.Supplier;
  */
 @SuppressWarnings("unchecked")
 public class MapperEntityFactory implements EntityFactory {
-    private Map<Class, Mapper>          realTypeMapper = new HashMap<>();
-    private Logger                      logger         = LoggerFactory.getLogger(this.getClass());
-    private Map<String, PropertyCopier> copierCache    = new HashMap<>();
+    private Map<Class, Mapper> realTypeMapper = new HashMap<>();
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private Map<String, PropertyCopier> copierCache = new HashMap<>();
 
     private static final DefaultMapperFactory DEFAULT_MAPPER_FACTORY = clazz -> {
         String simpleClassName = clazz.getPackage().getName().concat(".Simple").concat(clazz.getSimpleName());
@@ -51,11 +52,13 @@ public class MapperEntityFactory implements EntityFactory {
     };
 
     private static final DefaultPropertyCopier DEFAULT_PROPERTY_COPIER = (source, target) -> {
-        Object sourcePar = JSON.toJSON(source);
-        if (sourcePar instanceof JSONObject) {
-            return ((JSONObject) sourcePar).toJavaObject(target.getClass());
-        }
-        return JSON.parseObject(JSON.toJSONString(source, SerializerFeature.DisableCircularReferenceDetect), target.getClass());
+        return FastBeanCopier.copy(source, target);
+
+//        Object sourcePar = JSON.toJSON(source);
+//        if (sourcePar instanceof JSONObject) {
+//            return ((JSONObject) sourcePar).toJavaObject(target.getClass());
+//        }
+//        return JSON.parseObject(JSON.toJSONString(source, SerializerFeature.DisableCircularReferenceDetect), target.getClass());
     };
 
     private DefaultMapperFactory defaultMapperFactory = DEFAULT_MAPPER_FACTORY;
@@ -108,12 +111,6 @@ public class MapperEntityFactory implements EntityFactory {
             }
 
             return (T) defaultPropertyCopier.copyProperties(source, target);
-//
-//            Object sourcePar = JSON.toJSON(source);
-//            if (sourcePar instanceof JSONObject) {
-//                return ((JSONObject) sourcePar).toJavaObject((Class<T>) target.getClass());
-//            }
-//            return JSON.parseObject(JSON.toJSONString(source), (Class<T>) target.getClass());
         } catch (Exception e) {
             logger.warn("copy properties error", e);
         }
@@ -206,7 +203,7 @@ public class MapperEntityFactory implements EntityFactory {
     }
 
     public static class Mapper<T> {
-        Class<T>    target;
+        Class<T> target;
         Supplier<T> instanceGetter;
 
         public Mapper(Class<T> target, Supplier<T> instanceGetter) {
