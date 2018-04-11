@@ -1,7 +1,6 @@
 package org.hswebframework.web.dict.defaults;
 
 import lombok.extern.slf4j.Slf4j;
-import org.hswebframework.web.AopUtils;
 import org.hswebframework.web.dict.*;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -10,7 +9,6 @@ import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
 import org.springframework.util.ReflectionUtils;
 
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
