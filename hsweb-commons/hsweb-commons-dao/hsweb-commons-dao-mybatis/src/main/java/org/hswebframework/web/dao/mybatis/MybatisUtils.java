@@ -18,19 +18,25 @@
 
 package org.hswebframework.web.dao.mybatis;
 
-import org.hswebframework.web.dao.Dao;
-import org.mybatis.spring.annotation.MapperScan;
-import org.springframework.boot.autoconfigure.AutoConfigureAfter;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
+import org.apache.ibatis.mapping.ResultMap;
+import org.apache.ibatis.session.SqlSessionFactory;
 
-@Configuration
-@ComponentScan("org.hswebframework.web.dao.mybatis")
-@MapperScan(value = "org.hswebframework.web.dao", markerInterface = Dao.class)
-@AutoConfigureAfter(MyBatisAutoConfiguration.class)
-@EnableConfigurationProperties(MybatisProperties.class)
-public class MybatisDaoAutoConfiguration {
+import java.util.concurrent.CountDownLatch;
 
+/**
+ * @since 2.0
+ */
+public class MybatisUtils {
+    volatile static SqlSessionFactory sqlSession;
 
+    public static ResultMap getResultMap(String id) {
+        return getSqlSession().getConfiguration().getResultMap(id);
+    }
+
+    public static SqlSessionFactory getSqlSession() {
+        if (sqlSession == null) {
+            throw new UnsupportedOperationException("sqlSession is null");
+        }
+        return sqlSession;
+    }
 }

@@ -45,7 +45,7 @@ import org.hswebframework.web.BusinessException;
 import org.hswebframework.web.commons.entity.factory.EntityFactory;
 import org.hswebframework.web.dao.mybatis.builder.jpa.JpaAnnotationParser;
 import org.hswebframework.web.dao.mybatis.plgins.pager.Pager;
-import org.hswebframework.web.dao.mybatis.utils.ResultMapsUtils;
+import org.hswebframework.web.dao.mybatis.MybatisUtils;
 import org.hswebframework.utils.StringUtils;
 import org.hswebframework.web.datasource.DataSourceHolder;
 import org.hswebframework.web.datasource.DatabaseType;
@@ -146,7 +146,7 @@ public class EasyOrmSqlBuilder {
             return cached;
         }
         RDBTableMetaData rdbTableMetaData = new RDBTableMetaData();
-        ResultMap resultMaps = ResultMapsUtils.getResultMap(resultMapId);
+        ResultMap resultMaps = MybatisUtils.getResultMap(resultMapId);
         rdbTableMetaData.setName(tableName);
         rdbTableMetaData.setDatabaseMetaData(active);
 
