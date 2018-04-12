@@ -29,7 +29,6 @@ public class DictDefineTest {
         Assert.assertEquals(UserCode.SIMPLE, EnumDict.findByText(UserCode.class, UserCode.SIMPLE.getText()).orElse(null));
 
         Assert.assertEquals(UserCode.SIMPLE, EnumDict.find(UserCode.class, UserCode.SIMPLE.getText()).orElse(null));
-
     }
 
     @Test

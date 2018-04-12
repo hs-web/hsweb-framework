@@ -7,6 +7,8 @@ import org.hswebframework.ezorm.rdb.meta.RDBColumnMetaData;
 import org.hswebframework.ezorm.rdb.meta.RDBTableMetaData;
 import org.hswebframework.ezorm.rdb.meta.converter.DateTimeConverter;
 import org.hswebframework.ezorm.rdb.meta.converter.NumberValueConverter;
+import org.hswebframework.utils.ClassUtils;
+import org.hswebframework.web.dict.EnumDict;
 import org.springframework.core.annotation.AnnotationUtils;
 
 import javax.persistence.Column;
@@ -59,6 +61,8 @@ public class JpaAnnotationParser {
         jdbcTypeMapping.put(java.sql.Date.class, JDBCType.TIMESTAMP);
         jdbcTypeMapping.put(java.sql.Timestamp.class, JDBCType.TIMESTAMP);
 
+        jdbcTypeMapping.put(Object.class, JDBCType.VARCHAR);
+
         jdbcTypeConvert.add((type, property) -> {
             Enumerated enumerated = getAnnotation(type, property, Enumerated.class);
             return enumerated != null ? JDBCType.VARCHAR : null;
@@ -66,6 +70,14 @@ public class JpaAnnotationParser {
         jdbcTypeConvert.add((type, property) -> {
             Lob enumerated = getAnnotation(type, property, Lob.class);
             return enumerated != null ? JDBCType.CLOB : null;
+        });
+
+        jdbcTypeConvert.add((type, property) -> {
+            if (type.isEnum() && EnumDict.class.isAssignableFrom(type)) {
+                Class genType = ClassUtils.getGenericType(type);
+                return jdbcTypeMapping.getOrDefault(genType, JDBCType.OTHER);
+            }
+            return null;
         });
     }
 
@@ -92,7 +104,9 @@ public class JpaAnnotationParser {
             columnMetaData.setPrecision(column.precision());
             columnMetaData.setJavaType(descriptor.getPropertyType());
 
-            JDBCType type = jdbcTypeMapping.get(descriptor.getPropertyType());
+            Class propertyType = descriptor.getPropertyType();
+
+            JDBCType type = jdbcTypeMapping.get(propertyType);
             if (type == null) {
                 type = jdbcTypeConvert.stream()
                         .map(func -> func.apply(entityClass, descriptor))

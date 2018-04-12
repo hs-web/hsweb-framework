@@ -8,7 +8,6 @@ import org.hswebframework.web.commons.entity.DataStatus;
 import org.hswebframework.web.dao.schedule.ScheduleJobDao;
 import org.hswebframework.web.entity.schedule.ScheduleJobEntity;
 import org.hswebframework.web.id.IDGenerator;
-import org.hswebframework.web.service.EnableCacheGenericEntityService;
 import org.hswebframework.web.service.GenericEntityService;
 import org.hswebframework.web.service.schedule.ScheduleJobService;
 import org.hswebframework.web.service.schedule.ScheduleTriggerBuilder;
@@ -16,7 +15,6 @@ import org.quartz.*;
 import org.quartz.spi.MutableTrigger;
 import org.quartz.spi.OperableTrigger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -83,18 +81,18 @@ public class SimpleScheduleJobService extends GenericEntityService<ScheduleJobEn
 
     protected void startJob(ScheduleJobEntity jobEntity) {
         try {
-        if(scheduler.checkExists(createJobKey(jobEntity))) {
-            return;
-        }
-        JobDetail jobDetail = JobBuilder
-                .newJob(DynamicJob.class)
-                .withIdentity(createJobKey(jobEntity))
-                .setJobData(createJobDataMap(jobEntity.getParameters()))
-                .usingJobData(DynamicJobFactory.JOB_ID_KEY, jobEntity.getId())
-                .withDescription(jobEntity.getName() + (jobEntity.getRemark() == null ? "" : jobEntity.getRemark()))
-                .build();
-        MutableTrigger trigger = scheduleTriggerBuilder.buildTrigger(jobEntity.getQuartzConfig());
-        trigger.setKey(createTriggerKey(jobEntity));
+            if (scheduler.checkExists(createJobKey(jobEntity))) {
+                return;
+            }
+            JobDetail jobDetail = JobBuilder
+                    .newJob(DynamicJob.class)
+                    .withIdentity(createJobKey(jobEntity))
+                    .setJobData(createJobDataMap(jobEntity.getParameters()))
+                    .usingJobData(DynamicJobFactory.JOB_ID_KEY, jobEntity.getId())
+                    .withDescription(jobEntity.getName() + (jobEntity.getRemark() == null ? "" : jobEntity.getRemark()))
+                    .build();
+            MutableTrigger trigger = scheduleTriggerBuilder.buildTrigger(jobEntity.getQuartzConfig());
+            trigger.setKey(createTriggerKey(jobEntity));
 
             scheduler.scheduleJob(jobDetail, trigger);
         } catch (SchedulerException e) {
@@ -129,11 +127,11 @@ public class SimpleScheduleJobService extends GenericEntityService<ScheduleJobEn
     @Override
     public void enable(String id) {
         Objects.requireNonNull(id);
-      int size=  createUpdate().set(ScheduleJobEntity.status, DataStatus.STATUS_ENABLED)
+        int size = createUpdate().set(ScheduleJobEntity.status, DataStatus.STATUS_ENABLED)
                 .where(ScheduleJobEntity.id, id).exec();
-      if(size>0) {
-          startJob(selectByPk(id));
-      }
+        if (size > 0) {
+            startJob(selectByPk(id));
+        }
     }
 
     private void deleteJob(ScheduleJobEntity jobEntity) {
@@ -150,10 +148,10 @@ public class SimpleScheduleJobService extends GenericEntityService<ScheduleJobEn
     @Override
     public void disable(String id) {
         Objects.requireNonNull(id);
-       int size =  createUpdate().set(ScheduleJobEntity.status, DataStatus.STATUS_DISABLED)
+        int size = createUpdate().set(ScheduleJobEntity.status, DataStatus.STATUS_DISABLED)
                 .where(ScheduleJobEntity.id, id).exec();
-       if(size>0) {
-           deleteJob(selectByPk(id));
-       }
+        if (size > 0) {
+            deleteJob(selectByPk(id));
+        }
     }
 }

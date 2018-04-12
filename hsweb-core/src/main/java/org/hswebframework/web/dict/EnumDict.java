@@ -27,6 +27,20 @@ public interface EnumDict<V> {
     String getText();
 
     /**
+     * 对比是否和value相等,对比地址,值,value转为string忽略大小写对比,text忽略大小写对比
+     *
+     * @param v value
+     * @return 是否相等
+     */
+    default boolean eq(Object v) {
+        return getValue() == v
+                || getValue().equals(v)
+                || String.valueOf(getValue()).equalsIgnoreCase(String.valueOf(v))
+                || getText().equalsIgnoreCase(String.valueOf(v));
+    }
+
+
+    /**
      * 枚举选项的描述,对一个选项进行详细的描述有时候是必要的.默认值为{@link this#getText()}
      *
      * @return 描述
@@ -77,7 +91,7 @@ public interface EnumDict<V> {
      *
      * @see this#find(Class, Predicate)
      */
-    static <T extends Enum & EnumDict> Optional<T> find(Class<T> type, Object valueOrTextOrAlias) {
-        return Optional.ofNullable(findByValue(type, valueOrTextOrAlias).orElseGet(() -> findByText(type, String.valueOf(valueOrTextOrAlias)).orElse(null)));
+    static <T extends Enum & EnumDict> Optional<T> find(Class<T> type, Object target) {
+        return find(type, v->v.eq(target));
     }
 }

@@ -20,6 +20,6 @@ public class JpaAnnotationParserTest {
         RDBTableMetaData metaData = JpaAnnotationParser.parseMetaDataFromEntity(TestEntity.class);
 
         Assert.assertNotNull(metaData);
-        Assert.assertEquals(metaData.getColumns().size(), 4);
+        Assert.assertEquals(metaData.getColumns().size(), 5);
     }
 }

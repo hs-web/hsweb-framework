@@ -1,7 +1,9 @@
 package org.hswebframework.web.bean;
 
+import org.apache.commons.beanutils.BeanUtils;
 import org.junit.Test;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,7 +15,7 @@ import java.util.Map;
 public class FastBeanCopierTest {
 
     @Test
-    public void test() {
+    public void test() throws InvocationTargetException, IllegalAccessException {
         Source source = new Source();
         source.setAge(100);
         source.setName("测试");
@@ -31,8 +33,8 @@ public class FastBeanCopierTest {
         Target target = new Target();
         FastBeanCopier.copy(source, target);
 
+
         long t = System.currentTimeMillis();
-//        Copier copier = FastBeanCopier.getCopier(source, target, true);
         for (int i = 10_0000; i > 0; i--) {
             FastBeanCopier.copy(source, target);
         }

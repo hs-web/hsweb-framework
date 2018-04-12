@@ -1,6 +1,7 @@
 package org.hswebframework.web.dao.mybatis.builder.jpa;
 
 import lombok.Data;
+import org.hswebframework.web.dict.defaults.TrueOrFalse;
 
 import javax.persistence.Column;
 import javax.persistence.Table;
@@ -21,5 +22,8 @@ public class TestEntity extends AbstractEntity {
 
     @Column(name = "role_id")
     private String roleId;
+
+    @Column(name = "enabled")
+    private TrueOrFalse enabled;
 
 }

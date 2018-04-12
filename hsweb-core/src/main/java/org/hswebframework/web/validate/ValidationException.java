@@ -24,6 +24,7 @@ import org.hswebframework.web.BusinessException;
 import java.util.List;
 
 public class ValidationException extends BusinessException {
+    private static final long serialVersionUID = 7807607467371210082L;
     private ValidateResults results;
 
     public ValidationException(String message) {

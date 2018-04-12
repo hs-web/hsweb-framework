@@ -74,7 +74,6 @@ public class MyBatisAutoConfiguration {
     public SqlSessionFactory sqlSessionFactory(@Qualifier("dataSource") DataSource dataSource) throws Exception {
         SqlSessionFactoryBean factory = new SqlSessionFactoryBean();
         MybatisProperties mybatisProperties = this.mybatisProperties();
-
         if (null != entityFactory) {
             factory.setObjectFactory(new MybatisEntityFactory(entityFactory));
         }
@@ -109,7 +108,11 @@ public class MyBatisAutoConfiguration {
         }
         factory.setTypeHandlersPackage(typeHandlers);
         factory.setMapperLocations(mybatisProperties.resolveMapperLocations());
+
         SqlSessionFactory sqlSessionFactory = factory.getObject();
+        EnumDictHandlerRegister.typeHandlerRegistry = sqlSessionFactory.getConfiguration().getTypeHandlerRegistry();
+        EnumDictHandlerRegister.register("org.hswebframework.web;" + mybatisProperties.getTypeHandlersPackage());
+
         ResultMapsUtils.setSqlSession(sqlSessionFactory);
         try {
             Class.forName("javax.persistence.Table");
@@ -117,6 +120,9 @@ public class MyBatisAutoConfiguration {
         } catch (@SuppressWarnings("all") Exception ignore) {
         }
         EasyOrmSqlBuilder.getInstance().entityFactory = entityFactory;
+
+        sqlSessionFactory.getConfiguration().getTypeAliasRegistry();
+
         return sqlSessionFactory;
     }
 

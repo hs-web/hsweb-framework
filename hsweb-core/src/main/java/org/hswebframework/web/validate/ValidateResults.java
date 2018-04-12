@@ -22,7 +22,7 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * TODO 完成注释
+ * 验证结果
  *
  * @author zhouhao
  */
