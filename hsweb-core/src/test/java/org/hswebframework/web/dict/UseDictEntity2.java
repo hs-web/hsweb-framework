@@ -18,4 +18,6 @@ public class UseDictEntity2 extends UseDictEntity {
                     @Item(text = "编码2", value = "2")
             })
     private String code;
+
+    private UserCode userCode=UserCode.SIMPLE;
 }

@@ -28,6 +28,7 @@ import org.hswebframework.web.ThreadLocalUtils;
 import org.hswebframework.web.commons.entity.factory.EntityFactory;
 import org.hswebframework.web.commons.entity.factory.MapperEntityFactory;
 import org.hswebframework.web.convert.CustomMessageConverter;
+import org.hswebframework.web.dict.EnumDict;
 import org.hswebframework.web.starter.convert.FastJsonGenericHttpMessageConverter;
 import org.hswebframework.web.starter.convert.FastJsonHttpMessageConverter;
 import org.hswebframework.web.starter.entity.EntityFactoryInitConfiguration;
@@ -115,6 +116,7 @@ public class HswebAutoConfiguration {
                 if (type instanceof Class) {
                     Class classType = ((Class) type);
                     if (classType.isEnum()) {
+                        // TODO: 2018/4/12 支持EnumDict枚举的反序列化
                         return super.getDeserializer(type);
                     }
                     checkAutoType(type.getTypeName(), ((Class) type));
@@ -200,7 +202,7 @@ public class HswebAutoConfiguration {
     }
 
     @Bean
-    public RestControllerExceptionTranslator restControllerExceptionTranslator(){
+    public RestControllerExceptionTranslator restControllerExceptionTranslator() {
         return new RestControllerExceptionTranslator();
     }
 

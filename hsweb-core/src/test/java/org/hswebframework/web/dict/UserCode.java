@@ -1,5 +1,6 @@
 package org.hswebframework.web.dict;
 
+import com.alibaba.fastjson.annotation.JSONType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

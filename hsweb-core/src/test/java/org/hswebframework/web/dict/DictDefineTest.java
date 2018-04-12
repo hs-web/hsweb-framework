@@ -1,11 +1,19 @@
 package org.hswebframework.web.dict;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.parser.DefaultJSONParser;
+import com.alibaba.fastjson.parser.ParserConfig;
+import com.alibaba.fastjson.parser.deserializer.JavaBeanDeserializer;
+import com.alibaba.fastjson.parser.deserializer.ObjectDeserializer;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import org.hswebframework.web.dict.defaults.DefaultClassDictDefine;
 import org.hswebframework.web.dict.defaults.DefaultDictDefineRepository;
 import org.hswebframework.web.dict.defaults.DefaultDictSupportApi;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
 
@@ -21,9 +29,9 @@ public class DictDefineTest {
 
     private DictSupportApi api = new DefaultDictSupportApi(repository);
 
-
     @Test
     public void testEnumDict() {
+
         Assert.assertEquals(UserCode.SIMPLE, EnumDict.findByValue(UserCode.class, UserCode.SIMPLE.getValue()).orElse(null));
 
         Assert.assertEquals(UserCode.SIMPLE, EnumDict.findByText(UserCode.class, UserCode.SIMPLE.getText()).orElse(null));

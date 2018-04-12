@@ -19,37 +19,14 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 public class DefaultDictDefineRepository implements DictDefineRepository {
-    protected Map<String, DictDefine> parsedDict = new HashMap<>();
+    protected static final Map<String, DictDefine> parsedDict = new HashMap<>();
 
-    public void registerDefine(DictDefine define) {
+    public static void registerDefine(DictDefine define) {
         parsedDict.put(define.getId(), define);
     }
 
-    static {
-        ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
-        SimpleMetadataReaderFactory readerFactory = new SimpleMetadataReaderFactory();
-
-        try {
-            Resource[] resources = resourcePatternResolver.getResources("classpath*:org/hswebframework/web/**/*.class");
-            for (Resource resource : resources) {
-                try {
-                    MetadataReader reader = readerFactory.getMetadataReader(resource);
-                    String className = reader.getClassMetadata().getClassName();
-                    Class type = Class.forName(className);
-                    if (type.isEnum() && EnumDict.class.isAssignableFrom(type)) {
-
-                    }
-                } catch (Error e) {
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    protected <T extends Enum & EnumDict> List<DictDefine> parseEnumDict(Class<T> type) {
+    public static <T extends Enum & EnumDict> ClassDictDefine parseEnumDict(Class<T> type) {
         log.debug("parse enum dict :{}", type);
-
 
         Dict dict = type.getAnnotation(Dict.class);
 
@@ -78,7 +55,7 @@ public class DefaultDictDefineRepository implements DictDefineRepository {
         }
         define.setItems(items);
 
-        return new ArrayList<>(Collections.singletonList(define));
+        return define;
 
     }
 
@@ -105,7 +82,7 @@ public class DefaultDictDefineRepository implements DictDefineRepository {
         List<ClassDictDefine> defines = new ArrayList<>();
 
         if (type.isEnum() && EnumDict.class.isAssignableFrom(type)) {
-            return parseEnumDict(type);
+            return Arrays.asList(parseEnumDict(type));
         }
         for (Field field : parseField(type)) {
             Dict dict = field.getAnnotation(Dict.class);
@@ -155,5 +132,10 @@ public class DefaultDictDefineRepository implements DictDefineRepository {
             }
         }
         return defines;
+    }
+
+    @Override
+    public void addDefine(DictDefine dictDefine) {
+        registerDefine(dictDefine);
     }
 }

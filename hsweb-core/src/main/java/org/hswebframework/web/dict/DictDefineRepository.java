@@ -10,4 +10,6 @@ public interface DictDefineRepository {
     DictDefine getDefine(String id);
 
     List<ClassDictDefine> getDefine(Class type);
+
+    void addDefine(DictDefine dictDefine);
 }

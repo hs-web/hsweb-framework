@@ -9,6 +9,7 @@ import org.apache.ibatis.type.MappedJdbcTypes;
 import org.apache.ibatis.type.TypeHandler;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 import org.hswebframework.web.dict.EnumDict;
+import org.hswebframework.web.dict.defaults.DefaultDictDefineRepository;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -19,7 +20,10 @@ import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.util.ClassUtils;
 
 import java.io.IOException;
-import java.sql.*;
+import java.sql.CallableStatement;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 import static org.springframework.util.StringUtils.tokenizeToStringArray;
 
@@ -53,7 +57,8 @@ public class EnumDictHandlerRegister {
                         MetadataReader reader = metadataReaderFactory.getMetadataReader(resource);
                         Class enumType = Class.forName(reader.getClassMetadata().getClassName());
                         if (enumType.isEnum() && EnumDict.class.isAssignableFrom(enumType)) {
-                            log.debug("register typeHandler for enum dict:{}", enumType);
+                            log.debug("register enum dict:{}", enumType);
+                            DefaultDictDefineRepository.registerDefine(DefaultDictDefineRepository.parseEnumDict(enumType));
                             typeHandlerRegistry.register(enumType, new EnumDictHandler(enumType));
                         }
                     } catch (Exception ignore) {
