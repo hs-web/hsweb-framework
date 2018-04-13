@@ -31,15 +31,16 @@ public class DictDefineTest {
 
         Assert.assertEquals(UserCode.SIMPLE, find(UserCode.class, UserCode.SIMPLE.getText()).orElse(null));
 
-        long bit = toBit(UserCode.class, UserCode.values());
+        long bit = toBit( UserCode.values());
 
-        System.out.println(bit);
+        System.out.println(bitIn(bit,UserCode.SIMPLE,UserCode.TEST,UserCode.SIMPLE));
 
         for (UserCode userCode : UserCode.values()) {
             Assert.assertTrue(userCode.in(bit));
         }
 
         List<UserCode> codes = getByBit(UserCode.class, bit);
+
 
     }
 

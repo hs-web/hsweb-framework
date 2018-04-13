@@ -47,8 +47,10 @@ public interface EnumDict<V> {
      * @return 是否相等
      */
     default boolean eq(Object v) {
-        return getValue() == v
+        return this == v
+                || getValue() == v
                 || getValue().equals(v)
+                || v.equals(getBit())
                 || String.valueOf(getValue()).equalsIgnoreCase(String.valueOf(v))
                 || getText().equalsIgnoreCase(String.valueOf(v));
     }
@@ -74,7 +76,7 @@ public interface EnumDict<V> {
      * @param <T>       枚举类型
      * @return 查找到的结果
      */
-    static <T extends Enum & EnumDict> Optional<T> find(Class<T> type, Predicate<T> predicate) {
+    static <T extends EnumDict> Optional<T> find(Class<T> type, Predicate<T> predicate) {
         if (type.isEnum()) {
             for (T enumDict : type.getEnumConstants()) {
                 if (predicate.test(enumDict)) {
@@ -90,7 +92,7 @@ public interface EnumDict<V> {
      *
      * @see this#find(Class, Predicate)
      */
-    static <T extends Enum & EnumDict<?>> Optional<T> findByValue(Class<T> type, Object value) {
+    static <T extends EnumDict<?>> Optional<T> findByValue(Class<T> type, Object value) {
         return find(type, e -> e.getValue() == value || e.getValue().equals(value) || String.valueOf(e.getValue()).equalsIgnoreCase(String.valueOf(value)));
     }
 
@@ -99,7 +101,7 @@ public interface EnumDict<V> {
      *
      * @see this#find(Class, Predicate)
      */
-    static <T extends Enum & EnumDict> Optional<T> findByText(Class<T> type, String text) {
+    static <T extends EnumDict> Optional<T> findByText(Class<T> type, String text) {
         return find(type, e -> e.getText().equalsIgnoreCase(text));
     }
 
@@ -108,11 +110,12 @@ public interface EnumDict<V> {
      *
      * @see this#find(Class, Predicate)
      */
-    static <T extends Enum & EnumDict> Optional<T> find(Class<T> type, Object target) {
+    static <T extends EnumDict> Optional<T> find(Class<T> type, Object target) {
         return find(type, v -> v.eq(target));
     }
 
-    static <T extends Enum & EnumDict> long toBit(Class<T> type, T... t) {
+    @SafeVarargs
+    static <T extends EnumDict> long toBit(T... t) {
         long value = 0;
         for (T t1 : t) {
             value |= t1.getBit();
@@ -120,10 +123,16 @@ public interface EnumDict<V> {
         return value;
     }
 
-    static <T extends Enum & EnumDict> List<T> getByBit(Class<T> tClass, long mask) {
+    @SafeVarargs
+    static <T extends EnumDict> boolean bitIn(long bit, T... t) {
+        long value = toBit(t);
+        return (bit & value) == value;
+    }
+
+    static <T extends EnumDict> List<T> getByBit(Class<T> tClass, long bit) {
         List<T> arr = new ArrayList<>();
         for (T t : tClass.getEnumConstants()) {
-            if (t.in(mask)) {
+            if (t.in(bit)) {
                 arr.add(t);
             }
         }

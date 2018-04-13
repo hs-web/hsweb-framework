@@ -73,9 +73,17 @@ public class JpaAnnotationParser {
         });
 
         jdbcTypeConvert.add((type, property) -> {
+            boolean isArray = type.isArray();
+            if (isArray) {
+                type = type.getComponentType();
+
+            }
             if (type.isEnum() && EnumDict.class.isAssignableFrom(type)) {
                 Class genType = ClassUtils.getGenericType(type);
-                return jdbcTypeMapping.getOrDefault(genType, JDBCType.OTHER);
+                if (isArray) {
+                    return JDBCType.BIGINT;
+                }
+                return jdbcTypeMapping.getOrDefault(genType, JDBCType.VARCHAR);
             }
             return null;
         });
