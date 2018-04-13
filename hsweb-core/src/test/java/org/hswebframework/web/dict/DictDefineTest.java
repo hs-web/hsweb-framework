@@ -1,22 +1,15 @@
 package org.hswebframework.web.dict;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.parser.DefaultJSONParser;
-import com.alibaba.fastjson.parser.ParserConfig;
-import com.alibaba.fastjson.parser.deserializer.JavaBeanDeserializer;
-import com.alibaba.fastjson.parser.deserializer.ObjectDeserializer;
-import com.alibaba.fastjson.serializer.SerializerFeature;
 import org.hswebframework.web.dict.defaults.DefaultClassDictDefine;
 import org.hswebframework.web.dict.defaults.DefaultDictDefineRepository;
 import org.hswebframework.web.dict.defaults.DefaultDictSupportApi;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
 
+import static org.hswebframework.web.dict.EnumDict.*;
 import static org.junit.Assert.*;
 
 /**
@@ -32,16 +25,27 @@ public class DictDefineTest {
     @Test
     public void testEnumDict() {
 
-        Assert.assertEquals(UserCode.SIMPLE, EnumDict.findByValue(UserCode.class, UserCode.SIMPLE.getValue()).orElse(null));
+        Assert.assertEquals(UserCode.SIMPLE, findByValue(UserCode.class, UserCode.SIMPLE.getValue()).orElse(null));
 
-        Assert.assertEquals(UserCode.SIMPLE, EnumDict.findByText(UserCode.class, UserCode.SIMPLE.getText()).orElse(null));
+        Assert.assertEquals(UserCode.SIMPLE, findByText(UserCode.class, UserCode.SIMPLE.getText()).orElse(null));
 
-        Assert.assertEquals(UserCode.SIMPLE, EnumDict.find(UserCode.class, UserCode.SIMPLE.getText()).orElse(null));
+        Assert.assertEquals(UserCode.SIMPLE, find(UserCode.class, UserCode.SIMPLE.getText()).orElse(null));
+
+        long bit = toBit(UserCode.class, UserCode.values());
+
+        System.out.println(bit);
+
+        for (UserCode userCode : UserCode.values()) {
+            Assert.assertTrue(userCode.in(bit));
+        }
+
+        List<UserCode> codes = getByBit(UserCode.class, bit);
+
     }
 
     @Test
     public void testParse() {
-
+//        JSON.toJSONString("",SerializerFeature.PrettyFormat)
         DefaultClassDictDefine define = DefaultClassDictDefine.builder()
                 .id("test-code")
                 .field("code")

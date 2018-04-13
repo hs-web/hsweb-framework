@@ -20,10 +20,12 @@ import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.util.ClassUtils;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 import static org.springframework.util.StringUtils.tokenizeToStringArray;
 
@@ -42,6 +44,7 @@ public class EnumDictHandlerRegister {
                 ConfigurableApplicationContext.CONFIG_LOCATION_DELIMITERS));
     }
 
+    @SuppressWarnings("all")
     public static void register(String[] packages) {
         if (typeHandlerRegistry == null) {
             log.error("请在spring容器初始化后再调用此方法!");
@@ -59,7 +62,11 @@ public class EnumDictHandlerRegister {
                         if (enumType.isEnum() && EnumDict.class.isAssignableFrom(enumType)) {
                             log.debug("register enum dict:{}", enumType);
                             DefaultDictDefineRepository.registerDefine(DefaultDictDefineRepository.parseEnumDict(enumType));
+                            //注册枚举类型
                             typeHandlerRegistry.register(enumType, new EnumDictHandler(enumType));
+
+                            //注册枚举数组类型
+                            typeHandlerRegistry.register(Array.newInstance(enumType, 0).getClass(), new EnumDictArrayHandler(enumType));
                         }
                     } catch (Exception ignore) {
 
@@ -68,6 +75,44 @@ public class EnumDictHandlerRegister {
             } catch (IOException e) {
                 log.warn("register enum dict error", e);
             }
+        }
+    }
+
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    @MappedJdbcTypes({JdbcType.NUMERIC, JdbcType.TINYINT, JdbcType.INTEGER, JdbcType.BIGINT})
+    static class EnumDictArrayHandler<T extends Enum & EnumDict> implements TypeHandler<Object[]> {
+
+        private Class<T> type;
+
+        @Override
+        public void setParameter(PreparedStatement ps, int i, Object[] parameter, JdbcType jdbcType) throws SQLException {
+            T[] ts = ((T[]) parameter);
+            ps.setLong(i, EnumDict.toBit(type, ts));
+        }
+
+        @Override
+        public Object[] getResult(ResultSet rs, String columnName) throws SQLException {
+            return toArray(rs.getLong(columnName));
+        }
+
+        @Override
+        public Object[] getResult(ResultSet rs, int columnIndex) throws SQLException {
+            return toArray(rs.getLong(columnIndex));
+        }
+
+        @Override
+        public Object[] getResult(CallableStatement cs, int columnIndex) throws SQLException {
+            return toArray(cs.getLong(columnIndex));
+        }
+
+        private Object[] toArray(Long value) {
+            if (null == value) {
+                return null;
+            }
+            List<T> ts = EnumDict.getByBit(getType(), value);
+            return ts.toArray((Object[]) Array.newInstance(type, ts.size()));
         }
     }
 

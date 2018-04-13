@@ -1,10 +1,13 @@
 package org.hswebframework.web.dict;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 
 /**
- * 枚举字典,使用枚举来实现数据字典,可通过集成此接口来实现一些有趣的功能
+ * 枚举字典,使用枚举来实现数据字典,可通过集成此接口来实现一些有趣的功能.
+ * ⚠️:如果使用了位运算来判断枚举,枚举数量不要超过64个,且顺序不要随意变动!
  *
  * @author zhouhao
  * @see 3.0
@@ -27,6 +30,17 @@ public interface EnumDict<V> {
     String getText();
 
     /**
+     * {@link Enum#ordinal}
+     *
+     * @return 枚举序号, 如果枚举顺序改变, 此值将被变动
+     */
+    int ordinal();
+
+    default long getBit() {
+        return 1L << (long) ordinal();
+    }
+
+    /**
      * 对比是否和value相等,对比地址,值,value转为string忽略大小写对比,text忽略大小写对比
      *
      * @param v value
@@ -39,6 +53,9 @@ public interface EnumDict<V> {
                 || getText().equalsIgnoreCase(String.valueOf(v));
     }
 
+    default boolean in(long bit) {
+        return (bit & getBit()) != 0;
+    }
 
     /**
      * 枚举选项的描述,对一个选项进行详细的描述有时候是必要的.默认值为{@link this#getText()}
@@ -92,6 +109,24 @@ public interface EnumDict<V> {
      * @see this#find(Class, Predicate)
      */
     static <T extends Enum & EnumDict> Optional<T> find(Class<T> type, Object target) {
-        return find(type, v->v.eq(target));
+        return find(type, v -> v.eq(target));
+    }
+
+    static <T extends Enum & EnumDict> long toBit(Class<T> type, T... t) {
+        long value = 0;
+        for (T t1 : t) {
+            value |= t1.getBit();
+        }
+        return value;
+    }
+
+    static <T extends Enum & EnumDict> List<T> getByBit(Class<T> tClass, long mask) {
+        List<T> arr = new ArrayList<>();
+        for (T t : tClass.getEnumConstants()) {
+            if (t.in(mask)) {
+                arr.add(t);
+            }
+        }
+        return arr;
     }
 }
