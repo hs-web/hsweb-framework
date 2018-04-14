@@ -72,7 +72,7 @@ public class AutoSyncPermissionTest {
         Assert.assertEquals(permissionEntity.getName(), "测试权限");
         Assert.assertTrue(!permissionEntity.getActions().isEmpty());
 
-        Assert.assertEquals(permissionEntity.getOptionalFields().size(), 2);
+        Assert.assertEquals(permissionEntity.getOptionalFields().size(), 3);
     }
 
     @Authorize(permission = "test", description = "测试权限")
