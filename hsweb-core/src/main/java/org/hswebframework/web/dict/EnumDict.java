@@ -129,6 +129,12 @@ public interface EnumDict<V> {
         return (bit & value) == value;
     }
 
+    @SafeVarargs
+    static <T extends EnumDict> boolean bitInAny(long bit, T... t) {
+        long value = toBit(t);
+        return (bit & value) != 0;
+    }
+
     static <T extends EnumDict> List<T> getByBit(Class<T> tClass, long bit) {
         List<T> arr = new ArrayList<>();
         for (T t : tClass.getEnumConstants()) {

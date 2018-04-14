@@ -14,11 +14,13 @@ import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @SuppressWarnings("all")
-public class EnumDicInTermTypeMapper implements TermTypeMapper {
+public abstract class EnumDicInTermTypeMapper implements TermTypeMapper {
 
     protected Dialect dialect;
 
     protected boolean not;
+
+    protected boolean anyIn = false;
 
     protected boolean support(RDBColumnMetaData column) {
         Class type = column.getJavaType();
@@ -43,9 +45,9 @@ public class EnumDicInTermTypeMapper implements TermTypeMapper {
                 term.setValue(bit);
             } else {
                 return buildNotSupport(wherePrefix, term, column, tableAlias);
-
             }
         } else {
+            //类型不是数组
 //            if (support(column)) {
 //                if (value instanceof Collection) {
 //                    value = ((Collection) value).iterator().next();
@@ -65,7 +67,7 @@ public class EnumDicInTermTypeMapper implements TermTypeMapper {
         List<Object> values = param2list(term.getValue());
         term.setValue(values);
         SqlAppender appender = new SqlAppender();
-        appender.add(dialect.buildColumnName(tableAlias, column.getAlias()), not ? " NOT" : " ").add("IN(");
+        appender.add(dialect.buildColumnName(tableAlias, column.getName()), not ? " NOT" : " ").add("IN(");
         for (int i = 0; i < values.size(); i++) {
             appender.add("#{", wherePrefix, ".value[", i, "]}", ",");
         }
@@ -74,10 +76,7 @@ public class EnumDicInTermTypeMapper implements TermTypeMapper {
         return appender;
     }
 
-    protected SqlAppender build(String wherePrefix, Term term, RDBColumnMetaData column, String tableAlias) {
-        return new SqlAppender()
-                .add(dialect.buildColumnName(tableAlias, column.getName()), not ? "!=" : "=", "#{", wherePrefix, ".value}");
-    }
+    protected abstract SqlAppender build(String wherePrefix, Term term, RDBColumnMetaData column, String tableAlias);
 
 
     protected List<Object> param2list(Object value) {

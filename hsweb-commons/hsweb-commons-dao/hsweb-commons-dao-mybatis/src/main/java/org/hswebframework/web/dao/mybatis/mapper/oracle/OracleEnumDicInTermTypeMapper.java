@@ -10,14 +10,19 @@ import org.hswebframework.web.dao.mybatis.mapper.EnumDicTermTypeMapper;
 public class OracleEnumDicInTermTypeMapper extends EnumDicInTermTypeMapper {
 
     public OracleEnumDicInTermTypeMapper(boolean not) {
-        super(Dialect.ORACLE, not);
+        this(not, false);
     }
+
+    public OracleEnumDicInTermTypeMapper(boolean not, boolean anyIn) {
+        super(Dialect.ORACLE, not, anyIn);
+    }
+
 
     @Override
     protected SqlAppender build(String wherePrefix, Term term, RDBColumnMetaData column, String tableAlias) {
         String columnName = dialect.buildColumnName(tableAlias, column.getName());
         String where = "#{" + wherePrefix + ".value}";
         return new SqlAppender()
-                .add("BITAND(", columnName, ",", where, ")", not ? "!=" : "=", where);
+                .add("BITAND(", columnName, ",", where, ")", not ? "!=" : "=", anyIn ? "0" : where);
     }
 }

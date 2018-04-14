@@ -35,6 +35,11 @@ public class DictDefineTest {
 
         System.out.println(bitIn(bit,UserCode.SIMPLE,UserCode.TEST,UserCode.SIMPLE));
 
+        long bit2=toBit(UserCode.SIMPLE,UserCode.CODE0,UserCode.SIMPLE);
+
+        Assert.assertTrue(bitInAny(bit2,UserCode.SIMPLE,UserCode.CODE4,UserCode.CODE0));
+        Assert.assertFalse(bitInAny(bit2,UserCode.CODE1,UserCode.CODE4,UserCode.CODE5));
+
         for (UserCode userCode : UserCode.values()) {
             Assert.assertTrue(userCode.in(bit));
         }
