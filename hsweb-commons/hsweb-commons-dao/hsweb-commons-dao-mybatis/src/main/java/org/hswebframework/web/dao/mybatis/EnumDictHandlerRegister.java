@@ -130,7 +130,11 @@ public class EnumDictHandlerRegister {
 
         @Override
         public void setParameter(PreparedStatement ps, int i, T parameter, JdbcType jdbcType) throws SQLException {
-            ps.setObject(i, parameter.getValue());
+            if(parameter==null){
+                ps.setNull(i,jdbcType.TYPE_CODE);
+            }else {
+                ps.setObject(i, parameter.getValue());
+            }
         }
 
         @Override

@@ -116,7 +116,10 @@ public interface EnumDict<V> {
 
     @SafeVarargs
     static <T extends EnumDict> long toBit(T... t) {
-        long value = 0;
+        if (t == null) {
+            return 0L;
+        }
+        long value = 0L;
         for (T t1 : t) {
             value |= t1.getBit();
         }
