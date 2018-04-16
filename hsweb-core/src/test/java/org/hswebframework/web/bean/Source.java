@@ -22,6 +22,12 @@ public class Source {
 
     private int age3;
 
+    private Date deleteTime=new Date();
+
+    private Date createTime=new Date();
+
+    private String updateTime="2018-01-01";
+
 
     private NestObject nestObject;
 

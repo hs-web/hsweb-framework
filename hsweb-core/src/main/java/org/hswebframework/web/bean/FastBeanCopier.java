@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.beanutils.PropertyUtilsBean;
+import org.hswebframework.utils.time.DateFormatter;
 import org.hswebframework.web.dict.EnumDict;
 import org.hswebframework.web.proxy.Proxy;
 import org.springframework.util.ClassUtils;
@@ -400,10 +401,25 @@ public final class FastBeanCopier {
                 }
             }
             if (targetClass == String.class) {
+                if (source instanceof Date) {
+                    // TODO: 18-4-16 自定义格式
+                    return (T) DateFormatter.toString(((Date) source), "yyyy-MM-dd HH:mm:ss");
+                }
                 return (T) String.valueOf(source);
             }
             if (targetClass == Object.class) {
                 return (T) source;
+            }
+            if (targetClass == Date.class) {
+                if (source instanceof String) {
+                    return (T) DateFormatter.fromString((String) source);
+                }
+                if (source instanceof Number) {
+                    return (T) new Date(((Number) source).longValue());
+                }
+                if (source instanceof Date) {
+                    return (T) new Date(((Date) source).getTime());
+                }
             }
             org.apache.commons.beanutils.Converter converter = BeanUtilsBean
                     .getInstance()
