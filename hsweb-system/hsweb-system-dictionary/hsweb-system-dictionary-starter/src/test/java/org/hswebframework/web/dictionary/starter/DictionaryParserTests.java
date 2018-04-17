@@ -20,7 +20,7 @@ package org.hswebframework.web.dictionary.starter;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import org.hswebframework.web.entity.dictionary.DictionaryParserEntity;
+import org.hswebframework.web.dictionary.api.entity.DictionaryParserEntity;
 import org.hswebframework.web.starter.convert.FastJsonGenericHttpMessageConverter;
 import org.hswebframework.web.tests.SimpleWebApplicationTests;
 import org.junit.Assert;
