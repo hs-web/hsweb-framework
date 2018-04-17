@@ -55,6 +55,8 @@ public class TestCrud extends AbstractTransactionalJUnit4SpringContextTests {
 
         List<TestEntity> entities = testDao.query(query);
 
+//        testDao.query(entity);
+
         System.out.println(entities);
     }
 

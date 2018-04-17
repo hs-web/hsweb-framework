@@ -23,10 +23,10 @@
 <mapper namespace="BasicMapper">
     <!--通用查询条件-->
     <sql id="buildWhere">
-        ${@org.hswebframework.web.dao.mybatis.builder.SqlBuilder@current().buildWhere(resultMapId,tableName,#this['_parameter'].terms)}
+        ${@org.hswebframework.web.dao.mybatis.builder.SqlBuilder@current().buildWhere(resultMapId,tableName,#this['_parameter'])}
     </sql>
     <sql id="buildWhereForUpdate">
-        ${@org.hswebframework.web.dao.mybatis.builder.SqlBuilder@current().buildWhereForUpdate(resultMapId,tableName,#this['_parameter'].terms)}
+        ${@org.hswebframework.web.dao.mybatis.builder.SqlBuilder@current().buildWhereForUpdate(resultMapId,tableName,#this['_parameter'])}
     </sql>
     <!--生成查询字段-->
     <sql id="buildSelectField">
@@ -80,9 +80,6 @@
             <include refid="BasicMapper.buildUpdateField"/>
             <where>
                 <include refid="BasicMapper.buildWhereForUpdate"/>
-                <if test="terms.size()==0">
-                    u_id=#{data.id}
-                </if>
             </where>
         </trim>
     </sql>

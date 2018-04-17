@@ -18,6 +18,9 @@
 
 package org.hswebframework.web.commons.entity;
 
+import org.hswebframework.web.commons.bean.Bean;
+import org.hswebframework.web.commons.bean.ValidateBean;
+
 import java.io.Serializable;
 
 /**
@@ -28,7 +31,10 @@ import java.io.Serializable;
  * @see GenericEntity
  * @see TreeSupportEntity
  * @see TreeSortSupportEntity
+ * @see Bean
  * @since 3.0
  */
-public interface Entity extends Serializable {
+public interface Entity extends ValidateBean, Serializable {
+
+
 }

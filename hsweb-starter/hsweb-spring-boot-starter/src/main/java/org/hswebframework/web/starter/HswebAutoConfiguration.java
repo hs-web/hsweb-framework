@@ -172,13 +172,6 @@ public class HswebAutoConfiguration {
         };
     }
 
-    @Bean(name = "validator")
-    @ConditionalOnMissingBean(Validator.class)
-    public Validator validator() {
-        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-        return factory.getValidator();
-    }
-
     @Bean(name = "entityFactory")
     @ConditionalOnMissingBean(EntityFactory.class)
     public MapperEntityFactory mapperEntityFactory() {

@@ -36,6 +36,7 @@
         <module>hsweb-commons-controller</module>
         <module>hsweb-commons-utils</module>
         <module>hsweb-commons-model</module>
+        <module>hsweb-commons-bean</module>
     </modules>
 
 </project>

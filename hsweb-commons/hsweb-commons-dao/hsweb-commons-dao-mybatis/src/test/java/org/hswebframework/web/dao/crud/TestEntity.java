@@ -12,7 +12,7 @@ import java.util.Date;
 @Getter
 @Setter
 @ToString
-public class TestEntity {
+public class TestEntity implements org.hswebframework.web.commons.entity.Entity {
 
     @Id
     @GeneratedValue(
