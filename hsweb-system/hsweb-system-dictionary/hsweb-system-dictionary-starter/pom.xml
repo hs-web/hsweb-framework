@@ -41,7 +41,7 @@
     <dependencies>
         <dependency>
             <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-system-dictionary-simple</artifactId>
+            <artifactId>hsweb-system-dictionary-local</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
