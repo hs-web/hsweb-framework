@@ -8,9 +8,12 @@ import org.apache.commons.beanutils.PropertyUtilsBean;
 import org.hswebframework.utils.time.DateFormatter;
 import org.hswebframework.web.dict.EnumDict;
 import org.hswebframework.web.proxy.Proxy;
+import org.springframework.core.ResolvableType;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.Field;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -31,6 +34,8 @@ public final class FastBeanCopier {
     private static final Map<Class, Class> wrapperClassMapping = new HashMap<>();
 
     public static final DefaultConvert DEFAULT_CONVERT = new DefaultConvert();
+
+    public static final Class[] EMPTY_CLASS_ARRAY = new Class[0];
 
     static {
         wrapperClassMapping.put(byte.class, Byte.class);
@@ -155,7 +160,8 @@ public final class FastBeanCopier {
             if (!sourceProperty.isPrimitive()) {
                 code.append("if(source.").append(sourceProperty.getReadMethod()).append("!=null){\n");
             }
-            code.append(targetProperty.generateVar(targetProperty.getName())).append("=").append(sourceProperty.generateGetter(targetProperty.getType()))
+            code.append(targetProperty.generateVar(targetProperty.getName())).append("=")
+                    .append(sourceProperty.generateGetter(target, targetProperty.getType()))
                     .append(";\n");
 
             if (!targetProperty.isPrimitive()) {
@@ -185,13 +191,16 @@ public final class FastBeanCopier {
         protected String writeMethodName;
 
         @Getter
-        protected Function<Class, String> getter;
+        protected BiFunction<Class, Class, String> getter;
 
         @Getter
         protected BiFunction<Class, String, String> setter;
 
         @Getter
         protected Class type;
+
+        @Getter
+        protected Class beanType;
 
         public String getReadMethod() {
             return readMethodName + "()";
@@ -245,13 +254,26 @@ public final class FastBeanCopier {
             return getWrapperType().getSimpleName().concat(".valueOf(").concat(getter).concat(")");
         }
 
-        public Function<Class, String> createGetterFunction() {
+        public BiFunction<Class, Class, String> createGetterFunction() {
 
-            return (targetType) -> {
+            return (targetBeanType, targetType) -> {
                 String getterCode = "source." + getReadMethod();
 
+                String generic = "org.hswebframework.web.bean.FastBeanCopier.EMPTY_CLASS_ARRAY";
+                Field field = ReflectionUtils.findField(targetBeanType, name);
+                boolean hasGeneric = false;
+                if (field != null) {
+                    String[] arr = Arrays.stream(ResolvableType.forField(field)
+                            .getGenerics()).map(ResolvableType::getRawClass)
+                            .map(t -> t.getName().concat(".class"))
+                            .toArray(String[]::new);
+                    if (arr.length > 0) {
+                        generic = "new Class[]{" + String.join(",", arr) + "}";
+                        hasGeneric = true;
+                    }
+                }
                 String convert = "converter.convert((Object)(" + (isPrimitive() ? castWrapper(getterCode) : getterCode) + "),"
-                        + getTypeName(targetType) + ".class)";
+                        + getTypeName(targetType) + ".class," + generic + ")";
                 StringBuilder convertCode = new StringBuilder();
 
                 if (targetType != getType()) {
@@ -301,13 +323,18 @@ public final class FastBeanCopier {
                 } else {
                     if (Cloneable.class.isAssignableFrom(targetType)) {
                         try {
-//                            targetType.getDeclaredMethod("clone");
                             convertCode.append("(" + getTypeName() + ")").append(getterCode).append(".clone()");
                         } catch (Exception e) {
                             convertCode.append(getterCode);
                         }
                     } else {
-                        convertCode.append(getterCode);
+                        if ((Map.class.isAssignableFrom(targetType)
+                                || Collection.class.isAssignableFrom(type)) && hasGeneric) {
+                            convertCode.append("(" + getTypeName() + ")").append(convert);
+                        } else {
+                            convertCode.append(getterCode);
+                        }
+
                     }
 
                 }
@@ -322,8 +349,8 @@ public final class FastBeanCopier {
             return (sourceType, paramGetter) -> settingNameSupplier.apply(paramGetter);
         }
 
-        public String generateGetter(Class targetType) {
-            return getGetter().apply(targetType);
+        public String generateGetter(Class targetBeanType, Class targetType) {
+            return getGetter().apply(targetBeanType, targetType);
         }
 
         public String generateSetter(Class targetType, String getter) {
@@ -340,6 +367,8 @@ public final class FastBeanCopier {
             getter = createGetterFunction();
             setter = createSetterFunction(paramGetter -> writeMethodName + "(" + paramGetter + ")");
             name = descriptor.getName();
+            beanType = descriptor.getReadMethod().getDeclaringClass();
+
         }
     }
 
@@ -352,6 +381,7 @@ public final class FastBeanCopier {
 
             this.getter = createGetterFunction();
             this.setter = createSetterFunction(paramGetter -> "put(\"" + name + "\"," + paramGetter + ")");
+            beanType = Map.class;
         }
 
         @Override
@@ -387,7 +417,7 @@ public final class FastBeanCopier {
 
         @Override
         @SuppressWarnings("all")
-        public <T> T convert(Object source, Class<T> targetClass) {
+        public <T> T convert(Object source, Class<T> targetClass, Class[] genericType) {
             if (source == null) {
                 return null;
             }
@@ -397,7 +427,7 @@ public final class FastBeanCopier {
                     if (targetClass.isInstance(val)) {
                         return ((T) val);
                     }
-                    return convert(val, targetClass);
+                    return convert(val, targetClass, genericType);
                 }
             }
             if (targetClass == String.class) {
@@ -430,17 +460,25 @@ public final class FastBeanCopier {
             }
             if (Collection.class.isAssignableFrom(targetClass)) {
                 Collection collection = newCollection(targetClass);
+                Collection sourceCollection;
                 if (source instanceof Collection) {
-                    collection.addAll(((Collection) source));
+                    sourceCollection = (Collection) source;
                 } else if (source instanceof Object[]) {
-                    collection.addAll(Arrays.asList(((Object[]) source)));
+                    sourceCollection = Arrays.asList((Object[]) source);
                 } else {
                     if (source instanceof String) {
                         String stringValue = ((String) source);
-                        collection.addAll(Arrays.asList(stringValue.split("[,]")));
+                        sourceCollection = Arrays.asList(stringValue.split("[,]"));
                     } else {
-                        collection.add(source);
+                        sourceCollection = Arrays.asList(source);
                     }
+                }
+                if (genericType != null && genericType.length > 0 && genericType[0] != Object.class) {
+                    for (Object sourceObj : sourceCollection) {
+                        collection.add(convert(sourceObj, genericType[0], null));
+                    }
+                } else {
+                    collection.addAll(sourceCollection);
                 }
                 return (T) collection;
             }
@@ -452,7 +490,7 @@ public final class FastBeanCopier {
                     if (targetClass.isInstance(val)) {
                         return ((T) val);
                     }
-                    return convert(val, targetClass);
+                    return convert(val, targetClass, genericType);
                 }
                 for (T t : targetClass.getEnumConstants()) {
                     if (((Enum) t).name().equalsIgnoreCase(String.valueOf(source))) {

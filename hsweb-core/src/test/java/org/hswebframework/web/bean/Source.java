@@ -22,19 +22,20 @@ public class Source {
 
     private int age3;
 
-    private Date deleteTime=new Date();
+    private Date deleteTime = new Date();
 
-    private Date createTime=new Date();
+    private Date createTime = new Date();
 
-    private String updateTime="2018-01-01";
+    private String updateTime = "2018-01-01";
 
 
     private NestObject nestObject;
 
+    private List<NestObject> nestObjects = Arrays.asList(new NestObject("test", 1),new NestObject("test", 1));
+
     private Map<String, Object> nestObject2 = new HashMap<>();
 
     private NestObject nestObject3;
-
 
     private Color color = Color.RED;
 
