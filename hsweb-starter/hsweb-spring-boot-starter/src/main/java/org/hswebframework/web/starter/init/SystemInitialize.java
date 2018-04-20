@@ -159,6 +159,7 @@ public class SystemInitialize {
                 .addColumn().name("dependencies").notNull().alias(dependencies).clob()
                 .custom(column -> column.setValueConverter(new JSONValueConverter(SystemVersion.Dependency.class, new ClobValueConverter()))).notNull().comment("依赖详情").commit()
                 .comment("系统信息")
+                .property("unique-column", "name")
                 .custom(table -> table.setObjectWrapper(new BeanWrapper<SystemVersion>(SystemVersion::new, table)))
                 .commit();
 
