@@ -9,7 +9,25 @@
 
  [贡献代码](CONTRIBUTING.md)  [开发手册](https://github.com/hs-web/hsweb-framework/wiki/开发手册)
 
-本项目是hsweb的核心,不推荐将其直接clone后修改,运行.推荐使用maven依赖的方式使用hsweb.你可以参照[demo](https://github.com/hs-web/hsweb3-demo)进行使用.
+## 应用场景
+1. 后台管理系统.
+2. 完全开源的后台管理系统.
+3. 细粒度权限控制的后台管理系统.
+4. 模块化的后台管理系统.
+5. 功能可拓展的后台管理系统.
+6. 集成各种常用功能的后台管理系统.
+7. 前后分离的后台管理系统.
+
+注意:
+项目主要基于`spring-boot`,`mybatis`. 在使用`hsweb`之前,你应该对`spring-boot`有一定的了解.
+
+项目模块太多?不要被吓到.我们不推荐将本项目直接`clone`后修改,运行.而是使用maven依赖的方式使用`hsweb`. 
+选择自己需要的模块进行依赖,正式版发布后,所有模块都将发布到maven中央仓库.
+你可以参照[demo](https://github.com/hs-web/hsweb3-demo)进行使用.
+
+##文档
+各个模块的使用方式查看对应模块下的 `README.md`,在使用之前,
+你可以先粗略浏览一下各个模块,对每个模块的作用有大致的了解.
 
 ## 模块简介
 
@@ -18,12 +36,11 @@
 |[hsweb-authorization](hsweb-authorization)|权限控制| 90%|
 |[hsweb-commons](hsweb-commons) |基础通用功能| 90%|
 |[hsweb-concurrent](hsweb-concurrent)|并发包,缓存,锁,计数器等| 80%|
-|[hsweb-core](hsweb-core)|框架核心| 90%|
+|[hsweb-core](hsweb-core)|框架核心,基础工具类| 90%|
 |[hsweb-datasource](hsweb-datasource)|数据源| 90%|
 |[hsweb-examples](hsweb-examples)|例子,演示| 10%|
-|[hsweb-i18n](hsweb-i18n)|国际化| 0%|
-|[hsweb-logging](hsweb-logging)| 日志|  80%|
+|[hsweb-logging](hsweb-logging)| 日志|  100%|
 |[hsweb-message](hsweb-message)|mq,websocket...| 80%|
 |[hsweb-starter](hsweb-starter)|模块启动器| 90%|
-|[hsweb-system](hsweb-system)|**系统功能**| 40%|
+|[hsweb-system](hsweb-system)|**系统常用功能**| 60%|
 |[hsweb-tests](hsweb-tests)|测试| 80%|

@@ -1,6 +1,7 @@
 package org.hswebframework.web.bean;
 
 import lombok.Data;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.ArrayList;
 import java.util.Date;
