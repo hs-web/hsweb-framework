@@ -19,8 +19,6 @@
 package org.hswebframework.web.service;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public interface Service {

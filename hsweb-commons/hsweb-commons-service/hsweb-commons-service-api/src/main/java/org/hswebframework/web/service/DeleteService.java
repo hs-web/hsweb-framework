@@ -21,7 +21,7 @@ package org.hswebframework.web.service;
 /**
  * @author zhouhao
  */
-public interface DeleteService<PK> {
+public interface DeleteService<PK> extends Service {
     /**
      * 根据主键删除记录
      *

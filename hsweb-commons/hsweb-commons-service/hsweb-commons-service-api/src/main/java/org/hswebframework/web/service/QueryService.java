@@ -25,7 +25,7 @@ import java.util.List;
  * @since 3.0
  * @see QueryByEntityService
  */
-public interface QueryService<E, PK> {
+public interface QueryService<E, PK> extends Service {
 
     /**
      * 根据主键查询

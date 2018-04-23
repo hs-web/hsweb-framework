@@ -21,7 +21,7 @@ package org.hswebframework.web.service;
 /**
  * @author zhouhao
  */
-public interface InsertService<E, PK> {
+public interface InsertService<E, PK> extends Service {
 
     /**
      * 添加一条数据
