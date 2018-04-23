@@ -32,3 +32,5 @@ MyEntity selectByPk(String id);
 MyEntity selectByPk(String id);
 ```
 
+注意: 如果没有使用`hsweb-datasource-jta`模块,则无法在事务中切换数据源,
+你可能需要先取消掉对应方法上的事务:如在方法上注解`@Transactional(propagation = Propagation.NOT_SUPPORTED)`

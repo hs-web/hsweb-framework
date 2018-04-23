@@ -2,7 +2,7 @@
 
 ## 访问日志 API
 
-controller类或者方法上,注解 `@AccessLogger("功能描述")`
+controller类或者方法上,注解 `@AccessLogger("功能描述")` 如果正在使用swagger,只需要注解swagger的`@Api(tags="功能说明",value="XXX功能")`
 
 
 ## 开启访问日志
