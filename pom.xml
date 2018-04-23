@@ -290,6 +290,11 @@
                 <version>2.1.8</version>
             </dependency>
             <dependency>
+                <groupId>org.jooq</groupId>
+                <artifactId>jool-java-8</artifactId>
+                <version>0.9.13</version>
+            </dependency>
+            <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
                 <version>4.12</version>
