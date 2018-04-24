@@ -1,8 +1,10 @@
 package org.hswebframework.web.entity.authorization;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.Wither;
 import org.hswebframework.web.commons.entity.CloneableEntity;
 
 import java.util.Arrays;
@@ -12,6 +14,7 @@ import java.util.stream.Collectors;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 public class ActionEntity implements CloneableEntity {
 
     private static final long serialVersionUID = -5756333786703175612L;
@@ -48,4 +51,5 @@ public class ActionEntity implements CloneableEntity {
     public boolean equals(Object obj) {
         return obj instanceof ActionEntity && obj.hashCode() == hashCode();
     }
+
 }
