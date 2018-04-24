@@ -23,7 +23,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- *
  * @author zhouhao
  */
 public abstract class AbstractScopeDataAccessHandler<E> implements DataAccessHandler {
@@ -74,19 +73,15 @@ public abstract class AbstractScopeDataAccessHandler<E> implements DataAccessHan
     }
 
     protected boolean handleAdd(ScopeDataAccessConfig access, AuthorizingContext context) {
-        PersonnelAuthorization authorization = getPersonnelAuthorization();
-        Set<String> scopes = authorization.getRootOrgId();
-        String scope = null;
+        Set<String> scopes = getTryOperationScope(access);
+        String scope;
         if (scopes.isEmpty()) {
             return true;
         } else if (scopes.size() == 1) {
             scope = scopes.iterator().next();
         } else {
-            logger.warn("existing many scope :{} , try use config.", scopes);
-        }
-        scopes = getTryOperationScope(access).stream().map(String::valueOf).collect(Collectors.toSet());
-        if (scope == null && scopes.size() == 1) {
             scope = scopes.iterator().next();
+            logger.warn("existing many scope :{} , try use config.", scope);
         }
         if (scope != null) {
             String finalScopeId = scope;

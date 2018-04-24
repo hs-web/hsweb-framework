@@ -17,8 +17,6 @@ import static org.hswebframework.web.organizational.authorization.access.DataAcc
 import static org.hswebframework.web.organizational.authorization.access.DataAccessType.SCOPE_TYPE_ONLY_SELF;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public class DepartmentScopeDataAccessHandler extends AbstractScopeDataAccessHandler<DepartmentAttachEntity> {
