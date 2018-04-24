@@ -64,7 +64,7 @@ public class SimpleDynamicFormOperationService implements DynamicFormOperationSe
                 return PagerResult.empty();
             }
             paramEntity.rePaging(total);
-            List<T> list = query.setParam(paramEntity).list();
+            List<T> list = query.setParam(paramEntity).list(paramEntity.getPageIndex(),paramEntity.getPageSize());
             return PagerResult.of(total, list);
         } catch (SQLException e) {
             throw new DynamicFormException("selectPager fail:" + e.getMessage(), e);
