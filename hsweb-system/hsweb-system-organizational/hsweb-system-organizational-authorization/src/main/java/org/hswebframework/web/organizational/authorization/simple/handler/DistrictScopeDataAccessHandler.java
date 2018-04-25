@@ -12,8 +12,6 @@ import java.util.Set;
 import static org.hswebframework.web.organizational.authorization.access.DataAccessType.*;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public class DistrictScopeDataAccessHandler extends AbstractScopeDataAccessHandler<DistrictAttachEntity> {

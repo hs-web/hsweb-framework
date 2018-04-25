@@ -107,6 +107,7 @@ public class DefaultBasicAuthorizeDefinition implements AopAuthorizeDefinition {
             definition.setController(dataAccess.getClass().getName());
         }
         dataAccessDefinition = definition;
+        dataAccessControl=true;
     }
 
 

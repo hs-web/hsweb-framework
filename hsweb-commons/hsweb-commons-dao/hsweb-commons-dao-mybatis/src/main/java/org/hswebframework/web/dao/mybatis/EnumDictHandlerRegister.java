@@ -68,7 +68,7 @@ public class EnumDictHandlerRegister {
                             //注册枚举数组类型
                             typeHandlerRegistry.register(Array.newInstance(enumType, 0).getClass(), new EnumDictArrayHandler(enumType));
                         }
-                    } catch (Exception ignore) {
+                    } catch (Exception | Error ignore) {
 
                     }
                 }
@@ -130,9 +130,9 @@ public class EnumDictHandlerRegister {
 
         @Override
         public void setParameter(PreparedStatement ps, int i, T parameter, JdbcType jdbcType) throws SQLException {
-            if(parameter==null){
-                ps.setNull(i,jdbcType.TYPE_CODE);
-            }else {
+            if (parameter == null) {
+                ps.setNull(i, jdbcType.TYPE_CODE);
+            } else {
                 ps.setObject(i, parameter.getValue());
             }
         }

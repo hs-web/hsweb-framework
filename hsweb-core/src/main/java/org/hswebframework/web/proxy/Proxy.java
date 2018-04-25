@@ -4,6 +4,8 @@ import javassist.*;
 import javassist.bytecode.AnnotationsAttribute;
 import javassist.bytecode.ConstPool;
 import lombok.Getter;
+import lombok.SneakyThrows;
+import org.springframework.util.ClassUtils;
 
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -12,8 +14,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * @since 3.0
  */
 public class Proxy<I> {
-    public              ClassPool  classPool = new ClassPool(true);
-    public static final AtomicLong counter   = new AtomicLong(1);
+    private static final AtomicLong counter = new AtomicLong(1);
 
     private CtClass  ctClass;
     @Getter
@@ -25,19 +26,19 @@ public class Proxy<I> {
 
     private Class<I> targetClass;
 
+    @SneakyThrows
     public static <I> Proxy<I> create(Class<I> superClass, String... classPathString) {
-        try {
-            return new Proxy<>(superClass, classPathString);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        return new Proxy<>(superClass, classPathString);
     }
 
-    public Proxy(Class<I> superClass, String... classPathString) throws Exception {
+    @SneakyThrows
+    public Proxy(Class<I> superClass, String... classPathString) {
         if (superClass == null) {
             throw new NullPointerException("superClass can not be null");
         }
         this.superClass = superClass;
+        ClassPool classPool = new ClassPool(true);
+
         ClassPath classPath = new ClassClassPath(this.getClass());
         classPool.insertClassPath(classPath);
 
@@ -58,7 +59,6 @@ public class Proxy<I> {
                 ctClass.setSuperclass(classPool.get(superClass.getName()));
             }
         }
-//        ctClass.debugWriteFile();
         addConstructor("public " + className + "(){}");
     }
 
@@ -74,6 +74,7 @@ public class Proxy<I> {
         return addField(code, null);
     }
 
+    @SneakyThrows
     public Proxy<I> addField(String code, String annotation) {
         return handleException(() -> {
             CtField ctField = CtField.make(code, ctClass);
@@ -89,33 +90,22 @@ public class Proxy<I> {
         });
     }
 
+    @SneakyThrows
     private Proxy<I> handleException(Task task) {
-        try {
-            task.run();
-        } catch (RuntimeException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage(), e);
-        }
+        task.run();
         return this;
     }
 
 
+    @SneakyThrows
     public I newInstance() {
-        try {
-            return getTargetClass().newInstance();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        return getTargetClass().newInstance();
     }
 
+    @SneakyThrows
     public Class<I> getTargetClass() {
         if (targetClass == null) {
-            try {
-                targetClass = ctClass.toClass();
-            } catch (CannotCompileException e) {
-                throw new RuntimeException(e.getMessage(), e);
-            }
+            targetClass = ctClass.toClass(ClassUtils.getDefaultClassLoader(), null);
         }
         return targetClass;
     }
