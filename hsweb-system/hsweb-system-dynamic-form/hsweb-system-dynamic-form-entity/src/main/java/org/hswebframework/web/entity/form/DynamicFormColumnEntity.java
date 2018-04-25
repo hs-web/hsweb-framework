@@ -64,16 +64,6 @@ public interface DynamicFormColumnEntity extends GenericEntity<String> {
     String dictConfig = "dictConfig";
 
     /**
-     * 字典ID
-     */
-    String dictId = "dictId";
-
-    /**
-     * 字典解析器ID
-     */
-    String dictParserId = "dictParserId";
-
-    /**
      * 其他配置
      */
     String properties = "properties";
@@ -197,14 +187,6 @@ public interface DynamicFormColumnEntity extends GenericEntity<String> {
      * @param scale 小数点位数
      */
     void setScale(Integer scale);
-
-    String getDictId();
-
-    void setDictId(String dictId);
-
-    String getDictParserId();
-
-    void setDictParserId(String dictParserId);
 
     void setDictConfig(String dictConfig);
 

@@ -13,9 +13,9 @@ import java.lang.reflect.Method;
  * @author zhouhao
  * @since 3.0
  */
-public interface DynamicFormAuthorizeDefinitionParser extends AopMethodAuthorizeDefinitionCustomizerParser {
+public abstract class DynamicFormAuthorizeDefinitionParser implements AopMethodAuthorizeDefinitionCustomizerParser {
     @Override
-    default AuthorizeDefinition parse(Class target, Method method, MethodInterceptorContext context) {
+    public AuthorizeDefinition parse(Class target, Method method, MethodInterceptorContext context) {
         if (!ClassUtils.getUserClass(target).equals(DynamicFormOperationController.class)
                 || context == null) {
             return null;
@@ -24,9 +24,9 @@ public interface DynamicFormAuthorizeDefinitionParser extends AopMethodAuthorize
 
         //获取表单id
         return context.<String>getParameter("formId")
-                .map(formId -> getDefinition(formId, methodAuth == null ? new String[0] : methodAuth.action()))
+                .map(formId -> getDefinition(formId, methodAuth == null ? new String[0] : methodAuth.action(), context))
                 .orElse(null);
     }
 
-    AuthorizeDefinition getDefinition(String formId, String[] action);
+    protected abstract AuthorizeDefinition getDefinition(String formId, String[] action, MethodInterceptorContext context);
 }

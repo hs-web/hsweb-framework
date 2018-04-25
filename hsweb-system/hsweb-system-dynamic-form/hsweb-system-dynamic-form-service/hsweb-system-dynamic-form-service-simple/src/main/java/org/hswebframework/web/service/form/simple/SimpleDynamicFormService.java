@@ -19,10 +19,8 @@ import org.hswebframework.web.BusinessException;
 import org.hswebframework.web.commons.entity.DataStatus;
 import org.hswebframework.web.dao.form.DynamicFormColumnDao;
 import org.hswebframework.web.dao.form.DynamicFormDao;
-import org.hswebframework.web.entity.form.DynamicFormColumnBindEntity;
-import org.hswebframework.web.entity.form.DynamicFormColumnEntity;
-import org.hswebframework.web.entity.form.DynamicFormDeployLogEntity;
-import org.hswebframework.web.entity.form.DynamicFormEntity;
+import org.hswebframework.web.dict.EnumDict;
+import org.hswebframework.web.entity.form.*;
 import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.service.DefaultDSLDeleteService;
 import org.hswebframework.web.service.DefaultDSLQueryService;
@@ -446,7 +444,6 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
             columnMeta.setJdbcType(JDBCType.valueOf(column.getJdbcType()));
             columnMeta.setJavaType(getJavaType(column.getJavaType()));
             columnMeta.setProperties(column.getProperties() == null ? new HashMap<>() : column.getProperties());
-//            columnMeta.setValidator(column.getValidator());
             if (StringUtils.isEmpty(column.getDataType())) {
                 Dialect dialect = database.getMeta().getDialect();
                 columnMeta.setDataType(dialect.buildDataType(columnMeta));
@@ -454,8 +451,13 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
                 columnMeta.setDataType(column.getDataType());
             }
             columnMeta.setValueConverter(initColumnValueConvert(columnMeta.getJdbcType(), columnMeta.getJavaType()));
-            if (optionalConvertBuilder != null) {
-                columnMeta.setOptionConverter(optionalConvertBuilder.build(column));
+            if (optionalConvertBuilder != null && null != column.getDictConfig()) {
+                try {
+                    DictConfig config = JSON.parseObject(column.getDictConfig(), DictConfig.class);
+                    columnMeta.setOptionConverter(optionalConvertBuilder.build(config));
+                } catch (Exception e) {
+                    logger.warn("创建字典转换器失败", e);
+                }
             }
             customColumnSetting(database, form, metaData, column, columnMeta);
             metaData.addColumn(columnMeta);
@@ -549,6 +551,10 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
                 .values()
                 .contains(javaType) || javaType != Map.class || javaType != List.class;
 
+
+        if (EnumDict.class.isAssignableFrom(javaType)) {
+            // TODO: 18-4-25
+        }
         switch (jdbcType) {
             case BLOB:
                 if (!isBasicClass) {
