@@ -12,16 +12,16 @@ import java.util.concurrent.atomic.AtomicLong;
  * @since 3.0
  */
 public class Proxy<I> {
-    public ClassPool classPool = new ClassPool(true);
-    public static final AtomicLong counter = new AtomicLong(1);
+    public              ClassPool  classPool = new ClassPool(true);
+    public static final AtomicLong counter   = new AtomicLong(1);
 
-    private CtClass ctClass;
+    private CtClass  ctClass;
     @Getter
     private Class<I> superClass;
     @Getter
-    private String className;
+    private String   className;
     @Getter
-    private String classFullName;
+    private String   classFullName;
 
     private Class<I> targetClass;
 
@@ -38,13 +38,13 @@ public class Proxy<I> {
             throw new NullPointerException("superClass can not be null");
         }
         this.superClass = superClass;
+        ClassPath classPath = new ClassClassPath(this.getClass());
+        classPool.insertClassPath(classPath);
+
         if (classPathString != null) {
             for (String path : classPathString) {
                 classPool.insertClassPath(path);
             }
-        } else {
-            ClassPath classPath = new ClassClassPath(this.getClass());
-            classPool.insertClassPath(classPath);
         }
         className = superClass.getSimpleName() + "FastBeanCopier" + counter.getAndAdd(1);
         classFullName = superClass.getPackage() + "." + className;
