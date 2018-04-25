@@ -1,5 +1,6 @@
 package org.hswebframework.web.controller.template;
 
+import io.swagger.annotations.Api;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.controller.SimpleGenericEntityController;
@@ -18,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("${hsweb.web.mappings.template:template}")
 @Authorize(permission = "template")
-@AccessLogger("模板")
+@Api(tags = "模版管理",value = "模版管理")
 public class TemplateController implements SimpleGenericEntityController<TemplateEntity, String, QueryParamEntity> {
 
     private TemplateService templateService;

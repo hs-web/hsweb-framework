@@ -18,12 +18,12 @@
 
 package org.hswebframework.web.commons.model;
 
+import org.hswebframework.web.commons.bean.ValidateBean;
+
 import java.io.Serializable;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
-public interface Model extends Serializable {
+public interface Model extends ValidateBean {
 }

@@ -2,11 +2,13 @@ package org.hswebframework.web.commons.bean;
 
 import org.hswebframework.web.bean.FastBeanCopier;
 
+import java.io.Serializable;
+
 /**
  * @author zhouhao
  * @since 3.0
  */
-public interface Bean {
+public interface Bean extends Serializable {
     /**
      * 从指定的对象中复制属性到本对象
      *

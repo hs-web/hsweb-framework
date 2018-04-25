@@ -34,7 +34,7 @@ import java.io.Serializable;
  * @see Bean
  * @since 3.0
  */
-public interface Entity extends ValidateBean, Serializable {
+public interface Entity extends ValidateBean {
 
 
 }
