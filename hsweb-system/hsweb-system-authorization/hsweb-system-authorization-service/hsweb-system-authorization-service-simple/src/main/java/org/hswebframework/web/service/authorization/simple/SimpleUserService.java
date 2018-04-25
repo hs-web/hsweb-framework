@@ -15,12 +15,14 @@ import org.hswebframework.web.service.AbstractService;
 import org.hswebframework.web.service.DefaultDSLQueryService;
 import org.hswebframework.web.service.DefaultDSLUpdateService;
 import org.hswebframework.web.service.authorization.*;
+import org.hswebframework.web.service.authorization.events.UserPasswordModifiedEvent;
 import org.hswebframework.web.validate.ValidationException;
 import org.hswebframework.utils.ListUtils;
 import org.hswebframework.web.validator.group.CreateGroup;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -61,6 +63,9 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
 
     @Autowired
     private RoleDao roleDao;
+
+    @Autowired
+    private ApplicationEventPublisher publisher;
 
     @Override
     public String encodePassword(String password, String salt) {
@@ -177,10 +182,11 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
         //修改密码
         if (StringUtils.hasLength(userEntity.getPassword())) {
             //密码强度验证
-            tryValidateProperty(usernameValidator, UserEntity.password, userEntity.getPassword());
+            tryValidateProperty(passwordStrengthValidator, UserEntity.password, userEntity.getPassword());
             //密码MD5
             userEntity.setPassword(encodePassword(userEntity.getPassword(), oldUser.getSalt()));
             updateProperties.add(UserEntity.password);
+
         }
         //修改数据
         DefaultDSLUpdateService.createUpdate(getDao(), userEntity)
@@ -193,6 +199,9 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
             userRoleDao.deleteByUserId(bindRoleUserEntity.getId());
             //同步角色信息
             trySyncUserRole(userEntity.getId(), bindRoleUserEntity.getRoles());
+        }
+        if (updateProperties.contains(UserEntity.password)) {
+            publisher.publishEvent(new UserPasswordModifiedEvent(userId));
         }
     }
 
@@ -220,11 +229,14 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
         if (!userEntity.getPassword().equals(oldPassword)) {
             throw new ValidationException("{old_password_error}", "password");
         }
+        tryValidateProperty(passwordStrengthValidator, UserEntity.password, newPassword);
+
         newPassword = encodePassword(newPassword, userEntity.getSalt());
         DefaultDSLUpdateService.createUpdate(getDao())
                 .set(UserEntity.password, newPassword)
                 .where(GenericEntity.id, userId)
                 .exec();
+        publisher.publishEvent(new UserPasswordModifiedEvent(userId));
     }
 
 
