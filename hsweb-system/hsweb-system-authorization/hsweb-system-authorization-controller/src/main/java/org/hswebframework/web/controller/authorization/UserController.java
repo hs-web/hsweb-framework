@@ -19,6 +19,7 @@ package org.hswebframework.web.controller.authorization;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.hswebframework.web.AopUtils;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.annotation.Authorize;
@@ -75,6 +76,11 @@ public class UserController implements
         param.excludes("password", "salt");
         return QueryController.super.list(param)
                 .exclude(UserEntity.class, "password", "salt");
+    }
+
+    public static void main(String[] args) throws NoSuchMethodException {
+        System.out.println(AopUtils
+                .findMethodAnnotation(UserController.class,UserController.class.getMethod("list",QueryParamEntity.class),Authorize.class));
     }
 
     @Override
