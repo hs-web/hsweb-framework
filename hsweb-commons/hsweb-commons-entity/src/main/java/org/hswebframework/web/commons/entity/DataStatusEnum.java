@@ -15,4 +15,5 @@ public enum DataStatusEnum implements EnumDict<Byte> {
     private Byte value;
 
     private String text;
+
 }
