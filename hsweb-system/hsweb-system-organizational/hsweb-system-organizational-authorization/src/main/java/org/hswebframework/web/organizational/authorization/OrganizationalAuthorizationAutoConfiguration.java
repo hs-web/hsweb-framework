@@ -11,8 +11,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 @Configuration
@@ -88,9 +86,15 @@ public class OrganizationalAuthorizationAutoConfiguration implements BeanPostPro
     @Configuration
     @ConditionalOnBean(PersonnelAuthorizationManager.class)
     public static class PersonnelAuthorizationSupplierAutoConfiguration {
+
         @Bean
         public DefaultPersonnelAuthorizationSupplier personnelAuthorizationManager(PersonnelAuthorizationManager personnelAuthorizationManager) {
             return new DefaultPersonnelAuthorizationSupplier(personnelAuthorizationManager);
+        }
+
+        @Bean
+        public PersonnelAuthorizationSettingTypeSupplier personnelAuthorizationSettingTypeSupplier() {
+            return new PersonnelAuthorizationSettingTypeSupplier();
         }
     }
 }
