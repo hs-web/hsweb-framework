@@ -91,7 +91,7 @@ public class AuthorizeTests {
 
     @Test
     public void testParseAuthorizeDefinition() {
-        AuthorizeDefinition definition = parser.parse(queryById.getTarget().getClass(),queryById.getMethod());
+        AuthorizeDefinition definition = parser.parse(queryById.getTarget().getClass(), queryById.getMethod());
 
         Assert.assertNotNull(definition);
         Assert.assertEquals(definition.getPermissions().size(), 1);
@@ -103,7 +103,7 @@ public class AuthorizeTests {
     public void testAuthorizingHandler() {
         DefaultAuthorizingHandler handler = new DefaultAuthorizingHandler();
 
-        AuthorizeDefinition definition = parser.parse(queryById.getTarget().getClass(),queryById.getMethod());
+        AuthorizeDefinition definition = parser.parse(queryById.getTarget().getClass(), queryById.getMethod());
 
         AuthorizingContext authorizingContext = new AuthorizingContext();
         authorizingContext.setAuthentication(authentication);
@@ -126,7 +126,7 @@ public class AuthorizeTests {
         handler.setDataAccessController(controller);
 
 
-        AuthorizeDefinition definition = parser.parse(dynamicQuery.getTarget().getClass(),dynamicQuery.getMethod());
+        AuthorizeDefinition definition = parser.parse(dynamicQuery.getTarget().getClass(), dynamicQuery.getMethod());
 
         //获取到请求参数
         QueryParamEntity entity = dynamicQuery.<QueryParamEntity>getParameter("paramEntity").orElseThrow(NullPointerException::new);
@@ -157,7 +157,7 @@ public class AuthorizeTests {
         handler.setDataAccessController(controller);
 
 
-        AuthorizeDefinition definition = parser.parse(queryById.getTarget().getClass(),queryById.getMethod());
+        AuthorizeDefinition definition = parser.parse(queryById.getTarget().getClass(), queryById.getMethod());
 
         //响应结果
         Object response = queryById.getInvokeResult();
@@ -178,9 +178,8 @@ public class AuthorizeTests {
     }
 
     @Authorize(permission = "test")
-    public static class TestClass {
+    public static class TestClass implements TestClassSuper {
 
-        @Authorize(action = Permission.ACTION_QUERY, phased = Phased.after, dataAccess = @RequiresDataAccess)
         public ResponseMessage<User> queryById(String id) {
             return ResponseMessage.ok();
         }
@@ -188,6 +187,21 @@ public class AuthorizeTests {
         @Authorize(action = Permission.ACTION_QUERY)
         @RequiresDataAccess
         public void dynamicQuery(QueryParamEntity paramEntity) {
+            System.out.println(JSON.toJSON(paramEntity));
+        }
+
+    }
+
+    public interface TestClassSuper {
+
+        @Authorize(action = Permission.ACTION_QUERY, phased = Phased.after, dataAccess = @RequiresDataAccess)
+        default ResponseMessage<User> queryById(String id) {
+            return ResponseMessage.ok();
+        }
+
+        @Authorize(action = Permission.ACTION_QUERY)
+        @RequiresDataAccess
+        default void dynamicQuery(QueryParamEntity paramEntity) {
             System.out.println(JSON.toJSON(paramEntity));
         }
 
