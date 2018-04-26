@@ -29,6 +29,7 @@
         <module>hsweb-system-dictionary</module>
         <module>hsweb-system-oauth2-server</module>
         <module>hsweb-system-oauth2-client</module>
+        <module>hsweb-system-calendar</module>
     </modules>
     <artifactId>hsweb-system</artifactId>
 
