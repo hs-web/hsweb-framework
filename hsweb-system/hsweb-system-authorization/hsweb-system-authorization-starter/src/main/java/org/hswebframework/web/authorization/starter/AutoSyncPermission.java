@@ -9,8 +9,6 @@ import org.hswebframework.web.authorization.define.AuthorizeDefinition;
 import org.hswebframework.web.authorization.define.AuthorizeDefinitionInitializedEvent;
 import org.hswebframework.web.commons.entity.DataStatus;
 import org.hswebframework.web.commons.entity.factory.EntityFactory;
-import org.hswebframework.web.controller.GenericEntityController;
-import org.hswebframework.web.controller.authorization.UserController;
 import org.hswebframework.web.entity.authorization.ActionEntity;
 import org.hswebframework.web.entity.authorization.OptionalField;
 import org.hswebframework.web.entity.authorization.PermissionEntity;
@@ -20,6 +18,8 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Member;
+import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -116,8 +116,10 @@ public class AutoSyncPermission implements ApplicationListener<AuthorizeDefiniti
                 List<OptionalField> optionalFields = new ArrayList<>();
                 entity.setOptionalFields(optionalFields);
                 if (genType != Object.class) {
-                    List<Field> fields=new ArrayList<>();
-                    ReflectionUtils.doWithFields(genType, fields::add);
+                    List<Field> fields = new ArrayList<>();
+
+                    ReflectionUtils.doWithFields(genType, fields::add, field -> field.getModifiers() != Modifier.STATIC);
+
                     for (Field field : fields) {
                         if ("id".equals(field.getName())) {
                             continue;
