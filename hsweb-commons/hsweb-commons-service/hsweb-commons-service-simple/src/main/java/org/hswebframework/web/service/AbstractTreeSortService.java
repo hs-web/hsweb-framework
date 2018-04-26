@@ -65,6 +65,9 @@ public abstract class AbstractTreeSortService<E extends TreeSortSupportEntity<PK
 
     protected void applyPath(E entity) {
         if (StringUtils.isEmpty(entity.getParentId())) {
+            entity.setSortIndex(0L);
+            entity.setParentId(createParentIdOnExists());
+            entity.setPath(RandomUtil.randomChar(4));
             return;
         }
         if (!StringUtils.isEmpty(entity.getPath())) {
