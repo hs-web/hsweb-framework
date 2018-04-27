@@ -404,9 +404,13 @@ public class SimplePersonService extends GenericEntityService<PersonEntity, Stri
                                                                                             Set<String> rootIds,
                                                                                             BiConsumer<T, List<T>> childAccepter,
                                                                                             Consumer<List<T>> rootConsumer) {
+        if (rootIds.isEmpty()) {
+            return Collections.emptyList();
+        }
         //获取根节点
         List<T> root = DefaultDSLQueryService.createQuery(dao)
-                .where().in(TreeSupportEntity.id, rootIds)
+                .where()
+                .in(TreeSupportEntity.id, rootIds)
                 .listNoPaging();
         //节点不存在?
         if (!root.isEmpty()) {
