@@ -16,10 +16,14 @@
  */
 package org.hswebframework.web.service.organizational.simple;
 
+import org.hswebframework.web.BusinessException;
 import org.hswebframework.web.commons.entity.DataStatus;
+import org.hswebframework.web.dao.organizational.DepartmentDao;
 import org.hswebframework.web.dao.organizational.OrganizationalDao;
+import org.hswebframework.web.entity.organizational.DepartmentEntity;
 import org.hswebframework.web.entity.organizational.OrganizationalEntity;
 import org.hswebframework.web.id.IDGenerator;
+import org.hswebframework.web.service.DefaultDSLQueryService;
 import org.hswebframework.web.service.EnableCacheAllEvictTreeSortService;
 import org.hswebframework.web.service.organizational.OrganizationalService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +48,9 @@ public class SimpleOrganizationalService extends EnableCacheAllEvictTreeSortServ
     @Autowired
     private OrganizationalDao organizationalDao;
 
+    @Autowired
+    private DepartmentDao departmentDao;
+
     @Override
     public OrganizationalDao getDao() {
         return organizationalDao;
@@ -52,6 +59,17 @@ public class SimpleOrganizationalService extends EnableCacheAllEvictTreeSortServ
     @Override
     protected IDGenerator<String> getIDGenerator() {
         return IDGenerator.MD5;
+    }
+
+    @Override
+    public int deleteByPk(String id) {
+        if (DefaultDSLQueryService.createQuery(departmentDao)
+                .where(DepartmentEntity.orgId, id)
+                .total() > 0) {
+            throw new BusinessException("机构下存在部门信息,无法删除");
+        }
+
+        return super.deleteByPk(id);
     }
 
     @Override

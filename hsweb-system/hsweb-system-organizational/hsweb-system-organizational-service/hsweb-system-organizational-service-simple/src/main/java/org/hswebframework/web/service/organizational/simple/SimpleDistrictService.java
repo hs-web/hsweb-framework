@@ -1,11 +1,14 @@
 package org.hswebframework.web.service.organizational.simple;
 
+import org.hswebframework.web.BusinessException;
 import org.hswebframework.web.commons.entity.DataStatus;
 import org.hswebframework.web.commons.entity.Entity;
 import org.hswebframework.web.dao.organizational.DistrictDao;
+import org.hswebframework.web.dao.organizational.OrganizationalDao;
 import org.hswebframework.web.entity.organizational.DistrictEntity;
 import org.hswebframework.web.entity.organizational.OrganizationalEntity;
 import org.hswebframework.web.service.AbstractTreeSortService;
+import org.hswebframework.web.service.DefaultDSLQueryService;
 import org.hswebframework.web.service.GenericEntityService;
 import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.service.organizational.DistrictService;
@@ -20,6 +23,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
+import static org.hswebframework.web.service.DefaultDSLQueryService.*;
+
 /**
  * 默认的服务实现
  *
@@ -31,6 +36,9 @@ public class SimpleDistrictService extends AbstractTreeSortService<DistrictEntit
         implements DistrictService {
     @Autowired
     private DistrictDao districtDao;
+
+    @Autowired
+    private OrganizationalDao organizationalDao;
 
     @Override
     protected IDGenerator<String> getIDGenerator() {
@@ -69,6 +77,11 @@ public class SimpleDistrictService extends AbstractTreeSortService<DistrictEntit
     @Override
     @CacheEvict(allEntries = true)
     public int deleteByPk(String id) {
+        if (DefaultDSLQueryService.createQuery(organizationalDao)
+                .where(OrganizationalEntity.orgId, id)
+                .total() > 0) {
+            throw new BusinessException("行政区域下存在机构信息,无法删除!");
+        }
         return super.deleteByPk(id);
     }
 
@@ -87,7 +100,7 @@ public class SimpleDistrictService extends AbstractTreeSortService<DistrictEntit
     @Override
     @Cacheable(key = "'all'")
     public List<DistrictEntity> select() {
-        return  createQuery().where().orderByAsc(DistrictEntity.sortIndex).listNoPaging();
+        return createQuery().where().orderByAsc(DistrictEntity.sortIndex).listNoPaging();
     }
 
     @Override

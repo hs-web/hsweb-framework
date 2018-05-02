@@ -9,6 +9,7 @@ import java.util.function.Predicate;
  * 枚举字典,使用枚举来实现数据字典,可通过集成此接口来实现一些有趣的功能.
  * ⚠️:如果使用了位运算来判断枚举,枚举数量不要超过64个,且顺序不要随意变动!
  * 如果枚举数量大于64,你应该使用{@link org.hswebframework.web.dict.apply.DictApply}来处理
+ *
  * @author zhouhao
  * @see 3.0
  */
@@ -36,8 +37,12 @@ public interface EnumDict<V> {
      */
     int ordinal();
 
+    default long index() {
+        return ordinal();
+    }
+
     default long getBit() {
-        return 1L << (long) ordinal();
+        return 1L << index();
     }
 
     /**

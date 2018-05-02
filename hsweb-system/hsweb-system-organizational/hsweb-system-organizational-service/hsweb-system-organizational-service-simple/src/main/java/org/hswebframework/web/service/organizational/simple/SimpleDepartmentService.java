@@ -16,10 +16,14 @@
  */
 package org.hswebframework.web.service.organizational.simple;
 
+import org.hswebframework.web.BusinessException;
 import org.hswebframework.web.dao.organizational.DepartmentDao;
+import org.hswebframework.web.dao.organizational.PositionDao;
 import org.hswebframework.web.entity.organizational.DepartmentEntity;
+import org.hswebframework.web.entity.organizational.PositionEntity;
 import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.service.AbstractTreeSortService;
+import org.hswebframework.web.service.DefaultDSLQueryService;
 import org.hswebframework.web.service.EnableCacheAllEvictTreeSortService;
 import org.hswebframework.web.service.GenericEntityService;
 import org.hswebframework.web.service.organizational.DepartmentService;
@@ -44,6 +48,9 @@ public class SimpleDepartmentService
         implements DepartmentService {
     @Autowired
     private DepartmentDao departmentDao;
+
+    @Autowired
+    protected PositionDao positionDao;
 
     @Override
     public DepartmentDao getDao() {
@@ -71,5 +78,15 @@ public class SimpleDepartmentService
     @Cacheable(cacheNames = "'code:'+#code")
     public DepartmentEntity selectByCode(String code) {
         return createQuery().where(DepartmentEntity.code, code).single();
+    }
+
+    @Override
+    public int deleteByPk(String id) {
+        if (DefaultDSLQueryService.createQuery(positionDao)
+                .where(PositionEntity.departmentId, id)
+                .total() > 0) {
+            throw new BusinessException("部门下存在职位信息,无法删除!");
+        }
+        return super.deleteByPk(id);
     }
 }

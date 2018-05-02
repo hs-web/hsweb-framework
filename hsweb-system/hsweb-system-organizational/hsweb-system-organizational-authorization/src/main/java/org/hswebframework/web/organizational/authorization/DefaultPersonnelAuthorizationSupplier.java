@@ -34,17 +34,9 @@ public class DefaultPersonnelAuthorizationSupplier implements PersonnelAuthoriza
 
     @Override
     public PersonnelAuthorization get() {
-        /*
-            获取逻辑: 优先获取登录用户的权限信息中Authentication的personId属性;
-            如果不存在,则根据用户id获取.如果还不存在则返回null
-         */
         //TreadLocal Cache
         return ThreadLocalUtils.get(threadLocalCacheKey, () ->
-                Authentication.current().map(authentication ->
-                        authentication.getAttribute(PersonAttachEntity.personId)
-                                .map(String::valueOf)
-                                .map(this::getByPersonId)
-                                .orElseGet(() -> getByUserId(authentication.getUser().getId())))
+                Authentication.current().map(authentication -> getByUserId(authentication.getUser().getId()))
                         .orElse(null));
     }
 }

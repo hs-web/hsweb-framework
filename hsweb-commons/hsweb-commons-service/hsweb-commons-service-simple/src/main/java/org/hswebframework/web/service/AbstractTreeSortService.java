@@ -64,7 +64,10 @@ public abstract class AbstractTreeSortService<E extends TreeSortSupportEntity<PK
     }
 
     protected void applyPath(E entity) {
-        if (!StringUtils.isEmpty(entity.getParentId())) {
+        if (StringUtils.isEmpty(entity.getParentId())) {
+            entity.setSortIndex(0L);
+            entity.setParentId(createParentIdOnExists());
+            entity.setPath(RandomUtil.randomChar(4));
             return;
         }
         if (!StringUtils.isEmpty(entity.getPath())) {
@@ -125,11 +128,11 @@ public abstract class AbstractTreeSortService<E extends TreeSortSupportEntity<PK
     public PK saveOrUpdateForSingle(E entity) {
         assertNotNull(entity);
         PK id = entity.getId();
-        applyPath(entity);
         if (null == id || this.selectByPk(id) == null) {
             if (null == id) {
                 entity.setId(getIDGenerator().generate());
             }
+            applyPath(entity);
             return super.insert(entity);
         }
         super.updateByPk(entity);

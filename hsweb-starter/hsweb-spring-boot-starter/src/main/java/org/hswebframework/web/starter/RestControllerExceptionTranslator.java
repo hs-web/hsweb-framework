@@ -75,7 +75,7 @@ public class RestControllerExceptionTranslator {
         if (exception.getCause() != null) {
             logger.error("{}:{}", exception.getMessage(), exception.getStatus(), exception.getCause());
         }
-        return ResponseMessage.error(exception.getStatus(), exception.getMessage());
+        return ResponseMessage.error(exception.getStatus(), exception.getMessage()).result(exception.getCode());
     }
 
     @ExceptionHandler(UnAuthorizedException.class)

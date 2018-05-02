@@ -14,4 +14,6 @@ public enum Color implements EnumDict<Integer> {
 
     private String text;
 
+
+
 }

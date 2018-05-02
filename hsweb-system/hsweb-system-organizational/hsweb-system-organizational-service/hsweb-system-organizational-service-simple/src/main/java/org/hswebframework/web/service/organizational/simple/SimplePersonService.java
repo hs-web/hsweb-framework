@@ -60,10 +60,8 @@ import static org.springframework.util.StringUtils.isEmpty;
 @Service("personService")
 @CacheConfig(cacheNames = "person")
 public class SimplePersonService extends GenericEntityService<PersonEntity, String>
-        implements PersonService, PersonnelAuthorizationManager, AuthorizationSettingTypeSupplier {
+        implements PersonService, PersonnelAuthorizationManager {
 
-    private static String SETTING_TYPE_PERSON   = "person";
-    private static String SETTING_TYPE_POSITION = "position";
 
     @Autowired
     private PersonDao personDao;
@@ -406,9 +404,13 @@ public class SimplePersonService extends GenericEntityService<PersonEntity, Stri
                                                                                             Set<String> rootIds,
                                                                                             BiConsumer<T, List<T>> childAccepter,
                                                                                             Consumer<List<T>> rootConsumer) {
+        if (rootIds.isEmpty()) {
+            return Collections.emptyList();
+        }
         //获取根节点
         List<T> root = DefaultDSLQueryService.createQuery(dao)
-                .where().in(TreeSupportEntity.id, rootIds)
+                .where()
+                .in(TreeSupportEntity.id, rootIds)
                 .listNoPaging();
         //节点不存在?
         if (!root.isEmpty()) {
@@ -457,26 +459,5 @@ public class SimplePersonService extends GenericEntityService<PersonEntity, Stri
         return getPersonnelAuthorizationByPersonId(entity.getId());
     }
 
-    @Override
-    public Set<SettingInfo> get(String userId) {
-        //支持职位和人员 设置权限
-        PersonEntity entity = createQuery().where(PersonEntity.userId, userId).single();
-        if (entity == null) {
-            return new HashSet<>();
-        }
-        Set<SettingInfo> settingInfo = new HashSet<>();
-        //岗位设置
-        //TODO 2017/06/08 是否将子级岗位的设置也放进来??
-        DefaultDSLQueryService.createQuery(personPositionDao)
-                .where(PersonPositionEntity.personId, entity.getId())
-                .listNoPaging()
-                .stream()
-                .map(position -> new SettingInfo(SETTING_TYPE_POSITION, position.getPositionId()))
-                .forEach(settingInfo::add);
-        //其他设置支持?
 
-        //人员配置
-        settingInfo.add(new SettingInfo(SETTING_TYPE_PERSON, entity.getId()));
-        return settingInfo;
-    }
 }
