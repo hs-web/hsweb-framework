@@ -81,6 +81,11 @@ public interface PersonnelAuthorization extends Serializable {
      */
     Set<TreeNode<String>> getDepartmentIds();
 
+    /**
+     * 获取人员的所有职位信息
+     *
+     * @return 职位信息
+     */
     Set<Position> getPositions();
 
     default Optional<Position> getPosition(String id) {

@@ -297,23 +297,34 @@ public class SimplePersonService extends GenericEntityService<PersonEntity, Stri
         //获取所有职位,并得到根职位(树结构)
         List<PositionEntity> positionEntities = getAllChildrenAndReturnRootNode(positionDao, positionIds, PositionEntity::setChildren, rootPosList -> {
             //根据职位获取部门
-            Set<String> departmentIds = rootPosList.stream().map(PositionEntity::getDepartmentId).collect(Collectors.toSet());
-            rootPosList.forEach(positionEntity -> positionCache.put(positionEntity.getId(), positionEntity));
+            Set<String> departmentIds = rootPosList.stream()
+                    .peek(positionEntity -> positionCache.put(positionEntity.getId(), positionEntity))
+                    .map(PositionEntity::getDepartmentId)
+                    .collect(Collectors.toSet());
+//            rootPosList.forEach(positionEntity -> positionCache.put(positionEntity.getId(), positionEntity));
             if (!CollectionUtils.isEmpty(departmentIds)) {
                 List<DepartmentEntity> departmentEntities = getAllChildrenAndReturnRootNode(departmentDao, departmentIds, DepartmentEntity::setChildren, rootDepList -> {
-                    rootDepList.forEach(departmentEntity -> departmentCache.put(departmentEntity.getId(), departmentEntity));
+                    //rootDepList.forEach(departmentEntity -> departmentCache.put(departmentEntity.getId(), departmentEntity));
                     //根据部门获取机构
-                    Set<String> orgIds = rootDepList.stream().map(DepartmentEntity::getOrgId).collect(Collectors.toSet());
+                    Set<String> orgIds = rootDepList.stream()
+                            .peek(departmentEntity -> departmentCache.put(departmentEntity.getId(), departmentEntity))
+                            .map(DepartmentEntity::getOrgId)
+                            .collect(Collectors.toSet());
+
                     if (!CollectionUtils.isEmpty(orgIds)) {
                         List<OrganizationalEntity> orgEntities = getAllChildrenAndReturnRootNode(organizationalDao, orgIds, OrganizationalEntity::setChildren, rootOrgList -> {
-                            rootOrgList.forEach(org -> orgCache.put(org.getId(), org));
+//                            rootOrgList.forEach(org -> orgCache.put(org.getId(), org));
                             //根据机构获取行政区域
-                            Set<String> districtIds = rootOrgList.stream().map(OrganizationalEntity::getDistrictId).filter(Objects::nonNull).collect(Collectors.toSet());
+                            Set<String> districtIds = rootOrgList.stream()
+                                    .peek(org -> orgCache.put(org.getId(), org))
+                                    .map(OrganizationalEntity::getDistrictId)
+                                    .filter(Objects::nonNull)
+                                    .collect(Collectors.toSet());
                             if (!CollectionUtils.isEmpty(districtIds)) {
                                 List<DistrictEntity> districtEntities =
-                                        getAllChildrenAndReturnRootNode(districtDao, districtIds, DistrictEntity::setChildren, rootDistrictList -> {
-                                            rootDistrictList.forEach(dist -> districtCache.put(dist.getId(), dist));
-                                        });
+                                        getAllChildrenAndReturnRootNode(districtDao, districtIds, DistrictEntity::setChildren,
+                                                rootDistrictList -> rootDistrictList.forEach(dist -> districtCache.put(dist.getId(), dist)));
+
                                 authorization.setDistrictIds(transformationTreeNode(null, districtEntities));
                             }
                         });
@@ -365,7 +376,8 @@ public class SimplePersonService extends GenericEntityService<PersonEntity, Stri
                             .department(department)
                             .code("")
                             .build();
-                }).filter(Objects::nonNull)
+                })
+                .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
         authorization.setPositions(positions);
         //获取关系
@@ -404,7 +416,7 @@ public class SimplePersonService extends GenericEntityService<PersonEntity, Stri
                                                                                             Set<String> rootIds,
                                                                                             BiConsumer<T, List<T>> childAccepter,
                                                                                             Consumer<List<T>> rootConsumer) {
-        if (rootIds.isEmpty()) {
+        if (CollectionUtils.isEmpty(rootIds)) {
             return Collections.emptyList();
         }
         //获取根节点
