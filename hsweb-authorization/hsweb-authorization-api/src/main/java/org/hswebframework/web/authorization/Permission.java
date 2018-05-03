@@ -86,7 +86,7 @@ public interface Permission extends Serializable {
     /**
      * 用户对此权限的可操作事件(按钮)
      * <p>
-     * ⚠️:任何时候都不应该对返回对Set进行写操作
+     * ⚠️:任何时候都不应该对返回的Set进行写操作
      *
      * @return 如果没有配置返回空{@link Collections#emptySet()},不会返回null.
      */
@@ -95,7 +95,7 @@ public interface Permission extends Serializable {
     /**
      * 用户对此权限持有的数据权限信息, 用于数据级别的控制
      * <p>
-     * ⚠️:任何时候都不应该对返回对Set进行写操作
+     * ⚠️:任何时候都不应该对返回的Set进行写操作
      *
      * @return 如果没有配置返回空{@link Collections#emptySet()},不会返回null.
      * @see DataAccessConfig
