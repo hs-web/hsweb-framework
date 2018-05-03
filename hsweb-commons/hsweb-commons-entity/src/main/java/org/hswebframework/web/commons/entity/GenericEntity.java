@@ -18,6 +18,7 @@
 
 package org.hswebframework.web.commons.entity;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -36,9 +37,13 @@ public interface GenericEntity<PK> extends CloneableEntity {
 
     void setId(PK id);
 
-    Map<String, Object> getProperties();
+    default Map<String, Object> getProperties() {
+        return Collections.emptyMap();
+    }
 
-    void setProperties(Map<String, Object> properties);
+    default void setProperties(Map<String, Object> properties) {
+        throw new UnsupportedOperationException("不支持此操作");
+    }
 
     @SuppressWarnings("unchecked")
     default <T> T getProperty(String propertyName, T defaultValue) {
