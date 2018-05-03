@@ -95,6 +95,7 @@ public class SimpleAuthenticationBuilder implements AuthenticationBuilder {
             if (null != dataAccess) {
                 permission.setDataAccesses(dataAccess.stream().map(JSONObject.class::cast)
                         .map(dataJson -> dataBuilderFactory.create().fromJson(dataJson.toJSONString()).build())
+                        .filter(Objects::nonNull)
                         .collect(Collectors.toSet()));
             }
             permissions.add(permission);

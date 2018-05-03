@@ -40,8 +40,10 @@ public class SimpleDataAccessConfigBuilder implements DataAccessConfigBuilder {
         Objects.requireNonNull(action);
 
 
-        return converts.stream().filter(convert -> convert.isSupport(type, action, config))
-                .findAny().map(convert -> convert.convert(type, action, config))
+        return converts.stream()
+                .filter(convert -> convert.isSupport(type, action, config))
+                .map(convert -> convert.convert(type, action, config))
+                .findFirst()
                 .orElse(null);
     }
 }

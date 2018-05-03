@@ -18,8 +18,6 @@ import static org.hswebframework.web.authorization.access.DataAccessConfig.Defau
 import static org.hswebframework.web.authorization.access.DataAccessConfig.DefaultType.OWN_CREATED;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public class SimpleDataAccessConfigBuilderFactory implements DataAccessConfigBuilderFactory {

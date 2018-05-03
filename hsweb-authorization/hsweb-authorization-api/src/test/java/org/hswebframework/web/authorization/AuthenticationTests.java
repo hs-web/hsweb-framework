@@ -1,18 +1,39 @@
 package org.hswebframework.web.authorization;
 
+import com.alibaba.fastjson.JSON;
+import org.hswebframework.web.authorization.access.DataAccessConfig;
+import org.hswebframework.web.authorization.access.FieldFilterDataAccessConfig;
+import org.hswebframework.web.authorization.access.ScopeDataAccessConfig;
 import org.hswebframework.web.authorization.builder.AuthenticationBuilder;
 import org.hswebframework.web.authorization.exception.UnAuthorizedException;
+import org.hswebframework.web.authorization.simple.SimpleFiledScopeDataAccessConfig;
 import org.hswebframework.web.authorization.simple.builder.SimpleAuthenticationBuilder;
 import org.hswebframework.web.authorization.simple.builder.SimpleDataAccessConfigBuilderFactory;
 import org.hswebframework.web.authorization.token.*;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
+import static org.hswebframework.web.authorization.Permission.scope;
 import static org.junit.Assert.*;
 
 public class AuthenticationTests {
 
-    private AuthenticationBuilder builder = new SimpleAuthenticationBuilder(new SimpleDataAccessConfigBuilderFactory());
+    private AuthenticationBuilder builder;
+
+    @Before
+    public void setup() {
+        SimpleDataAccessConfigBuilderFactory builderFactory = new SimpleDataAccessConfigBuilderFactory();
+
+        builderFactory.init();
+
+        builder = new SimpleAuthenticationBuilder(builderFactory);
+    }
 
     /**
      * 测试初始化基本的权限信息
@@ -21,7 +42,8 @@ public class AuthenticationTests {
     public void testInitUserRoleAndPermission() {
         Authentication authentication = builder.user("{\"id\":\"admin\",\"username\":\"admin\",\"name\":\"Administrator\",\"type\":\"default\"}")
                 .role("[{\"id\":\"admin-role\",\"name\":\"admin\"}]")
-                .permission("[{\"id\":\"user-manager\",\"actions\":[\"GET\",\"UPDATE\"]}]")
+                .permission("[{\"id\":\"user-manager\",\"actions\":[\"query\",\"get\",\"update\"]" +
+                        ",\"dataAccesses\":[{\"action\":\"query\",\"field\":\"test\",\"config\":{\"fields\":[\"1\",\"2\",\"3\"]},\"scopeType\":\"CUSTOM_SCOPE\",\"type\":\"DENY_FIELDS\"}]}]")
                 .build();
 
         //test user
@@ -39,8 +61,17 @@ public class AuthenticationTests {
         //test permission
         assertEquals(authentication.getPermissions().size(), 1);
         assertTrue(authentication.hasPermission("user-manager"));
-        assertTrue(authentication.hasPermission("user-manager", "GET"));
-        assertTrue(!authentication.hasPermission("user-manager", "DELETE"));
+        assertTrue(authentication.hasPermission("user-manager", "get"));
+        assertTrue(!authentication.hasPermission("user-manager", "delete"));
+
+        //获取数据权限配置
+        Set<String> fields = authentication.getPermission("user-manager")
+                .map(permission -> permission.findDenyFields(Permission.ACTION_QUERY))
+                .orElseGet(Collections::emptySet);
+
+        Assert.assertEquals(fields.size(), 3);
+        System.out.println(fields);
+
     }
 
     /**
