@@ -12,6 +12,8 @@ import org.hswebframework.web.commons.entity.Entity;
  * @since 3.0
  */
 public class UpdateParamEntity<T> extends UpdateParam<T> implements Entity {
+    private static final long serialVersionUID = -4074863219482678510L;
+
     public UpdateParamEntity() {
     }
 

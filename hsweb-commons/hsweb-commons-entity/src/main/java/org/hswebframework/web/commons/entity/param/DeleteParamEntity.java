@@ -14,6 +14,8 @@ import org.hswebframework.web.commons.entity.Entity;
  * @since 3.0
  */
 public class DeleteParamEntity extends Param implements Entity {
+    private static final long serialVersionUID = 6120598637420234301L;
+
     /**
      * 创建一个无条件的删除条件实体
      * 创建后需自行指定条件({@link DeleteParamEntity#where(String, Object)})
