@@ -188,6 +188,17 @@ public interface Permission extends Serializable {
      */
     interface DataAccessPredicate<T extends DataAccessConfig> extends Predicate<DataAccessConfig> {
         boolean test(DataAccessConfig config);
+
+
+        @Override
+        default DataAccessPredicate<T> and(Predicate<? super DataAccessConfig> other) {
+            return (t) -> test(t) && other.test(t);
+        }
+
+        @Override
+        default DataAccessPredicate<T> or(Predicate<? super DataAccessConfig> other) {
+            return (t) -> test(t) || other.test(t);
+        }
     }
 
 }
