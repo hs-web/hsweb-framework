@@ -58,7 +58,8 @@ public class DynamicFormOperationController {
     @PostMapping("/{formId}")
     @ApiOperation("新增")
     @Authorize(action = Permission.ACTION_ADD)
-    public ResponseMessage<Map<String, Object>> add(@PathVariable String formId, @RequestBody Map<String, Object> data) {
+    public ResponseMessage<Map<String, Object>> add(@PathVariable String formId,
+                                                    @RequestBody Map<String, Object> data) {
         dynamicFormOperationService.insert(formId, data);
         return ResponseMessage.ok(data);
     }
@@ -66,14 +67,25 @@ public class DynamicFormOperationController {
     @PutMapping("/{formId}")
     @ApiOperation("动态修改")
     @Authorize(action = Permission.ACTION_UPDATE)
-    public ResponseMessage<Integer> update(@PathVariable String formId, @RequestBody UpdateParamEntity<Map<String, Object>> paramEntity) {
+    public ResponseMessage<Integer> update(@PathVariable String formId,
+                                           @RequestBody UpdateParamEntity<Map<String, Object>> paramEntity) {
         return ResponseMessage.ok(dynamicFormOperationService.update(formId, paramEntity));
     }
 
-    @DeleteMapping("/{formId}")
-    @ApiOperation("动态删除")
+    @PutMapping("/{formId}/{id}")
+    @ApiOperation("根据主键修改")
+    @Authorize(action = Permission.ACTION_UPDATE)
+    public ResponseMessage<Map<String, Object>> update(@PathVariable String formId,
+                                                       @PathVariable String id,
+                                                       @RequestBody Map<String, Object> param) {
+        return ResponseMessage.ok(dynamicFormOperationService.updateById(formId, id, param));
+    }
+
+    @DeleteMapping("/{formId}/{id}")
+    @ApiOperation("根据主键删除")
     @Authorize(action = Permission.ACTION_DELETE)
-    public ResponseMessage<Integer> delete(@PathVariable String formId, @RequestParam DeleteParamEntity paramEntity) {
-        return ResponseMessage.ok(dynamicFormOperationService.delete(formId, paramEntity));
+    public ResponseMessage<Integer> delete(@PathVariable String formId,
+                                           @PathVariable String id) {
+        return ResponseMessage.ok(dynamicFormOperationService.deleteById(formId, id));
     }
 }

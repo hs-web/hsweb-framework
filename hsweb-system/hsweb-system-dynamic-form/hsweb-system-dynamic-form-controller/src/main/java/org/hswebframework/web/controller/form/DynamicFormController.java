@@ -24,7 +24,7 @@ import java.util.Objects;
  * @author hsweb-generator-online
  */
 @RestController
-@RequestMapping("${hsweb.web.mappings.dynamic/form:dynamic/form}")
+@RequestMapping("${hsweb.web.mappings.dynamic-form:dynamic/form}")
 @Authorize(permission = "dynamic-form", description = "动态表单管理")
 @Api(value = "动态表单管理",tags = "动态表单-表单管理")
 public class DynamicFormController implements SimpleGenericEntityController<DynamicFormEntity, String, QueryParamEntity> {

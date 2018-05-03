@@ -1,5 +1,6 @@
 package org.hswebframework.web.service.form.simple;
 
+import lombok.SneakyThrows;
 import org.hswebframework.ezorm.core.Delete;
 import org.hswebframework.ezorm.core.Insert;
 import org.hswebframework.ezorm.core.Update;
@@ -44,10 +45,9 @@ public class SimpleDynamicFormOperationService implements DynamicFormOperationSe
 
     protected <T> RDBTable<T> getTable(String formId) {
         DynamicFormEntity form = dynamicFormService.selectByPk(formId);
-        if (null == form||Boolean.FALSE.equals(form.getDeployed())) {
+        if (null == form || Boolean.FALSE.equals(form.getDeployed())) {
             throw new NotFoundException("表单不存在");
         }
-
         RDBDatabase database = StringUtils.isEmpty(form.getDataSourceId()) ?
                 databaseRepository.getDefaultDatabase() : databaseRepository.getDatabase(form.getDataSourceId());
         return database.getTable(form.getDatabaseTableName());
@@ -55,99 +55,93 @@ public class SimpleDynamicFormOperationService implements DynamicFormOperationSe
 
     @Override
     @Transactional(readOnly = true)
+    @SneakyThrows
     public <T> PagerResult<T> selectPager(String formId, QueryParamEntity paramEntity) {
         RDBTable<T> table = getTable(formId);
-        try {
-            RDBQuery<T> query = table.createQuery();
-            int total = query.setParam(paramEntity).total();
-            if (total == 0) {
-                return PagerResult.empty();
-            }
-            paramEntity.rePaging(total);
-            List<T> list = query.setParam(paramEntity).list(paramEntity.getPageIndex(),paramEntity.getPageSize());
-            return PagerResult.of(total, list);
-        } catch (SQLException e) {
-            throw new DynamicFormException("selectPager fail:" + e.getMessage(), e);
+        RDBQuery<T> query = table.createQuery();
+        int total = query.setParam(paramEntity).total();
+        if (total == 0) {
+            return PagerResult.empty();
         }
-
+        paramEntity.rePaging(total);
+        List<T> list = query.setParam(paramEntity).list(paramEntity.getPageIndex(), paramEntity.getPageSize());
+        return PagerResult.of(total, list);
     }
 
     @Override
     @Transactional(readOnly = true)
+    @SneakyThrows
     public <T> List<T> select(String formId, QueryParamEntity paramEntity) {
         RDBTable<T> table = getTable(formId);
-        try {
-            RDBQuery<T> query = table.createQuery();
-            return query.setParam(paramEntity).list();
-        } catch (SQLException e) {
-            throw new DynamicFormException("select fail:" + e.getMessage(), e);
-        }
+        RDBQuery<T> query = table.createQuery();
+        return query.setParam(paramEntity).list();
     }
 
     @Override
     @Transactional(readOnly = true)
+    @SneakyThrows
     public <T> T selectSingle(String formId, QueryParamEntity paramEntity) {
         RDBTable<T> table = getTable(formId);
-        try {
-            RDBQuery<T> query = table.createQuery();
-
-            return query.setParam(paramEntity).single();
-        } catch (SQLException e) {
-            throw new DynamicFormException("selectSingle fail:" + e.getMessage(), e);
-        }
+        RDBQuery<T> query = table.createQuery();
+        return query.setParam(paramEntity).single();
     }
 
     @Override
     @Transactional(readOnly = true)
+    @SneakyThrows
     public int count(String formId, QueryParamEntity paramEntity) {
         RDBTable table = getTable(formId);
-        try {
-            RDBQuery query = table.createQuery();
-
-            return query.setParam(paramEntity).total();
-        } catch (SQLException e) {
-            throw new DynamicFormException("count fail:" + e.getMessage(), e);
-        }
+        RDBQuery query = table.createQuery();
+        return query.setParam(paramEntity).total();
     }
 
     @Override
+    @SneakyThrows
     public <T> int update(String formId, UpdateParamEntity<T> paramEntity) {
         if (Objects.requireNonNull(paramEntity).getTerms().isEmpty()) {
-            throw new UnsupportedOperationException("can not use empty condition for update");
+            throw new UnsupportedOperationException("不能执行无条件的更新操作");
         }
         RDBTable<T> table = getTable(formId);
-        try {
-            Update<T> update = table.createUpdate();
-
-            return update.setParam(paramEntity).exec();
-        } catch (SQLException e) {
-            throw new DynamicFormException("update fail:" + e.getMessage(), e);
-        }
+        Update<T> update = table.createUpdate();
+        return update.setParam(paramEntity).exec();
     }
 
     @Override
+    @SneakyThrows
     public <T> void insert(String formId, T entity) {
         RDBTable<T> table = getTable(formId);
-        try {
-            Insert<T> insert = table.createInsert();
-            insert.value(entity).exec();
-        } catch (SQLException e) {
-            throw new DynamicFormException("insert fail:" + e.getMessage(), e);
-        }
+        Insert<T> insert = table.createInsert();
+        insert.value(entity).exec();
     }
 
     @Override
+    @SneakyThrows
     public int delete(String formId, DeleteParamEntity paramEntity) {
         if (Objects.requireNonNull(paramEntity).getTerms().isEmpty()) {
-            throw new UnsupportedOperationException("can not use empty condition for delete");
+            throw new UnsupportedOperationException("不能执行无条件的删除操作");
         }
         RDBTable table = getTable(formId);
-        try {
-            Delete delete = table.createDelete();
+        Delete delete = table.createDelete();
+        return delete.setParam(paramEntity).exec();
+    }
 
-            return delete.setParam(paramEntity).exec();
-        } catch (SQLException e) {
-            throw new DynamicFormException("delete fail:" + e.getMessage(), e);
-        }
+    @Override
+    @SneakyThrows
+    public int deleteById(String formId, String id) {
+        Objects.requireNonNull(id, "主键不能为空");
+        RDBTable table = getTable(formId);
+        return table.createDelete().where("id", id).exec();
+    }
+
+    @Override
+    @SneakyThrows
+    public <T> T updateById(String formId, String id, T data) {
+        Objects.requireNonNull(id, "主键不能为空");
+        RDBTable<T> table = getTable(formId);
+        table.createUpdate()
+                .set(data)
+                .where("id", id)
+                .exec();
+        return data;
     }
 }

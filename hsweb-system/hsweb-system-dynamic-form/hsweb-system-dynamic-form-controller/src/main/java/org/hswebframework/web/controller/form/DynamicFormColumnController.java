@@ -21,7 +21,7 @@ import java.util.List;
  * @author hsweb-generator-online
  */
 @RestController
-@RequestMapping("${hsweb.web.mappings.dynamic/form/column:dynamic/form/column}")
+@RequestMapping("${hsweb.web.mappings.dynamic-form-column:dynamic/form/column}")
 @Authorize(permission = "dynamic-form", description = "动态表单管理")
 @Api(value = "动态表单管理",tags = "动态表单-表单管理")
 public class DynamicFormColumnController {
@@ -52,7 +52,7 @@ public class DynamicFormColumnController {
     @ApiOperation("删除列")
     public ResponseMessage<List<DynamicFormColumnEntity>> delete(@ApiParam(value = "要删除的列id,多个列以,分割", example = "1,2,3")
                                                                  @RequestParam String ids) {
-        return ResponseMessage.ok(dynamicFormService.deleteColumn(Arrays.asList(ids.split(","))));
+        return ResponseMessage.ok(dynamicFormService.deleteColumn(Arrays.asList(ids.split("[,]"))));
     }
 
     @GetMapping("/{formId}")
