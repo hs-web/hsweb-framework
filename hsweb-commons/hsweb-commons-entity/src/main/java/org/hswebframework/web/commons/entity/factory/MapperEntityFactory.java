@@ -18,9 +18,7 @@
 
 package org.hswebframework.web.commons.entity.factory;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.serializer.SerializerFeature;
+import lombok.SneakyThrows;
 import org.hswebframework.web.NotFoundException;
 import org.hswebframework.utils.ClassUtils;
 import org.hswebframework.web.bean.FastBeanCopier;
@@ -37,9 +35,9 @@ import java.util.function.Supplier;
  */
 @SuppressWarnings("unchecked")
 public class MapperEntityFactory implements EntityFactory {
-    private Map<Class, Mapper> realTypeMapper = new HashMap<>();
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
-    private Map<String, PropertyCopier> copierCache = new HashMap<>();
+    private Map<Class, Mapper>          realTypeMapper = new HashMap<>();
+    private Logger                      logger         = LoggerFactory.getLogger(this.getClass());
+    private Map<String, PropertyCopier> copierCache    = new HashMap<>();
 
     private static final DefaultMapperFactory DEFAULT_MAPPER_FACTORY = clazz -> {
         String simpleClassName = clazz.getPackage().getName().concat(".Simple").concat(clazz.getSimpleName());
@@ -53,12 +51,6 @@ public class MapperEntityFactory implements EntityFactory {
 
     private static final DefaultPropertyCopier DEFAULT_PROPERTY_COPIER = (source, target) -> {
         return FastBeanCopier.copy(source, target);
-
-//        Object sourcePar = JSON.toJSON(source);
-//        if (sourcePar instanceof JSONObject) {
-//            return ((JSONObject) sourcePar).toJavaObject(target.getClass());
-//        }
-//        return JSON.parseObject(JSON.toJSONString(source, SerializerFeature.DisableCircularReferenceDetect), target.getClass());
     };
 
     private DefaultMapperFactory defaultMapperFactory = DEFAULT_MAPPER_FACTORY;
@@ -128,13 +120,6 @@ public class MapperEntityFactory implements EntityFactory {
         //尝试使用 Simple类，如: package.SimpleUserBean
         if (realType == null) {
             mapper = defaultMapperFactory.apply(beanClass);
-//
-//            String simpleClassName = beanClass.getPackage().getName().concat(".Simple").concat(beanClass.getSimpleName());
-//            try {
-//                realType = (Class<T>) Class.forName(simpleClassName);
-//            } catch (ClassNotFoundException e) {
-//                // throw new NotFoundException(e.getMessage());
-//            }
         }
         if (!Modifier.isInterface(beanClass.getModifiers()) && !Modifier.isAbstract(beanClass.getModifiers())) {
             realType = beanClass;
@@ -203,7 +188,7 @@ public class MapperEntityFactory implements EntityFactory {
     }
 
     public static class Mapper<T> {
-        Class<T> target;
+        Class<T>    target;
         Supplier<T> instanceGetter;
 
         public Mapper(Class<T> target, Supplier<T> instanceGetter) {
@@ -236,12 +221,9 @@ public class MapperEntityFactory implements EntityFactory {
         }
 
         @Override
+        @SneakyThrows
         public T get() {
-            try {
-                return type.newInstance();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            return type.newInstance();
         }
     }
 }
