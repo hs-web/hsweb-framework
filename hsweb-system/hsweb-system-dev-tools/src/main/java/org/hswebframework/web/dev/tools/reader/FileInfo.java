@@ -18,6 +18,11 @@ public class FileInfo {
 
     private String absolutePath;
 
+    private String type;
+
+    private boolean file;
+
+    private boolean dir;
 
     public static FileInfo from(File file){
         FileInfo info=new FileInfo();
@@ -25,6 +30,8 @@ public class FileInfo {
         info.setLength(file.length());
         info.setParent(file.getParent());
         info.setAbsolutePath(file.getAbsolutePath());
+        info.setFile(file.isFile());
+        info.setDir(file.isDirectory());
         return  info;
     }
 }
