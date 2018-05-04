@@ -94,7 +94,7 @@ public interface Authentication extends Serializable {
         if (null == id) {
             return Optional.empty();
         }
-        return getPermissions().parallelStream()
+        return getPermissions().stream()
                 .filter(permission -> permission.getId().equals(id))
                 .findAny();
     }
