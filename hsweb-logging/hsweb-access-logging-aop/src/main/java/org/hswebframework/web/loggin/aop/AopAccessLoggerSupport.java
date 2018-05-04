@@ -9,7 +9,11 @@ import org.hswebframework.web.logging.AccessLogger;
 import org.hswebframework.web.logging.AccessLoggerInfo;
 import org.hswebframework.web.logging.AccessLoggerListener;
 import org.hswebframework.web.logging.LoggerDefine;
+import org.hswebframework.web.logging.events.AccessLoggerAfterEvent;
+import org.hswebframework.web.logging.events.AccessLoggerBeforeEvent;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Controller;
@@ -35,7 +39,11 @@ public class AopAccessLoggerSupport extends StaticMethodMatcherPointcutAdvisor {
 
     private final List<AccessLoggerListener> listeners = new ArrayList<>();
 
-    private final List<AccessLoggerParser> loggerParsers=new ArrayList<>();
+    private final List<AccessLoggerParser> loggerParsers = new ArrayList<>();
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
+
 
     public AopAccessLoggerSupport addListener(AccessLoggerListener loggerListener) {
         listeners.add(loggerListener);
@@ -53,6 +61,7 @@ public class AopAccessLoggerSupport extends StaticMethodMatcherPointcutAdvisor {
             AccessLoggerInfo info = createLogger(methodInterceptorHolder);
             Object response;
             try {
+                eventPublisher.publishEvent(new AccessLoggerBeforeEvent(info));
                 listeners.forEach(listener -> listener.onLogBefore(info));
                 response = methodInvocation.proceed();
                 info.setResponse(response);
@@ -62,6 +71,7 @@ public class AopAccessLoggerSupport extends StaticMethodMatcherPointcutAdvisor {
                 throw e;
             } finally {
                 //触发监听
+                eventPublisher.publishEvent(new AccessLoggerAfterEvent(info));
                 listeners.forEach(listener -> listener.onLogger(info));
             }
             return response;
@@ -73,15 +83,13 @@ public class AopAccessLoggerSupport extends StaticMethodMatcherPointcutAdvisor {
         info.setId(IDGenerator.MD5.generate());
 
         info.setRequestTime(System.currentTimeMillis());
-
-
-        LoggerDefine define=loggerParsers.stream()
-                .filter(parser->parser.support(ClassUtils.getUserClass(holder.getTarget()),holder.getMethod()))
+        LoggerDefine define = loggerParsers.stream()
+                .filter(parser -> parser.support(ClassUtils.getUserClass(holder.getTarget()), holder.getMethod()))
                 .findAny()
-                .map(parser->parser.parse(holder))
+                .map(parser -> parser.parse(holder))
                 .orElse(null);
 
-        if(define!=null) {
+        if (define != null) {
             info.setAction(define.getAction());
             info.setDescribe(define.getDescribe());
         }
@@ -108,11 +116,11 @@ public class AopAccessLoggerSupport extends StaticMethodMatcherPointcutAdvisor {
     @Override
     public boolean matches(Method method, Class<?> aClass) {
         AccessLogger ann = AopUtils.findAnnotation(aClass, method, AccessLogger.class);
-        if(ann!=null&&ann.ignore()){
+        if (ann != null && ann.ignore()) {
             return false;
         }
-        RequestMapping mapping= AopUtils.findAnnotation(aClass,method, RequestMapping.class);
-        return mapping!=null;
+        RequestMapping mapping = AopUtils.findAnnotation(aClass, method, RequestMapping.class);
+        return mapping != null;
 
 //        //注解了并且未取消
 //        return null != ann && !ann.ignore();
