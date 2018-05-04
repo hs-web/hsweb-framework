@@ -25,9 +25,6 @@ public class SimpleBindRoleUserEntity extends SimpleUserEntity implements BindRo
         if (roles != null) {
             target.setRoles(new ArrayList<>(getRoles()));
         }
-        if (getProperties() != null) {
-            target.setProperties(new HashMap<>(getProperties()));
-        }
         return target;
     }
 }

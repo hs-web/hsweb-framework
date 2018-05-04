@@ -1,9 +1,6 @@
 package org.hswebframework.web.entity.authorization;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.Wither;
 import org.hswebframework.web.commons.entity.CloneableEntity;
 
@@ -30,12 +27,9 @@ public class ActionEntity implements CloneableEntity {
     }
 
     @Override
+    @SneakyThrows
     public ActionEntity clone() {
-        try {
-            return (ActionEntity) super.clone();
-        } catch (CloneNotSupportedException e) {
-            throw new RuntimeException(e);
-        }
+        return (ActionEntity) super.clone();
     }
 
     public static List<ActionEntity> create(String... actions) {
