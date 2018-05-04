@@ -48,7 +48,7 @@ public class FileManagerDevToolsController {
     public ResponseMessage<List<FileInfo>> write(@RequestParam String path) {
         File file = new File(path);
         if (!file.exists()) {
-            return null;
+            return ResponseMessage.error(404,"文件不存在");
         }
         List<FileInfo> list;
         if (file.isDirectory()) {
@@ -73,7 +73,7 @@ public class FileManagerDevToolsController {
     public ResponseMessage<String> read(@RequestParam String file) {
         File fileInfo = new File(file);
         if (!fileInfo.exists()) {
-            return null;
+            return ResponseMessage.error(404,"文件不存在");
         }
         if (fileInfo.length() > 2 * 1024 * 1024 * 1024L) {
             return ResponseMessage.error(500, "文件过大,无法读取");
