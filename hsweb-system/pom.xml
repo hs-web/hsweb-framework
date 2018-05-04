@@ -30,6 +30,8 @@
         <module>hsweb-system-oauth2-server</module>
         <module>hsweb-system-oauth2-client</module>
         <module>hsweb-system-calendar</module>
+        <module>hsweb-system-dashboard</module>
+        <module>hsweb-system-dev-tools</module>
     </modules>
     <artifactId>hsweb-system</artifactId>
 
