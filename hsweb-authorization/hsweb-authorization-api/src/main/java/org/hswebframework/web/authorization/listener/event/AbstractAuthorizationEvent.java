@@ -57,7 +57,7 @@ public abstract class AbstractAuthorizationEvent extends ApplicationEvent implem
     }
 
     @SuppressWarnings("unchecked")
-    protected <T> Optional<T> getParameter(String name) {
+    public  <T> Optional<T> getParameter(String name) {
         return Optional.ofNullable((T) parameterGetter.apply(name));
     }
 
