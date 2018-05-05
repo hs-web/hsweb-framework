@@ -1,0 +1,44 @@
+package org.hswebframework.web.controller.dashboard;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import org.hswebframework.web.authorization.Authentication;
+import org.hswebframework.web.authorization.annotation.Authorize;
+import org.hswebframework.web.commons.entity.param.QueryParamEntity;
+import org.hswebframework.web.controller.SimpleGenericEntityController;
+import org.hswebframework.web.controller.message.ResponseMessage;
+import org.hswebframework.web.dashboard.DashBoardConfigEntity;
+import org.hswebframework.web.dashboard.DashBoardService;
+import org.hswebframework.web.dashboard.executor.DashBoardExecutor;
+import org.hswebframework.web.service.CrudService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/dashboard")
+@Api(tags = "仪表盘-配置", value = "仪表盘配置")
+@Authorize(permission = "dashboard", description = "仪表盘配置")
+public class DashBoardConfigController implements SimpleGenericEntityController<DashBoardConfigEntity, String, QueryParamEntity> {
+
+    @Autowired
+    DashBoardService dashBoardService;
+
+    @Autowired
+    DashBoardExecutor dashBoardExecutor;
+
+    @Override
+    public CrudService<DashBoardConfigEntity, String> getService() {
+        return dashBoardService;
+    }
+
+
+    @GetMapping("{id}/execute")
+    @Authorize
+    @ApiOperation("执行仪表盘配置")
+    public ResponseMessage<Object> execute(@PathVariable String id) {
+        return ResponseMessage.ok(dashBoardExecutor.execute(dashBoardService.selectByPk(id), Authentication.current().orElse(null)));
+    }
+}
