@@ -19,14 +19,11 @@ package org.hswebframework.web.controller.authorization;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.hswebframework.web.AopUtils;
 import org.hswebframework.web.authorization.Authentication;
+import org.hswebframework.web.authorization.AuthenticationManager;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.exception.UnAuthorizedException;
-import org.hswebframework.web.authorization.token.TokenState;
-import org.hswebframework.web.authorization.token.UserToken;
-import org.hswebframework.web.authorization.token.UserTokenManager;
 import org.hswebframework.web.commons.entity.PagerResult;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.controller.CreateController;
@@ -34,13 +31,9 @@ import org.hswebframework.web.controller.QueryController;
 import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.entity.authorization.UserEntity;
 import org.hswebframework.web.entity.authorization.bind.BindRoleUserEntity;
-import org.hswebframework.web.logging.AccessLogger;
 import org.hswebframework.web.service.authorization.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-
-import java.util.List;
 
 import static org.hswebframework.web.controller.message.ResponseMessage.ok;
 
@@ -52,22 +45,21 @@ import static org.hswebframework.web.controller.message.ResponseMessage.ok;
 @RestController
 @RequestMapping("${hsweb.web.mappings.user:user}")
 @Authorize(permission = "user", description = "用户管理")
-@Api(value = "用户管理",tags = "权限-用户管理")
+@Api(value = "用户管理", tags = "权限-用户管理")
 public class UserController implements
         QueryController<UserEntity, String, QueryParamEntity>,
         CreateController<BindRoleUserEntity, String, BindRoleUserEntity> {
 
+    @Autowired
     private UserService userService;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
 
     @Override
     @SuppressWarnings("unchecked")
     public UserService getService() {
         return userService;
-    }
-
-    @Autowired
-    public void setUserService(UserService userService) {
-        this.userService = userService;
     }
 
     @Override
@@ -76,11 +68,6 @@ public class UserController implements
         param.excludes("password", "salt");
         return QueryController.super.list(param)
                 .exclude(UserEntity.class, "password", "salt");
-    }
-
-    public static void main(String[] args) throws NoSuchMethodException {
-        System.out.println(AopUtils
-                .findMethodAnnotation(UserController.class,UserController.class.getMethod("list",QueryParamEntity.class),Authorize.class));
     }
 
     @Override
@@ -97,6 +84,13 @@ public class UserController implements
                                                     @RequestBody BindRoleUserEntity userModel) {
         getService().update(id, userModel);
         return ok();
+    }
+
+    @Authorize(action = Permission.ACTION_GET)
+    @GetMapping(path = "/{id:.+}/authentication")
+    @ApiOperation("获取用户的权限信息")
+    public ResponseMessage<Authentication> getUserAuthentication(@PathVariable String id) {
+        return ok(authenticationManager.getByUserId(id));
     }
 
     @Authorize(merge = false)
