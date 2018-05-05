@@ -12,5 +12,5 @@ import org.springframework.context.annotation.Configuration;
 @ComponentScan({"org.hswebframework.web.dashboard.local"
         , "org.hswebframework.web.controller.dashboard"})
 @MapperScan(value = "org.hswebframework.web.dashboard.local.dao", markerInterface = Dao.class)
-public class DashboadAutoConfiguration {
+public class DashboardAutoConfiguration {
 }
