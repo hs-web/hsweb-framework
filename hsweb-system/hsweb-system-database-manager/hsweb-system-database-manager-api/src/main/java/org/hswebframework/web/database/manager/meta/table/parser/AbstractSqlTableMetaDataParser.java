@@ -1,10 +1,12 @@
 package org.hswebframework.web.database.manager.meta.table.parser;
 
+import lombok.SneakyThrows;
 import org.apache.commons.beanutils.BeanUtilsBean;
 import org.hswebframework.ezorm.core.ObjectWrapper;
 import org.hswebframework.ezorm.rdb.executor.SqlExecutor;
 import org.hswebframework.web.database.manager.meta.table.ColumnMetadata;
 import org.hswebframework.web.database.manager.meta.table.TableMetadata;
+import org.hswebframework.web.datasource.DataSourceHolder;
 import org.hswebframework.web.datasource.DatabaseType;
 
 import java.sql.SQLException;
@@ -24,12 +26,12 @@ public abstract class AbstractSqlTableMetaDataParser implements TableMetaDataPar
 
     public abstract String getSelectAllTableSql();
 
-    public AbstractSqlTableMetaDataParser(SqlExecutor sqlExecutor,DatabaseType... databaseTypes) {
+    public AbstractSqlTableMetaDataParser(SqlExecutor sqlExecutor, DatabaseType... databaseTypes) {
         this.sqlExecutor = sqlExecutor;
         supportDataBases.addAll(Arrays.asList(databaseTypes));
     }
 
-    private Set<DatabaseType> supportDataBases =new HashSet<>();
+    private Set<DatabaseType> supportDataBases = new HashSet<>();
 
     @Override
     public boolean isSupport(DatabaseType type) {
@@ -43,15 +45,17 @@ public abstract class AbstractSqlTableMetaDataParser implements TableMetaDataPar
 
     @Override
     public List<TableMetadata> parseAll() throws SQLException {
+        String dsId = DataSourceHolder.switcher().currentDataSourceId();
         return sqlExecutor.list(getSelectAllTableSql())
                 .parallelStream()
                 .map(map -> map.get("name"))
                 .map(String::valueOf)
                 .map(tableName -> {
                     try {
+                        DataSourceHolder.switcher().use(dsId);
                         return this.parse(tableName);
-                    } catch (SQLException e) {
-                        throw new RuntimeException(e);
+                    } finally {
+                        DataSourceHolder.switcher().reset();
                     }
                 })
                 .filter(Objects::nonNull)
@@ -59,7 +63,8 @@ public abstract class AbstractSqlTableMetaDataParser implements TableMetaDataPar
     }
 
     @Override
-    public TableMetadata parse(String objectName) throws SQLException {
+    @SneakyThrows
+    public TableMetadata parse(String objectName) {
 
         Map<String, Object> param = new HashMap<>();
         param.put("table", objectName);
