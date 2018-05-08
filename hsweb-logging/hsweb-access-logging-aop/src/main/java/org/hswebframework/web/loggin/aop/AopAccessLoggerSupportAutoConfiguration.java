@@ -35,6 +35,7 @@ public class AopAccessLoggerSupportAutoConfiguration {
     public SwaggerAccessLoggerParser swaggerAccessLoggerParser(){
         return new SwaggerAccessLoggerParser();
     }
+
     @Bean
     public ListenerProcessor listenerProcessor() {
         return new ListenerProcessor();
