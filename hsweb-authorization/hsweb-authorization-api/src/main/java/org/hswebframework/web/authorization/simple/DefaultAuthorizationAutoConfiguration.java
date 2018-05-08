@@ -12,6 +12,7 @@ import org.hswebframework.web.authorization.simple.builder.SimpleDataAccessConfi
 import org.hswebframework.web.authorization.token.DefaultUserTokenManager;
 import org.hswebframework.web.authorization.token.UserTokenAuthenticationSupplier;
 import org.hswebframework.web.authorization.token.UserTokenManager;
+import org.hswebframework.web.authorization.web.UserTokenController;
 import org.hswebframework.web.convert.CustomMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -41,9 +42,15 @@ public class DefaultAuthorizationAutoConfiguration {
     @Bean
     @ConditionalOnBean(AuthenticationManager.class)
     public UserTokenAuthenticationSupplier userTokenAuthenticationSupplier(AuthenticationManager authenticationManager) {
-        UserTokenAuthenticationSupplier supplier= new UserTokenAuthenticationSupplier(authenticationManager);
+        UserTokenAuthenticationSupplier supplier = new UserTokenAuthenticationSupplier(authenticationManager);
         AuthenticationHolder.addSupplier(supplier);
         return supplier;
+    }
+
+    @Bean
+    @ConditionalOnBean({AuthenticationManager.class})
+    public UserTokenController userTokenController() {
+        return new UserTokenController();
     }
 
     @Bean
