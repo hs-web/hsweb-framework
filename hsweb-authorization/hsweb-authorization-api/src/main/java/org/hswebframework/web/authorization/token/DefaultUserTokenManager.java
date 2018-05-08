@@ -164,6 +164,9 @@ public class DefaultUserTokenManager implements UserTokenManager {
             return;
         }
         Set<String> tokens = getUserToken(userId);
+        if (tokens.isEmpty()) {
+            userStorage.remove(userId);
+        }
         tokens.forEach(token -> signOutByToken(token, false));
         tokens.clear();
         userStorage.remove(userId);
