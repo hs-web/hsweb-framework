@@ -15,10 +15,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController
-@RequestMapping("${hsweb.web.mappings.user-token:user-token}")
-@Api(value = "用户令牌", tags = "权限-用户令牌管理")
-@Authorize(permission = "user-token", description = "用户令牌管理")
+//@RestController
+//@RequestMapping("${hsweb.web.mappings.user-token:user-token}")
+//@Api(value = "用户令牌", tags = "权限-用户令牌管理")
+//@Authorize(permission = "user-token", description = "用户令牌管理")
+@Deprecated
 public class UserTokenInfoController {
 
     @Autowired
@@ -49,6 +50,14 @@ public class UserTokenInfoController {
         return ResponseMessage.ok(true);
     }
 
+    @PutMapping("/check")
+    @ApiOperation("检查所有已过期的token并移除")
+    @Authorize(action = Permission.ACTION_UPDATE)
+    public ResponseMessage<Void> checkExpiredToken() {
+        userTokenManager.checkExpiredToken();
+        return ResponseMessage.ok();
+    }
+
     @GetMapping("/token/all")
     @ApiOperation("获取所有令牌")
     @Authorize(action = Permission.ACTION_GET)
@@ -73,12 +82,5 @@ public class UserTokenInfoController {
         return ResponseMessage.ok();
     }
 
-    @PutMapping("/check")
-    @ApiOperation("检查所有已过期的token并移除")
-    @Authorize(action = Permission.ACTION_UPDATE)
-    public ResponseMessage<Void> checkExpiredToken() {
-        userTokenManager.checkExpiredToken();
-        return ResponseMessage.ok();
-    }
 
 }

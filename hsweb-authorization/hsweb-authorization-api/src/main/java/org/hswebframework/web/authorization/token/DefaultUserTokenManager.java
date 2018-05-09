@@ -108,7 +108,12 @@ public class DefaultUserTokenManager implements UserTokenManager {
         if (userId == null) {
             return Collections.emptyList();
         }
-        return getUserToken(userId)
+        Set<String> tokens = getUserToken(userId);
+        if (tokens.isEmpty()) {
+            userStorage.remove(userId);
+            return Collections.emptyList();
+        }
+        return tokens
                 .stream()
                 .map(tokenStorage::get)
                 .filter(Objects::nonNull)

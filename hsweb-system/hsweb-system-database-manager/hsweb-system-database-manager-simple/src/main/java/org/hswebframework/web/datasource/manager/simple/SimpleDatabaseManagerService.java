@@ -136,7 +136,7 @@ public class SimpleDatabaseManagerService implements DatabaseManagerService, Met
         return parserRepo
                 .computeIfAbsent(DataSourceHolder.currentDatabaseType(), t -> new HashMap<>())
                 .entrySet()
-                .parallelStream()
+                .stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> {
                     try {
                         return entry.getValue().parseAll();

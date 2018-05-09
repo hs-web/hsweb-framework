@@ -43,7 +43,7 @@ public class AuthenticationTests {
         Authentication authentication = builder.user("{\"id\":\"admin\",\"username\":\"admin\",\"name\":\"Administrator\",\"type\":\"default\"}")
                 .role("[{\"id\":\"admin-role\",\"name\":\"admin\"}]")
                 .permission("[{\"id\":\"user-manager\",\"actions\":[\"query\",\"get\",\"update\"]" +
-                        ",\"dataAccesses\":[{\"action\":\"query\",\"field\":\"test\",\"config\":{\"fields\":[\"1\",\"2\",\"3\"]},\"scopeType\":\"CUSTOM_SCOPE\",\"type\":\"DENY_FIELDS\"}]}]")
+                        ",\"dataAccesses\":[{\"action\":\"query\",\"field\":\"test\",\"fields\":[\"1\",\"2\",\"3\"],\"scopeType\":\"CUSTOM_SCOPE\",\"type\":\"DENY_FIELDS\"}]}]")
                 .build();
 
         //test user
@@ -54,7 +54,7 @@ public class AuthenticationTests {
 
         //test role
         assertNotNull(authentication.getRole("admin-role").orElse(null));
-        assertEquals(authentication.getRole("admin-role").orElse(null).getName(), "admin");
+        assertEquals(authentication.getRole("admin-role").get().getName(), "admin");
         assertTrue(authentication.hasRole("admin-role"));
 
 

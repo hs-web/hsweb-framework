@@ -3,7 +3,6 @@ package org.hswebframework.web.authorization.simple;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.AuthenticationHolder;
 import org.hswebframework.web.authorization.AuthenticationManager;
-import org.hswebframework.web.authorization.AuthenticationSupplier;
 import org.hswebframework.web.authorization.builder.AuthenticationBuilderFactory;
 import org.hswebframework.web.authorization.builder.DataAccessConfigBuilderFactory;
 import org.hswebframework.web.authorization.simple.builder.DataAccessConfigConvert;
@@ -41,7 +40,7 @@ public class DefaultAuthorizationAutoConfiguration {
     @Bean
     @ConditionalOnBean(AuthenticationManager.class)
     public UserTokenAuthenticationSupplier userTokenAuthenticationSupplier(AuthenticationManager authenticationManager) {
-        UserTokenAuthenticationSupplier supplier= new UserTokenAuthenticationSupplier(authenticationManager);
+        UserTokenAuthenticationSupplier supplier = new UserTokenAuthenticationSupplier(authenticationManager);
         AuthenticationHolder.addSupplier(supplier);
         return supplier;
     }
