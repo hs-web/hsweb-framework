@@ -7,7 +7,7 @@ import org.hswebframework.web.datasource.DatabaseType;
 public class OracleTableMetaDataParser extends AbstractSqlTableMetaDataParser {
 
     private final static String TABLE_META_SQL = "select distinct(cols.column_name) as \"name\"" +
-            ",cols.table_name as \"name\"" +
+            ",cols.table_name as \"tableName\"" +
             ",cols.data_type as \"dataType\"" +
             ",cols.data_length as \"dataLength\"" +
             ",cols.data_precision as \"precision\"" +
