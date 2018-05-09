@@ -4,7 +4,7 @@ import org.hswebframework.ezorm.rdb.executor.SqlExecutor;
 import org.hswebframework.web.database.manager.meta.table.parser.AbstractSqlTableMetaDataParser;
 import org.hswebframework.web.datasource.DatabaseType;
 
-public class OralceTableMetaDataParser extends AbstractSqlTableMetaDataParser {
+public class OracleTableMetaDataParser extends AbstractSqlTableMetaDataParser {
 
     private final static String TABLE_META_SQL = "select distinct(cols.column_name) as \"name\"" +
             ",cols.table_name as \"name\"" +
@@ -23,7 +23,7 @@ public class OralceTableMetaDataParser extends AbstractSqlTableMetaDataParser {
 
     private final static String ALL_TABLE_SQL = "select table_name as \"name\" from user_tab_comments where table_type='TABLE'";
 
-    public OralceTableMetaDataParser(SqlExecutor sqlExecutor) {
+    public OracleTableMetaDataParser(SqlExecutor sqlExecutor) {
         super(sqlExecutor, DatabaseType.oracle);
     }
 

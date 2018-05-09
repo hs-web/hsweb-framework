@@ -1,13 +1,13 @@
 package org.hswebframework.web.database.manager;
 
 import org.hswebframework.ezorm.rdb.executor.SqlExecutor;
-import org.hswebframework.ezorm.rdb.meta.parser.OracleTableMetaParser;
 import org.hswebframework.web.database.manager.meta.ObjectMetadata;
 import org.hswebframework.web.database.manager.meta.table.parser.MetaDataParserRegister;
 import org.hswebframework.web.database.manager.meta.table.parser.MetaDataParserSupplier;
 import org.hswebframework.web.database.manager.meta.table.parser.TableMetaDataParser;
 import org.hswebframework.web.database.manager.meta.table.parser.support.H2TableMetaDataParser;
 import org.hswebframework.web.database.manager.meta.table.parser.support.MysqlTableMetaDataParser;
+import org.hswebframework.web.database.manager.meta.table.parser.support.OracleTableMetaDataParser;
 import org.hswebframework.web.database.manager.meta.table.parser.support.SqlServerTableMetaDataParser;
 import org.hswebframework.web.datasource.DatabaseType;
 import org.springframework.beans.BeansException;
@@ -40,8 +40,8 @@ public class TableMetaDataParserAutoConfiguration {
 
     @Bean
     @ConditionalOnClass(name = "oracle.jdbc.driver.OracleDriver")
-    public OracleTableMetaParser oracleTableMetaParser() {
-        return new OracleTableMetaParser(sqlExecutor);
+    public OracleTableMetaDataParser oracleTableMetaParser() {
+        return new OracleTableMetaDataParser(sqlExecutor);
     }
 
     @Bean
