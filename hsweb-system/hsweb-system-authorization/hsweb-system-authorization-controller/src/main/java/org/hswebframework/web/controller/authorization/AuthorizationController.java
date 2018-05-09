@@ -22,6 +22,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.hswebframework.web.BusinessException;
 import org.hswebframework.web.NotFoundException;
+import org.hswebframework.web.WebUtil;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.AuthenticationManager;
 import org.hswebframework.web.authorization.annotation.Authorize;
@@ -35,10 +36,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 
 import static org.hswebframework.web.controller.message.ResponseMessage.ok;
@@ -76,35 +79,44 @@ public class AuthorizationController {
         return ok(authentication);
     }
 
-    @PostMapping(value = "/login")
-    @ApiOperation("用户名密码登录")
+
+    @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation("用户名密码登录,json方式")
+    public ResponseMessage<Map<String, Object>> authorize(@ApiParam(example = "{\"username\":\"admin\",\"password\":\"admin\"}")
+                                                          @RequestBody Map<String, String> parameter) {
+
+        return doLogin(Objects.requireNonNull(parameter.get("username"), "用户名不能为空")
+                , Objects.requireNonNull(parameter.get("password"), "密码不能为空")
+                , parameter);
+    }
+
+    @PostMapping(value = "/login",consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    @ApiOperation("用户名密码登录,参数方式")
     public ResponseMessage<Map<String, Object>> authorize(@RequestParam @ApiParam("用户名") String username,
                                                           @RequestParam @ApiParam("密码") String password,
                                                           @ApiParam(hidden = true) HttpServletRequest request) {
 
+        return doLogin(username, password, WebUtil.getParameters(request));
+    }
+
+    protected ResponseMessage<Map<String, Object>> doLogin(String username, String password, Map<String, ?> parameter) {
         AuthorizationFailedEvent.Reason reason = AuthorizationFailedEvent.Reason.OTHER;
-        Function<String, Object> parameterGetter = request::getParameter;
+        Function<String, Object> parameterGetter = parameter::get;
         try {
             AuthorizationDecodeEvent decodeEvent = new AuthorizationDecodeEvent(username, password, parameterGetter);
             eventPublisher.publishEvent(decodeEvent);
             username = decodeEvent.getUsername();
             password = decodeEvent.getPassword();
-
             AuthorizationBeforeEvent beforeEvent = new AuthorizationBeforeEvent(username, password, parameterGetter);
             eventPublisher.publishEvent(beforeEvent);
-            UserEntity entity = userService.selectByUsername(username);
+            UserEntity entity = userService.selectByUserNameAndPassword(username, password);
             if (entity == null) {
-                reason = AuthorizationFailedEvent.Reason.USER_NOT_EXISTS;
-                throw new NotFoundException("{user_not_exists}");
+                reason = AuthorizationFailedEvent.Reason.PASSWORD_ERROR;
+                throw new NotFoundException("密码错误");
             }
             if (!DataStatus.STATUS_ENABLED.equals(entity.getStatus())) {
                 reason = AuthorizationFailedEvent.Reason.USER_DISABLED;
                 throw new BusinessException("{user_is_disabled}", 400);
-            }
-            password = userService.encodePassword(password, entity.getSalt());
-            if (!entity.getPassword().equals(password)) {
-                reason = AuthorizationFailedEvent.Reason.PASSWORD_ERROR;
-                throw new BusinessException("{password_error}", 400);
             }
             // 验证通过
             Authentication authentication = authenticationManager.getByUserId(entity.getId());

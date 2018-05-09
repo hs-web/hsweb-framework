@@ -1,4 +1,4 @@
-package org.hswebframework.web.authorization.web;
+package org.hswebframework.web.controller.authorization;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -17,12 +17,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static org.hswebframework.web.controller.message.ResponseMessage.*;
+import static org.hswebframework.web.controller.message.ResponseMessage.ok;
 
 @RestController
 @RequestMapping
 @Authorize(permission = "user-token", description = "用户令牌信息管理")
-@Api(tags = "用户令牌管理", value = "用户令牌管理")
+@Api(tags = "权限-用户令牌管理", value = "权限-用户令牌管理")
 public class UserTokenController {
     private UserTokenManager userTokenManager;
 

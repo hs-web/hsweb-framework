@@ -59,6 +59,9 @@ public class AuthorizationFailedEvent extends AbstractAuthorizationEvent {
     }
 
     public enum Reason {
-        PASSWORD_ERROR, USER_DISABLED, USER_NOT_EXISTS, OTHER
+        PASSWORD_ERROR,
+        USER_DISABLED,
+        USER_NOT_EXISTS,
+        OTHER
     }
 }
