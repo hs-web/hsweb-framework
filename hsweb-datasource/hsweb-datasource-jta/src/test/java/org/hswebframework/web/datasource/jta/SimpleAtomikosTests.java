@@ -28,6 +28,7 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.test.annotation.Rollback;
+import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,7 +47,7 @@ import java.util.Map;
  */
 @SpringBootTest(properties = "application.yml", classes = SimpleAtomikosTests.Config.class)
 @RunWith(SpringRunner.class)
-public class SimpleAtomikosTests {
+public class SimpleAtomikosTests extends AbstractTransactionalJUnit4SpringContextTests {
 
     @Configuration
     @SpringBootApplication
@@ -121,7 +122,7 @@ public class SimpleAtomikosTests {
     private JmsTemplate jmsTemplate;
 
     @Test
-    @Rollback(false)
+    @Rollback
     public void test() throws SQLException, InterruptedException {
         new Thread(() -> {
             Object message = jmsTemplate.receiveAndConvert("test");
