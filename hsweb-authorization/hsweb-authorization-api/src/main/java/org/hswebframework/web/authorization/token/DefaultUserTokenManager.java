@@ -18,6 +18,8 @@
 
 package org.hswebframework.web.authorization.token;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.hswebframework.web.authorization.exception.AccessDenyException;
 import org.hswebframework.web.authorization.token.event.UserTokenChangedEvent;
 import org.hswebframework.web.authorization.token.event.UserTokenCreatedEvent;
@@ -43,6 +45,12 @@ public class DefaultUserTokenManager implements UserTokenManager {
     protected final ConcurrentMap<String, SimpleUserToken> tokenStorage;
 
     protected final ConcurrentMap<String, Set<String>> userStorage;
+
+
+    @Getter
+    @Setter
+    private Map<String, AllopatricLoginMode> allopatricLoginModes = new HashMap<>();
+
 
     public DefaultUserTokenManager() {
         this(new ConcurrentHashMap<>(256));
@@ -230,8 +238,8 @@ public class DefaultUserTokenManager implements UserTokenManager {
         SimpleUserToken detail = new SimpleUserToken(userId, token);
         detail.setType(type);
         detail.setMaxInactiveInterval(maxInactiveInterval);
-
-        if (allopatricLoginMode == AllopatricLoginMode.deny) {
+        AllopatricLoginMode mode = allopatricLoginModes.getOrDefault(type, allopatricLoginMode);
+        if (mode == AllopatricLoginMode.deny) {
             boolean hasAnotherToken = getByUserId(userId)
                     .stream()
                     .map(SimpleUserToken.class::cast)
@@ -240,7 +248,7 @@ public class DefaultUserTokenManager implements UserTokenManager {
             if (hasAnotherToken) {
                 throw new AccessDenyException("该用户已在其他地方登陆");
             }
-        } else if (allopatricLoginMode == AllopatricLoginMode.offlineOther) {
+        } else if (mode == AllopatricLoginMode.offlineOther) {
             //将在其他地方登录的用户设置为离线
             List<UserToken> oldToken = getByUserId(userId);
             for (UserToken userToken : oldToken) {
