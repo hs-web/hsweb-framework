@@ -3,6 +3,7 @@ package org.hswebframework.web.entity.authorization;
 import lombok.*;
 import lombok.experimental.Wither;
 import org.hswebframework.web.commons.entity.CloneableEntity;
+import org.springframework.util.StringUtils;
 
 import java.util.Arrays;
 import java.util.List;
@@ -46,4 +47,8 @@ public class ActionEntity implements CloneableEntity {
         return obj instanceof ActionEntity && obj.hashCode() == hashCode();
     }
 
+    @Override
+    public String toString() {
+        return action + (StringUtils.hasText(describe) ? "(" + describe + ")" : "");
+    }
 }
