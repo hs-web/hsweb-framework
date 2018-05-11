@@ -22,5 +22,10 @@ public enum TokenState {
     /**
      * 已被踢下线
      */
-    offline
+    offline,
+
+    /**
+     * 锁定
+     */
+    lock
 }
