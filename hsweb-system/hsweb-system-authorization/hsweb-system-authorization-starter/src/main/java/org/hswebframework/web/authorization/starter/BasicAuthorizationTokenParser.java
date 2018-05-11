@@ -76,8 +76,8 @@ public class BasicAuthorizationTokenParser implements UserTokenForTypeParser {
 
                         @Override
                         public long getMaxInactiveInterval() {
-                            //10分钟有效期
-                            return 10_60_1000;
+                            //60分钟有效期
+                            return 60*60*1000L;
                         }
                     };
                 }
