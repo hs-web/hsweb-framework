@@ -17,6 +17,7 @@ public class DashBoardConfigEntity extends SimpleGenericEntity<String> implement
     @NotBlank(groups = CreateGroup.class)
     private String name;
 
+    @NotBlank(groups = CreateGroup.class)
     private String type;
 
     private String template;

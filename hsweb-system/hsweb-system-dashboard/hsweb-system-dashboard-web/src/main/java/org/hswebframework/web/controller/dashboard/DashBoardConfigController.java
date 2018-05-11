@@ -35,8 +35,13 @@ public class DashBoardConfigController implements SimpleGenericEntityController<
     @Override
     public ResponseMessage<String> add(@RequestBody DashBoardConfigEntity data) {
         Authentication.current().ifPresent(a -> data.setCreatorId(a.getUser().getId()));
-        data.setCreateTimeNow();
         return SimpleGenericEntityController.super.add(data);
+    }
+
+    @Override
+    public ResponseMessage<String> saveOrUpdate(DashBoardConfigEntity data) {
+        Authentication.current().ifPresent(a -> data.setCreatorId(a.getUser().getId()));
+        return SimpleGenericEntityController.super.saveOrUpdate(data);
     }
 
     @GetMapping("{id}/execute")

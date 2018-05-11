@@ -53,16 +53,10 @@ public abstract class GenericEntityService<E extends GenericEntity<PK>, PK>
      */
     protected abstract IDGenerator<PK> getIDGenerator();
 
-//    @Override
-//    public abstract CrudDao<E, PK> getDao();
-
     @Override
     public int deleteByPk(PK pk) {
         Assert.notNull(pk, "parameter can not be null");
         return getDao().deleteByPk(pk);
-//        return createDelete()
-//                .where(GenericEntity.id, pk)
-//                .exec();
     }
 
     @Override
@@ -93,12 +87,16 @@ public abstract class GenericEntityService<E extends GenericEntity<PK>, PK>
 
     @Override
     public PK saveOrUpdate(E entity) {
-        if (null != entity.getId() && null != selectByPk(entity.getId())) {
+        if (dataExisted(entity)) {
             updateByPk(entity);
         } else {
             insert(entity);
         }
         return entity.getId();
+    }
+
+    protected boolean dataExisted(E entity) {
+        return null != entity.getId() && null != selectByPk(entity.getId());
     }
 
     @Override
@@ -109,9 +107,11 @@ public abstract class GenericEntityService<E extends GenericEntity<PK>, PK>
             }
             tryValidateProperty(selectByPk(entity.getId()) == null, "id", entity.getId() + "已存在");
         }
-
         if (entity.getId() == null && getIDGenerator() != null) {
             entity.setId(getIDGenerator().generate());
+        }
+        if (entity instanceof RecordCreationEntity) {
+            ((RecordCreationEntity) entity).setCreateTimeNow();
         }
         tryValidate(entity, CreateGroup.class);
         getDao().insert(entity);
@@ -128,10 +128,12 @@ public abstract class GenericEntityService<E extends GenericEntity<PK>, PK>
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<E> selectByPk(List<PK> id) {
         if (id == null || id.isEmpty()) {
             return new ArrayList<>();
         }
         return createQuery().where().in(GenericEntity.id, id).listNoPaging();
     }
+
 }
