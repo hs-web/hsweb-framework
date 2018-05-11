@@ -10,14 +10,16 @@
         <result property="template" column="template" javaType="String" jdbcType="CLOB"/>
         <result property="script" column="script" javaType="String" jdbcType="CLOB"/>
         <result property="scriptLanguage" column="script_lang" javaType="String" jdbcType="VARCHAR"/>
+        <result property="permission" column="permission" javaType="String" jdbcType="VARCHAR"/>
         <result property="creatorId" column="creator_id" javaType="String" jdbcType="VARCHAR"/>
         <result property="createTime" column="create_time" javaType="Date" jdbcType="TIMESTAMP"/>
+        <result property="defaultConfig" column="is_default" javaType="Boolean" jdbcType="INTEGER"/>
         <result property="status" column="status" javaType="org.hswebframework.web.commons.entity.DataStatusEnum" jdbcType="INTEGER"/>
     </resultMap>
 
     <!--用于动态生成sql所需的配置-->
     <sql id="config">
-        <bind name="resultMapId" value="'TemplateResultMap'"/>
+        <bind name="resultMapId" value="'DashBoardConfigEntityResultMap'"/>
         <bind name="tableName" value="'s_dashboard_conf'"/>
     </sql>
 

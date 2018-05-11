@@ -25,6 +25,10 @@ public class DashBoardConfigEntity extends SimpleGenericEntity<String> implement
 
     private String scriptLanguage;
 
+    private String permission;
+
+    private Boolean defaultConfig;
+
     private DataStatusEnum status;
 
     @NotBlank(groups = CreateGroup.class)
