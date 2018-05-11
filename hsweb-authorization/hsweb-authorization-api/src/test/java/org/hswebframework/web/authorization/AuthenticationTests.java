@@ -64,6 +64,24 @@ public class AuthenticationTests {
         assertTrue(authentication.hasPermission("user-manager", "get"));
         assertTrue(!authentication.hasPermission("user-manager", "delete"));
 
+        boolean has = AuthenticationPredicate.has("permission:user-manager")
+                .or(AuthenticationPredicate.role("admin-role"))
+                .test(authentication);
+
+        Assert.assertTrue(has);
+        has = AuthenticationPredicate.has("permission:user-manager:test")
+                .and(AuthenticationPredicate.role("admin-role"))
+                .test(authentication);
+        Assert.assertFalse(has);
+
+        has = AuthenticationPredicate.has("permission:user-manager:get and role:admin-role")
+                .test(authentication);
+        Assert.assertTrue(has);
+
+        has = AuthenticationPredicate.has("permission:user-manager:test or role:admin-role")
+                .test(authentication);
+        Assert.assertTrue(has);
+
         //获取数据权限配置
         Set<String> fields = authentication.getPermission("user-manager")
                 .map(permission -> permission.findDenyFields(Permission.ACTION_QUERY))

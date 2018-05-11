@@ -32,6 +32,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -242,6 +243,7 @@ public class DefaultUserTokenManager implements UserTokenManager {
         if (mode == AllopatricLoginMode.deny) {
             boolean hasAnotherToken = getByUserId(userId)
                     .stream()
+                    .filter(userToken -> type.equals(userToken.getType()))
                     .map(SimpleUserToken.class::cast)
                     .peek(this::checkTimeout)
                     .anyMatch(UserToken::isEffective);
@@ -252,7 +254,10 @@ public class DefaultUserTokenManager implements UserTokenManager {
             //将在其他地方登录的用户设置为离线
             List<UserToken> oldToken = getByUserId(userId);
             for (UserToken userToken : oldToken) {
-                changeTokenState(userToken.getToken(), TokenState.offline);
+                //相同的tokenType才让其下线
+                if (type.equals(userToken.getType())) {
+                    changeTokenState(userToken.getToken(), TokenState.offline);
+                }
             }
         }
         detail.setState(TokenState.effective);

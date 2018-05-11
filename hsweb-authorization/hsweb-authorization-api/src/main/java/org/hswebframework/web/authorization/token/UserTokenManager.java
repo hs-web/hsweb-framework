@@ -20,6 +20,7 @@ package org.hswebframework.web.authorization.token;
 
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 /**
  * 用户令牌管理器,用于管理用户令牌
@@ -137,4 +138,5 @@ public interface UserTokenManager {
      * @see this#signOutByToken(String)
      */
     void checkExpiredToken();
+
 }
