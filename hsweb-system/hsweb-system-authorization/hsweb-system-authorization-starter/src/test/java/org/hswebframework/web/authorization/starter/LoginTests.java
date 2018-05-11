@@ -24,6 +24,7 @@ import org.hswebframework.web.tests.SimpleWebApplicationTests;
 import org.junit.After;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 
 import java.sql.SQLException;
 
@@ -53,6 +54,7 @@ public class LoginTests extends SimpleWebApplicationTests {
         userService.insert(userEntity);
 
         JSONObject json = testPost("/authorize/login").setUp((builder) -> {
+            builder.contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE);
             builder.param("username", userEntity.getUsername());
             builder.param("password", "password_1234");
         }).exec().resultAsJson();
