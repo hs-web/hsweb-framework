@@ -39,13 +39,13 @@ public class DashBoardConfigController implements SimpleGenericEntityController<
     }
 
     @Override
-    public ResponseMessage<String> saveOrUpdate(DashBoardConfigEntity data) {
+    public ResponseMessage<String> saveOrUpdate(@RequestBody DashBoardConfigEntity data) {
         Authentication.current().ifPresent(a -> data.setCreatorId(a.getUser().getId()));
         return SimpleGenericEntityController.super.saveOrUpdate(data);
     }
 
     @GetMapping("{id}/execute")
-    @Authorize
+    @Authorize(merge = false)
     @ApiOperation("执行仪表盘配置")
     public ResponseMessage<Object> execute(@PathVariable String id) {
         return ResponseMessage.ok(dashBoardExecutor.execute(dashBoardService.selectByPk(id), Authentication.current().orElse(null)));

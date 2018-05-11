@@ -42,17 +42,6 @@ public class DashBoardUserConfigController {
     @Autowired
     private DashBoardService dashBoardService;
 
-    @Autowired
-    private DashBoardExecutor dashBoardExecutor;
-
-    @Autowired(required = false)
-    private Executor executor;
-
-    @PostConstruct
-    public void init() {
-        executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 2);
-    }
-
     @GetMapping("/all")
     @ApiOperation("获取用户可选择的仪表盘配置")
     public ResponseMessage<List<UserDashBoardResponse>> getUserAllDashBoardConfig(Authentication authentication) {
@@ -71,21 +60,21 @@ public class DashBoardUserConfigController {
     @ApiOperation("获取用户自定义的仪表盘配置")
     public ResponseMessage<List<UserDashBoardResponse>> getUserConfigDashBoardConfig(Authentication authentication) {
         UserSettingEntity settingEntity = userSettingService.selectByUser(authentication.getUser().getId(), "dashboard-config", "current");
+        List<DashBoardConfigEntity> configs;
+
         if (settingEntity == null) {
-            return ResponseMessage.ok(Collections.emptyList());
+            configs = dashBoardService.selectAllDefaults();
+            Collections.sort(configs);
+        } else {
+            List<String> ids = JSON.parseArray(settingEntity.getSetting(), String.class);
+            configs = dashBoardService.selectByPk(ids);
+            configs.sort(Comparator.comparing(conf -> ids.indexOf(conf.getId())));
         }
-
-        List<String> ids = JSON.parseArray(settingEntity.getSetting(), String.class);
-
-        List<UserDashBoardResponse> configList = ids
-                .parallelStream()
-                .map(dashBoardService::selectByPk) //为什么要单个查询不用批量查询?因为单个查询有缓存
-                .filter(Objects::nonNull)
+        List<UserDashBoardResponse> configList = configs.stream()
                 //过滤权限
-                .filter(config -> StringUtils.isEmpty(config) ||
+                .filter(config -> StringUtils.hasText(config.getPermission()) ||
                         AuthenticationPredicate.has(config.getPermission()).test(authentication))
                 .map(config -> config.copyTo(new UserDashBoardResponse()))
-                .sorted(Comparator.comparing(conf -> ids.indexOf(conf.getId())))
                 .collect(Collectors.toList());
 
         return ResponseMessage.ok(configList);

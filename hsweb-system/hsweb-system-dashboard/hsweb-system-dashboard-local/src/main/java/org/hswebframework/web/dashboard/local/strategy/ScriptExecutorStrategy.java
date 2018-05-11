@@ -10,8 +10,11 @@ import org.hswebframework.web.dashboard.local.DashBoardExecutorStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.DigestUtils;
+import org.springframework.util.StringUtils;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -20,9 +23,12 @@ public class ScriptExecutorStrategy implements DashBoardExecutorStrategy {
     @Autowired
     private SqlExecutor sqlExecutor;
 
+    static List<String> supportLang = Arrays.asList("js", "javascript", "groovy", "sql");
+
     @Override
     public boolean support(DashBoardConfigEntity entity) {
-        return "script".equals(entity.getType());
+        return StringUtils.hasText(entity.getScriptLanguage()) && StringUtils.hasText(entity.getScript())
+                && supportLang.contains(entity.getScriptLanguage());
     }
 
     @Override

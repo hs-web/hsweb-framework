@@ -14,7 +14,10 @@ public class UserDashBoardResponse {
 
     private String type;
 
+    private String name;
+
     private String template;
 
-    private Object data;
+//    private Object data;
+
 }

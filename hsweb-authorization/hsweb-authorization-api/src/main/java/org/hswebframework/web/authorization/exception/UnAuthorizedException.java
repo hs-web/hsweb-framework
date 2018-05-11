@@ -36,7 +36,7 @@ public class UnAuthorizedException extends RuntimeException {
     }
 
     public UnAuthorizedException(TokenState state) {
-        this("{un_authorization}", state);
+        this(state.getText(), state);
     }
 
     public UnAuthorizedException(String message, TokenState state) {
