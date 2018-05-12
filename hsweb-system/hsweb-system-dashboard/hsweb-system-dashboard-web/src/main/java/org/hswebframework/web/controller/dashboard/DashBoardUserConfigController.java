@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiOperation;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.AuthenticationPredicate;
 import org.hswebframework.web.authorization.annotation.Authorize;
+import org.hswebframework.web.commons.entity.DataStatus;
 import org.hswebframework.web.controller.dashboard.model.UserDashBoardResponse;
 import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.dashboard.DashBoardConfigEntity;
@@ -48,6 +49,7 @@ public class DashBoardUserConfigController {
         List<UserDashBoardResponse> configList = dashBoardService.select()
                 .stream()
                 .filter(Objects::nonNull)
+                .filter(config-> DataStatus.STATUS_ENABLED.equals(config.getStatus()))
                 //过滤权限
                 .filter(config -> StringUtils.isEmpty(config) ||
                         AuthenticationPredicate.has(config.getPermission()).test(authentication))
@@ -72,8 +74,8 @@ public class DashBoardUserConfigController {
         }
         List<UserDashBoardResponse> configList = configs.stream()
                 //过滤权限
-                .filter(config -> StringUtils.hasText(config.getPermission()) ||
-                        AuthenticationPredicate.has(config.getPermission()).test(authentication))
+                .filter(config -> DataStatus.STATUS_ENABLED.equals(config.getStatus())&&(!StringUtils.hasText(config.getPermission()) ||
+                        AuthenticationPredicate.has(config.getPermission()).test(authentication)))
                 .map(config -> config.copyTo(new UserDashBoardResponse()))
                 .collect(Collectors.toList());
 
