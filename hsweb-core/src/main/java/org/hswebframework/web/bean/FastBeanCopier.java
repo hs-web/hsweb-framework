@@ -102,6 +102,7 @@ public final class FastBeanCopier {
                 "\n}\n" +
                 "\n}";
         try {
+//            System.out.println(method);
             return Proxy.create(Copier.class)
                     .addMethod(method)
                     .newInstance();
@@ -332,7 +333,8 @@ public final class FastBeanCopier {
                                 || Collection.class.isAssignableFrom(type)) && hasGeneric) {
                             convertCode.append("(" + getTypeName() + ")").append(convert);
                         } else {
-                            convertCode.append(getterCode);
+                            convertCode.append("(" + getTypeName() + ")").append(getterCode);
+//                            convertCode.append(getterCode);
                         }
 
                     }
