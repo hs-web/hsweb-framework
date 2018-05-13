@@ -89,14 +89,14 @@ public class UserTokenController {
 
     @GetMapping("/user-token/user/total")
     @ApiOperation("获取当前已经登录的用户数量")
-    @Authorize(action = Permission.ACTION_GET)
+    @Authorize
     public ResponseMessage<Long> totalUser() {
         return ok(userTokenManager.totalUser());
     }
 
     @GetMapping("/user-token/token/total")
     @ApiOperation("获取当前已经登录的令牌数量")
-    @Authorize(action = Permission.ACTION_GET)
+    @Authorize
     public ResponseMessage<Long> totalToken() {
         return ok(userTokenManager.totalToken());
     }
