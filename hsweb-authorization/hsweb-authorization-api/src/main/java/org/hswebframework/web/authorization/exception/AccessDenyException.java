@@ -8,8 +8,10 @@ package org.hswebframework.web.authorization.exception;
  */
 public class AccessDenyException extends RuntimeException {
 
+    private static final long serialVersionUID = -5135300127303801430L;
+
     public AccessDenyException() {
-        this("{access_deny}");
+        this("权限不足,拒绝访问!");
     }
 
     public AccessDenyException(String message) {
