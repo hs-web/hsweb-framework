@@ -65,7 +65,7 @@ public class UserTokenManagerTests {
         } catch (AccessDenyException e) {
 
         }
-        Assert.assertTrue(userTokenManager.getByToken("test").isEffective());
+        Assert.assertTrue(userTokenManager.getByToken("test").isNormal());
         Assert.assertTrue(userTokenManager.getByToken("test2")==null);
 
     }
@@ -82,7 +82,7 @@ public class UserTokenManagerTests {
 
         userTokenManager.signIn("test2", "sessionId", "admin", 30000);
 
-        Assert.assertTrue(userTokenManager.getByToken("test2").isEffective());
+        Assert.assertTrue(userTokenManager.getByToken("test2").isNormal());
 
         Assert.assertTrue(userTokenManager.getByToken("test").isOffline());
 
