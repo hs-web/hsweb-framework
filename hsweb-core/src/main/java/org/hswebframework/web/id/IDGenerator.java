@@ -30,13 +30,14 @@ import java.security.NoSuchAlgorithmException;
  * @author zhouhao
  * @since 3.0
  */
+@FunctionalInterface
 public interface IDGenerator<T> {
     T generate();
 
     /**
      * 使用UUID生成id
      */
-    IDGenerator<String> UUID = java.util.UUID.randomUUID()::toString;
+    IDGenerator<String> UUID = () -> java.util.UUID.randomUUID().toString();
 
     /**
      * 随机字符
