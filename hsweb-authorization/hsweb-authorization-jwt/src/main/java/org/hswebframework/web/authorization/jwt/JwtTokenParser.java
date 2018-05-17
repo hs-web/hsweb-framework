@@ -54,7 +54,7 @@ public class JwtTokenParser implements UserTokenParser {
             } catch (ExpiredJwtException e) {
                 return null;
             } catch (Exception e) {
-                logger.error("parse token [{}] error", headerToken, e);
+                logger.debug("parse token [{}] error", headerToken, e);
                 return null;
             }
         }

@@ -11,6 +11,7 @@ import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +41,7 @@ public class DefaultDictSupportApi implements DictSupportApi {
     }
 
     @Override
+    @SuppressWarnings("all")
     public <T> T unwrap(T target) {
         if (target == null) {
             return null;
@@ -52,6 +54,10 @@ public class DefaultDictSupportApi implements DictSupportApi {
                     .map(this::wrap)
                     .collect(Collectors.toList());
         }
+        if (target instanceof String || target.getClass().isEnum() || target.getClass().isPrimitive() || target instanceof Type) {
+            return target;
+        }
+
         Class type = ClassUtils.getUserClass(target);
         List<ClassDictDefine> defines = repository.getDefine(type);
         if (defines.isEmpty()) {
@@ -91,6 +97,9 @@ public class DefaultDictSupportApi implements DictSupportApi {
         }
         if (target instanceof List) {
             return (T) ((List) target).stream().map(this::wrap).collect(Collectors.toList());
+        }
+        if (target instanceof String || target.getClass().isEnum() || target.getClass().isPrimitive() || target instanceof Type) {
+            return target;
         }
         Class type = ClassUtils.getUserClass(target);
         List<ClassDictDefine> defines = repository.getDefine(type);

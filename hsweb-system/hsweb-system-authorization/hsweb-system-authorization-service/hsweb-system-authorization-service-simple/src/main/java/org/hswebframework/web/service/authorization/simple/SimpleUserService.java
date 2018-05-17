@@ -105,7 +105,12 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
         }
         UserEntity userEntity = createQuery().where(UserEntity.id, id).single();
         if (null != userEntity) {
-            List<String> roleId = userRoleDao.selectByUserId(id).stream().map(UserRoleEntity::getRoleId).collect(Collectors.toList());
+
+            List<String> roleId = userRoleDao
+                    .selectByUserId(id)
+                    .stream()
+                    .map(UserRoleEntity::getRoleId) //转换为roleId
+                    .collect(Collectors.toList());
             BindRoleUserEntity roleUserEntity = entityFactory.newInstance(BindRoleUserEntity.class, userEntity);
             roleUserEntity.setRoles(roleId);
             return roleUserEntity;
