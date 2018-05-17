@@ -60,7 +60,12 @@ public interface IDGenerator<T> {
     /**
      * 雪花算法
      */
-    IDGenerator<Long> SNOW_FLAKE = SnowflakeIdGenerator.getInstance()::nextId;
+    IDGenerator<Long>   SNOW_FLAKE        = SnowflakeIdGenerator.getInstance()::nextId;
+
+    /**
+     * 雪花算法转String
+     */
+    IDGenerator<String> SNOW_FLAKE_STRING = () -> String.valueOf(SNOW_FLAKE.generate());
 
     /**
      * 雪花算法的16进制
