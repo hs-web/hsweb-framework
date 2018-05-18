@@ -65,11 +65,11 @@ public class AopAccessLoggerSupport extends StaticMethodMatcherPointcutAdvisor {
                 listeners.forEach(listener -> listener.onLogBefore(info));
                 response = methodInvocation.proceed();
                 info.setResponse(response);
-                info.setResponseTime(System.currentTimeMillis());
             } catch (Throwable e) {
                 info.setException(e);
                 throw e;
             } finally {
+                info.setResponseTime(System.currentTimeMillis());
                 //触发监听
                 eventPublisher.publishEvent(new AccessLoggerAfterEvent(info));
                 listeners.forEach(listener -> listener.onLogger(info));
