@@ -16,7 +16,6 @@
         <module>hsweb-message-jms</module>
         <module>hsweb-message-redis</module>
         <module>hsweb-message-websocket</module>
-        <module>hsweb-message-memory</module>
     </modules>
 
 
