@@ -139,6 +139,7 @@ public class CommandWebSocketMessageDispatcher extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+        logger.debug("new WebSocket Session Established,sessionId:{}",session.getId());
         if (tokenParsers != null) {
             String token = tokenParsers.stream()
                     .map(parser -> parser.parseToken(session))
@@ -168,6 +169,8 @@ public class CommandWebSocketMessageDispatcher extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
+        logger.debug("WebSocket Session Closed,sessionId:{}",session.getId());
+
         ThreadLocalUtils.clear();
         if (webSocketSessionListeners != null) {
             webSocketSessionListeners.forEach(webSocketSessionListener ->

@@ -61,10 +61,6 @@ public class TestProcessor implements CommandProcessor, WebSocketSessionListener
     }
 
     @Override
-    public void destroy() {
-    }
-
-    @Override
     public void onSessionConnect(WebSocketSession session) {
 
     }

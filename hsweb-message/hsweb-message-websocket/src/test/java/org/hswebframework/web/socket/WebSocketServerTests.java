@@ -23,10 +23,6 @@ public class WebSocketServerTests {
        // System.setProperty("org.apache.activemq.SERIALIZABLE_PACKAGES", "*");
     }
 //
-    @Bean
-    public Messager messager() {
-        return new MemoryMessager();
-    }
 
 //    @Bean(destroyMethod = "shutdown")
 //    public RedissonClient redissonClient(){

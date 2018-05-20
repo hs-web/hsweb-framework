@@ -9,8 +9,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 class MemoryTopic<M extends Message> {

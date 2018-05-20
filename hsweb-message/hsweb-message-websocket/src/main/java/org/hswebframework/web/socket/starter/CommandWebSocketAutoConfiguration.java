@@ -82,14 +82,14 @@ public class CommandWebSocketAutoConfiguration {
     @ConfigurationProperties(prefix = "hsweb.websocket")
     public ServletServerContainerFactoryBean createServletServerContainerFactoryBean() {
         ServletServerContainerFactoryBean container = new ServletServerContainerFactoryBean();
-        container.setMaxTextMessageBufferSize(10_1024_1024);
-        container.setMaxBinaryMessageBufferSize(10_1024_1024);
+        container.setMaxTextMessageBufferSize(10 * 1024 * 1024);
+        container.setMaxBinaryMessageBufferSize(10 * 1024 * 1024);
         return container;
     }
 
     @Configuration
     @ConfigurationProperties(prefix = "hsweb.websocket")
-    public static class HandlerConfigruation extends WebSocketConfigurationSupport {
+    public static class HandlerConfiguration extends WebSocketConfigurationSupport {
         private String[] allowedOrigins;
 
         public void setAllowedOrigins(String[] allowedOrigins) {

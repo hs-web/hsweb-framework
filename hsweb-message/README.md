@@ -2,9 +2,8 @@
 
 1. [hsweb-message-api](hsweb-message-api) API
 2. [hsweb-message-jms](hsweb-message-jms) JMS实现
-3. [hsweb-message-memory](hsweb-message-memory) 内存实现
-4. [hsweb-message-redis](hsweb-message-redis) Redis实现(redisson)
-5. [hsweb-message-websocket](hsweb-message-websocket) 使用websocket进行消息推送
+3. [hsweb-message-redis](hsweb-message-redis) Redis实现(redisson)
+4. [hsweb-message-websocket](hsweb-message-websocket) 使用websocket进行消息推送
 
 
 ## API

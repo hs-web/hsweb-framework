@@ -1,5 +1,6 @@
 package org.hswebframework.web.socket.message;
 
+import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.web.concurrent.counter.Counter;
 import org.hswebframework.web.concurrent.counter.CounterManager;
 import org.hswebframework.web.concurrent.counter.SimpleCounterManager;
@@ -20,10 +21,9 @@ import static org.hswebframework.web.message.builder.StaticMessageBuilder.object
 import static org.hswebframework.web.message.builder.StaticMessageSubjectBuilder.*;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
+@Slf4j
 public class DefaultWebSocketMessager implements WebSocketMessager {
 
     private Messager messager;
@@ -95,7 +95,7 @@ public class DefaultWebSocketMessager implements WebSocketMessager {
                     }
                     socketSession.sendMessage(new TextMessage(((ObjectMessage) message).getObject().toString()));
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    log.error("execute WebSocket command {} error",command,e);
                 }
             });
             return new MessageSubscribeSession(subscribe, socketSession) {
