@@ -3,8 +3,6 @@ package org.hswebframework.web.concurrent.counter;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public class SimpleCounter implements Counter {
