@@ -13,8 +13,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public class MemoryPublish implements MessagePublish {

@@ -13,7 +13,13 @@ public enum TokenState implements EnumDict<String> {
     /**
      * 正常，有效
      */
+    @Deprecated
     effective("effective", "正常"),
+
+    /**
+     * 正常，有效
+     */
+    normal("normal","正常"),
 
     /**
      * 已被禁止访问
@@ -27,6 +33,7 @@ public enum TokenState implements EnumDict<String> {
 
     /**
      * 已被踢下线
+     * @see AllopatricLoginMode#offlineOther
      */
     offline("offline", "用户已在其他地方登录"),
 
@@ -34,7 +41,6 @@ public enum TokenState implements EnumDict<String> {
      * 锁定
      */
     lock("lock", "登录状态已被锁定");
-
 
     private String value;
 

@@ -1,6 +1,5 @@
-package org.hswebframework.web.message.memory.starter;
+package org.hswebframework.web.message;
 
-import org.hswebframework.web.message.Messager;
 import org.hswebframework.web.message.memory.MemoryMessager;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -13,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @ConditionalOnMissingBean(Messager.class)
-public class MemoryMessagerAutoConfiguration {
+public class MessagerAutoConfiguration {
     @Bean
     public Messager messager() {
         return new MemoryMessager();

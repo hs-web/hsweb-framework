@@ -41,7 +41,7 @@ public class BasicAuthorizationTokenParser implements UserTokenForTypeParser {
         try {
             String usernameAndPassword = new String(Base64.decodeBase64(authorization));
             UserToken token = userTokenManager.getByToken(usernameAndPassword);
-            if (token != null && token.isEffective()) {
+            if (token != null && token.isNormal()) {
                 return new ParsedToken() {
                     @Override
                     public String getToken() {

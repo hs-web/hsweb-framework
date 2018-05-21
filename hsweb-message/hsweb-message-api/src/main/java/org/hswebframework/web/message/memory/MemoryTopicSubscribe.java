@@ -7,8 +7,6 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public class MemoryTopicSubscribe<M extends Message> implements MessageSubscribe<M> {
