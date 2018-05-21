@@ -1,8 +1,10 @@
 package org.hswebframework.web.counter.redis;
 
+import org.hswebframework.web.concurrent.counter.CounterAutoConfiguration;
+import org.hswebframework.web.concurrent.counter.CounterManager;
 import org.redisson.api.RedissonClient;
+import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -11,12 +13,12 @@ import org.springframework.context.annotation.Configuration;
  * @since 3.0
  */
 @Configuration
-@ConditionalOnMissingBean(RedissonCounterManager.class)
-@ConditionalOnBean(RedissonClient.class)
+@AutoConfigureBefore(CounterAutoConfiguration.class)
 public class RedisCounterAutoConfiguration {
 
     @Bean
-    public RedissonCounterManager redissonCounterManager(RedissonClient client) {
+    @ConditionalOnBean(RedissonClient.class)
+    public CounterManager counterManager(RedissonClient client) {
         return new RedissonCounterManager(client);
     }
 }

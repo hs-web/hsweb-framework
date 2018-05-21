@@ -9,11 +9,11 @@ import org.springframework.context.annotation.Configuration;
  * @since 3.0
  */
 @Configuration
-@ConditionalOnMissingBean(CounterManager.class)
 public class CounterAutoConfiguration {
 
     @Bean
-    public CounterManager inMemoryCounterManager() {
+    @ConditionalOnMissingBean(CounterManager.class)
+    public CounterManager counterManager() {
         return new SimpleCounterManager();
     }
 }
