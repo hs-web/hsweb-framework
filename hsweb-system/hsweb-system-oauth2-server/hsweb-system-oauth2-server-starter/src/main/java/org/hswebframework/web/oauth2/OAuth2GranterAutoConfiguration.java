@@ -34,6 +34,7 @@ import org.hswebframework.web.authorization.oauth2.server.support.password.Passw
 import org.hswebframework.web.authorization.oauth2.server.support.refresh.DefaultRefreshTokenGranter;
 import org.hswebframework.web.authorization.oauth2.server.support.refresh.RefreshTokenGranter;
 import org.hswebframework.web.authorization.oauth2.server.token.AccessTokenService;
+import org.hswebframework.web.authorization.token.UserTokenManager;
 import org.hswebframework.web.commons.entity.factory.EntityFactory;
 import org.hswebframework.web.dao.oauth2.AuthorizationCodeDao;
 import org.hswebframework.web.dao.oauth2.OAuth2AccessDao;
@@ -43,6 +44,7 @@ import org.hswebframework.web.service.oauth2.server.simple.*;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -91,16 +93,22 @@ public class OAuth2GranterAutoConfiguration {
                 .setTokenGenerator(tokenGenerator);
     }
 
+    @Bean
+    @ConditionalOnBean(UserTokenManager.class)
+    public OAuth2GrantEventListener oAuth2GrantEventListener(UserTokenManager userTokenManager) {
+        return new OAuth2GrantEventListener(userTokenManager);
+    }
+
     @Configuration
     public static class OAuth2GranterConfiguration {
         @Autowired
-        private AuthorizationCodeService authorizationCodeService;
+        private AuthorizationCodeService     authorizationCodeService;
         @Autowired
         private OAuth2ClientConfigRepository oAuth2ClientConfigRepository;
         @Autowired
-        private AccessTokenService       accessTokenService;
+        private AccessTokenService           accessTokenService;
         @Autowired
-        private PasswordService          passwordService;
+        private PasswordService              passwordService;
 
         private <T extends AbstractAuthorizationService> T setProperty(T abstractAuthorizationService) {
             abstractAuthorizationService.setAccessTokenService(accessTokenService);

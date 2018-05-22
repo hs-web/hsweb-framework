@@ -20,6 +20,7 @@ package org.hswebframework.web.authorization.oauth2.controller;
 
 import io.swagger.annotations.*;
 import org.hswebframework.web.authorization.oauth2.server.OAuth2AccessToken;
+import org.hswebframework.web.authorization.oauth2.server.event.OAuth2GrantEvent;
 import org.hswebframework.web.authorization.oauth2.server.exception.GrantTokenException;
 import org.hswebframework.web.authorization.oauth2.server.support.OAuth2Granter;
 import org.hswebframework.web.authorization.oauth2.server.support.client.HttpClientCredentialRequest;
@@ -31,6 +32,8 @@ import org.hswebframework.web.oauth2.core.ErrorType;
 import org.hswebframework.web.oauth2.core.GrantType;
 import org.hswebframework.web.oauth2.core.OAuth2Constants;
 import org.hswebframework.web.oauth2.model.AccessTokenModel;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -51,6 +54,8 @@ public class OAuth2TokenController {
     @Resource
     private OAuth2Granter oAuth2Granter;
 
+    @Autowired
+    private ApplicationEventPublisher publisher;
     @PostMapping
     @ApiOperation(value = "申请token", notes = "具体请求方式请参照: http://www.ruanyifeng.com/blog/2014/05/oauth_2_0.html")
     @ApiImplicitParams(
@@ -88,6 +93,7 @@ public class OAuth2TokenController {
             default:
                 ErrorType.UNSUPPORTED_GRANT_TYPE.throwThis(GrantTokenException::new);
         }
+        publisher.publishEvent(new OAuth2GrantEvent(accessToken));
         return entityToModel(accessToken);
     }
 
