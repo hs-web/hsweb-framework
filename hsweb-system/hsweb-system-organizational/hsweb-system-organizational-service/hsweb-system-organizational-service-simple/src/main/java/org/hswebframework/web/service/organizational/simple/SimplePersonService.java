@@ -274,9 +274,11 @@ public class SimplePersonService extends GenericEntityService<PersonEntity, Stri
     @Override
     @Cacheable(key = "'auth:persion-id'+#personId")
     public PersonnelAuthorization getPersonnelAuthorizationByPersonId(String personId) {
-        SimplePersonnelAuthorization authorization = new SimplePersonnelAuthorization();
         PersonEntity entity = selectByPk(personId);
-        assertNotNull(entity);
+        if (null == entity) {
+            return null;
+        }
+        SimplePersonnelAuthorization authorization = new SimplePersonnelAuthorization();
 
         Personnel personnel = entityFactory.newInstance(Personnel.class, SimplePersonnel.class, entity);
 
@@ -301,19 +303,15 @@ public class SimplePersonService extends GenericEntityService<PersonEntity, Stri
                     .peek(positionEntity -> positionCache.put(positionEntity.getId(), positionEntity))
                     .map(PositionEntity::getDepartmentId)
                     .collect(Collectors.toSet());
-//            rootPosList.forEach(positionEntity -> positionCache.put(positionEntity.getId(), positionEntity));
             if (!CollectionUtils.isEmpty(departmentIds)) {
                 List<DepartmentEntity> departmentEntities = getAllChildrenAndReturnRootNode(departmentDao, departmentIds, DepartmentEntity::setChildren, rootDepList -> {
-                    //rootDepList.forEach(departmentEntity -> departmentCache.put(departmentEntity.getId(), departmentEntity));
                     //根据部门获取机构
                     Set<String> orgIds = rootDepList.stream()
                             .peek(departmentEntity -> departmentCache.put(departmentEntity.getId(), departmentEntity))
                             .map(DepartmentEntity::getOrgId)
                             .collect(Collectors.toSet());
-
                     if (!CollectionUtils.isEmpty(orgIds)) {
                         List<OrganizationalEntity> orgEntities = getAllChildrenAndReturnRootNode(organizationalDao, orgIds, OrganizationalEntity::setChildren, rootOrgList -> {
-//                            rootOrgList.forEach(org -> orgCache.put(org.getId(), org));
                             //根据机构获取行政区域
                             Set<String> districtIds = rootOrgList.stream()
                                     .peek(org -> orgCache.put(org.getId(), org))
@@ -336,7 +334,7 @@ public class SimplePersonService extends GenericEntityService<PersonEntity, Stri
         });
         authorization.setPositionIds(transformationTreeNode(null, positionEntities));
 
-        Set<Position> positions = positionEntities.parallelStream()
+        Set<Position> positions = positionEntities.stream()
                 .map(positionEntity -> {
                     DepartmentEntity departmentEntity = departmentCache.get(positionEntity.getDepartmentId());
                     if (departmentEntity == null) {
