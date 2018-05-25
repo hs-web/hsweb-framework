@@ -27,10 +27,12 @@ import org.hswebframework.web.service.DefaultDSLQueryService;
 import org.hswebframework.web.service.EnableCacheAllEvictTreeSortService;
 import org.hswebframework.web.service.GenericEntityService;
 import org.hswebframework.web.service.organizational.DepartmentService;
+import org.hswebframework.web.service.organizational.event.ClearPersonCacheEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -51,6 +53,9 @@ public class SimpleDepartmentService
 
     @Autowired
     protected PositionDao positionDao;
+
+    @Autowired
+    private ApplicationEventPublisher publisher;
 
     @Override
     public DepartmentDao getDao() {
@@ -87,6 +92,20 @@ public class SimpleDepartmentService
                 .total() > 0) {
             throw new BusinessException("部门下存在职位信息,无法删除!");
         }
+        publisher.publishEvent(new ClearPersonCacheEvent());
         return super.deleteByPk(id);
     }
+
+    @Override
+    public String insert(DepartmentEntity entity) {
+        publisher.publishEvent(new ClearPersonCacheEvent());
+        return super.insert(entity);
+    }
+
+    @Override
+    public int updateByPk(String id, DepartmentEntity entity) {
+        publisher.publishEvent(new ClearPersonCacheEvent());
+        return super.updateByPk(id, entity);
+    }
+
 }

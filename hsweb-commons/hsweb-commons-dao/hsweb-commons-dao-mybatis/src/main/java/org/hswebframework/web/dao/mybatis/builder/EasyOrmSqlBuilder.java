@@ -24,6 +24,7 @@ import org.apache.ibatis.mapping.ResultMap;
 import org.apache.ibatis.mapping.ResultMapping;
 import org.hswebframework.ezorm.core.ValueConverter;
 import org.hswebframework.ezorm.core.param.*;
+import org.hswebframework.ezorm.rdb.meta.Correlation;
 import org.hswebframework.ezorm.rdb.meta.RDBColumnMetaData;
 import org.hswebframework.ezorm.rdb.meta.RDBDatabaseMetaData;
 import org.hswebframework.ezorm.rdb.meta.RDBTableMetaData;
@@ -184,14 +185,7 @@ public class EasyOrmSqlBuilder {
         resultMappings.addAll(resultMaps.getIdResultMappings());
         resultMappings.forEach(resultMapping -> {
             if (resultMapping.getNestedQueryId() == null) {
-                RDBColumnMetaData column = new RDBColumnMetaData() {
-                    @Override
-                    public RDBColumnMetaData clone() {
-                        RDBColumnMetaData target = super.clone();
-                        target.setValueConverter(getValueConverter());
-                        return target;
-                    }
-                };
+                RDBColumnMetaData column = new RDBColumnMetaData();
                 column.setJdbcType(JDBCType.valueOf(resultMapping.getJdbcType().name()));
                 column.setName(resultMapping.getColumn());
                 if (!StringUtils.isNullOrEmpty(resultMapping.getProperty())) {
@@ -275,7 +269,7 @@ public class EasyOrmSqlBuilder {
         if (!appender.isEmpty()) {
             appender.removeFirst();
         } else {
-            throw new UnsupportedOperationException("{no_columns_will_be_update}");
+            throw new UnsupportedOperationException("没有列被修改");
         }
         return appender.toString();
     }
@@ -309,7 +303,6 @@ public class EasyOrmSqlBuilder {
         SqlRender<UpdateParam> render = tableMetaData.getDatabaseMetaData().getRenderer(SqlRender.TYPE.UPDATE);
         return render.render(tableMetaData, param).getSql();
     }
-
     public String buildSelectFields(String resultMapId, String tableName, Object arg) {
         QueryParam param = null;
         if (arg instanceof QueryParam) {

@@ -23,7 +23,9 @@ import org.hswebframework.web.entity.organizational.PositionEntity;
 import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.service.AbstractTreeSortService;
 import org.hswebframework.web.service.organizational.PositionService;
+import org.hswebframework.web.service.organizational.event.ClearPersonCacheEvent;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -35,6 +37,10 @@ import org.springframework.util.CollectionUtils;
 @Service("positionService")
 public class SimplePositionService extends AbstractTreeSortService<PositionEntity, String>
         implements PositionService {
+
+    @Autowired
+    private ApplicationEventPublisher publisher;
+
     @Autowired
     private PositionDao positionDao;
 
@@ -56,6 +62,19 @@ public class SimplePositionService extends AbstractTreeSortService<PositionEntit
         if(!CollectionUtils.isEmpty(personDao.selectByPositionId(id))){
             throw new BusinessException("岗位中还有人员,无法删除!");
         }
+        publisher.publishEvent(new ClearPersonCacheEvent());
         return super.deleteByPk(id);
+    }
+
+    @Override
+    public int updateByPk(String id, PositionEntity entity) {
+        publisher.publishEvent(new ClearPersonCacheEvent());
+        return super.updateByPk(id, entity);
+    }
+
+    @Override
+    public String insert(PositionEntity entity) {
+        publisher.publishEvent(new ClearPersonCacheEvent());
+        return super.insert(entity);
     }
 }

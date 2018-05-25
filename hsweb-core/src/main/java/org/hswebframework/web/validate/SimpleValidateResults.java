@@ -22,12 +22,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * TODO 完成注释
  *
  * @author zhouhao
  */
 public class SimpleValidateResults implements ValidateResults {
 
+    private static final long serialVersionUID = -3355828475840578917L;
     private List<ValidateResults.Result> results = new ArrayList<>();
 
     public SimpleValidateResults addResult(String field, String message) {
@@ -46,6 +46,7 @@ public class SimpleValidateResults implements ValidateResults {
     }
 
     class Result implements ValidateResults.Result {
+        private static final long serialVersionUID = -4717219071013488363L;
         private String field;
         private String message;
 
