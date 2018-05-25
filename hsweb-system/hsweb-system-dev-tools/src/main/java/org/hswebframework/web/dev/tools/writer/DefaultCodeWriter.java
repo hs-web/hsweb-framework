@@ -21,12 +21,13 @@ public class DefaultCodeWriter implements CodeWriter {
         File file = new File(path);
         file.mkdir();
         String type = code.getType();
+        String filePath = code.getFile().startsWith("/") ? code.getFile() : path + "/" + code.getFile();
         if ("dir".equals(type)) {
             code.getChildren()
-                    .forEach(childrenCode -> writeCode(path + "/" + code.getFile(), childrenCode));
+                    .forEach(childrenCode -> writeCode(filePath, childrenCode));
         } else if ("file".equals(type)) {
             String template = code.getTemplate();
-            String fileName = path + "/" + code.getFile();
+            String fileName = filePath;
             String replaceMod = code.getRepeat();
             File codeFile = new File(fileName);
             if (codeFile.exists() && replaceMod != null && !fileName.endsWith(".java")) {

@@ -43,4 +43,6 @@ public class TestEntity implements org.hswebframework.web.commons.entity.Entity 
             columnDefinition = "bigint COMMENT '多个类型'"
     )
     private DataType[] dataTypes;
+
+    private NestEntity nest;
 }

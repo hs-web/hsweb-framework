@@ -37,6 +37,11 @@ public class TestCrud extends AbstractTransactionalJUnit4SpringContextTests {
                 "  data_type SMALLINT,\n" +
                 "  data_types BIGINT\n" +
                 ")");
+        sqlExecutor.exec("\n" +
+                "create table h_nest_table(\n" +
+                "  id BIGINT AUTO_INCREMENT PRIMARY KEY,\n" +
+                "  name VARCHAR(32)\n" +
+                ")");
     }
 
     @Test
@@ -52,8 +57,8 @@ public class TestCrud extends AbstractTransactionalJUnit4SpringContextTests {
         QueryParamEntity query = new QueryParamEntity();
         //any in
         query.where("dataTypes",  Arrays.asList(DataType.TYPE3, DataType.TYPE1));
-
-        List<TestEntity> entities = testDao.query(query);
+        query.includes("nest.name","*");
+        List<TestEntity> entities = testDao.queryNest(query);
 
 //        testDao.query(entity);
 
