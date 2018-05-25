@@ -21,7 +21,6 @@ import org.hswebframework.web.commons.entity.TreeSupportEntity;
 import org.hswebframework.web.dao.dynamic.QueryByEntityDao;
 import org.hswebframework.web.dao.organizational.*;
 import org.hswebframework.web.entity.authorization.UserEntity;
-import org.hswebframework.web.entity.authorization.bind.BindRoleUserEntity;
 import org.hswebframework.web.entity.organizational.*;
 import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.organizational.authorization.*;
@@ -31,15 +30,16 @@ import org.hswebframework.web.organizational.authorization.relation.SimpleRelati
 import org.hswebframework.web.organizational.authorization.simple.*;
 import org.hswebframework.web.service.DefaultDSLQueryService;
 import org.hswebframework.web.service.GenericEntityService;
-import org.hswebframework.web.service.authorization.AuthorizationSettingTypeSupplier;
 import org.hswebframework.web.service.authorization.UserService;
 import org.hswebframework.web.service.organizational.*;
+import org.hswebframework.web.service.organizational.event.ClearPersonCacheEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -134,6 +134,12 @@ public class SimplePersonService extends GenericEntityService<PersonEntity, Stri
             syncUserInfo(authBindEntity);
         }
         return this.updateByPk(((PersonEntity) authBindEntity));
+    }
+
+    @TransactionalEventListener
+    @CacheEvict(allEntries = true)
+    public void handleClearCache(ClearPersonCacheEvent event) {
+        logger.debug("clear all user cache");
     }
 
     @Override
