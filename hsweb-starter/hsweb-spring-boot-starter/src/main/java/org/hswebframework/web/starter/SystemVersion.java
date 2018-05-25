@@ -20,6 +20,7 @@ package org.hswebframework.web.starter;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.utils.ListUtils;
 import org.hswebframework.utils.StringUtils;
 
@@ -180,7 +181,7 @@ public class SystemVersion extends Version {
     }
 }
 
-
+@Slf4j
 class Version implements Comparable<Version> {
     protected String name;
     protected String comment;
@@ -206,7 +207,8 @@ class Version implements Comparable<Version> {
         String[] ver = version.split("[.]");
         Integer[] numberVer = ListUtils.stringArr2intArr(ver);
         if (numberVer.length < 1 || Arrays.stream(numberVer).anyMatch(Objects::isNull)) {
-            throw new UnsupportedOperationException("format version " + version + " error  ");
+            numberVer = new Integer[]{1, 0, 0};
+            log.warn("解析版本号失败:{},将使用默认版本号:1.0.0,请检查hsweb-starter.js配置内容!", version);
         }
         setVersion(numberVer[0],
                 numberVer.length <= 1 ? 0 : numberVer[1],

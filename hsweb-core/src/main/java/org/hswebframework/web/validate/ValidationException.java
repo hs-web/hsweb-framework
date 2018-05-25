@@ -21,6 +21,7 @@ package org.hswebframework.web.validate;
 
 import org.hswebframework.web.BusinessException;
 
+import java.util.Collections;
 import java.util.List;
 
 public class ValidationException extends BusinessException {
@@ -37,13 +38,13 @@ public class ValidationException extends BusinessException {
     }
 
     public ValidationException(ValidateResults results) {
-        super(results.toString(), 400);
+        super(results.getResults().get(0).getMessage(), 400);
         this.results = results;
     }
 
     public List<ValidateResults.Result> getResults() {
         if (results == null) {
-            return null;
+            return Collections.emptyList();
         }
         return results.getResults();
     }
