@@ -139,7 +139,7 @@ public class SimplePersonService extends GenericEntityService<PersonEntity, Stri
     @TransactionalEventListener
     @CacheEvict(allEntries = true)
     public void handleClearCache(ClearPersonCacheEvent event) {
-        logger.debug("clear all user cache");
+        logger.debug("clear all person cache");
     }
 
     @Override

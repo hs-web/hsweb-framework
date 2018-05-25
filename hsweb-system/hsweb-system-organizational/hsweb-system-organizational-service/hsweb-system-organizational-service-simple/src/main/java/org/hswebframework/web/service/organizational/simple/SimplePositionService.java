@@ -72,5 +72,9 @@ public class SimplePositionService extends AbstractTreeSortService<PositionEntit
         return super.updateByPk(id, entity);
     }
 
-    
+    @Override
+    public String insert(PositionEntity entity) {
+        publisher.publishEvent(new ClearPersonCacheEvent());
+        return super.insert(entity);
+    }
 }

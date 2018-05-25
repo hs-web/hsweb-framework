@@ -58,6 +58,7 @@ public class SimpleDistrictService extends AbstractTreeSortService<DistrictEntit
     @Override
     @CacheEvict(allEntries = true)
     public String insert(DistrictEntity entity) {
+        publisher.publishEvent(new ClearPersonCacheEvent());
         return super.insert(entity);
     }
 
