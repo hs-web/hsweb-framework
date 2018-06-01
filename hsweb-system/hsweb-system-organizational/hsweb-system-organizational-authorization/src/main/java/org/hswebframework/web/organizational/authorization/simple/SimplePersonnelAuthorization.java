@@ -1,10 +1,17 @@
 package org.hswebframework.web.organizational.authorization.simple;
 
-import org.hswebframework.web.organizational.authorization.Personnel;
-import org.hswebframework.web.organizational.authorization.PersonnelAuthorization;
-import org.hswebframework.web.organizational.authorization.Position;
-import org.hswebframework.web.organizational.authorization.TreeNode;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializerFeature;
+import org.hswebframework.web.Maps;
+import org.hswebframework.web.bean.BeanFactory;
+import org.hswebframework.web.bean.Converter;
+import org.hswebframework.web.bean.FastBeanCopier;
+import org.hswebframework.web.organizational.authorization.*;
+import org.hswebframework.web.organizational.authorization.relation.Relation;
 import org.hswebframework.web.organizational.authorization.relation.Relations;
+import org.hswebframework.web.organizational.authorization.relation.SimpleRelation;
+import org.hswebframework.web.organizational.authorization.relation.SimpleRelations;
 
 import java.util.Collections;
 import java.util.Set;
@@ -14,13 +21,13 @@ import java.util.Set;
  */
 public class SimplePersonnelAuthorization implements PersonnelAuthorization {
     private static final long serialVersionUID = 1_0;
-    private Personnel             personnel;
+    private Personnel personnel;
     private Set<TreeNode<String>> districtIds;
     private Set<TreeNode<String>> orgIds;
     private Set<TreeNode<String>> positionIds;
     private Set<TreeNode<String>> departmentIds;
-    private Relations             relations;
-    private Set<Position>         positions;
+    private Relations relations;
+    private Set<Position> positions;
 
     public void setPositions(Set<Position> positions) {
         this.positions = positions;
@@ -96,4 +103,6 @@ public class SimplePersonnelAuthorization implements PersonnelAuthorization {
     public void setDepartmentIds(Set<TreeNode<String>> departmentIds) {
         this.departmentIds = departmentIds;
     }
+
+
 }

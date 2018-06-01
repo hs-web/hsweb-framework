@@ -21,6 +21,7 @@ package org.hswebframework.web.commons.entity.factory;
 import lombok.SneakyThrows;
 import org.hswebframework.web.NotFoundException;
 import org.hswebframework.utils.ClassUtils;
+import org.hswebframework.web.bean.BeanFactory;
 import org.hswebframework.web.bean.FastBeanCopier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +35,7 @@ import java.util.function.Supplier;
  * @since 3.0
  */
 @SuppressWarnings("unchecked")
-public class MapperEntityFactory implements EntityFactory {
+public class MapperEntityFactory implements EntityFactory ,BeanFactory {
     private Map<Class, Mapper> realTypeMapper = new HashMap<>();
     private Logger logger = LoggerFactory.getLogger(this.getClass());
     private Map<String, PropertyCopier> copierCache = new HashMap<>();

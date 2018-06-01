@@ -454,7 +454,7 @@ public class SimplePersonService extends GenericEntityService<PersonEntity, Stri
                 TreeNode<String> parentNode = new TreeNode<>();
                 parentNode.setValue(parent.getId());
                 parentNode.setChildren(treeNodes);
-                treeNode.setParent(parentNode);
+//                treeNode.setParent(parentNode);
             }
             treeNode.setValue(node.getId());
             if (node.getChildren() != null && !node.getChildren().isEmpty()) {

@@ -2,6 +2,7 @@ package org.hswebframework.web.bean;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.beanutils.PropertyUtilsBean;
@@ -33,9 +34,17 @@ public final class FastBeanCopier {
 
     private static final Map<Class, Class> wrapperClassMapping = new HashMap<>();
 
-    public static final DefaultConvert DEFAULT_CONVERT = new DefaultConvert();
+    public static final DefaultConverter DEFAULT_CONVERT = new DefaultConverter();
 
     public static final Class[] EMPTY_CLASS_ARRAY = new Class[0];
+
+    public static BeanFactory BEAN_FACTORY = new BeanFactory() {
+        @Override
+        @SneakyThrows
+        public <T> T newInstance(Class<T> beanType) {
+            return beanType == Map.class ? (T) new HashMap<>() : beanType.newInstance();
+        }
+    };
 
     static {
         wrapperClassMapping.put(byte.class, Byte.class);
@@ -265,7 +274,9 @@ public final class FastBeanCopier {
                 boolean hasGeneric = false;
                 if (field != null) {
                     String[] arr = Arrays.stream(ResolvableType.forField(field)
-                            .getGenerics()).map(ResolvableType::getRawClass)
+                            .getGenerics())
+                            .map(ResolvableType::getRawClass)
+                            .filter(Objects::nonNull)
                             .map(t -> t.getName().concat(".class"))
                             .toArray(String[]::new);
                     if (arr.length > 0) {
@@ -324,16 +335,16 @@ public final class FastBeanCopier {
                 } else {
                     if (Cloneable.class.isAssignableFrom(targetType)) {
                         try {
-                            convertCode.append("(" + getTypeName() + ")").append(getterCode).append(".clone()");
+                            convertCode.append("(").append(getTypeName()).append(")").append(getterCode).append(".clone()");
                         } catch (Exception e) {
                             convertCode.append(getterCode);
                         }
                     } else {
                         if ((Map.class.isAssignableFrom(targetType)
                                 || Collection.class.isAssignableFrom(type)) && hasGeneric) {
-                            convertCode.append("(" + getTypeName() + ")").append(convert);
+                            convertCode.append("(").append(getTypeName()).append(")").append(convert);
                         } else {
-                            convertCode.append("(" + getTypeName() + ")").append(getterCode);
+                            convertCode.append("(").append(getTypeName()).append(")").append(getterCode);
 //                            convertCode.append(getterCode);
                         }
 
@@ -398,7 +409,12 @@ public final class FastBeanCopier {
     }
 
 
-    static final class DefaultConvert implements Converter {
+    public static final class DefaultConverter implements Converter {
+        private BeanFactory beanFactory = BEAN_FACTORY;
+
+        public void setBeanFactory(BeanFactory beanFactory) {
+            this.beanFactory = beanFactory;
+        }
 
         public Collection newCollection(Class targetClass) {
 
@@ -504,9 +520,7 @@ public final class FastBeanCopier {
                     return converter.convert(targetClass, source);
                 }
 
-                T newTarget = targetClass == Map.class ? (T) new HashMap<>() : targetClass.newInstance();
-                copy(source, newTarget);
-                return newTarget;
+                return copy(source, beanFactory.newInstance(targetClass),this);
             } catch (Exception e) {
                 log.warn("复制类型{}->{}失败", source, targetClass, e);
                 throw new UnsupportedOperationException(e.getMessage(), e);

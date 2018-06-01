@@ -11,8 +11,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Function;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public class PersonnelAuthorizationHolder {
