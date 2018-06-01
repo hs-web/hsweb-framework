@@ -1,6 +1,6 @@
 package org.hswebframework.web.organizational.authorization;
 
-import org.hswebframework.web.authorization.service.AuthorizationSettingTypeSupplier;
+import org.hswebframework.web.service.authorization.AuthorizationSettingTypeSupplier;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashSet;

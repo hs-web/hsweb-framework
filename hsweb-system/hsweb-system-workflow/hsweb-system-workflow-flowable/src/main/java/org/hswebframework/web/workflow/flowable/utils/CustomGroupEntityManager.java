@@ -5,8 +5,8 @@ import org.activiti.engine.impl.GroupQueryImpl;
 import org.activiti.engine.impl.Page;
 import org.activiti.engine.impl.persistence.entity.GroupEntity;
 import org.activiti.engine.impl.persistence.entity.GroupEntityManager;
-import org.hswebframework.web.authorization.entity.RoleEntity;
-import org.hswebframework.web.authorization.service.UserService;
+import org.hswebframework.web.entity.authorization.RoleEntity;
+import org.hswebframework.web.service.authorization.UserService;
 import org.springframework.dao.EmptyResultDataAccessException;
 
 import java.util.ArrayList;

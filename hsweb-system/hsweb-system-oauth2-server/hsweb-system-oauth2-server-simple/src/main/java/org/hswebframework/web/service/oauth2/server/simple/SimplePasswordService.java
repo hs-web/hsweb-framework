@@ -19,8 +19,8 @@
 package org.hswebframework.web.service.oauth2.server.simple;
 
 import org.hswebframework.web.authorization.oauth2.server.support.password.PasswordService;
-import org.hswebframework.web.authorization.entity.UserEntity;
-import org.hswebframework.web.authorization.service.UserService;
+import org.hswebframework.web.entity.authorization.UserEntity;
+import org.hswebframework.web.service.authorization.UserService;
 
 /**
  * @author zhouhao

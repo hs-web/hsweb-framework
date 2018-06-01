@@ -3,7 +3,7 @@ package org.hswebframework.web.workflow.flowable.utils;
 import org.activiti.engine.identity.Group;
 import org.activiti.engine.impl.persistence.entity.GroupEntity;
 import org.activiti.engine.impl.persistence.entity.UserEntity;
-import org.hswebframework.web.authorization.entity.RoleEntity;
+import org.hswebframework.web.entity.authorization.RoleEntity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +13,7 @@ import java.util.List;
  * @Date 2017/8/3.
  */
 public class ActivitiUserUtil {
-    public static UserEntity toActivitiUser(org.hswebframework.web.authorization.entity.UserEntity bUser) {
+    public static UserEntity toActivitiUser(org.hswebframework.web.entity.authorization.UserEntity bUser) {
         UserEntity userEntity = new UserEntity();
         userEntity.setId(bUser.getId());
         userEntity.setFirstName(bUser.getUsername());

@@ -2,7 +2,7 @@ package org.hswebframework.web.workflow.flowable;
 
 import org.activiti.engine.impl.interceptor.SessionFactory;
 import org.activiti.spring.boot.ProcessEngineConfigurationConfigurer;
-import org.hswebframework.web.authorization.service.UserService;
+import org.hswebframework.web.service.authorization.UserService;
 import org.hswebframework.web.workflow.flowable.utils.CustomGroupEntityManager;
 import org.hswebframework.web.workflow.flowable.utils.CustomGroupEntityManagerFactory;
 import org.hswebframework.web.workflow.flowable.utils.CustomUserEntityManager;

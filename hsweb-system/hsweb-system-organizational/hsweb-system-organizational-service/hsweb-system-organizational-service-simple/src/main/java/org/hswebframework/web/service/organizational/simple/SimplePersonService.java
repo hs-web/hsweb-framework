@@ -20,7 +20,7 @@ import org.hswebframework.web.commons.entity.DataStatus;
 import org.hswebframework.web.commons.entity.TreeSupportEntity;
 import org.hswebframework.web.dao.dynamic.QueryByEntityDao;
 import org.hswebframework.web.dao.organizational.*;
-import org.hswebframework.web.authorization.entity.UserEntity;
+import org.hswebframework.web.entity.authorization.UserEntity;
 import org.hswebframework.web.entity.organizational.*;
 import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.organizational.authorization.*;
@@ -30,7 +30,7 @@ import org.hswebframework.web.organizational.authorization.relation.SimpleRelati
 import org.hswebframework.web.organizational.authorization.simple.*;
 import org.hswebframework.web.service.DefaultDSLQueryService;
 import org.hswebframework.web.service.GenericEntityService;
-import org.hswebframework.web.authorization.service.UserService;
+import org.hswebframework.web.service.authorization.UserService;
 import org.hswebframework.web.service.organizational.*;
 import org.hswebframework.web.service.organizational.event.ClearPersonCacheEvent;
 import org.springframework.beans.factory.annotation.Autowired;

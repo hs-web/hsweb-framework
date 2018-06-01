@@ -21,7 +21,6 @@ package org.hswebframework.web.example.oauth2;
 import com.alibaba.fastjson.JSON;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.access.DataAccessConfig;
-import org.hswebframework.web.authorization.entity.*;
 import org.hswebframework.web.authorization.oauth2.server.entity.OAuth2ClientEntity;
 import org.hswebframework.web.authorization.simple.SimpleFieldFilterDataAccessConfig;
 import org.hswebframework.web.commons.entity.DataStatus;
