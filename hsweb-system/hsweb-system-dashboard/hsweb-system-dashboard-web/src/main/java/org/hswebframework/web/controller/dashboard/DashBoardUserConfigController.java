@@ -11,20 +11,16 @@ import org.hswebframework.web.controller.dashboard.model.UserDashBoardResponse;
 import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.dashboard.DashBoardConfigEntity;
 import org.hswebframework.web.dashboard.DashBoardService;
-import org.hswebframework.web.dashboard.executor.DashBoardExecutor;
-import org.hswebframework.web.entity.authorization.UserSettingEntity;
-import org.hswebframework.web.service.authorization.UserSettingService;
+import org.hswebframework.web.authorization.entity.UserSettingEntity;
+import org.hswebframework.web.authorization.service.UserSettingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.PostConstruct;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 /**

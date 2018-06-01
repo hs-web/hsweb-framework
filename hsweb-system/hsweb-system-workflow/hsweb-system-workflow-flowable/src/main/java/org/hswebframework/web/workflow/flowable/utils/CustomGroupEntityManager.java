@@ -5,14 +5,11 @@ import org.activiti.engine.impl.GroupQueryImpl;
 import org.activiti.engine.impl.Page;
 import org.activiti.engine.impl.persistence.entity.GroupEntity;
 import org.activiti.engine.impl.persistence.entity.GroupEntityManager;
-import org.hswebframework.web.entity.authorization.RoleEntity;
-import org.hswebframework.web.service.authorization.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.hswebframework.web.authorization.entity.RoleEntity;
+import org.hswebframework.web.authorization.service.UserService;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class CustomGroupEntityManager extends GroupEntityManager {

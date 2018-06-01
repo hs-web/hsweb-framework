@@ -24,7 +24,7 @@
 
     <groupId>org.hswebframework.web</groupId>
     <artifactId>hsweb-framework</artifactId>
-    <version>3.0-SNAPSHOT</version>
+    <version>3.0.0-RC-SNAPSHOT</version>
     <modules>
         <module>hsweb-starter</module>
         <module>hsweb-core</module>
@@ -34,7 +34,6 @@
         <module>hsweb-tests</module>
         <module>hsweb-datasource</module>
         <module>hsweb-commons</module>
-        <module>hsweb-i18n</module>
         <module>hsweb-logging</module>
         <module>hsweb-concurrent</module>
         <module>hsweb-examples</module>

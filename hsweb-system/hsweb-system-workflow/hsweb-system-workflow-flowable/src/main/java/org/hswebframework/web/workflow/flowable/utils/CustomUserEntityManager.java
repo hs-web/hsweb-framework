@@ -6,13 +6,11 @@ import org.activiti.engine.impl.UserQueryImpl;
 import org.activiti.engine.impl.persistence.entity.IdentityInfoEntity;
 import org.activiti.engine.impl.persistence.entity.UserEntity;
 import org.activiti.engine.impl.persistence.entity.UserEntityManager;
-import org.hswebframework.web.entity.authorization.RoleEntity;
-import org.hswebframework.web.service.authorization.UserService;
+import org.hswebframework.web.authorization.entity.RoleEntity;
+import org.hswebframework.web.authorization.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -31,7 +29,7 @@ public class CustomUserEntityManager extends UserEntityManager {
             return null;
         }
         try {
-            org.hswebframework.web.entity.authorization.UserEntity user = userService.selectByPk(userId);
+            org.hswebframework.web.authorization.entity.UserEntity user = userService.selectByPk(userId);
             return ActivitiUserUtil.toActivitiUser(user);
         } catch (EmptyResultDataAccessException e) {
             return null;

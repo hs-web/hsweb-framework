@@ -39,7 +39,7 @@ import org.hswebframework.web.commons.entity.factory.EntityFactory;
 import org.hswebframework.web.dao.oauth2.AuthorizationCodeDao;
 import org.hswebframework.web.dao.oauth2.OAuth2AccessDao;
 import org.hswebframework.web.dao.oauth2.OAuth2ClientDao;
-import org.hswebframework.web.service.authorization.UserService;
+import org.hswebframework.web.authorization.service.UserService;
 import org.hswebframework.web.service.oauth2.server.simple.*;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;

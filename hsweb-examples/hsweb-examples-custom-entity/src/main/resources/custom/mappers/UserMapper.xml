@@ -20,8 +20,8 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="org.hswebframework.web.dao.authorization.UserDao">
-    <resultMap id="UserResultMap" type="org.hswebframework.web.entity.authorization.UserEntity">
+<mapper namespace="UserDao">
+    <resultMap id="UserResultMap" type="UserEntity">
         <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
         <result property="name" column="name" javaType="string" jdbcType="VARCHAR"/>
         <result property="username" column="username" javaType="string" jdbcType="VARCHAR"/>
@@ -40,7 +40,7 @@
         <bind name="tableName" value="'s_user'"/>
     </sql>
 
-    <insert id="insert" parameterType="org.hswebframework.web.entity.authorization.UserEntity">
+    <insert id="insert" parameterType="UserEntity">
         <include refid="config"/>
         <include refid="BasicMapper.buildInsertSql"/>
     </insert>
