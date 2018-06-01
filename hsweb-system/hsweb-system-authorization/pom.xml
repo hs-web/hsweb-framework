@@ -12,12 +12,10 @@
     <artifactId>hsweb-system-authorization</artifactId>
     <packaging>pom</packaging>
     <modules>
-        <module>hsweb-system-authorization-entity</module>
-        <module>hsweb-system-authorization-dao</module>
-        <module>hsweb-system-authorization-service</module>
         <module>hsweb-system-authorization-starter</module>
-        <module>hsweb-system-authorization-controller</module>
-        <module>hsweb-system-authorization-model</module>
+        <module>hsweb-system-authorization-api</module>
+        <module>hsweb-system-authorization-local</module>
+        <module>hsweb-system-authorization-web</module>
     </modules>
 
 

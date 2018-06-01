@@ -40,17 +40,12 @@
     <dependencies>
         <dependency>
             <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-system-authorization-service-simple</artifactId>
+            <artifactId>hsweb-system-authorization-local</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-system-authorization-dao-mybatis</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-system-authorization-controller</artifactId>
+            <artifactId>hsweb-system-authorization-web</artifactId>
             <version>${project.version}</version>
         </dependency>
 
