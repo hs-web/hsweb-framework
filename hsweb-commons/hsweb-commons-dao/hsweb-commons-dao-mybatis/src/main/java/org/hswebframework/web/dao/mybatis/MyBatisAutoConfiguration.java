@@ -70,6 +70,7 @@ public class MyBatisAutoConfiguration {
     }
 
     @Bean(name = "sqlSessionFactory")
+    @Primary
     public SqlSessionFactory sqlSessionFactory(@Qualifier("dataSource") DataSource dataSource) throws Exception {
         SqlSessionFactoryBean factory = new SqlSessionFactoryBean();
         MybatisProperties mybatisProperties = this.mybatisProperties();

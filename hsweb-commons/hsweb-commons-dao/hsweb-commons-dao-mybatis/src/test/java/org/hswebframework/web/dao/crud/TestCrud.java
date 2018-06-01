@@ -1,5 +1,6 @@
 package org.hswebframework.web.dao.crud;
 
+import org.apache.ibatis.session.SqlSessionFactory;
 import org.hswebframework.ezorm.core.param.QueryParam;
 import org.hswebframework.ezorm.rdb.executor.SqlExecutor;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
@@ -8,6 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -26,6 +28,14 @@ public class TestCrud extends AbstractTransactionalJUnit4SpringContextTests {
     @Autowired
     private SqlExecutor sqlExecutor;
 
+
+    @Autowired
+    @Qualifier("sqlSessionFactory2")
+    SqlSessionFactory sqlSessionFactory2;
+
+    @Autowired
+    @Qualifier("sqlSessionFactory")
+    SqlSessionFactory sqlSessionFactory;
 
     @Before
     public void init() throws SQLException {
@@ -56,8 +66,8 @@ public class TestCrud extends AbstractTransactionalJUnit4SpringContextTests {
 
         QueryParamEntity query = new QueryParamEntity();
         //any in
-        query.where("dataTypes",  Arrays.asList(DataType.TYPE3, DataType.TYPE1));
-        query.includes("nest.name","*");
+        query.where("dataTypes", Arrays.asList(DataType.TYPE3, DataType.TYPE1));
+        query.includes("nest.name", "*");
         List<TestEntity> entities = testDao.queryNest(query);
 
 //        testDao.query(entity);
