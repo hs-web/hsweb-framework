@@ -14,7 +14,7 @@
     <dependencies>
         <dependency>
             <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-system-database-manager-simple</artifactId>
+            <artifactId>hsweb-system-database-manager-local</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

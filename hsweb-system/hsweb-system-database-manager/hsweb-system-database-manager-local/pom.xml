@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>hsweb-system-database-manager-simple</artifactId>
+    <artifactId>hsweb-system-database-manager-local</artifactId>
 
     <dependencies>
         <dependency>
