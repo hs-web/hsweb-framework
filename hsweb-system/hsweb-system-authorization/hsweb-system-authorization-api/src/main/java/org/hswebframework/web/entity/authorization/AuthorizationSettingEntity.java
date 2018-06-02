@@ -32,21 +32,24 @@ public interface AuthorizationSettingEntity extends GenericEntity<String> {
     |                属性名常量                |
     ===========================================*/
     /**
-     * 类型
+     * 设置类型,如: role
+     *
+     * @see org.hswebframework.web.service.authorization.AuthorizationSettingTypeSupplier
      */
-    String type       = "type";
+    String type = "type";
     /**
-     * 设置给谁
+     * 设置给谁,通常是{@link this#type}对应的id
+     * @see org.hswebframework.web.service.authorization.AuthorizationSettingTypeSupplier
      */
     String settingFor = "settingFor";
     /**
      * 状态
      */
-    String status     = "status";
+    String status = "status";
     /**
      * 备注
      */
-    String describe   = "describe";
+    String describe = "describe";
 
     /**
      * @return 类型

@@ -6,7 +6,7 @@ import java.util.Set;
 
 /**
  * 权限设置类型提供者,在初始化权限信息的时候,用于获取被授权用户持有的设置类型.
- *
+ * 通过实现此接口,可实现多维度的通用权限设置
  * @author zhouhao
  * @since 3.0
  */
@@ -23,9 +23,18 @@ public interface AuthorizationSettingTypeSupplier {
 
     class SettingInfo {
 
-        //设置类型 如: user,role,position,person等等
+        /**
+         * 设置类型 如: user,role,position,person等等
+         *
+         * @see org.hswebframework.web.entity.authorization.AuthorizationSettingEntity#type
+         */
         private String type;
-        //type对应的主键信息,如 user.id
+
+        /**
+         * type对应的主键信息,如 user.id
+         *
+         * @see org.hswebframework.web.entity.authorization.AuthorizationSettingEntity#settingFor
+         */
         private String settingFor;
 
         @Override

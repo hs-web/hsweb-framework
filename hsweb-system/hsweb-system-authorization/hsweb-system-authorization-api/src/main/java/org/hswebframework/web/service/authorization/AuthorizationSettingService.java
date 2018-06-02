@@ -20,9 +20,14 @@ import org.hswebframework.web.entity.authorization.AuthorizationSettingEntity;
 import org.hswebframework.web.service.CrudService;
 
 /**
- * 权限设置 服务类,提供通用的权限设置
+ * 权限设置 服务类,提供通用的权限设置. 通过此服务,可实现对用户权限的多维度,自定义,可拓展的权限设置.<br>
+ * 例如: 可对用户自身设置权限信息,可对角色设置权限信息,可对机构,部门设置权限信息。各个维度的权限使用{@link AuthorizationSettingTypeSupplier}进行绑定.
  *
- * @author hsweb-generator-online
+ * @author zhouhao
+ * @see AuthorizationSettingTypeSupplier
+ * @see org.hswebframework.web.authorization.AuthenticationInitializeService
+ *
+ * @since 3.0
  */
 public interface AuthorizationSettingService extends CrudService<AuthorizationSettingEntity, String> {
     /**

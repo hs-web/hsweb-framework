@@ -33,8 +33,5 @@ import java.util.List;
 public interface MenuService
         extends CrudService<MenuEntity, String>
         , TreeService<MenuEntity, String> {
-    MenuEntity getByPermissionId(String permissionId);
-
-    List<MenuEntity> getByPermissionId(List<String> permissionId);
 
 }

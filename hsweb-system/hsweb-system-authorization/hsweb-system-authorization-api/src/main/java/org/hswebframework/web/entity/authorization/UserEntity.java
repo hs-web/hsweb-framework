@@ -25,15 +25,18 @@ import org.hswebframework.web.commons.entity.RecordCreationEntity;
  * @author zhouhao
  */
 public interface UserEntity extends GenericEntity<String>, RecordCreationEntity {
-    String name     = "name";
+    String name = "name";
     String username = "username";
-    String salt     = "salt";
+    String salt = "salt";
     @SuppressWarnings("all")
     String password = "password";
     String status = "status";
 
     void setName(String name);
 
+    /**
+     * @return 用户名, 只读, 只能新增, 不能修改
+     */
     String getUsername();
 
     void setUsername(String username);
