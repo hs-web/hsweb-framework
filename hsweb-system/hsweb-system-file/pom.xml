@@ -12,11 +12,11 @@
     <artifactId>hsweb-system-file</artifactId>
     <packaging>pom</packaging>
     <modules>
-        <module>hsweb-system-file-service</module>
-        <module>hsweb-system-file-controller</module>
-        <module>hsweb-system-file-dao</module>
-        <module>hsweb-system-file-entity</module>
         <module>hsweb-system-file-starter</module>
+        <module>hsweb-system-file-api</module>
+        <module>hsweb-system-file-local</module>
+        <module>hsweb-system-file-web</module>
+        <module>hsweb-system-file-oauth2</module>
     </modules>
 
 

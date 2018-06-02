@@ -31,20 +31,19 @@
 
         <dependency>
             <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-system-file-service-simple</artifactId>
+            <artifactId>hsweb-system-file-local</artifactId>
             <version>${project.version}</version>
         </dependency>
-      
+
         <dependency>
             <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-system-file-dao-mybatis</artifactId>
+            <artifactId>hsweb-system-file-web</artifactId>
             <version>${project.version}</version>
         </dependency>
-      
+
         <dependency>
-            <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-system-file-controller</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
         </dependency>
 
         <dependency>
