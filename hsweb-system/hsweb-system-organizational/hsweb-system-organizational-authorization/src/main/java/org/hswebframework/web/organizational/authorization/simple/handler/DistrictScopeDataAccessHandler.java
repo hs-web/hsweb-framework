@@ -3,8 +3,8 @@ package org.hswebframework.web.organizational.authorization.simple.handler;
 import org.hswebframework.ezorm.core.param.Term;
 import org.hswebframework.ezorm.core.param.TermType;
 import org.hswebframework.web.authorization.define.AuthorizingContext;
-import org.hswebframework.web.entity.organizational.authorization.DistrictAttachEntity;
-import org.hswebframework.web.organizational.authorization.PersonnelAuthorization;
+import org.hswebframework.web.organizational.authorization.access.DistrictAttachEntity;
+import org.hswebframework.web.organizational.authorization.PersonnelAuthentication;
 
 import java.util.Collections;
 import java.util.Set;
@@ -36,7 +36,7 @@ public class DistrictScopeDataAccessHandler extends AbstractScopeDataAccessHandl
     }
 
     @Override
-    protected Set<String> getTryOperationScope(String scopeType, PersonnelAuthorization authorization) {
+    protected Set<String> getTryOperationScope(String scopeType, PersonnelAuthentication authorization) {
         switch (scopeType) {
             case SCOPE_TYPE_CHILDREN:
                 return authorization.getAllDistrictId();

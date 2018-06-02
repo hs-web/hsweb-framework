@@ -38,9 +38,7 @@
 |[hsweb-concurrent](hsweb-concurrent)|并发包,缓存,锁,计数器等| 80%|
 |[hsweb-core](hsweb-core)|框架核心,基础工具类| 90%|
 |[hsweb-datasource](hsweb-datasource)|数据源| 90%|
-|[hsweb-examples](hsweb-examples)|例子,演示| 10%|
 |[hsweb-logging](hsweb-logging)| 日志|  100%|
 |[hsweb-message](hsweb-message)|mq,websocket...| 80%|
 |[hsweb-starter](hsweb-starter)|模块启动器| 90%|
-|[hsweb-system](hsweb-system)|**系统常用功能**| 60%|
-|[hsweb-tests](hsweb-tests)|测试| 80%|
+|[hsweb-system](hsweb-system)|**系统常用功能**| 80%|

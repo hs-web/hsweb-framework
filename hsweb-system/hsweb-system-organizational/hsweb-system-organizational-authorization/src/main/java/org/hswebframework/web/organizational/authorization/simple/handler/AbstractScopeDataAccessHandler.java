@@ -11,7 +11,7 @@ import org.hswebframework.web.authorization.exception.AccessDenyException;
 import org.hswebframework.web.commons.entity.Entity;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.controller.QueryController;
-import org.hswebframework.web.organizational.authorization.PersonnelAuthorization;
+import org.hswebframework.web.organizational.authorization.PersonnelAuthentication;
 import org.hswebframework.web.organizational.authorization.access.DataAccessType;
 import org.hswebframework.web.service.QueryService;
 import org.slf4j.Logger;
@@ -40,7 +40,7 @@ public abstract class AbstractScopeDataAccessHandler<E> implements DataAccessHan
 
     protected abstract Term createQueryTerm(Set<String> scope, AuthorizingContext context);
 
-    protected abstract Set<String> getTryOperationScope(String scopeType, PersonnelAuthorization authorization);
+    protected abstract Set<String> getTryOperationScope(String scopeType, PersonnelAuthentication authorization);
 
     @Override
     public boolean isSupport(DataAccessConfig access) {
@@ -50,7 +50,7 @@ public abstract class AbstractScopeDataAccessHandler<E> implements DataAccessHan
     @Override
     public boolean handle(DataAccessConfig access, AuthorizingContext context) {
         ScopeDataAccessConfig accessConfig = ((ScopeDataAccessConfig) access);
-        if (!PersonnelAuthorization.current().isPresent()) {
+        if (!PersonnelAuthentication.current().isPresent()) {
             return false;
         }
         switch (accessConfig.getAction()) {
@@ -67,8 +67,8 @@ public abstract class AbstractScopeDataAccessHandler<E> implements DataAccessHan
         }
     }
 
-    protected PersonnelAuthorization getPersonnelAuthorization() {
-        return PersonnelAuthorization.current()
+    protected PersonnelAuthentication getPersonnelAuthorization() {
+        return PersonnelAuthentication.current()
                 .orElseThrow(AccessDenyException::new);
     }
 

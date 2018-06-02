@@ -41,17 +41,12 @@
     <dependencies>
         <dependency>
             <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-system-oauth2-client-service-simple</artifactId>
+            <artifactId>hsweb-system-oauth2-client-local</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-system-oauth2-client-dao-mybatis</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-system-oauth2-client-controller</artifactId>
+            <artifactId>hsweb-system-oauth2-client-web</artifactId>
             <version>${project.version}</version>
         </dependency>
 

@@ -175,7 +175,7 @@ public class HswebAutoConfiguration {
     @ConditionalOnMissingBean(EntityFactory.class)
     public MapperEntityFactory mapperEntityFactory() {
         MapperEntityFactory entityFactory = new MapperEntityFactory(entityProperties.createMappers());
-        FastBeanCopier.BEAN_FACTORY = entityFactory;
+        FastBeanCopier.setBeanFactory(entityFactory); ;
         return entityFactory;
     }
 

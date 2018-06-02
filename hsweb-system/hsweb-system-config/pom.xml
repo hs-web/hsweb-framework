@@ -30,10 +30,9 @@
     <artifactId>hsweb-system-config</artifactId>
     <packaging>pom</packaging>
     <modules>
-        <module>hsweb-system-config-dao</module>
-        <module>hsweb-system-config-service</module>
-        <module>hsweb-system-config-controller</module>
-        <module>hsweb-system-config-entity</module>
+        <module>hsweb-system-config-web</module>
+        <module>hsweb-system-config-api</module>
+        <module>hsweb-system-config-local</module>
         <module>hsweb-system-config-starter</module>
     </modules>
 

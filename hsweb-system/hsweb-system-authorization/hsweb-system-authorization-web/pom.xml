@@ -15,10 +15,10 @@
     <dependencies>
         <dependency>
             <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
-            <version>2.5</version>
-            <optional>true</optional>
+            <artifactId>javax.servlet-api</artifactId>
+            <scope>provided</scope>
         </dependency>
+
         <dependency>
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-system-authorization-api</artifactId>

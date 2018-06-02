@@ -11,11 +11,10 @@
     <packaging>pom</packaging>
     <artifactId>hsweb-system-schedule</artifactId>
     <modules>
-        <module>hsweb-system-schedule-dao</module>
-        <module>hsweb-system-schedule-service</module>
-        <module>hsweb-system-schedule-controller</module>
-        <module>hsweb-system-schedule-entity</module>
         <module>hsweb-system-schedule-starter</module>
+        <module>hsweb-system-schedule-api</module>
+        <module>hsweb-system-schedule-local</module>
+        <module>hsweb-system-schedule-web</module>
     </modules>
 
     <dependencyManagement>

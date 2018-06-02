@@ -34,17 +34,26 @@ public final class FastBeanCopier {
 
     private static final Map<Class, Class> wrapperClassMapping = new HashMap<>();
 
-    public static final DefaultConverter DEFAULT_CONVERT = new DefaultConverter();
-
     public static final Class[] EMPTY_CLASS_ARRAY = new Class[0];
 
-    public static BeanFactory BEAN_FACTORY = new BeanFactory() {
+    private static BeanFactory BEAN_FACTORY = new BeanFactory() {
         @Override
         @SneakyThrows
         public <T> T newInstance(Class<T> beanType) {
             return beanType == Map.class ? (T) new HashMap<>() : beanType.newInstance();
         }
     };
+
+    public static final DefaultConverter DEFAULT_CONVERT;
+
+    public static void setBeanFactory(BeanFactory beanFactory) {
+        BEAN_FACTORY = beanFactory;
+        DEFAULT_CONVERT.setBeanFactory(beanFactory);
+    }
+
+    public static BeanFactory getBeanFactory() {
+        return BEAN_FACTORY;
+    }
 
     static {
         wrapperClassMapping.put(byte.class, Byte.class);
@@ -55,6 +64,15 @@ public final class FastBeanCopier {
         wrapperClassMapping.put(char.class, Character.class);
         wrapperClassMapping.put(boolean.class, Boolean.class);
         wrapperClassMapping.put(long.class, Long.class);
+        BEAN_FACTORY = new BeanFactory() {
+            @Override
+            @SneakyThrows
+            public <T> T newInstance(Class<T> beanType) {
+                return beanType == Map.class ? (T) new HashMap<>() : beanType.newInstance();
+            }
+        };
+        DEFAULT_CONVERT = new DefaultConverter();
+        DEFAULT_CONVERT.setBeanFactory(BEAN_FACTORY);
     }
 
     public static <T, S> T copy(S source, T target, String... ignore) {
@@ -520,7 +538,7 @@ public final class FastBeanCopier {
                     return converter.convert(targetClass, source);
                 }
 
-                return copy(source, beanFactory.newInstance(targetClass),this);
+                return copy(source, beanFactory.newInstance(targetClass), this);
             } catch (Exception e) {
                 log.warn("复制类型{}->{}失败", source, targetClass, e);
                 throw new UnsupportedOperationException(e.getMessage(), e);

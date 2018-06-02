@@ -84,7 +84,7 @@
         <project.build.jdk>${java.version}</project.build.jdk>
 
 
-        <spring.boot.version>1.4.5.RELEASE</spring.boot.version>
+        <spring.boot.version>1.5.13.RELEASE</spring.boot.version>
 
         <javassist.version>3.20.0-GA</javassist.version>
         <activiti.version>5.19.0.2</activiti.version>
@@ -425,14 +425,6 @@
     </distributionManagement>
 
     <pluginRepositories>
-        <!--<pluginRepository>-->
-        <!--<id>hsweb-nexus</id>-->
-        <!--<name>Nexus Release Repository</name>-->
-        <!--<url>http://nexus.hsweb.me/content/groups/public/</url>-->
-        <!--<snapshots>-->
-        <!--<enabled>true</enabled>-->
-        <!--</snapshots>-->
-        <!--</pluginRepository>-->
         <pluginRepository>
             <id>aliyun-nexus</id>
             <name>aliyun</name>

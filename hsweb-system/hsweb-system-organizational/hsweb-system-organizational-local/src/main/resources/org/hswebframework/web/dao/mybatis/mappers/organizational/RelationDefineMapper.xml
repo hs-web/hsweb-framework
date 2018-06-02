@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.hswebframework.web.dao.organizational.RelationDefineDao">
+    <resultMap id="RelationDefineResultMap" type="org.hswebframework.web.entity.organizational.RelationDefineEntity">
+              <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
+            <result property="name" column="name" javaType="String" jdbcType="VARCHAR"/>
+            <result property="typeId" column="type_id" javaType="String" jdbcType="VARCHAR"/>
+            <result property="status" column="status" javaType="Byte" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!--用于动态生成sql所需的配置-->
+    <sql id="config">
+        <bind name="resultMapId" value="'RelationDefineResultMap'"/>
+        <bind name="tableName" value="'s_relation_def'"/>
+    </sql>
+  
+    <insert id="insert" parameterType="org.hswebframework.web.entity.organizational.RelationDefineEntity" >
+        <include refid="config"/>
+        <include refid="BasicMapper.buildInsertSql"/>
+    </insert>
+
+    <delete id="deleteByPk" parameterType="String">
+        delete from s_relation_def where u_id =#{id}
+    </delete>
+
+    <delete id="delete" parameterType="org.hswebframework.web.commons.entity.Entity">
+        <include refid="config"/>
+        <include refid="BasicMapper.buildDeleteSql"/>
+    </delete>
+
+    <update id="update" parameterType="org.hswebframework.web.commons.entity.Entity">
+        <include refid="config"/>
+        <include refid="BasicMapper.buildUpdateSql"/>
+    </update>
+
+    <select id="query" parameterType="org.hswebframework.web.commons.entity.Entity" resultMap="RelationDefineResultMap">
+        <include refid="config"/>
+        <include refid="BasicMapper.buildSelectSql"/>
+    </select>
+
+    <select id="count" parameterType="org.hswebframework.web.commons.entity.Entity" resultType="int">
+        <include refid="config"/>
+        <include refid="BasicMapper.buildTotalSql"/>
+    </select>
+</mapper>

@@ -2,7 +2,6 @@ package org.hswebframework.web.workflow.flowable.controller;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
 import org.activiti.engine.impl.pvm.process.ActivityImpl;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.task.Task;
@@ -11,10 +10,9 @@ import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.commons.entity.PagerResult;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
-import org.hswebframework.web.commons.entity.param.UpdateParamEntity;
 import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.entity.workflow.ActDefEntity;
-import org.hswebframework.web.organizational.authorization.PersonnelAuthorization;
+import org.hswebframework.web.organizational.authorization.PersonnelAuthentication;
 import org.hswebframework.web.service.form.DynamicFormOperationService;
 import org.hswebframework.web.service.workflow.ActDefService;
 import org.hswebframework.web.workflow.flowable.service.BpmActivityService;
@@ -24,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -95,7 +92,7 @@ public class FlowableCoreController {
     @ApiOperation("提交表单数据并启动流程")
     public ResponseMessage<Map<String, Object>> startProc(@PathVariable String formId,@PathVariable String defId, @RequestBody Map<String, Object> data) {
         assertDynamicFormReady();
-        PersonnelAuthorization authorization = PersonnelAuthorization
+        PersonnelAuthentication authorization = PersonnelAuthentication
                 .current()
                 .orElseThrow(NotFoundException::new);
         dynamicFormOperationService.insert(formId, data);
@@ -111,7 +108,7 @@ public class FlowableCoreController {
     @GetMapping("tasks")
     @ApiOperation("获取代办任务")
     public ResponseMessage<List<Task>> getMyTasks() {
-        PersonnelAuthorization authorization = PersonnelAuthorization
+        PersonnelAuthentication authorization = PersonnelAuthentication
                 .current()
                 .orElseThrow(NotFoundException::new);
         String userId = authorization.getPersonnel().getId();
@@ -130,7 +127,7 @@ public class FlowableCoreController {
     @PutMapping("complete/{formId}-{taskId}")
     public ResponseMessage<Map<String,Object>> complete(@PathVariable String formId,@PathVariable String taskId){
         assertDynamicFormReady();
-        PersonnelAuthorization authorization = PersonnelAuthorization
+        PersonnelAuthentication authorization = PersonnelAuthentication
                 .current()
                 .orElseThrow(NotFoundException::new);
         String userId = authorization.getPersonnel().getId();

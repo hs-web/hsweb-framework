@@ -15,7 +15,7 @@ import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.entity.authorization.SimpleUserEntity;
 import org.hswebframework.web.entity.authorization.UserEntity;
 import org.hswebframework.web.logging.AccessLogger;
-import org.hswebframework.web.organizational.authorization.PersonnelAuthorization;
+import org.hswebframework.web.organizational.authorization.PersonnelAuthentication;
 import org.hswebframework.web.service.QueryByEntityService;
 import org.hswebframework.web.service.QueryService;
 import org.springframework.web.bind.annotation.*;
@@ -38,9 +38,9 @@ public class TestController implements QueryController<UserEntity, String, Query
     @Authorize(action = "query")
     public ResponseMessage testSimple(Authentication authentication) {
         return ResponseMessage.ok(
-                PersonnelAuthorization.current()
+                PersonnelAuthentication.current()
                         //查找人员关系
-                        .map(PersonnelAuthorization::getRelations)
+                        .map(PersonnelAuthentication::getRelations)
                         .map(relations -> relations.findPos("leader"))
                         .orElse(null));
     }
@@ -79,8 +79,8 @@ public class TestController implements QueryController<UserEntity, String, Query
 
 
     @PutMapping("/test/testPersonnel")
-    public ResponseMessage<PersonnelAuthorization> testPersonnel() {
-        return ResponseMessage.ok(PersonnelAuthorization.current().orElseThrow(UnAuthorizedException::new));
+    public ResponseMessage<PersonnelAuthentication> testPersonnel() {
+        return ResponseMessage.ok(PersonnelAuthentication.current().orElseThrow(UnAuthorizedException::new));
     }
     @PostMapping("/test/testDict")
     public ResponseMessage<TestEntity> testPersonnel(@RequestBody TestEntity entity) {

@@ -108,7 +108,7 @@
         <!--</dependency>-->
         <dependency>
             <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-system-organizational-service-api</artifactId>
+            <artifactId>hsweb-system-organizational-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -123,7 +123,7 @@
         </dependency>
         <dependency>
             <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-system-dynamic-form-service-api</artifactId>
+            <artifactId>hsweb-system-dynamic-form-api</artifactId>
             <version>${project.version}</version>
         </dependency>
 

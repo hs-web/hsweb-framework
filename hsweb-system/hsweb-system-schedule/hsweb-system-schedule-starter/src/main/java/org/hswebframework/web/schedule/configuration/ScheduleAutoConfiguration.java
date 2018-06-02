@@ -1,12 +1,10 @@
 package org.hswebframework.web.schedule.configuration;
 
 import lombok.extern.slf4j.Slf4j;
-import org.hswebframework.web.message.Messager;
 import org.hswebframework.web.service.schedule.ScheduleJobExecutor;
 import org.hswebframework.web.service.schedule.ScheduleJobService;
 import org.hswebframework.web.service.schedule.simple.DefaultScriptScheduleJobExecutor;
 import org.hswebframework.web.service.schedule.simple.DynamicJobFactory;
-import org.hswebframework.web.service.schedule.simple.cluster.MessagerScheduleJobExecutor;
 import org.quartz.Calendar;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerListener;
@@ -54,9 +52,6 @@ public class ScheduleAutoConfiguration {
     @Autowired(required = false)
     private SchedulerListener[] schedulerListeners;
 
-    @Autowired(required = false)
-    private Messager messager;
-
     @Bean
     public JobFactory jobFactory() {
         return new DynamicJobFactory(new AdaptableJobFactory());
@@ -90,19 +85,9 @@ public class ScheduleAutoConfiguration {
     @ConditionalOnMissingBean(ScheduleJobExecutor.class)
     public ScheduleJobExecutor scheduleJobExecutor(ScheduleJobService scheduleJobService) {
         ScheduleJobExecutor defaultExecutor = new DefaultScriptScheduleJobExecutor(scheduleJobService);
-        ScheduleJobExecutor scheduleJobExecutor = defaultExecutor;
 
-        if (schedulerProperties.isEnableCluster()) {
-            if (messager != null) {
-                MessagerScheduleJobExecutor executor = new MessagerScheduleJobExecutor(scheduleJobService, defaultExecutor, messager);
-                executor.setTags(schedulerProperties.getExecuteTags());
-                scheduleJobExecutor = executor;
-            } else {
-                log.warn("schedule job cluster enabled,please add messager dependency in your configuration");
-            }
-        }
 
-        return scheduleJobExecutor;
+        return defaultExecutor;
     }
 
 }

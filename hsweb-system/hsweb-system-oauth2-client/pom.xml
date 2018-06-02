@@ -30,11 +30,10 @@
     <artifactId>hsweb-system-oauth2-client</artifactId>
     <packaging>pom</packaging>
     <modules>
-        <module>hsweb-system-oauth2-client-controller</module>
-        <module>hsweb-system-oauth2-client-dao</module>
-        <module>hsweb-system-oauth2-client-entity</module>
-        <module>hsweb-system-oauth2-client-service</module>
         <module>hsweb-system-oauth2-client-starter</module>
+        <module>hsweb-system-oauth2-client-api</module>
+        <module>hsweb-system-oauth2-client-local</module>
+        <module>hsweb-system-oauth2-client-web</module>
     </modules>
 
 

@@ -12,11 +12,12 @@ import org.hswebframework.web.organizational.authorization.relation.SimpleRelati
 import java.util.Map;
 
 public class SimplePersonnelAuthorizationBuilder {
-    static FastBeanCopier.DefaultConverter converter = new FastBeanCopier.DefaultConverter();
+   private static FastBeanCopier.DefaultConverter converter = new FastBeanCopier.DefaultConverter();
 
     static {
         converter.setBeanFactory(new BeanFactory() {
             @Override
+            @SuppressWarnings("all")
             public <T> T newInstance(Class<T> targetClass) {
                 if (targetClass == Position.class) {
                     return (T) new SimplePosition();
@@ -39,17 +40,17 @@ public class SimplePersonnelAuthorizationBuilder {
                 if (targetClass == Relations.class) {
                     return (T) new SimpleRelations();
                 }
-                return FastBeanCopier.BEAN_FACTORY.newInstance(targetClass);
+                return FastBeanCopier.getBeanFactory().newInstance(targetClass);
             }
         });
     }
 
-    public static SimplePersonnelAuthorization fromJson(String json) {
+    public static SimplePersonnelAuthentication fromJson(String json) {
         return fromMap(JSON.parseObject(json));
     }
 
-    public static SimplePersonnelAuthorization fromMap(Map<String,Object> map) {
-        return FastBeanCopier.copy(map, new SimplePersonnelAuthorization(), converter);
+    public static SimplePersonnelAuthentication fromMap(Map<String,Object> map) {
+        return FastBeanCopier.copy(map, new SimplePersonnelAuthentication(), converter);
     }
 
 }

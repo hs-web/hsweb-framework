@@ -3,9 +3,8 @@ package org.hswebframework.web.organizational.authorization.simple.handler;
 import org.hswebframework.ezorm.core.param.Term;
 import org.hswebframework.ezorm.core.param.TermType;
 import org.hswebframework.web.authorization.define.AuthorizingContext;
-import org.hswebframework.web.entity.organizational.PositionEntity;
-import org.hswebframework.web.entity.organizational.authorization.PositionAttachEntity;
-import org.hswebframework.web.organizational.authorization.PersonnelAuthorization;
+import org.hswebframework.web.organizational.authorization.access.PositionAttachEntity;
+import org.hswebframework.web.organizational.authorization.PersonnelAuthentication;
 import org.hswebframework.web.organizational.authorization.access.DataAccessType;
 
 import java.util.Collections;
@@ -15,8 +14,6 @@ import static org.hswebframework.web.organizational.authorization.access.DataAcc
 import static org.hswebframework.web.organizational.authorization.access.DataAccessType.SCOPE_TYPE_ONLY_SELF;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public class PositionScopeDataAccessHandler extends AbstractScopeDataAccessHandler<PositionAttachEntity> {
@@ -31,7 +28,7 @@ public class PositionScopeDataAccessHandler extends AbstractScopeDataAccessHandl
     }
 
     @Override
-    protected Set<String> getTryOperationScope(String scopeType, PersonnelAuthorization authorization) {
+    protected Set<String> getTryOperationScope(String scopeType, PersonnelAuthentication authorization) {
         switch (scopeType) {
             case SCOPE_TYPE_CHILDREN:
                 return authorization.getAllPositionId();
@@ -55,11 +52,7 @@ public class PositionScopeDataAccessHandler extends AbstractScopeDataAccessHandl
     @Override
     protected Term createQueryTerm(Set<String> scope, AuthorizingContext context) {
         Term term = new Term();
-        if (genericTypeInstanceOf(PositionEntity.class,context)) {
-            term.setColumn(PositionEntity.id);
-        } else {
-            term.setColumn(PositionAttachEntity.positionId);
-        }
+        term.setColumn(PositionAttachEntity.positionId);
         term.setTermType(TermType.in);
         term.setValue(scope);
         term.setType(Term.Type.and);

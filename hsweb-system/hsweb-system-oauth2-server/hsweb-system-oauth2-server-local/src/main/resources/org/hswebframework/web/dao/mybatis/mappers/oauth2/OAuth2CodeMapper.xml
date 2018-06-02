@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  ~  Copyright 2016 http://www.hswebframework.org
+  ~
+  ~  Licensed under the Apache License, Version 2.0 (the "License");
+  ~  you may not use this file except in compliance with the License.
+  ~  You may obtain a copy of the License at
+  ~
+  ~        http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  ~
+  ~
+  -->
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.hswebframework.web.dao.oauth2.server.AuthorizationCodeDao">
+    <resultMap id="AuthorizationCodeResultMap" type="org.hswebframework.web.entity.oauth2.server.AuthorizationCodeEntity">
+        <result property="clientId" column="client_id" javaType="String" jdbcType="VARCHAR"/>
+        <result property="userId" column="user_id" javaType="String" jdbcType="VARCHAR"/>
+        <result property="code" column="code" javaType="String" jdbcType="VARCHAR"/>
+        <result property="createTime" column="create_time" javaType="Long" jdbcType="NUMERIC"/>
+        <result property="scope" column="scope" javaType="java.util.Set" jdbcType="VARCHAR"/>
+        <result property="redirectUri" column="redirect_uri" javaType="String" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!--用于动态生成sql所需的配置-->
+    <sql id="config">
+        <bind name="resultMapId" value="'AuthorizationCodeResultMap'"/>
+        <bind name="tableName" value="'s_oauth2_auth_code'"/>
+    </sql>
+
+    <insert id="insert" parameterType="org.hswebframework.web.entity.oauth2.server.AuthorizationCodeEntity">
+        <include refid="config"/>
+        <include refid="BasicMapper.buildInsertSql"/>
+    </insert>
+
+    <delete id="delete" parameterType="org.hswebframework.web.commons.entity.Entity">
+        <include refid="config"/>
+        <include refid="BasicMapper.buildDeleteSql"/>
+    </delete>
+
+    <select id="query" parameterType="org.hswebframework.web.commons.entity.Entity" resultMap="AuthorizationCodeResultMap">
+        <include refid="config"/>
+        <include refid="BasicMapper.buildSelectSql"/>
+    </select>
+
+    <select id="count" parameterType="org.hswebframework.web.commons.entity.Entity" resultType="int">
+        <include refid="config"/>
+        <include refid="BasicMapper.buildTotalSql"/>
+    </select>
+</mapper>

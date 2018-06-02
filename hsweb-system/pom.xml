@@ -15,7 +15,6 @@
         <module>hsweb-system-dynamic-form</module>
         <module>hsweb-system-config</module>
         <module>hsweb-system-database-manager</module>
-        <module>hsweb-system-monitor</module>
         <module>hsweb-system-datasource</module>
         <module>hsweb-system-workflow</module>
         <module>hsweb-system-schedule</module>

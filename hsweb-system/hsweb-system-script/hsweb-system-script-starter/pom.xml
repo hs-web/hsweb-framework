@@ -24,19 +24,13 @@
     <dependencies>
         <dependency>
             <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-system-script-service-simple</artifactId>
+            <artifactId>hsweb-system-script-local</artifactId>
             <version>${project.version}</version>
         </dependency>
       
         <dependency>
             <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-system-script-dao-mybatis</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-      
-        <dependency>
-            <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-system-script-controller</artifactId>
+            <artifactId>hsweb-system-script-web</artifactId>
             <version>${project.version}</version>
         </dependency>
 

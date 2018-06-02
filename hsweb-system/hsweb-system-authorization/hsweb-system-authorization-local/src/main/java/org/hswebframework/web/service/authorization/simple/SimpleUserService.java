@@ -176,36 +176,38 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
         assertNotNull(oldUser);
         boolean roleModified = false;
         boolean passwordModified = false;
-        //判断用户是否存在
-        boolean userExists = createQuery().where()
-                .is(UserEntity.username, userEntity.getUsername())
-                .and().not(GenericEntity.id, userId)
-                .total() > 0;
-        tryValidateProperty(!userExists, GenericEntity.id, "{username_exists}");
-        List<String> updateProperties = new ArrayList<>(Collections.singletonList("name"));
+
+        //不修改的字段
+        List<String> excludeProperties = new ArrayList<>(Arrays.asList(
+                UserEntity.username
+                ,UserEntity.password
+                ,UserEntity.salt
+                ,UserEntity.status));
         //修改密码
         if (StringUtils.hasLength(userEntity.getPassword())) {
             //密码强度验证
             tryValidateProperty(passwordStrengthValidator, UserEntity.password, userEntity.getPassword());
             //密码MD5
             userEntity.setPassword(encodePassword(userEntity.getPassword(), oldUser.getSalt()));
-            updateProperties.add(UserEntity.password);
+            excludeProperties.remove(UserEntity.password);
             passwordModified = true;
         }
         //修改数据
         createUpdate(getDao(), userEntity)
-                .includes(updateProperties.toArray(new String[updateProperties.size()]))
+                .excludes(excludeProperties.toArray(new String[excludeProperties.size()]))
                 .where(GenericEntity.id, userEntity.getId())
                 .exec();
         if (userEntity instanceof BindRoleUserEntity) {
             BindRoleUserEntity bindRoleUserEntity = ((BindRoleUserEntity) userEntity);
-            //删除旧的数据
-            userRoleDao.deleteByUserId(bindRoleUserEntity.getId());
-            //同步角色信息
-            trySyncUserRole(userEntity.getId(), bindRoleUserEntity.getRoles());
-            roleModified = true;
+            if (bindRoleUserEntity.getRoles() != null) {
+                //删除旧的数据
+                userRoleDao.deleteByUserId(bindRoleUserEntity.getId());
+                //同步角色信息
+                trySyncUserRole(userEntity.getId(), bindRoleUserEntity.getRoles());
+                roleModified = true;
+            }
         }
-        if (updateProperties.contains(UserEntity.password)) {
+        if (excludeProperties.contains(UserEntity.password)) {
             publisher.publishEvent(new UserModifiedEvent(userEntity, passwordModified, roleModified));
         }
     }
@@ -232,7 +234,7 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
         assertNotNull(userEntity);
         oldPassword = encodePassword(oldPassword, userEntity.getSalt());
         if (!userEntity.getPassword().equals(oldPassword)) {
-            throw new ValidationException("{old_password_error}", "password");
+            throw new ValidationException("密码错误", "password");
         }
         tryValidateProperty(passwordStrengthValidator, UserEntity.password, newPassword);
 

@@ -32,8 +32,6 @@
         <module>hsweb-examples-simple</module>
         <module>hsweb-examples-oauth2</module>
         <module>hsweb-examples-custom-entity</module>
-        <module>hsweb-examples-workflow</module>
-        <module>hsweb-examples-cloud</module>
     </modules>
 
     <build>
