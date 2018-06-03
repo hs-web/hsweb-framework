@@ -13,7 +13,7 @@ import java.util.function.Predicate;
  * @author zhouhao
  * @see 3.0
  */
-public interface EnumDict<V> {
+public interface EnumDict<V>{
     /**
      * 枚举选项的值,通常由字母或者数字组成,并且在同一个枚举中值唯一;对应数据库中的值通常也为此值
      *

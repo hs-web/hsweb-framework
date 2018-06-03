@@ -22,6 +22,10 @@ public class DictDefineTest {
 
     private DictSupportApi api = new DefaultDictSupportApi(repository);
 
+    public void testJson(){
+        UserCode code=UserCode.CODE0;
+
+    }
     @Test
     public void testEnumDict() {
 
