@@ -3,14 +3,12 @@ package org.hswebframework.web.dao.mybatis.mapper;
 import lombok.AllArgsConstructor;
 import org.hswebframework.ezorm.core.param.Term;
 import org.hswebframework.ezorm.rdb.meta.RDBColumnMetaData;
-import org.hswebframework.ezorm.rdb.render.Sql;
 import org.hswebframework.ezorm.rdb.render.SqlAppender;
 import org.hswebframework.ezorm.rdb.render.dialect.Dialect;
 import org.hswebframework.ezorm.rdb.render.dialect.Dialect.TermTypeMapper;
 import org.hswebframework.web.dict.EnumDict;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @SuppressWarnings("all")
@@ -45,7 +43,7 @@ public abstract class EnumDicInTermTypeMapper implements TermTypeMapper {
                             .stream().map(v -> EnumDict.find(componentType, v).orElse(null))
                             .filter(Objects::nonNull)
                             .toArray(EnumDict[]::new);
-                    long bit = EnumDict.toBit(newValue);
+                    long bit = EnumDict.toMask(newValue);
                     term.setValue(bit);
                 }else{
                     //枚举数量大于等于64,无法使用位运算
