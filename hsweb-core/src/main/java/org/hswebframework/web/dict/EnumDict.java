@@ -1,7 +1,19 @@
 package org.hswebframework.web.dict;
 
+import com.alibaba.fastjson.JSONException;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.parser.DefaultJSONParser;
+import com.alibaba.fastjson.parser.JSONLexer;
+import com.alibaba.fastjson.parser.JSONToken;
+import com.alibaba.fastjson.parser.deserializer.ObjectDeserializer;
+import com.alibaba.fastjson.serializer.JSONSerializable;
+import com.alibaba.fastjson.serializer.JSONSerializer;
+
+import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
 
@@ -13,7 +25,8 @@ import java.util.function.Predicate;
  * @author zhouhao
  * @see 3.0
  */
-public interface EnumDict<V>{
+public interface EnumDict<V> extends JSONSerializable {
+
     /**
      * 枚举选项的值,通常由字母或者数字组成,并且在同一个枚举中值唯一;对应数据库中的值通常也为此值
      *
@@ -152,4 +165,76 @@ public interface EnumDict<V>{
         }
         return arr;
     }
+
+    boolean DEFAULT_WRITE_JSON_OBJECT = Boolean.getBoolean("hsweb.enum.dict.enableWriteJSONObject");
+
+    default boolean writeJSONObject() {
+        return DEFAULT_WRITE_JSON_OBJECT;
+    }
+
+    default JSONObject getWriteObject() {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("value", getValue());
+        jsonObject.put("text", getText());
+        return jsonObject;
+    }
+
+    @Override
+    default void write(JSONSerializer jsonSerializer, Object o, Type type, int i) throws IOException {
+        if (writeJSONObject()) {
+            jsonSerializer.write(getWriteObject());
+        } else {
+            jsonSerializer.write(getValue());
+        }
+
+    }
+
+    class EnumDictJSONDeserializer implements ObjectDeserializer {
+
+        @Override
+        @SuppressWarnings("all")
+        public <T> T deserialze(DefaultJSONParser parser, Type type, Object fieldName) {
+            try {
+                Object value;
+                final JSONLexer lexer = parser.lexer;
+                final int token = lexer.token();
+                if (token == JSONToken.LITERAL_INT) {
+                    int intValue = lexer.intValue();
+                    lexer.nextToken(JSONToken.COMMA);
+
+                    return (T) EnumDict.find((Class) type, intValue);
+                } else if (token == JSONToken.LITERAL_STRING) {
+                    String name = lexer.stringVal();
+                    lexer.nextToken(JSONToken.COMMA);
+
+                    if (name.length() == 0) {
+                        return (T) null;
+                    }
+                    return (T) EnumDict.find((Class) type, name).orElse(null);
+                } else if (token == JSONToken.NULL) {
+                    lexer.nextToken(JSONToken.COMMA);
+                    return null;
+                } else {
+                    value = parser.parse();
+                    if (value instanceof Map) {
+                        return (T) EnumDict.find(((Class) type), ((Map) value).get("value"))
+                                .orElseGet(() ->
+                                        EnumDict.find(((Class) type), ((Map) value).get("text")).orElse(null));
+                    }
+                }
+
+                throw new JSONException("parse enum " + type + " error, value : " + value);
+            } catch (JSONException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new JSONException(e.getMessage(), e);
+            }
+        }
+
+        @Override
+        public int getFastMatchToken() {
+            return JSONToken.LITERAL_STRING;
+        }
+    }
+
 }
