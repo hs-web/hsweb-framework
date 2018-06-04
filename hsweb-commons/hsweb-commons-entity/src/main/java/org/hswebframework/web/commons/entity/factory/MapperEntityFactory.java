@@ -35,10 +35,10 @@ import java.util.function.Supplier;
  * @since 3.0
  */
 @SuppressWarnings("unchecked")
-public class MapperEntityFactory implements EntityFactory ,BeanFactory {
-    private Map<Class, Mapper> realTypeMapper = new HashMap<>();
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
-    private Map<String, PropertyCopier> copierCache = new HashMap<>();
+public class MapperEntityFactory implements EntityFactory, BeanFactory {
+    private Map<Class, Mapper>          realTypeMapper = new HashMap<>();
+    private Logger                      logger         = LoggerFactory.getLogger(this.getClass());
+    private Map<String, PropertyCopier> copierCache    = new HashMap<>();
 
     private static final DefaultMapperFactory DEFAULT_MAPPER_FACTORY = clazz -> {
         String simpleClassName = clazz.getPackage().getName().concat(".Simple").concat(clazz.getSimpleName());
@@ -159,6 +159,15 @@ public class MapperEntityFactory implements EntityFactory ,BeanFactory {
         if (defaultClass != null) {
             return newInstance(defaultClass);
         }
+        if (Map.class == beanClass) {
+            return (T) new HashMap<>();
+        }
+        if (List.class == beanClass) {
+            return (T) new ArrayList<>();
+        }
+        if (Set.class == beanClass) {
+            return (T) new HashSet<>();
+        }
 
         throw new NotFoundException("can't create instance for " + beanClass);
     }
@@ -190,7 +199,7 @@ public class MapperEntityFactory implements EntityFactory ,BeanFactory {
     }
 
     public static class Mapper<T> {
-        Class<T> target;
+        Class<T>    target;
         Supplier<T> instanceGetter;
 
         public Mapper(Class<T> target, Supplier<T> instanceGetter) {
