@@ -42,3 +42,4 @@
 |[hsweb-message](hsweb-message)|mq,websocket...| 80%|
 |[hsweb-starter](hsweb-starter)|模块启动器| 90%|
 |[hsweb-system](hsweb-system)|**系统常用功能**| 80%|
+|[hsweb-thirdparty](hsweb-thirdparty)| 第三方插件 | 100% |
