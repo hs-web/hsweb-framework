@@ -18,8 +18,10 @@
 
 package org.hswebframework.web.entity.authorization;
 
+import org.hibernate.validator.constraints.NotBlank;
 import org.hswebframework.web.commons.entity.GenericEntity;
 import org.hswebframework.web.commons.entity.RecordCreationEntity;
+import org.hswebframework.web.validator.group.CreateGroup;
 
 /**
  * @author zhouhao
@@ -41,6 +43,7 @@ public interface UserEntity extends GenericEntity<String>, RecordCreationEntity 
 
     void setUsername(String username);
 
+    @NotBlank(groups = CreateGroup.class)
     String getName();
 
     void setPassword(String password);
