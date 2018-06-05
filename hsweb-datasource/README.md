@@ -5,6 +5,20 @@
 
 # example
 
+表达式方式:
+
+application.yml配置
+```xml
+hsweb:
+    datasource:
+        switcher:
+           test: # 只是一个标识
+              # 拦截类和方法的表达式
+              expression: org.hswebframework.**.*Service.find*
+              # 使用数据源
+              data-source-id: read_db
+```
+
 编程方式:
 ```java
   //切换到 id为mysql_read_01的数据源

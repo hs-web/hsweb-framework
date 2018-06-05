@@ -23,8 +23,8 @@ logging:
       com.atomikos: WARN
       org.hswebframework: DEBUG
 hsweb:
-  dynamic:
-    datasource:
+  datasource:
+    jta:
         test_ds:
             xa-data-source-class-name: com.alibaba.druid.pool.xa.DruidXADataSource
             xa-properties:
@@ -43,6 +43,12 @@ hsweb:
           max-pool-size: 20
           borrow-connection-timeout: 1000
           init-timeout: 20
+    switcher:
+       test: # 只是一个标识
+          # 拦截表达式
+          expression: org.hswebframework.**.*DynDsTest.find*
+          # 使用数据源
+          data-source-id: test_ds
 
 config:
     test: 123

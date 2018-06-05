@@ -25,5 +25,5 @@ public @interface UseDataSource {
      * 将抛出 {@link org.hswebframework.web.datasource.exception.DataSourceNotFoundException}
      * @see DataSourceHolder#currentExisting()
      */
-    boolean fallbackDefault() default true;
+    boolean fallbackDefault() default false;
 }
