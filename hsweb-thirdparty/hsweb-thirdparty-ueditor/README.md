@@ -1,4 +1,4 @@
-# 百度UEditor spring-boot集成
+# 百度UEditor
 
 对[百度UEditor](http://ueditor.baidu.com/website/)后台服务的封装
 
