@@ -20,3 +20,4 @@
 hs_err_pid*
 **/transaction-logs/
 pom.xml.versionsBackup
+build/
