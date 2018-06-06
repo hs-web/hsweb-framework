@@ -46,7 +46,7 @@ public class UserInPositionSqlTerm extends UserInSqlTerm {
 
         appender.addSpc("where ",
                 createColumnName(column, tableAlias), "=",
-                isForPerson() ? "_person.u_id=tmp_.person_id and _tmp.person_id" : "_person.user_id");
+                isForPerson() ? " _tmp.person_id" : "_person.user_id and _person.u_id=tmp_.person_id");
 
         if (isChild()) {
             appender.addSpc("and _pos.u_id=tmp_.position_id");
