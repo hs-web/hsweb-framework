@@ -6,7 +6,7 @@
 `hsweb-system-organizational-local`模块中提供了一些自定义的查询条件,用于对组织机构关联查询.可以在动态查询中
 进行使用,例如:
 
-```xml
+```java
 
 //查询orgId为1234的机构以及其所有子机构的数据
 createQuery().where("orgId","org-child-in","1234").list();
