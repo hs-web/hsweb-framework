@@ -36,7 +36,7 @@ public class UserInPositionSqlTerm extends UserInSqlTerm {
         ChangedTermValue termValue = createChangedTermValue(term);
 
         SqlAppender appender = new SqlAppender();
-        appender.addSpc(not ? "not" : "", "exists(select 1 from s_person_position tmp_");
+        appender.addSpc(not ? "not" : "", "exists(select 1 from s_person_position _tmp");
         if (isChild()) {
             appender.addSpc(",s_position _pos");
         }
@@ -46,10 +46,10 @@ public class UserInPositionSqlTerm extends UserInSqlTerm {
 
         appender.addSpc("where ",
                 createColumnName(column, tableAlias), "=",
-                isForPerson() ? " _tmp.person_id" : "_person.user_id and _person.u_id=tmp_.person_id");
+                isForPerson() ? " _tmp.person_id" : "_person.user_id and _person.u_id=_tmp.person_id");
 
         if (isChild()) {
-            appender.addSpc("and _pos.u_id=tmp_.position_id");
+            appender.addSpc("and _pos.u_id=_tmp.position_id");
         }
 
         List<Object> positionIdList = BoostTermTypeMapper.convertList(column, termValue.getOld());

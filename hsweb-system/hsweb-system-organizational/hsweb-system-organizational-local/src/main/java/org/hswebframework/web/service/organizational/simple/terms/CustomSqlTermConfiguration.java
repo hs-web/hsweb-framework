@@ -24,7 +24,6 @@ public class CustomSqlTermConfiguration {
         return new InServiceTreeInSqlTerm<>(districtService, "dist", "s_district", true);
     }
 
-
     @Bean
     public InServiceTreeInSqlTerm<String> orgInSqlTerm(OrganizationalService organizationalService) {
         return new InServiceTreeInSqlTerm<>(organizationalService, "org", "s_organization", false);
@@ -43,16 +42,6 @@ public class CustomSqlTermConfiguration {
     @Bean
     public InServiceTreeInSqlTerm<String> departmentNotInSqlTerm(DepartmentService departmentService) {
         return new InServiceTreeInSqlTerm<>(departmentService, "dept", "s_department", true);
-    }
-
-    @Bean
-    public InServiceTreeInSqlTerm<String> positionInSqlTerm(PositionService positionService) {
-        return new InServiceTreeInSqlTerm<>(positionService, "pos", "s_position", false);
-    }
-
-    @Bean
-    public InServiceTreeInSqlTerm<String> positionNotInSqlTerm(PositionService positionService) {
-        return new InServiceTreeInSqlTerm<>(positionService, "pos", "s_position", true);
     }
 
     @Bean
