@@ -43,7 +43,7 @@ public abstract class TreeStructureSqlTermCustomer extends AbstractSqlTermCustom
         }
         for (int i = 0; i < len; i++) {
             if (i > 0) {
-                termCondition.addSpc("and");
+                termCondition.addSpc("or");
             }
             termCondition.add("tmp.path like #{", wherePrefix, ".value[", i, "]}");
         }
