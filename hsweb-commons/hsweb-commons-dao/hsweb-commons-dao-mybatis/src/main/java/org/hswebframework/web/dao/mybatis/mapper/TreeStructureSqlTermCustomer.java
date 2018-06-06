@@ -26,13 +26,17 @@ public abstract class TreeStructureSqlTermCustomer extends AbstractSqlTermCustom
 
     @Override
     public SqlAppender accept(String wherePrefix, Term term, RDBColumnMetaData column, String tableAlias) {
-        List<Object> value = BoostTermTypeMapper.convertList(column, term.getValue());
+        ChangedTermValue termValue = createChangedTermValue(term);
+
+        List<Object> value = BoostTermTypeMapper.convertList(column, termValue.getOld());
+
         List<String> paths = getTreePathByTerm(value)
                 .stream()
                 .map(path -> path.concat("%"))
                 .collect(Collectors.toList());
 
-        term.setValue(paths);
+        termValue.setValue(paths);
+
         SqlAppender termCondition = new SqlAppender();
 
         termCondition.add(not ? "not " : "", "exists(select 1 from ", getTableName(), " tmp where tmp.u_id = ", createColumnName(column, tableAlias));

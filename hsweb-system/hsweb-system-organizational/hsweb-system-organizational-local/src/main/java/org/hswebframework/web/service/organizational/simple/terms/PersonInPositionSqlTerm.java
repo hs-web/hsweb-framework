@@ -5,6 +5,7 @@ import org.hswebframework.ezorm.rdb.meta.RDBColumnMetaData;
 import org.hswebframework.ezorm.rdb.render.SqlAppender;
 import org.hswebframework.ezorm.rdb.render.dialect.term.BoostTermTypeMapper;
 import org.hswebframework.web.dao.mybatis.mapper.AbstractSqlTermCustomer;
+import org.hswebframework.web.dao.mybatis.mapper.ChangedTermValue;
 
 import java.util.List;
 
@@ -26,15 +27,16 @@ public class PersonInPositionSqlTerm extends AbstractSqlTermCustomer {
 
     @Override
     public SqlAppender accept(String wherePrefix, Term term, RDBColumnMetaData column, String tableAlias) {
+        ChangedTermValue termValue = createChangedTermValue(term);
+
         SqlAppender appender = new SqlAppender();
         //exists(select 1 from s_person_position tmp where tmp.person_id = t.owner_id and position_id =?)
         appender.add(not ? "not " : "", "exists(select 1 from s_person_position tmp where tmp.person_id =", createColumnName(column, tableAlias));
 
-        List<Object> positionIdList = BoostTermTypeMapper.convertList(column, term.getValue());
+        List<Object> positionIdList = BoostTermTypeMapper.convertList(column, termValue.getOld());
         if (!positionIdList.isEmpty()) {
             appender.add(" and tmp.position_id");
-            appendCondition(positionIdList, wherePrefix, appender);
-            term.setValue(positionIdList);
+            termValue.setValue(appendCondition(positionIdList, wherePrefix, appender));
         }
 
         appender.add(")");

@@ -5,7 +5,7 @@ import org.hswebframework.ezorm.rdb.meta.RDBColumnMetaData;
 import org.hswebframework.ezorm.rdb.render.SqlAppender;
 import org.hswebframework.ezorm.rdb.render.dialect.term.BoostTermTypeMapper;
 import org.hswebframework.web.dao.mybatis.mapper.ChangedTermValue;
-import org.hswebframework.web.service.organizational.PositionService;
+import org.hswebframework.web.service.organizational.DepartmentService;
 
 import java.util.List;
 
@@ -16,19 +16,19 @@ import java.util.List;
  * @author zhouhao
  * @since 3.0.0-RC
  */
-public class UserInPositionSqlTerm extends UserInSqlTerm {
+public class UserInDepartmentSqlTerm extends UserInSqlTerm {
 
     private boolean not;
 
-    public UserInPositionSqlTerm(boolean not, boolean child, String term, PositionService positionService) {
-        super(term, positionService);
+    public UserInDepartmentSqlTerm(boolean not, boolean child, String term, DepartmentService departmentService) {
+        super(term, departmentService);
         setChild(child);
         this.not = not;
     }
 
     @Override
     public String getTableName() {
-        return "_pos";
+        return "_dept";
     }
 
     @Override
@@ -36,30 +36,23 @@ public class UserInPositionSqlTerm extends UserInSqlTerm {
         ChangedTermValue termValue = createChangedTermValue(term);
 
         SqlAppender appender = new SqlAppender();
-        appender.addSpc(not ? "not" : "", "exists(select 1 from s_person_position tmp_");
+        appender.addSpc(not ? "not" : "", "exists(select 1 from s_person_position _tmp,s_position _pos,s_person _person");
         if (isChild()) {
-            appender.addSpc(",s_position _pos");
+            appender.addSpc(",s_department _dept");
         }
-        if (!isForPerson()) {
-            appender.addSpc(",s_person _person");
-        }
-
-        appender.addSpc("where ",
-                createColumnName(column, tableAlias), "=",
-                isForPerson() ? "_person.u_id=tmp_.person_id and _tmp.person_id" : "_person.user_id");
-
+        appender.addSpc("where _person.u_id=_tmp.person_id and _tmp.position_id = _pos.u_id and _person.u_id=_tmp.person_id"
+                , "and", createColumnName(column, tableAlias), "=_person.user_id");
         if (isChild()) {
-            appender.addSpc("and _pos.u_id=tmp_.position_id");
+            appender.addSpc("and _dept.u_id=_pos.department_id");
         }
 
         List<Object> positionIdList = BoostTermTypeMapper.convertList(column, termValue.getOld());
         if (!positionIdList.isEmpty()) {
             appender.addSpc("and");
-            termValue.setValue(appendCondition(positionIdList, wherePrefix, appender, "tmp_.position_id"));
+            termValue.setValue(appendCondition(positionIdList, wherePrefix, appender, "_pos.department_id"));
         }
 
         appender.add(")");
-
         return appender;
     }
 }
