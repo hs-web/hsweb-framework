@@ -39,7 +39,7 @@ public abstract class TreeStructureSqlTermCustomer extends AbstractSqlTermCustom
         int len = paths.size();
 
         if (len > 0) {
-            termCondition.add("and (");
+            termCondition.add(" and (");
         }
         for (int i = 0; i < len; i++) {
             if (i > 0) {
@@ -48,7 +48,7 @@ public abstract class TreeStructureSqlTermCustomer extends AbstractSqlTermCustom
             termCondition.add("tmp.path like #{", wherePrefix, ".value[", i, "]}");
         }
         if (len > 0) {
-            termCondition.addSpc(")");
+            termCondition.add(")");
         }
         termCondition.add(")");
 
