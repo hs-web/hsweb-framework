@@ -115,7 +115,6 @@ public class HswebAutoConfiguration {
                 if (type instanceof Class) {
                     Class classType = ((Class) type);
                     if (classType.isEnum()) {
-                        // TODO: 2018/4/12 支持EnumDict枚举的反序列化
                         return super.getDeserializer(type);
                     }
                     checkAutoType(type.getTypeName(), ((Class) type));

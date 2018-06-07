@@ -36,6 +36,11 @@ public abstract class SimpleGenericEntity<PK> implements GenericEntity<PK> {
     private Map<String, Object> properties;
 
     @Override
+    public String toString() {
+        return toString((String[]) null);
+    }
+
+    @Override
     public PK getId() {
         return this.id;
     }
