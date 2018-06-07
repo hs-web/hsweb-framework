@@ -10,5 +10,6 @@ public interface Copier {
     default void copy(Object source, Object target, String... ignore){
         copy(source,target,new HashSet<>(Arrays.asList(ignore)),FastBeanCopier.DEFAULT_CONVERT);
     }
+
 }
 

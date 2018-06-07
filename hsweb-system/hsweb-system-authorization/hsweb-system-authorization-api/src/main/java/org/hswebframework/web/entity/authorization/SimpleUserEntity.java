@@ -3,6 +3,7 @@ package org.hswebframework.web.entity.authorization;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hswebframework.web.bean.ToString;
 import org.hswebframework.web.commons.entity.SimpleGenericEntity;
 
 /**
@@ -18,8 +19,10 @@ public class SimpleUserEntity extends SimpleGenericEntity<String> implements Use
 
     private String username;
 
+    @ToString.Ignore
     private String password;
 
+    @ToString.Ignore(cover = false)
     private String salt;
 
     private Long createTime;
