@@ -41,7 +41,7 @@ public class EnumDicTermTypeMapper implements TermTypeMapper {
                         .stream().map(v -> EnumDict.find(componentType, v).orElse(null))
                         .filter(Objects::nonNull)
                         .toArray(EnumDict[]::new);
-                long bit = EnumDict.toBit(newValue);
+                long bit = EnumDict.toMask(newValue);
                 term.setValue(bit);
             }
         } else {

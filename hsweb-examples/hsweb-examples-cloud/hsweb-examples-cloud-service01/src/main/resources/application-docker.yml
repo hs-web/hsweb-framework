@@ -1,5 +1,0 @@
-eureka-host: gateway
-eureka-port: 8761
-spring:
-  datasource:
-     url : jdbc:h2:file:./data/service01

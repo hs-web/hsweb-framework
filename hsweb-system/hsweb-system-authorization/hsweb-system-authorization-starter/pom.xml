@@ -22,7 +22,7 @@
     <parent>
         <artifactId>hsweb-system-authorization</artifactId>
         <groupId>org.hswebframework.web</groupId>
-        <version>3.0-SNAPSHOT</version>
+        <version>3.0.0-RC-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -40,17 +40,12 @@
     <dependencies>
         <dependency>
             <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-system-authorization-service-simple</artifactId>
+            <artifactId>hsweb-system-authorization-local</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-system-authorization-dao-mybatis</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-system-authorization-controller</artifactId>
+            <artifactId>hsweb-system-authorization-web</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -66,11 +61,11 @@
             <version>${project.version}</version>
             <optional>true</optional>
         </dependency>
+
         <dependency>
             <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
-            <version>2.5</version>
-            <optional>true</optional>
+            <artifactId>javax.servlet-api</artifactId>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -78,6 +73,7 @@
             <artifactId>h2</artifactId>
             <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>druid</artifactId>

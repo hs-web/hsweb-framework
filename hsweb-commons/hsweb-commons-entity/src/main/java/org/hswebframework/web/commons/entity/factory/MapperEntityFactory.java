@@ -21,6 +21,7 @@ package org.hswebframework.web.commons.entity.factory;
 import lombok.SneakyThrows;
 import org.hswebframework.web.NotFoundException;
 import org.hswebframework.utils.ClassUtils;
+import org.hswebframework.web.bean.BeanFactory;
 import org.hswebframework.web.bean.FastBeanCopier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,10 +35,10 @@ import java.util.function.Supplier;
  * @since 3.0
  */
 @SuppressWarnings("unchecked")
-public class MapperEntityFactory implements EntityFactory {
-    private Map<Class, Mapper> realTypeMapper = new HashMap<>();
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
-    private Map<String, PropertyCopier> copierCache = new HashMap<>();
+public class MapperEntityFactory implements EntityFactory, BeanFactory {
+    private Map<Class, Mapper>          realTypeMapper = new HashMap<>();
+    private Logger                      logger         = LoggerFactory.getLogger(this.getClass());
+    private Map<String, PropertyCopier> copierCache    = new HashMap<>();
 
     private static final DefaultMapperFactory DEFAULT_MAPPER_FACTORY = clazz -> {
         String simpleClassName = clazz.getPackage().getName().concat(".Simple").concat(clazz.getSimpleName());
@@ -158,6 +159,15 @@ public class MapperEntityFactory implements EntityFactory {
         if (defaultClass != null) {
             return newInstance(defaultClass);
         }
+        if (Map.class == beanClass) {
+            return (T) new HashMap<>();
+        }
+        if (List.class == beanClass) {
+            return (T) new ArrayList<>();
+        }
+        if (Set.class == beanClass) {
+            return (T) new HashSet<>();
+        }
 
         throw new NotFoundException("can't create instance for " + beanClass);
     }
@@ -189,7 +199,7 @@ public class MapperEntityFactory implements EntityFactory {
     }
 
     public static class Mapper<T> {
-        Class<T> target;
+        Class<T>    target;
         Supplier<T> instanceGetter;
 
         public Mapper(Class<T> target, Supplier<T> instanceGetter) {

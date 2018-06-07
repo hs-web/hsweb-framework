@@ -5,7 +5,7 @@
     <parent>
         <artifactId>hsweb-system-template</artifactId>
         <groupId>org.hswebframework.web</groupId>
-        <version>3.0-SNAPSHOT</version>
+        <version>3.0.0-RC-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -24,19 +24,13 @@
     <dependencies>
         <dependency>
             <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-system-template-service-simple</artifactId>
+            <artifactId>hsweb-system-template-local</artifactId>
             <version>${project.version}</version>
         </dependency>
       
         <dependency>
             <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-system-template-dao-mybatis</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-      
-        <dependency>
-            <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-system-template-controller</artifactId>
+            <artifactId>hsweb-system-template-web</artifactId>
             <version>${project.version}</version>
         </dependency>
 

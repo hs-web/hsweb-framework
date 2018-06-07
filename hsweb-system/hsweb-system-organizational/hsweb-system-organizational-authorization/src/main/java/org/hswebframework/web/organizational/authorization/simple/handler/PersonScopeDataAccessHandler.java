@@ -3,8 +3,8 @@ package org.hswebframework.web.organizational.authorization.simple.handler;
 import org.hswebframework.ezorm.core.param.Term;
 import org.hswebframework.ezorm.core.param.TermType;
 import org.hswebframework.web.authorization.define.AuthorizingContext;
-import org.hswebframework.web.entity.organizational.authorization.PersonAttachEntity;
-import org.hswebframework.web.organizational.authorization.PersonnelAuthorization;
+import org.hswebframework.web.organizational.authorization.access.PersonAttachEntity;
+import org.hswebframework.web.organizational.authorization.PersonnelAuthentication;
 import org.hswebframework.web.organizational.authorization.access.DataAccessType;
 
 import java.util.Collections;
@@ -30,7 +30,7 @@ public class PersonScopeDataAccessHandler extends AbstractScopeDataAccessHandler
     }
 
     @Override
-    protected Set<String> getTryOperationScope(String scopeType, PersonnelAuthorization authorization) {
+    protected Set<String> getTryOperationScope(String scopeType, PersonnelAuthentication authorization) {
         switch (scopeType) {
             case SCOPE_TYPE_CHILDREN:
                 logger.warn("not support person children control!");

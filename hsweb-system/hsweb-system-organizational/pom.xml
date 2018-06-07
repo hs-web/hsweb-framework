@@ -22,19 +22,18 @@
     <parent>
         <artifactId>hsweb-system</artifactId>
         <groupId>org.hswebframework.web</groupId>
-        <version>3.0-SNAPSHOT</version>
+        <version>3.0.0-RC-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>hsweb-system-organizational</artifactId>
     <packaging>pom</packaging>
     <modules>
-        <module>hsweb-system-organizational-dao</module>
-        <module>hsweb-system-organizational-service</module>
-        <module>hsweb-system-organizational-controller</module>
-        <module>hsweb-system-organizational-entity</module>
         <module>hsweb-system-organizational-starter</module>
         <module>hsweb-system-organizational-authorization</module>
+        <module>hsweb-system-organizational-api</module>
+        <module>hsweb-system-organizational-local</module>
+        <module>hsweb-system-organizational-web</module>
     </modules>
 
 

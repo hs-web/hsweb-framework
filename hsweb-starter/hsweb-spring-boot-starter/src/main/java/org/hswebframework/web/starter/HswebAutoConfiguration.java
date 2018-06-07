@@ -25,6 +25,7 @@ import com.alibaba.fastjson.parser.deserializer.JavaBeanDeserializer;
 import com.alibaba.fastjson.parser.deserializer.ObjectDeserializer;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import org.hswebframework.web.ThreadLocalUtils;
+import org.hswebframework.web.bean.FastBeanCopier;
 import org.hswebframework.web.commons.entity.factory.EntityFactory;
 import org.hswebframework.web.commons.entity.factory.MapperEntityFactory;
 import org.hswebframework.web.convert.CustomMessageConverter;
@@ -64,8 +65,6 @@ import java.lang.reflect.Type;
 import java.util.List;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 @Configuration
@@ -116,7 +115,6 @@ public class HswebAutoConfiguration {
                 if (type instanceof Class) {
                     Class classType = ((Class) type);
                     if (classType.isEnum()) {
-                        // TODO: 2018/4/12 支持EnumDict枚举的反序列化
                         return super.getDeserializer(type);
                     }
                     checkAutoType(type.getTypeName(), ((Class) type));
@@ -175,7 +173,9 @@ public class HswebAutoConfiguration {
     @Bean(name = "entityFactory")
     @ConditionalOnMissingBean(EntityFactory.class)
     public MapperEntityFactory mapperEntityFactory() {
-        return new MapperEntityFactory(entityProperties.createMappers());
+        MapperEntityFactory entityFactory = new MapperEntityFactory(entityProperties.createMappers());
+        FastBeanCopier.setBeanFactory(entityFactory); ;
+        return entityFactory;
     }
 
     @Bean

@@ -10,9 +10,7 @@ import org.hswebframework.web.entity.authorization.RoleEntity;
 import org.hswebframework.web.service.authorization.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -51,23 +49,23 @@ public class CustomUserEntityManager extends UserEntityManager {
 
     @Override
     public List<org.activiti.engine.identity.User> findUserByQueryCriteria(UserQueryImpl query, Page page) {
-        throw new RuntimeException("not implement method..");
+        throw new UnsupportedOperationException("not implement method..");
     }
 
     @Override
     public IdentityInfoEntity findUserInfoByUserIdAndKey(String userId,
                                                          String key) {
-        throw new RuntimeException("not implement method.");
+        throw new UnsupportedOperationException("not implement method.");
     }
 
     @Override
     public List<String> findUserInfoKeysByUserIdAndType(String userId,
                                                         String type) {
-        throw new RuntimeException("not implement method.");
+        throw new UnsupportedOperationException("not implement method.");
     }
 
     @Override
     public long findUserCountByQueryCriteria(UserQueryImpl query) {
-        throw new RuntimeException("not implement method.");
+        throw new UnsupportedOperationException("not implement method.");
     }
 }

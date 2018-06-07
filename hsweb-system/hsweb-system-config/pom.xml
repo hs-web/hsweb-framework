@@ -23,17 +23,16 @@
     <parent>
         <artifactId>hsweb-system</artifactId>
         <groupId>org.hswebframework.web</groupId>
-        <version>3.0-SNAPSHOT</version>
+        <version>3.0.0-RC-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>hsweb-system-config</artifactId>
     <packaging>pom</packaging>
     <modules>
-        <module>hsweb-system-config-dao</module>
-        <module>hsweb-system-config-service</module>
-        <module>hsweb-system-config-controller</module>
-        <module>hsweb-system-config-entity</module>
+        <module>hsweb-system-config-web</module>
+        <module>hsweb-system-config-api</module>
+        <module>hsweb-system-config-local</module>
         <module>hsweb-system-config-starter</module>
     </modules>
 

@@ -5,7 +5,7 @@
     <parent>
         <artifactId>hsweb-system-workflow</artifactId>
         <groupId>org.hswebframework.web</groupId>
-        <version>3.0-SNAPSHOT</version>
+        <version>3.0.0-RC-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -92,7 +92,7 @@
         </dependency>
         <dependency>
             <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-system-authorization-service-api</artifactId>
+            <artifactId>hsweb-system-authorization-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -108,7 +108,7 @@
         <!--</dependency>-->
         <dependency>
             <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-system-organizational-service-api</artifactId>
+            <artifactId>hsweb-system-organizational-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -123,7 +123,7 @@
         </dependency>
         <dependency>
             <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-system-dynamic-form-service-api</artifactId>
+            <artifactId>hsweb-system-dynamic-form-api</artifactId>
             <version>${project.version}</version>
         </dependency>
 

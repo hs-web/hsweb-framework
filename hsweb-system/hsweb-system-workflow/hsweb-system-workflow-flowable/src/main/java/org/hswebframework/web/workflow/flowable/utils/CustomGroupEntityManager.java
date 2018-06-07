@@ -7,15 +7,11 @@ import org.activiti.engine.impl.persistence.entity.GroupEntity;
 import org.activiti.engine.impl.persistence.entity.GroupEntityManager;
 import org.hswebframework.web.entity.authorization.RoleEntity;
 import org.hswebframework.web.service.authorization.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by Administrator on 2016/3/19 0019.
- */
 public class CustomGroupEntityManager extends GroupEntityManager {
 
     private UserService userService;
@@ -45,7 +41,7 @@ public class CustomGroupEntityManager extends GroupEntityManager {
             List<RoleEntity> sysRoles = userService.getUserRole(id);
             return ActivitiUserUtil.toActivitiGroups(sysRoles);
         } catch (EmptyResultDataAccessException e) {
-            return null;
+            return new ArrayList<>();
         }
     }
 

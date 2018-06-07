@@ -18,7 +18,6 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Member;
 import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.function.Function;
@@ -118,7 +117,7 @@ public class AutoSyncPermission implements ApplicationListener<AuthorizeDefiniti
                 if (genType != Object.class) {
                     List<Field> fields = new ArrayList<>();
 
-                    ReflectionUtils.doWithFields(genType, fields::add, field -> field.getModifiers() != Modifier.STATIC);
+                    ReflectionUtils.doWithFields(genType, fields::add, field -> (field.getModifiers() & Modifier.STATIC) == 0);
 
                     for (Field field : fields) {
                         if ("id".equals(field.getName())) {

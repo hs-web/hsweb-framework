@@ -23,18 +23,17 @@
     <parent>
         <artifactId>hsweb-system</artifactId>
         <groupId>org.hswebframework.web</groupId>
-        <version>3.0-SNAPSHOT</version>
+        <version>3.0.0-RC-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>hsweb-system-oauth2-client</artifactId>
     <packaging>pom</packaging>
     <modules>
-        <module>hsweb-system-oauth2-client-controller</module>
-        <module>hsweb-system-oauth2-client-dao</module>
-        <module>hsweb-system-oauth2-client-entity</module>
-        <module>hsweb-system-oauth2-client-service</module>
         <module>hsweb-system-oauth2-client-starter</module>
+        <module>hsweb-system-oauth2-client-api</module>
+        <module>hsweb-system-oauth2-client-local</module>
+        <module>hsweb-system-oauth2-client-web</module>
     </modules>
 
 

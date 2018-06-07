@@ -26,6 +26,7 @@ public class FastBeanCopierTest {
         source.setNestObject2(Collections.singletonMap("name","mapTest"));
         NestObject nestObject = new NestObject();
         nestObject.setAge(10);
+        nestObject.setPassword("1234567");
         nestObject.setName("测试2");
         source.setNestObject(nestObject);
         source.setNestObject3(nestObject);
@@ -35,9 +36,9 @@ public class FastBeanCopierTest {
 
 
         long t = System.currentTimeMillis();
-        for (int i = 10_0000; i > 0; i--) {
-            FastBeanCopier.copy(source, target);
-        }
+//        for (int i = 10_0000; i > 0; i--) {
+//            FastBeanCopier.copy(source, target);
+//        }
         System.out.println(System.currentTimeMillis() - t);
 
         System.out.println(source);

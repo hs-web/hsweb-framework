@@ -14,3 +14,8 @@ hsweb:
     authorize:
       sync: true
       auto-parse: true
+logging:
+  level:
+    org.springframework: WARN
+    org.hswebframework: WARN
+    org.hswebframework.web: DEBUG

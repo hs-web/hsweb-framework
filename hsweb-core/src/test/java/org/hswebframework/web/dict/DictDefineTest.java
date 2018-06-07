@@ -1,5 +1,6 @@
 package org.hswebframework.web.dict;
 
+import com.alibaba.fastjson.JSON;
 import org.hswebframework.web.dict.defaults.DefaultClassDictDefine;
 import org.hswebframework.web.dict.defaults.DefaultDictDefineRepository;
 import org.hswebframework.web.dict.defaults.DefaultDictSupportApi;
@@ -23,6 +24,17 @@ public class DictDefineTest {
     private DictSupportApi api = new DefaultDictSupportApi(repository);
 
     @Test
+    public void testJson(){
+
+        UserCode code=UserCode.CODE0;
+
+        String json  =JSON.toJSONString(code);
+        System.out.println(json);
+        Assert.assertNotNull(json);
+        Assert.assertNotNull(JSON.parseObject(json,UserCode.class));
+
+    }
+    @Test
     public void testEnumDict() {
 
         Assert.assertEquals(UserCode.SIMPLE, findByValue(UserCode.class, UserCode.SIMPLE.getValue()).orElse(null));
@@ -31,20 +43,20 @@ public class DictDefineTest {
 
         Assert.assertEquals(UserCode.SIMPLE, find(UserCode.class, UserCode.SIMPLE.getText()).orElse(null));
 
-        long bit = toBit( UserCode.values());
+        long bit = toMask( UserCode.values());
 
-        System.out.println(bitIn(bit,UserCode.SIMPLE,UserCode.TEST,UserCode.SIMPLE));
+        System.out.println(maskIn(bit,UserCode.SIMPLE,UserCode.TEST,UserCode.SIMPLE));
 
-        long bit2=toBit(UserCode.SIMPLE,UserCode.CODE0,UserCode.SIMPLE);
+        long bit2= toMask(UserCode.SIMPLE,UserCode.CODE0,UserCode.SIMPLE);
 
-        Assert.assertTrue(bitInAny(bit2,UserCode.SIMPLE,UserCode.CODE4,UserCode.CODE0));
-        Assert.assertFalse(bitInAny(bit2,UserCode.CODE1,UserCode.CODE4,UserCode.CODE5));
+        Assert.assertTrue(maskInAny(bit2,UserCode.SIMPLE,UserCode.CODE4,UserCode.CODE0));
+        Assert.assertFalse(maskInAny(bit2,UserCode.CODE1,UserCode.CODE4,UserCode.CODE5));
 
         for (UserCode userCode : UserCode.values()) {
             Assert.assertTrue(userCode.in(bit));
         }
 
-        List<UserCode> codes = getByBit(UserCode.class, bit);
+        List<UserCode> codes = getByMask(UserCode.class, bit);
 
 
     }
@@ -67,7 +79,7 @@ public class DictDefineTest {
         assertFalse(defines.isEmpty());
         assertEquals(defines.size(), 1);
 
-        assertEquals(defines.get(0).getItems().size(), 2);
+        assertEquals(defines.get(0).getItems().size(), UserCode.values());
 
 
     }

@@ -3,7 +3,6 @@ package org.hswebframework.web.datasource.jta;
 import com.atomikos.jdbc.AtomikosDataSourceBean;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.web.datasource.config.DynamicDataSourceConfig;
 

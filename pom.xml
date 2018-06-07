@@ -24,7 +24,7 @@
 
     <groupId>org.hswebframework.web</groupId>
     <artifactId>hsweb-framework</artifactId>
-    <version>3.0-SNAPSHOT</version>
+    <version>3.0.0-RC-SNAPSHOT</version>
     <modules>
         <module>hsweb-starter</module>
         <module>hsweb-core</module>
@@ -34,7 +34,6 @@
         <module>hsweb-tests</module>
         <module>hsweb-datasource</module>
         <module>hsweb-commons</module>
-        <module>hsweb-i18n</module>
         <module>hsweb-logging</module>
         <module>hsweb-concurrent</module>
         <module>hsweb-examples</module>
@@ -85,12 +84,12 @@
         <project.build.jdk>${java.version}</project.build.jdk>
 
 
-        <spring.boot.version>1.4.5.RELEASE</spring.boot.version>
+        <spring.boot.version>1.5.13.RELEASE</spring.boot.version>
 
         <javassist.version>3.20.0-GA</javassist.version>
         <activiti.version>5.19.0.2</activiti.version>
 
-        <fastjson.version>1.2.32</fastjson.version>
+        <fastjson.version>1.2.47</fastjson.version>
         <h2.version>1.4.191</h2.version>
         <mysql.version>5.1.39</mysql.version>
         <cglib.version>3.2.2</cglib.version>
@@ -326,7 +325,7 @@
             <dependency>
                 <groupId>org.redisson</groupId>
                 <artifactId>redisson</artifactId>
-                <version>3.5.5</version>
+                <version>3.7.0</version>
             </dependency>
 
             <dependency>
@@ -426,14 +425,6 @@
     </distributionManagement>
 
     <pluginRepositories>
-        <!--<pluginRepository>-->
-        <!--<id>hsweb-nexus</id>-->
-        <!--<name>Nexus Release Repository</name>-->
-        <!--<url>http://nexus.hsweb.me/content/groups/public/</url>-->
-        <!--<snapshots>-->
-        <!--<enabled>true</enabled>-->
-        <!--</snapshots>-->
-        <!--</pluginRepository>-->
         <pluginRepository>
             <id>aliyun-nexus</id>
             <name>aliyun</name>

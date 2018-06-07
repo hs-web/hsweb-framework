@@ -1,6 +1,8 @@
 package org.hswebframework.web.workflow.flowable.controller;
 
+import io.swagger.annotations.Api;
 import org.activiti.engine.impl.pvm.process.ActivityImpl;
+import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.entity.workflow.ActDefEntity;
 import org.hswebframework.web.service.workflow.ActDefService;
@@ -20,7 +22,9 @@ import static org.hswebframework.web.commons.entity.param.QueryParamEntity.singl
  * @Date 2017/9/4.
  */
 @RestController
-@RequestMapping("workflow/utils/")
+@RequestMapping("workflow/utils")
+@Api(tags = "工作流-节点配置", description = "工作流节点配置")
+@Authorize(permission = "workflow-utils", description = "节点配置")
 public class FlowableUtilsController {
 
     @Autowired

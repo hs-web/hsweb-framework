@@ -60,3 +60,24 @@ public class User  {
 注意: 1,2的功能由`hsweb-commons-dao`模块去实现,如果你不没有使用hsweb自带的dao实现,可能无法使用此功能.
 
 所有的字典都会注册到:`DictDefineRepository`,可通过此类去获取字典,以提供给前端或者其他地方使用.
+
+## ToString
+``org.hswebframework.web.bean.ToString``提供了对Bean转为String的功能.包括字段脱敏(打码).
+
+```java
+
+@lombok.Getter
+@lombok.Setter
+public class MyEntity{
+    
+    //敏感字段,在ToString的时候会给字段打码.比如: 185*****234
+    @org.hswebframework.web.bean.ToString.Ignore
+    private String userPhone;
+    
+    public String toString(){
+        return org.hswebframework.web.bean.ToString.toString(this);
+    }
+}
+
+```
+

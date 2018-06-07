@@ -36,9 +36,9 @@ import org.hswebframework.web.authorization.oauth2.server.support.refresh.Refres
 import org.hswebframework.web.authorization.oauth2.server.token.AccessTokenService;
 import org.hswebframework.web.authorization.token.UserTokenManager;
 import org.hswebframework.web.commons.entity.factory.EntityFactory;
-import org.hswebframework.web.dao.oauth2.AuthorizationCodeDao;
-import org.hswebframework.web.dao.oauth2.OAuth2AccessDao;
-import org.hswebframework.web.dao.oauth2.OAuth2ClientDao;
+import org.hswebframework.web.dao.oauth2.server.AuthorizationCodeDao;
+import org.hswebframework.web.dao.oauth2.server.OAuth2AccessDao;
+import org.hswebframework.web.dao.oauth2.server.OAuth2ClientDao;
 import org.hswebframework.web.service.authorization.UserService;
 import org.hswebframework.web.service.oauth2.server.simple.*;
 import org.springframework.beans.BeansException;

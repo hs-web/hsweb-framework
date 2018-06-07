@@ -5,7 +5,7 @@
     <parent>
         <artifactId>hsweb-system-database-manager</artifactId>
         <groupId>org.hswebframework.web</groupId>
-        <version>3.0-SNAPSHOT</version>
+        <version>3.0.0-RC-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -14,7 +14,7 @@
     <dependencies>
         <dependency>
             <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-system-database-manager-simple</artifactId>
+            <artifactId>hsweb-system-database-manager-local</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

@@ -5,7 +5,7 @@
     <parent>
         <artifactId>hsweb-system</artifactId>
         <groupId>org.hswebframework.web</groupId>
-        <version>3.0-SNAPSHOT</version>
+        <version>3.0.0-RC-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -13,10 +13,9 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>hsweb-system-template-controller</module>
-        <module>hsweb-system-template-dao</module>
-        <module>hsweb-system-template-entity</module>
-        <module>hsweb-system-template-service</module>
         <module>hsweb-system-template-starter</module>
+        <module>hsweb-system-template-api</module>
+        <module>hsweb-system-template-web</module>
+        <module>hsweb-system-template-local</module>
     </modules>
 </project>

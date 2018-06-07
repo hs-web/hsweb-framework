@@ -21,11 +21,9 @@ package org.hswebframework.web.authorization.starter;
 import org.hswebframework.web.authorization.AuthenticationInitializeService;
 import org.hswebframework.web.authorization.AuthenticationManager;
 import org.hswebframework.web.authorization.simple.DefaultAuthorizationAutoConfiguration;
-import org.hswebframework.web.authorization.token.UserTokenManager;
-import org.hswebframework.web.service.authorization.UserService;
 import org.hswebframework.web.service.authorization.simple.SimpleAuthenticationManager;
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -38,7 +36,8 @@ import org.springframework.context.annotation.Import;
  */
 @Configuration
 @ComponentScan({"org.hswebframework.web.service.authorization.simple"
-        , "org.hswebframework.web.controller.authorization"})
+        , "org.hswebframework.web.authorization.controller"})
+@MapperScan("org.hswebframework.web.authorization.dao")
 @AutoConfigureBefore(DefaultAuthorizationAutoConfiguration.class)
 @Import(BasicAuthorizationConfiguration.class)
 public class AuthorizationAutoConfiguration {

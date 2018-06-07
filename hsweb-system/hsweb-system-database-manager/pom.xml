@@ -5,7 +5,7 @@
     <parent>
         <artifactId>hsweb-system</artifactId>
         <groupId>org.hswebframework.web</groupId>
-        <version>3.0-SNAPSHOT</version>
+        <version>3.0.0-RC-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -14,7 +14,7 @@
     <description>数据库在线维护模块</description>
     <modules>
         <module>hsweb-system-database-manager-api</module>
-        <module>hsweb-system-database-manager-simple</module>
+        <module>hsweb-system-database-manager-local</module>
         <module>hsweb-system-database-manager-web</module>
         <module>hsweb-system-database-manager-starter</module>
     </modules>

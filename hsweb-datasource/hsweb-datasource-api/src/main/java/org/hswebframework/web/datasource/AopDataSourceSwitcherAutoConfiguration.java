@@ -1,20 +1,26 @@
 package org.hswebframework.web.datasource;
 
 import org.aopalliance.intercept.MethodInterceptor;
-import org.hswebframework.web.AopUtils;
 import org.hswebframework.web.ExpressionUtils;
 import org.hswebframework.web.boost.aop.context.MethodInterceptorHolder;
-import org.hswebframework.web.datasource.DataSourceHolder;
-import org.hswebframework.web.datasource.annotation.UseDataSource;
-import org.hswebframework.web.datasource.annotation.UseDefaultDataSource;
 import org.hswebframework.web.datasource.exception.DataSourceNotFoundException;
+import org.hswebframework.web.datasource.strategy.AnnotationDataSourceSwitchStrategyMatcher;
+import org.hswebframework.web.datasource.strategy.DataSourceSwitchStrategyMatcher;
+import org.hswebframework.web.datasource.strategy.ExpressionDataSourceSwitchStrategyMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.ClassUtils;
 
 import java.lang.reflect.Method;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import static org.hswebframework.web.datasource.strategy.AnnotationDataSourceSwitchStrategyMatcher.*;
 
 /**
  * 通过aop方式进行对注解方式切换数据源提供支持
@@ -26,40 +32,61 @@ import java.lang.reflect.Method;
 public class AopDataSourceSwitcherAutoConfiguration {
 
     @Bean
-    public SwitcherMethodMatcherPointcutAdvisor switcherMethodMatcherPointcutAdvisor() {
-        return new SwitcherMethodMatcherPointcutAdvisor();
+    @ConfigurationProperties(prefix = "hsweb.datasource")
+    public ExpressionDataSourceSwitchStrategyMatcher expressionDataSourceSwitchStrategyMatcher() {
+        return new ExpressionDataSourceSwitchStrategyMatcher();
+    }
+
+    @Bean
+    public AnnotationDataSourceSwitchStrategyMatcher annotationDataSourceSwitchStrategyMatcher() {
+        return new AnnotationDataSourceSwitchStrategyMatcher();
+    }
+
+    @Bean
+    public SwitcherMethodMatcherPointcutAdvisor switcherMethodMatcherPointcutAdvisor(List<DataSourceSwitchStrategyMatcher> matchers) {
+        return new SwitcherMethodMatcherPointcutAdvisor(matchers);
     }
 
     public static class SwitcherMethodMatcherPointcutAdvisor extends StaticMethodMatcherPointcutAdvisor {
-        private static final Logger logger = LoggerFactory.getLogger(SwitcherMethodMatcherPointcutAdvisor.class);
+        private static final Logger logger           = LoggerFactory.getLogger(SwitcherMethodMatcherPointcutAdvisor.class);
+        private static final long   serialVersionUID = 536295121851990398L;
 
-        public SwitcherMethodMatcherPointcutAdvisor() {
+        private List<DataSourceSwitchStrategyMatcher> matchers;
+
+        private Map<AnnotationDataSourceSwitchStrategyMatcher.CacheKey, DataSourceSwitchStrategyMatcher> cache = new ConcurrentHashMap<>();
+
+        public SwitcherMethodMatcherPointcutAdvisor(List<DataSourceSwitchStrategyMatcher> matchers) {
+            this.matchers = matchers;
             setAdvice((MethodInterceptor) methodInvocation -> {
-                logger.debug("switch datasource...");
-                UseDataSource useDataSource = AopUtils.findAnnotation(methodInvocation.getThis().getClass(),
-                        methodInvocation.getMethod(), UseDataSource.class);
-                if (useDataSource != null) {
-                    String id = useDataSource.value();
-                    if (id.contains("${")) {
-                        MethodInterceptorHolder holder = MethodInterceptorHolder.create(methodInvocation);
-                        id = ExpressionUtils.analytical(id, holder.getArgs(), "spel");
-                    }
-                    if (!DataSourceHolder.existing(id)) {
-                        if (useDataSource.fallbackDefault()) {
+                CacheKey key = new CacheKey(ClassUtils.getUserClass(methodInvocation.getThis()), methodInvocation.getMethod());
+                DataSourceSwitchStrategyMatcher matcher = cache.get(key);
+                if (matcher == null) {
+                    logger.warn("method:{} not support switch datasource", methodInvocation.getMethod());
+                } else {
+                    MethodInterceptorHolder holder = MethodInterceptorHolder.create(methodInvocation);
+                    Strategy strategy = matcher.getStrategy(holder.createParamContext());
+                    if (strategy == null) {
+                        logger.warn("strategy matcher found:{}, but strategy is null!", matcher);
+                    } else {
+                        logger.debug("switch datasource.use strategy:{}", strategy);
+                        if (strategy.isUseDefaultDataSource()) {
                             DataSourceHolder.switcher().useDefault();
                         } else {
-                            throw new DataSourceNotFoundException(id);
+                            String id = strategy.getDataSourceId();
+                            if (id.contains("${")) {
+                                id = ExpressionUtils.analytical(id, holder.getArgs(), "spel");
+                            }
+                            if (!DataSourceHolder.existing(id)) {
+                                if (strategy.isFallbackDefault()) {
+                                    DataSourceHolder.switcher().useDefault();
+                                } else {
+                                    throw new DataSourceNotFoundException(id);
+                                }
+                            } else {
+                                DataSourceHolder.switcher().use(id);
+                            }
                         }
-                    } else {
-                        DataSourceHolder.switcher().use(id);
                     }
-                } else {
-                    UseDefaultDataSource useDefaultDataSource = AopUtils.findAnnotation(methodInvocation.getThis().getClass(),
-                            methodInvocation.getMethod(), UseDefaultDataSource.class);
-                    if (useDefaultDataSource == null) {
-                        logger.warn("can't found  annotation: UseDefaultDataSource !");
-                    }
-                    DataSourceHolder.switcher().useDefault();
                 }
                 try {
                     return methodInvocation.proceed();
@@ -71,8 +98,12 @@ public class AopDataSourceSwitcherAutoConfiguration {
 
         @Override
         public boolean matches(Method method, Class<?> aClass) {
-            return AopUtils.findAnnotation(aClass, method, UseDataSource.class) != null ||
-                    AopUtils.findAnnotation(aClass, method, UseDefaultDataSource.class) != null;
+            CacheKey key = new CacheKey(aClass, method);
+            matchers.stream()
+                    .filter(matcher -> matcher.match(aClass, method))
+                    .findFirst()
+                    .ifPresent((matcher) -> cache.put(key, matcher));
+            return cache.containsKey(key);
         }
     }
 }
