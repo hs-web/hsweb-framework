@@ -41,7 +41,7 @@ public class UserInDepartmentSqlTerm extends UserInSqlTerm {
             appender.addSpc(",s_department _dept");
         }
         appender.addSpc("where _person.u_id=_tmp.person_id and _tmp.position_id = _pos.u_id and _person.u_id=_tmp.person_id"
-                , "and", createColumnName(column, tableAlias), "=_person.user_id");
+                , "and", createColumnName(column, tableAlias), "=", isForPerson() ? "_tmp.person_id" : "_person.user_id");
         if (isChild()) {
             appender.addSpc("and _dept.u_id=_pos.department_id");
         }
