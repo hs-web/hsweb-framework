@@ -59,7 +59,7 @@ public class MethodInterceptorHolder {
         Object[] args = invocation.getArguments();
         Map<String, Object> argMap = new LinkedHashMap<>();
         for (int i = 0, len = args.length; i < len; i++) {
-            argMap.put(argNames[i] == null ? "arg" + i : argNames[i], args[i]);
+            argMap.put((argNames == null || argNames[i] == null) ? "arg" + i : argNames[i], args[i]);
         }
         return new MethodInterceptorHolder(id,
                 invocation.getMethod(),
@@ -118,9 +118,11 @@ public class MethodInterceptorHolder {
     public <T extends Annotation> T findAnnotation(Class<T> annClass) {
         return AopUtils.findAnnotation(target.getClass(), method, annClass);
     }
-    public MethodInterceptorContext createParamContext(){
+
+    public MethodInterceptorContext createParamContext() {
         return createParamContext(null);
     }
+
     public MethodInterceptorContext createParamContext(Object invokeResult) {
         return new MethodInterceptorContext() {
             private static final long serialVersionUID = -4102787561601219273L;
