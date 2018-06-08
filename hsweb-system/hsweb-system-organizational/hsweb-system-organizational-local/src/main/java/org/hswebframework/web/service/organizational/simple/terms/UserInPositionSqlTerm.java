@@ -55,7 +55,7 @@ public class UserInPositionSqlTerm extends UserInSqlTerm {
         List<Object> positionIdList = BoostTermTypeMapper.convertList(column, termValue.getOld());
         if (!positionIdList.isEmpty()) {
             appender.addSpc("and");
-            termValue.setValue(appendCondition(positionIdList, wherePrefix, appender, "tmp_.position_id"));
+            termValue.setValue(appendCondition(positionIdList, wherePrefix, appender, "_tmp.position_id"));
         }
 
         appender.add(")");
