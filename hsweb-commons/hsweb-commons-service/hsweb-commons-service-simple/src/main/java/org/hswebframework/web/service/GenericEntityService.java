@@ -112,13 +112,15 @@ public abstract class GenericEntityService<E extends GenericEntity<PK>, PK>
 
     @SuppressWarnings("unchecked")
     protected boolean dataExisted(E entity) {
-        try {
-            logicPrimaryKeyValidator.validate(entity);
-        } catch (DuplicateKeyException e) {
-            if (getEntityType().isInstance(e.getData())) {
-                PK id = ((E) e.getData()).getId();
-                entity.setId(id);
-                return true;
+        if (null != logicPrimaryKeyValidator) {
+            try {
+                logicPrimaryKeyValidator.validate(entity);
+            } catch (DuplicateKeyException e) {
+                if (getEntityType().isInstance(e.getData())) {
+                    PK id = ((E) e.getData()).getId();
+                    entity.setId(id);
+                    return true;
+                }
             }
         }
         return null != entity.getId() && null != selectByPk(entity.getId());
