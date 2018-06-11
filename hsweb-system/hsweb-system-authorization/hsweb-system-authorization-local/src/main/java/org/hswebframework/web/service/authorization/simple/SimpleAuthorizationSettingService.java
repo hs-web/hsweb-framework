@@ -56,6 +56,7 @@ import static org.hswebframework.web.commons.entity.DataStatus.STATUS_ENABLED;
 import static org.hswebframework.web.entity.authorization.AuthorizationSettingDetailEntity.*;
 import static org.hswebframework.web.entity.authorization.AuthorizationSettingEntity.settingFor;
 import static org.hswebframework.web.entity.authorization.AuthorizationSettingEntity.type;
+import static org.hswebframework.web.service.authorization.simple.CacheConstants.USER_AUTH_CACHE_NAME;
 import static org.hswebframework.web.service.authorization.simple.CacheConstants.USER_MENU_CACHE_NAME;
 
 /**
@@ -272,7 +273,10 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
     }
 
     @TransactionalEventListener(condition = "#event.all")
-    @CacheEvict(cacheNames = USER_MENU_CACHE_NAME, allEntries = true)
+   @Caching(evict = {
+           @CacheEvict(cacheNames = USER_MENU_CACHE_NAME, allEntries = true),
+           @CacheEvict(cacheNames = USER_AUTH_CACHE_NAME, allEntries = true)
+   })
     public void clearAllUserCache(ClearUserAuthorizationCacheEvent event) {
         logger.debug("clear all user authorization cache");
     }
@@ -280,9 +284,9 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
     @TransactionalEventListener(condition = "!#event.all")
     @Caching(
             evict = {
-                    @CacheEvict(value = CacheConstants.USER_AUTH_CACHE_NAME, key = "#event.userId"),
-                    @CacheEvict(value = CacheConstants.USER_AUTH_CACHE_NAME, key = "'user-menu-list:'+#event.userId"),
-                    @CacheEvict(value = CacheConstants.USER_AUTH_CACHE_NAME, key = "'menu-tree:'+#event.userId")
+                    @CacheEvict(value = CacheConstants.USER_AUTH_CACHE_NAME, key = "#event.getUserId()"),
+                    @CacheEvict(value = CacheConstants.USER_MENU_CACHE_NAME, key = "'user-menu-list:'+#event.getUserId()"),
+                    @CacheEvict(value = CacheConstants.USER_MENU_CACHE_NAME, key = "'menu-tree:'+#event.getUserId()")
             }
     )
     public void clearUserCache(ClearUserAuthorizationCacheEvent event) {

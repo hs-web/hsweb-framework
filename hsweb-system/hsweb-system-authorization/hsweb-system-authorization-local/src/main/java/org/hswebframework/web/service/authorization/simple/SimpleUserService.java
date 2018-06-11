@@ -211,7 +211,7 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
         if (excludeProperties.contains(UserEntity.password)) {
             publisher.publishEvent(new UserModifiedEvent(userEntity, passwordModified, roleModified));
         }
-        publisher.publishEvent(new ClearUserAuthorizationCacheEvent(userEntity.getId(),false));
+        publisher.publishEvent(new ClearUserAuthorizationCacheEvent(userId,false));
 
     }
 
