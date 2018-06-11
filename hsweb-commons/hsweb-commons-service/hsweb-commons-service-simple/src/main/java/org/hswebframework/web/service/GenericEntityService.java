@@ -22,11 +22,15 @@ import org.hswebframework.web.commons.entity.GenericEntity;
 import org.hswebframework.web.commons.entity.RecordCreationEntity;
 import org.hswebframework.web.dao.CrudDao;
 import org.hswebframework.web.id.IDGenerator;
+import org.hswebframework.web.validator.DuplicateKeyException;
+import org.hswebframework.web.validator.LogicPrimaryKeyValidator;
 import org.hswebframework.web.validator.group.CreateGroup;
 import org.hswebframework.web.validator.group.UpdateGroup;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,6 +56,17 @@ public abstract class GenericEntityService<E extends GenericEntity<PK>, PK>
      * @see IDGenerator
      */
     protected abstract IDGenerator<PK> getIDGenerator();
+
+    @Autowired(required = false)
+    public LogicPrimaryKeyValidator logicPrimaryKeyValidator;
+
+    @PostConstruct
+    public void init() {
+        if (null != logicPrimaryKeyValidator && logicPrimaryKeyValidator instanceof DefaultLogicPrimaryKeyValidator) {
+            ((DefaultLogicPrimaryKeyValidator) logicPrimaryKeyValidator)
+                    .<E>registerQuerySuppiler(getEntityInstanceType(), bean -> this.createQuery().not("id", bean.getId()));
+        }
+    }
 
     @Override
     public int deleteByPk(PK pk) {
@@ -95,7 +110,17 @@ public abstract class GenericEntityService<E extends GenericEntity<PK>, PK>
         return entity.getId();
     }
 
+    @SuppressWarnings("unchecked")
     protected boolean dataExisted(E entity) {
+        try {
+            logicPrimaryKeyValidator.validate(entity);
+        } catch (DuplicateKeyException e) {
+            if (getEntityType().isInstance(e.getData())) {
+                PK id = ((E) e.getData()).getId();
+                entity.setId(id);
+                return true;
+            }
+        }
         return null != entity.getId() && null != selectByPk(entity.getId());
     }
 

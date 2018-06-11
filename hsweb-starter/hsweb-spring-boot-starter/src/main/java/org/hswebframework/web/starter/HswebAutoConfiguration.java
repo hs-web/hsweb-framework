@@ -30,12 +30,14 @@ import org.hswebframework.web.commons.entity.factory.EntityFactory;
 import org.hswebframework.web.commons.entity.factory.MapperEntityFactory;
 import org.hswebframework.web.convert.CustomMessageConverter;
 import org.hswebframework.web.dict.EnumDict;
+import org.hswebframework.web.service.DefaultLogicPrimaryKeyValidator;
 import org.hswebframework.web.starter.convert.FastJsonGenericHttpMessageConverter;
 import org.hswebframework.web.starter.convert.FastJsonHttpMessageConverter;
 import org.hswebframework.web.starter.entity.EntityFactoryInitConfiguration;
 import org.hswebframework.web.starter.entity.EntityProperties;
 import org.hswebframework.web.starter.resolver.AuthorizationArgumentResolver;
 import org.hswebframework.web.starter.resolver.JsonParamResolver;
+import org.hswebframework.web.validator.LogicPrimaryKeyValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -174,8 +176,15 @@ public class HswebAutoConfiguration {
     @ConditionalOnMissingBean(EntityFactory.class)
     public MapperEntityFactory mapperEntityFactory() {
         MapperEntityFactory entityFactory = new MapperEntityFactory(entityProperties.createMappers());
-        FastBeanCopier.setBeanFactory(entityFactory); ;
+        FastBeanCopier.setBeanFactory(entityFactory);
+        ;
         return entityFactory;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(LogicPrimaryKeyValidator.class)
+    public LogicPrimaryKeyValidator logicPrimaryKeyValidator() {
+        return new DefaultLogicPrimaryKeyValidator();
     }
 
     @Bean
