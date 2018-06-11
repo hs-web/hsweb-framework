@@ -6,11 +6,15 @@ import org.hswebframework.web.entity.authorization.PermissionEntity;
 import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.service.GenericEntityService;
 import org.hswebframework.web.service.authorization.PermissionService;
+import org.hswebframework.web.service.authorization.events.ClearUserAuthorizationCacheEvent;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 /**
- * TODO 完成注释
+ * 权限管理
  *
  * @author zhouhao
  */
@@ -19,6 +23,9 @@ public class SimplePermissionService extends GenericEntityService<PermissionEnti
         implements PermissionService {
     @Autowired
     private PermissionDao permissionDao;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     @Override
     protected IDGenerator<String> getIDGenerator() {
@@ -36,4 +43,17 @@ public class SimplePermissionService extends GenericEntityService<PermissionEnti
         return super.insert(entity);
     }
 
+    @Override
+    public int updateByPk(String id, PermissionEntity entity) {
+        int len = super.updateByPk(id, entity);
+        eventPublisher.publishEvent(new ClearUserAuthorizationCacheEvent(null, true));
+        return len;
+    }
+
+    @Override
+    public int deleteByPk(String id) {
+        int len = super.deleteByPk(id);
+        eventPublisher.publishEvent(new ClearUserAuthorizationCacheEvent(null, true));
+        return len;
+    }
 }

@@ -14,6 +14,7 @@ import org.hswebframework.web.entity.authorization.bind.BindRoleUserEntity;
 import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.service.AbstractService;
 import org.hswebframework.web.service.DefaultDSLQueryService;
+import org.hswebframework.web.service.authorization.events.ClearUserAuthorizationCacheEvent;
 import org.hswebframework.web.service.authorization.events.UserModifiedEvent;
 import org.hswebframework.web.validate.ValidationException;
 import org.hswebframework.utils.ListUtils;
@@ -165,10 +166,10 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
 
     @Override
     @Caching(evict = {
-            @CacheEvict(value = CacheConstants.USER_CACHE_NAME, key = "#userId"),
-            @CacheEvict(value = CacheConstants.USER_AUTH_CACHE_NAME, key = "#userId"),
-            @CacheEvict(value = CacheConstants.USER_AUTH_CACHE_NAME, key = "'user-menu-list:'+#userId"),
-            @CacheEvict(value = CacheConstants.USER_AUTH_CACHE_NAME, key = "'menu-tree:'+#userId")
+            @CacheEvict(value = CacheConstants.USER_CACHE_NAME, key = "#userId")
+//           , @CacheEvict(value = CacheConstants.USER_AUTH_CACHE_NAME, key = "#userId"),
+//            @CacheEvict(value = CacheConstants.USER_AUTH_CACHE_NAME, key = "'user-menu-list:'+#userId"),
+//            @CacheEvict(value = CacheConstants.USER_AUTH_CACHE_NAME, key = "'menu-tree:'+#userId")
     })
     public void update(String userId, UserEntity userEntity) {
         userEntity.setId(userId);
@@ -210,6 +211,8 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
         if (excludeProperties.contains(UserEntity.password)) {
             publisher.publishEvent(new UserModifiedEvent(userEntity, passwordModified, roleModified));
         }
+        publisher.publishEvent(new ClearUserAuthorizationCacheEvent(userEntity.getId(),false));
+
     }
 
     @Override

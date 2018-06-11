@@ -34,11 +34,14 @@ import org.hswebframework.web.service.DefaultDSLQueryService;
 import org.hswebframework.web.service.GenericEntityService;
 import org.hswebframework.web.service.authorization.*;
 import org.hswebframework.web.service.authorization.AuthorizationSettingTypeSupplier.SettingInfo;
+import org.hswebframework.web.service.authorization.events.ClearUserAuthorizationCacheEvent;
 import org.hswebframework.web.validator.group.CreateGroup;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
@@ -267,6 +270,25 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
                         // parentId为空或者为-1的菜单则认为是根菜单
                         StringUtils.isEmpty(menuEntity.getParentId()) || "-1".equals(menuEntity.getParentId()));
     }
+
+    @TransactionalEventListener(condition = "#event.all")
+    @CacheEvict(cacheNames = USER_MENU_CACHE_NAME, allEntries = true)
+    public void clearAllUserCache(ClearUserAuthorizationCacheEvent event) {
+        logger.debug("clear all user authorization cache");
+    }
+
+    @TransactionalEventListener(condition = "!#event.all")
+    @Caching(
+            evict = {
+                    @CacheEvict(value = CacheConstants.USER_AUTH_CACHE_NAME, key = "#event.userId"),
+                    @CacheEvict(value = CacheConstants.USER_AUTH_CACHE_NAME, key = "'user-menu-list:'+#event.userId"),
+                    @CacheEvict(value = CacheConstants.USER_AUTH_CACHE_NAME, key = "'menu-tree:'+#event.userId")
+            }
+    )
+    public void clearUserCache(ClearUserAuthorizationCacheEvent event) {
+        logger.debug("clear user:{} authorization cache", event.getUserId());
+    }
+
 
     @Override
     public Authentication initUserAuthorization(String userId) {
