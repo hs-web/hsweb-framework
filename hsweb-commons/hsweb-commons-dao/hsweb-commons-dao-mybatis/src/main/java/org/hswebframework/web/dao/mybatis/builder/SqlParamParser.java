@@ -1,19 +1,14 @@
 package org.hswebframework.web.dao.mybatis.builder;
 
-import org.apache.commons.beanutils.BeanMap;
-import org.hswebframework.ezorm.core.Conditional;
-import org.hswebframework.ezorm.core.NestConditional;
 import org.hswebframework.ezorm.core.dsl.Query;
-import org.hswebframework.ezorm.core.param.Param;
-import org.hswebframework.ezorm.core.param.QueryParam;
 import org.hswebframework.ezorm.core.param.Term;
 import org.hswebframework.utils.StringUtils;
+import org.hswebframework.web.bean.FastBeanCopier;
 import org.hswebframework.web.commons.entity.Entity;
-import org.hswebframework.web.commons.entity.QueryEntity;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 
-import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -63,10 +58,7 @@ public class SqlParamParser {
                     }
                 });
             } else {
-                Map map = new HashMap<>(new BeanMap(obj));
-                map.remove("class");
-                map.remove("declaringClass");
-                parse(map);
+                parse(FastBeanCopier.copy(obj, new LinkedHashMap<>()));
             }
             return this;
         }

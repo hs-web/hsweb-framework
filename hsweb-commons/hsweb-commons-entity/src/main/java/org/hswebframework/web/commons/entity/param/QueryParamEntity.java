@@ -41,7 +41,19 @@ public class QueryParamEntity extends QueryParam implements QueryEntity {
      * @see QueryParam#where(String, Object)
      */
     public static QueryParamEntity single(String field, Object value) {
+        return of(field, value);
+    }
+
+    /**
+     * @see this#single(String, Object)
+     */
+    public static QueryParamEntity of(String field, Object value) {
         return empty().where(field, value);
+    }
+
+    @Override
+    public String toString() {
+        return toHttpQueryParamString();
     }
 
 }

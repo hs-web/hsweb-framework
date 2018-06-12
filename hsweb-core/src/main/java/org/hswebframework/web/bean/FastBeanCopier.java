@@ -129,7 +129,6 @@ public final class FastBeanCopier {
                 "\n}\n" +
                 "\n}";
         try {
-//            System.out.println(method);
             return Proxy.create(Copier.class)
                     .addMethod(method)
                     .newInstance();
@@ -140,16 +139,22 @@ public final class FastBeanCopier {
     }
 
     private static Map<String, ClassProperty> createProperty(Class type) {
+
+        List<String> fieldNames = Arrays.stream(type.getDeclaredFields())
+                .map(Field::getName).collect(Collectors.toList());
+
         return Stream.of(propertyUtils.getPropertyDescriptors(type))
                 .filter(property -> !property.getName().equals("class") && property.getReadMethod() != null && property.getWriteMethod() != null)
                 .map(BeanClassProperty::new)
-                .collect(Collectors.toMap(ClassProperty::getName, Function.identity()));
+                //让字段有序
+                .sorted(Comparator.comparing(property -> fieldNames.indexOf(property.name)))
+                .collect(Collectors.toMap(ClassProperty::getName, Function.identity(), (k, k2) -> k, LinkedHashMap::new));
 
     }
 
     private static Map<String, ClassProperty> createMapProperty(Map<String, ClassProperty> template) {
         return template.values().stream().map(classProperty -> new MapClassProperty(classProperty.name))
-                .collect(Collectors.toMap(ClassProperty::getName, Function.identity()));
+                .collect(Collectors.toMap(ClassProperty::getName, Function.identity(), (k, k2) -> k, LinkedHashMap::new));
     }
 
     private static String createCopierCode(Class source, Class target) {

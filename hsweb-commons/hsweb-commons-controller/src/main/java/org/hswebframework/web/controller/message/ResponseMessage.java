@@ -28,7 +28,9 @@ import java.lang.reflect.Field;
 import java.util.*;
 
 /**
- * 响应消息。controller中处理后，返回此对象，响应请求结果给客户端。
+ * 响应消息,controller中处理后，返回此对象，响应请求结果给客户端。
+ *
+ * @since 2.0
  */
 @ApiModel(description = "响应结果")
 public class ResponseMessage<T> implements Serializable {
@@ -42,6 +44,9 @@ public class ResponseMessage<T> implements Serializable {
 
     private Long timestamp;
 
+    /**
+     * @since 3.0.0-RC
+     */
     private String code;
 
     @ApiModelProperty("调用结果消息")
@@ -101,6 +106,12 @@ public class ResponseMessage<T> implements Serializable {
         return this;
     }
 
+
+    public ResponseMessage<T> code(String code) {
+        this.code = code;
+        return this;
+    }
+
     /**
      * 过滤字段：指定需要序列化的字段
      */
@@ -134,7 +145,7 @@ public class ResponseMessage<T> implements Serializable {
                     if (field1 != null) {
                         include(field1.getType(), tmp[1]);
                     }
-                } catch (Throwable e) {
+                } catch (Exception ignore) {
                 }
             } else {
                 getStringListFromMap(includes, type).add(field);
@@ -158,7 +169,7 @@ public class ResponseMessage<T> implements Serializable {
                     if (field1 != null) {
                         exclude(field1.getType(), tmp[1]);
                     }
-                } catch (Throwable e) {
+                } catch (Exception ignore) {
                 }
             } else {
                 getStringListFromMap(excludes, type).add(field);
