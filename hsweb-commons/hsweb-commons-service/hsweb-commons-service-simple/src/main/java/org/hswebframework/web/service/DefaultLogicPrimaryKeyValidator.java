@@ -105,39 +105,38 @@ public class DefaultLogicPrimaryKeyValidator implements LogicPrimaryKeyValidator
                     continue;
                 }
             }
-
         }
 
         if (keys.isEmpty()) {
             return Collections.emptyMap();
         }
-//
-
         return keys.entrySet()
-                   .stream()
-                   .flatMap(entry -> Stream.of(entry.getValue().groups())
-                                           .flatMap(group -> Optional.ofNullable(entry.getValue().value())
-                                                                     .map(Arrays::asList)
-                                                                     .filter(CollectionUtils::isNotEmpty)
-                                                                     .orElse(Arrays.asList(entry.getKey()))
-                                                                     .stream()
-                                                                     .map(field -> LogicPrimaryKeyField.builder()
-                                                                                                       .field(field)
-                                                                                                       .termType(entry.getValue().termType())
-                                                                                                       .condition(entry.getValue().condition())
-                                                                                                       .matchNullOrEmpty(entry.getValue().matchNullOrEmpty())
-                                                                                                       .group(group)
-                                                                                                       .build())
-                                           ))
-                   .collect(Collectors.groupingBy(
-                           //按group分组
-                           LogicPrimaryKeyField::getGroup,
-                           //将每一组的集合构造为验证器对象
-                           Collectors.collectingAndThen(Collectors.mapping(Function.identity(), Collectors.toSet()), list -> DefaultValidator.builder()
-                                                                                                                                             .infos(list)
-                                                                                                                                             .build())
-                           )
-                   );
+                .stream()
+                .flatMap(entry -> Stream.of(entry.getValue().groups())
+                        .flatMap(group -> Optional.ofNullable(entry.getValue().value())
+                                .map(Arrays::asList)
+                                .filter(CollectionUtils::isNotEmpty)
+                                .orElse(Arrays.asList(entry.getKey()))
+                                .stream()
+                                .map(field -> LogicPrimaryKeyField.builder()
+                                        .field(field)
+                                        .termType(entry.getValue().termType())
+                                        .condition(entry.getValue().condition())
+                                        .matchNullOrEmpty(entry.getValue().matchNullOrEmpty())
+                                        .group(group)
+                                        .build())
+                        ))
+                .collect(Collectors.groupingBy(
+                        //按group分组
+                        LogicPrimaryKeyField::getGroup,
+                        //将每一组的集合构造为验证器对象
+                        Collectors.collectingAndThen(
+                                Collectors.mapping(Function.identity(), Collectors.toSet())
+                                , list -> DefaultValidator.builder()
+                                        .infos(list)
+                                        .build())
+                        )
+                );
 
     }
 
