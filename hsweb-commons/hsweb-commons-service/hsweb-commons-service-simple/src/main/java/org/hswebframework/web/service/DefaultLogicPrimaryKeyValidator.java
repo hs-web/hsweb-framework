@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.hswebframework.ezorm.core.dsl.Query;
 import org.hswebframework.ezorm.core.param.TermType;
 import org.hswebframework.web.bean.FastBeanCopier;
@@ -113,32 +114,30 @@ public class DefaultLogicPrimaryKeyValidator implements LogicPrimaryKeyValidator
 //
 
         return keys.entrySet()
-                .stream()
-                .flatMap(entry ->
-                        Stream.of(entry.getValue().groups())
-                                .flatMap(group ->
-                                        Stream.of(entry.getValue().value().length == 0 ? new String[]{entry.getKey()} : entry.getValue().value())
-                                                .map(field -> LogicPrimaryKeyField
-                                                        .builder()
-                                                        .field(field)
-                                                        .termType(entry.getValue().termType())
-                                                        .condition(entry.getValue().condition())
-                                                        .matchNullOrEmpty(entry.getValue().matchNullOrEmpty())
-                                                        .group(group)
-                                                        .build())
-                                ))
-                .collect(Collectors.groupingBy(
-                        //按group分组
-                        LogicPrimaryKeyField::getGroup
-                        //将每一组的集合构造为验证器对象
-                        , Collectors.collectingAndThen(
-                                Collectors.mapping(Function.identity(), Collectors.toSet())
-                                , list -> DefaultValidator
-                                        .builder()
-                                        .infos(list)
-                                        .build())
-                        )
-                );
+                   .stream()
+                   .flatMap(entry -> Stream.of(entry.getValue().groups())
+                                           .flatMap(group -> Optional.ofNullable(entry.getValue().value())
+                                                                     .map(Arrays::asList)
+                                                                     .filter(CollectionUtils::isEmpty)
+                                                                     .orElse(Arrays.asList(entry.getKey()))
+                                                                     .stream()
+                                                                     .map(field -> LogicPrimaryKeyField.builder()
+                                                                                                       .field(field)
+                                                                                                       .termType(entry.getValue().termType())
+                                                                                                       .condition(entry.getValue().condition())
+                                                                                                       .matchNullOrEmpty(entry.getValue().matchNullOrEmpty())
+                                                                                                       .group(group)
+                                                                                                       .build())
+                                           ))
+                   .collect(Collectors.groupingBy(
+                           //按group分组
+                           LogicPrimaryKeyField::getGroup,
+                           //将每一组的集合构造为验证器对象
+                           Collectors.collectingAndThen(Collectors.mapping(Function.identity(), Collectors.toSet()), list -> DefaultValidator.builder()
+                                                                                                                                             .infos(list)
+                                                                                                                                             .build())
+                           )
+                   );
 
     }
 
