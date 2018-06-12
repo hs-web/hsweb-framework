@@ -8,7 +8,6 @@ import org.hswebframework.ezorm.core.dsl.Query;
 import org.hswebframework.ezorm.core.param.TermType;
 import org.hswebframework.web.bean.FastBeanCopier;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
-import org.hswebframework.web.validator.DuplicateKeyException;
 import org.hswebframework.web.validator.LogicPrimaryKey;
 import org.hswebframework.web.validator.LogicPrimaryKeyValidator;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -19,6 +18,7 @@ import org.springframework.util.StringUtils;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @SuppressWarnings("all")
 @Slf4j
@@ -28,9 +28,10 @@ public class DefaultLogicPrimaryKeyValidator implements LogicPrimaryKeyValidator
 
 
     private static final Validator EMPTY_VALIDATOR = bean -> {
+        return Result.passed();
     };
 
-    public <T> void registerQuerySuppiler(Class type, Function<T, Query<T, QueryParamEntity>> querySupplier) {
+    public <T> void registerQuerySuppiler(Class<T> type, Function<T, Query<T, QueryParamEntity>> querySupplier) {
         validatorCache.computeIfAbsent(type, this::createValidator)
                 .values()
                 .stream()
@@ -40,20 +41,26 @@ public class DefaultLogicPrimaryKeyValidator implements LogicPrimaryKeyValidator
     }
 
     @Override
-    public void validate(Object bean, Class... groups) {
+    public Result validate(Object bean, Class... groups) {
 
         Class target = ClassUtils.getUserClass(bean);
+        Result result;
         if (null != groups && groups.length > 0) {
-            for (Class group : groups) {
-                validatorCache.computeIfAbsent(target, this::createValidator)
-                        .getOrDefault(group, EMPTY_VALIDATOR)
-                        .doValidate(bean);
-            }
+            result = Arrays.stream(groups)
+                    .map(group ->
+                            validatorCache.computeIfAbsent(target, this::createValidator)
+                                    .getOrDefault(group, EMPTY_VALIDATOR)
+                                    .doValidate(bean))
+                    .filter(Result::isError)
+                    .findFirst()
+                    .orElseGet(Result::passed);
+
         } else {
-            validatorCache.computeIfAbsent(target, this::createValidator)
+            result = validatorCache.computeIfAbsent(target, this::createValidator)
                     .getOrDefault(Void.class, EMPTY_VALIDATOR)
                     .doValidate(bean);
         }
+        return result;
 
     }
 
@@ -69,86 +76,103 @@ public class DefaultLogicPrimaryKeyValidator implements LogicPrimaryKeyValidator
         });
 
         //获取类上的注解
-        Class tempClass = target;
+        Class[] tempClass = new Class[]{target};
         LogicPrimaryKey classAnn = null;
+        Class[] empty = new Class[0];
 
-        while (classAnn == null) {
-            classAnn = AnnotationUtils.findAnnotation(tempClass, LogicPrimaryKey.class);
-            if (null != classAnn) {
-                if (classAnn.value().length > 0) {
-                    for (String field : classAnn.value()) {
-                        keys.put(field, classAnn);
+        while (tempClass.length != 0) {
+
+            for (Class group : tempClass) {
+                classAnn = AnnotationUtils.findAnnotation(group, LogicPrimaryKey.class);
+                if (null != classAnn) {
+                    if (classAnn.value().length > 0) {
+                        for (String field : classAnn.value()) {
+                            keys.put(field, classAnn);
+                        }
+                        tempClass = empty;
+                        continue;
+                    } else {
+                        //如果注解没有指定字段则从group中获取
+                        tempClass = classAnn.groups();
+                        if (tempClass.length == 1 && tempClass[0] == Void.class) {
+                            log.warn("类{}的注解{}无效,请设置value属性或者group属性", classAnn, tempClass);
+                            continue;
+                        }
                     }
-                    break;
                 } else {
-                    //如果注解没有指定字段则从group中获取
-                    tempClass = classAnn.group();
-                    if (tempClass == Void.class) {
-                        log.warn("类{}的注解{}无效,请设置value属性或者group属性", classAnn, tempClass);
-                        break;
-                    }
+                    tempClass = empty;
+                    continue;
                 }
-            } else {
-                break;
             }
+
         }
 
         if (keys.isEmpty()) {
             return Collections.emptyMap();
         }
+//
 
         return keys.entrySet()
                 .stream()
-                .collect(
-                        Collectors.groupingBy(
-
-                                //按注解中的group分组
-                                e -> e.getValue().group()
-                                //将分组后的注解转为字段配置
-                                , Collectors.collectingAndThen(
-                                        Collectors.mapping(e -> LogicPrimaryKeyField
-                                                .builder()
-                                                .field(e.getKey())
-                                                .termType(e.getValue().termType())
-                                                .condition(e.getValue().condition())
-                                                .matchNullOrEmpty(e.getValue().matchNullOrEmpty())
-                                                .build(), Collectors.toList())
-                                        //将每一组的字段集合构造为验证器对象
-                                        , list -> DefaultValidator
-                                                .builder()
-                                                .infos(list)
-                                                .build())
+                .flatMap(entry ->
+                        Stream.of(entry.getValue().groups())
+                                .flatMap(group ->
+                                        Stream.of(entry.getValue().value().length == 0 ? new String[]{entry.getKey()} : entry.getValue().value())
+                                                .map(field -> LogicPrimaryKeyField
+                                                        .builder()
+                                                        .field(field)
+                                                        .termType(entry.getValue().termType())
+                                                        .condition(entry.getValue().condition())
+                                                        .matchNullOrEmpty(entry.getValue().matchNullOrEmpty())
+                                                        .group(group)
+                                                        .build())
+                                ))
+                .collect(Collectors.groupingBy(
+                        //按group分组
+                        LogicPrimaryKeyField::getGroup
+                        //将每一组的集合构造为验证器对象
+                        , Collectors.collectingAndThen(
+                                Collectors.mapping(Function.identity(), Collectors.toSet())
+                                , list -> DefaultValidator
+                                        .builder()
+                                        .infos(list)
+                                        .build())
                         )
                 );
 
     }
 
     interface Validator<T> {
-        void doValidate(T bean);
+        Result doValidate(T bean);
     }
 
     @Builder
     static class DefaultValidator<T> implements Validator<T> {
-        private List<LogicPrimaryKeyField> infos = new ArrayList<>();
+        private Set<LogicPrimaryKeyField> infos = new HashSet<>();
 
         private volatile Function<T, Query<T, QueryParamEntity>> querySupplier;
 
-        public void doValidate(T bean) {
+        public Result doValidate(T bean) {
             if (querySupplier == null) {
-                return;
+                return Result.passed();
             }
 
             Query<T, QueryParamEntity> query = querySupplier.apply(bean);
 
+            //转为map
             Map<String, Object> mapBean = FastBeanCopier.copy(bean, new HashMap<>());
+
+            Map<String, Object> properties = new HashMap<>();
 
             for (LogicPrimaryKeyField info : infos) {
                 String field = info.getField();
                 Object value = mapBean.get(field);
+                //为空,可能是有字段嵌套,也有可能是真的null
                 if (value == null) {
                     String tmpField = field;
                     Object tmpValue = null;
                     Map<String, Object> tempMapBean = mapBean;
+                    //嵌套的场景
                     while (tmpValue == null && tmpField.contains(".")) {
                         String[] nest = tmpField.split("[.]", 2);
                         Object nestObject = tempMapBean.get(nest[0]);
@@ -165,7 +189,6 @@ public class DefaultLogicPrimaryKeyValidator implements LogicPrimaryKeyValidator
                     }
                     value = tmpValue;
                 }
-
                 if (StringUtils.isEmpty(value)) {
                     if (info.matchNullOrEmpty) {
                         if (value == null) {
@@ -178,14 +201,19 @@ public class DefaultLogicPrimaryKeyValidator implements LogicPrimaryKeyValidator
                     String termType = StringUtils.isEmpty(info.termType) ? TermType.eq : info.termType;
                     query.and(info.getField(), termType, value);
                 }
+                properties.put(info.getField(), value);
             }
 
             T result = query.single();
 
             if (result != null) {
-
-                throw new DuplicateKeyException(result, "存在重复数据");
+                Result validateResult = new Result();
+                validateResult.setError(true);
+                validateResult.setData(result);
+                validateResult.setProperties(properties);
+                return validateResult;
             }
+            return Result.passed();
         }
     }
 
@@ -200,5 +228,20 @@ public class DefaultLogicPrimaryKeyValidator implements LogicPrimaryKeyValidator
         private boolean matchNullOrEmpty;
 
         private String termType;
+
+        private Class group;
+
+        @Override
+        public int hashCode() {
+            return field.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof LogicPrimaryKeyField) {
+                return hashCode() == obj.hashCode();
+            }
+            return false;
+        }
     }
 }

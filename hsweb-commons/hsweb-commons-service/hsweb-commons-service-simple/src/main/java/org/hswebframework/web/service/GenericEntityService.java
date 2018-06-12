@@ -64,7 +64,7 @@ public abstract class GenericEntityService<E extends GenericEntity<PK>, PK>
     public void init() {
         if (null != logicPrimaryKeyValidator && logicPrimaryKeyValidator instanceof DefaultLogicPrimaryKeyValidator) {
             ((DefaultLogicPrimaryKeyValidator) logicPrimaryKeyValidator)
-                    .<E>registerQuerySuppiler(getEntityInstanceType(), bean -> this.createQuery().not("id", bean.getId()));
+                    .registerQuerySuppiler(getEntityInstanceType(), bean -> this.createQuery().not("id", bean.getId()));
         }
     }
 
@@ -113,15 +113,9 @@ public abstract class GenericEntityService<E extends GenericEntity<PK>, PK>
     @SuppressWarnings("unchecked")
     protected boolean dataExisted(E entity) {
         if (null != logicPrimaryKeyValidator) {
-            try {
-                logicPrimaryKeyValidator.validate(entity);
-            } catch (DuplicateKeyException e) {
-                if (getEntityType().isInstance(e.getData())) {
-                    PK id = ((E) e.getData()).getId();
-                    entity.setId(id);
-                    return true;
-                }
-            }
+            logicPrimaryKeyValidator
+                    .validate(entity)
+                    .ifError(result -> entity.setId(result.getData().getId()));
         }
         return null != entity.getId() && null != selectByPk(entity.getId());
     }

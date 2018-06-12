@@ -10,10 +10,15 @@ import java.util.Map;
 @Setter
 public class DuplicateKeyException extends BusinessException {
 
-    private Object data;
+    private static final long serialVersionUID = 8449360528527473673L;
+    private LogicPrimaryKeyValidator.Result result;
 
-    public DuplicateKeyException(Object data, String message) {
+    public DuplicateKeyException(LogicPrimaryKeyValidator.Result result) {
+        this(result, result.getMessage());
+    }
+
+    public DuplicateKeyException(LogicPrimaryKeyValidator.Result result, String message) {
         super(message, 400);
-        this.data = data;
+        this.result = result;
     }
 }

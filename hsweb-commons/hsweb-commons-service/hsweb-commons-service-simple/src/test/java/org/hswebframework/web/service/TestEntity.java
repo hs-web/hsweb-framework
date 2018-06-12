@@ -4,6 +4,7 @@ import lombok.*;
 import org.hibernate.validator.constraints.NotBlank;
 import org.hswebframework.web.commons.entity.SimpleGenericEntity;
 import org.hswebframework.web.commons.entity.SimpleTreeSortSupportEntity;
+import org.hswebframework.web.validator.LogicPrimaryKey;
 import org.hswebframework.web.validator.group.CreateGroup;
 
 import java.util.List;
