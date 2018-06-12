@@ -212,7 +212,7 @@ public class DefaultExcelImporter implements ExcelImporter {
 
                 HeaderMapping mapping = headerMapper.getMapping(key).orElse(null);
 
-                if (mapping == null) {
+                if (mapping == null || !mapping.enableImport) {
                     continue;
                 }
 
