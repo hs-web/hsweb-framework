@@ -32,6 +32,7 @@
     <modules>
         <module>hsweb-boost-aop</module>
         <module>hsweb-boost-ftp</module>
+        <module>hsweb-boost-excel</module>
     </modules>
 
 
