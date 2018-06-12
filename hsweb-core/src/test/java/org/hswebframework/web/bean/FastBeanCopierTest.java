@@ -23,7 +23,7 @@ public class FastBeanCopierTest {
         source.setAge2(2);
         source.setBoy2(true);
         source.setColor(Color.RED);
-        source.setNestObject2(Collections.singletonMap("name","mapTest"));
+        source.setNestObject2(Collections.singletonMap("name", "mapTest"));
         NestObject nestObject = new NestObject();
         nestObject.setAge(10);
         nestObject.setPassword("1234567");
@@ -67,6 +67,8 @@ public class FastBeanCopierTest {
 
     @Test
     public void testCopyMap() {
+
+
         Source source = new Source();
         source.setAge(100);
         source.setName("测试");
@@ -75,9 +77,12 @@ public class FastBeanCopierTest {
         nestObject.setAge(10);
         nestObject.setName("测试2");
 //        source.setNestObject(nestObject);
+
+
         Map<String, Object> target = new HashMap<>();
 
-        FastBeanCopier.copy(source, target);
+
+        System.out.println(FastBeanCopier.copy(source, target, FastBeanCopier.include("age")));
 
         System.out.println(target);
         System.out.println(FastBeanCopier.copy(target, new Source()));
