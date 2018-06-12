@@ -333,7 +333,9 @@ public class DefaultToStringOperator<T> implements ToStringOperator<T> {
         if (ToString.Feature.hasFeature(features, ToString.Feature.jsonFormat)) {
             return JSON.toJSONString(mapValue);
         }
-        StringJoiner joiner = new StringJoiner(", ", target.getClass().getSimpleName() + "(", ")");
+        boolean writeClassName = ToString.Feature.hasFeature(features, ToString.Feature.writeClassname);
+
+        StringJoiner joiner = new StringJoiner(", ", (writeClassName ? target.getClass().getSimpleName() : "") + "(", ")");
 
         mapValue.forEach((key, value) -> joiner.add(key.concat("=").concat(String.valueOf(value))));
 

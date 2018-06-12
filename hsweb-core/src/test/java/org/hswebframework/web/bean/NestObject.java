@@ -12,21 +12,23 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class NestObject implements Cloneable {
+
+    @Override
+    public String toString() {
+        return ToString.toString(this);
+    }
+
     private String name;
 
     private int age;
 
-
     @ToString.Ignore
-    private String password ;
+    private String password;
+
 
     @Override
     public NestObject clone() throws CloneNotSupportedException {
         return (NestObject) super.clone();
     }
 
-    @Override
-    public String toString() {
-        return ToString.toString(this);
-    }
 }
