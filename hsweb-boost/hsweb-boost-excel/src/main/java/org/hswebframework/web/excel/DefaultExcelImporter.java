@@ -47,7 +47,7 @@ public class DefaultExcelImporter implements ExcelImporter {
             HeaderMapping mapping = new HeaderMapping();
             mapping.header = header;
             mapping.field = field.getName();
-            mapping.index = excel == null || excel.sheetIndex() == -1 ? index.getAndAdd(1) : excel.sheetIndex();
+            mapping.index = excel == null || excel.exportOrder() == -1 ? index.getAndAdd(1) : excel.exportOrder();
             mapping.converter = createConvert(field.getType());
             if (null != excel) {
                 mapping.enableImport = excel.enableImport();
@@ -191,7 +191,7 @@ public class DefaultExcelImporter implements ExcelImporter {
 
     @Override
     @SneakyThrows
-    public <T> Result<T> doImport(InputStream inputStream, Class<T> type, Function<T, Error> validator, Class... group) {
+    public <T> Result<T> doImport(InputStream inputStream, Class<T> type, Function<T, Error> afterParsed, Class... group) {
         AtomicInteger counter = new AtomicInteger(0);
         AtomicInteger errorCounter = new AtomicInteger(0);
         List<T> data = new ArrayList<>();
@@ -245,7 +245,7 @@ public class DefaultExcelImporter implements ExcelImporter {
 
             data.add(instance);
 
-            Error error = validator.apply(instance);
+            Error error = afterParsed.apply(instance);
             if (null != error) {
                 errorCounter.getAndAdd(1);
                 error.setRowIndex(counter.get());
