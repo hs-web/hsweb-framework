@@ -85,7 +85,7 @@ public class SimpleDistrictService extends AbstractTreeSortService<DistrictEntit
     @CacheEvict(allEntries = true)
     public int deleteByPk(String id) {
         if (DefaultDSLQueryService.createQuery(organizationalDao)
-                .where(OrganizationalEntity.orgId, id)
+                .where(OrganizationalEntity.districtId, id)
                 .total() > 0) {
             throw new BusinessException("行政区域下存在机构信息,无法删除!");
         }
