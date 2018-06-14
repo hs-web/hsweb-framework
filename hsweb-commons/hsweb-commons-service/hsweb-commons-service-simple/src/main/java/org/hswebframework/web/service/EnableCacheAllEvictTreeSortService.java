@@ -15,6 +15,18 @@ public abstract class EnableCacheAllEvictTreeSortService<E extends TreeSortSuppo
         extends AbstractTreeSortService<E, PK> {
 
     @Override
+    @Cacheable(key = "'chidlren:'+#parentId")
+    public List<E> selectChildNode(PK parentId) {
+        return super.selectChildNode(parentId);
+    }
+
+    @Override
+    @Cacheable(key = "'all-chidlren:'+#parentId")
+    public List<E> selectAllChildNode(PK parentId) {
+        return super.selectAllChildNode(parentId);
+    }
+
+    @Override
     @CacheEvict(allEntries = true)
     public int updateBatch(Collection<E> data) {
         return super.updateBatch(data);

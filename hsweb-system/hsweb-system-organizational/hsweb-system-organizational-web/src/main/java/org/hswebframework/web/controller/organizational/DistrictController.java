@@ -17,14 +17,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * 表单发布日志
+ * 行政区划管理
  *
  * @author hsweb-generator-online
  */
 @RestController
 @RequestMapping("${hsweb.web.mappings.district:district}")
 @Authorize(permission = "district", description = "行政区划管理")
-@Api(value = "行政区划管理",tags = "组织架构-行政区划管理")
+@Api(value = "行政区划管理", tags = "组织架构-行政区划管理")
 public class DistrictController implements SimpleGenericEntityController<DistrictEntity, String, QueryParamEntity> {
 
     private DistrictService districtService;
@@ -46,6 +46,20 @@ public class DistrictController implements SimpleGenericEntityController<Distric
         return ResponseMessage.ok(districtService.selectByCode(code));
     }
 
+    @GetMapping("/children/{parentId}")
+    @Authorize(action = Permission.ACTION_QUERY)
+    @ApiOperation("获取子级行政区划")
+    public ResponseMessage<List<DistrictEntity>> getByParentId(@PathVariable String parentId) {
+        return ResponseMessage.ok(districtService.selectChildNode(parentId));
+    }
+
+    @GetMapping("/children/{parentId}/all")
+    @Authorize(action = Permission.ACTION_QUERY)
+    @ApiOperation("获取所有子级行政区划")
+    public ResponseMessage<List<DistrictEntity>> getAllByParentId(@PathVariable String parentId) {
+        return ResponseMessage.ok(districtService.selectAllChildNode(parentId));
+    }
+
     @GetMapping("/all")
     @Authorize(action = Permission.ACTION_QUERY)
     @ApiOperation("获取全部行政区划")
@@ -63,7 +77,7 @@ public class DistrictController implements SimpleGenericEntityController<Distric
 
     @PutMapping("/{id}/disable")
     @Authorize(action = Permission.ACTION_DISABLE)
-    @ApiOperation("禁用机构")
+    @ApiOperation("禁用行政区划")
     public ResponseMessage<Boolean> disable(@PathVariable String id) {
         districtService.disable(id);
         return ResponseMessage.ok();
@@ -71,7 +85,7 @@ public class DistrictController implements SimpleGenericEntityController<Distric
 
     @PutMapping("/{id}/enable")
     @Authorize(action = Permission.ACTION_ENABLE)
-    @ApiOperation("启用机构")
+    @ApiOperation("启用行政区划")
     public ResponseMessage<Boolean> enable(@PathVariable String id) {
         districtService.enable(id);
         return ResponseMessage.ok();
