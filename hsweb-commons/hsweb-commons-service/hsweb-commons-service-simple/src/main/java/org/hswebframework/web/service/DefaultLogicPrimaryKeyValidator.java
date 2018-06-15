@@ -28,12 +28,21 @@ public class DefaultLogicPrimaryKeyValidator implements LogicPrimaryKeyValidator
     private static final Map<Class, Map<Class, Validator>> validatorCache = new HashMap<>();
 
 
-    private static final Validator EMPTY_VALIDATOR = bean -> {
+    private static final DefaultLogicPrimaryKeyValidator instrance = new DefaultLogicPrimaryKeyValidator();
+
+    protected DefaultLogicPrimaryKeyValidator() {
+    }
+
+    public static DefaultLogicPrimaryKeyValidator getInstrance() {
+        return instrance;
+    }
+
+    private static final Validator ALWAYS_PASSED_VALIDATOR = bean -> {
         return Result.passed();
     };
 
-    public <T> void registerQuerySuppiler(Class<T> type, Function<T, Query<T, QueryParamEntity>> querySupplier) {
-        validatorCache.computeIfAbsent(type, this::createValidator)
+    public static <T> void registerQuerySuppiler(Class<T> type, Function<T, Query<T, QueryParamEntity>> querySupplier) {
+        validatorCache.computeIfAbsent(type, instrance::createValidator)
                 .values()
                 .stream()
                 .filter(DefaultValidator.class::isInstance)
@@ -50,7 +59,7 @@ public class DefaultLogicPrimaryKeyValidator implements LogicPrimaryKeyValidator
             result = Arrays.stream(groups)
                     .map(group ->
                             validatorCache.computeIfAbsent(target, this::createValidator)
-                                    .getOrDefault(group, EMPTY_VALIDATOR)
+                                    .getOrDefault(group, ALWAYS_PASSED_VALIDATOR)
                                     .doValidate(bean))
                     .filter(Result::isError)
                     .findFirst()
@@ -58,7 +67,7 @@ public class DefaultLogicPrimaryKeyValidator implements LogicPrimaryKeyValidator
 
         } else {
             result = validatorCache.computeIfAbsent(target, this::createValidator)
-                    .getOrDefault(Void.class, EMPTY_VALIDATOR)
+                    .getOrDefault(Void.class, ALWAYS_PASSED_VALIDATOR)
                     .doValidate(bean);
         }
         return result;
@@ -134,6 +143,7 @@ public class DefaultLogicPrimaryKeyValidator implements LogicPrimaryKeyValidator
                                 Collectors.mapping(Function.identity(), Collectors.toSet())
                                 , list -> DefaultValidator.builder()
                                         .infos(list)
+                                        .targetType(target)
                                         .build())
                         )
                 );
@@ -148,10 +158,18 @@ public class DefaultLogicPrimaryKeyValidator implements LogicPrimaryKeyValidator
     static class DefaultValidator<T> implements Validator<T> {
         private Set<LogicPrimaryKeyField> infos = new HashSet<>();
 
+        private Class<T> targetType;
+
         private volatile Function<T, Query<T, QueryParamEntity>> querySupplier;
 
         public Result doValidate(T bean) {
             if (querySupplier == null) {
+                log.warn("未设置查询函数," +
+                                "你可以在服务初始化的时候通过调用" +
+                                "DefaultLogicPrimaryKeyValidator" +
+                                ".registerQuerySuppiler({},bean -> this.createQuery().not(\"id\", bean.getId()))" +
+                                "进行设置"
+                        , targetType);
                 return Result.passed();
             }
 

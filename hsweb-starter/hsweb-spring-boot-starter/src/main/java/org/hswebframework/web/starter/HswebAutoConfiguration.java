@@ -179,7 +179,7 @@ public class HswebAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(LogicPrimaryKeyValidator.class)
     public LogicPrimaryKeyValidator logicPrimaryKeyValidator() {
-        return new DefaultLogicPrimaryKeyValidator();
+        return DefaultLogicPrimaryKeyValidator.getInstrance();
     }
 
     @Bean
