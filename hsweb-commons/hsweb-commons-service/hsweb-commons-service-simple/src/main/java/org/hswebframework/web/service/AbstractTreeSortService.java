@@ -44,14 +44,19 @@ public abstract class AbstractTreeSortService<E extends TreeSortSupportEntity<PK
         assertNotNull(parentId);
         E old = selectByPk(parentId);
         assertNotNull(old);
-        return createQuery().where().like$(TreeSupportEntity.path, old.getPath()).noPaging().list();
+        return createQuery()
+                .where()
+                .like$(TreeSupportEntity.path, old.getPath())
+                .listNoPaging();
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<E> selectChildNode(PK parentId) {
         assertNotNull(parentId);
-        return createQuery().where(TreeSupportEntity.parentId, parentId).noPaging().list();
+        return createQuery()
+                .where(TreeSupportEntity.parentId, parentId)
+                .listNoPaging();
     }
 
     //当父节点不存在时,创建parentId
@@ -67,6 +72,7 @@ public abstract class AbstractTreeSortService<E extends TreeSortSupportEntity<PK
         if (StringUtils.isEmpty(entity.getParentId())) {
             entity.setSortIndex(0L);
             entity.setParentId(createParentIdOnExists());
+            entity.setLevel(0);
             entity.setPath(RandomUtil.randomChar(4));
             return;
         }
@@ -80,10 +86,12 @@ public abstract class AbstractTreeSortService<E extends TreeSortSupportEntity<PK
                 entity.setSortIndex(0L);
             entity.setParentId(createParentIdOnExists());
             entity.setPath(RandomUtil.randomChar(4));
+            entity.setLevel(0);
         } else {
-            if (entity.getSortIndex() == null&&parent.getSortIndex()!=null)
+            if (entity.getSortIndex() == null && parent.getSortIndex() != null)
                 entity.setSortIndex(parent.getSortIndex() * 10);
             entity.setPath(parent.getPath() + "-" + RandomUtil.randomChar(4));
+            entity.setLevel(entity.getPath().split("[-]").length);
         }
     }
 
@@ -119,13 +127,11 @@ public abstract class AbstractTreeSortService<E extends TreeSortSupportEntity<PK
         assertNotNull(entity);
         List<E> childrenList = new ArrayList<>();
         TreeSupportEntity.expandTree2List(entity, childrenList, getIDGenerator());
-//        this.saveOrUpdateForSingle(entity);
-//        childrenList.remove(entity);
         childrenList.forEach(this::saveOrUpdateForSingle);
         return childrenList.size() + 1;
     }
 
-    public PK saveOrUpdateForSingle(E entity) {
+    protected PK saveOrUpdateForSingle(E entity) {
         assertNotNull(entity);
         PK id = entity.getId();
         if (null == id || this.selectByPk(id) == null) {

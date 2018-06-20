@@ -3,8 +3,12 @@ package org.hswebframework.web.excel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.expands.office.excel.ExcelIO;
+import org.hswebframework.web.ApplicationContextHolder;
 import org.hswebframework.web.bean.FastBeanCopier;
+import org.hswebframework.web.dict.EnumDict;
+import org.hswebframework.web.dict.ItemDefine;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -19,11 +23,29 @@ import java.util.function.Supplier;
  * @author zhouhao
  * @since 3.0.0-RC
  */
+@Slf4j
+@SuppressWarnings("all")
 public class DefaultExcelImporter implements ExcelImporter {
 
     protected static Map<Class, Map<Class, HeaderMapper>> headerMappings = new ConcurrentHashMap<>();
 
-    @SuppressWarnings("all")
+    protected static ExcelCellConverter DEFAULT_CONVERTER = new ExcelCellConverter() {
+        @Override
+        public Object convertFromCell(Object from) {
+            return from;
+        }
+
+        @Override
+        public Object convertToCell(Object from) {
+            if (from instanceof EnumDict) {
+                return ((EnumDict) from).getText();
+            }
+            return from;
+        }
+    };
+
+    protected ExcelCellConverter defaultConvert = DEFAULT_CONVERTER;
+
     protected Map<Class, HeaderMapper> createHeaderMapping(Class type) {
         //一些基本类型不做处理
         if (type == String.class
@@ -47,8 +69,7 @@ public class DefaultExcelImporter implements ExcelImporter {
             HeaderMapping mapping = new HeaderMapping();
             mapping.header = header;
             mapping.field = field.getName();
-            mapping.index = excel == null || excel.sheetIndex() == -1 ? index.getAndAdd(1) : excel.sheetIndex();
-            mapping.converter = createConvert(field.getType());
+            mapping.index = excel == null || excel.exportOrder() == -1 ? index.getAndAdd(1) : excel.exportOrder();
             if (null != excel) {
                 mapping.enableImport = excel.enableImport();
                 mapping.enableExport = excel.enableExport();
@@ -58,7 +79,9 @@ public class DefaultExcelImporter implements ExcelImporter {
                             .mappings
                             .add(mapping);
                 }
+                mapping.converter = createConvert(excel.converter(), field.getType());
             } else {
+                mapping.converter = createConvert(ExcelCellConverter.class, field.getType());
                 mapping.children = () -> getHeaderMapper(field.getType());
                 headerMapperMap.computeIfAbsent(Void.class, DefaultHeaderMapper::new)
                         .mappings
@@ -70,19 +93,17 @@ public class DefaultExcelImporter implements ExcelImporter {
         return (Map) headerMapperMap;
     }
 
-    protected <T> ExcelCellConverter<T> createConvert(Class<T> type) {
-        // TODO: 18-6-12
-        return new ExcelCellConverter<T>() {
-            @Override
-            public T convertFromCell(Object from) {
-                return type.cast(from);
+    @SneakyThrows
+    protected <T> ExcelCellConverter<T> createConvert(Class<ExcelCellConverter> converterClass, Class<T> type) {
+        if (converterClass != ExcelCellConverter.class) {
+            try {
+                return ApplicationContextHolder.get().getBean(converterClass);
+            } catch (Exception e) {
+                log.warn("can not get bean ({}) from spring context.", converterClass, e);
+                return converterClass.newInstance();
             }
-
-            @Override
-            public Object convertToCell(T from) {
-                return from;
-            }
-        };
+        }
+        return defaultConvert;
     }
 
     @Getter
@@ -147,11 +168,15 @@ public class DefaultExcelImporter implements ExcelImporter {
         @Override
         public Optional<HeaderMapping> getMapping(String key) {
             return Optional.ofNullable(fastMapping.computeIfAbsent(key, k -> {
+                //尝试获取嵌套的属性
                 for (HeaderMapping mapping : mappings) {
                     String newKey = key;
+                    //字段嵌套
                     if (newKey.startsWith(mapping.field)) {
                         newKey = newKey.substring(mapping.field.length());
-                    } else if (newKey.startsWith(mapping.header)) {
+                    }
+                    //表头嵌套
+                    else if (newKey.startsWith(mapping.header)) {
                         newKey = newKey.substring(mapping.header.length());
                     } else {
                         continue;
@@ -162,6 +187,7 @@ public class DefaultExcelImporter implements ExcelImporter {
                         if (map != null) {
                             map = map.copy();
                             map.field = mapping.field.concat(".").concat(map.field);
+                            map.header = mapping.header.concat(map.header);
                             return map;
                         }
                     }
@@ -191,7 +217,7 @@ public class DefaultExcelImporter implements ExcelImporter {
 
     @Override
     @SneakyThrows
-    public <T> Result<T> doImport(InputStream inputStream, Class<T> type, Function<T, Error> validator, Class... group) {
+    public <T> Result<T> doImport(InputStream inputStream, Class<T> type, Function<T, Error> afterParsed, Class... group) {
         AtomicInteger counter = new AtomicInteger(0);
         AtomicInteger errorCounter = new AtomicInteger(0);
         List<T> data = new ArrayList<>();
@@ -208,31 +234,44 @@ public class DefaultExcelImporter implements ExcelImporter {
 
             for (Map.Entry<String, Object> entry : mapValue.entrySet()) {
                 String key = entry.getKey();
-                Object value = entry.getValue();
-
                 HeaderMapping mapping = headerMapper.getMapping(key).orElse(null);
 
                 if (mapping == null || !mapping.enableImport) {
                     continue;
                 }
+                Object value = mapping.getConverter().convertFromCell(entry.getValue());
 
-                String field = mapping.field;
+                String field = mapping.getField();
                 //嵌套的字段
                 if (field.contains(".")) {
                     String tmpField = field;
                     Map<String, Object> nestMapValue = newValue;
+
                     while (tmpField.contains(".")) {
+
+                        // nest.obj.name => [nest,obj.name]
                         String[] nestFields = tmpField.split("[.]", 2);
+
+                        //nest
+                        String nestField = nestFields[0];
+
+                        //obj.name
                         tmpField = nestFields[1];
-                        Object nestValue = nestMapValue.get(nestFields[0]);
+
+                        Object nestValue = nestMapValue.get(nestField);
+                        //构造嵌套对象为map
                         if (nestValue == null) {
-                            nestMapValue.put(nestFields[0], nestMapValue = new HashMap<>());
+                            nestMapValue.put(nestField, nestMapValue = new HashMap<>());
                         } else {
                             if (nestValue instanceof Map) {
                                 nestMapValue = ((Map) nestValue);
+                            } else {
+                                //这里几乎不可能进入...
+                                nestMapValue.put(nestField, nestMapValue = FastBeanCopier.copy(nestValue, new HashMap<>()));
                             }
                         }
                     }
+                    //最后nestMapValue就为最里层嵌套的对象了
                     nestMapValue.put(tmpField, value);
                 } else {
                     newValue.put(field, value);
@@ -245,7 +284,7 @@ public class DefaultExcelImporter implements ExcelImporter {
 
             data.add(instance);
 
-            Error error = validator.apply(instance);
+            Error error = afterParsed.apply(instance);
             if (null != error) {
                 errorCounter.getAndAdd(1);
                 error.setRowIndex(counter.get());

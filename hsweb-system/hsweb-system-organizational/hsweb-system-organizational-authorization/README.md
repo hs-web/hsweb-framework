@@ -4,7 +4,7 @@
 ### 获取当前用户对应的人员信息
 
 ```java
-   PersonnelAuthorization person= PersonnelAuthorization.current().orElse(null);
+   PersonnelAuthentication person= PersonnelAuthentication.current().orElse(null);
     
     //人员基本信息
    person.getPersonnel();

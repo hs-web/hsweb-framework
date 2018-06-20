@@ -9,6 +9,7 @@ import org.hswebframework.web.entity.organizational.DistrictEntity;
 import org.hswebframework.web.entity.organizational.OrganizationalEntity;
 import org.hswebframework.web.service.AbstractTreeSortService;
 import org.hswebframework.web.service.DefaultDSLQueryService;
+import org.hswebframework.web.service.EnableCacheAllEvictTreeSortService;
 import org.hswebframework.web.service.GenericEntityService;
 import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.service.organizational.DistrictService;
@@ -34,7 +35,7 @@ import static org.hswebframework.web.service.DefaultDSLQueryService.*;
  */
 @Service("districtService")
 @CacheConfig(cacheNames = "district")
-public class SimpleDistrictService extends AbstractTreeSortService<DistrictEntity, String>
+public class SimpleDistrictService extends EnableCacheAllEvictTreeSortService<DistrictEntity, String>
         implements DistrictService {
     @Autowired
     private DistrictDao districtDao;
@@ -84,9 +85,7 @@ public class SimpleDistrictService extends AbstractTreeSortService<DistrictEntit
     @Override
     @CacheEvict(allEntries = true)
     public int deleteByPk(String id) {
-        if (DefaultDSLQueryService.createQuery(organizationalDao)
-                .where(OrganizationalEntity.orgId, id)
-                .total() > 0) {
+        if (DefaultDSLQueryService.createQuery(organizationalDao).where(OrganizationalEntity.districtId, id).total() > 0) {
             throw new BusinessException("行政区域下存在机构信息,无法删除!");
         }
         publisher.publishEvent(new ClearPersonCacheEvent());

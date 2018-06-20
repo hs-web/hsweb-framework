@@ -57,14 +57,10 @@ public abstract class GenericEntityService<E extends GenericEntity<PK>, PK>
      */
     protected abstract IDGenerator<PK> getIDGenerator();
 
-    @Autowired(required = false)
-    public LogicPrimaryKeyValidator logicPrimaryKeyValidator;
-
     @PostConstruct
     public void init() {
         if (null != logicPrimaryKeyValidator && logicPrimaryKeyValidator instanceof DefaultLogicPrimaryKeyValidator) {
-            ((DefaultLogicPrimaryKeyValidator) logicPrimaryKeyValidator)
-                    .registerQuerySuppiler(getEntityInstanceType(), bean -> this.createQuery().not("id", bean.getId()));
+            DefaultLogicPrimaryKeyValidator.registerQuerySuppiler(getEntityInstanceType(), bean -> this.createQuery().not("id", bean.getId()));
         }
     }
 
@@ -80,6 +76,7 @@ public abstract class GenericEntityService<E extends GenericEntity<PK>, PK>
         Assert.notNull(entity, "entity can not be null");
         entity.setId(pk);
         tryValidate(entity, UpdateGroup.class);
+
         return createUpdate(entity)
                 //如果是RecordCreationEntity则不修改creator_id和creator_time
                 .when(entity instanceof RecordCreationEntity,

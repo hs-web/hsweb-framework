@@ -77,6 +77,9 @@ public interface QueryController<E, PK, Q extends Entity> {
     @GetMapping("/no-paging")
     @ApiOperation(value = "不分页动态查询", responseReference = "get")
     default ResponseMessage<List<E>> listNoPaging(Q param) {
+        if (param instanceof QueryParamEntity) {
+            ((QueryParamEntity) param).setPaging(false);
+        }
         return ok(getService().select(param));
     }
 
