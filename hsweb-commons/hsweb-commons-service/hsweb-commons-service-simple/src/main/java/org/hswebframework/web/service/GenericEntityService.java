@@ -76,6 +76,7 @@ public abstract class GenericEntityService<E extends GenericEntity<PK>, PK>
         Assert.notNull(entity, "entity can not be null");
         entity.setId(pk);
         tryValidate(entity, UpdateGroup.class);
+
         return createUpdate(entity)
                 //如果是RecordCreationEntity则不修改creator_id和creator_time
                 .when(entity instanceof RecordCreationEntity,
