@@ -137,8 +137,7 @@ public class LocalFileService implements FileService {
         String fileAbsName = absPath.concat("/").concat(newName);
         int fileSize;
         MessageDigest digest = DigestUtils.getMd5Digest();
-
-        try (InputStream in = new InputStream() {
+        try (InputStream proxyStream = new InputStream() {
             @Override
             public int read(byte[] b, int off, int len) throws IOException {
                 int l = fileStream.read(b, off, len);
@@ -162,12 +161,12 @@ public class LocalFileService implements FileService {
                 return fileStream.read();
             }
         }; FileOutputStream os = new FileOutputStream(fileAbsName)) {
-            int remainBytes = fileSize = in.available();
+            int remainBytes = fileSize = proxyStream.available();
             byte[] buff = new byte[remainBytes > 1024 * 10 ? 1024 * 10 : remainBytes];
             int bytes;
             logger.info("开始写出文件:{}到:{}, size: {} bytes", fileName, fileAbsName, fileSize);
             while (remainBytes > 0) {
-                bytes = in.read(buff, 0, remainBytes > buff.length ? buff.length : remainBytes);
+                bytes = proxyStream.read(buff, 0, remainBytes > buff.length ? buff.length : remainBytes);
                 os.write(buff, 0, bytes);
                 remainBytes -= bytes;
                 logger.info("写出文件:{}:{},剩余数据量: {} bytes", fileName, fileAbsName, remainBytes);
