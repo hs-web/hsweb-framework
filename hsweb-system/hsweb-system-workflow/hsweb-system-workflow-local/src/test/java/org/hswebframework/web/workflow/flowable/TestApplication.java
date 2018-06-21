@@ -1,25 +1,13 @@
 package org.hswebframework.web.workflow.flowable;
 
-import org.hswebframework.web.service.organizational.RelationDefineService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.context.annotation.ComponentScan;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 @SpringBootApplication
-@ActiveProfiles("dev")
+@ComponentScan("org.hswebframework.web.workflow")
 public class TestApplication {
-    @Autowired
-    RelationDefineService relationDefineService;
 
-    public static void main(String[] args) {
-        SpringApplication application = new SpringApplication(TestApplication.class);
-        application.setAdditionalProfiles("dev");
-        application.run(args);
-    }
 }
