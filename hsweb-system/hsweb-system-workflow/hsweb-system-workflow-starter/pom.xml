@@ -15,17 +15,7 @@
     <dependencies>
         <dependency>
             <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-system-workflow-dao-mybatis</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-system-workflow-flowable</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-system-workflow-service-simple</artifactId>
+            <artifactId>hsweb-system-workflow-local</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

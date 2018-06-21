@@ -16,11 +16,8 @@
         <flowable.version>5.23.0</flowable.version>
     </properties>
     <modules>
-        <module>hsweb-system-workflow-flowable</module>
-        <module>hsweb-system-workflow-dao</module>
-        <module>hsweb-system-workflow-entity</module>
-        <module>hsweb-system-workflow-service</module>
         <module>hsweb-system-workflow-starter</module>
+        <module>hsweb-system-workflow-local</module>
     </modules>
 
 
