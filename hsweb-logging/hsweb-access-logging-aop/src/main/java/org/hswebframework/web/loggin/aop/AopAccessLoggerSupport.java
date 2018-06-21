@@ -28,8 +28,10 @@ import java.util.List;
  */
 public class AopAccessLoggerSupport extends StaticMethodMatcherPointcutAdvisor {
 
+    @Autowired(required = false)
     private final List<AccessLoggerListener> listeners = new ArrayList<>();
 
+    @Autowired(required = false)
     private final List<AccessLoggerParser> loggerParsers = new ArrayList<>();
 
     @Autowired
@@ -37,12 +39,16 @@ public class AopAccessLoggerSupport extends StaticMethodMatcherPointcutAdvisor {
 
 
     public AopAccessLoggerSupport addListener(AccessLoggerListener loggerListener) {
-        listeners.add(loggerListener);
+        if (!listeners.contains(loggerListener)) {
+            listeners.add(loggerListener);
+        }
         return this;
     }
 
     public AopAccessLoggerSupport addParser(AccessLoggerParser parser) {
-        loggerParsers.add(parser);
+        if (!loggerParsers.contains(parser)) {
+            loggerParsers.add(parser);
+        }
         return this;
     }
 
@@ -106,6 +112,6 @@ public class AopAccessLoggerSupport extends StaticMethodMatcherPointcutAdvisor {
 
     @Override
     public boolean matches(Method method, Class<?> aClass) {
-        return loggerParsers.stream().anyMatch(parser->parser.support(aClass,method));
+        return loggerParsers.stream().anyMatch(parser -> parser.support(aClass, method));
     }
 }
