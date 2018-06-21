@@ -194,6 +194,8 @@ public class FlowableModelManagerController {
                 exportBytes = modelEditorSource;
                 filename = mainProcessId + ".json";
 
+            } else {
+                throw new UnsupportedOperationException("不支持的格式:" + type);
             }
 
             response.setCharacterEncoding("UTF-8");
