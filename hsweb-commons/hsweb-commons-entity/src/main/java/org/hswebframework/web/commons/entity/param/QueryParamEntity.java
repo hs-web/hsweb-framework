@@ -56,4 +56,9 @@ public class QueryParamEntity extends QueryParam implements QueryEntity {
         return toHttpQueryParamString();
     }
 
+    public QueryParamEntity noPaging() {
+        setPaging(false);
+        return this;
+    }
+
 }
