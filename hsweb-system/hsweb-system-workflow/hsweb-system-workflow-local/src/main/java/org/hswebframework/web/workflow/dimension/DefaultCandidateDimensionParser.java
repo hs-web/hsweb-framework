@@ -39,7 +39,7 @@ public class DefaultCandidateDimensionParser implements CandidateDimensionParser
                     List<String> list = strategies
                             .stream()
                             .filter(strategy -> strategy.support(type))
-                            .map(strategy -> strategy.parse(config))
+                            .map(strategy -> strategy.parse(context,config))
                             .filter(CollectionUtils::isNotEmpty)
                             .flatMap(Collection::stream)
                             .collect(Collectors.toList());
