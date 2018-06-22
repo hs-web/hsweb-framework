@@ -3,6 +3,7 @@ package org.hswebframework.web.service.organizational.simple.terms;
 import org.hswebframework.ezorm.core.param.Term;
 import org.hswebframework.ezorm.rdb.meta.RDBColumnMetaData;
 import org.hswebframework.ezorm.rdb.render.SqlAppender;
+import org.hswebframework.ezorm.rdb.render.dialect.Dialect;
 import org.hswebframework.ezorm.rdb.render.dialect.term.BoostTermTypeMapper;
 import org.hswebframework.web.dao.mybatis.mapper.ChangedTermValue;
 import org.hswebframework.web.service.organizational.DepartmentService;
@@ -35,6 +36,8 @@ public class UserInDepartmentSqlTerm extends UserInSqlTerm {
     public SqlAppender accept(String wherePrefix, Term term, RDBColumnMetaData column, String tableAlias) {
         ChangedTermValue termValue = createChangedTermValue(term);
 
+        Dialect dialect=column.getTableMetaData().getDatabaseMetaData().getDialect();
+
         SqlAppender appender = new SqlAppender();
         appender.addSpc(not ? "not" : "", "exists(select 1 from s_person_position _tmp,s_position _pos,s_person _person");
         if (isChild()) {
@@ -49,7 +52,7 @@ public class UserInDepartmentSqlTerm extends UserInSqlTerm {
         List<Object> positionIdList = BoostTermTypeMapper.convertList(column, termValue.getOld());
         if (!positionIdList.isEmpty()) {
             appender.addSpc("and");
-            termValue.setValue(appendCondition(positionIdList, wherePrefix, appender, "_pos.department_id"));
+            termValue.setValue(appendCondition(positionIdList, wherePrefix, appender, "_pos.department_id",dialect));
         }
 
         appender.add(")");

@@ -18,8 +18,11 @@ public class InServiceTreeInSqlTerm<PK> extends TreeStructureSqlTermCustomer {
 
     private String tableName;
 
-    public InServiceTreeInSqlTerm(QueryService<? extends TreeSupportEntity<PK>, PK> service, String prefix, String tableName, boolean not) {
-        super(prefix + "-child-" + (not ? "not-" : "") + "in", not);
+    public InServiceTreeInSqlTerm(QueryService<? extends TreeSupportEntity<PK>, PK> service,
+                                  String prefix,
+                                  String tableName,
+                                  boolean not, boolean parent) {
+        super(prefix + "-" + (parent ? "parent" : "child") + "-" + (not ? "not-" : "") + "in", not, parent);
         this.treeService = service;
         this.tableName = tableName;
     }
