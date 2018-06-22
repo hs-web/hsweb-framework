@@ -18,4 +18,5 @@ public interface UserRoleDao extends Dao {
     List<UserRoleEntity> selectByUserId(String userId);
 
     List<UserRoleEntity> selectByRoleId(String roleId);
+
 }

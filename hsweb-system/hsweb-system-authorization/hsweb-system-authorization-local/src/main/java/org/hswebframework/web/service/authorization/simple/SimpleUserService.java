@@ -181,9 +181,9 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
         //不修改的字段
         List<String> excludeProperties = new ArrayList<>(Arrays.asList(
                 UserEntity.username
-                ,UserEntity.password
-                ,UserEntity.salt
-                ,UserEntity.status));
+                , UserEntity.password
+                , UserEntity.salt
+                , UserEntity.status));
         //修改密码
         if (StringUtils.hasLength(userEntity.getPassword())) {
             //密码强度验证
@@ -211,7 +211,7 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
         if (excludeProperties.contains(UserEntity.password)) {
             publisher.publishEvent(new UserModifiedEvent(userEntity, passwordModified, roleModified));
         }
-        publisher.publishEvent(new ClearUserAuthorizationCacheEvent(userId,false));
+        publisher.publishEvent(new ClearUserAuthorizationCacheEvent(userId, false));
 
     }
 
@@ -284,5 +284,15 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
         //使用用户的配置
         settingInfo.add(new SettingInfo(SETTING_TYPE_USER, userId));
         return settingInfo;
+    }
+
+    @Override
+    public List<UserEntity> selectByUserByRole(List<String> roleIdList) {
+        if (CollectionUtils.isEmpty(roleIdList)) {
+            return Collections.emptyList();
+        }
+        return createQuery()
+                .where("id", "user-in-role", roleIdList)
+                .listNoPaging();
     }
 }

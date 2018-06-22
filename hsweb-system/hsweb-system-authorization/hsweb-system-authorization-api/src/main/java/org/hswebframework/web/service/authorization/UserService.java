@@ -107,4 +107,12 @@ public interface UserService extends
      * @return 永远不为null, 如果用户不存在或者用户没有任何角色, 返回空集合.
      */
     List<RoleEntity> getUserRole(String userId);
+
+    /**
+     * 根据角色id集合获取对应的全部用户
+     *
+     * @param roleIdList 角色ID集合
+     * @return 用户, 不存在时返回空集合,不会返回null
+     */
+    List<UserEntity> selectByUserByRole(List<String> roleIdList);
 }
