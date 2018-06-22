@@ -2,6 +2,7 @@ package org.hswebframework.web.workflow.dimension.parser;
 
 import org.hswebframework.web.entity.authorization.UserEntity;
 import org.hswebframework.web.service.authorization.UserService;
+import org.hswebframework.web.workflow.dimension.DimensionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
@@ -28,7 +29,7 @@ public class RoleCandidateDimensionParserStrategy implements CandidateDimensionP
     }
 
     @Override
-    public List<String> parse(StrategyConfig config) {
+    public List<String> parse(DimensionContext context, StrategyConfig config) {
         return userService.selectByUserByRole(config.getIdList())
                 .stream()
                 .map(UserEntity::getId)

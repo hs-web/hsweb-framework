@@ -6,5 +6,5 @@ package org.hswebframework.web.workflow.dimension;
  * @since 3.0.0-RC
  */
 public interface CandidateDimensionParser {
-    CandidateDimension parse(String jsonConfig);
+    CandidateDimension parse(DimensionContext context, String jsonConfig);
 }

@@ -20,7 +20,7 @@ public class DefaultCandidateDimensionParser implements CandidateDimensionParser
     private List<CandidateDimensionParserStrategy> strategies;
 
     @Override
-    public CandidateDimension parse(String jsonConfig) {
+    public CandidateDimension parse(DimensionContext context, String jsonConfig) {
         JSONObject jsonObject = JSON.parseObject(jsonConfig);
         String type = jsonObject.getString("type");
         CandidateDimensionParserStrategy.StrategyConfig config = jsonObject

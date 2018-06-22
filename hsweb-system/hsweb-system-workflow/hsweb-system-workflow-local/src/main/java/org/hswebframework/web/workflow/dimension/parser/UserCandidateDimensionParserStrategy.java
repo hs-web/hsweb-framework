@@ -1,5 +1,6 @@
 package org.hswebframework.web.workflow.dimension.parser;
 
+import org.hswebframework.web.workflow.dimension.DimensionContext;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -17,7 +18,7 @@ public class UserCandidateDimensionParserStrategy implements CandidateDimensionP
     }
 
     @Override
-    public List<String> parse(StrategyConfig config) {
+    public List<String> parse(DimensionContext context, StrategyConfig config) {
         return config.getIdList();
     }
 }

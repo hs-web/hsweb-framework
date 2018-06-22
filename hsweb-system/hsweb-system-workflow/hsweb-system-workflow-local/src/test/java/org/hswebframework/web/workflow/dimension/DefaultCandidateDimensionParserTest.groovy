@@ -53,4 +53,26 @@ class DefaultCandidateDimensionParserTest extends Specification {
         dimension.getCandidateUserIdList() != null
         dimension != CandidateDimension.empty
     }
+
+    def "Test Parse Department"() {
+        setup:
+        def config = """ {"type":"department","idList":["test"]} """
+        and:
+        def dimension = parser.parse(config)
+        expect:
+        dimension != null
+        dimension.getCandidateUserIdList() != null
+        dimension != CandidateDimension.empty
+    }
+
+    def "Test Parse Org"() {
+        setup:
+        def config = """ {"type":"org","idList":["test"]} """
+        and:
+        def dimension = parser.parse(config)
+        expect:
+        dimension != null
+        dimension.getCandidateUserIdList() != null
+        dimension != CandidateDimension.empty
+    }
 }
