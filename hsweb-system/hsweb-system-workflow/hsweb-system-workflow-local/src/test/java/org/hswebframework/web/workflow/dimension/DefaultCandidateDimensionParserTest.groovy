@@ -23,7 +23,7 @@ class DefaultCandidateDimensionParserTest extends Specification {
         setup:
         def config = """ {"type":"user","idList":["admin"]} """
         and:
-        def dimension = parser.parse(config)
+        def dimension = parser.parse(null,config)
         expect:
         dimension != null
         dimension.getCandidateUserIdList() != null
@@ -35,7 +35,7 @@ class DefaultCandidateDimensionParserTest extends Specification {
         setup:
         def config = """ {"type":"role","idList":["admin"]} """
         and:
-        def dimension = parser.parse(config)
+        def dimension = parser.parse(null,config)
         expect:
         dimension != null
         dimension.getCandidateUserIdList() != null
@@ -47,7 +47,7 @@ class DefaultCandidateDimensionParserTest extends Specification {
         setup:
         def config = """ {"type":"position","idList":["test"],"tree":"parent"} """
         and:
-        def dimension = parser.parse(config)
+        def dimension = parser.parse(null,config)
         expect:
         dimension != null
         dimension.getCandidateUserIdList() != null
@@ -58,7 +58,7 @@ class DefaultCandidateDimensionParserTest extends Specification {
         setup:
         def config = """ {"type":"department","idList":["test"]} """
         and:
-        def dimension = parser.parse(config)
+        def dimension = parser.parse(null,config)
         expect:
         dimension != null
         dimension.getCandidateUserIdList() != null
@@ -69,7 +69,7 @@ class DefaultCandidateDimensionParserTest extends Specification {
         setup:
         def config = """ {"type":"org","idList":["test"]} """
         and:
-        def dimension = parser.parse(config)
+        def dimension = parser.parse(null,config)
         expect:
         dimension != null
         dimension.getCandidateUserIdList() != null
