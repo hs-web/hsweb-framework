@@ -1,6 +1,5 @@
 package org.hswebframework.web.workflow.dimension;
 
-import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 
@@ -11,7 +10,6 @@ import java.util.List;
 public interface CandidateDimension {
 
     List<String> getCandidateUserIdList();
-
 
     CandidateDimension empty =  Collections::emptyList;
 

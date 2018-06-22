@@ -1,9 +1,32 @@
 package org.hswebframework.web.workflow.dimension.parser;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 public interface CandidateDimensionParserStrategy {
-    boolean support(String type);
+    String DIMENSION_USER       = "user";
+    String DIMENSION_ROLE       = "role";
+    String DIMENSION_POSITION   = "position";
+    String DIMENSION_DEPARTMENT = "department";
+    String DIMENSION_ORG        = "org";
 
-    List<String> parse(List<String> ids);
+    boolean support(String dimension);
+
+    List<String> parse(StrategyConfig config);
+
+    @Getter
+    @Setter
+    class StrategyConfig {
+        private List<String> idList;
+
+        private Map<String, Object> config;
+
+        public Optional<Object> getConfig(String name) {
+            return config == null ? Optional.empty() : Optional.ofNullable(config.get(name));
+        }
+    }
 }
