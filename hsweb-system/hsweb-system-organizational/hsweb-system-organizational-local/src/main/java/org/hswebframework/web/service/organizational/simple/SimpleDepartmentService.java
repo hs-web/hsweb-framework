@@ -16,6 +16,7 @@
  */
 package org.hswebframework.web.service.organizational.simple;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.hswebframework.web.BusinessException;
 import org.hswebframework.web.dao.organizational.DepartmentDao;
 import org.hswebframework.web.dao.organizational.PositionDao;
@@ -35,8 +36,8 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 默认的服务实现
@@ -68,19 +69,48 @@ public class SimpleDepartmentService
     }
 
     @Override
-    @Cacheable(cacheNames = "'org-id:'+#orgId")
+    @Cacheable(key = "'org-id:'+#orgId")
     public List<DepartmentEntity> selectByOrgId(String orgId) {
         return createQuery().where(DepartmentEntity.orgId, orgId).listNoPaging();
     }
 
     @Override
-    @Cacheable(cacheNames = "'name:'+#name")
+    @Cacheable(key = "'org-ids:'+#orgId==null?0:orgId.hashCode()+'_'+#children+'_'+#parent")
+    public List<DepartmentEntity> selectByOrgIds(List<String> orgId, boolean children, boolean parent) {
+        if (CollectionUtils.isEmpty(orgId)) {
+            return Collections.emptyList();
+        }
+        Set<String> allOrgId = new HashSet<>();
+
+        if (children) {
+            allOrgId.addAll(orgId.stream()
+                    .map(this::selectAllChildNode)
+                    .flatMap(Collection::stream)
+                    .map(DepartmentEntity::getId)
+                    .collect(Collectors.toSet()));
+
+        }
+        if (parent) {
+            allOrgId.addAll(orgId.stream()
+                    .map(this::selectParentNode)
+                    .flatMap(Collection::stream)
+                    .map(DepartmentEntity::getId)
+                    .collect(Collectors.toSet()));
+        }
+        return createQuery()
+                .where()
+                .in(DepartmentEntity.orgId, allOrgId)
+                .listNoPaging();
+    }
+
+    @Override
+    @Cacheable(key = "'name:'+#name")
     public List<DepartmentEntity> selectByName(String name) {
         return createQuery().where(DepartmentEntity.name, name).listNoPaging();
     }
 
     @Override
-    @Cacheable(cacheNames = "'code:'+#code")
+    @Cacheable(key = "'code:'+#code")
     public DepartmentEntity selectByCode(String code) {
         return createQuery().where(DepartmentEntity.code, code).single();
     }

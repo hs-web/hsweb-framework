@@ -39,7 +39,7 @@ public class UserInPositionSqlTerm extends UserInSqlTerm {
 
         SqlAppender appender = new SqlAppender();
         appender.addSpc(not ? "not" : "", "exists(select 1 from s_person_position _tmp");
-        if (isChild()) {
+        if (isChild()||isParent()) {
             appender.addSpc(",s_position _pos");
         }
         if (!isForPerson()) {
@@ -50,7 +50,7 @@ public class UserInPositionSqlTerm extends UserInSqlTerm {
                 createColumnName(column, tableAlias), "=",
                 isForPerson() ? " _tmp.person_id" : "_person.user_id and _person.u_id=_tmp.person_id");
 
-        if (isChild()) {
+        if (isChild()||isParent()) {
             appender.addSpc("and _pos.u_id=_tmp.position_id");
         }
 

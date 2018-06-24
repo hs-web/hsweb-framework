@@ -39,5 +39,17 @@ public interface PersonService extends CrudService<PersonEntity, String> {
 
     List<PersonEntity> selectByPositionId(String positionId);
 
+    List<PersonEntity> selectByPositionIds(List<String> positionId);
+
+    List<PersonEntity> selectByDepartmentId(List<String> departmentId);
+
+    List<PersonEntity> selectByOrgId(List<String> departmentId);
+
+    PersonEntity selectByUserId(String userId);
+
+    List<String> selectAllDepartmentId(List<String> personId);
+
+    List<String> selectAllOrgId(List<String> personId);
+
     List<PersonEntity> selectByRoleId(String roleId);
 }

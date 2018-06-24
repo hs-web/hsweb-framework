@@ -11,7 +11,7 @@ import java.io.Serializable;
 public class SimpleRelation implements Relation {
     private static final long serialVersionUID = 1_0;
 
-    private String type;
+    private String dimension;
 
     private String relation;
 

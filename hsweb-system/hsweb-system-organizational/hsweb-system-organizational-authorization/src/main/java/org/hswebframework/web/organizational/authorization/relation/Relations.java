@@ -37,7 +37,7 @@ public interface Relations extends Serializable {
     default boolean has(String relation, String type, String to, Relation.Direction direction) {
         return getAll().stream().anyMatch(rel ->
                 rel.getRelation().equals(relation)
-                        && rel.getType().equals(type)
+                        && rel.getDimension().equals(type)
                         && rel.getTarget().equals(to)
                         && rel.matchDirection(direction));
     }
@@ -45,7 +45,7 @@ public interface Relations extends Serializable {
     default boolean has(String relation, String type, Relation.Direction direction) {
         return getAll().stream().anyMatch(rel ->
                 rel.getRelation().equals(relation)
-                        && rel.getType().equals(type)
+                        && rel.getDimension().equals(type)
                         && rel.matchDirection(direction));
     }
 
@@ -139,15 +139,15 @@ public interface Relations extends Serializable {
     }
 
     /**
-     * 获取指定关系和类型的全部关系信息
+     * 获取指定关系和维度的全部关系信息
      *
      * @param relation 关系标识，例如: leader
-     * @param type     关系类型,例如：person
+     * @param type     关系维度,例如：person
      * @return 关系信息集合，如果关系不存在，返回空集合
      * @see this#find(Predicate)
      */
     default List<Relation> findAll(String relation, String type) {
-        return find(rel -> rel.getRelation().equals(relation) && rel.getType().equals(type));
+        return find(rel -> rel.getRelation().equals(relation) && rel.getDimension().equals(type));
     }
 
     /**
@@ -186,7 +186,7 @@ public interface Relations extends Serializable {
     default List<Relation> find(String relation, String type, Relation.Direction direction) {
         return find(rel ->
                 rel.getRelation().equals(relation)
-                        && rel.getType().equals(type)
+                        && rel.getDimension().equals(type)
                         && rel.matchDirection(direction));
     }
 
@@ -200,7 +200,7 @@ public interface Relations extends Serializable {
     /**
      * 查找关系
      * <pre>
-     *     findAll(rel->rel.getType().equals("person"))
+     *     findAll(rel->rel.getDimension().equals("person"))
      * </pre>
      *
      * @param predicate 查找的判断逻辑

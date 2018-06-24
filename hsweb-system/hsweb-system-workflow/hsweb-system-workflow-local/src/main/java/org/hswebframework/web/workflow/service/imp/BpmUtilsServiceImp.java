@@ -41,17 +41,17 @@ public class BpmUtilsServiceImp implements BpmUtilsService {
 //        assertOrgModuleReady();
 //        List<String> list = new ArrayList<>();
 //        // 根据配置类型  获取人员信息 设置待办人
-//        if ("person".equals(actDefEntity.getType())) { // 矩阵
-//            List<Relation> relations = relationInfoService.getRelations(actDefEntity.getType(), userId).findPos(actDefEntity.getDefId());
+//        if ("person".equals(actDefEntity.getDimension())) { // 矩阵
+//            List<Relation> relations = relationInfoService.getRelations(actDefEntity.getDimension(), userId).findPos(actDefEntity.getDefId());
 //            for (Relation relation : relations) {
 //                list.add(relation.getTarget());
 //            }
-//        } else if ("position".equals(actDefEntity.getType())) { // 岗位
+//        } else if ("position".equals(actDefEntity.getDimension())) { // 岗位
 //            List<PersonEntity> personEntities = personService.selectByPositionId(actDefEntity.getDefId());
 //            for(PersonEntity personEntity:personEntities){
 //                list.add(personEntity.getUserId());
 //            }
-//        } else if ("role".equals(actDefEntity.getType())) {  // 角色
+//        } else if ("role".equals(actDefEntity.getDimension())) {  // 角色
 //            List<PersonEntity> personEntities = personService.selectByRoleId(actDefEntity.getDefId());
 //            for(PersonEntity personEntity:personEntities){
 //                list.add(personEntity.getUserId());

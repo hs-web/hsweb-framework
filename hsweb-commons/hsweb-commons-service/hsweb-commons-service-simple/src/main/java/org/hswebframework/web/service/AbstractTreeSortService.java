@@ -40,6 +40,19 @@ public abstract class AbstractTreeSortService<E extends TreeSortSupportEntity<PK
 
     @Override
     @Transactional(readOnly = true)
+    public List<E> selectParentNode(PK childId) {
+        assertNotNull(childId);
+        E old = selectByPk(childId);
+        assertNotNull(old);
+        return createQuery()
+                .where()
+                // where ? like concat(path,'%')
+                .and("path$like$reverse$startWith", old.getPath())
+                .listNoPaging();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<E> selectAllChildNode(PK parentId) {
         assertNotNull(parentId);
         E old = selectByPk(parentId);
@@ -103,8 +116,6 @@ public abstract class AbstractTreeSortService<E extends TreeSortSupportEntity<PK
         applyPath(entity);
         List<E> childrenList = new ArrayList<>();
         TreeSupportEntity.expandTree2List(entity, childrenList, getIDGenerator());
-//        super.insert(entity);
-//        childrenList.remove(entity);
         childrenList.forEach(this::saveOrUpdateForSingle);
         return entity.getId();
     }

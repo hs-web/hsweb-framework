@@ -31,6 +31,13 @@ import java.util.List;
 public interface TreeService<E extends TreeSupportEntity, PK> extends Service {
 
     /**
+     * 查询所有父节点
+     * @param childId 子节点id
+     * @return 父节点集合
+     */
+    List<E> selectParentNode(PK childId);
+
+    /**
      * 根据父节点id获取子节点数据
      *
      * @param parentId 父节点ID

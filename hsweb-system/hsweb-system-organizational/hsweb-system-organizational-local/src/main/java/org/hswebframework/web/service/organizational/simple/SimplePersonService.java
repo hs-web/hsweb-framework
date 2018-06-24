@@ -190,6 +190,78 @@ public class SimplePersonService extends GenericEntityService<PersonEntity, Stri
     }
 
     @Override
+    public List<PersonEntity> selectByPositionIds(List<String> positionId) {
+        return createQuery()
+                .where(PersonEntity.id, "person-in-position", positionId)
+                .listNoPaging();
+    }
+
+    @Override
+    public List<PersonEntity> selectByDepartmentId(List<String> departmentId) {
+        return createQuery()
+                .where(PersonEntity.id, "person-in-department", departmentId)
+                .listNoPaging();
+    }
+
+    @Override
+    public List<PersonEntity> selectByOrgId(List<String> orgId) {
+        return createQuery()
+                .where(PersonEntity.id, "person-in-org", orgId)
+                .listNoPaging();
+    }
+
+    @Override
+    public PersonEntity selectByUserId(String userId) {
+        return createQuery().where(PersonEntity.userId,userId).single();
+    }
+
+    @Override
+    public List<String> selectAllDepartmentId(List<String> personId) {
+        if (CollectionUtils.isEmpty(personId)) {
+            return Collections.emptyList();
+        }
+        //所有的机构
+        List<String> positionId = DefaultDSLQueryService.createQuery(personPositionDao)
+                .where().in(PersonPositionEntity.personId, personId)
+                .listNoPaging()
+                .stream()
+                .map(PersonPositionEntity::getPositionId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+
+        if (CollectionUtils.isEmpty(positionId)) {
+            return Collections.emptyList();
+        }
+        return DefaultDSLQueryService.createQuery(positionDao)
+                .where()
+                .in(PositionEntity.id, positionId)
+                .listNoPaging()
+                .stream()
+                .map(PositionEntity::getDepartmentId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<String> selectAllOrgId(List<String> personId) {
+        List<String> departmentId = this.selectAllDepartmentId(personId);
+        if (CollectionUtils.isEmpty(departmentId)) {
+            return Collections.emptyList();
+        }
+        return DefaultDSLQueryService.createQuery(departmentDao)
+                .where()
+                .in(DepartmentEntity.id, departmentId)
+                .listNoPaging()
+                .stream()
+                .map(DepartmentEntity::getOrgId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public List<PersonEntity> selectByRoleId(String roleId) {
         Objects.requireNonNull(roleId);
         return personDao.selectByRoleId(roleId);
@@ -215,25 +287,6 @@ public class SimplePersonService extends GenericEntityService<PersonEntity, Stri
             logger.warn("userService not ready!");
             return;
         }
-//        //获取所有职位
-//        Set<String> positionIds = bindEntity.getPositionIds();
-//        Set<String> roleIds;
-//
-//        if (positionIds == null) {
-//            roleIds = null;
-//        } else if (positionIds.isEmpty()) {
-//            roleIds = new HashSet<>();
-//        } else {
-//            //获取职位实体
-//            List<PositionEntity> positionEntities = DefaultDSLQueryService.createQuery(positionDao)
-//                    .where().in(PositionEntity.id, positionIds)
-//                    .listNoPaging();
-//            roleIds = positionEntities.stream()
-//                    .map(PositionEntity::getRoles)
-//                    .filter(Objects::nonNull)
-//                    .flatMap(List::stream)
-//                    .collect(Collectors.toSet());
-//        }
         //获取用户是否存在
         UserEntity oldUser = userService.selectByUsername(bindEntity.getPersonUser().getUsername());
         if (null != oldUser) {
@@ -252,14 +305,6 @@ public class SimplePersonService extends GenericEntityService<PersonEntity, Stri
                             return oldUser.getId();
                         };
         UserEntity userEntity = entityFactory.newInstance(UserEntity.class);
-//
-//        if (roleIds != null) {
-//            BindRoleUserEntity tmp = entityFactory.newInstance(BindRoleUserEntity.class);
-//            tmp.setRoles(new ArrayList<>(roleIds));
-//            userEntity = tmp;
-//        } else {
-//            userEntity = entityFactory.newInstance(UserEntity.class);
-//        }
 
         userEntity.setUsername(bindEntity.getPersonUser().getUsername());
         userEntity.setPassword(bindEntity.getPersonUser().getPassword());
@@ -392,7 +437,7 @@ public class SimplePersonService extends GenericEntityService<PersonEntity, Stri
         List<Relation> relations = relationInfoList.stream()
                 .map(info -> {
                     SimpleRelation relation = new SimpleRelation();
-                    relation.setType(info.getRelationTypeFrom());
+                    relation.setDimension(info.getRelationTypeFrom());
                     relation.setTarget(info.getRelationTo());
                     relation.setRelation(info.getRelationId());
                     if (personId.equals(info.getRelationFrom())) {

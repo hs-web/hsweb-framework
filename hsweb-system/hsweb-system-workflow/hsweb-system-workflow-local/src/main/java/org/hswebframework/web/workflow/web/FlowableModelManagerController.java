@@ -173,7 +173,7 @@ public class FlowableModelManagerController {
             // 处理异常
             if (bpmnModel.getMainProcess() == null) {
                 response.setStatus(HttpStatus.UNPROCESSABLE_ENTITY.value());
-                response.getOutputStream().println("no main process, can't export for type: " + type);
+                response.getOutputStream().println("no main process, can't export for dimension: " + type);
                 response.flushBuffer();
                 return;
             }
@@ -209,7 +209,7 @@ public class FlowableModelManagerController {
             response.flushBuffer();
             in.close();
         } catch (Exception e) {
-            log.error("导出model的xml文件失败：modelId={}, type={}", modelId, type, e);
+            log.error("导出model的xml文件失败：modelId={}, dimension={}", modelId, type, e);
         }
     }
 

@@ -32,9 +32,9 @@ public interface Relation extends Serializable {
     String TYPE_PERSON = "person";
 
     /**
-     * @return 关系类型，如:person,department
+     * @return 关系维度，如:person,department
      */
-    String getType();
+    String getDimension();
 
     /**
      * @return 关系，如: leader,member
@@ -47,13 +47,13 @@ public interface Relation extends Serializable {
     String getTarget();
 
     /**
-     * @return 关系目标对象，用于获取建立关系对象完整信息，返回值的类型可能随着{@link this#getType()}的不同而变化
+     * @return 关系目标对象，用于获取建立关系对象完整信息，返回值的类型可能随着{@link this#getDimension()}的不同而变化
      * @see RelationTargetSupplier
      */
     Serializable getTargetObject();
 
     /**
-     * @return 关系名称，与{@link this#getType()} 对应，如: 经理,员工
+     * @return 关系名称，与{@link this#getDimension()} 对应，如: 经理,员工
      */
     String getName();
 

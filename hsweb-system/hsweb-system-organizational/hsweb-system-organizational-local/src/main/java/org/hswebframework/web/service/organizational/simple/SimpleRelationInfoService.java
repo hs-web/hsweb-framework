@@ -53,7 +53,7 @@ public class SimpleRelationInfoService extends GenericEntityService<RelationInfo
         List<Relation> relations = relationInfoList.stream()
                 .map(info -> {
                     SimpleRelation relation = new SimpleRelation();
-                    relation.setType(info.getRelationTypeFrom());
+                    relation.setDimension(info.getRelationTypeFrom());
                     relation.setTarget(info.getRelationTo());
                     relation.setTargetObject(RelationTargetHolder
                             .get(info.getRelationTypeTo(), info.getRelationTo()).orElse(null));

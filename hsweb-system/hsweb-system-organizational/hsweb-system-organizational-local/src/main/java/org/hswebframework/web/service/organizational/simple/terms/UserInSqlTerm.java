@@ -66,7 +66,7 @@ public abstract class UserInSqlTerm<PK> extends AbstractSqlTermCustomer {
 
 
     protected Object appendCondition(List<Object> values, String wherePrefix, SqlAppender appender, String column, Dialect dialect) {
-        if (!child) {
+        if (!child&&!parent) {
             appender.addSpc(column);
             return super.appendCondition(values, wherePrefix, appender);
         } else {

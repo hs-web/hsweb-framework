@@ -22,7 +22,7 @@ public class DefaultCandidateDimensionParser implements CandidateDimensionParser
     @Override
     public CandidateDimension parse(DimensionContext context, String jsonConfig) {
         JSONObject jsonObject = JSON.parseObject(jsonConfig);
-        String type = jsonObject.getString("type");
+        String type = jsonObject.getString("dimension");
         CandidateDimensionParserStrategy.StrategyConfig config = jsonObject
                 .toJavaObject(CandidateDimensionParserStrategy.StrategyConfig.class);
         if (config.getConfig() == null) {

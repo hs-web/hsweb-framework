@@ -33,6 +33,8 @@ public interface DepartmentService extends
 
     List<DepartmentEntity> selectByOrgId(String orgId);
 
+    List<DepartmentEntity> selectByOrgIds(List<String> orgId,boolean children,boolean parent);
+
     DepartmentEntity selectByCode(String code);
 
     List<DepartmentEntity> selectByName(String name);

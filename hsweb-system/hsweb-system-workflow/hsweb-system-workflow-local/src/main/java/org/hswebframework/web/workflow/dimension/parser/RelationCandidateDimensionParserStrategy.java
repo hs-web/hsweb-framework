@@ -1,5 +1,6 @@
 package org.hswebframework.web.workflow.dimension.parser;
 
+import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.web.organizational.authorization.PersonnelAuthentication;
 import org.hswebframework.web.organizational.authorization.PersonnelAuthenticationManager;
 import org.hswebframework.web.organizational.authorization.relation.Relations;
@@ -13,6 +14,7 @@ import java.util.List;
  * @author zhouhao
  * @since 3.0.0-RC
  */
+@Slf4j
 public class RelationCandidateDimensionParserStrategy implements CandidateDimensionParserStrategy {
 
     @Autowired
@@ -48,14 +50,18 @@ public class RelationCandidateDimensionParserStrategy implements CandidateDimens
         if (null == authentication) {
             return Collections.emptyList();
         }
+
         Relations relations = authentication.getRelations();
 
+        if (relations == null || relations.getAll().isEmpty()) {
+            return Collections.emptyList();
+        }
 
 
         return Collections.emptyList();
     }
 
-    public static class RelationInfo{
+    public static class RelationInfo {
 
     }
 }

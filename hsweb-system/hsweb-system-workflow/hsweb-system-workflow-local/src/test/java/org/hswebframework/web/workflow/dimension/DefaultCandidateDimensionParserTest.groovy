@@ -21,7 +21,7 @@ class DefaultCandidateDimensionParserTest extends Specification {
 
     def "Test Parse User"() {
         setup:
-        def config = """ {"type":"user","idList":["admin"]} """
+        def config = """ {"dimension":"user","idList":["admin"]} """
         and:
         def dimension = parser.parse(null,config)
         expect:
@@ -33,7 +33,7 @@ class DefaultCandidateDimensionParserTest extends Specification {
 
     def "Test Parse Role"() {
         setup:
-        def config = """ {"type":"role","idList":["admin"]} """
+        def config = """ {"dimension":"role","idList":["admin"]} """
         and:
         def dimension = parser.parse(null,config)
         expect:
@@ -45,7 +45,7 @@ class DefaultCandidateDimensionParserTest extends Specification {
 
     def "Test Parse Position"() {
         setup:
-        def config = """ {"type":"position","idList":["test"],"tree":"parent"} """
+        def config = """ {"dimension":"position","idList":["test"],"tree":"parent"} """
         and:
         def dimension = parser.parse(null,config)
         expect:
@@ -56,7 +56,7 @@ class DefaultCandidateDimensionParserTest extends Specification {
 
     def "Test Parse Department"() {
         setup:
-        def config = """ {"type":"department","idList":["test"]} """
+        def config = """ {"dimension":"department","idList":["test"]} """
         and:
         def dimension = parser.parse(null,config)
         expect:
@@ -67,7 +67,7 @@ class DefaultCandidateDimensionParserTest extends Specification {
 
     def "Test Parse Org"() {
         setup:
-        def config = """ {"type":"org","idList":["test"]} """
+        def config = """ {"dimension":"org","idList":["test"]} """
         and:
         def dimension = parser.parse(null,config)
         expect:
