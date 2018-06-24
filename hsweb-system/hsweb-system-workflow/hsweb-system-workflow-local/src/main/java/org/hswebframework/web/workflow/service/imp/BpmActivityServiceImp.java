@@ -70,12 +70,12 @@ public class BpmActivityServiceImp extends AbstractFlowableService implements Bp
     @Override
     public List<ActivityImpl> getUserTasksByProcDefId(String procDefId) {
 
-        return findActivities(procDefId, activity -> "userTask".equals(activity.getProperty("dimension")));
+        return findActivities(procDefId, activity -> "userTask".equals(activity.getProperty("type")));
 
 //        ProcessDefinitionEntity pde = getProcessDefinition(procDefId);
 //        List<ActivityImpl> activityList = new ArrayList<>();
 //        for (ActivityImpl activity : pde.getActivities()) {
-//            if (activity.getProperty("dimension").equals("userTask"))
+//            if (activity.getProperty("type").equals("userTask"))
 //                activityList.add(activity);
 //        }
 //        return activityList;
@@ -85,12 +85,12 @@ public class BpmActivityServiceImp extends AbstractFlowableService implements Bp
     public List<ActivityImpl> getUserTasksByProcDefKey(String procDefKey) {
         ProcessDefinition definition = repositoryService.createProcessDefinitionQuery().processDefinitionKey(procDefKey).orderByProcessDefinitionVersion().desc().list().get(0);
         String procDefId = definition.getId();
-        List<ActivityImpl> activities = findActivities(procDefId, activity -> "userTask".equals(activity.getProperty("dimension")));
+        List<ActivityImpl> activities = findActivities(procDefId, activity -> "userTask".equals(activity.getProperty("type")));
 //
 //        ProcessDefinitionEntity pde = getProcessDefinition(procDefId);
 //        List<ActivityImpl> activities = new ArrayList<>();
 //        for (ActivityImpl activity : pde.getActivities()) {
-//            if (activity.getProperty("dimension").equals("userTask"))
+//            if (activity.getProperty("type").equals("userTask"))
 //                activities.add(activity);
 //        }
         if (null != activities) {
@@ -130,7 +130,7 @@ public class BpmActivityServiceImp extends AbstractFlowableService implements Bp
     public List<TaskDefinition> getTaskDefinition(ActivityImpl activityImpl, String elString) {
         List<TaskDefinition> taskDefinitionList = new ArrayList<>();
         List<TaskDefinition> nextTaskDefinition;
-        if ("userTask".equals(activityImpl.getProperty("dimension"))) {
+        if ("userTask".equals(activityImpl.getProperty("type"))) {
             TaskDefinition taskDefinition = ((UserTaskActivityBehavior) activityImpl.getActivityBehavior()).getTaskDefinition();
             taskDefinitionList.add(taskDefinition);
         } else {
@@ -138,7 +138,7 @@ public class BpmActivityServiceImp extends AbstractFlowableService implements Bp
             List<PvmTransition> outTransitionsTemp;
             for (PvmTransition tr : pvmTransitions) {
                 PvmActivity pvmActivity = tr.getDestination(); //获取线路的终点节点
-                if ("exclusiveGateway".equals(pvmActivity.getProperty("dimension")) || "parallelGateway".equals(pvmActivity.getProperty("dimension"))) {
+                if ("exclusiveGateway".equals(pvmActivity.getProperty("type")) || "parallelGateway".equals(pvmActivity.getProperty("type"))) {
                     outTransitionsTemp = pvmActivity.getOutgoingTransitions();
                     if (outTransitionsTemp.size() == 1) {
                         nextTaskDefinition = getTaskDefinition((ActivityImpl) outTransitionsTemp.get(0).getDestination(), elString);
@@ -152,7 +152,7 @@ public class BpmActivityServiceImp extends AbstractFlowableService implements Bp
                             }
                         }
                     }
-                } else if ("userTask".equals(pvmActivity.getProperty("dimension"))) {
+                } else if ("userTask".equals(pvmActivity.getProperty("type"))) {
                     taskDefinitionList.add(((UserTaskActivityBehavior) ((ActivityImpl) pvmActivity).getActivityBehavior()).getTaskDefinition());
                 }
             }
@@ -184,12 +184,12 @@ public class BpmActivityServiceImp extends AbstractFlowableService implements Bp
 
     @Override
     public ActivityImpl getStartEvent(String procDefId) {
-        return findActivity(procDefId, activity -> "startEvent".equals(activity.getProperty("dimension")));
+        return findActivity(procDefId, activity -> "startEvent".equals(activity.getProperty("type")));
 
 //        List<ActivityImpl> activities = getActivitiesById(procDefId, null);
 //        ActivityImpl activity = null;
 //        for (ActivityImpl a : activities) {
-//            if (a.getProperty("dimension").equals("startEvent")) {
+//            if (a.getProperty("type").equals("startEvent")) {
 //                activity = a;
 //            }
 //        }
@@ -221,7 +221,7 @@ public class BpmActivityServiceImp extends AbstractFlowableService implements Bp
 
     @Override
     public ActivityImpl getEndEvent(String procDefId) {
-        return findActivity(procDefId, activity -> "endEvent".equals(activity.getProperty("dimension")));
+        return findActivity(procDefId, activity -> "endEvent".equals(activity.getProperty("type")));
     }
 
     /**

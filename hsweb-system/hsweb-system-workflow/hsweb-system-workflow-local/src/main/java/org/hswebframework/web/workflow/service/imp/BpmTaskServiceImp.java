@@ -322,7 +322,7 @@ public class BpmTaskServiceImp extends AbstractFlowableService implements BpmTas
         List<ActivityImpl> activities = entity.getActivities();
         return activities
                 .stream()
-                .filter(activity -> "userTask".equals(activity.getProperty("dimension")) && activity.getProperty("name").equals(task.getName()))
+                .filter(activity -> "userTask".equals(activity.getProperty("type")) && activity.getProperty("name").equals(task.getName()))
                 .findFirst()
                 .orElseThrow(() -> new NotFoundException("获取节点信息失败"));
     }
