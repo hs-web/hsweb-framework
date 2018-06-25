@@ -21,6 +21,7 @@ import org.hswebframework.web.BusinessException;
 import org.hswebframework.web.dao.organizational.DepartmentDao;
 import org.hswebframework.web.dao.organizational.PositionDao;
 import org.hswebframework.web.entity.organizational.DepartmentEntity;
+import org.hswebframework.web.entity.organizational.OrganizationalEntity;
 import org.hswebframework.web.entity.organizational.PositionEntity;
 import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.service.AbstractTreeSortService;
@@ -28,6 +29,7 @@ import org.hswebframework.web.service.DefaultDSLQueryService;
 import org.hswebframework.web.service.EnableCacheAllEvictTreeSortService;
 import org.hswebframework.web.service.GenericEntityService;
 import org.hswebframework.web.service.organizational.DepartmentService;
+import org.hswebframework.web.service.organizational.OrganizationalService;
 import org.hswebframework.web.service.organizational.event.ClearPersonCacheEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
@@ -58,6 +60,9 @@ public class SimpleDepartmentService
     @Autowired
     private ApplicationEventPublisher publisher;
 
+    @Autowired
+    private OrganizationalService organizationalService;
+
     @Override
     public DepartmentDao getDao() {
         return departmentDao;
@@ -80,23 +85,24 @@ public class SimpleDepartmentService
         if (CollectionUtils.isEmpty(orgId)) {
             return Collections.emptyList();
         }
-        Set<String> allOrgId = new HashSet<>();
+        Set<String> allOrgId = new HashSet<>(orgId);
 
         if (children) {
             allOrgId.addAll(orgId.stream()
-                    .map(this::selectAllChildNode)
+                    .map(organizationalService::selectAllChildNode)
                     .flatMap(Collection::stream)
-                    .map(DepartmentEntity::getId)
+                    .map(OrganizationalEntity::getId)
                     .collect(Collectors.toSet()));
 
         }
         if (parent) {
             allOrgId.addAll(orgId.stream()
-                    .map(this::selectParentNode)
+                    .map(organizationalService::selectParentNode)
                     .flatMap(Collection::stream)
-                    .map(DepartmentEntity::getId)
+                    .map(OrganizationalEntity::getId)
                     .collect(Collectors.toSet()));
         }
+
         return createQuery()
                 .where()
                 .in(DepartmentEntity.orgId, allOrgId)

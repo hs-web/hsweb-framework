@@ -11,3 +11,6 @@ hsweb:
     app:
       name: 组织架构测试
       version: 3.0.0
+logging:
+  level:
+    org.hswebframework: debug

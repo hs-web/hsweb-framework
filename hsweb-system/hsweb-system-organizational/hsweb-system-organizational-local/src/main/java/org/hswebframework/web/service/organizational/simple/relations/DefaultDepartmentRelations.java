@@ -1,8 +1,8 @@
 package org.hswebframework.web.service.organizational.simple.relations;
 
+import io.vavr.Lazy;
 import org.hswebframework.ezorm.core.NestConditional;
 import org.hswebframework.ezorm.core.dsl.Query;
-import org.hswebframework.ezorm.core.param.TermType;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.entity.organizational.DepartmentEntity;
 import org.hswebframework.web.entity.organizational.PersonEntity;
@@ -50,7 +50,7 @@ public class DefaultDepartmentRelations extends DefaultLinkedRelations<Departmen
     @Override
     public DepartmentRelations relations(Relation.Direction direction, String dimension, String relation) {
 
-        if (dimension == null && direction != Relation.Direction.REVERSE) {
+        if ((dimension == null || Relation.TYPE_POSITION.equals(dimension)) && direction != Relation.Direction.REVERSE) {
             //没指定维度,尝试获取岗位关系
             positionQuery.is(PositionEntity.name, relation);
         }
@@ -75,7 +75,7 @@ public class DefaultDepartmentRelations extends DefaultLinkedRelations<Departmen
     @Override
     public DepartmentRelations not(String property, Object value) {
         departmentQuery.not(property, value);
-        positionQuery.not(property, value);
+//        positionQuery.not(property, value);
 
         return super.not(property, value);
     }
@@ -83,7 +83,7 @@ public class DefaultDepartmentRelations extends DefaultLinkedRelations<Departmen
     @Override
     public DepartmentRelations is(String property, Object value) {
         departmentQuery.is(property, value);
-        positionQuery.is(property, value);
+//        positionQuery.is(property, value);
         return super.is(property, value);
     }
 
@@ -92,6 +92,7 @@ public class DefaultDepartmentRelations extends DefaultLinkedRelations<Departmen
 
         Map<String, List<PersonEntity>> cache = new HashMap<>();
 
+        List<PositionEntity> positions = positionSupplier.get();
 
         List<String> positionIdList = getAllPerson()
                 .stream()
@@ -100,12 +101,11 @@ public class DefaultDepartmentRelations extends DefaultLinkedRelations<Departmen
                 .flatMap(bind -> bind.getPositionIds().stream().peek(positionId -> cache.computeIfAbsent(positionId, i -> new ArrayList<>()).add(bind)))
                 .collect(Collectors.toList());
 
-        QueryParamEntity positionQueryParam = positionQuery.end().in(PositionEntity.id, positionIdList)
-                .getParam();
+        if (CollectionUtils.isEmpty(positionIdList)) {
+            return super.relationStream(allDepartmentId);
+        }
 
-        Stream<Relation> relationStream = serviceContext
-                .getPositionService()
-                .select(positionQueryParam).stream()
+        Stream<Relation> relationStream = positions.stream()
                 .flatMap(position -> {
                     List<PersonEntity> personEntities = cache.get(position.getId());
                     if (CollectionUtils.isEmpty(personEntities)) {
@@ -130,9 +130,33 @@ public class DefaultDepartmentRelations extends DefaultLinkedRelations<Departmen
         return Stream.concat(relationStream, super.relationStream(allDepartmentId));
     }
 
+    public List<String> getAllDepartmentId() {
+        return allDepartmentId.get();
+    }
+
+    @SuppressWarnings("all")
+    private Supplier<List<PositionEntity>> positionSupplier = Lazy.val(() -> {
+        List<String> departmentId = getAllDepartmentId();
+        if (CollectionUtils.isEmpty(departmentId)) {
+            return (Supplier) () -> Collections.emptyList();
+        }
+        QueryParamEntity positionQueryParam = positionQuery.end()
+                .in(PositionEntity.departmentId, departmentId)
+                .getParam();
+
+        List<PositionEntity> positions = serviceContext
+                .getPositionService()
+                .select(positionQueryParam).stream()
+                .collect(Collectors.toList());
+
+        return (Supplier) () -> positions;
+    }, Supplier.class);
+
     private Supplier<List<String>> allDepartmentId = createLazyIdSupplier(() -> {
         Set<String> departmentId = new HashSet<>(targetIdSupplier.get());
-
+        if (CollectionUtils.isEmpty(departmentId)) {
+            return Collections.emptyList();
+        }
         Set<String> allParent = null, allChildren = null;
         //包含父级
         if (includeParent) {
@@ -162,9 +186,9 @@ public class DefaultDepartmentRelations extends DefaultLinkedRelations<Departmen
         if (paramEntity.getTerms().isEmpty()) {
             return new ArrayList<>(departmentId);
         }
-        paramEntity.noPaging()
-                .includes(DepartmentEntity.id)
-                .and(DepartmentEntity.id, TermType.in, departmentId);
+        paramEntity = departmentQuery.end()
+                .select(DepartmentEntity.id)
+                .in(DepartmentEntity.id, departmentId).getParam();
 
         return serviceContext.getDepartmentService()
                 .select(paramEntity)
@@ -175,27 +199,19 @@ public class DefaultDepartmentRelations extends DefaultLinkedRelations<Departmen
 
 
     public List<PersonEntity> getAllPerson() {
-        List<String> departmentId = allDepartmentId.get();
 
-        QueryParamEntity positionQueryParam = positionQuery.end()
-                .in(PositionEntity.departmentId, departmentId)
-                .getParam();
+        List<PositionEntity> positionEntities = positionSupplier.get();
 
-        List<String> positionIds = serviceContext
-                .getPositionService()
-                .select(positionQueryParam).stream()
-                .map(PositionEntity::getId)
-                .collect(Collectors.toList());
-        if (CollectionUtils.isEmpty(positionIds)) {
-
+        if (CollectionUtils.isEmpty(positionEntities)) {
             return Collections.emptyList();
         }
 
         return serviceContext
                 .getPersonService()
-                .selectByPositionIds(positionIds);
-
-
+                .selectByPositionIds(
+                        positionEntities.stream()
+                                .map(PositionEntity::getId)
+                                .collect(Collectors.toList()));
     }
 
     public List<String> getAllUserId() {

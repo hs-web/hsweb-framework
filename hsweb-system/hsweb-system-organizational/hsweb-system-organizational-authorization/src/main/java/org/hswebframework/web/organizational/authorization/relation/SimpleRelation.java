@@ -22,4 +22,5 @@ public class SimpleRelation implements Relation {
     private String name;
 
     private Direction direction;
+
 }

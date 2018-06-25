@@ -22,7 +22,7 @@ public interface OrgRelations extends LinkedRelations<OrgRelations> {
      *
      * @return 部门关系链
      */
-    DepartmentRelations departments();
+    DepartmentRelations department();
 
 
 }

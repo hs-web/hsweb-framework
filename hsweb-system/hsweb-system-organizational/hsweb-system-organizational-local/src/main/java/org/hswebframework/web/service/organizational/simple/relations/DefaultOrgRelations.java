@@ -31,7 +31,7 @@ public class DefaultOrgRelations extends DefaultLinkedRelations<OrgRelations> im
     }
 
     @Override
-    public DepartmentRelations departments() {
+    public DepartmentRelations department() {
         return new DefaultDepartmentRelations(serviceContext, () -> serviceContext
                 .getDepartmentService()
                 .selectByOrgIds(targetIdSupplier.get(),includeChildren,includeParents)
