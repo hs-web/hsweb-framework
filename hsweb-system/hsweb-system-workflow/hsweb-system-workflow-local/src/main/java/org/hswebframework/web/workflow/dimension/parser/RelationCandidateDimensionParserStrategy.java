@@ -5,7 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.expands.script.engine.DynamicScriptEngine;
 import org.hswebframework.expands.script.engine.DynamicScriptEngineFactory;
 import org.hswebframework.web.Maps;
-import org.hswebframework.web.commons.entity.GenericEntity;
+import org.hswebframework.web.entity.authorization.UserEntity;
+import org.hswebframework.web.entity.organizational.PersonEntity;
 import org.hswebframework.web.organizational.authorization.relation.PersonRelations;
 import org.hswebframework.web.organizational.authorization.relation.Relation;
 import org.hswebframework.web.organizational.authorization.relation.RelationsManager;
@@ -81,8 +82,10 @@ public class RelationCandidateDimensionParserStrategy implements CandidateDimens
                 return (String) o;
             } else if (o instanceof Relation) {
                 Object target = ((Relation) o).getTargetObject();
-                if (target instanceof GenericEntity) {
-                    return String.valueOf(((GenericEntity) target).getId());
+                if (target instanceof PersonEntity) {
+                    return ((PersonEntity) target).getUserId();
+                } else if (target instanceof UserEntity) {
+                    return ((UserEntity) target).getId();
                 } else {
                     return ((Relation) o).getRelation();
                 }

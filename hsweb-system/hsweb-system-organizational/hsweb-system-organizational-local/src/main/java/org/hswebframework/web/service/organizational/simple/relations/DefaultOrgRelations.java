@@ -3,6 +3,7 @@ package org.hswebframework.web.service.organizational.simple.relations;
 import org.hswebframework.web.entity.organizational.DepartmentEntity;
 import org.hswebframework.web.organizational.authorization.relation.DepartmentRelations;
 import org.hswebframework.web.organizational.authorization.relation.OrgRelations;
+import org.hswebframework.web.organizational.authorization.relation.Relation;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -34,9 +35,14 @@ public class DefaultOrgRelations extends DefaultLinkedRelations<OrgRelations> im
     public DepartmentRelations department() {
         return new DefaultDepartmentRelations(serviceContext, () -> serviceContext
                 .getDepartmentService()
-                .selectByOrgIds(targetIdSupplier.get(),includeChildren,includeParents)
+                .selectByOrgIds(targetIdSupplier.get(), includeChildren, includeParents)
                 .stream()
                 .map(DepartmentEntity::getId)
                 .collect(Collectors.toList()));
+    }
+
+    @Override
+    public OrgRelations deep() {
+        return new DefaultOrgRelations(serviceContext, () -> stream().map(Relation::getTarget).collect(Collectors.toList()));
     }
 }

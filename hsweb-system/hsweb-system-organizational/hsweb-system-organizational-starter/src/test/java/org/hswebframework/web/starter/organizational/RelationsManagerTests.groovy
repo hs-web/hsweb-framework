@@ -174,7 +174,6 @@ class RelationsManagerTests extends Specification {
                 .relations("总监")
                 .all()
 
-
         def orgRelationList = pre
                 .org()
                 .andParents()

@@ -5,13 +5,11 @@ import org.hswebframework.ezorm.core.NestConditional;
 import org.hswebframework.ezorm.core.dsl.Query;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.entity.organizational.PersonEntity;
-import org.hswebframework.web.organizational.authorization.relation.LinkedRelations;
-import org.hswebframework.web.organizational.authorization.relation.Relation;
-import org.hswebframework.web.organizational.authorization.relation.RelationTargetHolder;
-import org.hswebframework.web.organizational.authorization.relation.SimpleRelation;
+import org.hswebframework.web.organizational.authorization.relation.*;
 
 import java.util.List;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @SuppressWarnings("all")
@@ -41,13 +39,13 @@ public class DefaultLinkedRelations<C extends LinkedRelations> implements Linked
             case ALL:
                 query
                         .nest()
-                            .nest()
-                                 .is("relationTypeFrom", dimension).is("relationId", relation)
-                            .end()
+                        .nest()
+                        .is("relationTypeFrom", dimension).is("relationId", relation)
+                        .end()
                         .or()
-                            .nest()
-                                 .is("relationTypeTo", dimension).is("relationId", relation)
-                            .end()
+                        .nest()
+                        .is("relationTypeTo", dimension).is("relationId", relation)
+                        .end()
                         .end();
                 break;
 
@@ -119,6 +117,17 @@ public class DefaultLinkedRelations<C extends LinkedRelations> implements Linked
                     }
                     return relation;
                 });
+    }
+
+    @Override
+    public C deep() {
+        if (this.getClass() != DefaultLinkedRelations.class) {
+            throw new UnsupportedOperationException("子类未实现deep方法");
+        }
+        return (C) new DefaultLinkedRelations<C>(serviceContext, () -> all()
+                .stream()
+                .map(Relation::getTarget)
+                .collect(Collectors.toList()));
     }
 
     @Override

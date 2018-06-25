@@ -75,7 +75,6 @@ public class DefaultDepartmentRelations extends DefaultLinkedRelations<Departmen
     @Override
     public DepartmentRelations not(String property, Object value) {
         departmentQuery.not(property, value);
-//        positionQuery.not(property, value);
 
         return super.not(property, value);
     }
@@ -83,7 +82,6 @@ public class DefaultDepartmentRelations extends DefaultLinkedRelations<Departmen
     @Override
     public DepartmentRelations is(String property, Object value) {
         departmentQuery.is(property, value);
-//        positionQuery.is(property, value);
         return super.is(property, value);
     }
 
@@ -104,7 +102,7 @@ public class DefaultDepartmentRelations extends DefaultLinkedRelations<Departmen
         if (CollectionUtils.isEmpty(positionIdList)) {
             return super.relationStream(allDepartmentId);
         }
-
+        //将岗位里的人员转为关系信息
         Stream<Relation> relationStream = positions.stream()
                 .flatMap(position -> {
                     List<PersonEntity> personEntities = cache.get(position.getId());
@@ -118,14 +116,16 @@ public class DefaultDepartmentRelations extends DefaultLinkedRelations<Departmen
                                 relation.setName(position.getName());
                                 relation.setTarget(person.getId());
                                 relation.setTargetObject(person);
+                                //固定方向,因为从逻辑都是某人是某部门的某岗位
                                 relation.setDirection(Relation.Direction.REVERSE);
+                                //维度默认为岗位
                                 relation.setDimension(Relation.TYPE_POSITION);
+                                //关系标识为岗位id
                                 relation.setRelation(position.getId());
                                 return (Relation) relation;
                             });
 
                 });
-
 
         return Stream.concat(relationStream, super.relationStream(allDepartmentId));
     }
@@ -135,6 +135,7 @@ public class DefaultDepartmentRelations extends DefaultLinkedRelations<Departmen
     }
 
     @SuppressWarnings("all")
+    //获取所有的岗位
     private Supplier<List<PositionEntity>> positionSupplier = Lazy.val(() -> {
         List<String> departmentId = getAllDepartmentId();
         if (CollectionUtils.isEmpty(departmentId)) {
@@ -152,6 +153,7 @@ public class DefaultDepartmentRelations extends DefaultLinkedRelations<Departmen
         return (Supplier) () -> positions;
     }, Supplier.class);
 
+    //获取所有的部门
     private Supplier<List<String>> allDepartmentId = createLazyIdSupplier(() -> {
         Set<String> departmentId = new HashSet<>(targetIdSupplier.get());
         if (CollectionUtils.isEmpty(departmentId)) {
@@ -168,7 +170,6 @@ public class DefaultDepartmentRelations extends DefaultLinkedRelations<Departmen
         }
         //包含子级
         if (includeChildren) {
-
             allChildren = departmentId.stream()
                     .map(serviceContext.getDepartmentService()::selectAllChildNode)
                     .flatMap(Collection::stream)
@@ -225,6 +226,11 @@ public class DefaultDepartmentRelations extends DefaultLinkedRelations<Departmen
                 .stream()
                 .map(PersonEntity::getId)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public DepartmentRelations deep() {
+        return new DefaultDepartmentRelations(serviceContext, allDepartmentId);
     }
 
     @Override

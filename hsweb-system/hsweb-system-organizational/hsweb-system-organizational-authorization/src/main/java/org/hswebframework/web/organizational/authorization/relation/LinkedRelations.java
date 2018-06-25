@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public interface LinkedRelations<C extends LinkedRelations>  {
+public interface LinkedRelations<C extends LinkedRelations> {
 
     /**
      * 获取指定方向以及维度的关系链,如: 我是李四的经理,张三是我的经理
@@ -136,8 +136,18 @@ public interface LinkedRelations<C extends LinkedRelations>  {
     }
 
     /**
+     * 获取所有的关系目标标识,通常是人员的id
+     *
+     * @return 人员id
+     */
+    default List<String> allTarget() {
+        return stream().map(Relation::getTarget).collect(Collectors.toList());
+    }
+
+    /**
      * @return 全部关系信息的stream
      */
     Stream<Relation> stream();
 
+    C deep();
 }

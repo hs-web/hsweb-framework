@@ -12,6 +12,4 @@ public interface PersonRelations extends LinkedRelations<PersonRelations> {
      */
     OrgRelations org();
 
-
-
 }
