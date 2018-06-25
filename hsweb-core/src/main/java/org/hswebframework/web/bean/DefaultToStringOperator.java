@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.utils.time.DateFormatter;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.util.ReflectionUtils;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
@@ -112,7 +113,10 @@ public class DefaultToStringOperator<T> implements ToStringOperator<T> {
             ToString.Ignore propertyIgnore = null;
             long propertyFeature = 0;
             try {
-                Field field = targetType.getDeclaredField(descriptor.getName());
+                Field field = ReflectionUtils.findField(targetType, descriptor.getName());
+                if (null == field) {
+                    log.warn("无法获取字段{},该字段将不会被打码!", descriptor.getName());
+                }
                 propertyIgnore = field.getAnnotation(ToString.Ignore.class);
                 features = AnnotationUtils.getAnnotation(field, ToString.Features.class);
                 if (propertyIgnore != null) {
@@ -123,9 +127,8 @@ public class DefaultToStringOperator<T> implements ToStringOperator<T> {
                 if (null != features && features.value().length > 0) {
                     propertyFeature = ToString.Feature.createFeatures(features.value());
                 }
-            } catch (NoSuchFieldException e) {
+            } catch (Exception e) {
                 log.warn("无法获取字段{},该字段将不会被打码!", descriptor.getName());
-
             }
             //是否设置了打码
             boolean cover = (propertyIgnore == null && defaultCover) || (propertyIgnore != null && propertyIgnore.cover());
@@ -335,7 +338,7 @@ public class DefaultToStringOperator<T> implements ToStringOperator<T> {
         }
         boolean writeClassName = ToString.Feature.hasFeature(features, ToString.Feature.writeClassname);
 
-        StringJoiner joiner = new StringJoiner(", ", (writeClassName ? target.getClass().getSimpleName() : "") + "(", ")");
+        StringJoiner joiner = new StringJoiner(", ", (writeClassName ? target.getClass().getSimpleName() : "") + "{", "}");
 
         mapValue.forEach((key, value) -> joiner.add(key.concat("=").concat(String.valueOf(value))));
 
