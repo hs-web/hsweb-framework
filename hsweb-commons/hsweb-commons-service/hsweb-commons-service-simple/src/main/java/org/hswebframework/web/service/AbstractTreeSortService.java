@@ -25,6 +25,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -43,7 +44,9 @@ public abstract class AbstractTreeSortService<E extends TreeSortSupportEntity<PK
     public List<E> selectParentNode(PK childId) {
         assertNotNull(childId);
         E old = selectByPk(childId);
-        assertNotNull(old);
+        if (null == old) {
+            return Collections.emptyList();
+        }
         return createQuery()
                 .where()
                 // where ? like concat(path,'%')
@@ -56,7 +59,9 @@ public abstract class AbstractTreeSortService<E extends TreeSortSupportEntity<PK
     public List<E> selectAllChildNode(PK parentId) {
         assertNotNull(parentId);
         E old = selectByPk(parentId);
-        assertNotNull(old);
+        if (null == old) {
+            return Collections.emptyList();
+        }
         return createQuery()
                 .where()
                 .like$(TreeSupportEntity.path, old.getPath())
