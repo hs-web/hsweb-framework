@@ -9,6 +9,7 @@ import com.alibaba.fastjson.parser.JSONToken;
 import com.alibaba.fastjson.parser.deserializer.ObjectDeserializer;
 import com.alibaba.fastjson.serializer.JSONSerializable;
 import com.alibaba.fastjson.serializer.JSONSerializer;
+import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -71,6 +72,9 @@ public interface EnumDict<V> extends JSONSerializable {
      * @return 是否相等
      */
     default boolean eq(Object v) {
+        if (StringUtils.isEmpty(v)) {
+            return false;
+        }
         return this == v
                 || getValue() == v
                 || getValue().equals(v)
