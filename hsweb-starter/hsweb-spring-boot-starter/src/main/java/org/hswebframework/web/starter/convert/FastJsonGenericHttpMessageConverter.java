@@ -39,8 +39,9 @@ import java.util.Set;
 public class FastJsonGenericHttpMessageConverter extends AbstractGenericHttpMessageConverter<Object> implements Ordered {
 
     public final static Charset UTF8 = Charset.forName("UTF-8");
-    @Autowired(required = false)
-    private DictSupportApi dictSupportApi;
+
+//    @Autowired(required = false)
+//    private DictSupportApi dictSupportApi;
 
     private Charset charset = UTF8;
 
@@ -116,9 +117,9 @@ public class FastJsonGenericHttpMessageConverter extends AbstractGenericHttpMess
             }
         }
         Object object = JSON.parseObject(bytes, 0, bytes.length, charset.newDecoder(), type);
-        if (dictSupportApi != null) {
-            object = dictSupportApi.unwrap(object);
-        }
+//        if (dictSupportApi != null) {
+//            object = dictSupportApi.unwrap(object);
+//        }
         return object;
     }
 
@@ -149,14 +150,14 @@ public class FastJsonGenericHttpMessageConverter extends AbstractGenericHttpMess
         String callback = ThreadLocalUtils.getAndRemove("jsonp-callback");
         if (obj instanceof ResponseMessage) {
             ResponseMessage message = (ResponseMessage) obj;
-            if (dictSupportApi != null) {
-                message.setResult(dictSupportApi.wrap(message.getResult()));
-            }
+//            if (dictSupportApi != null) {
+//                message.setResult(dictSupportApi.wrap(message.getResult()));
+//            }
             text = JSON.toJSONString(obj, FastJsonHttpMessageConverter.parseFilter(message), features);
         } else {
-            if (dictSupportApi != null) {
-                obj = dictSupportApi.wrap(obj);
-            }
+//            if (dictSupportApi != null) {
+//                obj = dictSupportApi.wrap(obj);
+//            }
             text = JSON.toJSONString(obj, features);
         }
         if (!StringUtils.isNullOrEmpty(callback)) {

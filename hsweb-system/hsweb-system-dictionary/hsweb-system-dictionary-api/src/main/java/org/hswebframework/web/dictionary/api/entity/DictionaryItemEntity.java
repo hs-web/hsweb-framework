@@ -17,6 +17,8 @@
 package org.hswebframework.web.dictionary.api.entity;
 
 import org.hswebframework.web.commons.entity.TreeSortSupportEntity;
+import org.hswebframework.web.dict.EnumDict;
+import org.hswebframework.web.dict.ItemDefine;
 
 import java.util.List;
 
@@ -25,75 +27,58 @@ import java.util.List;
  *
  * @author hsweb-generator-online
  */
-public interface DictionaryItemEntity extends TreeSortSupportEntity<String> {
+public interface DictionaryItemEntity extends TreeSortSupportEntity<String>, EnumDict<String> {
  /*-------------------------------------------
     |               属性名常量               |
     ===========================================*/
     /**
      * 字典id
      */
-    String dictId         = "dictId";
+    String dictId = "dictId";
     /**
      * 名称
      */
-    String name           = "name";
+    String name = "name";
     /**
      * 字典值
      */
-    String value          = "value";
+    String value = "value";
     /**
      * 字典文本
      */
-    String text           = "text";
+    String text = "text";
     /**
      * 字典值类型
      */
-    String valueType      = "valueType";
+    String valueType = "valueType";
     /**
      * 是否启用
      */
-    String status         = "status";
+    String status = "status";
     /**
      * 说明
      */
-    String describe       = "describe";
+    String describe = "describe";
     /**
      * 父级选项
      */
-    String parentId       = "parentId";
+    String parentId = "parentId";
     /**
      * 树编码
      */
-    String path           = "path";
+    String path = "path";
     /**
      * 快速搜索码
      */
-    String searchCode     = "searchCode";
+    String searchCode = "searchCode";
     /**
      * 排序索引
      */
-    String sortIndex      = "sortIndex";
+    String sortIndex = "sortIndex";
     /**
      * 树结构层级
      */
-    String level          = "level";
-    /**
-     * 文本提取表达式
-     */
-    String textExpression = "textExpression";
-
-    /**
-     * 文本提取表达式
-     */
-    String valueExpression = "valueExpression";
-
-    String getTextExpression();
-
-    void setTextExpression(String textExpression);
-
-    String getValueExpression();
-
-    void setValueExpression(String valueExpression);
+    String level = "level";
 
     /**
      * @return 字典id
@@ -176,4 +161,18 @@ public interface DictionaryItemEntity extends TreeSortSupportEntity<String> {
     void setSearchCode(String searchCode);
 
     void setChildren(List<DictionaryItemEntity> children);
+
+    Integer getOrdinal();
+
+    void setOrdinal(Integer ordinal);
+
+    @Override
+    default int ordinal() {
+        return getOrdinal() == null ? 0 : getOrdinal();
+    }
+
+    @Override
+    default String getComments() {
+        return getDescribe();
+    }
 }

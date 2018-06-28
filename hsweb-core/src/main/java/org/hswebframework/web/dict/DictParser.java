@@ -7,7 +7,7 @@ package org.hswebframework.web.dict;
 public interface DictParser {
     String getId();
 
-    String parseText(DictDefine dictDefine, String value);
+    String parseText(DictDefine dictDefine, Object value);
 
     String parseValue(DictDefine dictDefine, String text);
 }

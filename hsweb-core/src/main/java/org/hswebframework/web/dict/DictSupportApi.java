@@ -4,6 +4,7 @@ package org.hswebframework.web.dict;
  * @author zhouhao
  * @since 3.0
  */
+@Deprecated
 public interface DictSupportApi {
     DictParser getParser(String id, String defaultId);
 
