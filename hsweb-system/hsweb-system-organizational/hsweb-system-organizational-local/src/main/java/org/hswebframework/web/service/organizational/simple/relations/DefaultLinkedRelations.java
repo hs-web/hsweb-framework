@@ -80,6 +80,7 @@ public class DefaultLinkedRelations<C extends LinkedRelations> implements Linked
 
     public Supplier<List<String>> createLazyIdSupplier(Supplier<List<String>> idSupplier) {
         return Lazy.val(() -> {
+
             List<String> ids = idSupplier.get();
 
             return (Supplier) () -> ids;

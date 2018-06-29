@@ -136,11 +136,19 @@ public final class FastBeanCopier {
     }
 
     public static Copier createCopier(Class source, Class target) {
+        String sourceName = source.getName();
+        String tartName = source.getName();
+        if (sourceName.startsWith("package ")) {
+            sourceName = sourceName.substring("package ".length());
+        }
+        if (tartName.startsWith("package ")) {
+            tartName = tartName.substring("package ".length());
+        }
         String method = "public void copy(Object s, Object t, java.util.Set ignore, " +
                 "org.hswebframework.web.bean.Converter converter){\n" +
                 "try{\n\t" +
-                source.getName() + " source=(" + source.getName() + ")s;\n\t" +
-                target.getName() + " target=(" + target.getName() + ")t;\n\t" +
+                sourceName + " source=(" + sourceName + ")s;\n\t" +
+                tartName + " target=(" + tartName + ")t;\n\t" +
                 createCopierCode(source, target) +
                 "}catch(Exception e){\n" +
                 "\tthrow new RuntimeException(e.getMessage(),e);" +

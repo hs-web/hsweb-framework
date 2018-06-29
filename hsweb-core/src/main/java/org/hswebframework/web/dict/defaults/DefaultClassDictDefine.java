@@ -19,10 +19,11 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DefaultClassDictDefine implements ClassDictDefine {
-    private String           field;
-    private String           id;
-    private String           alias;
-    private String           comments;
-    private String           parserId;
-    private List<EnumDict> items;
+    private static final long serialVersionUID = -4113467848927281082L;
+    private String                 field;
+    private String                 id;
+    private String                 alias;
+    private String                 comments;
+    private String                 parserId;
+    private List<EnumDict<Object>> items;
 }

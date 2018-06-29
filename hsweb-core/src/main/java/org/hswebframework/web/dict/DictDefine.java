@@ -16,6 +16,6 @@ public interface DictDefine extends Serializable {
 
     String getParserId();
 
-    List<EnumDict<String>> getItems();
+    List<EnumDict<Object>> getItems();
 
 }

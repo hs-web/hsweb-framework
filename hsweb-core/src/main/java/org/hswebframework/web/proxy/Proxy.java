@@ -3,10 +3,17 @@ package org.hswebframework.web.proxy;
 import javassist.*;
 import javassist.bytecode.AnnotationsAttribute;
 import javassist.bytecode.ConstPool;
+import javassist.bytecode.annotation.*;
+import javassist.scopedpool.*;
 import lombok.Getter;
 import lombok.SneakyThrows;
+import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.core.type.StandardAnnotationMetadata;
 import org.springframework.util.ClassUtils;
 
+import java.util.Arrays;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -37,11 +44,11 @@ public class Proxy<I> {
             throw new NullPointerException("superClass can not be null");
         }
         this.superClass = superClass;
+
         ClassPool classPool = new ClassPool(true);
 
         ClassPath classPath = new ClassClassPath(this.getClass());
         classPool.insertClassPath(classPath);
-
         if (classPathString != null) {
             for (String path : classPathString) {
                 classPool.insertClassPath(path);
@@ -51,7 +58,6 @@ public class Proxy<I> {
         classFullName = superClass.getPackage() + "." + className;
 
         ctClass = classPool.makeClass(classFullName);
-
         if (superClass != Object.class) {
             if (superClass.isInterface()) {
                 ctClass.setInterfaces(new CtClass[]{classPool.get(superClass.getName())});
@@ -74,16 +80,52 @@ public class Proxy<I> {
         return addField(code, null);
     }
 
+    public Proxy<I> addField(String code, Class<? extends java.lang.annotation.Annotation> annotation) {
+        return addField(code, annotation, null);
+    }
+
+    @SuppressWarnings("all")
+    protected MemberValue createMemberValue(Object value, ConstPool constPool) {
+        MemberValue memberValue = null;
+        if (value instanceof Integer) {
+            memberValue = new IntegerMemberValue(constPool, ((Integer) value));
+        } else if (value instanceof Boolean) {
+            memberValue = new BooleanMemberValue((Boolean) value, constPool);
+        } else if (value instanceof Long) {
+            memberValue = new LongMemberValue((Long) value, constPool);
+        } else if (value instanceof String) {
+            memberValue = new StringMemberValue((String) value, constPool);
+        } else if (value instanceof Class) {
+            memberValue = new ClassMemberValue(((Class) value).getName(), constPool);
+        } else if (value instanceof Object[]) {
+            Object[] arr = ((Object[]) value);
+            ArrayMemberValue arrayMemberValue = new ArrayMemberValue(new ClassMemberValue(arr[0].getClass().getName(), constPool), constPool);
+            arrayMemberValue.setValue(Arrays.stream(arr)
+                    .map(o -> createMemberValue(o, constPool))
+                    .toArray(MemberValue[]::new));
+            memberValue=arrayMemberValue;
+
+        }
+        return memberValue;
+    }
+
     @SneakyThrows
-    public Proxy<I> addField(String code, String annotation) {
+    public Proxy<I> addField(String code, Class<? extends java.lang.annotation.Annotation> annotation, Map<String, Object> annotationProperties) {
         return handleException(() -> {
             CtField ctField = CtField.make(code, ctClass);
             if (null != annotation) {
                 ConstPool constPool = ctClass.getClassFile().getConstPool();
-                AnnotationsAttribute attributeInfo =
-                        new AnnotationsAttribute(constPool, AnnotationsAttribute.visibleTag);
-                attributeInfo.addAnnotation(
-                        new javassist.bytecode.annotation.Annotation(annotation, constPool));
+                AnnotationsAttribute attributeInfo = new AnnotationsAttribute(constPool, AnnotationsAttribute.visibleTag);
+                Annotation ann = new javassist.bytecode.annotation.Annotation(annotation.getName(), constPool);
+                if (null != annotationProperties) {
+                    annotationProperties.forEach((key, value) -> {
+                        MemberValue memberValue = createMemberValue(value, constPool);
+                        if (memberValue != null) {
+                            ann.addMemberValue(key, memberValue);
+                        }
+                    });
+                }
+                attributeInfo.addAnnotation(ann);
                 ctField.getFieldInfo().addAttribute(attributeInfo);
             }
             ctClass.addField(ctField);

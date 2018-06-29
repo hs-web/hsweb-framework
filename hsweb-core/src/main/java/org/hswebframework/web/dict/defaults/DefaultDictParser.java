@@ -32,6 +32,7 @@ public class DefaultDictParser implements DictParser {
                 .stream()
                 .filter(itemDefine -> itemDefine.eq(text))
                 .map(EnumDict::getValue)
+                .map(String::valueOf)
                 .findFirst()
                 .orElse(text);
     }
