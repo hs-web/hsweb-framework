@@ -5,7 +5,9 @@ import org.hswebframework.web.entity.form.DictConfig;
 import org.hswebframework.web.service.form.OptionalConvertBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -20,6 +22,9 @@ public class DefaultOptionalConvertBuilder implements OptionalConvertBuilder {
 
     @Override
     public OptionConverter build(DictConfig dictConfig) {
+        if(CollectionUtils.isEmpty(strategies)){
+            return null;
+        }
         return strategies.stream()
                 .filter(strategy -> strategy.support(dictConfig.getType()))
                 .findFirst()

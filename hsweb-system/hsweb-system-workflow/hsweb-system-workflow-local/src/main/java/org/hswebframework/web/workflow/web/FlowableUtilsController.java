@@ -39,11 +39,11 @@ public class FlowableUtilsController {
         List<ActivityImpl> activities = bpmActivityService.getActivitiesById(procDefId, null);
         for (ActivityImpl activity : activities) {
             Map<String, Object> map = new HashMap<>();
-            if ("startEvent".equals(activity.getProperty("dimension"))) {
+            if ("startEvent".equals(activity.getProperty("type"))) {
                 map.put("id", activity.getId());
                 map.put("name", "流程发起者");
 //                map.put("info", actDefService.selectSingle(single(ActDefEntity.actId, activity.getId())));
-            } else if ("userTask".equals(activity.getProperty("dimension"))) {
+            } else if ("userTask".equals(activity.getProperty("type"))) {
                 map.put("id", activity.getId());
                 map.put("name", activity.getProperty("name").toString());
 //                map.put("info", actDefService.selectSingle(single(ActDefEntity.actId, activity.getId())));

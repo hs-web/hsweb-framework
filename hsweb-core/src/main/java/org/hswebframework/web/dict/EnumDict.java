@@ -9,15 +9,12 @@ import com.alibaba.fastjson.parser.JSONToken;
 import com.alibaba.fastjson.parser.deserializer.ObjectDeserializer;
 import com.alibaba.fastjson.serializer.JSONSerializable;
 import com.alibaba.fastjson.serializer.JSONSerializer;
-import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 /**
  * 枚举字典,使用枚举来实现数据字典,可通过集成此接口来实现一些有趣的功能.
@@ -71,20 +68,30 @@ public interface EnumDict<V> extends JSONSerializable {
      * @param v value
      * @return 是否相等
      */
+    @SuppressWarnings("all")
     default boolean eq(Object v) {
-        if (StringUtils.isEmpty(v)) {
+        if (v == null) {
             return false;
         }
+        if (v instanceof Object[]) {
+            v = Arrays.asList(v);
+        }
+        if (v instanceof Collection) {
+            return ((Collection) v).stream().anyMatch(this::eq);
+        }
+        v = ((Map) v).getOrDefault("value", ((Map) v).get("text"));
         return this == v
                 || getValue() == v
                 || getValue().equals(v)
-                || v.equals(getMask())
+                || (v instanceof Number ? in(((Number) v).longValue()) : false)
                 || String.valueOf(getValue()).equalsIgnoreCase(String.valueOf(v))
-                || getText().equalsIgnoreCase(String.valueOf(v));
+                || v.equals(getMask())
+                || getText().equalsIgnoreCase(String.valueOf(v)
+        );
     }
 
-    default boolean in(long bit) {
-        return (bit & getMask()) != 0;
+    default boolean in(long mask) {
+        return (mask & getMask()) != 0;
     }
 
     /**
@@ -104,7 +111,7 @@ public interface EnumDict<V> extends JSONSerializable {
      * @param <T>       枚举类型
      * @return 查找到的结果
      */
-    static <T extends EnumDict> Optional<T> find(Class<T> type, Predicate<T> predicate) {
+    static <T extends Enum & EnumDict> Optional<T> find(Class<T> type, Predicate<T> predicate) {
         if (type.isEnum()) {
             for (T enumDict : type.getEnumConstants()) {
                 if (predicate.test(enumDict)) {
@@ -120,7 +127,7 @@ public interface EnumDict<V> extends JSONSerializable {
      *
      * @see this#find(Class, Predicate)
      */
-    static <T extends EnumDict<?>> Optional<T> findByValue(Class<T> type, Object value) {
+    static <T extends Enum & EnumDict<?>> Optional<T> findByValue(Class<T> type, Object value) {
         return find(type, e -> e.getValue() == value || e.getValue().equals(value) || String.valueOf(e.getValue()).equalsIgnoreCase(String.valueOf(value)));
     }
 
@@ -129,7 +136,7 @@ public interface EnumDict<V> extends JSONSerializable {
      *
      * @see this#find(Class, Predicate)
      */
-    static <T extends EnumDict> Optional<T> findByText(Class<T> type, String text) {
+    static <T extends Enum & EnumDict> Optional<T> findByText(Class<T> type, String text) {
         return find(type, e -> e.getText().equalsIgnoreCase(text));
     }
 
@@ -138,7 +145,7 @@ public interface EnumDict<V> extends JSONSerializable {
      *
      * @see this#find(Class, Predicate)
      */
-    static <T extends EnumDict> Optional<T> find(Class<T> type, Object target) {
+    static <T extends Enum & EnumDict> Optional<T> find(Class<T> type, Object target) {
         return find(type, v -> v.eq(target));
     }
 
@@ -155,25 +162,39 @@ public interface EnumDict<V> extends JSONSerializable {
     }
 
     @SafeVarargs
-    static <T extends EnumDict> boolean maskIn(long bit, T... t) {
+    static <T extends EnumDict> boolean maskIn(long mask, T... t) {
         long value = toMask(t);
-        return (bit & value) == value;
+        return (mask & value) == value;
     }
 
     @SafeVarargs
-    static <T extends EnumDict> boolean maskInAny(long bit, T... t) {
+    static <T extends EnumDict> boolean maskInAny(long mask, T... t) {
         long value = toMask(t);
-        return (bit & value) != 0;
+        return (mask & value) != 0;
     }
 
-    static <T extends EnumDict> List<T> getByMask(Class<T> tClass, long bit) {
+    static <T extends EnumDict> List<T> getByMask(List<T> allOptions, long mask) {
+        if (allOptions.size() >= 64) {
+            throw new UnsupportedOperationException("不支持选项超过64个数据字典!");
+        }
         List<T> arr = new ArrayList<>();
-        for (T t : tClass.getEnumConstants()) {
-            if (t.in(bit)) {
+        List<T> all = allOptions;
+        for (T t : all) {
+            if (t.in(mask)) {
                 arr.add(t);
             }
         }
         return arr;
+    }
+
+    static <T extends EnumDict> List<T> getByMask(Supplier<List<T>> allOptionsSuppiler, long mask) {
+        return getByMask(allOptionsSuppiler.get(), mask);
+    }
+
+
+    static <T extends Enum & EnumDict> List<T> getByMask(Class<T> tClass, long mask) {
+
+        return getByMask(Arrays.asList(tClass.getEnumConstants()), mask);
     }
 
     /**

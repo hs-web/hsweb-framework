@@ -4,9 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hswebframework.web.dict.ClassDictDefine;
 import org.hswebframework.web.dict.DictDefine;
-import org.hswebframework.web.dict.ItemDefine;
+import org.hswebframework.web.dict.EnumDict;
 
 import java.util.List;
 
@@ -24,5 +23,5 @@ public class DefaultDictDefine implements DictDefine {
     private String           alias;
     private String           comments;
     private String           parserId;
-    private List<ItemDefine> items;
+    private List<EnumDict<String>> items;
 }

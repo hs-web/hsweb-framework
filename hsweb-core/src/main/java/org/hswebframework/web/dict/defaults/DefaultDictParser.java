@@ -2,7 +2,10 @@ package org.hswebframework.web.dict.defaults;
 
 import org.hswebframework.web.dict.DictDefine;
 import org.hswebframework.web.dict.DictParser;
+import org.hswebframework.web.dict.EnumDict;
 import org.hswebframework.web.dict.ItemDefine;
+
+import java.util.stream.Collectors;
 
 /**
  * @author zhouhao
@@ -15,21 +18,20 @@ public class DefaultDictParser implements DictParser {
     }
 
     @Override
-    public String parseText(DictDefine dictDefine, String value) {
+    public String parseText(DictDefine dictDefine, Object value) {
         return dictDefine.getItems()
                 .stream()
-                .filter(itemDefine -> itemDefine.getValue().equals(value))
-                .map(ItemDefine::getText)
-                .findFirst()
-                .orElse(value);
+                .filter(itemDefine -> itemDefine.eq(value))
+                .map(EnumDict::getText)
+                .collect(Collectors.joining(","));
     }
 
     @Override
     public String parseValue(DictDefine dictDefine, String text) {
         return dictDefine.getItems()
                 .stream()
-                .filter(itemDefine -> itemDefine.getText().equals(text))
-                .map(ItemDefine::getValue)
+                .filter(itemDefine -> itemDefine.eq(text))
+                .map(EnumDict::getValue)
                 .findFirst()
                 .orElse(text);
     }
