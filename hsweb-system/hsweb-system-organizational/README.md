@@ -13,10 +13,10 @@ createQuery().where("orgId","org-child-in","1234").list();
 
 ```
 
-1. dist-child`(-parent)``(-not)`-in : 参数`(不)`在指定的行政区域以及子(父)节点中
-2. org-child`(-parent)``(-not)`-in : 参数`(不)`在指定的机构以及子(父)节点中
-3. dept-child`(-parent)``(-not)`-in: 参数`(不)`在指定的部门以及子(父)节点中
-3. pos-child`(-parent)``(-not)`-in: 参数`(不)`在指定的岗位以及子(父)节点中
+1. dist-child`(-parent)(-not)`-in : 参数`(不)`在指定的行政区域以及子(父)节点中
+2. org-child`(-parent)(-not)`-in : 参数`(不)`在指定的机构以及子(父)节点中
+3. dept-child`(-parent)(-not)`-in: 参数`(不)`在指定的部门以及子(父)节点中
+3. pos-child`(-parent)(-not)`-in: 参数`(不)`在指定的岗位以及子(父)节点中
 4. user`(-not)`-in-position`(-child)(-parent)`: 用户ID`(不)`在岗位中`(包含子级(父级)岗位)`
 5. user`(-not)`-in-department`(-child)(-parent)`: 用户ID`(不)`在部门中`(包含子级(父级)岗位)`
 6. user`(-not)`-in-org`(-child)(-parent)`: 用户ID`(不)`在机构中`(包含子级(父级)岗位)`
