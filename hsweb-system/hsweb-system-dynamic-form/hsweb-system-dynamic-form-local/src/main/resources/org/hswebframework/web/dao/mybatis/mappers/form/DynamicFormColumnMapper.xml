@@ -19,6 +19,7 @@
         <result property="dictConfig" column="dict_config" javaType="String" jdbcType="CLOB"/>
         <result property="sortIndex" column="sort_index" javaType="Long" jdbcType="DECIMAL"/>
         <result property="properties" column="properties" javaType="java.util.Map" jdbcType="CLOB"/>
+        <result property="validator" column="validator" javaType="java.util.List" jdbcType="CLOB"/>
     </resultMap>
 
     <!--用于动态生成sql所需的配置-->

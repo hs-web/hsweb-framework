@@ -3,6 +3,7 @@ package org.hswebframework.web.service.form.simple.dict;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.hswebframework.ezorm.core.OptionConverter;
+import org.hswebframework.ezorm.core.ValueConverter;
 import org.hswebframework.web.dict.DictDefineRepository;
 import org.hswebframework.web.dict.EnumDict;
 import org.hswebframework.web.entity.form.DictConfig;
@@ -35,9 +36,7 @@ public class DictionaryOptionalConvertBuilderStrategy implements OptionalConvert
         String dictId = conf.getString("dictId");
         String fieldName = conf.getString("fieldName");
         String sppliter = conf.getString("sppliter");
-
         String writeObject = conf.getString("writeObject");
-
         EnumDictOptionConverter<EnumDict<Object>> converter = new EnumDictOptionConverter<>(() -> dictDefineRepository.getDefine(dictId).getItems(), fieldName);
 
         converter.setWriteObject(!"false".equalsIgnoreCase(writeObject));
@@ -45,6 +44,17 @@ public class DictionaryOptionalConvertBuilderStrategy implements OptionalConvert
         if (!StringUtils.isEmpty(sppliter)) {
             converter.setSplitter(str -> Arrays.asList(str.split(sppliter)));
         }
+
+        return converter;
+    }
+
+    @Override
+    public ValueConverter buildValueConverter(DictConfig dictConfig) {
+        JSONObject conf = JSON.parseObject(dictConfig.getConfig());
+        String dictId = conf.getString("dictId");
+
+        EnumDictValueConverter<EnumDict<Object>> converter =
+                new EnumDictValueConverter<>(() -> dictDefineRepository.getDefine(dictId).getItems());
 
         return converter;
     }

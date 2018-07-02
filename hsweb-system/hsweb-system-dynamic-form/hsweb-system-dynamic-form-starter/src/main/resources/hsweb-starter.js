@@ -54,7 +54,7 @@ function install(context) {
         .addColumn().name("properties").alias("properties").comment("其他配置").jdbcType(java.sql.JDBCType.CLOB).commit()
         .addColumn().name("dict_config").alias("dictConfig").comment("字典配置").jdbcType(java.sql.JDBCType.CLOB).commit()
         .addColumn().name("sort_index").alias("sortIndex").comment("排序序号").jdbcType(java.sql.JDBCType.DECIMAL).length(32, 0).commit()
-
+        .addColumn().name("validator").alias("validator").comment("验证器配置").jdbcType(java.sql.JDBCType.CLOB).commit()
         .comment("动态表单列").commit();
 
     database.createOrAlter("s_dyn_form_log")

@@ -1,6 +1,7 @@
 package org.hswebframework.web.service.form.simple.dict;
 
 import org.hswebframework.ezorm.core.OptionConverter;
+import org.hswebframework.ezorm.core.ValueConverter;
 import org.hswebframework.web.entity.form.DictConfig;
 import org.hswebframework.web.service.form.OptionalConvertBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,18 @@ public class DefaultOptionalConvertBuilder implements OptionalConvertBuilder {
                 .filter(strategy -> strategy.support(dictConfig.getType()))
                 .findFirst()
                 .map(strategy -> strategy.build(dictConfig))
+                .orElse(null);
+    }
+
+    @Override
+    public ValueConverter buildValueConverter(DictConfig dictConfig) {
+        if(CollectionUtils.isEmpty(strategies)){
+            return null;
+        }
+        return strategies.stream()
+                .filter(strategy -> strategy.support(dictConfig.getType()))
+                .findFirst()
+                .map(strategy -> strategy.buildValueConverter(dictConfig))
                 .orElse(null);
     }
 }

@@ -1,6 +1,7 @@
 package org.hswebframework.web.service.form.simple.dict;
 
 import org.hswebframework.ezorm.core.OptionConverter;
+import org.hswebframework.ezorm.core.ValueConverter;
 import org.hswebframework.web.entity.form.DictConfig;
 
 /**
@@ -15,10 +16,12 @@ public interface OptionalConvertBuilderStrategy {
     boolean support(String type);
 
     /**
-     * 根据配置创建转换器
+     * 根据配置创建选项转换器
      *
      * @param dictConfig 配置内容
      * @return 转换器对象
      */
     OptionConverter build(DictConfig dictConfig);
+
+    ValueConverter buildValueConverter(DictConfig dictConfig);
 }

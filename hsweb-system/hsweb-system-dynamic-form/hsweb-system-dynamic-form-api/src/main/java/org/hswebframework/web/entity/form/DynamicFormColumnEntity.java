@@ -4,6 +4,8 @@ import org.hibernate.validator.constraints.NotBlank;
 import org.hswebframework.web.commons.entity.GenericEntity;
 import org.hswebframework.web.validator.group.CreateGroup;
 
+import java.util.List;
+
 /**
  * 动态表单 实体
  *
@@ -195,4 +197,9 @@ public interface DynamicFormColumnEntity extends GenericEntity<String> {
     Long getSortIndex();
 
     void setSortIndex(Long sortIndex);
+
+    List<String> getValidator();
+
+    void setValidator(List<String> validator);
+
 }

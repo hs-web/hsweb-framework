@@ -4,7 +4,9 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.hswebframework.ezorm.core.ObjectWrapperFactory;
 import org.hswebframework.ezorm.core.Trigger;
+import org.hswebframework.ezorm.core.ValidatorFactory;
 import org.hswebframework.ezorm.core.ValueConverter;
 import org.hswebframework.ezorm.rdb.RDBDatabase;
 import org.hswebframework.ezorm.rdb.meta.Correlation;
@@ -33,6 +35,7 @@ import org.hswebframework.web.service.form.OptionalConvertBuilder;
 import org.hswebframework.web.service.form.initialize.ColumnInitializeContext;
 import org.hswebframework.web.service.form.initialize.DynamicFormInitializeCustomer;
 import org.hswebframework.web.service.form.initialize.TableInitializeContext;
+import org.hswebframework.web.service.form.simple.dict.EnumDictValueConverter;
 import org.hswebframework.web.validator.group.CreateGroup;
 import org.hswebframework.web.validator.group.UpdateGroup;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,6 +80,12 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
 
     @Autowired(required = false)
     private List<DynamicFormInitializeCustomer> initializeCustomers;
+
+    @Autowired
+    private ValidatorFactory validatorFactory;
+
+    @Autowired(required = false)
+    private ObjectWrapperFactory objectWrapperFactory;
 
     @Override
     protected IDGenerator<String> getIDGenerator() {
@@ -355,6 +364,8 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
                 ? databaseRepository.getDefaultDatabase()
                 : databaseRepository.getDatabase(form.getDataSourceId());
         RDBTableMetaData metaData = buildTable(database, form, columns);
+        metaData.setValidator(validatorFactory.createValidator(metaData));
+
         try {
             if (!database.getMeta().getParser().tableExists(metaData.getName())) {
                 database.createTable(metaData);
@@ -433,6 +444,7 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
         metaData.setAlias(form.getAlias());
         metaData.setCorrelations(buildCorrelations(form.getCorrelations()));
         buildTrigger(form.getTriggers()).forEach(metaData::on);
+
         columns.forEach(column -> {
             RDBColumnMetaData columnMeta = new RDBColumnMetaData();
             columnMeta.setName(column.getColumnName());
@@ -444,6 +456,9 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
             columnMeta.setJdbcType(JDBCType.valueOf(column.getJdbcType()));
             columnMeta.setJavaType(getJavaType(column.getJavaType()));
             columnMeta.setProperties(column.getProperties() == null ? new HashMap<>() : column.getProperties());
+            if (!CollectionUtils.isEmpty(column.getValidator())) {
+                columnMeta.setValidator(new HashSet<>(column.getValidator()));
+            }
             if (StringUtils.isEmpty(column.getDataType())) {
                 Dialect dialect = database.getMeta().getDialect();
                 columnMeta.setDataType(dialect.buildDataType(columnMeta));
@@ -462,6 +477,9 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
             customColumnSetting(database, form, metaData, column, columnMeta);
             metaData.addColumn(columnMeta);
         });
+        if (objectWrapperFactory != null) {
+            metaData.setObjectWrapper(objectWrapperFactory.createObjectWrapper(metaData));
+        }
         customTableSetting(database, form, metaData);
         //没有主键并且没有id字段
         if (metaData.getColumns().stream().noneMatch(RDBColumnMetaData::isPrimaryKey) && metaData.findColumn("id") == null) {
@@ -470,6 +488,7 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
             primaryKey.setDataType(dialect.buildDataType(primaryKey));
             metaData.addColumn(primaryKey);
         }
+
         return metaData;
     }
 
@@ -551,9 +570,8 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
                 .values()
                 .contains(javaType) || javaType != Map.class || javaType != List.class;
 
-
-        if (EnumDict.class.isAssignableFrom(javaType)) {
-            // TODO: 18-4-25
+        if (javaType.isEnum() && EnumDict.class.isAssignableFrom(javaType)) {
+            return new EnumDictValueConverter<EnumDict>(() -> (List) Arrays.asList(javaType.getEnumConstants()));
         }
         switch (jdbcType) {
             case BLOB:
