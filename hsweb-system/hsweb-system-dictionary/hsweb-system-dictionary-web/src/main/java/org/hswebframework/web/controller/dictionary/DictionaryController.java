@@ -25,6 +25,7 @@ import org.hswebframework.web.controller.SimpleGenericEntityController;
 import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.dict.DictDefine;
 import org.hswebframework.web.dict.DictDefineRepository;
+import org.hswebframework.web.dict.EnumDict;
 import org.hswebframework.web.dict.ItemDefine;
 import org.hswebframework.web.dictionary.api.DictionaryService;
 import org.hswebframework.web.dictionary.api.entity.DictionaryEntity;
@@ -73,7 +74,7 @@ public class DictionaryController implements SimpleGenericEntityController<Dicti
     @GetMapping("/define/{id:.+}/items")
     @Authorize(merge = false)
     @ApiOperation("获取数据字典选项信息")
-    public ResponseMessage<List<ItemDefine>> getItemDefineById(@PathVariable String id) {
+    public ResponseMessage<List<EnumDict<Object>>> getItemDefineById(@PathVariable String id) {
         return ok(Optional.ofNullable(repository.getDefine(id))
                 .map(DictDefine::getItems)
                 .orElse(Collections.emptyList()));
