@@ -88,7 +88,7 @@ public class SimpleDynamicFormServiceTest extends SimpleWebApplicationTests {
 
         dynamicFormOperationService.insert(form.getId(), new HashMap<String, Object>() {
             {
-//                put("name", "张三");
+                put("name", "张三");
                 put("age", 10);
             }
         });
