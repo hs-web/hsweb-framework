@@ -79,7 +79,12 @@ mybatis:
         <include refid="config"/>
         <include refid="BasicMapper.buildTotalSql"/>
     </select>
-
+    
+    <delete id="delete" parameterType="org.hswebframework.web.commons.entity.Entity">
+        <include refid="config"/>
+        <include refid="BasicMapper.buildDeleteSql"/>
+    </delete>
+    
      <!--表关联的查询-->
     <select id="queryNest" parameterType="org.hswebframework.web.commons.entity.Entity" resultMap="TestNestResultMap">
         <bind name="tableName" value="'h_test'"/>
