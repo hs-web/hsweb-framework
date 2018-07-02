@@ -32,8 +32,7 @@ public class BoostDictDefineRepository extends DefaultDictDefineRepository {
         if (entity == null) {
             return super.getDefine(id);
         }
-        List<EnumDict<String>> items = new ArrayList<>(entity.getItems());
-
+        List<EnumDict<Object>> items = (List) new ArrayList<>(entity.getItems());
 
         return DefaultDictDefine.builder()
                 .id(id)
