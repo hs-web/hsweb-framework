@@ -15,6 +15,7 @@ import org.springframework.util.ClassUtils;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Consumer;
 
 /**
  * @author zhouhao
@@ -44,7 +45,6 @@ public class Proxy<I> {
             throw new NullPointerException("superClass can not be null");
         }
         this.superClass = superClass;
-
         ClassPool classPool = new ClassPool(true);
 
         ClassPath classPath = new ClassClassPath(this.getClass());
@@ -85,7 +85,7 @@ public class Proxy<I> {
     }
 
     @SuppressWarnings("all")
-    protected MemberValue createMemberValue(Object value, ConstPool constPool) {
+    public static MemberValue createMemberValue(Object value, ConstPool constPool) {
         MemberValue memberValue = null;
         if (value instanceof Integer) {
             memberValue = new IntegerMemberValue(constPool, ((Integer) value));
@@ -103,10 +103,15 @@ public class Proxy<I> {
             arrayMemberValue.setValue(Arrays.stream(arr)
                     .map(o -> createMemberValue(o, constPool))
                     .toArray(MemberValue[]::new));
-            memberValue=arrayMemberValue;
+            memberValue = arrayMemberValue;
 
         }
         return memberValue;
+    }
+
+    public Proxy<I> custom(Consumer<CtClass> ctClassConsumer) {
+        ctClassConsumer.accept(ctClass);
+        return this;
     }
 
     @SneakyThrows

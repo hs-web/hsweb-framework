@@ -137,7 +137,7 @@ public final class FastBeanCopier {
 
     public static Copier createCopier(Class source, Class target) {
         String sourceName = source.getName();
-        String tartName = source.getName();
+        String tartName = target.getName();
         if (sourceName.startsWith("package ")) {
             sourceName = sourceName.substring("package ".length());
         }
