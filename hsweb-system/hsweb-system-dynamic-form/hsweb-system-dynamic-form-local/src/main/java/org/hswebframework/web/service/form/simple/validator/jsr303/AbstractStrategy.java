@@ -1,5 +1,6 @@
 package org.hswebframework.web.service.form.simple.validator.jsr303;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,12 +11,10 @@ import org.hswebframework.web.service.form.simple.validator.JSR303AnnotationPars
 import org.hswebframework.web.validator.group.CreateGroup;
 import org.hswebframework.web.validator.group.UpdateGroup;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -82,12 +81,21 @@ public abstract class AbstractStrategy implements JSR303AnnotationParserStrategy
 
         propertyMappings.forEach(mapping -> {
             Object value = mapping.getConverter().apply(configMap.get(mapping.getName()));
-            if (null != value) {
+            if (!StringUtils.isEmpty(value)) {
                 properties.put(mapping.getName(), value);
             }
         });
 
-        List<Object> groups = new JSONObject(configMap).getJSONArray("groups");
+        List<Object> groups = null;
+
+        Object groupObject = new JSONObject(configMap).get("groups");
+        if (groupObject instanceof JSONArray) {
+            groups = ((JSONArray) groupObject);
+        }
+        if (groupObject instanceof String) {
+            groups = Arrays.asList(((String) groupObject).split("[,]"));
+        }
+
         if (!CollectionUtils.isEmpty(groups)) {
             properties.put("groups", groups.stream().map(obj -> {
                 if ("create".equals(obj)) {
