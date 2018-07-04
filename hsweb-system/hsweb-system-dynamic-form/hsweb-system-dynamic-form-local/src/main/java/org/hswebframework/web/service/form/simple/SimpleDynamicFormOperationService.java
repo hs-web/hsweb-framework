@@ -16,7 +16,10 @@ import org.hswebframework.web.entity.form.DynamicFormEntity;
 import org.hswebframework.web.service.form.DatabaseRepository;
 import org.hswebframework.web.service.form.DynamicFormOperationService;
 import org.hswebframework.web.service.form.DynamicFormService;
+import org.hswebframework.web.service.form.events.FormDataInsertBeforeEvent;
+import org.hswebframework.web.service.form.events.FormDataUpdateBeforeEvent;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -32,6 +35,9 @@ public class SimpleDynamicFormOperationService implements DynamicFormOperationSe
     private DynamicFormService dynamicFormService;
 
     private DatabaseRepository databaseRepository;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     @Autowired
     public void setDynamicFormService(DynamicFormService dynamicFormService) {
@@ -111,6 +117,7 @@ public class SimpleDynamicFormOperationService implements DynamicFormOperationSe
     public <T> void insert(String formId, T entity) {
         RDBTable<T> table = getTable(formId);
         Insert<T> insert = table.createInsert();
+        eventPublisher.publishEvent(new FormDataInsertBeforeEvent<>(formId, table, entity));
         insert.value(entity).exec();
     }
 
@@ -138,6 +145,7 @@ public class SimpleDynamicFormOperationService implements DynamicFormOperationSe
     public <T> T updateById(String formId, String id, T data) {
         Objects.requireNonNull(id, "主键不能为空");
         RDBTable<T> table = getTable(formId);
+        eventPublisher.publishEvent(new FormDataUpdateBeforeEvent<>(formId, table, data, id));
         table.createUpdate()
                 .set(data)
                 .where("id", id)

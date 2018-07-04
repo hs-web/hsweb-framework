@@ -12,7 +12,9 @@ import org.hswebframework.web.datasource.DataSourceHolder;
 import org.hswebframework.web.datasource.DatabaseType;
 import org.hswebframework.web.datasource.DynamicDataSource;
 import org.hswebframework.web.service.form.DatabaseRepository;
+import org.hswebframework.web.service.form.events.DatabaseInitEvent;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -22,14 +24,14 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-/**
- * Created by zhouhao on 2017/7/2.
- */
 @Service
 public class SimpleDatabaseRepository implements DatabaseRepository {
 
     private volatile RDBDatabase defaultDatabase = null;
-    private SqlExecutor sqlExecutor     = null;
+    private          SqlExecutor sqlExecutor     = null;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     private final Map<String, RDBDatabase>                                 repository            = new HashMap<>();
     private final Map<DatabaseType, Supplier<AbstractRDBDatabaseMetaData>> databaseMetaSuppliers = new EnumMap<>(DatabaseType.class);
@@ -99,6 +101,7 @@ public class SimpleDatabaseRepository implements DatabaseRepository {
         AbstractRDBDatabaseMetaData metaData = supplier.get();
         SimpleDatabase database = new SimpleDatabase(metaData, sqlExecutor);
         database.setAutoParse(true);
+        eventPublisher.publishEvent(new DatabaseInitEvent(database));
         return database;
     }
 }
