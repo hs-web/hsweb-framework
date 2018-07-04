@@ -35,6 +35,7 @@ import org.hswebframework.web.service.form.OptionalConvertBuilder;
 import org.hswebframework.web.service.form.initialize.ColumnInitializeContext;
 import org.hswebframework.web.service.form.initialize.DynamicFormInitializeCustomer;
 import org.hswebframework.web.service.form.initialize.TableInitializeContext;
+import org.hswebframework.web.service.form.simple.convert.SmartValueConverter;
 import org.hswebframework.web.service.form.simple.dict.EnumDictValueConverter;
 import org.hswebframework.web.validator.group.CreateGroup;
 import org.hswebframework.web.validator.group.UpdateGroup;
@@ -44,6 +45,8 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -102,6 +105,7 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
             @CacheEvict(value = "dyn-form-deploy", allEntries = true),
             @CacheEvict(value = "dyn-form", allEntries = true),
     })
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public void deployAllFromLog() {
         List<DynamicFormEntity> entities = createQuery()
                 .select(DynamicFormEntity.id)
@@ -143,6 +147,8 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
         return entity;
     }
 
+
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public void deployFromLog(DynamicFormDeployLogEntity logEntity) {
         DynamicFormColumnBindEntity entity = JSON.parseObject(logEntity.getMetaData(), DynamicFormColumnBindEntity.class);
         DynamicFormEntity form = entity.getForm();
@@ -218,7 +224,13 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
     }
 
     @Override
-    @CacheEvict(key = "'form-columns:'+#columnEntity.formId")
+    @Caching(
+            evict = {
+                    @CacheEvict(key = "'form-columns:'+#columnEntity.formId"),
+                    @CacheEvict(key = "'form_id:'+#columnEntity.formId"),
+
+            }
+    )
     public String saveOrUpdateColumn(DynamicFormColumnEntity columnEntity) {
         String id = saveOrUpdate0(columnEntity);
         getDao().incrementVersion(columnEntity.getFormId());
@@ -241,7 +253,13 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
     }
 
     @Override
-    @CacheEvict(key = "'form-columns:'+#result")
+    @Caching(
+            evict = {
+                    @CacheEvict(key = "'form-columns:'+#result"),
+                    @CacheEvict(key = "'form_id:'+#result"),
+
+            }
+    )
     public String saveOrUpdate(DynamicFormColumnBindEntity bindEntity) {
         DynamicFormEntity formEntity = bindEntity.getForm();
 
@@ -258,7 +276,13 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
     }
 
     @Override
-    @CacheEvict(key = "'form-columns:'+#formId")
+    @Caching(
+            evict = {
+                    @CacheEvict(key = "'form-columns:'+#formId"),
+                    @CacheEvict(key = "'form_id:'+#formId"),
+
+            }
+    )
     public DynamicFormColumnEntity deleteColumn(String formId) {
         DynamicFormColumnEntity oldColumn = DefaultDSLQueryService
                 .createQuery(formColumnDao)
@@ -337,11 +361,11 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
     }
 
     @Override
-
     @Caching(evict = {
             @CacheEvict(value = "dyn-form-deploy", key = "'form-deploy:'+#formId+':latest'"),
             @CacheEvict(value = "dyn-form", allEntries = true)
     })
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public void deploy(String formId) {
         DynamicFormEntity formEntity = selectByPk(formId);
         assertNotNull(formEntity);
@@ -365,7 +389,6 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
                 : databaseRepository.getDatabase(form.getDataSourceId());
         RDBTableMetaData metaData = buildTable(database, form, columns);
         metaData.setValidator(validatorFactory.createValidator(metaData));
-
         try {
             if (!database.getMeta().getParser().tableExists(metaData.getName())) {
                 database.createTable(metaData);
@@ -465,15 +488,18 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
             } else {
                 columnMeta.setDataType(column.getDataType());
             }
-            columnMeta.setValueConverter(initColumnValueConvert(columnMeta.getJdbcType(), columnMeta.getJavaType()));
+            List<ValueConverter> converters = new ArrayList<>();
+            converters.add(initColumnValueConvert(columnMeta.getJdbcType(), columnMeta.getJavaType()));
             if (optionalConvertBuilder != null && null != column.getDictConfig()) {
                 try {
                     DictConfig config = JSON.parseObject(column.getDictConfig(), DictConfig.class);
                     columnMeta.setOptionConverter(optionalConvertBuilder.build(config));
+                    converters.add(optionalConvertBuilder.buildValueConverter(config));
                 } catch (Exception e) {
                     logger.warn("创建字典转换器失败", e);
                 }
             }
+            columnMeta.setValueConverter(new SmartValueConverter(converters));
             customColumnSetting(database, form, metaData, column, columnMeta);
             metaData.addColumn(columnMeta);
         });
@@ -502,6 +528,7 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
         id.setComment("主键");
         id.setPrimaryKey(true);
         id.setNotNull(true);
+        id.setProperty("read-only", true);
         return id;
     }
 

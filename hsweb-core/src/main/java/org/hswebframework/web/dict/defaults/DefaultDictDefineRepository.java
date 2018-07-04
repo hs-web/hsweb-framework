@@ -55,6 +55,11 @@ public class DefaultDictDefineRepository implements DictDefineRepository {
     }
 
     @Override
+    public List<DictDefine> getAllDefine() {
+        return new ArrayList<>(parsedDict.values());
+    }
+
+    @Override
     public List<ClassDictDefine> getDefine(Class type) {
         return Collections.emptyList();
     }
