@@ -1,5 +1,6 @@
 package org.hswebframework.web.datasource;
 
+import org.hswebframework.ezorm.core.ObjectWrapper;
 import org.hswebframework.ezorm.rdb.executor.AbstractJdbcSqlExecutor;
 import org.hswebframework.ezorm.rdb.executor.SQL;
 import org.springframework.jdbc.datasource.DataSourceUtils;
@@ -9,7 +10,10 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 /**
  * @author zhouhao
@@ -48,6 +52,54 @@ public class DefaultJdbcExecutor extends AbstractJdbcSqlExecutor {
                 logger.error(e2.getMessage(), e2);
             }
         }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public <T> List<T> list(SQL sql, ObjectWrapper<T> wrapper) throws SQLException {
+        return super.list(sql, wrapper);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public void list(String sql, Object params, Consumer<Map<String, Object>> consumer) throws SQLException {
+        super.list(sql, params, consumer);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public void list(String sql, Consumer<Map<String, Object>> consumer) throws SQLException {
+        super.list(sql, consumer);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public <T> List<T> list(String sql, Object params, ObjectWrapper<T> wrapper) throws SQLException {
+        return super.list(sql, params, wrapper);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public <T> List<T> list(String sql, ObjectWrapper<T> wrapper) throws SQLException {
+        return super.list(sql, wrapper);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> list(String sql) throws SQLException {
+        return super.list(sql);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> list(SQL sql) throws SQLException {
+        return super.list(sql);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> list(String sql, Object params) throws SQLException {
+        return super.list(sql, params);
     }
 
     @Override
