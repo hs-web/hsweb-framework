@@ -79,7 +79,9 @@ public interface EnumDict<V> extends JSONSerializable {
         if (v instanceof Collection) {
             return ((Collection) v).stream().anyMatch(this::eq);
         }
-        v = ((Map) v).getOrDefault("value", ((Map) v).get("text"));
+        if (v instanceof Map) {
+            v = ((Map) v).getOrDefault("value", ((Map) v).get("text"));
+        }
         return this == v
                 || getValue() == v
                 || getValue().equals(v)
