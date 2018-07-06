@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author zhouhao
@@ -41,4 +42,17 @@ public class BoostDictDefineRepository extends DefaultDictDefineRepository {
                 .build();
     }
 
+    @Override
+    public List<DictDefine> getAllDefine() {
+        List<DictDefine> all = dictionaryService.select()
+                .stream()
+                .map(dict -> DefaultDictDefine.builder()
+                        .id(dict.getId())
+                        .comments(dict.getDescribe())
+                        .items((List) new ArrayList<>(dict.getItems()))
+                        .build()).collect(Collectors.toList());
+
+        all.addAll(super.getAllDefine());
+        return all;
+    }
 }
