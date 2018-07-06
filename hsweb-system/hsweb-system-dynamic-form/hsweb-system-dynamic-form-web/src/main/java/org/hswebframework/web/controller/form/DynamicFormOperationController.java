@@ -13,6 +13,7 @@ import org.hswebframework.web.service.form.DynamicFormOperationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -39,6 +40,14 @@ public class DynamicFormOperationController {
     @Authorize(action = Permission.ACTION_QUERY)
     public ResponseMessage<PagerResult<Object>> selectPager(@PathVariable String formId, QueryParamEntity paramEntity) {
         return ResponseMessage.ok(dynamicFormOperationService.selectPager(formId, paramEntity));
+    }
+
+    @GetMapping("/{formId}/no-paging")
+    @ApiOperation("不分页动态查询")
+    @Authorize(action = Permission.ACTION_QUERY)
+    public ResponseMessage<List<Object>> select(@PathVariable String formId, QueryParamEntity paramEntity) {
+        paramEntity.setPaging(false);
+        return ResponseMessage.ok(dynamicFormOperationService.select(formId, paramEntity));
     }
 
     @GetMapping("/{formId}/single")
