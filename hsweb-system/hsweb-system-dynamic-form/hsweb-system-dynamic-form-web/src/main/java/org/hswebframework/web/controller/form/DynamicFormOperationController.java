@@ -92,6 +92,14 @@ public class DynamicFormOperationController {
         return ResponseMessage.ok(dynamicFormOperationService.update(formId, paramEntity));
     }
 
+    @GetMapping("/{formId}/{id}")
+    @ApiOperation("根据主键查询")
+    @Authorize(action = Permission.ACTION_GET)
+    public ResponseMessage<Map<String, Object>> selectById(@PathVariable String formId,
+                                                           @PathVariable String id) {
+        return ResponseMessage.ok(dynamicFormOperationService.selectById(formId, id));
+    }
+
     @PutMapping("/{formId}/{id}")
     @ApiOperation("根据主键修改")
     @Authorize(action = Permission.ACTION_UPDATE)

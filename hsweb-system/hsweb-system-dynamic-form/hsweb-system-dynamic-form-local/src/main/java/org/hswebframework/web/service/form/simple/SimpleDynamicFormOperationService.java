@@ -164,6 +164,14 @@ public class SimpleDynamicFormOperationService implements DynamicFormOperationSe
 
     @Override
     @SneakyThrows
+    public <T> T selectById(String formId, Object id) {
+        Objects.requireNonNull(id, "主键不能为空");
+        RDBTable<T> table = getTable(formId);
+        return table.createQuery().where(idProperty,id).single();
+    }
+
+    @Override
+    @SneakyThrows
     public <T> T updateById(String formId, Object id, T data) {
         Objects.requireNonNull(id, "主键不能为空");
         RDBTable<T> table = getTable(formId);
