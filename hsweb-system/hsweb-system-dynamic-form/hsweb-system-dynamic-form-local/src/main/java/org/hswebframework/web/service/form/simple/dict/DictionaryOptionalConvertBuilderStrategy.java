@@ -32,10 +32,10 @@ public class DictionaryOptionalConvertBuilderStrategy implements OptionalConvert
 
     @Override
     public OptionConverter build(DictConfig dictConfig) {
-        JSONObject conf = JSON.parseObject(dictConfig.getConfig());
+        JSONObject conf = new JSONObject(dictConfig.getConfig());
         String dictId = conf.getString("dictId");
-        String fieldName = conf.getString("fieldName");
-        String sppliter = conf.getString("sppliter");
+        String fieldName = dictConfig.getToField();
+        String sppliter = conf.getString("spliter");
         String writeObject = conf.getString("writeObject");
         EnumDictOptionConverter<EnumDict<Object>> converter = new EnumDictOptionConverter<>(() -> dictDefineRepository.getDefine(dictId).getItems(), fieldName);
 
@@ -50,11 +50,16 @@ public class DictionaryOptionalConvertBuilderStrategy implements OptionalConvert
 
     @Override
     public ValueConverter buildValueConverter(DictConfig dictConfig) {
-        JSONObject conf = JSON.parseObject(dictConfig.getConfig());
+        JSONObject conf = new JSONObject(dictConfig.getConfig());
         String dictId = conf.getString("dictId");
+        String multi = conf.getString("multi");
 
         EnumDictValueConverter<EnumDict<Object>> converter =
                 new EnumDictValueConverter<>(() -> dictDefineRepository.getDefine(dictId).getItems());
+
+        converter.setMulti(!"false".equalsIgnoreCase(multi));
+
+        converter.setDataToMask(!"false".equalsIgnoreCase(conf.getString("fast")));
 
         return converter;
     }

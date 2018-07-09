@@ -114,10 +114,11 @@ public class EnumDictValueConverter<T extends EnumDict> implements ValueConverte
                                     .map(String::valueOf));
                 }
             }
+            List<Object> lst = splitter.apply(String.valueOf(data));
             return multiValueConvert
                     .apply(allOptionSupplier.get()
                             .stream()
-                            .filter(e -> e.eq(data))
+                            .filter(e -> e.eq(lst))
                             .map(EnumDict::getValue)
                             .map(String::valueOf));
         }

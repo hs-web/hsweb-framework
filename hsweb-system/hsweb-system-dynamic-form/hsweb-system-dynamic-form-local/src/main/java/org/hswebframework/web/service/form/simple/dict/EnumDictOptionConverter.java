@@ -68,12 +68,12 @@ public class EnumDictOptionConverter<T extends EnumDict> implements OptionConver
         if (writeObject) {
             return allOptionSupplier.get()
                     .stream()
-                    .filter(e -> e.eq(o))
+                    .filter(e -> e.eq(values))
                     .collect(Collectors.toSet());
         }
         return dictToText.apply(allOptionSupplier.get()
                 .stream()
-                .filter(e -> e.eq(o))
+                .filter(e -> e.eq(values))
                 .map(EnumDict::getText)
                 .map(String::valueOf));
     }

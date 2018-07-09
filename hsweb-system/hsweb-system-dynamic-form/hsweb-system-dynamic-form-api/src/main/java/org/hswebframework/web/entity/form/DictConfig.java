@@ -6,6 +6,7 @@ import org.hswebframework.web.commons.bean.Bean;
 import org.hswebframework.web.commons.entity.Entity;
 
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * @author zhouhao
@@ -21,6 +22,6 @@ public class DictConfig implements Bean {
 
     private String toField;
 
-    private String config;
+    private Map<String,Object> config;
 
 }
