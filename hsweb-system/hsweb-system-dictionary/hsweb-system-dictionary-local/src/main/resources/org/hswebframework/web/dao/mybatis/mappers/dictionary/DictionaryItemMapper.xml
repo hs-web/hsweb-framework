@@ -32,7 +32,7 @@
         <result property="path" column="path" javaType="String" jdbcType="VARCHAR"/>
         <result property="searchCode" column="search_code" javaType="String" jdbcType="VARCHAR"/>
         <result property="sortIndex" column="sort_index" javaType="Long" jdbcType="DECIMAL"/>
-        <result property="level" column="level_" javaType="Long" jdbcType="DECIMAL"/>
+        <result property="level" column="level_" javaType="Integer" jdbcType="DECIMAL"/>
         <result property="ordinal" column="ordinal" javaType="Integer" jdbcType="DECIMAL"/>
         <result property="properties" column="properties" javaType="Map" jdbcType="CLOB"/>
     </resultMap>
