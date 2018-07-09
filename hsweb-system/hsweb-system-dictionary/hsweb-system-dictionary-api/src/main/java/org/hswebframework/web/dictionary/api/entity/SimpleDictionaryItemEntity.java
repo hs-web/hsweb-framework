@@ -16,9 +16,13 @@
  */
 package org.hswebframework.web.dictionary.api.entity;
 
+import com.alibaba.fastjson.JSONObject;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.validator.constraints.Length;
+import org.hibernate.validator.constraints.NotBlank;
 import org.hswebframework.web.commons.entity.SimpleTreeSortSupportEntity;
+import org.hswebframework.web.validator.group.CreateGroup;
 
 import java.util.List;
 
@@ -31,6 +35,7 @@ import java.util.List;
 @Setter
 public class SimpleDictionaryItemEntity extends SimpleTreeSortSupportEntity<String> implements DictionaryItemEntity {
     //字典id
+    @NotBlank(groups = CreateGroup.class)
     private String dictId;
     //名称
     private String name;
@@ -41,21 +46,31 @@ public class SimpleDictionaryItemEntity extends SimpleTreeSortSupportEntity<Stri
     //字典值类型
     private String valueType;
     //是否启用
-    private Byte status;
+    private Byte   status;
     //说明
     private String describe;
     //快速搜索码
     private String searchCode;
 
-    // 使用表达式拼接text
-    // #value+'('+#context.otherVal+')'
-    private String textExpression;
-
-    private String valueExpression;
-
     private Integer ordinal;
 
     private List<DictionaryItemEntity> children;
 
-
+    @Override
+    public Object getWriteJSONObject() {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("id", getId());
+        jsonObject.put("name", getName());
+        jsonObject.put("dictId", getDictId());
+        jsonObject.put("value", getValue());
+        jsonObject.put("text", getText());
+        jsonObject.put("ordinal", getOrdinal());
+        jsonObject.put("sortIndex", getSortIndex());
+        jsonObject.put("path", getPath());
+        jsonObject.put("mask", getMask());
+        jsonObject.put("searchCode", getSearchCode());
+        jsonObject.put("status", getStatus());
+        jsonObject.put("describe", getDescribe());
+        return jsonObject;
+    }
 }

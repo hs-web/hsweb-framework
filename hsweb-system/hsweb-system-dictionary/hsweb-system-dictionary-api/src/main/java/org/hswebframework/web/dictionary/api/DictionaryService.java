@@ -17,7 +17,10 @@
 package org.hswebframework.web.dictionary.api;
 
 import org.hswebframework.web.dictionary.api.entity.DictionaryEntity;
+import org.hswebframework.web.dictionary.api.entity.DictionaryItemEntity;
 import org.hswebframework.web.service.CrudService;
+
+import java.util.List;
 
 /**
  *  数据字典 服务类
@@ -25,5 +28,7 @@ import org.hswebframework.web.service.CrudService;
  * @author hsweb-generator-online
  */
 public interface DictionaryService extends CrudService<DictionaryEntity, String> {
+
+
 
 }

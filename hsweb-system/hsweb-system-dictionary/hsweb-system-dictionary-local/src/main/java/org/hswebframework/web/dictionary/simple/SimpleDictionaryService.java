@@ -18,12 +18,19 @@ package org.hswebframework.web.dictionary.simple;
 
 import org.hswebframework.web.dictionary.api.DictionaryService;
 import org.hswebframework.web.dictionary.api.entity.DictionaryEntity;
+import org.hswebframework.web.dictionary.api.events.ClearDictionaryCacheEvent;
 import org.hswebframework.web.dictionary.simple.dao.DictionaryDao;
 import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.service.EnableCacheAllEvictGenericEntityService;
+import org.hswebframework.web.service.EnableCacheGenericEntityService;
+import org.hswebframework.web.service.GenericEntityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 /**
  * 默认的服务实现
@@ -32,10 +39,14 @@ import org.springframework.stereotype.Service;
  */
 @Service("dictionaryService")
 @CacheConfig(cacheNames = "dictionary")
-public class SimpleDictionaryService extends EnableCacheAllEvictGenericEntityService<DictionaryEntity, String>
+public class SimpleDictionaryService extends GenericEntityService<DictionaryEntity, String>
         implements DictionaryService {
+
     @Autowired
     private DictionaryDao dictionaryDao;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     @Override
     protected IDGenerator<String> getIDGenerator() {
@@ -47,5 +58,22 @@ public class SimpleDictionaryService extends EnableCacheAllEvictGenericEntitySer
         return dictionaryDao;
     }
 
+    @Override
+    public String insert(DictionaryEntity entity) {
+        String id = super.insert(entity);
+        eventPublisher.publishEvent(new ClearDictionaryCacheEvent(id));
+        return id;
+    }
 
+    @Override
+    public int updateByPk(String id, DictionaryEntity entity) {
+        eventPublisher.publishEvent(new ClearDictionaryCacheEvent(id));
+        return super.updateByPk(id, entity);
+    }
+
+    @Override
+    public int deleteByPk(String id) {
+        eventPublisher.publishEvent(new ClearDictionaryCacheEvent(id));
+        return super.deleteByPk(id);
+    }
 }
