@@ -21,16 +21,11 @@ import org.hswebframework.web.dictionary.api.entity.DictionaryEntity;
 import org.hswebframework.web.dictionary.api.events.ClearDictionaryCacheEvent;
 import org.hswebframework.web.dictionary.simple.dao.DictionaryDao;
 import org.hswebframework.web.id.IDGenerator;
-import org.hswebframework.web.service.EnableCacheAllEvictGenericEntityService;
-import org.hswebframework.web.service.EnableCacheGenericEntityService;
 import org.hswebframework.web.service.GenericEntityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.event.TransactionalEventListener;
 
 /**
  * 默认的服务实现
