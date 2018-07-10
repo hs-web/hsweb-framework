@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.hswebframework.ezorm.core.OptionConverter;
 import org.hswebframework.ezorm.core.ValueConverter;
 import org.hswebframework.ezorm.rdb.meta.RDBColumnMetaData;
+import org.hswebframework.web.dao.mybatis.mapper.dict.DictInTermTypeMapper;
 import org.hswebframework.web.dict.DictDefineRepository;
 import org.hswebframework.web.dict.EnumDict;
 import org.hswebframework.web.entity.form.DictConfig;
@@ -64,9 +65,9 @@ public class DictionaryOptionalConvertBuilderStrategy implements OptionalConvert
         converter.setMulti(multi);
 
         RDBColumnMetaData column = dictConfig.getColumn();
-        if (multi && column.getJdbcType() == JDBCType.NUMERIC) {
+        if (multi && (column.getJdbcType() == JDBCType.NUMERIC || column.getJdbcType() == JDBCType.BIGINT)) {
             if (supplier.get().size() < 64) {
-                column.setProperty("dict-mask", true);
+                column.setProperty(DictInTermTypeMapper.USE_DICT_MASK_FLAG, true);
                 converter.setDataToMask(true);
             } else {
                 throw new UnsupportedOperationException("数据类型为数字,并且数据字典选项数量超过64个,不支持多选!");
