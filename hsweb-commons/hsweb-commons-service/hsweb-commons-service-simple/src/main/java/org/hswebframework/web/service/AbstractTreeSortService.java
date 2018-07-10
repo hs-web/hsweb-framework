@@ -135,7 +135,9 @@ public abstract class AbstractTreeSortService<E extends TreeSortSupportEntity<PK
     @Override
     public int updateBatch(Collection<E> data) {
         assertNotNull(data);
-        return data.stream().map(this::updateByPk).reduce(Math::addExact).orElse(0);
+        return data.stream()
+                .mapToInt(this::updateByPk)
+                .sum();
     }
 
     @Override
