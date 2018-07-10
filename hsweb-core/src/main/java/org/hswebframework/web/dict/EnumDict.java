@@ -189,8 +189,8 @@ public interface EnumDict<V> extends JSONSerializable {
         return arr;
     }
 
-    static <T extends EnumDict> List<T> getByMask(Supplier<List<T>> allOptionsSuppiler, long mask) {
-        return getByMask(allOptionsSuppiler.get(), mask);
+    static <T extends EnumDict> List<T> getByMask(Supplier<List<T>> allOptionsSupplier, long mask) {
+        return getByMask(allOptionsSupplier.get(), mask);
     }
 
 

@@ -21,6 +21,8 @@ package org.hswebframework.web.dao.mybatis;
 import org.hswebframework.ezorm.rdb.render.dialect.Dialect;
 import org.hswebframework.web.dao.Dao;
 import org.hswebframework.web.dao.mybatis.mapper.SqlTermCustomer;
+import org.hswebframework.web.dao.mybatis.mapper.dict.DictInTermTypeMapper;
+import org.hswebframework.web.dao.mybatis.mapper.dict.DictTermTypeMapper;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -40,6 +42,25 @@ import java.util.Set;
 @AutoConfigureAfter(MyBatisAutoConfiguration.class)
 @EnableConfigurationProperties(MybatisProperties.class)
 public class MybatisDaoAutoConfiguration {
+    @Bean
+    public DictTermTypeMapper dictTermTypeMapper() {
+        return new DictTermTypeMapper(false);
+    }
+
+    @Bean
+    public DictTermTypeMapper dictNotTermTypeMapper() {
+        return new DictTermTypeMapper(true);
+    }
+
+    @Bean
+    public DictInTermTypeMapper dictInTermTypeMapper() {
+        return new DictInTermTypeMapper(false);
+    }
+
+    @Bean
+    public DictInTermTypeMapper dictNotInTermTypeMapper() {
+        return new DictInTermTypeMapper(true);
+    }
 
     @Bean
     public BeanPostProcessor SqlTermCustomerRegister() {
