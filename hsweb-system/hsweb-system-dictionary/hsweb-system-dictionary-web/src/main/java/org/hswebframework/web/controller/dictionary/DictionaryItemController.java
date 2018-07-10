@@ -18,14 +18,18 @@
 package org.hswebframework.web.controller.dictionary;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.controller.SimpleGenericEntityController;
+import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.dictionary.api.DictionaryItemService;
 import org.hswebframework.web.dictionary.api.entity.DictionaryItemEntity;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * 数据字典
@@ -44,6 +48,13 @@ public class DictionaryItemController implements SimpleGenericEntityController<D
     @Override
     public DictionaryItemService getService() {
         return dictionaryService;
+    }
+
+    @Authorize(action = Permission.ACTION_UPDATE)
+    @PatchMapping(path = "/batch")
+    @ApiOperation("批量修改字典")
+    public ResponseMessage<Integer> batchUpdate(@RequestBody List<DictionaryItemEntity> data) {
+        return ResponseMessage.ok(getService().updateBatch(data));
     }
 
 }
