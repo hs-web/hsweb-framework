@@ -36,7 +36,7 @@ public class OAuth2UserTokenParser implements UserTokenParser {
             accessToken = request.getParameter(OAuth2Constants.access_token);
         } else {
             String[] arr = accessToken.split("[ ]");
-            if (arr.length > 1) {
+            if (arr.length > 1 && ("Bearer".equalsIgnoreCase(arr[0]) || "OAuth".equalsIgnoreCase(arr[0]))) {
                 accessToken = arr[1];
             }
         }
