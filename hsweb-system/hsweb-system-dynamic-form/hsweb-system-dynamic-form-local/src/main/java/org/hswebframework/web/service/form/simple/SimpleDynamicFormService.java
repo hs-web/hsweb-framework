@@ -493,6 +493,7 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
             if (optionalConvertBuilder != null && null != column.getDictConfig()) {
                 try {
                     DictConfig config = JSON.parseObject(column.getDictConfig(), DictConfig.class);
+                    config.setColumn(columnMeta);
                     columnMeta.setOptionConverter(optionalConvertBuilder.build(config));
                     ValueConverter converter = optionalConvertBuilder.buildValueConverter(config);
                     if (null != converter) {

@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.hswebframework.ezorm.core.OptionConverter;
 import org.hswebframework.ezorm.core.ValueConverter;
+import org.hswebframework.ezorm.rdb.meta.RDBColumnMetaData;
 import org.hswebframework.web.dict.DictDefineRepository;
 import org.hswebframework.web.dict.EnumDict;
 import org.hswebframework.web.entity.form.DictConfig;
@@ -11,7 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import java.sql.JDBCType;
 import java.util.Arrays;
+import java.util.List;
+import java.util.function.Supplier;
 
 
 /**
@@ -52,14 +56,22 @@ public class DictionaryOptionalConvertBuilderStrategy implements OptionalConvert
     public ValueConverter buildValueConverter(DictConfig dictConfig) {
         JSONObject conf = new JSONObject(dictConfig.getConfig());
         String dictId = conf.getString("dictId");
-        String multi = conf.getString("multi");
+        boolean multi = !"false".equalsIgnoreCase(conf.getString("multi"));
 
-        EnumDictValueConverter<EnumDict<Object>> converter =
-                new EnumDictValueConverter<>(() -> dictDefineRepository.getDefine(dictId).getItems());
+        Supplier<List<EnumDict<Object>>> supplier = () -> dictDefineRepository.getDefine(dictId).getItems();
 
-        converter.setMulti(!"false".equalsIgnoreCase(multi));
+        EnumDictValueConverter<EnumDict<Object>> converter = new EnumDictValueConverter<>(supplier);
+        converter.setMulti(multi);
 
-        converter.setDataToMask(!"false".equalsIgnoreCase(conf.getString("fast")));
+        RDBColumnMetaData column = dictConfig.getColumn();
+        if (multi && column.getJdbcType() == JDBCType.NUMERIC) {
+            if (supplier.get().size() < 64) {
+                column.setProperty("dict-mask", true);
+                converter.setDataToMask(true);
+            } else {
+                throw new UnsupportedOperationException("数据类型为数字,并且数据字典选项数量超过64个,不支持多选!");
+            }
+        }
 
         return converter;
     }
