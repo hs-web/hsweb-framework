@@ -5,6 +5,7 @@ import org.activiti.engine.repository.ProcessDefinition;
 import org.hibernate.validator.constraints.NotBlank;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.User;
+import org.hswebframework.web.commons.bean.ValidateBean;
 
 import java.util.Map;
 
@@ -19,7 +20,8 @@ import java.util.Map;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class StartProcessRequest {
+@ToString
+public class StartProcessRequest implements ValidateBean{
     /**
      * 流程定义KEY
      *

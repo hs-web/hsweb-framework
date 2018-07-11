@@ -3,6 +3,7 @@ package org.hswebframework.web.workflow.service;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.Job;
 import org.activiti.engine.runtime.ProcessInstance;
+import org.hswebframework.web.workflow.service.request.StartProcessRequest;
 
 import java.io.InputStream;
 import java.util.List;
@@ -24,18 +25,9 @@ public interface BpmProcessService{
     /**
      * 启动一个流程，并初始化自定义主表单数据
      *
-     * @param creator_id     流程创建人
-     * @param procDefKey  流程定义key
-     * @param activity       下一环节id
-     * @param next_claim     下一步执行人（预留）
-     * @param businessKey    业务数据ID
-     * @param variables     启动参数（流程变量,流程未结束前任意环节都可以使用）
      * @return 启动后的流程实例
-     * @throws Exception 异常信息
      */
-    ProcessInstance startProcessInstance(String creator_id, String procDefKey, String activity, String next_claim,
-                                         String businessKey,
-                                         Map<String, Object> variables);
+    ProcessInstance startProcessInstance(StartProcessRequest request);
 
     /**
      * 根据流程图key获取所有运行中流程分页

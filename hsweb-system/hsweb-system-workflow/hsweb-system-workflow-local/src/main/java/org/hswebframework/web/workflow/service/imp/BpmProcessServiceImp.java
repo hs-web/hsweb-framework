@@ -7,6 +7,7 @@ import org.activiti.engine.task.Task;
 import org.hswebframework.utils.StringUtils;
 import org.hswebframework.web.workflow.service.BpmProcessService;
 import org.hswebframework.web.workflow.service.BpmTaskService;
+import org.hswebframework.web.workflow.service.request.StartProcessRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -35,6 +36,14 @@ public class BpmProcessServiceImp extends AbstractFlowableService implements Bpm
     }
 
     @Override
+    public ProcessInstance startProcessInstance(StartProcessRequest request) {
+        request.tryValidate();
+
+
+
+        return null;
+    }
+
     public ProcessInstance startProcessInstance(String creatorId,
                                                 String procDefKey,
                                                 String activity,
