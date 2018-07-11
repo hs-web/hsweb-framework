@@ -91,7 +91,7 @@ public class FlowableCoreController {
                 .orElseThrow(NotFoundException::new);
         dynamicFormOperationService.insert(formId, data);
         ProcessDefinition processDefinition = bpmProcessService.getProcessDefinitionById(defId);
-        bpmProcessService.startProcessInstance(authorization.getPersonnel().getId(),processDefinition.getKey(),null,null,formId,null);
+//        bpmProcessService.startProcessInstance(authorization.getPersonnel().getId(),processDefinition.getKey(),null,null,formId,null);
         return ResponseMessage.ok(data);
     }
 

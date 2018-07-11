@@ -17,7 +17,6 @@ import org.hswebframework.utils.StringUtils;
 import org.hswebframework.web.NotFoundException;
 import org.hswebframework.web.workflow.service.BpmActivityService;
 import org.hswebframework.web.workflow.service.BpmTaskService;
-import org.hswebframework.web.workflow.service.BpmUtilsService;
 import org.hswebframework.web.workflow.flowable.utils.JumpTaskCmd;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +27,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.util.*;
 
-import static org.hswebframework.web.commons.entity.param.QueryParamEntity.single;
 
 /**
  * @Author wangwei
@@ -42,8 +40,6 @@ public class BpmTaskServiceImp extends AbstractFlowableService implements BpmTas
 
     @Resource
     private BpmActivityService bpmActivityService;
-    @Autowired
-    BpmUtilsService bpmUtilsService;
 
     @Override
     public List<Task> selectNowTask(String procInstId) {
