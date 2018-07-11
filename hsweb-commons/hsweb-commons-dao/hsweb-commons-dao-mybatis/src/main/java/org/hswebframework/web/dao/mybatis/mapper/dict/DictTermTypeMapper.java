@@ -91,7 +91,7 @@ public class DictTermTypeMapper extends AbstractSqlTermCustomer {
         Dialect dialect = column.getTableMetaData().getDatabaseMetaData().getDialect();
         String columnName = dialect.buildColumnName(tableAlias, column.getName());
         SqlAppender appender = new SqlAppender();
-        appender.add(columnName, not ? " != " : "=", "#{", wherePrefix, ".value}");
+        appender.add(columnName, not ? " != " : "=", "#{", wherePrefix, ".value.value}");
         return appender;
     }
 }
