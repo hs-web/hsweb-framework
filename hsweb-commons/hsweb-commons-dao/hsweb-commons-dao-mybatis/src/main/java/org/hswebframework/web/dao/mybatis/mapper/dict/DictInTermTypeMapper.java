@@ -98,7 +98,7 @@ public class DictInTermTypeMapper extends AbstractSqlTermCustomer {
         } else {
             n = not ? "!=" : "=";
         }
-        return new SqlAppender().add(bitAnd, n, any ? "0" : where);
+        return new SqlAppender().add(bitAnd, n, any ? "0" : columnName);
 
     }
 

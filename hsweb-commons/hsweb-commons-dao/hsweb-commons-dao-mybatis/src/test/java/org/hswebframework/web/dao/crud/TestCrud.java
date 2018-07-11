@@ -67,7 +67,7 @@ public class TestCrud extends AbstractTransactionalJUnit4SpringContextTests {
 
         QueryParamEntity query = new QueryParamEntity();
         //any in
-        query.where("dataTypes$in$any", Arrays.asList(DataType.TYPE1, DataType.TYPE3,DataType.TYPE2));
+        query.where("dataTypes$in$any", Arrays.asList(DataType.TYPE1,DataType.TYPE2));
         query.includes("nest.name", "*");
         List<TestEntity> entities = testDao.queryNest(query);
 
