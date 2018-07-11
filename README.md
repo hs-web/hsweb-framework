@@ -1,8 +1,8 @@
 ## hsweb  3.0
 [![Maven metadata URI](https://img.shields.io/maven-metadata/v/http/nexus.hsweb.me/content/groups/public/org/hswebframework/web/hsweb-framework/maven-metadata.xml.svg)](http://nexus.hsweb.me/#nexus-search;quick~hsweb-framework)
 [![Codecov](https://codecov.io/gh/hs-web/hsweb-framework/branch/master/graph/badge.svg)](https://codecov.io/gh/hs-web/hsweb-framework/branch/master)
-[![Sonar Coverage](https://sonarcloud.io/api/badges/measure?key=org.hswebframework.web:hsweb-framework&metric=coverage)](https://sonarcloud.io/dashboard?id=org.hswebframework.web%3Ahsweb-framework)
-[![Sonar Bugs](https://sonarcloud.io/api/badges/measure?key=org.hswebframework.web:hsweb-framework&metric=bugs)](https://sonarcloud.io/dashboard?id=org.hswebframework.web%3Ahsweb-framework)
+[![Sonar Coverage](https://sonarcloud.io/api/project_badges/measure?project=org.hswebframework.web:hsweb-framework&metric=alert_status)](https://sonarcloud.io/dashboard?id=org.hswebframework.web%3Ahsweb-framework)
+[![Sonar Bugs](https://sonarcloud.io/api/project_badges/measure?project=org.hswebframework.web:hsweb-framework&metric=bugs)](https://sonarcloud.io/dashboard?id=org.hswebframework.web%3Ahsweb-framework)
 [![Build Status](https://travis-ci.org/hs-web/hsweb-framework.svg?branch=master)](https://travis-ci.org/hs-web/hsweb-framework)
 [![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg?style=flat-square)](https://www.apache.org/licenses/LICENSE-2.0.html)
 [![Insight.io](https://www.insight.io/repoBadge/github.com/hs-web/hsweb-framework)](https://insight.io/github.com/hs-web/hsweb-framework)
