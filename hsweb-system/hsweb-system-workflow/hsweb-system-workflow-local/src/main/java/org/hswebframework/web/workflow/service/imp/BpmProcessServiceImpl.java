@@ -5,6 +5,7 @@ import org.activiti.engine.runtime.Job;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.hswebframework.utils.StringUtils;
+import org.hswebframework.web.NotFoundException;
 import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.service.form.DynamicFormOperationService;
 import org.hswebframework.web.workflow.service.ActivityConfigurationService;
@@ -54,6 +55,12 @@ public class BpmProcessServiceImpl extends AbstractFlowableService implements Bp
         logger.debug("start workflow :{}", request);
         try {
             identityService.setAuthenticatedUserId(request.getCreatorId());
+
+            ProcessDefinition definition = repositoryService.createProcessDefinitionQuery().processDefinitionId(request.getProcessDefineId())
+                    .singleResult();
+            if (definition == null) {
+                throw new NotFoundException("流程[" + request.getProcessDefineId() + "]不存在");
+            }
 
             //创建业务ID
             String businessKey = IDGenerator.MD5.generate();

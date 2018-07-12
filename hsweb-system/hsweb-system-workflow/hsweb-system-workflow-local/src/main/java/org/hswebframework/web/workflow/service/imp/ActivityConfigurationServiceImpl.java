@@ -1,5 +1,6 @@
 package org.hswebframework.web.workflow.service.imp;
 
+import org.activiti.engine.repository.ProcessDefinition;
 import org.hswebframework.web.workflow.service.ActivityConfigurationService;
 import org.hswebframework.web.workflow.service.dto.ActivityCandidateInfo;
 import org.hswebframework.web.workflow.service.dto.ActivityConfiguration;
@@ -46,6 +47,11 @@ public class ActivityConfigurationServiceImpl implements ActivityConfigurationSe
         @Override
         public List<ActivityCandidateInfo> getCandidateInfo() {
             return Collections.emptyList();
+        }
+
+        @Override
+        public void assertCanStartProcess(String userId, ProcessDefinition definition) {
+            
         }
     }
 }

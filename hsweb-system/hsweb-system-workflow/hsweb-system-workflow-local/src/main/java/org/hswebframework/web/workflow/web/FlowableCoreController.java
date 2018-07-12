@@ -18,6 +18,7 @@ import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.organizational.authorization.PersonnelAuthentication;
 import org.hswebframework.web.service.form.DynamicFormOperationService;
+import org.hswebframework.web.workflow.service.ActivityConfigurationService;
 import org.hswebframework.web.workflow.service.BpmActivityService;
 import org.hswebframework.web.workflow.service.BpmProcessService;
 import org.hswebframework.web.workflow.service.BpmTaskService;
@@ -51,16 +52,28 @@ public class FlowableCoreController {
     @Autowired
     private RepositoryService repositoryService;
 
+    @Autowired
+    private ActivityConfigurationService activityConfigurationService;
+
     @PostMapping("start/key/{defineKey}")
-    @ApiOperation("提交表单数据并启动流程")
+    @ApiOperation("提交表单数据并根据流程定义key启动流程")
+    @Authorize(merge = false)
     public ResponseMessage<String> startProcessByKey(@PathVariable String defineKey,
                                                      @RequestBody Map<String, Object> data,
                                                      Authentication authentication) {
-        String id = repositoryService.createProcessDefinitionQuery()
+        ProcessDefinition definition = repositoryService.createProcessDefinitionQuery()
                 .processDefinitionKey(defineKey)
                 .active()
-                .singleResult()
-                .getId();
+                .singleResult();
+
+        if (null == definition) {
+            throw new NotFoundException("流程[" + defineKey + "]不存在");
+        }
+        //判断权限
+        activityConfigurationService.getProcessConfiguration(definition.getId())
+                .assertCanStartProcess(authentication.getUser().getId(), definition);
+
+        String id = definition.getId();
 
         ProcessInstance instance = bpmProcessService.startProcessInstance(StartProcessRequest.builder()
                 .creatorId(authentication.getUser().getId())
@@ -69,6 +82,7 @@ public class FlowableCoreController {
                 .processDefineId(id)
                 .build());
 
+
         return ResponseMessage.ok(instance.getId());
     }
 
@@ -76,10 +90,23 @@ public class FlowableCoreController {
      * 提交表单数据并启动流程
      */
     @PostMapping("start/id/{defId}")
-    @ApiOperation("提交表单数据并启动流程")
+    @ApiOperation("提交表单数据并根据流程定义ID启动流程")
+    @Authorize(merge = false)
     public ResponseMessage<String> startProcess(@PathVariable String defId,
                                                 @RequestBody Map<String, Object> data,
                                                 Authentication authentication) {
+        ProcessDefinition definition = repositoryService.createProcessDefinitionQuery()
+                .processDefinitionId(defId)
+                .active()
+                .singleResult();
+
+        if (null == definition) {
+            throw new NotFoundException("流程[" + defId + "]不存在");
+        }
+        //判断权限
+        activityConfigurationService.getProcessConfiguration(definition.getId())
+                .assertCanStartProcess(authentication.getUser().getId(), definition);
+
 
         ProcessInstance instance = bpmProcessService.startProcessInstance(StartProcessRequest.builder()
                 .creatorId(authentication.getUser().getId())
@@ -92,10 +119,11 @@ public class FlowableCoreController {
     }
 
     /**
-     * 获取待办任务
+     * 获取待签收的任务
      */
     @GetMapping("claims")
-    @ApiOperation("获取代办任务")
+    @ApiOperation("获取所有待签收的任务")
+    @Authorize(merge = false)
     public ResponseMessage<List<Task>> getMyTasks(Authentication authentication) {
 
         List<Task> tasks = bpmTaskService.claimList(authentication.getUser().getId());
@@ -116,8 +144,8 @@ public class FlowableCoreController {
     /**
      * 办理任务
      *
-     * @param taskId
-     * @return
+     * @param taskId 办理任务
+     * @return 办理
      */
     @PutMapping("complete/{taskId}")
     public ResponseMessage<Map<String, Object>> complete(@PathVariable String taskId,
