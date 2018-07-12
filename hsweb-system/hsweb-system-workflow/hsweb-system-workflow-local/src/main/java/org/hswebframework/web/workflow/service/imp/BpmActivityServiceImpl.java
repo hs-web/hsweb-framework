@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
  * @Date 2017/8/7.
  */
 @Service
-public class BpmActivityServiceImp extends AbstractFlowableService implements BpmActivityService {
+public class BpmActivityServiceImpl extends AbstractFlowableService implements BpmActivityService {
 
     /**
      * 获取指定节点

@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
 
+import java.util.Collections;
 import java.util.List;
 
 public class CustomUserEntityManager extends UserEntityManager {
@@ -28,18 +29,14 @@ public class CustomUserEntityManager extends UserEntityManager {
         if (userId == null) {
             return null;
         }
-        try {
-            org.hswebframework.web.entity.authorization.UserEntity user = userService.selectByPk(userId);
-            return ActivitiUserUtil.toActivitiUser(user);
-        } catch (EmptyResultDataAccessException e) {
-            return null;
-        }
+        org.hswebframework.web.entity.authorization.UserEntity user = userService.selectByPk(userId);
+        return ActivitiUserUtil.toActivitiUser(user);
     }
 
     @Override
     public List<Group> findGroupsByUser(final String userId) {
         if (userId == null) {
-            return null;
+            return Collections.emptyList();
         }
 
         List<RoleEntity> sysRoles = userService.getUserRole(userId);

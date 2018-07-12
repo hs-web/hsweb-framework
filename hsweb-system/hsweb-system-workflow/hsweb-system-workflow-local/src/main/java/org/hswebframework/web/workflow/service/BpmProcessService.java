@@ -30,15 +30,6 @@ public interface BpmProcessService{
     ProcessInstance startProcessInstance(StartProcessRequest request);
 
     /**
-     * 根据流程图key获取所有运行中流程分页
-     * @param page
-     * @param num
-     * @param procDefKey
-     * @return
-     */
-    List<ProcessInstance> getProcessInstances(int page, int num, String procDefKey);
-
-    /**
      * 流程实例挂起
      * @param procInstId 流程实例ID
      */

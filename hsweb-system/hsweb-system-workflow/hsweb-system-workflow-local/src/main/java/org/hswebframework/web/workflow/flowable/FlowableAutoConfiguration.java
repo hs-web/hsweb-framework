@@ -12,6 +12,7 @@ import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.List;
 
@@ -26,7 +27,7 @@ public class FlowableAutoConfiguration {
     private List<SessionFactory> sessionFactories;
 
     @Bean
-    public ProcessEngineConfigurationConfigurer processEngineConfigurationConfigurer() {
+    public ProcessEngineConfigurationConfigurer processEngineConfigurationConfigurer(PlatformTransactionManager transactionManager) {
         return configuration -> {
             configuration
                     .setAsyncExecutorActivate(false)

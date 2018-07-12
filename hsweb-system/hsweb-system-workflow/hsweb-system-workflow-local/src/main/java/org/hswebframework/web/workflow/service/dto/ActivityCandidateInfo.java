@@ -1,14 +1,16 @@
 package org.hswebframework.web.workflow.service.dto;
 
-import lombok.Getter;
-import lombok.Setter;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.organizational.authorization.PersonnelAuthentication;
 
-@Getter
-@Setter
-public class ActivityCandidateInfo {
-    private Authentication user;
+public interface ActivityCandidateInfo {
+    /**
+     * 候选人的用户授权信息
+     */
+    Authentication user();
 
-    private PersonnelAuthentication person;
+    /**
+     * 候选人的组织架构人员信息
+     */
+    PersonnelAuthentication person();
 }

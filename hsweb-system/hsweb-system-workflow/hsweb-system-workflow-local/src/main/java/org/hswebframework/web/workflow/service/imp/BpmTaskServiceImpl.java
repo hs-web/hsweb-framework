@@ -14,10 +14,16 @@ import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.hswebframework.utils.StringUtils;
+import org.hswebframework.web.BusinessException;
 import org.hswebframework.web.NotFoundException;
+import org.hswebframework.web.workflow.service.ActivityConfigurationService;
 import org.hswebframework.web.workflow.service.BpmActivityService;
 import org.hswebframework.web.workflow.service.BpmTaskService;
 import org.hswebframework.web.workflow.flowable.utils.JumpTaskCmd;
+import org.hswebframework.web.workflow.service.WorkFlowFormService;
+import org.hswebframework.web.workflow.service.dto.ActivityCandidateInfo;
+import org.hswebframework.web.workflow.service.request.CompleteTaskRequest;
+import org.hswebframework.web.workflow.service.request.SaveFormRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,16 +40,24 @@ import java.util.*;
  */
 @Service
 @Transactional(rollbackFor = Throwable.class)
-public class BpmTaskServiceImp extends AbstractFlowableService implements BpmTaskService {
+public class BpmTaskServiceImpl extends AbstractFlowableService implements BpmTaskService {
 
     protected Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    @Resource
+    @Autowired
     private BpmActivityService bpmActivityService;
+
+    @Autowired
+    private ActivityConfigurationService activityConfigurationService;
+
+    @Autowired
+    private WorkFlowFormService workFlowFormService;
 
     @Override
     public List<Task> selectNowTask(String procInstId) {
-        return taskService.createTaskQuery().processInstanceId(procInstId).active().list();
+        return taskService.createTaskQuery()
+                .processInstanceId(procInstId)
+                .active().list();
     }
 
     @Override
@@ -57,46 +71,14 @@ public class BpmTaskServiceImp extends AbstractFlowableService implements BpmTas
     }
 
     @Override
-    public String selectNowTaskName(String procInstId) {
-        List<Task> tasks = selectNowTask(procInstId);
-        if (tasks.size() == 1) {
-            return tasks.get(0).getName();
-        } else {
-            StringBuilder builder = new StringBuilder();
-            for (int i = 0; i < tasks.size(); i++) {
-                if (i != 0) {
-                    builder.append(",");
-                }
-                builder.append(tasks.get(i).getName());
-            }
-            return builder.toString();
-        }
-
-    }
-
-    @Override
-    public String selectNowTaskId(String procInstId) {
-        List<Task> tasks = selectNowTask(procInstId);
-        if (tasks.size() == 1) {
-            return tasks.get(0).getId();
-        } else {
-            StringBuilder builder = new StringBuilder();
-            for (int i = 0; i < tasks.size(); i++) {
-                if (i != 0) {
-                    builder.append(",");
-                }
-                builder.append(tasks.get(i).getId());
-            }
-            return builder.toString();
-        }
-    }
-
-    @Override
     public void claim(String taskId, String userId) {
-        Task task = taskService.createTaskQuery().taskId(taskId).taskCandidateUser(userId).active().singleResult();
+        Task task = taskService.createTaskQuery().
+                taskId(taskId)
+                .taskCandidateUser(userId)
+                .active()
+                .singleResult();
         if (task == null) {
-            logger.warn("获取任务失败!");
-            throw new NotFoundException("task not found");
+            throw new NotFoundException("无法签收此任务");
             //return; // fix null point
         }
         if (!StringUtils.isNullOrEmpty(task.getAssignee())) {
@@ -110,63 +92,77 @@ public class BpmTaskServiceImp extends AbstractFlowableService implements BpmTas
     @Override
     public List<Task> claimList(String userId) {
         // 等待签收的任务
-        List<Task> claimList = taskService.createTaskQuery()
+        return taskService.createTaskQuery()
                 .taskCandidateUser(userId)
                 .includeProcessVariables()
                 .active()
                 .list();
-        return claimList;
     }
 
     @Override
     public List<Task> todoList(String userId) {
         // 已经签收的任务
-        List<Task> todoList = taskService.createTaskQuery()
+        return taskService.createTaskQuery()
                 .taskAssignee(userId)
                 .includeProcessVariables()
                 .active()
                 .list();
-        return todoList;
     }
 
     @Override
-    public void complete(String taskId, String userId, String activityId, String nextClaim) {
-        Task task = taskService.createTaskQuery().taskId(taskId).includeProcessVariables().active().singleResult();
-        if (StringUtils.isNullOrEmpty(task)) {
-            logger.warn("任务不存在!");
-            throw new NotFoundException("task not found");
-        }
+    public void complete(CompleteTaskRequest request) {
+        request.tryValidate();
+
+        Task task = taskService.createTaskQuery()
+                .taskId(request.getTaskId())
+                .includeProcessVariables()
+                .active()
+                .singleResult();
+
+        Objects.requireNonNull(task, "任务不存在");
         String assignee = task.getAssignee();
-        if (StringUtils.isNullOrEmpty(assignee)) {
-            logger.warn("请先签收任务!");
-            throw new NotFoundException("Please sign for the task first");
+        Objects.requireNonNull(assignee, "任务未签收");
+        if (!assignee.equals(request.getCompleteUserId())) {
+            throw new BusinessException("只能完成自己的任务");
         }
-        if (!userId.equals(assignee)) {
-            logger.warn("只能完成自己的任务");
-            throw new NotFoundException("You can only do your own work");
+        Map<String, Object> variable = new HashMap<>();
+        variable.put("oldTaskId", task.getId());
+        Map<String, Object> transientVariables = new HashMap<>();
+
+        if (null != request.getVariables()) {
+            variable.putAll(request.getVariables());
+            transientVariables.putAll(request.getVariables());
         }
-        Map<String, Object> map = new HashMap<>();
-        map.put("oldTaskId", task.getId());
-        //完成此任务
-        if (StringUtils.isNullOrEmpty(activityId)) {
-            taskService.complete(taskId, map);
-        } else {
-            jumpTask(taskId, activityId, nextClaim);
+
+        //保存表单数据
+        workFlowFormService.saveTaskForm(task, SaveFormRequest.builder()
+                .userName(request.getCompleteUserName())
+                .userId(request.getCompleteUserId())
+                .formData(request.getFormData())
+                .build());
+
+        if (null != request.getFormData()) {
+            transientVariables.putAll(request.getFormData());
         }
-        //根据流程ID查找执行计划，存在则进行下一步,没有则结束（定制化流程预留）
-        List<Execution> execution = runtimeService.createExecutionQuery().processInstanceId(task.getProcessInstanceId()).list();
-        if (execution.size() > 0) {
-            List<Task> tasks = selectNowTask(task.getProcessInstanceId());
-            // 自定义下一执行人
-            if (tasks.size() == 1 && !StringUtils.isNullOrEmpty(nextClaim)) {
-                claim(tasks.get(0).getId(), nextClaim);
+
+        taskService.complete(task.getId(), variable, transientVariables);
+
+        //跳转
+        if (!StringUtils.isNullOrEmpty(request.getNextActivityId())) {
+            jumpTask(task, request.getNextActivityId());
+        }
+
+        //下一步候选人
+        List<Task> tasks = selectNowTask(task.getProcessInstanceId());
+        for (Task next : tasks) {
+            if (!StringUtils.isNullOrEmpty(request.getNextClaimUserId())) {
+                taskService.addCandidateUser(next.getId(), request.getNextClaimUserId());
             } else {
-                for (Task t : tasks) {
-                    addCandidateUser(t.getId(), t.getTaskDefinitionKey(), userId);
-                }
+                setCandidate(request.getCompleteUserId(), next);
             }
         }
     }
+
 
     @Override
     public void reject(String taskId) {
@@ -241,39 +237,15 @@ public class BpmTaskServiceImp extends AbstractFlowableService implements BpmTas
 
     }
 
-    @Override
-    public void jumpTask(String taskId, String activity, String next_claim) {
-        Task task = selectTaskByTaskId(taskId);
+    public Task jumpTask(Task task, String activityId) {
         TaskServiceImpl taskServiceImpl = (TaskServiceImpl) taskService;
-        taskServiceImpl.getCommandExecutor().execute(new JumpTaskCmd(task.getExecutionId(), activity));
-        if(!StringUtils.isNullOrEmpty(next_claim)){
-            task = selectTaskByTaskId(taskId);
-            if (null != task) {
-                claim(task.getId(), next_claim);
-            }
-        }
+        taskServiceImpl.getCommandExecutor().execute(new JumpTaskCmd(task.getExecutionId(), activityId));
+        return task;
     }
 
     @Override
-    public void addCandidateUser(String taskId, String actId, String userId) {
-        if (!StringUtils.isNullOrEmpty(actId)) {
-            // 获取节点配置信息
-//            ActDefEntity actDefEntity = actDefService.selectSingle(single(ActDefEntity.actId, actId));
-            // 根据配置类型  获取人员信息 设置待办人
-//            if (actDefEntity!=null) {
-//                List<String> list = bpmUtilsService.selectUserIdsBy(userId,actDefEntity);
-//                list.forEach(uId -> taskService.addCandidateUser(taskId,uId));
-//            } else {
-                taskService.addCandidateUser(taskId,
-                        runtimeService.getIdentityLinksForProcessInstance(selectTaskByTaskId(taskId).getProcessInstanceId())
-                        .stream()
-                        .filter(linkEntity -> "starter".equals(linkEntity.getType()))
-                        .findFirst().orElseThrow(()-> new NotFoundException("发起人获取失败")).getUserId()
-                );
-//            }
-        } else {
-            taskService.addCandidateUser(taskId, userId);
-        }
+    public Task jumpTask(String taskId, String activity) {
+        return jumpTask(selectTaskByTaskId(taskId), activity);
     }
 
     @Override
@@ -285,7 +257,7 @@ public class BpmTaskServiceImp extends AbstractFlowableService implements BpmTas
     public void endProcess(String procInstId) {
         ProcessInstance processInstance = runtimeService.createProcessInstanceQuery().processInstanceId(procInstId).singleResult();
         ActivityImpl activity = bpmActivityService.getEndEvent(processInstance.getProcessDefinitionId());
-        jumpTask(procInstId, activity.getId(), null);
+        jumpTask(procInstId, activity.getId());
     }
 
     @Override
@@ -306,6 +278,26 @@ public class BpmTaskServiceImp extends AbstractFlowableService implements BpmTas
     @Override
     public HistoricProcessInstance selectHisProInst(String procInstId) {
         return historyService.createHistoricProcessInstanceQuery().processInstanceId(procInstId).singleResult();
+    }
+
+    @Override
+    public void setCandidate(String doingUserId, Task task) {
+        if (task == null) {
+            return;
+        }
+        if (task.getTaskDefinitionKey() != null) {
+            //从配置中获取候选人
+            List<ActivityCandidateInfo> candidateInfoList = activityConfigurationService
+                    .getActivityConfiguration(doingUserId
+                            , task.getProcessDefinitionId()
+                            , task.getTaskDefinitionKey())
+                    .getCandidateInfo();
+            for (ActivityCandidateInfo candidateInfo : candidateInfoList) {
+                taskService.addCandidateUser(task.getId(), candidateInfo.user().getUser().getId());
+            }
+        } else {
+            logger.warn("未能成功设置环节候选人,task:{}", task);
+        }
     }
 
     @Override
