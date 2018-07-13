@@ -2,6 +2,7 @@ package org.hswebframework.web.workflow.flowable
 
 import com.alibaba.fastjson.JSON
 import org.activiti.engine.RuntimeService
+import org.activiti.engine.TaskService
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity
 import org.activiti.engine.runtime.ProcessInstance
 import org.hswebframework.web.authorization.AuthenticationInitializeService
@@ -48,6 +49,9 @@ class WorkFlowProcessTests extends Specification {
 
     @Autowired
     private RuntimeService runtimeService;
+
+    @Autowired
+    private TaskService taskService;
 
     void setup() {
         mockMvc = MockMvcBuilders.webAppContextSetup(context).build();

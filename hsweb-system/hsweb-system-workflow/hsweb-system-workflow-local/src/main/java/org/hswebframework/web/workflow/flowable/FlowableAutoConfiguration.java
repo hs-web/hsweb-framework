@@ -27,7 +27,7 @@ public class FlowableAutoConfiguration {
     private List<SessionFactory> sessionFactories;
 
     @Bean
-    public ProcessEngineConfigurationConfigurer processEngineConfigurationConfigurer(PlatformTransactionManager transactionManager) {
+    public ProcessEngineConfigurationConfigurer processEngineConfigurationConfigurer() {
         return configuration -> {
             configuration
                     .setAsyncExecutorActivate(false)

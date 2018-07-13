@@ -10,11 +10,11 @@ import org.hswebframework.web.commons.bean.Bean;
  */
 @Getter
 @Setter
-public class SimpleProcessDefinition implements ProcessDefinition, Bean {
+public class SimpleProcessDefinition implements Bean {
 
     private static final long serialVersionUID = -7246626050183062980L;
 
-    private String id;
+    private String  id;
     private String  category;
     private String  name;
     private String  key;
@@ -54,14 +54,4 @@ public class SimpleProcessDefinition implements ProcessDefinition, Bean {
         this.suspended = suspended;
     }
 
-
-    @Override
-    public boolean hasGraphicalNotation() {
-        return hasGraphicalNotation;
-    }
-
-    @Override
-    public boolean hasStartFormKey() {
-        return hasStartFormKey;
-    }
 }

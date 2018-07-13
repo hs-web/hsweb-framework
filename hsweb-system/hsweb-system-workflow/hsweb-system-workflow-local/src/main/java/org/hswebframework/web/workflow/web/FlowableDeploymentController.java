@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.SneakyThrows;
 import org.activiti.bpmn.converter.BpmnXMLConverter;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.editor.constants.ModelDataJsonConstants;
@@ -30,6 +31,9 @@ import org.hswebframework.web.workflow.service.BpmActivityService;
 import org.hswebframework.web.workflow.service.BpmProcessService;
 import org.hswebframework.web.workflow.service.BpmTaskService;
 import org.hswebframework.web.workflow.service.imp.AbstractFlowableService;
+import org.hswebframework.web.workflow.util.QueryUtils;
+import org.hswebframework.web.workflow.web.response.ActivityInfo;
+import org.hswebframework.web.workflow.web.response.ProcessDefinitionInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.util.StreamUtils;
@@ -63,9 +67,9 @@ public class FlowableDeploymentController extends AbstractFlowableService {
     private final static String MODEL_ID = "modelId";
 
     @Autowired
-    BpmTaskService bpmTaskService;
+    BpmTaskService     bpmTaskService;
     @Autowired
-    BpmProcessService bpmProcessService;
+    BpmProcessService  bpmProcessService;
     @Autowired
     BpmActivityService bpmActivityService;
 
@@ -75,51 +79,10 @@ public class FlowableDeploymentController extends AbstractFlowableService {
     @GetMapping
     @ApiOperation("查询流程定义列表")
     @Authorize(action = Permission.ACTION_QUERY)
-    public ResponseMessage<PagerResult<ProcessDefinition>> QueryProcessList(QueryParamEntity param) {
+    public ResponseMessage<PagerResult<ProcessDefinitionInfo>> queryProcessList(QueryParamEntity param) {
         ProcessDefinitionQuery processDefinitionQuery = repositoryService.createProcessDefinitionQuery();
-        param.getTerms().forEach((term) -> {
-            PropertyWrapper valueWrapper = new SimplePropertyWrapper(term.getValue());
-            String stringValue = valueWrapper.toString();
-            switch (term.getColumn()) {
-                case "name":
-                    if (term.getTermType().equals(TermType.like)) {
-                        processDefinitionQuery.processDefinitionNameLike(stringValue);
-                    } else {
-                        processDefinitionQuery.processDefinitionName(stringValue);
-                    }
-                    break;
-                case "key":
-                    if (term.getTermType().equals(TermType.like)) {
-                        processDefinitionQuery.processDefinitionKeyLike(stringValue);
-                    } else {
-                        processDefinitionQuery.processDefinitionKey(stringValue);
-                    }
-                    break;
-                case "category":
-                    if (term.getTermType().equals(TermType.like)) {
-                        processDefinitionQuery.processDefinitionCategoryLike(stringValue);
-                    } else {
-                        processDefinitionQuery.processDefinitionCategory(stringValue);
-                    }
-                    break;
-                case "deploymentId":
-                    processDefinitionQuery.deploymentId(stringValue);
-                    break;
-            }
-        });
-        int total = (int) processDefinitionQuery.count();
-        param.rePaging(total);
-        if (total == 0) {
-            return ResponseMessage.ok(PagerResult.empty());
-        }
-        List<ProcessDefinition> models = processDefinitionQuery
-                .listPage(param.getPageIndex(), param.getPageSize() * (param.getPageIndex() + 1))
-                .stream()
-                .map(SimpleProcessDefinition::new)
-                .collect(Collectors.toList());
 
-
-        return ResponseMessage.ok(new PagerResult<>(total, models));
+        return ResponseMessage.ok(QueryUtils.doQuery(processDefinitionQuery, param, ProcessDefinitionInfo::of));
     }
 
     /**
@@ -129,7 +92,7 @@ public class FlowableDeploymentController extends AbstractFlowableService {
     @PostMapping(value = "/deploy")
     @ApiOperation("上传流程定义文件并部署流程")
     @Authorize(action = "deploy")
-    public ResponseMessage<Deployment> deploy(@RequestParam(value = "file") MultipartFile file) throws IOException {
+    public ResponseMessage<Deployment> deploy(@RequestPart(value = "file") MultipartFile file) throws IOException {
         // 获取上传的文件名
         String fileName = file.getOriginalFilename();
 
@@ -162,9 +125,9 @@ public class FlowableDeploymentController extends AbstractFlowableService {
     @GetMapping(value = "/{processDefinitionId}/resource/{resourceName}")
     @ApiOperation("读取流程资源")
     @Authorize(action = Permission.ACTION_QUERY)
+    @SneakyThrows
     public void readResource(@PathVariable String processDefinitionId
-            , @PathVariable String resourceName, HttpServletResponse response)
-            throws Exception {
+            , @PathVariable String resourceName, HttpServletResponse response) {
         ProcessDefinitionQuery pdq = repositoryService.createProcessDefinitionQuery();
         ProcessDefinition pd = pdq.processDefinitionId(processDefinitionId).singleResult();
 
@@ -177,10 +140,6 @@ public class FlowableDeploymentController extends AbstractFlowableService {
 
     /***
      * 流程定义转换Model
-     * @param processDefinitionId
-     * @return
-     * @throws UnsupportedEncodingException
-     * @throws XMLStreamException
      */
     @PutMapping(value = "/convert-to-model/{processDefinitionId}")
     @ApiOperation("流程定义转换模型")
@@ -194,10 +153,12 @@ public class FlowableDeploymentController extends AbstractFlowableService {
         }
         InputStream bpmnStream = repositoryService.getResourceAsStream(processDefinition.getDeploymentId(),
                 processDefinition.getResourceName());
+
         XMLInputFactory xif = XMLInputFactory.newInstance();
         InputStreamReader in = new InputStreamReader(bpmnStream, "UTF-8");
         XMLStreamReader xtr = xif.createXMLStreamReader(in);
         BpmnModel bpmnModel = new BpmnXMLConverter().convertToBpmnModel(xtr);
+
 
         BpmnJsonConverter converter = new BpmnJsonConverter();
         com.fasterxml.jackson.databind.node.ObjectNode modelNode = converter.convertToJson(bpmnModel);
@@ -226,44 +187,27 @@ public class FlowableDeploymentController extends AbstractFlowableService {
     @DeleteMapping(value = "/deployment/{deploymentId}")
     @ApiOperation("删除部署的流程")
     @Authorize(action = Permission.ACTION_DELETE)
-    public ResponseMessage<String> deleteProcessDefinition(
+    public ResponseMessage<Void> deleteProcessDefinition(
             @PathVariable("deploymentId") String deploymentId
             , @RequestParam(defaultValue = "false") boolean cascade) {
         repositoryService.deleteDeployment(deploymentId, cascade);
         return ResponseMessage.ok();
     }
 
-//    /**
-//     * 删除部署的流程，级联删除流程实例
-//     *
-//     * @param deploymentId 流程部署ID
-//     */
-//    @DeleteMapping(value = "/deploy")
-//    public ResponseMessage<String> deleteProcess(@RequestParam("deploymentId") String deploymentId) {
-//        repositoryService.deleteDeployment(deploymentId, true);
-//        return ResponseMessage.ok();
-//    }
 
     /**
      * 查看当前节点流程图
-     *
-     * @param processInstanceId
-     * @return 当前节点
      */
     @GetMapping("/{processInstanceId}/activity")
     @ApiOperation("查看当前流程活动节点流程图")
     @Authorize(action = Permission.ACTION_QUERY)
-    public ResponseMessage<Map<String, Object>> getProcessInstanceActivity(@PathVariable String processInstanceId) {
+    public ResponseMessage<ActivityInfo> getProcessInstanceActivity(@PathVariable String processInstanceId) {
         HistoricProcessInstance processInstance = bpmTaskService.selectHisProInst(processInstanceId);
         if (processInstance != null) {
-            JSONObject jsonObject = new JSONObject();
             ActivityImpl activity = bpmActivityService.getActivityByProcInstId(processInstance.getProcessDefinitionId(), processInstance.getId());
-            jsonObject.put("activity", activity);
-            jsonObject.put("procDefId", processInstance.getProcessDefinitionId());
-            return ResponseMessage.ok(jsonObject);
+            return ResponseMessage.ok(ActivityInfo.of(activity));
         } else {
             throw new NotFoundException("流程不存在");
-//            jsonObject.put("message", "获取流程图失败");
         }
     }
 
@@ -273,7 +217,7 @@ public class FlowableDeploymentController extends AbstractFlowableService {
     public void getProcessImage(@PathVariable String processInstanceId, HttpServletResponse response) throws IOException {
         try (InputStream inputStream = bpmProcessService.findProcessPic(processInstanceId)) {
             response.setContentType(MediaType.IMAGE_PNG_VALUE);
-            ImageIO.write(ImageIO.read(inputStream),"png",response.getOutputStream());
+            ImageIO.write(ImageIO.read(inputStream), "png", response.getOutputStream());
         }
     }
 }
