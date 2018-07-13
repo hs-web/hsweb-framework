@@ -22,18 +22,6 @@
 
         <dependency>
             <groupId>org.flowable</groupId>
-            <artifactId>flowable-diagram-rest</artifactId>
-            <version>${flowable.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.flowable</groupId>
-                    <artifactId>flowable-common-rest</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <dependency>
-            <groupId>org.flowable</groupId>
             <artifactId>flowable-spring-boot-starter-basic</artifactId>
             <version>${flowable.version}</version>
         </dependency>
@@ -49,6 +37,7 @@
             <artifactId>batik-parser</artifactId>
             <version>${batik.version}</version>
         </dependency>
+
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-transcoder</artifactId>
@@ -60,6 +49,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-bridge</artifactId>
@@ -125,26 +115,29 @@
             <artifactId>hsweb-system-organizational-api</artifactId>
             <version>${project.version}</version>
         </dependency>
+
         <dependency>
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-system-organizational-authorization</artifactId>
             <version>${project.version}</version>
         </dependency>
+
         <dependency>
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-system-dynamic-form-api</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>io.vavr</groupId>
+            <artifactId>vavr</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-system-dynamic-form-starter</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>io.vavr</groupId>
-            <artifactId>vavr</artifactId>
         </dependency>
 
         <dependency>

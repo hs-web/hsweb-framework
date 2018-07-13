@@ -1,6 +1,8 @@
 package org.hswebframework.web.workflow.web.diagram;
 
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -9,6 +11,17 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/workflow/service/")
-public class ProcessInstanceDiagramLayoutResource extends org.activiti.rest.diagram.services.ProcessInstanceDiagramLayoutResource {
+public class ProcessInstanceDiagramLayoutResource
+        extends BaseProcessDefinitionDiagramLayoutResource
+{
 
+
+    @RequestMapping(
+            value = {"/process-instance/{processInstanceId}/diagram-layout"},
+            method = {RequestMethod.GET},
+            produces = {"application/json"}
+    )
+    public Object getDiagram(@PathVariable String processInstanceId) {
+        return this.getDiagramNode(processInstanceId, (String)null);
+    }
 }
