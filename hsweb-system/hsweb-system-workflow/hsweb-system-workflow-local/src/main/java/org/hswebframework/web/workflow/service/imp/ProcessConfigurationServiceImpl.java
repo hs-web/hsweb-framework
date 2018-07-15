@@ -1,10 +1,10 @@
 package org.hswebframework.web.workflow.service.imp;
 
 import org.activiti.engine.repository.ProcessDefinition;
-import org.hswebframework.web.workflow.service.ActivityConfigurationService;
-import org.hswebframework.web.workflow.service.dto.ActivityCandidateInfo;
-import org.hswebframework.web.workflow.service.dto.ActivityConfiguration;
-import org.hswebframework.web.workflow.service.dto.ProcessConfiguration;
+import org.hswebframework.web.workflow.service.config.ProcessConfigurationService;
+import org.hswebframework.web.workflow.service.config.CandidateInfo;
+import org.hswebframework.web.workflow.service.config.ActivityConfiguration;
+import org.hswebframework.web.workflow.service.config.ProcessConfiguration;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -16,7 +16,7 @@ import java.util.List;
  * @since 3.0.0-RC
  */
 @Service
-public class ActivityConfigurationServiceImpl implements ActivityConfigurationService {
+public class ProcessConfigurationServiceImpl implements ProcessConfigurationService {
 
     static final EmptyActivityConfiguration emptyConfiguration = new EmptyActivityConfiguration();
 
@@ -45,7 +45,7 @@ public class ActivityConfigurationServiceImpl implements ActivityConfigurationSe
         }
 
         @Override
-        public List<ActivityCandidateInfo> getCandidateInfo() {
+        public List<CandidateInfo> getCandidateInfo() {
             return Collections.emptyList();
         }
 

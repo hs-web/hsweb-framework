@@ -3,10 +3,10 @@ package org.hswebframework.web.workflow.service.imp;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.hswebframework.web.service.form.DynamicFormOperationService;
-import org.hswebframework.web.workflow.service.ActivityConfigurationService;
+import org.hswebframework.web.workflow.service.config.ProcessConfigurationService;
 import org.hswebframework.web.workflow.service.WorkFlowFormService;
-import org.hswebframework.web.workflow.service.dto.ActivityConfiguration;
-import org.hswebframework.web.workflow.service.dto.ProcessConfiguration;
+import org.hswebframework.web.workflow.service.config.ActivityConfiguration;
+import org.hswebframework.web.workflow.service.config.ProcessConfiguration;
 import org.hswebframework.web.workflow.service.request.SaveFormRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,7 +22,7 @@ import java.util.Map;
 public class WorkFlowFormServiceImpl extends AbstractFlowableService implements WorkFlowFormService {
 
     @Autowired
-    private ActivityConfigurationService activityConfigurationService;
+    private ProcessConfigurationService processConfigurationService;
 
     @Autowired
     private DynamicFormOperationService dynamicFormOperationService;
@@ -31,7 +31,7 @@ public class WorkFlowFormServiceImpl extends AbstractFlowableService implements 
     public void saveProcessForm(ProcessInstance instance, SaveFormRequest request) {
         request.tryValidate();
 
-        ProcessConfiguration configuration = activityConfigurationService
+        ProcessConfiguration configuration = processConfigurationService
                 .getProcessConfiguration(instance.getProcessDefinitionId());
 
         if (configuration == null || StringUtils.isEmpty(configuration.getFormId())) {
@@ -49,7 +49,7 @@ public class WorkFlowFormServiceImpl extends AbstractFlowableService implements 
     public void saveTaskForm(Task task, SaveFormRequest request) {
         request.tryValidate();
 
-        ActivityConfiguration configuration = activityConfigurationService
+        ActivityConfiguration configuration = processConfigurationService
                 .getActivityConfiguration(request.getUserId()
                         , task.getProcessDefinitionId()
                         , task.getTaskDefinitionKey());

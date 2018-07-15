@@ -16,12 +16,12 @@ import org.activiti.engine.task.Task;
 import org.hswebframework.utils.StringUtils;
 import org.hswebframework.web.BusinessException;
 import org.hswebframework.web.NotFoundException;
-import org.hswebframework.web.workflow.service.ActivityConfigurationService;
+import org.hswebframework.web.workflow.service.config.ProcessConfigurationService;
 import org.hswebframework.web.workflow.service.BpmActivityService;
 import org.hswebframework.web.workflow.service.BpmTaskService;
 import org.hswebframework.web.workflow.flowable.utils.JumpTaskCmd;
 import org.hswebframework.web.workflow.service.WorkFlowFormService;
-import org.hswebframework.web.workflow.service.dto.ActivityCandidateInfo;
+import org.hswebframework.web.workflow.service.config.CandidateInfo;
 import org.hswebframework.web.workflow.service.request.CompleteTaskRequest;
 import org.hswebframework.web.workflow.service.request.SaveFormRequest;
 import org.slf4j.Logger;
@@ -30,7 +30,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
 import java.util.*;
 
 
@@ -48,7 +47,7 @@ public class BpmTaskServiceImpl extends AbstractFlowableService implements BpmTa
     private BpmActivityService bpmActivityService;
 
     @Autowired
-    private ActivityConfigurationService activityConfigurationService;
+    private ProcessConfigurationService processConfigurationService;
 
     @Autowired
     private WorkFlowFormService workFlowFormService;
@@ -287,12 +286,12 @@ public class BpmTaskServiceImpl extends AbstractFlowableService implements BpmTa
         }
         if (task.getTaskDefinitionKey() != null) {
             //从配置中获取候选人
-            List<ActivityCandidateInfo> candidateInfoList = activityConfigurationService
+            List<CandidateInfo> candidateInfoList = processConfigurationService
                     .getActivityConfiguration(doingUserId
                             , task.getProcessDefinitionId()
                             , task.getTaskDefinitionKey())
                     .getCandidateInfo();
-            for (ActivityCandidateInfo candidateInfo : candidateInfoList) {
+            for (CandidateInfo candidateInfo : candidateInfoList) {
                 taskService.addCandidateUser(task.getId(), candidateInfo.user().getUser().getId());
             }
         } else {

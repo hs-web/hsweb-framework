@@ -1,4 +1,4 @@
-package org.hswebframework.web.workflow.service.dto;
+package org.hswebframework.web.workflow.service.config;
 
 
 import org.activiti.engine.repository.ProcessDefinition;

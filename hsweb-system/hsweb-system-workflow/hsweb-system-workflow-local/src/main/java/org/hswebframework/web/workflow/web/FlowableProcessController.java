@@ -10,7 +10,6 @@ import org.activiti.engine.history.HistoricTaskInstanceQuery;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.runtime.ProcessInstanceQuery;
-import org.activiti.engine.task.Task;
 import org.activiti.engine.task.TaskQuery;
 import org.hswebframework.web.NotFoundException;
 import org.hswebframework.web.authorization.Authentication;
@@ -19,7 +18,7 @@ import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.commons.entity.PagerResult;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.controller.message.ResponseMessage;
-import org.hswebframework.web.workflow.service.ActivityConfigurationService;
+import org.hswebframework.web.workflow.service.config.ProcessConfigurationService;
 import org.hswebframework.web.workflow.service.BpmProcessService;
 import org.hswebframework.web.workflow.service.BpmTaskService;
 import org.hswebframework.web.workflow.service.request.CompleteTaskRequest;
@@ -30,7 +29,6 @@ import org.hswebframework.web.workflow.web.response.TaskInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
 
 
@@ -57,7 +55,7 @@ public class FlowableProcessController {
     private RepositoryService repositoryService;
 
     @Autowired
-    private ActivityConfigurationService activityConfigurationService;
+    private ProcessConfigurationService processConfigurationService;
 
     @Autowired
     private TaskService taskService;
@@ -129,7 +127,7 @@ public class FlowableProcessController {
             throw new NotFoundException("流程[" + defineKey + "]不存在");
         }
         //判断权限
-        activityConfigurationService.getProcessConfiguration(definition.getId())
+        processConfigurationService.getProcessConfiguration(definition.getId())
                 .assertCanStartProcess(authentication.getUser().getId(), definition);
 
         String id = definition.getId();
@@ -160,7 +158,7 @@ public class FlowableProcessController {
             throw new NotFoundException("流程[" + defId + "]不存在");
         }
         //判断权限
-        activityConfigurationService.getProcessConfiguration(definition.getId())
+        processConfigurationService.getProcessConfiguration(definition.getId())
                 .assertCanStartProcess(authentication.getUser().getId(), definition);
 
 
