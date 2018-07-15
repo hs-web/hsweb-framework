@@ -1,9 +1,7 @@
 package org.hswebframework.web.workflow.web.diagram;
 
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @author zhouhao
@@ -16,12 +14,11 @@ public class ProcessInstanceDiagramLayoutResource
 {
 
 
-    @RequestMapping(
+    @GetMapping(
             value = {"/process-instance/{processInstanceId}/diagram-layout"},
-            method = {RequestMethod.GET},
-            produces = {"application/json"}
+            produces = MediaType.APPLICATION_JSON_UTF8_VALUE
     )
     public Object getDiagram(@PathVariable String processInstanceId) {
-        return this.getDiagramNode(processInstanceId, (String)null);
+        return this.getDiagramNode(processInstanceId, null);
     }
 }

@@ -249,8 +249,8 @@ public class BaseProcessDefinitionDiagramLayoutResource {
         return highLightedFlows;
     }
 
-    private void getActivity(String processInstanceId, ActivityImpl activity, List activityArray,
-                             List sequenceFlowArray, ProcessInstance processInstance, List<String> highLightedFlows,
+    private void getActivity(String processInstanceId, ActivityImpl activity, List<Object> activityArray,
+                             List<Object> sequenceFlowArray, ProcessInstance processInstance, List<String> highLightedFlows,
                              Map<String, Object> subProcessInstanceMap) {
 
         JSONObject activityJSON = new JSONObject();

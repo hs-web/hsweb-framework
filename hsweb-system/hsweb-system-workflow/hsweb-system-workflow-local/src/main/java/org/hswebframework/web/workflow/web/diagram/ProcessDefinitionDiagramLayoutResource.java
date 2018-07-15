@@ -1,6 +1,6 @@
 package org.hswebframework.web.workflow.web.diagram;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -14,7 +14,7 @@ public class ProcessDefinitionDiagramLayoutResource
 
     @GetMapping(
             value = {"/process-definition/{processDefinitionId}/diagram-layout"},
-            produces = {"application/json"}
+            produces = MediaType.APPLICATION_JSON_UTF8_VALUE
     )
     public Object getDiagram(@PathVariable String processDefinitionId) {
         return this.getDiagramNode(null, processDefinitionId);

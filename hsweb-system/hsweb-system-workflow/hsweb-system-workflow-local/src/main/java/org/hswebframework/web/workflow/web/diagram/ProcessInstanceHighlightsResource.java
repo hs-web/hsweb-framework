@@ -30,9 +30,9 @@ import org.activiti.engine.impl.pvm.PvmTransition;
 import org.activiti.engine.impl.pvm.process.ActivityImpl;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
-import com.alibaba.fastjson.JSONArray;
 
 @RestController
 @RequestMapping("/workflow/service")
@@ -48,7 +48,7 @@ public class ProcessInstanceHighlightsResource {
     private HistoryService historyService;
 
 
-    @GetMapping(value = "/process-instance/{processInstanceId}/highlights", produces = "application/json")
+    @GetMapping(value = "/process-instance/{processInstanceId}/highlights", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public Object getHighlighted(@PathVariable String processInstanceId) {
 
         JSONObject responseJSON = new JSONObject();
