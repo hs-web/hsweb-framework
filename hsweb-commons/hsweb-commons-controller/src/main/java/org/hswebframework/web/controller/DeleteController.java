@@ -35,15 +35,15 @@ import static org.hswebframework.web.controller.message.ResponseMessage.ok;
  *
  * @author zhouhao
  */
-public interface DeleteController<PK> {
+public interface DeleteController<E,PK> {
 
     @Authorize(ignore = true)
-    DeleteService<PK> getService();
+    DeleteService<E,PK> getService();
 
     @Authorize(action = Permission.ACTION_DELETE)
     @DeleteMapping(path = "/{id:.+}")
     @ApiOperation("删除数据")
-    default ResponseMessage deleteByPrimaryKey(@PathVariable PK id) {
+    default ResponseMessage<E> deleteByPrimaryKey(@PathVariable PK id) {
         return ok(getService().deleteByPk(id));
     }
 

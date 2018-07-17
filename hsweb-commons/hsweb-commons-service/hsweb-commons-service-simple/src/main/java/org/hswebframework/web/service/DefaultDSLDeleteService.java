@@ -25,7 +25,7 @@ import org.hswebframework.web.dao.dynamic.DeleteByEntityDao;
 /**
  * @author zhouhao
  */
-public interface DefaultDSLDeleteService<PK> extends DefaultDeleteService<PK> {
+public interface DefaultDSLDeleteService<E, PK> extends DefaultDeleteService<E, PK> {
     DeleteByEntityDao getDao();
 
     default Delete<DeleteParamEntity> createDelete() {

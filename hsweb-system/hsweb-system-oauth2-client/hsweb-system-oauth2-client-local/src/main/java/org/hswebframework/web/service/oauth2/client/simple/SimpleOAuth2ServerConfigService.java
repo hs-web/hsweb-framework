@@ -71,7 +71,7 @@ public class SimpleOAuth2ServerConfigService extends GenericEntityService<OAuth2
 
     @Override
     @CacheEvict(key = "'conf-id:'+#id")
-    public int deleteByPk(String id) {
+    public OAuth2ServerConfigEntity deleteByPk(String id) {
         return super.deleteByPk(id);
     }
 

@@ -84,7 +84,7 @@ public class SimpleDistrictService extends EnableCacheAllEvictTreeSortService<Di
 
     @Override
     @CacheEvict(allEntries = true)
-    public int deleteByPk(String id) {
+    public DistrictEntity deleteByPk(String id) {
         if (DefaultDSLQueryService.createQuery(organizationalDao).where(OrganizationalEntity.districtId, id).total() > 0) {
             throw new BusinessException("行政区域下存在机构信息,无法删除!");
         }

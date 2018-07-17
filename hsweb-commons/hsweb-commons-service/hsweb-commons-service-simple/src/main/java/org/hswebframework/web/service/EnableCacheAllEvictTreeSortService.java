@@ -64,7 +64,7 @@ public abstract class EnableCacheAllEvictTreeSortService<E extends TreeSortSuppo
 
     @Override
     @CacheEvict(allEntries = true)
-    public int deleteByPk(PK pk) {
+    public E deleteByPk(PK pk) {
         return super.deleteByPk(pk);
     }
 

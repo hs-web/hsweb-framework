@@ -301,7 +301,7 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
                     @CacheEvict(key = "'form-columns:'+#id"),
                     @CacheEvict(key = "'form_id:'+#id")
             })
-    public int deleteByPk(String id) {
+    public DynamicFormEntity deleteByPk(String id) {
         Objects.requireNonNull(id, "id can not be null");
 
         DefaultDSLDeleteService.createDelete(formColumnDao)

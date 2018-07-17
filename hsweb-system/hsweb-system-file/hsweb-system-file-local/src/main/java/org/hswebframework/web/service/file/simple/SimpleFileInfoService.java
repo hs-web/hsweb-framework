@@ -69,7 +69,7 @@ public class SimpleFileInfoService extends GenericEntityService<FileInfoEntity, 
             @CacheEvict(key = "'id-or-md5:'+#id"),
             @CacheEvict(key = "'id-or-md5:'+#id")
     })
-    public int deleteByPk(String id) {
+    public FileInfoEntity deleteByPk(String id) {
         return super.deleteByPk(id);
     }
 

@@ -66,9 +66,11 @@ public abstract class GenericEntityService<E extends GenericEntity<PK>, PK>
     }
 
     @Override
-    public int deleteByPk(PK pk) {
+    public E deleteByPk(PK pk) {
         Assert.notNull(pk, "parameter can not be null");
-        return getDao().deleteByPk(pk);
+        E old = selectByPk(pk);
+        getDao().deleteByPk(pk);
+        return old;
     }
 
     @Override

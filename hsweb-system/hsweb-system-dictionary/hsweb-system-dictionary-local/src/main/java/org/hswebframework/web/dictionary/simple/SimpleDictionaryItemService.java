@@ -67,7 +67,7 @@ public class SimpleDictionaryItemService extends AbstractTreeSortService<Diction
     }
 
     @Override
-    public int deleteByPk(String id) {
+    public DictionaryItemEntity deleteByPk(String id) {
         DictionaryItemEntity entity = selectByPk(id);
         if (null != entity) {
             clearDictCache(entity.getDictId());

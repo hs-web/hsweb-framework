@@ -122,12 +122,4 @@ public class GenericEntityServiceTest {
         Assert.assertEquals(i, 1);
     }
 
-    @Test
-    public void testDelete() {
-        int i = entityService.deleteByPk("test");
-        Assert.assertEquals(i, 1);
-        i = entityService.deleteByPk("test2");
-        Assert.assertEquals(i, 0);
-    }
-
 }

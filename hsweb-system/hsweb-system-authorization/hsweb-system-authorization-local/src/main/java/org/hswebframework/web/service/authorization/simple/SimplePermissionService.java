@@ -51,9 +51,9 @@ public class SimplePermissionService extends GenericEntityService<PermissionEnti
     }
 
     @Override
-    public int deleteByPk(String id) {
-        int len = super.deleteByPk(id);
+    public PermissionEntity deleteByPk(String id) {
+        PermissionEntity old = super.deleteByPk(id);
         eventPublisher.publishEvent(new ClearUserAuthorizationCacheEvent(null, true));
-        return len;
+        return old;
     }
 }

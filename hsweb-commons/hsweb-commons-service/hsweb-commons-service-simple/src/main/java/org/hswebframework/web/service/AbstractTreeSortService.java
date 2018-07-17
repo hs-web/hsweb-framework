@@ -168,15 +168,17 @@ public abstract class AbstractTreeSortService<E extends TreeSortSupportEntity<PK
     }
 
     @Override
-    public int deleteByPk(PK id) {
+    public E deleteByPk(PK id) {
         E old = selectByPk(id);
         assertNotNull(old);
         if (StringUtils.isEmpty(old.getPath())) {
-            return getDao().deleteByPk(id);
+            getDao().deleteByPk(id);
+        } else {
+            DefaultDSLDeleteService.createDelete(getDao())
+                    // where path like 'path%'
+                    .where().like$(TreeSupportEntity.path, old.getPath())
+                    .exec();
         }
-        return DefaultDSLDeleteService.createDelete(getDao())
-                // where path like 'path%'
-                .where().like$(TreeSupportEntity.path, old.getPath())
-                .exec();
+        return old;
     }
 }

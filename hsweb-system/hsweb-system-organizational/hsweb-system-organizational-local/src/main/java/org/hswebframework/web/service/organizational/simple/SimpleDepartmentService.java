@@ -122,7 +122,7 @@ public class SimpleDepartmentService
     }
 
     @Override
-    public int deleteByPk(String id) {
+    public DepartmentEntity deleteByPk(String id) {
         if (DefaultDSLQueryService.createQuery(positionDao)
                 .where(PositionEntity.departmentId, id)
                 .total() > 0) {

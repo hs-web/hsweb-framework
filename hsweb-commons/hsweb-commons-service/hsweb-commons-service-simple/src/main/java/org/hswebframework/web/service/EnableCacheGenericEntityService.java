@@ -63,7 +63,7 @@ public abstract class EnableCacheGenericEntityService<E extends GenericEntity<PK
                     @CacheEvict(key = "'count'")
             }
     )
-    public int deleteByPk(PK pk) {
+    public E deleteByPk(PK pk) {
         return super.deleteByPk(pk);
     }
 

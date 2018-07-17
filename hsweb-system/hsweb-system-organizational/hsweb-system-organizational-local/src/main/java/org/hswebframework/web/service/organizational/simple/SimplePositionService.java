@@ -63,7 +63,7 @@ public class SimplePositionService extends EnableCacheAllEvictTreeSortService<Po
 
     @Override
     @CacheEvict(allEntries = true)
-    public int deleteByPk(String id) {
+    public PositionEntity deleteByPk(String id) {
         if (!CollectionUtils.isEmpty(personDao.selectByPositionId(id))) {
             throw new BusinessException("岗位中还有人员,无法删除!");
         }

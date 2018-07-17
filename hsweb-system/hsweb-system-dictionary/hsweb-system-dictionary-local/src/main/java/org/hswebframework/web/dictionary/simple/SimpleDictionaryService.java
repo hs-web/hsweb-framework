@@ -67,7 +67,7 @@ public class SimpleDictionaryService extends GenericEntityService<DictionaryEnti
     }
 
     @Override
-    public int deleteByPk(String id) {
+    public DictionaryEntity deleteByPk(String id) {
         eventPublisher.publishEvent(new ClearDictionaryCacheEvent(id));
         return super.deleteByPk(id);
     }

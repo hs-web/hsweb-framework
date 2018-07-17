@@ -125,7 +125,7 @@ public class SimpleMenuGroupService
 
     @Override
     @CacheEvict(allEntries = true)
-    public int deleteByPk(String id) {
+    public MenuGroupEntity deleteByPk(String id) {
         return super.deleteByPk(id);
     }
 

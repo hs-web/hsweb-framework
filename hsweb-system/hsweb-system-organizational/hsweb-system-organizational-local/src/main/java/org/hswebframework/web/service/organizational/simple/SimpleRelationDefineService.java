@@ -45,7 +45,7 @@ public class SimpleRelationDefineService extends EnableCacheGenericEntityService
     }
 
     @Override
-    public int deleteByPk(String pk) {
+    public RelationDefineEntity deleteByPk(String pk) {
         publisher.publishEvent(new ClearPersonCacheEvent());
         return super.deleteByPk(pk);
     }

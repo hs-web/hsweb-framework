@@ -317,7 +317,7 @@ public class SimplePersonService extends GenericEntityService<PersonEntity, Stri
 
     @Override
     @CacheEvict(allEntries = true)
-    public int deleteByPk(String id) {
+    public PersonEntity deleteByPk(String id) {
         personPositionDao.deleteByPersonId(id);
         return super.deleteByPk(id);
     }
