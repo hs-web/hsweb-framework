@@ -21,9 +21,9 @@ import java.sql.SQLException;
 public class AtomikosDataSourceAutoConfiguration {
 
     //默认数据源
-    @Bean(initMethod = "init", destroyMethod = "destroy", value = "defaultDataSource")
+    @Bean(initMethod = "init", destroyMethod = "destroy", value = "datasource")
     @Primary
-    public AtomikosDataSourceBean defaultDataSource() {
+    public AtomikosDataSourceBean datasource() {
         return new AtomikosDataSourceBean();
     }
 
