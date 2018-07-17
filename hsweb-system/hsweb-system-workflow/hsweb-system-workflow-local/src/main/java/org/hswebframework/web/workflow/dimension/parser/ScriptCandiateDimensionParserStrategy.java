@@ -29,10 +29,10 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @ConditionalOnBean(RelationsManager.class)
-public class RelationCandidateDimensionParserStrategy implements CandidateDimensionParserStrategy {
+public class ScriptCandiateDimensionParserStrategy implements CandidateDimensionParserStrategy {
 
     @Autowired
-    RelationsManager relationsManager;
+    private RelationsManager relationsManager;
 
     @Override
     public boolean support(String dimension) {
@@ -50,10 +50,7 @@ public class RelationCandidateDimensionParserStrategy implements CandidateDimens
             return Collections.emptyList();
         }
 
-        String preId = context.getPreTask().getOwner();
         String creatorId = context.getCreatorId();
-
-        Supplier<PersonRelations> pre = () -> relationsManager.getPersonRelationsByUserId(preId);
 
         Supplier<PersonRelations> creator = () -> relationsManager.getPersonRelationsByUserId(creatorId);
 
@@ -69,9 +66,7 @@ public class RelationCandidateDimensionParserStrategy implements CandidateDimens
         }
 
         Object obj = engine.execute(id, Maps.<String, Object>buildMap()
-                .put("pre", pre)
-                .put("creator", creator)
-                .put("preId", preId)
+                .put("user", creator)
                 .put("creatorId", creatorId)
                 .put("context", context)
                 .get())

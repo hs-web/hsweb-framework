@@ -1,4 +1,4 @@
-package org.hswebframework.web.workflow.entity;
+package org.hswebframework.web.workflow.dao.entity;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -6,15 +6,26 @@ import org.hibernate.validator.constraints.NotBlank;
 import org.hswebframework.web.commons.entity.SimpleGenericEntity;
 import org.hswebframework.web.validator.group.CreateGroup;
 
+import javax.validation.constraints.NotNull;
+import java.util.Date;
+
 @Getter
 @Setter
 public class ActivityConfigEntity extends SimpleGenericEntity<String> {
+
+    private static final long serialVersionUID = 2909584456889604626L;
 
     /**
      * 节点ID
      */
     @NotBlank(groups = CreateGroup.class)
     private String activityId;
+
+    /**
+     * 流程定义key
+     */
+    @NotBlank(groups = CreateGroup.class)
+    private String processDefineKey;
 
     /**
      * 流程定义ID
@@ -37,10 +48,11 @@ public class ActivityConfigEntity extends SimpleGenericEntity<String> {
      */
     private String candidateDimension;
 
-    /**
-     * 版本号
-     */
-    private Long version;
+    @NotNull(groups = CreateGroup.class)
+    private Date createTime;
 
+    private Date updateTime;
 
+    @NotNull(groups = CreateGroup.class)
+    private Byte status;
 }

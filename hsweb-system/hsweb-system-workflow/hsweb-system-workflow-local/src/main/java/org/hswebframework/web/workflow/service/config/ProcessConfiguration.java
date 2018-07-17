@@ -11,4 +11,6 @@ public interface ProcessConfiguration {
     String getFormId();
 
     void assertCanStartProcess(String userId, ProcessDefinition definition);
+
+    boolean canStartProcess(String userId, ProcessDefinition definition);
 }

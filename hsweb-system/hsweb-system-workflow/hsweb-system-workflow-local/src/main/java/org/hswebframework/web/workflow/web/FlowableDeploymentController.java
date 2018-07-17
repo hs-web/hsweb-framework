@@ -1,6 +1,5 @@
 package org.hswebframework.web.workflow.web;
 
-import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.swagger.annotations.Api;
@@ -17,16 +16,12 @@ import org.activiti.engine.repository.DeploymentBuilder;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.repository.ProcessDefinitionQuery;
 import org.apache.commons.io.FilenameUtils;
-import org.hswebframework.ezorm.core.PropertyWrapper;
-import org.hswebframework.ezorm.core.SimplePropertyWrapper;
-import org.hswebframework.ezorm.core.param.TermType;
 import org.hswebframework.web.NotFoundException;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.commons.entity.PagerResult;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.controller.message.ResponseMessage;
-import org.hswebframework.web.workflow.entity.SimpleProcessDefinition;
 import org.hswebframework.web.workflow.service.BpmActivityService;
 import org.hswebframework.web.workflow.service.BpmProcessService;
 import org.hswebframework.web.workflow.service.BpmTaskService;
@@ -49,9 +44,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.zip.ZipInputStream;
 
 /**

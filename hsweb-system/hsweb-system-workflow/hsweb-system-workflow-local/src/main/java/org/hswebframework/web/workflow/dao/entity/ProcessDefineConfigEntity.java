@@ -1,4 +1,4 @@
-package org.hswebframework.web.workflow.entity;
+package org.hswebframework.web.workflow.dao.entity;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -6,9 +6,19 @@ import org.hibernate.validator.constraints.NotBlank;
 import org.hswebframework.web.commons.entity.SimpleGenericEntity;
 import org.hswebframework.web.validator.group.CreateGroup;
 
+import javax.validation.constraints.NotNull;
+import java.util.Date;
+
 @Getter
 @Setter
 public class ProcessDefineConfigEntity extends SimpleGenericEntity<String> {
+
+    private static final long serialVersionUID = -140312693789656665L;
+    /**
+     * 流程定义Key
+     */
+    @NotBlank(groups = CreateGroup.class)
+    private String processDefineKey;
 
     /**
      * 流程定义ID
@@ -32,4 +42,13 @@ public class ProcessDefineConfigEntity extends SimpleGenericEntity<String> {
      */
     private String permissionDimension;
 
+    private Date createTime;
+
+    private Date updateTime;
+
+    /**
+     * 状态
+     */
+    @NotNull(groups = CreateGroup.class)
+    private Byte status;
 }

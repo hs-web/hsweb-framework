@@ -287,10 +287,9 @@ public class BpmTaskServiceImpl extends AbstractFlowableService implements BpmTa
         if (task.getTaskDefinitionKey() != null) {
             //从配置中获取候选人
             List<CandidateInfo> candidateInfoList = processConfigurationService
-                    .getActivityConfiguration(doingUserId
-                            , task.getProcessDefinitionId()
-                            , task.getTaskDefinitionKey())
-                    .getCandidateInfo();
+                    .getActivityConfiguration(doingUserId, task.getProcessDefinitionId(), task.getTaskDefinitionKey())
+                    .getCandidateInfo(task);
+
             for (CandidateInfo candidateInfo : candidateInfoList) {
                 taskService.addCandidateUser(task.getId(), candidateInfo.user().getUser().getId());
             }
