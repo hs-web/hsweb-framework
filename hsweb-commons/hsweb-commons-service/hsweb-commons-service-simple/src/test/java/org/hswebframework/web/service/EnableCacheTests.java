@@ -131,10 +131,8 @@ public class EnableCacheTests {
         Assert.assertEquals(counter.get(), 6);
 
         service.deleteByPk("testId"); //evict cache
-        if (service instanceof TreeService){
-            //树结构会先查询后再执行删除
-            counter.decrementAndGet();
-        }
+        //删除前会查询
+        counter.decrementAndGet();
         service.select(); //db 7
         service.selectByPk("testId");//db 8
         service.count();//db 9
