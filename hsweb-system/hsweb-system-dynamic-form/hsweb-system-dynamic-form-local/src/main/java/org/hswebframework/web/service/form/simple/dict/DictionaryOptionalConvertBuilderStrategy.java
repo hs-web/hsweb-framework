@@ -47,7 +47,7 @@ public class DictionaryOptionalConvertBuilderStrategy implements OptionalConvert
         converter.setWriteObject(!"false".equalsIgnoreCase(writeObject));
 
         if (!StringUtils.isEmpty(sppliter)) {
-            converter.setSplitter(str -> new Arr);
+            converter.setSplitter(str -> Arrays.asList(str.split(sppliter)));
         }
 
         return converter;

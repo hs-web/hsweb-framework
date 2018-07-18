@@ -601,7 +601,7 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
                 .contains(javaType) || javaType != Map.class || javaType != List.class;
 
         if (javaType.isEnum() && EnumDict.class.isAssignableFrom(javaType)) {
-            return new EnumDictValueConverter<EnumDict>(() -> new Arr);
+            return new EnumDictValueConverter<EnumDict>(() -> (List) Arrays.asList(javaType.getEnumConstants()));
         }
         switch (jdbcType) {
             case BLOB:
