@@ -57,7 +57,7 @@ public class AbstractOAuth2CrudServiceTests {
                 createFixedResponseRequest(
                         whenRequest("get", ResponseMessage.ok(entity))
                         , whenRequest("put", ResponseMessage.ok(1))
-                        , whenRequest("delete", ResponseMessage.ok(1))));
+                        , whenRequest("delete", ResponseMessage.ok())));
 
         when(oAuth2Session.request("/test/no-paging")).thenReturn(
                 createFixedResponseRequest(
@@ -112,7 +112,7 @@ public class AbstractOAuth2CrudServiceTests {
         int i = testEntityService.updateByPk("test", entity);
         Assert.assertEquals(i, 1);
 
-        i = testEntityService.deleteByPk("test");
+         testEntityService.deleteByPk("test");
         Assert.assertEquals(i, 1);
 
         String saveId = testEntityService.saveOrUpdate(entity);
