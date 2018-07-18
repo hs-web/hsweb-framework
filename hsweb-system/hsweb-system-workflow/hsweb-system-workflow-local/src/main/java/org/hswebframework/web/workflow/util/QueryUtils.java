@@ -82,12 +82,13 @@ public class QueryUtils {
             Method method = ReflectionUtils.findMethod(type, "orderBy" + StringUtils.toUpperCaseFirstOne(name));
             if (method != null && method.getParameterCount() == 0) {
                 ReflectionUtils.invokeMethod(method, query);
+                if ("asc".equals(sort.getOrder())) {
+                    query.asc();
+                } else {
+                    query.desc();
+                }
             }
-            if ("asc".equals(sort.getOrder())) {
-                query.asc();
-            } else {
-                query.desc();
-            }
+
         }
     }
 }
