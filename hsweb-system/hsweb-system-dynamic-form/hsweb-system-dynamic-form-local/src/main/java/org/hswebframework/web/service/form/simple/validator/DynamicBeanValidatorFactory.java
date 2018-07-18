@@ -90,7 +90,7 @@ public class DynamicBeanValidatorFactory implements ValidatorFactory {
 
     protected List<JSR303AnnotationInfo> createValidatorAnnotation(Set<String> config) {
         if (CollectionUtils.isEmpty(config)) {
-            return Collections.emptyList();
+            return new java.util.ArrayList<>();
         }
 
         return config.stream()

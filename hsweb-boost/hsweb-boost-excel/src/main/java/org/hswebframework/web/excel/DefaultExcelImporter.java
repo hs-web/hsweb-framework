@@ -55,7 +55,7 @@ public class DefaultExcelImporter implements ExcelImporter {
                 || type.isEnum()
                 || type.isArray()
                 || Date.class.isAssignableFrom(type)) {
-            return Collections.emptyMap();
+            return new java.util.HashMap<>();
         }
         AtomicInteger index = new AtomicInteger(0);
         Map<Class, DefaultHeaderMapper> headerMapperMap = new HashMap<>();

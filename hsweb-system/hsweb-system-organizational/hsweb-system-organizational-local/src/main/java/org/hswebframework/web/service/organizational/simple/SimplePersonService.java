@@ -218,7 +218,7 @@ public class SimplePersonService extends GenericEntityService<PersonEntity, Stri
     @Override
     public List<String> selectAllDepartmentId(List<String> personId) {
         if (CollectionUtils.isEmpty(personId)) {
-            return Collections.emptyList();
+            return new java.util.ArrayList<>();
         }
         //所有的机构
         List<String> positionId = DefaultDSLQueryService.createQuery(personPositionDao)
@@ -231,7 +231,7 @@ public class SimplePersonService extends GenericEntityService<PersonEntity, Stri
                 .collect(Collectors.toList());
 
         if (CollectionUtils.isEmpty(positionId)) {
-            return Collections.emptyList();
+            return new java.util.ArrayList<>();
         }
         return DefaultDSLQueryService.createQuery(positionDao)
                 .where()
@@ -248,7 +248,7 @@ public class SimplePersonService extends GenericEntityService<PersonEntity, Stri
     public List<String> selectAllOrgId(List<String> personId) {
         List<String> departmentId = this.selectAllDepartmentId(personId);
         if (CollectionUtils.isEmpty(departmentId)) {
-            return Collections.emptyList();
+            return new java.util.ArrayList<>();
         }
         return DefaultDSLQueryService.createQuery(departmentDao)
                 .where()
@@ -466,7 +466,7 @@ public class SimplePersonService extends GenericEntityService<PersonEntity, Stri
                                                                                             BiConsumer<T, List<T>> childAccepter,
                                                                                             Consumer<List<T>> rootConsumer) {
         if (CollectionUtils.isEmpty(rootIds)) {
-            return Collections.emptyList();
+            return new java.util.ArrayList<>();
         }
         //获取根节点
         List<T> root = DefaultDSLQueryService.createQuery(dao)
@@ -488,7 +488,7 @@ public class SimplePersonService extends GenericEntityService<PersonEntity, Stri
             rootConsumer.accept(root);
             return tree;
         }
-        return Collections.emptyList();
+        return new java.util.ArrayList<>();
     }
 
     public static <V extends TreeSupportEntity<String>> Set<TreeNode<String>> transformationTreeNode(V parent, List<V> data) {

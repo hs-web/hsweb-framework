@@ -47,7 +47,7 @@ public class ScriptCandiateDimensionParserStrategy implements CandidateDimension
         String expressionLanguage = config.getStringConfig("expressionLanguage").orElse(null);
 
         if (StringUtils.isEmpty(expression)) {
-            return Collections.emptyList();
+            return new java.util.ArrayList<>();
         }
 
         String creatorId = context.getCreatorId();
@@ -99,7 +99,7 @@ public class ScriptCandiateDimensionParserStrategy implements CandidateDimension
         } else {
             String result = userIdConverter.apply(obj);
             if (result == null) {
-                return Collections.emptyList();
+                return new java.util.ArrayList<>();
             }
             return Collections.singletonList(result);
         }

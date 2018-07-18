@@ -10,7 +10,7 @@ import java.util.*;
 public interface ToStringOperator<T> {
 
     default String toString(T target, String... ignoreProperty) {
-        return toString(target, -1, ignoreProperty == null ? Collections.emptySet() : new HashSet<>(Arrays.asList(ignoreProperty)));
+        return toString(target, -1, ignoreProperty == null ? new java.util.HashSet<>() : new HashSet<>(Arrays.asList(ignoreProperty)));
     }
 
     String toString(T target, long features, Set<String> ignoreProperty);

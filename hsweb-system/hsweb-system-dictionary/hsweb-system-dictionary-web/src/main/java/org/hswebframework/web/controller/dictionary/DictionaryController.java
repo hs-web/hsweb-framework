@@ -88,7 +88,7 @@ public class DictionaryController implements SimpleGenericEntityController<Dicti
     public ResponseMessage<List<EnumDict<Object>>> getItemDefineById(@PathVariable String id) {
         return ok(Optional.ofNullable(repository.getDefine(id))
                 .map(DictDefine::getItems)
-                .orElse(Collections.emptyList()));
+                .orElse(new java.util.ArrayList<>()));
     }
 
 }

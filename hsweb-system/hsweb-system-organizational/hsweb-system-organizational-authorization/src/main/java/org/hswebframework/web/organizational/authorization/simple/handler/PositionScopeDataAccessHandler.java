@@ -35,7 +35,7 @@ public class PositionScopeDataAccessHandler extends AbstractScopeDataAccessHandl
             case SCOPE_TYPE_ONLY_SELF:
                 return authorization.getRootPositionId();
             default:
-                return Collections.emptySet();
+                return new java.util.HashSet<>();
         }
     }
 

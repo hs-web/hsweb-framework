@@ -54,7 +54,7 @@ public interface DefaultQueryByEntityService<E>
         int total = getDao().count(param);
         pagerResult.setTotal(total);
         if (total == 0) {
-            pagerResult.setData(Collections.emptyList());
+            pagerResult.setData(new java.util.ArrayList<>());
         } else {
             //根据实际记录数量重新指定分页参数
             if (param instanceof QueryParamEntity) {

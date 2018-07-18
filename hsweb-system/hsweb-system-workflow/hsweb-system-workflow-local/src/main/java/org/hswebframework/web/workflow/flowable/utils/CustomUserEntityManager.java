@@ -36,7 +36,7 @@ public class CustomUserEntityManager extends UserEntityManager {
     @Override
     public List<Group> findGroupsByUser(final String userId) {
         if (userId == null) {
-            return Collections.emptyList();
+            return new java.util.ArrayList<>();
         }
 
         List<RoleEntity> sysRoles = userService.getUserRole(userId);

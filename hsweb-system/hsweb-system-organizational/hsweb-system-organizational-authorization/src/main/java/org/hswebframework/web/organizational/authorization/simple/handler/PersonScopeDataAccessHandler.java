@@ -37,7 +37,7 @@ public class PersonScopeDataAccessHandler extends AbstractScopeDataAccessHandler
             case SCOPE_TYPE_ONLY_SELF:
                 return Collections.singleton(authorization.getPersonnel().getId());
             default:
-                return Collections.emptySet();
+                return new java.util.HashSet<>();
         }
     }
 

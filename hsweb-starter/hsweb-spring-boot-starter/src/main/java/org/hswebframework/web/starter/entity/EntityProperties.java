@@ -53,7 +53,7 @@ public class EntityProperties {
 
     public Map<Class<Entity>, MapperEntityFactory.Mapper> createMappers() {
         if (mappings == null || mappings.isEmpty()) {
-            return Collections.emptyMap();
+            return new java.util.HashMap<>();
         }
         return mappings.stream()
                 .map(Mapping::create)
@@ -68,7 +68,7 @@ public class EntityProperties {
 
         Map<Class<Entity>, MapperEntityFactory.Mapper> create() {
             if (mapping == null || mapping.isEmpty()) {
-                return Collections.emptyMap();
+                return new java.util.HashMap<>();
             }
             return mapping.entrySet().stream()
                     .collect(Collectors.toMap(

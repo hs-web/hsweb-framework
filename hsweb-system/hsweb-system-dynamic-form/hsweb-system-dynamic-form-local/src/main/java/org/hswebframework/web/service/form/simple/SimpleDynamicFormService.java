@@ -315,7 +315,7 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
     public List<DynamicFormColumnEntity> deleteColumn(List<String> ids) {
         Objects.requireNonNull(ids);
         if (ids.isEmpty()) {
-            return Collections.emptyList();
+            return new java.util.ArrayList<>();
         }
         List<DynamicFormColumnEntity> oldColumns = DefaultDSLQueryService
                 .createQuery(formColumnDao)
@@ -601,7 +601,7 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
                 .contains(javaType) || javaType != Map.class || javaType != List.class;
 
         if (javaType.isEnum() && EnumDict.class.isAssignableFrom(javaType)) {
-            return new EnumDictValueConverter<EnumDict>(() -> (List) Arrays.asList(javaType.getEnumConstants()));
+            return new EnumDictValueConverter<EnumDict>(() -> new Arr);
         }
         switch (jdbcType) {
             case BLOB:

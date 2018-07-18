@@ -40,7 +40,7 @@ public class OrgScopeDataAccessHandler extends AbstractScopeDataAccessHandler<Or
             case SCOPE_TYPE_ONLY_SELF:
                 return authorization.getRootOrgId();
             default:
-                return Collections.emptySet();
+                return new java.util.HashSet<>();
         }
     }
 

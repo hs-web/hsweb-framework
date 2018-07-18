@@ -40,7 +40,7 @@ public class SimplePersonnelAuthentication implements PersonnelAuthentication {
     @Override
     public Set<TreeNode<String>> getDistrictIds() {
         if (districtIds == null) {
-            districtIds = Collections.emptySet();
+            districtIds = new java.util.HashSet<>();
         }
         return districtIds;
     }
@@ -61,7 +61,7 @@ public class SimplePersonnelAuthentication implements PersonnelAuthentication {
     @Override
     public Set<TreeNode<String>> getOrgIds() {
         if (orgIds == null) {
-            orgIds = Collections.emptySet();
+            orgIds = new java.util.HashSet<>();
         }
         return orgIds;
     }
@@ -73,7 +73,7 @@ public class SimplePersonnelAuthentication implements PersonnelAuthentication {
     @Override
     public Set<TreeNode<String>> getPositionIds() {
         if (positionIds == null) {
-            positionIds = Collections.emptySet();
+            positionIds = new java.util.HashSet<>();
         }
         return positionIds;
     }
@@ -85,7 +85,7 @@ public class SimplePersonnelAuthentication implements PersonnelAuthentication {
     @Override
     public Set<TreeNode<String>> getDepartmentIds() {
         if (departmentIds == null) {
-            departmentIds = Collections.emptySet();
+            departmentIds = new java.util.HashSet<>();
         }
         return departmentIds;
     }

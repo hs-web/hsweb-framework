@@ -59,7 +59,7 @@ public class FieldAccessModel implements Model {
             required = true, dataType = "ActionModel")
     public List<ActionModel> getActions() {
         if (actions == null) {
-            actions = Collections.emptyList();
+            actions = new java.util.ArrayList<>();
         }
         return actions;
     }

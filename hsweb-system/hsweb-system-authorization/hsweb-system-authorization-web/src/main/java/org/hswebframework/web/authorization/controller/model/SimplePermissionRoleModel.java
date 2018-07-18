@@ -48,7 +48,7 @@ public class SimplePermissionRoleModel implements PermissionRoleModel {
     @Override
     public List<String> getActions() {
         if (this.actions == null) {
-            return Collections.emptyList();
+            return new java.util.ArrayList<>();
         }
         return actions;
     }
@@ -61,7 +61,7 @@ public class SimplePermissionRoleModel implements PermissionRoleModel {
     @Override
     public List<DataAccessModel> getDataAccesses() {
         if (this.dataAccesses == null) {
-            return Collections.emptyList();
+            return new java.util.ArrayList<>();
         }
         return this.dataAccesses;
     }

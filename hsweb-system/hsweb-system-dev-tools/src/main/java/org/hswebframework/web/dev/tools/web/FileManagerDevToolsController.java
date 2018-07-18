@@ -54,7 +54,7 @@ public class FileManagerDevToolsController {
         if (file.isDirectory()) {
             File[] files = file.listFiles();
             if (files == null) {
-                list = Collections.emptyList();
+                list = new java.util.ArrayList<>();
             } else {
                 list = Stream.of(files)
                         .map(FileInfo::from)

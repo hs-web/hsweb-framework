@@ -37,7 +37,7 @@ public class SimpleDictParserFormatter implements DictParserFormatter {
             , Object value
             , BiFunction<String, String, T> mapping) {
         if (value == null) {
-            return Collections.emptyList();
+            return new java.util.ArrayList<>();
         }
         String stringValue = String.valueOf(value);
         if (!needParse(stringValue, format)) {

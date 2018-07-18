@@ -22,6 +22,6 @@ public class SessionIdWebSocketTokenParser implements WebSocketTokenParser {
                         .add(tmp[1].trim());
             }
         }
-        return sessionId.getOrDefault("JSESSIONID", sessionId.getOrDefault("SESSIONID", Collections.emptySet())).stream().findFirst().orElse(null);
+        return sessionId.getOrDefault("JSESSIONID", sessionId.getOrDefault("SESSIONID", new java.util.HashSet<>())).stream().findFirst().orElse(null);
     }
 }

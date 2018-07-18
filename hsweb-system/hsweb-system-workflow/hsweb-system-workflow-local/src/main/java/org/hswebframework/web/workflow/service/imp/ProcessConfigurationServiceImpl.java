@@ -151,7 +151,7 @@ public class ProcessConfigurationServiceImpl implements ProcessConfigurationServ
 
         @Override
         public List<CandidateInfo> getCandidateInfo(Task task) {
-            return Collections.emptyList();
+            return new java.util.ArrayList<>();
         }
 
         @Override

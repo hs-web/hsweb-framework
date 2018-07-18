@@ -139,7 +139,7 @@ public class DefaultDepartmentRelations extends DefaultLinkedRelations<Departmen
     private Supplier<List<PositionEntity>> positionSupplier = Lazy.val(() -> {
         List<String> departmentId = getAllDepartmentId();
         if (CollectionUtils.isEmpty(departmentId)) {
-            return (Supplier) () -> Collections.emptyList();
+            return (Supplier) () -> new java.util.ArrayList<>();
         }
         QueryParamEntity positionQueryParam = positionQuery.end()
                 .in(PositionEntity.departmentId, departmentId)
@@ -157,7 +157,7 @@ public class DefaultDepartmentRelations extends DefaultLinkedRelations<Departmen
     private Supplier<List<String>> allDepartmentId = createLazyIdSupplier(() -> {
         Set<String> departmentId = new HashSet<>(targetIdSupplier.get());
         if (CollectionUtils.isEmpty(departmentId)) {
-            return Collections.emptyList();
+            return new java.util.ArrayList<>();
         }
         Set<String> allParent = null, allChildren = null;
         //包含父级
@@ -204,7 +204,7 @@ public class DefaultDepartmentRelations extends DefaultLinkedRelations<Departmen
         List<PositionEntity> positionEntities = positionSupplier.get();
 
         if (CollectionUtils.isEmpty(positionEntities)) {
-            return Collections.emptyList();
+            return new java.util.ArrayList<>();
         }
 
         return serviceContext

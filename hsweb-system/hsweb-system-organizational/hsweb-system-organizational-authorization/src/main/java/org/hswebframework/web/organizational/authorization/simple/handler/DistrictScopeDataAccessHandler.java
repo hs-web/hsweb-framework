@@ -43,7 +43,7 @@ public class DistrictScopeDataAccessHandler extends AbstractScopeDataAccessHandl
             case SCOPE_TYPE_ONLY_SELF:
                 return authorization.getRootDistrictId();
             default:
-                return Collections.emptySet();
+                return new java.util.HashSet<>();
         }
     }
 

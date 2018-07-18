@@ -55,7 +55,7 @@ public class BpmActivityServiceImpl extends AbstractFlowableService implements B
         } else {
             ActivityImpl activity = pde.findActivity(activityId);
             if (null == activity) {
-                return Collections.emptyList();
+                return new java.util.ArrayList<>();
             }
             return Collections.singletonList(activity);
         }

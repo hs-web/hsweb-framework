@@ -58,7 +58,7 @@ public abstract class FixUseSupperClassFallbackCacheOperationSource implements C
      * Canonical value held in cache to indicate no caching attribute was
      * found for this method and we don't need to look again.
      */
-    private final static Collection<CacheOperation> NULL_CACHING_ATTRIBUTE = Collections.emptyList();
+    private final static Collection<CacheOperation> NULL_CACHING_ATTRIBUTE = new java.util.ArrayList<>();
 
 
     /**

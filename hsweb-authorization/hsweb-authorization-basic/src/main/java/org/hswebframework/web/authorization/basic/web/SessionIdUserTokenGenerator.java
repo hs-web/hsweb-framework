@@ -36,7 +36,7 @@ public class SessionIdUserTokenGenerator implements UserTokenGenerator, Serializ
 
             @Override
             public Map<String, Object> getResponse() {
-                return Collections.emptyMap();
+                return new java.util.HashMap<>();
             }
 
             @Override

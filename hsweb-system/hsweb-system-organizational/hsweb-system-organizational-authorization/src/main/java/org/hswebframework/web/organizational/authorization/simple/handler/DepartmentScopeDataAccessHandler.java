@@ -45,7 +45,7 @@ public class DepartmentScopeDataAccessHandler extends AbstractScopeDataAccessHan
             case SCOPE_TYPE_ONLY_SELF:
                 return authorization.getRootDepartmentId();
             default:
-                return Collections.emptySet();
+                return new java.util.HashSet<>();
         }
     }
 

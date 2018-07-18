@@ -100,7 +100,7 @@ public final class FastBeanCopier {
     }
 
     public static <T, S> T copy(S source, T target, Converter converter, String... ignore) {
-        return copy(source, target, converter, (ignore == null || ignore.length == 0) ? Collections.emptySet() : new HashSet<>(Arrays.asList(ignore)));
+        return copy(source, target, converter, (ignore == null || ignore.length == 0) ? new java.util.HashSet<>() : new HashSet<>(Arrays.asList(ignore)));
     }
 
     public static <T, S> T copy(S source, T target, Set<String> ignore) {
