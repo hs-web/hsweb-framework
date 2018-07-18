@@ -183,6 +183,7 @@ public class FlowableDeploymentController extends AbstractFlowableService {
             @PathVariable("deploymentId") String deploymentId
             , @RequestParam(defaultValue = "false") boolean cascade) {
         repositoryService.deleteDeployment(deploymentId, cascade);
+        
         return ResponseMessage.ok();
     }
 

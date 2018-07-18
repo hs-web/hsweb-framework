@@ -14,6 +14,8 @@ import org.springframework.util.ReflectionUtils;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -35,7 +37,7 @@ public class QueryUtils {
         return doQuery(query,
                 entity,
                 mapping,
-                (term, tuQuery) -> log.warn("不支持的查询条件:{}{}", term.getTermType(), term.getColumn()));
+                (term, tuQuery) -> log.warn("不支持的查询条件:{} {}", term.getTermType(), term.getColumn()));
     }
 
     public static <U, R, T extends Query<?, U>> PagerResult<R> doQuery(T query,
@@ -65,17 +67,18 @@ public class QueryUtils {
             } else if (TermType.in.equals(term.getTermType())) {
                 name = name.concat("s");
             }
-            Method method = ReflectionUtils.findMethod(type, name);
-            if (method == null) {
+            String finalName = name;
+            AtomicBoolean found = new AtomicBoolean(false);
+            ReflectionUtils.doWithMethods(type, method -> {
+                if (method.getParameterCount() == 1 && method.getName().equals(finalName)) {
+                    Object value = FastBeanCopier.DEFAULT_CONVERT.convert(term.getValue(), method.getParameterTypes()[0], FastBeanCopier.EMPTY_CLASS_ARRAY);
+                    ReflectionUtils.invokeMethod(method, query, value);
+                    found.set(true);
+                }
+            });
+            if (!found.get()) {
                 notFound.accept(term, query);
-                continue;
             }
-            if (method.getParameterCount() != 1) {
-                log.debug("查询参数:[{} {}]不支持,method:{}", term.getTermType(), name, method);
-                continue;
-            }
-            Object value = FastBeanCopier.DEFAULT_CONVERT.convert(term.getValue(), method.getParameterTypes()[0], FastBeanCopier.EMPTY_CLASS_ARRAY);
-            ReflectionUtils.invokeMethod(method, query, value);
         }
         for (Sort sort : entity.getSorts()) {
             String name = sort.getName();
