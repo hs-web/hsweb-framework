@@ -29,6 +29,7 @@ import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity;
 import org.activiti.engine.impl.pvm.PvmTransition;
 import org.activiti.engine.impl.pvm.process.ActivityImpl;
 import org.activiti.engine.runtime.ProcessInstance;
+import org.hswebframework.web.authorization.annotation.Authorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -36,6 +37,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/workflow/service")
+@Authorize(permission = "workflow-definition", description = "工作流-流程定义管理")
 public class ProcessInstanceHighlightsResource {
 
     @Autowired

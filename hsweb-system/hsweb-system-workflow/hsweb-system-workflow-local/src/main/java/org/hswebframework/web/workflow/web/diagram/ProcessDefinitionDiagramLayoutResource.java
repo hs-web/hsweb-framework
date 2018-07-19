@@ -1,5 +1,6 @@
 package org.hswebframework.web.workflow.web.diagram;
 
+import org.hswebframework.web.authorization.annotation.Authorize;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping("/workflow/service/")
+@Authorize(permission = "workflow-definition", description = "工作流-流程定义管理")
 public class ProcessDefinitionDiagramLayoutResource
         extends BaseProcessDefinitionDiagramLayoutResource {
 

@@ -326,11 +326,11 @@ public class BaseProcessDefinitionDiagramLayoutResource {
         for (String key : properties.keySet()) {
             Object prop = properties.get(key);
             if (prop instanceof String)
-                propertiesJSON.put(key, (String) properties.get(key));
+                propertiesJSON.put(key,  properties.get(key));
             else if (prop instanceof Integer)
-                propertiesJSON.put(key, (Integer) properties.get(key));
+                propertiesJSON.put(key,  properties.get(key));
             else if (prop instanceof Boolean)
-                propertiesJSON.put(key, (Boolean) properties.get(key));
+                propertiesJSON.put(key,  properties.get(key));
             else if ("initial".equals(key)) {
                 ActivityImpl act = (ActivityImpl) properties.get(key);
                 propertiesJSON.put(key, act.getId());
