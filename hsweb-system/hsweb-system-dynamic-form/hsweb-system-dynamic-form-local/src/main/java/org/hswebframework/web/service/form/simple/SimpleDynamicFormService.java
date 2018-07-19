@@ -28,22 +28,23 @@ import org.hswebframework.web.service.DefaultDSLDeleteService;
 import org.hswebframework.web.service.DefaultDSLQueryService;
 import org.hswebframework.web.service.DefaultDSLUpdateService;
 import org.hswebframework.web.service.GenericEntityService;
-import org.hswebframework.web.service.form.DatabaseRepository;
-import org.hswebframework.web.service.form.DynamicFormDeployLogService;
-import org.hswebframework.web.service.form.DynamicFormService;
-import org.hswebframework.web.service.form.OptionalConvertBuilder;
+import org.hswebframework.web.service.form.*;
+import org.hswebframework.web.service.form.events.FormDeployEvent;
 import org.hswebframework.web.service.form.initialize.ColumnInitializeContext;
 import org.hswebframework.web.service.form.initialize.DynamicFormInitializeCustomer;
 import org.hswebframework.web.service.form.initialize.TableInitializeContext;
+import org.hswebframework.web.service.form.simple.cluster.ClusterDatabase;
 import org.hswebframework.web.service.form.simple.convert.SmartValueConverter;
 import org.hswebframework.web.service.form.simple.dict.EnumDictValueConverter;
 import org.hswebframework.web.validator.group.CreateGroup;
 import org.hswebframework.web.validator.group.UpdateGroup;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -65,7 +66,11 @@ import java.util.stream.Collectors;
 @Service("dynamicFormService")
 @CacheConfig(cacheNames = "dyn-form")
 public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEntity, String>
-        implements DynamicFormService {
+        implements DynamicFormService, FormDeployService {
+
+    @Value("${hsweb.dynamic-form.tags:none}")
+    private String tags;
+
     @Autowired
     private DynamicFormDao dynamicFormDao;
 
@@ -90,6 +95,9 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
     @Autowired(required = false)
     private ObjectWrapperFactory objectWrapperFactory;
 
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
+
     @Override
     protected IDGenerator<String> getIDGenerator() {
         return IDGenerator.MD5;
@@ -110,6 +118,7 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
         List<DynamicFormEntity> entities = createQuery()
                 .select(DynamicFormEntity.id)
                 .where(DynamicFormEntity.deployed, true)
+                .and(DynamicFormEntity.tags, tags)
                 .listNoPaging();
         if (logger.isDebugEnabled()) {
             logger.debug("do deploy all form , size:{}", entities.size());
@@ -156,7 +165,7 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
         if (logger.isDebugEnabled()) {
             logger.debug("do deploy form {} , columns size:{}", form.getName(), columns.size());
         }
-        deploy(form, columns);
+        deploy(form, columns, true);
     }
 
 
@@ -166,6 +175,7 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
         entity.setDeployed(false);
         entity.setVersion(1L);
         entity.setCreateTime(System.currentTimeMillis());
+        entity.setTags(tags);
         return super.insert(entity);
     }
 
@@ -185,6 +195,10 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
         return super.updateByPk(id, entity);
     }
 
+    protected void initDatabase(RDBDatabase database) {
+
+    }
+
     @Override
     @Caching(evict = {
             @CacheEvict(value = "dyn-form-deploy", allEntries = true),
@@ -201,6 +215,7 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
                 : databaseRepository.getDatabase(form.getDataSourceId());
         database.removeTable(form.getDatabaseTableName());
         createUpdate().set(DynamicFormEntity.deployed, false).where(DynamicFormEntity.id, formId).exec();
+        eventPublisher.publishEvent(new FormDeployEvent(formId));
     }
 
     private String saveOrUpdate0(DynamicFormColumnEntity columnEntity) {
@@ -342,15 +357,29 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
     @Cacheable(value = "dyn-form-deploy", key = "'form-deploy:'+#formId+':'+#version")
     public DynamicFormColumnBindEntity selectDeployed(String formId, int version) {
         DynamicFormDeployLogEntity entity = dynamicFormDeployLogService.selectDeployed(formId, version);
-        assertNotNull(entity);
+        if (entity == null) {
+            return null;
+        }
         return JSON.parseObject(entity.getMetaData(), DynamicFormColumnBindEntity.class);
+    }
+
+    @Override
+    @Cacheable(value = "dyn-form-deploy", key = "'form-deploy-version:'+#formId")
+    public long selectDeployedVersion(String formId) {
+        DynamicFormColumnBindEntity entity = selectLatestDeployed(formId);
+        if (null != entity) {
+            return entity.getForm().getVersion();
+        }
+        return 0L;
     }
 
     @Override
     @Cacheable(value = "dyn-form-deploy", key = "'form-deploy:'+#formId+':latest'")
     public DynamicFormColumnBindEntity selectLatestDeployed(String formId) {
         DynamicFormDeployLogEntity entity = dynamicFormDeployLogService.selectLastDeployed(formId);
-        assertNotNull(entity);
+        if (entity == null) {
+            return null;
+        }
         return JSON.parseObject(entity.getMetaData(), DynamicFormColumnBindEntity.class);
     }
 
@@ -362,6 +391,7 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
 
     @Override
     @Caching(evict = {
+            @CacheEvict(value = "dyn-form-deploy", key = "'form-deploy-version:'+#formId"),
             @CacheEvict(value = "dyn-form-deploy", key = "'form-deploy:'+#formId+':latest'"),
             @CacheEvict(value = "dyn-form", allEntries = true)
     })
@@ -373,27 +403,32 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
             dynamicFormDeployLogService.cancelDeployed(formId);
         }
         List<DynamicFormColumnEntity> columns = selectColumnsByFormId(formId);
-        deploy(formEntity, columns);
+        deploy(formEntity, columns, true);
         createUpdate().set(DynamicFormEntity.deployed, true).where(DynamicFormEntity.id, formId).exec();
         try {
             dynamicFormDeployLogService.insert(createDeployLog(formEntity, columns));
+            eventPublisher.publishEvent(new FormDeployEvent(formId));
         } catch (Exception e) {
             unDeploy(formId);
             throw e;
         }
     }
 
-    protected void deploy(DynamicFormEntity form, List<DynamicFormColumnEntity> columns) {
+    public void deploy(DynamicFormEntity form, List<DynamicFormColumnEntity> columns, boolean updateMeta) {
         RDBDatabase database = StringUtils.isEmpty(form.getDataSourceId())
                 ? databaseRepository.getDefaultDatabase()
                 : databaseRepository.getDatabase(form.getDataSourceId());
+        initDatabase(database);
         RDBTableMetaData metaData = buildTable(database, form, columns);
-        metaData.setValidator(validatorFactory.createValidator(metaData));
         try {
             if (!database.getMeta().getParser().tableExists(metaData.getName())) {
                 database.createTable(metaData);
             } else {
-                database.alterTable(metaData);
+                if (!updateMeta) {
+                    database.reloadTable(metaData);
+                } else {
+                    database.alterTable(metaData);
+                }
             }
         } catch (SQLException e) {
             throw new DynamicFormException("部署失败:" + e.getMessage(), e);
@@ -464,6 +499,9 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
         if (null != form.getProperties()) {
             metaData.setProperties(form.getProperties());
         }
+        metaData.setProperty("version", form.getVersion());
+        metaData.setProperty("formId", form.getId());
+
         metaData.setAlias(form.getAlias());
         metaData.setCorrelations(buildCorrelations(form.getCorrelations()));
         buildTrigger(form.getTriggers()).forEach(metaData::on);
@@ -509,6 +547,8 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
         if (objectWrapperFactory != null) {
             metaData.setObjectWrapper(objectWrapperFactory.createObjectWrapper(metaData));
         }
+        metaData.setValidator(validatorFactory.createValidator(metaData));
+
         customTableSetting(database, form, metaData);
         //没有主键并且没有id字段
         if (metaData.getColumns().stream().noneMatch(RDBColumnMetaData::isPrimaryKey) && metaData.findColumn("id") == null) {

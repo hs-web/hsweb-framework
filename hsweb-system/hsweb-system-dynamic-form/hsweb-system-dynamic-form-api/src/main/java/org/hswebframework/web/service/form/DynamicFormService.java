@@ -39,4 +39,5 @@ public interface DynamicFormService extends CrudService<DynamicFormEntity, Strin
 
     DynamicFormColumnBindEntity selectDeployed(String formId, int version);
 
+    long selectDeployedVersion(String formId);
 }

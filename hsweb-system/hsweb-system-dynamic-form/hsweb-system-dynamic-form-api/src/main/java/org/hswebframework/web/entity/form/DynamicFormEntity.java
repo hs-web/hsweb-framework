@@ -67,6 +67,8 @@ public interface DynamicFormEntity extends GenericEntity<String> {
      */
     String type              = "type";
 
+    String tags = "tags";
+
     /**
      * @return 表单名称
      */
@@ -208,5 +210,9 @@ public interface DynamicFormEntity extends GenericEntity<String> {
      * @param type 表单类型
      */
     void setType(String type);
+
+    String getTags();
+
+    void setTags(String tags);
 
 }

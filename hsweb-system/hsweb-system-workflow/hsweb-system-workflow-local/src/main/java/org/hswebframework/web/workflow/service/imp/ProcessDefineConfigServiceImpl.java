@@ -47,6 +47,7 @@ public class ProcessDefineConfigServiceImpl extends EnableCacheGenericEntityServ
     public String insert(ProcessDefineConfigEntity entity) {
         entity.setCreateTime(new Date());
         entity.setUpdateTime(new Date());
+        entity.setStatus(DataStatus.STATUS_ENABLED);
         return super.insert(entity);
     }
 

@@ -12,8 +12,12 @@ import org.hswebframework.web.datasource.DataSourceHolder;
 import org.hswebframework.web.datasource.DatabaseType;
 import org.hswebframework.web.datasource.DynamicDataSource;
 import org.hswebframework.web.service.form.DatabaseRepository;
+import org.hswebframework.web.service.form.DynamicFormService;
+import org.hswebframework.web.service.form.FormDeployService;
 import org.hswebframework.web.service.form.events.DatabaseInitEvent;
+import org.hswebframework.web.service.form.simple.cluster.ClusterDatabase;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +33,9 @@ public class SimpleDatabaseRepository implements DatabaseRepository {
 
     private volatile RDBDatabase defaultDatabase = null;
     private          SqlExecutor sqlExecutor     = null;
+
+    @Value("${hsweb.dynamic-form.cluster:false}")
+    private boolean cluster = false;
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;
@@ -99,7 +106,10 @@ public class SimpleDatabaseRepository implements DatabaseRepository {
         Supplier<AbstractRDBDatabaseMetaData> supplier = databaseMetaSuppliers.get(databaseType);
         Objects.requireNonNull(supplier, "database type" + databaseType + " is not support");
         AbstractRDBDatabaseMetaData metaData = supplier.get();
-        SimpleDatabase database = new SimpleDatabase(metaData, sqlExecutor);
+
+        SimpleDatabase database = cluster ?
+                new ClusterDatabase(metaData, sqlExecutor) :
+                new SimpleDatabase(metaData, sqlExecutor);
         database.setAutoParse(true);
         eventPublisher.publishEvent(new DatabaseInitEvent(database));
         return database;

@@ -19,6 +19,7 @@
         <result property="dataSourceId" column="data_source_id" javaType="String" jdbcType="VARCHAR"/>
         <result property="properties" column="properties" javaType="java.util.Map" jdbcType="CLOB"/>
         <result property="type" column="type" javaType="String" jdbcType="VARCHAR"/>
+        <result property="tags" column="tags" javaType="String" jdbcType="VARCHAR"/>
     </resultMap>
 
     <!--用于动态生成sql所需的配置-->

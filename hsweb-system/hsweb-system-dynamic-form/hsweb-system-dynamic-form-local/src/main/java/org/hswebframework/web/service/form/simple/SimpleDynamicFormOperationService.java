@@ -17,6 +17,7 @@ import org.hswebframework.web.entity.form.DynamicFormEntity;
 import org.hswebframework.web.service.form.DatabaseRepository;
 import org.hswebframework.web.service.form.DynamicFormOperationService;
 import org.hswebframework.web.service.form.DynamicFormService;
+import org.hswebframework.web.service.form.FormDeployService;
 import org.hswebframework.web.service.form.events.FormDataInsertBeforeEvent;
 import org.hswebframework.web.service.form.events.FormDataUpdateBeforeEvent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,22 +36,14 @@ import java.util.Objects;
 @Transactional(rollbackFor = Throwable.class)
 public class SimpleDynamicFormOperationService implements DynamicFormOperationService {
 
+    @Autowired
     private DynamicFormService dynamicFormService;
 
+    @Autowired
     private DatabaseRepository databaseRepository;
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;
-
-    @Autowired
-    public void setDynamicFormService(DynamicFormService dynamicFormService) {
-        this.dynamicFormService = dynamicFormService;
-    }
-
-    @Autowired
-    public void setDatabaseRepository(DatabaseRepository databaseRepository) {
-        this.databaseRepository = databaseRepository;
-    }
 
     protected <T> RDBTable<T> getTable(String formId) {
         DynamicFormEntity form = dynamicFormService.selectByPk(formId);
@@ -167,7 +160,7 @@ public class SimpleDynamicFormOperationService implements DynamicFormOperationSe
     public <T> T selectById(String formId, Object id) {
         Objects.requireNonNull(id, "主键不能为空");
         RDBTable<T> table = getTable(formId);
-        return table.createQuery().where(idProperty,id).single();
+        return table.createQuery().where(idProperty, id).single();
     }
 
     @Override
