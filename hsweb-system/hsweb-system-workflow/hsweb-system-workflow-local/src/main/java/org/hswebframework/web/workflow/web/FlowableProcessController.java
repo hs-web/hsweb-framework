@@ -192,7 +192,6 @@ public class FlowableProcessController {
         TaskQuery taskQuery = taskService.createTaskQuery();
 
         taskQuery.taskCandidateUser(authentication.getUser().getId());
-
         PagerResult<TaskInfo> result = QueryUtils.doQuery(taskQuery, query, TaskInfo::of);
 
         return ResponseMessage.ok(result);

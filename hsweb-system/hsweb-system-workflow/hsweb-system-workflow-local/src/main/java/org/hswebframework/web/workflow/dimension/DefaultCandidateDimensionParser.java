@@ -46,6 +46,7 @@ public class DefaultCandidateDimensionParser implements CandidateDimensionParser
                                     .map(strategy -> strategy.parse(context, config))
                                     .filter(CollectionUtils::isNotEmpty)
                                     .flatMap(Collection::stream)
+                                    .filter(StringUtils::hasText)
                     ).collect(Collectors.toList());
 
             return (CandidateDimension) () -> list;

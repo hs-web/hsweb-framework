@@ -16,6 +16,8 @@ import org.activiti.engine.task.Task;
 import org.hswebframework.utils.StringUtils;
 import org.hswebframework.web.BusinessException;
 import org.hswebframework.web.NotFoundException;
+import org.hswebframework.web.authorization.Authentication;
+import org.hswebframework.web.authorization.User;
 import org.hswebframework.web.workflow.service.config.ProcessConfigurationService;
 import org.hswebframework.web.workflow.service.BpmActivityService;
 import org.hswebframework.web.workflow.service.BpmTaskService;
@@ -291,7 +293,10 @@ public class BpmTaskServiceImpl extends AbstractFlowableService implements BpmTa
                     .getCandidateInfo(task);
 
             for (CandidateInfo candidateInfo : candidateInfoList) {
-                taskService.addCandidateUser(task.getId(), candidateInfo.user().getUser().getId());
+                Authentication user = candidateInfo.user();
+                if (user != null) {
+                    taskService.addCandidateUser(task.getId(), user.getUser().getId());
+                }
             }
         } else {
             logger.warn("未能成功设置环节候选人,task:{}", task);
