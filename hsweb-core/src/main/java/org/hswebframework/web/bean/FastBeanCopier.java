@@ -468,11 +468,11 @@ public final class FastBeanCopier {
         public Collection newCollection(Class targetClass) {
 
             if (targetClass == List.class) {
-                return new ArrayList();
+                return new ArrayList<>();
             } else if (targetClass == Set.class) {
-                return new HashSet();
+                return new HashSet<>();
             } else if (targetClass == Queue.class) {
-                return new LinkedList();
+                return new LinkedList<>();
             } else {
                 try {
                     return (Collection) targetClass.newInstance();

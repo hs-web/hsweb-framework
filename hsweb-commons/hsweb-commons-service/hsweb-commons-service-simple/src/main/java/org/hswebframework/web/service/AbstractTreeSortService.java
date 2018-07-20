@@ -45,7 +45,7 @@ public abstract class AbstractTreeSortService<E extends TreeSortSupportEntity<PK
         assertNotNull(childId);
         E old = selectByPk(childId);
         if (null == old) {
-            return new ArrayList();
+            return new ArrayList<>();
         }
         return createQuery()
                 .where()
@@ -60,7 +60,7 @@ public abstract class AbstractTreeSortService<E extends TreeSortSupportEntity<PK
         assertNotNull(parentId);
         E old = selectByPk(parentId);
         if (null == old) {
-            return new ArrayList();
+            return new ArrayList<>();
         }
         return createQuery()
                 .where()
