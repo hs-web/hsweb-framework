@@ -17,12 +17,10 @@ import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
 
-/**
- * Created by Administrator on 2017/7/26.
- */
 @Configuration
 @AutoConfigureAfter(FlowableAutoConfiguration.CustomEntityManagerAutoConfiguration.class)
-@MapperScan(value = "org.hswebframework.web.workflow.dao", markerInterface = Dao.class)
+@MapperScan(value = "org.hswebframework.web.workflow.dao", markerInterface = Dao.class
+        ,sqlSessionFactoryRef = "sqlSessionFactory")
 public class FlowableAutoConfiguration {
 
     @Autowired(required = false)

@@ -23,6 +23,7 @@ public interface CandidateDimensionParserStrategy {
     @Getter
     @Setter
     class StrategyConfig {
+        private String       dimension;
 
         private List<String> idList;
 

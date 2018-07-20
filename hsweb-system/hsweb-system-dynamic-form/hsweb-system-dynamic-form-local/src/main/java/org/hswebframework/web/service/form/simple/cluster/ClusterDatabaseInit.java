@@ -33,7 +33,7 @@ public class ClusterDatabaseInit {
                 if (formId != null) {
                     DynamicFormColumnBindEntity entity = dynamicFormService.selectLatestDeployed(formId);
                     if (null != entity) {
-                        formDeployService.deploy(entity.getForm(), entity.getColumns(), true);
+                        formDeployService.deploy(entity.getForm(), entity.getColumns(), false);
                     }
                 }
             });
