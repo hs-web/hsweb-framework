@@ -53,6 +53,7 @@ import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.sql.Array;
 import java.sql.JDBCType;
 import java.sql.SQLException;
 import java.util.*;
@@ -69,7 +70,13 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
         implements DynamicFormService, FormDeployService {
 
     @Value("${hsweb.dynamic-form.tags:none}")
-    private String tags;
+    private String[] tags;
+
+    @Value("${hsweb.dynamic-form.tag:none}")
+    private String tag;
+
+    @Value("${hsweb.dynamic-form.load-only-tags:null}")
+    private String[] loadOnlyTags;
 
     @Autowired
     private DynamicFormDao dynamicFormDao;
@@ -115,10 +122,16 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
     })
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public void deployAllFromLog() {
+
+        List<String> tags = new ArrayList<>(Arrays.asList(this.tags));
+        if (loadOnlyTags != null) {
+            tags.addAll(Arrays.asList(loadOnlyTags));
+        }
         List<DynamicFormEntity> entities = createQuery()
                 .select(DynamicFormEntity.id)
                 .where(DynamicFormEntity.deployed, true)
-                .and(DynamicFormEntity.tags, tags)
+                .and()
+                .in(DynamicFormEntity.tags, tags)
                 .listNoPaging();
         if (logger.isDebugEnabled()) {
             logger.debug("do deploy all form , size:{}", entities.size());
@@ -165,7 +178,8 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
         if (logger.isDebugEnabled()) {
             logger.debug("do deploy form {} , columns size:{}", form.getName(), columns.size());
         }
-        deploy(form, columns, true);
+
+        deploy(form, columns, !(loadOnlyTags != null && Arrays.asList(loadOnlyTags).contains(entity.getForm().getTags())));
     }
 
 
@@ -175,7 +189,7 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
         entity.setDeployed(false);
         entity.setVersion(1L);
         entity.setCreateTime(System.currentTimeMillis());
-        entity.setTags(tags);
+        entity.setTags(tag);
         return super.insert(entity);
     }
 
