@@ -2,6 +2,8 @@ package org.hswebframework.web.workflow.web;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.activiti.engine.HistoryService;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
@@ -16,6 +18,7 @@ import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.runtime.ProcessInstanceQuery;
 import org.activiti.engine.task.Task;
 import org.activiti.engine.task.TaskQuery;
+import org.hswebframework.ezorm.core.dsl.Query;
 import org.hswebframework.web.NotFoundException;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.Permission;
@@ -24,6 +27,7 @@ import org.hswebframework.web.commons.entity.PagerResult;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.workflow.service.BpmActivityService;
+import org.hswebframework.web.workflow.service.WorkFlowFormService;
 import org.hswebframework.web.workflow.service.config.CandidateInfo;
 import org.hswebframework.web.workflow.service.config.ProcessConfigurationService;
 import org.hswebframework.web.workflow.service.BpmProcessService;
@@ -76,6 +80,9 @@ public class FlowableProcessController {
     @Autowired
     private HistoryService historyService;
 
+    @Autowired
+    private WorkFlowFormService workFlowFormService;
+
     @GetMapping("/doing")
     @Authorize(action = Permission.ACTION_QUERY)
     @ApiOperation("查询进行中的流程信息")
@@ -124,8 +131,6 @@ public class FlowableProcessController {
 
         return ResponseMessage.ok(result).exclude(query.getExcludes()).include(query.getIncludes());
     }
-
-
 
     @PostMapping("/start/key/{defineKey}")
     @ApiOperation("提交表单数据并根据流程定义key启动流程")
@@ -199,6 +204,45 @@ public class FlowableProcessController {
 
         return ResponseMessage.ok(result).exclude(query.getExcludes()).include(query.getIncludes());
     }
+
+    @AllArgsConstructor
+    @Getter
+    public enum Type{
+        claim("user-wf-claim"),
+        todo("user-wf-todo"),
+        completed("user-wf-completed"),
+        part("user-wf-part");
+
+        private String termType;
+
+    }
+
+    @GetMapping("/{type}/form/{processDefineId}")
+    @ApiOperation("获取自己可查看的流程表单数据")
+    @Authorize(merge = false)
+    public ResponseMessage<PagerResult<Object>> getFormData(@PathVariable Type type, @PathVariable String processDefineId, QueryParamEntity query, Authentication authentication) {
+
+        Query.empty(query)
+                .nest()
+                //只能看到自己待办理
+                .and("processInstanceId", type.getTermType(), authentication.getUser().getId())
+                .end();
+        return ResponseMessage.ok(workFlowFormService.selectProcessForm(processDefineId, query));
+    }
+
+    @GetMapping("/task/form/{processDefineId}/{taskDefineKey}")
+    @ApiOperation("获取流程任务表单数据")
+    @Authorize(merge = false)
+    public ResponseMessage<PagerResult<Object>> getTaskFormData(@PathVariable String processDefineId, @PathVariable String taskDefineKey, QueryParamEntity query, Authentication authentication) {
+
+        Query.empty(query)
+                .nest()
+                .and("processInstanceId", "user-wf-todo", authentication.getUser().getId())
+                .end();
+
+        return ResponseMessage.ok(workFlowFormService.selectTaskForm(processDefineId, taskDefineKey, query));
+    }
+
 
     @GetMapping("/claims")
     @ApiOperation("获取待签收任务")

@@ -8,10 +8,16 @@ import org.hswebframework.ezorm.rdb.meta.RDBTableMetaData;
 import org.hswebframework.ezorm.rdb.meta.converter.DateTimeConverter;
 import org.hswebframework.ezorm.rdb.render.dialect.Dialect;
 import org.hswebframework.web.authorization.Authentication;
+import org.hswebframework.web.commons.entity.PagerResult;
+import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.service.form.DynamicFormOperationService;
 import org.hswebframework.web.service.form.initialize.ColumnInitializeContext;
 import org.hswebframework.web.service.form.initialize.DynamicFormInitializeCustomer;
 import org.hswebframework.web.service.form.initialize.TableInitializeContext;
+import org.hswebframework.web.workflow.dao.entity.ActivityConfigEntity;
+import org.hswebframework.web.workflow.dao.entity.ProcessDefineConfigEntity;
+import org.hswebframework.web.workflow.service.ActivityConfigService;
+import org.hswebframework.web.workflow.service.ProcessDefineConfigService;
 import org.hswebframework.web.workflow.service.config.ProcessConfigurationService;
 import org.hswebframework.web.workflow.service.WorkFlowFormService;
 import org.hswebframework.web.workflow.service.config.ActivityConfiguration;
@@ -19,53 +25,81 @@ import org.hswebframework.web.workflow.service.config.ProcessConfiguration;
 import org.hswebframework.web.workflow.service.request.SaveFormRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.sql.JDBCType;
 import java.util.Date;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author zhouhao
  * @since 3.0.0-RC
  */
 @Service
+@Transactional(rollbackFor = Exception.class)
 public class WorkFlowFormServiceImpl extends AbstractFlowableService implements WorkFlowFormService, DynamicFormInitializeCustomer {
 
     @Autowired
-    private ProcessConfigurationService processConfigurationService;
+    private DynamicFormOperationService dynamicFormOperationService;
 
     @Autowired
-    private DynamicFormOperationService dynamicFormOperationService;
+    private ActivityConfigService activityConfigService;
+
+    @Autowired
+    private ProcessDefineConfigService processDefineConfigService;
 
     @Override
     public void saveProcessForm(ProcessInstance instance, SaveFormRequest request) {
         request.tryValidate();
 
-        ProcessConfiguration configuration = processConfigurationService
-                .getProcessConfiguration(instance.getProcessDefinitionId());
+        ProcessDefineConfigEntity entity = processDefineConfigService.selectByProcessDefineId(instance.getProcessDefinitionId());
 
-        if (configuration == null || StringUtils.isEmpty(configuration.getFormId())) {
+        if (entity == null || StringUtils.isEmpty(entity.getFormId())) {
             return;
         }
         Map<String, Object> formData = request.getFormData();
 
         acceptStartProcessFormData(instance, formData);
 
-        dynamicFormOperationService.saveOrUpdate(configuration.getFormId(), formData);
+        dynamicFormOperationService.saveOrUpdate(entity.getFormId(), formData);
 
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public <T> PagerResult<T> selectProcessForm(String processDefineId, QueryParamEntity queryParam) {
+        ProcessDefineConfigEntity entity = processDefineConfigService.selectByProcessDefineId(processDefineId);
+
+        if (entity == null || StringUtils.isEmpty(entity.getFormId())) {
+            return PagerResult.empty();
+        }
+
+        return dynamicFormOperationService.selectPager(entity.getFormId(), queryParam);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public <T> PagerResult<T> selectTaskForm(String processDefineId, String activityId, QueryParamEntity queryParam) {
+        Objects.requireNonNull(processDefineId, "processDefineId can not be null");
+        Objects.requireNonNull(activityId, "activityId can not be null");
+
+        ActivityConfigEntity entity = activityConfigService.selectByProcessDefineIdAndActivityId(processDefineId, activityId);
+
+        if (entity == null || StringUtils.isEmpty(entity.getFormId())) {
+            return PagerResult.empty();
+        }
+        return dynamicFormOperationService.selectPager(entity.getFormId(), queryParam);
     }
 
     @Override
     public void saveTaskForm(Task task, SaveFormRequest request) {
         request.tryValidate();
 
-        ActivityConfiguration configuration = processConfigurationService
-                .getActivityConfiguration(request.getUserId()
-                        , task.getProcessDefinitionId()
-                        , task.getTaskDefinitionKey());
+        ActivityConfigEntity entity = activityConfigService.selectByProcessDefineIdAndActivityId(task.getProcessDefinitionId(), task.getTaskDefinitionKey());
 
-        if (configuration == null || StringUtils.isEmpty(configuration.getFormId())) {
+        if (entity == null || StringUtils.isEmpty(entity.getFormId())) {
             return;
         }
 
@@ -73,7 +107,7 @@ public class WorkFlowFormServiceImpl extends AbstractFlowableService implements 
 
         acceptTaskFormData(task, formData);
 
-        dynamicFormOperationService.saveOrUpdate(configuration.getFormId(), formData);
+        dynamicFormOperationService.saveOrUpdate(entity.getFormId(), formData);
 
     }
 
@@ -88,7 +122,7 @@ public class WorkFlowFormServiceImpl extends AbstractFlowableService implements 
 
         formData.put("processTaskId", task.getId());
         formData.put("processTaskDefineKey", task.getTaskDefinitionKey());
-        formData.put("processTaskName",task.getName());
+        formData.put("processTaskName", task.getName());
 
     }
 
@@ -109,7 +143,7 @@ public class WorkFlowFormServiceImpl extends AbstractFlowableService implements 
         RDBTableMetaData table = context.getTable();
         Dialect dialect = context.getDatabase().getMeta().getDialect();
 
-        if(!table.getProperty("enable-workflow",true).isTrue()){
+        if (!table.getProperty("enable-workflow", true).isTrue()) {
             return;
         }
         //----------taskId--------------
@@ -251,7 +285,7 @@ public class WorkFlowFormServiceImpl extends AbstractFlowableService implements 
             createTime.setProperty("read-only", true);
             createTime.setComment("创建时间");
             createTime.setNotNull(true);
-            createTime.setValueConverter(new DateTimeConverter("yyyy-MM-dd HH:mm:ss",Date.class));
+            createTime.setValueConverter(new DateTimeConverter("yyyy-MM-dd HH:mm:ss", Date.class));
             createTime.setDefaultValue(Date::new);
             table.addColumn(createTime);
         }
@@ -264,7 +298,7 @@ public class WorkFlowFormServiceImpl extends AbstractFlowableService implements 
             lastUpdateTime.setDataType(dialect.buildDataType(lastUpdateTime));
             lastUpdateTime.setComment("最后一次修改时间");
             lastUpdateTime.setNotNull(true);
-            lastUpdateTime.setValueConverter(new DateTimeConverter("yyyy-MM-dd HH:mm:ss",Date.class));
+            lastUpdateTime.setValueConverter(new DateTimeConverter("yyyy-MM-dd HH:mm:ss", Date.class));
             lastUpdateTime.setDefaultValue(Date::new);
             table.addColumn(lastUpdateTime);
         }
