@@ -1,5 +1,6 @@
 package org.hswebframework.web.workflow.service;
 
+import org.activiti.engine.delegate.DelegateExecution;
 import org.activiti.engine.impl.pvm.process.ActivityImpl;
 import org.activiti.engine.impl.task.TaskDefinition;
 
@@ -62,25 +63,17 @@ public interface BpmActivityService {
      * @param activityId 图元ID
      * @return List<TaskDefinition>  当前流程的所有下一环节资源
      */
-    List<TaskDefinition> getNextActivities(String procDefId, String activityId);
+    List<TaskDefinition> getNextActivities(String procDefId, String activityId,DelegateExecution execution);
+
 
     /**
      * 根据图元获取办理环节数据
      *
      * @param activityImpl
-     * @param elString     根据连线条件conditionText获取输出节点，主要用于网关分支（预留）
+     * @param execution     根据连线条件conditionText获取输出节点，主要用于网关分支（预留）
      * @return
      */
-    List<TaskDefinition> getTaskDefinition(ActivityImpl activityImpl, String elString);
-
-    /**
-     * 获取下一环节办理人
-     *
-     * @param procDefId  流程定义ID
-     * @param activityId 图元ID
-     * @return 节点id对应的办理人
-     */
-    Map<String, List<String>> getNextClaim(String procDefId, String activityId);
+    List<TaskDefinition> getTaskDefinition(ActivityImpl activityImpl,DelegateExecution execution);
 
     /**
      * 获取开始节点

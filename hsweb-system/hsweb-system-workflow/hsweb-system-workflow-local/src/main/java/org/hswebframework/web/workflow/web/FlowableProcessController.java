@@ -7,9 +7,14 @@ import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.history.HistoricTaskInstanceQuery;
+import org.activiti.engine.impl.RepositoryServiceImpl;
+import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
+import org.activiti.engine.impl.task.TaskDefinition;
 import org.activiti.engine.repository.ProcessDefinition;
+import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.runtime.ProcessInstanceQuery;
+import org.activiti.engine.task.Task;
 import org.activiti.engine.task.TaskQuery;
 import org.hswebframework.web.NotFoundException;
 import org.hswebframework.web.authorization.Authentication;
@@ -18,18 +23,23 @@ import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.commons.entity.PagerResult;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.controller.message.ResponseMessage;
+import org.hswebframework.web.workflow.service.BpmActivityService;
+import org.hswebframework.web.workflow.service.config.CandidateInfo;
 import org.hswebframework.web.workflow.service.config.ProcessConfigurationService;
 import org.hswebframework.web.workflow.service.BpmProcessService;
 import org.hswebframework.web.workflow.service.BpmTaskService;
 import org.hswebframework.web.workflow.service.request.CompleteTaskRequest;
 import org.hswebframework.web.workflow.service.request.StartProcessRequest;
 import org.hswebframework.web.workflow.util.QueryUtils;
+import org.hswebframework.web.workflow.web.response.CandidateDetail;
 import org.hswebframework.web.workflow.web.response.ProcessInfo;
 import org.hswebframework.web.workflow.web.response.TaskInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 
 /**
@@ -47,6 +57,9 @@ public class FlowableProcessController {
 
     @Autowired
     private BpmTaskService bpmTaskService;
+
+    @Autowired
+    private BpmActivityService bpmActivityService;
 
     @Autowired
     private BpmProcessService bpmProcessService;
@@ -112,7 +125,9 @@ public class FlowableProcessController {
         return ResponseMessage.ok(result).exclude(query.getExcludes()).include(query.getIncludes());
     }
 
-    @PostMapping("start/key/{defineKey}")
+
+
+    @PostMapping("/start/key/{defineKey}")
     @ApiOperation("提交表单数据并根据流程定义key启动流程")
     @Authorize(merge = false)
     public ResponseMessage<String> startProcessByKey(@PathVariable String defineKey,
@@ -143,7 +158,7 @@ public class FlowableProcessController {
         return ResponseMessage.ok(instance.getId());
     }
 
-    @PostMapping("start/id/{defId}")
+    @PostMapping("/start/id/{defId}")
     @ApiOperation("提交表单数据并根据流程定义ID启动流程")
     @Authorize(merge = false)
     public ResponseMessage<String> startProcess(@PathVariable String defId,
@@ -172,10 +187,10 @@ public class FlowableProcessController {
         return ResponseMessage.ok(instance.getId());
     }
 
-    @GetMapping("todo")
+    @GetMapping("/todo")
     @ApiOperation("获取待办任务")
     @Authorize(merge = false)
-    public ResponseMessage<PagerResult<TaskInfo>> getTodoLst(QueryParamEntity query, Authentication authentication) {
+    public ResponseMessage<PagerResult<TaskInfo>> getTodoList(QueryParamEntity query, Authentication authentication) {
         TaskQuery taskQuery = taskService.createTaskQuery();
 
         taskQuery.taskAssignee(authentication.getUser().getId());
@@ -185,7 +200,7 @@ public class FlowableProcessController {
         return ResponseMessage.ok(result).exclude(query.getExcludes()).include(query.getIncludes());
     }
 
-    @GetMapping("claims")
+    @GetMapping("/claims")
     @ApiOperation("获取待签收任务")
     @Authorize(merge = false)
     public ResponseMessage<PagerResult<TaskInfo>> getClaims(QueryParamEntity query, Authentication authentication) {
@@ -197,7 +212,7 @@ public class FlowableProcessController {
         return ResponseMessage.ok(result);
     }
 
-    @PutMapping("claim/{taskId}")
+    @PutMapping("/claim/{taskId}")
     @ApiOperation("签收任务")
     @Authorize(merge = false)
     public ResponseMessage<Void> claim(@PathVariable String taskId, Authentication authentication) {
@@ -205,7 +220,7 @@ public class FlowableProcessController {
         return ResponseMessage.ok();
     }
 
-    @PutMapping("complete/{taskId}")
+    @PutMapping("/complete/{taskId}")
     @Authorize(merge = false)
     public ResponseMessage<Void> complete(@PathVariable String taskId,
                                           @RequestBody(required = false) Map<String, Object> formData,
@@ -220,4 +235,35 @@ public class FlowableProcessController {
         return ResponseMessage.ok();
     }
 
+    @PostMapping("/next-task-candidate/{taskId}")
+    @Authorize(merge = false)
+    public ResponseMessage<List<CandidateDetail>> candidateList(@PathVariable String taskId,
+                                                                @RequestBody Map<String, Object> data,
+                                                                Authentication authentication) {
+
+        Task task = taskService.createTaskQuery()
+                .taskId(taskId)
+                .singleResult();
+
+        ExecutionEntity execution = (ExecutionEntity) runtimeService.createExecutionQuery()
+                .processInstanceId(task.getProcessInstanceId())
+                .activityId(task.getTaskDefinitionKey())
+                .singleResult();
+
+        execution.setVariablesLocal(data);
+
+        List<TaskDefinition> taskDefinitions = bpmActivityService
+                .getNextActivities(task.getProcessDefinitionId(), task.getTaskDefinitionKey(), (execution));
+
+        List<CandidateDetail> candidates = taskDefinitions.stream().map(TaskDefinition::getKey)
+                .flatMap(key ->
+                        processConfigurationService
+                                .getActivityConfiguration(authentication.getUser().getId(), task.getProcessDefinitionId(), key)
+                                .getCandidateInfo(task).stream())
+                .map(CandidateDetail::of)
+                .collect(Collectors.toList());
+
+
+        return ResponseMessage.ok(candidates);
+    }
 }
