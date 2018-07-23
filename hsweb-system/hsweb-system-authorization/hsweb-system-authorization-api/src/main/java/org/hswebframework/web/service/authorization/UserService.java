@@ -71,7 +71,7 @@ public interface UserService extends
      *
      * @param plainUsername 用户名,区分大小写,不能为空
      * @param plainPassword 明文密码,区分大小写,不能为空
-     * @return 用户信息, 如果用户米或者密码错误, 则返回<code>null</code>
+     * @return 用户信息, 如果用户名或者密码错误, 则返回<code>null</code>
      * @see PasswordEncoder
      */
     UserEntity selectByUserNameAndPassword(String plainUsername, String plainPassword);
