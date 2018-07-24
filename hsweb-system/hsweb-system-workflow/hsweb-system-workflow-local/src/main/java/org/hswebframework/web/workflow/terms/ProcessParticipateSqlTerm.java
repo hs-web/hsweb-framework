@@ -32,9 +32,9 @@ public class ProcessParticipateSqlTerm extends AbstractSqlTermCustomer {
 
         appender.add("exists(select 1 from ACT_HI_IDENTITYLINK I  WHERE ",
                 createColumnName(processInstanceId, tableAlias),
-                "=I.PROC_INST_ID_  "
+                "=I.PROC_INST_ID_"
                 , (!term.getOptions().isEmpty() ? " and I.TYPE_ =" + wherePrefix + ".options[0]" : "")
-                , " and I.USER_ID_  ");
+                , " and I.USER_ID_ ");
         appendCondition(val, wherePrefix, appender);
         appender.add(")");
 

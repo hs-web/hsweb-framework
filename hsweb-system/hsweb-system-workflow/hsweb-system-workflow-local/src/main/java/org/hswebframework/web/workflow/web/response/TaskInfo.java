@@ -4,6 +4,7 @@ import lombok.Data;
 import org.hswebframework.web.commons.bean.Bean;
 
 import java.util.Date;
+import java.util.Map;
 
 /**
  * @author zhouhao
@@ -38,7 +39,6 @@ public class TaskInfo implements Bean {
     public static TaskInfo of(org.activiti.engine.task.TaskInfo task) {
         TaskInfo taskInfo = new TaskInfo();
         taskInfo.copyFrom(task);
-
         return taskInfo;
     }
 }

@@ -10,6 +10,7 @@ import org.hswebframework.web.workflow.service.ProcessDefineConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
@@ -42,7 +43,7 @@ public class ProcessDefineConfigServiceImpl extends EnableCacheGenericEntityServ
     @Override
     @Caching(evict = {
             @CacheEvict(key = "'define-id:'+#entity.processDefineId"),
-            @CacheEvict(key = "'define-key-latest:'+#entity.processDefineKey", condition = "#entity.status==1")
+            @CacheEvict(key = "'define-key-latest:'+#entity.processDefineKey")
     })
     public String insert(ProcessDefineConfigEntity entity) {
         entity.setCreateTime(new Date());
@@ -63,6 +64,24 @@ public class ProcessDefineConfigServiceImpl extends EnableCacheGenericEntityServ
 
     @Override
     @Caching(evict = {
+            @CacheEvict(key = "'define-id:'+#entity.processDefineId"),
+            @CacheEvict(key = "'define-key-latest:'+#entity.processDefineKey")
+    })
+    protected int updateByPk(ProcessDefineConfigEntity entity) {
+        return super.updateByPk(entity);
+    }
+
+    @Override
+    @Caching(evict = {
+            @CacheEvict(key = "'define-id:'+#entity.processDefineId"),
+            @CacheEvict(key = "'define-key-latest:'+#entity.processDefineKey")
+    })
+    public String saveOrUpdate(ProcessDefineConfigEntity entity) {
+        return super.saveOrUpdate(entity);
+    }
+
+    @Override
+    @Caching(evict = {
             @CacheEvict(key = "'define-id:'+#result.processDefineId"),
             @CacheEvict(key = "'define-key-latest:'+#result.processDefineKey")
     })
@@ -72,7 +91,7 @@ public class ProcessDefineConfigServiceImpl extends EnableCacheGenericEntityServ
     }
 
     @Override
-    @CacheEvict(key = "'define-id:'+#processDefineId")
+    @Cacheable(key = "'define-id:'+#processDefineId")
     public ProcessDefineConfigEntity selectByProcessDefineId(String processDefineId) {
         return createQuery()
                 .where("processDefineId", Objects.requireNonNull(processDefineId, "参数[processDefineId]不能为空"))
@@ -80,7 +99,7 @@ public class ProcessDefineConfigServiceImpl extends EnableCacheGenericEntityServ
     }
 
     @Override
-    @CacheEvict(key = "'define-key-latest:'+#processDefineKey")
+    @Cacheable(key = "'define-key-latest:'+#processDefineKey")
     public ProcessDefineConfigEntity selectByLatestProcessDefineKey(String processDefineKey) {
         return createQuery()
                 .where("processDefineKey", Objects.requireNonNull(processDefineKey, "参数[processDefineKey]不能为空"))

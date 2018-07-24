@@ -18,6 +18,8 @@ import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.runtime.ProcessInstanceQuery;
 import org.activiti.engine.task.Task;
 import org.activiti.engine.task.TaskQuery;
+import org.hswebframework.ezorm.core.Conditional;
+import org.hswebframework.ezorm.core.NestConditional;
 import org.hswebframework.ezorm.core.dsl.Query;
 import org.hswebframework.web.NotFoundException;
 import org.hswebframework.web.authorization.Authentication;
@@ -202,30 +204,53 @@ public class FlowableProcessController {
 
         PagerResult<TaskInfo> result = QueryUtils.doQuery(taskQuery, query, TaskInfo::of);
 
+
         return ResponseMessage.ok(result).exclude(query.getExcludes()).include(query.getIncludes());
     }
 
     @AllArgsConstructor
     @Getter
-    public enum Type{
+    public enum Type {
         claim("user-wf-claim"),
         todo("user-wf-todo"),
         completed("user-wf-completed"),
-        part("user-wf-part");
+        part("user-wf-part"),
+        create("is") {
+            @Override
+            public void applyQueryTerm(NestConditional<?> conditional, String userId) {
+                conditional.accept("creatorId", getTermType(), userId);
+            }
+        },
+        claimOrTodo("is") {
+            @Override
+            public void applyQueryTerm(NestConditional<?> conditional, String userId) {
+                conditional.nest()
+                        .when(true, q -> Type.claim.applyQueryTerm(q, userId))
+                        .or()
+                        .when(true, q -> Type.todo.applyQueryTerm(q, userId))
+                        .end();
+            }
+        };
 
         private String termType;
 
+        public void applyQueryTerm(NestConditional<?> conditional, String userId) {
+            conditional.accept("processInstanceId", termType, userId);
+        }
     }
 
     @GetMapping("/{type}/form/{processDefineId}")
     @ApiOperation("获取自己可查看的流程表单数据")
     @Authorize(merge = false)
-    public ResponseMessage<PagerResult<Object>> getFormData(@PathVariable Type type, @PathVariable String processDefineId, QueryParamEntity query, Authentication authentication) {
-
+    @SuppressWarnings("all")
+    public ResponseMessage<PagerResult<Object>> getFormData(@PathVariable Type type,
+                                                            @PathVariable String processDefineId,
+                                                            QueryParamEntity query,
+                                                            Authentication authentication) {
         Query.empty(query)
                 .nest()
                 //只能看到自己待办理
-                .and("processInstanceId", type.getTermType(), authentication.getUser().getId())
+                .when(type != null, q -> type.applyQueryTerm(q, authentication.getUser().getId()))
                 .end();
         return ResponseMessage.ok(workFlowFormService.selectProcessForm(processDefineId, query));
     }
@@ -233,13 +258,9 @@ public class FlowableProcessController {
     @GetMapping("/task/form/{processDefineId}/{taskDefineKey}")
     @ApiOperation("获取流程任务表单数据")
     @Authorize(merge = false)
-    public ResponseMessage<PagerResult<Object>> getTaskFormData(@PathVariable String processDefineId, @PathVariable String taskDefineKey, QueryParamEntity query, Authentication authentication) {
-
-        Query.empty(query)
-                .nest()
-                .and("processInstanceId", "user-wf-todo", authentication.getUser().getId())
-                .end();
-
+    public ResponseMessage<PagerResult<Object>> getTaskFormData(@PathVariable String processDefineId,
+                                                                @PathVariable String taskDefineKey,
+                                                                QueryParamEntity query) {
         return ResponseMessage.ok(workFlowFormService.selectTaskForm(processDefineId, taskDefineKey, query));
     }
 
@@ -251,6 +272,20 @@ public class FlowableProcessController {
         TaskQuery taskQuery = taskService.createTaskQuery();
 
         taskQuery.taskCandidateUser(authentication.getUser().getId());
+
+        PagerResult<TaskInfo> result = QueryUtils.doQuery(taskQuery, query, TaskInfo::of);
+
+        return ResponseMessage.ok(result);
+    }
+
+    @GetMapping("/claims-and-todo")
+    @ApiOperation("获取待签收和待处理的任务")
+    @Authorize(merge = false)
+    public ResponseMessage<PagerResult<TaskInfo>> getClaimsAndTodo(QueryParamEntity query, Authentication authentication) {
+        TaskQuery taskQuery = taskService.createTaskQuery();
+
+        taskQuery.taskCandidateOrAssigned(authentication.getUser().getId());
+
         PagerResult<TaskInfo> result = QueryUtils.doQuery(taskQuery, query, TaskInfo::of);
 
         return ResponseMessage.ok(result);

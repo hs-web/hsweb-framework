@@ -63,6 +63,24 @@ public class ActivityConfigServiceImpl extends GenericEntityService<ActivityConf
 
     @Override
     @Caching(evict = {
+            @CacheEvict(key = "'define-id:'+#entity.processDefineId+'-'+#entity.activityId"),
+            @CacheEvict(key = "'define-key:'+#entity.processDefineKey+'-'+#entity.activityId")
+    })
+    protected int updateByPk(ActivityConfigEntity entity) {
+        return super.updateByPk(entity);
+    }
+
+    @Override
+    @Caching(evict = {
+            @CacheEvict(key = "'define-id:'+#entity.processDefineId+'-'+#entity.activityId"),
+            @CacheEvict(key = "'define-key:'+#entity.processDefineKey+'-'+#entity.activityId")
+    })
+    public String saveOrUpdate(ActivityConfigEntity entity) {
+        return super.saveOrUpdate(entity);
+    }
+
+    @Override
+    @Caching(evict = {
             @CacheEvict(key = "'define-id:'+#result.processDefineId+'-'+#result.activityId", condition = "#result!=null"),
             @CacheEvict(key = "'define-key:'+#result.processDefineKey+'-'+#result.activityId", condition = "#result!=null")
     })
