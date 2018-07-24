@@ -23,6 +23,7 @@ import org.hswebframework.web.workflow.service.config.ActivityConfiguration;
 import org.hswebframework.web.workflow.service.config.ProcessConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.Collections;
 import java.util.List;
@@ -128,6 +129,9 @@ public class ProcessConfigurationServiceImpl implements ProcessConfigurationServ
 
             @Override
             public boolean canStartProcess(String userId, ProcessDefinition definition) {
+                if (StringUtils.isEmpty(entity.getPermissionDimension()) || "*".equals(entity.getPermissionDimension())) {
+                    return true;
+                }
                 AuthenticationPredicate predicate = permissionDimensionParser.parse(entity.getPermissionDimension());
                 if (null != predicate) {
                     return predicate.test(AuthenticationHolder.get(userId));
