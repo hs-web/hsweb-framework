@@ -39,11 +39,6 @@ public class ActivityConfigEntity extends SimpleGenericEntity<String> {
     private String formId;
 
     /**
-     * 前端表单模版ID
-     */
-    private String formTemplateId;
-
-    /**
      * 节点办理候选人维度,用于设置该环节的办理人,json格式,由CandidateDimensionParser解析
      */
     private String candidateDimension;

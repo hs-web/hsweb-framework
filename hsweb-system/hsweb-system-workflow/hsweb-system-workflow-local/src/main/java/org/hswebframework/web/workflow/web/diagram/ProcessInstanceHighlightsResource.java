@@ -60,8 +60,11 @@ public class ProcessInstanceHighlightsResource {
         JSONArray activitiesArray = new JSONArray();
         JSONArray flowsArray = new JSONArray();
 
-        ProcessInstance processInstance = runtimeService.createProcessInstanceQuery().processInstanceId(processInstanceId).singleResult();
-        ProcessDefinitionEntity processDefinition = (ProcessDefinitionEntity) repositoryService.getProcessDefinition(processInstance.getProcessDefinitionId());
+        ProcessInstance processInstance = runtimeService.createProcessInstanceQuery()
+                .processInstanceId(processInstanceId)
+                .singleResult();
+        ProcessDefinitionEntity processDefinition = (ProcessDefinitionEntity) repositoryService
+                .getProcessDefinition(processInstance.getProcessDefinitionId());
 
         responseJSON.put("processDefinitionId", processInstance.getProcessDefinitionId());
 

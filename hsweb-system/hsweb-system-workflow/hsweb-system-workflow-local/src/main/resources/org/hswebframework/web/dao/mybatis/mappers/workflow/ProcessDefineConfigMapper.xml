@@ -8,8 +8,8 @@
         <result property="processDefineKey" column="proc_def_key" javaType="String" jdbcType="VARCHAR"/>
         <result property="processDefineId" column="proc_def_id" javaType="String" jdbcType="VARCHAR"/>
         <result property="formId" column="form_id" javaType="String" jdbcType="VARCHAR"/>
-        <result property="formTemplateId" column="template_id" javaType="String" jdbcType="VARCHAR"/>
         <result property="permissionDimension" column="permission_dimension" javaType="String" jdbcType="CLOB"/>
+        <result property="properties" column="properties" javaType="java.util.Map" jdbcType="CLOB"/>
 
         <result property="createTime" column="create_time" javaType="date" jdbcType="TIMESTAMP"/>
         <result property="updateTime" column="update_time" javaType="date" jdbcType="TIMESTAMP"/>

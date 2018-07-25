@@ -16,7 +16,7 @@ import java.util.List;
 public interface WorkFlowFormService {
     void saveProcessForm(ProcessInstance instance, SaveFormRequest request);
 
-    void saveTaskForm(Task task, SaveFormRequest request);
+    void saveTaskForm(ProcessInstance instance,Task task, SaveFormRequest request);
 
     <T> PagerResult<T> selectProcessForm(String processDefineId, QueryParamEntity queryParam);
 

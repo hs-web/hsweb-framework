@@ -33,11 +33,6 @@ public class ProcessDefineConfigEntity extends SimpleGenericEntity<String> {
     private String formId;
 
     /**
-     * 前端表单模版ID
-     */
-    private String formTemplateId;
-
-    /**
      * 权限维度,用于控制不同人,可发起不同的流程
      */
     private String permissionDimension;

@@ -35,6 +35,7 @@ import org.hswebframework.web.workflow.service.config.ProcessConfigurationServic
 import org.hswebframework.web.workflow.service.BpmProcessService;
 import org.hswebframework.web.workflow.service.BpmTaskService;
 import org.hswebframework.web.workflow.service.request.CompleteTaskRequest;
+import org.hswebframework.web.workflow.service.request.RejectTaskRequest;
 import org.hswebframework.web.workflow.service.request.StartProcessRequest;
 import org.hswebframework.web.workflow.util.QueryUtils;
 import org.hswebframework.web.workflow.web.response.CandidateDetail;
@@ -313,19 +314,20 @@ public class FlowableProcessController {
         return ResponseMessage.ok();
     }
 
-    @PutMapping("/reject/{taskId}")
+    @PutMapping("/reject/{processInstanceId}/{activityId}")
     @Authorize(merge = false)
     @ApiOperation("驳回")
-    public ResponseMessage<Void> reject(@PathVariable String taskId,
-                                          @RequestBody(required = false) Map<String, Object> formData,
-                                          Authentication authentication) {
-//        bpmTaskService.reject();
-        // 办理
-        bpmTaskService.complete(CompleteTaskRequest.builder()
-                .taskId(taskId)
-                .completeUserId(authentication.getUser().getId())
-                .completeUserName(authentication.getUser().getName())
-                .formData(formData)
+    public ResponseMessage<Void> reject(@PathVariable String processInstanceId,
+                                        @PathVariable String activityId,
+                                        @RequestBody Map<String, Object> data,
+                                        Authentication authentication) {
+        // 驳回
+        bpmTaskService.reject(RejectTaskRequest.builder()
+                .processInstanceId(processInstanceId)
+                .activityId(activityId)
+                .rejectUserId(authentication.getUser().getId())
+                .rejectUserName(authentication.getUser().getName())
+                .data(data)
                 .build());
         return ResponseMessage.ok();
     }

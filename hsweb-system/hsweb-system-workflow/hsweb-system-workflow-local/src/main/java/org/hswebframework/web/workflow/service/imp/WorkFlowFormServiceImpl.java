@@ -94,7 +94,7 @@ public class WorkFlowFormServiceImpl extends AbstractFlowableService implements 
     }
 
     @Override
-    public void saveTaskForm(Task task, SaveFormRequest request) {
+    public void saveTaskForm(ProcessInstance instance, Task task, SaveFormRequest request) {
         request.tryValidate();
 
         ActivityConfigEntity entity = activityConfigService.selectByProcessDefineIdAndActivityId(task.getProcessDefinitionId(), task.getTaskDefinitionKey());
@@ -105,6 +105,7 @@ public class WorkFlowFormServiceImpl extends AbstractFlowableService implements 
 
         Map<String, Object> formData = request.getFormData();
 
+        acceptStartProcessFormData(instance, formData);
         acceptTaskFormData(task, formData);
 
         dynamicFormOperationService.saveOrUpdate(entity.getFormId(), formData);
@@ -114,11 +115,6 @@ public class WorkFlowFormServiceImpl extends AbstractFlowableService implements 
     protected void acceptTaskFormData(Task task,
                                       Map<String, Object> formData) {
 
-        ProcessInstance instance = runtimeService.createProcessInstanceQuery()
-                .processInstanceId(task.getProcessInstanceId())
-                .singleResult();
-
-        acceptStartProcessFormData(instance, formData);
 
         formData.put("processTaskId", task.getId());
         formData.put("processTaskDefineKey", task.getTaskDefinitionKey());
@@ -127,10 +123,16 @@ public class WorkFlowFormServiceImpl extends AbstractFlowableService implements 
     }
 
     protected void acceptStartProcessFormData(ProcessInstance instance,
+
                                               Map<String, Object> formData) {
-
-        String processDefinitionName = ((ExecutionEntity) instance).getProcessDefinition().getName();
-
+        String processDefinitionName;
+        try {
+            processDefinitionName = ((ExecutionEntity) instance).getProcessDefinition().getName();
+        } catch (NullPointerException e) {
+            processDefinitionName = repositoryService.createProcessDefinitionQuery()
+                    .processDefinitionId(instance.getProcessDefinitionId())
+                    .singleResult().getName();
+        }
         formData.put("id", instance.getBusinessKey());
         formData.put("processDefineId", instance.getProcessDefinitionId());
         formData.put("processDefineKey", instance.getProcessDefinitionKey());

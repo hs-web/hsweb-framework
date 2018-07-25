@@ -1,5 +1,6 @@
 package org.hswebframework.web.workflow.service.imp;
 
+import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.Job;
 import org.activiti.engine.runtime.ProcessInstance;
@@ -7,8 +8,10 @@ import org.activiti.engine.task.Task;
 import org.hswebframework.utils.StringUtils;
 import org.hswebframework.web.NotFoundException;
 import org.hswebframework.web.id.IDGenerator;
+import org.hswebframework.web.workflow.dao.entity.ProcessHistoryEntity;
 import org.hswebframework.web.workflow.service.BpmProcessService;
 import org.hswebframework.web.workflow.service.BpmTaskService;
+import org.hswebframework.web.workflow.service.ProcessHistoryService;
 import org.hswebframework.web.workflow.service.WorkFlowFormService;
 import org.hswebframework.web.workflow.service.request.SaveFormRequest;
 import org.hswebframework.web.workflow.service.request.StartProcessRequest;
@@ -36,6 +39,9 @@ public class BpmProcessServiceImpl extends AbstractFlowableService implements Bp
 
     @Autowired
     private WorkFlowFormService workFlowFormService;
+
+    @Autowired
+    private ProcessHistoryService processHistoryService;
 
     @Override
     public List<ProcessDefinition> getAllProcessDefinition() {
@@ -113,6 +119,20 @@ public class BpmProcessServiceImpl extends AbstractFlowableService implements Bp
                     .userName(request.getCreatorName())
                     .formData(request.getFormData())
                     .build());
+
+            ProcessHistoryEntity history = ProcessHistoryEntity.builder()
+                    .type("start")
+                    .typeText("启动流程")
+                    .businessKey(businessKey)
+                    .creatorId(request.getCreatorId())
+                    .creatorName(request.getCreatorName())
+                    .processInstanceId(processInstance.getProcessInstanceId())
+                    .processDefineId(processInstance.getProcessDefinitionId())
+                    .build();
+
+            processHistoryService.insert(history);
+
+
         } finally {
             identityService.setAuthenticatedUserId(null);
         }

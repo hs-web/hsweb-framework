@@ -6,6 +6,7 @@ import org.hswebframework.web.commons.entity.SimpleGenericEntity;
 
 import javax.validation.constraints.NotNull;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -33,19 +34,8 @@ public class ProcessHistoryEntity extends SimpleGenericEntity<String> {
     @NotBlank(message = "[processInstanceId]不能为空")
     private String processInstanceId;
 
-    @NotBlank(message = "[taskId]不能为空")
-    private String taskId;
-
-    @NotBlank(message = "[taskDefineKey]不能为空")
-    private String taskDefineKey;
-
-    @NotBlank(message = "[taskName]不能为空")
-    private String taskName;
-
     @NotBlank(message = "[businessKey]不能为空")
     private String businessKey;
-
-    private Map<String, Object> data;
 
     @NotNull(message = "[createTime]不能为空")
     private Date createTime;
@@ -56,4 +46,11 @@ public class ProcessHistoryEntity extends SimpleGenericEntity<String> {
     @NotBlank(message = "[creatorName]不能为空")
     private String creatorName;
 
+    private Map<String, Object> data = new HashMap<>();
+
+    private String taskId;
+
+    private String taskDefineKey;
+
+    private String taskName;
 }

@@ -13,6 +13,7 @@ import org.activiti.bpmn.converter.BpmnXMLConverter;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.editor.language.json.converter.BpmnJsonConverter;
 import org.activiti.engine.RepositoryService;
+import org.activiti.engine.impl.persistence.entity.ModelEntity;
 import org.activiti.engine.repository.Deployment;
 import org.activiti.engine.repository.Model;
 import org.activiti.engine.repository.ModelQuery;
@@ -28,9 +29,11 @@ import org.hswebframework.ezorm.core.param.TermType;
 import org.hswebframework.web.NotFoundException;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.annotation.Authorize;
+import org.hswebframework.web.bean.FastBeanCopier;
 import org.hswebframework.web.commons.entity.PagerResult;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.controller.message.ResponseMessage;
+import org.hswebframework.web.workflow.util.QueryUtils;
 import org.hswebframework.web.workflow.web.request.ModelCreateRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -66,54 +69,14 @@ public class FlowableModelManagerController {
     @ApiOperation("获取模型列表")
     public ResponseMessage<PagerResult<Model>> getModelList(QueryParamEntity param) {
         ModelQuery modelQuery = repositoryService.createModelQuery();
-        param.getTerms().forEach((term) -> {
-
-            PropertyWrapper valueWrapper = new SimplePropertyWrapper(term.getValue());
-            String stringValue = valueWrapper.toString();
-            switch (term.getColumn()) {
-                case "name":
-                    if (term.getTermType().equals(TermType.like)) {
-                        modelQuery.modelNameLike(stringValue);
-                    } else {
-                        modelQuery.modelName(stringValue);
-                    }
-                    break;
-                case "key":
-                    modelQuery.modelKey(stringValue);
-                    break;
-                case "category":
-                    if (term.getTermType().equals(TermType.like)) {
-                        modelQuery.modelCategoryLike(stringValue);
-                    } else if (term.getTermType().equals(TermType.not)) {
-                        modelQuery.modelCategoryNotEquals(stringValue);
-                    } else {
-                        modelQuery.modelCategory(stringValue);
-                    }
-                    break;
-                case "tenantId":
-                    if (term.getTermType().equals(TermType.like)) {
-                        modelQuery.modelTenantIdLike(stringValue);
-                    } else {
-                        modelQuery.modelTenantId(stringValue);
-                    }
-                    break;
-                case "version":
-                    if ("latest".equals(stringValue)) {
-                        modelQuery.latestVersion();
-                    } else {
-                        modelQuery.modelVersion(valueWrapper.toInt());
-                    }
-                    break;
-                default:
-                    break;
-            }
-        });
-        modelQuery.orderByCreateTime().desc();
-        int total = (int) modelQuery.count();
-        param.rePaging(total);
-        List<Model> models = modelQuery.listPage(param.getPageIndex(), param.getPageSize() * (param.getPageIndex() + 1));
-        return ResponseMessage.ok(new PagerResult<>(total, models))
-                .exclude(Model.class, "metaInfo", "persistentState");
+        return ResponseMessage.ok(
+                QueryUtils.doQuery(modelQuery, param,
+                        model -> FastBeanCopier.copy(model, new ModelEntity()),
+                        (term, modelQuery1) -> {
+                            if ("latestVersion".equals(term.getColumn())) {
+                                modelQuery1.latestVersion();
+                            }
+                        }));
     }
 
     @PostMapping
@@ -213,13 +176,14 @@ public class FlowableModelManagerController {
             response.setHeader("Content-Disposition", "attachment; filename=" + URLEncoder.encode(filename, "UTF-8"));
 
             /*创建输入流*/
-            ByteArrayInputStream in = new ByteArrayInputStream(exportBytes);
-            IOUtils.copy(in, response.getOutputStream());
+            try (ByteArrayInputStream in = new ByteArrayInputStream(exportBytes)) {
+                IOUtils.copy(in, response.getOutputStream());
+                response.flushBuffer();
+                in.close();
+            }
 
-            response.flushBuffer();
-            in.close();
         } catch (Exception e) {
-            log.error("导出model的xml文件失败：modelId={}, dimension={}", modelId, type, e);
+            log.error("导出model的xml文件失败：modelId={}, type={}", modelId, type, e);
         }
     }
 
