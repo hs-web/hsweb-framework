@@ -249,7 +249,6 @@ public class FlowableProcessController {
                                                             Authentication authentication) {
         Query.empty(query)
                 .nest()
-                //只能看到自己待办理
                 .when(type != null, q -> type.applyQueryTerm(q, authentication.getUser().getId()))
                 .end();
         return ResponseMessage.ok(workFlowFormService.selectProcessForm(processDefineId, query));
@@ -304,6 +303,23 @@ public class FlowableProcessController {
     public ResponseMessage<Void> complete(@PathVariable String taskId,
                                           @RequestBody(required = false) Map<String, Object> formData,
                                           Authentication authentication) {
+        // 办理
+        bpmTaskService.complete(CompleteTaskRequest.builder()
+                .taskId(taskId)
+                .completeUserId(authentication.getUser().getId())
+                .completeUserName(authentication.getUser().getName())
+                .formData(formData)
+                .build());
+        return ResponseMessage.ok();
+    }
+
+    @PutMapping("/reject/{taskId}")
+    @Authorize(merge = false)
+    @ApiOperation("驳回")
+    public ResponseMessage<Void> reject(@PathVariable String taskId,
+                                          @RequestBody(required = false) Map<String, Object> formData,
+                                          Authentication authentication) {
+//        bpmTaskService.reject();
         // 办理
         bpmTaskService.complete(CompleteTaskRequest.builder()
                 .taskId(taskId)

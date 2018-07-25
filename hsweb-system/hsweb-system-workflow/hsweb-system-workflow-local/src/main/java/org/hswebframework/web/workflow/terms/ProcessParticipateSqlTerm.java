@@ -24,7 +24,9 @@ public class ProcessParticipateSqlTerm extends AbstractSqlTermCustomer {
     public SqlAppender accept(String wherePrefix, Term term, RDBColumnMetaData column, String tableAlias) {
         ChangedTermValue termValue = createChangedTermValue(term);
         RDBColumnMetaData processInstanceId = column.getTableMetaData().findColumn("processInstanceId");
-
+        if (processInstanceId == null) {
+            throw new UnsupportedOperationException("未获取到属性:[processInstanceId]对应的列");
+        }
         List<Object> val = BoostTermTypeMapper.convertList(column, termValue.getOld());
 
         termValue.setValue(val);

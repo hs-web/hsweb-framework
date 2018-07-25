@@ -6,6 +6,7 @@ import org.hswebframework.ezorm.core.param.Term;
 import org.hswebframework.ezorm.rdb.meta.RDBColumnMetaData;
 import org.hswebframework.ezorm.rdb.render.SqlAppender;
 import org.hswebframework.ezorm.rdb.render.dialect.Dialect;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -25,6 +26,9 @@ public abstract class AbstractSqlTermCustomer implements SqlTermCustomer {
     }
 
     protected String createColumnName(RDBColumnMetaData column, String tableAlias) {
+        if (StringUtils.isEmpty(tableAlias)) {
+            tableAlias = column.getTableMetaData().getAlias();
+        }
         return column.getTableMetaData()
                 .getDatabaseMetaData()
                 .getDialect()
