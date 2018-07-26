@@ -366,7 +366,7 @@ public class FlowableProcessController {
                 .activityId(task.getTaskDefinitionKey())
                 .singleResult();
 
-        execution.setVariablesLocal(data);
+        execution.setTransientVariables(data);
 
         List<TaskDefinition> taskDefinitions = bpmActivityService
                 .getNextActivities(task.getProcessDefinitionId(), task.getTaskDefinitionKey(), (execution));
