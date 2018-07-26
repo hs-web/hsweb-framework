@@ -35,6 +35,7 @@ import org.hswebframework.web.workflow.service.config.ProcessConfigurationServic
 import org.hswebframework.web.workflow.service.BpmProcessService;
 import org.hswebframework.web.workflow.service.BpmTaskService;
 import org.hswebframework.web.workflow.service.request.CompleteTaskRequest;
+import org.hswebframework.web.workflow.service.request.JumpTaskRequest;
 import org.hswebframework.web.workflow.service.request.RejectTaskRequest;
 import org.hswebframework.web.workflow.service.request.StartProcessRequest;
 import org.hswebframework.web.workflow.util.QueryUtils;
@@ -314,19 +315,37 @@ public class FlowableProcessController {
         return ResponseMessage.ok();
     }
 
-    @PutMapping("/reject/{processInstanceId}/{activityId}")
+    @PutMapping("/reject/{taskId}")
     @Authorize(merge = false)
     @ApiOperation("驳回")
-    public ResponseMessage<Void> reject(@PathVariable String processInstanceId,
-                                        @PathVariable String activityId,
+    public ResponseMessage<Void> reject(@PathVariable String taskId,
                                         @RequestBody Map<String, Object> data,
                                         Authentication authentication) {
         // 驳回
         bpmTaskService.reject(RejectTaskRequest.builder()
-                .processInstanceId(processInstanceId)
-                .activityId(activityId)
+                .taskId(taskId)
                 .rejectUserId(authentication.getUser().getId())
                 .rejectUserName(authentication.getUser().getName())
+                .data(data)
+                .build());
+        return ResponseMessage.ok();
+    }
+
+    @PutMapping("/jump/{taskId}/{activityId}")
+    @Authorize(merge = false)
+    @ApiOperation("流程跳转")
+    public ResponseMessage<Void> jump(@PathVariable String taskId,
+                                      @PathVariable String activityId,
+                                      @RequestBody Map<String, Object> data,
+                                      Authentication authentication) {
+        // 流程跳转
+        bpmTaskService.jumpTask(JumpTaskRequest
+                .builder()
+                .taskId(taskId)
+                .targetActivityId(activityId)
+                .recordLog(true)
+                .jumpUserId(authentication.getUser().getId())
+                .jumpUserName(authentication.getUser().getUsername())
                 .data(data)
                 .build());
         return ResponseMessage.ok();

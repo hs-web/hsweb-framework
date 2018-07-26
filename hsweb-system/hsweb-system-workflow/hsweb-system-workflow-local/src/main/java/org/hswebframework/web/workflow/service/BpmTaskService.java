@@ -4,6 +4,7 @@ import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.impl.pvm.process.ActivityImpl;
 import org.activiti.engine.task.Task;
 import org.hswebframework.web.workflow.service.request.CompleteTaskRequest;
+import org.hswebframework.web.workflow.service.request.JumpTaskRequest;
 import org.hswebframework.web.workflow.service.request.RejectTaskRequest;
 
 import java.util.Collection;
@@ -78,26 +79,13 @@ public interface BpmTaskService {
 
     /**
      * 流程任意跳转
-     *
-     * @param procInstId 流程实例ID
-     * @param activity   流程环节ID
      */
-    Task jumpTask(String procInstId, String activity);
+    void jumpTask(JumpTaskRequest request);
 
     /**
-     * 驳回
-     *
-     * @param request
+     * 驳回任务
      */
     void reject(RejectTaskRequest request);
-
-    /**
-     * 设置办理人
-     *
-     * @param taskId 当前环节ID
-     * @param userId 用户ID
-     */
-    void setAssignee(String taskId, String userId);
 
     /**
      * 结束流程

@@ -56,11 +56,6 @@ public class StartProcessRequest implements ValidateBean {
     private String nextClaimUserId;
 
     /**
-     * 下一环节的ID,如果指定了此属性,则流程启动后自动跳转到该环节
-     */
-    private String nextActivityId;
-
-    /**
      * 流程变量
      */
     private Map<String, Object> variables = new HashMap<>();

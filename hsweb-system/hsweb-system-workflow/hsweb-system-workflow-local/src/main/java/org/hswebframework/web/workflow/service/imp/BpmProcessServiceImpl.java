@@ -86,31 +86,18 @@ public class BpmProcessServiceImpl extends AbstractFlowableService implements Bp
 
             List<Task> tasks = bpmTaskService.selectTaskByProcessId(processInstance.getProcessDefinitionId());
 
-            //指定了下一环节
-            if (!StringUtils.isNullOrEmpty(request.getNextActivityId())) {
-                //跳转
-                Task afterJump = bpmTaskService.jumpTask(processInstance.getProcessDefinitionId(), request.getNextActivityId());
-
-                //设置候选人
-                candidateUserSetter.accept(afterJump);
-
-                tasks.stream()
-                        .map(Task::getId)
-                        .forEach(bpmTaskService::removeHiTask);
+            //当前节点
+            String activityId = processInstance.getActivityId();
+            if (activityId == null) {
+                //所有task设置候选人
+                tasks.forEach(candidateUserSetter);
             } else {
-                //当前节点
-                String activityId = processInstance.getActivityId();
-                if (activityId == null) {
-                    //所有task设置候选人
-                    tasks.forEach(candidateUserSetter);
-                } else {
-                    candidateUserSetter.accept(taskService
-                            .createTaskQuery()
-                            .processInstanceId(processInstance.getProcessInstanceId())
-                            .taskDefinitionKey(activityId)
-                            .active()
-                            .singleResult());
-                }
+                candidateUserSetter.accept(taskService
+                        .createTaskQuery()
+                        .processInstanceId(processInstance.getProcessInstanceId())
+                        .taskDefinitionKey(activityId)
+                        .active()
+                        .singleResult());
             }
 
             workFlowFormService.saveProcessForm(processInstance, SaveFormRequest
