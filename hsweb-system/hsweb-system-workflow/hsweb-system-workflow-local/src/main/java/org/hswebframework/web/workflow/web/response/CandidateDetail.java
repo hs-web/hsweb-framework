@@ -43,4 +43,17 @@ public class CandidateDetail implements Bean {
 
         return detail;
     }
+
+    @Override
+    public int hashCode() {
+        return userId.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof CandidateDetail) {
+            return ((CandidateDetail) obj).getUserId().equals(userId);
+        }
+        return super.equals(obj);
+    }
 }

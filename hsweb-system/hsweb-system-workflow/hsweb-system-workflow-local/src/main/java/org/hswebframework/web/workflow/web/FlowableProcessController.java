@@ -145,6 +145,7 @@ public class FlowableProcessController {
         ProcessDefinition definition = repositoryService.createProcessDefinitionQuery()
                 .processDefinitionKey(defineKey)
                 .active()
+                .latestVersion()
                 .singleResult();
 
         if (null == definition) {
@@ -375,7 +376,9 @@ public class FlowableProcessController {
                 .flatMap(key ->
                         processConfigurationService
                                 .getActivityConfiguration(authentication.getUser().getId(), task.getProcessDefinitionId(), key)
-                                .getCandidateInfo(task).stream())
+                                .getCandidateInfo(task)
+                                .stream())
+                .distinct()
                 .map(CandidateDetail::of)
                 .collect(Collectors.toList());
 

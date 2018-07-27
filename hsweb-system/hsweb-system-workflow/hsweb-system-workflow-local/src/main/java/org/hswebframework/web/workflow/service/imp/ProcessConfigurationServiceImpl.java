@@ -89,6 +89,7 @@ public class ProcessConfigurationServiceImpl implements ProcessConfigurationServ
 
                     return dimension.getCandidateUserIdList()
                             .stream()
+                            .distinct()
                             .map(userId ->
                                     Lazy.val(() -> new CandidateInfo() {
                                         @Override
