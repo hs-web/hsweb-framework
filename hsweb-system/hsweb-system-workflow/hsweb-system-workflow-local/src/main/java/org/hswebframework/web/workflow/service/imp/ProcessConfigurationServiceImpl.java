@@ -15,6 +15,8 @@ import org.hswebframework.web.workflow.dimension.CandidateDimension;
 import org.hswebframework.web.workflow.dimension.CandidateDimensionParser;
 import org.hswebframework.web.workflow.dimension.DimensionContext;
 import org.hswebframework.web.workflow.dimension.PermissionDimensionParser;
+import org.hswebframework.web.workflow.listener.ProcessEventListener;
+import org.hswebframework.web.workflow.listener.TaskEventListener;
 import org.hswebframework.web.workflow.service.ActivityConfigService;
 import org.hswebframework.web.workflow.service.ProcessDefineConfigService;
 import org.hswebframework.web.workflow.service.config.ProcessConfigurationService;
@@ -106,6 +108,11 @@ public class ProcessConfigurationServiceImpl implements ProcessConfigurationServ
 
                 }, List.class);
             }
+
+            @Override
+            public TaskEventListener getTaskListener(String eventType) {
+                return null;
+            }
         };
     }
 
@@ -139,6 +146,11 @@ public class ProcessConfigurationServiceImpl implements ProcessConfigurationServ
                 }
                 return true;
             }
+
+            @Override
+            public ProcessEventListener getProcessListener(String eventType) {
+                return null;
+            }
         };
     }
 
@@ -161,12 +173,21 @@ public class ProcessConfigurationServiceImpl implements ProcessConfigurationServ
 
         @Override
         public void assertCanStartProcess(String userId, ProcessDefinition definition) {
-            // throw new AccessDenyException("没有权限启动此流程:" + definition.getName() + "(" + definition.getId() + ")");
         }
 
         @Override
         public boolean canStartProcess(String userId, ProcessDefinition definition) {
             return true;
+        }
+
+        @Override
+        public ProcessEventListener getProcessListener(String eventType) {
+            return null;
+        }
+
+        @Override
+        public TaskEventListener getTaskListener(String eventType) {
+            return null;
         }
     }
 }

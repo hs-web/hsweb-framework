@@ -8,6 +8,8 @@ import org.hswebframework.web.validator.group.CreateGroup;
 
 import javax.validation.constraints.NotNull;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -50,4 +52,7 @@ public class ActivityConfigEntity extends SimpleGenericEntity<String> {
 
     @NotNull(groups = CreateGroup.class)
     private Byte status;
+
+    private List<ListenerConfig> listeners;
+
 }

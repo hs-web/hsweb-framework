@@ -22,6 +22,8 @@ import org.hswebframework.web.BusinessException;
 import org.hswebframework.web.Maps;
 import org.hswebframework.web.NotFoundException;
 import org.hswebframework.web.authorization.Authentication;
+import org.hswebframework.web.commons.entity.PagerResult;
+import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.workflow.dao.entity.ProcessHistoryEntity;
 import org.hswebframework.web.workflow.service.ProcessHistoryService;
 import org.hswebframework.web.workflow.service.config.ProcessConfigurationService;
@@ -145,6 +147,22 @@ public class BpmTaskServiceImpl extends AbstractFlowableService implements BpmTa
         ProcessInstance instance = runtimeService.createProcessInstanceQuery()
                 .processInstanceId(task.getProcessInstanceId())
                 .singleResult();
+
+        //查询主表的数据作为变量
+        Optional.of(workFlowFormService.<Map<String, Object>>selectProcessForm(instance.getProcessDefinitionId(),
+                QueryParamEntity.of("processInstanceId", instance.getProcessInstanceId()).doPaging(0, 2)))
+                .map(PagerResult::getData)
+                .map(list -> {
+                    if (list.size() == 1) {
+                        return list.get(0);
+                    }
+                    if (list.size() > 1) {
+                        logger.warn("主表数据存在多条数据:processInstanceId={}", instance.getProcessInstanceId());
+                    }
+                    return null;
+                })
+                .ifPresent(transientVariables::putAll);
+
 
         //保存表单数据
         workFlowFormService.saveTaskForm(instance, task, SaveFormRequest.builder()

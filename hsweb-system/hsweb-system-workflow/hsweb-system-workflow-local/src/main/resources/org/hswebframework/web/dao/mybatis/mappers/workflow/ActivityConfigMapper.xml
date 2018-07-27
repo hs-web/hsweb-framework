@@ -15,6 +15,7 @@
         <result property="createTime" column="create_time" javaType="date" jdbcType="TIMESTAMP"/>
         <result property="updateTime" column="update_time" javaType="date" jdbcType="TIMESTAMP"/>
         <result property="status" column="status" javaType="Byte" jdbcType="TINYINT"/>
+        <result property="listeners" column="listeners" javaType="java.util.List" jdbcType="CLOB"/>
 
     </resultMap>
 

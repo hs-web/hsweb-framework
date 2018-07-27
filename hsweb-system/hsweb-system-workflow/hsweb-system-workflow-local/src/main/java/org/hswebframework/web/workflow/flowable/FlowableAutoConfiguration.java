@@ -1,5 +1,6 @@
 package org.hswebframework.web.workflow.flowable;
 
+import org.activiti.engine.delegate.event.ActivitiEventListener;
 import org.activiti.engine.impl.interceptor.SessionFactory;
 import org.activiti.spring.boot.ProcessEngineConfigurationConfigurer;
 import org.hswebframework.web.dao.Dao;
@@ -20,11 +21,14 @@ import java.util.List;
 @Configuration
 @AutoConfigureAfter(FlowableAutoConfiguration.CustomEntityManagerAutoConfiguration.class)
 @MapperScan(value = "org.hswebframework.web.workflow.dao", markerInterface = Dao.class
-        ,sqlSessionFactoryRef = "sqlSessionFactory")
+        , sqlSessionFactoryRef = "sqlSessionFactory")
 public class FlowableAutoConfiguration {
 
     @Autowired(required = false)
     private List<SessionFactory> sessionFactories;
+
+    @Autowired(required = false)
+    private List<ActivitiEventListener> activitiEventListeners;
 
     @Bean
     public ProcessEngineConfigurationConfigurer processEngineConfigurationConfigurer() {
@@ -37,6 +41,9 @@ public class FlowableAutoConfiguration {
                     .setLabelFontName("宋体")
                     .setAnnotationFontName("宋体");
 
+            if (activitiEventListeners != null) {
+                configuration.setEventListeners(activitiEventListeners);
+            }
             if (sessionFactories != null) {
                 configuration.setCustomSessionFactories(sessionFactories);
             }
