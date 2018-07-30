@@ -149,7 +149,7 @@ public class SimpleDynamicFormOperationService implements DynamicFormOperationSe
 
         boolean useTrigger = table.getMeta().triggerIsSupport(triggerName);
         String idProperty = getIdProperty(table.getMeta());
-
+        //使用触发器来判断是否存在重复数据
         if (useTrigger) {
             Map<String, Object> triggerContext = new HashMap<>();
             triggerContext.put("table", table);
@@ -162,7 +162,10 @@ public class SimpleDynamicFormOperationService implements DynamicFormOperationSe
             if (result instanceof Map) {
                 Object id = ((Map) result).get(idProperty);
                 if (id == null) {
-                    log.error("触发器返回了数据:{},但是不包含主键字段:{}", data, idProperty);
+                    log.error("table:[{}]触发器返回了数据:[{}],但是不包含主键字段:[{}]",
+                            table.getMeta().getName(),
+                            data,
+                            idProperty);
                     throw new BusinessException("数据错误,请联系管理员");
                 }
                 return id;
