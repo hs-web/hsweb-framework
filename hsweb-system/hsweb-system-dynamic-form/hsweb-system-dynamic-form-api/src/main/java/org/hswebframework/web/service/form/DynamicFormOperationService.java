@@ -14,8 +14,6 @@ import java.util.List;
  * @since 3.0
  */
 public interface DynamicFormOperationService {
-    String idProperty = "id";
-
     <T> PagerResult<T> selectPager(String formId, QueryParamEntity paramEntity);
 
     <T> T selectSingle(String formId, QueryParamEntity paramEntity);
@@ -30,13 +28,12 @@ public interface DynamicFormOperationService {
 
     <T> T insert(String formId, T entity);
 
-    <T> T saveOrUpdate(String formId, T entity);
-
     int delete(String formId, DeleteParamEntity paramEntity);
 
     int deleteById(String formId, Object id);
 
-    <T>T selectById(String formId, Object id);
+    <T> T saveOrUpdate(String formId, T data);
 
+    <T> T selectById(String formId, Object id);
 
 }

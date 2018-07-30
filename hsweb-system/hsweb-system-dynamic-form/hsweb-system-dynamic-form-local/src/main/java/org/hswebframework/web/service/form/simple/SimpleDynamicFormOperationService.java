@@ -1,12 +1,16 @@
 package org.hswebframework.web.service.form.simple;
 
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.ezorm.core.Delete;
 import org.hswebframework.ezorm.core.Insert;
 import org.hswebframework.ezorm.core.Update;
 import org.hswebframework.ezorm.rdb.RDBDatabase;
 import org.hswebframework.ezorm.rdb.RDBQuery;
 import org.hswebframework.ezorm.rdb.RDBTable;
+import org.hswebframework.ezorm.rdb.meta.RDBColumnMetaData;
+import org.hswebframework.ezorm.rdb.meta.RDBTableMetaData;
+import org.hswebframework.web.BusinessException;
 import org.hswebframework.web.NotFoundException;
 import org.hswebframework.web.bean.FastBeanCopier;
 import org.hswebframework.web.commons.entity.PagerResult;
@@ -34,6 +38,7 @@ import java.util.Objects;
 
 @Service("dynamicFormOperationService")
 @Transactional(rollbackFor = Throwable.class)
+@Slf4j
 public class SimpleDynamicFormOperationService implements DynamicFormOperationService {
 
     @Autowired
@@ -53,6 +58,16 @@ public class SimpleDynamicFormOperationService implements DynamicFormOperationSe
         RDBDatabase database = StringUtils.isEmpty(form.getDataSourceId()) ?
                 databaseRepository.getDefaultDatabase() : databaseRepository.getDatabase(form.getDataSourceId());
         return database.getTable(form.getDatabaseTableName());
+    }
+
+    protected RDBDatabase getDatabase(String formId) {
+        DynamicFormEntity form = dynamicFormService.selectByPk(formId);
+        if (null == form || Boolean.FALSE.equals(form.getDeployed())) {
+            throw new NotFoundException("表单不存在");
+        }
+        return StringUtils.isEmpty(form.getDataSourceId()) ?
+                databaseRepository.getDefaultDatabase() :
+                databaseRepository.getDatabase(form.getDataSourceId());
     }
 
     @Override
@@ -118,22 +133,68 @@ public class SimpleDynamicFormOperationService implements DynamicFormOperationSe
         return entity;
     }
 
+    private String getIdProperty(RDBTableMetaData tableMetaData) {
+        return tableMetaData.getColumns()
+                .stream()
+                .filter(RDBColumnMetaData::isPrimaryKey)
+                .findFirst()
+                .map(RDBColumnMetaData::getAlias)
+                .orElseThrow(() -> new BusinessException("表[" + tableMetaData.getComment() + "]未设置主键字段"));
+    }
+
+    @SneakyThrows
+    protected <T> Object getExistingDataId(String formId, T data) {
+        RDBTable<T> table = getTable(formId);
+        String triggerName = "check-data-existing";
+
+        boolean useTrigger = table.getMeta().triggerIsSupport(triggerName);
+        String idProperty = getIdProperty(table.getMeta());
+
+        if (useTrigger) {
+            Map<String, Object> triggerContext = new HashMap<>();
+            triggerContext.put("table", table);
+            triggerContext.put("database", getDatabase(formId));
+            triggerContext.put("data", data);
+            Object result = table.getMeta().on(triggerName, triggerContext);
+            if (result instanceof String) {
+                return result;
+            }
+            if (result instanceof Map) {
+                Object id = ((Map) result).get(idProperty);
+                if (id == null) {
+                    log.error("触发器返回了数据:{},但是不包含主键字段:{}", data, idProperty);
+                    throw new BusinessException("数据错误,请联系管理员");
+                }
+                return id;
+            }
+        } else {
+            Map<String, Object> mapData = FastBeanCopier.copy(data, new HashMap<>());
+            Object id = mapData.get(idProperty);
+            if (null == id) {
+                return null;
+            }
+            Object existing = selectSingle(formId, QueryParamEntity.single(idProperty, id).includes(idProperty));
+            if (null != existing) {
+                mapData = FastBeanCopier.copy(data, new HashMap<>());
+                return mapData.get(idProperty);
+            }
+        }
+
+        return null;
+
+    }
+
     @Override
     @SneakyThrows
-    public <T> T saveOrUpdate(String formId, T entity) {
-
-        Map<String, Object> map = FastBeanCopier.copy(entity, new HashMap<>(), FastBeanCopier.include(idProperty));
-
-        Object id = map.get(idProperty);
-        if (id == null) {
-            return insert(formId, entity);
+    public <T> T saveOrUpdate(String formId, T data) {
+        Objects.requireNonNull(formId, "表单ID不能为空");
+        Object id = getExistingDataId(formId, data);
+        if (null == id) {
+            insert(formId, data);
+        } else {
+            updateById(formId, id, data);
         }
-        int total = getTable(formId).createQuery().where(idProperty, id).total();
-        if (total > 0) {
-            return updateById(formId, String.valueOf(id), entity);
-        }
-
-        return insert(formId, entity);
+        return data;
     }
 
     @Override
@@ -152,7 +213,9 @@ public class SimpleDynamicFormOperationService implements DynamicFormOperationSe
     public int deleteById(String formId, Object id) {
         Objects.requireNonNull(id, "主键不能为空");
         RDBTable table = getTable(formId);
-        return table.createDelete().where(idProperty, id).exec();
+        return table.createDelete()
+                .where(getIdProperty(table.getMeta()), id)
+                .exec();
     }
 
     @Override
@@ -160,7 +223,9 @@ public class SimpleDynamicFormOperationService implements DynamicFormOperationSe
     public <T> T selectById(String formId, Object id) {
         Objects.requireNonNull(id, "主键不能为空");
         RDBTable<T> table = getTable(formId);
-        return table.createQuery().where(idProperty, id).single();
+        return table.createQuery()
+                .where(getIdProperty(table.getMeta()), id)
+                .single();
     }
 
     @Override
@@ -168,10 +233,12 @@ public class SimpleDynamicFormOperationService implements DynamicFormOperationSe
     public <T> T updateById(String formId, Object id, T data) {
         Objects.requireNonNull(id, "主键不能为空");
         RDBTable<T> table = getTable(formId);
+
         eventPublisher.publishEvent(new FormDataUpdateBeforeEvent<>(formId, table, data, id));
+
         table.createUpdate()
                 .set(data)
-                .where(idProperty, id)
+                .where(getIdProperty(table.getMeta()), id)
                 .exec();
         return data;
     }
