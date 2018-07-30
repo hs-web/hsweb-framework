@@ -8,6 +8,7 @@ import org.activiti.engine.task.Task;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.hswebframework.expands.script.engine.DynamicScriptEngine;
 import org.hswebframework.expands.script.engine.DynamicScriptEngineFactory;
+import org.hswebframework.expands.script.engine.ExecuteResult;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.AuthenticationHolder;
 import org.hswebframework.web.authorization.AuthenticationPredicate;
@@ -150,7 +151,10 @@ public class ProcessConfigurationServiceImpl implements ProcessConfigurationServ
             return event -> {
                 Map<String, Object> context = new HashMap<>();
                 context.put("event", event);
-                engine.execute(scriptId, context).getIfSuccess();
+                ExecuteResult result = engine.execute(scriptId, context);
+                if (!result.isSuccess()) {
+                    throw new RuntimeException("执行监听器失败:" + result.getMessage(), result.getException());
+                }
             };
         } else {
             log.warn("不支持的脚本语言:{}", listenerConfig.getLanguage());
