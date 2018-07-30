@@ -40,7 +40,7 @@ import java.util.Set;
 @ComponentScan("org.hswebframework.web.dao.mybatis")
 @MapperScan(value = "org.hswebframework.web.dao"
         , markerInterface = Dao.class
-        ,sqlSessionFactoryRef = "sqlSessionFactory")
+        , sqlSessionFactoryRef = "sqlSessionFactory")
 @AutoConfigureAfter(MyBatisAutoConfiguration.class)
 @EnableConfigurationProperties(MybatisProperties.class)
 public class MybatisDaoAutoConfiguration {
@@ -71,6 +71,7 @@ public class MybatisDaoAutoConfiguration {
                 Dialect.H2
                 , Dialect.MYSQL
                 , Dialect.ORACLE
+                , Dialect.POSTGRES
                 , Dialect.MSSQL);
 
         return new BeanPostProcessor() {
