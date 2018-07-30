@@ -1,8 +1,13 @@
 package org.hswebframework.web.workflow.service.imp;
 
 import io.vavr.Lazy;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.task.Task;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.hswebframework.expands.script.engine.DynamicScriptEngine;
+import org.hswebframework.expands.script.engine.DynamicScriptEngineFactory;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.AuthenticationHolder;
 import org.hswebframework.web.authorization.AuthenticationPredicate;
@@ -10,12 +15,15 @@ import org.hswebframework.web.authorization.exception.AccessDenyException;
 import org.hswebframework.web.organizational.authorization.PersonnelAuthentication;
 import org.hswebframework.web.organizational.authorization.PersonnelAuthenticationHolder;
 import org.hswebframework.web.workflow.dao.entity.ActivityConfigEntity;
+import org.hswebframework.web.workflow.dao.entity.ListenerConfig;
 import org.hswebframework.web.workflow.dao.entity.ProcessDefineConfigEntity;
 import org.hswebframework.web.workflow.dimension.CandidateDimension;
 import org.hswebframework.web.workflow.dimension.CandidateDimensionParser;
 import org.hswebframework.web.workflow.dimension.DimensionContext;
 import org.hswebframework.web.workflow.dimension.PermissionDimensionParser;
+import org.hswebframework.web.workflow.listener.ProcessEvent;
 import org.hswebframework.web.workflow.listener.ProcessEventListener;
+import org.hswebframework.web.workflow.listener.TaskEvent;
 import org.hswebframework.web.workflow.listener.TaskEventListener;
 import org.hswebframework.web.workflow.service.ActivityConfigService;
 import org.hswebframework.web.workflow.service.ProcessDefineConfigService;
@@ -25,10 +33,14 @@ import org.hswebframework.web.workflow.service.config.ActivityConfiguration;
 import org.hswebframework.web.workflow.service.config.ProcessConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 
@@ -37,6 +49,7 @@ import java.util.stream.Collectors;
  * @since 3.0.0-RC
  */
 @Service
+@Slf4j
 public class ProcessConfigurationServiceImpl implements ProcessConfigurationService {
 
     @Autowired
@@ -52,7 +65,7 @@ public class ProcessConfigurationServiceImpl implements ProcessConfigurationServ
     private CandidateDimensionParser candidateDimensionParser;
 
 
-    static final EmptyActivityConfiguration emptyConfiguration = new EmptyActivityConfiguration();
+    private static final EmptyActivityConfiguration emptyConfiguration = new EmptyActivityConfiguration();
 
     @Override
     public ActivityConfiguration getActivityConfiguration(String doingUser, String processDefineId, String activityId) {
@@ -111,9 +124,38 @@ public class ProcessConfigurationServiceImpl implements ProcessConfigurationServ
 
             @Override
             public TaskEventListener getTaskListener(String eventType) {
-                return null;
+                if (CollectionUtils.isEmpty(configEntity.getListeners())) {
+                    return null;
+                }
+                return configEntity
+                        .getListeners()
+                        .stream()
+                        .filter(config -> eventType.equals(config.getEventType()))
+                        .map(ProcessConfigurationServiceImpl.this::<TaskEvent>createTaskEventListener)
+                        .collect(Collectors.collectingAndThen(Collectors.toList(),
+                                list -> event -> list.forEach(listener -> listener.accept(event))));
             }
         };
+    }
+
+
+    @SneakyThrows
+    protected <T> Consumer<T> createTaskEventListener(ListenerConfig listenerConfig) {
+        DynamicScriptEngine engine = DynamicScriptEngineFactory.getEngine(listenerConfig.getLanguage());
+        if (null != engine) {
+            String scriptId = DigestUtils.md5Hex(listenerConfig.getScript());
+            if (!engine.compiled(scriptId)) {
+                engine.compile(scriptId, listenerConfig.getScript());
+            }
+            return event -> {
+                Map<String, Object> context = new HashMap<>();
+                context.put("event", event);
+                engine.execute(scriptId, context).getIfSuccess();
+            };
+        } else {
+            log.warn("不支持的脚本语言:{}", listenerConfig.getLanguage());
+        }
+        return null;
     }
 
     @Override
@@ -149,7 +191,16 @@ public class ProcessConfigurationServiceImpl implements ProcessConfigurationServ
 
             @Override
             public ProcessEventListener getProcessListener(String eventType) {
-                return null;
+                if (CollectionUtils.isEmpty(entity.getListeners())) {
+                    return null;
+                }
+                return entity
+                        .getListeners()
+                        .stream()
+                        .filter(config -> eventType.equals(config.getEventType()))
+                        .map(ProcessConfigurationServiceImpl.this::<ProcessEvent>createTaskEventListener)
+                        .collect(Collectors.collectingAndThen(Collectors.toList(),
+                                list -> event -> list.forEach(listener -> listener.accept(event))));
             }
         };
     }
