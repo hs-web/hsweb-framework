@@ -9,6 +9,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.hswebframework.expands.script.engine.DynamicScriptEngine;
 import org.hswebframework.expands.script.engine.DynamicScriptEngineFactory;
 import org.hswebframework.expands.script.engine.ExecuteResult;
+import org.hswebframework.web.BusinessException;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.AuthenticationHolder;
 import org.hswebframework.web.authorization.AuthenticationPredicate;
@@ -153,7 +154,7 @@ public class ProcessConfigurationServiceImpl implements ProcessConfigurationServ
                 context.put("event", event);
                 ExecuteResult result = engine.execute(scriptId, context);
                 if (!result.isSuccess()) {
-                    throw new RuntimeException("执行监听器失败:" + result.getMessage(), result.getException());
+                    throw new BusinessException("执行监听器失败:" + result.getMessage(), result.getException());
                 }
             };
         } else {
