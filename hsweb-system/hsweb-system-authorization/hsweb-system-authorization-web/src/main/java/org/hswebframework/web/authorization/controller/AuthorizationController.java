@@ -20,8 +20,7 @@ package org.hswebframework.web.authorization.controller;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import org.hswebframework.web.BusinessException;
-import org.hswebframework.web.NotFoundException;
+import lombok.SneakyThrows;
 import org.hswebframework.web.WebUtil;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.AuthenticationManager;
@@ -32,6 +31,7 @@ import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.entity.authorization.UserEntity;
 import org.hswebframework.web.logging.AccessLogger;
 import org.hswebframework.web.service.authorization.UserService;
+import org.hswebframework.web.validate.ValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.MediaType;
@@ -88,7 +88,7 @@ public class AuthorizationController {
                 , parameter);
     }
 
-    @PostMapping(value = "/login",consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    @PostMapping(value = "/login", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     @ApiOperation("用户名密码登录,参数方式")
     public ResponseMessage<Map<String, Object>> authorize(@RequestParam @ApiParam("用户名") String username,
                                                           @RequestParam @ApiParam("密码") String password,
@@ -97,6 +97,7 @@ public class AuthorizationController {
         return doLogin(username, password, WebUtil.getParameters(request));
     }
 
+    @SneakyThrows
     protected ResponseMessage<Map<String, Object>> doLogin(String username, String password, Map<String, ?> parameter) {
         AuthorizationFailedEvent.Reason reason = AuthorizationFailedEvent.Reason.OTHER;
         Function<String, Object> parameterGetter = parameter::get;
@@ -110,11 +111,11 @@ public class AuthorizationController {
             UserEntity entity = userService.selectByUserNameAndPassword(username, password);
             if (entity == null) {
                 reason = AuthorizationFailedEvent.Reason.PASSWORD_ERROR;
-                throw new NotFoundException("密码错误");
+                throw new ValidationException("密码错误", "password");
             }
             if (!DataStatus.STATUS_ENABLED.equals(entity.getStatus())) {
                 reason = AuthorizationFailedEvent.Reason.USER_DISABLED;
-                throw new BusinessException("{user_is_disabled}", 400);
+                throw new ValidationException("用户已被禁用", "username");
             }
             // 验证通过
             Authentication authentication = authenticationManager.getByUserId(entity.getId());
@@ -127,7 +128,7 @@ public class AuthorizationController {
             AuthorizationFailedEvent failedEvent = new AuthorizationFailedEvent(username, password, parameterGetter, reason);
             failedEvent.setException(e);
             eventPublisher.publishEvent(failedEvent);
-            throw e;
+            throw failedEvent.getException();
         }
     }
 
