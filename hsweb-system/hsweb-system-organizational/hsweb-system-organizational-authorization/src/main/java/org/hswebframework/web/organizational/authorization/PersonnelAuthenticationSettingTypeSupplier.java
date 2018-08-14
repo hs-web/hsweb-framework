@@ -53,7 +53,7 @@ public class PersonnelAuthenticationSettingTypeSupplier implements Authorization
                 .map(id -> new SettingInfo(SETTING_TYPE_ORG, id))
                 .collect(Collectors.toSet()));
 
-        //行政区域
+        //行政区划
         settingInfo.addAll(authorization.getAllDistrictId()
                 .stream()
                 .map(id -> new SettingInfo(SETTING_TYPE_DISTRICT, id))
