@@ -13,11 +13,14 @@ import java.util.Map;
 /**
  * 表达式方式切换数据源,在配置文件中设置:
  * <pre>
- *     hsweb:
- *        datasource:
- *           switcher:
- *              org.hswebframework.**.*Service.select*:
- *                  data-source-id: test1
+ *    hsweb:
+ *      datasource:
+ *          switcher:
+ *              test: # 只是一个标识
+ *              # 拦截类和方法的表达式
+ *              expression: org.hswebframework.**.*Service.find*
+ *              # 使用数据源
+ *              data-source-id: read_db
  * </pre>
  *
  * @author zhouhao

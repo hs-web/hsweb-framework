@@ -4,6 +4,7 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.hswebframework.ezorm.core.param.QueryParam;
 import org.hswebframework.ezorm.rdb.executor.SqlExecutor;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
+import org.hswebframework.web.datasource.DataSourceHolder;
 import org.hswebframework.web.dict.EnumDict;
 import org.junit.Assert;
 import org.junit.Before;
@@ -67,8 +68,10 @@ public class TestCrud extends AbstractTransactionalJUnit4SpringContextTests {
 
         QueryParamEntity query = new QueryParamEntity();
         //any in
-        query.where("dataTypes$in$any", Arrays.asList(DataType.TYPE1,DataType.TYPE2));
+        query.where("dataTypes$in$any", Arrays.asList(DataType.TYPE1, DataType.TYPE2));
         query.includes("nest.name", "*");
+
+        //  DataSourceHolder.tableSwitcher().use("h_test", "h_test2");
         List<TestEntity> entities = testDao.queryNest(query);
 
 //        testDao.query(entity);
