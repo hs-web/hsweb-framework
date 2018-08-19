@@ -70,7 +70,7 @@ public class QueryUtils {
             String finalName = name;
             AtomicBoolean found = new AtomicBoolean(false);
             ReflectionUtils.doWithMethods(type, method -> {
-                if (method.getParameterCount() == 1 && method.getName().equals(finalName)) {
+                if (method.getParameterCount() == 1 && (method.getName().equals(finalName) || method.getName().equals(term.getColumn()))) {
                     Object value = FastBeanCopier.DEFAULT_CONVERT.convert(term.getValue(), method.getParameterTypes()[0], FastBeanCopier.EMPTY_CLASS_ARRAY);
                     ReflectionUtils.invokeMethod(method, query, value);
                     found.set(true);
