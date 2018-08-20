@@ -39,7 +39,6 @@
         <module>hsweb-examples</module>
         <module>hsweb-boost</module>
         <module>hsweb-thirdparty</module>
-        <module>hsweb-task</module>
     </modules>
 
     <packaging>pom</packaging>
