@@ -56,51 +56,52 @@ public class AopAuthorizingController extends StaticMethodMatcherPointcutAdvisor
             boolean isControl = false;
             if (null != definition) {
                 Authentication authentication = Authentication.current().orElseThrow(UnAuthorizedException::new);
-                if (!definition.isEmpty()) {
+                //空配置也进行权限控制
+//                if (!definition.isEmpty()) {
 
-                    AuthorizingContext context = new AuthorizingContext();
-                    context.setAuthentication(authentication);
-                    context.setDefinition(definition);
-                    context.setParamContext(paramContext);
-                    isControl = true;
+                AuthorizingContext context = new AuthorizingContext();
+                context.setAuthentication(authentication);
+                context.setDefinition(definition);
+                context.setParamContext(paramContext);
+                isControl = true;
 
-                    Phased dataAccessPhased = null;
-                    if (definition.getDataAccessDefinition() != null) {
-                        dataAccessPhased = definition.getDataAccessDefinition().getPhased();
+                Phased dataAccessPhased = null;
+                if (definition.getDataAccessDefinition() != null) {
+                    dataAccessPhased = definition.getDataAccessDefinition().getPhased();
+                }
+                if (definition.getPhased() == Phased.before) {
+                    //RDAC before
+                    authorizingHandler.handRBAC(context);
+
+                    //方法调用前验证数据权限
+                    if (dataAccessPhased == Phased.before) {
+                        authorizingHandler.handleDataAccess(context);
                     }
-                    if (definition.getPhased() == Phased.before) {
-                        //RDAC before
-                        authorizingHandler.handRBAC(context);
 
-                        //方法调用前验证数据权限
-                        if (dataAccessPhased == Phased.before) {
-                            authorizingHandler.handleDataAccess(context);
-                        }
+                    result = methodInvocation.proceed();
 
-                        result = methodInvocation.proceed();
-
-                        //方法调用后验证数据权限
-                        if (dataAccessPhased == Phased.after) {
-                            context.setParamContext(holder.createParamContext(result));
-                            authorizingHandler.handleDataAccess(context);
-                        }
-                    } else {
-                        //方法调用前验证数据权限
-                        if (dataAccessPhased == Phased.before) {
-                            authorizingHandler.handleDataAccess(context);
-                        }
-
-                        result = methodInvocation.proceed();
+                    //方法调用后验证数据权限
+                    if (dataAccessPhased == Phased.after) {
                         context.setParamContext(holder.createParamContext(result));
+                        authorizingHandler.handleDataAccess(context);
+                    }
+                } else {
+                    //方法调用前验证数据权限
+                    if (dataAccessPhased == Phased.before) {
+                        authorizingHandler.handleDataAccess(context);
+                    }
 
-                        authorizingHandler.handRBAC(context);
+                    result = methodInvocation.proceed();
+                    context.setParamContext(holder.createParamContext(result));
 
-                        //方法调用后验证数据权限
-                        if (dataAccessPhased == Phased.after) {
-                            authorizingHandler.handleDataAccess(context);
-                        }
+                    authorizingHandler.handRBAC(context);
+
+                    //方法调用后验证数据权限
+                    if (dataAccessPhased == Phased.after) {
+                        authorizingHandler.handleDataAccess(context);
                     }
                 }
+//                }
             }
             if (!isControl) {
                 result = methodInvocation.proceed();
