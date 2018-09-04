@@ -10,10 +10,8 @@ import org.hswebframework.web.datasource.exception.DataSourceNotFoundException;
 import javax.annotation.PreDestroy;
 import javax.sql.DataSource;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 /**
  * @author zhouhao
@@ -45,12 +43,11 @@ public abstract class AbstractDynamicDataSourceService<C extends DynamicDataSour
 
     @Override
     public DynamicDataSource getDataSource(String dataSourceId) {
-        DataSourceCache cache = dataSourceStore.get(dataSourceId);
         C config = repository.findById(dataSourceId);
         if (config == null) {
             throw new DataSourceNotFoundException(dataSourceId, "数据源" + dataSourceId + "不存在");
-
         }
+        DataSourceCache cache = dataSourceStore.get(dataSourceId);
         if (cache == null) {
             cache = createCache(config);
             dataSourceStore.put(dataSourceId, cache);

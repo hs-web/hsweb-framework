@@ -1,5 +1,7 @@
 package org.hswebframework.web.datasource;
 
+import lombok.SneakyThrows;
+
 import javax.sql.DataSource;
 import java.io.PrintWriter;
 import java.sql.Connection;
@@ -47,6 +49,7 @@ public class DynamicDataSourceProxy implements DynamicDataSource {
     }
 
     @Override
+    @SneakyThrows
     public DatabaseType getType() {
         if (databaseType == null) {
             lock.lock();
@@ -57,13 +60,10 @@ public class DynamicDataSourceProxy implements DynamicDataSource {
                 try (Connection connection = proxy.getConnection()) {
                     databaseType = DatabaseType.fromJdbcUrl(connection.getMetaData().getURL());
                 }
-            } catch (SQLException e) {
-                throw new UnsupportedOperationException(e);
             } finally {
                 lock.unlock();
             }
         }
-
         return databaseType;
     }
 

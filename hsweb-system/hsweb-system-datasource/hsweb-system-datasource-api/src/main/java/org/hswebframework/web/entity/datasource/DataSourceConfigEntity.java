@@ -2,6 +2,7 @@ package org.hswebframework.web.entity.datasource;
 
 import org.hswebframework.web.commons.entity.GenericEntity;
 
+
 /**
  * 数据源配置 实体
  *

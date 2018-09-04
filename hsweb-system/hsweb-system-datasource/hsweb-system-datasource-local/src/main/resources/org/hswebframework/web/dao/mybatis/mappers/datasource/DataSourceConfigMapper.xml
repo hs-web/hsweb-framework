@@ -4,12 +4,12 @@
         "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.hswebframework.web.dao.datasource.DataSourceConfigDao">
     <resultMap id="DataSourceConfigResultMap" type="org.hswebframework.web.entity.datasource.DataSourceConfigEntity">
-              <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
-            <result property="name" column="name" javaType="String" jdbcType="VARCHAR"/>
-            <result property="enabled" column="enabled" javaType="Long" jdbcType="DECIMAL"/>
-            <result property="createDate" column="create_date" javaType="java.util.Date" jdbcType="DATE"/>
-            <result property="properties" column="properties" javaType="String" jdbcType="CLOB"/>
-            <result property="describe" column="describe" javaType="String" jdbcType="VARCHAR"/>
+        <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
+        <result property="name" column="name" javaType="String" jdbcType="VARCHAR"/>
+        <result property="enabled" column="enabled" javaType="Long" jdbcType="DECIMAL"/>
+        <result property="createDate" column="create_date" javaType="java.util.Date" jdbcType="DATE"/>
+        <result property="properties" column="properties" javaType="java.util.Map" jdbcType="CLOB"/>
+        <result property="describe" column="describe" javaType="String" jdbcType="VARCHAR"/>
     </resultMap>
 
     <!--用于动态生成sql所需的配置-->
@@ -17,8 +17,8 @@
         <bind name="resultMapId" value="'DataSourceConfigResultMap'"/>
         <bind name="tableName" value="'s_datasource_conf'"/>
     </sql>
-  
-    <insert id="insert" parameterType="org.hswebframework.web.entity.datasource.DataSourceConfigEntity" >
+
+    <insert id="insert" parameterType="org.hswebframework.web.entity.datasource.DataSourceConfigEntity">
         <include refid="config"/>
         <include refid="BasicMapper.buildInsertSql"/>
     </insert>

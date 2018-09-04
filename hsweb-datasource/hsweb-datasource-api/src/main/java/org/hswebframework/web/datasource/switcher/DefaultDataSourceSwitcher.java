@@ -28,7 +28,7 @@ public class DefaultDataSourceSwitcher implements DataSourceSwitcher {
     @Override
     public void useLast() {
         // 没有上一次了
-        if (getUsedHistoryQueue().size() == 0) {
+        if (getUsedHistoryQueue().isEmpty()) {
             return;
         }
         //移除队尾,则当前的队尾则为上一次的数据源
@@ -38,7 +38,7 @@ public class DefaultDataSourceSwitcher implements DataSourceSwitcher {
             if (null != current) {
                 logger.debug("try use last data source : {}", currentDataSourceId());
             } else {
-                logger.debug("try use default data source");
+                logger.debug("try use last default data source");
             }
         }
     }
@@ -62,7 +62,7 @@ public class DefaultDataSourceSwitcher implements DataSourceSwitcher {
 
     @Override
     public String currentDataSourceId() {
-        if (getUsedHistoryQueue().size() == 0) {
+        if (getUsedHistoryQueue().isEmpty()) {
             return null;
         }
 

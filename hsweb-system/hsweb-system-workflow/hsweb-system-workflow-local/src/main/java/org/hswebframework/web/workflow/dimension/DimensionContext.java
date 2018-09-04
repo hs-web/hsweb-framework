@@ -25,7 +25,8 @@ public class DimensionContext {
     private String activityId;
 
     /**
-     * 上一环节
+     * 当前环节
      */
     private TaskInfo task;
+
 }

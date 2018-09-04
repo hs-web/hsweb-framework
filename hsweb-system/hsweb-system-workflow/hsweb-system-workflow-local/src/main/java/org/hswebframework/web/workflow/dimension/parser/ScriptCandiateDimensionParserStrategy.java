@@ -4,6 +4,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.expands.script.engine.DynamicScriptEngine;
 import org.hswebframework.expands.script.engine.DynamicScriptEngineFactory;
+import org.hswebframework.web.Lists;
 import org.hswebframework.web.Maps;
 import org.hswebframework.web.entity.authorization.UserEntity;
 import org.hswebframework.web.entity.organizational.PersonEntity;
@@ -16,6 +17,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.util.DigestUtils;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -67,6 +69,7 @@ public class ScriptCandiateDimensionParserStrategy implements CandidateDimension
 
         Object obj = engine.execute(id, Maps.<String, Object>buildMap()
                 .put("user", creator)
+                .put("creator", creator)
                 .put("creatorId", creatorId)
                 .put("context", context)
                 .get())
@@ -82,7 +85,7 @@ public class ScriptCandiateDimensionParserStrategy implements CandidateDimension
                 } else if (target instanceof UserEntity) {
                     return ((UserEntity) target).getId();
                 } else {
-                    return ((Relation) o).getRelation();
+                    return ((Relation) o).getTarget();
                 }
             } else {
                 log.warn("不支持的关系:{}", o);
@@ -101,7 +104,7 @@ public class ScriptCandiateDimensionParserStrategy implements CandidateDimension
             if (result == null) {
                 return new java.util.ArrayList<>();
             }
-            return Collections.singletonList(result);
+            return Lists.buildList(result).get();
         }
     }
 

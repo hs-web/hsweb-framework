@@ -40,9 +40,6 @@ public class DataSourceCache {
                 initLatch = null;
             }
         }
-        if (closed) {
-            throw new DataSourceClosedException(dataSource.getId());
-        }
         return dataSource;
     }
 

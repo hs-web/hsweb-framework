@@ -100,7 +100,6 @@ public class ProcessConfigurationServiceImpl implements ProcessConfigurationServ
                     context.setActivityId(activityId);
                     context.setProcessDefineId(processDefineId);
                     context.setTask(task);
-
                     CandidateDimension dimension = candidateDimensionParser
                             .parse(context, configEntity.getCandidateDimension());
 

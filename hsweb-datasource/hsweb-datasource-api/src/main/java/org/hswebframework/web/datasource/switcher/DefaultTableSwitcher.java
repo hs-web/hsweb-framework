@@ -1,6 +1,5 @@
 package org.hswebframework.web.datasource.switcher;
 
-import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.web.ThreadLocalUtils;
 
 import java.util.HashMap;

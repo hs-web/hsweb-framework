@@ -41,4 +41,20 @@ public class DefaultDataSourceSwitcherTest {
 
     }
 
+    @Test
+    public void testChangeSwitcher2() {
+
+        switcher.use("test");//切换为test
+        assertEquals(switcher.currentDataSourceId(), "test");
+        switcher.useDefault();
+        switcher.useDefault();
+        switcher.useDefault();
+        assertTrue(switcher.currentDataSourceId() == null);
+        switcher.useLast();
+        switcher.useLast();
+        switcher.useLast();
+        assertEquals(switcher.currentDataSourceId(), "test");
+    }
+
+
 }

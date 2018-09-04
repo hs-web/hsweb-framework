@@ -1,38 +1,39 @@
 package org.hswebframework.web.service.datasource.simple;
 
-import com.alibaba.fastjson.JSON;
+import org.hswebframework.web.bean.FastBeanCopier;
 import org.hswebframework.web.commons.entity.factory.EntityFactory;
-import org.hswebframework.web.datasource.jta.AtomikosDataSourceConfig;
-import org.hswebframework.web.datasource.jta.JtaDataSourceRepository;
+import org.hswebframework.web.datasource.annotation.UseDefaultDataSource;
+import org.hswebframework.web.datasource.config.DynamicDataSourceConfigRepository;
 import org.hswebframework.web.entity.datasource.DataSourceConfigEntity;
 import org.hswebframework.web.service.datasource.DataSourceConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.stream.Collectors;
 
 /**
  * @author zhouhao
  * @since 1.0
  */
-public class InServiceJtaDataSourceRepository implements JtaDataSourceRepository {
+@Transactional(propagation = Propagation.NOT_SUPPORTED)
+public class InDBDataSourceRepository implements DynamicDataSourceConfigRepository<InDBDynamicDataSourceConfig> {
     private DataSourceConfigService dataSourceConfigService;
 
-    private EntityFactory entityFactory;
-
-    @Autowired
-    public void setEntityFactory(EntityFactory entityFactory) {
-        this.entityFactory = entityFactory;
+    public InDBDataSourceRepository(DataSourceConfigService dataSourceConfigService) {
+        this.dataSourceConfigService = dataSourceConfigService;
     }
 
-    @Autowired
+    public InDBDataSourceRepository() {
+    }
+
     public void setDataSourceConfigService(DataSourceConfigService dataSourceConfigService) {
         this.dataSourceConfigService = dataSourceConfigService;
     }
 
-    protected AtomikosDataSourceConfig convert(DataSourceConfigEntity entity) {
+    protected InDBDynamicDataSourceConfig convert(DataSourceConfigEntity entity) {
         if (null == entity) {
             return null;
         }
@@ -40,43 +41,33 @@ public class InServiceJtaDataSourceRepository implements JtaDataSourceRepository
         if (config == null) {
             return null;
         }
-        Object xaProperties = config.get("xaProperties");
-        Properties properties = new Properties();
-
-        if (xaProperties instanceof String) {
-            xaProperties = JSON.parseObject(((String) xaProperties));
-        }
-        if (xaProperties instanceof Map) {
-            properties.putAll(((Map) xaProperties));
-        }
-        config.remove("xaProperties");
-        AtomikosDataSourceConfig target = entityFactory.copyProperties(config, new AtomikosDataSourceConfig());
+        InDBDynamicDataSourceConfig target = FastBeanCopier.copy(config, InDBDynamicDataSourceConfig::new);
         target.setId(entity.getId());
         target.setName(entity.getName());
         target.setDescribe(entity.getDescribe());
-        target.setXaProperties(properties);
+        target.setProperties(config);
         return target;
     }
 
     @Override
-    public List<AtomikosDataSourceConfig> findAll() {
+    public List<InDBDynamicDataSourceConfig> findAll() {
         return dataSourceConfigService.select().stream()
                 .map(this::convert)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public AtomikosDataSourceConfig findById(String dataSourceId) {
+    public InDBDynamicDataSourceConfig findById(String dataSourceId) {
         return convert(dataSourceConfigService.selectByPk(dataSourceId));
     }
 
     @Override
-    public AtomikosDataSourceConfig add(AtomikosDataSourceConfig config) {
+    public InDBDynamicDataSourceConfig add(InDBDynamicDataSourceConfig config) {
         throw new UnsupportedOperationException("add AtomikosDataSourceConfig not support");
     }
 
     @Override
-    public AtomikosDataSourceConfig remove(String dataSourceId) {
+    public InDBDynamicDataSourceConfig remove(String dataSourceId) {
         throw new UnsupportedOperationException("remove datasource not support");
     }
 }
