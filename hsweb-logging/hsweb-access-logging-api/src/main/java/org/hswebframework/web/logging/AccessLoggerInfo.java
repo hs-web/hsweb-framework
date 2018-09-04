@@ -214,7 +214,7 @@ public class AccessLoggerInfo {
             Class[] parameterTypes = method.getParameterTypes();
 
             for (int i = 0; i < parameterTypes.length; i++) {
-                methodAppender.add(parameterTypes[i].getSimpleName().concat(" ").concat(parameterNames.length >= i ? parameterNames[i] : ("arg" + i)));
+                methodAppender.add(parameterTypes[i].getSimpleName().concat(" ").concat(parameterNames.length > i ? parameterNames[i] : ("arg" + i)));
             }
             map.put("method", methodAppender.toString());
         }
