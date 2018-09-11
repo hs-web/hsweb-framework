@@ -3,7 +3,7 @@
 ## 目录
 1. [前言](#前言)
 2. [创建项目](#创建项目)
-3. [引入hsweb](#引入hsweb)
+3. [增删改查](#增删改查)
 
 ## 前言
 `hsweb`是基于`java8`,`spring-boot`,`mybatis`开发.所以在开始使用`hsweb`的前,你至少应该掌握以下技术:`java`,`maven`.
@@ -13,7 +13,7 @@
 
 hsweb 目前未提供前端支持,仅有一个[demo](https://github.com/hs-web/hsweb3-demo)可供参考.
 
-本入门教程以一个最传统的单模块项目为例子. IDE为:`Intellij IDEA`
+本入门教程以一个最传统的单模块项目为例子. IDE为:`Intellij IDEA`(需安装lombok插件)
 
 ## 创建项目
 1. 新建maven项目:
@@ -101,6 +101,12 @@ hsweb 目前未提供前端支持,仅有一个[demo](https://github.com/hs-web/h
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hswebframework.web</groupId>
+            <artifactId>hsweb-tests</artifactId>
+            <version>${hsweb.framework.version}</version>
             <scope>test</scope>
         </dependency>
         <!--必须要引入的依赖-->
@@ -287,30 +293,260 @@ public class MyProjectApplication {
 到此,项目建立完成,和普通的spring-boot项目没有区别.
 
 
-## 引入hsweb
+## 增删改查
 
-以权限管理模块(`hsweb-system/hsweb-system-authorization`)为例.
-
-在pom.xml中引入模块:
+使用通用CURD,添加一个增删改查功能:
+ 
+在`pom.xml`中引入模块:
 ```xml
-<!--权限控制-->
+<!--通用CRUD-->
 <dependency>
     <groupId>org.hswebframework.web</groupId>
-    <artifactId>hsweb-authorization-basic</artifactId>
+    <artifactId>hsweb-commons-dao-mybatis</artifactId>
     <version>${hsweb.framework.version}</version>
 </dependency>
-
-<!--权限管理-->
 <dependency>
     <groupId>org.hswebframework.web</groupId>
-    <artifactId>hsweb-system-authorization-starter</artifactId>
+    <artifactId>hsweb-commons-service-simple</artifactId>
+    <version>${hsweb.framework.version}</version>
+</dependency>
+<dependency>
+    <groupId>org.hswebframework.web</groupId>
+    <artifactId>hsweb-commons-controller</artifactId>
     <version>${hsweb.framework.version}</version>
 </dependency>
 ```
 
-![import-authorization-module](./img/import-authorization-module.gif "import-authorization-module")
+![引入curd依赖](./img/import-authorization-module.gif "引入curd依赖")
 
 
 
+1. 创建数据库表:
+
+```sql
+    create table tb_test(
+        id varchar(32) primary key,
+        name varchar(32) not null,
+        status tinyint,
+        comment text
+    )
+```
+
+2. 创建实体类 `com.mycompany.entity.TestEntity`
+
+实体类可通过继承:`org.hswebframework.web.commons.entity.SimpleGenericEntity<主键类型>`.来使用通用的crud功能.
+
+```java
+@Getter
+@Setter
+public class TestEntity extends SimpleGenericEntity<String> {
+    private String name;
+
+    private Byte status;
+
+    private String comment;
+}
+
+```
+
+![创建实体](./img/create-entity.gif "创建实体")
+
+3. 创建Dao 
+
+dao接口可通过继承:`org.hswebframework.web.dao.CrudDao<实体类,主键类型>`.来使用通用的crud功能.
+
+创建Dao接口 `com.mycompany.dao.TestDao`
+
+```java
+public interface TestDao extends CrudDao<TestEntity,String> {
+
+}
+```
+![创建Dao](./img/create-dao.gif "创建实体Dao")
+
+
+创建myabtis mapper,在`resources`目录上创建:`com/mycompany/dao/mybatis/TestMapper.xml` 
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mycompany.dao.TestDao">
+    <resultMap id="TestEntityResultMap" type="com.mycompany.entity.TestEntity">
+        <!--必须列出映射关系-->
+        <id property="id" column="id" javaType="String" jdbcType="VARCHAR"/>
+        <result property="name" column="name" javaType="String" jdbcType="VARCHAR"/>
+        <result property="status" column="name" javaType="Byte" jdbcType="TINYINT"/>
+        <result property="comment" column="comment" javaType="String" jdbcType="CLOB"/>
+    </resultMap>
+
+    <!--用于动态生成sql所需的配置-->
+    <sql id="config">
+        <bind name="resultMapId" value="'TestEntityResultMap'"/>
+        <bind name="tableName" value="'tb_test'"/>
+    </sql>
+
+    <insert id="insert" parameterType="com.mycompany.entity.TestEntity" >
+        <include refid="config"/>
+        <include refid="BasicMapper.buildInsertSql"/>
+    </insert>
+
+    <delete id="deleteByPk" parameterType="String">
+        delete from tb_test where id =#{id}
+    </delete>
+
+    <delete id="delete" parameterType="org.hswebframework.web.commons.entity.Entity">
+        <include refid="config"/>
+        <include refid="BasicMapper.buildDeleteSql"/>
+    </delete>
+
+    <update id="update" parameterType="org.hswebframework.web.commons.entity.Entity">
+        <include refid="config"/>
+        <include refid="BasicMapper.buildUpdateSql"/>
+    </update>
+
+    <select id="query" parameterType="org.hswebframework.web.commons.entity.Entity" resultMap="TestEntityResultMap">
+        <include refid="config"/>
+        <include refid="BasicMapper.buildSelectSql"/>
+    </select>
+
+    <select id="count" parameterType="org.hswebframework.web.commons.entity.Entity" resultType="int">
+        <include refid="config"/>
+        <include refid="BasicMapper.buildTotalSql"/>
+    </select>
+</mapper>
+
+```
+![创建Mybatis](./img/create-mybaits-mapper.gif "创建实体Mybatis")
+
+
+
+在`application.yml`中添加配置:
+
+```yaml
+mybatis:
+  mapper-locations: classpath:com/mycompany/dao/mybatis/**/*.xml
+```
+
+在`MyProjectApplication`上添加注解:`@MapperScan(basePackages = "com.mycompany.dao", markerInterface = org.hswebframework.web.dao.Dao.class)`
+
+
+
+4. 创建Service
+
+service接口可通过继承:`org.hswebframework.web.service.CrudService<实体类,主键类型>`.来使用通用的crud功能.
+
+创建接口类: `com.mycompany.service.TestService`
+
+```java
+public interface TestService extends CrudService<TestEntity,String> {
+}
+
+```
+
+实现类可通过继承: ` org.hswebframework.web.service.GenericEntityService<实体类,主键类型>`.来使用通用crud功能.
+
+创建实现类 `com.mycompany.service.impl.TestServiceImpl` 
+ 
+```java
+@Service
+public class TestServiceImpl extends GenericEntityService<TestEntity,String>
+        implements TestService {
+
+    @Autowired
+    private TestDao testDao;
+
+    @Override
+    protected IDGenerator<String> getIDGenerator() {
+        return IDGenerator.MD5;
+    }
+
+    @Override
+    public TestDao getDao() {
+        return testDao;
+    }
+}
+```
+
+![创建Service](./img/create-service.gif "创建Serivce")
+
+
+5. 创建Controller
+
+controller 可通过实现接口: `org.hswebframework.web.controller.SimpleGenericEntityController<实体类,主键类型,org.hswebframework.web.commons.entity.param.QueryParamEntity>`
+
+创建controller类: `com.mycompany.controller.TestController`
+
+```java
+
+@RestController
+@RequestMapping("/test")
+public class TestController implements SimpleGenericEntityController<TestEntity, String, QueryParamEntity> {
+
+    @Autowired
+    TestService testService;
+
+    @Override
+    public CrudService<TestEntity, String> getService() {
+        return testService;
+    }
+}
+
+```
+
+6. 测试
+
+方式一:编写单元测试
+
+在test目录创建`com.mycompany.TestApplication`和`com.mycompany.controller.TestControllerTest`
+
+```java
+@SpringBootApplication
+@WebAppConfiguration
+public class TestApplication {
+
+}
+```
+
+```groovy
+@WebAppConfiguration
+@ContextConfiguration
+@SpringBootTest(classes = [TestApplication.class], properties = ["classpath:application.yml"])
+class TestControllerTest extends Specification {
+    @Autowired
+    private ConfigurableApplicationContext context;
+
+    @Shared
+    private MockMvc mockMvc;
+
+    void setup() {
+        mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
+    }
+
+    def "Test Create Data"() {
+        setup:
+        def testData = """
+            {"name":"测试数据","status":1,"comment":"说明"}
+            """
+        and:
+        mockMvc.perform(
+                post("/test")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(testData)
+        ).andExpect(status().is(201))
+
+    }
+}
+```
+执行单元测试,通过则说明新增功能测试通过.
+
+方式二: `postman` 或者idea的`Test Restful Web Servcice`,以Idea工具为例:
+
+执行启动类:`com.mycompany.MyProjectApplication`启动服务,然后调用`/test`服务
+
+![测试](./img/idea-test.gif "测试")
+
+一个最简单的通用crud例子完成了!! 
 
 
