@@ -38,12 +38,13 @@ import org.springframework.context.annotation.Import;
 @ComponentScan({"org.hswebframework.web.service.authorization.simple"
         , "org.hswebframework.web.authorization.controller"})
 @MapperScan("org.hswebframework.web.authorization.dao")
-@AutoConfigureBefore(DefaultAuthorizationAutoConfiguration.class)
+@AutoConfigureBefore(value = {
+        DefaultAuthorizationAutoConfiguration.class
+}, name = "org.hswebframework.web.authorization.basic.configuration.AuthorizingHandlerAutoConfiguration")
 @Import(BasicAuthorizationConfiguration.class)
 public class AuthorizationAutoConfiguration {
 
     @Bean
-    @ConditionalOnMissingBean(AuthenticationManager.class)
     public AuthenticationManager authenticationManager(AuthenticationInitializeService authenticationInitializeService) {
         return new SimpleAuthenticationManager(authenticationInitializeService);
     }

@@ -18,21 +18,23 @@
 package org.hswebframework.web.authorization.starter;
 
 import com.alibaba.fastjson.JSONObject;
+import org.hswebframework.web.authorization.basic.configuration.EnableAopAuthorize;
 import org.hswebframework.web.entity.authorization.UserEntity;
 import org.hswebframework.web.service.authorization.UserService;
 import org.hswebframework.web.tests.SimpleWebApplicationTests;
 import org.junit.After;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 
 import java.sql.SQLException;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
+@Configuration
+@EnableAopAuthorize
 public class LoginTests extends SimpleWebApplicationTests {
 
     @Autowired

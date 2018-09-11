@@ -90,6 +90,16 @@ public class AuthorizingHandlerAutoConfiguration {
         return new UserTokenAutoExpiredListener(userTokenManager);
     }
 
+    @Bean
+    public AuthorizationController authorizationController() {
+        return new AuthorizationController();
+    }
+
+    @Bean
+    public UserTokenController userTokenController() {
+        return new UserTokenController();
+    }
+
     @Configuration
     public static class DataAccessHandlerProcessor implements BeanPostProcessor {
 
