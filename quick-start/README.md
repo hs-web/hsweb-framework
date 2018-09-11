@@ -317,7 +317,7 @@ public class MyProjectApplication {
 </dependency>
 ```
 
-![引入curd依赖](./img/import-authorization-module.gif "引入curd依赖")
+![引入curd依赖](./img/import-commons-module.gif "引入curd依赖")
 
 
 
