@@ -54,12 +54,14 @@ public abstract class CachedDataSourceSwitchStrategyMatcher implements DataSourc
                 return false;
             }
             CacheKey target = ((CacheKey) obj);
-            return target.target == this.target && target.method == method;
+            return target.target.getName().equals(this.target.getName())
+                    && target.method.getName().equals(method.getName())
+                    && target.method.getParameterCount() == method.getParameterCount();
         }
 
         public int hashCode() {
-            int result = this.target != null ? this.target.hashCode() : 0;
-            result = 31 * result + (this.method != null ? this.method.hashCode() : 0);
+            int result = this.target != null ? this.target.getName().hashCode() : 0;
+            result = 31 * result + (this.method != null ? this.method.getName().hashCode() : 0);
             return result;
         }
     }

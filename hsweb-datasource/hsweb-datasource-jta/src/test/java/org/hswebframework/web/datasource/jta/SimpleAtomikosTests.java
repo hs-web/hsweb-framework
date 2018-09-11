@@ -168,10 +168,20 @@ public class SimpleAtomikosTests extends AbstractTransactionalJUnit4SpringContex
         Thread.sleep(1000);
     }
 
+    public interface TestService {
+        List findAll() throws SQLException;
+    }
+
+    public static class AbstractTest implements TestService {
+        RDBDatabase database;
+
+        public List findAll() throws SQLException {
+            return database.getTable("s_user").createQuery().list();
+        }
+    }
 
     @Transactional
-    public static class DynDsTest {
-        private RDBDatabase database;
+    public static class DynDsTest extends AbstractTest {
 
         @Transactional(propagation = Propagation.NOT_SUPPORTED)
         public void testCreateTable() throws SQLException {
@@ -195,9 +205,6 @@ public class SimpleAtomikosTests extends AbstractTransactionalJUnit4SpringContex
             return database.getTable("s_user").createQuery().list();
         }
 
-        public List findAll() throws SQLException {
-            return database.getTable("s_user").createQuery().list();
-        }
 
         @UseDataSource("test_ds")
         public List query() throws SQLException {
