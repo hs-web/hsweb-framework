@@ -1,0 +1,38 @@
+
+spring:
+    aop:
+        auto: true
+        proxy-target-class: true
+    datasource:
+       url : jdbc:h2:mem:example-oauth2-client
+       username : sa
+       password :
+       type: com.alibaba.druid.pool.DruidDataSource
+       driver-class-name : org.h2.Driver
+    cache:
+       type: simple
+hsweb:
+    app:
+      name: hsweb-oauth2 客户端示例
+      version: 3.0.0
+    users:
+        admin:
+          name: 超级管理员
+          username: admin
+          password: admin
+          roles: #用户的角色
+            - id: admin
+              name: 管理员
+            - id: user
+              name: 用户
+          permissions:
+            - id: user-manager
+              actions: query,get,update,delete
+              dataAccesses:
+                - action: query
+                  type: DENY_FIELDS
+                  fields:
+                    - password
+                    - salt
+server:
+  port: 8808

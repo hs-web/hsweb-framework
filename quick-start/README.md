@@ -291,4 +291,26 @@ public class MyProjectApplication {
 
 以权限管理模块(`hsweb-system/hsweb-system-authorization`)为例.
 
-TODO
+在pom.xml中引入模块:
+```xml
+<!--权限控制-->
+<dependency>
+    <groupId>org.hswebframework.web</groupId>
+    <artifactId>hsweb-authorization-basic</artifactId>
+    <version>${hsweb.framework.version}</version>
+</dependency>
+
+<!--权限管理-->
+<dependency>
+    <groupId>org.hswebframework.web</groupId>
+    <artifactId>hsweb-system-authorization-starter</artifactId>
+    <version>${hsweb.framework.version}</version>
+</dependency>
+```
+
+![import-authorization-module](./img/import-authorization-module.gif "import-authorization-module")
+
+
+
+
+

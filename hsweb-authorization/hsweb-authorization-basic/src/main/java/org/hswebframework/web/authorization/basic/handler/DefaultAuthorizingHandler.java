@@ -1,6 +1,7 @@
 package org.hswebframework.web.authorization.basic.handler;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.hswebframework.expands.script.engine.DynamicScriptEngine;
 import org.hswebframework.expands.script.engine.DynamicScriptEngineFactory;
 import org.hswebframework.web.authorization.Authentication;
@@ -54,7 +55,7 @@ public class DefaultAuthorizingHandler implements AuthorizingHandler {
 
     @Override
     public void handRBAC(AuthorizingContext context) {
-        if(handleEvent(context,HandleType.RBAC)){
+        if (handleEvent(context, HandleType.RBAC)) {
             return;
         }
         //进行rdac权限控制
@@ -63,8 +64,9 @@ public class DefaultAuthorizingHandler implements AuthorizingHandler {
         handleExpression(context.getAuthentication(), context.getDefinition(), context.getParamContext());
 
     }
-    private boolean handleEvent(AuthorizingContext context,HandleType type){
-        if(null!=eventPublisher) {
+
+    private boolean handleEvent(AuthorizingContext context, HandleType type) {
+        if (null != eventPublisher) {
             AuthorizingHandleBeforeEvent event = new AuthorizingHandleBeforeEvent(context, type);
             eventPublisher.publishEvent(event);
             if (!event.isExecute()) {
@@ -77,16 +79,17 @@ public class DefaultAuthorizingHandler implements AuthorizingHandler {
         }
         return false;
     }
+
     public void handleDataAccess(AuthorizingContext context) {
 
         if (dataAccessController == null) {
             logger.warn("dataAccessController is null,skip result access control!");
             return;
         }
-        if(context.getDefinition().getDataAccessDefinition()==null){
+        if (context.getDefinition().getDataAccessDefinition() == null) {
             return;
         }
-        if(handleEvent(context,HandleType.DATA)){
+        if (handleEvent(context, HandleType.DATA)) {
             return;
         }
 
@@ -160,7 +163,7 @@ public class DefaultAuthorizingHandler implements AuthorizingHandler {
                 logger.info("do permission access handle : permissions{}({}),actions{} ,definition:{}.{} ({})",
                         definition.getPermissionDescription(),
                         permissionsDef, actionsDef
-                        ,definition.getPermissions(),
+                        , definition.getPermissions(),
                         definition.getActions(),
                         definition.getLogical());
             }
@@ -188,14 +191,14 @@ public class DefaultAuthorizingHandler implements AuthorizingHandler {
                         return logicalIsOr || permission.getActions().containsAll(actions);
                     }).collect(Collectors.toList());
             access = logicalIsOr ?
-                    permissions.size() > 0 :
+                    CollectionUtils.isNotEmpty(permissions) :
                     //权限数量和配置的数量相同
                     permissions.size() == permissionsDef.size();
         }
         //控制角色
         if (!rolesDef.isEmpty()) {
             if (logger.isInfoEnabled()) {
-                logger.info("do role access handle : roles{} , definition:{}", rolesDef,definition.getRoles());
+                logger.info("do role access handle : roles{} , definition:{}", rolesDef, definition.getRoles());
             }
             Function<Predicate<Role>, Boolean> func = logicalIsOr
                     ? authentication.getRoles().stream()::anyMatch
@@ -205,7 +208,7 @@ public class DefaultAuthorizingHandler implements AuthorizingHandler {
         //控制用户
         if (!usersDef.isEmpty()) {
             if (logger.isInfoEnabled()) {
-                logger.info("do user access handle : users{} , definition:{} ", usersDef,definition.getUser());
+                logger.info("do user access handle : users{} , definition:{} ", usersDef, definition.getUser());
             }
             Function<Predicate<String>, Boolean> func = logicalIsOr
                     ? usersDef.stream()::anyMatch

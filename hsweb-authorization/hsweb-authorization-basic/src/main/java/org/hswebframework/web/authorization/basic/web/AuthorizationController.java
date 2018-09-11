@@ -15,7 +15,7 @@
  *
  */
 
-package org.hswebframework.web.authorization.controller;
+package org.hswebframework.web.authorization.basic.web;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -26,12 +26,9 @@ import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.AuthenticationManager;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.listener.event.*;
-import org.hswebframework.web.commons.entity.DataStatus;
+import org.hswebframework.web.authorization.simple.PlainTextUsernamePasswordAuthenticationRequest;
 import org.hswebframework.web.controller.message.ResponseMessage;
-import org.hswebframework.web.entity.authorization.UserEntity;
 import org.hswebframework.web.logging.AccessLogger;
-import org.hswebframework.web.service.authorization.UserService;
-import org.hswebframework.web.validate.ValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.MediaType;
@@ -52,9 +49,6 @@ import static org.hswebframework.web.controller.message.ResponseMessage.ok;
 @AccessLogger("授权")
 @Api(tags = "权限-用户授权", value = "授权")
 public class AuthorizationController {
-
-    @Autowired
-    private UserService userService;
 
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -108,20 +102,11 @@ public class AuthorizationController {
             password = decodeEvent.getPassword();
             AuthorizationBeforeEvent beforeEvent = new AuthorizationBeforeEvent(username, password, parameterGetter);
             eventPublisher.publishEvent(beforeEvent);
-            UserEntity entity = userService.selectByUserNameAndPassword(username, password);
-            if (entity == null) {
-                reason = AuthorizationFailedEvent.Reason.PASSWORD_ERROR;
-                throw new ValidationException("密码错误", "password");
-            }
-            if (!DataStatus.STATUS_ENABLED.equals(entity.getStatus())) {
-                reason = AuthorizationFailedEvent.Reason.USER_DISABLED;
-                throw new ValidationException("用户已被禁用", "username");
-            }
             // 验证通过
-            Authentication authentication = authenticationManager.getByUserId(entity.getId());
+            Authentication authentication = authenticationManager.authenticate(new PlainTextUsernamePasswordAuthenticationRequest(username, password));
             //触发授权成功事件
             AuthorizationSuccessEvent event = new AuthorizationSuccessEvent(authentication, parameterGetter);
-            event.getResult().put("userId", entity.getId());
+            event.getResult().put("userId", authentication.getUser().getId());
             eventPublisher.publishEvent(event);
             return ok(event.getResult());
         } catch (Exception e) {

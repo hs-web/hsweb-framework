@@ -2,6 +2,7 @@ package org.hswebframework.web.example.oauth2;
 
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.AuthenticationManager;
+import org.hswebframework.web.authorization.AuthenticationRequest;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,6 +12,11 @@ public class MemoryAuthenticationManager implements AuthenticationManager {
 
     public static void addAuthentication(Authentication authentication) {
         users.put(authentication.getUser().getId(), authentication);
+    }
+
+    @Override
+    public Authentication authenticate(AuthenticationRequest request) {
+        return null;
     }
 
     @Override

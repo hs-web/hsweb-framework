@@ -1,8 +1,10 @@
 package org.hswebframework.web.authorization.basic.configuration;
 
+import org.hswebframework.web.authorization.AuthenticationManager;
 import org.hswebframework.web.authorization.access.DataAccessController;
 import org.hswebframework.web.authorization.access.DataAccessHandler;
 import org.hswebframework.web.authorization.basic.aop.AopMethodAuthorizeDefinitionParser;
+import org.hswebframework.web.authorization.basic.embed.EmbedAuthenticationManager;
 import org.hswebframework.web.authorization.basic.handler.DefaultAuthorizingHandler;
 import org.hswebframework.web.authorization.basic.handler.access.DefaultDataAccessController;
 import org.hswebframework.web.authorization.basic.web.*;
@@ -11,6 +13,8 @@ import org.hswebframework.web.authorization.token.UserTokenManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -59,10 +63,16 @@ public class AuthorizingHandlerAutoConfiguration {
         return new WebMvcConfigurerAdapter() {
             @Override
             public void addInterceptors(InterceptorRegistry registry) {
-                registry.addInterceptor(new WebUserTokenInterceptor(userTokenManager, userTokenParser,parser));
+                registry.addInterceptor(new WebUserTokenInterceptor(userTokenManager, userTokenParser, parser));
                 super.addInterceptors(registry);
             }
         };
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(AuthenticationManager.class)
+    public AuthenticationManager embedAuthenticationManager() {
+        return new EmbedAuthenticationManager();
     }
 
     @Bean

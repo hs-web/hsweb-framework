@@ -1,4 +1,4 @@
-package org.hswebframework.web.authorization.controller;
+package org.hswebframework.web.authorization.basic.web;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
