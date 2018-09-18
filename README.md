@@ -7,7 +7,7 @@
 [![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg?style=flat-square)](https://www.apache.org/licenses/LICENSE-2.0.html)
 [![Insight.io](https://www.insight.io/repoBadge/github.com/hs-web/hsweb-framework)](https://insight.io/github.com/hs-web/hsweb-framework)
 
- [贡献代码](CONTRIBUTING.md)  [文档](https://github.com/hs-web/hsweb-framework/wiki/)
+  [贡献代码](CONTRIBUTING.md)  [快速开始](quick-start)
 
 ## 应用场景
 1. 后台管理系统.
