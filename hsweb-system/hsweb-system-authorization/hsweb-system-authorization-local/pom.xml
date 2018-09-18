@@ -11,6 +11,7 @@
 
     <artifactId>hsweb-system-authorization-local</artifactId>
 
+    <description>业务模块-权限管理本地实现</description>
     <dependencies>
         <dependency>
             <groupId>org.hswebframework</groupId>

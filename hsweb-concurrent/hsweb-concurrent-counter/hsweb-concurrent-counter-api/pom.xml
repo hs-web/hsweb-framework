@@ -28,6 +28,7 @@
 
     <artifactId>hsweb-concurrent-counter-api</artifactId>
 
+    <description>计数器API以及本地实现</description>
 
     <dependencies>
         <dependency>

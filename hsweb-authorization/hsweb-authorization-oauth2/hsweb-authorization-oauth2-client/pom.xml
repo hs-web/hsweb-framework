@@ -29,6 +29,7 @@
 
     <artifactId>hsweb-authorization-oauth2-client</artifactId>
 
+    <description>OAuth2客户端实现</description>
 
     <dependencies>
         <dependency>

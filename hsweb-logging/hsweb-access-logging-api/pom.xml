@@ -12,5 +12,6 @@
 
     <artifactId>hsweb-access-logging-api</artifactId>
 
+    <description>访问日志API模块</description>
 
 </project>

@@ -12,6 +12,8 @@
 
     <artifactId>hsweb-commons-bean</artifactId>
 
+    <description>通用增删改查-通用Bean模块</description>
+
     <dependencies>
 
         <dependency>

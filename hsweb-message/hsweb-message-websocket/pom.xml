@@ -11,6 +11,8 @@
 
     <artifactId>hsweb-message-websocket</artifactId>
 
+    <description>使用hsweb-message-api进行websocket 消息传递</description>
+
     <dependencies>
 
         <dependency>
@@ -21,10 +23,10 @@
         </dependency>
 
         <!--<dependency>-->
-            <!--<groupId>org.hswebframework.web</groupId>-->
-            <!--<artifactId>hsweb-message-jms</artifactId>-->
-            <!--<version>${project.version}</version>-->
-            <!--<scope>test</scope>-->
+        <!--<groupId>org.hswebframework.web</groupId>-->
+        <!--<artifactId>hsweb-message-jms</artifactId>-->
+        <!--<version>${project.version}</version>-->
+        <!--<scope>test</scope>-->
         <!--</dependency>-->
         <dependency>
             <groupId>org.hswebframework.web</groupId>
@@ -54,17 +56,17 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-websocket</artifactId>
             <!--<exclusions>-->
-                <!--<exclusion>-->
-                    <!--<groupId>org.springframework.boot</groupId>-->
-                    <!--<artifactId>spring-boot-starter-tomcat</artifactId>-->
-                <!--</exclusion>-->
+            <!--<exclusion>-->
+            <!--<groupId>org.springframework.boot</groupId>-->
+            <!--<artifactId>spring-boot-starter-tomcat</artifactId>-->
+            <!--</exclusion>-->
             <!--</exclusions>-->
         </dependency>
 
         <!--使用undertow作为web容器-->
         <!--<dependency>-->
-            <!--<groupId>org.springframework.boot</groupId>-->
-            <!--<artifactId>spring-boot-starter-undertow</artifactId>-->
+        <!--<groupId>org.springframework.boot</groupId>-->
+        <!--<artifactId>spring-boot-starter-undertow</artifactId>-->
         <!--</dependency>-->
 
         <dependency>

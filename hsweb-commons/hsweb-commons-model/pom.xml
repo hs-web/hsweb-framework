@@ -27,6 +27,8 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <description>通用增删改查-通用model模块</description>
+
     <artifactId>hsweb-commons-model</artifactId>
 
     <dependencies>

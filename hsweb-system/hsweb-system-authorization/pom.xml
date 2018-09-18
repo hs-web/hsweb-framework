@@ -9,6 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <description>业务模块-权限管理</description>
     <artifactId>hsweb-system-authorization</artifactId>
     <packaging>pom</packaging>
     <modules>

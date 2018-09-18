@@ -28,6 +28,8 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <description>日志模块</description>
+
     <artifactId>hsweb-logging</artifactId>
     <packaging>pom</packaging>
     <modules>

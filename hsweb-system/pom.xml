@@ -9,7 +9,7 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
+    <description>业务模块</description>
     <packaging>pom</packaging>
     <modules>
         <module>hsweb-system-authorization</module>

@@ -31,6 +31,8 @@
 
     <artifactId>hsweb-commons-service-simple</artifactId>
 
+    <description>通用增删改查-通用服务本地实现模块</description>
+
     <dependencies>
         <dependency>
             <groupId>org.slf4j</groupId>

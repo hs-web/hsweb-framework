@@ -11,6 +11,8 @@
 
     <artifactId>hsweb-concurrent-lock-api</artifactId>
 
+    <description>锁API以及本地实现</description>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>

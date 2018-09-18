@@ -11,6 +11,7 @@
 
     <artifactId>hsweb-message-redis</artifactId>
 
+    <description>使用redis来实现hsweb-message-api</description>
 
     <dependencies>
         <dependency>

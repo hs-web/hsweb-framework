@@ -29,6 +29,8 @@
 
     <artifactId>hsweb-boost-aop</artifactId>
 
+    <description>对AOP提供一些增强功能</description>
+
     <dependencies>
         <dependency>
             <groupId>org.hswebframework.web</groupId>

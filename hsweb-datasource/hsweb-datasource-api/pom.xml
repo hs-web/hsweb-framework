@@ -13,6 +13,7 @@
 
     <artifactId>hsweb-datasource-api</artifactId>
 
+     <description>数据源管理API,以及简单的多数据源实现,支持aop,表达式等多种方式切换数据源</description>
 
     <dependencies>
         <dependency>

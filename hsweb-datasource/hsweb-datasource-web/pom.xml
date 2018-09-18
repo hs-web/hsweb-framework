@@ -13,6 +13,8 @@
 
     <artifactId>hsweb-datasource-web</artifactId>
 
+    <description>暴露多数据源的web接口</description>
+
     <dependencies>
         <dependency>
             <groupId>org.hswebframework.web</groupId>

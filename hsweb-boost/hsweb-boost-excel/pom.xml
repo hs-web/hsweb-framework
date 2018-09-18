@@ -11,6 +11,8 @@
 
     <artifactId>hsweb-boost-excel</artifactId>
 
+    <description>便捷EXCEL操作工具</description>
+
     <dependencies>
         <dependency>
             <groupId>org.hswebframework</groupId>

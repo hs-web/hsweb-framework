@@ -11,6 +11,7 @@
 
     <artifactId>hsweb-concurrent-counter-redis</artifactId>
 
+    <description>计数器redisson实现</description>
 
     <dependencies>
         <dependency>

@@ -9,6 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <description>授权,权限管理API</description>
     <artifactId>hsweb-authorization-api</artifactId>
     <dependencies>
         <dependency>

@@ -27,6 +27,7 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
+    <description>通用模块</description>
 
     <artifactId>hsweb-commons</artifactId>
     <packaging>pom</packaging>

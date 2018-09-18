@@ -27,6 +27,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <description>一些增强功能</description>
     <artifactId>hsweb-boost</artifactId>
     <packaging>pom</packaging>
     <modules>

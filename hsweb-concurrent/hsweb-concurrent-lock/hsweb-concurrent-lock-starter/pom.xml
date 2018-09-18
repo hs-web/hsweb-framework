@@ -11,6 +11,7 @@
 
     <artifactId>hsweb-concurrent-lock-starter</artifactId>
 
+    <description>使用AOP实现锁</description>
 
     <dependencies>
         <dependency>

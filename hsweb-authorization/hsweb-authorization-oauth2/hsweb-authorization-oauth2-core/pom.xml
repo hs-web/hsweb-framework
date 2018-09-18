@@ -30,6 +30,7 @@
 
     <artifactId>hsweb-authorization-oauth2-core</artifactId>
 
+    <description>OAuth2通用核心包</description>
 
     <dependencies>
         <dependency>

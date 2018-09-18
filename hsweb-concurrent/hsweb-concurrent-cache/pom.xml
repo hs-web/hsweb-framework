@@ -28,6 +28,8 @@
 
     <artifactId>hsweb-concurrent-cache</artifactId>
 
+    <description>对spring-cache的拓展</description>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework</groupId>

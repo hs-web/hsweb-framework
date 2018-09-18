@@ -30,6 +30,7 @@
 
     <artifactId>hsweb-commons-utils</artifactId>
 
+    <description>通用模块-工具类</description>
 
     <dependencies>
         <dependency>

@@ -27,6 +27,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <description>hsweb自动配置器</description>
     <artifactId>hsweb-spring-boot-starter</artifactId>
 
     <dependencies>

@@ -9,6 +9,8 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <description>DSL LIKE的message API</description>
+
     <artifactId>hsweb-message-api</artifactId>
 
     <dependencies>

@@ -26,6 +26,8 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <description>并发包</description>
+
     <artifactId>hsweb-concurrent</artifactId>
     <packaging>pom</packaging>
     <modules>

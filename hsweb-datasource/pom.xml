@@ -11,6 +11,8 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <description>数据源,多数据源,动态数据源</description>
+
     <artifactId>hsweb-datasource</artifactId>
     <packaging>pom</packaging>
     <modules>

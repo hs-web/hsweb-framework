@@ -11,6 +11,7 @@
 
     <artifactId>hsweb-boost-ftp</artifactId>
 
+    <description>ftp操作工具,使用ftp连接池.</description>
 
     <dependencies>
         <dependency>

@@ -11,6 +11,7 @@
 
     <artifactId>hsweb-system-authorization-api</artifactId>
 
+    <description>业务模块-权限管理API</description>
     <dependencies>
         <dependency>
             <groupId>org.hswebframework.web</groupId>

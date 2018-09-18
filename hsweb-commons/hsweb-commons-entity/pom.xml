@@ -29,6 +29,8 @@
 
     <artifactId>hsweb-commons-entity</artifactId>
 
+    <description>通用增删改查-通用实体模块</description>
+
     <dependencies>
         <dependency>
             <groupId>${project.parent.groupId}</groupId>

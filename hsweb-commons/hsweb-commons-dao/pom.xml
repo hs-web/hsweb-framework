@@ -28,6 +28,8 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <description>通用增删改查-通用Dao模块</description>
+
     <artifactId>hsweb-commons-dao</artifactId>
     <packaging>pom</packaging>
     <modules>

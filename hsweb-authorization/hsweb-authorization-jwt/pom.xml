@@ -11,6 +11,8 @@
 
     <artifactId>hsweb-authorization-jwt</artifactId>
 
+    <description>使用jwt实现简单的token策略</description>
+
     <dependencies>
         <dependency>
             <groupId>org.hswebframework.web</groupId>

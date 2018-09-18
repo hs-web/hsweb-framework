@@ -30,6 +30,8 @@
 
     <artifactId>hsweb-commons-dao-api</artifactId>
 
+    <description>通用增删改查-通用Dao接口模块</description>
+
     <dependencies>
         <dependency>
             <groupId>org.hswebframework.web</groupId>

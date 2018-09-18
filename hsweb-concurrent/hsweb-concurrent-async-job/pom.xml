@@ -11,6 +11,8 @@
 
     <artifactId>hsweb-concurrent-async-job</artifactId>
 
+    <description>支持事务的异步任务</description>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework</groupId>

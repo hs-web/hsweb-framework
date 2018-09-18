@@ -13,6 +13,8 @@
 
     <artifactId>hsweb-commons-service-oauth2</artifactId>
 
+    <description>通用增删改查-通用服务OAuth2实现模块</description>
+
     <dependencies>
         <dependency>
             <groupId>org.hswebframework.web</groupId>

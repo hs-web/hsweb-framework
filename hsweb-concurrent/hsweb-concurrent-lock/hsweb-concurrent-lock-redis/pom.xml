@@ -11,6 +11,7 @@
 
     <artifactId>hsweb-concurrent-lock-redis</artifactId>
 
+    <description>使用redisson实现分布式锁</description>
 
     <dependencies>
         <dependency>

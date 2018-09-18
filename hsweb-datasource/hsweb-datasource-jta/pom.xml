@@ -13,6 +13,8 @@
 
     <artifactId>hsweb-datasource-jta</artifactId>
 
+    <description>基于atomikos的多数据源实现,支持事务中切换数据源</description>
+
     <dependencies>
         <dependency>
             <groupId>com.h2database</groupId>
