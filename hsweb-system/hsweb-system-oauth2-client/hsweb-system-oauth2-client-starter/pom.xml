@@ -22,7 +22,7 @@
     <parent>
         <artifactId>hsweb-system-oauth2-client</artifactId>
         <groupId>org.hswebframework.web</groupId>
-        <version>3.0.0-RC-SNAPSHOT</version>
+        <version>3.0.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 

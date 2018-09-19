@@ -24,7 +24,7 @@
 
     <groupId>org.hswebframework.web</groupId>
     <artifactId>hsweb-framework</artifactId>
-    <version>3.0.0-RC-SNAPSHOT</version>
+    <version>3.0.0</version>
     <modules>
         <module>hsweb-starter</module>
         <module>hsweb-core</module>
@@ -36,7 +36,6 @@
         <module>hsweb-commons</module>
         <module>hsweb-logging</module>
         <module>hsweb-concurrent</module>
-        <module>hsweb-examples</module>
         <module>hsweb-boost</module>
         <module>hsweb-thirdparty</module>
     </modules>
@@ -117,6 +116,7 @@
                             <serverId>sonatype-releases</serverId>
                             <nexusUrl>https://oss.sonatype.org/</nexusUrl>
                             <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                            <stagingProgressTimeoutMinutes>120</stagingProgressTimeoutMinutes>
                         </configuration>
                     </plugin>
                     <plugin>
@@ -249,8 +249,8 @@
 
     <dependencies>
         <!--<dependency>-->
-            <!--<groupId>io.reactivex.rxjava2</groupId>-->
-            <!--<artifactId>rxjava</artifactId>-->
+        <!--<groupId>io.reactivex.rxjava2</groupId>-->
+        <!--<artifactId>rxjava</artifactId>-->
         <!--</dependency>-->
         <dependency>
             <groupId>org.projectlombok</groupId>

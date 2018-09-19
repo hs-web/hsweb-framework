@@ -1,4 +1,6 @@
-# 傻瓜式快速入门
+# 快速入门
+
+本文提供了最基本的hsweb使用方式,只要认真阅读本文,创建一个项目不成问题.
 
 ## 目录
 1. [前言](#前言)
@@ -549,4 +551,5 @@ class TestControllerTest extends Specification {
 
 一个最简单的通用crud例子完成了!! 
 
+更多教程: [通用增删改查使用](USE-CRUD.md) , [权限控制](AUTZ.md) ,[业务功能](SYSTEM.md) , [实用工具包](UTILS.md)
 

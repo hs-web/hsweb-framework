@@ -5,7 +5,7 @@
     <parent>
         <artifactId>hsweb-commons-service</artifactId>
         <groupId>org.hswebframework.web</groupId>
-        <version>3.0.0-RC-SNAPSHOT</version>
+        <version>3.0.0</version>
 
         <relativePath>../pom.xml</relativePath>
     </parent>
