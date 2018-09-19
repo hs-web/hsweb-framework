@@ -43,9 +43,10 @@ hsweb 目前未提供前端支持,仅有一个[demo](https://github.com/hs-web/h
         <java.version>1.8</java.version>
         <project.build.jdk>${java.version}</project.build.jdk>
 
-        <hsweb.framework.version>3.0.0-RC-SNAPSHOT</hsweb.framework.version>
+        <hsweb.framework.version>3.0.0</hsweb.framework.version>
 
-        <hsweb.expands.version>3.0.1-SNAPSHOT</hsweb.expands.version>
+        <hsweb.expands.version>3.0.1</hsweb.expands.version>
+
 
     </properties>
 

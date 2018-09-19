@@ -73,12 +73,17 @@ hsweb提供了通用增删改查功能,并实现使用mybatis和easyorm实现了
    createDelete().where("id",id).exec();
 ```
 
-支持的条件类型方法:
-is(eq),not,in,notIn,isNull,notNull,like,notLike,lt,gte,lte,自定义等等.
+如果想调用其他dao进行dsl操作,可使用`DefaultDSLQueryService.createQuery(dao)`
+,`DefaultDSLUpdateService.createUpdate(dap)`
+,`DefaultDSLDeleteService.createDelete(dao)` 进行操作
 
-可以拓展支持一些[自定义的通用的查询条件](../hsweb-commons/hsweb-commons-dao/hsweb-commons-dao-mybatis/README.md#拓展动态条件),例如: 
+
+默认支持的条件类型方法:is(eq),not,in,notIn,isNull,notNull,like,notLike,lt,gte,lte,等等.
+
+还可以[自定义的通用的查询条件](../hsweb-commons/hsweb-commons-dao/hsweb-commons-dao-mybatis/README.md#拓展动态条件): 
 
 以在组织架构模块[中自定义的查询条件](../hsweb-system/hsweb-system-organizational/README.md#SQL条件)为例:
+
 ```java
 //user-in-org为自定义的查询条件类型
 //userId字段为指定机构中的用户的数据
@@ -87,3 +92,7 @@ createQuery()
     .list();
 ```
 这样就无需在需要用到相关查询的地方重复的编写mybatis mapper xml.
+
+3. 通用Controller
+
+参照[这里](../hsweb-commons/hsweb-commons-controller/README.md)
