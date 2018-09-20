@@ -380,7 +380,7 @@ public interface TestDao extends CrudDao<TestEntity,String> {
         <!--必须列出映射关系-->
         <id property="id" column="id" javaType="String" jdbcType="VARCHAR"/>
         <result property="name" column="name" javaType="String" jdbcType="VARCHAR"/>
-        <result property="status" column="name" javaType="Byte" jdbcType="TINYINT"/>
+        <result property="status" column="status" javaType="Byte" jdbcType="TINYINT"/>
         <result property="comment" column="comment" javaType="String" jdbcType="CLOB"/>
     </resultMap>
 
