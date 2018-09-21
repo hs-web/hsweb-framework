@@ -12,6 +12,7 @@ import org.hswebframework.web.authorization.basic.web.session.UserTokenAutoExpir
 import org.hswebframework.web.authorization.token.UserTokenManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -118,5 +119,17 @@ public class AuthorizingHandlerAutoConfiguration {
             }
             return bean;
         }
+    }
+
+    @Configuration
+    @ConditionalOnProperty(prefix = "hsweb.authorize", name = "basic-authorization", havingValue = "true")
+    @ConditionalOnClass(UserTokenForTypeParser.class)
+    public static class BasicAuthorizationConfiguration {
+        @Bean
+        public BasicAuthorizationTokenParser basicAuthorizationTokenParser(AuthenticationManager authenticationManager,
+                                                                           UserTokenManager tokenManager) {
+            return new BasicAuthorizationTokenParser(authenticationManager, tokenManager);
+        }
+
     }
 }
