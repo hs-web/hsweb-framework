@@ -6,6 +6,7 @@ import org.hswebframework.web.authorization.access.DataAccessHandler;
 import org.hswebframework.web.authorization.basic.aop.AopMethodAuthorizeDefinitionParser;
 import org.hswebframework.web.authorization.basic.embed.EmbedAuthenticationManager;
 import org.hswebframework.web.authorization.basic.handler.DefaultAuthorizingHandler;
+import org.hswebframework.web.authorization.basic.handler.UserAllowPermissionHandler;
 import org.hswebframework.web.authorization.basic.handler.access.DefaultDataAccessController;
 import org.hswebframework.web.authorization.basic.web.*;
 import org.hswebframework.web.authorization.basic.web.session.UserTokenAutoExpiredListener;
@@ -74,6 +75,12 @@ public class AuthorizingHandlerAutoConfiguration {
     @ConditionalOnMissingBean(AuthenticationManager.class)
     public AuthenticationManager embedAuthenticationManager() {
         return new EmbedAuthenticationManager();
+    }
+
+    @Bean
+    @ConditionalOnProperty("hsweb.authorize.allows")
+    public UserAllowPermissionHandler userAllowPermissionHandler() {
+        return new UserAllowPermissionHandler();
     }
 
     @Bean
