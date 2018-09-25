@@ -144,3 +144,9 @@ Set<Object> canQueryDepartment= authentication.getPermission("test")
 在上述说明中是通过配置文件来进行用户以及权限配置的,在hsweb-system模块中还提供了使用数据库来来进行更灵活的权限信息配置
 
 [请看这里](../hsweb-system/hsweb-system-authorization)
+
+# 会话状态
+
+默认使用`sessionId`来作为用户的`token`,你也可以通过拓展来实现自定义的`token`策略:
+
+[请看这里](https://github.com/hs-web/hsweb-framework/wiki/autz#%E8%87%AA%E5%AE%9A%E4%B9%89token%E7%AD%96%E7%95%A5%E5%AE%9E%E7%8E%B0%E5%89%8D%E5%90%8E%E5%88%86%E7%A6%BB)
