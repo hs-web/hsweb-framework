@@ -20,16 +20,18 @@ package org.hswebframework.web.authorization.starter;
 
 import org.hswebframework.web.authorization.AuthenticationInitializeService;
 import org.hswebframework.web.authorization.AuthenticationManager;
-import org.hswebframework.web.authorization.basic.configuration.BasicAuthorizationConfiguration;
+import org.hswebframework.web.authorization.basic.embed.EmbedAuthenticationManager;
 import org.hswebframework.web.authorization.simple.DefaultAuthorizationAutoConfiguration;
 import org.hswebframework.web.service.authorization.simple.SimpleAuthenticationManager;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 
 /**
  * @author zhouhao
@@ -41,12 +43,33 @@ import org.springframework.context.annotation.Import;
 @AutoConfigureBefore(value = {
         DefaultAuthorizationAutoConfiguration.class
 }, name = "org.hswebframework.web.authorization.basic.configuration.AuthorizingHandlerAutoConfiguration")
-@Import(BasicAuthorizationConfiguration.class)
 public class AuthorizationAutoConfiguration {
 
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationInitializeService authenticationInitializeService) {
-        return new SimpleAuthenticationManager(authenticationInitializeService);
+    @ConditionalOnMissingClass("org.hswebframework.web.authorization.basic.embed.EmbedAuthenticationManager")
+    @Configuration
+    public static class NoEmbedAuthenticationManagerAutoConfiguration {
+        @Bean
+        @Primary
+        public AuthenticationManager authenticationManager(AuthenticationInitializeService authenticationInitializeService) {
+            return new SimpleAuthenticationManager(authenticationInitializeService);
+        }
+
+    }
+
+    @ConditionalOnClass(EmbedAuthenticationManager.class)
+    @Configuration
+    public static class EmbedAuthenticationManagerAutoConfiguration {
+        @Bean
+        public EmbedAuthenticationManager embedAuthenticationManager() {
+            return new EmbedAuthenticationManager();
+        }
+
+        @Bean
+        @Primary
+        public AuthenticationManager authenticationManager(EmbedAuthenticationManager embedAuthenticationManager,
+                                                           AuthenticationInitializeService authenticationInitializeService) {
+            return new SimpleAuthenticationManager(authenticationInitializeService, embedAuthenticationManager);
+        }
     }
 
     @Bean
