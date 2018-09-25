@@ -30,6 +30,7 @@ class EmbedAuthenticationManagerTest extends Specification {
         authentication.getUser() != null
         authentication.getUser().getName() == "超级管理员"
         authentication.hasPermission("user-manager", "query")
+        authentication.hasPermission("test", "query")
         authentication.getPermission("user-manager") != null
         authentication.hasRole("user")
         authentication.getPermission("user-manager")

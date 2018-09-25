@@ -58,6 +58,8 @@ public class EmbedAuthenticationProperties {
 
     private List<PermissionInfo> permissions = new ArrayList<>();
 
+    private Map<String, List<String>> permissionsSimple = new HashMap<>();
+
     @Getter
     @Setter
     public static class PermissionInfo {
@@ -77,7 +79,9 @@ public class EmbedAuthenticationProperties {
         user.setType(type);
         authentication.setUser(user);
         authentication.setRoles((List) roles);
-        List<Permission> permissionList = permissions.stream()
+        List<Permission> permissionList = new ArrayList<>();
+
+        permissionList.addAll(permissions.stream()
                 .map(info -> {
                     SimplePermission permission = new SimplePermission();
                     permission.setId(info.getId());
@@ -88,7 +92,16 @@ public class EmbedAuthenticationProperties {
                                     .build()).collect(Collectors.toSet()));
                     return permission;
 
-                }).collect(Collectors.toList());
+                })
+                .collect(Collectors.toList()));
+
+        permissionList.addAll(permissionsSimple.entrySet().stream()
+                .map(entry -> {
+                    SimplePermission permission = new SimplePermission();
+                    permission.setId(entry.getKey());
+                    permission.setActions(new HashSet<>(entry.getValue()));
+                    return permission;
+                }).collect(Collectors.toList()));
 
         authentication.setPermissions(permissionList);
         return authentication;

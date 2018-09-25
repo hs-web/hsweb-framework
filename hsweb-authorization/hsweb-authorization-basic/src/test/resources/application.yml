@@ -25,6 +25,8 @@ hsweb:
               name: 管理员
             - id: user
               name: 用户
+          permissions-simple:
+              test: query,get
           permissions:
             - id: user-manager
               actions: query,get,update,delete

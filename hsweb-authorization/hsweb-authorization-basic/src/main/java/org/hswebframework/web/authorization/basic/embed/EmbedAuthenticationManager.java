@@ -11,6 +11,8 @@ import org.hswebframework.web.authorization.simple.builder.SimpleDataAccessConfi
 import org.hswebframework.web.validate.ValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
@@ -22,6 +24,7 @@ import java.util.Map;
  * @since 3.0.0-RC
  */
 @ConfigurationProperties(prefix = "hsweb")
+@Order(Ordered.HIGHEST_PRECEDENCE)
 public class EmbedAuthenticationManager implements AuthenticationManager {
 
     private Map<String, Authentication> authentications = new HashMap<>();
