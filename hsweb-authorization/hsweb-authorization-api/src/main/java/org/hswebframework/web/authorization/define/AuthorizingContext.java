@@ -1,11 +1,19 @@
 package org.hswebframework.web.authorization.define;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.boost.aop.context.MethodInterceptorContext;
 
 /**
  * 权限控制上下文
  */
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class AuthorizingContext {
     private AuthorizeDefinition definition;
 

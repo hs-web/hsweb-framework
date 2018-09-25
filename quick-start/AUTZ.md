@@ -138,3 +138,9 @@ Set<Object> canQueryDepartment= authentication.getPermission("test")
             .orElseThrow(AccessDenyException::new);
 
 ```
+
+# 使用数据库来维护用户以及权限信息
+
+在上述说明中是通过配置文件来进行用户以及权限配置的,在hsweb-system模块中还提供了使用数据库来来进行更灵活的权限信息配置
+
+[请看这里](../hsweb-system/hsweb-system-authorization)
