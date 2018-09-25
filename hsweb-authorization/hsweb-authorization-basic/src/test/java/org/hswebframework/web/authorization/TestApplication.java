@@ -1,9 +1,6 @@
-package org.hswebframework.web.authorization.basic.embed;
+package org.hswebframework.web.authorization;
 
-import org.hswebframework.web.authorization.basic.configuration.AopAuthorizeAutoConfiguration;
-import org.hswebframework.web.authorization.basic.configuration.AuthorizingHandlerAutoConfiguration;
 import org.hswebframework.web.authorization.basic.configuration.EnableAopAuthorize;
-import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.test.context.web.WebAppConfiguration;
 

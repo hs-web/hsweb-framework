@@ -78,7 +78,6 @@ public class AuthorizingHandlerAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnProperty("hsweb.authorize.allows")
     public UserAllowPermissionHandler userAllowPermissionHandler() {
         return new UserAllowPermissionHandler();
     }

@@ -3,6 +3,7 @@ package org.hswebframework.web.authorization.basic.handler;
 import lombok.Getter;
 import lombok.Setter;
 import org.hswebframework.web.authorization.define.AuthorizingContext;
+import org.hswebframework.web.authorization.define.HandleType;
 import org.hswebframework.web.authorization.listener.event.AuthorizingHandleBeforeEvent;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.event.EventListener;
@@ -39,11 +40,13 @@ public class UserAllowPermissionHandler {
 
     @EventListener
     public void handEvent(AuthorizingHandleBeforeEvent event) {
-        AuthorizingContext context = event.getContext();
-        if (allows.isEmpty()) {
+
+        if (allows.isEmpty() || event.getHandleType() == HandleType.DATA) {
             return;
         }
-        // package.method
+        AuthorizingContext context = event.getContext();
+
+        // class full name.method
         String path = ClassUtils.getUserClass(context.getParamContext()
                 .getTarget())
                 .getName().concat(".")

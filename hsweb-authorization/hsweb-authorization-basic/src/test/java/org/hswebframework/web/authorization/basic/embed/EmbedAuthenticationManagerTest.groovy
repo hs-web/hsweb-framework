@@ -2,6 +2,7 @@ package org.hswebframework.web.authorization.basic.embed
 
 import org.hswebframework.web.authorization.Authentication
 import org.hswebframework.web.authorization.AuthenticationManager
+import org.hswebframework.web.authorization.TestApplication
 import org.hswebframework.web.authorization.simple.PlainTextUsernamePasswordAuthenticationRequest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
