@@ -13,6 +13,7 @@ import org.hswebframework.web.tests.SimpleWebApplicationTests;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Array;
@@ -45,7 +46,7 @@ public class SimpleDynamicFormServiceTest extends SimpleWebApplicationTests {
     private SqlExecutor        sqlExecutor;
 
     @Test
-    @Transactional
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public void testDeploy() throws SQLException {
         DynamicFormEntity form = entityFactory.newInstance(DynamicFormEntity.class);
         form.setName("test");

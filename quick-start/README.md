@@ -6,6 +6,7 @@
 1. [前言](#前言)
 2. [创建项目](#创建项目)
 3. [增删改查](#增删改查)
+4. [更多教程](#更多教程)
 
 ## 前言
 `hsweb`是基于`java8`,`spring-boot`,`mybatis`开发.所以在开始使用`hsweb`的前,你至少应该掌握以下技术:`java`,`maven`.
@@ -552,5 +553,7 @@ class TestControllerTest extends Specification {
 
 一个最简单的通用crud例子完成了!! 
 
-更多教程: [通用增删改查使用](USE-CRUD.md) , [权限控制](AUTZ.md) ,[业务功能](SYSTEM.md) , [实用工具包](UTILS.md)
+## 更多教程
+
+[通用增删改查使用](USE-CRUD.md) , [权限控制](AUTZ.md) ,[业务功能](SYSTEM.md) , [实用工具包](UTILS.md)
 
