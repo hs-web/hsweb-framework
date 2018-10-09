@@ -26,6 +26,8 @@ import org.hswebframework.ezorm.rdb.meta.parser.OracleTableMetaParser;
 import org.hswebframework.ezorm.rdb.render.dialect.H2RDBDatabaseMetaData;
 import org.hswebframework.ezorm.rdb.render.dialect.MysqlRDBDatabaseMetaData;
 import org.hswebframework.ezorm.rdb.render.dialect.OracleRDBDatabaseMetaData;
+import org.hswebframework.ezorm.rdb.render.dialect.MSSQLRDBDatabaseMetaData;
+import org.hswebframework.ezorm.rdb.meta.parser.SqlServer2012TableMetaParser;
 import org.hswebframework.ezorm.rdb.simple.SimpleDatabase;
 import org.hswebframework.expands.script.engine.DynamicScriptEngine;
 import org.hswebframework.expands.script.engine.DynamicScriptEngineFactory;
@@ -136,6 +138,10 @@ public class SystemInitializeAutoConfiguration implements CommandLineRunner, Bea
                     metaData = new MysqlRDBDatabaseMetaData();
                 }
                 metaData.setParser(new MysqlTableMetaParser(sqlExecutor));
+                break;
+            case sqlserver:
+                metaData = new MSSQLRDBDatabaseMetaData();
+                metaData.setParser(new SqlServer2012TableMetaParser(sqlExecutor));
                 break;
             default:
                 metaData = new H2RDBDatabaseMetaData();

@@ -33,10 +33,7 @@ import org.hswebframework.ezorm.rdb.meta.converter.NumberValueConverter;
 import org.hswebframework.ezorm.rdb.render.Sql;
 import org.hswebframework.ezorm.rdb.render.SqlAppender;
 import org.hswebframework.ezorm.rdb.render.SqlRender;
-import org.hswebframework.ezorm.rdb.render.dialect.Dialect;
-import org.hswebframework.ezorm.rdb.render.dialect.H2RDBDatabaseMetaData;
-import org.hswebframework.ezorm.rdb.render.dialect.MysqlRDBDatabaseMetaData;
-import org.hswebframework.ezorm.rdb.render.dialect.OracleRDBDatabaseMetaData;
+import org.hswebframework.ezorm.rdb.render.dialect.*;
 import org.hswebframework.ezorm.rdb.render.support.simple.CommonSqlRender;
 import org.hswebframework.ezorm.rdb.render.support.simple.SimpleWhereSqlBuilder;
 import org.hswebframework.web.BusinessException;
@@ -111,6 +108,7 @@ public class EasyOrmSqlBuilder {
     private final RDBDatabaseMetaData mysql  = new MysqlMeta();
     private final RDBDatabaseMetaData oracle = new OracleMeta();
     private final RDBDatabaseMetaData h2     = new H2Meta();
+    private final RDBDatabaseMetaData sqlserver = new MSSQLMeta();
 
     private final ConcurrentMap<RDBDatabaseMetaData, Map<String, RDBTableMetaData>> metaCache = new ConcurrentHashMap<RDBDatabaseMetaData, Map<String, RDBTableMetaData>>() {
         @Override
@@ -133,6 +131,8 @@ public class EasyOrmSqlBuilder {
                 return mysql;
             case oracle:
                 return oracle;
+            case sqlserver:
+                return sqlserver;
             default:
                 return h2;
         }
@@ -426,6 +426,14 @@ public class EasyOrmSqlBuilder {
             super();
             renderMap.put(SqlRender.TYPE.INSERT, new InsertSqlBuilder());
             renderMap.put(SqlRender.TYPE.UPDATE, new UpdateSqlBuilder(Dialect.H2));
+        }
+    }
+
+    class MSSQLMeta extends MSSQLRDBDatabaseMetaData {
+        public MSSQLMeta() {
+            super();
+            renderMap.put(SqlRender.TYPE.INSERT, new InsertSqlBuilder());
+            renderMap.put(SqlRender.TYPE.UPDATE, new UpdateSqlBuilder(Dialect.MSSQL));
         }
     }
 }
