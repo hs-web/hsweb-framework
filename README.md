@@ -1,8 +1,6 @@
 ## hsweb  3.0
 [![Maven Central](https://img.shields.io/maven-central/v/org.hswebframework.web/hsweb-framework.svg)](http://search.maven.org/#search%7Cga%7C1%7Corg.hswebframework)
 [![Codecov](https://codecov.io/gh/hs-web/hsweb-framework/branch/master/graph/badge.svg)](https://codecov.io/gh/hs-web/hsweb-framework/branch/master)
-[![Sonar Coverage](https://sonarcloud.io/api/project_badges/measure?project=org.hswebframework.web:hsweb-framework&metric=alert_status)](https://sonarcloud.io/dashboard?id=org.hswebframework.web%3Ahsweb-framework)
-[![Sonar Bugs](https://sonarcloud.io/api/project_badges/measure?project=org.hswebframework.web:hsweb-framework&metric=bugs)](https://sonarcloud.io/dashboard?id=org.hswebframework.web%3Ahsweb-framework)
 [![Build Status](https://travis-ci.org/hs-web/hsweb-framework.svg?branch=master)](https://travis-ci.org/hs-web/hsweb-framework)
 [![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg?style=flat-square)](https://www.apache.org/licenses/LICENSE-2.0.html)
 
