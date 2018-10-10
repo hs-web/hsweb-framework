@@ -72,7 +72,7 @@ public class SimpleAuthenticationManager implements AuthenticationManager {
             String password = ((PlainTextUsernamePasswordAuthenticationRequest) request).getPassword();
             UserEntity userEntity = userService.selectByUserNameAndPassword(username, password);
             if (userEntity == null) {
-                throw new ValidationException("密码错误", "password");
+                throw new ValidationException("用户名或密码错误");
             }
             if (!DataStatus.STATUS_ENABLED.equals(userEntity.getStatus())) {
                 throw new ValidationException("用户已被禁用", "username");
