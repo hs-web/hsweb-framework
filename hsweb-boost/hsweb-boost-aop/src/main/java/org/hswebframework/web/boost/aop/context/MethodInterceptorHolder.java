@@ -81,7 +81,6 @@ public class MethodInterceptorHolder {
 
     public MethodInterceptorHolder(String id, Method method, Object target, Map<String, Object> args) {
         Objects.requireNonNull(id);
-        Objects.requireNonNull(id);
         Objects.requireNonNull(method);
         Objects.requireNonNull(target);
         Objects.requireNonNull(args);
