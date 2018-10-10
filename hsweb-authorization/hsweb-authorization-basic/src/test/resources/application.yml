@@ -40,5 +40,20 @@ hsweb:
                   fields:
                     - password
                     - salt
+            - id: test
+              actions: query,add,update
+              dataAccesses:
+                - action: query
+                  type: DENY_FIELDS
+                  fields:
+                    - password
+                - action: update
+                  type: DENY_FIELDS
+                  fields:
+                    - name
+                - action: add
+                  type: DENY_FIELDS
+                  fields:
+                    - id
 server:
   port: 8808
