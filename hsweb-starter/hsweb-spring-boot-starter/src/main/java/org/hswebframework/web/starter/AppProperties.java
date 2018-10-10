@@ -18,13 +18,19 @@
 
 package org.hswebframework.web.starter;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
  * @author zhouhao
  */
 @ConfigurationProperties(prefix = "hsweb.app")
+@Getter
+@Setter
 public class AppProperties {
+    private boolean autoInit = true;
+
     private String name;
     private String comment;
     private String website;
@@ -37,37 +43,5 @@ public class AppProperties {
         systemVersion.setWebsite(website);
         systemVersion.setVersion(version);
         return systemVersion;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getComment() {
-        return comment;
-    }
-
-    public void setComment(String comment) {
-        this.comment = comment;
-    }
-
-    public String getWebsite() {
-        return website;
-    }
-
-    public void setWebsite(String website) {
-        this.website = website;
-    }
-
-    public String getVersion() {
-        return version;
-    }
-
-    public void setVersion(String version) {
-        this.version = version;
     }
 }

@@ -2,6 +2,7 @@ package org.hswebframework.web.authorization.basic.embed
 
 import org.hswebframework.web.authorization.Authentication
 import org.hswebframework.web.authorization.AuthenticationManager
+import org.hswebframework.web.authorization.TestApplication
 import org.hswebframework.web.authorization.simple.PlainTextUsernamePasswordAuthenticationRequest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -30,6 +31,7 @@ class EmbedAuthenticationManagerTest extends Specification {
         authentication.getUser() != null
         authentication.getUser().getName() == "超级管理员"
         authentication.hasPermission("user-manager", "query")
+        authentication.hasPermission("test", "query")
         authentication.getPermission("user-manager") != null
         authentication.hasRole("user")
         authentication.getPermission("user-manager")

@@ -32,6 +32,7 @@ import org.hswebframework.web.logging.AccessLogger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.MediaType;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -77,9 +78,8 @@ public class AuthorizationController {
     public ResponseMessage<Map<String, Object>> authorize(@ApiParam(example = "{\"username\":\"admin\",\"password\":\"admin\"}")
                                                           @RequestBody Map<String, String> parameter) {
 
-        return doLogin(Objects.requireNonNull(parameter.get("username"), "用户名不能为空")
-                , Objects.requireNonNull(parameter.get("password"), "密码不能为空")
-                , parameter);
+
+        return doLogin(parameter.get("username"), parameter.get("password"), parameter);
     }
 
     @PostMapping(value = "/login", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
@@ -93,6 +93,9 @@ public class AuthorizationController {
 
     @SneakyThrows
     protected ResponseMessage<Map<String, Object>> doLogin(String username, String password, Map<String, ?> parameter) {
+        Assert.hasLength(username, "用户名不能为空");
+        Assert.hasLength(password, "密码不能为空");
+
         AuthorizationFailedEvent.Reason reason = AuthorizationFailedEvent.Reason.OTHER;
         Function<String, Object> parameterGetter = parameter::get;
         try {

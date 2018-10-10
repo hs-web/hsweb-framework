@@ -1,5 +1,7 @@
 package org.hswebframework.web.service.authorization.simple;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.AuthenticationInitializeService;
 import org.hswebframework.web.authorization.AuthenticationManager;
@@ -25,6 +27,11 @@ public class SimpleAuthenticationManager implements AuthenticationManager {
 
     private AuthenticationInitializeService authenticationInitializeService;
 
+
+    @Setter
+    @Getter
+    private AuthenticationManager parent;
+
     @Autowired
     private UserService userService;
 
@@ -38,6 +45,11 @@ public class SimpleAuthenticationManager implements AuthenticationManager {
         this.authenticationInitializeService = authenticationInitializeService;
     }
 
+    public SimpleAuthenticationManager(AuthenticationInitializeService authenticationInitializeService, AuthenticationManager parent) {
+        this.authenticationInitializeService = authenticationInitializeService;
+        this.parent = parent;
+    }
+
     @Autowired
     public void setAuthenticationInitializeService(AuthenticationInitializeService authenticationInitializeService) {
         this.authenticationInitializeService = authenticationInitializeService;
@@ -45,6 +57,16 @@ public class SimpleAuthenticationManager implements AuthenticationManager {
 
     @Override
     public Authentication authenticate(AuthenticationRequest request) {
+        if (null != parent) {
+            try {
+                Authentication authentication = parent.authenticate(request);
+                if (null != authentication) {
+                    return authentication;
+                }
+            } catch (Exception ignore) {
+                // ignore errors
+            }
+        }
         if (request instanceof PlainTextUsernamePasswordAuthenticationRequest) {
             String username = ((PlainTextUsernamePasswordAuthenticationRequest) request).getUsername();
             String password = ((PlainTextUsernamePasswordAuthenticationRequest) request).getPassword();
