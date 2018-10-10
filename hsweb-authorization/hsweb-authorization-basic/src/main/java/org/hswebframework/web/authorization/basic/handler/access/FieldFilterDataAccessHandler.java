@@ -41,6 +41,7 @@ public class FieldFilterDataAccessHandler implements DataAccessHandler {
             case Permission.ACTION_QUERY:
             case Permission.ACTION_GET:
                 return doQueryAccess(filterDataAccessConfig, context);
+            case Permission.ACTION_ADD:
             case Permission.ACTION_UPDATE:
                 return doUpdateAccess(filterDataAccessConfig, context);
             default:
@@ -59,10 +60,14 @@ public class FieldFilterDataAccessHandler implements DataAccessHandler {
      * @see org.apache.commons.beanutils.PropertyUtilsBean
      */
     protected boolean doUpdateAccess(FieldFilterDataAccessConfig accesses, AuthorizingContext params) {
-        Object supportParam = params.getParamContext().getParams().values().stream()
-                .filter(param -> (param instanceof Entity) || (param instanceof Model) || (param instanceof Map))
-                .findAny()
-                .orElse(null);
+        Map<String, Object> paramsMap = params.getParamContext().getParams();
+
+        Object supportParam = paramsMap.size() == 0 ?
+                paramsMap.values().iterator().next() :
+                paramsMap.values().stream()
+                        .filter(param -> (param instanceof Entity) || (param instanceof Model) || (param instanceof Map))
+                        .findAny()
+                        .orElse(null);
         if (null != supportParam) {
             for (String field : accesses.getFields()) {
                 try {
