@@ -18,8 +18,6 @@ import static org.hswebframework.web.message.builder.StaticMessageSubjectBuilder
 import static org.hswebframework.web.message.builder.StaticMessageSubjectBuilder.topic;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 @RunWith(SpringRunner.class)
@@ -50,7 +48,7 @@ public class JmsMessagerTest {
 
 
         for (int i = 0; i < 100; i++) {
-            Thread.sleep(1000);
+            Thread.sleep(100);
             messager.publish(text("hello jms"))
                     .to(queue("test"))
                     .send();
@@ -67,7 +65,7 @@ public class JmsMessagerTest {
 
 
         for (int i = 0; i < 10; i++) {
-            Thread.sleep(1000);
+            Thread.sleep(100);
             messager.publish(text("hello jms"))
                     .to(topic("test"))
                     .send();

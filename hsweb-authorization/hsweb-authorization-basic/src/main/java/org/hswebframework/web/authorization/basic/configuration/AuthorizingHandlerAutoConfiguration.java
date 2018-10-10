@@ -6,12 +6,14 @@ import org.hswebframework.web.authorization.access.DataAccessHandler;
 import org.hswebframework.web.authorization.basic.aop.AopMethodAuthorizeDefinitionParser;
 import org.hswebframework.web.authorization.basic.embed.EmbedAuthenticationManager;
 import org.hswebframework.web.authorization.basic.handler.DefaultAuthorizingHandler;
+import org.hswebframework.web.authorization.basic.handler.UserAllowPermissionHandler;
 import org.hswebframework.web.authorization.basic.handler.access.DefaultDataAccessController;
 import org.hswebframework.web.authorization.basic.web.*;
 import org.hswebframework.web.authorization.basic.web.session.UserTokenAutoExpiredListener;
 import org.hswebframework.web.authorization.token.UserTokenManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -76,6 +78,11 @@ public class AuthorizingHandlerAutoConfiguration {
     }
 
     @Bean
+    public UserAllowPermissionHandler userAllowPermissionHandler() {
+        return new UserAllowPermissionHandler();
+    }
+
+    @Bean
     public UserOnSignIn userOnSignIn(UserTokenManager userTokenManager) {
         return new UserOnSignIn(userTokenManager);
     }
@@ -118,5 +125,17 @@ public class AuthorizingHandlerAutoConfiguration {
             }
             return bean;
         }
+    }
+
+    @Configuration
+    @ConditionalOnProperty(prefix = "hsweb.authorize", name = "basic-authorization", havingValue = "true")
+    @ConditionalOnClass(UserTokenForTypeParser.class)
+    public static class BasicAuthorizationConfiguration {
+        @Bean
+        public BasicAuthorizationTokenParser basicAuthorizationTokenParser(AuthenticationManager authenticationManager,
+                                                                           UserTokenManager tokenManager) {
+            return new BasicAuthorizationTokenParser(authenticationManager, tokenManager);
+        }
+
     }
 }

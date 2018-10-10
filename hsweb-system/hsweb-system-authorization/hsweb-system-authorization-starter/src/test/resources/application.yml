@@ -12,8 +12,8 @@ hsweb:
       name: 权限管理测试
       version: 3.0.0
     authorize:
-      sync: true
-      auto-parse: true
+      sync: false
+      auto-parse: false
 logging:
   level:
     org.springframework: WARN

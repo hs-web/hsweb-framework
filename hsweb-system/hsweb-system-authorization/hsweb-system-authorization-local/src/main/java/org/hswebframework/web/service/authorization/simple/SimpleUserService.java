@@ -25,6 +25,7 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -78,7 +79,7 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
     @Override
     @Transactional(readOnly = true)
     public UserEntity selectByUsername(String username) {
-        if (null == username) {
+        if (!StringUtils.hasLength(username)) {
             return null;
         }
         return createQuery().where("username", username).single();
@@ -87,8 +88,8 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
     @Override
     @Transactional(readOnly = true)
     public UserEntity selectByUserNameAndPassword(String plainUsername, String plainPassword) {
-        Objects.requireNonNull(plainUsername);
-        Objects.requireNonNull(plainPassword);
+        Assert.hasLength(plainUsername, "用户名不能为空");
+        Assert.hasLength(plainPassword, "密码不能为空");
 
         return Optional.ofNullable(selectByUsername(plainUsername))
                 .filter(user -> encodePassword(plainPassword, user.getSalt()).equals(user.getPassword()))

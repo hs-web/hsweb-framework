@@ -15,6 +15,10 @@ hsweb:
     app:
       name: hsweb-oauth2 客户端示例
       version: 3.0.0
+    authorize:
+        allows:
+          users:
+            admin: "**.TestController.*"
     users:
         admin:
           name: 超级管理员
@@ -25,6 +29,8 @@ hsweb:
               name: 管理员
             - id: user
               name: 用户
+          permissions-simple:
+              test: query,get
           permissions:
             - id: user-manager
               actions: query,get,update,delete

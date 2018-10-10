@@ -19,6 +19,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import spock.lang.Shared
 import spock.lang.Specification
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -62,10 +63,11 @@ class UserSettingControllerTest extends Specification {
         ]
         permissions.forEach({ permission ->
             //添加权限
-            mockMvc.perform(post("/permission")
+            mockMvc.perform(patch("/permission")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(JSON.toJSONString(permission)))
-                    .andExpect(status().is(201))
+                    .andDo({ result -> println result.response.contentAsString })
+                    .andExpect(status().is(200))
         })
     }
 
@@ -84,6 +86,7 @@ class UserSettingControllerTest extends Specification {
                         }
                         """
                 ))
+                .andDo({ result -> println result.response.contentAsString })
                 .andExpect(status().is(201))
                 .andReturn()
                 .getResponse()
@@ -127,7 +130,8 @@ class UserSettingControllerTest extends Specification {
                                                 ]
                                         ]
                         ])
-                )).andExpect(status().is(201))
+                )).andDo({ result -> println result.response.contentAsString })
+//                .andExpect(status().is(201))
         expect:
         userId != null
         def autz = initializeService.initUserAuthorization(userId)

@@ -1,6 +1,5 @@
 package org.hswebframework.web.authorization.basic.web;
 
-import org.hswebframework.web.authorization.listener.AuthorizationListener;
 import org.hswebframework.web.authorization.listener.event.AuthorizationSuccessEvent;
 import org.hswebframework.web.authorization.token.UserToken;
 import org.hswebframework.web.authorization.token.UserTokenHolder;

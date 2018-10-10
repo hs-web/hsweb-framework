@@ -5,7 +5,7 @@
     <parent>
         <artifactId>hsweb-framework</artifactId>
         <groupId>org.hswebframework.web</groupId>
-        <version>3.0.0</version>
+        <version>3.0.1</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -19,9 +19,8 @@
         </dependency>
 
         <dependency>
-            <groupId>javax.el</groupId>
-            <artifactId>el-api</artifactId>
-            <version>2.2</version>
+            <groupId>org.glassfish</groupId>
+            <artifactId>javax.el</artifactId>
         </dependency>
 
         <dependency>

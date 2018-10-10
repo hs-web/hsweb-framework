@@ -1,5 +1,6 @@
-package org.hswebframework.web.authorization.starter;
+package org.hswebframework.web.authorization;
 
+import org.hswebframework.web.authorization.basic.configuration.EnableAopAuthorize;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.test.context.web.WebAppConfiguration;
 
@@ -9,6 +10,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
  */
 @SpringBootApplication
 @WebAppConfiguration
+@EnableAopAuthorize
 public class TestApplication {
 
 }

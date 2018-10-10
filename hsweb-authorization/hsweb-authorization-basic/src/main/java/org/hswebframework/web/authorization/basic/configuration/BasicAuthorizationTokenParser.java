@@ -1,18 +1,20 @@
-package org.hswebframework.web.authorization.starter;
+package org.hswebframework.web.authorization.basic.configuration;
+
 import org.apache.commons.codec.binary.Base64;
+import org.hswebframework.web.authorization.Authentication;
+import org.hswebframework.web.authorization.AuthenticationManager;
 import org.hswebframework.web.authorization.basic.web.AuthorizedToken;
 import org.hswebframework.web.authorization.basic.web.ParsedToken;
 import org.hswebframework.web.authorization.basic.web.UserTokenForTypeParser;
+import org.hswebframework.web.authorization.simple.PlainTextUsernamePasswordAuthenticationRequest;
 import org.hswebframework.web.authorization.token.UserToken;
 import org.hswebframework.web.authorization.token.UserTokenManager;
-import org.hswebframework.web.entity.authorization.UserEntity;
-import org.hswebframework.web.service.authorization.UserService;
 
 import javax.servlet.http.HttpServletRequest;
 
 public class BasicAuthorizationTokenParser implements UserTokenForTypeParser {
 
-    private UserService userService;
+    private AuthenticationManager authenticationManager;
 
     private UserTokenManager userTokenManager;
 
@@ -21,8 +23,8 @@ public class BasicAuthorizationTokenParser implements UserTokenForTypeParser {
         return "basic";
     }
 
-    public BasicAuthorizationTokenParser(UserService userService, UserTokenManager userTokenManager) {
-        this.userService = userService;
+    public BasicAuthorizationTokenParser(AuthenticationManager authenticationManager, UserTokenManager userTokenManager) {
+        this.authenticationManager = authenticationManager;
         this.userTokenManager = userTokenManager;
     }
 
@@ -56,12 +58,12 @@ public class BasicAuthorizationTokenParser implements UserTokenForTypeParser {
             }
             if (usernameAndPassword.contains(":")) {
                 String[] arr = usernameAndPassword.split("[:]");
-                UserEntity user = userService.selectByUserNameAndPassword(arr[0], arr[1]);
-                if (user != null) {
+                Authentication authentication = authenticationManager.authenticate(new PlainTextUsernamePasswordAuthenticationRequest(arr[0], arr[1]));
+                if (authentication != null) {
                     return new AuthorizedToken() {
                         @Override
                         public String getUserId() {
-                            return user.getId();
+                            return authentication.getUser().getId();
                         }
 
                         @Override
@@ -77,7 +79,7 @@ public class BasicAuthorizationTokenParser implements UserTokenForTypeParser {
                         @Override
                         public long getMaxInactiveInterval() {
                             //60分钟有效期
-                            return 60*60*1000L;
+                            return 60 * 60 * 1000L;
                         }
                     };
                 }
