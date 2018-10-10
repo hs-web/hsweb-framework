@@ -99,7 +99,7 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
     @Override
     @Transactional(readOnly = true)
     public UserEntity selectByPk(String id) {
-        if (null == id) {
+        if (!StringUtils.hasLength(id)) {
             return null;
         }
         UserEntity userEntity = createQuery().where(UserEntity.id, id).single();
@@ -218,6 +218,9 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
 
     @Override
     public boolean enable(String userId) {
+        if (!StringUtils.hasLength(userId)) {
+            return false;
+        }
         return createUpdate(getDao())
                 .set(UserEntity.status, DataStatus.STATUS_ENABLED)
                 .where(GenericEntity.id, userId)
@@ -226,6 +229,9 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
 
     @Override
     public boolean disable(String userId) {
+        if (!StringUtils.hasLength(userId)) {
+            return false;
+        }
         return createUpdate(getDao())
                 .set(UserEntity.status, DataStatus.STATUS_DISABLED)
                 .where(GenericEntity.id, userId)
@@ -253,7 +259,7 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
 
     @Override
     public List<RoleEntity> getUserRole(String userId) {
-        Objects.requireNonNull(userId);
+        Assert.hasLength(userId,"参数不能为空");
         List<UserRoleEntity> roleEntities = userRoleDao.selectByUserId(userId);
         if (roleEntities.isEmpty()) {
             return new ArrayList<>();
