@@ -259,7 +259,7 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
 
     @Override
     public List<RoleEntity> getUserRole(String userId) {
-        Assert.hasLength(userId,"参数不能为空");
+        Assert.hasLength(userId, "参数不能为空");
         List<UserRoleEntity> roleEntities = userRoleDao.selectByUserId(userId);
         if (roleEntities.isEmpty()) {
             return new ArrayList<>();
