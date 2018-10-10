@@ -44,6 +44,11 @@ public class InDBJtaDynamicDataSourceService extends JtaDynamicDataSourceService
             public int hashCode() {
                 return entity.hashCode();
             }
+
+            @Override
+            public boolean equals(Object o) {
+                return o instanceof AtomikosDataSourceConfig && hashCode() == o.hashCode();
+            }
         });
         target.setId(entity.getId());
         target.setName(entity.getName());

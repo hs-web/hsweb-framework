@@ -59,14 +59,6 @@ public class DefaultDataSourceSwitcherTest {
         assertEquals(switcher.currentDataSourceId(), "test");
     }
 
-    @SneakyThrows
-    public static void main(String[] args) {
-        Method method = Test2.class.getMethod("test");
-
-        System.out.println(method);
-        System.out.println(method.getDeclaringClass());
-    }
-
     public class Test2 extends TestClass {
 
     }
