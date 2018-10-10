@@ -27,7 +27,6 @@ public class SimpleAuthenticationManager implements AuthenticationManager {
 
     private AuthenticationInitializeService authenticationInitializeService;
 
-
     @Setter
     @Getter
     private AuthenticationManager parent;
@@ -85,7 +84,16 @@ public class SimpleAuthenticationManager implements AuthenticationManager {
     @Override
 //    @Cacheable(value = USER_AUTH_CACHE_NAME, key = "#userId")
     public Authentication getByUserId(String userId) {
-        Supplier<Authentication> supplier = () -> authenticationInitializeService.initUserAuthorization(userId);
+        Supplier<Authentication> supplier = () -> {
+            Authentication authentication = null;
+            if (parent != null) {
+                authentication = parent.getByUserId(userId);
+            }
+            if (authentication == null) {
+                authentication = authenticationInitializeService.initUserAuthorization(userId);
+            }
+            return authentication;
+        };
 
         if (null != cacheManager) {
             Cache cache = cacheManager.getCache(USER_AUTH_CACHE_NAME);
@@ -104,6 +112,9 @@ public class SimpleAuthenticationManager implements AuthenticationManager {
     @Override
     @CachePut(value = USER_AUTH_CACHE_NAME, key = "#authentication.user.id")
     public Authentication sync(Authentication authentication) {
+        if (parent != null) {
+            parent.sync(authentication);
+        }
         return authentication;
     }
 }

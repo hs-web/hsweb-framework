@@ -55,6 +55,7 @@ public class EmbedAuthenticationManager implements AuthenticationManager {
                     }
                 }
             }
+            authentications.put(id, properties.toAuthentication(dataAccessConfigBuilderFactory));
         });
     }
 
@@ -66,7 +67,7 @@ public class EmbedAuthenticationManager implements AuthenticationManager {
                             ((PlainTextUsernamePasswordAuthenticationRequest) request).getUsername().equals(user.getUsername())
                                     && ((PlainTextUsernamePasswordAuthenticationRequest) request).getPassword().equals(user.getPassword()))
                     .findFirst()
-                    .map(properties -> properties.toAuthentication(dataAccessConfigBuilderFactory))
+                    .map(properties -> authentications.get(properties.getId()))
                     .orElseThrow(() -> new ValidationException("用户不存在")));
         }
 
