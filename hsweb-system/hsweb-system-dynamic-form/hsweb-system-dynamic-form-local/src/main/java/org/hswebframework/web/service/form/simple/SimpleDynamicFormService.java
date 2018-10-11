@@ -31,10 +31,8 @@ import org.hswebframework.web.service.GenericEntityService;
 import org.hswebframework.web.service.form.*;
 import org.hswebframework.web.service.form.events.FormDeployEvent;
 import org.hswebframework.web.service.form.initialize.ColumnInitializeContext;
-import org.hswebframework.web.service.form.initialize.DynamicFormInitializeCustomer;
+import org.hswebframework.web.service.form.initialize.DynamicFormInitializeCustomizer;
 import org.hswebframework.web.service.form.initialize.TableInitializeContext;
-import org.hswebframework.web.service.form.simple.cluster.ClusterDatabase;
-import org.hswebframework.web.service.form.simple.convert.SmartValueConverter;
 import org.hswebframework.web.service.form.simple.dict.EnumDictValueConverter;
 import org.hswebframework.web.validator.group.CreateGroup;
 import org.hswebframework.web.validator.group.UpdateGroup;
@@ -53,7 +51,6 @@ import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.sql.Array;
 import java.sql.JDBCType;
 import java.sql.SQLException;
 import java.util.*;
@@ -94,7 +91,7 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
     private OptionalConvertBuilder optionalConvertBuilder;
 
     @Autowired(required = false)
-    private List<DynamicFormInitializeCustomer> initializeCustomers;
+    private List<DynamicFormInitializeCustomizer> initializeCustomizers;
 
     @Autowired
     private ValidatorFactory validatorFactory;
@@ -608,8 +605,8 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
                 return table;
             }
         };
-        if (!CollectionUtils.isEmpty(initializeCustomers)) {
-            initializeCustomers.forEach(customer -> customer.customTableSetting(context));
+        if (!CollectionUtils.isEmpty(initializeCustomizers)) {
+            initializeCustomizers.forEach(customizer -> customizer.customTableSetting(context));
         }
     }
 
@@ -644,8 +641,8 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
                 return table;
             }
         };
-        if (!CollectionUtils.isEmpty(initializeCustomers)) {
-            initializeCustomers.forEach(customer -> customer.customTableColumnSetting(context));
+        if (!CollectionUtils.isEmpty(initializeCustomizers)) {
+            initializeCustomizers.forEach(customer -> customer.customTableColumnSetting(context));
         }
     }
 

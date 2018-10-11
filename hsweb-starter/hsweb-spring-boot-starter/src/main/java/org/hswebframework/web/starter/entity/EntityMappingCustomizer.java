@@ -5,6 +5,6 @@ import org.hswebframework.web.commons.entity.factory.MapperEntityFactory;
 /**
  * @author zhouhao
  */
-public interface EntityMappingCustomer {
+public interface EntityMappingCustomizer {
     void customize(MapperEntityFactory entityFactory);
 }

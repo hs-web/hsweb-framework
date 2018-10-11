@@ -79,7 +79,7 @@ hsweb:
 #### java类方式
 ```java
     @Component
-    public class CustomEntityMappingCustomer implements EntityMappingCustomer {
+    public class CustomEntityMappingCustomizer implements EntityMappingCustomizer {
         @Override
         public void customize(MapperEntityFactory entityFactory) {
             //OrganizationalEntity使用CustomOrganizationalEntity实现
@@ -100,14 +100,15 @@ jpa注解和mapper配置各有优势(jpa更简单,但只支持简单的字段.my
 
 1. 创建mapper.xml,可直接复制旧的xml进行修改.旧的xml可在`hsweb-system`中对应的模块进行查找.
 
+`com/myproject/mappers/OrganizationalMapper.xml`
+
 ```xml
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.hswebframework.web.dao.organizational.OrganizationalDao">
-     <!--修改type为新的实体类型-->
-    <resultMap id="OrganizationalResultMap" type="com.myproject.entity.CustomOrganizationalEntity">
+    <resultMap id="OrganizationalResultMap" type="org.hswebframework.web.entity.organizational.OrganizationalEntity">
         <!--默认的属性-->
         <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
         <result property="name" column="name" javaType="String" jdbcType="VARCHAR"/>
@@ -172,13 +173,13 @@ application.yml方式:
 ```yaml
 mybatis:
   mapper-location-excludes: classpath*:org/hswebframework/**/OrganizationalMapper.xml #不加载的xml
-  mapper-locations: classpath*:custom/mappers/OrganizationalMapper.xml
+  mapper-locations: classpath*:com/myproject/mappers/OrganizationalMapper.xml
 ```
 
 java类配置方式:
 ```java
 @Component //提供给spring才会生效
-public class CustomMybatisMapperCustomer implements MybatisMapperCustomer {
+public class CustomMybatisMapperCustomizer implements MybatisMapperCustomizer {
     @Override
     public String[] getExcludes() {
         return new String[]{
@@ -189,7 +190,7 @@ public class CustomMybatisMapperCustomer implements MybatisMapperCustomer {
     @Override
     public String[] getIncludes() {
         return new String[]{
-                "classpath*:custom/mappers/OrganizationalMapper.xml"
+                "classpath*:com/myproject/mappers/OrganizationalMapper.xml"
         };
     }
 }

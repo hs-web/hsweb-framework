@@ -29,13 +29,13 @@ public class DefaultAopMethodAuthorizeDefinitionParser implements AopMethodAutho
 
     private Map<CacheKey, AuthorizeDefinition> cache = new ConcurrentHashMap<>();
 
-    private List<AopMethodAuthorizeDefinitionCustomizerParser> parserCustomers;
+    private List<AopMethodAuthorizeDefinitionCustomizerParser> parserCustomizers;
 
     private static Set<String> excludeMethodName = new HashSet<>(Arrays.asList("toString", "clone", "hashCode", "getClass"));
 
     @Autowired(required = false)
-    public void setParserCustomers(List<AopMethodAuthorizeDefinitionCustomizerParser> parserCustomers) {
-        this.parserCustomers = parserCustomers;
+    public void setParserCustomizers(List<AopMethodAuthorizeDefinitionCustomizerParser> parserCustomizers) {
+        this.parserCustomizers = parserCustomizers;
     }
 
     @Override
@@ -59,9 +59,9 @@ public class DefaultAopMethodAuthorizeDefinitionParser implements AopMethodAutho
             return definition;
         }
         //使用自定义
-        if (!CollectionUtils.isEmpty(parserCustomers)) {
-            definition = parserCustomers.stream()
-                    .map(customer -> customer.parse(target, method, context))
+        if (!CollectionUtils.isEmpty(parserCustomizers)) {
+            definition = parserCustomizers.stream()
+                    .map(customizer -> customizer.parse(target, method, context))
                     .filter(Objects::nonNull)
                     .findAny().orElse(null);
             if (definition instanceof EmptyAuthorizeDefinition) {

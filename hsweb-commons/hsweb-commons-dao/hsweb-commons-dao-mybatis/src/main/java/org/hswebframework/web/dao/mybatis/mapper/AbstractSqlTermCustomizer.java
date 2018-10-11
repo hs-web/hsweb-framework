@@ -15,7 +15,7 @@ import java.util.List;
  * @since 3.0.0-RC
  */
 @AllArgsConstructor
-public abstract class AbstractSqlTermCustomer implements SqlTermCustomer {
+public abstract class AbstractSqlTermCustomizer implements SqlTermCustomizer {
 
     @Getter
     protected final String termType;
