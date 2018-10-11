@@ -555,5 +555,5 @@ class TestControllerTest extends Specification {
 
 ## 更多教程
 
-[通用增删改查使用](USE-CRUD.md) , [权限控制](AUTZ.md) ,[业务功能](SYSTEM.md) , [实用工具包](UTILS.md)
+[通用增删改查使用](USE-CRUD.md) ,[拓展系统自带功能的字段](CUSTOM-PROP.md) [权限控制](AUTZ.md) ,[业务功能](SYSTEM.md) , [实用工具包](UTILS.md)
 
