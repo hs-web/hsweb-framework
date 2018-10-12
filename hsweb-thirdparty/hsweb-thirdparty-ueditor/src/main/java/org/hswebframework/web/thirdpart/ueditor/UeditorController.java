@@ -58,9 +58,6 @@ public class UeditorController {
 
     private String getDownloadPath(HttpServletRequest request) {
         return rootPath;
-//        String contextPath = request.getContextPath();
-//
-//        return (StringUtils.hasText(contextPath) || contextPath.equals("/") ? "/" : (contextPath.startsWith("/") ? contextPath : "/" + contextPath) + "/");
     }
 
     /**
@@ -71,21 +68,9 @@ public class UeditorController {
      */
     @RequestMapping(method = RequestMethod.POST, consumes = "multipart/form-data")
     @ApiOperation("上传文件")
-    public String upload(@RequestParam(value = "upfile", required = false) MultipartFile file,HttpServletRequest request) throws IOException {
+    public String upload(@RequestParam(value = "upfile", required = false) MultipartFile file) throws IOException {
         String fileName = file.getOriginalFilename();
-        String contentType = Optional.ofNullable(request)
-                .orElseThrow(UnsupportedOperationException::new)
-                .getContentType();
-        ParameterParser parser = new ParameterParser();
-        Map<String, String> params = parser.parse(contentType, ';');
-        if (params.get("charset") == null) {
-            try {
-                fileName = new String(file.getOriginalFilename().getBytes("ISO-8859-1"), "utf-8");
-            } catch (@SuppressWarnings("all") UnsupportedEncodingException ignore) {
-            }
-        }
         String suffix = FileType.getSuffixByFilename(fileName);
-
         String path = fileService.saveStaticFile(file.getInputStream(), System.currentTimeMillis() + suffix);
         State state = new BaseState(true);
         state.putInfo("size", file.getSize());
