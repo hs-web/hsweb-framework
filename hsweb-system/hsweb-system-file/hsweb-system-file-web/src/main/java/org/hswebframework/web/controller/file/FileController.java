@@ -261,6 +261,7 @@ public class FileController {
             return ResponseMessage.ok();
         }
         String fileName = file.getOriginalFilename();
+        //fix bug #93
 //        String contentType = Optional.ofNullable(WebUtil.getHttpServletRequest())
 //                .orElseThrow(UnsupportedOperationException::new)
 //                .getContentType();
