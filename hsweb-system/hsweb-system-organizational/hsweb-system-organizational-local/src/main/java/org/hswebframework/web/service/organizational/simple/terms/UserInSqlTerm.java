@@ -8,7 +8,7 @@ import org.hswebframework.ezorm.rdb.render.dialect.Dialect;
 import org.hswebframework.ezorm.rdb.render.dialect.RenderPhase;
 import org.hswebframework.ezorm.rdb.render.dialect.function.SqlFunction;
 import org.hswebframework.web.commons.entity.TreeSupportEntity;
-import org.hswebframework.web.dao.mybatis.mapper.AbstractSqlTermCustomer;
+import org.hswebframework.web.dao.mybatis.mapper.AbstractSqlTermCustomizer;
 import org.hswebframework.web.service.QueryService;
 
 import java.util.Arrays;
@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
  * @since 3.0.0-RC
  */
 @Slf4j
-public abstract class UserInSqlTerm<PK> extends AbstractSqlTermCustomer {
+public abstract class UserInSqlTerm<PK> extends AbstractSqlTermCustomizer {
 
 
     @Setter

@@ -4,7 +4,7 @@ import org.hswebframework.ezorm.core.param.Term;
 import org.hswebframework.ezorm.rdb.meta.RDBColumnMetaData;
 import org.hswebframework.ezorm.rdb.render.SqlAppender;
 import org.hswebframework.ezorm.rdb.render.dialect.term.BoostTermTypeMapper;
-import org.hswebframework.web.dao.mybatis.mapper.AbstractSqlTermCustomer;
+import org.hswebframework.web.dao.mybatis.mapper.AbstractSqlTermCustomizer;
 import org.hswebframework.web.dao.mybatis.mapper.ChangedTermValue;
 
 import java.util.List;
@@ -15,7 +15,7 @@ import java.util.List;
  * @author zhouhao
  * @since 3.0.0-RC
  */
-public class ClaimSqlTerm extends AbstractSqlTermCustomer {
+public class ClaimSqlTerm extends AbstractSqlTermCustomizer {
     public ClaimSqlTerm(String termType) {
         super(termType);
     }

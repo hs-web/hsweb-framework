@@ -18,12 +18,12 @@ import java.util.stream.Collectors;
  * @since 3.0.0-RC
  */
 @Slf4j
-public abstract class TreeStructureSqlTermCustomer extends AbstractSqlTermCustomer {
+public abstract class TreeStructureSqlTermCustomizer extends AbstractSqlTermCustomizer {
     boolean not = false;
 
     boolean parent = false;
 
-    public TreeStructureSqlTermCustomer(String termType, boolean not,boolean parent) {
+    public TreeStructureSqlTermCustomizer(String termType, boolean not, boolean parent) {
         super(termType);
         this.not = not;
     }

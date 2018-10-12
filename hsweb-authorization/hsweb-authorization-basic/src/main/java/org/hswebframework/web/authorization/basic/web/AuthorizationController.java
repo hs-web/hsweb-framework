@@ -91,6 +91,9 @@ public class AuthorizationController {
         return doLogin(username, password, WebUtil.getParameters(request));
     }
 
+    /**
+     * <img src="https://raw.githubusercontent.com/hs-web/hsweb-framework/3.0.x/hsweb-authorization/hsweb-authorization-basic/img/autz-flow.png">
+     */
     @SneakyThrows
     protected ResponseMessage<Map<String, Object>> doLogin(String username, String password, Map<String, ?> parameter) {
         Assert.hasLength(username, "用户名不能为空");

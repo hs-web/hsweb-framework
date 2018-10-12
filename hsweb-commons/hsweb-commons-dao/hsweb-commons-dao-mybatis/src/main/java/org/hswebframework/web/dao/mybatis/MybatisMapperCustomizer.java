@@ -6,7 +6,7 @@ package org.hswebframework.web.dao.mybatis;
  * @author zhouhao
  * @since 3.0
  */
-public interface MybatisMapperCustomer {
+public interface MybatisMapperCustomizer {
     String[] getExcludes();
 
     String[] getIncludes();

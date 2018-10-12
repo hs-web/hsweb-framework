@@ -20,7 +20,7 @@ package org.hswebframework.web.dao.mybatis;
 
 import org.hswebframework.ezorm.rdb.render.dialect.Dialect;
 import org.hswebframework.web.dao.Dao;
-import org.hswebframework.web.dao.mybatis.mapper.SqlTermCustomer;
+import org.hswebframework.web.dao.mybatis.mapper.SqlTermCustomizer;
 import org.hswebframework.web.dao.mybatis.mapper.dict.DictInTermTypeMapper;
 import org.hswebframework.web.dao.mybatis.mapper.dict.DictTermTypeMapper;
 import org.mybatis.spring.annotation.MapperScan;
@@ -34,7 +34,6 @@ import org.springframework.context.annotation.Configuration;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 
 @Configuration
 @ComponentScan("org.hswebframework.web.dao.mybatis")
@@ -65,7 +64,7 @@ public class MybatisDaoAutoConfiguration {
     }
 
     @Bean
-    public BeanPostProcessor SqlTermCustomerRegister() {
+    public BeanPostProcessor sqlTermCustomizerRegister() {
 
         List<Dialect> dialects = Arrays.asList(
                 Dialect.H2
@@ -82,14 +81,14 @@ public class MybatisDaoAutoConfiguration {
 
             @Override
             public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-                if (bean instanceof SqlTermCustomer) {
-                    SqlTermCustomer customer = ((SqlTermCustomer) bean);
-                    if (customer.forDialect() != null) {
-                        for (Dialect dialect : customer.forDialect()) {
-                            dialect.setTermTypeMapper(customer.getTermType(), customer);
+                if (bean instanceof SqlTermCustomizer) {
+                    SqlTermCustomizer customizer = ((SqlTermCustomizer) bean);
+                    if (customizer.forDialect() != null) {
+                        for (Dialect dialect : customizer.forDialect()) {
+                            dialect.setTermTypeMapper(customizer.getTermType(), customizer);
                         }
                     } else {
-                        dialects.forEach(dialect -> dialect.setTermTypeMapper(customer.getTermType(), customer));
+                        dialects.forEach(dialect -> dialect.setTermTypeMapper(customizer.getTermType(), customizer));
                     }
                 }
                 return bean;

@@ -3,7 +3,6 @@ package org.hswebframework.web.workflow.service.imp;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
-import org.hswebframework.ezorm.rdb.RDBTable;
 import org.hswebframework.ezorm.rdb.meta.RDBColumnMetaData;
 import org.hswebframework.ezorm.rdb.meta.RDBTableMetaData;
 import org.hswebframework.ezorm.rdb.meta.converter.DateTimeConverter;
@@ -13,21 +12,17 @@ import org.hswebframework.web.commons.entity.PagerResult;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.service.form.DynamicFormOperationService;
 import org.hswebframework.web.service.form.initialize.ColumnInitializeContext;
-import org.hswebframework.web.service.form.initialize.DynamicFormInitializeCustomer;
+import org.hswebframework.web.service.form.initialize.DynamicFormInitializeCustomizer;
 import org.hswebframework.web.service.form.initialize.TableInitializeContext;
 import org.hswebframework.web.workflow.dao.entity.ActivityConfigEntity;
 import org.hswebframework.web.workflow.dao.entity.ProcessDefineConfigEntity;
 import org.hswebframework.web.workflow.service.ActivityConfigService;
 import org.hswebframework.web.workflow.service.ProcessDefineConfigService;
-import org.hswebframework.web.workflow.service.config.ProcessConfigurationService;
 import org.hswebframework.web.workflow.service.WorkFlowFormService;
-import org.hswebframework.web.workflow.service.config.ActivityConfiguration;
-import org.hswebframework.web.workflow.service.config.ProcessConfiguration;
 import org.hswebframework.web.workflow.service.request.SaveFormRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.sql.JDBCType;
@@ -39,7 +34,7 @@ import java.util.*;
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
-public class WorkFlowFormServiceImpl extends AbstractFlowableService implements WorkFlowFormService, DynamicFormInitializeCustomer {
+public class WorkFlowFormServiceImpl extends AbstractFlowableService implements WorkFlowFormService, DynamicFormInitializeCustomizer {
 
     @Autowired
     private DynamicFormOperationService dynamicFormOperationService;

@@ -6,17 +6,14 @@ import org.hswebframework.ezorm.core.param.TermType;
 import org.hswebframework.ezorm.rdb.meta.RDBColumnMetaData;
 import org.hswebframework.ezorm.rdb.render.SqlAppender;
 import org.hswebframework.ezorm.rdb.render.dialect.Dialect;
-import org.hswebframework.ezorm.rdb.render.dialect.RenderPhase;
-import org.hswebframework.ezorm.rdb.render.dialect.function.SqlFunction;
 import org.hswebframework.ezorm.rdb.render.dialect.term.BoostTermTypeMapper;
-import org.hswebframework.web.dao.mybatis.mapper.AbstractSqlTermCustomer;
+import org.hswebframework.web.dao.mybatis.mapper.AbstractSqlTermCustomizer;
 import org.hswebframework.web.dao.mybatis.mapper.ChangedTermValue;
 import org.hswebframework.web.dict.EnumDict;
 
 import java.sql.JDBCType;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import static org.hswebframework.web.dao.mybatis.mapper.dict.DictInTermTypeMapper.USE_DICT_MASK_FLAG;
@@ -25,7 +22,7 @@ import static org.hswebframework.web.dao.mybatis.mapper.dict.DictInTermTypeMappe
  * @author zhouhao
  * @since 3.0.0-RC
  */
-public class DictTermTypeMapper extends AbstractSqlTermCustomer {
+public class DictTermTypeMapper extends AbstractSqlTermCustomizer {
 
     private boolean not;
 

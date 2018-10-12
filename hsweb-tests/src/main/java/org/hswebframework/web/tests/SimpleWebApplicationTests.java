@@ -41,12 +41,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 /**
- * TODO 完成注释
+ * 已弃用,请使用 {@link HswebSpecification} {@link  HswebCrudWebApiSpecification }
  *
  * @author zhouhao
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = SimpleWebApplicationTests.Config.class)
+@Deprecated
 public class SimpleWebApplicationTests extends AbstractTransactionalJUnit4SpringContextTests {
 
     protected MockMvc               mvc;
