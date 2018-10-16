@@ -37,13 +37,7 @@ public final class FastBeanCopier {
     @SuppressWarnings("all")
     public static final Class[] EMPTY_CLASS_ARRAY = new Class[0];
 
-    private static BeanFactory BEAN_FACTORY = new BeanFactory() {
-        @Override
-        @SneakyThrows
-        public <T> T newInstance(Class<T> beanType) {
-            return beanType == Map.class ? (T) new HashMap<>() : beanType.newInstance();
-        }
-    };
+    private static BeanFactory BEAN_FACTORY;
 
     public static final DefaultConverter DEFAULT_CONVERT;
 
