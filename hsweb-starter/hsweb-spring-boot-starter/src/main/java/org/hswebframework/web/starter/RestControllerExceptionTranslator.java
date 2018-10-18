@@ -41,6 +41,8 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -95,6 +97,19 @@ public class RestControllerExceptionTranslator {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     ResponseMessage handleException(NotFoundException exception) {
         return ResponseMessage.error(404, exception.getMessage());
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    ResponseMessage handleConstraintViolationException(ConstraintViolationException e) {
+        SimpleValidateResults results = new SimpleValidateResults();
+        for (ConstraintViolation<?> violation : e.getConstraintViolations()) {
+            results.addResult(violation.getPropertyPath().toString(), violation.getMessage());
+        }
+        List<ValidateResults.Result> errorResults = results.getResults();
+        return ResponseMessage
+                .error(400, errorResults.isEmpty() ? "" : errorResults.get(0).getMessage())
+                .result(errorResults);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -152,11 +167,11 @@ public class RestControllerExceptionTranslator {
     /**
      * 404异常，Spring MVC DispatcherServlet 当没找到 Handler处理请求时，
      * 如果配置了 throwExceptionIfNoHandlerFound 为 true时，会抛出此异常
-     *
+     * <p>
      * 在配置文件中使用：
-     *  spring:
-     *       mvc:
-     *         throw-exception-if-no-handler-found: true
+     * spring:
+     * mvc:
+     * throw-exception-if-no-handler-found: true
      *
      * @see org.springframework.web.servlet.DispatcherServlet#noHandlerFound(HttpServletRequest, HttpServletResponse)
      */
@@ -187,7 +202,6 @@ public class RestControllerExceptionTranslator {
         logger.error(exception.getMessage(), exception);
         return ResponseMessage.error(HttpStatus.BAD_REQUEST.value(), "请求缺失参数：" + exception.getMessage());
     }
-
 
 
 }

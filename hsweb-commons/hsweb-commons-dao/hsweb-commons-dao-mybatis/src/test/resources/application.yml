@@ -23,3 +23,4 @@ spring:
         ddl-auto: update
 mybatis:
   mapper-locations: org/hswebframework/web/dao/test/*.xml
+  dynamic-datasource: true

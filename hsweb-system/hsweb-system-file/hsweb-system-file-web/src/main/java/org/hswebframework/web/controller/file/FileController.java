@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -254,35 +255,27 @@ public class FileController {
     @ApiOperation("上传单个文件")
     @Authorize(action = "upload", description = "上传文件")
     public ResponseMessage<FileInfoEntity> upload(@RequestPart("file") MultipartFile file) {
-        List<FileInfoEntity> fileInfoList = new LinkedList<>();
         Authentication authentication = Authentication.current().orElse(null);
         String creator = authentication == null ? null : authentication.getUser().getId();
         if (file.isEmpty()) {
             return ResponseMessage.ok();
         }
         String fileName = file.getOriginalFilename();
-        String contentType = Optional.ofNullable(WebUtil.getHttpServletRequest())
-                .orElseThrow(UnsupportedOperationException::new)
-                .getContentType();
-        ParameterParser parser = new ParameterParser();
-        Map<String, String> params = parser.parse(contentType, ';');
-        if (params.get("charset") == null) {
-            try {
-                fileName = new String(file.getOriginalFilename().getBytes("ISO-8859-1"), "utf-8");
-            } catch (@SuppressWarnings("all") UnsupportedEncodingException ignore) {
-            }
-        }
-        if (logger.isInfoEnabled()) {
-            logger.info("start write file:{}", fileName);
-        }
-
+        //fix bug #93
+//        String contentType = Optional.ofNullable(WebUtil.getHttpServletRequest())
+//                .orElseThrow(UnsupportedOperationException::new)
+//                .getContentType();
+//        ParameterParser parser = new ParameterParser();
+//        Map<String, String> params = parser.parse(contentType, ';');
+//        if (params.get("charset") == null) {
+//            fileName = new String(file.getOriginalFilename().getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
+//        }
         FileInfoEntity fileInfo;
         try {
             fileInfo = fileService.saveFile(file.getInputStream(), fileName, file.getContentType(), creator);
         } catch (IOException e) {
             throw new BusinessException("save file error", e);
         }
-        fileInfoList.add(fileInfo);
         return ResponseMessage.ok(fileInfo)
                 .include(FileInfoEntity.class, FileInfoEntity.id,
                         FileInfoEntity.name,

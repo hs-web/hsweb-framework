@@ -3,8 +3,6 @@ package org.hswebframework.web.entity.authorization;
 import org.hswebframework.web.commons.entity.CloneableEntity;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public class DataAccessEntity implements CloneableEntity {

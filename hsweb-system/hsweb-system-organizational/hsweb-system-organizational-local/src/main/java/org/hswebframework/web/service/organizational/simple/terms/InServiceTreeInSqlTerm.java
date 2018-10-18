@@ -1,7 +1,7 @@
 package org.hswebframework.web.service.organizational.simple.terms;
 
 import org.hswebframework.web.commons.entity.TreeSupportEntity;
-import org.hswebframework.web.dao.mybatis.mapper.TreeStructureSqlTermCustomer;
+import org.hswebframework.web.dao.mybatis.mapper.TreeStructureSqlTermCustomizer;
 import org.hswebframework.web.service.QueryService;
 
 import java.util.List;
@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
  * @author zhouhao
  * @since 3.0.0-RC
  */
-public class InServiceTreeInSqlTerm<PK> extends TreeStructureSqlTermCustomer {
+public class InServiceTreeInSqlTerm<PK> extends TreeStructureSqlTermCustomizer {
 
     private QueryService<? extends TreeSupportEntity<PK>, PK> treeService;
 

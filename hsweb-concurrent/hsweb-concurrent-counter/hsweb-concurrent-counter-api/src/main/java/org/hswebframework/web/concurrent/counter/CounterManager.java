@@ -18,8 +18,6 @@
 package org.hswebframework.web.concurrent.counter;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public interface CounterManager {

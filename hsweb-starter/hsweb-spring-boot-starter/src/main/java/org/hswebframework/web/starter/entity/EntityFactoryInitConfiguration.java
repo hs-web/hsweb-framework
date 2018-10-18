@@ -24,8 +24,8 @@ public class EntityFactoryInitConfiguration implements BeanPostProcessor {
         } else if (bean instanceof PropertyCopier) {
             mapperEntityFactory.addCopier(((PropertyCopier) bean));
         }
-        if (bean instanceof EntityMappingCustomer) {
-            ((EntityMappingCustomer) bean).customize(mapperEntityFactory);
+        if (bean instanceof EntityMappingCustomizer) {
+            ((EntityMappingCustomizer) bean).customize(mapperEntityFactory);
         }
         return bean;
     }

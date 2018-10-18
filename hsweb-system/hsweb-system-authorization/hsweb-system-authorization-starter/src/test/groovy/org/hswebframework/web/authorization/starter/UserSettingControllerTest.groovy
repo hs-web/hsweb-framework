@@ -3,6 +3,8 @@ package org.hswebframework.web.authorization.starter
 import com.alibaba.fastjson.JSON
 import org.hswebframework.web.authorization.Authentication
 import org.hswebframework.web.authorization.AuthenticationInitializeService
+import org.hswebframework.web.authorization.access.DataAccessConfig
+import org.hswebframework.web.tests.HswebCrudWebApiSpecification
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -27,32 +29,26 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * @author zhouhao
- * @since
+ * @since 3.0
  */
-@WebAppConfiguration
-@ContextConfiguration
-@SpringBootTest(classes = [TestApplication.class], properties = ["classpath:application.yml"])
-class UserSettingControllerTest extends Specification {
-    @Autowired
-    private ConfigurableApplicationContext context;
-
-    @Shared
-    private MockMvc mockMvc;
+class UserSettingControllerTest extends HswebCrudWebApiSpecification {
 
     @Autowired
     private AuthenticationInitializeService initializeService;
 
-    void setup() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
+    @Override
+    protected String getBaseApi() {
+        return "/autz-setting"
     }
+
 
     def "Add Permission"() {
         def permissions = [
                 [
-                        "id"     : "user",
-                        "name"   : "用户管理",
-                        "actions": [["action": "query", "describe": "查询"], ["action": "update", "describe": "修改"]]
-
+                        "id"                    : "user",
+                        "name"                  : "用户管理",
+                        "actions"               : [["action": "query", "describe": "查询"], ["action": "update", "describe": "修改"]],
+                        "supportDataAccessTypes": [DataAccessConfig.DefaultType.DENY_FIELDS]
                 ],
                 [
                         "id"     : "role",
@@ -99,45 +95,52 @@ class UserSettingControllerTest extends Specification {
         "Add Permission"()
         def userId = "Add User"()
         //添加用户权限
-        mockMvc.perform(
-                post("/autz-setting")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(JSON.toJSONString
-                        ([
-                                type      : "user", //设置类型:user
-                                settingFor: userId, //设置给具体的user
-                                describe  : "测试",
-                                details   :
+        doAddRequest(JSON.toJSONString
+                ([
+                        type      : "user", //设置类型:user
+                        settingFor: userId, //设置给具体的user
+                        describe  : "测试",
+                        details   :
+                                [
                                         [
-                                                [
-                                                        permissionId: "user", //赋予user权限
-                                                        actions     : ["query", "update"],
-                                                        status      : 1
-                                                ],
-                                                [
-                                                        permissionId: "role", //赋予role权限
-                                                        actions     : ["query", "get"],
-                                                        status      : 1
+                                                permissionId: "user", //赋予user权限
+                                                actions     : ["query", "update"],
+                                                status      : 1,
+                                                dataAccesses: [ //数据权限,控制查询的时候不能查询password字段
+                                                                [
+                                                                        type  : DataAccessConfig.DefaultType.DENY_FIELDS,
+                                                                        action: "query",
+                                                                        config: """{"fields": ["password"]}"""
+                                                                ]
                                                 ]
                                         ],
-                                menus     :
                                         [
-                                                [
-                                                        menuId: "user-menu"
-                                                ],
-                                                [
-                                                        menuId: "role-menu"
-                                                ]
+                                                permissionId: "role", //赋予role权限
+                                                actions     : ["query", "get"],
+                                                status      : 1
                                         ]
-                        ])
-                )).andDo({ result -> println result.response.contentAsString })
-//                .andExpect(status().is(201))
+                                ],
+                        menus     :
+                                [
+                                        [
+                                                menuId: "user-menu"
+                                        ],
+                                        [
+                                                menuId: "role-menu"
+                                        ]
+                                ]
+                ]))
+
         expect:
         userId != null
         def autz = initializeService.initUserAuthorization(userId)
         autz != null
         autz.hasPermission("user", "query")
         autz.hasPermission("role", "query", "get")
-
+        autz.getPermission("user")
+                .map({ per -> per.findDenyFields("query") })
+                .map({ fields -> fields.contains("password") })
+                .orElse(false)
     }
+
 }
