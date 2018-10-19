@@ -18,6 +18,7 @@
 
 package org.hswebframework.web.oauth2;
 
+import org.hswebframework.web.authorization.AuthenticationManager;
 import org.hswebframework.web.authorization.oauth2.server.client.OAuth2ClientConfigRepository;
 import org.hswebframework.web.authorization.oauth2.server.support.AbstractAuthorizationService;
 import org.hswebframework.web.authorization.oauth2.server.support.DefaultOAuth2Granter;
@@ -39,7 +40,6 @@ import org.hswebframework.web.commons.entity.factory.EntityFactory;
 import org.hswebframework.web.dao.oauth2.server.AuthorizationCodeDao;
 import org.hswebframework.web.dao.oauth2.server.OAuth2AccessDao;
 import org.hswebframework.web.dao.oauth2.server.OAuth2ClientDao;
-import org.hswebframework.web.service.authorization.UserService;
 import org.hswebframework.web.service.oauth2.server.simple.*;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,7 +82,7 @@ public class OAuth2GranterAutoConfiguration {
 
     @ConditionalOnMissingBean(PasswordService.class)
     @Bean
-    public SimplePasswordService simplePasswordService(UserService userService) {
+    public SimplePasswordService simplePasswordService(AuthenticationManager userService) {
         return new SimplePasswordService(userService);
     }
 

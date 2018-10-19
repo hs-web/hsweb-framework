@@ -18,29 +18,32 @@
 
 package org.hswebframework.web.service.oauth2.server.simple;
 
+import org.hswebframework.web.authorization.Authentication;
+import org.hswebframework.web.authorization.AuthenticationManager;
 import org.hswebframework.web.authorization.oauth2.server.support.password.PasswordService;
-import org.hswebframework.web.entity.authorization.UserEntity;
-import org.hswebframework.web.service.authorization.UserService;
+import org.hswebframework.web.authorization.simple.PlainTextUsernamePasswordAuthenticationRequest;
+import org.hswebframework.web.validate.ValidationException;
 
 /**
  * @author zhouhao
  */
 public class SimplePasswordService implements PasswordService {
-    private UserService userService;
+    private AuthenticationManager authenticationManager;
 
-    public SimplePasswordService(UserService userService) {
-        this.userService = userService;
+    public SimplePasswordService(AuthenticationManager authenticationManager) {
+        this.authenticationManager = authenticationManager;
     }
 
     @Override
     public String getUserIdByUsernameAndPassword(String username, String password) {
-        UserEntity userEntity = userService.selectByUsername(username);
-        if (userEntity == null) {
+        try {
+            Authentication authenticate = authenticationManager.authenticate(new PlainTextUsernamePasswordAuthenticationRequest(username, password));
+            if (null != authenticate) {
+                return authenticate.getUser().getId();
+            }
+        } catch (ValidationException | UnsupportedOperationException | IllegalArgumentException e) {
             return null;
         }
-        if (!userService.encodePassword(password, userEntity.getSalt()).equals(userEntity.getPassword())) {
-            return null;
-        }
-        return userEntity.getId();
+        return null;
     }
 }
