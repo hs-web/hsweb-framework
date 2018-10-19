@@ -503,7 +503,7 @@ public class TestController implements SimpleGenericEntityController<TestEntity,
 
 方式一:编写单元测试
 
-在test目录创建`com.mycompany.TestApplication`和`com.mycompany.controller.TestControllerTest`
+在src/test/groovy目录下创建`com.mycompany.TestApplication.java`和`com.mycompany.controller.TestControllerTest.groovy`
 
 ```java
 @SpringBootApplication
