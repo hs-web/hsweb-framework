@@ -28,4 +28,8 @@ class HswebSpecification extends Specification {
         mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
     }
 
+    MockMvc getMockMvc() {
+        return mockMvc;
+    }
+
 }
