@@ -369,7 +369,7 @@ public interface TestDao extends CrudDao<TestEntity,String> {
 ![创建Dao](./img/create-dao.gif "创建实体Dao")
 
 
-创建myabtis mapper,在`resources`目录上创建:`com/mycompany/dao/mybatis/TestMapper.xml` 
+创建myabtis mapper,在`resources`目录上创建:`com/mycompany/dao/mybatis/TestMapper.xml`,注意: 目录分割使用`/`而不是`.`
 
 ```xml
 <?xml version="1.0" encoding="UTF-8" ?>
@@ -553,7 +553,14 @@ class TestControllerTest extends Specification {
 
 一个最简单的通用crud例子完成了!! 
 
+## 获取例子的完整源代码
+[myproject](https://github.com/hs-web/hsweb-examples/tree/master/myproject)
+
 ## 更多教程
 
 [通用增删改查使用](USE-CRUD.md) ,[拓展系统自带功能的字段](CUSTOM-PROP.md) [权限控制](AUTZ.md) ,[业务功能](SYSTEM.md) , [实用工具包](UTILS.md)
+
+[常见问题及解决方式](https://github.com/hs-web/hsweb-framework/issues/97)
+
+ 
 
