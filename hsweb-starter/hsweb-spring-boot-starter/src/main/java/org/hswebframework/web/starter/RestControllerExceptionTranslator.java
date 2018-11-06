@@ -29,6 +29,7 @@ import org.hswebframework.web.validate.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -110,6 +111,19 @@ public class RestControllerExceptionTranslator {
         return ResponseMessage
                 .error(400, errorResults.isEmpty() ? "" : errorResults.get(0).getMessage())
                 .result(errorResults);
+    }
+
+    @ExceptionHandler(BindException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    ResponseMessage handleException(BindException e) {
+        SimpleValidateResults results = new SimpleValidateResults();
+        e.getBindingResult().getAllErrors()
+                .stream()
+                .filter(FieldError.class::isInstance)
+                .map(FieldError.class::cast)
+                .forEach(fieldError -> results.addResult(fieldError.getField(), fieldError.getDefaultMessage()));
+
+        return ResponseMessage.error(400, results.getResults().isEmpty() ? e.getMessage() : results.getResults().get(0).getMessage()).result(results.getResults());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
