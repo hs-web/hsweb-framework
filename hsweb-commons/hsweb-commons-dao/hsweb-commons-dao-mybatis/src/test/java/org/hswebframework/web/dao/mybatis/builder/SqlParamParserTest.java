@@ -2,19 +2,19 @@ package org.hswebframework.web.dao.mybatis.builder;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hswebframework.ezorm.core.param.Term;
 import org.hswebframework.web.commons.entity.QueryEntity;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.junit.Assert;
 import org.junit.Test;
+import org.springframework.asm.ClassReader;
 
+import java.lang.invoke.LambdaMetafactory;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 import static org.junit.Assert.*;
 
@@ -23,6 +23,17 @@ import static org.junit.Assert.*;
  * @since 1.0
  */
 public class SqlParamParserTest {
+    @SneakyThrows
+    public static <T> void test(Function<T, Object> function) {
+        Class t=function.getClass();
+
+        System.out.println(t);
+    }
+
+    public static void main(String[] args) {
+        test(TestQueryEntity::getName$like);
+    }
+
 
     @Test
     public void testParseQueryParam() {

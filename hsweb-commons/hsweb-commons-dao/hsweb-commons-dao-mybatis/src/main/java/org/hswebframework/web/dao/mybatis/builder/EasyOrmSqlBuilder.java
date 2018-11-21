@@ -175,20 +175,19 @@ public class EasyOrmSqlBuilder {
                 }
                 column.setJavaType(resultMapping.getJavaType());
                 column.setProperty("resultMapping", resultMapping);
-                ValueConverter dateConvert = new DateTimeConverter("yyyy-MM-dd HH:mm:ss", column.getJavaType()) {
-                    @Override
-                    public Object getData(Object value) {
-                        if (value instanceof Number) {
-                            return new Date(((Number) value).longValue());
+                //时间
+                if (column.getJdbcType() == JDBCType.DATE || column.getJdbcType() == JDBCType.TIMESTAMP) {
+                    ValueConverter dateConvert = new DateTimeConverter("yyyy-MM-dd HH:mm:ss", column.getJavaType()) {
+                        @Override
+                        public Object getData(Object value) {
+                            if (value instanceof Number) {
+                                return new Date(((Number) value).longValue());
+                            }
+                            return super.getData(value);
                         }
-                        return super.getData(value);
-                    }
-                };
-                if (column.getJdbcType() == JDBCType.DATE) {
+                    };
                     column.setValueConverter(dateConvert);
-                } else if (column.getJdbcType() == JDBCType.TIMESTAMP) {
-                    column.setValueConverter(dateConvert);
-                } else if (column.getJdbcType() == JDBCType.NUMERIC) {
+                } else if (TypeUtils.isNumberType(column)) { //数字
                     column.setValueConverter(new NumberValueConverter(column.getJavaType()));
                 }
                 rdbTableMetaData.addColumn(column);

@@ -8,6 +8,7 @@ import org.hswebframework.ezorm.rdb.meta.RDBTableMetaData;
 import org.hswebframework.ezorm.rdb.meta.converter.DateTimeConverter;
 import org.hswebframework.ezorm.rdb.meta.converter.NumberValueConverter;
 import org.hswebframework.utils.ClassUtils;
+import org.hswebframework.web.dao.mybatis.builder.TypeUtils;
 import org.hswebframework.web.dict.EnumDict;
 import org.springframework.core.annotation.AnnotationUtils;
 
@@ -35,27 +36,9 @@ import java.util.function.Function;
  */
 public class JpaAnnotationParser {
 
-    private static final Map<Class, RDBTableMetaData> metaDataCache = new ConcurrentHashMap<>(256);
-
     private static final Map<Class, JDBCType> jdbcTypeMapping = new HashMap<>();
 
     private static final List<BiFunction<Class, PropertyDescriptor, JDBCType>> jdbcTypeConvert = new ArrayList<>();
-
-    private static final List<Class> numberType = Arrays.asList(
-            byte.class, Byte.class
-            , short.class, Short.class
-            , int.class, Integer.class
-            , float.class, Float.class
-            , double.class, Double.class
-            , long.class, Long.class
-            , BigDecimal.class, BigInteger.class
-    );
-
-    private static final List<JDBCType> numberJdbcType = Arrays.asList(
-            JDBCType.TINYINT, JDBCType.DECIMAL, JDBCType.NUMERIC,
-            JDBCType.BIGINT, JDBCType.SMALLINT, JDBCType.INTEGER,
-            JDBCType.DECIMAL, JDBCType.BIT
-    );
 
     static {
         jdbcTypeMapping.put(String.class, JDBCType.VARCHAR);
@@ -121,11 +104,6 @@ public class JpaAnnotationParser {
         });
     }
 
-    public static boolean isNumberType(RDBColumnMetaData columnMetaData) {
-        return numberType.contains(columnMetaData.getJavaType())
-                || Number.class.isAssignableFrom(columnMetaData.getJavaType())
-                || numberJdbcType.contains(columnMetaData.getJdbcType());
-    }
 
     public static RDBTableMetaData parseMetaDataFromEntity(Class entityClass) {
         Table table = AnnotationUtils.findAnnotation(entityClass, Table.class);
@@ -174,7 +152,7 @@ public class JpaAnnotationParser {
             if (columnMetaData.getJdbcType() == JDBCType.DATE
                     || columnMetaData.getJdbcType() == JDBCType.TIMESTAMP) {
                 columnMetaData.setValueConverter(dateConvert);
-            } else if (isNumberType(columnMetaData)) {
+            } else if (TypeUtils.isNumberType(columnMetaData)) {
                 columnMetaData.setValueConverter(new NumberValueConverter(columnMetaData.getJavaType()));
             }
 
