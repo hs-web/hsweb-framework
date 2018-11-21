@@ -28,7 +28,9 @@ import org.hswebframework.web.validate.ValidateResults;
 import org.hswebframework.web.validate.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
@@ -45,7 +47,11 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class RestControllerExceptionTranslator {
@@ -55,8 +61,8 @@ public class RestControllerExceptionTranslator {
     @ExceptionHandler(JSONException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     ResponseMessage handleException(JSONException exception) {
-        logger.error("json error", exception);
-        return ResponseMessage.error(400, exception.getMessage());
+        logger.error(exception.getMessage(), exception);
+        return ResponseMessage.error(400, "解析JSON失败");
     }
 
     @ExceptionHandler(org.hswebframework.ezorm.rdb.exception.ValidationException.class)
@@ -142,15 +148,27 @@ public class RestControllerExceptionTranslator {
     @ExceptionHandler(RuntimeException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     ResponseMessage handleException(RuntimeException exception) {
+        String msg = Optional.ofNullable(exception.getMessage())
+                .orElse("服务器内部错误");
         logger.error(exception.getMessage(), exception);
-        return ResponseMessage.error(500, exception.getMessage());
+        return ResponseMessage.error(500, msg);
     }
+
+    @ExceptionHandler(DuplicateKeyException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    ResponseMessage handleException(DuplicateKeyException exception) {
+        logger.error(exception.getMessage(), exception);
+        return ResponseMessage.error(400, "重复的请求");
+    }
+
 
     @ExceptionHandler(NullPointerException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     ResponseMessage handleException(NullPointerException exception) {
+        String msg = Optional.ofNullable(exception.getMessage())
+                .orElse("服务器内部错误");
         logger.error(exception.getMessage(), exception);
-        return ResponseMessage.error(500, "服务器内部错误");
+        return ResponseMessage.error(500, msg);
     }
 
     @ExceptionHandler(SQLException.class)
@@ -163,8 +181,11 @@ public class RestControllerExceptionTranslator {
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     ResponseMessage handleException(IllegalArgumentException exception) {
-        logger.error(exception.getMessage(), exception);
-        return ResponseMessage.error(400, "参数错误:" + exception.getMessage());
+        String msg = exception.getMessage();
+        if (null == msg) {
+            logger.error(msg = "参数错误", exception);
+        }
+        return ResponseMessage.error(400, msg);
     }
 
     /**
@@ -174,8 +195,9 @@ public class RestControllerExceptionTranslator {
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
     ResponseMessage handleException(HttpRequestMethodNotSupportedException exception) {
-        logger.error(exception.getMessage(), exception);
-        return ResponseMessage.error(HttpStatus.METHOD_NOT_ALLOWED.value(), "请求API的方式不支持").result(exception.getSupportedHttpMethods());
+        return ResponseMessage
+                .error(HttpStatus.METHOD_NOT_ALLOWED.value(), "不支持的请求方式")
+                .result(exception.getSupportedHttpMethods());
     }
 
     /**
@@ -192,8 +214,10 @@ public class RestControllerExceptionTranslator {
     @ExceptionHandler(NoHandlerFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     ResponseMessage handleException(NoHandlerFoundException exception) {
-        logger.error(exception.getMessage(), exception);
-        return ResponseMessage.error(HttpStatus.NOT_FOUND.value(), "请求URL不存在");
+        Map<String, Object> result = new HashMap<>();
+        result.put("url", exception.getRequestURL());
+        result.put("method", exception.getHttpMethod());
+        return ResponseMessage.error(HttpStatus.NOT_FOUND.value(), "请求地址不存在.");
     }
 
     /**
@@ -203,8 +227,12 @@ public class RestControllerExceptionTranslator {
     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
     @ResponseStatus(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
     ResponseMessage handleException(HttpMediaTypeNotSupportedException exception) {
-        logger.error(exception.getMessage(), exception);
-        return ResponseMessage.error(HttpStatus.UNSUPPORTED_MEDIA_TYPE.value(), "请求URL不存在");
+        return ResponseMessage.error(HttpStatus.UNSUPPORTED_MEDIA_TYPE.value(),
+                "不支持的请求类型:" + exception.getContentType().toString())
+                .result(exception.getSupportedMediaTypes()
+                        .stream()
+                        .map(MediaType::toString)
+                        .collect(Collectors.toList()));
     }
 
     /**
@@ -213,9 +241,8 @@ public class RestControllerExceptionTranslator {
     @ExceptionHandler(MissingServletRequestParameterException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     ResponseMessage handleException(MissingServletRequestParameterException exception) {
-        logger.error(exception.getMessage(), exception);
-        return ResponseMessage.error(HttpStatus.BAD_REQUEST.value(), "请求缺失参数：" + exception.getMessage());
+        return ResponseMessage
+                .error(HttpStatus.BAD_REQUEST.value(), "参数[" + exception.getParameterName() + "]不能为空");
     }
-
 
 }
