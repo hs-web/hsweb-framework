@@ -28,6 +28,8 @@ import org.hswebframework.web.validate.ValidateResults;
 import org.hswebframework.web.validate.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -161,6 +163,12 @@ public class RestControllerExceptionTranslator {
         return ResponseMessage.error(400, "重复的请求");
     }
 
+    @ExceptionHandler(DataAccessException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    ResponseMessage handleException(DataAccessException e) {
+        logger.error(e.getMessage(), e);
+        return ResponseMessage.error(500, "服务异常");
+    }
 
     @ExceptionHandler(NullPointerException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
