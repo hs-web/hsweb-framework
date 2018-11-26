@@ -31,9 +31,6 @@ import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.boot.autoconfigure.SpringBootVFS;
 import org.mybatis.spring.transaction.SpringManagedTransactionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.autoconfigure.AutoConfigureAfter;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -109,7 +106,7 @@ public class MyBatisAutoConfiguration {
         factory.setMapperLocations(mybatisProperties.resolveMapperLocations());
 
         SqlSessionFactory sqlSessionFactory = factory.getObject();
-        MybatisUtils.sqlSession=sqlSessionFactory;
+        MybatisUtils.sqlSession = sqlSessionFactory;
 
         EnumDictHandlerRegister.typeHandlerRegistry = sqlSessionFactory.getConfiguration().getTypeHandlerRegistry();
         EnumDictHandlerRegister.register("org.hswebframework.web;" + mybatisProperties.getTypeHandlersPackage());
@@ -120,8 +117,6 @@ public class MyBatisAutoConfiguration {
         } catch (@SuppressWarnings("all") Exception ignore) {
         }
         EasyOrmSqlBuilder.getInstance().entityFactory = entityFactory;
-
-        sqlSessionFactory.getConfiguration().getTypeAliasRegistry();
 
         return sqlSessionFactory;
     }

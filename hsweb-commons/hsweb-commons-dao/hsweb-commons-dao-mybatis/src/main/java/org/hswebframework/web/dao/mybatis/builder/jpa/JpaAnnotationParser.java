@@ -8,6 +8,7 @@ import org.hswebframework.ezorm.rdb.meta.RDBTableMetaData;
 import org.hswebframework.ezorm.rdb.meta.converter.DateTimeConverter;
 import org.hswebframework.ezorm.rdb.meta.converter.NumberValueConverter;
 import org.hswebframework.utils.ClassUtils;
+import org.hswebframework.web.dao.mybatis.builder.TypeUtils;
 import org.hswebframework.web.dict.EnumDict;
 import org.springframework.core.annotation.AnnotationUtils;
 
@@ -25,6 +26,7 @@ import java.sql.JDBCType;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 /**
  * jpa 注解解析器
@@ -34,8 +36,6 @@ import java.util.function.BiFunction;
  */
 public class JpaAnnotationParser {
 
-    private static final Map<Class, RDBTableMetaData> metaDataCache = new ConcurrentHashMap<>(256);
-
     private static final Map<Class, JDBCType> jdbcTypeMapping = new HashMap<>();
 
     private static final List<BiFunction<Class, PropertyDescriptor, JDBCType>> jdbcTypeConvert = new ArrayList<>();
@@ -43,12 +43,27 @@ public class JpaAnnotationParser {
     static {
         jdbcTypeMapping.put(String.class, JDBCType.VARCHAR);
 
+        jdbcTypeMapping.put(Byte.class, JDBCType.TINYINT);
+        jdbcTypeMapping.put(byte.class, JDBCType.TINYINT);
+
+        jdbcTypeMapping.put(Short.class, JDBCType.INTEGER);
+        jdbcTypeMapping.put(short.class, JDBCType.INTEGER);
+
         jdbcTypeMapping.put(Integer.class, JDBCType.INTEGER);
         jdbcTypeMapping.put(int.class, JDBCType.INTEGER);
+
+        jdbcTypeMapping.put(Character.class, JDBCType.CHAR);
+        jdbcTypeMapping.put(char.class, JDBCType.CHAR);
+
+        jdbcTypeMapping.put(Long.class, JDBCType.BIGINT);
+        jdbcTypeMapping.put(long.class, JDBCType.BIGINT);
+
         jdbcTypeMapping.put(Double.class, JDBCType.DECIMAL);
         jdbcTypeMapping.put(double.class, JDBCType.DECIMAL);
+
         jdbcTypeMapping.put(Float.class, JDBCType.DECIMAL);
         jdbcTypeMapping.put(float.class, JDBCType.DECIMAL);
+
         jdbcTypeMapping.put(Boolean.class, JDBCType.BIT);
         jdbcTypeMapping.put(boolean.class, JDBCType.BIT);
 
@@ -88,6 +103,7 @@ public class JpaAnnotationParser {
             return null;
         });
     }
+
 
     public static RDBTableMetaData parseMetaDataFromEntity(Class entityClass) {
         Table table = AnnotationUtils.findAnnotation(entityClass, Table.class);
@@ -133,11 +149,10 @@ public class JpaAnnotationParser {
                 }
             };
 
-            if (columnMetaData.getJdbcType() == JDBCType.DATE) {
+            if (columnMetaData.getJdbcType() == JDBCType.DATE
+                    || columnMetaData.getJdbcType() == JDBCType.TIMESTAMP) {
                 columnMetaData.setValueConverter(dateConvert);
-            } else if (columnMetaData.getJdbcType() == JDBCType.TIMESTAMP) {
-                columnMetaData.setValueConverter(dateConvert);
-            } else if (columnMetaData.getJdbcType() == JDBCType.NUMERIC) {
+            } else if (TypeUtils.isNumberType(columnMetaData)) {
                 columnMetaData.setValueConverter(new NumberValueConverter(columnMetaData.getJavaType()));
             }
 
@@ -146,6 +161,7 @@ public class JpaAnnotationParser {
         }
         return tableMetaData;
     }
+
 
     private static <T extends Annotation> T getAnnotation(Class entityClass, PropertyDescriptor descriptor, Class<T> type) {
         T ann = null;

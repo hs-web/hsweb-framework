@@ -5,7 +5,7 @@
     <parent>
         <artifactId>hsweb-system-oauth2-server</artifactId>
         <groupId>org.hswebframework.web</groupId>
-        <version>3.0.2</version>
+        <version>3.0.3</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -19,11 +19,11 @@
             <artifactId>hsweb-commons-service-simple</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-system-authorization-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>org.hswebframework.web</groupId>-->
+            <!--<artifactId>hsweb-system-authorization-api</artifactId>-->
+            <!--<version>${project.version}</version>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>

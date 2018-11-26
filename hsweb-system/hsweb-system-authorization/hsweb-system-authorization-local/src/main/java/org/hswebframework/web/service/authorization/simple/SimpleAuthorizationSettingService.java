@@ -1,18 +1,18 @@
 /*
  *  Copyright 2016 http://www.hswebframework.org
- *  
+ *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
  *        http://www.apache.org/licenses/LICENSE-2.0
- *  
+ *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *  
+ *
  */
 package org.hswebframework.web.service.authorization.simple;
 
@@ -42,6 +42,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.event.TransactionalEventListener;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
@@ -177,6 +178,7 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
         return super.deleteByPk(id);
     }
 
+
     private List<AuthorizationSettingEntity> getUserSetting(String userId) {
         Map<String, List<SettingInfo>> settingInfo =
                 authorizationSettingTypeSuppliers.stream()
@@ -273,10 +275,10 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
     }
 
     @TransactionalEventListener(condition = "#event.all")
-   @Caching(evict = {
-           @CacheEvict(cacheNames = USER_MENU_CACHE_NAME, allEntries = true),
-           @CacheEvict(cacheNames = USER_AUTH_CACHE_NAME, allEntries = true)
-   })
+    @Caching(evict = {
+            @CacheEvict(cacheNames = USER_MENU_CACHE_NAME, allEntries = true),
+            @CacheEvict(cacheNames = USER_AUTH_CACHE_NAME, allEntries = true)
+    })
     public void clearAllUserCache(ClearUserAuthorizationCacheEvent event) {
         logger.debug("clear all user authorization cache");
     }
@@ -333,6 +335,30 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
                 .where(status, STATE_OK)
                 .and().in(settingId, settingIdList)
                 .listNoPaging();
+
+        authentication.setPermissions(initPermission(detailList));
+
+        return authentication;
+    }
+
+    @Override
+    public List<Permission> initPermission(String type, String settingFor) {
+        AuthorizationSettingEntity entity = select(type, settingFor);
+        if (entity == null) {
+            return new ArrayList<>();
+        }
+        List<AuthorizationSettingDetailEntity> detailList = DefaultDSLQueryService
+                .createQuery(authorizationSettingDetailDao)
+                .where(status, STATE_OK)
+                .and().is(settingId, entity.getId())
+                .listNoPaging();
+        if (CollectionUtils.isEmpty(detailList)) {
+            return new ArrayList<>();
+        }
+        return initPermission(detailList);
+    }
+
+    private List<Permission> initPermission(List<AuthorizationSettingDetailEntity> detailList) {
         //权限id集合
         List<String> permissionIds = detailList.stream()
                 .map(AuthorizationSettingDetailEntity::getPermissionId)
@@ -438,8 +464,7 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
                     .collect(Collectors.toSet()));
             permissions.add(permission);
         });
-        authentication.setPermissions(permissions);
-        return authentication;
+        return permissions;
     }
 
 
