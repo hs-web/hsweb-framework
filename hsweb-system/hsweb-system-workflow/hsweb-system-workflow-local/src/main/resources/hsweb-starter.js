@@ -23,8 +23,8 @@ function install(context) {
     var database = context.database;
     database.createOrAlter("s_wf_proc_conf")
         .addColumn().name("u_id").alias("id").comment("ID").jdbcType(java.sql.JDBCType.VARCHAR).length(32).primaryKey().commit()
-        .addColumn().name("proc_def_key").alias("processDefineKey").comment("模板定义KEY").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
-        .addColumn().name("proc_def_id").alias("processDefineId").comment("模板定义ID").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
+        .addColumn().name("proc_def_key").alias("processDefineKey").comment("模板定义KEY").jdbcType(java.sql.JDBCType.VARCHAR).length(64).commit()
+        .addColumn().name("proc_def_id").alias("processDefineId").comment("模板定义ID").jdbcType(java.sql.JDBCType.VARCHAR).length(64).commit()
         .addColumn().name("form_id").alias("formId").comment("表单ID").length(32).jdbcType(java.sql.JDBCType.VARCHAR).commit()
         .addColumn().name("permission_dimension").alias("permissionDimension").comment("启动权限配置").jdbcType(java.sql.JDBCType.CLOB).length(32).commit()
         .addColumn().name("properties").alias("properties").comment("其他配置").jdbcType(java.sql.JDBCType.CLOB).commit()
@@ -37,9 +37,9 @@ function install(context) {
 
     database.createOrAlter("s_wf_act_conf")
         .addColumn().name("u_id").alias("id").comment("ID").jdbcType(java.sql.JDBCType.VARCHAR).length(32).primaryKey().commit()
-        .addColumn().name("proc_def_key").alias("processDefineKey").comment("模板定义KEY").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
-        .addColumn().name("proc_def_id").alias("processDefineId").comment("模板定义ID").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
-        .addColumn().name("act_id").alias("activityId").comment("元图ID").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
+        .addColumn().name("proc_def_key").alias("processDefineKey").comment("模板定义KEY").jdbcType(java.sql.JDBCType.VARCHAR).length(64).commit()
+        .addColumn().name("proc_def_id").alias("processDefineId").comment("模板定义ID").jdbcType(java.sql.JDBCType.VARCHAR).length(64).commit()
+        .addColumn().name("act_id").alias("activityId").comment("元图ID").jdbcType(java.sql.JDBCType.VARCHAR).length(64).commit()
         .addColumn().name("form_id").alias("formId").comment("表单ID").length(32).jdbcType(java.sql.JDBCType.VARCHAR).commit()
         .addColumn().name("candidate_dimension").alias("candidateDimension").comment("候选人维度").jdbcType(java.sql.JDBCType.CLOB).length(32).commit()
         .addColumn().name("create_time").alias("createTime").comment("创建时间").datetime().commit()
