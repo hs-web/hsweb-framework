@@ -1,5 +1,7 @@
 package org.hswebframework.web.commons.entity.param;
 
+import org.hswebframework.ezorm.core.dsl.Delete;
+import org.hswebframework.ezorm.core.dsl.Update;
 import org.hswebframework.ezorm.core.param.Param;
 import org.hswebframework.web.commons.entity.Entity;
 import org.hswebframework.web.commons.entity.QueryEntity;
@@ -26,6 +28,13 @@ public class DeleteParamEntity extends Param implements QueryEntity {
      */
     public static DeleteParamEntity build() {
         return new DeleteParamEntity();
+    }
+
+    /**
+     * @since 3.0.4
+     */
+    public static Delete<DeleteParamEntity> newDelete() {
+        return new Delete<>(new DeleteParamEntity());
     }
 
     @Override

@@ -1,5 +1,6 @@
 package org.hswebframework.web.commons.entity.param;
 
+import org.hswebframework.ezorm.core.dsl.Query;
 import org.hswebframework.ezorm.core.param.QueryParam;
 import org.hswebframework.web.commons.entity.Entity;
 import org.hswebframework.web.commons.entity.QueryEntity;
@@ -49,6 +50,13 @@ public class QueryParamEntity extends QueryParam implements QueryEntity {
      */
     public static QueryParamEntity of(String field, Object value) {
         return empty().where(field, value);
+    }
+
+    /**
+     * @since 3.0.4
+     */
+    public static <T> Query<T, QueryParamEntity> newQuery() {
+        return Query.empty(new QueryParamEntity());
     }
 
     @Override
