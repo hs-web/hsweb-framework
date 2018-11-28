@@ -89,7 +89,10 @@ public class DictTermTypeMapper extends AbstractSqlTermCustomizer {
     }
 
     protected SqlAppender buildNotSupport(String wherePrefix, Term term, RDBColumnMetaData column, String tableAlias) {
-        createChangedTermValue(term);
+        ChangedTermValue termValue = createChangedTermValue(term);
+        // fix https://github.com/hs-web/hsweb-framework/issues/102
+        Object newValue = BoostTermTypeMapper.convertValue(column, termValue.getOld());
+        termValue.setValue(newValue);
 
         Dialect dialect = column.getTableMetaData().getDatabaseMetaData().getDialect();
         String columnName = dialect.buildColumnName(tableAlias, column.getName());
