@@ -29,6 +29,7 @@ import org.hswebframework.web.validator.group.UpdateGroup;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
@@ -142,7 +143,7 @@ public abstract class GenericEntityService<E extends GenericEntity<PK>, PK>
     @Override
     @Transactional(readOnly = true)
     public E selectByPk(PK pk) {
-        if (null == pk) {
+        if (StringUtils.isEmpty(pk)) {
             return null;
         }
         return createQuery().where(GenericEntity.id, pk).single();
@@ -151,7 +152,7 @@ public abstract class GenericEntityService<E extends GenericEntity<PK>, PK>
     @Override
     @Transactional(readOnly = true)
     public List<E> selectByPk(List<PK> id) {
-        if (id == null || id.isEmpty()) {
+        if (CollectionUtils.isEmpty(id)) {
             return new ArrayList<>();
         }
         return createQuery().where().in(GenericEntity.id, id).listNoPaging();
