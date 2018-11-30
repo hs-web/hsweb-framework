@@ -119,7 +119,7 @@ public class DictInTermTypeMapper extends AbstractSqlTermCustomizer {
 
         String columnName = dialect.buildColumnName(tableAlias, column.getName());
         SqlAppender appender = new SqlAppender();
-        appender.add(columnName, not ? " NOT" : " ").add("IN(");
+        appender.add(columnName, not ? " NOT " : " ").add("IN(");
         for (int i = 0; i < values.size(); i++) {
             appender.add("#{", wherePrefix, ".value.value[", i, "]}", ",");
         }
