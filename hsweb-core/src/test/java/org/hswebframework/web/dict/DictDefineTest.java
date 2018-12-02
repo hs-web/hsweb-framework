@@ -56,6 +56,13 @@ public class DictDefineTest {
             Assert.assertTrue(userCode.in(bit));
         }
 
+        Assert.assertTrue(UserCode.SIMPLE.in(UserCode.SIMPLE,UserCode.CODE1,UserCode.CODE2));
+        Assert.assertFalse(UserCode.CODE6.in(UserCode.SIMPLE,UserCode.CODE1,UserCode.CODE2));
+
+        Assert.assertTrue(EnumDict.in(UserCode.SIMPLE,UserCode.SIMPLE,UserCode.CODE1,UserCode.CODE2));
+        Assert.assertFalse(EnumDict.in(UserCode.CODE7,UserCode.SIMPLE,UserCode.CODE1,UserCode.CODE2));
+
+
         List<UserCode> codes = getByMask(UserCode.class, bit);
 
 

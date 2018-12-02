@@ -96,6 +96,10 @@ public interface EnumDict<V> extends JSONSerializable {
         return (mask & getMask()) != 0;
     }
 
+    default boolean in(EnumDict<V>... dict) {
+        return in(toMask(dict));
+    }
+
     /**
      * 枚举选项的描述,对一个选项进行详细的描述有时候是必要的.默认值为{@link this#getText()}
      *
@@ -161,6 +165,20 @@ public interface EnumDict<V> extends JSONSerializable {
             value |= t1.getMask();
         }
         return value;
+    }
+
+
+    @SafeVarargs
+    static <T extends Enum & EnumDict> boolean in(T target, T... t) {
+        Enum[] all = target.getClass().getEnumConstants();
+
+        if (all.length >= 64) {
+            List<T> list = Arrays.asList(t);
+            return Arrays.stream(all)
+                    .map(EnumDict.class::cast)
+                    .anyMatch(list::contains);
+        }
+        return maskIn(toMask(t), target);
     }
 
     @SafeVarargs
