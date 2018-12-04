@@ -107,10 +107,5 @@ public @interface Authorize {
      */
     RequiresDataAccess dataAccess() default @RequiresDataAccess(ignore = true);
 
-    /**
-     * @return 双重验证
-     */
-    TwoFactor twoFactor() default @TwoFactor(ignore = true);
-
     String[] description() default {};
 }

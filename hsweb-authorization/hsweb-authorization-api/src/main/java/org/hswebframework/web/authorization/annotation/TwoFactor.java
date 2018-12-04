@@ -7,11 +7,13 @@ import java.lang.annotation.*;
 @Inherited
 @Documented
 public @interface TwoFactor {
-    String operation() default "";
+    String value();
 
     long timeout() default 10 * 60 * 1000L;
 
     String provider() default "totp";
+
+    String parameter() default "verifyCode";
 
     boolean ignore() default false;
 }

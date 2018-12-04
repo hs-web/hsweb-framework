@@ -26,12 +26,15 @@ var info = {
 
 //版本更新信息
 var versions = [
-    // {
-    //     version: "3.0.0",
-    //     upgrade: function (context) {
-    //         java.lang.System.out.println("更新到3.0.2了");
-    //     }
-    // }
+    {
+        version: "3.0.4",
+        upgrade: function (context) {
+            var database = context.database;
+            database.createOrAlter("s_user_setting")
+                .addColumn().name("permission").varchar(32).comment("用户可操作权限").commit()
+                .commit();
+        }
+    }
 ];
 var JDBCType = java.sql.JDBCType;
 

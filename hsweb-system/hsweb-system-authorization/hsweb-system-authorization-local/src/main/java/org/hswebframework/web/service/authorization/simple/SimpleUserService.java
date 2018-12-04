@@ -15,6 +15,7 @@ import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.service.AbstractService;
 import org.hswebframework.web.service.DefaultDSLQueryService;
 import org.hswebframework.web.service.authorization.events.ClearUserAuthorizationCacheEvent;
+import org.hswebframework.web.service.authorization.events.UserCreatedEvent;
 import org.hswebframework.web.service.authorization.events.UserModifiedEvent;
 import org.hswebframework.web.service.authorization.simple.terms.UserInRoleSqlTerm;
 import org.hswebframework.web.validate.ValidationException;
@@ -156,6 +157,7 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
                 trySyncUserRole(userEntity.getId(), bindRoleUserEntity.getRoles());
             }
         }
+        publisher.publishEvent(new UserCreatedEvent(userEntity));
         return userEntity.getId();
     }
 

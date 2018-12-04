@@ -31,4 +31,5 @@ public class AopAuthorizeAutoConfiguration {
 
         return  new AopAuthorizingController(authorizingHandler, aopMethodAuthorizeDefinitionParser);
     }
+
 }

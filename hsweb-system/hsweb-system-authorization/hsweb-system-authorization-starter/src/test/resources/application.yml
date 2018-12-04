@@ -14,6 +14,9 @@ hsweb:
     authorize:
       sync: false
       auto-parse: false
+      two-factor:
+        totp:
+          enable: true
     users:
       fix-bug-91-in-yml:
         username: "fix-bug-91-in-yml"

@@ -21,6 +21,7 @@ import com.alibaba.fastjson.JSONException;
 import org.hswebframework.web.BusinessException;
 import org.hswebframework.web.NotFoundException;
 import org.hswebframework.web.authorization.exception.AccessDenyException;
+import org.hswebframework.web.authorization.exception.NeedTwoFactorException;
 import org.hswebframework.web.authorization.exception.UnAuthorizedException;
 import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.validate.SimpleValidateResults;
@@ -194,6 +195,15 @@ public class RestControllerExceptionTranslator {
             logger.error(msg = "参数错误", exception);
         }
         return ResponseMessage.error(400, msg);
+    }
+
+    @ExceptionHandler(NeedTwoFactorException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    ResponseMessage handleException(NeedTwoFactorException e) {
+        return ResponseMessage
+                .error(403, e.getMessage())
+                .code("need_tow_factor")
+                .result(e.getProvider());
     }
 
     /**

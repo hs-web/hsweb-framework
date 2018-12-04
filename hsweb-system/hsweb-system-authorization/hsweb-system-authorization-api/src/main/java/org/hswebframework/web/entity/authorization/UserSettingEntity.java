@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.validator.constraints.NotBlank;
+import org.hswebframework.web.authorization.setting.UserSettingPermission;
 import org.hswebframework.web.commons.entity.SimpleGenericEntity;
 import org.hswebframework.web.validator.group.CreateGroup;
 
@@ -21,7 +22,6 @@ public class UserSettingEntity extends SimpleGenericEntity<String> {
     private String userId;
 
     @NotBlank(groups = CreateGroup.class)
-
     private String key;
 
     @NotBlank(groups = CreateGroup.class)
@@ -38,4 +38,17 @@ public class UserSettingEntity extends SimpleGenericEntity<String> {
 
     private Date updateTime;
 
+    private UserSettingPermission permission;
+
+    public boolean hasPermission(UserSettingPermission... permissions) {
+        if (permission == null) {
+            return true;
+        }
+        if (permission == UserSettingPermission.NONE) {
+            return false;
+        }
+
+        return permission.in(permissions);
+
+    }
 }
