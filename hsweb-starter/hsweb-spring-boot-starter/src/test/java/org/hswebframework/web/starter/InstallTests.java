@@ -38,10 +38,7 @@ import org.slf4j.LoggerFactory;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * TODO 完成注释
@@ -51,7 +48,7 @@ import java.util.Map;
 public class InstallTests {
     SqlExecutor sqlExecutor;
     RDBDatabase database;
-    Connection connection;
+    Connection  connection;
 
     @Before
     public void setup() throws Exception {
@@ -87,10 +84,12 @@ public class InstallTests {
         version.setVersion("3.0.0");
         org.hswebframework.web.starter.init.SystemInitialize systemInitialize
                 = new org.hswebframework.web.starter.init.SystemInitialize(sqlExecutor, database, version);
+        systemInitialize.setExcludeTables(Collections.singletonList("s_user_test"));
 
+        systemInitialize.init();
         systemInitialize.install();
 
-      //  List systems = database.getTable("s_system").createQuery().list();
+        //  List systems = database.getTable("s_system").createQuery().list();
         //System.out.println(JSON.toJSONString(systems, SerializerFeature.PrettyFormat));
     }
 

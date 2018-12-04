@@ -157,7 +157,7 @@ public class SystemInitializeAutoConfiguration implements CommandLineRunner, Bea
 
         initialize.addScriptContext("db", jdbcUserName);
         initialize.addScriptContext("dbType", type.name());
-
+        initialize.setExcludeTables(appProperties.getInitTableExcludes());
         initialize.install();
     }
 
