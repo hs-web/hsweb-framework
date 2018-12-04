@@ -30,6 +30,26 @@
 ![权限控制](./img/autz-handle-flow.png "权限控制")
 
 
+## 双重验证
+
+配置 application.yml
+```yml
+hsweb:
+    authorize:
+        two-factor:
+            enable: true
+```
+
+在需要验证的接口上注解:
+
+```java
+@PostMapping
+@TwoFactor("update-password")
+public ResponseMessage<Boolean> updatePassword(String password){
+    
+    //
+}
+```
 
 ## 注销
 与授权同理,类`UserOnSignOut`监听`AuthorizationExitEvent` ,当触发事件后,调用`UserTokenManager`移除当前登录的token信息

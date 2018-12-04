@@ -1,5 +1,7 @@
 package org.hswebframework.web.authorization.twofactor.defaults;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.hswebframework.web.authorization.twofactor.TwoFactorValidator;
 import org.hswebframework.web.authorization.twofactor.TwoFactorValidatorManager;
 import org.hswebframework.web.authorization.twofactor.TwoFactorValidatorProvider;
@@ -15,6 +17,8 @@ import java.util.Map;
  */
 public class DefaultTwoFactorValidatorManager implements TwoFactorValidatorManager, BeanPostProcessor {
 
+    @Getter
+    @Setter
     private String defaultProvider = "totp";
 
     private Map<String, TwoFactorValidatorProvider> providers = new HashMap<>();
@@ -41,6 +45,9 @@ public class DefaultTwoFactorValidatorManager implements TwoFactorValidatorManag
         if (bean instanceof TwoFactorValidatorProvider) {
             TwoFactorValidatorProvider provider = ((TwoFactorValidatorProvider) bean);
             providers.put(provider.getProvider(), provider);
+            if (provider.getProvider().equalsIgnoreCase(defaultProvider)) {
+                providers.put("default", provider);
+            }
         }
         return bean;
     }

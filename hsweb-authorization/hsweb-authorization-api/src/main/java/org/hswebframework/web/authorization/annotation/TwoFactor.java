@@ -11,7 +11,7 @@ public @interface TwoFactor {
 
     long timeout() default 10 * 60 * 1000L;
 
-    String provider() default "totp";
+    String provider() default "default";
 
     String parameter() default "verifyCode";
 
