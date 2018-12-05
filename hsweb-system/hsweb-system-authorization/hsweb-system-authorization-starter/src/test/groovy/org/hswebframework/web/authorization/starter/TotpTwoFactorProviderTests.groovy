@@ -26,9 +26,9 @@ class TotpTwoFactorProviderTests extends Specification {
     def "测试totp"() {
         given:
         String id = userService.insert(new SimpleUserEntity(
-                username: "admin",
-                password: "admin",
-                name: "admin"
+                username: "admin2",
+                password: "admin2",
+                name: "admin2"
         ))
         expect:
         !validatorManager.getValidator(id, "", "totp")
