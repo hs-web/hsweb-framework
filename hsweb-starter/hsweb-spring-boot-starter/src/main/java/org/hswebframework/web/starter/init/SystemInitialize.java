@@ -111,7 +111,7 @@ public class SystemInitialize {
                         installer.doInstall(getScriptContext());
                     }
                     //更新依赖
-                    if (installed == null || installed.compareTo(dependency) > 0) {
+                    if (installed == null || installed.compareTo(dependency) < 0) {
                         installer.doUpgrade(getScriptContext(), installed);
                     }
                     return dependency;

@@ -31,6 +31,7 @@ import org.hswebframework.expands.script.engine.DynamicScriptEngine;
 import org.hswebframework.expands.script.engine.DynamicScriptEngineFactory;
 import org.hswebframework.web.starter.init.simple.SimpleDependencyInstaller;
 import org.hswebframework.utils.file.FileUtils;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
@@ -74,6 +75,22 @@ public class InstallTests {
         RDBDatabaseMetaData databaseMetaData = new H2RDBDatabaseMetaData();
 //        RDBDatabaseMetaData databaseMetaData = new MysqlRDBDatabaseMetaData("MyISAM");
         database = new SimpleDatabase(databaseMetaData, sqlExecutor);
+    }
+
+    @Test
+    public void testVersion() {
+        SystemVersion version = new SystemVersion();
+        version.setVersion("3.0.0");
+
+        SystemVersion version2 = new SystemVersion();
+        version2.setVersion("3.0.1");
+
+        SystemVersion version4 = new SystemVersion();
+        version4.setVersion("3.0.2");
+
+        Assert.assertEquals(version.compareTo(version2), -1);
+
+        Assert.assertEquals(version.compareTo(version4), -1);
     }
 
     @Test
