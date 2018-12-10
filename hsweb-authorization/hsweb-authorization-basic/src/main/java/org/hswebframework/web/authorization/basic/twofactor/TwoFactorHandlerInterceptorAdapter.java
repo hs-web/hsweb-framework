@@ -41,6 +41,9 @@ public class TwoFactorHandlerInterceptorAdapter extends HandlerInterceptorAdapte
                 return true;
             }
             String code = request.getParameter(factor.parameter());
+            if (code == null) {
+                code = request.getHeader(factor.parameter());
+            }
             if (StringUtils.isEmpty(code)) {
                 throw new NeedTwoFactorException("需要进行双重验证", factor.provider());
             } else if (!validator.verify(code, factor.timeout())) {
