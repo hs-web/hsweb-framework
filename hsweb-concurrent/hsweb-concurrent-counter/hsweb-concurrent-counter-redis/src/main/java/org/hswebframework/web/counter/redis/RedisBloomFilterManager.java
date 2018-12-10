@@ -15,6 +15,7 @@ public class RedisBloomFilterManager extends AbstractBoomFilterManager {
     @Override
     protected BloomFilter createBloomFilter(String name) {
         RBloomFilter<String> filter = redissonClient.getBloomFilter("hsweb:bloom-filter:" + name, StringCodec.INSTANCE);
+        filter.tryInit(55000000L, 0.01);
         return filter::add;
     }
 }

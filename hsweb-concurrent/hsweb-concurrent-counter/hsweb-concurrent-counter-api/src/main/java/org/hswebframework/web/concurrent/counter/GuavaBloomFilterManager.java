@@ -9,7 +9,7 @@ import java.nio.charset.StandardCharsets;
 @Setter
 public class GuavaBloomFilterManager extends AbstractBoomFilterManager {
 
-    private long expectedInsertions = 5000L;
+    private long expectedInsertions = 55000000L;
 
     private double fpp = 0.01;
 
