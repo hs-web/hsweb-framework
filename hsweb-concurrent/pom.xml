@@ -35,6 +35,7 @@
         <module>hsweb-concurrent-lock</module>
         <module>hsweb-concurrent-counter</module>
         <module>hsweb-concurrent-async-job</module>
+        <module>hsweb-concurrent-rate-limiter</module>
     </modules>
 
 

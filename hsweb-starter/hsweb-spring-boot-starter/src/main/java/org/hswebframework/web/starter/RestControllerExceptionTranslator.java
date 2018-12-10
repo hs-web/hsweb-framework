@@ -54,6 +54,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
@@ -146,6 +147,15 @@ public class RestControllerExceptionTranslator {
                 .forEach(fieldError -> results.addResult(fieldError.getField(), fieldError.getDefaultMessage()));
 
         return ResponseMessage.error(400, results.getResults().isEmpty() ? e.getMessage() : results.getResults().get(0).getMessage()).result(results.getResults());
+    }
+
+    @ExceptionHandler(TimeoutException.class)
+    @ResponseStatus(HttpStatus.GATEWAY_TIMEOUT)
+    ResponseMessage handleException(TimeoutException exception) {
+        String msg = Optional.ofNullable(exception.getMessage())
+                .orElse("访问服务超时");
+        logger.warn(exception.getMessage(), exception);
+        return ResponseMessage.error(504, msg);
     }
 
     @ExceptionHandler(RuntimeException.class)
