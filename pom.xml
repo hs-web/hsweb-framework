@@ -95,7 +95,7 @@
         <aspectj.version>1.6.12</aspectj.version>
         <hibernate.validator.version>5.1.1.Final</hibernate.validator.version>
 
-        <hsweb.ezorm.version>3.0.2-SNAPSHOT</hsweb.ezorm.version>
+        <hsweb.ezorm.version>3.0.2</hsweb.ezorm.version>
         <hsweb.utils.version>3.0.2</hsweb.utils.version>
         <hsweb.expands.version>3.0.2</hsweb.expands.version>
 
