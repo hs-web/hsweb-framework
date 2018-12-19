@@ -110,6 +110,7 @@ public class AuthorizationController {
             eventPublisher.publishEvent(beforeEvent);
             // 验证通过
             Authentication authentication = authenticationManager.authenticate(new PlainTextUsernamePasswordAuthenticationRequest(username, password));
+
             //触发授权成功事件
             AuthorizationSuccessEvent event = new AuthorizationSuccessEvent(authentication, parameterGetter);
             event.getResult().put("userId", authentication.getUser().getId());

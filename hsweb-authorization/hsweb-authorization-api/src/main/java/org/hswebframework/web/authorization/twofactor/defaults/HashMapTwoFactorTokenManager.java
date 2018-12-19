@@ -1,6 +1,5 @@
 package org.hswebframework.web.authorization.twofactor.defaults;
 
-import lombok.Setter;
 import org.hswebframework.web.authorization.twofactor.TwoFactorToken;
 import org.hswebframework.web.authorization.twofactor.TwoFactorTokenManager;
 
@@ -19,6 +18,7 @@ public class HashMapTwoFactorTokenManager implements TwoFactorTokenManager {
     private Map<String, WeakReference<TwoFactorTokenInfo>> tokens = new ConcurrentHashMap<>();
 
     private class TwoFactorTokenInfo implements Serializable {
+        private static final long serialVersionUID = -5246224779564760241L;
         private volatile long lastRequestTime = System.currentTimeMillis();
 
         private long timeOut;
