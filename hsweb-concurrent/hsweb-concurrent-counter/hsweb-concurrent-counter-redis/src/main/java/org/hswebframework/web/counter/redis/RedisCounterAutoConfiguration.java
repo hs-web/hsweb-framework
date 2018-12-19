@@ -1,5 +1,6 @@
 package org.hswebframework.web.counter.redis;
 
+import org.hswebframework.web.concurrent.counter.BloomFilterManager;
 import org.hswebframework.web.concurrent.counter.CounterAutoConfiguration;
 import org.hswebframework.web.concurrent.counter.CounterManager;
 import org.redisson.api.RedissonClient;
@@ -20,5 +21,12 @@ public class RedisCounterAutoConfiguration {
     @ConditionalOnBean(RedissonClient.class)
     public CounterManager counterManager(RedissonClient client) {
         return new RedissonCounterManager(client);
+    }
+
+
+    @Bean
+    @ConditionalOnBean(BloomFilterManager.class)
+    public BloomFilterManager bloomFilterManager(RedissonClient client) {
+        return new RedisBloomFilterManager(client);
     }
 }

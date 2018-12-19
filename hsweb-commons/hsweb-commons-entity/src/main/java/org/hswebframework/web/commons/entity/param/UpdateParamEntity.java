@@ -1,5 +1,7 @@
 package org.hswebframework.web.commons.entity.param;
 
+import org.hswebframework.ezorm.core.dsl.Query;
+import org.hswebframework.ezorm.core.dsl.Update;
 import org.hswebframework.ezorm.core.param.UpdateParam;
 import org.hswebframework.web.commons.entity.Entity;
 import org.hswebframework.web.commons.entity.QueryEntity;
@@ -52,6 +54,13 @@ public class UpdateParamEntity<T> extends UpdateParam<T> implements QueryEntity 
      */
     public static <T> UpdateParamEntity<T> build(T data, String field, Object value) {
         return new UpdateParamEntity<>(data).where(field, value);
+    }
+
+    /**
+     * @since 3.0.4
+     */
+    public static <T> Update<T, UpdateParamEntity<T>> newUpdate() {
+        return new Update<>(new UpdateParamEntity<>());
     }
 
     @Override

@@ -21,13 +21,16 @@ package org.hswebframework.web.authorization.starter;
 import org.hswebframework.web.authorization.AuthenticationInitializeService;
 import org.hswebframework.web.authorization.AuthenticationManager;
 import org.hswebframework.web.authorization.basic.embed.EmbedAuthenticationManager;
+import org.hswebframework.web.authorization.setting.UserSettingManager;
 import org.hswebframework.web.authorization.simple.DefaultAuthorizationAutoConfiguration;
+import org.hswebframework.web.authorization.twofactor.TwoFactorTokenManager;
+import org.hswebframework.web.authorization.twofactor.defaults.HashMapTwoFactorTokenManager;
 import org.hswebframework.web.service.authorization.simple.SimpleAuthenticationManager;
+import org.hswebframework.web.service.authorization.simple.totp.TotpTwoFactorProvider;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.*;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -78,4 +81,17 @@ public class AuthorizationAutoConfiguration {
         return new AutoSyncPermission();
     }
 
+    @Bean
+    @ConditionalOnMissingBean(TwoFactorTokenManager.class)
+    public TwoFactorTokenManager twoFactorTokenManager() {
+        return new HashMapTwoFactorTokenManager();
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = "hsweb.authorize.two-factor.totp", name = "enable", havingValue = "true")
+    @ConfigurationProperties(prefix = "hsweb.authorize.two-factor.totp")
+    public TotpTwoFactorProvider totpTwoFactorProvider(UserSettingManager userSettingManager,
+                                                       TwoFactorTokenManager twoFactorTokenManager) {
+        return new TotpTwoFactorProvider(userSettingManager, twoFactorTokenManager);
+    }
 }

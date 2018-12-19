@@ -22,7 +22,7 @@
     <parent>
         <artifactId>hsweb-framework</artifactId>
         <groupId>org.hswebframework.web</groupId>
-        <version>3.0.3</version>
+        <version>3.0.4</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -35,6 +35,7 @@
         <module>hsweb-concurrent-lock</module>
         <module>hsweb-concurrent-counter</module>
         <module>hsweb-concurrent-async-job</module>
+        <module>hsweb-concurrent-rate-limiter</module>
     </modules>
 
 

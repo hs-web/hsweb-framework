@@ -45,4 +45,5 @@ public class TestEntity implements org.hswebframework.web.commons.entity.Entity 
     private DataType[] dataTypes;
 
     private NestEntity nest;
+
 }

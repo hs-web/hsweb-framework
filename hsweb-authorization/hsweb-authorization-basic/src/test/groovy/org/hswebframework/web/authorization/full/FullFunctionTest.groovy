@@ -51,6 +51,29 @@ class FullFunctionTest extends Specification {
     }
 
 
+    def "测试双重验证"() {
+        given: "登录"
+        def token = doLogin("admin", "admin")
+        when: "登录成功"
+        token != null
+        then: "调用双重验证接口"
+        mockMvc.perform(get("/test/two-factor")
+                .header("token", token))
+                .andExpect(status().is(403))
+                .andReturn()
+                .getResponse()
+                .getContentAsString()
+        def resp = mockMvc.perform(get("/test/two-factor")
+                .header("token", token)
+                .param("verifyCode", "test"))
+                .andExpect(status().is(200))
+                .andReturn()
+                .getResponse()
+                .getContentAsString()
+        expect:
+        resp != null
+    }
+
     def "测试查询"() {
         given: "登录"
         def token = doLogin("admin", "admin")

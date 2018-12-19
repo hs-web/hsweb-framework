@@ -22,7 +22,7 @@
     <parent>
         <artifactId>hsweb-concurrent-counter</artifactId>
         <groupId>org.hswebframework.web</groupId>
-        <version>3.0.3</version>
+        <version>3.0.4</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -34,6 +34,12 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>20.0</version>
             <optional>true</optional>
         </dependency>
     </dependencies>

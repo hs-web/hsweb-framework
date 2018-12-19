@@ -1,5 +1,7 @@
 package org.hswebframework.web.starter.init;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.hswebframework.ezorm.rdb.RDBDatabase;
 import org.hswebframework.ezorm.rdb.RDBTable;
 import org.hswebframework.ezorm.rdb.executor.SqlExecutor;
@@ -14,14 +16,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StreamUtils;
 
 import java.nio.charset.Charset;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.hswebframework.web.starter.SystemVersion.Property.*;
@@ -42,17 +42,35 @@ public class SystemInitialize {
 
     private List<SimpleDependencyInstaller> readyToInstall;
 
+    @Setter
+    @Getter
+    private List<String> excludeTables;
+
     private String installScriptPath = "classpath*:hsweb-starter.js";
 
     private Map<String, Object> scriptContext = new HashMap<>();
+
+    private boolean initialized = false;
+
 
     public SystemInitialize(SqlExecutor sqlExecutor, RDBDatabase database, SystemVersion targetVersion) {
         this.sqlExecutor = sqlExecutor;
         this.database = database;
         this.targetVersion = targetVersion;
+    }
+
+
+    public void init() {
+        if (initialized) {
+            return;
+        }
+        if (!CollectionUtils.isEmpty(excludeTables)) {
+            this.database = new SkipCreateOrAlterRDBDatabase(database, excludeTables, sqlExecutor);
+        }
         scriptContext.put("sqlExecutor", sqlExecutor);
         scriptContext.put("database", database);
         scriptContext.put("logger", logger);
+        initialized = true;
     }
 
     public void addScriptContext(String var, Object val) {
@@ -73,7 +91,7 @@ public class SystemInitialize {
                 }
             }
 
-            rdbTable.createUpdate().set(targetVersion).where().is("name",targetVersion.getName()).exec();
+            rdbTable.createUpdate().set(targetVersion).where().is("name", targetVersion.getName()).exec();
         }
     }
 
@@ -93,7 +111,7 @@ public class SystemInitialize {
                         installer.doInstall(getScriptContext());
                     }
                     //更新依赖
-                    if (installed == null || installed.compareTo(dependency) > 0) {
+                    if (installed == null || installed.compareTo(dependency) < 0) {
                         installer.doUpgrade(getScriptContext(), installed);
                     }
                     return dependency;
@@ -167,11 +185,12 @@ public class SystemInitialize {
             return;
         }
         RDBTable<SystemVersion> rdbTable = database.getTable("s_system");
-        installed = rdbTable.createQuery().where("name",targetVersion.getName()).single();
+        installed = rdbTable.createQuery().where("name", targetVersion.getName()).single();
     }
 
 
     public void install() throws Exception {
+        init();
         initInstallInfo();
         initReadyToInstallDependencies();
         doInstall();

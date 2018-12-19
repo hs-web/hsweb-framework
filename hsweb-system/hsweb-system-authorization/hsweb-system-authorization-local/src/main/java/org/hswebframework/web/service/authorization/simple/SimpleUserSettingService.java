@@ -39,6 +39,20 @@ public class SimpleUserSettingService extends EnableCacheGenericEntityService<Us
     }
 
     @Override
+    protected boolean dataExisted(UserSettingEntity entity) {
+        UserSettingEntity old = createQuery()
+                .where(entity::getUserId)
+                .and(entity::getKey)
+                .and(entity::getSettingId)
+                .single();
+        if (old != null) {
+            entity.setId(old.getId());
+            return true;
+        }
+        return false;
+    }
+
+    @Override
     @Cacheable(key = "'user:'+#userId+'.'+#key")
     public List<UserSettingEntity> selectByUser(String userId, String key) {
         Objects.requireNonNull(userId);

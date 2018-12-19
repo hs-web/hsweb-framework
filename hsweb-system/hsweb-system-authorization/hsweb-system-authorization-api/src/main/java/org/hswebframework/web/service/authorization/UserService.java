@@ -24,6 +24,17 @@ public interface UserService extends
         InsertService<UserEntity, String> {
 
     /**
+     * 新增用户
+     *
+     * @param data 要添加的数据
+     * @return 用户id
+     * @see org.hswebframework.web.service.authorization.events.UserCreatedEvent
+     * @see BindRoleUserEntity
+     */
+    @Override
+    String insert(UserEntity data);
+
+    /**
      * 启用用户
      *
      * @param userId 用户Id

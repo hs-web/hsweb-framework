@@ -69,6 +69,10 @@ public class TestCrud extends AbstractTransactionalJUnit4SpringContextTests {
         QueryParamEntity query = new QueryParamEntity();
         //any in
         query.where("dataTypes$in$any", Arrays.asList(DataType.TYPE1, DataType.TYPE2));
+
+        //#102
+        query.where("createTime","2017-11-10");
+
         query.includes("nest.name", "*");
 
         //  DataSourceHolder.tableSwitcher().use("h_test", "h_test2");

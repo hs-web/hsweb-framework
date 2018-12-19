@@ -21,6 +21,7 @@ import com.alibaba.fastjson.JSONException;
 import org.hswebframework.web.BusinessException;
 import org.hswebframework.web.NotFoundException;
 import org.hswebframework.web.authorization.exception.AccessDenyException;
+import org.hswebframework.web.authorization.exception.NeedTwoFactorException;
 import org.hswebframework.web.authorization.exception.UnAuthorizedException;
 import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.validate.SimpleValidateResults;
@@ -28,6 +29,8 @@ import org.hswebframework.web.validate.ValidateResults;
 import org.hswebframework.web.validate.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -51,6 +54,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
@@ -145,6 +149,15 @@ public class RestControllerExceptionTranslator {
         return ResponseMessage.error(400, results.getResults().isEmpty() ? e.getMessage() : results.getResults().get(0).getMessage()).result(results.getResults());
     }
 
+    @ExceptionHandler(TimeoutException.class)
+    @ResponseStatus(HttpStatus.GATEWAY_TIMEOUT)
+    ResponseMessage handleException(TimeoutException exception) {
+        String msg = Optional.ofNullable(exception.getMessage())
+                .orElse("访问服务超时");
+        logger.warn(exception.getMessage(), exception);
+        return ResponseMessage.error(504, msg);
+    }
+
     @ExceptionHandler(RuntimeException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     ResponseMessage handleException(RuntimeException exception) {
@@ -161,6 +174,12 @@ public class RestControllerExceptionTranslator {
         return ResponseMessage.error(400, "重复的请求");
     }
 
+    @ExceptionHandler(DataAccessException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    ResponseMessage handleException(DataAccessException e) {
+        logger.error(e.getMessage(), e);
+        return ResponseMessage.error(500, "服务异常");
+    }
 
     @ExceptionHandler(NullPointerException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -186,6 +205,15 @@ public class RestControllerExceptionTranslator {
             logger.error(msg = "参数错误", exception);
         }
         return ResponseMessage.error(400, msg);
+    }
+
+    @ExceptionHandler(NeedTwoFactorException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    ResponseMessage handleException(NeedTwoFactorException e) {
+        return ResponseMessage
+                .error(403, e.getMessage())
+                .code("need_tow_factor")
+                .result(e.getProvider());
     }
 
     /**

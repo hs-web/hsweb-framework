@@ -22,6 +22,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.util.List;
+
 /**
  * @author zhouhao
  */
@@ -29,7 +31,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Getter
 @Setter
 public class AppProperties {
-    private boolean autoInit = true;
+    private boolean      autoInit = true;
+    private List<String> initTableExcludes;
 
     private String name;
     private String comment;

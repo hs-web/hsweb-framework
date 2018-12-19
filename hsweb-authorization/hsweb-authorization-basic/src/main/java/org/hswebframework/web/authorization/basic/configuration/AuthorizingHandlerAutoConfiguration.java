@@ -8,17 +8,19 @@ import org.hswebframework.web.authorization.basic.embed.EmbedAuthenticationManag
 import org.hswebframework.web.authorization.basic.handler.DefaultAuthorizingHandler;
 import org.hswebframework.web.authorization.basic.handler.UserAllowPermissionHandler;
 import org.hswebframework.web.authorization.basic.handler.access.DefaultDataAccessController;
+import org.hswebframework.web.authorization.basic.twofactor.TwoFactorHandlerInterceptorAdapter;
 import org.hswebframework.web.authorization.basic.web.*;
 import org.hswebframework.web.authorization.basic.web.session.UserTokenAutoExpiredListener;
 import org.hswebframework.web.authorization.token.UserTokenManager;
+import org.hswebframework.web.authorization.twofactor.TwoFactorValidatorManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.*;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
@@ -58,6 +60,20 @@ public class AuthorizingHandlerAutoConfiguration {
 
 
     @Bean
+    @ConditionalOnProperty(prefix = "hsweb.authorize.two-factor", name = "enable", havingValue = "true")
+    @Order(100)
+    public WebMvcConfigurer twoFactorHandlerConfigurer(TwoFactorValidatorManager manager) {
+        return new WebMvcConfigurerAdapter() {
+            @Override
+            public void addInterceptors(InterceptorRegistry registry) {
+                registry.addInterceptor(new TwoFactorHandlerInterceptorAdapter(manager));
+                super.addInterceptors(registry);
+            }
+        };
+    }
+
+    @Bean
+    @Order(Ordered.HIGHEST_PRECEDENCE)
     public WebMvcConfigurer webUserTokenInterceptorConfigurer(UserTokenManager userTokenManager,
                                                               AopMethodAuthorizeDefinitionParser parser,
                                                               List<UserTokenParser> userTokenParser) {
