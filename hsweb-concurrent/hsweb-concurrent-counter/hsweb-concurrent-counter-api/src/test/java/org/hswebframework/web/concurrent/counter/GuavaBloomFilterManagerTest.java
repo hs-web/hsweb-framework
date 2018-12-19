@@ -14,8 +14,11 @@ public class GuavaBloomFilterManagerTest {
         BloomFilter filter = manager.getBloomFilter("test");
         Assert.assertNotNull(filter);
 
-        Assert.assertTrue(filter.put("test"));
-        Assert.assertFalse(filter.put("test"));
+        for (int i = 0; i < 100000; i++) {
+            Assert.assertTrue(filter.put("test" + i));
+            Assert.assertTrue(filter.contains("test" + i));
+            Assert.assertFalse(filter.put("test" + i));
+        }
 
     }
 

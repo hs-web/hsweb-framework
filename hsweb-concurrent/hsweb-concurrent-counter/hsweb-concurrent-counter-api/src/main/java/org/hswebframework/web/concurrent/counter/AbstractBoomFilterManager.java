@@ -12,9 +12,9 @@ public abstract class AbstractBoomFilterManager implements BloomFilterManager {
 
     @Override
     public BloomFilter getBloomFilter(String key) {
-        BloomFilter counter = counterStore.get(key);
-        if (counter != null) {
-            return counter;
+        BloomFilter filter = counterStore.get(key);
+        if (filter != null) {
+            return filter;
         }
         synchronized (counterStore) {
             return counterStore.computeIfAbsent(key, this::createBloomFilter);

@@ -8,6 +8,8 @@ public interface BloomFilter {
 
     boolean put(String unique);
 
+    boolean contains(String unique);
+
     @SneakyThrows
     default void tryPut(String unique, Supplier<? extends Exception> supplier) {
         if (!put(unique)) {
