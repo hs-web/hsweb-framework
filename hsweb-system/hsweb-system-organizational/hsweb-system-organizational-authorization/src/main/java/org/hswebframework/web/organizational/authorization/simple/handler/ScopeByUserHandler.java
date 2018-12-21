@@ -105,7 +105,7 @@ public class ScopeByUserHandler implements DataAccessHandler {
                 if (targetId == null) {
                     return true;
                 }
-                return scopeInfo.scope.contains(controllerCache.targetIdGetter.apply(entity));
+                return scopeInfo.allScope.contains(controllerCache.targetIdGetter.apply(entity));
             }
         } else {
             log.warn("Controller没有实现任何通用CURD功能,无法进行数据权限控制!");
@@ -116,7 +116,7 @@ public class ScopeByUserHandler implements DataAccessHandler {
 
     private ScopeInfo getScope(ScopeByUserDataAccessConfig config, PersonnelAuthentication authentication) {
         String termType = null;
-        Set<String> scope = null;
+        Set<String> scope = null, allScope = null;
         ScopeInfo scopeInfo = new ScopeInfo();
         if (authentication == null) {
             return scopeInfo;
@@ -127,29 +127,37 @@ public class ScopeByUserHandler implements DataAccessHandler {
             case DataAccessType.ORG_SCOPE:
                 termType = "user-in-org";
                 scope = authentication.getRootOrgId();
+                allScope = config.isChildren() ? authentication.getAllOrgId() : scope;
                 break;
             case DataAccessType.DEPARTMENT_SCOPE:
                 termType = "user-in-department";
                 scope = authentication.getRootDepartmentId();
+                allScope = config.isChildren() ? authentication.getAllDepartmentId() : scope;
                 break;
             case DataAccessType.POSITION_SCOPE:
                 termType = "user-in-position";
+                scope = authentication.getRootPositionId();
+                allScope = config.isChildren() ? authentication.getAllPositionId() : scope;
                 break;
             case DataAccessType.DISTRICT_SCOPE:
                 termType = "user-in-dist";
                 scope = authentication.getRootDistrictId();
+                allScope = config.isChildren() ? authentication.getAllDistrictId() : scope;
                 break;
             case "CUSTOM_SCOPE_ORG":
                 termType = "user-in-org";
                 scope = config.getScope();
+                allScope = scope;
                 break;
             case "CUSTOM_SCOPE_DEPT":
                 termType = "user-in-department";
                 scope = config.getScope();
+                allScope = scope;
                 break;
             case "CUSTOM_SCOPE_DIST":
                 termType = "user-in-dist";
                 scope = config.getScope();
+                allScope = scope;
                 break;
             default:
                 log.warn("不支持的数据权限范围:{}", config.getScopeType());
@@ -157,7 +165,8 @@ public class ScopeByUserHandler implements DataAccessHandler {
         if (termType == null) {
             return scopeInfo;
         }
-        scopeInfo.scope = scope;
+        scopeInfo.scope = new ArrayList<>(scope);
+        scopeInfo.allScope = new ArrayList<>(allScope);
         scopeInfo.termType = termType;
         if (config.isChildren()) {
             scopeInfo.termType = termType + termType.concat("-child");
@@ -169,7 +178,8 @@ public class ScopeByUserHandler implements DataAccessHandler {
     class ScopeInfo {
         String termType;
 
-        Set<String> scope;
+        List<String> scope;
+        List<String> allScope;
 
         Consumer<Query<?, QueryParamEntity>> notUserConsumer;
 
@@ -244,27 +254,27 @@ public class ScopeByUserHandler implements DataAccessHandler {
                 if (RecordCreationEntity.class.isAssignableFrom(entityClass)) {
                     controllerCache.targetIdGetter = createGetter(RecordCreationEntity.class, RecordCreationEntity::getCreatorId);
                     controllerCache.queryConsumer = (query, scopeInfo) -> {
-                        query.and(getControlProperty(entityClass, RecordCreationEntity::getCreatorIdProperty), scopeInfo.termType, scopeInfo.scope);
+                        query.in(getControlProperty(entityClass, RecordCreationEntity::getCreatorIdProperty), scopeInfo.termType, scopeInfo.scope);
                     };
                 } else if (OrgAttachEntity.class.isAssignableFrom(entityClass) && config.getScopeType().contains("ORG")) {
                     controllerCache.targetIdGetter = createGetter(OrgAttachEntity.class, OrgAttachEntity::getOrgId);
                     controllerCache.queryConsumer = (query, scopeInfo) -> {
-                        query.and(getControlProperty(entityClass, OrgAttachEntity::getOrgIdProperty), children ? "org-child-in" : "org-in", scopeInfo.scope);
+                        query.and(getControlProperty(entityClass, OrgAttachEntity::getOrgIdProperty), children ? "org-child-in" : "in", scopeInfo.scope);
                     };
                 } else if (DepartmentAttachEntity.class.isAssignableFrom(entityClass) && config.getScopeType().contains("DEPT")) {
                     controllerCache.targetIdGetter = createGetter(DepartmentAttachEntity.class, DepartmentAttachEntity::getDepartmentId);
                     controllerCache.queryConsumer = (query, scopeInfo) -> {
-                        query.and(getControlProperty(entityClass, DepartmentAttachEntity::getDepartmentIdProperty), children ? "dept-child-in" : "dept-in", scopeInfo.scope);
+                        query.and(getControlProperty(entityClass, DepartmentAttachEntity::getDepartmentIdProperty), children ? "dept-child-in" : "in", scopeInfo.scope);
                     };
                 } else if (PositionAttachEntity.class.isAssignableFrom(entityClass) && config.getScopeType().contains("POS")) {
                     controllerCache.targetIdGetter = createGetter(PositionAttachEntity.class, PositionAttachEntity::getPositionId);
                     controllerCache.queryConsumer = (query, scopeInfo) -> {
-                        query.and(getControlProperty(entityClass, PositionAttachEntity::getPositionIdProperty), children ? "pos-child-in" : "pos-in", scopeInfo.scope);
+                        query.and(getControlProperty(entityClass, PositionAttachEntity::getPositionIdProperty), children ? "pos-child-in" : "in", scopeInfo.scope);
                     };
                 } else if (DistrictAttachEntity.class.isAssignableFrom(entityClass) && config.getScopeType().contains("DIST")) {
                     controllerCache.targetIdGetter = createGetter(DistrictAttachEntity.class, DistrictAttachEntity::getDistrictId);
                     controllerCache.queryConsumer = (query, scopeInfo) -> {
-                        query.and(getControlProperty(entityClass, DistrictAttachEntity::getDistrictIdProperty), children ? "dist-child-in" : "dist-in", scopeInfo.scope);
+                        query.and(getControlProperty(entityClass, DistrictAttachEntity::getDistrictIdProperty), children ? "dist-child-in" : "in", scopeInfo.scope);
                     };
                 } else {
                     String userIdField = getUserField(entityClass);
@@ -305,11 +315,11 @@ public class ScopeByUserHandler implements DataAccessHandler {
                 result = ((ResponseMessage) result).getResult();
             }
             String value = controllerCache.targetIdGetter.apply(result);
-            log.debug("执行数据权限控制,scope:{},target:{}", scopeInfo.scope, value);
+            log.debug("执行数据权限控制[{}],scope:{},target:{}", config.getScopeTypeName(), scopeInfo.scope, value);
             if (value == null) {
                 return true;
             }
-            return scopeInfo.scope.contains(value);
+            return scopeInfo.allScope.contains(value);
         }
 
         Entity entity = context.getParamContext()
@@ -324,7 +334,7 @@ public class ScopeByUserHandler implements DataAccessHandler {
         if (entity instanceof QueryParamEntity) {
             QueryParamEntity param = ((QueryParamEntity) entity);
             param.toNestQuery(query -> {
-                log.debug("执行查询数据权限控制,scope:{}", scopeInfo.scope);
+                log.debug("执行查询数据权限控制[{}],scope:{}", config.getScopeTypeName(), scopeInfo.scope);
                 controllerCache.queryConsumer.accept(query, scopeInfo);
             });
         }
