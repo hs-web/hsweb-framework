@@ -21,4 +21,8 @@ public interface DepartmentAttachEntity extends Entity {
     String getDepartmentId();
 
     void setDepartmentId(String departmentId);
+
+    default String getDepartmentIdProperty() {
+        return departmentId;
+    }
 }

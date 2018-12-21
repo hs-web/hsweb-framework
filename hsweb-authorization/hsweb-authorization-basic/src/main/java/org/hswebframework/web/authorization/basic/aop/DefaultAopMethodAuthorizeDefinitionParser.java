@@ -100,15 +100,13 @@ public class DefaultAopMethodAuthorizeDefinitionParser implements AopMethodAutho
 
         authorizeDefinition.put(expression);
 
-        if (methodAuth != null) {
-            authorizeDefinition.put(methodAuth.dataAccess());
-        }
         authorizeDefinition.put(classDataAccess);
 
         authorizeDefinition.put(methodDataAccess);
 
         if (authorizeDefinition.getPermissionDescription().length == 0) {
             if (classAuth != null) {
+                authorizeDefinition.put(classAuth.dataAccess());
                 String[] desc = classAuth.description();
                 if (desc.length > 0) {
                     authorizeDefinition.setPermissionDescription(desc);

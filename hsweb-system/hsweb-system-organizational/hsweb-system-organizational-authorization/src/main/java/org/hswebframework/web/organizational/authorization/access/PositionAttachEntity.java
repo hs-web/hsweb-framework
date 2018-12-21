@@ -11,4 +11,8 @@ public interface PositionAttachEntity extends Entity {
     String getPositionId();
 
     void setPositionId(String positionId);
+
+    default String getPositionIdProperty() {
+        return positionId;
+    }
 }

@@ -22,6 +22,7 @@ import io.swagger.annotations.ApiOperation;
 import org.hswebframework.web.NotFoundException;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.annotation.Authorize;
+import org.hswebframework.web.authorization.annotation.RequiresDataAccess;
 import org.hswebframework.web.commons.entity.PagerResult;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.controller.SimpleGenericEntityController;
@@ -43,7 +44,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("${hsweb.web.mappings.person:person}")
-@Authorize(permission = "person",description = "人员管理")
+@Authorize(permission = "person",description = "人员管理",dataAccess = @RequiresDataAccess)
 @Api(value = "人员管理",tags = "组织架构-人员管理")
 public class PersonController implements SimpleGenericEntityController<PersonEntity, String, QueryParamEntity> {
 

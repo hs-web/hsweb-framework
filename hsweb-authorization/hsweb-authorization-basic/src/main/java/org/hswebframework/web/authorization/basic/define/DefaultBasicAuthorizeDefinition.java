@@ -82,6 +82,7 @@ public class DefaultBasicAuthorizeDefinition implements AopAuthorizeDefinition {
         }
         message = authorize.message();
         phased = authorize.phased();
+        put(authorize.dataAccess());
     }
 
     public void put(RequiresExpression expression) {

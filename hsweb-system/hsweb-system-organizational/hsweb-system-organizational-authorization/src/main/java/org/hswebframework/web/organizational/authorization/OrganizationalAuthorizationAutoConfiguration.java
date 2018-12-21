@@ -65,6 +65,18 @@ public class OrganizationalAuthorizationAutoConfiguration implements BeanPostPro
         return new CustomScopeDataAccessConfigConvert();
     }
 
+    @Bean
+    @ConditionalOnMissingBean(ScopeByUserDataAccessConfigConvert.class)
+    public ScopeByUserDataAccessConfigConvert scopeByUserDataAccessConfigConvert() {
+        return new ScopeByUserDataAccessConfigConvert();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(ScopeByUserHandler.class)
+    public ScopeByUserHandler scopeByUserHandler() {
+        return new ScopeByUserHandler();
+    }
+
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
         return bean;

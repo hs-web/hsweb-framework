@@ -12,8 +12,6 @@ import java.util.HashSet;
 import java.util.List;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public class CustomScopeHandler implements DataAccessHandler {
