@@ -1,5 +1,7 @@
 package org.hswebframework.web.commons.entity.param;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.hswebframework.ezorm.core.NestConditional;
 import org.hswebframework.ezorm.core.dsl.Query;
 import org.hswebframework.ezorm.core.param.QueryParam;
@@ -7,6 +9,7 @@ import org.hswebframework.ezorm.core.param.Term;
 import org.hswebframework.web.commons.entity.Entity;
 import org.hswebframework.web.commons.entity.QueryEntity;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +22,7 @@ import java.util.function.Consumer;
  * {@link QueryParamEntity#single(String, Object)}<br>
  * 如:
  * <code>
- * QueryParamBean.single("id",id);
+ * QueryParamEntity.single("id",id);
  * </code>
  *
  * @author zhouhao
@@ -30,6 +33,9 @@ import java.util.function.Consumer;
 public class QueryParamEntity extends QueryParam implements QueryEntity {
 
     private static final long serialVersionUID = 8097500947924037523L;
+
+    @Getter
+    private String termExpression;
 
     /**
      * 创建一个空的查询参数实体,该实体无任何参数.
@@ -116,6 +122,31 @@ public class QueryParamEntity extends QueryParam implements QueryEntity {
                 .end();
     }
 
+    /**
+     * 设置条件表达式,可以通过表达式的方式快速构建查询条件. 表达式是类似sql条件的语法,如:
+     * <pre>
+     *     name is 测试 and age gte 10
+     * </pre>
+     * <pre>
+     *     name is 测试 and (age gt 10 or age lte 90 )
+     * </pre>
+     *
+     * @param termExpression 表达式
+     * @see 3.0.5
+     */
+    public void setTermExpression(String termExpression) {
+        this.termExpression = termExpression;
+        setTerms(TermExpressionParser.parse(termExpression));
+    }
+
+    @Override
+    public List<Term> getTerms() {
+        List<Term> terms = super.getTerms();
+        if (CollectionUtils.isEmpty(terms) && StringUtils.hasText(termExpression)) {
+            setTerms(terms = TermExpressionParser.parse(termExpression));
+        }
+        return terms;
+    }
 
     @Override
     public String toString() {
