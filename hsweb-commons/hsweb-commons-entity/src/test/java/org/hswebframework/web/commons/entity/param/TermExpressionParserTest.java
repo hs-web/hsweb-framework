@@ -29,7 +29,7 @@ public class TermExpressionParserTest {
 
     @Test
     public void testNest() {
-        String expression = "name = 测试 and (age > 10 or age <= 20) and test like test2 and (age gt age2 or age btw age3,age4)";
+        String expression = "name = 测试 and (age > 10 or age <= 20) and test like test2 and (age gt age2 or age btw age3,age4 or (age > 10 or age <= 20))";
         System.out.println(expression);
         List<Term> terms = TermExpressionParser.parse(expression);
         System.out.println(JSON.toJSONString(terms, SerializerFeature.PrettyFormat));
