@@ -57,6 +57,8 @@ public enum ErrorType {
 
     USER_NOT_EXIST(4041),//客户端不存在
 
+    STATE_ERROR(4042), //stat错误
+
     ACCESS_DENIED(503), //访问被拒绝
 
     OTHER(5001), //其他错误 ;
