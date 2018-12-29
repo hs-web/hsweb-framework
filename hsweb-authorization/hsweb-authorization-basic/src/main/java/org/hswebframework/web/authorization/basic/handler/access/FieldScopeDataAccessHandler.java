@@ -84,7 +84,7 @@ public class FieldScopeDataAccessHandler implements DataAccessHandler {
 
     @SuppressWarnings("all")
     protected boolean doQueryAccess(FieldScopeDataAccessConfig access, AuthorizingContext context) {
-        if (context.getDefinition().getPhased() == Phased.before) {
+        if (context.getDefinition().getDataAccessDefinition().getPhased() == Phased.before) {
             QueryParamEntity entity = context.getParamContext().getParams()
                     .values().stream()
                     .filter(QueryParamEntity.class::isInstance)
