@@ -1,6 +1,7 @@
 package org.hswebframework.web.datasource.jta;
 
 import lombok.SneakyThrows;
+import org.hswebframework.web.datasource.DatabaseType;
 import org.hswebframework.web.datasource.DynamicDataSource;
 import org.hswebframework.web.datasource.DynamicDataSourceProxy;
 import org.hswebframework.web.datasource.config.DynamicDataSourceConfigRepository;
@@ -44,7 +45,6 @@ public class JtaDynamicDataSourceService extends AbstractDynamicDataSourceServic
         this.executor = executor;
     }
 
-
     @Override
     @SneakyThrows
     protected DataSourceCache createCache(AtomikosDataSourceConfig config) {
@@ -54,7 +54,11 @@ public class JtaDynamicDataSourceService extends AbstractDynamicDataSourceServic
         atomikosDataSourceBean.setUniqueResourceName("dynamic_ds_" + config.getId());
         AtomicInteger successCounter = new AtomicInteger();
         CountDownLatch downLatch = new CountDownLatch(1);
-        DataSourceCache cache = new DataSourceCache(config.hashCode(), new DynamicDataSourceProxy(config.getId(), atomikosDataSourceBean), downLatch, config) {
+        DynamicDataSourceProxy proxy = new DynamicDataSourceProxy(config.getId(), atomikosDataSourceBean);
+        if (config.getDatabaseType() != null) {
+            proxy.setDatabaseType(config.getDatabaseType());
+        }
+        DataSourceCache cache = new DataSourceCache(config.hashCode(), proxy, downLatch, config) {
             @Override
             public void closeDataSource() {
                 super.closeDataSource();
@@ -79,7 +83,6 @@ public class JtaDynamicDataSourceService extends AbstractDynamicDataSourceServic
                 downLatch.countDown();
             } catch (Exception e) {
                 logger.error("init datasource {} error", config.getId(), e);
-
                 //atomikosDataSourceBean.close();
             }
         });

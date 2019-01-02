@@ -1,5 +1,6 @@
 package org.hswebframework.web.datasource;
 
+import lombok.Setter;
 import lombok.SneakyThrows;
 
 import javax.sql.DataSource;
@@ -21,6 +22,7 @@ public class DynamicDataSourceProxy implements DynamicDataSource {
 
     private String id;
 
+    @Setter
     private volatile DatabaseType databaseType;
 
     private DataSource proxy;
