@@ -123,13 +123,13 @@ public abstract class GenericEntityService<E extends GenericEntity<PK>, PK>
 
     @Override
     public PK insert(E entity) {
-        if (entity.getId() != null) {
+        if (!StringUtils.isEmpty(entity.getId())) {
             if ((entity.getId() instanceof String) && !StringUtils.isEmpty(entity.getId())) {
                 tryValidateProperty(entity.getId().toString().matches("[a-zA-Z0-9_\\-]+"), "id", "只能由数字,字母,下划线,和-组成");
             }
             tryValidateProperty(selectByPk(entity.getId()) == null, "id", entity.getId() + "已存在");
         }
-        if (entity.getId() == null && getIDGenerator() != null) {
+        if (StringUtils.isEmpty(entity.getId()) && getIDGenerator() != null) {
             entity.setId(getIDGenerator().generate());
         }
         if (entity instanceof RecordCreationEntity) {
