@@ -29,7 +29,6 @@
         <module>hsweb-starter</module>
         <module>hsweb-core</module>
         <module>hsweb-authorization</module>
-        <module>hsweb-message</module>
         <module>hsweb-system</module>
         <module>hsweb-tests</module>
         <module>hsweb-datasource</module>

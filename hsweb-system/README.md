@@ -9,7 +9,7 @@
 |[hsweb-system-database-manager](hsweb-system-database-manager)|在线数据库维护| 90%|
 |[hsweb-system-datasource](hsweb-system-datasource)|动态数据源管理| 90%|
 |[hsweb-system-dictionary](hsweb-system-dictionary)| 数据字典功能|  90%|
-|[hsweb-system-dynamic-form](hsweb-system-dynamic-form)|动态表单| 80%|
+|[hsweb-system-dynamic-form](hsweb-system-dynamic-form)|动态表单| 90%|
 |[hsweb-system-file](hsweb-system-file)|文件管理| 100%|
 |[hsweb-system-oauth2-client](hsweb-system-oauth2-client)|OAuth2 客户端| 90%|
 |[hsweb-system-oauth2-server](hsweb-system-oauth2-server)|OAuth2 服务端| 90%|
