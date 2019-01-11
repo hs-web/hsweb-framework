@@ -113,8 +113,7 @@ function install(context) {
         .addColumn().name("user_id").alias("userId").comment("关联用户id").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
         .addColumn().name("status").alias("status").comment("状态").jdbcType(java.sql.JDBCType.DECIMAL).length(4, 0).commit()
         .addColumn().name("remark").alias("remark").comment("备注").jdbcType(java.sql.JDBCType.VARCHAR).length(256).commit()
-        .index().name("idx_person_parent_id").column("parent_id").commit()
-        .index().name("idx_person_path").column("path").commit()
+        .index().name("idx_person_user_id").column("user_id").commit()
 
         .comment("人员").commit();
 
