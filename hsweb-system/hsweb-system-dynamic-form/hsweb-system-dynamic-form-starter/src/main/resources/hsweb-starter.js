@@ -56,6 +56,8 @@ function install(context) {
         .addColumn().name("dict_config").alias("dictConfig").comment("字典配置").jdbcType(java.sql.JDBCType.CLOB).commit()
         .addColumn().name("sort_index").alias("sortIndex").comment("排序序号").jdbcType(java.sql.JDBCType.DECIMAL).length(32, 0).commit()
         .addColumn().name("validator").alias("validator").comment("验证器配置").jdbcType(java.sql.JDBCType.CLOB).commit()
+        .index().name("idx_dynf_form_id").column("form_id").commit()
+
         .comment("动态表单列").commit();
 
     database.createOrAlter("s_dyn_form_log")
@@ -65,6 +67,8 @@ function install(context) {
         .addColumn().name("deploy_time").alias("deployTime").comment("发布时间").jdbcType(java.sql.JDBCType.DECIMAL).length(32, 0).commit()
         .addColumn().name("meta_data").alias("metaData").comment("部署的元数据").jdbcType(java.sql.JDBCType.CLOB).commit()
         .addColumn().name("status").alias("status").comment("状态").jdbcType(java.sql.JDBCType.NUMERIC).length(4, 0).commit()
+        .index().name("idx_dynfl_form_id").column("form_id").commit()
+        .index().name("idx_dynfl_form_id_ver").column("form_id").column("version").commit()
         .comment("表单发布日志").commit();
 }
 //设置依赖
