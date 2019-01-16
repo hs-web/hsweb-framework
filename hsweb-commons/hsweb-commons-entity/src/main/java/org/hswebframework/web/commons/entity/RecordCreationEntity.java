@@ -23,4 +23,8 @@ public interface RecordCreationEntity extends Entity {
     default void setCreateTimeNow() {
         setCreateTime(System.currentTimeMillis());
     }
+
+    default String getCreatorIdProperty() {
+        return creatorId;
+    }
 }

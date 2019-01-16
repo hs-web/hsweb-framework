@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 http://www.hswebframework.org
+ * Copyright 2019 http://www.hswebframework.org
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,6 +64,11 @@ function install(context) {
         .addColumn().name("create_time").alias("createTime").comment("创建时间").jdbcType(java.sql.JDBCType.DECIMAL).length(32, 0).commit()
         .addColumn().name("update_time").alias("updateTime").comment("更新时间").jdbcType(java.sql.JDBCType.DECIMAL).length(32, 0).commit()
         .addColumn().name("grant_type").alias("grant_type").comment("授权方式").jdbcType(java.sql.JDBCType.VARCHAR).length(128).commit()
+        .index().name("idx_oauth_cli_c_user_id").column("client_user_id").commit()
+        .index().name("idx_oauth_cli_s_user_id").column("server_user_id").commit()
+        .index().name("idx_oauth_cli_access_token").column("access_token").commit()
+        .index().name("idx_oauth_cli_refresh_token").column("refresh_token").commit()
+
         .comment("OAuth2用户授权信息").commit();
 }
 

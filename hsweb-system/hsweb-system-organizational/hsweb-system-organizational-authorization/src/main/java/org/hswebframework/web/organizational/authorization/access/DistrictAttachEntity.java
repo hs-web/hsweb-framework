@@ -11,4 +11,8 @@ public interface DistrictAttachEntity extends Entity {
     String getDistrictId();
 
     void setDistrictId(String districtId);
+
+    default String getDistrictIdProperty() {
+        return districtId;
+    }
 }

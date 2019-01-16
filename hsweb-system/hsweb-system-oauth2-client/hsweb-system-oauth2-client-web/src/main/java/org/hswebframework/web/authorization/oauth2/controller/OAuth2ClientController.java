@@ -1,5 +1,5 @@
 /*
- *  Copyright 2016 http://www.hswebframework.org
+ *  Copyright 2019 http://www.hswebframework.org
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -20,12 +20,14 @@ package org.hswebframework.web.authorization.oauth2.controller;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.hswebframework.web.BusinessException;
 import org.hswebframework.web.WebUtil;
 import org.hswebframework.web.authorization.oauth2.client.OAuth2RequestService;
 import org.hswebframework.web.authorization.oauth2.client.listener.OAuth2CodeAuthBeforeEvent;
 import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.entity.oauth2.client.OAuth2ServerConfigEntity;
 import org.hswebframework.web.id.IDGenerator;
+import org.hswebframework.web.oauth2.core.ErrorType;
 import org.hswebframework.web.oauth2.core.OAuth2Constants;
 import org.hswebframework.web.service.oauth2.client.OAuth2ServerConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -104,7 +106,9 @@ public class OAuth2ClientController {
                                  HttpSession session) throws UnsupportedEncodingException {
         try {
             String cachedState = (String) session.getAttribute(STATE_SESSION_KEY);
-            //  if (!state.equals(cachedState)) throw new BusinessException("state error");
+            if (!state.equals(cachedState)) {
+                throw new BusinessException(ErrorType.STATE_ERROR.name());
+            }
             oAuth2RequestService.doEvent(serverId, new OAuth2CodeAuthBeforeEvent(code, state, request::getParameter));
             return new RedirectView(URLDecoder.decode(redirect, "UTF-8"));
         } finally {

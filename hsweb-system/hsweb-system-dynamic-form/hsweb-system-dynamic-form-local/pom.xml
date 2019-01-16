@@ -5,7 +5,7 @@
     <parent>
         <artifactId>hsweb-system-dynamic-form</artifactId>
         <groupId>org.hswebframework.web</groupId>
-        <version>3.0.4</version>
+        <version>3.0.5</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -14,12 +14,6 @@
 
 
     <dependencies>
-        <dependency>
-            <groupId>org.glassfish</groupId>
-            <artifactId>javax.el</artifactId>
-            <optional>true</optional>
-        </dependency>
-
         <dependency>
             <groupId>org.glassfish</groupId>
             <artifactId>javax.el</artifactId>

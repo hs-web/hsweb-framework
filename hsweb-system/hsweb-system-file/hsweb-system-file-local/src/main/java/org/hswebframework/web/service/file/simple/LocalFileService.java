@@ -29,7 +29,7 @@ import java.util.Date;
 public class LocalFileService implements FileService {
     private FileInfoService fileInfoService;
 
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private Logger logger         = LoggerFactory.getLogger(this.getClass());
     /**
      * 静态文件存储目录,不能以/结尾
      */
@@ -99,25 +99,30 @@ public class LocalFileService implements FileService {
 
     @Override
     public String saveStaticFile(InputStream fileStream, String fileName) throws IOException {
-        //文件后缀
-        String suffix = fileName.contains(".") ?
-                fileName.substring(fileName.lastIndexOf("."), fileName.length()) : "";
+        try {
+            //文件后缀
+            String suffix = fileName.contains(".") ?
+                    fileName.substring(fileName.lastIndexOf(".")) : "";
 
-        //以日期划分目录
-        String filePath = DateFormatter.toString(new Date(), "yyyyMMdd");
+            //以日期划分目录
+            String filePath = DateFormatter.toString(new Date(), "yyyyMMdd");
 
-        //创建目录
-        new File(getStaticFilePath() + "/" + filePath).mkdirs();
+            //创建目录
+            new File(getStaticFilePath() + "/" + filePath).mkdirs();
 
-        // 存储的文件名
-        String realFileName = System.nanoTime() + suffix;
+            // 存储的文件名
+            String realFileName = System.nanoTime() + suffix;
 
-        String fileAbsName = getStaticFilePath() + "/" + filePath + "/" + realFileName;
-        try (FileOutputStream out = new FileOutputStream(fileAbsName)) {
-            StreamUtils.copy(fileStream, out);
+            String fileAbsName = getStaticFilePath() + "/" + filePath + "/" + realFileName;
+            try (FileOutputStream out = new FileOutputStream(fileAbsName)) {
+                StreamUtils.copy(fileStream, out);
+            }
+
+            //响应上传成功的资源信息
+            return getStaticLocation() + filePath + "/" + realFileName;
+        } finally {
+            fileStream.close();
         }
-        //响应上传成功的资源信息
-        return getStaticLocation() + filePath + "/" + realFileName;
     }
 
     @Override

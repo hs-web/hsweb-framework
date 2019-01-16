@@ -12,4 +12,8 @@ public interface PersonAttachEntity  extends Entity {
     String getPersonId();
 
     void setPersonId(String personId);
+
+    default String getPersonIdProperty() {
+        return personId;
+    }
 }

@@ -36,15 +36,17 @@ public abstract class TreeStructureSqlTermCustomizer extends AbstractSqlTermCust
     public SqlAppender accept(String wherePrefix, Term term, RDBColumnMetaData column, String tableAlias) {
         ChangedTermValue termValue = createChangedTermValue(term);
         Dialect dialect = column.getTableMetaData().getDatabaseMetaData().getDialect();
-
-        List<Object> value = BoostTermTypeMapper.convertList(column, termValue.getOld());
-
-        List<String> paths = getTreePathByTerm(value)
-                .stream()
-                .map(path -> path.concat("%"))
-                .collect(Collectors.toList());
-
-        termValue.setValue(paths);
+        List<String> paths;
+        if (termValue.getOld() == termValue.getValue()) {
+            List<Object> value = BoostTermTypeMapper.convertList(column, termValue.getOld());
+            paths = getTreePathByTerm(value)
+                    .stream()
+                    .map(path -> path.concat("%"))
+                    .collect(Collectors.toList());
+            termValue.setValue(paths);
+        } else {
+            paths = ((List) termValue.getValue());
+        }
 
         SqlAppender termCondition = new SqlAppender();
 
@@ -56,7 +58,7 @@ public abstract class TreeStructureSqlTermCustomizer extends AbstractSqlTermCust
         }
         for (int i = 0; i < len; i++) {
             if (i > 0) {
-                termCondition.addSpc("or");
+                termCondition.addSpc(" or");
             }
             if (parent) {
                 SqlFunction function = dialect.getFunction(SqlFunction.concat);
@@ -67,9 +69,9 @@ public abstract class TreeStructureSqlTermCustomizer extends AbstractSqlTermCust
                 } else {
                     concat = function.apply(SqlFunction.Param.of(RenderPhase.where, Arrays.asList("tmp.path", "'%'")));
                 }
-                termCondition.add("#{", wherePrefix, ".value[", i, "]}", " like ", concat);
+                termCondition.add("#{", wherePrefix, ".value.value[", i, "]}", " like ", concat);
             } else {
-                termCondition.add("tmp.path like #{", wherePrefix, ".value[", i, "]}");
+                termCondition.add("tmp.path like #{", wherePrefix, ".value.value[", i, "]}");
             }
         }
         if (len > 0) {

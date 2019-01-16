@@ -137,7 +137,7 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
         //用户名合法性验证
         tryValidateProperty(usernameValidator, UserEntity.username, userEntity.getUsername());
         //判断用户是否已经存在
-        tryValidateProperty(null == selectByUsername(userEntity.getUsername()), UserEntity.username, "{username_exists}");
+        tryValidateProperty(null == selectByUsername(userEntity.getUsername()), UserEntity.username, "用户名已存在");
         //密码强度验证
         tryValidateProperty(passwordStrengthValidator, UserEntity.password, userEntity.getPassword());
         userEntity.setCreateTime(System.currentTimeMillis());

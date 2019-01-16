@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
   ~ /*
-  ~  * Copyright 2016 http://www.hswebframework.org
+  ~  * Copyright 2019 http://www.hswebframework.org
   ~  *
   ~  * Licensed under the Apache License, Version 2.0 (the "License");
   ~  * you may not use this file except in compliance with the License.
@@ -24,12 +24,11 @@
 
     <groupId>org.hswebframework.web</groupId>
     <artifactId>hsweb-framework</artifactId>
-    <version>3.0.4</version>
+    <version>3.0.5</version>
     <modules>
         <module>hsweb-starter</module>
         <module>hsweb-core</module>
         <module>hsweb-authorization</module>
-        <module>hsweb-message</module>
         <module>hsweb-system</module>
         <module>hsweb-tests</module>
         <module>hsweb-datasource</module>
@@ -364,7 +363,7 @@
             <dependency>
                 <groupId>org.redisson</groupId>
                 <artifactId>redisson</artifactId>
-                <version>3.7.0</version>
+                <version>3.10.0</version>
             </dependency>
 
             <dependency>

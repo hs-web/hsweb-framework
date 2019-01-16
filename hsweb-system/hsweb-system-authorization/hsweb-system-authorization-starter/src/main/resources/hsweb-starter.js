@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 http://www.hswebframework.org
+ * Copyright 2019 http://www.hswebframework.org
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +51,8 @@ function install(context) {
         .addColumn().name("last_login_time").number(32).comment("上一次登录时间").commit()
         .addColumn().name("creator_id").varchar(32).comment("创建者ID").commit()
         .addColumn().name("create_time").number(32).notNull().comment("创建时间").commit()
+        //用户名唯一索引
+        .index().name("idx_user_username").column("username").unique().commit()
         .comment("用户表").commit();
 
     database.createOrAlter("s_role")
@@ -82,6 +84,9 @@ function install(context) {
     database.createOrAlter("s_user_role")
         .addColumn().name("role_id").varchar(32).notNull().comment("角色ID").commit()
         .addColumn().name("user_id").varchar(32).notNull().comment("用户ID").commit()
+        .index().name("idx_ur_user_id").column("user_id").commit()
+        .index().name("idx_ur_role_id").column("role_id").commit()
+
         .comment("用户与角色关联表").commit();
 
     //权限设置
@@ -91,6 +96,8 @@ function install(context) {
         .addColumn().name("setting_for").varchar(64).notNull().comment("设置给谁").commit()
         .addColumn().name("describe").varchar(256).comment("备注").commit()
         .addColumn().name("status").number(4, 0).comment("设置给谁").commit()
+
+        .index().name("idx_as_type_setting_for").column("type").column("setting_for").commit()
         .comment("权限设置表").commit();
 
     database.createOrAlter("s_autz_detail")
@@ -102,6 +109,8 @@ function install(context) {
         .addColumn().name("status").number(4, 0).comment("状态").commit()
         .addColumn().name("priority").number(32, 0).comment("优先级").commit()
         .addColumn().name("is_merge").number(4, 0).comment("是否合并").commit()
+        .index().name("idx_ad_setting_id").column("setting_id").commit()
+
         .comment("权限设置详情表").commit();
 
     database.createOrAlter("s_autz_menu")
@@ -114,6 +123,9 @@ function install(context) {
         .addColumn().name("status").number(4, 0).comment("状态").commit()
         .addColumn().name("level").number(32, 0).comment("树深度").commit()
         .addColumn().name("config").clob().comment("其他配置").commit()
+        .index().name("idx_ame_setting_id").column("setting_id").commit()
+        .index().name("idx_ame_parent_id").column("parent_id").commit()
+        .index().name("idx_ame_path").column("path").commit()
         .comment("权限设置菜单表").commit();
 
     // 菜单
@@ -128,6 +140,9 @@ function install(context) {
         .addColumn().name("url").varchar(2000).comment("URL").commit()
         .addColumn().name("icon").varchar(512).comment("图标").commit()
         .addColumn().name("status").alias("status").comment("状态").jdbcType(java.sql.JDBCType.DECIMAL).length(4, 0).commit()
+        .index().name("idx_menu_path").column("path").commit()
+        .index().name("idx_menu_parent_id").column("parent_id").commit()
+
         .comment("系统菜单表").commit()
 
     database.createOrAlter("s_menu_group")
@@ -164,6 +179,9 @@ function install(context) {
         .addColumn().name("setting_id").varchar(32).notNull().comment("自定义配置id").commit()
         .addColumn().name("create_time").datetime().notNull().comment("创建时间").commit()
         .addColumn().name("update_time").datetime().comment("创建时间").commit()
+        .index().name("idx_uset_user_id").column("user_id").commit()
+        .index().name("idx_uset_user_id_key").column("user_id").column("key").commit()
+        .index().name("idx_uset_user_id_key_setting").column("user_id").column("key").column("setting_id").commit()
         .comment("用户设置表").commit();
 }
 

@@ -1,5 +1,5 @@
 /*
- *  Copyright 2016 http://www.hswebframework.org
+ *  Copyright 2019 http://www.hswebframework.org
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -56,6 +56,8 @@ public enum ErrorType {
     CLIENT_NOT_EXIST(4040),//客户端不存在
 
     USER_NOT_EXIST(4041),//客户端不存在
+
+    STATE_ERROR(4042), //stat错误
 
     ACCESS_DENIED(503), //访问被拒绝
 

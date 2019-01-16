@@ -30,13 +30,12 @@
 
 | 模块       | 说明          |   进度 |
 | ------------- |:-------------:| ----|
-|[hsweb-authorization](hsweb-authorization)|权限控制| 90%|
-|[hsweb-commons](hsweb-commons) |基础通用功能| 90%|
+|[hsweb-authorization](hsweb-authorization)|权限控制| 100%|
+|[hsweb-commons](hsweb-commons) |基础通用功能| 100%|
 |[hsweb-concurrent](hsweb-concurrent)|并发包,缓存,锁,计数器等| 80%|
-|[hsweb-core](hsweb-core)|框架核心,基础工具类| 90%|
-|[hsweb-datasource](hsweb-datasource)|数据源| 90%|
+|[hsweb-core](hsweb-core)|框架核心,基础工具类| 100%|
+|[hsweb-datasource](hsweb-datasource)|数据源| 100%|
 |[hsweb-logging](hsweb-logging)| 日志|  100%|
-|[hsweb-message](hsweb-message)|mq,websocket...| 80%|
-|[hsweb-starter](hsweb-starter)|模块启动器| 90%|
+|[hsweb-starter](hsweb-starter)|模块启动器| 100%|
 |[hsweb-system](hsweb-system)|**系统常用功能**| 80%|
 |[hsweb-thirdparty](hsweb-thirdparty)| 第三方插件 | 100% |

@@ -45,10 +45,25 @@ public class DynamicDataSourceAutoConfiguration {
     }
 
     @Bean
+    @ConfigurationProperties(prefix = "spring.datasource")
+    public HswebDataSourceProperties hswebDataSouceProperties() {
+        return new HswebDataSourceProperties();
+    }
+
+    @Bean
     @ConditionalOnMissingBean(DynamicDataSourceService.class)
     public InSpringContextDynamicDataSourceService inMemoryDynamicDataSourceService(DynamicDataSourceConfigRepository<InSpringDynamicDataSourceConfig> repository,
+                                                                                    HswebDataSourceProperties properties,
                                                                                     DataSource dataSource) {
-        DynamicDataSourceProxy dataSourceProxy = new DynamicDataSourceProxy(null, dataSource);
+        DynamicDataSourceProxy dataSourceProxy = new DynamicDataSourceProxy(null, dataSource) {
+            @Override
+            public DatabaseType getType() {
+                if (properties.getDatabaseType() != null) {
+                    return properties.getDatabaseType();
+                }
+                return super.getType();
+            }
+        };
         return new InSpringContextDynamicDataSourceService(repository, dataSourceProxy);
     }
 

@@ -84,11 +84,10 @@ public abstract class AbstractScopeDataAccessHandler<E> implements DataAccessHan
             logger.warn("existing many scope :{} , try use config.", scope);
         }
         if (scope != null) {
-            String finalScopeId = scope;
             context.getParamContext().getParams().values().stream()
                     .filter(getEntityClass()::isInstance)
                     .map(getEntityClass()::cast)
-                    .forEach(entity -> applyScopeProperty(entity, finalScopeId));
+                    .forEach(entity -> applyScopeProperty(entity, scope));
         } else {
             logger.warn("scope is null!");
         }
@@ -153,18 +152,24 @@ public abstract class AbstractScopeDataAccessHandler<E> implements DataAccessHan
             if (logger.isDebugEnabled()) {
                 logger.debug("try rebuild query param ...");
             }
-            QueryParamEntity queryParamEntity = ((QueryParamEntity) entity);
+
             //重构查询条件
             //如: 旧的条件为 where name =? or name = ?
             //重构后为: where org_id in(?,?) and (name = ? or name = ?)
-            List<Term> oldParam = queryParamEntity.getTerms();
-            //清空旧的查询条件
-            queryParamEntity.setTerms(new ArrayList<>());
-            //添加一个查询条件
-            queryParamEntity
-                    .addTerm(createQueryTerm(scope, context))
-                    //客户端提交的参数 作为嵌套参数
-                    .nest().setTerms(oldParam);
+            QueryParamEntity queryParamEntity = ((QueryParamEntity) entity);
+            queryParamEntity.toNestQuery(query-> query.accept(createQueryTerm(scope, context)));
+
+//            //重构查询条件
+//            //如: 旧的条件为 where name =? or name = ?
+//            //重构后为: where org_id in(?,?) and (name = ? or name = ?)
+//            List<Term> oldParam = queryParamEntity.getTerms();
+//            //清空旧的查询条件
+//            queryParamEntity.setTerms(new ArrayList<>());
+//            //添加一个查询条件
+//            queryParamEntity
+//                    .addTerm(createQueryTerm(scope, context))
+//                    //客户端提交的参数 作为嵌套参数
+//                    .nest().setTerms(oldParam);
         } else {
             logger.warn("try validate query access,but entity not support, QueryParamEntity support now!");
         }

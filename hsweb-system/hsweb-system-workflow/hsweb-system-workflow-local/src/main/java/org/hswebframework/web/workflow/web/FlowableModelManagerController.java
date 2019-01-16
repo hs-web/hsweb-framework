@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.activiti.bpmn.converter.BpmnXMLConverter;
 import org.activiti.bpmn.model.BpmnModel;
@@ -33,6 +34,7 @@ import org.hswebframework.web.bean.FastBeanCopier;
 import org.hswebframework.web.commons.entity.PagerResult;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.controller.message.ResponseMessage;
+import org.hswebframework.web.workflow.enums.ModelType;
 import org.hswebframework.web.workflow.util.QueryUtils;
 import org.hswebframework.web.workflow.web.request.ModelCreateRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -132,58 +134,51 @@ public class FlowableModelManagerController {
     @GetMapping(value = "export/{modelId}/{type}")
     @ApiOperation("导出模型")
     @Authorize(action = "export")
+    @SneakyThrows
     public void export(@PathVariable("modelId") @ApiParam("模型ID") String modelId,
-                       @PathVariable("type") @ApiParam(value = "类型", allowableValues = "bpmn,json", example = "json") String type,
+                       @PathVariable("type") @ApiParam(value = "类型", allowableValues = "bpmn,json", example = "json")
+                               ModelType type,
                        @ApiParam(hidden = true) HttpServletResponse response) {
-        try {
-            Model modelData = repositoryService.getModel(modelId);
-            BpmnJsonConverter jsonConverter = new BpmnJsonConverter();
-            byte[] modelEditorSource = repositoryService.getModelEditorSource(modelData.getId());
+        Model modelData = repositoryService.getModel(modelId);
+        if (modelData == null) {
+            throw new NotFoundException("模型不存在");
+        }
+        BpmnJsonConverter jsonConverter = new BpmnJsonConverter();
+        byte[] modelEditorSource = repositoryService.getModelEditorSource(modelData.getId());
 
-            JsonNode editorNode = new ObjectMapper().readTree(modelEditorSource);
-            BpmnModel bpmnModel = jsonConverter.convertToBpmnModel(editorNode);
+        JsonNode editorNode = new ObjectMapper().readTree(modelEditorSource);
+        BpmnModel bpmnModel = jsonConverter.convertToBpmnModel(editorNode);
 
-            // 处理异常
-            if (bpmnModel.getMainProcess() == null) {
-                response.setStatus(HttpStatus.UNPROCESSABLE_ENTITY.value());
-                response.getOutputStream().println("no main process, can't export for dimension: " + type);
-                response.flushBuffer();
-                return;
-            }
+        // 处理异常
+        if (bpmnModel.getMainProcess() == null) {
+            throw new UnsupportedOperationException("无法导出模型文件:" + type);
+        }
 
-            String filename = "";
-            byte[] exportBytes = null;
+        String filename = "";
+        byte[] exportBytes = null;
 
-            String mainProcessId = bpmnModel.getMainProcess().getId();
+        String mainProcessId = bpmnModel.getMainProcess().getId();
 
-            if ("bpmn".equals(type)) {
+        if (type == ModelType.bpmn) {
+            BpmnXMLConverter xmlConverter = new BpmnXMLConverter();
+            exportBytes = xmlConverter.convertToXML(bpmnModel);
+            filename = mainProcessId + ".bpmn20.xml";
+        } else if (type == ModelType.json) {
+            exportBytes = modelEditorSource;
+            filename = mainProcessId + ".json";
 
-                BpmnXMLConverter xmlConverter = new BpmnXMLConverter();
-                exportBytes = xmlConverter.convertToXML(bpmnModel);
+        } else {
+            throw new UnsupportedOperationException("不支持的格式:" + type);
+        }
 
-                filename = mainProcessId + ".bpmn20.xml";
-            } else if ("json".equals(type)) {
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("application/octet-stream");
+        response.setHeader("Content-Disposition", "attachment; filename=" + URLEncoder.encode(filename, "UTF-8"));
 
-                exportBytes = modelEditorSource;
-                filename = mainProcessId + ".json";
-
-            } else {
-                throw new UnsupportedOperationException("不支持的格式:" + type);
-            }
-
-            response.setCharacterEncoding("UTF-8");
-            response.setContentType("application/octet-stream");
-            response.setHeader("Content-Disposition", "attachment; filename=" + URLEncoder.encode(filename, "UTF-8"));
-
-            /*创建输入流*/
-            try (ByteArrayInputStream in = new ByteArrayInputStream(exportBytes)) {
-                IOUtils.copy(in, response.getOutputStream());
-                response.flushBuffer();
-                in.close();
-            }
-
-        } catch (Exception e) {
-            log.error("导出model的xml文件失败：modelId={}, type={}", modelId, type, e);
+        /*创建输入流*/
+        try (ByteArrayInputStream in = new ByteArrayInputStream(exportBytes)) {
+            IOUtils.copy(in, response.getOutputStream());
+            response.flushBuffer();
         }
     }
 

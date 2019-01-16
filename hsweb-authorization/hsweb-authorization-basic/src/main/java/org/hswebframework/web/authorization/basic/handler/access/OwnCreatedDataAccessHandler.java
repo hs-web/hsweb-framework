@@ -99,7 +99,7 @@ public class OwnCreatedDataAccessHandler implements DataAccessHandler {
     protected boolean doQueryAccess(OwnCreatedDataAccessConfig access, AuthorizingContext context) {
         String userId = context.getAuthentication().getUser().getId();
 
-        if (context.getDefinition().getPhased() == Phased.before) {
+        if (context.getDefinition().getDataAccessDefinition().getPhased() == Phased.before) {
             Entity entity = context.getParamContext().getParams()
                     .values().stream()
                     .filter(Entity.class::isInstance)
@@ -144,8 +144,7 @@ public class OwnCreatedDataAccessHandler implements DataAccessHandler {
         } else if (result instanceof Collection) {
             Collection<?> collection = ((Collection) result);
             //删掉不能访问的对象
-            collection.removeAll(collection.stream().filter((Object o) -> !matchCreatorId(o, userId))
-                    .collect(Collectors.toList()));
+            collection.removeAll(collection.stream().filter((Object o) -> !matchCreatorId(o, userId)).collect(Collectors.toList()));
         } else {
             try {
                 return userId.equals(PropertyUtils.getProperty(result, "creatorId"));

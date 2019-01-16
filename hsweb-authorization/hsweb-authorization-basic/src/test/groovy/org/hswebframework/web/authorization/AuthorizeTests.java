@@ -194,7 +194,9 @@ public class AuthorizeTests {
 
     public interface TestClassSuper {
 
-        @Authorize(action = Permission.ACTION_QUERY, phased = Phased.after, dataAccess = @RequiresDataAccess)
+        @Authorize(action = Permission.ACTION_QUERY,
+                phased = Phased.after,
+                dataAccess = @RequiresDataAccess(phased = Phased.after))
         default ResponseMessage<User> queryById(String id) {
             return ResponseMessage.ok();
         }

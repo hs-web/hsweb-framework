@@ -14,4 +14,8 @@ public interface OrgAttachEntity extends Entity {
     String getOrgId();
 
     void setOrgId(String orgId);
+
+    default String getOrgIdProperty() {
+        return orgId;
+    }
 }
