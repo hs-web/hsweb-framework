@@ -149,6 +149,11 @@ public class ScopeByUserHandler implements DataAccessHandler {
                 scope = config.getScope();
                 allScope = scope;
                 break;
+            case "CUSTOM_SCOPE_POSITION":
+                termType = "user-in-position";
+                scope = config.getScope();
+                allScope = scope;
+                break;
             case "CUSTOM_SCOPE_DEPT":
                 termType = "user-in-department";
                 scope = config.getScope();
