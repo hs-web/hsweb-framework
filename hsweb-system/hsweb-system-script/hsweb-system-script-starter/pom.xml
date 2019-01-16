@@ -67,12 +67,5 @@
             <scope>test</scope>
         </dependency>
 
-        <dependency>
-            <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-message-api</artifactId>
-            <version>${project.version}</version>
-            <optional>true</optional>
-        </dependency>
-      
     </dependencies>
 </project>
