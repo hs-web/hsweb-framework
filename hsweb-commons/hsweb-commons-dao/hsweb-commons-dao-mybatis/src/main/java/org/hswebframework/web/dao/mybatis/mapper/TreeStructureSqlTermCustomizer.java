@@ -58,7 +58,7 @@ public abstract class TreeStructureSqlTermCustomizer extends AbstractSqlTermCust
         }
         for (int i = 0; i < len; i++) {
             if (i > 0) {
-                termCondition.addSpc("or");
+                termCondition.addSpc(" or");
             }
             if (parent) {
                 SqlFunction function = dialect.getFunction(SqlFunction.concat);
