@@ -1,5 +1,6 @@
 package org.hswebframework.web.organizational.authorization.simple;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.hswebframework.web.authorization.simple.AbstractDataAccessConfig;
@@ -12,6 +13,7 @@ import java.util.Set;
  */
 @Getter
 @Setter
+@EqualsAndHashCode(callSuper = true)
 public class ScopeByUserDataAccessConfig extends AbstractDataAccessConfig {
 
     private static final long serialVersionUID = 6678003761927318688L;
