@@ -20,8 +20,12 @@ package org.hswebframework.web.controller;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.Permission;
+import org.hswebframework.web.authorization.User;
 import org.hswebframework.web.authorization.annotation.Authorize;
+import org.hswebframework.web.commons.entity.RecordCreationEntity;
+import org.hswebframework.web.commons.entity.RecordModifierEntity;
 import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.logging.AccessLogger;
 import org.hswebframework.web.service.CreateEntityService;
@@ -56,8 +60,26 @@ public interface CreateController<E, PK, M> {
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation(value = "新增")
     default ResponseMessage<PK> add(@RequestBody M data) {
-        E entity = getService().createEntity();
-        return ok(getService().insert(modelToEntity(data, entity)));
+        E entity = modelToEntity(data, getService().createEntity());
+        //自动添加创建人和创建时间
+        if (entity instanceof RecordCreationEntity) {
+            RecordCreationEntity creationEntity = (RecordCreationEntity) entity;
+            creationEntity.setCreateTimeNow();
+            creationEntity.setCreatorId(Authentication.current()
+                    .map(Authentication::getUser)
+                    .map(User::getId)
+                    .orElse(null));
+        }
+        //修改人和修改时间
+        if (entity instanceof RecordModifierEntity) {
+            RecordModifierEntity creationEntity = (RecordModifierEntity) entity;
+            creationEntity.setModifyTimeNow();
+            creationEntity.setModifierId(Authentication.current()
+                    .map(Authentication::getUser)
+                    .map(User::getId)
+                    .orElse(null));
+        }
+        return ok(getService().insert(entity));
     }
 
     @Authorize(ignore = true)
