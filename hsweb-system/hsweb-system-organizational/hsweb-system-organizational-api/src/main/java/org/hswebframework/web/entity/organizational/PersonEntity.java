@@ -16,15 +16,17 @@
  */
 package org.hswebframework.web.entity.organizational;
 
+import org.hswebframework.web.authorization.access.UserAttachEntity;
 import org.hswebframework.web.commons.entity.GenericEntity;
 import org.hswebframework.web.commons.entity.RecordCreationEntity;
+import org.hswebframework.web.organizational.authorization.access.PersonAttachEntity;
 
 /**
  * 人员 实体
  *
  * @author hsweb-generator-online
  */
-public interface PersonEntity extends GenericEntity<String> {
+public interface PersonEntity extends GenericEntity<String>, PersonAttachEntity, UserAttachEntity {
   /*------------------------------------------
     |               属性名常量               |
     =========================================*/
@@ -141,4 +143,18 @@ public interface PersonEntity extends GenericEntity<String> {
      */
     void setRemark(String remark);
 
+    @Override
+    default String getPersonId() {
+        return getId();
+    }
+
+    @Override
+    default void setPersonId(String personId) {
+        setId(personId);
+    }
+
+    @Override
+    default String getPersonIdProperty() {
+        return "id";
+    }
 }

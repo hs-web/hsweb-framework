@@ -18,7 +18,9 @@ public class DefaultDataAccessDefinition implements DataAccessDefinition {
 
     private String controller;
 
-    private String idParameterName="id";
+    private String idParameterName = "id";
+
+    private Class entityType;
 
     private Phased phased;
 }
