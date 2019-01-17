@@ -117,7 +117,7 @@ public class ScopeByUserHandler implements DataAccessHandler {
                 return scopeInfo.allScope.contains(controllerCache.targetIdGetter.apply(entity));
             }
         } else {
-            log.warn("Controller没有实现任何通用CURD功能,无法进行数据权限控制!");
+            log.debug("Controller没有实现任何通用CURD功能,无法进行数据权限控制!");
         }
         return true;
 
@@ -245,7 +245,7 @@ public class ScopeByUserHandler implements DataAccessHandler {
             }
         }
         if (useProperty == null) {
-            log.warn("类[{}]中未包含字段[{}],可能无法进行数据权限控制.", entityClass, Arrays.asList(properties));
+            log.debug("类[{}]中未包含字段[{}],可能无法进行数据权限控制.", entityClass, Arrays.asList(properties));
         }
         return entity -> {
             Map<String, String> userInfo = FastBeanCopier.copy(entity, new HashMap<>(), FastBeanCopier.include(properties));
@@ -441,7 +441,7 @@ public class ScopeByUserHandler implements DataAccessHandler {
                 controllerCache.queryConsumer.accept(query, scopeInfo);
             });
         } else {
-            log.warn("方法[{}]未使用动态查询参数[QueryParamEntity],无法进行数据权限控制!", context.getParamContext().getMethod());
+            log.debug("方法[{}]未使用动态查询参数[QueryParamEntity],无法进行数据权限控制!", context.getParamContext().getMethod());
         }
         return true;
     }
