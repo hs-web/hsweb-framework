@@ -367,6 +367,9 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
         private String sourcePermission;
 
         public static Stream<ParentPermissionDetail> of(PermissionEntity entity) {
+            if (isEmpty(entity.getParents())) {
+                return Stream.empty();
+            }
             return entity.getParents()
                     .stream()
                     .filter(Objects::nonNull)
@@ -383,15 +386,14 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
 
     private List<Permission> initPermission(List<AuthorizationSettingDetailEntity> detailList) {
         //权限id集合
-        List<String> permissionIds = detailList.stream()
-                .map(AuthorizationSettingDetailEntity::getPermissionId)
-                .distinct()
-                .collect(Collectors.toList());
+//        List<String> permissionIds = detailList.stream()
+//                .map(AuthorizationSettingDetailEntity::getPermissionId)
+//                .distinct()
+//                .collect(Collectors.toList());
         //权限信息缓存
-        Map<String, PermissionEntity> permissionEntityCache =
-                permissionService.selectByPk(permissionIds)
-                        .stream()
-                        .collect(Collectors.toMap(PermissionEntity::getId, Function.identity()));
+        Map<String, PermissionEntity> permissionEntityCache = permissionService.select()
+                .stream()
+                .collect(Collectors.toMap(PermissionEntity::getId, Function.identity()));
 
         //防止越权
         detailList = detailList.stream().filter(detail -> {
@@ -477,6 +479,18 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
                 .flatMap(ParentPermissionDetail::of)
                 .collect(Collectors.groupingBy(ParentPermission::getPermission));
 
+        //判断是否满足关联权限的条件
+        Predicate<ParentPermissionDetail> preActionPredicate = parent -> {
+            if (isEmpty(parent.getActions())) {
+                return false;
+            }
+            if (isEmpty(parent.getPreActions())) {
+                return true;
+            }
+            Permission source = permissionCache.get(parent.getSourcePermission());
+            return source != null && source.getActions().containsAll(parent.getPreActions());
+        };
+
         for (Permission permission : permissions) {
             //有其他权限关联了此权限
             List<ParentPermissionDetail> parents = parentsPermissions.get(permission.getId());
@@ -484,17 +498,7 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
                 //添加action
                 permission.getActions()
                         .addAll(parents.stream()
-                                .filter(parent -> {
-                                    if (CollectionUtils.isEmpty(parent.getActions())) {
-                                        return false;
-                                    }
-                                    if (CollectionUtils.isEmpty(parent.getPreActions())) {
-                                        return true;
-                                    }
-                                    //判断是否满足关联权限的条件
-                                    Permission source = permissionCache.get(parent.getSourcePermission());
-                                    return source != null && parent.getPreActions().containsAll(source.getActions());
-                                })
+                                .filter(preActionPredicate)
                                 .map(ParentPermission::getActions)
                                 .flatMap(Collection::stream)
                                 .collect(Collectors.toSet()));
@@ -504,7 +508,7 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
         }
         //没有赋予被关联的权限时,直接关联权限
         parentsPermissions.forEach((per, all) -> {
-            PermissionEntity entity = permissionEntityCache.get(permissionId);
+            PermissionEntity entity = permissionEntityCache.get(per);
             if (entity == null || !DataStatus.STATUS_ENABLED.equals(entity.getStatus())) {
                 return;
             }
@@ -512,10 +516,13 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
             permission.setId(per);
             permission.setName(entity.getName());
             permission.setActions(all.stream()
+                    .filter(preActionPredicate)
                     .map(ParentPermission::getActions)
-                    .filter(Objects::nonNull)
                     .flatMap(Collection::stream)
                     .collect(Collectors.toSet()));
+            if (isEmpty(permission.getActions())) {
+                return;
+            }
             permissions.add(permission);
         });
         parentsPermissions.clear();
