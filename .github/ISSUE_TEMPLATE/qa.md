@@ -1,5 +1,5 @@
 ---
-name: 求教
+name: 求助 疑问
 about: 有任何疑问尽管提
 title: "[疑问]"
 labels: 帮助
