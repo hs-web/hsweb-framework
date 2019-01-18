@@ -85,6 +85,8 @@ public interface Permission extends Serializable {
      */
     String getId();
 
+    String getName();
+
     /**
      * 用户对此权限的可操作事件(按钮)
      * <p>
