@@ -1,5 +1,5 @@
 ---
-name: Bug 提交
+name: 提交Bug
 about: 提交bug,帮助我们更好完善项目.
 title: "[BUG]"
 labels: bug
