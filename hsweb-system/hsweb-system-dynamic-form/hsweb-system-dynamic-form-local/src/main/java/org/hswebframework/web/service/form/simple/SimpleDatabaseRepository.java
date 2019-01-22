@@ -2,10 +2,7 @@ package org.hswebframework.web.service.form.simple;
 
 import org.hswebframework.ezorm.rdb.RDBDatabase;
 import org.hswebframework.ezorm.rdb.executor.SqlExecutor;
-import org.hswebframework.ezorm.rdb.meta.parser.H2TableMetaParser;
-import org.hswebframework.ezorm.rdb.meta.parser.MysqlTableMetaParser;
-import org.hswebframework.ezorm.rdb.meta.parser.OracleTableMetaParser;
-import org.hswebframework.ezorm.rdb.meta.parser.SqlServer2012TableMetaParser;
+import org.hswebframework.ezorm.rdb.meta.parser.*;
 import org.hswebframework.ezorm.rdb.render.dialect.*;
 import org.hswebframework.ezorm.rdb.simple.SimpleDatabase;
 import org.hswebframework.web.datasource.DataSourceHolder;
@@ -74,6 +71,13 @@ public class SimpleDatabaseRepository implements DatabaseRepository {
             return metaData;
         });
         databaseMetaSuppliers.put(DatabaseType.sqlserver, databaseMetaSuppliers.get(DatabaseType.jtds_sqlserver));
+
+        databaseMetaSuppliers.put(DatabaseType.postgresql, () -> {
+            PGRDBDatabaseMetaData metaData = new PGRDBDatabaseMetaData();
+            metaData.setParser(new PGSqlTableMetaParser(sqlExecutor));
+            return metaData;
+        });
+
     }
 
     @Override
