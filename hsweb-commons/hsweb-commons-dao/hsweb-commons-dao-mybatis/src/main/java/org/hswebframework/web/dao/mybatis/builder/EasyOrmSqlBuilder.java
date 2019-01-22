@@ -183,7 +183,10 @@ public class EasyOrmSqlBuilder {
                         }
                     };
                     column.setValueConverter(dateConvert);
+                } else if (column.getJavaType() == boolean.class || column.getJavaType() == Boolean.class) {
+                    column.setValueConverter(new NumberValueConverter(Boolean.class));
                 } else if (TypeUtils.isNumberType(column)) { //数字
+                    //数字
                     column.setValueConverter(new NumberValueConverter(column.getJavaType()));
                 }
                 rdbTableMetaData.addColumn(column);
