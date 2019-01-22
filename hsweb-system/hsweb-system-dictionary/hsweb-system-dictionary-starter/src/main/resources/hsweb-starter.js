@@ -63,7 +63,11 @@ function install(context) {
         .addColumn().name("level_").alias("level").comment("树结构层级").jdbcType(java.sql.JDBCType.DECIMAL).length(32, 0).commit()
         .addColumn().name("ordinal").alias("ordinal").comment("识别码").jdbcType(java.sql.JDBCType.DECIMAL).length(32, 0).commit()
         .addColumn().name("properties").alias("properties").comment("其他自定义属性").jdbcType(java.sql.JDBCType.CLOB).commit()
-        .comment("数据字典解析配置").commit();
+        .index().name("idx_dict_dic_id").column("dict_id").commit()
+        .index().name("idx_dict_path").column("path").commit()
+        .index().name("idx_dict_search_code").column("search_code").commit()
+        .index().name("idx_dict_ordinal").column("ordinal").commit()
+        .comment("数据字典选项配置").commit();
 
     database.createOrAlter("s_dict_parser")
         .addColumn().name("u_id").alias("id").comment("ID").jdbcType(java.sql.JDBCType.VARCHAR).length(32).primaryKey().commit()
