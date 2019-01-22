@@ -28,6 +28,7 @@ import org.hswebframework.ezorm.core.param.*;
 import org.hswebframework.ezorm.rdb.meta.RDBColumnMetaData;
 import org.hswebframework.ezorm.rdb.meta.RDBDatabaseMetaData;
 import org.hswebframework.ezorm.rdb.meta.RDBTableMetaData;
+import org.hswebframework.ezorm.rdb.meta.converter.BooleanValueConverter;
 import org.hswebframework.ezorm.rdb.meta.converter.DateTimeConverter;
 import org.hswebframework.ezorm.rdb.meta.converter.NumberValueConverter;
 import org.hswebframework.ezorm.rdb.render.Sql;
@@ -184,7 +185,7 @@ public class EasyOrmSqlBuilder {
                     };
                     column.setValueConverter(dateConvert);
                 } else if (column.getJavaType() == boolean.class || column.getJavaType() == Boolean.class) {
-                    column.setValueConverter(new NumberValueConverter(Boolean.class));
+                    column.setValueConverter(new BooleanValueConverter(column.getJdbcType()));
                 } else if (TypeUtils.isNumberType(column)) { //数字
                     //数字
                     column.setValueConverter(new NumberValueConverter(column.getJavaType()));
