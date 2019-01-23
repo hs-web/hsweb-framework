@@ -29,15 +29,14 @@ import org.hswebframework.web.organizational.authorization.relation.SimpleRelati
 import org.hswebframework.web.organizational.authorization.relation.SimpleRelations;
 import org.hswebframework.web.organizational.authorization.simple.*;
 import org.hswebframework.web.service.DefaultDSLQueryService;
-import org.hswebframework.web.service.GenericEntityService;
+import org.hswebframework.web.service.EnableCacheAllEvictGenericEntityService;
 import org.hswebframework.web.service.authorization.UserService;
-import org.hswebframework.web.service.organizational.*;
+import org.hswebframework.web.service.organizational.PersonService;
 import org.hswebframework.web.service.organizational.event.ClearPersonCacheEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.util.CollectionUtils;
@@ -59,7 +58,7 @@ import static org.springframework.util.StringUtils.isEmpty;
  */
 @Service("personService")
 @CacheConfig(cacheNames = "person")
-public class SimplePersonService extends GenericEntityService<PersonEntity, String>
+public class SimplePersonService extends EnableCacheAllEvictGenericEntityService<PersonEntity, String>
         implements PersonService, PersonnelAuthenticationManager {
 
 
@@ -98,13 +97,7 @@ public class SimplePersonService extends GenericEntityService<PersonEntity, Stri
     }
 
     @Override
-    @Caching(evict = {
-            @CacheEvict(key = "'id:'+#result"),
-            @CacheEvict(key = "'auth:persion-id'+#result"),
-            @CacheEvict(key = "'auth:user-id'+#authBindEntity.userId"),
-            @CacheEvict(key = "'auth-bind'+#result"),
-            @CacheEvict(key = "'person-name'+#authBindEntity.name")
-    })
+    @CacheEvict(allEntries = true)
     public String insert(PersonAuthBindEntity authBindEntity) {
         authBindEntity.setStatus(DataStatus.STATUS_ENABLED);
         if (authBindEntity.getPersonUser() != null) {
@@ -118,13 +111,7 @@ public class SimplePersonService extends GenericEntityService<PersonEntity, Stri
     }
 
     @Override
-    @Caching(evict = {
-            @CacheEvict(key = "'id:'+#authBindEntity.id"),
-            @CacheEvict(key = "'auth:persion-id'+#authBindEntity.id"),
-            @CacheEvict(key = "'auth:user-id'+#authBindEntity.userId"),
-            @CacheEvict(key = "'auth-bind'+#authBindEntity.id"),
-            @CacheEvict(key = "'person-name'+#authBindEntity.name")
-    })
+    @CacheEvict(allEntries = true)
     public int updateByPk(PersonAuthBindEntity authBindEntity) {
         if (authBindEntity.getPositionIds() != null) {
             personPositionDao.deleteByPersonId(authBindEntity.getId());
@@ -143,7 +130,7 @@ public class SimplePersonService extends GenericEntityService<PersonEntity, Stri
     }
 
     @Override
-    @Cacheable(key = "'person-name'+#name")
+    @Cacheable(key = "'person-name:'+#name")
     public List<PersonEntity> selectByName(String name) {
         if (StringUtils.isEmpty(name)) {
             return new ArrayList<>();
@@ -152,7 +139,7 @@ public class SimplePersonService extends GenericEntityService<PersonEntity, Stri
     }
 
     @Override
-    @Cacheable(key = "'auth-bind'+#id")
+    @Cacheable(key = "'auth-bind:'+#id")
     public PersonAuthBindEntity selectAuthBindByPk(String id) {
         PersonEntity personEntity = this.selectByPk(id);
         if (personEntity == null) {
@@ -184,38 +171,58 @@ public class SimplePersonService extends GenericEntityService<PersonEntity, Stri
     }
 
     @Override
+    @Cacheable(key = "'by-position-id:'+#positionId")
     public List<PersonEntity> selectByPositionId(String positionId) {
-        Objects.requireNonNull(positionId);
+        if (StringUtils.isEmpty(positionId)) {
+            return new ArrayList<>();
+        }
         return personDao.selectByPositionId(positionId);
     }
 
     @Override
+    @Cacheable(key = "'by-position-ids:'+#positionId.hashCode()")
     public List<PersonEntity> selectByPositionIds(List<String> positionId) {
+        if (CollectionUtils.isEmpty(positionId)) {
+            return new ArrayList<>();
+        }
         return createQuery()
                 .where(PersonEntity.id, "person-in-position", positionId)
                 .listNoPaging();
     }
 
     @Override
+    @Cacheable(key = "'by-department:'+#departmentId.hashCode()")
     public List<PersonEntity> selectByDepartmentId(List<String> departmentId) {
+        if (CollectionUtils.isEmpty(departmentId)) {
+            return new ArrayList<>();
+        }
         return createQuery()
                 .where(PersonEntity.id, "person-in-department", departmentId)
                 .listNoPaging();
     }
 
     @Override
+    @Cacheable(key = "'by-org-id:'+#orgId.hashCode()")
     public List<PersonEntity> selectByOrgId(List<String> orgId) {
+        if (CollectionUtils.isEmpty(orgId)) {
+            return new ArrayList<>();
+        }
         return createQuery()
                 .where(PersonEntity.id, "person-in-org", orgId)
                 .listNoPaging();
     }
 
     @Override
+    @Cacheable(key = "'by-user-id:'+#userId")
     public PersonEntity selectByUserId(String userId) {
-        return createQuery().where(PersonEntity.userId,userId).single();
+        if (StringUtils.isEmpty(userId)) {
+            return null;
+        }
+        return createQuery().where(PersonEntity.userId, userId).single();
     }
 
     @Override
+    @Cacheable(key = "'all-department-id:'+#personId.hashCode()")
     public List<String> selectAllDepartmentId(List<String> personId) {
         if (CollectionUtils.isEmpty(personId)) {
             return new java.util.ArrayList<>();
@@ -245,6 +252,7 @@ public class SimplePersonService extends GenericEntityService<PersonEntity, Stri
     }
 
     @Override
+    @Cacheable(key = "'all-org-id:'+#personId.hashCode()")
     public List<String> selectAllOrgId(List<String> personId) {
         List<String> departmentId = this.selectAllDepartmentId(personId);
         if (CollectionUtils.isEmpty(departmentId)) {
@@ -262,8 +270,11 @@ public class SimplePersonService extends GenericEntityService<PersonEntity, Stri
     }
 
     @Override
+    @Cacheable(key = "'by-role-id:'+#roleId")
     public List<PersonEntity> selectByRoleId(String roleId) {
-        Objects.requireNonNull(roleId);
+        if (StringUtils.isEmpty(roleId)) {
+            return new ArrayList<>();
+        }
         return personDao.selectByRoleId(roleId);
     }
 
@@ -511,7 +522,7 @@ public class SimplePersonService extends GenericEntityService<PersonEntity, Stri
     }
 
     @Override
-    @Cacheable(key = "'auth:user-id'+#userId")
+    @Cacheable(key = "'auth:user-id:'+#userId")
     public PersonnelAuthentication getPersonnelAuthorizationByUserId(String userId) {
         PersonEntity entity = createQuery().where(PersonEntity.userId, userId).single();
         if (entity == null) {
