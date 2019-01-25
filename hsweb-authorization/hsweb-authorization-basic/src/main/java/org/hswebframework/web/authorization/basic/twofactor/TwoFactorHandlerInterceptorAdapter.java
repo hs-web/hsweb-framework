@@ -45,7 +45,7 @@ public class TwoFactorHandlerInterceptorAdapter extends HandlerInterceptorAdapte
                 code = request.getHeader(factor.parameter());
             }
             if (StringUtils.isEmpty(code)) {
-                throw new NeedTwoFactorException("需要进行双重验证", factor.provider());
+                throw new NeedTwoFactorException(factor.message(), factor.provider());
             } else if (!validator.verify(code, factor.timeout())) {
                 throw new NeedTwoFactorException("验证码错误", factor.provider());
             }
