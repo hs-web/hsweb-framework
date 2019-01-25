@@ -25,7 +25,6 @@ import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.dao.dynamic.QueryByEntityDao;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
 import java.util.List;
 
 public interface DefaultQueryByEntityService<E>
@@ -44,24 +43,32 @@ public interface DefaultQueryByEntityService<E>
     @Override
     default PagerResult<E> selectPager(Entity param) {
         PagerResult<E> pagerResult = new PagerResult<>();
+
         if (param instanceof QueryParamEntity) {
             QueryParamEntity entity = ((QueryParamEntity) param);
             //不分页,不进行count
             if (!entity.isPaging()) {
                 pagerResult.setData(getDao().query(param));
                 pagerResult.setTotal(pagerResult.getData().size());
+                pagerResult.setPageIndex(entity.getThinkPageIndex());
+                pagerResult.setPageSize(pagerResult.getData().size());
                 return pagerResult;
             }
         }
         int total = getDao().count(param);
         pagerResult.setTotal(total);
+
+        //根据实际记录数量重新指定分页参数
+        if (param instanceof QueryParamEntity) {
+            QueryParamEntity paramEntity = (QueryParamEntity) param;
+            paramEntity.rePaging(total);
+            pagerResult.setPageSize(paramEntity.getPageSize());
+            pagerResult.setPageIndex(paramEntity.getThinkPageIndex());
+        }
+
         if (total == 0) {
             pagerResult.setData(new java.util.ArrayList<>());
         } else {
-            //根据实际记录数量重新指定分页参数
-            if (param instanceof QueryParamEntity) {
-                ((QueryParamEntity) param).rePaging(total);
-            }
             pagerResult.setData(select(param));
         }
         return pagerResult;
