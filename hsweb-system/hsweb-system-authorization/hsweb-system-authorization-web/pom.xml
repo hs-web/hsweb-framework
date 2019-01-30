@@ -11,7 +11,14 @@
 
     <artifactId>hsweb-system-authorization-web</artifactId>
     <description>业务模块-权限管理WEB API模块</description>
-
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+    </build>
     <dependencies>
         <dependency>
             <groupId>javax.servlet</groupId>

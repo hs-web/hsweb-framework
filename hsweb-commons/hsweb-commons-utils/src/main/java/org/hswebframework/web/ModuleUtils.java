@@ -9,6 +9,7 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
+import java.security.ProtectionDomain;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -49,13 +50,21 @@ public abstract class ModuleUtils {
     }
 
     public static String getClassPath(Class type) {
-        String path = type.getResource("").getPath();
-        String packages = type.getPackage().getName();
-        return getClassPath(path, packages);
+
+        return getClassPath(type.getResource("").getPath(), type.getPackage().getName());
     }
 
     public static String getClassPath(String path, String packages) {
-        int pos = path.contains("!/") ? 3 : path.endsWith("/") ? 2 : 1;
+        if (path.endsWith(".jar")) {
+            return path;
+        }
+        boolean isJar = path.contains("!/") && path.contains(".jar");
+
+        if (isJar) {
+            return path.substring(0, path.lastIndexOf(".jar") + 4);
+        }
+
+        int pos = path.endsWith("/") ? 2 : 1;
         return path.substring(0, path.length() - packages.length() - pos);
     }
 
@@ -102,7 +111,7 @@ public abstract class ModuleUtils {
 
         public String getGitLocation() {
             String gitCommitHash = this.gitCommitHash;
-            if (gitCommitHash.contains("$")) {
+            if (gitCommitHash == null || gitCommitHash.contains("$")) {
                 gitCommitHash = "master";
             }
             return gitRepository + "/blob/" + gitCommitHash + "/" + path + "/";
