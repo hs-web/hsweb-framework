@@ -23,7 +23,7 @@
     <parent>
         <artifactId>hsweb-commons</artifactId>
         <groupId>org.hswebframework.web</groupId>
-        <version>3.0.6</version>
+        <version>3.0.7-SNAPSHOT</version>
 
         <relativePath>../pom.xml</relativePath>
     </parent>
