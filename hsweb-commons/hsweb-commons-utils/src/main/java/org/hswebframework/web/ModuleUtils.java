@@ -9,6 +9,7 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
+import java.security.CodeSource;
 import java.security.ProtectionDomain;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -35,7 +36,7 @@ public abstract class ModuleUtils {
             log.info("init module info");
             Resource[] resources = new PathMatchingResourcePatternResolver().getResources("classpath*:/hsweb-module.json");
             for (Resource resource : resources) {
-                String classPath = getClassPath(resource.getURL().getPath(), "hsweb-module.json");
+                String classPath = getClassPath(resource.getURL().toString(), "hsweb-module.json");
                 ModuleInfo moduleInfo = JSON.parseObject(resource.getInputStream(), ModuleInfo.class);
                 moduleInfo.setClassPath(classPath);
                 ModuleUtils.register(moduleInfo);
@@ -50,8 +51,17 @@ public abstract class ModuleUtils {
     }
 
     public static String getClassPath(Class type) {
+        ProtectionDomain domain = type.getProtectionDomain();
+        CodeSource codeSource = domain.getCodeSource();
+        if (codeSource == null) {
+            return getClassPath(type.getResource("").getPath(), type.getPackage().getName());
+        }
+        String path = codeSource.getLocation().toString();
 
-        return getClassPath(type.getResource("").getPath(), type.getPackage().getName());
+        if (path.endsWith("/")) {
+            return path.substring(0, path.length() - 1);
+        }
+        return path;
     }
 
     public static String getClassPath(String path, String packages) {
