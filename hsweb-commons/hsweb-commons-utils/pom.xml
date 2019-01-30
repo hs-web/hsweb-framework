@@ -32,6 +32,15 @@
 
     <description>通用模块-工具类</description>
 
+    <build>
+        <testResources>
+            <testResource>
+                <directory>src/test/resources</directory>
+                <filtering>true</filtering>
+            </testResource>
+        </testResources>
+    </build>
+
     <dependencies>
 
         <dependency>
@@ -70,6 +79,11 @@
             <groupId>org.hswebframework</groupId>
             <artifactId>hsweb-easy-orm-core</artifactId>
             <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
         </dependency>
     </dependencies>
 </project>

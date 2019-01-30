@@ -1,0 +1,8 @@
+{
+  "groupId": "${project.groupId}",
+  "artifactId": "${project.artifactId}",
+  "parent": "${parent.groupId}/${parent.artifactId}",
+  "gitCommitHash": "${git.commit.hash}",
+  "gitRepository": "http://github.com/hs-web/hsweb-framework",
+  "version": "${project.version}"
+}
