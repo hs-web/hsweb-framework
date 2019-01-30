@@ -1,0 +1,8 @@
+{
+  "groupId": "${project.groupId}",
+  "artifactId": "${project.artifactId}",
+  "path": "hsweb-commons/hsweb-commons-service/hsweb-commons-service-simple",
+  "gitCommitHash": "${git.commit.hash}",
+  "gitRepository": "http://github.com/hs-web/hsweb-framework",
+  "version": "${project.version}"
+}

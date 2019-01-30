@@ -19,4 +19,6 @@ public class ParentPermission implements Entity {
     private String permission;
 
     private Set<String> actions;
+
+    private Set<String> preActions;
 }

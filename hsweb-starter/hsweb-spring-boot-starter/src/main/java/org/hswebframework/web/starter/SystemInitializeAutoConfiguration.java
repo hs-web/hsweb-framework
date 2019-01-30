@@ -21,12 +21,8 @@ package org.hswebframework.web.starter;
 import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.ezorm.rdb.executor.SqlExecutor;
 import org.hswebframework.ezorm.rdb.meta.RDBDatabaseMetaData;
-import org.hswebframework.ezorm.rdb.meta.parser.H2TableMetaParser;
-import org.hswebframework.ezorm.rdb.meta.parser.MysqlTableMetaParser;
-import org.hswebframework.ezorm.rdb.meta.parser.OracleTableMetaParser;
-import org.hswebframework.ezorm.rdb.render.dialect.H2RDBDatabaseMetaData;
-import org.hswebframework.ezorm.rdb.render.dialect.MysqlRDBDatabaseMetaData;
-import org.hswebframework.ezorm.rdb.render.dialect.OracleRDBDatabaseMetaData;
+import org.hswebframework.ezorm.rdb.meta.parser.*;
+import org.hswebframework.ezorm.rdb.render.dialect.*;
 import org.hswebframework.ezorm.rdb.simple.SimpleDatabase;
 import org.hswebframework.expands.script.engine.DynamicScriptEngine;
 import org.hswebframework.expands.script.engine.DynamicScriptEngineFactory;
@@ -134,6 +130,15 @@ public class SystemInitializeAutoConfiguration implements CommandLineRunner, Bea
             case oracle:
                 metaData = new OracleRDBDatabaseMetaData();
                 metaData.setParser(new OracleTableMetaParser(sqlExecutor));
+                break;
+            case postgresql:
+                metaData = new PGRDBDatabaseMetaData();
+                metaData.setParser(new PGSqlTableMetaParser(sqlExecutor));
+                break;
+            case sqlserver:
+            case jtds_sqlserver:
+                metaData = new MSSQLRDBDatabaseMetaData();
+                metaData.setParser(new SqlServer2012TableMetaParser(sqlExecutor));
                 break;
             case mysql:
                 String engine = environment.getProperty("mysql.engine");

@@ -4,7 +4,7 @@
 [![Build Status](https://travis-ci.org/hs-web/hsweb-framework.svg?branch=master)](https://travis-ci.org/hs-web/hsweb-framework)
 [![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg?style=flat-square)](https://www.apache.org/licenses/LICENSE-2.0.html)
 
-  [贡献代码](CONTRIBUTING.md)  [快速开始](https://docs.hsweb.io/framework/kuai-su-kai-shi)
+  [贡献代码](CONTRIBUTING.md)  [用户手册](https://docs.hsweb.io)
 
 ## 应用场景
 1. 完全开源的后台管理系统.

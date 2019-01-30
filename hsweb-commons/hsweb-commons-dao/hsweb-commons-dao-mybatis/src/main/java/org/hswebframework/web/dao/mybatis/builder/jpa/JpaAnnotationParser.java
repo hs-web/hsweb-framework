@@ -6,6 +6,7 @@ import org.apache.commons.beanutils.BeanUtilsBean;
 import org.hswebframework.ezorm.core.ValueConverter;
 import org.hswebframework.ezorm.rdb.meta.RDBColumnMetaData;
 import org.hswebframework.ezorm.rdb.meta.RDBTableMetaData;
+import org.hswebframework.ezorm.rdb.meta.converter.BooleanValueConverter;
 import org.hswebframework.ezorm.rdb.meta.converter.DateTimeConverter;
 import org.hswebframework.ezorm.rdb.meta.converter.NumberValueConverter;
 import org.hswebframework.utils.ClassUtils;
@@ -120,26 +121,25 @@ public class JpaAnnotationParser {
                 .getPropertyUtils()
                 .getPropertyDescriptors(entityClass);
         for (PropertyDescriptor descriptor : descriptors) {
-            Column column = getAnnotation(entityClass, descriptor, Column.class);
-            if (column == null) {
+            Column columnAnn = getAnnotation(entityClass, descriptor, Column.class);
+            if (columnAnn == null) {
                 continue;
             }
-            RDBColumnMetaData columnMetaData = new RDBColumnMetaData();
-            columnMetaData.setName(column.name());
-            columnMetaData.setAlias(descriptor.getName());
-            columnMetaData.setLength(column.length());
-            columnMetaData.setPrecision(column.precision());
-            columnMetaData.setJavaType(descriptor.getPropertyType());
-            if (!column.updatable()) {
-                columnMetaData.setProperty("read-only", true);
+            RDBColumnMetaData column = new RDBColumnMetaData();
+            column.setName(columnAnn.name());
+            column.setAlias(descriptor.getName());
+            column.setLength(columnAnn.length());
+            column.setPrecision(columnAnn.precision());
+            column.setJavaType(descriptor.getPropertyType());
+            if (!columnAnn.updatable()) {
+                column.setProperty("read-only", true);
             }
-            if (!column.nullable()) {
-                columnMetaData.setNotNull(true);
+            if (!columnAnn.nullable()) {
+                column.setNotNull(true);
             }
-            if (StringUtils.hasText(column.columnDefinition())) {
-                columnMetaData.setColumnDefinition(column.columnDefinition());
+            if (StringUtils.hasText(columnAnn.columnDefinition())) {
+                column.setColumnDefinition(columnAnn.columnDefinition());
             }
-
             Class propertyType = descriptor.getPropertyType();
 
             JDBCType type = jdbcTypeMapping.get(propertyType);
@@ -150,8 +150,8 @@ public class JpaAnnotationParser {
                         .findFirst()
                         .orElse(JDBCType.OTHER);
             }
-            columnMetaData.setJdbcType(type);
-            ValueConverter dateConvert = new DateTimeConverter("yyyy-MM-dd HH:mm:ss", columnMetaData.getJavaType()) {
+            column.setJdbcType(type);
+            ValueConverter dateConvert = new DateTimeConverter("yyyy-MM-dd HH:mm:ss", column.getJavaType()) {
                 @Override
                 public Object getData(Object value) {
                     if (value instanceof Number) {
@@ -161,15 +161,15 @@ public class JpaAnnotationParser {
                 }
             };
 
-            if (columnMetaData.getJdbcType() == JDBCType.DATE
-                    || columnMetaData.getJdbcType() == JDBCType.TIMESTAMP) {
-                columnMetaData.setValueConverter(dateConvert);
-            } else if (TypeUtils.isNumberType(columnMetaData)) {
-                columnMetaData.setValueConverter(new NumberValueConverter(columnMetaData.getJavaType()));
+            if (column.getJdbcType() == JDBCType.DATE
+                    || column.getJdbcType() == JDBCType.TIMESTAMP) {
+                column.setValueConverter(dateConvert);
+            } else if (column.getJavaType() == boolean.class || column.getJavaType() == Boolean.class) {
+                column.setValueConverter(new BooleanValueConverter(column.getJdbcType()));
+            } else if (TypeUtils.isNumberType(column)) {
+                column.setValueConverter(new NumberValueConverter(column.getJavaType()));
             }
-
-
-            tableMetaData.addColumn(columnMetaData);
+            tableMetaData.addColumn(column);
         }
         return tableMetaData;
     }

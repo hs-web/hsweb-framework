@@ -43,7 +43,6 @@ public @interface RequiresDataAccess {
     /**
      * @return permission id ,如果为空将继承 {@link Authorize#permission()}
      * @see Permission#getId()
-     *
      */
     String permission() default "";
 
@@ -82,4 +81,9 @@ public @interface RequiresDataAccess {
      */
     boolean ignore() default false;
 
+    /**
+     * @return 进行控制的实体类类型
+     * @since 3.0.6
+     */
+    Class entityType() default Void.class;
 }

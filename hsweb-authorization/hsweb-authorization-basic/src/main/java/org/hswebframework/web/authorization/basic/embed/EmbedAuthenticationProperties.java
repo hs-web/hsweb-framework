@@ -65,6 +65,8 @@ public class EmbedAuthenticationProperties {
     public static class PermissionInfo {
         private String id;
 
+        private String name;
+
         private Set<String> actions = new HashSet<>();
 
         private List<Map<String, Object>> dataAccesses = new ArrayList<>();
@@ -85,6 +87,7 @@ public class EmbedAuthenticationProperties {
                 .map(info -> {
                     SimplePermission permission = new SimplePermission();
                     permission.setId(info.getId());
+                    permission.setName(info.getName());
                     permission.setActions(info.getActions());
                     permission.setDataAccesses(info.getDataAccesses()
                             .stream().map(conf -> factory.create()

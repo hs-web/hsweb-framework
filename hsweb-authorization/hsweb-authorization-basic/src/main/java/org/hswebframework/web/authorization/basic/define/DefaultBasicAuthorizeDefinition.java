@@ -101,6 +101,7 @@ public class DefaultBasicAuthorizeDefinition implements AopAuthorizeDefinition {
         }
         actions.addAll(Arrays.asList(dataAccess.action()));
         DefaultDataAccessDefinition definition = new DefaultDataAccessDefinition();
+        definition.setEntityType(dataAccess.entityType());
         definition.setPhased(dataAccess.phased());
         if (!"".equals(dataAccess.controllerBeanName())) {
             definition.setController(dataAccess.controllerBeanName());
@@ -108,7 +109,7 @@ public class DefaultBasicAuthorizeDefinition implements AopAuthorizeDefinition {
             definition.setController(dataAccess.getClass().getName());
         }
         dataAccessDefinition = definition;
-        dataAccessControl=true;
+        dataAccessControl = true;
     }
 
 

@@ -32,7 +32,10 @@ public enum DatabaseType {
     h2("org.h2.Driver", "org.h2.jdbcx.JdbcDataSource", "select 1", createUrlPredicate("h2")),
     oracle("oracle.jdbc.driver.OracleDriver", "oracle.jdbc.xa.client.OracleXADataSource", "select 1 from dual", createUrlPredicate("oracle")),
     jtds_sqlserver("net.sourceforge.jtds.jdbc.Driver", "net.sourceforge.jtds.jdbcx.JtdsDataSource", "select 1 t", createUrlPredicate("jtds:sqlserver")),
-    sqlserver("com.microsoft.sqlserver.jdbc.SQLServerDriver", "com.microsoft.sqlserver.jdbc.SQLServerXADataSource", "select 1 t", createUrlPredicate("sqlserver"));
+    sqlserver("com.microsoft.sqlserver.jdbc.SQLServerDriver", "com.microsoft.sqlserver.jdbc.SQLServerXADataSource", "select 1 t", createUrlPredicate("sqlserver")),
+    //beta
+    postgresql("org.postgresql.Driver", "org.postgresql.xa.PGXADataSource", "select 1 ", createUrlPredicate("postgresql"));
+
 
     static Predicate<String> createUrlPredicate(String name) {
         return url -> {

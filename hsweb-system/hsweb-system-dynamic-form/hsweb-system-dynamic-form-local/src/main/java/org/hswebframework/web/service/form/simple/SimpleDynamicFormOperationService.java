@@ -82,7 +82,7 @@ public class SimpleDynamicFormOperationService implements DynamicFormOperationSe
         }
         paramEntity.rePaging(total);
         List<T> list = query.setParam(paramEntity).list(paramEntity.getPageIndex(), paramEntity.getPageSize());
-        return PagerResult.of(total, list);
+        return PagerResult.of(total, list, paramEntity);
     }
 
     @Override

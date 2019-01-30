@@ -17,9 +17,9 @@ import java.util.stream.Collectors;
 @Setter
 @NoArgsConstructor
 public class SimplePermissionEntity extends SimpleGenericEntity<String> implements PermissionEntity {
-    private static final long serialVersionUID = -5505339187716888516L;
+    private static final long   serialVersionUID = -5505339187716888516L;
     @NotBlank
-    private String name;
+    private              String name;
 
     private String describe;
 
@@ -43,6 +43,9 @@ public class SimplePermissionEntity extends SimpleGenericEntity<String> implemen
         SimplePermissionEntity target = (SimplePermissionEntity) super.clone();
         if (actions != null) {
             target.setActions(getActions().stream().map(ActionEntity::clone).collect(Collectors.toList()));
+        }
+        if (parents != null) {
+            target.setParents(new ArrayList<>(getParents()));
         }
         if (optionalFields != null) {
             target.setOptionalFields(getOptionalFields().stream().map(OptionalField::clone).collect(Collectors.toList()));

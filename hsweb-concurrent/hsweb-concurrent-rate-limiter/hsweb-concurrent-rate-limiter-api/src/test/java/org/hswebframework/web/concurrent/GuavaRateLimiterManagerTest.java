@@ -17,7 +17,7 @@ public class GuavaRateLimiterManagerTest {
     @Test
     public void testRateLimiter() {
         RateLimiter limiter = manager.getRateLimiter("test", 1, TimeUnit.SECONDS);
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 10; i++) {
             if (!limiter.tryAcquire(10, TimeUnit.SECONDS)) {
                 throw new UnsupportedOperationException();
             }

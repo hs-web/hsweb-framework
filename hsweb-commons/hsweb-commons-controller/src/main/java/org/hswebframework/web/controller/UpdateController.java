@@ -21,9 +21,13 @@ package org.hswebframework.web.controller;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.Permission;
+import org.hswebframework.web.authorization.User;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.annotation.Logical;
+import org.hswebframework.web.commons.entity.RecordCreationEntity;
+import org.hswebframework.web.commons.entity.RecordModifierEntity;
 import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.logging.AccessLogger;
 import org.hswebframework.web.service.CreateEntityService;
@@ -45,16 +49,42 @@ public interface UpdateController<E, PK, M> {
     @PutMapping(path = "/{id}")
     @ApiOperation("修改数据")
     default ResponseMessage<Integer> updateByPrimaryKey(@PathVariable PK id, @RequestBody M data) {
-        E entity = getService().createEntity();
-        return ResponseMessage.ok(getService().updateByPk(id, modelToEntity(data, entity)));
+        E entity = modelToEntity(data, getService().createEntity());
+        if (entity instanceof RecordModifierEntity) {
+            RecordModifierEntity creationEntity = (RecordModifierEntity) entity;
+            creationEntity.setModifyTimeNow();
+            creationEntity.setModifierId(Authentication.current()
+                    .map(Authentication::getUser)
+                    .map(User::getId)
+                    .orElse(null));
+        }
+        return ResponseMessage.ok(getService().updateByPk(id, entity));
     }
 
     @Authorize(action = {Permission.ACTION_UPDATE, Permission.ACTION_ADD}, logical = Logical.AND)
     @PatchMapping
     @ApiOperation("新增或者修改")
     default ResponseMessage<PK> saveOrUpdate(@RequestBody M data) {
-        E entity = getService().createEntity();
-        return ResponseMessage.ok(getService().saveOrUpdate(modelToEntity(data, entity)));
+        E entity = modelToEntity(data, getService().createEntity());
+        //自动添加创建人和创建时间
+        if (entity instanceof RecordCreationEntity) {
+            RecordCreationEntity creationEntity = (RecordCreationEntity) entity;
+            creationEntity.setCreateTimeNow();
+            creationEntity.setCreatorId(Authentication.current()
+                    .map(Authentication::getUser)
+                    .map(User::getId)
+                    .orElse(null));
+        }
+        //修改人和修改时间
+        if (entity instanceof RecordModifierEntity) {
+            RecordModifierEntity creationEntity = (RecordModifierEntity) entity;
+            creationEntity.setModifyTimeNow();
+            creationEntity.setModifierId(Authentication.current()
+                    .map(Authentication::getUser)
+                    .map(User::getId)
+                    .orElse(null));
+        }
+        return ResponseMessage.ok(getService().saveOrUpdate(entity));
     }
 
     /**

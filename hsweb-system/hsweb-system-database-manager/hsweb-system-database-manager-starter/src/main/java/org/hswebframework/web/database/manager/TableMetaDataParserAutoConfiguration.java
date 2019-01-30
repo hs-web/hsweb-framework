@@ -5,10 +5,7 @@ import org.hswebframework.web.database.manager.meta.ObjectMetadata;
 import org.hswebframework.web.database.manager.meta.table.parser.MetaDataParserRegister;
 import org.hswebframework.web.database.manager.meta.table.parser.MetaDataParserSupplier;
 import org.hswebframework.web.database.manager.meta.table.parser.TableMetaDataParser;
-import org.hswebframework.web.database.manager.meta.table.parser.support.H2TableMetaDataParser;
-import org.hswebframework.web.database.manager.meta.table.parser.support.MysqlTableMetaDataParser;
-import org.hswebframework.web.database.manager.meta.table.parser.support.OracleTableMetaDataParser;
-import org.hswebframework.web.database.manager.meta.table.parser.support.SqlServerTableMetaDataParser;
+import org.hswebframework.web.database.manager.meta.table.parser.support.*;
 import org.hswebframework.web.datasource.DatabaseType;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +40,12 @@ public class TableMetaDataParserAutoConfiguration {
     public OracleTableMetaDataParser oracleTableMetaParser() {
         return new OracleTableMetaDataParser(sqlExecutor);
     }
+    @Bean
+    @ConditionalOnClass(name = "org.postgresql.Driver")
+    public PostgresTableMetaDataParser postgresTableMetaDataParser() {
+        return new PostgresTableMetaDataParser(sqlExecutor);
+    }
+
 
     @Bean
     @ConditionalOnClass(name = "com.microsoft.sqlserver.jdbc.SQLServerDriver")

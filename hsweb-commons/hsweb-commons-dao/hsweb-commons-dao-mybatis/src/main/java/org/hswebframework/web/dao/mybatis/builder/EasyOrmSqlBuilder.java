@@ -28,15 +28,13 @@ import org.hswebframework.ezorm.core.param.*;
 import org.hswebframework.ezorm.rdb.meta.RDBColumnMetaData;
 import org.hswebframework.ezorm.rdb.meta.RDBDatabaseMetaData;
 import org.hswebframework.ezorm.rdb.meta.RDBTableMetaData;
+import org.hswebframework.ezorm.rdb.meta.converter.BooleanValueConverter;
 import org.hswebframework.ezorm.rdb.meta.converter.DateTimeConverter;
 import org.hswebframework.ezorm.rdb.meta.converter.NumberValueConverter;
 import org.hswebframework.ezorm.rdb.render.Sql;
 import org.hswebframework.ezorm.rdb.render.SqlAppender;
 import org.hswebframework.ezorm.rdb.render.SqlRender;
-import org.hswebframework.ezorm.rdb.render.dialect.Dialect;
-import org.hswebframework.ezorm.rdb.render.dialect.H2RDBDatabaseMetaData;
-import org.hswebframework.ezorm.rdb.render.dialect.MysqlRDBDatabaseMetaData;
-import org.hswebframework.ezorm.rdb.render.dialect.OracleRDBDatabaseMetaData;
+import org.hswebframework.ezorm.rdb.render.dialect.*;
 import org.hswebframework.ezorm.rdb.render.support.simple.CommonSqlRender;
 import org.hswebframework.ezorm.rdb.render.support.simple.SimpleWhereSqlBuilder;
 import org.hswebframework.web.BusinessException;
@@ -108,32 +106,30 @@ public class EasyOrmSqlBuilder {
         return javaType;
     }
 
-    private final RDBDatabaseMetaData mysql  = new MysqlMeta();
-    private final RDBDatabaseMetaData oracle = new OracleMeta();
-    private final RDBDatabaseMetaData h2     = new H2Meta();
+    private final RDBDatabaseMetaData mysql      = new MysqlMeta();
+    private final RDBDatabaseMetaData oracle     = new OracleMeta();
+    private final RDBDatabaseMetaData h2         = new H2Meta();
+    private final RDBDatabaseMetaData postgresql = new PGMeta();
+    private final RDBDatabaseMetaData mssql      = new MSSQLMeta();
 
-    private final ConcurrentMap<RDBDatabaseMetaData, Map<String, RDBTableMetaData>> metaCache = new ConcurrentHashMap<RDBDatabaseMetaData, Map<String, RDBTableMetaData>>() {
-        @Override
-        public Map<String, RDBTableMetaData> get(Object key) {
-            Map<String, RDBTableMetaData> map = super.get(key);
-            if (map == null) {
-                map = new ConcurrentHashMap<>();
-                put((RDBDatabaseMetaData) key, map);
-            }
-            return map;
-        }
-    };
+    private final ConcurrentMap<RDBDatabaseMetaData, Map<String, RDBTableMetaData>> metaCache = new ConcurrentHashMap<>();
 
     public RDBDatabaseMetaData getActiveDatabase() {
         DatabaseType type = DataSourceHolder.currentDatabaseType();
         switch (type) {
-            case h2:
-                return h2;
             case mysql:
                 return mysql;
             case oracle:
                 return oracle;
+            case postgresql:
+                return postgresql;
+            case h2:
+                return h2;
+            case jtds_sqlserver:
+            case sqlserver:
+                return mssql;
             default:
+                log.warn("不支持的数据库类型:[{}]", type);
                 return h2;
         }
     }
@@ -153,7 +149,8 @@ public class EasyOrmSqlBuilder {
         tableName = getRealTableName(tableName);
         RDBDatabaseMetaData active = getActiveDatabase();
         String cacheKey = tableName.concat("-").concat(resultMapId);
-        Map<String, RDBTableMetaData> cache = metaCache.get(active);
+        Map<String, RDBTableMetaData> cache = metaCache.computeIfAbsent(active, k -> new ConcurrentHashMap<>());
+
         RDBTableMetaData cached = cache.get(cacheKey);
         if (cached != null) {
             return cached;
@@ -165,7 +162,7 @@ public class EasyOrmSqlBuilder {
 
         List<ResultMapping> resultMappings = new ArrayList<>(resultMaps.getResultMappings());
         resultMappings.addAll(resultMaps.getIdResultMappings());
-        resultMappings.forEach(resultMapping -> {
+        for (ResultMapping resultMapping : resultMappings) {
             if (resultMapping.getNestedQueryId() == null) {
                 RDBColumnMetaData column = new RDBColumnMetaData();
                 column.setJdbcType(JDBCType.valueOf(resultMapping.getJdbcType().name()));
@@ -187,13 +184,16 @@ public class EasyOrmSqlBuilder {
                         }
                     };
                     column.setValueConverter(dateConvert);
+                } else if (column.getJavaType() == boolean.class || column.getJavaType() == Boolean.class) {
+                    column.setValueConverter(new BooleanValueConverter(column.getJdbcType()));
                 } else if (TypeUtils.isNumberType(column)) { //数字
+                    //数字
                     column.setValueConverter(new NumberValueConverter(column.getJavaType()));
                 }
                 rdbTableMetaData.addColumn(column);
             }
-        });
-        cache.put(cacheKey, rdbTableMetaData);
+        }
+
         if (useJpa) {
             Class type = entityFactory == null ? resultMaps.getType() : entityFactory.getInstanceType(resultMaps.getType());
             RDBTableMetaData parseResult = JpaAnnotationParser.parseMetaDataFromEntity(type);
@@ -207,6 +207,7 @@ public class EasyOrmSqlBuilder {
                 }
             }
         }
+        cache.put(cacheKey, rdbTableMetaData);
         return rdbTableMetaData;
     }
 
@@ -274,8 +275,7 @@ public class EasyOrmSqlBuilder {
         }
         RDBTableMetaData tableMetaData = createMeta(tableName, resultMapId);
         SqlRender<InsertParam> render = tableMetaData.getDatabaseMetaData().getRenderer(SqlRender.TYPE.INSERT);
-        String sql = render.render(tableMetaData, insertParam).getSql();
-        return sql;
+        return render.render(tableMetaData, insertParam).getSql();
     }
 
     public String buildUpdateSql(String resultMapId, String tableName, UpdateParam param) {
@@ -405,7 +405,7 @@ public class EasyOrmSqlBuilder {
     }
 
     class MysqlMeta extends MysqlRDBDatabaseMetaData {
-        public MysqlMeta() {
+        MysqlMeta() {
             super();
             renderMap.put(SqlRender.TYPE.INSERT, new InsertSqlBuilder());
             renderMap.put(SqlRender.TYPE.UPDATE, new UpdateSqlBuilder(Dialect.MYSQL));
@@ -413,7 +413,7 @@ public class EasyOrmSqlBuilder {
     }
 
     class OracleMeta extends OracleRDBDatabaseMetaData {
-        public OracleMeta() {
+        OracleMeta() {
             super();
             renderMap.put(SqlRender.TYPE.INSERT, new InsertSqlBuilder());
             renderMap.put(SqlRender.TYPE.UPDATE, new UpdateSqlBuilder(Dialect.ORACLE));
@@ -421,10 +421,26 @@ public class EasyOrmSqlBuilder {
     }
 
     class H2Meta extends H2RDBDatabaseMetaData {
-        public H2Meta() {
+        H2Meta() {
             super();
             renderMap.put(SqlRender.TYPE.INSERT, new InsertSqlBuilder());
             renderMap.put(SqlRender.TYPE.UPDATE, new UpdateSqlBuilder(Dialect.H2));
+        }
+    }
+
+    class PGMeta extends PGRDBDatabaseMetaData {
+        PGMeta() {
+            super();
+            renderMap.put(SqlRender.TYPE.INSERT, new InsertSqlBuilder());
+            renderMap.put(SqlRender.TYPE.UPDATE, new UpdateSqlBuilder(Dialect.POSTGRES));
+        }
+    }
+
+    class MSSQLMeta extends MSSQLRDBDatabaseMetaData {
+        MSSQLMeta() {
+            super();
+            renderMap.put(SqlRender.TYPE.INSERT, new InsertSqlBuilder());
+            renderMap.put(SqlRender.TYPE.UPDATE, new UpdateSqlBuilder(Dialect.MSSQL));
         }
     }
 }

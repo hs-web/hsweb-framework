@@ -89,48 +89,50 @@ public class DefaultAopMethodAuthorizeDefinitionParser implements AopMethodAutho
             cache.put(key, EmptyAuthorizeDefinition.instance);
             return null;
         }
-        DefaultBasicAuthorizeDefinition authorizeDefinition = new DefaultBasicAuthorizeDefinition();
-        authorizeDefinition.setTargetClass(target);
-        authorizeDefinition.setTargetMethod(method);
-        if (methodAuth == null || methodAuth.merge()) {
-            authorizeDefinition.put(classAuth);
-        }
+        synchronized (cache) {
+            DefaultBasicAuthorizeDefinition authorizeDefinition = new DefaultBasicAuthorizeDefinition();
+            authorizeDefinition.setTargetClass(target);
+            authorizeDefinition.setTargetMethod(method);
+            if (methodAuth == null || methodAuth.merge()) {
+                authorizeDefinition.put(classAuth);
+            }
 
-        authorizeDefinition.put(methodAuth);
+            authorizeDefinition.put(methodAuth);
 
-        authorizeDefinition.put(expression);
+            authorizeDefinition.put(expression);
 
-        authorizeDefinition.put(classDataAccess);
+            authorizeDefinition.put(classDataAccess);
 
-        authorizeDefinition.put(methodDataAccess);
+            authorizeDefinition.put(methodDataAccess);
 
-        if (authorizeDefinition.getPermissionDescription().length == 0) {
-            if (classAuth != null) {
-                authorizeDefinition.put(classAuth.dataAccess());
-                String[] desc = classAuth.description();
-                if (desc.length > 0) {
-                    authorizeDefinition.setPermissionDescription(desc);
+            if (authorizeDefinition.getPermissionDescription().length == 0) {
+                if (classAuth != null) {
+                    authorizeDefinition.put(classAuth.dataAccess());
+                    String[] desc = classAuth.description();
+                    if (desc.length > 0) {
+                        authorizeDefinition.setPermissionDescription(desc);
+                    }
                 }
             }
-        }
 
-        if (authorizeDefinition.getActionDescription().length == 0) {
-            if (methodAuth != null) {
-                if (methodAuth.description().length != 0) {
-                    authorizeDefinition.setActionDescription(methodAuth.description());
+            if (authorizeDefinition.getActionDescription().length == 0) {
+                if (methodAuth != null) {
+                    if (methodAuth.description().length != 0) {
+                        authorizeDefinition.setActionDescription(methodAuth.description());
+                    }
                 }
             }
-        }
 
-        log.info("parsed authorizeDefinition {}.{} => {}.{} permission:{} actions:{}",
-                target.getSimpleName(),
-                method.getName(),
-                authorizeDefinition.getPermissionDescription(),
-                authorizeDefinition.getActionDescription(),
-                authorizeDefinition.getPermissions(),
-                authorizeDefinition.getActions());
-        cache.put(key, authorizeDefinition);
-        return authorizeDefinition;
+            log.info("parsed authorizeDefinition {}.{} => {}.{} permission:{} actions:{}",
+                    target.getSimpleName(),
+                    method.getName(),
+                    authorizeDefinition.getPermissionDescription(),
+                    authorizeDefinition.getActionDescription(),
+                    authorizeDefinition.getPermissions(),
+                    authorizeDefinition.getActions());
+            cache.put(key, authorizeDefinition);
+            return authorizeDefinition;
+        }
     }
 
     public CacheKey buildCacheKey(Class target, Method method) {

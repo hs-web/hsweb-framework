@@ -1,11 +1,19 @@
 package org.hswebframework.web.entity.authorization;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 import org.hswebframework.web.commons.entity.CloneableEntity;
 
 /**
  * @author zhouhao
  */
+@Getter
+@Setter
+@EqualsAndHashCode
 public class DataAccessEntity implements CloneableEntity {
+    private static final long serialVersionUID = 2198771924746804915L;
+
     private String action;
 
     private String describe;
@@ -13,38 +21,6 @@ public class DataAccessEntity implements CloneableEntity {
     private String type;
 
     private String config;
-
-    public String getAction() {
-        return this.action;
-    }
-
-    public void setAction(String action) {
-        this.action = action;
-    }
-
-    public String getDescribe() {
-        return this.describe;
-    }
-
-    public void setDescribe(String describe) {
-        this.describe = describe;
-    }
-
-    public String getType() {
-        return this.type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public String getConfig() {
-        return this.config;
-    }
-
-    public void setConfig(String config) {
-        this.config = config;
-    }
 
     @Override
     public DataAccessEntity clone() {

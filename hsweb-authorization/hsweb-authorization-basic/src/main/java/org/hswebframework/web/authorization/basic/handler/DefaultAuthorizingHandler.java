@@ -160,12 +160,10 @@ public class DefaultAuthorizingHandler implements AuthorizingHandler {
         // 控制权限
         if (!definition.getPermissions().isEmpty()) {
             if (logger.isInfoEnabled()) {
-                logger.info("do permission access handle : permissions{}({}),actions{} ,definition:{}.{} ({})",
+                logger.info("执行权限控制:权限{}({}),操作{}.",
                         definition.getPermissionDescription(),
-                        permissionsDef, actionsDef
-                        , definition.getPermissions(),
-                        definition.getActions(),
-                        definition.getLogical());
+                        permissionsDef,
+                        actionsDef);
             }
             List<Permission> permissions = authentication.getPermissions().stream()
                     .filter(permission -> {

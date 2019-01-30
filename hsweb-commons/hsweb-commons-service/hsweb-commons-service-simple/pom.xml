@@ -23,7 +23,7 @@
     <parent>
         <artifactId>hsweb-commons-service</artifactId>
         <groupId>org.hswebframework.web</groupId>
-        <version>3.0.5</version>
+        <version>3.0.6</version>
         <relativePath>../pom.xml</relativePath>
 
     </parent>
@@ -32,7 +32,14 @@
     <artifactId>hsweb-commons-service-simple</artifactId>
 
     <description>通用增删改查-通用服务本地实现模块</description>
-
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+    </build>
     <dependencies>
         <dependency>
             <groupId>org.slf4j</groupId>
