@@ -5,7 +5,7 @@
     <parent>
         <artifactId>hsweb-system-dashboard</artifactId>
         <groupId>org.hswebframework.web</groupId>
-        <version>3.0.6-SNAPSHOT</version>
+        <version>3.0.6</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
