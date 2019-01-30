@@ -6,6 +6,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.Map;
@@ -87,6 +88,8 @@ public abstract class ModuleUtils {
 
         private String groupId;
 
+        private String path;
+
         private String artifactId;
 
         private String gitCommitHash;
@@ -96,6 +99,24 @@ public abstract class ModuleUtils {
         private String comment;
 
         private String version;
+
+        public String getGitLocation() {
+            String gitCommitHash = this.gitCommitHash;
+            if (gitCommitHash.contains("$")) {
+                gitCommitHash = "master";
+            }
+            return gitRepository + "/blob/" + gitCommitHash + "/" + path + "/";
+        }
+
+        public String getGitClassLocation(Class clazz) {
+            return getGitLocation() + "src/main/java/" + (ClassUtils.getPackageName(clazz).replace(".", "/"))
+                    + "/" + clazz.getSimpleName() + ".java";
+        }
+
+        public String getGitClassLocation(Class clazz, long line, long lineTo) {
+            return getGitLocation() + "src/main/java/" + (ClassUtils.getPackageName(clazz).replace(".", "/"))
+                    + "/" + clazz.getSimpleName() + ".java#L" + line + "-" + "L" + lineTo;
+        }
 
         public String getId() {
             if (StringUtils.isEmpty(id)) {

@@ -4,7 +4,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 
-import static org.junit.Assert.*;
 
 /**
  * @author zhouhao
@@ -18,7 +17,8 @@ public class ModuleUtilsTest {
         Assert.assertNotNull(moduleInfo);
         Assert.assertFalse(moduleInfo.isNone());
         Assert.assertEquals(moduleInfo.getArtifactId(),"hsweb-commons-utils");
-
+        System.out.println(moduleInfo.getGitLocation());
+        System.out.println(moduleInfo.getGitClassLocation(Maps.class,10,12));
         ModuleUtils.ModuleInfo noneInfo = ModuleUtils.getModuleByClass(Logger.class);
         Assert.assertNotNull(noneInfo);
         Assert.assertTrue(noneInfo.isNone());

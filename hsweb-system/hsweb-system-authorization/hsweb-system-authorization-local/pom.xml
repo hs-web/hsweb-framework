@@ -11,6 +11,19 @@
 
     <artifactId>hsweb-system-authorization-local</artifactId>
 
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+            <resource>
+                <directory>src/main/resources/org</directory>
+                <filtering>false</filtering>
+            </resource>
+        </resources>
+    </build>
+
     <description>业务模块-权限管理本地实现</description>
     <dependencies>
         <dependency>
