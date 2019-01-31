@@ -58,6 +58,12 @@ public abstract class ModuleUtils {
         }
         String path = codeSource.getLocation().toString();
 
+        boolean isJar = path.contains("!/") && path.contains(".jar");
+
+        if (isJar) {
+            return path.substring(0, path.lastIndexOf(".jar") + 4);
+        }
+
         if (path.endsWith("/")) {
             return path.substring(0, path.length() - 1);
         }
