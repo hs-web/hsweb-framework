@@ -87,9 +87,8 @@ public abstract class CompareUtils {
         return false;
     }
 
+    @SuppressWarnings("all")
     public static boolean compare(Collection collection, Object target) {
-
-        int size = collection.size();
 
         Collection targetCollection = null;
         if (target instanceof String) {
@@ -103,15 +102,22 @@ public abstract class CompareUtils {
         if (targetCollection == null) {
             return false;
         }
-        if (size != targetCollection.size()) {
-            return false;
+
+        Set left = new HashSet(collection);
+        Set right = new HashSet(targetCollection);
+
+        if (left.size() < right.size()) {
+            Set tmp = right;
+            right = left;
+            left = tmp;
         }
-
-
-        //[1,2,3] ,[3,3,3]
-       // return targetCollection.stream().allMatch(object -> {});
-
-        return false;
+        l:
+        for (Object source : left) {
+            if (!right.stream().anyMatch(targetObj -> compare(source, targetObj))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public static boolean compare(Object[] number, Object target) {

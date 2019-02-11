@@ -7,9 +7,11 @@ import lombok.Setter;
 @Setter
 public class Diff {
 
-    private String fieldName;
+    private String field;
 
-    private String fieldComment;
+    private String comment;
+
+    private String type;
 
     private Object before;
 

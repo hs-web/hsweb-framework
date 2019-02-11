@@ -8,6 +8,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Date;
 
 import static org.junit.Assert.*;
@@ -53,6 +54,14 @@ public class CompareUtilsTest {
         Assert.assertTrue(CompareUtils.compare(100,new BigDecimal("100")));
 
         Assert.assertTrue(CompareUtils.compare(new BigDecimal("100"),100.0D));
+
+        Assert.assertTrue(CompareUtils.compare(Arrays.asList(1,2,3),Arrays.asList("3","2","1")));
+
+        Assert.assertFalse(CompareUtils.compare(Arrays.asList(1,2,3),Arrays.asList("3","3","1")));
+
+        Assert.assertFalse(CompareUtils.compare(Arrays.asList(1,2,3),Arrays.asList("3","1")));
+
+        Assert.assertTrue(CompareUtils.compare(Arrays.asList(date,3),Arrays.asList("3",DateFormatter.toString(date,"yyyy-MM-dd"))));
 
 
     }
