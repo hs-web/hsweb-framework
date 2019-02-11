@@ -83,7 +83,7 @@
         <project.build.jdk>${java.version}</project.build.jdk>
 
 
-        <spring.boot.version>1.5.13.RELEASE</spring.boot.version>
+        <spring.boot.version>1.5.19.RELEASE</spring.boot.version>
 
         <javassist.version>3.20.0-GA</javassist.version>
         <activiti.version>5.19.0.2</activiti.version>
