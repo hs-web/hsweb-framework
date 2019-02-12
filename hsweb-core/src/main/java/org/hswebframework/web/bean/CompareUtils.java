@@ -1,13 +1,12 @@
 package org.hswebframework.web.bean;
 
-import org.hswebframework.utils.StringUtils;
 import org.hswebframework.utils.time.DateFormatter;
 import org.hswebframework.web.dict.EnumDict;
-import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.util.*;
 
+@SuppressWarnings("all")
 public abstract class CompareUtils {
 
     public static boolean compare(Object source, Object target) {
@@ -77,19 +76,46 @@ public abstract class CompareUtils {
         }
 
 
-        return false;
+        return compare(FastBeanCopier.copy(source, HashMap.class), FastBeanCopier.copy(target, HashMap.class));
 
     }
 
-    public static boolean compare(Map collection, Object target) {
+    public static boolean compare(Map<?, ?> map, Object target) {
+        if (map == target) {
+            return true;
+        }
 
+        if (map == null || target == null) {
+            return false;
+        }
+        Map<?, ?> targetMap = null;
+        if (target instanceof Map) {
+            targetMap = ((Map) target);
+        } else {
+            targetMap = FastBeanCopier.copy(target, HashMap::new);
+        }
 
-        return false;
+        if (map.size() != targetMap.size()) {
+            return false;
+        }
+        for (Map.Entry entry : map.entrySet()) {
+            if (!compare(entry.getValue(), targetMap.get(entry.getKey()))) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
-    @SuppressWarnings("all")
+
     public static boolean compare(Collection collection, Object target) {
+        if (collection == target) {
+            return true;
+        }
 
+        if (collection == null || target == null) {
+            return false;
+        }
         Collection targetCollection = null;
         if (target instanceof String) {
             target = ((String) target).split("[, ;]");
@@ -127,6 +153,14 @@ public abstract class CompareUtils {
     }
 
     public static boolean compare(Number number, Object target) {
+        if (number == target) {
+            return true;
+        }
+
+        if (number == null || target == null) {
+            return false;
+        }
+
         if (target.equals(number)) {
             return true;
         }
@@ -144,8 +178,10 @@ public abstract class CompareUtils {
                 DateFormatter dateFormatter = DateFormatter.getFormatter(stringValue);
                 return (dateFormatter.toString(new Date(number.longValue())).equals(stringValue));
             }
-            if (StringUtils.isNumber(target)) {
+            try{
                 return new BigDecimal(stringValue).doubleValue() == number.doubleValue();
+            }catch (NumberFormatException e){
+                return false;
             }
         }
 
@@ -153,6 +189,13 @@ public abstract class CompareUtils {
     }
 
     public static boolean compare(Enum e, Object target) {
+        if (e == target) {
+            return true;
+        }
+
+        if (e == null || target == null) {
+            return false;
+        }
         String stringValue = String.valueOf(target);
         if (e instanceof EnumDict) {
             EnumDict dict = ((EnumDict) e);
@@ -163,20 +206,43 @@ public abstract class CompareUtils {
     }
 
     public static boolean compare(String string, Object target) {
+        if (string == target) {
+            return true;
+        }
 
+        if (string == null || target == null) {
+            return false;
+        }
         if (string.equals(String.valueOf(target))) {
             return true;
         }
 
+        if (target instanceof Enum) {
+            return compare(((Enum) target), string);
+        }
+
         if (target instanceof Date) {
-            Date date = DateFormatter.fromString(string);
-            return (date != null && ((Date) target).getTime() == date.getTime());
+            return compare(((Date) target), string);
+        }
+
+        if (target instanceof Number) {
+            return compare(((Number) target), string);
+        }
+        if (target instanceof Collection) {
+            return compare(((Collection) target), string);
         }
 
         return false;
     }
 
     public static boolean compare(Date date, Object target) {
+        if (date == target) {
+            return true;
+        }
+
+        if (date == null || target == null) {
+            return false;
+        }
         if (target instanceof Date) {
             return date.getTime() == ((Date) target).getTime();
         }
