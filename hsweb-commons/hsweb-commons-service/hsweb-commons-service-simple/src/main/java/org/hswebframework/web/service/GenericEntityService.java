@@ -18,7 +18,6 @@
 
 package org.hswebframework.web.service;
 
-import lombok.Setter;
 import org.hswebframework.web.commons.entity.GenericEntity;
 import org.hswebframework.web.commons.entity.LogicalDeleteEntity;
 import org.hswebframework.web.commons.entity.RecordCreationEntity;
@@ -30,8 +29,6 @@ import org.hswebframework.web.validator.group.CreateGroup;
 import org.hswebframework.web.validator.group.UpdateGroup;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.PayloadApplicationEvent;
-import org.springframework.core.ResolvableType;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -118,17 +115,7 @@ public abstract class GenericEntityService<E extends GenericEntity<PK>, PK>
         //实现了 RecordModifierEntity接口的实体,将推送 EntityModifyEvent 事件.
         if (eventPublisher != null && pushModifyEvent()) {
             E old = selectByPk(pk);
-
-            EntityModifyEvent<?> e = new EntityModifyEvent<>(old, entity);
-            PayloadApplicationEvent<EntityModifyEvent<?>> event = new PayloadApplicationEvent<EntityModifyEvent<?>>(this, e) {
-                @Override
-                public ResolvableType getResolvableType() {
-                    return ResolvableType.forClassWithGenerics(PayloadApplicationEvent.class
-                            , ResolvableType.forClassWithGenerics(EntityModifyEvent.class, entityType));
-                }
-            };
-
-            eventPublisher.publishEvent(event);
+            eventPublisher.publishEvent(new GenericsPayloadApplicationEvent<>(this, new EntityModifyEvent<>(old, entity), entityType));
         }
         return createUpdate(entity)
                 //如果是RecordCreationEntity则不修改creator_id和creator_time
@@ -188,15 +175,7 @@ public abstract class GenericEntityService<E extends GenericEntity<PK>, PK>
         getDao().insert(entity);
 
         if (eventPublisher != null && pushCreatedEvent()) {
-            EntityCreatedEvent<?> e = new EntityCreatedEvent<>(entity);
-            PayloadApplicationEvent<EntityCreatedEvent<?>> event = new PayloadApplicationEvent<EntityCreatedEvent<?>>(this, e) {
-                @Override
-                public ResolvableType getResolvableType() {
-                    return ResolvableType.forClassWithGenerics(PayloadApplicationEvent.class
-                            , ResolvableType.forClassWithGenerics(EntityModifyEvent.class, entityType));
-                }
-            };
-            eventPublisher.publishEvent(event);
+            eventPublisher.publishEvent(new GenericsPayloadApplicationEvent<>(this, new EntityCreatedEvent<>(entity), entityType));
         }
         return entity.getId();
     }

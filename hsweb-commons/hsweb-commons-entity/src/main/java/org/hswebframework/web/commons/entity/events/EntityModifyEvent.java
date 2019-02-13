@@ -9,6 +9,8 @@ import java.io.Serializable;
 @Getter
 public class EntityModifyEvent<E> implements Serializable{
 
+    private static final long serialVersionUID = -7158901204884303777L;
+
     private E before;
 
     private E after;
