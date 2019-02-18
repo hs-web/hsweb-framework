@@ -15,11 +15,13 @@ hsweb:
 hsweb: 
     cors:
       enable: true
-      allowed-headers: "*"
-      allowed-methods: "*"
-      allowed-origins: "*"
-      allow-credentials: true
-      max-age: 14400
+      configs:
+        - /**:
+            allowed-headers: "*"
+            allowed-methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
+            allowed-origins: ["http://xxx.example.com"]
+            allow-credentials: true
+            maxAge: 1800
 ```
 
 # json序列化配置
