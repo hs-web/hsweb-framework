@@ -30,19 +30,19 @@ var versions = [
     {
         version: "3.0.0",
         upgrade: function (context) {
-            java.lang.System.out.println("更新到3.0.2了");
+            java.lang.System.out.println("更新到3.0.0了");
         }
     },
     {
         version: "3.0.1",
         upgrade: function (context) {
-            java.lang.System.out.println("更新到3.0.2了");
+            java.lang.System.out.println("更新到3.0.1了");
         }
     },
     {
         version: "3.0.2",
         upgrade: function (context) {
-            java.lang.System.out.println("更新到3.0.1了");
+            java.lang.System.out.println("更新到3.0.2了");
         }
     }
 ];
