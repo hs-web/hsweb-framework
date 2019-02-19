@@ -76,7 +76,7 @@ public @interface Authorize {
      *
      * @return 验证失败提示的消息
      */
-    String message() default "{unauthorized}";
+    String message() default "无权限";
 
     /**
      * 是否合并类上的注解
