@@ -28,6 +28,11 @@
         <include refid="BasicMapper.buildUpdateSql"/>
     </update>
 
+    <update id="delete" parameterType="org.hswebframework.web.commons.entity.Entity">
+        <include refid="config"/>
+        <include refid="BasicMapper.buildDeleteSql"/>
+    </update>
+
     <select id="query" parameterType="org.hswebframework.web.commons.entity.Entity" resultMap="TestResultMap">
         <include refid="config"/>
         <include refid="BasicMapper.buildSelectSql"/>
