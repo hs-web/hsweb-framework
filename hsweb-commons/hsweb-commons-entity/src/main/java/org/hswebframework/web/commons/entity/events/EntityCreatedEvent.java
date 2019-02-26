@@ -7,7 +7,9 @@ import java.io.Serializable;
 
 @AllArgsConstructor
 @Getter
-public class EntityCreatedEvent<E> implements Serializable{
+public class EntityCreatedEvent<E> implements Serializable {
 
     private E entity;
+
+    private Class<E> entityType;
 }

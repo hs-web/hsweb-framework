@@ -120,10 +120,10 @@ public abstract class GenericEntityService<E extends GenericEntity<PK>, PK>
         entity.setId(pk);
 
         tryValidate(entity, UpdateGroup.class);
-        //实现了 RecordModifierEntity接口的实体,将推送 EntityModifyEvent 事件.
+        //尝试推送 EntityModifyEvent 事件.
         if (eventPublisher != null && pushModifyEvent()) {
             E old = selectByPk(pk);
-            eventPublisher.publishEvent(new GenericsPayloadApplicationEvent<>(this, new EntityModifyEvent<>(old, entity), getEntityType()));
+            eventPublisher.publishEvent(new GenericsPayloadApplicationEvent<>(this, new EntityModifyEvent<>(old, entity, getEntityType()), getEntityType()));
         }
         return createUpdate(entity)
                 //如果是RecordCreationEntity则不修改creator_id和creator_time
@@ -183,7 +183,7 @@ public abstract class GenericEntityService<E extends GenericEntity<PK>, PK>
         getDao().insert(entity);
 
         if (eventPublisher != null && pushCreatedEvent()) {
-            eventPublisher.publishEvent(new GenericsPayloadApplicationEvent<>(this, new EntityCreatedEvent<>(entity), getEntityType()));
+            eventPublisher.publishEvent(new GenericsPayloadApplicationEvent<>(this, new EntityCreatedEvent<>(entity, getEntityType()), getEntityType()));
         }
         return entity.getId();
     }

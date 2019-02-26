@@ -26,5 +26,6 @@ public @interface Audit {
 
     //如果设置了审核权限,当进行审核或者回退的时候将进行权限验证.
     //如: permission:user:audit
+    //role:admin
     String auditPermission() default "";
 }

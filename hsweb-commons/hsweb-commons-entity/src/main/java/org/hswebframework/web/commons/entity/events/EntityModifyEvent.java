@@ -15,4 +15,6 @@ public class EntityModifyEvent<E> implements Serializable{
 
     private E after;
 
+    private Class<E> entityType;
+
 }
