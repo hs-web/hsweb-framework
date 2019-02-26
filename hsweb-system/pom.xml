@@ -28,7 +28,6 @@
         <module>hsweb-system-oauth2-client</module>
         <module>hsweb-system-dashboard</module>
         <module>hsweb-system-dev-tools</module>
-        <module>hsweb-system-audit</module>
     </modules>
     <artifactId>hsweb-system</artifactId>
 
