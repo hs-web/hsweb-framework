@@ -91,9 +91,17 @@ public abstract class GenericEntityService<E extends GenericEntity<PK>, PK>
                     .where(GenericEntity.id, pk)
                     .exec();
         } else {
-            getDao().deleteByPk(pk);
+            if (!physicalDeleteByPk(pk)) {
+                logger.warn("物理删除数据失败,主键:{}", pk);
+            }
         }
         return old;
+    }
+
+    protected boolean physicalDeleteByPk(PK pk) {
+        //createDelete().where(GenericEntity.id,pk).exec()>0;
+
+        return getDao().deleteByPk(pk) > 0;
     }
 
     protected boolean pushModifyEvent() {
