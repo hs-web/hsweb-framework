@@ -275,12 +275,13 @@ public class ScopeByUserHandler implements DataAccessHandler {
         };
     }
 
-    static Map<Class, String> cache = new ConcurrentHashMap<>();
+   // static Map<Class, String> cache = new ConcurrentHashMap<>();
 
     protected <T> String getControlProperty(Class type, Function<T, String> function) {
-        return cache.computeIfAbsent(type, t -> {
-            return function.apply((T) entityFactory.newInstance(type));
-        });
+        return function.apply((T) entityFactory.newInstance(type));
+//        return cache.computeIfAbsent(type, t -> {
+//            return function.apply((T) entityFactory.newInstance(type));
+//        });
     }
 
     class ControllerCache {
@@ -323,41 +324,41 @@ public class ScopeByUserHandler implements DataAccessHandler {
             ControllerCache controllerCache = new ControllerCache();
             Class entityClass = dataAccessEntityType;
             if (entityClass == Void.class) {
-                if (cacheKey.queryController) {
+                if (key.queryController) {
                     entityClass = org.hswebframework.utils.ClassUtils.getGenericType(controller, 0);
                 }
             }
-            boolean children = cacheKey.isChildren();
+            boolean children = key.isChildren();
             //控制机构
-            if (cacheKey.getType().contains("ORG") && OrgAttachEntity.class.isAssignableFrom(entityClass)) {
+            if (key.getType().contains("ORG") && OrgAttachEntity.class.isAssignableFrom(entityClass)) {
                 String property = getControlProperty(entityClass, OrgAttachEntity::getOrgIdProperty);
                 controllerCache.targetIdGetter = createGetter(OrgAttachEntity.class, OrgAttachEntity::getOrgId);
                 controllerCache.queryConsumer = (query, scopeInfo) -> {
                     query.and(property, children ? "org-child-in" : "in", scopeInfo.scope);
                 };
                 //部门
-            } else if (cacheKey.getType().contains("DEPT") && DepartmentAttachEntity.class.isAssignableFrom(entityClass)) {
+            } else if (key.getType().contains("DEPT") && DepartmentAttachEntity.class.isAssignableFrom(entityClass)) {
                 String property = getControlProperty(entityClass, DepartmentAttachEntity::getDepartmentIdProperty);
                 controllerCache.targetIdGetter = createGetter(DepartmentAttachEntity.class, DepartmentAttachEntity::getDepartmentId);
                 controllerCache.queryConsumer = (query, scopeInfo) -> {
                     query.and(property, children ? "org-child-in" : "in", scopeInfo.scope);
                 };
                 //岗位
-            } else if (cacheKey.getType().contains("POS") && PositionAttachEntity.class.isAssignableFrom(entityClass)) {
+            } else if (key.getType().contains("POS") && PositionAttachEntity.class.isAssignableFrom(entityClass)) {
                 String property = getControlProperty(entityClass, PositionAttachEntity::getPositionIdProperty);
                 controllerCache.targetIdGetter = createGetter(PositionAttachEntity.class, PositionAttachEntity::getPositionId);
                 controllerCache.queryConsumer = (query, scopeInfo) -> {
                     query.and(property, children ? "pos-child-in" : "in", scopeInfo.scope);
                 };
                 //行政区划
-            } else if (cacheKey.getType().contains("DIST") && DistrictAttachEntity.class.isAssignableFrom(entityClass)) {
+            } else if (key.getType().contains("DIST") && DistrictAttachEntity.class.isAssignableFrom(entityClass)) {
                 String property = getControlProperty(entityClass, DistrictAttachEntity::getDistrictIdProperty);
                 controllerCache.targetIdGetter = createGetter(DistrictAttachEntity.class, DistrictAttachEntity::getDistrictId);
                 controllerCache.queryConsumer = (query, scopeInfo) -> {
                     query.and(property, children ? "dist-child-in" : "in", scopeInfo.scope);
                 };
                 //人员
-            } else if (cacheKey.getType().contains("PERSON") && PersonAttachEntity.class.isAssignableFrom(entityClass)) {
+            } else if (key.getType().contains("PERSON") && PersonAttachEntity.class.isAssignableFrom(entityClass)) {
                 String property = getControlProperty(entityClass, PersonAttachEntity::getPersonIdProperty);
                 controllerCache.targetIdGetter = createGetter(PersonAttachEntity.class, PersonAttachEntity::getPersonId);
                 controllerCache.queryConsumer = (query, scopeInfo) -> {

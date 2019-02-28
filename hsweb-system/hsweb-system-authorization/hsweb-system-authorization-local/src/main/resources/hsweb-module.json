@@ -1,7 +1,7 @@
 {
   "groupId": "${project.groupId}",
   "artifactId": "${project.artifactId}",
-  "path": "hsweb-system/hsweb-system-authorization",
+  "path": "hsweb-system/hsweb-system-authorization/hsweb-system-authorization-local",
   "gitCommitHash": "${git.commit.hash}",
   "gitRepository": "http://github.com/hs-web/hsweb-framework",
   "version": "${project.version}",

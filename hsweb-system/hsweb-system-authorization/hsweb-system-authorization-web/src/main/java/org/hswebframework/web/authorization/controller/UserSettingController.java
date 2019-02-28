@@ -39,7 +39,7 @@ public class UserSettingController {
                                                   @PathVariable String id) {
         UserSettingEntity entity = userSettingService.selectByUser(authentication.getUser().getId(), key, id);
         if (entity != null && entity.hasPermission(R, RW)) {
-            return ResponseMessage.ok();
+            return ResponseMessage.ok(entity);
         }
         return ResponseMessage.ok();
     }

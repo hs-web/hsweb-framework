@@ -106,6 +106,8 @@ public class EnableCacheTests {
         doTest(enableCacheAllEvictTreeTestService);
     }
 
+
+
     public void doTest(CrudService<TestEntity, String> service) {
         service.selectByPk("testId"); //db 1
         service.selectByPk("testId");//cache

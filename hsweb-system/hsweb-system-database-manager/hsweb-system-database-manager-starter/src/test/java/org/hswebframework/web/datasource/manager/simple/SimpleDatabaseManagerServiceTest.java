@@ -6,6 +6,7 @@ import org.hswebframework.web.database.manager.SqlExecuteRequest;
 import org.hswebframework.web.database.manager.SqlExecuteResult;
 import org.hswebframework.web.database.manager.SqlInfo;
 import org.hswebframework.web.tests.SimpleWebApplicationTests;
+import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
@@ -15,6 +16,7 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.*;
 
@@ -42,22 +44,24 @@ public class SimpleDatabaseManagerServiceTest extends SimpleWebApplicationTests 
 
         request.setSql(Arrays.asList(sqlInfo));
         List<SqlExecuteResult> results = databaseManagerService.execute(id, request);
-        System.out.println(JSON.toJSONString(results));
+//        System.out.println(JSON.toJSONString(results));
+        Assert.assertFalse(results.isEmpty());
         request.setSql(Arrays.asList(sqlInfo2));
-        int total = 1000;
+        int total = 10;
         CountDownLatch countDownLatch = new CountDownLatch(total);
 
         for (int i = 0; i < total; i++) {
             new Thread(() -> {
                 try {
                     databaseManagerService.execute(id, request);
+                    Thread.sleep(100);
                 } catch (Exception e) {
-                    throw new RuntimeException();
+                    throw new RuntimeException(e);
                 }
                 countDownLatch.countDown();
             }).start();
         }
-        countDownLatch.await();
+        countDownLatch.await(30, TimeUnit.SECONDS);
 
         sqlInfo = new SqlInfo();
         sqlInfo.setSql("select *,name as \"NAME\",1 as \"\" from t_test ");
@@ -65,13 +69,15 @@ public class SimpleDatabaseManagerServiceTest extends SimpleWebApplicationTests 
 
         request.setSql(Arrays.asList(sqlInfo));
         results = databaseManagerService.execute(id, request);
-        System.out.println(JSON.toJSONString(results));
+        Assert.assertFalse(results.isEmpty());
 
-        System.out.println(sqlExecutor.list("select * from t_test"));
+//        System.out.println(JSON.toJSONString(results));
+
+        Assert.assertTrue(sqlExecutor.list("select * from t_test").isEmpty());
 
         databaseManagerService.rollback(id);
-        Thread.sleep(2000);
-        System.out.println(sqlExecutor.list("select * from t_test").size());
+        Assert.assertTrue(sqlExecutor.list("select * from t_test").isEmpty());
+
 
     }
 }

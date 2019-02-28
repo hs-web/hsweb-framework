@@ -2,6 +2,7 @@ package org.hswebframework.web.service;
 
 import lombok.*;
 import org.hibernate.validator.constraints.NotBlank;
+import org.hswebframework.web.commons.entity.RecordModifierEntity;
 import org.hswebframework.web.commons.entity.SimpleGenericEntity;
 import org.hswebframework.web.commons.entity.SimpleTreeSortSupportEntity;
 import org.hswebframework.web.validator.LogicPrimaryKey;
@@ -18,7 +19,9 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TestEntity extends SimpleTreeSortSupportEntity<String> {
+public class TestEntity extends SimpleTreeSortSupportEntity<String>
+//        implements RecordModifierEntity
+{
 
     @NotBlank(groups = CreateGroup.class)
     private String name;
@@ -28,4 +31,9 @@ public class TestEntity extends SimpleTreeSortSupportEntity<String> {
     private Boolean enabled;
 
     private List<TestEntity> children;
+
+    private String modifierId;
+
+    private Long modifyTime;
+
 }

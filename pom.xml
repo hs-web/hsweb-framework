@@ -24,7 +24,7 @@
 
     <groupId>org.hswebframework.web</groupId>
     <artifactId>hsweb-framework</artifactId>
-    <version>3.0.6</version>
+    <version>3.0.7</version>
     <modules>
         <module>hsweb-starter</module>
         <module>hsweb-core</module>
@@ -83,7 +83,7 @@
         <project.build.jdk>${java.version}</project.build.jdk>
 
 
-        <spring.boot.version>1.5.13.RELEASE</spring.boot.version>
+        <spring.boot.version>1.5.19.RELEASE</spring.boot.version>
 
         <javassist.version>3.20.0-GA</javassist.version>
         <activiti.version>5.19.0.2</activiti.version>
@@ -95,7 +95,7 @@
         <aspectj.version>1.6.12</aspectj.version>
         <hibernate.validator.version>5.1.1.Final</hibernate.validator.version>
 
-        <hsweb.ezorm.version>3.0.3</hsweb.ezorm.version>
+        <hsweb.ezorm.version>3.0.4</hsweb.ezorm.version>
         <hsweb.utils.version>3.0.2</hsweb.utils.version>
         <hsweb.expands.version>3.0.2</hsweb.expands.version>
 

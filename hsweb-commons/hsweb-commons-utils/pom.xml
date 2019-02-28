@@ -23,7 +23,7 @@
     <parent>
         <artifactId>hsweb-commons</artifactId>
         <groupId>org.hswebframework.web</groupId>
-        <version>3.0.6</version>
+        <version>3.0.7</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -84,6 +84,11 @@
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

@@ -3,6 +3,7 @@ package org.hswebframework.web.dao.crud;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.hswebframework.ezorm.core.param.QueryParam;
 import org.hswebframework.ezorm.rdb.executor.SqlExecutor;
+import org.hswebframework.web.commons.entity.param.DeleteParamEntity;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.datasource.DataSourceHolder;
 import org.hswebframework.web.dict.EnumDict;
@@ -80,6 +81,9 @@ public class TestCrud extends AbstractTransactionalJUnit4SpringContextTests {
 
 //        testDao.query(entity);
 
+        DeleteParamEntity.newDelete()
+                .where("id","1234")
+                .exec(testDao::delete);
         System.out.println(entities);
     }
 

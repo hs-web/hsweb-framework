@@ -13,6 +13,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationEventPublisher;
 
 import javax.validation.Validation;
 import java.util.ArrayList;
@@ -40,7 +42,6 @@ public class GenericEntityServiceTest {
     public void init() {
         entityService.setEntityFactory(new MapperEntityFactory());
         entityService.setValidator(Validation.buildDefaultValidatorFactory().getValidator());
-
         TestEntity entity = TestEntity.builder()
                 .age((byte) 10)
                 .enabled(true)
