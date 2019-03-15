@@ -410,6 +410,11 @@ public class EasyOrmSqlBuilder {
             renderMap.put(SqlRender.TYPE.INSERT, new InsertSqlBuilder());
             renderMap.put(SqlRender.TYPE.UPDATE, new UpdateSqlBuilder(Dialect.MYSQL));
         }
+
+        @Override
+        public String getDatabaseName() {
+            return DataSourceHolder.databaseSwitcher().currentDatabase();
+        }
     }
 
     class OracleMeta extends OracleRDBDatabaseMetaData {
@@ -417,6 +422,11 @@ public class EasyOrmSqlBuilder {
             super();
             renderMap.put(SqlRender.TYPE.INSERT, new InsertSqlBuilder());
             renderMap.put(SqlRender.TYPE.UPDATE, new UpdateSqlBuilder(Dialect.ORACLE));
+        }
+
+        @Override
+        public String getDatabaseName() {
+            return DataSourceHolder.databaseSwitcher().currentDatabase();
         }
     }
 
@@ -426,6 +436,10 @@ public class EasyOrmSqlBuilder {
             renderMap.put(SqlRender.TYPE.INSERT, new InsertSqlBuilder());
             renderMap.put(SqlRender.TYPE.UPDATE, new UpdateSqlBuilder(Dialect.H2));
         }
+        @Override
+        public String getDatabaseName() {
+            return DataSourceHolder.databaseSwitcher().currentDatabase();
+        }
     }
 
     class PGMeta extends PGRDBDatabaseMetaData {
@@ -434,6 +448,10 @@ public class EasyOrmSqlBuilder {
             renderMap.put(SqlRender.TYPE.INSERT, new InsertSqlBuilder());
             renderMap.put(SqlRender.TYPE.UPDATE, new UpdateSqlBuilder(Dialect.POSTGRES));
         }
+        @Override
+        public String getDatabaseName() {
+            return DataSourceHolder.databaseSwitcher().currentDatabase();
+        }
     }
 
     class MSSQLMeta extends MSSQLRDBDatabaseMetaData {
@@ -441,6 +459,10 @@ public class EasyOrmSqlBuilder {
             super();
             renderMap.put(SqlRender.TYPE.INSERT, new InsertSqlBuilder());
             renderMap.put(SqlRender.TYPE.UPDATE, new UpdateSqlBuilder(Dialect.MSSQL));
+        }
+        @Override
+        public String getDatabaseName() {
+            return DataSourceHolder.databaseSwitcher().currentDatabase();
         }
     }
 }
