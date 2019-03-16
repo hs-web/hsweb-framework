@@ -30,12 +30,12 @@
     </sql>
 
     <insert id="insert" parameterType="org.hswebframework.web.entity.form.DynamicFormEntity">
-        <include refid="config"/> <include refid="BasicMapper.switcher"/>
+        <include refid="config"/>
         <include refid="BasicMapper.buildInsertSql"/>
     </insert>
 
     <delete id="deleteByPk" parameterType="String">
-        <include refid="config"/>
+        <include refid="config"/><include refid="BasicMapper.switcher"/>
         delete from ${_fullTableName} where u_id =#{id}
     </delete>
 
@@ -50,7 +50,8 @@
     </update>
 
     <update id="incrementVersion" parameterType="String">
-        update s_dyn_form set version=version+1 where u_id = #{id}
+        <include refid="config"/><include refid="BasicMapper.switcher"/>
+        update ${_fullTableName} set version=version+1 where u_id = #{id}
     </update>
 
     <select id="query" parameterType="org.hswebframework.web.commons.entity.Entity" resultMap="DynamicFormResultMap">
