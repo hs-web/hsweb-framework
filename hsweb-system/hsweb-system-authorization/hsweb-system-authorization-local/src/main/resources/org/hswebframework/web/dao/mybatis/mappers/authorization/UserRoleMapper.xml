@@ -38,19 +38,23 @@
     </insert>
 
     <delete id="deleteByRoleId" parameterType="String">
-        delete from s_user_role where role_id =#{id}
+        <include refid="config"/> <include refid="BasicMapper.switcher"/>
+        delete from ${_fullTableName} where role_id =#{id}
     </delete>
 
     <delete id="deleteByUserId" parameterType="String">
-        delete from s_user_role where user_id =#{id}
+        <include refid="config"/> <include refid="BasicMapper.switcher"/>
+        delete from ${_fullTableName} where user_id =#{id}
     </delete>
 
     <select id="selectByUserId" parameterType="string" resultMap="UserRoleResultMap">
-        select * from s_user_role where user_id=#{id}
+        <include refid="config"/> <include refid="BasicMapper.switcher"/>
+        delete from ${_fullTableName} where user_id=#{id}
     </select>
 
     <select id="selectByRoleId" parameterType="String" resultMap="UserRoleResultMap">
-        select * from s_user_role where role_id=#{id}
+        <include refid="config"/> <include refid="BasicMapper.switcher"/>
+        delete from ${_fullTableName} where role_id=#{id}
     </select>
 
 </mapper>

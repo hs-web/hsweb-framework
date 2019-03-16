@@ -146,7 +146,7 @@ public class EasyOrmSqlBuilder {
     }
 
     protected RDBTableMetaData createMeta(String tableName, String resultMapId) {
-        tableName = getRealTableName(tableName);
+//        tableName = getRealTableName(tableName);
         RDBDatabaseMetaData active = getActiveDatabase();
         String cacheKey = tableName.concat("-").concat(resultMapId);
         Map<String, RDBTableMetaData> cache = metaCache.computeIfAbsent(active, k -> new ConcurrentHashMap<>());
@@ -155,7 +155,14 @@ public class EasyOrmSqlBuilder {
         if (cached != null) {
             return cached;
         }
-        RDBTableMetaData rdbTableMetaData = new RDBTableMetaData();
+
+        RDBTableMetaData rdbTableMetaData = new RDBTableMetaData(){
+            @Override
+            public String getName() {
+                //动态切换表名
+                return getRealTableName(tableName);
+            }
+        };
         ResultMap resultMaps = MybatisUtils.getResultMap(resultMapId);
         rdbTableMetaData.setName(tableName);
         rdbTableMetaData.setDatabaseMetaData(active);

@@ -1,6 +1,5 @@
 package org.hswebframework.web.datasource;
 
-import org.hswebframework.ezorm.core.Database;
 import org.hswebframework.web.datasource.exception.DataSourceNotFoundException;
 import org.hswebframework.web.datasource.switcher.*;
 
@@ -23,9 +22,9 @@ public final class DataSourceHolder {
      */
     static volatile DynamicDataSourceService dynamicDataSourceService;
 
-    static volatile TableSwitcher tableSwitcher;
+    static volatile TableSwitcher tableSwitcher = new DefaultTableSwitcher();
 
-    static volatile DatabaseSwitcher databaseSwitcher=new DefaultDatabaseSwitcher();
+    static volatile DatabaseSwitcher databaseSwitcher = new DefaultDatabaseSwitcher();
 
 
     public static void checkDynamicDataSourceReady() {

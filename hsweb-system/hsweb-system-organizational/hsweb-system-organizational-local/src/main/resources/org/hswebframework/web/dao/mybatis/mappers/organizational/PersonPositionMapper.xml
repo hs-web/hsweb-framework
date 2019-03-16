@@ -36,11 +36,13 @@
     </insert>
 
     <delete id="deleteByPersonId" parameterType="String">
-        delete from s_person_position where person_id=#{personId}
+        <include refid="config"/> <include refid="BasicMapper.switcher"/>
+        delete from ${_fullTableName} where person_id=#{personId}
     </delete>
 
     <delete id="deleteByPositionId">
-        delete from s_person_position where position_id=#{positionId}
+        <include refid="config"/>
+        delete from ${_fullTableName} where position_id=#{positionId}
     </delete>
 
     <select id="query" parameterType="org.hswebframework.web.commons.entity.Entity" resultMap="PersonPositionResultMap">

@@ -14,6 +14,8 @@ import org.hswebframework.web.commons.entity.SimpleGenericEntity;
 public class SimpleDynamicFormEntity extends SimpleGenericEntity<String> implements DynamicFormEntity {
     //表单名称
     private String  name;
+    //数据库名
+    private String databaseName;
     //数据库表名
     private String  databaseTableName;
     //备注

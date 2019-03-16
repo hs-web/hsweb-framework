@@ -60,6 +60,8 @@ public class TestCrud extends AbstractTransactionalJUnit4SpringContextTests {
     @Test
     public void testInsert() {
 
+        DataSourceHolder.databaseSwitcher().use("PUBLIC");
+
         TestEntity entity = new TestEntity();
         entity.setName("测试");
         entity.setDataType(DataType.TYPE1);
@@ -72,17 +74,18 @@ public class TestCrud extends AbstractTransactionalJUnit4SpringContextTests {
         query.where("dataTypes$in$any", Arrays.asList(DataType.TYPE1, DataType.TYPE2));
 
         //#102
-        query.where("createTime","2017-11-10");
+        query.where("createTime", "2017-11-10");
 
-        query.includes("nest.name", "*");
+//        query.includes("nest.name", "*");
 
-        //  DataSourceHolder.tableSwitcher().use("h_test", "h_test2");
+//        DataSourceHolder.tableSwitcher().use("h_test", "h_test2");
         List<TestEntity> entities = testDao.queryNest(query);
 
-//        testDao.query(entity);
-
+        testDao.query(query);
+        testDao.countNest(query);
+        testDao.count(query);
         DeleteParamEntity.newDelete()
-                .where("id","1234")
+                .where("id", "1234")
                 .exec(testDao::delete);
         System.out.println(entities);
     }

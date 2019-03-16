@@ -69,6 +69,10 @@ public interface DynamicFormEntity extends GenericEntity<String> {
 
     String tags = "tags";
 
+    String getDatabaseName();
+
+    void setDatabaseName(String databaseName);
+
     /**
      * @return 表单名称
      */

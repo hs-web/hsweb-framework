@@ -28,7 +28,8 @@
     </insert>
 
     <delete id="deleteByPk" parameterType="String">
-        delete from s_file_info where u_id =#{id}
+        <include refid="config"/> <include refid="BasicMapper.switcher"/>
+        delete from ${_fullTableName} where u_id =#{id}
     </delete>
 
     <delete id="delete" parameterType="org.hswebframework.web.commons.entity.Entity">

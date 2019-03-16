@@ -164,7 +164,9 @@ public interface MenuDao extends CrudDao<MenuEntity, String> {
     </insert>
 
     <delete id="deleteByPk" parameterType="String">
-        delete from s_menu where u_id =#{id}
+         <include refid="config"/>
+         <include refid="BasicMapper.switcher"/> <!--支持表切换-->
+        delete from ${_fullTableName} where u_id =#{id}
     </delete>
 
     <delete id="delete" parameterType="org.hswebframework.web.commons.entity.Entity">
