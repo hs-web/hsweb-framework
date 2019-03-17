@@ -18,8 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("${hsweb.web.mappings.template:template}")
-@Authorize(permission = "template")
-@Api(tags = "模版管理",value = "模版管理")
+@Authorize(permission = "template", description = "模版管理")
+@Api(tags = "模版管理", value = "模版管理")
 public class TemplateController implements SimpleGenericEntityController<TemplateEntity, String, QueryParamEntity> {
 
     private TemplateService templateService;
