@@ -25,7 +25,7 @@ function install(context) {
         .addColumn().name("name").alias("name").comment("文件名称").jdbcType(java.sql.JDBCType.VARCHAR).length(256).commit()
         .addColumn().name("location").alias("location").comment("文件相对路径").jdbcType(java.sql.JDBCType.VARCHAR).length(1024).commit()
         .addColumn().name("type").alias("type").comment("类型").jdbcType(java.sql.JDBCType.VARCHAR).length(256).commit()
-        .addColumn().name("md5").alias("md5").comment("md5校验值").jdbcType(java.sql.JDBCType.VARCHAR).length(256).commit()
+        .addColumn().name("md5").alias("md5").comment("md5校验值").jdbcType(java.sql.JDBCType.VARCHAR).length(128).commit()
         .addColumn().name("size").alias("size").comment("文件大小").jdbcType(java.sql.JDBCType.DECIMAL).length(32, 0).commit()
         .addColumn().name("status").alias("status").comment("状态").jdbcType(java.sql.JDBCType.DECIMAL).length(4, 0).commit()
         .addColumn().name("classified").alias("classified").comment("分类").jdbcType(java.sql.JDBCType.VARCHAR).length(32).commit()
