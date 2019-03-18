@@ -49,12 +49,12 @@
 
     <select id="selectByUserId" parameterType="string" resultMap="UserRoleResultMap">
         <include refid="config"/> <include refid="BasicMapper.switcher"/>
-        delete from ${_fullTableName} where user_id=#{id}
+        select * from ${_fullTableName} where user_id=#{id}
     </select>
 
     <select id="selectByRoleId" parameterType="String" resultMap="UserRoleResultMap">
         <include refid="config"/> <include refid="BasicMapper.switcher"/>
-        delete from ${_fullTableName} where role_id=#{id}
+        select * from ${_fullTableName} where role_id=#{id}
     </select>
 
 </mapper>
