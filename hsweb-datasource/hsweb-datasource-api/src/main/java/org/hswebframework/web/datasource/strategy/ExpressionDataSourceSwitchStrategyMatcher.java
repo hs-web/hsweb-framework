@@ -17,10 +17,10 @@ import java.util.Map;
  *      datasource:
  *          switcher:
  *              test: # 只是一个标识
- *              # 拦截类和方法的表达式
- *              expression: org.hswebframework.**.*Service.find*
- *              # 使用数据源
- *              data-source-id: read_db
+ *                  # 拦截类和方法的表达式
+ *                  expression: org.hswebframework.**.*Service.find*
+ *                  # 使用数据源
+ *                  data-source-id: read_db
  * </pre>
  *
  * @author zhouhao
@@ -53,8 +53,9 @@ public class ExpressionDataSourceSwitchStrategyMatcher extends CachedDataSourceS
     @Setter
     public static class ExpressionStrategy implements Strategy {
         private boolean useDefaultDataSource = false;
-        private boolean fallbackDefault      = false;
-        private String  dataSourceId         = null;
+        private boolean fallbackDefault = false;
+        private String dataSourceId = null;
+        private String database;
         private String expression;
         private String id;
 

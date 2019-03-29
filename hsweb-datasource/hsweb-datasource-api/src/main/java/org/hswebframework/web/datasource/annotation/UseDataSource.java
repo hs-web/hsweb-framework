@@ -17,7 +17,14 @@ public @interface UseDataSource {
      * @return 数据源ID ,支持表达式如 : ${#param.id}
      * @see DynamicDataSource#getId()
      */
-    String value();
+    String value() default "";
+
+    /**
+     * 指定数据库
+     *
+     * @return 数据库名
+     */
+    String database() default "";
 
     /**
      * @return 数据源不存在时, 是否使用默认数据源.

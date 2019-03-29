@@ -3,6 +3,7 @@ package org.hswebframework.web.datasource.strategy;
 import org.hswebframework.web.AopUtils;
 import org.hswebframework.web.datasource.annotation.UseDataSource;
 import org.hswebframework.web.datasource.annotation.UseDefaultDataSource;
+import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -45,6 +46,11 @@ public class AnnotationDataSourceSwitchStrategyMatcher extends CachedDataSourceS
                 @Override
                 public String toString() {
                     return "Annotation Strategy(" + (useDataSource != null ? useDataSource : useDefaultDataSource) + ")";
+                }
+
+                @Override
+                public String getDatabase() {
+                    return useDataSource == null ? null : StringUtils.isEmpty(useDataSource.database()) ? null : useDataSource.database();
                 }
             };
         }

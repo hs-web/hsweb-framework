@@ -13,6 +13,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -67,8 +68,8 @@ public class AopDataSourceSwitcherAutoConfiguration {
     }
 
     public static class SwitcherMethodMatcherPointcutAdvisor extends StaticMethodMatcherPointcutAdvisor {
-        private static final Logger logger           = LoggerFactory.getLogger(SwitcherMethodMatcherPointcutAdvisor.class);
-        private static final long   serialVersionUID = 536295121851990398L;
+        private static final Logger logger = LoggerFactory.getLogger(SwitcherMethodMatcherPointcutAdvisor.class);
+        private static final long serialVersionUID = 536295121851990398L;
 
         private List<DataSourceSwitchStrategyMatcher> matchers;
 
@@ -76,7 +77,7 @@ public class AopDataSourceSwitcherAutoConfiguration {
 
         private Map<CachedDataSourceSwitchStrategyMatcher.CacheKey, DataSourceSwitchStrategyMatcher> cache
                 = new ConcurrentHashMap<>();
-        private Map<CachedTableSwitchStrategyMatcher.CacheKey, TableSwitchStrategyMatcher>           tableCache
+        private Map<CachedTableSwitchStrategyMatcher.CacheKey, TableSwitchStrategyMatcher> tableCache
                 = new ConcurrentHashMap<>();
 
         public SwitcherMethodMatcherPointcutAdvisor(List<DataSourceSwitchStrategyMatcher> matchers,
@@ -92,7 +93,9 @@ public class AopDataSourceSwitcherAutoConfiguration {
 
                 Consumer<MethodInterceptorContext> before = context -> {
                 };
-                AtomicBoolean dataSourceChanged = new AtomicBoolean(true);
+                AtomicBoolean dataSourceChanged = new AtomicBoolean(false);
+                AtomicBoolean databaseChanged = new AtomicBoolean(false);
+
                 if (matcher != null) {
                     before = before.andThen(context -> {
                         Strategy strategy = matcher.getStrategy(context);
@@ -100,23 +103,26 @@ public class AopDataSourceSwitcherAutoConfiguration {
                             dataSourceChanged.set(false);
                             logger.warn("strategy matcher found:{}, but strategy is null!", matcher);
                         } else {
-                            logger.debug("switch datasource.use strategy:{}", strategy);
+                            logger.debug("switch datasource. use strategy:{}", strategy);
                             if (strategy.isUseDefaultDataSource()) {
                                 DataSourceHolder.switcher().useDefault();
                             } else {
                                 try {
                                     String id = strategy.getDataSourceId();
-                                    if (id.contains("${")) {
-                                        id = ExpressionUtils.analytical(id, context.getParams(), "spel");
-                                    }
-                                    if (!DataSourceHolder.existing(id)) {
-                                        if (strategy.isFallbackDefault()) {
-                                            DataSourceHolder.switcher().useDefault();
-                                        } else {
-                                            throw new DataSourceNotFoundException(id);
+                                    if (StringUtils.hasText(id)) {
+                                        if (id.contains("${")) {
+                                            id = ExpressionUtils.analytical(id, context.getParams(), "spel");
                                         }
-                                    } else {
-                                        DataSourceHolder.switcher().use(id);
+                                        if (!DataSourceHolder.existing(id)) {
+                                            if (strategy.isFallbackDefault()) {
+                                                DataSourceHolder.switcher().useDefault();
+                                            } else {
+                                                throw new DataSourceNotFoundException("数据源[" + id + "]不存在");
+                                            }
+                                        } else {
+                                            DataSourceHolder.switcher().use(id);
+                                        }
+                                        dataSourceChanged.set(true);
                                     }
                                 } catch (RuntimeException e) {
                                     dataSourceChanged.set(false);
@@ -125,6 +131,10 @@ public class AopDataSourceSwitcherAutoConfiguration {
                                     dataSourceChanged.set(false);
                                     throw new RuntimeException(e.getMessage(), e);
                                 }
+                            }
+                            if (StringUtils.hasText(strategy.getDatabase())) {
+                                databaseChanged.set(true);
+                                DataSourceHolder.databaseSwitcher().use(strategy.getDatabase());
                             }
                         }
                     });
@@ -148,6 +158,9 @@ public class AopDataSourceSwitcherAutoConfiguration {
                 } finally {
                     if (dataSourceChanged.get()) {
                         DataSourceHolder.switcher().useLast();
+                    }
+                    if (databaseChanged.get()) {
+                        DataSourceHolder.databaseSwitcher().useLast();
                     }
                     DataSourceHolder.tableSwitcher().reset();
                 }
