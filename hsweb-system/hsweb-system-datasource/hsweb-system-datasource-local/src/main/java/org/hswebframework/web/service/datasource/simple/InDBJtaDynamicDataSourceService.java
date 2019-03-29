@@ -1,6 +1,5 @@
 package org.hswebframework.web.service.datasource.simple;
 
-import com.alibaba.fastjson.JSON;
 import org.hswebframework.web.bean.FastBeanCopier;
 import org.hswebframework.web.datasource.DatabaseType;
 import org.hswebframework.web.datasource.DynamicDataSource;
@@ -25,16 +24,13 @@ public class InDBJtaDynamicDataSourceService extends JtaDynamicDataSourceService
         if (config == null) {
             return null;
         }
-        Object xaProperties = config.get("xaProperties");
-        Properties properties = new Properties();
-
-        if (xaProperties instanceof String) {
-            xaProperties = JSON.parseObject(((String) xaProperties));
+        Properties xaProperties = new Properties();
+        for (Map.Entry<String, Object> entry : config.entrySet()) {
+            String key = entry.getKey();
+            if (key.startsWith("xaProperties.")) {
+                xaProperties.put(key.substring("xaProperties.".length()), entry.getValue());
+            }
         }
-        if (xaProperties instanceof Map) {
-            properties.putAll(((Map) xaProperties));
-        }
-        config.remove("xaProperties");
         AtomikosDataSourceConfig target = FastBeanCopier.copy(config, new AtomikosDataSourceConfig() {
             private static final long serialVersionUID = -2704649332301331803L;
 
@@ -51,9 +47,11 @@ public class InDBJtaDynamicDataSourceService extends JtaDynamicDataSourceService
         target.setId(entity.getId());
         target.setName(entity.getName());
         target.setDescribe(entity.getDescribe());
-        target.setXaProperties(properties);
-        target.setDatabaseType(Optional.ofNullable(properties.getProperty("databaseType"))
-                .map(DatabaseType::valueOf).orElse(null));
+        target.setXaProperties(xaProperties);
+        target.setDatabaseType(Optional.ofNullable(config.get("databaseType"))
+                .map(String::valueOf)
+                .map(DatabaseType::valueOf)
+                .orElse(null));
         return target;
     }
 

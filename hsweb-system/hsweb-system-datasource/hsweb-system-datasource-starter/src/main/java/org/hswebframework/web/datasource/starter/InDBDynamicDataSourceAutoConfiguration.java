@@ -31,6 +31,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClas
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 
 import javax.sql.DataSource;
 
@@ -44,6 +45,7 @@ import javax.sql.DataSource;
 public class InDBDynamicDataSourceAutoConfiguration {
 
     @Bean
+    @Primary
     public InDBDataSourceRepository inDBDataSourceRepository(DataSourceConfigService dataSourceConfigService) {
         return new InDBDataSourceRepository(dataSourceConfigService);
     }
