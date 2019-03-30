@@ -36,9 +36,9 @@ public class DefaultDataSourceSwitcher implements DataSourceSwitcher {
         if (logger.isDebugEnabled()) {
             String current = currentDataSourceId();
             if (null != current) {
-                logger.debug("try use last data source : {}", currentDataSourceId());
+                logger.debug("try use last datasource : {}", currentDataSourceId());
             } else {
-                logger.debug("try use last default data source");
+                logger.debug("try use last default datasource");
             }
         }
     }
@@ -48,7 +48,7 @@ public class DefaultDataSourceSwitcher implements DataSourceSwitcher {
         //添加对队尾
         getUsedHistoryQueue().addLast(dataSourceId);
         if (logger.isDebugEnabled()) {
-            logger.debug("try use data source : {}", dataSourceId);
+            logger.debug("try use datasource : {}", dataSourceId);
         }
     }
 
@@ -56,7 +56,7 @@ public class DefaultDataSourceSwitcher implements DataSourceSwitcher {
     public void useDefault() {
         getUsedHistoryQueue().addLast(DEFAULT_DATASOURCE_ID);
         if (logger.isDebugEnabled()) {
-            logger.debug("try use default data source");
+            logger.debug("try use default datasource");
         }
     }
 
@@ -77,7 +77,7 @@ public class DefaultDataSourceSwitcher implements DataSourceSwitcher {
     public void reset() {
         getUsedHistoryQueue().clear();
         if (logger.isDebugEnabled()) {
-            logger.debug("reset data source used history");
+            logger.debug("reset datasource history");
         }
     }
 }
