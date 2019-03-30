@@ -48,7 +48,7 @@ public class DefaultDatabaseSwitcher implements DatabaseSwitcher {
         //添加对队尾
         getUsedHistoryQueue().addLast(dataSourceId);
         if (logger.isDebugEnabled()) {
-            logger.debug("try use datasource : {}", dataSourceId);
+            logger.debug("try use database : {}", dataSourceId);
         }
     }
 
