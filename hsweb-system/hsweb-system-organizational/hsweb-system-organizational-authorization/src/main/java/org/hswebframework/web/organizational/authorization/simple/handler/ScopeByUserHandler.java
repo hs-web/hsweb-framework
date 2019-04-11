@@ -6,6 +6,7 @@ import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.ezorm.core.dsl.Query;
+import org.hswebframework.ezorm.rdb.render.dialect.Dialect;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.User;
@@ -15,7 +16,6 @@ import org.hswebframework.web.authorization.access.UserAttachEntity;
 import org.hswebframework.web.authorization.define.AuthorizingContext;
 import org.hswebframework.web.authorization.define.Phased;
 import org.hswebframework.web.authorization.exception.AccessDenyException;
-import org.hswebframework.web.authorization.exception.UnAuthorizedException;
 import org.hswebframework.web.bean.FastBeanCopier;
 import org.hswebframework.web.commons.entity.Entity;
 import org.hswebframework.web.commons.entity.PagerResult;
@@ -67,6 +67,10 @@ public class ScopeByUserHandler implements DataAccessHandler {
             default:
                 return doUpdateAccess(scope, context);
         }
+    }
+
+    protected boolean supportChildSqlTerm() {
+        return Dialect.H2.isSupportTermType("user-in-org");
     }
 
     protected boolean doUpdateAccess(ScopeByUserDataAccessConfig config, AuthorizingContext context) {
@@ -132,6 +136,7 @@ public class ScopeByUserHandler implements DataAccessHandler {
             return scopeInfo;
         }
         Consumer<Query<?, QueryParamEntity>> consumer;
+        boolean supportChildTerm = supportChildSqlTerm();
 
         switch (config.getScopeType()) {
             case "OWN_PERSON":
@@ -149,50 +154,50 @@ public class ScopeByUserHandler implements DataAccessHandler {
                 allScope = scope;
                 break;
             case DataAccessType.ORG_SCOPE:
-                termType = "user-in-org";
-                personTermType = "person-in-org";
-                scope = authentication.getRootOrgId();
+                termType = supportChildTerm ? "user-in-org" : "in";
+                personTermType = supportChildTerm ? "person-in-org" : "in";
+                scope = config.isChildren() && !supportChildTerm ? authentication.getAllOrgId() : authentication.getRootOrgId();
                 allScope = config.isChildren() ? authentication.getAllOrgId() : scope;
                 break;
             case DataAccessType.DEPARTMENT_SCOPE:
-                termType = "user-in-department";
-                personTermType = "person-in-department";
-                scope = authentication.getRootDepartmentId();
+                termType = supportChildTerm ? "user-in-department" : "in";
+                personTermType = supportChildTerm ? "person-in-department" : "in";
+                scope = config.isChildren() && !supportChildTerm ? authentication.getAllDepartmentId() : authentication.getRootDepartmentId();
                 allScope = config.isChildren() ? authentication.getAllDepartmentId() : scope;
                 break;
             case DataAccessType.POSITION_SCOPE:
-                termType = "user-in-position";
-                personTermType = "person-in-position";
-                scope = authentication.getRootPositionId();
+                termType = supportChildTerm ? "user-in-position" : "in";
+                personTermType = supportChildTerm ? "person-in-position" : "in";
+                scope = config.isChildren() && !supportChildTerm ? authentication.getAllPositionId() : authentication.getRootPositionId();
                 allScope = config.isChildren() ? authentication.getAllPositionId() : scope;
                 break;
             case DataAccessType.DISTRICT_SCOPE:
-                termType = "user-in-dist";
-                personTermType = "person-in-dist";
-                scope = authentication.getRootDistrictId();
+                termType = supportChildTerm ? "user-in-dist" : "in";
+                personTermType = supportChildTerm ? "person-in-dist" : "in";
+                scope = config.isChildren() && !supportChildTerm ? authentication.getAllDistrictId() : authentication.getRootDistrictId();
                 allScope = config.isChildren() ? authentication.getAllDistrictId() : scope;
                 break;
             case "CUSTOM_SCOPE_ORG":
-                termType = "user-in-org";
-                personTermType = "person-in-org";
+                termType = supportChildSqlTerm() ? "user-in-org" : "in";
+                personTermType = supportChildSqlTerm() ? "person-in-org" : "in";
                 scope = config.getScope();
                 allScope = scope;
                 break;
             case "CUSTOM_SCOPE_POSITION":
-                termType = "user-in-position";
-                personTermType = "person-in-position";
+                termType = supportChildSqlTerm() ? "user-in-position" : "in";
+                personTermType = supportChildSqlTerm() ? "person-in-position" : "in";
                 scope = config.getScope();
                 allScope = scope;
                 break;
             case "CUSTOM_SCOPE_DEPT":
-                termType = "user-in-department";
-                personTermType = "person-in-department";
+                termType = supportChildSqlTerm() ? "user-in-department" : "in";
+                personTermType = supportChildSqlTerm() ? "person-in-department" : "in";
                 scope = config.getScope();
                 allScope = scope;
                 break;
             case "CUSTOM_SCOPE_DIST":
-                termType = "user-in-dist";
-                personTermType = "person-in-dist";
+                termType = supportChildSqlTerm() ? "user-in-dist" : "in";
+                personTermType = supportChildSqlTerm() ? "person-in-dist" : "in";
                 scope = config.getScope();
                 allScope = scope;
                 break;
@@ -275,7 +280,7 @@ public class ScopeByUserHandler implements DataAccessHandler {
         };
     }
 
-   // static Map<Class, String> cache = new ConcurrentHashMap<>();
+    // static Map<Class, String> cache = new ConcurrentHashMap<>();
 
     protected <T> String getControlProperty(Class type, Function<T, String> function) {
         return function.apply((T) entityFactory.newInstance(type));
@@ -334,35 +339,35 @@ public class ScopeByUserHandler implements DataAccessHandler {
                 String property = getControlProperty(entityClass, OrgAttachEntity::getOrgIdProperty);
                 controllerCache.targetIdGetter = createGetter(OrgAttachEntity.class, OrgAttachEntity::getOrgId);
                 controllerCache.queryConsumer = (query, scopeInfo) -> {
-                    query.and(property, children ? "org-child-in" : "in", scopeInfo.scope);
+                    query.and(property, children && supportChildSqlTerm() ? "org-child-in" : "in", scopeInfo.scope);
                 };
                 //部门
             } else if (key.getType().contains("DEPT") && DepartmentAttachEntity.class.isAssignableFrom(entityClass)) {
                 String property = getControlProperty(entityClass, DepartmentAttachEntity::getDepartmentIdProperty);
                 controllerCache.targetIdGetter = createGetter(DepartmentAttachEntity.class, DepartmentAttachEntity::getDepartmentId);
                 controllerCache.queryConsumer = (query, scopeInfo) -> {
-                    query.and(property, children ? "org-child-in" : "in", scopeInfo.scope);
+                    query.and(property, children && supportChildSqlTerm() ? "dept-child-in" : "in", scopeInfo.scope);
                 };
                 //岗位
             } else if (key.getType().contains("POS") && PositionAttachEntity.class.isAssignableFrom(entityClass)) {
                 String property = getControlProperty(entityClass, PositionAttachEntity::getPositionIdProperty);
                 controllerCache.targetIdGetter = createGetter(PositionAttachEntity.class, PositionAttachEntity::getPositionId);
                 controllerCache.queryConsumer = (query, scopeInfo) -> {
-                    query.and(property, children ? "pos-child-in" : "in", scopeInfo.scope);
+                    query.and(property, children && supportChildSqlTerm() ? "pos-child-in" : "in", scopeInfo.scope);
                 };
                 //行政区划
             } else if (key.getType().contains("DIST") && DistrictAttachEntity.class.isAssignableFrom(entityClass)) {
                 String property = getControlProperty(entityClass, DistrictAttachEntity::getDistrictIdProperty);
                 controllerCache.targetIdGetter = createGetter(DistrictAttachEntity.class, DistrictAttachEntity::getDistrictId);
                 controllerCache.queryConsumer = (query, scopeInfo) -> {
-                    query.and(property, children ? "dist-child-in" : "in", scopeInfo.scope);
+                    query.and(property, children && supportChildSqlTerm() ? "dist-child-in" : "in", scopeInfo.scope);
                 };
                 //人员
             } else if (key.getType().contains("PERSON") && PersonAttachEntity.class.isAssignableFrom(entityClass)) {
                 String property = getControlProperty(entityClass, PersonAttachEntity::getPersonIdProperty);
                 controllerCache.targetIdGetter = createGetter(PersonAttachEntity.class, PersonAttachEntity::getPersonId);
                 controllerCache.queryConsumer = (query, scopeInfo) -> {
-                    query.and(property, scopeInfo.termType, scopeInfo.scope);
+                    query.and(property, scopeInfo.personTermType, scopeInfo.scope);
                 };
                 //根据用户控制
             } else {
