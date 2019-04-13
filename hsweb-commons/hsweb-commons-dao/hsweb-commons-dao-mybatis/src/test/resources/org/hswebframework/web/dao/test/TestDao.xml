@@ -4,6 +4,7 @@
 
     <resultMap id="TestResultMap" type="org.hswebframework.web.dao.crud.TestEntity">
         <id property="id" column="id" javaType="Long" jdbcType="INTEGER"/>
+        <id property="name" column="name" javaType="String" jdbcType="VARCHAR"/>
 
     </resultMap>
 
@@ -50,7 +51,7 @@
         select
         <include refid="BasicMapper.buildSelectField"/>
         from ${_fullTableName} h_test
-        left join ${databasePrefix}h_nest_table nest_table on nest_table.id=h_test.id
+        left join ${_databasePrefix}h_nest_table nest_table on nest_table.id=h_test.id
         <where>
             <include refid="BasicMapper.buildWhere"/>
         </where>
@@ -63,7 +64,7 @@
         select
         count(1)
         from ${_fullTableName} h_test
-        left join ${databasePrefix}h_nest_table nest_table on nest_table.id=h_test.id
+        left join ${_databasePrefix}h_nest_table nest_table on nest_table.id=h_test.id
         <where>
             <include refid="BasicMapper.buildWhere"/>
         </where>

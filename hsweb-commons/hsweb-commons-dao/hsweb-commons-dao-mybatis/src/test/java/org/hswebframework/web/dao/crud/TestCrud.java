@@ -5,6 +5,7 @@ import org.hswebframework.ezorm.core.param.QueryParam;
 import org.hswebframework.ezorm.rdb.executor.SqlExecutor;
 import org.hswebframework.web.commons.entity.param.DeleteParamEntity;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
+import org.hswebframework.web.commons.entity.param.UpdateParamEntity;
 import org.hswebframework.web.datasource.DataSourceHolder;
 import org.hswebframework.web.dict.EnumDict;
 import org.junit.Assert;
@@ -58,7 +59,7 @@ public class TestCrud extends AbstractTransactionalJUnit4SpringContextTests {
     }
 
     @Test
-    public void testInsert() {
+    public void testCRUD() {
 
         DataSourceHolder.databaseSwitcher().use("PUBLIC");
 
@@ -84,6 +85,11 @@ public class TestCrud extends AbstractTransactionalJUnit4SpringContextTests {
         testDao.query(query);
         testDao.countNest(query);
         testDao.count(query);
+        UpdateParamEntity.newUpdate()
+                .set("name","测试")
+                .where("id",entity.getId())
+                .exec(testDao::update);
+
         DeleteParamEntity.newDelete()
                 .where("id", "1234")
                 .exec(testDao::delete);

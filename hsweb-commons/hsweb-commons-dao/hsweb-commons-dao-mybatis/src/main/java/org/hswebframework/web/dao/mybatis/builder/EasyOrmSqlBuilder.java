@@ -66,7 +66,7 @@ public class EasyOrmSqlBuilder {
 
     public EntityFactory entityFactory;
 
-    private static final   EasyOrmSqlBuilder  instance   = new EasyOrmSqlBuilder();
+    private static final EasyOrmSqlBuilder instance = new EasyOrmSqlBuilder();
     protected static final Map<Class, String> simpleName = new HashMap<>();
 
     protected PropertyUtilsBean propertyUtils = BeanUtilsBean.getInstance().getPropertyUtils();
@@ -106,11 +106,11 @@ public class EasyOrmSqlBuilder {
         return javaType;
     }
 
-    private final RDBDatabaseMetaData mysql      = new MysqlMeta();
-    private final RDBDatabaseMetaData oracle     = new OracleMeta();
-    private final RDBDatabaseMetaData h2         = new H2Meta();
+    private final RDBDatabaseMetaData mysql = new MysqlMeta();
+    private final RDBDatabaseMetaData oracle = new OracleMeta();
+    private final RDBDatabaseMetaData h2 = new H2Meta();
     private final RDBDatabaseMetaData postgresql = new PGMeta();
-    private final RDBDatabaseMetaData mssql      = new MSSQLMeta();
+    private final RDBDatabaseMetaData mssql = new MSSQLMeta();
 
     private final ConcurrentMap<RDBDatabaseMetaData, Map<String, RDBTableMetaData>> metaCache = new ConcurrentHashMap<>();
 
@@ -156,7 +156,7 @@ public class EasyOrmSqlBuilder {
             return cached;
         }
 
-        RDBTableMetaData rdbTableMetaData = new RDBTableMetaData(){
+        RDBTableMetaData rdbTableMetaData = new RDBTableMetaData() {
             @Override
             public String getName() {
                 //动态切换表名
@@ -174,6 +174,9 @@ public class EasyOrmSqlBuilder {
                 RDBColumnMetaData column = new RDBColumnMetaData();
                 column.setJdbcType(JDBCType.valueOf(resultMapping.getJdbcType().name()));
                 column.setName(resultMapping.getColumn());
+                if (resultMapping.getTypeHandler() != null) {
+                    column.setProperty("typeHandler", resultMapping.getTypeHandler().getClass().getName());
+                }
                 if (!StringUtils.isNullOrEmpty(resultMapping.getProperty())) {
                     column.setAlias(resultMapping.getProperty());
                 }
@@ -248,10 +251,14 @@ public class EasyOrmSqlBuilder {
                 appender.add(",", encodeColumn(dialect, columnMetaData.getName())
                         , "=", ((Sql) value).getSql());
             } else {
+                String typeHandler = columnMetaData.getProperty("typeHandler")
+                        .getValue();
+
                 appender.add(",", encodeColumn(dialect, columnMetaData.getName())
                         , "=", "#{data.", columnMetaData.getAlias(),
                         ",javaType=", EasyOrmSqlBuilder.getJavaType(columnMetaData.getJavaType()),
                         ",jdbcType=", columnMetaData.getJdbcType(),
+                        typeHandler != null ? ",typeHandler=" + typeHandler : "",
                         "}");
             }
         });
@@ -443,6 +450,7 @@ public class EasyOrmSqlBuilder {
             renderMap.put(SqlRender.TYPE.INSERT, new InsertSqlBuilder());
             renderMap.put(SqlRender.TYPE.UPDATE, new UpdateSqlBuilder(Dialect.H2));
         }
+
         @Override
         public String getDatabaseName() {
             return DataSourceHolder.databaseSwitcher().currentDatabase();
@@ -455,6 +463,7 @@ public class EasyOrmSqlBuilder {
             renderMap.put(SqlRender.TYPE.INSERT, new InsertSqlBuilder());
             renderMap.put(SqlRender.TYPE.UPDATE, new UpdateSqlBuilder(Dialect.POSTGRES));
         }
+
         @Override
         public String getDatabaseName() {
             return DataSourceHolder.databaseSwitcher().currentDatabase();
@@ -467,6 +476,7 @@ public class EasyOrmSqlBuilder {
             renderMap.put(SqlRender.TYPE.INSERT, new InsertSqlBuilder());
             renderMap.put(SqlRender.TYPE.UPDATE, new UpdateSqlBuilder(Dialect.MSSQL));
         }
+
         @Override
         public String getDatabaseName() {
             return DataSourceHolder.databaseSwitcher().currentDatabase();
