@@ -87,6 +87,7 @@ public class TestCrud extends AbstractTransactionalJUnit4SpringContextTests {
         testDao.count(query);
         UpdateParamEntity.newUpdate()
                 .set("name","测试")
+                .set(entity::getDataType)
                 .where("id",entity.getId())
                 .exec(testDao::update);
 
