@@ -222,8 +222,8 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
         dynamicFormDeployLogService.cancelDeployed(formId);
         //移除表结构定义
         RDBDatabase database = StringUtils.isEmpty(form.getDataSourceId())
-                ? databaseRepository.getDefaultDatabase()
-                : databaseRepository.getDatabase(form.getDataSourceId());
+                ? databaseRepository.getDefaultDatabase(form.getDatabaseName())
+                : databaseRepository.getDatabase(form.getDataSourceId(),form.getDatabaseName());
         database.removeTable(form.getDatabaseTableName());
         createUpdate().set(DynamicFormEntity.deployed, false).where(DynamicFormEntity.id, formId).exec();
         eventPublisher.publishEvent(new FormDeployEvent(formId));
@@ -427,8 +427,9 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
 
     public void deploy(DynamicFormEntity form, List<DynamicFormColumnEntity> columns, boolean updateMeta) {
         RDBDatabase database = StringUtils.isEmpty(form.getDataSourceId())
-                ? databaseRepository.getDefaultDatabase()
-                : databaseRepository.getDatabase(form.getDataSourceId());
+                ? databaseRepository.getDefaultDatabase(form.getDatabaseName())
+                : databaseRepository.getDatabase(form.getDataSourceId(),form.getDatabaseName());
+
         initDatabase(database);
         RDBTableMetaData metaData = buildTable(database, form, columns);
         try {
@@ -515,6 +516,7 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
 
         metaData.setAlias(form.getAlias());
         metaData.setCorrelations(buildCorrelations(form.getCorrelations()));
+        metaData.setDatabaseMetaData(database.getMeta());
         buildTrigger(form.getTriggers()).forEach(metaData::on);
 
         columns.forEach(column -> {

@@ -10,12 +10,15 @@ var info = {
 
 //版本更新信息
 var versions = [
-    // {
-    //     version: "3.0.2",
-    //     upgrade: function (context) {
-    //         java.lang.System.out.println("更新到3.0.2了");
-    //     }
-    // }
+    {
+        version: "3.0.8",
+        upgrade: function (context) {
+            var database = context.database;
+            database.createOrAlter("s_dyn_form")
+                .addColumn().name("db_name").alias("databaseName").comment("数据库名").jdbcType(java.sql.JDBCType.VARCHAR).length(128).commit()
+                .comment("动态表单").commit();
+        }
+    }
 ];
 var JDBCType = java.sql.JDBCType;
 function install(context) {

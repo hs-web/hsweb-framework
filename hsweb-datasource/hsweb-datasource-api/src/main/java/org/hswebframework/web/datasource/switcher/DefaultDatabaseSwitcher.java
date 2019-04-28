@@ -8,21 +8,21 @@ import java.util.Deque;
 import java.util.LinkedList;
 
 /**
- * 默认的动态数据源切换器,基于ThreadLocal,queue
+ * 默认的动态数据库切换器,基于ThreadLocal,queue
  *
  * @author zhouhao
- * @since 3.0
+ * @since 3.0.8
  */
-public class DefaultDataSourceSwitcher implements DataSourceSwitcher {
+public class DefaultDatabaseSwitcher implements DatabaseSwitcher {
 
     //默认数据源标识
-    private static final String DEFAULT_DATASOURCE_ID = DataSourceSwitcher.class.getName() + "_default_";
+    private static final String DEFAULT_DATASOURCE_ID = DatabaseSwitcher.class.getName() + "_default_";
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private Deque<String> getUsedHistoryQueue() {
         // 从ThreadLocal中获取一个使用记录
-        return ThreadLocalUtils.get(DefaultDataSourceSwitcher.class.getName() + "_queue", LinkedList::new);
+        return ThreadLocalUtils.get(DefaultDatabaseSwitcher.class.getName() + "_queue", LinkedList::new);
     }
 
     @Override
@@ -34,11 +34,11 @@ public class DefaultDataSourceSwitcher implements DataSourceSwitcher {
         //移除队尾,则当前的队尾则为上一次的数据源
         getUsedHistoryQueue().removeLast();
         if (logger.isDebugEnabled()) {
-            String current = currentDataSourceId();
+            String current = currentDatabase();
             if (null != current) {
-                logger.debug("try use last datasource : {}", currentDataSourceId());
+                logger.debug("try use database : {}", currentDatabase());
             } else {
-                logger.debug("try use last default datasource");
+                logger.debug("try use last default database");
             }
         }
     }
@@ -48,7 +48,7 @@ public class DefaultDataSourceSwitcher implements DataSourceSwitcher {
         //添加对队尾
         getUsedHistoryQueue().addLast(dataSourceId);
         if (logger.isDebugEnabled()) {
-            logger.debug("try use datasource : {}", dataSourceId);
+            logger.debug("try use database : {}", dataSourceId);
         }
     }
 
@@ -56,12 +56,12 @@ public class DefaultDataSourceSwitcher implements DataSourceSwitcher {
     public void useDefault() {
         getUsedHistoryQueue().addLast(DEFAULT_DATASOURCE_ID);
         if (logger.isDebugEnabled()) {
-            logger.debug("try use default datasource");
+            logger.debug("try use default database");
         }
     }
 
     @Override
-    public String currentDataSourceId() {
+    public String currentDatabase() {
         if (getUsedHistoryQueue().isEmpty()) {
             return null;
         }
@@ -77,7 +77,7 @@ public class DefaultDataSourceSwitcher implements DataSourceSwitcher {
     public void reset() {
         getUsedHistoryQueue().clear();
         if (logger.isDebugEnabled()) {
-            logger.debug("reset datasource history");
+            logger.debug("reset database used history");
         }
     }
 }

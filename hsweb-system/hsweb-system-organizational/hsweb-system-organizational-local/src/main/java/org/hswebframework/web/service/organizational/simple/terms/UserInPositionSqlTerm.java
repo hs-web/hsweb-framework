@@ -38,12 +38,12 @@ public class UserInPositionSqlTerm extends UserInSqlTerm {
         Dialect dialect=column.getTableMetaData().getDatabaseMetaData().getDialect();
 
         SqlAppender appender = new SqlAppender();
-        appender.addSpc(not ? "not" : "", "exists(select 1 from s_person_position _tmp");
+        appender.addSpc(not ? "not" : "", "exists(select 1 from ",getTableFullName("s_person_position")," _tmp");
         if (isChild()||isParent()) {
-            appender.addSpc(",s_position _pos");
+            appender.addSpc(",",getTableFullName("s_position")," _pos");
         }
         if (!isForPerson()) {
-            appender.addSpc(",s_person _person");
+            appender.addSpc(",",getTableFullName("s_person")," _person");
         }
 
         appender.addSpc("where ",

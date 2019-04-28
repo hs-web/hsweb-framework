@@ -45,12 +45,36 @@
         ${@org.hswebframework.web.dao.mybatis.builder.SqlBuilder@current().buildOrder(resultMapId,tableName,#this['_parameter'])}
     </sql>
 
+    <sql id="switcher">
+        <bind name="_fullTableName" value="tableName"/>
+        <!--当前数据库-->
+        <bind name="_databaseName"
+              value="@org.hswebframework.web.datasource.DataSourceHolder@databaseSwitcher().currentDatabase()"/>
+        <!--表全名前缀-->
+        <bind name="_databasePrefix" value="''"/>
+
+        <!--当前表名-->
+        <bind name="_currentTableName"
+              value="@org.hswebframework.web.datasource.DataSourceHolder@tableSwitcher().getTable(tableName)"/>
+
+        <if test="_currentTableName==null">
+            <bind name="_currentTableName" value="tableName"/>
+        </if>
+        <if test="_databaseName!=null">
+            <bind name="_databasePrefix" value="_databaseName+'.'"/>
+        </if>
+        <if test="_currentTableName!=null">
+            <bind name="_fullTableName" value="_databasePrefix+_currentTableName"/>
+        </if>
+    </sql>
+
     <!--生成查询sql-->
     <sql id="buildSelectSql">
+        <include refid="BasicMapper.switcher"/>
         <trim>
             select
             <include refid="BasicMapper.buildSelectField"/>
-            from ${tableName}
+            from ${_fullTableName}
             <where>
                 <include refid="BasicMapper.buildWhere"/>
             </where>
@@ -60,8 +84,9 @@
 
     <!--生成删除sql-->
     <sql id="buildDeleteSql">
+        <include refid="BasicMapper.switcher"/>
         <trim>
-            delete from ${tableName}
+            delete from ${_fullTableName}
             <where>
                 <include refid="BasicMapper.buildWhereForUpdate"/>
             </where>
@@ -75,8 +100,9 @@
 
     <!--生成UpdateSql-->
     <sql id="buildUpdateSql">
+        <include refid="BasicMapper.switcher"/>
         <trim>
-            update ${tableName}
+            update ${_fullTableName}
             <include refid="BasicMapper.buildUpdateField"/>
             <where>
                 <include refid="BasicMapper.buildWhereForUpdate"/>
@@ -86,8 +112,9 @@
 
     <!--生成查询数量sql-->
     <sql id="buildTotalSql">
+        <include refid="BasicMapper.switcher"/>
         <trim>
-            select count(0) as total from ${tableName}
+            select count(0) as total from ${_fullTableName}
             <where>
                 <include refid="BasicMapper.buildWhere"/>
             </where>

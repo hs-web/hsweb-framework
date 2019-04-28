@@ -41,12 +41,13 @@
     </sql>
 
     <insert id="insert" parameterType="org.hswebframework.web.entity.oauth2.client.SimpleOAuth2UserTokenEntity">
-        <include refid="config"/>
+        <include refid="config"/> <include refid="BasicMapper.switcher"/>
         <include refid="BasicMapper.buildInsertSql"/>
     </insert>
 
     <delete id="deleteByPk" parameterType="String">
-        delete from s_oauth2_user_token where u_id =#{id}
+        <include refid="config"/>
+        delete from ${_fullTableName} where u_id =#{id}
     </delete>
 
     <delete id="delete" parameterType="org.hswebframework.web.commons.entity.Entity">

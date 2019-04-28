@@ -29,7 +29,7 @@ import java.util.function.Supplier;
 public class SimpleDatabaseRepository implements DatabaseRepository {
 
     private volatile RDBDatabase defaultDatabase = null;
-    private          SqlExecutor sqlExecutor     = null;
+    private SqlExecutor sqlExecutor = null;
 
     @Value("${hsweb.dynamic-form.cluster:false}")
     private boolean cluster = false;
@@ -37,7 +37,7 @@ public class SimpleDatabaseRepository implements DatabaseRepository {
     @Autowired
     private ApplicationEventPublisher eventPublisher;
 
-    private final Map<String, RDBDatabase>                                 repository            = new HashMap<>();
+    private final Map<String, RDBDatabase> repository = new HashMap<>();
     private final Map<DatabaseType, Supplier<AbstractRDBDatabaseMetaData>> databaseMetaSuppliers = new EnumMap<>(DatabaseType.class);
 
     @Autowired
@@ -81,36 +81,29 @@ public class SimpleDatabaseRepository implements DatabaseRepository {
     }
 
     @Override
-    public RDBDatabase getDefaultDatabase() {
-        if (defaultDatabase == null) {
-            synchronized (this) {
-                if (defaultDatabase == null) {
-                    defaultDatabase = initDatabase(DataSourceHolder.defaultDatabaseType());
-                }
-            }
-        }
-        return defaultDatabase;
+    public RDBDatabase getDefaultDatabase(String databaseName) {
+        return repository.computeIfAbsent("DEFAULT." + databaseName, id -> this.initDatabase(DataSourceHolder.defaultDatabaseType(), databaseName));
     }
 
     @Override
-    public RDBDatabase getDatabase(String datasourceId) {
+    public RDBDatabase getDatabase(String datasourceId, String databaseName) {
         DynamicDataSource dynamicDataSource = DataSourceHolder.dataSource(datasourceId);
-        return repository.computeIfAbsent(datasourceId, id -> this.initDatabase(dynamicDataSource.getType()));
+        return repository.computeIfAbsent(datasourceId + "." + databaseName, id -> this.initDatabase(dynamicDataSource.getType(), databaseName));
     }
 
     @Override
     public RDBDatabase getCurrentDatabase() {
         return repository
                 .computeIfAbsent(DataSourceHolder.switcher().currentDataSourceId()
-                        , id -> this.initDatabase(DataSourceHolder.currentDatabaseType()));
+                        , id -> this.initDatabase(DataSourceHolder.currentDatabaseType(), null));
     }
 
 
-    private RDBDatabase initDatabase(DatabaseType databaseType) {
+    private RDBDatabase initDatabase(DatabaseType databaseType, String databaseName) {
         Supplier<AbstractRDBDatabaseMetaData> supplier = databaseMetaSuppliers.get(databaseType);
         Objects.requireNonNull(supplier, "database type" + databaseType + " is not support");
         AbstractRDBDatabaseMetaData metaData = supplier.get();
-
+        metaData.setDatabaseName(databaseName);
         SimpleDatabase database = cluster ?
                 new ClusterDatabase(metaData, sqlExecutor) :
                 new SimpleDatabase(metaData, sqlExecutor);

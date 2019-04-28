@@ -10,9 +10,9 @@ import org.hswebframework.ezorm.rdb.RDBDatabase;
  * @since 3.0
  */
 public interface DatabaseRepository {
-    RDBDatabase getDefaultDatabase();
+    RDBDatabase getDefaultDatabase(String databaseName);
 
-    RDBDatabase getDatabase(String datasourceId);
+    RDBDatabase getDatabase(String datasourceId,String databaseName);
 
     RDBDatabase getCurrentDatabase();
 }

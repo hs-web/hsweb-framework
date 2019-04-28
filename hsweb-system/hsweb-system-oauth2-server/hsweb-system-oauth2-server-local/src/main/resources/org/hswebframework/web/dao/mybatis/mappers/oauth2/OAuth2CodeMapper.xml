@@ -35,6 +35,7 @@
     <sql id="config">
         <bind name="resultMapId" value="'AuthorizationCodeResultMap'"/>
         <bind name="tableName" value="'s_oauth2_auth_code'"/>
+        <include refid="BasicMapper.switcher"/>
     </sql>
 
     <insert id="insert" parameterType="org.hswebframework.web.entity.oauth2.server.AuthorizationCodeEntity">

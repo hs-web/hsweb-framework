@@ -6,6 +6,7 @@ import org.hswebframework.web.datasource.config.InSpringDynamicDataSourceConfig;
 import org.hswebframework.web.datasource.service.InSpringContextDynamicDataSourceService;
 import org.hswebframework.web.datasource.service.InSpringDynamicDataSourceConfigRepository;
 import org.hswebframework.web.datasource.switcher.DataSourceSwitcher;
+import org.hswebframework.web.datasource.switcher.DatabaseSwitcher;
 import org.hswebframework.web.datasource.switcher.DefaultTableSwitcher;
 import org.hswebframework.web.datasource.switcher.TableSwitcher;
 import org.springframework.beans.BeansException;
@@ -40,7 +41,7 @@ public class DynamicDataSourceAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(DynamicDataSourceConfigRepository.class)
-    public InSpringDynamicDataSourceConfigRepository inSpringDynamicDataSourceConfigRepository() {
+    public DynamicDataSourceConfigRepository inSpringDynamicDataSourceConfigRepository() {
         return new InSpringDynamicDataSourceConfigRepository();
     }
 
@@ -85,6 +86,9 @@ public class DynamicDataSourceAutoConfiguration {
                 }
                 if (bean instanceof TableSwitcher) {
                     DataSourceHolder.tableSwitcher = ((TableSwitcher) bean);
+                }
+                if (bean instanceof DatabaseSwitcher) {
+                    DataSourceHolder.databaseSwitcher = ((DatabaseSwitcher) bean);
                 }
                 return bean;
             }

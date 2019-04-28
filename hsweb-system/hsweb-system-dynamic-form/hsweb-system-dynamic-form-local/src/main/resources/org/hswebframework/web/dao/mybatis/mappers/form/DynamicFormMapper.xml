@@ -6,6 +6,7 @@
     <resultMap id="DynamicFormResultMap" type="org.hswebframework.web.entity.form.DynamicFormEntity">
         <id property="id" column="u_id" javaType="string" jdbcType="VARCHAR"/>
         <result property="name" column="name" javaType="String" jdbcType="VARCHAR"/>
+        <result property="databaseName" column="db_name" javaType="String" jdbcType="VARCHAR"/>
         <result property="databaseTableName" column="t_name" javaType="String" jdbcType="VARCHAR"/>
         <result property="describe" column="describe" javaType="String" jdbcType="VARCHAR"/>
         <result property="version" column="version" javaType="Long" jdbcType="DECIMAL"/>
@@ -34,7 +35,8 @@
     </insert>
 
     <delete id="deleteByPk" parameterType="String">
-        delete from s_dyn_form where u_id =#{id}
+        <include refid="config"/><include refid="BasicMapper.switcher"/>
+        delete from ${_fullTableName} where u_id =#{id}
     </delete>
 
     <delete id="delete" parameterType="org.hswebframework.web.commons.entity.Entity">
@@ -48,7 +50,8 @@
     </update>
 
     <update id="incrementVersion" parameterType="String">
-        update s_dyn_form set version=version+1 where u_id = #{id}
+        <include refid="config"/><include refid="BasicMapper.switcher"/>
+        update ${_fullTableName} set version=version+1 where u_id = #{id}
     </update>
 
     <select id="query" parameterType="org.hswebframework.web.commons.entity.Entity" resultMap="DynamicFormResultMap">

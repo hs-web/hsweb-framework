@@ -50,6 +50,7 @@ public class SimpleDynamicFormServiceTest extends SimpleWebApplicationTests {
     public void testDeploy() throws SQLException {
         DynamicFormEntity form = entityFactory.newInstance(DynamicFormEntity.class);
         form.setName("test");
+        form.setDatabaseName("PUBLIC");
         form.setDatabaseTableName("f_test");
         form.setTriggers("[" +
                 "{\"trigger\":\"select.wrapper.done\"" +//触发器 在每个查询结果被包装为对象时触发
@@ -94,7 +95,7 @@ public class SimpleDynamicFormServiceTest extends SimpleWebApplicationTests {
             }
         });
 
-        databaseRepository.getDefaultDatabase().getTable("s_dyn_form");
+        databaseRepository.getDefaultDatabase(form.getDatabaseName()).getTable("s_dyn_form");
 
         List<Object> objects = dynamicFormOperationService.select(form.getId(), new QueryParamEntity().includes("*", "form.*"));
 

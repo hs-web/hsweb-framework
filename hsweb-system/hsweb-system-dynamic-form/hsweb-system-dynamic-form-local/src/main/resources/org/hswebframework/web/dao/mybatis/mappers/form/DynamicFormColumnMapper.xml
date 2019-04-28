@@ -29,12 +29,13 @@
     </sql>
 
     <insert id="insert" parameterType="org.hswebframework.web.entity.form.DynamicFormColumnEntity">
-        <include refid="config"/>
+        <include refid="config"/> <include refid="BasicMapper.switcher"/>
         <include refid="BasicMapper.buildInsertSql"/>
     </insert>
 
     <delete id="deleteByPk" parameterType="String">
-        delete from s_dyn_form_column where u_id =#{id}
+        <include refid="config"/>
+        delete from ${_fullTableName} where u_id =#{id}
     </delete>
 
     <delete id="delete" parameterType="org.hswebframework.web.commons.entity.Entity">

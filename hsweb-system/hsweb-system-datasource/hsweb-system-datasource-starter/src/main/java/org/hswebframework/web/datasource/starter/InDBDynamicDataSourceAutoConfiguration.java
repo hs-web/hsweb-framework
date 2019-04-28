@@ -21,8 +21,10 @@ package org.hswebframework.web.datasource.starter;
 import org.hswebframework.web.datasource.DynamicDataSourceAutoConfiguration;
 import org.hswebframework.web.datasource.DynamicDataSourceProxy;
 import org.hswebframework.web.datasource.DynamicDataSourceService;
+import org.hswebframework.web.datasource.config.DynamicDataSourceConfigRepository;
 import org.hswebframework.web.service.datasource.DataSourceConfigService;
 import org.hswebframework.web.service.datasource.simple.InDBDataSourceRepository;
+import org.hswebframework.web.service.datasource.simple.InDBDynamicDataSourceConfig;
 import org.hswebframework.web.service.datasource.simple.InDBDynamicDataSourceService;
 import org.hswebframework.web.service.datasource.simple.InDBJtaDynamicDataSourceService;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
@@ -31,6 +33,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClas
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 
 import javax.sql.DataSource;
 
@@ -40,17 +43,19 @@ import javax.sql.DataSource;
 @Configuration
 @ComponentScan({"org.hswebframework.web.service.datasource.simple"
         , "org.hswebframework.web.controller.datasource"})
-@AutoConfigureBefore(DynamicDataSourceAutoConfiguration.class)
+@AutoConfigureBefore(value = DynamicDataSourceAutoConfiguration.class, name = "org.hswebframework.web.datasource.jta.AtomikosDataSourceAutoConfiguration")
+@SuppressWarnings("all")
 public class InDBDynamicDataSourceAutoConfiguration {
 
     @Bean
-    public InDBDataSourceRepository inDBDataSourceRepository(DataSourceConfigService dataSourceConfigService) {
+    @Primary
+    public DynamicDataSourceConfigRepository inDBDataSourceRepository(DataSourceConfigService dataSourceConfigService) {
         return new InDBDataSourceRepository(dataSourceConfigService);
     }
 
     @Bean
     @ConditionalOnMissingClass("org.hswebframework.web.datasource.jta.JtaDynamicDataSourceService")
-    public DynamicDataSourceService inDBDynamicDataSourceService(InDBDataSourceRepository repository,
+    public DynamicDataSourceService inDBDynamicDataSourceService(DynamicDataSourceConfigRepository repository,
                                                                  DataSource dataSource) {
         return new InDBDynamicDataSourceService(repository, new DynamicDataSourceProxy("dataSource", dataSource));
     }
@@ -59,7 +64,7 @@ public class InDBDynamicDataSourceAutoConfiguration {
     @ConditionalOnClass(org.hswebframework.web.datasource.jta.JtaDynamicDataSourceService.class)
     public static class InDBJtaDynamicDataSourceServiceAutoConfiguration {
         @Bean
-        public DynamicDataSourceService inDBJtaDynamicDataSourceService(InDBDataSourceRepository repository,
+        public DynamicDataSourceService inDBJtaDynamicDataSourceService(DynamicDataSourceConfigRepository repository,
                                                                         DataSource dataSource) {
             return new InDBJtaDynamicDataSourceService(repository, new DynamicDataSourceProxy("dataSource", dataSource));
         }

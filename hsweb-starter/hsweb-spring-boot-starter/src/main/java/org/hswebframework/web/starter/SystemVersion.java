@@ -202,17 +202,21 @@ class Version implements Comparable<Version> {
         if (null == version) {
             return;
         }
+        version = version.toLowerCase();
+
         boolean snapshot = version.toLowerCase().contains("snapshot");
-        version = version.toLowerCase()
-                .replace(".snapshot", "")
-                .replace("-snapshot", "")
-                .replace("-rc", "")
-                .replace("-release", "");
-        String[] ver = version.split("[.]");
+
+        String[] ver = version.split("[-]")[0].split("[.]");
         Integer[] numberVer = ListUtils.stringArr2intArr(ver);
-        if (numberVer.length < 1 || Arrays.stream(numberVer).anyMatch(Objects::isNull)) {
+        if (numberVer.length == 0) {
             numberVer = new Integer[]{1, 0, 0};
             log.warn("解析版本号失败:{},将使用默认版本号:1.0.0,请检查hsweb-starter.js配置内容!", version);
+        }
+
+        for (int i = 0; i < numberVer.length; i++) {
+            if (numberVer[i] == null) {
+                numberVer[i] = 0;
+            }
         }
         setVersion(numberVer[0],
                 numberVer.length <= 1 ? 0 : numberVer[1],

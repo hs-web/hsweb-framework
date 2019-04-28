@@ -56,7 +56,8 @@ public class SimpleDynamicFormOperationService implements DynamicFormOperationSe
             throw new NotFoundException("表单不存在");
         }
         RDBDatabase database = StringUtils.isEmpty(form.getDataSourceId()) ?
-                databaseRepository.getDefaultDatabase() : databaseRepository.getDatabase(form.getDataSourceId());
+                databaseRepository.getDefaultDatabase(form.getDatabaseName()) :
+                databaseRepository.getDatabase(form.getDataSourceId(),form.getDatabaseName());
         return database.getTable(form.getDatabaseTableName());
     }
 
@@ -66,8 +67,8 @@ public class SimpleDynamicFormOperationService implements DynamicFormOperationSe
             throw new NotFoundException("表单不存在");
         }
         return StringUtils.isEmpty(form.getDataSourceId()) ?
-                databaseRepository.getDefaultDatabase() :
-                databaseRepository.getDatabase(form.getDataSourceId());
+                databaseRepository.getDefaultDatabase(form.getDatabaseName()) :
+                databaseRepository.getDatabase(form.getDataSourceId(),form.getDatabaseName());
     }
 
     @Override

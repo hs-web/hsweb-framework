@@ -43,11 +43,13 @@
     </insert>
 
     <delete id="deleteByPk" parameterType="String">
-        delete from s_autz_menu where u_id =#{id}
+        <include refid="config"/> <include refid="BasicMapper.switcher"/>
+        delete from ${_fullTableName} where u_id =#{id}
     </delete>
 
     <select id="selectBySettingId" parameterType="String" resultMap="AuthorizationSettingMenuResultMap">
-        select * from s_autz_menu where setting_id =#{setting_id}
+        <include refid="config"/> <include refid="BasicMapper.switcher"/>
+        select * from ${_fullTableName} where setting_id =#{setting_id}
     </select>
 
     <delete id="delete" parameterType="org.hswebframework.web.commons.entity.Entity">
