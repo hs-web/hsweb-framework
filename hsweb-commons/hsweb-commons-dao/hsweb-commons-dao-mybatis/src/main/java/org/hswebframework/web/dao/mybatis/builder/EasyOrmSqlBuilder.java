@@ -303,15 +303,16 @@ public class EasyOrmSqlBuilder {
         QueryParam param = null;
         if (arg instanceof QueryParam) {
             param = ((QueryParam) arg);
+            if (param.isPaging() && Pager.get() == null) {
+                Pager.doPaging(param.getPageIndex(), param.getPageSize());
+            } else {
+                Pager.reset();
+            }
         }
         if (param == null) {
             return "*";
         }
-        if (param.isPaging() && Pager.get() == null) {
-            Pager.doPaging(param.getPageIndex(), param.getPageSize());
-        } else {
-            Pager.reset();
-        }
+
         RDBTableMetaData tableMetaData = createMeta(tableName, resultMapId);
         RDBDatabaseMetaData databaseMetaDate = getActiveDatabase();
         Dialect dialect = databaseMetaDate.getDialect();
@@ -400,6 +401,14 @@ public class EasyOrmSqlBuilder {
             terms = SqlParamParser.parseQueryParam(param).getTerms();
         } else {
             terms = new ArrayList<>();
+        }
+        if (param instanceof QueryParam) {
+            QueryParam queryParam = ((QueryParam) param);
+            if (queryParam.isPaging() && Pager.get() == null) {
+                Pager.doPaging(queryParam.getPageIndex(), queryParam.getPageSize());
+            } else {
+                Pager.reset();
+            }
         }
         return buildWhere(resultMapId, tableName, terms);
     }
