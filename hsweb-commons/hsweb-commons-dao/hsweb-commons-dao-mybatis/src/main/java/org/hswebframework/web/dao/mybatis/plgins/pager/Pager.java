@@ -71,14 +71,13 @@ public interface Pager {
 
     static void rePaging(int total) {
         Pager pager = get();
-        int pageIndex = 0;
         if (pager != null) {
             // 当前页没有数据后跳转到最后一页
             if (pager.pageIndex() != 0 && (pager.pageIndex() * pager.pageSize()) >= total) {
                 int tmp = total / pager.pageSize();
-                pageIndex = total % pager.pageSize() == 0 ? tmp - 1 : tmp;
+                int pageIndex = total % pager.pageSize() == 0 ? tmp - 1 : tmp;
+                doPaging(pageIndex, pager.pageSize());
             }
-            doPaging(pageIndex, pager.pageSize());
         }
     }
 }
