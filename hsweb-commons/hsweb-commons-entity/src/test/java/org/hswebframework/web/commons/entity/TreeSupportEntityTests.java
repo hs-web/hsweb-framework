@@ -2,18 +2,17 @@ package org.hswebframework.web.commons.entity;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import org.hswebframework.web.id.IDGenerator;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Predicate;
 
-import static org.junit.Assert.*;
-
 public class TreeSupportEntityTests {
+
 
     @Test
     public void test() {
@@ -47,6 +46,12 @@ public class TreeSupportEntityTests {
         Assert.assertEquals(tree.get(0).getChildren().get(1).getChildren().get(0).getId(), Integer.valueOf(10201));
 
         System.out.println(JSON.toJSONString(tree, SerializerFeature.PrettyFormat));
+
+        LongAdder adder=new LongAdder();
+        TreeSupportEntity.forEach(tree,menu->{
+            adder.increment();
+        });
+        Assert.assertEquals(adder.intValue(),4);
 
         List<MenuEntity> list = new ArrayList<>();
 
