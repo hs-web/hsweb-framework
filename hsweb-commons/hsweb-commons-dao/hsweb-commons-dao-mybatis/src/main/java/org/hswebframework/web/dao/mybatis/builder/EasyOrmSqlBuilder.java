@@ -106,11 +106,11 @@ public class EasyOrmSqlBuilder {
         return javaType;
     }
 
-    private final RDBDatabaseMetaData mysql = new MysqlMeta();
-    private final RDBDatabaseMetaData oracle = new OracleMeta();
-    private final RDBDatabaseMetaData h2 = new H2Meta();
-    private final RDBDatabaseMetaData postgresql = new PGMeta();
-    private final RDBDatabaseMetaData mssql = new MSSQLMeta();
+    public static final RDBDatabaseMetaData mysql = new MysqlMeta();
+    public static final RDBDatabaseMetaData oracle = new OracleMeta();
+    public static final RDBDatabaseMetaData h2 = new H2Meta();
+    public static final RDBDatabaseMetaData postgresql = new PGMeta();
+    public static final RDBDatabaseMetaData mssql = new MSSQLMeta();
 
     private final ConcurrentMap<RDBDatabaseMetaData, Map<String, RDBTableMetaData>> metaCache = new ConcurrentHashMap<>();
 
@@ -427,7 +427,7 @@ public class EasyOrmSqlBuilder {
         return appender.toString();
     }
 
-    class MysqlMeta extends MysqlRDBDatabaseMetaData {
+    static class MysqlMeta extends MysqlRDBDatabaseMetaData {
         MysqlMeta() {
             super();
             renderMap.put(SqlRender.TYPE.INSERT, new InsertSqlBuilder());
@@ -440,7 +440,7 @@ public class EasyOrmSqlBuilder {
         }
     }
 
-    class OracleMeta extends OracleRDBDatabaseMetaData {
+    static class OracleMeta extends OracleRDBDatabaseMetaData {
         OracleMeta() {
             super();
             renderMap.put(SqlRender.TYPE.INSERT, new InsertSqlBuilder());
@@ -453,7 +453,7 @@ public class EasyOrmSqlBuilder {
         }
     }
 
-    class H2Meta extends H2RDBDatabaseMetaData {
+    static class H2Meta extends H2RDBDatabaseMetaData {
         H2Meta() {
             super();
             renderMap.put(SqlRender.TYPE.INSERT, new InsertSqlBuilder());
@@ -466,7 +466,7 @@ public class EasyOrmSqlBuilder {
         }
     }
 
-    class PGMeta extends PGRDBDatabaseMetaData {
+    static class PGMeta extends PGRDBDatabaseMetaData {
         PGMeta() {
             super();
             renderMap.put(SqlRender.TYPE.INSERT, new InsertSqlBuilder());
@@ -479,7 +479,7 @@ public class EasyOrmSqlBuilder {
         }
     }
 
-    class MSSQLMeta extends MSSQLRDBDatabaseMetaData {
+    static class MSSQLMeta extends MSSQLRDBDatabaseMetaData {
         MSSQLMeta() {
             super();
             renderMap.put(SqlRender.TYPE.INSERT, new InsertSqlBuilder());
