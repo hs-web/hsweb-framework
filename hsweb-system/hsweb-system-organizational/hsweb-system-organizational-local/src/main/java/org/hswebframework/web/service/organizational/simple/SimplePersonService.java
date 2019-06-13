@@ -18,6 +18,7 @@ package org.hswebframework.web.service.organizational.simple;
 
 import org.hswebframework.web.commons.entity.DataStatus;
 import org.hswebframework.web.commons.entity.TreeSupportEntity;
+import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.dao.dynamic.QueryByEntityDao;
 import org.hswebframework.web.dao.organizational.*;
 import org.hswebframework.web.entity.authorization.UserEntity;
@@ -49,6 +50,9 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static org.hswebframework.web.commons.entity.TreeSupportEntity.*;
+import static org.hswebframework.web.commons.entity.param.QueryParamEntity.*;
+import static org.hswebframework.web.service.DefaultDSLQueryService.*;
 import static org.springframework.util.StringUtils.isEmpty;
 
 /**
@@ -480,23 +484,22 @@ public class SimplePersonService extends EnableCacheAllEvictGenericEntityService
             return new java.util.ArrayList<>();
         }
         //获取根节点
-        List<T> root = DefaultDSLQueryService.createQuery(dao)
+        List<T> rootNodeList =  newQuery()
                 .where()
-                .in(TreeSupportEntity.id, rootIds)
-                .listNoPaging();
-        //节点不存在?
-        if (!root.isEmpty()) {
+                .in(id, rootIds)
+                .execute(dao::query);
+
+        if (!rootNodeList.isEmpty()) {
             //所有子节点,使用节点的path属性进行快速查询,查询结果包含了根节点
-            List<T> allNode = DefaultDSLQueryService
-                    .createQuery(dao)
+            List<T> allNode = newQuery()
                     //遍历生成查询条件: like path like ?||'%' or path like ?||'%'  ....
-                    .each(root, (query, data) -> query.or().like$(TreeSupportEntity.path, data.getPath()))
-                    .listNoPaging();
+                    .each(rootNodeList, (query, rootNode) -> query.or().like$(rootNode::getPath))
+                    .noPaging()
+                    .execute(dao::query);
+
             //转为树形结构
-            List<T> tree = TreeSupportEntity
-                    .list2tree(allNode, childAccepter,
-                            (Predicate<T>) node -> rootIds.contains(node.getId()));  // 根节点判定
-            rootConsumer.accept(root);
+            List<T> tree = list2tree(allNode, childAccepter, (Predicate<T>) node -> rootIds.contains(node.getId()));  // 根节点判定
+            rootConsumer.accept(rootNodeList);
             return tree;
         }
         return new java.util.ArrayList<>();
@@ -504,7 +507,7 @@ public class SimplePersonService extends EnableCacheAllEvictGenericEntityService
 
     public static <V extends TreeSupportEntity<String>> Set<TreeNode<String>> transformationTreeNode(V parent, List<V> data) {
         Set<TreeNode<String>> treeNodes = new HashSet<>();
-        data.forEach(node -> {
+        for (V node : data) {
             TreeNode<String> treeNode = new TreeNode<>();
             if (parent != null) {
                 TreeNode<String> parentNode = new TreeNode<>();
@@ -514,10 +517,11 @@ public class SimplePersonService extends EnableCacheAllEvictGenericEntityService
             }
             treeNode.setValue(node.getId());
             if (node.getChildren() != null && !node.getChildren().isEmpty()) {
+                // TODO: 2019-06-13 有不用递归的方式?
                 treeNode.setChildren(transformationTreeNode(node, node.getChildren()));
             }
             treeNodes.add(treeNode);
-        });
+        }
         return treeNodes;
     }
 
