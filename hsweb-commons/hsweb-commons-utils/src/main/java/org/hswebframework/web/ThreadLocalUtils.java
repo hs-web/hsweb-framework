@@ -48,7 +48,7 @@ public final class ThreadLocalUtils {
      * @return threadLocal中的全部值
      */
     public static Map<String, Object> getAll() {
-        return local.get();
+        return new HashMap<>(local.get());
     }
 
     /**
