@@ -231,11 +231,15 @@ public class EasyOrmSqlBuilder {
         List<CommonSqlRender.OperationColumn> columns = render.parseOperationField(tableMetaData, param);
         SqlAppender appender = new SqlAppender();
         columns.forEach(column -> {
+
             RDBColumnMetaData columnMetaData = column.getRDBColumnMetaData();
             if (columnMetaData == null) {
                 return;
             }
             if (columnMetaData.getName().contains(".")) {
+                return;
+            }
+            if (columnMetaData.getProperty("read-only").isTrue()) {
                 return;
             }
             Object value;
