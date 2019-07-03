@@ -55,6 +55,9 @@ public class Source {
 
     private String[] arr6 = {"1", "2"};
 
+    private String source;
+
+    private String target;
 
 }
 
