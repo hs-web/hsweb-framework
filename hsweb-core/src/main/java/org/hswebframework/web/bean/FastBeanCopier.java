@@ -141,8 +141,8 @@ public final class FastBeanCopier {
         String method = "public void copy(Object s, Object t, java.util.Set ignore, " +
                 "org.hswebframework.web.bean.Converter converter){\n" +
                 "try{\n\t" +
-                sourceName + " source=(" + sourceName + ")s;\n\t" +
-                tartName + " target=(" + tartName + ")t;\n\t" +
+                sourceName + " $$__source=(" + sourceName + ")s;\n\t" +
+                tartName + " $$__target=(" + tartName + ")t;\n\t" +
                 createCopierCode(source, target) +
                 "}catch(Exception e){\n" +
                 "\tthrow new RuntimeException(e.getMessage(),e);" +
@@ -211,7 +211,7 @@ public final class FastBeanCopier {
             }
             code.append("if(!ignore.contains(\"").append(sourceProperty.getName()).append("\")){\n\t");
             if (!sourceProperty.isPrimitive()) {
-                code.append("if(source.").append(sourceProperty.getReadMethod()).append("!=null){\n");
+                code.append("if($$__source.").append(sourceProperty.getReadMethod()).append("!=null){\n");
             }
             code.append(targetProperty.generateVar(targetProperty.getName())).append("=")
                     .append(sourceProperty.generateGetter(target, targetProperty.getType()))
@@ -220,7 +220,7 @@ public final class FastBeanCopier {
             if (!targetProperty.isPrimitive()) {
                 code.append("\tif(").append(sourceProperty.getName()).append("!=null){\n");
             }
-            code.append("\ttarget.").append(targetProperty.generateSetter(targetProperty.getType(), sourceProperty.getName())).append(";\n");
+            code.append("\t$$__target.").append(targetProperty.generateSetter(targetProperty.getType(), sourceProperty.getName())).append(";\n");
             if (!targetProperty.isPrimitive()) {
                 code.append("\t}\n");
             }
@@ -310,7 +310,7 @@ public final class FastBeanCopier {
         public BiFunction<Class, Class, String> createGetterFunction() {
 
             return (targetBeanType, targetType) -> {
-                String getterCode = "source." + getReadMethod();
+                String getterCode = "$$__source." + getReadMethod();
 
                 String generic = "org.hswebframework.web.bean.FastBeanCopier.EMPTY_CLASS_ARRAY";
                 Field field = ReflectionUtils.findField(targetBeanType, name);
