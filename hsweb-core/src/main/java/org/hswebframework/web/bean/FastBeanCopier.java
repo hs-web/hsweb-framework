@@ -14,6 +14,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.function.BiFunction;
@@ -540,7 +541,11 @@ public final class FastBeanCopier {
 
             if (targetClass.isEnum()) {
                 if (EnumDict.class.isAssignableFrom(targetClass)) {
-                    Object val = EnumDict.find((Class) targetClass, String.valueOf(source)).orElse(null);
+                    String strVal=String.valueOf(source);
+
+                    Object val = EnumDict.find((Class) targetClass, e -> {
+                        return e.eq(source) || e.name().equalsIgnoreCase(strVal);
+                    }).orElse(null);
                     if (targetClass.isInstance(val)) {
                         return ((T) val);
                     }
@@ -551,9 +556,17 @@ public final class FastBeanCopier {
                         return t;
                     }
                 }
+
                 log.warn("无法将:{}转为枚举:{}", source, targetClass);
                 return null;
             }
+            //转换为数组
+            if (targetClass.isArray()) {
+                Class<?> componentType = targetClass.getComponentType();
+                List<?> val = convert(source, List.class, new Class[]{componentType});
+                return (T) val.toArray((Object[])Array.newInstance(componentType,val.size()));
+            }
+
             try {
                 org.apache.commons.beanutils.Converter converter = BeanUtilsBean
                         .getInstance()
