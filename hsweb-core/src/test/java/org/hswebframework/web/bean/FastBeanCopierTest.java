@@ -1,9 +1,11 @@
 package org.hswebframework.web.bean;
 
 import org.apache.commons.beanutils.BeanUtils;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -35,35 +37,26 @@ public class FastBeanCopierTest {
         FastBeanCopier.copy(source, target);
 
 
-        long t = System.currentTimeMillis();
-//        for (int i = 10_0000; i > 0; i--) {
-//            FastBeanCopier.copy(source, target);
-//        }
-        System.out.println(System.currentTimeMillis() - t);
-
         System.out.println(source);
         System.out.println(target);
         System.out.println(target.getNestObject() == source.getNestObject());
-//        Source source1=new Source();
-
-//        FastBeanCopier.copy(source,source1);
-
-//        System.out.println(source1);
-//
-//        t = System.currentTimeMillis();
-//
-//        for (int i = 100_0000; i > 0; i--) {
-//            try {
-//                BeanUtils.copyProperties(source, target);
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        }
-//        System.out.println(System.currentTimeMillis() - t);
-//        System.out.println(target);
-//        System.out.println(target.getNestObject() == source.getNestObject());
     }
 
+    @Test
+    public void testMapArray() {
+       Map<String,Object> data =new HashMap<>();
+       data.put("colors", Arrays.asList("RED"));
+
+
+        Target target = new Target();
+        FastBeanCopier.copy(data, target);
+
+
+        System.out.println(target);
+        Assert.assertNotNull(target.getColors());
+        Assert.assertSame(target.getColors()[0], Color.RED);
+
+    }
 
     @Test
     public void testCopyMap() {
@@ -85,7 +78,7 @@ public class FastBeanCopierTest {
         System.out.println(FastBeanCopier.copy(source, target, FastBeanCopier.include("age")));
 
         System.out.println(target);
-        System.out.println(FastBeanCopier.copy(target, new Source()));
+        System.out.println(FastBeanCopier.copy(target, new Target()));
     }
 
 
