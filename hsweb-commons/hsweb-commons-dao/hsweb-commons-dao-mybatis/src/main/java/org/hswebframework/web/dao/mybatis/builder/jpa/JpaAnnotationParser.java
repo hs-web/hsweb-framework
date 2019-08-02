@@ -15,10 +15,7 @@ import org.hswebframework.web.dict.EnumDict;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.StringUtils;
 
-import javax.persistence.Column;
-import javax.persistence.Enumerated;
-import javax.persistence.Lob;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -109,25 +106,31 @@ public class JpaAnnotationParser {
     }
 
 
-    public static RDBTableMetaData parseMetaDataFromEntity(Class entityClass) {
-        Table table = AnnotationUtils.findAnnotation(entityClass, Table.class);
-        if (table == null) {
-            return null;
-        }
-        RDBTableMetaData tableMetaData = new RDBTableMetaData();
-        tableMetaData.setName(table.name());
+    private static List<RDBColumnMetaData> parseColumnMeta(String prefix, String columnName, Class entityClass) {
 
         PropertyDescriptor[] descriptors = BeanUtilsBean.getInstance()
                 .getPropertyUtils()
                 .getPropertyDescriptors(entityClass);
+        List<RDBColumnMetaData> columnMetaDataList = new ArrayList<>();
+
         for (PropertyDescriptor descriptor : descriptors) {
             Column columnAnn = getAnnotation(entityClass, descriptor, Column.class);
+            CollectionTable collectionTable = getAnnotation(entityClass, descriptor, CollectionTable.class);
+
             if (columnAnn == null) {
+                if (collectionTable != null) {
+                    columnMetaDataList.addAll(parseColumnMeta(descriptor.getName(), collectionTable.name(), descriptor.getPropertyType()));
+                    continue;
+                }
                 continue;
             }
+
+            String realName = StringUtils.hasText(columnAnn.name()) ? columnAnn.name() : descriptor.getName();
+            String realAlias = StringUtils.hasText(prefix) ? prefix.concat(".").concat(descriptor.getName()) : descriptor.getName();
+
             RDBColumnMetaData column = new RDBColumnMetaData();
-            column.setName(columnAnn.name());
-            column.setAlias(descriptor.getName());
+            column.setName(StringUtils.hasText(columnName) ? columnName.concat(".").concat(realName) : realName);
+            column.setAlias(realAlias);
             column.setLength(columnAnn.length());
             column.setPrecision(columnAnn.precision());
             column.setJavaType(descriptor.getPropertyType());
@@ -151,26 +154,19 @@ public class JpaAnnotationParser {
                         .orElse(JDBCType.OTHER);
             }
             column.setJdbcType(type);
-            ValueConverter dateConvert = new DateTimeConverter("yyyy-MM-dd HH:mm:ss", column.getJavaType()) {
-                @Override
-                public Object getData(Object value) {
-                    if (value instanceof Number) {
-                        return new Date(((Number) value).longValue());
-                    }
-                    return super.getData(value);
-                }
-            };
-
-            if (column.getJdbcType() == JDBCType.DATE
-                    || column.getJdbcType() == JDBCType.TIMESTAMP) {
-                column.setValueConverter(dateConvert);
-            } else if (column.getJavaType() == boolean.class || column.getJavaType() == Boolean.class) {
-                column.setValueConverter(new BooleanValueConverter(column.getJdbcType()));
-            } else if (TypeUtils.isNumberType(column)) {
-                column.setValueConverter(new NumberValueConverter(column.getJavaType()));
-            }
-            tableMetaData.addColumn(column);
+            columnMetaDataList.add(column);
         }
+        return columnMetaDataList;
+    }
+
+    public static RDBTableMetaData parseMetaDataFromEntity(Class entityClass) {
+        Table table = AnnotationUtils.findAnnotation(entityClass, Table.class);
+        if (table == null) {
+            return null;
+        }
+        RDBTableMetaData tableMetaData = new RDBTableMetaData();
+        tableMetaData.setName(table.name());
+        parseColumnMeta(null, null, entityClass).forEach(tableMetaData::addColumn);
         return tableMetaData;
     }
 
