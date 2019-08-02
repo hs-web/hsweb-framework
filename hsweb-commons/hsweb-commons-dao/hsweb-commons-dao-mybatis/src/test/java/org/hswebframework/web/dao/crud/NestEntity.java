@@ -2,6 +2,8 @@ package org.hswebframework.web.dao.crud;
 
 import lombok.Data;
 
+import javax.persistence.Column;
+
 /**
  *
  * @author zhouhao
@@ -9,5 +11,7 @@ import lombok.Data;
  */
 @Data
 public class NestEntity {
+
+    @Column
     private String name;
 }

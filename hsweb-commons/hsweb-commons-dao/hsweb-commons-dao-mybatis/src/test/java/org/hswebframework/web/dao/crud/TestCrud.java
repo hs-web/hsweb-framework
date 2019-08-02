@@ -77,14 +77,16 @@ public class TestCrud extends AbstractTransactionalJUnit4SpringContextTests {
         //#102
         query.where("createTime", "2017-11-10");
 
-//        query.includes("nest.name", "*");
 
 //        DataSourceHolder.tableSwitcher().use("h_test", "h_test2");
         List<TestEntity> entities = testDao.queryNest(query);
-
-        testDao.query(query);
-        testDao.countNest(query);
+        query.includes("name");
         testDao.count(query);
+        testDao.query(query);
+
+        query.includes("nest.name", "*");
+        testDao.countNest(query);
+
         UpdateParamEntity.newUpdate()
                 .set("name","测试")
                 .set(entity::getDataType)

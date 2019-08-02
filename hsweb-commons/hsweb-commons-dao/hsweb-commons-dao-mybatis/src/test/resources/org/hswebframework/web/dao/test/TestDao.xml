@@ -10,7 +10,10 @@
 
     <resultMap id="TestNestResultMap" type="org.hswebframework.web.dao.crud.TestEntity">
         <id property="id" column="id" javaType="Long" jdbcType="INTEGER"/>
-        <result property="nest.name" column="nest_table.name" javaType="String" jdbcType="VARCHAR"/>
+<!--        <result property="nest.name" column="nest_table.name" javaType="String" jdbcType="VARCHAR"/>-->
+<!--        <association property="nest" column="nest_table">-->
+<!--            <result column="name" jdbcType="VARCHAR" javaType="String"/>-->
+<!--        </association>-->
     </resultMap>
 
     <!--用于动态生成sql所需的配置-->
