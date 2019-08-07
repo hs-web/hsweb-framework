@@ -10,9 +10,12 @@
 
     <resultMap id="TestNestResultMap" type="org.hswebframework.web.dao.crud.TestEntity">
         <id property="id" column="id" javaType="Long" jdbcType="INTEGER"/>
-<!--        <result property="nest.name" column="nest_table.name" javaType="String" jdbcType="VARCHAR"/>-->
-<!--        <association property="nest" column="nest_table">-->
-<!--            <result column="name" jdbcType="VARCHAR" javaType="String"/>-->
+<!--                <result property="nest2.name" column="nest_table2.name" javaType="String" jdbcType="VARCHAR"/>-->
+<!--        <association property="nest" javaType="org.hswebframework.web.dao.crud.NestEntity" columnPrefix="nest_table." column="nest_table">-->
+<!--            <result property="name" column="name" jdbcType="VARCHAR" javaType="String"/>-->
+<!--        </association>-->
+<!--        <association property="nest2" javaType="org.hswebframework.web.dao.crud.NestEntity" columnPrefix="nest_table2." column="nest_table2">-->
+<!--            <result property="name" column="name" jdbcType="VARCHAR" javaType="String"/>-->
 <!--        </association>-->
     </resultMap>
 
@@ -22,7 +25,8 @@
         <bind name="tableName" value="'h_test'"/>
     </sql>
 
-    <insert id="insert" keyColumn="id" keyProperty="id" useGeneratedKeys="true" parameterType="org.hswebframework.web.dao.crud.TestEntity">
+    <insert id="insert" keyColumn="id" keyProperty="id" useGeneratedKeys="true"
+            parameterType="org.hswebframework.web.dao.crud.TestEntity">
         <include refid="config"/>
         <include refid="BasicMapper.buildInsertSql"/>
     </insert>
@@ -55,6 +59,7 @@
         <include refid="BasicMapper.buildSelectField"/>
         from ${_fullTableName} h_test
         left join ${_databasePrefix}h_nest_table nest_table on nest_table.id=h_test.id
+        left join ${_databasePrefix}h_nest_table nest_table2 on nest_table2.id=h_test.id
         <where>
             <include refid="BasicMapper.buildWhere"/>
         </where>
@@ -68,6 +73,7 @@
         count(1)
         from ${_fullTableName} h_test
         left join ${_databasePrefix}h_nest_table nest_table on nest_table.id=h_test.id
+        left join ${_databasePrefix}h_nest_table nest_table2 on nest_table2.id=h_test.id
         <where>
             <include refid="BasicMapper.buildWhere"/>
         </where>

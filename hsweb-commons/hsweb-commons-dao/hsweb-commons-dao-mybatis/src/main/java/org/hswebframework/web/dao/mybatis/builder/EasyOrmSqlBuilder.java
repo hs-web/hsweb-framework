@@ -153,7 +153,7 @@ public class EasyOrmSqlBuilder {
 
             if (resultMapping.getNestedResultMapId() != null) {
                 ResultMap nests = MybatisUtils.getResultMap(resultMapping.getNestedResultMapId());
-                List<ResultMapping> resultMappings = new ArrayList<>(nests.getResultMappings());
+                Set<ResultMapping> resultMappings = new HashSet<>(nests.getResultMappings());
                 resultMappings.addAll(nests.getIdResultMappings());
                 for (ResultMapping mapping : resultMappings) {
                     metaData.addAll(createColumn(resultMapping.getProperty(),
