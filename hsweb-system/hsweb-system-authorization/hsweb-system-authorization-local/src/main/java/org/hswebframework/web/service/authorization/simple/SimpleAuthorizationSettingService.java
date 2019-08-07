@@ -240,7 +240,7 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
 
         List<String> settingIdList = detailEntities
                 .stream()
-                .map(AuthorizationSettingDetailEntity::getPermissionId)
+                .map(AuthorizationSettingDetailEntity::getSettingId)
                 .collect(Collectors.toList());
 
         List<AuthorizationSettingEntity> allSettings = selectByPk(settingIdList)
