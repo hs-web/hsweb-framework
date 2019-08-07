@@ -26,14 +26,17 @@ import org.hswebframework.web.authorization.simple.SimpleAuthentication;
 import org.hswebframework.web.authorization.simple.SimplePermission;
 import org.hswebframework.web.authorization.simple.SimpleRole;
 import org.hswebframework.web.authorization.simple.SimpleUser;
+import org.hswebframework.web.bean.FastBeanCopier;
 import org.hswebframework.web.commons.entity.DataStatus;
 import org.hswebframework.web.commons.entity.TreeSupportEntity;
+import org.hswebframework.web.commons.entity.factory.EntityFactory;
 import org.hswebframework.web.dao.authorization.AuthorizationSettingDao;
 import org.hswebframework.web.dao.authorization.AuthorizationSettingDetailDao;
 import org.hswebframework.web.entity.authorization.*;
 import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.service.DefaultDSLDeleteService;
 import org.hswebframework.web.service.DefaultDSLQueryService;
+import org.hswebframework.web.service.DefaultDSLUpdateService;
 import org.hswebframework.web.service.GenericEntityService;
 import org.hswebframework.web.service.authorization.*;
 import org.hswebframework.web.service.authorization.AuthorizationSettingTypeSupplier.SettingInfo;
@@ -44,6 +47,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -54,12 +58,14 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.Optional.*;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.hswebframework.web.commons.entity.DataStatus.STATUS_ENABLED;
 import static org.hswebframework.web.entity.authorization.AuthorizationSettingDetailEntity.*;
 import static org.hswebframework.web.entity.authorization.AuthorizationSettingEntity.settingFor;
 import static org.hswebframework.web.entity.authorization.AuthorizationSettingEntity.type;
+import static org.hswebframework.web.service.DefaultDSLDeleteService.*;
 import static org.hswebframework.web.service.authorization.simple.CacheConstants.USER_AUTH_CACHE_NAME;
 import static org.hswebframework.web.service.authorization.simple.CacheConstants.USER_MENU_CACHE_NAME;
 
@@ -181,6 +187,77 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
         return super.deleteByPk(id);
     }
 
+    @Override
+    @CacheEvict(cacheNames = {CacheConstants.USER_AUTH_CACHE_NAME, CacheConstants.USER_MENU_CACHE_NAME}, allEntries = true)
+    public void deleteDetail(String settingId, String permissionId) {
+
+        DefaultDSLDeleteService.createDelete(authorizationSettingDetailDao)
+                .where(AuthorizationSettingDetailEntity.settingId, settingId)
+                .and(AuthorizationSettingDetailEntity.permissionId, permissionId)
+                .exec();
+    }
+
+    @Override
+    @CacheEvict(cacheNames = {CacheConstants.USER_AUTH_CACHE_NAME, CacheConstants.USER_MENU_CACHE_NAME}, allEntries = true)
+    public void mergeSetting(List<AuthorizationSettingEntity> settings) {
+        for (AuthorizationSettingEntity setting : settings) {
+            if (select(setting.getType(), setting.getSettingFor()) == null) {
+                insert(setting);
+                continue;
+            }
+            if (!CollectionUtils.isEmpty(setting.getDetails())) {
+                for (AuthorizationSettingDetailEntity detail : setting.getDetails()) {
+                    detail.setSettingId(setting.getId());
+                    int i = DefaultDSLUpdateService
+                            .createUpdate(authorizationSettingDetailDao, detail)
+                            .where(detail::getSettingId)
+                            .and(detail::getPermissionId)
+                            .exec();
+                    if (i == 0) {
+                        detail.setId(IDGenerator.MD5.generate());
+                        authorizationSettingDetailDao.insert(detail);
+                    }
+                }
+            } else if (!CollectionUtils.isEmpty(setting.getMenus())) {
+                for (AuthorizationSettingMenuEntity menu : setting.getMenus()) {
+                    menu.setSettingId(setting.getId());
+                    authorizationSettingMenuService.saveOrUpdate(menu);
+                }
+            }
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public List<AuthorizationSettingEntity> selectByPermissionId(String permissionId) {
+        List<AuthorizationSettingDetailEntity> detailEntities = DefaultDSLQueryService
+                .createQuery(authorizationSettingDetailDao)
+                .where(AuthorizationSettingDetailEntity::getPermissionId, permissionId)
+                .listNoPaging();
+
+        if (CollectionUtils.isEmpty(detailEntities)) {
+            return new ArrayList<>();
+        }
+
+        List<String> settingIdList = detailEntities
+                .stream()
+                .map(AuthorizationSettingDetailEntity::getPermissionId)
+                .collect(Collectors.toList());
+
+        List<AuthorizationSettingEntity> allSettings = selectByPk(settingIdList)
+                .stream()
+                //复制为新对象,防止加载一些没用的信息
+                .map(entity -> FastBeanCopier.copy(entity, entityFactory.newInstance(AuthorizationSettingEntity.class), "details", "menus"))
+                .collect(Collectors.toList());
+
+        Map<String, List<AuthorizationSettingDetailEntity>> details = detailEntities.stream()
+                .collect(Collectors.groupingBy(AuthorizationSettingDetailEntity::getSettingId));
+
+        for (AuthorizationSettingEntity allSetting : allSettings) {
+            ofNullable(details.get(allSetting.getId())).ifPresent(allSetting::setDetails);
+        }
+
+        return allSettings;
+    }
 
     private List<AuthorizationSettingEntity> getUserSetting(String userId) {
         Map<String, List<SettingInfo>> settingInfo =

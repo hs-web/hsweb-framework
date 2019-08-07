@@ -32,7 +32,7 @@ public interface AuthorizationSettingEntity extends GenericEntity<String> {
     |                属性名常量                |
     ===========================================*/
     /**
-     * 设置类型,如: role
+     * 设置类型(维度),如: role
      *
      * @see org.hswebframework.web.service.authorization.AuthorizationSettingTypeSupplier
      */
