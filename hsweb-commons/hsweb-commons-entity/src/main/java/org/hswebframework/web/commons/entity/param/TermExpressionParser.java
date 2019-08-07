@@ -19,19 +19,37 @@ public class TermExpressionParser {
 
         NestConditional<?> nest = null;
 
+        // 字符容器
         char[] buf = new char[128];
+        // 记录词项的长度, Arrays.copyOf使用
         byte len = 0;
+        // 空格数量?
         byte spaceLen = 0;
-
+        // 当前列
         char[] currentColumn = null;
-
-        String currentTermType = null;
+        // 当前列对应的值
         char[] currentValue = null;
-        char[] all = expression.toCharArray();
+        // 当前条件类型 eq btw in ...
+        String currentTermType = null;
+        // 当前链接类型 and / or
         String currentType = "and";
+        // 是否是引号, 单引号 / 双引号
+        byte quotationMarks = 0;
+        // 表达式字符数组
+        char[] all = expression.toCharArray();
+
         for (char c : all) {
 
-            if (c == '(') {
+            if (c == '\'' || c == '"') {
+                if (quotationMarks != 0) {
+                    // 碰到(结束的)单/双引号, 标志归零, 跳过
+                    quotationMarks = 0;
+                    continue;
+                }
+                // 碰到(开始的)单/双引号, 做记录, 跳过
+                quotationMarks++;
+                continue;
+            } else if (c == '(') {
                 nest = (nest == null ?
                         (currentType.equals("or") ? conditional.orNest() : conditional.nest()) :
                         (currentType.equals("or") ? nest.orNest() : nest.nest()));
@@ -68,6 +86,11 @@ public class TermExpressionParser {
                 continue;
             } else if (c == ' ') {
                 if (len == 0) {
+                    continue;
+                }
+                if (quotationMarks != 0) {
+                    // 如果当前字符是空格，并且前面迭代时碰到过单/双引号, 不处理并且添加到buf中
+                    buf[len++] = c;
                     continue;
                 }
                 spaceLen++;
@@ -117,6 +140,10 @@ public class TermExpressionParser {
                         len = 0;
                         spaceLen++;
                     }
+                } else {
+                    currentColumn = Arrays.copyOf(buf, len);
+                    len = 0;
+                    spaceLen++;
                 }
                 continue;
             }

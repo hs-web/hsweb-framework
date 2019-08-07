@@ -51,7 +51,31 @@ public class TermExpressionParserTest {
         Assert.assertEquals(terms.get(2).getValue(), "test2");
         Assert.assertEquals(terms.get(2).getTermType(), "like");
 
+    }
 
+    /**
+     * 测试日期字符串空格解析，'2019-07-26 12:00:00'
+     */
+    @Test
+    public void testDateSpace() {
+        String expression = "(name=测试 or age=10) and (birth btw \"2019-07-26 12:00:00, 2019-08-04 12:00:00\" or startTime <= '2019-08-04 12:00:00') and finishTime >= '2019-08-01 00:00:00'";
+        List<Term> terms = TermExpressionParser.parse(expression);
+        System.out.println(JSON.toJSONString(terms, SerializerFeature.PrettyFormat));
+
+        Assert.assertEquals(terms.size(), 3);
+        Assert.assertEquals(terms.get(0).getTerms().size(), 2);
+
+        Assert.assertEquals(terms.get(1).getTerms().get(0).getColumn(), "birth");
+        Assert.assertEquals(terms.get(1).getTerms().get(0).getTermType(), "btw");
+        Assert.assertEquals(terms.get(1).getTerms().get(0).getValue(), "2019-07-26 12:00:00, 2019-08-04 12:00:00");
+        Assert.assertEquals(terms.get(1).getTerms().get(1).getColumn(), "startTime");
+        Assert.assertEquals(terms.get(1).getTerms().get(1).getTermType(), "lte");
+        Assert.assertEquals(terms.get(1).getTerms().get(1).getValue(), "2019-08-04 12:00:00");
+        Assert.assertEquals(terms.get(1).getTerms().get(1).getType(), Term.Type.or);
+
+        Assert.assertEquals(terms.get(2).getColumn(), "finishTime");
+        Assert.assertEquals(terms.get(2).getValue(), "2019-08-01 00:00:00");
+        Assert.assertEquals(terms.get(2).getTermType(), "gte");
     }
 
 }
