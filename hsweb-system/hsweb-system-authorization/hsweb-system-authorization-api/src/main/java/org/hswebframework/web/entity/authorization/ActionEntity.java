@@ -6,6 +6,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Getter
@@ -21,6 +22,8 @@ public class ActionEntity implements CloneableEntity {
     private String describe;
 
     private boolean defaultCheck;
+
+    private Map<String,Object> properties;
 
     public ActionEntity(String action) {
         this.action = action;
