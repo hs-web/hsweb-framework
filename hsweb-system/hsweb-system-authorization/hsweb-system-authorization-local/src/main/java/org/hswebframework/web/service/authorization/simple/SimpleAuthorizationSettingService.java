@@ -213,12 +213,21 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
             if (!CollectionUtils.isEmpty(setting.getDetails())) {
                 for (AuthorizationSettingDetailEntity detail : setting.getDetails()) {
                     detail.setSettingId(setting.getId());
+                    //删除权限信息
+                    if (Byte.valueOf((byte) -100).equals(detail.getStatus())) {
+                        DefaultDSLDeleteService.createDelete(authorizationSettingDetailDao)
+                                .where(detail::getSettingId)
+                                .and(detail::getPermissionId)
+                                .exec();
+                        continue;
+                    }
                     int i = DefaultDSLUpdateService
                             .createUpdate(authorizationSettingDetailDao, detail)
                             .where(detail::getSettingId)
                             .and(detail::getPermissionId)
                             .exec();
                     if (i == 0) {
+                        detail.setStatus(STATUS_ENABLED);
                         detail.setId(IDGenerator.MD5.generate());
                         authorizationSettingDetailDao.insert(detail);
                     }
