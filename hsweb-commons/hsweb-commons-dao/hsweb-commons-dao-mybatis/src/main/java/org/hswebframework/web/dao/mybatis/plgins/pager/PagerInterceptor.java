@@ -49,8 +49,14 @@ public class PagerInterceptor implements Interceptor {
             MetaObject metaStatementHandler = SystemMetaObject.forObject(statementHandler);
             String sql = statementHandler.getBoundSql().getSql();
             Pager pager = Pager.getAndReset();
-            String newSql = sql;
-            if (sql.trim().toLowerCase().startsWith("select")) {
+
+            String lower = sql.trim();
+
+            if (lower.startsWith("select")) {
+                if (lower.contains("count(")) {
+                    return Plugin.wrap(target, this);
+                }
+                String newSql = sql;
                 if (pager != null) {
                     newSql = EasyOrmSqlBuilder.getInstance()
                             .getActiveDatabase().getDialect()
