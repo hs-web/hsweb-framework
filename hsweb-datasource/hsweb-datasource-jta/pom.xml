@@ -5,7 +5,7 @@
     <parent>
         <artifactId>hsweb-datasource</artifactId>
         <groupId>org.hswebframework.web</groupId>
-        <version>3.0.9-SNAPSHOT</version>
+        <version>3.0.9</version>
         <relativePath>../pom.xml</relativePath>
 
     </parent>
