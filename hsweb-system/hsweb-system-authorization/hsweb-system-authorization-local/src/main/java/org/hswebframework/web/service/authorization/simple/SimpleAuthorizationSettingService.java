@@ -22,6 +22,7 @@ import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.AuthenticationInitializeService;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.access.DataAccessConfig;
+import org.hswebframework.web.authorization.listener.event.AuthorizationInitializeEvent;
 import org.hswebframework.web.authorization.simple.SimpleAuthentication;
 import org.hswebframework.web.authorization.simple.SimplePermission;
 import org.hswebframework.web.authorization.simple.SimpleRole;
@@ -440,7 +441,7 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
                 .listNoPaging();
 
         authentication.setPermissions(initPermission(detailList));
-
+        eventPublisher.publishEvent(new AuthorizationInitializeEvent(authentication));
         return authentication;
     }
 
