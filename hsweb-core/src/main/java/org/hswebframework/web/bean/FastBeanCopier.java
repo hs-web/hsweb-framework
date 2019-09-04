@@ -14,6 +14,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.function.BiFunction;
@@ -141,8 +142,8 @@ public final class FastBeanCopier {
         String method = "public void copy(Object s, Object t, java.util.Set ignore, " +
                 "org.hswebframework.web.bean.Converter converter){\n" +
                 "try{\n\t" +
-                sourceName + " source=(" + sourceName + ")s;\n\t" +
-                tartName + " target=(" + tartName + ")t;\n\t" +
+                sourceName + " $$__source=(" + sourceName + ")s;\n\t" +
+                tartName + " $$__target=(" + tartName + ")t;\n\t" +
                 createCopierCode(source, target) +
                 "}catch(Exception e){\n" +
                 "\tthrow new RuntimeException(e.getMessage(),e);" +
@@ -211,7 +212,7 @@ public final class FastBeanCopier {
             }
             code.append("if(!ignore.contains(\"").append(sourceProperty.getName()).append("\")){\n\t");
             if (!sourceProperty.isPrimitive()) {
-                code.append("if(source.").append(sourceProperty.getReadMethod()).append("!=null){\n");
+                code.append("if($$__source.").append(sourceProperty.getReadMethod()).append("!=null){\n");
             }
             code.append(targetProperty.generateVar(targetProperty.getName())).append("=")
                     .append(sourceProperty.generateGetter(target, targetProperty.getType()))
@@ -220,7 +221,7 @@ public final class FastBeanCopier {
             if (!targetProperty.isPrimitive()) {
                 code.append("\tif(").append(sourceProperty.getName()).append("!=null){\n");
             }
-            code.append("\ttarget.").append(targetProperty.generateSetter(targetProperty.getType(), sourceProperty.getName())).append(";\n");
+            code.append("\t$$__target.").append(targetProperty.generateSetter(targetProperty.getType(), sourceProperty.getName())).append(";\n");
             if (!targetProperty.isPrimitive()) {
                 code.append("\t}\n");
             }
@@ -310,7 +311,7 @@ public final class FastBeanCopier {
         public BiFunction<Class, Class, String> createGetterFunction() {
 
             return (targetBeanType, targetType) -> {
-                String getterCode = "source." + getReadMethod();
+                String getterCode = "$$__source." + getReadMethod();
 
                 String generic = "org.hswebframework.web.bean.FastBeanCopier.EMPTY_CLASS_ARRAY";
                 Field field = ReflectionUtils.findField(targetBeanType, name);
@@ -540,7 +541,11 @@ public final class FastBeanCopier {
 
             if (targetClass.isEnum()) {
                 if (EnumDict.class.isAssignableFrom(targetClass)) {
-                    Object val = EnumDict.find((Class) targetClass, String.valueOf(source)).orElse(null);
+                    String strVal=String.valueOf(source);
+
+                    Object val = EnumDict.find((Class) targetClass, e -> {
+                        return e.eq(source) || e.name().equalsIgnoreCase(strVal);
+                    }).orElse(null);
                     if (targetClass.isInstance(val)) {
                         return ((T) val);
                     }
@@ -551,9 +556,17 @@ public final class FastBeanCopier {
                         return t;
                     }
                 }
+
                 log.warn("无法将:{}转为枚举:{}", source, targetClass);
                 return null;
             }
+            //转换为数组
+            if (targetClass.isArray()) {
+                Class<?> componentType = targetClass.getComponentType();
+                List<?> val = convert(source, List.class, new Class[]{componentType});
+                return (T) val.toArray((Object[])Array.newInstance(componentType,val.size()));
+            }
+
             try {
                 org.apache.commons.beanutils.Converter converter = BeanUtilsBean
                         .getInstance()

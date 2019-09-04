@@ -44,6 +44,10 @@ public class TestEntity implements org.hswebframework.web.commons.entity.Entity 
     )
     private DataType[] dataTypes;
 
+    @CollectionTable(name = "nest_table")
     private NestEntity nest;
+
+    @CollectionTable(name = "nest_table2")
+    private NestEntity nest2;
 
 }

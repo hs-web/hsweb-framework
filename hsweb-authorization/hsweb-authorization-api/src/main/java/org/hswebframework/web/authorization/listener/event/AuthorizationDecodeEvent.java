@@ -39,7 +39,7 @@ public class AuthorizationDecodeEvent extends AbstractAuthorizationEvent {
     }
 
     public void setPassword(String password) {
-        super.username = password;
+        super.password = password;
     }
 
 }

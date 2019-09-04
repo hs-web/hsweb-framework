@@ -1,5 +1,6 @@
 package org.hswebframework.web.dao.crud;
 
+import lombok.SneakyThrows;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.hswebframework.ezorm.core.param.QueryParam;
 import org.hswebframework.ezorm.rdb.executor.SqlExecutor;
@@ -53,12 +54,13 @@ public class TestCrud extends AbstractTransactionalJUnit4SpringContextTests {
                 ")");
         sqlExecutor.exec("\n" +
                 "create table h_nest_table(\n" +
-                "  id BIGINT AUTO_INCREMENT PRIMARY KEY,\n" +
+                "  id BIGINT PRIMARY KEY,\n" +
                 "  name VARCHAR(32)\n" +
                 ")");
     }
 
     @Test
+    @SneakyThrows
     public void testCRUD() {
 
         DataSourceHolder.databaseSwitcher().use("PUBLIC");
@@ -69,22 +71,25 @@ public class TestCrud extends AbstractTransactionalJUnit4SpringContextTests {
         entity.setDataTypes(new DataType[]{DataType.TYPE1, DataType.TYPE3});
         testDao.insert(entity);
         Assert.assertNotNull(entity.getId());
+        sqlExecutor.insert("insert into h_nest_table (id,name) values(#{id},'1234')",entity);
 
         QueryParamEntity query = new QueryParamEntity();
         //any in
         query.where("dataTypes$in$any", Arrays.asList(DataType.TYPE1, DataType.TYPE2));
 
         //#102
-        query.where("createTime", "2017-11-10");
+        //query.where("createTime", "2017-11-10");
 
-//        query.includes("nest.name", "*");
 
 //        DataSourceHolder.tableSwitcher().use("h_test", "h_test2");
         List<TestEntity> entities = testDao.queryNest(query);
-
-        testDao.query(query);
-        testDao.countNest(query);
+        query.includes("name");
         testDao.count(query);
+        testDao.query(query);
+
+        query.includes("nest.name", "*");
+        testDao.countNest(query);
+
         UpdateParamEntity.newUpdate()
                 .set("name","测试")
                 .set(entity::getDataType)

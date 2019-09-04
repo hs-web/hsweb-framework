@@ -22,18 +22,24 @@ import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.AuthenticationInitializeService;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.access.DataAccessConfig;
+import org.hswebframework.web.authorization.listener.event.AuthorizationInitializeEvent;
 import org.hswebframework.web.authorization.simple.SimpleAuthentication;
 import org.hswebframework.web.authorization.simple.SimplePermission;
 import org.hswebframework.web.authorization.simple.SimpleRole;
 import org.hswebframework.web.authorization.simple.SimpleUser;
+import org.hswebframework.web.bean.FastBeanCopier;
 import org.hswebframework.web.commons.entity.DataStatus;
+import org.hswebframework.web.commons.entity.QueryEntity;
 import org.hswebframework.web.commons.entity.TreeSupportEntity;
+import org.hswebframework.web.commons.entity.factory.EntityFactory;
+import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.dao.authorization.AuthorizationSettingDao;
 import org.hswebframework.web.dao.authorization.AuthorizationSettingDetailDao;
 import org.hswebframework.web.entity.authorization.*;
 import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.service.DefaultDSLDeleteService;
 import org.hswebframework.web.service.DefaultDSLQueryService;
+import org.hswebframework.web.service.DefaultDSLUpdateService;
 import org.hswebframework.web.service.GenericEntityService;
 import org.hswebframework.web.service.authorization.*;
 import org.hswebframework.web.service.authorization.AuthorizationSettingTypeSupplier.SettingInfo;
@@ -44,6 +50,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -54,12 +61,14 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.Optional.*;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.hswebframework.web.commons.entity.DataStatus.STATUS_ENABLED;
 import static org.hswebframework.web.entity.authorization.AuthorizationSettingDetailEntity.*;
 import static org.hswebframework.web.entity.authorization.AuthorizationSettingEntity.settingFor;
 import static org.hswebframework.web.entity.authorization.AuthorizationSettingEntity.type;
+import static org.hswebframework.web.service.DefaultDSLDeleteService.*;
 import static org.hswebframework.web.service.authorization.simple.CacheConstants.USER_AUTH_CACHE_NAME;
 import static org.hswebframework.web.service.authorization.simple.CacheConstants.USER_MENU_CACHE_NAME;
 
@@ -181,6 +190,98 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
         return super.deleteByPk(id);
     }
 
+    @Override
+    @CacheEvict(cacheNames = {CacheConstants.USER_AUTH_CACHE_NAME, CacheConstants.USER_MENU_CACHE_NAME}, allEntries = true)
+    public void deleteDetail(String settingId, String permissionId) {
+
+        DefaultDSLDeleteService.createDelete(authorizationSettingDetailDao)
+                .where(AuthorizationSettingDetailEntity.settingId, settingId)
+                .and(AuthorizationSettingDetailEntity.permissionId, permissionId)
+                .exec();
+    }
+
+    @Override
+    @CacheEvict(cacheNames = {CacheConstants.USER_AUTH_CACHE_NAME, CacheConstants.USER_MENU_CACHE_NAME}, allEntries = true)
+    public void mergeSetting(List<AuthorizationSettingEntity> settings) {
+        for (AuthorizationSettingEntity setting : settings) {
+            AuthorizationSettingEntity old = select(setting.getType(), setting.getSettingFor());
+            if (old == null) {
+                setting.setStatus(STATUS_ENABLED);
+                insert(setting);
+                continue;
+            }
+            setting.setId(old.getId());
+            if (!CollectionUtils.isEmpty(setting.getDetails())) {
+                for (AuthorizationSettingDetailEntity detail : setting.getDetails()) {
+                    detail.setSettingId(setting.getId());
+                    //删除权限信息
+                    if (Byte.valueOf((byte) -100).equals(detail.getStatus())) {
+                        DefaultDSLDeleteService.createDelete(authorizationSettingDetailDao)
+                                .where(detail::getSettingId)
+                                .and(detail::getPermissionId)
+                                .exec();
+                        continue;
+                    }
+                    int i = DefaultDSLUpdateService
+                            .createUpdate(authorizationSettingDetailDao, detail)
+                            .where(detail::getSettingId)
+                            .and(detail::getPermissionId)
+                            .exec();
+                    if (i == 0) {
+                        detail.setStatus(STATUS_ENABLED);
+                        detail.setId(IDGenerator.MD5.generate());
+                        authorizationSettingDetailDao.insert(detail);
+                    }
+                }
+            }
+            if (!CollectionUtils.isEmpty(setting.getMenus())) {
+                Set<String> menus = old.getMenus().stream()
+                        .map(AuthorizationSettingMenuEntity::getMenuId)
+                        .collect(Collectors.toSet());
+                for (AuthorizationSettingMenuEntity menu : setting.getMenus()) {
+                    menu.setSettingId(setting.getId());
+                    if (menus.contains(menu.getMenuId())) {
+                        continue;
+                    }
+                    menu.setStatus(STATUS_ENABLED);
+                    menus.add(menu.getMenuId());
+                    authorizationSettingMenuService.saveOrUpdate(menu);
+                }
+            }
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public List<AuthorizationSettingEntity> selectByPermissionId(String permissionId) {
+        List<AuthorizationSettingDetailEntity> detailEntities = DefaultDSLQueryService
+                .createQuery(authorizationSettingDetailDao)
+                .where(AuthorizationSettingDetailEntity::getPermissionId, permissionId)
+                .listNoPaging();
+
+        if (CollectionUtils.isEmpty(detailEntities)) {
+            return new ArrayList<>();
+        }
+
+        List<String> settingIdList = detailEntities
+                .stream()
+                .map(AuthorizationSettingDetailEntity::getSettingId)
+                .collect(Collectors.toList());
+
+        List<AuthorizationSettingEntity> allSettings = selectByPk(settingIdList)
+                .stream()
+                //复制为新对象,防止加载一些没用的信息
+                .map(entity -> FastBeanCopier.copy(entity, entityFactory.newInstance(AuthorizationSettingEntity.class), "details", "menus"))
+                .collect(Collectors.toList());
+
+        Map<String, List<AuthorizationSettingDetailEntity>> details = detailEntities.stream()
+                .collect(Collectors.groupingBy(AuthorizationSettingDetailEntity::getSettingId));
+
+        for (AuthorizationSettingEntity allSetting : allSettings) {
+            ofNullable(details.get(allSetting.getId())).ifPresent(allSetting::setDetails);
+        }
+
+        return allSettings;
+    }
 
     private List<AuthorizationSettingEntity> getUserSetting(String userId) {
         Map<String, List<SettingInfo>> settingInfo =
@@ -340,7 +441,7 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
                 .listNoPaging();
 
         authentication.setPermissions(initPermission(detailList));
-
+        eventPublisher.publishEvent(new AuthorizationInitializeEvent(authentication));
         return authentication;
     }
 

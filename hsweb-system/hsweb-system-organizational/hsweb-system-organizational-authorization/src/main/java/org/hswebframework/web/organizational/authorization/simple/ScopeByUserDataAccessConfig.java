@@ -3,6 +3,7 @@ package org.hswebframework.web.organizational.authorization.simple;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.hswebframework.web.authorization.access.ScopeDataAccessConfig;
 import org.hswebframework.web.authorization.simple.AbstractDataAccessConfig;
 
 import java.util.Set;
@@ -14,7 +15,7 @@ import java.util.Set;
 @Getter
 @Setter
 @ToString
-public class ScopeByUserDataAccessConfig extends AbstractDataAccessConfig {
+public class ScopeByUserDataAccessConfig extends AbstractDataAccessConfig implements ScopeDataAccessConfig {
 
     private static final long serialVersionUID = 6678003761927318688L;
 
@@ -22,7 +23,7 @@ public class ScopeByUserDataAccessConfig extends AbstractDataAccessConfig {
 
     private String scopeTypeName;
 
-    private Set<String> scope;
+    private Set<Object> scope;
 
     private boolean children;
 
@@ -40,5 +41,6 @@ public class ScopeByUserDataAccessConfig extends AbstractDataAccessConfig {
     public boolean equals(Object obj) {
         return obj instanceof ScopeByUserDataAccessConfig && obj.hashCode() == hashCode();
     }
+
 
 }

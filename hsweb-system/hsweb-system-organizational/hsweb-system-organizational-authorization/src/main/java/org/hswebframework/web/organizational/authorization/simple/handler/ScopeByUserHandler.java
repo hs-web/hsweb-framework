@@ -130,7 +130,7 @@ public class ScopeByUserHandler implements DataAccessHandler {
     @SneakyThrows
     private ScopeInfo getScope(ScopeByUserDataAccessConfig config, PersonnelAuthentication authentication) {
         String termType = null, personTermType = "in";
-        Set<String> scope = null, allScope = null;
+        Set<?> scope = null, allScope = null;
         ScopeInfo scopeInfo = new ScopeInfo();
         if (authentication == null) {
             return scopeInfo;
@@ -226,8 +226,8 @@ public class ScopeByUserHandler implements DataAccessHandler {
         String termType;
         String personTermType;
 
-        List<String> scope;
-        List<String> allScope;
+        List<?> scope;
+        List<?> allScope;
 
         Consumer<Query<?, QueryParamEntity>> notUserConsumer;
 
