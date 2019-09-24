@@ -19,6 +19,8 @@
 package org.hswebframework.web.authorization;
 
 import org.hswebframework.web.ThreadLocalUtils;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +28,7 @@ import java.util.Objects;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * 权限获取器,用于静态方式获取当前登录用户的权限信息.
@@ -45,31 +48,23 @@ import java.util.function.Function;
 public final class AuthenticationHolder {
     private static final List<AuthenticationSupplier> suppliers = new ArrayList<>();
 
-    private static final String CURRENT_USER_ID_KEY = Authentication.class.getName() + "_current_id";
-
     private static final ReadWriteLock lock = new ReentrantReadWriteLock();
 
-    private static Authentication get(Function<AuthenticationSupplier, Authentication> function) {
-        lock.readLock().lock();
-        try {
-            return suppliers.stream()
-                    .map(function)
-                    .filter(Objects::nonNull)
-                    .findFirst()
-                    .orElse(null);
-        } finally {
-            lock.readLock().unlock();
-        }
+    private static Mono<Authentication> get(Function<AuthenticationSupplier, Mono<Authentication>> function) {
+
+        return Flux.concat(suppliers.stream()
+                .map(function)
+                .collect(Collectors.toList()))
+                .reduceWith(CompositeAuthentication::new, CompositeAuthentication::merge)
+                .filter(CompositeAuthentication::isNotEmpty)
+                .map(Authentication.class::cast);
     }
 
     /**
      * @return 当前登录的用户权限信息
      */
-    public static Authentication get() {
-        String currentId = ThreadLocalUtils.get(CURRENT_USER_ID_KEY);
-        if (currentId != null) {
-            return get(currentId);
-        }
+    public static Mono<Authentication> get() {
+
         return get(AuthenticationSupplier::get);
     }
 
@@ -79,7 +74,7 @@ public final class AuthenticationHolder {
      * @param userId 用户ID
      * @return 权限信息
      */
-    public static Authentication get(String userId) {
+    public static Mono<Authentication> get(String userId) {
         return get(supplier -> supplier.get(userId));
     }
 
@@ -97,7 +92,4 @@ public final class AuthenticationHolder {
         }
     }
 
-    public static void setCurrentUserId(String id) {
-        ThreadLocalUtils.put(AuthenticationHolder.CURRENT_USER_ID_KEY, id);
-    }
 }

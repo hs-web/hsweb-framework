@@ -44,17 +44,7 @@ public interface AuthenticationPredicate extends Predicate<Authentication> {
         return (t) -> test(t) || other.test(t);
     }
 
-    default boolean test() {
-        return Authentication.current()
-                .map(this::test)
-                .orElse(false);
-    }
 
-    default void assertHas() {
-        if (!test()) {
-            throw new AccessDenyException();
-        }
-    }
 
     default void assertHas(Authentication authentication) {
         if (!test(authentication)) {

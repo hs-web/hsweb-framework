@@ -23,7 +23,7 @@
     <parent>
         <artifactId>hsweb-commons</artifactId>
         <groupId>org.hswebframework.web</groupId>
-        <version>3.0.10-SNAPSHOT</version>
+        <version>4.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -42,6 +42,10 @@
     </build>
 
     <dependencies>
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-core</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>javax.servlet</groupId>

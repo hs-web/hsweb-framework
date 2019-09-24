@@ -23,7 +23,7 @@
     <parent>
         <artifactId>hsweb-framework</artifactId>
         <groupId>org.hswebframework.web</groupId>
-        <version>3.0.10-SNAPSHOT</version>
+        <version>4.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -39,6 +39,7 @@
         <module>hsweb-commons-utils</module>
         <module>hsweb-commons-model</module>
         <module>hsweb-commons-bean</module>
+        <module>hsweb-commons-crud</module>
     </modules>
 
 </project>

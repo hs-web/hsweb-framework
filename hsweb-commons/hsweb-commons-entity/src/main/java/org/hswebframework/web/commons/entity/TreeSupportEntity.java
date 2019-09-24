@@ -19,9 +19,9 @@
 package org.hswebframework.web.commons.entity;
 
 
+import org.apache.commons.collections.CollectionUtils;
 import org.hswebframework.utils.RandomUtil;
 import org.hswebframework.web.id.IDGenerator;
-import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 import java.util.function.*;

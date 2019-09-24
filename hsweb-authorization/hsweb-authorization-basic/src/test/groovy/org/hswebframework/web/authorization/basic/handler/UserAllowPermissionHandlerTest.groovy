@@ -7,7 +7,7 @@ import org.hswebframework.web.authorization.basic.define.EmptyAuthorizeDefinitio
 import org.hswebframework.web.authorization.define.AuthorizeDefinition
 import org.hswebframework.web.authorization.define.AuthorizingContext
 import org.hswebframework.web.authorization.define.HandleType
-import org.hswebframework.web.authorization.listener.event.AuthorizingHandleBeforeEvent
+import org.hswebframework.web.authorization.events.AuthorizingHandleBeforeEvent
 import org.hswebframework.web.authorization.simple.PlainTextUsernamePasswordAuthenticationRequest
 import org.hswebframework.web.boost.aop.context.MethodInterceptorContext
 import org.hswebframework.web.boost.aop.context.MethodInterceptorHolder

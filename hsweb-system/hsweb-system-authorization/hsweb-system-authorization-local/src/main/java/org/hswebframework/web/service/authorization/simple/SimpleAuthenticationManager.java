@@ -6,7 +6,6 @@ import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.AuthenticationInitializeService;
 import org.hswebframework.web.authorization.AuthenticationManager;
 import org.hswebframework.web.authorization.AuthenticationRequest;
-import org.hswebframework.web.authorization.listener.event.AuthorizationFailedEvent;
 import org.hswebframework.web.authorization.simple.PlainTextUsernamePasswordAuthenticationRequest;
 import org.hswebframework.web.commons.entity.DataStatus;
 import org.hswebframework.web.entity.authorization.UserEntity;

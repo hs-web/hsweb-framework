@@ -25,7 +25,7 @@ import org.hswebframework.web.WebUtil;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.AuthenticationManager;
 import org.hswebframework.web.authorization.annotation.Authorize;
-import org.hswebframework.web.authorization.listener.event.*;
+import org.hswebframework.web.authorization.events.*;
 import org.hswebframework.web.authorization.simple.PlainTextUsernamePasswordAuthenticationRequest;
 import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.logging.AccessLogger;
@@ -37,7 +37,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Function;
 
 import static org.hswebframework.web.controller.message.ResponseMessage.ok;

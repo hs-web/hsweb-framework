@@ -1,6 +1,7 @@
 package org.hswebframework.web.authorization.basic.web;
 
-import org.hswebframework.web.authorization.listener.event.AuthorizationSuccessEvent;
+import org.hswebframework.web.authorization.events.AuthorizationEvent;
+import org.hswebframework.web.authorization.events.AuthorizationSuccessEvent;
 import org.hswebframework.web.authorization.token.UserToken;
 import org.hswebframework.web.authorization.token.UserTokenHolder;
 import org.hswebframework.web.authorization.token.UserTokenManager;
@@ -15,7 +16,7 @@ import java.util.List;
  *
  * @author zhouhao
  * @see org.springframework.context.ApplicationEvent
- * @see org.hswebframework.web.authorization.listener.event.AuthorizationEvent
+ * @see AuthorizationEvent
  * @see UserTokenManager
  * @see UserTokenGenerator
  * @since 3.0

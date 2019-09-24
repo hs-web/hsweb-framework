@@ -24,7 +24,7 @@
 
     <groupId>org.hswebframework.web</groupId>
     <artifactId>hsweb-framework</artifactId>
-    <version>3.0.10-SNAPSHOT</version>
+    <version>4.0.0-SNAPSHOT</version>
     <modules>
         <module>hsweb-starter</module>
         <module>hsweb-core</module>
@@ -34,7 +34,6 @@
         <module>hsweb-datasource</module>
         <module>hsweb-commons</module>
         <module>hsweb-logging</module>
-        <module>hsweb-concurrent</module>
         <module>hsweb-boost</module>
         <module>hsweb-thirdparty</module>
     </modules>
@@ -82,8 +81,7 @@
         <java.version>1.8</java.version>
         <project.build.jdk>${java.version}</project.build.jdk>
 
-
-        <spring.boot.version>1.5.19.RELEASE</spring.boot.version>
+        <spring.boot.version>2.2.0.M6</spring.boot.version>
 
         <javassist.version>3.20.0-GA</javassist.version>
         <activiti.version>5.19.0.2</activiti.version>
@@ -95,7 +93,7 @@
         <aspectj.version>1.6.12</aspectj.version>
         <hibernate.validator.version>5.1.1.Final</hibernate.validator.version>
 
-        <hsweb.ezorm.version>3.0.6</hsweb.ezorm.version>
+        <hsweb.ezorm.version>4.0.0-SNAPSHOT</hsweb.ezorm.version>
         <hsweb.utils.version>3.0.2</hsweb.utils.version>
         <hsweb.expands.version>3.0.2</hsweb.expands.version>
 
@@ -239,14 +237,9 @@
                 <executions>
                     <execution>
                         <goals>
-                            <!--<goal>addSources</goal>-->
                             <goal>addTestSources</goal>
-                            <!--<goal>generateStubs</goal>-->
                             <goal>compile</goal>
-                            <!--<goal>generateTestStubs</goal>-->
                             <goal>compileTests</goal>
-                            <!--<goal>removeStubs</goal>-->
-                            <!--<goal>removeTestStubs</goal>-->
                         </goals>
                     </execution>
                 </executions>
@@ -276,10 +269,7 @@
     </build>
 
     <dependencies>
-        <!--<dependency>-->
-        <!--<groupId>io.reactivex.rxjava2</groupId>-->
-        <!--<artifactId>rxjava</artifactId>-->
-        <!--</dependency>-->
+
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy-all</artifactId>
@@ -312,6 +302,11 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.hibernate</groupId>
+                <artifactId>hibernate-validator</artifactId>
+                <version>6.0.17.Final</version>
+            </dependency>
             <dependency>
                 <groupId>io.vavr</groupId>
                 <artifactId>vavr</artifactId>
@@ -383,20 +378,20 @@
 
             <dependency>
                 <groupId>org.hswebframework</groupId>
-                <artifactId>hsweb-easy-orm</artifactId>
+                <artifactId>hsweb-easy-orm-rdb</artifactId>
                 <version>${hsweb.ezorm.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.hswebframework</groupId>
-                        <artifactId>hsweb-expands-script</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.alibaba</groupId>
-                        <artifactId>fastjson</artifactId>
-                    </exclusion>
-                </exclusions>
-                <type>pom</type>
-                <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.hswebframework</groupId>
+                <artifactId>hsweb-easy-orm-core</artifactId>
+                <version>${hsweb.ezorm.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.hswebframework</groupId>
+                <artifactId>hsweb-easy-orm-elasticsearch</artifactId>
+                <version>${hsweb.ezorm.version}</version>
             </dependency>
 
             <dependency>
@@ -443,11 +438,19 @@
                 </updatePolicy>
             </snapshots>
         </repository>
+
         <repository>
             <id>aliyun-nexus</id>
             <name>aliyun</name>
             <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
         </repository>
+
+        <repository>
+            <id>spring.io</id>
+            <name>spring</name>
+            <url>https://repo.spring.io/milestone</url>
+        </repository>
+
     </repositories>
 
     <distributionManagement>

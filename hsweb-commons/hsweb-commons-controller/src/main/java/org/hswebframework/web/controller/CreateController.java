@@ -65,19 +65,19 @@ public interface CreateController<E, PK, M> {
         if (entity instanceof RecordCreationEntity) {
             RecordCreationEntity creationEntity = (RecordCreationEntity) entity;
             creationEntity.setCreateTimeNow();
-            creationEntity.setCreatorId(Authentication.current()
-                    .map(Authentication::getUser)
-                    .map(User::getId)
-                    .orElse(null));
+//            creationEntity.setCreatorId(Authentication.current()
+//                    .map(Authentication::getUser)
+//                    .map(User::getId)
+//                    .orElse(null));
         }
         //修改人和修改时间
         if (entity instanceof RecordModifierEntity) {
             RecordModifierEntity creationEntity = (RecordModifierEntity) entity;
             creationEntity.setModifyTimeNow();
-            creationEntity.setModifierId(Authentication.current()
-                    .map(Authentication::getUser)
-                    .map(User::getId)
-                    .orElse(null));
+//            creationEntity.setModifierId(Authentication.current()
+//                    .map(Authentication::getUser)
+//                    .map(User::getId)
+//                    .orElse(null));
         }
         return ok(getService().insert(entity));
     }

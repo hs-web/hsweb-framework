@@ -1,15 +1,16 @@
 package org.hswebframework.web.authorization.token;
 
-import org.hswebframework.web.ThreadLocalUtils;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.AuthenticationManager;
 import org.hswebframework.web.authorization.AuthenticationSupplier;
+import org.hswebframework.web.context.ContextKey;
+import org.hswebframework.web.context.ContextUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import reactor.core.publisher.Mono;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * @author zhouhao
@@ -32,14 +33,14 @@ public class UserTokenAuthenticationSupplier implements AuthenticationSupplier {
     }
 
     @Override
-    public Authentication get(String userId) {
+    public Mono<Authentication> get(String userId) {
         if (userId == null) {
             return null;
         }
         return get(this.defaultAuthenticationManager, userId);
     }
 
-    protected Authentication get(ThirdPartAuthenticationManager authenticationManager, String userId) {
+    protected Mono<Authentication> get(ThirdPartAuthenticationManager authenticationManager, String userId) {
         if (null == userId) {
             return null;
         }
@@ -49,7 +50,7 @@ public class UserTokenAuthenticationSupplier implements AuthenticationSupplier {
         return authenticationManager.getByUserId(userId);
     }
 
-    protected Authentication get(AuthenticationManager authenticationManager, String userId) {
+    protected Mono<Authentication> get(AuthenticationManager authenticationManager, String userId) {
         if (null == userId) {
             return null;
         }
@@ -59,19 +60,14 @@ public class UserTokenAuthenticationSupplier implements AuthenticationSupplier {
         return authenticationManager.getByUserId(userId);
     }
 
-    protected UserToken getCurrentUserToken() {
-        return UserTokenHolder.currentToken();
-    }
-
     @Override
-    public Authentication get() {
-        return ThreadLocalUtils.get(Authentication.class.getName(), () ->
-                Optional.ofNullable(getCurrentUserToken())
-                        .filter(UserToken::validate) //验证token,如果不是正常状态,将会抛出异常
-                        .map(token ->
-                                get(thirdPartAuthenticationManager
-                                        .get(token.getType()), token.getUserId())
-                        )
-                        .orElse(null));
+    public Mono<Authentication> get() {
+        return ContextUtils.currentContext()
+                .flatMap(context ->
+                        context.get(ContextKey.of(UserToken.class))
+                                .filter(UserToken::validate)
+                                .map(token -> get(thirdPartAuthenticationManager.get(token.getType()), token.getUserId()))
+                                .orElseGet(Mono::empty));
+
     }
 }

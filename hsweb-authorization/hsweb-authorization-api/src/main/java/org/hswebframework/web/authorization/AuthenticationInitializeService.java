@@ -18,7 +18,7 @@
 
 package org.hswebframework.web.authorization;
 
-import org.hswebframework.web.authorization.listener.event.AuthorizationInitializeEvent;
+import org.hswebframework.web.authorization.events.AuthorizationInitializeEvent;
 
 /**
  * 授权信息初始化服务接口,使用该接口初始化用的权限信息

@@ -23,7 +23,7 @@
     <parent>
         <artifactId>hsweb-commons-service</artifactId>
         <groupId>org.hswebframework.web</groupId>
-        <version>3.0.10-SNAPSHOT</version>
+        <version>4.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
 
     </parent>
@@ -68,19 +68,8 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.glassfish</groupId>
-            <artifactId>javax.el</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-concurrent-cache</artifactId>
-            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>

@@ -18,6 +18,8 @@
 
 package org.hswebframework.web.authorization;
 
+import reactor.core.publisher.Mono;
+
 import java.io.Serializable;
 import java.util.Map;
 
@@ -36,7 +38,7 @@ public interface AuthenticationManager {
      * @param request 授权请求
      * @return 授权成功则返回用户权限信息
      */
-    Authentication authenticate(AuthenticationRequest request);
+    Mono<Authentication> authenticate(AuthenticationRequest request);
 
     /**
      * 根据用户ID获取权限信息
@@ -44,7 +46,7 @@ public interface AuthenticationManager {
      * @param userId 用户ID
      * @return 权限信息
      */
-    Authentication getByUserId(String userId);
+    Mono<Authentication> getByUserId(String userId);
 
     /**
      * 同步授权信息,在调用了{@link Authentication#setAttribute(String, Serializable)}或者
@@ -56,5 +58,5 @@ public interface AuthenticationManager {
      * @param authentication 要同步的权限信息
      * @return 同步后的权限信息
      */
-    Authentication sync(Authentication authentication);
+    Mono<Authentication> sync(Authentication authentication);
 }

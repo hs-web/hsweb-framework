@@ -14,7 +14,7 @@ import org.hswebframework.web.authorization.define.AuthorizeDefinition;
 import org.hswebframework.web.authorization.define.AuthorizingContext;
 import org.hswebframework.web.authorization.define.HandleType;
 import org.hswebframework.web.authorization.exception.AccessDenyException;
-import org.hswebframework.web.authorization.listener.event.AuthorizingHandleBeforeEvent;
+import org.hswebframework.web.authorization.events.AuthorizingHandleBeforeEvent;
 import org.hswebframework.web.boost.aop.context.MethodInterceptorContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

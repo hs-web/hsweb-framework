@@ -22,7 +22,7 @@
     <parent>
         <artifactId>hsweb-system-organizational</artifactId>
         <groupId>org.hswebframework.web</groupId>
-        <version>3.0.10-SNAPSHOT</version>
+        <version>4.0.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 

@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hswebframework.web.authorization.define.AuthorizingContext;
 import org.hswebframework.web.authorization.define.HandleType;
-import org.hswebframework.web.authorization.listener.event.AuthorizingHandleBeforeEvent;
+import org.hswebframework.web.authorization.events.AuthorizingHandleBeforeEvent;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.event.EventListener;
 import org.springframework.util.AntPathMatcher;

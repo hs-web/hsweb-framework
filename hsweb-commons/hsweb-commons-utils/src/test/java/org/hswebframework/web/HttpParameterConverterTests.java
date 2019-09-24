@@ -59,7 +59,7 @@ public class HttpParameterConverterTests {
 
     @Test
     public void testConvertObject() {
-        QueryParam param = Query.empty(new QueryParam())
+        QueryParam param = Query.of(new QueryParam())
                 .where("name", "张三")
                 .and().like("address", "%重庆%")
                 .nest()

@@ -17,6 +17,8 @@
 
 package org.hswebframework.web.authorization;
 
+import reactor.core.publisher.Mono;
+
 import java.util.function.Supplier;
 
 /**
@@ -25,6 +27,6 @@ import java.util.function.Supplier;
  * @see Authentication
  * @see AuthenticationHolder
  */
-public interface AuthenticationSupplier extends Supplier<Authentication> {
-    Authentication get(String userId);
+public interface AuthenticationSupplier extends Supplier<Mono<Authentication>> {
+    Mono<Authentication> get(String userId);
 }

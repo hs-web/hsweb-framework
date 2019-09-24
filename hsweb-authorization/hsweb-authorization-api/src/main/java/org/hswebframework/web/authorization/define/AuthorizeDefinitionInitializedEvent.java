@@ -1,6 +1,6 @@
 package org.hswebframework.web.authorization.define;
 
-import org.hswebframework.web.authorization.listener.event.AuthorizationEvent;
+import org.hswebframework.web.authorization.events.AuthorizationEvent;
 import org.springframework.context.ApplicationEvent;
 
 import java.util.List;

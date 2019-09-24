@@ -1,6 +1,6 @@
 package org.hswebframework.web.authorization.token.event;
 
-import org.hswebframework.web.authorization.listener.event.AuthorizationEvent;
+import org.hswebframework.web.authorization.events.AuthorizationEvent;
 import org.hswebframework.web.authorization.token.UserToken;
 import org.springframework.context.ApplicationEvent;
 

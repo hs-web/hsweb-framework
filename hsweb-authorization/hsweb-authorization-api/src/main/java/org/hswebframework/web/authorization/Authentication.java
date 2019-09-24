@@ -17,6 +17,8 @@
 
 package org.hswebframework.web.authorization;
 
+import reactor.core.publisher.Mono;
+
 import java.io.Serializable;
 import java.util.*;
 
@@ -50,8 +52,8 @@ public interface Authentication extends Serializable {
      * @see Optional
      * @see AuthenticationHolder
      */
-    static Optional<Authentication> current() {
-        return Optional.ofNullable(AuthenticationHolder.get());
+    static Mono<Authentication> current() {
+        return AuthenticationHolder.get();
     }
 
     /**

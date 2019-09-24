@@ -1,17 +1,23 @@
 package org.hswebframework.web.authorization;
 
 import org.hswebframework.web.authorization.builder.AuthenticationBuilder;
+import org.hswebframework.web.authorization.exception.AccessDenyException;
 import org.hswebframework.web.authorization.exception.UnAuthorizedException;
 import org.hswebframework.web.authorization.simple.builder.SimpleAuthenticationBuilder;
 import org.hswebframework.web.authorization.simple.builder.SimpleDataAccessConfigBuilderFactory;
 import org.hswebframework.web.authorization.token.*;
+import org.hswebframework.web.context.ContextKey;
+import org.hswebframework.web.context.ContextUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import java.util.Collections;
 import java.util.Set;
 
+import static org.hswebframework.web.context.ContextUtils.*;
 import static org.junit.Assert.*;
 
 public class AuthenticationTests {
@@ -54,7 +60,7 @@ public class AuthenticationTests {
         assertEquals(authentication.getPermissions().size(), 1);
         assertTrue(authentication.hasPermission("user-manager"));
         assertTrue(authentication.hasPermission("user-manager", "get"));
-        assertTrue(!authentication.hasPermission("user-manager", "delete"));
+        assertFalse(authentication.hasPermission("user-manager", "delete"));
 
         boolean has = AuthenticationPredicate.has("permission:user-manager")
                 .or(AuthenticationPredicate.role("admin-role"))
@@ -95,21 +101,21 @@ public class AuthenticationTests {
         //初始化权限管理器,用于获取用户的权限信息
         AuthenticationManager authenticationManager = new AuthenticationManager() {
             @Override
-            public Authentication authenticate(AuthenticationRequest request) {
+            public Mono<Authentication> authenticate(AuthenticationRequest request) {
                 return null;
             }
 
             @Override
-            public Authentication getByUserId(String userId) {
+            public Mono<Authentication> getByUserId(String userId) {
                 if (userId.equals("admin")) {
-                    return authentication;
+                    return Mono.just(authentication);
                 }
-                return null;
+                return Mono.empty();
             }
 
             @Override
-            public Authentication sync(Authentication authentication) {
-                return authentication;
+            public Mono<Authentication> sync(Authentication authentication) {
+                return Mono.just(authentication);
             }
         };
         AuthenticationHolder.addSupplier(new UserTokenAuthenticationSupplier(authenticationManager));
@@ -117,11 +123,16 @@ public class AuthenticationTests {
         //绑定用户token
         UserTokenManager userTokenManager = new DefaultUserTokenManager();
         UserToken token = userTokenManager.signIn("test", "token-test", "admin", -1);
-        UserTokenHolder.setCurrent(token);
 
         //获取当前登录用户
-        Authentication current = Authentication.current().orElseThrow(UnAuthorizedException::new);
-        Assert.assertEquals(current.getUser().getId(), "admin");
+        Authentication
+                .current()
+                .map(Authentication::getUser)
+                .map(User::getId)
+                .subscriberContext(acceptContext(ctx->ctx.put(ContextKey.of(UserToken.class),token)))
+                .as(StepVerifier::create)
+                .expectNext("admin")
+                .verifyComplete();
 
 
     }
