@@ -6,7 +6,7 @@ import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.ezorm.core.dsl.Query;
-import org.hswebframework.ezorm.rdb.render.dialect.Dialect;
+import org.hswebframework.ezorm.rdb.operator.DatabaseOperator;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.User;
@@ -50,6 +50,9 @@ public class ScopeByUserHandler implements DataAccessHandler {
     @Autowired
     private EntityFactory entityFactory;
 
+    @Autowired(required = false)
+    private DatabaseOperator databaseOperator;
+
     @Override
     public boolean isSupport(DataAccessConfig access) {
         return access instanceof ScopeByUserDataAccessConfig;
@@ -70,7 +73,7 @@ public class ScopeByUserHandler implements DataAccessHandler {
     }
 
     protected boolean supportChildSqlTerm() {
-        return Dialect.H2.isSupportTermType("user-in-org");
+        return true;
     }
 
     protected boolean doUpdateAccess(ScopeByUserDataAccessConfig config, AuthorizingContext context) {
@@ -95,7 +98,7 @@ public class ScopeByUserHandler implements DataAccessHandler {
         QueryService<Object, Object> queryService = null;
 
         if (controller instanceof QueryController) {
-            queryService = ((QueryController<Object, Object, Entity>) controller).getService();
+            queryService = ((QueryController<Object, Object>) controller).getService();
         } else {
             Method getService = ReflectionUtils.findMethod(controller.getClass(), "getService");
             if (getService != null) {

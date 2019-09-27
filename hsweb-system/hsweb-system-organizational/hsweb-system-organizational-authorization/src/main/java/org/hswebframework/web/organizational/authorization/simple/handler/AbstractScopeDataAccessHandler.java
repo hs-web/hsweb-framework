@@ -113,7 +113,7 @@ public abstract class AbstractScopeDataAccessHandler<E> implements DataAccessHan
             Class entityType = ClassUtils.getGenericType(controller.getClass(), 0);
             if (ClassUtils.instanceOf(entityType, getEntityClass())) {
                 @SuppressWarnings("unchecked")
-                QueryService<E, Object> queryService = ((QueryController<E, Object, Entity>) controller).getService();
+                QueryService<E, Object> queryService = ((QueryController<E, Object>) controller).getService();
                 E oldData = queryService.selectByPk(id);
                 return !(oldData != null && !ids.contains(getOperationScope(oldData)));
             } else {
