@@ -27,7 +27,7 @@ import java.util.List;
 @RequestMapping("${hsweb.web.mappings.dynamic-form-log:dynamic/form-deploy-log}")
 @Authorize(permission = "form-deploy-log",description = "表单发布日志")
 @Api(value = "表单发布日志",tags = "动态表单-发布日志")
-public class DynamicFormDeployLogController implements QueryController<DynamicFormDeployLogEntity, String, QueryParamEntity> {
+public class DynamicFormDeployLogController implements QueryController<DynamicFormDeployLogEntity, String> {
 
     private DynamicFormDeployLogService dynamicFormDeployLogService;
   
