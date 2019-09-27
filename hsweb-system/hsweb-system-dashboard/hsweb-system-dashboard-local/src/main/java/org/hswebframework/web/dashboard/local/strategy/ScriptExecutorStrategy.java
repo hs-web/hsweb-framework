@@ -3,7 +3,8 @@ package org.hswebframework.web.dashboard.local.strategy;
 import lombok.SneakyThrows;
 import org.hswebframework.expands.script.engine.DynamicScriptEngine;
 import org.hswebframework.expands.script.engine.DynamicScriptEngineFactory;
-import org.hswebframework.ezorm.rdb.executor.SqlExecutor;
+import org.hswebframework.ezorm.rdb.executor.SqlRequests;
+import org.hswebframework.ezorm.rdb.executor.SyncSqlExecutor;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.dashboard.DashBoardConfigEntity;
 import org.hswebframework.web.dashboard.local.DashBoardExecutorStrategy;
@@ -21,7 +22,7 @@ import java.util.Map;
 public class ScriptExecutorStrategy implements DashBoardExecutorStrategy {
 
     @Autowired
-    private SqlExecutor sqlExecutor;
+    private SyncSqlExecutor sqlExecutor;
 
     static List<String> supportLang = Arrays.asList("js", "javascript", "groovy", "sql");
 
@@ -39,7 +40,7 @@ public class ScriptExecutorStrategy implements DashBoardExecutorStrategy {
         scriptContext.put("autz", authentication);
 
         if ("sql".equals(entity.getScriptLanguage())) {
-            return sqlExecutor.list(entity.getScript(), scriptContext);
+            return sqlExecutor.update(SqlRequests.template(entity.getScript(),scriptContext) );
         }
 
         DynamicScriptEngine engine = DynamicScriptEngineFactory.getEngine(entity.getScriptLanguage());

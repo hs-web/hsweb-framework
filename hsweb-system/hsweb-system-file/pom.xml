@@ -16,7 +16,6 @@
         <module>hsweb-system-file-api</module>
         <module>hsweb-system-file-local</module>
         <module>hsweb-system-file-web</module>
-        <module>hsweb-system-file-oauth2</module>
     </modules>
 
 

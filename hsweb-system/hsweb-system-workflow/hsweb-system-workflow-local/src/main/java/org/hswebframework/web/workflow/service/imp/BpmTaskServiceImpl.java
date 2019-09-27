@@ -3,35 +3,31 @@ package org.hswebframework.web.workflow.service.imp;
 import lombok.SneakyThrows;
 import org.activiti.engine.history.HistoricActivityInstance;
 import org.activiti.engine.history.HistoricProcessInstance;
-import org.activiti.engine.history.HistoricTaskInstance;
-import org.activiti.engine.history.HistoricVariableInstance;
 import org.activiti.engine.impl.RepositoryServiceImpl;
 import org.activiti.engine.impl.TaskServiceImpl;
 import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity;
 import org.activiti.engine.impl.pvm.PvmActivity;
 import org.activiti.engine.impl.pvm.PvmTransition;
-import org.activiti.engine.impl.pvm.delegate.ActivityExecution;
 import org.activiti.engine.impl.pvm.process.ActivityImpl;
-import org.activiti.engine.impl.pvm.process.TransitionImpl;
 import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
-import org.hswebframework.ezorm.rdb.executor.SqlExecutor;
+import org.hswebframework.ezorm.rdb.executor.SqlRequests;
+import org.hswebframework.ezorm.rdb.executor.SyncSqlExecutor;
 import org.hswebframework.utils.StringUtils;
 import org.hswebframework.web.BusinessException;
-import org.hswebframework.web.Maps;
 import org.hswebframework.web.NotFoundException;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.commons.entity.PagerResult;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.workflow.dao.entity.ProcessHistoryEntity;
-import org.hswebframework.web.workflow.service.ProcessHistoryService;
-import org.hswebframework.web.workflow.service.config.ProcessConfigurationService;
+import org.hswebframework.web.workflow.flowable.utils.JumpTaskCmd;
 import org.hswebframework.web.workflow.service.BpmActivityService;
 import org.hswebframework.web.workflow.service.BpmTaskService;
-import org.hswebframework.web.workflow.flowable.utils.JumpTaskCmd;
+import org.hswebframework.web.workflow.service.ProcessHistoryService;
 import org.hswebframework.web.workflow.service.WorkFlowFormService;
 import org.hswebframework.web.workflow.service.config.CandidateInfo;
+import org.hswebframework.web.workflow.service.config.ProcessConfigurationService;
 import org.hswebframework.web.workflow.service.request.CompleteTaskRequest;
 import org.hswebframework.web.workflow.service.request.JumpTaskRequest;
 import org.hswebframework.web.workflow.service.request.RejectTaskRequest;
@@ -47,7 +43,6 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 
@@ -74,7 +69,7 @@ public class BpmTaskServiceImpl extends AbstractFlowableService implements BpmTa
     private ProcessHistoryService processHistoryService;
 
     @Autowired
-    private SqlExecutor sqlExecutor;
+    private SyncSqlExecutor sqlExecutor;
 
     @Override
     public List<Task> selectNowTask(String procInstId) {
@@ -335,7 +330,7 @@ public class BpmTaskServiceImpl extends AbstractFlowableService implements BpmTa
                         .activityId(pvmTransition.getId())
                         .list();
                 for (HistoricActivityInstance historicActivityInstance : instance) {
-                    sqlExecutor.delete("delete from act_hi_actinst where id_= #{id}", historicActivityInstance);
+                    sqlExecutor.update(SqlRequests.of("delete from act_hi_actinst where id_= ?", historicActivityInstance.getId()));
                 }
             }
         }

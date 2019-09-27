@@ -37,7 +37,7 @@ public class PositionCandidateDimensionParserStrategy implements CandidateDimens
         return userService.select(
                 empty().noPaging()
                         //https://github.com/hs-web/hsweb-framework/tree/master/hsweb-system/hsweb-system-organizational#sql条件
-                        .where("id", "user-in-position"+type, config.getIdList()))
+                        .and("id", "user-in-position"+type, config.getIdList()))
                 .stream()
                 .map(UserEntity::getId)
                 .collect(Collectors.toList());

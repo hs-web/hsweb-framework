@@ -3,10 +3,11 @@ package org.hswebframework.web.workflow.service.imp;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
-import org.hswebframework.ezorm.rdb.meta.RDBColumnMetaData;
-import org.hswebframework.ezorm.rdb.meta.RDBTableMetaData;
-import org.hswebframework.ezorm.rdb.meta.converter.DateTimeConverter;
-import org.hswebframework.ezorm.rdb.render.dialect.Dialect;
+import org.hswebframework.ezorm.core.RuntimeDefaultValue;
+import org.hswebframework.ezorm.rdb.codec.DateTimeCodec;
+import org.hswebframework.ezorm.rdb.metadata.RDBColumnMetadata;
+import org.hswebframework.ezorm.rdb.metadata.RDBTableMetadata;
+import org.hswebframework.ezorm.rdb.metadata.dialect.Dialect;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.commons.entity.PagerResult;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
@@ -138,153 +139,133 @@ public class WorkFlowFormServiceImpl extends AbstractFlowableService implements 
 
     @Override
     public void customTableSetting(TableInitializeContext context) {
-        RDBTableMetaData table = context.getTable();
-        Dialect dialect = context.getDatabase().getMeta().getDialect();
+        RDBTableMetadata table = context.getTable();
+        Dialect dialect = table.getDialect();
 
-        if (!table.getProperty("enable-workflow", true).isTrue()) {
+        if (!table.findFeature("enableWorkFlow").isPresent()) {
             return;
         }
         //----------taskId--------------
         {
-            RDBColumnMetaData processTaskId = new RDBColumnMetaData();
-            processTaskId.setJavaType(String.class);
-            processTaskId.setJdbcType(JDBCType.VARCHAR);
+            RDBColumnMetadata processTaskId = table.newColumn();
+            processTaskId.setJdbcType(JDBCType.VARCHAR,String.class);
             processTaskId.setLength(32);
             processTaskId.setName("proc_task_id");
             processTaskId.setAlias("processTaskId");
-            processTaskId.setDataType(dialect.buildDataType(processTaskId));
             processTaskId.setComment("流程任务ID");
             table.addColumn(processTaskId);
         }
 
         //----------taskDefineKey--------------
         {
-            RDBColumnMetaData taskDefineKey = new RDBColumnMetaData();
-            taskDefineKey.setJavaType(String.class);
-            taskDefineKey.setJdbcType(JDBCType.VARCHAR);
+            RDBColumnMetadata taskDefineKey = table.newColumn();
+            taskDefineKey.setJdbcType(JDBCType.VARCHAR,String.class);
             taskDefineKey.setLength(128);
             taskDefineKey.setName("proc_task_key");
             taskDefineKey.setAlias("processTaskDefineKey");
-            taskDefineKey.setDataType(dialect.buildDataType(taskDefineKey));
             taskDefineKey.setComment("流程任务定义KEY");
             table.addColumn(taskDefineKey);
         }
 
         //----------taskName--------------
         {
-            RDBColumnMetaData processTaskName = new RDBColumnMetaData();
-            processTaskName.setJavaType(String.class);
-            processTaskName.setJdbcType(JDBCType.VARCHAR);
+            RDBColumnMetadata processTaskName = table.newColumn();
+            processTaskName.setJdbcType(JDBCType.VARCHAR,String.class);
             processTaskName.setLength(128);
             processTaskName.setName("proc_task_name");
             processTaskName.setAlias("processTaskName");
-            processTaskName.setDataType(dialect.buildDataType(processTaskName));
             processTaskName.setComment("流程任务定义名称");
             table.addColumn(processTaskName);
         }
 
         //----------processDefineId--------------
         {
-            RDBColumnMetaData processDefineId = new RDBColumnMetaData();
-            processDefineId.setJavaType(String.class);
-            processDefineId.setJdbcType(JDBCType.VARCHAR);
+            RDBColumnMetadata processDefineId = table.newColumn();
+            processDefineId.setJdbcType(JDBCType.VARCHAR,String.class);
             processDefineId.setLength(32);
             processDefineId.setName("proc_def_id");
             processDefineId.setAlias("processDefineId");
-            processDefineId.setDataType(dialect.buildDataType(processDefineId));
             processDefineId.setProperty("read-only", true);
             processDefineId.setComment("流程定义ID");
             table.addColumn(processDefineId);
         }
         //----------processDefineKey--------------
         {
-            RDBColumnMetaData processDefineKey = new RDBColumnMetaData();
-            processDefineKey.setJavaType(String.class);
-            processDefineKey.setJdbcType(JDBCType.VARCHAR);
+            RDBColumnMetadata processDefineKey = table.newColumn();
+            processDefineKey.setJdbcType(JDBCType.VARCHAR,String.class);
             processDefineKey.setLength(32);
             processDefineKey.setName("proc_def_key");
             processDefineKey.setAlias("processDefineKey");
-            processDefineKey.setDataType(dialect.buildDataType(processDefineKey));
             processDefineKey.setProperty("read-only", true);
             processDefineKey.setComment("流程定义KEY");
             table.addColumn(processDefineKey);
         } //----------processDefineName--------------
         {
-            RDBColumnMetaData processDefineName = new RDBColumnMetaData();
-            processDefineName.setJavaType(String.class);
-            processDefineName.setJdbcType(JDBCType.VARCHAR);
+            RDBColumnMetadata processDefineName =table.newColumn();
+            processDefineName.setJdbcType(JDBCType.VARCHAR,String.class);
             processDefineName.setLength(128);
             processDefineName.setName("proc_def_name");
             processDefineName.setAlias("processDefineName");
-            processDefineName.setDataType(dialect.buildDataType(processDefineName));
             processDefineName.setProperty("read-only", true);
             processDefineName.setComment("流程定义Name");
             table.addColumn(processDefineName);
         }
         //----------processDefineVersion--------------
         {
-            RDBColumnMetaData processInstanceId = new RDBColumnMetaData();
-            processInstanceId.setJavaType(String.class);
-            processInstanceId.setJdbcType(JDBCType.VARCHAR);
+            RDBColumnMetadata processInstanceId =table.newColumn();
+            processInstanceId.setJdbcType(JDBCType.VARCHAR,String.class);
             processInstanceId.setLength(32);
             processInstanceId.setName("proc_ins_id");
             processInstanceId.setAlias("processInstanceId");
-            processInstanceId.setDataType(dialect.buildDataType(processInstanceId));
             processInstanceId.setProperty("read-only", true);
             processInstanceId.setComment("流程实例ID");
             table.addColumn(processInstanceId);
         }//----------creatorUserId--------------
         {
-            RDBColumnMetaData creatorUserId = new RDBColumnMetaData();
-            creatorUserId.setJavaType(String.class);
-            creatorUserId.setJdbcType(JDBCType.VARCHAR);
+            RDBColumnMetadata creatorUserId = table.newColumn();
+            creatorUserId.setJdbcType(JDBCType.VARCHAR,String.class);
             creatorUserId.setLength(32);
             creatorUserId.setName("creator_id");
             creatorUserId.setAlias("creatorId");
-            creatorUserId.setDataType(dialect.buildDataType(creatorUserId));
             creatorUserId.setProperty("read-only", true);
             creatorUserId.setComment("创建人ID");
-            creatorUserId.setDefaultValue(() -> Authentication.current().map(autz -> autz.getUser().getId()).orElse(null));
+            creatorUserId.setDefaultValue((RuntimeDefaultValue)() -> Authentication.current().map(autz -> autz.getUser().getId()).orElse(null));
             table.addColumn(creatorUserId);
         }
         {//-----------creatorName---------
-            RDBColumnMetaData creatorName = new RDBColumnMetaData();
-            creatorName.setJavaType(String.class);
-            creatorName.setJdbcType(JDBCType.VARCHAR);
+            RDBColumnMetadata creatorName =table.newColumn();
+            creatorName.setJdbcType(JDBCType.VARCHAR,String.class);
             creatorName.setLength(32);
             creatorName.setName("creator_name");
             creatorName.setAlias("creatorName");
-            creatorName.setDataType(dialect.buildDataType(creatorName));
             creatorName.setProperty("read-only", true);
             creatorName.setComment("创建人姓名");
-            creatorName.setDefaultValue(() -> Authentication.current().map(autz -> autz.getUser().getName()).orElse(null));
+            creatorName.setDefaultValue((RuntimeDefaultValue)() -> Authentication.current().map(autz -> autz.getUser().getName()).orElse(null));
             table.addColumn(creatorName);
         }
         {//-----------creatorName---------
-            RDBColumnMetaData createTime = new RDBColumnMetaData();
+            RDBColumnMetadata createTime =table.newColumn();
             createTime.setJavaType(Date.class);
-            createTime.setJdbcType(JDBCType.TIMESTAMP);
+            createTime.setJdbcType(JDBCType.TIMESTAMP,Date.class);
             createTime.setName("create_time");
             createTime.setAlias("createTime");
-            createTime.setDataType(dialect.buildDataType(createTime));
             createTime.setProperty("read-only", true);
             createTime.setComment("创建时间");
             createTime.setNotNull(true);
-            createTime.setValueConverter(new DateTimeConverter("yyyy-MM-dd HH:mm:ss", Date.class));
-            createTime.setDefaultValue(Date::new);
+            createTime.setValueCodec(new DateTimeCodec("yyyy-MM-dd HH:mm:ss", Date.class));
+            createTime.setDefaultValue((RuntimeDefaultValue)Date::new);
             table.addColumn(createTime);
         }
         {//-----------lastUpdateTime---------
-            RDBColumnMetaData lastUpdateTime = new RDBColumnMetaData();
+            RDBColumnMetadata lastUpdateTime =table.newColumn();
             lastUpdateTime.setJavaType(Date.class);
-            lastUpdateTime.setJdbcType(JDBCType.TIMESTAMP);
+            lastUpdateTime.setJdbcType(JDBCType.TIMESTAMP,Date.class);
             lastUpdateTime.setName("last_update_time");
             lastUpdateTime.setAlias("lastUpdateTime");
-            lastUpdateTime.setDataType(dialect.buildDataType(lastUpdateTime));
             lastUpdateTime.setComment("最后一次修改时间");
             lastUpdateTime.setNotNull(true);
-            lastUpdateTime.setValueConverter(new DateTimeConverter("yyyy-MM-dd HH:mm:ss", Date.class));
-            lastUpdateTime.setDefaultValue(Date::new);
+            lastUpdateTime.setValueCodec(new DateTimeCodec("yyyy-MM-dd HH:mm:ss", Date.class));
+            lastUpdateTime.setDefaultValue((RuntimeDefaultValue)Date::new);
             table.addColumn(lastUpdateTime);
         }
     }

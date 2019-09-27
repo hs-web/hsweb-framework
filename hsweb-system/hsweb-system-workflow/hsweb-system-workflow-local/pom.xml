@@ -179,6 +179,11 @@
             <version>1.0.26</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.hswebframework</groupId>
+            <artifactId>hsweb-expands-script</artifactId>
+            <version>${hsweb.expands.version}</version>
+        </dependency>
     </dependencies>
 
 </project>

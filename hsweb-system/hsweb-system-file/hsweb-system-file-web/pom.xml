@@ -35,6 +35,11 @@
             <version>1.3.3</version>
         </dependency>
         <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.13</version>
+        </dependency>
+        <dependency>
             <groupId>org.hswebframework</groupId>
             <artifactId>hsweb-expands-compress</artifactId>
             <version>${hsweb.expands.version}</version>

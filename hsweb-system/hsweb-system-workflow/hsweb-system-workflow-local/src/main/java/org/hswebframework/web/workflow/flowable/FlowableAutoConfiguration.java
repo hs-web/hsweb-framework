@@ -3,13 +3,11 @@ package org.hswebframework.web.workflow.flowable;
 import org.activiti.engine.delegate.event.ActivitiEventListener;
 import org.activiti.engine.impl.interceptor.SessionFactory;
 import org.activiti.spring.boot.ProcessEngineConfigurationConfigurer;
-import org.hswebframework.web.dao.Dao;
 import org.hswebframework.web.service.authorization.UserService;
 import org.hswebframework.web.workflow.flowable.utils.CustomGroupEntityManager;
 import org.hswebframework.web.workflow.flowable.utils.CustomGroupEntityManagerFactory;
 import org.hswebframework.web.workflow.flowable.utils.CustomUserEntityManager;
 import org.hswebframework.web.workflow.flowable.utils.CustomUserEntityManagerFactory;
-import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -20,8 +18,6 @@ import java.util.List;
 
 @Configuration
 @AutoConfigureAfter(FlowableAutoConfiguration.CustomEntityManagerAutoConfiguration.class)
-@MapperScan(value = "org.hswebframework.web.workflow.dao", markerInterface = Dao.class
-        , sqlSessionFactoryRef = "sqlSessionFactory")
 public class FlowableAutoConfiguration {
 
     @Autowired(required = false)

@@ -39,7 +39,7 @@ public class DepartmentCandidateDimensionParserStrategy implements CandidateDime
         return userService.select(
                 empty().noPaging()
                         //https://github.com/hs-web/hsweb-framework/tree/master/hsweb-system/hsweb-system-organizational#sql条件
-                        .where("id", "user-in-department" + type, config.getIdList()))
+                        .and("id", "user-in-department" + type, config.getIdList()))
                 .stream()
                 .map(UserEntity::getId)
                 .collect(Collectors.toList());

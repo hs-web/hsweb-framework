@@ -22,5 +22,10 @@
             <artifactId>hsweb-system-script-api</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.hswebframework</groupId>
+            <artifactId>hsweb-expands-script</artifactId>
+            <version>${hsweb.expands.version}</version>
+        </dependency>
     </dependencies>
 </project>

@@ -10,20 +10,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class WorkflowTermsAutoConfiguration {
 
-    @Bean
-    public ClaimSqlTerm claimSqlTerm() {
-        return new ClaimSqlTerm("user-wf-claim");
-    }
-
-    @Bean
-    public CompletedSqlTerm completedSqlTerm() {
-        return new CompletedSqlTerm("user-wf-completed");
-    }
-
-    @Bean
-    public ProcessParticipateSqlTerm participateSqlTerm() {
-        return new ProcessParticipateSqlTerm("user-wf-part");
-    }
 
     @Bean
     public TodoSqlTerm todoSqlTerm() {

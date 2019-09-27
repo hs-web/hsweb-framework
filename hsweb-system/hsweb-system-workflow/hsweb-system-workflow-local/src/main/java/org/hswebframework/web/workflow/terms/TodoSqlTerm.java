@@ -1,11 +1,10 @@
 package org.hswebframework.web.workflow.terms;
 
 import org.hswebframework.ezorm.core.param.Term;
-import org.hswebframework.ezorm.rdb.meta.RDBColumnMetaData;
-import org.hswebframework.ezorm.rdb.render.SqlAppender;
-import org.hswebframework.ezorm.rdb.render.dialect.term.BoostTermTypeMapper;
-import org.hswebframework.web.dao.mybatis.mapper.AbstractSqlTermCustomizer;
-import org.hswebframework.web.dao.mybatis.mapper.ChangedTermValue;
+import org.hswebframework.ezorm.rdb.metadata.RDBColumnMetadata;
+import org.hswebframework.ezorm.rdb.operator.builder.fragments.PrepareSqlFragments;
+import org.hswebframework.ezorm.rdb.operator.builder.fragments.SqlFragments;
+import org.hswebframework.web.service.terms.AbstractSqlTermCustomizer;
 
 import java.util.List;
 
@@ -20,23 +19,22 @@ public class TodoSqlTerm extends AbstractSqlTermCustomizer {
         super(termType);
     }
 
+
     @Override
-    public SqlAppender accept(String wherePrefix, Term term, RDBColumnMetaData column, String tableAlias) {
-        ChangedTermValue termValue = createChangedTermValue(term);
-        RDBColumnMetaData processInstanceId = column.getTableMetaData().findColumn("processInstanceId");
-        if (processInstanceId == null) {
-            throw new UnsupportedOperationException("未获取到属性:[processInstanceId]对应的列");
-        }
-        List<Object> val = BoostTermTypeMapper.convertList(column, termValue.getOld());
+    public SqlFragments createFragments(String columnFullName, RDBColumnMetadata column, Term term) {
+        PrepareSqlFragments fragments = PrepareSqlFragments.of();
 
-        termValue.setValue(val);
-        SqlAppender appender = new SqlAppender();
-        appender.add("exists(select 1 from ACT_RU_TASK RES WHERE ",
-                createColumnName(processInstanceId, tableAlias),
-                "= RES.PROC_INST_ID_ and RES.ASSIGNEE_ ");
-        appendCondition(val, wherePrefix, appender);
-        appender.add(")");
+        List<Object> val = convertList(term.getValue());
+        fragments.addSql("exists(select 1 from ACT_RU_TASK RES WHERE ",
+                columnFullName,
+                "= RES.PROC_INST_ID_ and RES.ASSIGNEE_ and ", columnFullName);
 
-        return appender;
+        appendCondition(fragments, column, val);
+        return fragments;
+    }
+
+    @Override
+    public String getName() {
+        return "查询代办数据";
     }
 }

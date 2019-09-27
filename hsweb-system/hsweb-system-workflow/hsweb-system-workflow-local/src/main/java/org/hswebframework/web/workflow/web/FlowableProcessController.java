@@ -250,7 +250,7 @@ public class FlowableProcessController {
                                                             @PathVariable String processDefineId,
                                                             QueryParamEntity query,
                                                             Authentication authentication) {
-        Query.empty(query)
+        Query.of(query)
                 .nest()
                 .when(type != null, q -> type.applyQueryTerm(q, authentication.getUser().getId()))
                 .end();

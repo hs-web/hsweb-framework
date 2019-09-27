@@ -19,7 +19,6 @@ package org.hswebframework.web.dictionary.simple;
 import org.hswebframework.web.dictionary.api.DictionaryService;
 import org.hswebframework.web.dictionary.api.entity.DictionaryEntity;
 import org.hswebframework.web.dictionary.api.events.ClearDictionaryCacheEvent;
-import org.hswebframework.web.dictionary.simple.dao.DictionaryDao;
 import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.service.GenericEntityService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,19 +37,11 @@ public class SimpleDictionaryService extends GenericEntityService<DictionaryEnti
         implements DictionaryService {
 
     @Autowired
-    private DictionaryDao dictionaryDao;
-
-    @Autowired
     private ApplicationEventPublisher eventPublisher;
 
     @Override
     protected IDGenerator<String> getIDGenerator() {
         return IDGenerator.MD5;
-    }
-
-    @Override
-    public DictionaryDao getDao() {
-        return dictionaryDao;
     }
 
     @Override

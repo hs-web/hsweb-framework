@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("${hsweb.web.mappings.file-info:file-info}")
 @Authorize(permission = "file-info", description = "文件信息管理")
 @Api(value = "文件信息管理",tags = "文件管理-文件信息管理")
-public class FileInfoController implements QueryController<FileInfoEntity, String, QueryParamEntity> {
+public class FileInfoController implements QueryController<FileInfoEntity, String> {
 
     private FileInfoService fileInfoService;
 
