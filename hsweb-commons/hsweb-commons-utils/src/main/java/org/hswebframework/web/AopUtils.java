@@ -26,7 +26,6 @@ import org.springframework.util.ReflectionUtils;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.*;
-import java.util.stream.Stream;
 
 public final class AopUtils {
 
@@ -42,8 +41,7 @@ public final class AopUtils {
         m = ClassUtils.getMostSpecificMethod(m, targetClass);
         a = AnnotationUtils.findAnnotation(m, annClass);
         if (a == null) {
-            List<Class> supers = new ArrayList<>();
-            supers.addAll(Arrays.asList(targetClass.getInterfaces()));
+            List<Class> supers = new ArrayList<>(Arrays.asList(targetClass.getInterfaces()));
             if (targetClass.getSuperclass() != Object.class) {
                 supers.add(targetClass.getSuperclass());
             }

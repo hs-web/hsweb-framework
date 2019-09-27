@@ -24,6 +24,5 @@ public class DefaultClassDictDefine implements ClassDictDefine {
     private String                 id;
     private String                 alias;
     private String                 comments;
-    private String                 parserId;
     private List<EnumDict<Object>> items;
 }

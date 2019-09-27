@@ -19,7 +19,7 @@
 package org.hswebframework.web.commons.entity.factory;
 
 import lombok.SneakyThrows;
-import org.hswebframework.web.NotFoundException;
+import org.hswebframework.web.exception.NotFoundException;
 import org.hswebframework.utils.ClassUtils;
 import org.hswebframework.web.bean.BeanFactory;
 import org.hswebframework.web.bean.FastBeanCopier;

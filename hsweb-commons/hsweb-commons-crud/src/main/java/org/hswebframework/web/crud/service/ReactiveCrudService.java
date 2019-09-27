@@ -1,7 +1,10 @@
 package org.hswebframework.web.crud.service;
 
 import org.hswebframework.ezorm.core.param.QueryParam;
+import org.hswebframework.ezorm.rdb.mapping.ReactiveDelete;
+import org.hswebframework.ezorm.rdb.mapping.ReactiveQuery;
 import org.hswebframework.ezorm.rdb.mapping.ReactiveRepository;
+import org.hswebframework.ezorm.rdb.mapping.ReactiveUpdate;
 import org.hswebframework.ezorm.rdb.mapping.defaults.SaveResult;
 import org.hswebframework.web.crud.entity.PagerResult;
 import org.reactivestreams.Publisher;
@@ -14,6 +17,18 @@ import java.util.Collections;
 public interface ReactiveCrudService<E, K> {
 
     ReactiveRepository<E, K> getRepository();
+
+    default ReactiveQuery<E> createQuery() {
+        return getRepository().createQuery();
+    }
+
+    default ReactiveUpdate<E> createUpdate() {
+        return getRepository().createUpdate();
+    }
+
+    default ReactiveDelete createDelete() {
+        return getRepository().createDelete();
+    }
 
     @Transactional(readOnly = true)
     default Mono<E> findById(Mono<K> publisher) {

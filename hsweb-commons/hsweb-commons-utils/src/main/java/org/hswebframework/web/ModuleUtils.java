@@ -127,7 +127,7 @@ public abstract class ModuleUtils {
 
         public String getGitLocation() {
             String gitCommitHash = this.gitCommitHash;
-            if (gitCommitHash == null || gitCommitHash.contains("$")) {
+            if (gitCommitHash == null || gitCommitHash.contains("$") || gitCommitHash.contains("@")) {
                 gitCommitHash = "master";
             }
             return gitRepository + "/blob/" + gitCommitHash + "/" + path + "/";

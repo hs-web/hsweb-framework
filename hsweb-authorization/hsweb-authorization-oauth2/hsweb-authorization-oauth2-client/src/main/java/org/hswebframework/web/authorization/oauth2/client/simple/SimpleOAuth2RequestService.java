@@ -19,7 +19,7 @@
 package org.hswebframework.web.authorization.oauth2.client.simple;
 
 import org.hswebframework.utils.ClassUtils;
-import org.hswebframework.web.NotFoundException;
+import org.hswebframework.web.exception.NotFoundException;
 import org.hswebframework.web.authorization.oauth2.client.OAuth2RequestBuilderFactory;
 import org.hswebframework.web.authorization.oauth2.client.OAuth2RequestService;
 import org.hswebframework.web.authorization.oauth2.client.OAuth2ServerConfig;

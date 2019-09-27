@@ -23,7 +23,7 @@ public class Sqls {
                         s1 = s1.substring(0, s1.length() - 1);
                         if (!StringUtils.isEmpty(s1))
                             tmp.add(s1);
-                        sqlList.add(String.join("\n", tmp.toArray(new String[tmp.size()])));
+                        sqlList.add(String.join("\n", tmp.toArray(new String[0])));
                         tmp.clear();
                     } else {
                         if (!StringUtils.isEmpty(s1))
@@ -31,7 +31,7 @@ public class Sqls {
                     }
                 });
         if (!tmp.isEmpty()) {
-            sqlList.add(String.join("\n", tmp.toArray(new String[tmp.size()])));
+            sqlList.add(String.join("\n", tmp.toArray(new String[0])));
             tmp.clear();
         }
         return sqlList;

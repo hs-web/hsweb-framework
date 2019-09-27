@@ -1,6 +1,6 @@
 package org.hswebframework.web.datasource.exception;
 
-import org.hswebframework.web.NotFoundException;
+import org.hswebframework.web.exception.NotFoundException;
 
 /**
  * @author zhouhao

@@ -30,12 +30,9 @@
         <module>hsweb-core</module>
         <module>hsweb-authorization</module>
         <module>hsweb-system</module>
-        <module>hsweb-tests</module>
         <module>hsweb-datasource</module>
         <module>hsweb-commons</module>
         <module>hsweb-logging</module>
-        <module>hsweb-boost</module>
-        <module>hsweb-thirdparty</module>
     </modules>
 
     <packaging>pom</packaging>
@@ -303,10 +300,11 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.hibernate</groupId>
-                <artifactId>hibernate-validator</artifactId>
-                <version>6.0.17.Final</version>
+                <groupId>org.hibernate.javax.persistence</groupId>
+                <artifactId>hibernate-jpa-2.1-api</artifactId>
+                <version>1.0.2.Final</version>
             </dependency>
+
             <dependency>
                 <groupId>io.vavr</groupId>
                 <artifactId>vavr</artifactId>

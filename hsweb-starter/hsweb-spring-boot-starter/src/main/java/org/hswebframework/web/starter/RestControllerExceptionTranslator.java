@@ -18,8 +18,8 @@
 package org.hswebframework.web.starter;
 
 import com.alibaba.fastjson.JSONException;
-import org.hswebframework.web.BusinessException;
-import org.hswebframework.web.NotFoundException;
+import org.hswebframework.web.exception.BusinessException;
+import org.hswebframework.web.exception.NotFoundException;
 import org.hswebframework.web.authorization.exception.AccessDenyException;
 import org.hswebframework.web.authorization.exception.NeedTwoFactorException;
 import org.hswebframework.web.authorization.exception.UnAuthorizedException;
@@ -30,7 +30,6 @@ import org.hswebframework.web.validate.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;

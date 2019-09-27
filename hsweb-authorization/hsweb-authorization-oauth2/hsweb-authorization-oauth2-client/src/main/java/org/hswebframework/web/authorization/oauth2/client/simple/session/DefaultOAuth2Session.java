@@ -19,7 +19,7 @@
 package org.hswebframework.web.authorization.oauth2.client.simple.session;
 
 import org.apache.commons.codec.binary.Base64;
-import org.hswebframework.web.BusinessException;
+import org.hswebframework.web.exception.BusinessException;
 import org.hswebframework.web.authorization.oauth2.client.*;
 import org.hswebframework.web.authorization.oauth2.client.exception.OAuth2RequestException;
 import org.hswebframework.web.authorization.oauth2.client.request.OAuth2Request;

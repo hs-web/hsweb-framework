@@ -18,7 +18,7 @@
 
 package org.hswebframework.web.authorization.oauth2.client.simple;
 
-import org.hswebframework.web.NotFoundException;
+import org.hswebframework.web.exception.NotFoundException;
 import org.hswebframework.web.authorization.oauth2.client.*;
 import org.hswebframework.web.authorization.oauth2.client.request.OAuth2Session;
 import org.hswebframework.web.authorization.oauth2.client.simple.session.AuthorizationCodeSession;
@@ -28,9 +28,7 @@ import org.hswebframework.web.authorization.oauth2.client.simple.session.Passwor
 import org.hswebframework.web.oauth2.core.GrantType;
 import org.hswebframework.web.oauth2.core.OAuth2Constants;
 
-import java.util.List;
 import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 

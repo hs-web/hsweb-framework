@@ -1,7 +1,7 @@
 package org.hswebframework.web.authorization.oauth2.client.simple.provider;
 
 import com.alibaba.fastjson.JSON;
-import org.hswebframework.web.BusinessException;
+import org.hswebframework.web.exception.BusinessException;
 import org.hswebframework.web.authorization.oauth2.client.exception.OAuth2RequestException;
 import org.hswebframework.web.authorization.simple.SimpleUser;
 import org.hswebframework.web.authorization.simple.builder.SimpleAuthenticationBuilderFactory;
@@ -11,8 +11,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.math.BigDecimal;
-
-import static org.junit.Assert.*;
 
 /**
  * TODO 完成注释

@@ -34,8 +34,7 @@ public class DefaultDictDefineRepository implements DictDefineRepository {
         DefaultClassDictDefine define = new DefaultClassDictDefine();
         define.setField("");
         if (dict != null) {
-            define.setId(dict.id());
-            define.setParserId(dict.parserId());
+            define.setId(dict.value());
             define.setComments(dict.comments());
             define.setAlias(dict.alias());
         } else {
@@ -43,10 +42,7 @@ public class DefaultDictDefineRepository implements DictDefineRepository {
             define.setAlias(type.getName());
             define.setComments(type.getSimpleName());
         }
-
-        List dicts = Arrays.asList(type.getEnumConstants());
-
-        define.setItems(new ArrayList<>(dicts));
+        define.setItems(new ArrayList<>(Arrays.asList(type.getEnumConstants())));
 
         return define;
 
@@ -61,12 +57,6 @@ public class DefaultDictDefineRepository implements DictDefineRepository {
     public List<DictDefine> getAllDefine() {
         return new ArrayList<>(parsedDict.values());
     }
-
-    @Override
-    public List<ClassDictDefine> getDefine(Class type) {
-        return new java.util.ArrayList<>();
-    }
-
 
     @Override
     public void addDefine(DictDefine dictDefine) {

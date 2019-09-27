@@ -21,6 +21,7 @@ package org.hswebframework.web.crud.entity;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hswebframework.ezorm.core.param.QueryParam;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +39,7 @@ public class PagerResult<E> {
         return new PagerResult<>(total, list);
     }
 
-    public static <E> PagerResult<E> of(int total, List<E> list, QueryParamEntity entity) {
+    public static <E> PagerResult<E> of(int total, List<E> list, QueryParam entity) {
         PagerResult<E> pagerResult = new PagerResult<>(total, list);
         pagerResult.setPageIndex(entity.getThinkPageIndex());
         pagerResult.setPageSize(entity.getPageSize());

@@ -11,8 +11,5 @@ public interface DictDefineRepository {
 
     List<DictDefine> getAllDefine();
 
-    @Deprecated
-    List<ClassDictDefine> getDefine(Class type);
-
     void addDefine(DictDefine dictDefine);
 }

@@ -19,7 +19,6 @@ import java.util.function.Supplier;
 /**
  * 枚举字典,使用枚举来实现数据字典,可通过集成此接口来实现一些有趣的功能.
  * ⚠️:如果使用了位运算来判断枚举,枚举数量不要超过64个,且顺序不要随意变动!
- * 如果枚举数量大于64,你应该使用{@link org.hswebframework.web.dict.apply.DictApply}来处理.
  * ⚠️:如果要开启在反序列化json的时候,支持将对象反序列化枚举,由于fastJson目前的版本还不支持从父类获取注解,
  * 所以需要在实现类上注解:<code>@JSONType(deserializer = EnumDict.EnumDictJSONDeserializer.class)</code>.
  *
@@ -48,7 +47,7 @@ public interface EnumDict<V> extends JSONSerializable {
     String getText();
 
     /**
-     * {@link Enum#ordinal}
+     * {@link Enum#ordinal()}
      *
      * @return 枚举序号, 如果枚举顺序改变, 此值将被变动
      */

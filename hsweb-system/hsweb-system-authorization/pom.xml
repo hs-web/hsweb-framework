@@ -11,13 +11,13 @@
 
     <description>业务模块-权限管理</description>
     <artifactId>hsweb-system-authorization</artifactId>
-    <packaging>pom</packaging>
-    <modules>
-        <module>hsweb-system-authorization-starter</module>
-        <module>hsweb-system-authorization-api</module>
-        <module>hsweb-system-authorization-local</module>
-        <module>hsweb-system-authorization-web</module>
-    </modules>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.hswebframework.web</groupId>
+            <artifactId>hsweb-commons-crud</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 
 </project>
