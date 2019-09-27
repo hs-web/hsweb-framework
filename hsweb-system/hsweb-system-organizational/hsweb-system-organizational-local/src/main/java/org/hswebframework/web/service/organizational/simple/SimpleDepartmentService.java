@@ -17,28 +17,27 @@
 package org.hswebframework.web.service.organizational.simple;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.hswebframework.ezorm.rdb.mapping.SyncRepository;
 import org.hswebframework.web.BusinessException;
-import org.hswebframework.web.dao.organizational.DepartmentDao;
-import org.hswebframework.web.dao.organizational.PositionDao;
 import org.hswebframework.web.entity.organizational.DepartmentEntity;
 import org.hswebframework.web.entity.organizational.OrganizationalEntity;
 import org.hswebframework.web.entity.organizational.PositionEntity;
 import org.hswebframework.web.id.IDGenerator;
-import org.hswebframework.web.service.AbstractTreeSortService;
 import org.hswebframework.web.service.DefaultDSLQueryService;
 import org.hswebframework.web.service.EnableCacheAllEvictTreeSortService;
-import org.hswebframework.web.service.GenericEntityService;
 import org.hswebframework.web.service.organizational.DepartmentService;
 import org.hswebframework.web.service.organizational.OrganizationalService;
 import org.hswebframework.web.service.organizational.event.ClearPersonCacheEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -51,22 +50,15 @@ import java.util.stream.Collectors;
 public class SimpleDepartmentService
         extends EnableCacheAllEvictTreeSortService<DepartmentEntity, String>
         implements DepartmentService {
-    @Autowired
-    private DepartmentDao departmentDao;
 
     @Autowired
-    protected PositionDao positionDao;
+    protected SyncRepository<PositionEntity,String> positionDao;
 
     @Autowired
     private ApplicationEventPublisher publisher;
 
     @Autowired
     private OrganizationalService organizationalService;
-
-    @Override
-    public DepartmentDao getDao() {
-        return departmentDao;
-    }
 
     @Override
     protected IDGenerator<String> getIDGenerator() {
@@ -76,7 +68,7 @@ public class SimpleDepartmentService
     @Override
     @Cacheable(key = "'org-id:'+#orgId")
     public List<DepartmentEntity> selectByOrgId(String orgId) {
-        return createQuery().where(DepartmentEntity.orgId, orgId).listNoPaging();
+        return createQuery().where(DepartmentEntity.orgId, orgId).fetch();
     }
 
     @Override
@@ -106,26 +98,26 @@ public class SimpleDepartmentService
         return createQuery()
                 .where()
                 .in(DepartmentEntity.orgId, allOrgId)
-                .listNoPaging();
+                .fetch();
     }
 
     @Override
     @Cacheable(key = "'name:'+#name")
     public List<DepartmentEntity> selectByName(String name) {
-        return createQuery().where(DepartmentEntity.name, name).listNoPaging();
+        return createQuery().where(DepartmentEntity.name, name).fetch();
     }
 
     @Override
     @Cacheable(key = "'code:'+#code")
     public DepartmentEntity selectByCode(String code) {
-        return createQuery().where(DepartmentEntity.code, code).single();
+        return createQuery().where(DepartmentEntity.code, code).fetchOne().orElse(null);
     }
 
     @Override
     public DepartmentEntity deleteByPk(String id) {
         if (DefaultDSLQueryService.createQuery(positionDao)
                 .where(PositionEntity.departmentId, id)
-                .total() > 0) {
+                .count() > 0) {
             throw new BusinessException("部门下存在职位信息,无法删除!");
         }
         publisher.publishEvent(new ClearPersonCacheEvent());

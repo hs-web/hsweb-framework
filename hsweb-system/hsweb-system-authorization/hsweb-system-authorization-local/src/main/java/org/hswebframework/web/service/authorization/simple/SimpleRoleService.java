@@ -17,36 +17,24 @@
 
 package org.hswebframework.web.service.authorization.simple;
 
-import org.hswebframework.web.service.authorization.RoleService;
 import org.hswebframework.web.commons.entity.DataStatus;
-import org.hswebframework.web.dao.authorization.RoleDao;
 import org.hswebframework.web.entity.authorization.RoleEntity;
 import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.service.DefaultDSLUpdateService;
 import org.hswebframework.web.service.GenericEntityService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.hswebframework.web.service.authorization.RoleService;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 @Service("roleService")
 public class SimpleRoleService extends GenericEntityService<RoleEntity, String> implements RoleService {
 
-    @Autowired
-    private RoleDao roleDao;
-
     @Override
     protected IDGenerator<String> getIDGenerator() {
         return IDGenerator.MD5;
-    }
-
-    @Override
-    public RoleDao getDao() {
-        return roleDao;
     }
 
     @Override
@@ -67,7 +55,7 @@ public class SimpleRoleService extends GenericEntityService<RoleEntity, String> 
         DefaultDSLUpdateService.createUpdate(getDao())
                 .set(RoleEntity.status, DataStatus.STATUS_ENABLED)
                 .where(RoleEntity.id, roleId)
-                .exec();
+                .execute();
     }
 
     @Override
@@ -76,6 +64,6 @@ public class SimpleRoleService extends GenericEntityService<RoleEntity, String> 
         DefaultDSLUpdateService.createUpdate(getDao())
                 .set(RoleEntity.status, DataStatus.STATUS_DISABLED)
                 .where(RoleEntity.id, roleId)
-                .exec();
+                .execute();
     }
 }

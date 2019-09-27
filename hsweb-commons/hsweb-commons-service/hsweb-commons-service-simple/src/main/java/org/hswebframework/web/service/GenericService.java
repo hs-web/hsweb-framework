@@ -18,6 +18,7 @@
 
 package org.hswebframework.web.service;
 
+import org.hswebframework.ezorm.rdb.mapping.SyncRepository;
 import org.hswebframework.web.dao.CrudDao;
 
 /**
@@ -35,5 +36,5 @@ public interface GenericService<E, PK> extends
         DefaultDSLDeleteService<E,PK>,
         CrudService<E, PK> {
     @Override
-    CrudDao<E, PK> getDao();
+    SyncRepository<E,PK> getDao();
 }

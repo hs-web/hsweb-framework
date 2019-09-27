@@ -24,7 +24,7 @@ public class DefaultLinkedRelations<C extends LinkedRelations> implements Linked
     public DefaultLinkedRelations(ServiceContext serviceContext, Supplier<List<String>> targetIdSupplier) {
         this.serviceContext = serviceContext;
         this.targetIdSupplier = targetIdSupplier;
-        query = Query.<PersonEntity, QueryParamEntity>empty(new QueryParamEntity()).nest();
+        query = Query.<PersonEntity, QueryParamEntity>of(new QueryParamEntity()).nest();
     }
 
     @Override

@@ -53,6 +53,7 @@ public abstract class GenericEntityService<E extends GenericEntity<PK>, PK>
         super();
     }
 
+
     /**
      * 获取ID生成器,在insert的时候，如果ID为空,则调用生成器进行生成
      *
@@ -89,7 +90,7 @@ public abstract class GenericEntityService<E extends GenericEntity<PK>, PK>
                     .set(deleteEntity::getDeleted)
                     .set(deleteEntity::getDeleteTime)
                     .where(GenericEntity.id, pk)
-                    .exec();
+                    .execute();
         } else {
             if (!physicalDeleteByPk(pk)) {
                 logger.warn("物理删除数据失败,主键:{}", pk);
@@ -98,10 +99,11 @@ public abstract class GenericEntityService<E extends GenericEntity<PK>, PK>
         return old;
     }
 
+    @SuppressWarnings("all")
     protected boolean physicalDeleteByPk(PK pk) {
         //createDelete().where(GenericEntity.id,pk).exec()>0;
 
-        return getDao().deleteByPk(pk) > 0;
+        return getDao().deleteById(pk) > 0;
     }
 
     protected boolean pushModifyEvent() {
@@ -130,7 +132,7 @@ public abstract class GenericEntityService<E extends GenericEntity<PK>, PK>
                 .when(entity instanceof RecordCreationEntity,
                         update -> update.and().excludes(((RecordCreationEntity) entity).getCreatorIdProperty(), RecordCreationEntity.createTime))
                 .where(GenericEntity.id, pk)
-                .exec();
+                .execute();
     }
 
     protected int updateByPk(E entity) {
@@ -194,7 +196,7 @@ public abstract class GenericEntityService<E extends GenericEntity<PK>, PK>
         if (StringUtils.isEmpty(pk)) {
             return null;
         }
-        return createQuery().where(GenericEntity.id, pk).single();
+        return getDao().findById(pk).orElse(null);
     }
 
     @Override
@@ -203,7 +205,7 @@ public abstract class GenericEntityService<E extends GenericEntity<PK>, PK>
         if (CollectionUtils.isEmpty(id)) {
             return new ArrayList<>();
         }
-        return createQuery().where().in(GenericEntity.id, id).listNoPaging();
+        return getDao().findById(id);
     }
 
 }

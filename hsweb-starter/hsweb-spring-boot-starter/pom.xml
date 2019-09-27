@@ -23,7 +23,7 @@
     <parent>
         <artifactId>hsweb-starter</artifactId>
         <groupId>org.hswebframework.web</groupId>
-        <version>3.0.10-SNAPSHOT</version>
+        <version>3.1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -63,6 +63,11 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.hibernate.javax.persistence</groupId>
+            <artifactId>hibernate-jpa-2.1-api</artifactId>
+            <version>1.0.2.Final</version>
+        </dependency>
+        <dependency>
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-commons-controller</artifactId>
             <version>${project.version}</version>
@@ -71,6 +76,15 @@
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-datasource-api</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hswebframework</groupId>
+            <artifactId>hsweb-expands-script</artifactId>
+            <version>${hsweb.expands.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-core</artifactId>
         </dependency>
     </dependencies>
 </project>

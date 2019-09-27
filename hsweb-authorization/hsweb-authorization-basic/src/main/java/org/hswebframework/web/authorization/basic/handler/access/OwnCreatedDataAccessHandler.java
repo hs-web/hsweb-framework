@@ -3,6 +3,7 @@ package org.hswebframework.web.authorization.basic.handler.access;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.beanutils.PropertyUtilsBean;
 import org.hswebframework.ezorm.core.param.Term;
+import org.hswebframework.ezorm.core.param.TermType;
 import org.hswebframework.utils.ClassUtils;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.access.DataAccessConfig;
@@ -86,7 +87,7 @@ public class OwnCreatedDataAccessHandler implements DataAccessHandler {
             Class entityType = ClassUtils.getGenericType(controller.getClass(), 0);
             if (ClassUtils.instanceOf(entityType, RecordCreationEntity.class)) {
                 QueryService<RecordCreationEntity, Object> queryService =
-                        ((QueryController<RecordCreationEntity, Object, Entity>) controller).getService();
+                        ((QueryController<RecordCreationEntity, Object>) controller).getService();
                 RecordCreationEntity oldData = queryService.selectByPk(id);
                 if (oldData != null && !context.getAuthentication().getUser().getId().equals(oldData.getCreatorId())) {
                     return false;
@@ -119,7 +120,7 @@ public class OwnCreatedDataAccessHandler implements DataAccessHandler {
                 queryParamEntity.setTerms(new ArrayList<>());
                 //添加一个查询条件
                 queryParamEntity
-                        .where(RecordCreationEntity.creatorId, userId)
+                        .and(RecordCreationEntity.creatorId, TermType.eq, userId)
                         //客户端提交的参数 作为嵌套参数
                         .nest().setTerms(oldParam);
             } else if (entity instanceof RecordCreationEntity) {

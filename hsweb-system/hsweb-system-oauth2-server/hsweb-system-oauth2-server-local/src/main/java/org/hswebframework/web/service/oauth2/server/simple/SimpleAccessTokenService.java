@@ -19,14 +19,15 @@
 package org.hswebframework.web.service.oauth2.server.simple;
 
 
-import org.hswebframework.web.entity.oauth2.server.OAuth2AccessEntity;
+import org.hswebframework.ezorm.rdb.mapping.SyncRepository;
 import org.hswebframework.web.authorization.oauth2.server.OAuth2AccessToken;
 import org.hswebframework.web.authorization.oauth2.server.token.AccessTokenService;
+import org.hswebframework.web.bean.FastBeanCopier;
 import org.hswebframework.web.commons.entity.factory.EntityFactory;
-import org.hswebframework.web.dao.oauth2.server.OAuth2AccessDao;
+import org.hswebframework.web.entity.oauth2.server.OAuth2AccessEntity;
+import org.hswebframework.web.entity.oauth2.server.SimpleOAuth2AccessEntity;
 import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.service.DefaultDSLQueryService;
-import org.hswebframework.web.service.DefaultDSLUpdateService;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
@@ -41,11 +42,11 @@ public class SimpleAccessTokenService implements AccessTokenService {
 
     private TokenGenerator tokenGenerator = IDGenerator.MD5::generate;
 
-    private OAuth2AccessDao oAuth2AccessDao;
+    private SyncRepository<OAuth2AccessEntity, String> oAuth2AccessDao;
 
     private EntityFactory entityFactory;
 
-    public SimpleAccessTokenService(OAuth2AccessDao oAuth2AccessDao, EntityFactory entityFactory) {
+    public SimpleAccessTokenService(SyncRepository<OAuth2AccessEntity, String> oAuth2AccessDao, EntityFactory entityFactory) {
         this.oAuth2AccessDao = oAuth2AccessDao;
         this.entityFactory = entityFactory;
     }
@@ -60,13 +61,13 @@ public class SimpleAccessTokenService implements AccessTokenService {
     @Override
     @Cacheable(cacheNames = "oauth2-access-token", key = "'cgo'+#token.clientId+#token.grantType+#token.ownerId")
     public OAuth2AccessToken tryGetOldToken(OAuth2AccessToken token) {
-        OAuth2AccessToken old = DefaultDSLQueryService
+        return DefaultDSLQueryService
                 .createQuery(oAuth2AccessDao)
                 .where("clientId", token.getClientId())
                 .and("grantType", token.getGrantType())
                 .and("ownerId", token.getOwnerId())
-                .single();
-        return old;
+                .fetchOne()
+                .orElse(null);
     }
 
     @Override
@@ -84,7 +85,9 @@ public class SimpleAccessTokenService implements AccessTokenService {
     public OAuth2AccessToken getTokenByRefreshToken(String refreshToken) {
         Assert.notNull(refreshToken, "refreshToken can not be null!");
         return DefaultDSLQueryService.createQuery(oAuth2AccessDao)
-                .where("refreshToken", refreshToken).single();
+                .where("refreshToken", refreshToken)
+                .fetchOne()
+                .orElse(null);
     }
 
     @Override
@@ -93,7 +96,9 @@ public class SimpleAccessTokenService implements AccessTokenService {
     public OAuth2AccessToken getTokenByAccessToken(String accessToken) {
         Assert.notNull(accessToken, "accessToken can not be null!");
         return DefaultDSLQueryService.createQuery(oAuth2AccessDao)
-                .where("accessToken", accessToken).single();
+                .where("accessToken", accessToken)
+                .fetchOne()
+                .orElse(null);
     }
 
     @Override
@@ -109,15 +114,16 @@ public class SimpleAccessTokenService implements AccessTokenService {
                 .createQuery(oAuth2AccessDao)
                 .where("clientId", token.getClientId())
                 .and("grantType", token.getGrantType())
-                .and("ownerId", token.getOwnerId()).total();
+                .and("ownerId", token.getOwnerId())
+                .count();
         token.setUpdateTime(System.currentTimeMillis());
         if (total > 0) {
-            DefaultDSLUpdateService
-                    .createUpdate(oAuth2AccessDao, token)
+            oAuth2AccessDao.createUpdate()
+                    .set(FastBeanCopier.copy(token, SimpleOAuth2AccessEntity::new))
                     .where("clientId", token.getClientId())
                     .and("grantType", token.getGrantType())
                     .and("ownerId", token.getOwnerId())
-                    .exec();
+                    .execute();
         } else {
             token.setCreateTime(System.currentTimeMillis());
             oAuth2AccessDao.insert(((OAuth2AccessEntity) token));

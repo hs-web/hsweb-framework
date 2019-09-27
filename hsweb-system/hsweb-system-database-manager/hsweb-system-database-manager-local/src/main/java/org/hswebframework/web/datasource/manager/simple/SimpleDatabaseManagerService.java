@@ -1,33 +1,25 @@
 package org.hswebframework.web.datasource.manager.simple;
 
 import lombok.extern.slf4j.Slf4j;
-import org.hswebframework.ezorm.rdb.executor.SqlExecutor;
+import org.hswebframework.ezorm.rdb.executor.SyncSqlExecutor;
 import org.hswebframework.web.database.manager.DatabaseManagerService;
 import org.hswebframework.web.database.manager.SqlExecuteRequest;
 import org.hswebframework.web.database.manager.SqlExecuteResult;
-import org.hswebframework.web.database.manager.meta.ObjectMetadata;
-import org.hswebframework.web.database.manager.meta.table.parser.MetaDataParser;
-import org.hswebframework.web.database.manager.meta.table.parser.MetaDataParserRegister;
 import org.hswebframework.web.database.manager.sql.TransactionInfo;
-import org.hswebframework.web.datasource.DataSourceHolder;
-import org.hswebframework.web.datasource.DatabaseType;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.PostConstruct;
-import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
 
 /**
  * @author zhouhao
  */
 @Slf4j
-public class SimpleDatabaseManagerService implements DatabaseManagerService, MetaDataParserRegister {
+public class SimpleDatabaseManagerService implements DatabaseManagerService {
 
     private Map<String, TransactionExecutor> transactionExecutorMap = new ConcurrentHashMap<>();
 
@@ -35,11 +27,9 @@ public class SimpleDatabaseManagerService implements DatabaseManagerService, Met
 
     private ExecutorService executorService;
 
-    private SqlExecutor sqlExecutor;
+    private SyncSqlExecutor sqlExecutor;
 
     private TransactionTemplate transactionTemplate;
-
-    private Map<DatabaseType, Map<ObjectMetadata.ObjectType, MetaDataParser<? extends ObjectMetadata>>> parserRepo = new HashMap<>();
 
     @Override
     public List<TransactionInfo> allTransaction() {
@@ -64,7 +54,7 @@ public class SimpleDatabaseManagerService implements DatabaseManagerService, Met
     }
 
     @Autowired
-    public void setSqlExecutor(SqlExecutor sqlExecutor) {
+    public void setSqlExecutor(SyncSqlExecutor sqlExecutor) {
         this.sqlExecutor = sqlExecutor;
     }
 
@@ -131,25 +121,5 @@ public class SimpleDatabaseManagerService implements DatabaseManagerService, Met
         return new NonTransactionSqlExecutor(sqlExecutor).execute(request);
     }
 
-    @Override
-    public Map<ObjectMetadata.ObjectType, List<? extends ObjectMetadata>> getMetas() {
-        return parserRepo
-                .computeIfAbsent(DataSourceHolder.currentDatabaseType(), t -> new HashMap<>())
-                .entrySet()
-                .stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, entry -> {
-                    try {
-                        return entry.getValue().parseAll();
-                    } catch (SQLException e) {
-                        log.error("parse meta {} error", entry.getKey(), e);
-                        return new ArrayList<>();
-                    }
-                }));
-    }
 
-    @Override
-    public <M extends ObjectMetadata> void registerMetaDataParser(DatabaseType databaseType, ObjectMetadata.ObjectType objectType, MetaDataParser<M> parser) {
-        parserRepo.computeIfAbsent(databaseType, t -> new HashMap<>())
-                .put(objectType, parser);
-    }
 }

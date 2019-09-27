@@ -18,12 +18,10 @@
 
 package org.hswebframework.web.service.authorization.simple;
 
-import org.hswebframework.web.dao.authorization.MenuDao;
 import org.hswebframework.web.entity.authorization.MenuEntity;
 import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.service.AbstractTreeSortService;
 import org.hswebframework.web.service.authorization.MenuService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -39,21 +37,9 @@ public class SimpleMenuService
         extends AbstractTreeSortService<MenuEntity, String>
         implements MenuService {
 
-    private MenuDao menuDao;
-
     @Override
     protected IDGenerator<String> getIDGenerator() {
         return IDGenerator.MD5;
-    }
-
-    @Autowired
-    public void setMenuDao(MenuDao menuDao) {
-        this.menuDao = menuDao;
-    }
-
-    @Override
-    public MenuDao getDao() {
-        return menuDao;
     }
 
     @Override

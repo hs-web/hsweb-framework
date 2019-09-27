@@ -1,11 +1,10 @@
 package org.hswebframework.web.service.authorization.simple.terms;
 
 import org.hswebframework.ezorm.core.param.Term;
-import org.hswebframework.ezorm.rdb.meta.RDBColumnMetaData;
-import org.hswebframework.ezorm.rdb.render.SqlAppender;
-import org.hswebframework.ezorm.rdb.render.dialect.term.BoostTermTypeMapper;
-import org.hswebframework.web.dao.mybatis.mapper.AbstractSqlTermCustomizer;
-import org.hswebframework.web.dao.mybatis.mapper.ChangedTermValue;
+import org.hswebframework.ezorm.rdb.metadata.RDBColumnMetadata;
+import org.hswebframework.ezorm.rdb.operator.builder.fragments.PrepareSqlFragments;
+import org.hswebframework.ezorm.rdb.operator.builder.fragments.SqlFragments;
+import org.hswebframework.web.service.terms.AbstractSqlTermCustomizer;
 
 import java.util.List;
 
@@ -23,19 +22,23 @@ public class UserInRoleSqlTerm extends AbstractSqlTermCustomizer {
     }
 
     @Override
-    public SqlAppender accept(String wherePrefix, Term term, RDBColumnMetaData column, String tableAlias) {
-        ChangedTermValue termValue = createChangedTermValue(term);
-        SqlAppender appender = new SqlAppender();
-        appender.add(not ? "not " : "", "exists(select 1 from s_user_role tmp where tmp.user_id =",
-                createColumnName(column, tableAlias));
+    public SqlFragments createFragments(String columnFullName, RDBColumnMetadata column, Term term) {
+        PrepareSqlFragments fragments = PrepareSqlFragments.of();
 
-        List<Object> positionIdList = BoostTermTypeMapper.convertList(column, termValue.getOld());
+        fragments.addSql(not ? "not " : "", "exists(select 1 from s_user_role tmp where tmp.user_id =", columnFullName);
+
+        List<Object> positionIdList = convertList(term.getValue());
         if (!positionIdList.isEmpty()) {
-            appender.add(" and tmp.role_id");
-            termValue.setValue(appendCondition(positionIdList, wherePrefix, appender));
+            fragments.addSql(" and tmp.role_id");
+            appendCondition(fragments, column, positionIdList);
         }
-        appender.add(")");
+        fragments.addSql(")");
 
-        return appender;
+        return fragments;
+    }
+
+    @Override
+    public String getName() {
+        return "按角色查询用户";
     }
 }

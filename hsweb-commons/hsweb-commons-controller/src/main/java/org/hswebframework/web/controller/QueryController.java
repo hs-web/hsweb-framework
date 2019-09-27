@@ -40,12 +40,11 @@ import static org.hswebframework.web.controller.message.ResponseMessage.ok;
  *
  * @param <E>  实体类型
  * @param <PK> 主键类型
- * @param <Q>  查询条件实体类型,默认提供{@link QueryParamEntity}实现
  * @author zhouhao
  * @see QueryParamEntity
  * @see 3.0
  */
-public interface QueryController<E, PK, Q extends Entity> {
+public interface QueryController<E, PK> {
 
     /**
      * 获取实现了{@link QueryByEntityService}和{@link QueryService}的服务类
@@ -69,24 +68,22 @@ public interface QueryController<E, PK, Q extends Entity> {
     @Authorize(action = Permission.ACTION_QUERY)
     @GetMapping
     @ApiOperation(value = "根据动态条件查询", responseReference = "get")
-    default ResponseMessage<PagerResult<E>> list(Q param) {
+    default ResponseMessage<PagerResult<E>> list(QueryParamEntity param) {
         return ok(getService().selectPager(param));
     }
 
     @Authorize(action = Permission.ACTION_QUERY)
     @GetMapping("/no-paging")
     @ApiOperation(value = "不分页动态查询", responseReference = "get")
-    default ResponseMessage<List<E>> listNoPaging(Q param) {
-        if (param instanceof QueryParamEntity) {
-            ((QueryParamEntity) param).setPaging(false);
-        }
+    default ResponseMessage<List<E>> listNoPaging(QueryParamEntity param) {
+
         return ok(getService().select(param));
     }
 
     @Authorize(action = Permission.ACTION_QUERY)
     @GetMapping("/count")
     @ApiOperation(value = "根据动态条件统计", responseReference = "get")
-    default ResponseMessage<Integer> count(Q param) {
+    default ResponseMessage<Integer> count(QueryParamEntity param) {
         return ok(getService().count(param));
     }
 

@@ -39,6 +39,7 @@ import java.util.stream.Collectors;
 public abstract class AbstractTreeSortService<E extends TreeSortSupportEntity<PK>, PK>
         extends GenericEntityService<E, PK> implements TreeService<E, PK> {
 
+
     @Override
     @Transactional(readOnly = true)
     public List<E> selectParentNode(PK childId) {
@@ -51,7 +52,7 @@ public abstract class AbstractTreeSortService<E extends TreeSortSupportEntity<PK
                 .where()
                 // where ? like concat(path,'%')
                 .and("path$like$reverse$startWith", old.getPath())
-                .listNoPaging();
+                .fetch();
     }
 
     @Override
@@ -65,7 +66,7 @@ public abstract class AbstractTreeSortService<E extends TreeSortSupportEntity<PK
         return createQuery()
                 .where()
                 .like$(TreeSupportEntity.path, old.getPath())
-                .listNoPaging();
+                .fetch();
     }
 
     @Override
@@ -74,7 +75,7 @@ public abstract class AbstractTreeSortService<E extends TreeSortSupportEntity<PK
         assertNotNull(parentId);
         return createQuery()
                 .where(TreeSupportEntity.parentId, parentId)
-                .listNoPaging();
+                .fetch();
     }
 
     //当父节点不存在时,创建parentId
@@ -172,12 +173,12 @@ public abstract class AbstractTreeSortService<E extends TreeSortSupportEntity<PK
         E old = selectByPk(id);
         assertNotNull(old);
         if (StringUtils.isEmpty(old.getPath())) {
-            getDao().deleteByPk(id);
+            getDao().deleteById(id);
         } else {
-            DefaultDSLDeleteService.createDelete(getDao())
+          createDelete()
                     // where path like 'path%'
                     .where().like$(TreeSupportEntity.path, old.getPath())
-                    .exec();
+                    .execute();
         }
         return old;
     }

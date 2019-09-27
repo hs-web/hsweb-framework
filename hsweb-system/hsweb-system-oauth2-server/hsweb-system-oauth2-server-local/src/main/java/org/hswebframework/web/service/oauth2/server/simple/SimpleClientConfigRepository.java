@@ -18,40 +18,46 @@
 
 package org.hswebframework.web.service.oauth2.server.simple;
 
+import org.hswebframework.ezorm.rdb.mapping.SyncRepository;
 import org.hswebframework.web.authorization.oauth2.server.client.OAuth2Client;
 import org.hswebframework.web.authorization.oauth2.server.client.OAuth2ClientConfigRepository;
+import org.hswebframework.web.entity.oauth2.server.OAuth2ClientEntity;
 import org.hswebframework.web.entity.oauth2.server.SimpleOAuth2ClientEntity;
 import org.hswebframework.web.commons.entity.DataStatus;
-import org.hswebframework.web.commons.entity.param.QueryParamEntity;
-import org.hswebframework.web.dao.oauth2.server.OAuth2ClientDao;
 import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.service.DefaultDSLQueryService;
-import org.hswebframework.web.service.DefaultDSLUpdateService;
 import org.springframework.cache.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author zhouhao
  */
 @CacheConfig(cacheNames = "oauth2-client-config")
 public class SimpleClientConfigRepository implements OAuth2ClientConfigRepository {
-    private OAuth2ClientDao oAuth2ClientDao;
+    private SyncRepository<OAuth2ClientEntity, String> oAuth2ClientDao;
 
-    public SimpleClientConfigRepository(OAuth2ClientDao oAuth2ClientDao) {
+    public SimpleClientConfigRepository(SyncRepository<OAuth2ClientEntity, String> oAuth2ClientDao) {
         this.oAuth2ClientDao = oAuth2ClientDao;
     }
 
     @Override
     @Cacheable(key = "'id:'+#id")
     public OAuth2Client getClientById(String id) {
-        return DefaultDSLQueryService.createQuery(oAuth2ClientDao).where("id", id).single();
+        return DefaultDSLQueryService
+                .createQuery(oAuth2ClientDao)
+                .where("id", id)
+                .fetchOne()
+                .orElse(null);
     }
 
     @Override
     @Cacheable(key = "'ownerId:'+#ownerId")
     public OAuth2Client getClientByOwnerId(String ownerId) {
-        return DefaultDSLQueryService.createQuery(oAuth2ClientDao).where("ownerId", ownerId).single();
+        return DefaultDSLQueryService
+                .createQuery(oAuth2ClientDao).where("ownerId", ownerId)
+                .fetchOne().orElse(null);
     }
 
     @Override
@@ -62,10 +68,12 @@ public class SimpleClientConfigRepository implements OAuth2ClientConfigRepositor
     public OAuth2Client save(OAuth2Client oAuth2Client) {
         OAuth2Client old = getClientById(oAuth2Client.getId());
         if (old != null) {
-            DefaultDSLUpdateService
-                    .createUpdate(oAuth2ClientDao, oAuth2Client)
+            oAuth2ClientDao.createUpdate()
+                    .set((OAuth2ClientEntity) oAuth2Client)
                     .excludes("id", "createTime")
-                    .where("id", oAuth2Client.getId()).exec();
+                    .where("id", oAuth2Client.getId())
+                    .execute();
+
         } else {
             oAuth2ClientDao.insert(((SimpleOAuth2ClientEntity) oAuth2Client));
         }
@@ -79,7 +87,7 @@ public class SimpleClientConfigRepository implements OAuth2ClientConfigRepositor
     })
     public OAuth2Client remove(String id) {
         OAuth2Client old = getClientById(id);
-        oAuth2ClientDao.deleteByPk(id);
+        oAuth2ClientDao.deleteById(id);
         return old;
     }
 
@@ -97,8 +105,11 @@ public class SimpleClientConfigRepository implements OAuth2ClientConfigRepositor
     @Override
     @SuppressWarnings("unchecked")
     public List<OAuth2Client> getAll() {
-        QueryParamEntity entity = new QueryParamEntity();
-        entity.setPaging(false);
-        return (List) oAuth2ClientDao.query(entity);
+        return oAuth2ClientDao
+                .createQuery()
+                .fetch()
+                .stream()
+                .map(OAuth2Client.class::cast)
+                .collect(Collectors.toList());
     }
 }

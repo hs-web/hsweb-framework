@@ -2,7 +2,7 @@ package org.hswebframework.web.service.form.events;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.hswebframework.ezorm.rdb.RDBDatabase;
+import org.hswebframework.ezorm.rdb.operator.DatabaseOperator;
 
 /**
  * @author zhouhao
@@ -12,6 +12,6 @@ import org.hswebframework.ezorm.rdb.RDBDatabase;
 public class DatabaseInitEvent {
 
     @Getter
-    private RDBDatabase database;
+    private DatabaseOperator database;
 
 }

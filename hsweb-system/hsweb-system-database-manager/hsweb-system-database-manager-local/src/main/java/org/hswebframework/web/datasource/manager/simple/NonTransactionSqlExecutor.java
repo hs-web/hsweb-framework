@@ -1,5 +1,6 @@
 package org.hswebframework.web.datasource.manager.simple;
 
+import org.hswebframework.ezorm.rdb.executor.SqlRequests;
 import org.hswebframework.web.database.manager.SqlExecuteRequest;
 import org.hswebframework.web.database.manager.SqlExecuteResult;
 import org.hswebframework.web.database.manager.SqlInfo;
@@ -11,10 +12,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class NonTransactionSqlExecutor implements SqlExecutor {
-    private org.hswebframework.ezorm.rdb.executor.SqlExecutor executor;
+    private org.hswebframework.ezorm.rdb.executor.SyncSqlExecutor executor;
 
 
-    public NonTransactionSqlExecutor(org.hswebframework.ezorm.rdb.executor.SqlExecutor executor) {
+    public NonTransactionSqlExecutor(org.hswebframework.ezorm.rdb.executor.SyncSqlExecutor executor) {
         this.executor = executor;
     }
 
@@ -26,27 +27,21 @@ public class NonTransactionSqlExecutor implements SqlExecutor {
     public SqlExecuteResult doExecute(SqlInfo sqlInfo) {
         SqlExecuteResult result = new SqlExecuteResult();
         Object executeResult = null;
-        try {
-            switch (sqlInfo.getType().toUpperCase()) {
-                case "SELECT":
-                    QueryResultWrapper wrapper = new QueryResultWrapper();
-                    executor.list(sqlInfo.getSql(), wrapper);
-                    executeResult = wrapper.getResult();
-                    break;
-                case "INSERT":
-                case "UPDATE":
-                    executeResult = executor.update(sqlInfo.getSql());
-                    break;
-                case "DELETE":
-                    executeResult = executor.delete(sqlInfo.getSql());
-                    break;
-                default:
-                    executor.exec(sqlInfo.getSql());
-            }
-            result.setSuccess(true);
-        } catch (SQLException e) {
-            throw new SqlExecuteException(e.getMessage(), e, sqlInfo.getSql());
+        switch (sqlInfo.getType().toUpperCase()) {
+            case "SELECT":
+                QueryResultWrapper wrapper = new QueryResultWrapper();
+                executor.select(SqlRequests.of(sqlInfo.getSql()), wrapper);
+                executeResult = wrapper.getResult();
+                break;
+            case "INSERT":
+            case "DELETE":
+            case "UPDATE":
+                executeResult = executor.update(SqlRequests.of(sqlInfo.getSql()));
+            default:
+                executor.execute(SqlRequests.of(sqlInfo.getSql()));
         }
+        result.setSuccess(true);
+
         result.setResult(executeResult);
         result.setSqlInfo(sqlInfo);
 

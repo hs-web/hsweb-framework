@@ -25,10 +25,10 @@ public class DefaultDepartmentRelations extends DefaultLinkedRelations<Departmen
     private boolean includeParent;
 
     private NestConditional<Query<DepartmentEntity, QueryParamEntity>> departmentQuery =
-            Query.<DepartmentEntity, QueryParamEntity>empty(new QueryParamEntity()).noPaging().nest();
+            Query.<DepartmentEntity, QueryParamEntity>of(new QueryParamEntity()).noPaging().nest();
 
     private NestConditional<Query<PositionEntity, QueryParamEntity>> positionQuery =
-            Query.<PositionEntity, QueryParamEntity>empty(new QueryParamEntity()).noPaging().nest();
+            Query.<PositionEntity, QueryParamEntity>of(new QueryParamEntity()).noPaging().nest();
 
 
     public DefaultDepartmentRelations(ServiceContext serviceContext, Supplier<List<String>> targetIdSupplier) {

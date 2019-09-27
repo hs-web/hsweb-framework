@@ -11,8 +11,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ComponentScan({"org.hswebframework.web.database.manager.web"
         , "org.hswebframework.web.datasource.manager.simple"})
-@ImportAutoConfiguration(TableMetaDataParserAutoConfiguration.class)
-@AutoConfigureBefore(TableMetaDataParserAutoConfiguration.class)
 public class DataBaseManagerAutoConfiguration {
 
     @Bean

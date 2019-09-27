@@ -18,6 +18,7 @@ package org.hswebframework.web.service.authorization.simple;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hswebframework.ezorm.rdb.mapping.SyncRepository;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.AuthenticationInitializeService;
 import org.hswebframework.web.authorization.Permission;
@@ -29,12 +30,7 @@ import org.hswebframework.web.authorization.simple.SimpleRole;
 import org.hswebframework.web.authorization.simple.SimpleUser;
 import org.hswebframework.web.bean.FastBeanCopier;
 import org.hswebframework.web.commons.entity.DataStatus;
-import org.hswebframework.web.commons.entity.QueryEntity;
 import org.hswebframework.web.commons.entity.TreeSupportEntity;
-import org.hswebframework.web.commons.entity.factory.EntityFactory;
-import org.hswebframework.web.commons.entity.param.QueryParamEntity;
-import org.hswebframework.web.dao.authorization.AuthorizationSettingDao;
-import org.hswebframework.web.dao.authorization.AuthorizationSettingDetailDao;
 import org.hswebframework.web.entity.authorization.*;
 import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.service.DefaultDSLDeleteService;
@@ -61,14 +57,13 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.Optional.*;
+import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.hswebframework.web.commons.entity.DataStatus.STATUS_ENABLED;
 import static org.hswebframework.web.entity.authorization.AuthorizationSettingDetailEntity.*;
 import static org.hswebframework.web.entity.authorization.AuthorizationSettingEntity.settingFor;
 import static org.hswebframework.web.entity.authorization.AuthorizationSettingEntity.type;
-import static org.hswebframework.web.service.DefaultDSLDeleteService.*;
 import static org.hswebframework.web.service.authorization.simple.CacheConstants.USER_AUTH_CACHE_NAME;
 import static org.hswebframework.web.service.authorization.simple.CacheConstants.USER_MENU_CACHE_NAME;
 
@@ -81,9 +76,8 @@ import static org.hswebframework.web.service.authorization.simple.CacheConstants
 public class SimpleAuthorizationSettingService extends GenericEntityService<AuthorizationSettingEntity, String>
         implements AuthorizationSettingService, AuthenticationInitializeService, UserMenuManagerService {
 
-    private AuthorizationSettingDao authorizationSettingDao;
-
-    private AuthorizationSettingDetailDao authorizationSettingDetailDao;
+    @Autowired
+    private SyncRepository<AuthorizationSettingDetailEntity, String> authorizationSettingDetailDao;
 
     private AuthorizationSettingMenuService authorizationSettingMenuService;
 
@@ -102,10 +96,6 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
         return IDGenerator.MD5;
     }
 
-    @Override
-    public AuthorizationSettingDao getDao() {
-        return authorizationSettingDao;
-    }
 
     @Override
     public AuthorizationSettingEntity select(String type, String settingFor) {
@@ -113,7 +103,8 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
         tryValidateProperty(settingFor != null, AuthorizationSettingEntity.settingFor, "{can not be null}");
         return createQuery().where(AuthorizationSettingEntity.type, type)
                 .and(AuthorizationSettingEntity.settingFor, settingFor)
-                .single();
+                .fetchOne()
+                .orElse(null);
     }
 
     @Override
@@ -168,7 +159,7 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
             DefaultDSLDeleteService
                     .createDelete(authorizationSettingDetailDao)
                     .where(settingId, id)
-                    .exec();
+                    .execute();
             for (AuthorizationSettingDetailEntity detail : entity.getDetails()) {
                 detail.setId(getIDGenerator().generate());
                 detail.setSettingId(id);
@@ -186,7 +177,8 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
         Objects.requireNonNull(id, "id can not be null");
         authorizationSettingMenuService.deleteBySettingId(id);
         DefaultDSLDeleteService.createDelete(authorizationSettingDetailDao)
-                .where(AuthorizationSettingDetailEntity.settingId, id).exec();
+                .where(AuthorizationSettingDetailEntity.settingId, id)
+                .execute();
         return super.deleteByPk(id);
     }
 
@@ -197,7 +189,7 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
         DefaultDSLDeleteService.createDelete(authorizationSettingDetailDao)
                 .where(AuthorizationSettingDetailEntity.settingId, settingId)
                 .and(AuthorizationSettingDetailEntity.permissionId, permissionId)
-                .exec();
+                .execute();
     }
 
     @Override
@@ -219,14 +211,14 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
                         DefaultDSLDeleteService.createDelete(authorizationSettingDetailDao)
                                 .where(detail::getSettingId)
                                 .and(detail::getPermissionId)
-                                .exec();
+                                .execute();
                         continue;
                     }
                     int i = DefaultDSLUpdateService
                             .createUpdate(authorizationSettingDetailDao, detail)
                             .where(detail::getSettingId)
                             .and(detail::getPermissionId)
-                            .exec();
+                            .execute();
                     if (i == 0) {
                         detail.setStatus(STATUS_ENABLED);
                         detail.setId(IDGenerator.MD5.generate());
@@ -256,7 +248,7 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
         List<AuthorizationSettingDetailEntity> detailEntities = DefaultDSLQueryService
                 .createQuery(authorizationSettingDetailDao)
                 .where(AuthorizationSettingDetailEntity::getPermissionId, permissionId)
-                .listNoPaging();
+                .fetch();
 
         if (CollectionUtils.isEmpty(detailEntities)) {
             return new ArrayList<>();
@@ -301,7 +293,7 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
                                 .where(type, entry.getKey())
                                 .and()
                                 .in(settingFor, entry.getValue().stream().map(SettingInfo::getSettingFor).collect(Collectors.toList()))
-                                .listNoPaging())
+                                .fetch())
                 .flatMap(List::stream)
                 .collect(Collectors.toList());
     }
@@ -438,7 +430,7 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
                 .createQuery(authorizationSettingDetailDao)
                 .where(status, STATE_OK)
                 .and().in(settingId, settingIdList)
-                .listNoPaging();
+                .fetch();
 
         authentication.setPermissions(initPermission(detailList));
         eventPublisher.publishEvent(new AuthorizationInitializeEvent(authentication));
@@ -455,7 +447,7 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
                 .createQuery(authorizationSettingDetailDao)
                 .where(status, STATE_OK)
                 .and().is(settingId, entity.getId())
-                .listNoPaging();
+                .fetch();
         if (CollectionUtils.isEmpty(detailList)) {
             return new ArrayList<>();
         }
@@ -646,16 +638,6 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
     @Autowired
     public void setUserService(UserService userService) {
         this.userService = userService;
-    }
-
-    @Autowired
-    public void setAuthorizationSettingDao(AuthorizationSettingDao authorizationSettingDao) {
-        this.authorizationSettingDao = authorizationSettingDao;
-    }
-
-    @Autowired
-    public void setAuthorizationSettingDetailDao(AuthorizationSettingDetailDao authorizationSettingDetailDao) {
-        this.authorizationSettingDetailDao = authorizationSettingDetailDao;
     }
 
     @Autowired

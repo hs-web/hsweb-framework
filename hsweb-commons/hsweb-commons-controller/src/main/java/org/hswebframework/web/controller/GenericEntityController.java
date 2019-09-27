@@ -32,7 +32,7 @@ import org.hswebframework.web.service.CrudService;
  * @see CrudService
  */
 public interface GenericEntityController<E extends GenericEntity<PK>, PK, Q extends Entity, M>
-        extends CrudController<E, PK, Q, M> {
+        extends CrudController<E, PK, M> {
 
     @Override
     @Authorize(ignore = true)

@@ -1,11 +1,9 @@
 package org.hswebframework.web.service.organizational.simple.terms;
 
 import org.hswebframework.ezorm.core.param.Term;
-import org.hswebframework.ezorm.rdb.meta.RDBColumnMetaData;
-import org.hswebframework.ezorm.rdb.render.SqlAppender;
-import org.hswebframework.ezorm.rdb.render.dialect.Dialect;
-import org.hswebframework.ezorm.rdb.render.dialect.term.BoostTermTypeMapper;
-import org.hswebframework.web.dao.mybatis.mapper.ChangedTermValue;
+import org.hswebframework.ezorm.rdb.metadata.RDBColumnMetadata;
+import org.hswebframework.ezorm.rdb.operator.builder.fragments.PrepareSqlFragments;
+import org.hswebframework.ezorm.rdb.operator.builder.fragments.SqlFragments;
 import org.hswebframework.web.service.organizational.PositionService;
 
 import java.util.List;
@@ -19,12 +17,10 @@ import java.util.List;
  */
 public class UserInPositionSqlTerm extends UserInSqlTerm {
 
-    private boolean not;
 
-    public UserInPositionSqlTerm(boolean not, boolean child, String term, PositionService positionService) {
+    public UserInPositionSqlTerm(String term, PositionService positionService) {
         super(term, positionService);
-        setChild(child);
-        this.not = not;
+
     }
 
     @Override
@@ -33,35 +29,38 @@ public class UserInPositionSqlTerm extends UserInSqlTerm {
     }
 
     @Override
-    public SqlAppender accept(String wherePrefix, Term term, RDBColumnMetaData column, String tableAlias) {
-        ChangedTermValue termValue = createChangedTermValue(term);
-        Dialect dialect=column.getTableMetaData().getDatabaseMetaData().getDialect();
+    public SqlFragments createFragments(String columnFullName, RDBColumnMetadata column, Term term) {
+        PrepareSqlFragments fragments = PrepareSqlFragments.of();
 
-        SqlAppender appender = new SqlAppender();
-        appender.addSpc(not ? "not" : "", "exists(select 1 from ",getTableFullName("s_person_position")," _tmp");
-        if (isChild()||isParent()) {
-            appender.addSpc(",",getTableFullName("s_position")," _pos");
+        boolean not = term.getOptions().contains("not");
+        boolean child = term.getOptions().contains("child");
+        boolean parent = term.getOptions().contains("parent");
+
+
+        fragments.addSql(not ? "not" : "", "exists(select 1 from ", getTableFullName("s_person_position"), " _tmp");
+        if (child || parent) {
+            fragments.addSql(",", getTableFullName("s_position"), " _pos");
         }
         if (!isForPerson()) {
-            appender.addSpc(",",getTableFullName("s_person")," _person");
+            fragments.addSql(",", getTableFullName("s_person"), " _person");
         }
-
-        appender.addSpc("where ",
-                createColumnName(column, tableAlias), "=",
+        fragments.addSql("where ",
+                columnFullName, "=",
                 isForPerson() ? " _tmp.person_id" : "_person.user_id and _person.u_id=_tmp.person_id");
-
-        if (isChild()||isParent()) {
-            appender.addSpc("and _pos.u_id=_tmp.position_id");
+        if (child || parent) {
+            fragments.addSql("and _pos.u_id=_tmp.position_id");
         }
-
-        List<Object> positionIdList = BoostTermTypeMapper.convertList(column, termValue.getOld());
+        List<Object> positionIdList = convertList(term.getValue());
         if (!positionIdList.isEmpty()) {
-            appender.addSpc("and");
-            termValue.setValue(appendCondition(positionIdList, wherePrefix, appender, "_tmp.position_id",dialect));
+            fragments.addSql("and");
+            appendCondition("_tmp.position_id", fragments, column,term, positionIdList);
         }
+        fragments.addSql(")");
+        return fragments;
+    }
 
-        appender.add(")");
-
-        return appender;
+    @Override
+    public String getName() {
+        return "根据" + (isForPerson() ? "人员" : "用户") + "按岗位查询";
     }
 }

@@ -1,26 +1,25 @@
 /*
  *  Copyright 2019 http://www.hswebframework.org
- *  
+ *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
  *        http://www.apache.org/licenses/LICENSE-2.0
- *  
+ *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *  
+ *
  */
 package org.hswebframework.web.service.organizational.simple;
 
+import org.hswebframework.ezorm.rdb.mapping.SyncQuery;
+import org.hswebframework.ezorm.rdb.mapping.SyncRepository;
 import org.hswebframework.web.commons.entity.DataStatus;
 import org.hswebframework.web.commons.entity.TreeSupportEntity;
-import org.hswebframework.web.commons.entity.param.QueryParamEntity;
-import org.hswebframework.web.dao.dynamic.QueryByEntityDao;
-import org.hswebframework.web.dao.organizational.*;
 import org.hswebframework.web.entity.authorization.UserEntity;
 import org.hswebframework.web.entity.organizational.*;
 import org.hswebframework.web.id.IDGenerator;
@@ -50,9 +49,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static org.hswebframework.web.commons.entity.TreeSupportEntity.*;
-import static org.hswebframework.web.commons.entity.param.QueryParamEntity.*;
-import static org.hswebframework.web.service.DefaultDSLQueryService.*;
+import static org.hswebframework.web.commons.entity.TreeSupportEntity.id;
+import static org.hswebframework.web.commons.entity.TreeSupportEntity.list2tree;
 import static org.springframework.util.StringUtils.isEmpty;
 
 /**
@@ -67,37 +65,29 @@ public class SimplePersonService extends EnableCacheAllEvictGenericEntityService
 
 
     @Autowired
-    private PersonDao personDao;
+    private SyncRepository<PersonPositionEntity, String> personPositionDao;
 
     @Autowired
-    private PersonPositionDao personPositionDao;
+    private SyncRepository<PositionEntity, String> positionDao;
 
     @Autowired
-    private PositionDao positionDao;
+    private SyncRepository<DepartmentEntity, String> departmentDao;
 
     @Autowired
-    private DepartmentDao departmentDao;
+    private SyncRepository<OrganizationalEntity, String> organizationalDao;
 
     @Autowired
-    private OrganizationalDao organizationalDao;
-
-    @Autowired
-    private DistrictDao districtDao;
+    private SyncRepository<DistrictEntity, String> districtDao;
 
     @Autowired(required = false)
     private UserService userService;
 
     @Autowired
-    private RelationInfoDao relationInfoDao;
+    private SyncRepository<RelationInfoEntity, String> relationInfoDao;
 
     @Override
     protected IDGenerator<String> getIDGenerator() {
         return IDGenerator.MD5;
-    }
-
-    @Override
-    public PersonDao getDao() {
-        return personDao;
     }
 
     @Override
@@ -118,7 +108,8 @@ public class SimplePersonService extends EnableCacheAllEvictGenericEntityService
     @CacheEvict(allEntries = true)
     public int updateByPk(PersonAuthBindEntity authBindEntity) {
         if (authBindEntity.getPositionIds() != null) {
-            personPositionDao.deleteByPersonId(authBindEntity.getId());
+            personPositionDao.createDelete()
+                    .where(PersonPositionEntity::getPersonId, authBindEntity.getId());
             syncPositionInfo(authBindEntity.getId(), authBindEntity.getPositionIds());
         }
         if (authBindEntity.getPersonUser() != null) {
@@ -139,7 +130,7 @@ public class SimplePersonService extends EnableCacheAllEvictGenericEntityService
         if (StringUtils.isEmpty(name)) {
             return new ArrayList<>();
         }
-        return createQuery().where(PersonEntity.name, name).listNoPaging();
+        return createQuery().where(PersonEntity.name, name).fetch();
     }
 
     @Override
@@ -157,7 +148,8 @@ public class SimplePersonService extends EnableCacheAllEvictGenericEntityService
         PersonAuthBindEntity bindEntity = entityFactory.newInstance(PersonAuthBindEntity.class, personEntity);
         Set<String> positionIds = DefaultDSLQueryService.createQuery(personPositionDao)
                 .where(PersonPositionEntity.personId, id)
-                .listNoPaging().stream()
+                .fetch()
+                .stream()
                 .map(PersonPositionEntity::getPositionId)
                 .collect(Collectors.toSet());
 
@@ -180,7 +172,9 @@ public class SimplePersonService extends EnableCacheAllEvictGenericEntityService
         if (StringUtils.isEmpty(positionId)) {
             return new ArrayList<>();
         }
-        return personDao.selectByPositionId(positionId);
+        return createQuery()
+                .where().and(PersonEntity.id, "person-in-position", positionId)
+                .fetch();
     }
 
     @Override
@@ -190,8 +184,8 @@ public class SimplePersonService extends EnableCacheAllEvictGenericEntityService
             return new ArrayList<>();
         }
         return createQuery()
-                .where(PersonEntity.id, "person-in-position", positionId)
-                .listNoPaging();
+                .where().and(PersonEntity.id, "person-in-position", positionId)
+                .fetch();
     }
 
     @Override
@@ -201,8 +195,8 @@ public class SimplePersonService extends EnableCacheAllEvictGenericEntityService
             return new ArrayList<>();
         }
         return createQuery()
-                .where(PersonEntity.id, "person-in-department", departmentId)
-                .listNoPaging();
+                .where().and(PersonEntity.id, "person-in-department", departmentId)
+                .fetch();
     }
 
     @Override
@@ -212,8 +206,8 @@ public class SimplePersonService extends EnableCacheAllEvictGenericEntityService
             return new ArrayList<>();
         }
         return createQuery()
-                .where(PersonEntity.id, "person-in-org", orgId)
-                .listNoPaging();
+                .where().and(PersonEntity.id, "person-in-org", orgId)
+                .fetch();
     }
 
     @Override
@@ -222,7 +216,10 @@ public class SimplePersonService extends EnableCacheAllEvictGenericEntityService
         if (StringUtils.isEmpty(userId)) {
             return null;
         }
-        return createQuery().where(PersonEntity.userId, userId).single();
+        return createQuery()
+                .where(PersonEntity.userId, userId)
+                .fetchOne()
+                .orElse(null);
     }
 
     @Override
@@ -234,7 +231,7 @@ public class SimplePersonService extends EnableCacheAllEvictGenericEntityService
         //所有的机构
         List<String> positionId = DefaultDSLQueryService.createQuery(personPositionDao)
                 .where().in(PersonPositionEntity.personId, personId)
-                .listNoPaging()
+                .fetch()
                 .stream()
                 .map(PersonPositionEntity::getPositionId)
                 .filter(Objects::nonNull)
@@ -247,7 +244,7 @@ public class SimplePersonService extends EnableCacheAllEvictGenericEntityService
         return DefaultDSLQueryService.createQuery(positionDao)
                 .where()
                 .in(PositionEntity.id, positionId)
-                .listNoPaging()
+                .fetch()
                 .stream()
                 .map(PositionEntity::getDepartmentId)
                 .filter(Objects::nonNull)
@@ -265,7 +262,7 @@ public class SimplePersonService extends EnableCacheAllEvictGenericEntityService
         return DefaultDSLQueryService.createQuery(departmentDao)
                 .where()
                 .in(DepartmentEntity.id, departmentId)
-                .listNoPaging()
+                .fetch()
                 .stream()
                 .map(DepartmentEntity::getOrgId)
                 .filter(Objects::nonNull)
@@ -279,7 +276,11 @@ public class SimplePersonService extends EnableCacheAllEvictGenericEntityService
         if (StringUtils.isEmpty(roleId)) {
             return new ArrayList<>();
         }
-        return personDao.selectByRoleId(roleId);
+        return getDao()
+                .createQuery()
+                .where()
+                .and(PersonEntity::getUserId, "user-in-role", roleId)
+                .fetch();
     }
 
     protected void syncPositionInfo(String personId, Set<String> positionIds) {
@@ -309,7 +310,7 @@ public class SimplePersonService extends EnableCacheAllEvictGenericEntityService
             int userBindSize = createQuery().where()
                     .is(PersonEntity.userId, oldUser.getId())
                     .not(PersonEntity.id, bindEntity.getId())
-                    .total();
+                    .count();
             tryValidateProperty(userBindSize == 0, "personUser.username", "用户已绑定其他人员");
         }
         // 初始化用户后的操作方式
@@ -333,7 +334,9 @@ public class SimplePersonService extends EnableCacheAllEvictGenericEntityService
     @Override
     @CacheEvict(allEntries = true)
     public PersonEntity deleteByPk(String id) {
-        personPositionDao.deleteByPersonId(id);
+        personPositionDao.createDelete()
+                .where(PersonPositionEntity::getPersonId, id)
+                .execute();
         return super.deleteByPk(id);
     }
 
@@ -353,7 +356,7 @@ public class SimplePersonService extends EnableCacheAllEvictGenericEntityService
         // 获取用户的职位ID集合(多个职位)
         Set<String> positionIds = DefaultDSLQueryService.createQuery(personPositionDao)
                 .where(PersonPositionEntity.personId, personId)
-                .listNoPaging().stream()
+                .fetch().stream()
                 .map(PersonPositionEntity::getPositionId)
                 .collect(Collectors.toSet());
 
@@ -363,21 +366,21 @@ public class SimplePersonService extends EnableCacheAllEvictGenericEntityService
         Map<String, DistrictEntity> districtCache = new HashMap<>();
 
         //获取所有职位,并得到根职位(树结构)
-        List<PositionEntity> positionEntities = getAllChildrenAndReturnRootNode(positionDao, positionIds, PositionEntity::setChildren, rootPosList -> {
+        List<PositionEntity> positionEntities = getAllChildrenAndReturnRootNode(positionDao.createQuery(), positionIds, PositionEntity::setChildren, rootPosList -> {
             //根据职位获取部门
             Set<String> departmentIds = rootPosList.stream()
                     .peek(positionEntity -> positionCache.put(positionEntity.getId(), positionEntity))
                     .map(PositionEntity::getDepartmentId)
                     .collect(Collectors.toSet());
             if (!CollectionUtils.isEmpty(departmentIds)) {
-                List<DepartmentEntity> departmentEntities = getAllChildrenAndReturnRootNode(departmentDao, departmentIds, DepartmentEntity::setChildren, rootDepList -> {
+                List<DepartmentEntity> departmentEntities = getAllChildrenAndReturnRootNode(departmentDao.createQuery(), departmentIds, DepartmentEntity::setChildren, rootDepList -> {
                     //根据部门获取机构
                     Set<String> orgIds = rootDepList.stream()
                             .peek(departmentEntity -> departmentCache.put(departmentEntity.getId(), departmentEntity))
                             .map(DepartmentEntity::getOrgId)
                             .collect(Collectors.toSet());
                     if (!CollectionUtils.isEmpty(orgIds)) {
-                        List<OrganizationalEntity> orgEntities = getAllChildrenAndReturnRootNode(organizationalDao, orgIds, OrganizationalEntity::setChildren, rootOrgList -> {
+                        List<OrganizationalEntity> orgEntities = getAllChildrenAndReturnRootNode(organizationalDao.createQuery(), orgIds, OrganizationalEntity::setChildren, rootOrgList -> {
                             //根据机构获取行政区域
                             Set<String> districtIds = rootOrgList.stream()
                                     .peek(org -> orgCache.put(org.getId(), org))
@@ -386,7 +389,7 @@ public class SimplePersonService extends EnableCacheAllEvictGenericEntityService
                                     .collect(Collectors.toSet());
                             if (!CollectionUtils.isEmpty(districtIds)) {
                                 List<DistrictEntity> districtEntities =
-                                        getAllChildrenAndReturnRootNode(districtDao, districtIds, DistrictEntity::setChildren,
+                                        getAllChildrenAndReturnRootNode(districtDao.createQuery(), districtIds, DistrictEntity::setChildren,
                                                 rootDistrictList -> rootDistrictList.forEach(dist -> districtCache.put(dist.getId(), dist)));
 
                                 authorization.setDistrictIds(transformationTreeNode(null, districtEntities));
@@ -448,7 +451,7 @@ public class SimplePersonService extends EnableCacheAllEvictGenericEntityService
         List<RelationInfoEntity> relationInfoList = DefaultDSLQueryService.createQuery(relationInfoDao)
                 .where(RelationInfoEntity.relationFrom, personId)
                 .or(RelationInfoEntity.relationTo, personId)
-                .listNoPaging();
+                .fetch();
         List<Relation> relations = relationInfoList.stream()
                 .map(info -> {
                     SimpleRelation relation = new SimpleRelation();
@@ -469,14 +472,13 @@ public class SimplePersonService extends EnableCacheAllEvictGenericEntityService
     /**
      * 获取一个树形结构的数据,并返回根节点集合
      *
-     * @param dao           查询dao接口
      * @param rootIds       根节点ID集合
      * @param childAccepter 子节点接收方法
      * @param rootConsumer  根节点消费回调
      * @param <T>           节点类型
      * @return 根节点集合
      */
-    protected <T extends TreeSupportEntity<String>> List<T> getAllChildrenAndReturnRootNode(QueryByEntityDao<T> dao,
+    protected <T extends TreeSupportEntity<String>> List<T> getAllChildrenAndReturnRootNode(SyncQuery<T> query,
                                                                                             Set<String> rootIds,
                                                                                             BiConsumer<T, List<T>> childAccepter,
                                                                                             Consumer<List<T>> rootConsumer) {
@@ -484,18 +486,17 @@ public class SimplePersonService extends EnableCacheAllEvictGenericEntityService
             return new java.util.ArrayList<>();
         }
         //获取根节点
-        List<T> rootNodeList =  newQuery()
+        List<T> rootNodeList = query
                 .where()
                 .in(id, rootIds)
-                .execute(dao::query);
+                .fetch();
 
         if (!rootNodeList.isEmpty()) {
             //所有子节点,使用节点的path属性进行快速查询,查询结果包含了根节点
-            List<T> allNode = newQuery()
+            List<T> allNode = query
                     //遍历生成查询条件: like path like ?||'%' or path like ?||'%'  ....
-                    .each(rootNodeList, (query, rootNode) -> query.or().like$(rootNode::getPath))
-                    .noPaging()
-                    .execute(dao::query);
+                    .each(rootNodeList, (q, rootNode) -> q.or().like$(rootNode::getPath))
+                    .fetch();
 
             //转为树形结构
             List<T> tree = list2tree(allNode, childAccepter, (Predicate<T>) node -> rootIds.contains(node.getId()));  // 根节点判定
@@ -528,11 +529,12 @@ public class SimplePersonService extends EnableCacheAllEvictGenericEntityService
     @Override
     @Cacheable(key = "'auth:user-id:'+#userId")
     public PersonnelAuthentication getPersonnelAuthorizationByUserId(String userId) {
-        PersonEntity entity = createQuery().where(PersonEntity.userId, userId).single();
-        if (entity == null) {
-            return null;
-        }
-        return getPersonnelAuthorizationByPersonId(entity.getId());
+        return createQuery()
+                .where(PersonEntity.userId, userId)
+                .fetchOne()
+                .map(PersonEntity::getId)
+                .map(this::getPersonnelAuthorizationByPersonId)
+                .orElse(null);
     }
 
 

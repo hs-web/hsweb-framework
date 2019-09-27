@@ -19,6 +19,8 @@
 package org.hswebframework.web.service;
 
 import org.hswebframework.ezorm.core.dsl.Query;
+import org.hswebframework.ezorm.rdb.mapping.SyncQuery;
+import org.hswebframework.ezorm.rdb.mapping.SyncRepository;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.dao.dynamic.QueryByEntityDao;
 
@@ -29,33 +31,29 @@ public interface DefaultDSLQueryService<E, PK>
 
     @Override
     default List<E> select() {
-        return createQuery().noPaging().list();
+        return createQuery().fetch();
     }
 
     @Override
     default int count() {
-        return createQuery().total();
+        return createQuery().count();
     }
 
     /**
      * 创建本服务的dsl查询操作对象
      * 可通过返回的Query对象进行dsl方式操作如:<br>
      * <code>
-     * createQuery().where("id",1).single();
+     * createQuery().where("id",1).fetch();
      * </code>
      *
      * @return {@link Query}
      * @see Query
      * @see org.hswebframework.ezorm.core.Conditional
-     * @since 3.0
+     * @since 3.1
      */
-    default Query<E, QueryParamEntity> createQuery() {
-        Query<E, QueryParamEntity> query = Query.empty(new QueryParamEntity());
-        query.setListExecutor(this::select);
-        query.setTotalExecutor(this::count);
-        query.setSingleExecutor(this::selectSingle);
-        query.noPaging();
-        return query;
+    default SyncQuery<E> createQuery() {
+
+        return getDao().createQuery();
     }
 
     /**
@@ -65,27 +63,14 @@ public interface DefaultDSLQueryService<E, PK>
      * createQuery(userMapper).where("id",1).single();
      * </code>
      *
-     * @param dao  dao接口
-     * @param <PO> PO泛型
+     * @param dao dao接口
      * @return {@link Query}
      * @see Query
      * @see org.hswebframework.ezorm.core.Conditional
-     * @since 3.0
+     * @since 3.1
      */
-    static <PO> Query<PO, QueryParamEntity> createQuery(QueryByEntityDao<PO> dao) {
-        Query<PO, QueryParamEntity> query = new Query<>(new QueryParamEntity());
-        query.setListExecutor(dao::query);
-        query.setTotalExecutor(dao::count);
-        query.setSingleExecutor((param) -> {
-            param.doPaging(0, 1);
-            List<PO> list = dao.query(param);
-            if (null == list || list.isEmpty()) {
-                return null;
-            } else {
-                return list.get(0);
-            }
-        });
-        query.noPaging();
-        return query;
+    static <E> SyncQuery<E> createQuery(SyncRepository<E, ?> dao) {
+
+        return dao.createQuery();
     }
 }

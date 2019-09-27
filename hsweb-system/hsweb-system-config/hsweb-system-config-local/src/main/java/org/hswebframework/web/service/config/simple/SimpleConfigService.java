@@ -18,14 +18,11 @@
 
 package org.hswebframework.web.service.config.simple;
 
-import org.hswebframework.web.dao.config.ConfigDao;
 import org.hswebframework.web.entity.config.ConfigContent;
 import org.hswebframework.web.entity.config.ConfigEntity;
 import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.service.EnableCacheAllEvictGenericEntityService;
-import org.hswebframework.web.service.GenericEntityService;
 import org.hswebframework.web.service.config.ConfigService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -40,17 +37,9 @@ import java.util.Optional;
 public class SimpleConfigService extends EnableCacheAllEvictGenericEntityService<ConfigEntity, String>
         implements ConfigService {
 
-    @Autowired
-    private ConfigDao configDao;
-
     @Override
     protected IDGenerator<String> getIDGenerator() {
         return IDGenerator.MD5;
-    }
-
-    @Override
-    public ConfigDao getDao() {
-        return configDao;
     }
 
     protected Optional<ConfigContent> getConfigContent(String configId, String key) {

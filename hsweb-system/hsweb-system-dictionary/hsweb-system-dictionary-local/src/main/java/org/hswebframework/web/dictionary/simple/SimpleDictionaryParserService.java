@@ -21,7 +21,6 @@ import org.hswebframework.web.dictionary.api.DictionaryParserService;
 import org.hswebframework.web.dictionary.api.builder.DictionaryParserBuilder;
 import org.hswebframework.web.dictionary.api.entity.DictionaryEntity;
 import org.hswebframework.web.dictionary.api.entity.DictionaryParserEntity;
-import org.hswebframework.web.dictionary.simple.dao.DictionaryParserDao;
 import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.service.GenericEntityService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,8 +34,6 @@ import org.springframework.stereotype.Service;
 @Service("dictionaryParserService")
 public class SimpleDictionaryParserService extends GenericEntityService<DictionaryParserEntity, String>
         implements DictionaryParserService {
-    @Autowired
-    private DictionaryParserDao dictionaryParserDao;
 
     @Autowired
     private DictionaryParserBuilder dictionaryParserBuilder;
@@ -44,11 +41,6 @@ public class SimpleDictionaryParserService extends GenericEntityService<Dictiona
     @Override
     protected IDGenerator<String> getIDGenerator() {
         return IDGenerator.MD5;
-    }
-
-    @Override
-    public DictionaryParserDao getDao() {
-        return dictionaryParserDao;
     }
 
     @Override

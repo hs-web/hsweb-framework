@@ -1,16 +1,15 @@
 package org.hswebframework.web.service.form;
 
-import org.hswebframework.ezorm.core.OptionConverter;
-import org.hswebframework.ezorm.core.ValueConverter;
+import org.hswebframework.ezorm.core.DictionaryCodec;
+import org.hswebframework.ezorm.core.ValueCodec;
 import org.hswebframework.web.entity.form.DictConfig;
-import org.hswebframework.web.entity.form.DynamicFormColumnEntity;
 
 /**
  *
  * @author zhouhao
  */
 public interface OptionalConvertBuilder {
-    OptionConverter build(DictConfig dictConfig);
+    DictionaryCodec build(DictConfig dictConfig);
 
-    ValueConverter buildValueConverter(DictConfig dictConfig);
+    ValueCodec buildValueConverter(DictConfig dictConfig);
 }

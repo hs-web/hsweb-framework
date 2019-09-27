@@ -2,7 +2,6 @@ package org.hswebframework.web.service.form.events;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.hswebframework.ezorm.rdb.RDBTable;
 
 /**
  * @author zhouhao
@@ -12,8 +11,6 @@ import org.hswebframework.ezorm.rdb.RDBTable;
 @Getter
 public class FormDataUpdateBeforeEvent<T> {
     private String formId;
-
-    private RDBTable<T> table;
 
     private T data;
 

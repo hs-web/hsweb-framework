@@ -52,7 +52,6 @@ public class QueryParamEntity extends QueryParam implements QueryEntity {
      * @param field 参数名称
      * @param value 参数值
      * @return 单个条件的参数实体
-     * @see QueryParam#where(String, Object)
      */
     public static QueryParamEntity single(String field, Object value) {
         return of(field, value);
@@ -62,21 +61,21 @@ public class QueryParamEntity extends QueryParam implements QueryEntity {
      * @see this#single(String, Object)
      */
     public static QueryParamEntity of(String field, Object value) {
-        return empty().where(field, value);
+        return of(field, value);
     }
 
     /**
      * @since 3.0.4
      */
     public static <T> Query<T, QueryParamEntity> newQuery() {
-        return Query.empty(new QueryParamEntity());
+        return Query.of(new QueryParamEntity());
     }
 
     /**
      * @since 3.0.4
      */
     public <T> Query<T, QueryParamEntity> toQuery() {
-        return Query.empty(this);
+        return Query.of(this);
     }
 
     /**

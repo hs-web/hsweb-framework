@@ -1,41 +1,38 @@
 package org.hswebframework.web.datasource.manager.simple;
 
-import org.hswebframework.ezorm.core.ObjectWrapper;
+import org.hswebframework.ezorm.rdb.executor.wrapper.ColumnWrapperContext;
+import org.hswebframework.ezorm.rdb.executor.wrapper.ResultWrapper;
+import org.hswebframework.ezorm.rdb.executor.wrapper.ResultWrapperContext;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class QueryResultWrapper implements ObjectWrapper<QueryResult> {
+public class QueryResultWrapper implements ResultWrapper<QueryResult,QueryResult> {
    private QueryResult result = new QueryResult();
 
     private List<Object> temp = new ArrayList<>();
 
     @Override
-    public void setUp(List<String> columns) {
-        result.setColumns(columns);
+    public void beforeWrap(ResultWrapperContext context) {
+        result.setColumns(context.getColumns());
     }
 
-    @Override
-    public Class<QueryResult> getType() {
-        return QueryResult.class;
-    }
 
     @Override
-    public QueryResult newInstance() {
+    public QueryResult newRowInstance() {
         return result;
     }
 
     @Override
-    public void wrapper(QueryResult instance, int index, String attr, Object value) {
-        temp.add(value);
-
+    public void wrapColumn(ColumnWrapperContext<QueryResult> context) {
+        temp.add(context.getResult());
     }
 
     @Override
-    public boolean done(QueryResult instance) {
-        instance.getData().add(new ArrayList<>(temp));
+    public boolean completedWrapRow(QueryResult result) {
+        result.getData().add(new ArrayList<>(temp));
         temp.clear();
-        return false;
+        return true;
     }
 
     public QueryResult getResult() {

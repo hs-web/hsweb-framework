@@ -34,8 +34,8 @@ import org.hswebframework.web.service.CrudService;
  * @see CrudService
  * @since 3.0
  */
-public interface CrudController<E, PK, Q extends Entity, M>
-        extends QueryController<E, PK, Q>
+public interface CrudController<E, PK, M>
+        extends QueryController<E, PK>
         , UpdateController<E, PK, M>
         , CreateController<E, PK, M>
         , DeleteController<E,PK> {

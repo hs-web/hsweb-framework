@@ -1,14 +1,10 @@
 package org.hswebframework.web.workflow.service.imp;
 
 import org.hswebframework.web.commons.entity.DataStatus;
-import org.hswebframework.web.dao.CrudDao;
 import org.hswebframework.web.id.IDGenerator;
-import org.hswebframework.web.service.EnableCacheGenericEntityService;
 import org.hswebframework.web.service.GenericEntityService;
-import org.hswebframework.web.workflow.dao.ActivityConfigDao;
 import org.hswebframework.web.workflow.dao.entity.ActivityConfigEntity;
 import org.hswebframework.web.workflow.service.ActivityConfigService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -26,18 +22,12 @@ import java.util.Date;
 public class ActivityConfigServiceImpl extends GenericEntityService<ActivityConfigEntity, String>
         implements ActivityConfigService {
 
-    @Autowired
-    private ActivityConfigDao activityConfigDao;
 
     @Override
     protected IDGenerator<String> getIDGenerator() {
         return IDGenerator.MD5;
     }
 
-    @Override
-    public CrudDao<ActivityConfigEntity, String> getDao() {
-        return activityConfigDao;
-    }
 
     @Override
     @Caching(evict = {
@@ -94,7 +84,8 @@ public class ActivityConfigServiceImpl extends GenericEntityService<ActivityConf
         return createQuery()
                 .where("processDefineId", processDefineId)
                 .and("activityId", activityId)
-                .single();
+                .fetchOne()
+                .orElse(null);
     }
 
     @Override
@@ -103,6 +94,7 @@ public class ActivityConfigServiceImpl extends GenericEntityService<ActivityConf
         return createQuery()
                 .where("processDefineKey", processDefineKey)
                 .and("activityId", activityId)
-                .single();
+                .fetchOne()
+                .orElse(null);
     }
 }

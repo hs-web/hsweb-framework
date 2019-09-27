@@ -1,7 +1,6 @@
 package org.hswebframework.web.service.authorization.simple;
 
 import org.hswebframework.web.commons.entity.DataStatus;
-import org.hswebframework.web.dao.authorization.PermissionDao;
 import org.hswebframework.web.entity.authorization.PermissionEntity;
 import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.service.GenericEntityService;
@@ -10,8 +9,6 @@ import org.hswebframework.web.service.authorization.events.ClearUserAuthorizatio
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 /**
  * 权限管理
@@ -22,19 +19,11 @@ import java.util.Optional;
 public class SimplePermissionService extends GenericEntityService<PermissionEntity, String>
         implements PermissionService {
     @Autowired
-    private PermissionDao permissionDao;
-
-    @Autowired
     private ApplicationEventPublisher eventPublisher;
 
     @Override
     protected IDGenerator<String> getIDGenerator() {
         return IDGenerator.MD5;
-    }
-
-    @Override
-    public PermissionDao getDao() {
-        return permissionDao;
     }
 
     @Override

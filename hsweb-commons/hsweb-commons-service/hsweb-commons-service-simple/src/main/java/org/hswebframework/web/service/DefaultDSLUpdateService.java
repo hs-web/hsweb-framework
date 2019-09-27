@@ -18,7 +18,8 @@
 
 package org.hswebframework.web.service;
 
-import org.hswebframework.ezorm.core.dsl.Update;
+import org.hswebframework.ezorm.rdb.mapping.SyncRepository;
+import org.hswebframework.ezorm.rdb.mapping.SyncUpdate;
 import org.hswebframework.web.dao.dynamic.UpdateByEntityDao;
 import org.hswebframework.web.commons.entity.param.UpdateParamEntity;
 
@@ -29,21 +30,21 @@ import org.hswebframework.web.commons.entity.param.UpdateParamEntity;
  */
 public interface DefaultDSLUpdateService<E, PK> extends UpdateService<E, PK> {
 
-    UpdateByEntityDao getDao();
+    SyncRepository<E, PK> getDao();
 
-    default Update<E, UpdateParamEntity<E>> createUpdate(E data) {
-        return createUpdate(getDao(), data);
+    default SyncUpdate<E> createUpdate(E data) {
+        return getDao().createUpdate().set(data);
     }
 
-    default Update<E, UpdateParamEntity<E>> createUpdate() {
-        return createUpdate(getDao());
+    default SyncUpdate<E> createUpdate() {
+        return getDao().createUpdate();
     }
 
-    static <E> Update<E, UpdateParamEntity<E>> createUpdate(UpdateByEntityDao dao) {
-        return Update.build(dao::update, new UpdateParamEntity<>());
+    static <E> SyncUpdate<E> createUpdate(SyncRepository<E, ?> dao) {
+        return dao.createUpdate();
     }
 
-    static <E> Update<E, UpdateParamEntity<E>> createUpdate(UpdateByEntityDao dao, E data) {
-        return Update.build(dao::update, new UpdateParamEntity<>(data));
+    static <E> SyncUpdate<E> createUpdate(SyncRepository<E, ?> dao, E data) {
+        return dao.createUpdate().set(data);
     }
 }

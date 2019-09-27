@@ -1,11 +1,10 @@
 package org.hswebframework.web.datasource.manager.simple;
 
 import lombok.SneakyThrows;
-import org.hswebframework.ezorm.rdb.executor.SqlExecutor;
+import org.hswebframework.ezorm.rdb.executor.SyncSqlExecutor;
 import org.hswebframework.web.database.manager.SqlExecuteRequest;
 import org.hswebframework.web.database.manager.SqlExecuteResult;
 import org.hswebframework.web.database.manager.SqlInfo;
-import org.hswebframework.web.database.manager.exception.SqlExecuteException;
 import org.hswebframework.web.datasource.DataSourceHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,9 +13,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -32,7 +29,7 @@ public class DefaultLocalTransactionExecutor implements TransactionExecutor {
 
     private BlockingQueue<Execution> executionQueue = new LinkedBlockingQueue<>();
 
-    private SqlExecutor sqlExecutor;
+    private SyncSqlExecutor sqlExecutor;
 
     private SqlRequestExecutor sqlRequestExecutor;
 
@@ -52,7 +49,7 @@ public class DefaultLocalTransactionExecutor implements TransactionExecutor {
 
     private CountDownLatch waitClose = new CountDownLatch(1);
 
-    public DefaultLocalTransactionExecutor(SqlExecutor sqlExecutor, String transactionId, String datasourceId, TransactionTemplate transactionTemplate) {
+    public DefaultLocalTransactionExecutor(SyncSqlExecutor sqlExecutor, String transactionId, String datasourceId, TransactionTemplate transactionTemplate) {
         this.sqlExecutor = sqlExecutor;
         this.transactionId = transactionId;
         this.datasourceId = datasourceId;
@@ -103,7 +100,7 @@ public class DefaultLocalTransactionExecutor implements TransactionExecutor {
         commit = false;
     }
 
-    public void setSqlExecutor(SqlExecutor sqlExecutor) {
+    public void setSqlExecutor(SyncSqlExecutor sqlExecutor) {
         this.sqlExecutor = sqlExecutor;
     }
 
@@ -240,7 +237,7 @@ public class DefaultLocalTransactionExecutor implements TransactionExecutor {
     }
 
     private interface SqlRequestExecutor {
-        SqlExecuteResult apply(SqlExecutor executor, SqlInfo sqlInfo) throws SQLException;
+        SqlExecuteResult apply(SyncSqlExecutor executor, SqlInfo sqlInfo) throws SQLException;
     }
 
 }

@@ -3,7 +3,7 @@ package org.hswebframework.web.service.form.simple.dict;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.hswebframework.ezorm.core.OptionConverter;
+import org.hswebframework.ezorm.core.DictionaryCodec;
 import org.hswebframework.web.dict.EnumDict;
 
 import java.util.*;
@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Slf4j
-public class EnumDictOptionConverter<T extends EnumDict> implements OptionConverter {
+public class EnumDictOptionConverter<T extends EnumDict> implements DictionaryCodec {
 
     protected Supplier<List<T>> allOptionSupplier;
 
@@ -37,8 +37,8 @@ public class EnumDictOptionConverter<T extends EnumDict> implements OptionConver
     }
 
     @Override
-    public Object getOptions() {
-        return allOptionSupplier.get();
+    public Set<Object> getItems() {
+        return new HashSet<>(allOptionSupplier.get());
     }
 
     @Override
@@ -47,14 +47,14 @@ public class EnumDictOptionConverter<T extends EnumDict> implements OptionConver
     }
 
     @Override
-    public Object converterData(Object o) {
+    public Object encode(Object o) {
         //什么也不做,EnumDictValueConverter会进行处理
         return o;
     }
 
     @Override
     @SuppressWarnings("all")
-    public Object converterValue(Object o) {
+    public Object decode(Object o) {
         List<Object> values;
         if (o instanceof String) {
             values = splitter.apply((String) o);

@@ -19,6 +19,7 @@
 package org.hswebframework.web.service;
 
 import org.hswebframework.ezorm.core.dsl.Query;
+import org.hswebframework.ezorm.rdb.mapping.SyncRepository;
 import org.hswebframework.web.commons.entity.Entity;
 import org.hswebframework.web.commons.entity.PagerResult;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
@@ -30,46 +31,39 @@ import java.util.List;
 public interface DefaultQueryByEntityService<E>
         extends QueryByEntityService<E> {
 
-    QueryByEntityDao<E> getDao();
+    SyncRepository<E, ?> getDao();
 
     /**
      * 分页进行查询数据，查询条件同 {@link DefaultQueryByEntityService#select}
      *
-     * @param param 查询参数
+     * @param entity 查询参数
      * @return 分页查询结果
      * @see QueryParamEntity
      * @see QueryParamEntity#newQuery()
      */
     @Override
-    default PagerResult<E> selectPager(Entity param) {
+    default PagerResult<E> selectPager(QueryParamEntity entity) {
         PagerResult<E> pagerResult = new PagerResult<>();
 
-        if (param instanceof QueryParamEntity) {
-            QueryParamEntity entity = ((QueryParamEntity) param);
-            //不分页,不进行count
-            if (!entity.isPaging()) {
-                pagerResult.setData(getDao().query(param));
-                pagerResult.setTotal(pagerResult.getData().size());
-                pagerResult.setPageIndex(entity.getThinkPageIndex());
-                pagerResult.setPageSize(pagerResult.getData().size());
-                return pagerResult;
-            }
+        //不分页,不进行count
+        if (!entity.isPaging()) {
+            pagerResult.setData(getDao().createQuery().setParam(entity).fetch());
+            pagerResult.setTotal(pagerResult.getData().size());
+            pagerResult.setPageIndex(entity.getThinkPageIndex());
+            pagerResult.setPageSize(pagerResult.getData().size());
+            return pagerResult;
         }
-        int total = getDao().count(param);
+        int total = getDao().createQuery().setParam(entity).count();
         pagerResult.setTotal(total);
 
-        //根据实际记录数量重新指定分页参数
-        if (param instanceof QueryParamEntity) {
-            QueryParamEntity paramEntity = (QueryParamEntity) param;
-            paramEntity.rePaging(total);
-            pagerResult.setPageSize(paramEntity.getPageSize());
-            pagerResult.setPageIndex(paramEntity.getThinkPageIndex());
-        }
+        entity.rePaging(total);
+        pagerResult.setPageSize(entity.getPageSize());
+        pagerResult.setPageIndex(entity.getThinkPageIndex());
 
         if (total == 0) {
             pagerResult.setData(new java.util.ArrayList<>());
         } else {
-            pagerResult.setData(select(param));
+            pagerResult.setData(select(entity));
         }
         return pagerResult;
     }
@@ -84,11 +78,11 @@ public interface DefaultQueryByEntityService<E>
      */
     @Override
     @Transactional(readOnly = true)
-    default List<E> select(Entity param) {
+    default List<E> select(QueryParamEntity param) {
         if (param == null) {
             param = QueryParamEntity.empty();
         }
-        return getDao().query(param);
+        return getDao().createQuery().setParam(param).fetch();
     }
 
 
@@ -102,11 +96,11 @@ public interface DefaultQueryByEntityService<E>
      */
     @Override
     @Transactional(readOnly = true)
-    default int count(Entity param) {
+    default int count(QueryParamEntity param) {
         if (param == null) {
             param = QueryParamEntity.empty();
         }
-        return getDao().count(param);
+        return getDao().createQuery().setParam(param).count();
     }
 
     /**
@@ -119,16 +113,9 @@ public interface DefaultQueryByEntityService<E>
      */
     @Override
     @Transactional(readOnly = true)
-    default E selectSingle(Entity param) {
-        if (param instanceof QueryParamEntity) {
-            ((QueryParamEntity) param).doPaging(0, 1);
-        }
-        List<E> list = this.select(param);
-        if (list.isEmpty()) {
-            return null;
-        } else {
-            return list.get(0);
-        }
+    default E selectSingle(QueryParamEntity param) {
+
+        return getDao().createQuery().setParam(param).fetchOne().orElse(null);
     }
 
 }

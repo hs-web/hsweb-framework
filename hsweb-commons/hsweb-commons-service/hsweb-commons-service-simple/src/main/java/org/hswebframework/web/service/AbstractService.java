@@ -1,5 +1,6 @@
 package org.hswebframework.web.service;
 
+import org.hswebframework.ezorm.rdb.mapping.SyncRepository;
 import org.hswebframework.utils.ClassUtils;
 import org.hswebframework.web.NotFoundException;
 import org.hswebframework.web.commons.entity.Entity;
@@ -47,6 +48,14 @@ public abstract class AbstractService<E extends Entity, PK> implements CreateEnt
     public void setLogicPrimaryKeyValidator(LogicPrimaryKeyValidator logicPrimaryKeyValidator) {
         this.logicPrimaryKeyValidator = logicPrimaryKeyValidator;
     }
+
+    @Autowired
+    private SyncRepository<E,PK> repository;
+
+    public SyncRepository<E,PK> getDao() {
+        return repository;
+    }
+
 
     protected Class<E> entityType;
 

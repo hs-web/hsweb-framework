@@ -34,8 +34,8 @@ import org.springframework.beans.BeanUtils;
  * @see CrudService
  * @since 3.0
  */
-public interface SimpleCrudController<E, PK, Q extends Entity>
-        extends QueryController<E, PK, Q>
+public interface SimpleCrudController<E, PK>
+        extends QueryController<E, PK>
         , UpdateController<E, PK, E>
         , CreateController<E, PK, E>
         , DeleteController<E,PK> {

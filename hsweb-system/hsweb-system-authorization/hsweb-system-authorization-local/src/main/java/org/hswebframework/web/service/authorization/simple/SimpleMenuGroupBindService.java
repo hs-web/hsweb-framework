@@ -16,12 +16,10 @@
  */
 package org.hswebframework.web.service.authorization.simple;
 
-import org.hswebframework.web.dao.authorization.MenuGroupBindDao;
 import org.hswebframework.web.entity.authorization.MenuGroupBindEntity;
 import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.service.AbstractTreeSortService;
 import org.hswebframework.web.service.authorization.MenuGroupBindService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -32,22 +30,16 @@ import org.springframework.stereotype.Service;
 @Service("menuGroupBindService")
 public class SimpleMenuGroupBindService extends AbstractTreeSortService<MenuGroupBindEntity, String>
         implements MenuGroupBindService {
-    @Autowired
-    private MenuGroupBindDao menuGroupBindDao;
 
     @Override
     protected IDGenerator<String> getIDGenerator() {
         return IDGenerator.MD5;
     }
 
-    @Override
-    public MenuGroupBindDao getDao() {
-        return menuGroupBindDao;
-    }
 
     @Override
     public int deleteByGroupId(String groupId) {
         tryValidateProperty(groupId != null, MenuGroupBindEntity.groupId, "groups id can not be null");
-        return createDelete().where(MenuGroupBindEntity.groupId, groupId).exec();
+        return createDelete().where(MenuGroupBindEntity.groupId, groupId).execute();
     }
 }

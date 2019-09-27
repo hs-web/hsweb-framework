@@ -18,6 +18,7 @@
 
 package org.hswebframework.web.oauth2;
 
+import org.hswebframework.ezorm.rdb.mapping.SyncRepository;
 import org.hswebframework.web.authorization.AuthenticationManager;
 import org.hswebframework.web.authorization.oauth2.server.client.OAuth2ClientConfigRepository;
 import org.hswebframework.web.authorization.oauth2.server.support.AbstractAuthorizationService;
@@ -37,9 +38,9 @@ import org.hswebframework.web.authorization.oauth2.server.support.refresh.Refres
 import org.hswebframework.web.authorization.oauth2.server.token.AccessTokenService;
 import org.hswebframework.web.authorization.token.UserTokenManager;
 import org.hswebframework.web.commons.entity.factory.EntityFactory;
-import org.hswebframework.web.dao.oauth2.server.AuthorizationCodeDao;
-import org.hswebframework.web.dao.oauth2.server.OAuth2AccessDao;
-import org.hswebframework.web.dao.oauth2.server.OAuth2ClientDao;
+import org.hswebframework.web.entity.oauth2.server.AuthorizationCodeEntity;
+import org.hswebframework.web.entity.oauth2.server.OAuth2AccessEntity;
+import org.hswebframework.web.entity.oauth2.server.OAuth2ClientEntity;
 import org.hswebframework.web.service.oauth2.server.simple.*;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,7 +69,7 @@ public class OAuth2GranterAutoConfiguration {
 
     @ConditionalOnMissingBean(AuthorizationCodeService.class)
     @Bean
-    public SimpleAuthorizationCodeService simpleAuthorizationCodeService(AuthorizationCodeDao authorizationCodeDao,
+    public SimpleAuthorizationCodeService simpleAuthorizationCodeService(SyncRepository<AuthorizationCodeEntity,String> authorizationCodeDao,
                                                                          EntityFactory entityFactory) {
         return new SimpleAuthorizationCodeService(authorizationCodeDao, entityFactory)
                 .setCodeGenerator(codeGenerator);
@@ -76,7 +77,7 @@ public class OAuth2GranterAutoConfiguration {
 
     @ConditionalOnMissingBean(OAuth2ClientConfigRepository.class)
     @Bean
-    public SimpleClientConfigRepository simpleClientService(OAuth2ClientDao oAuth2ClientDao) {
+    public SimpleClientConfigRepository simpleClientService(SyncRepository<OAuth2ClientEntity,String> oAuth2ClientDao) {
         return new SimpleClientConfigRepository(oAuth2ClientDao);
     }
 
@@ -88,7 +89,7 @@ public class OAuth2GranterAutoConfiguration {
 
     @ConditionalOnMissingBean(AccessTokenService.class)
     @Bean
-    public SimpleAccessTokenService simpleAccessTokenService(OAuth2AccessDao oAuth2AccessDao, EntityFactory entityFactory) {
+    public SimpleAccessTokenService simpleAccessTokenService(SyncRepository<OAuth2AccessEntity,String> oAuth2AccessDao, EntityFactory entityFactory) {
         return new SimpleAccessTokenService(oAuth2AccessDao, entityFactory)
                 .setTokenGenerator(tokenGenerator);
     }

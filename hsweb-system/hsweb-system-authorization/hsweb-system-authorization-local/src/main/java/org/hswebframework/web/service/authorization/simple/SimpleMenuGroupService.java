@@ -18,7 +18,6 @@ package org.hswebframework.web.service.authorization.simple;
 
 import org.hswebframework.web.service.authorization.MenuGroupService;
 import org.hswebframework.web.commons.entity.TreeSupportEntity;
-import org.hswebframework.web.dao.authorization.MenuGroupDao;
 import org.hswebframework.web.entity.authorization.MenuEntity;
 import org.hswebframework.web.entity.authorization.MenuGroupBindEntity;
 import org.hswebframework.web.entity.authorization.MenuGroupEntity;
@@ -48,8 +47,6 @@ import java.util.stream.Collectors;
 public class SimpleMenuGroupService
         extends AbstractTreeSortService<MenuGroupEntity, String>
         implements MenuGroupService {
-    @Autowired
-    private MenuGroupDao menuGroupDao;
 
     @Autowired
     private MenuService menuService;
@@ -60,11 +57,6 @@ public class SimpleMenuGroupService
     @Override
     protected IDGenerator<String> getIDGenerator() {
         return IDGenerator.MD5;
-    }
-
-    @Override
-    public MenuGroupDao getDao() {
-        return menuGroupDao;
     }
 
     @Override
@@ -136,7 +128,7 @@ public class SimpleMenuGroupService
         createUpdate()
                 .set(MenuGroupEntity.status, 1)
                 .where(MenuGroupEntity.id, id)
-                .exec();
+                .execute();
     }
 
     @Override
@@ -147,6 +139,6 @@ public class SimpleMenuGroupService
                 .createUpdate(getDao())
                 .set(MenuGroupEntity.status, 0)
                 .where(MenuGroupEntity.id, id)
-                .exec();
+                .execute();
     }
 }

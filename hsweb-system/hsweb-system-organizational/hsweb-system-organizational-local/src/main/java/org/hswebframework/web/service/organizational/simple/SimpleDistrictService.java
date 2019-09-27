@@ -1,32 +1,26 @@
 package org.hswebframework.web.service.organizational.simple;
 
+import org.hswebframework.ezorm.rdb.mapping.SyncRepository;
+import org.hswebframework.ezorm.rdb.operator.dml.query.SortOrder;
 import org.hswebframework.web.BusinessException;
 import org.hswebframework.web.commons.entity.DataStatus;
-import org.hswebframework.web.commons.entity.Entity;
-import org.hswebframework.web.dao.organizational.DistrictDao;
-import org.hswebframework.web.dao.organizational.OrganizationalDao;
 import org.hswebframework.web.entity.organizational.DistrictEntity;
 import org.hswebframework.web.entity.organizational.OrganizationalEntity;
-import org.hswebframework.web.service.AbstractTreeSortService;
+import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.service.DefaultDSLQueryService;
 import org.hswebframework.web.service.EnableCacheAllEvictTreeSortService;
-import org.hswebframework.web.service.GenericEntityService;
-import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.service.organizational.DistrictService;
 import org.hswebframework.web.service.organizational.event.ClearPersonCacheEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-
-import static org.hswebframework.web.service.DefaultDSLQueryService.*;
 
 /**
  * 默认的服务实现
@@ -37,11 +31,9 @@ import static org.hswebframework.web.service.DefaultDSLQueryService.*;
 @CacheConfig(cacheNames = "district")
 public class SimpleDistrictService extends EnableCacheAllEvictTreeSortService<DistrictEntity, String>
         implements DistrictService {
-    @Autowired
-    private DistrictDao districtDao;
 
     @Autowired
-    private OrganizationalDao organizationalDao;
+    private SyncRepository<OrganizationalEntity, String> organizationalDao;
 
     @Autowired
     private ApplicationEventPublisher publisher;
@@ -51,10 +43,6 @@ public class SimpleDistrictService extends EnableCacheAllEvictTreeSortService<Di
         return IDGenerator.MD5;
     }
 
-    @Override
-    public DistrictDao getDao() {
-        return districtDao;
-    }
 
     @Override
     @CacheEvict(allEntries = true)
@@ -85,7 +73,7 @@ public class SimpleDistrictService extends EnableCacheAllEvictTreeSortService<Di
     @Override
     @CacheEvict(allEntries = true)
     public DistrictEntity deleteByPk(String id) {
-        if (DefaultDSLQueryService.createQuery(organizationalDao).where(OrganizationalEntity.districtId, id).total() > 0) {
+        if (DefaultDSLQueryService.createQuery(organizationalDao).where(OrganizationalEntity.districtId, id).count() > 0) {
             throw new BusinessException("行政区域下存在机构信息,无法删除!");
         }
         publisher.publishEvent(new ClearPersonCacheEvent());
@@ -95,7 +83,10 @@ public class SimpleDistrictService extends EnableCacheAllEvictTreeSortService<Di
     @Override
     @Cacheable(key = "'code:'+#code")
     public DistrictEntity selectByCode(String code) {
-        return createQuery().where(DistrictEntity.code, code).single();
+        return createQuery()
+                .where(DistrictEntity.code, code)
+                .fetchOne()
+                .orElse(null);
     }
 
     @Override
@@ -107,7 +98,10 @@ public class SimpleDistrictService extends EnableCacheAllEvictTreeSortService<Di
     @Override
     @Cacheable(key = "'all'")
     public List<DistrictEntity> select() {
-        return createQuery().where().orderByAsc(DistrictEntity.sortIndex).listNoPaging();
+        return createQuery()
+                .where()
+                .orderBy(SortOrder.asc(DistrictEntity.sortIndex))
+                .fetch();
     }
 
     @Override
@@ -123,7 +117,7 @@ public class SimpleDistrictService extends EnableCacheAllEvictTreeSortService<Di
         createUpdate()
                 .set(DistrictEntity.status, DataStatus.STATUS_DISABLED)
                 .where(DistrictEntity.id, id)
-                .exec();
+                .execute();
         publisher.publishEvent(new ClearPersonCacheEvent());
     }
 
@@ -134,7 +128,7 @@ public class SimpleDistrictService extends EnableCacheAllEvictTreeSortService<Di
         createUpdate()
                 .set(DistrictEntity.status, DataStatus.STATUS_ENABLED)
                 .where(DistrictEntity.id, id)
-                .exec();
+                .execute();
         publisher.publishEvent(new ClearPersonCacheEvent());
     }
 }

@@ -1,11 +1,9 @@
 package org.hswebframework.web.service.file.simple;
 
-import org.hswebframework.web.dao.file.FileInfoDao;
 import org.hswebframework.web.entity.file.FileInfoEntity;
 import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.service.GenericEntityService;
 import org.hswebframework.web.service.file.FileInfoService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -23,21 +21,9 @@ import java.util.List;
 @CacheConfig(cacheNames = "file-info")
 public class SimpleFileInfoService extends GenericEntityService<FileInfoEntity, String>
         implements FileInfoService {
-    private FileInfoDao fileInfoDao;
-
     @Override
     protected IDGenerator<String> getIDGenerator() {
         return IDGenerator.MD5;
-    }
-
-    @Override
-    public FileInfoDao getDao() {
-        return fileInfoDao;
-    }
-
-    @Autowired
-    public void setFileInfoDao(FileInfoDao fileInfoDao) {
-        this.fileInfoDao = fileInfoDao;
     }
 
     @Override
@@ -91,7 +77,10 @@ public class SimpleFileInfoService extends GenericEntityService<FileInfoEntity, 
         if (null == md5) {
             return null;
         }
-        return createQuery().where(FileInfoEntity.md5, md5).single();
+        return createQuery()
+                .where(FileInfoEntity.md5, md5)
+                .fetchOne()
+                .orElse(null);
     }
 
     @Override
@@ -100,6 +89,10 @@ public class SimpleFileInfoService extends GenericEntityService<FileInfoEntity, 
         if (null == idOrMd5) {
             return null;
         }
-        return createQuery().where(FileInfoEntity.md5, idOrMd5).or(FileInfoEntity.id, idOrMd5).single();
+        return createQuery()
+                .where(FileInfoEntity.md5, idOrMd5)
+                .or(FileInfoEntity.id, idOrMd5)
+                .fetchOne()
+                .orElse(null);
     }
 }

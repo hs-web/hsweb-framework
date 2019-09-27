@@ -24,7 +24,7 @@
 
     <groupId>org.hswebframework.web</groupId>
     <artifactId>hsweb-framework</artifactId>
-    <version>3.0.10-SNAPSHOT</version>
+    <version>3.1.0-SNAPSHOT</version>
     <modules>
         <module>hsweb-starter</module>
         <module>hsweb-core</module>
@@ -95,7 +95,7 @@
         <aspectj.version>1.6.12</aspectj.version>
         <hibernate.validator.version>5.1.1.Final</hibernate.validator.version>
 
-        <hsweb.ezorm.version>3.0.6</hsweb.ezorm.version>
+        <hsweb.ezorm.version>4.0.0-SNAPSHOT</hsweb.ezorm.version>
         <hsweb.utils.version>3.0.2</hsweb.utils.version>
         <hsweb.expands.version>3.0.2</hsweb.expands.version>
 
@@ -312,6 +312,11 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>io.projectreactor</groupId>
+                <artifactId>reactor-core</artifactId>
+                <version>3.2.12.RELEASE</version>
+            </dependency>
             <dependency>
                 <groupId>io.vavr</groupId>
                 <artifactId>vavr</artifactId>

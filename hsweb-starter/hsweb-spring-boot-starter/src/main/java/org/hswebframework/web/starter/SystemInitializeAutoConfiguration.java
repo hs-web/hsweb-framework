@@ -19,13 +19,10 @@
 package org.hswebframework.web.starter;
 
 import lombok.extern.slf4j.Slf4j;
-import org.hswebframework.ezorm.rdb.executor.SqlExecutor;
-import org.hswebframework.ezorm.rdb.meta.RDBDatabaseMetaData;
-import org.hswebframework.ezorm.rdb.meta.parser.*;
-import org.hswebframework.ezorm.rdb.render.dialect.*;
-import org.hswebframework.ezorm.rdb.simple.SimpleDatabase;
 import org.hswebframework.expands.script.engine.DynamicScriptEngine;
 import org.hswebframework.expands.script.engine.DynamicScriptEngineFactory;
+import org.hswebframework.ezorm.rdb.executor.SyncSqlExecutor;
+import org.hswebframework.ezorm.rdb.operator.DatabaseOperator;
 import org.hswebframework.web.ScriptScope;
 import org.hswebframework.web.datasource.DataSourceHolder;
 import org.hswebframework.web.datasource.DatabaseType;
@@ -72,7 +69,7 @@ public class SystemInitializeAutoConfiguration implements CommandLineRunner, Bea
     private DataSource dataSource;
 
     @Autowired
-    private SqlExecutor sqlExecutor;
+    private SyncSqlExecutor sqlExecutor;
 
     @Autowired
     private ApplicationContext applicationContext;
@@ -84,6 +81,9 @@ public class SystemInitializeAutoConfiguration implements CommandLineRunner, Bea
 
     @Autowired
     private Environment environment;
+
+    @Autowired
+    private DatabaseOperator databaseOperator;
 
     @PostConstruct
     public void init() {
@@ -130,46 +130,16 @@ public class SystemInitializeAutoConfiguration implements CommandLineRunner, Bea
                 connection.close();
             }
         }
-        RDBDatabaseMetaData metaData;
-        switch (type) {
-            case oracle:
-                metaData = new OracleRDBDatabaseMetaData();
-                metaData.setParser(new OracleTableMetaParser(sqlExecutor));
-                break;
-            case postgresql:
-                metaData = new PGRDBDatabaseMetaData();
-                metaData.setParser(new PGSqlTableMetaParser(sqlExecutor));
-                break;
-            case sqlserver:
-            case jtds_sqlserver:
-                metaData = new MSSQLRDBDatabaseMetaData();
-                metaData.setParser(new SqlServer2012TableMetaParser(sqlExecutor));
-                break;
-            case mysql:
-                String engine = environment.getProperty("mysql.engine");
-                if (StringUtils.hasText(engine)) {
-                    metaData = new MysqlRDBDatabaseMetaData(engine);
-                } else {
-                    metaData = new MysqlRDBDatabaseMetaData();
-                }
-                metaData.setParser(new MysqlTableMetaParser(sqlExecutor));
-                break;
-            default:
-                metaData = new H2RDBDatabaseMetaData();
-                metaData.setParser(new H2TableMetaParser(sqlExecutor));
-                break;
-        }
-        metaData.init();
 
-        SimpleDatabase database = new SimpleDatabase(metaData, sqlExecutor);
-        database.setAutoParse(true);
 
-        SystemInitializeEvent event = new SystemInitializeEvent(database);
+
+
+        SystemInitializeEvent event = new SystemInitializeEvent(databaseOperator);
         eventPublisher.publishEvent(event);
         if (event.isIgnore()) {
             return;
         }
-        SystemInitialize initialize = new SystemInitialize(sqlExecutor, database, version);
+        SystemInitialize initialize = new SystemInitialize(sqlExecutor, databaseOperator, version);
 
         initialize.addScriptContext("db", jdbcUserName);
         initialize.addScriptContext("dbType", type.name());

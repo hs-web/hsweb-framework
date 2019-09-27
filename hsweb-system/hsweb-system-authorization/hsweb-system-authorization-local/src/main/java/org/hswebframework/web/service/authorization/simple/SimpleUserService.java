@@ -1,12 +1,10 @@
 package org.hswebframework.web.service.authorization.simple;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.hswebframework.web.service.authorization.*;
+import org.hswebframework.ezorm.rdb.mapping.SyncRepository;
+import org.hswebframework.utils.ListUtils;
 import org.hswebframework.web.commons.entity.DataStatus;
 import org.hswebframework.web.commons.entity.GenericEntity;
-import org.hswebframework.web.dao.authorization.RoleDao;
-import org.hswebframework.web.dao.authorization.UserDao;
-import org.hswebframework.web.dao.authorization.UserRoleDao;
 import org.hswebframework.web.entity.authorization.RoleEntity;
 import org.hswebframework.web.entity.authorization.UserEntity;
 import org.hswebframework.web.entity.authorization.UserRoleEntity;
@@ -14,12 +12,11 @@ import org.hswebframework.web.entity.authorization.bind.BindRoleUserEntity;
 import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.service.AbstractService;
 import org.hswebframework.web.service.DefaultDSLQueryService;
+import org.hswebframework.web.service.authorization.*;
 import org.hswebframework.web.service.authorization.events.ClearUserAuthorizationCacheEvent;
 import org.hswebframework.web.service.authorization.events.UserCreatedEvent;
 import org.hswebframework.web.service.authorization.events.UserModifiedEvent;
-import org.hswebframework.web.service.authorization.simple.terms.UserInRoleSqlTerm;
 import org.hswebframework.web.validate.ValidationException;
-import org.hswebframework.utils.ListUtils;
 import org.hswebframework.web.validator.group.CreateGroup;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -34,7 +31,7 @@ import org.springframework.util.StringUtils;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.hswebframework.web.service.DefaultDSLUpdateService.*;
+import static org.hswebframework.web.service.DefaultDSLUpdateService.createUpdate;
 
 /**
  * 默认的用户服务实现
@@ -57,13 +54,13 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
     private PasswordEncoder passwordEncoder = (password, salt) -> DigestUtils.md5Hex(String.format("hsweb.%s.framework.%s", password, salt));
 
     @Autowired
-    private UserDao userDao;
+    private SyncRepository<UserEntity, String> userDao;
 
     @Autowired
-    private UserRoleDao userRoleDao;
+    private SyncRepository<UserRoleEntity, String> userRoleDao;
 
     @Autowired
-    private RoleDao roleDao;
+    private SyncRepository<RoleEntity, String> roleDao;
 
     @Autowired
     private ApplicationEventPublisher publisher;
@@ -88,7 +85,7 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
         if (!StringUtils.hasLength(username)) {
             return null;
         }
-        return createQuery().where("username", username).single();
+        return createQuery().where("username", username).fetchOne().orElse(null);
     }
 
     @Override
@@ -108,19 +105,22 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
         if (!StringUtils.hasLength(id)) {
             return null;
         }
-        UserEntity userEntity = createQuery().where(UserEntity.id, id).single();
-        if (null != userEntity) {
+        return createQuery()
+                .where(UserEntity.id, id)
+                .fetchOne()
+                .map(userEntity -> {
+                    List<String> roleId = userRoleDao
+                            .createQuery()
+                            .where(UserRoleEntity::getRoleId, id)
+                            .fetch()
+                            .stream()
+                            .map(UserRoleEntity::getRoleId) //转换为roleId
+                            .collect(Collectors.toList());
+                    BindRoleUserEntity roleUserEntity = entityFactory.newInstance(BindRoleUserEntity.class, userEntity);
+                    roleUserEntity.setRoles(roleId);
+                    return roleUserEntity;
+                }).orElse(null);
 
-            List<String> roleId = userRoleDao
-                    .selectByUserId(id)
-                    .stream()
-                    .map(UserRoleEntity::getRoleId) //转换为roleId
-                    .collect(Collectors.toList());
-            BindRoleUserEntity roleUserEntity = entityFactory.newInstance(BindRoleUserEntity.class, userEntity);
-            roleUserEntity.setRoles(roleId);
-            return roleUserEntity;
-        }
-        return null;
     }
 
     @Override
@@ -128,7 +128,7 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
         if (CollectionUtils.isEmpty(id)) {
             return new ArrayList<>();
         }
-        return createQuery().where().in(UserEntity.id, id).listNoPaging();
+        return createQuery().where().in(UserEntity.id, id).fetch();
     }
 
     @Override
@@ -162,7 +162,8 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
     }
 
     protected void trySyncUserRole(final String userId, final List<String> roleIdList) {
-        new HashSet<>(roleIdList).stream()
+        new HashSet<>(roleIdList)
+                .stream()
                 .map(roleId -> {
                     UserRoleEntity roleEntity = entityFactory.newInstance(UserRoleEntity.class);
                     roleEntity.setRoleId(roleId);
@@ -202,12 +203,12 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
         createUpdate(getDao(), userEntity)
                 .excludes(excludeProperties.toArray(new String[excludeProperties.size()]))
                 .where(GenericEntity.id, userEntity.getId())
-                .exec();
+                .execute();
         if (userEntity instanceof BindRoleUserEntity) {
             BindRoleUserEntity bindRoleUserEntity = ((BindRoleUserEntity) userEntity);
             if (bindRoleUserEntity.getRoles() != null) {
                 //删除旧的数据
-                userRoleDao.deleteByUserId(bindRoleUserEntity.getId());
+                userRoleDao.createDelete().where(UserRoleEntity::getRoleId, bindRoleUserEntity.getId()).execute();
                 //同步角色信息
                 trySyncUserRole(userEntity.getId(), bindRoleUserEntity.getRoles());
                 roleModified = true;
@@ -225,10 +226,10 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
         if (!StringUtils.hasLength(userId)) {
             return false;
         }
-        return createUpdate(getDao())
+        return getDao().createUpdate()
                 .set(UserEntity.status, DataStatus.STATUS_ENABLED)
                 .where(GenericEntity.id, userId)
-                .exec() > 0;
+                .execute() > 0;
     }
 
     @Override
@@ -239,7 +240,7 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
         return createUpdate(getDao())
                 .set(UserEntity.status, DataStatus.STATUS_DISABLED)
                 .where(GenericEntity.id, userId)
-                .exec() > 0;
+                .execute() > 0;
     }
 
     @Override
@@ -256,7 +257,7 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
         createUpdate(getDao())
                 .set(UserEntity.password, newPassword)
                 .where(GenericEntity.id, userId)
-                .exec();
+                .execute();
         publisher.publishEvent(new UserModifiedEvent(userEntity, true, false));
     }
 
@@ -264,22 +265,18 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
     @Override
     public List<RoleEntity> getUserRole(String userId) {
         Assert.hasLength(userId, "参数不能为空");
-        List<UserRoleEntity> roleEntities = userRoleDao.selectByUserId(userId);
+        List<UserRoleEntity> roleEntities = userRoleDao.createQuery().where(UserRoleEntity::getUserId, userId).fetch();
         if (roleEntities.isEmpty()) {
             return new ArrayList<>();
         }
         List<String> roleIdList = roleEntities.stream().map(UserRoleEntity::getRoleId).collect(Collectors.toList());
         return DefaultDSLQueryService
-                .createQuery(roleDao).where()
+                .createQuery(roleDao)
+                .where()
                 .in(GenericEntity.id, roleIdList)
-                .noPaging()
-                .list();
+                .fetch();
     }
 
-    @Override
-    public UserDao getDao() {
-        return userDao;
-    }
 
     @Override
     public Set<SettingInfo> get(String userId) {
@@ -287,7 +284,7 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
         if (null == userEntity) {
             return new HashSet<>();
         }
-        List<UserRoleEntity> roleEntities = userRoleDao.selectByUserId(userId);
+        List<UserRoleEntity> roleEntities = userRoleDao.createQuery().where(UserRoleEntity::getUserId, userId).fetch();
         //使用角色配置
         Set<SettingInfo> settingInfo = roleEntities.stream()
                 .map(entity -> new SettingInfo(SETTING_TYPE_ROLE, entity.getRoleId()))
@@ -302,9 +299,8 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
         if (CollectionUtils.isEmpty(roleIdList)) {
             return new java.util.ArrayList<>();
         }
-        // org.hswebframework.web.service.authorization.simple.terms.UserInRoleSqlTerm
         return createQuery()
-                .where("id", "user-in-role", roleIdList)
-                .listNoPaging();
+                .where().and("id", "user-in-role", roleIdList)
+                .fetch();
     }
 }

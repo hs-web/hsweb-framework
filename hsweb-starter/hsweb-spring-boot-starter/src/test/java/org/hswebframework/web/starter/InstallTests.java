@@ -18,63 +18,48 @@
 
 package org.hswebframework.web.starter;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.SerializerFeature;
-import org.hswebframework.ezorm.rdb.RDBDatabase;
-import org.hswebframework.ezorm.rdb.executor.AbstractJdbcSqlExecutor;
-import org.hswebframework.ezorm.rdb.executor.SqlExecutor;
-import org.hswebframework.ezorm.rdb.meta.RDBDatabaseMetaData;
-import org.hswebframework.ezorm.rdb.render.dialect.H2RDBDatabaseMetaData;
-import org.hswebframework.ezorm.rdb.render.dialect.MysqlRDBDatabaseMetaData;
-import org.hswebframework.ezorm.rdb.simple.SimpleDatabase;
-import org.hswebframework.expands.script.engine.DynamicScriptEngine;
-import org.hswebframework.expands.script.engine.DynamicScriptEngineFactory;
-import org.hswebframework.web.starter.init.simple.SimpleDependencyInstaller;
-import org.hswebframework.utils.file.FileUtils;
+import org.hswebframework.ezorm.rdb.executor.SqlRequest;
+import org.hswebframework.ezorm.rdb.executor.SyncSqlExecutor;
+import org.hswebframework.ezorm.rdb.executor.jdbc.JdbcSyncSqlExecutor;
+import org.hswebframework.ezorm.rdb.metadata.RDBDatabaseMetadata;
+import org.hswebframework.ezorm.rdb.metadata.dialect.Dialect;
+import org.hswebframework.ezorm.rdb.operator.DatabaseOperator;
+import org.hswebframework.ezorm.rdb.operator.DefaultDatabaseOperator;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.Collections;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public class InstallTests {
-    SqlExecutor sqlExecutor;
-    RDBDatabase database;
+    SyncSqlExecutor sqlExecutor;
+    DatabaseOperator database;
     Connection  connection;
 
     @Before
     public void setup() throws Exception {
-//        Class.forName("com.mysql.jdbc.Driver");
-//        connection = DriverManager.getConnection(
-//                "jdbc:mysql://localhost/test_db1?useSSL=false&useUnicode=true&characterEncoding=utf8&autoReconnect=true&failOverReadOnly=false",
-//                "root", "root");
-//
-
         Class.forName("org.h2.Driver");
         connection = DriverManager.getConnection("jdbc:h2:file:./target/data/h2db;", "sa", "");
-        sqlExecutor = new AbstractJdbcSqlExecutor() {
+        sqlExecutor =new JdbcSyncSqlExecutor() {
             @Override
-            public Connection getConnection() {
+            public Connection getConnection(SqlRequest sqlRequest) {
                 return connection;
             }
 
             @Override
-            public void releaseConnection(Connection connection) throws SQLException {
-                //connection.close();
+            public void releaseConnection(Connection connection, SqlRequest sqlRequest) {
+
             }
         };
-        RDBDatabaseMetaData databaseMetaData = new H2RDBDatabaseMetaData();
-//        RDBDatabaseMetaData databaseMetaData = new MysqlRDBDatabaseMetaData("MyISAM");
-        database = new SimpleDatabase(databaseMetaData, sqlExecutor);
+        RDBDatabaseMetadata databaseMetaData=new RDBDatabaseMetadata(Dialect.H2);
+
+        database = DefaultDatabaseOperator.of(databaseMetaData);
     }
 
     @Test

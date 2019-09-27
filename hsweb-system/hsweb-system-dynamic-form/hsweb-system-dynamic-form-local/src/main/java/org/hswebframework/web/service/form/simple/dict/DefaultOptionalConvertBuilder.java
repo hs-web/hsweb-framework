@@ -1,7 +1,7 @@
 package org.hswebframework.web.service.form.simple.dict;
 
-import org.hswebframework.ezorm.core.OptionConverter;
-import org.hswebframework.ezorm.core.ValueConverter;
+import org.hswebframework.ezorm.core.DictionaryCodec;
+import org.hswebframework.ezorm.core.ValueCodec;
 import org.hswebframework.web.entity.form.DictConfig;
 import org.hswebframework.web.service.form.OptionalConvertBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +22,7 @@ public class DefaultOptionalConvertBuilder implements OptionalConvertBuilder {
     private List<OptionalConvertBuilderStrategy> strategies;
 
     @Override
-    public OptionConverter build(DictConfig dictConfig) {
+    public DictionaryCodec build(DictConfig dictConfig) {
         if(CollectionUtils.isEmpty(strategies)){
             return null;
         }
@@ -34,7 +34,7 @@ public class DefaultOptionalConvertBuilder implements OptionalConvertBuilder {
     }
 
     @Override
-    public ValueConverter buildValueConverter(DictConfig dictConfig) {
+    public ValueCodec buildValueConverter(DictConfig dictConfig) {
         if(CollectionUtils.isEmpty(strategies)){
             return null;
         }

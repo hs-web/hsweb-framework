@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.hswebframework.ezorm.core.dsl.Query;
 import org.hswebframework.ezorm.core.param.TermType;
+import org.hswebframework.ezorm.rdb.mapping.SyncQuery;
 import org.hswebframework.web.bean.FastBeanCopier;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.validator.LogicPrimaryKey;
@@ -41,7 +42,7 @@ public class DefaultLogicPrimaryKeyValidator implements LogicPrimaryKeyValidator
         return Result.passed();
     };
 
-    public static <T> void registerQuerySuppiler(Class<T> type, Function<T, Query<T, QueryParamEntity>> querySupplier) {
+    public static <T> void registerQuerySuppiler(Class<T> type, Function<T, SyncQuery<T>> querySupplier) {
         validatorCache.computeIfAbsent(type, instrance::createValidator)
                 .values()
                 .stream()
@@ -160,7 +161,7 @@ public class DefaultLogicPrimaryKeyValidator implements LogicPrimaryKeyValidator
 
         private Class<T> targetType;
 
-        private volatile Function<T, Query<T, QueryParamEntity>> querySupplier;
+        private volatile Function<T, SyncQuery<T>> querySupplier;
 
         public Result doValidate(T bean) {
             if (querySupplier == null) {
@@ -173,7 +174,7 @@ public class DefaultLogicPrimaryKeyValidator implements LogicPrimaryKeyValidator
                 return Result.passed();
             }
 
-            Query<T, QueryParamEntity> query = querySupplier.apply(bean);
+            SyncQuery<T> query = querySupplier.apply(bean);
 
             //转为map
             Map<String, Object> mapBean = FastBeanCopier.copy(bean, new HashMap<>());
@@ -220,16 +221,14 @@ public class DefaultLogicPrimaryKeyValidator implements LogicPrimaryKeyValidator
                 properties.put(info.getField(), value);
             }
 
-            T result = query.single();
-
-            if (result != null) {
-                Result validateResult = new Result();
-                validateResult.setError(true);
-                validateResult.setData(result);
-                validateResult.setProperties(properties);
-                return validateResult;
-            }
-            return Result.passed();
+           return query.fetchOne()
+                    .map(result->{
+                        Result validateResult = new Result();
+                        validateResult.setError(true);
+                        validateResult.setData(result);
+                        validateResult.setProperties(properties);
+                        return validateResult;
+                    }).orElseGet(Result::passed);
         }
     }
 

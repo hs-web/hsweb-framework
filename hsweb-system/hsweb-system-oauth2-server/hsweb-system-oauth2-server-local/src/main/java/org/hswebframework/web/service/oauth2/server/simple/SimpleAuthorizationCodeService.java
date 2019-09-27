@@ -18,12 +18,12 @@
 
 package org.hswebframework.web.service.oauth2.server.simple;
 
+import org.hswebframework.ezorm.rdb.mapping.SyncRepository;
 import org.hswebframework.web.entity.oauth2.server.AuthorizationCodeEntity;
 import org.hswebframework.web.authorization.oauth2.server.support.code.AuthorizationCode;
 import org.hswebframework.web.authorization.oauth2.server.support.code.AuthorizationCodeRequest;
 import org.hswebframework.web.authorization.oauth2.server.support.code.AuthorizationCodeService;
 import org.hswebframework.web.commons.entity.factory.EntityFactory;
-import org.hswebframework.web.dao.oauth2.server.AuthorizationCodeDao;
 import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.service.DefaultDSLDeleteService;
 import org.hswebframework.web.service.DefaultDSLQueryService;
@@ -32,16 +32,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public class SimpleAuthorizationCodeService implements AuthorizationCodeService {
-    private AuthorizationCodeDao authorizationCodeDao;
     private EntityFactory        entityFactory;
     private CodeGenerator codeGenerator = IDGenerator.MD5::generate;
 
-    public SimpleAuthorizationCodeService(AuthorizationCodeDao authorizationCodeDao, EntityFactory entityFactory) {
+    private SyncRepository<AuthorizationCodeEntity,String> authorizationCodeDao;
+
+    public SimpleAuthorizationCodeService(SyncRepository<AuthorizationCodeEntity,String> authorizationCodeDao, EntityFactory entityFactory) {
         this.authorizationCodeDao = authorizationCodeDao;
         this.entityFactory = entityFactory;
     }
@@ -71,10 +70,12 @@ public class SimpleAuthorizationCodeService implements AuthorizationCodeService 
     public AuthorizationCode consumeAuthorizationCode(String code) {
         AuthorizationCodeEntity codeEntity = DefaultDSLQueryService
                 .createQuery(authorizationCodeDao)
-                .where("code", code).single();
+                .where("code", code)
+                .fetchOne()
+                .orElse(null);
         //delete
         DefaultDSLDeleteService.createDelete(authorizationCodeDao)
-                .where("code", code).exec();
+                .where("code", code).execute();
         return codeEntity;
     }
 }

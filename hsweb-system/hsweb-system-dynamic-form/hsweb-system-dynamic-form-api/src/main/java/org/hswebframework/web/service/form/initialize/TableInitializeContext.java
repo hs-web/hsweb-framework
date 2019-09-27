@@ -1,7 +1,7 @@
 package org.hswebframework.web.service.form.initialize;
 
-import org.hswebframework.ezorm.rdb.RDBDatabase;
-import org.hswebframework.ezorm.rdb.meta.RDBTableMetaData;
+import org.hswebframework.ezorm.rdb.metadata.RDBTableMetadata;
+import org.hswebframework.ezorm.rdb.operator.DatabaseOperator;
 import org.hswebframework.web.entity.form.DynamicFormEntity;
 
 /**
@@ -9,10 +9,10 @@ import org.hswebframework.web.entity.form.DynamicFormEntity;
  */
 public interface TableInitializeContext {
 
-    RDBDatabase getDatabase();
+    DatabaseOperator getDatabase();
 
     DynamicFormEntity getFormEntity();
 
-    RDBTableMetaData getTable();
+    RDBTableMetadata getTable();
 
 }

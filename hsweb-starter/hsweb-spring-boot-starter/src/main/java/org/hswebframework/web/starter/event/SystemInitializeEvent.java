@@ -1,16 +1,16 @@
 package org.hswebframework.web.starter.event;
 
 import lombok.Getter;
-import org.hswebframework.ezorm.rdb.RDBDatabase;
+import org.hswebframework.ezorm.rdb.operator.DatabaseOperator;
 
 @Getter
 public class SystemInitializeEvent {
 
-    public SystemInitializeEvent(RDBDatabase database){
+    public SystemInitializeEvent(DatabaseOperator database){
         this.database=database;
     }
 
-    private RDBDatabase database;
+    private DatabaseOperator database;
 
     private boolean ignore;
 

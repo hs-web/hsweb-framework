@@ -1,6 +1,6 @@
 package org.hswebframework.web.datasource;
 
-import org.hswebframework.ezorm.rdb.executor.SqlExecutor;
+import org.hswebframework.ezorm.rdb.executor.SyncSqlExecutor;
 import org.hswebframework.web.datasource.config.DynamicDataSourceConfigRepository;
 import org.hswebframework.web.datasource.config.InSpringDynamicDataSourceConfig;
 import org.hswebframework.web.datasource.service.InSpringContextDynamicDataSourceService;
@@ -28,8 +28,8 @@ import javax.sql.DataSource;
 public class DynamicDataSourceAutoConfiguration {
 
     @Bean
-    @ConditionalOnMissingBean(SqlExecutor.class)
-    public SqlExecutor sqlExecutor() {
+    @ConditionalOnMissingBean(SyncSqlExecutor.class)
+    public SyncSqlExecutor sqlExecutor() {
         return new DefaultJdbcExecutor();
     }
 

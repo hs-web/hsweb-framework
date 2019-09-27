@@ -1,11 +1,9 @@
 package org.hswebframework.web.service.authorization.simple;
 
-import org.hswebframework.web.service.authorization.UserSettingService;
-import org.hswebframework.web.dao.authorization.UserSettingDao;
 import org.hswebframework.web.entity.authorization.UserSettingEntity;
 import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.service.EnableCacheGenericEntityService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.hswebframework.web.service.authorization.UserSettingService;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -25,17 +23,9 @@ import java.util.Objects;
 public class SimpleUserSettingService extends EnableCacheGenericEntityService<UserSettingEntity, String>
         implements UserSettingService {
 
-    @Autowired
-    private UserSettingDao userSettingDao;
-
     @Override
     protected IDGenerator<String> getIDGenerator() {
         return IDGenerator.MD5;
-    }
-
-    @Override
-    public UserSettingDao getDao() {
-        return userSettingDao;
     }
 
     @Override
@@ -44,7 +34,7 @@ public class SimpleUserSettingService extends EnableCacheGenericEntityService<Us
                 .where(entity::getUserId)
                 .and(entity::getKey)
                 .and(entity::getSettingId)
-                .single();
+                .fetchOne().orElse(null);
         if (old != null) {
             entity.setId(old.getId());
             return true;
@@ -58,7 +48,7 @@ public class SimpleUserSettingService extends EnableCacheGenericEntityService<Us
         Objects.requireNonNull(userId);
         Objects.requireNonNull(key);
 
-        return createQuery().where("userId", userId).and("key", key).listNoPaging();
+        return createQuery().where("userId", userId).and("key", key).fetch();
     }
 
     @Override
@@ -67,7 +57,11 @@ public class SimpleUserSettingService extends EnableCacheGenericEntityService<Us
         Objects.requireNonNull(userId);
         Objects.requireNonNull(key);
         Objects.requireNonNull(settingId);
-        return createQuery().where("userId", userId).and("key", key).and("settingId", settingId).single();
+        return createQuery()
+                .where("userId", userId)
+                .and("key", key)
+                .and("settingId", settingId).fetchOne()
+                .orElse(null);
     }
 
     @Override

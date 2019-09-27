@@ -1,9 +1,10 @@
 package org.hswebframework.web.service.organizational.simple.terms;
 
+import lombok.Getter;
 import org.hswebframework.web.commons.entity.TreeSupportEntity;
-import org.hswebframework.web.dao.mybatis.mapper.TreeStructureSqlTermCustomizer;
 import org.hswebframework.web.datasource.DataSourceHolder;
 import org.hswebframework.web.service.QueryService;
+import org.hswebframework.web.service.terms.TreeStructureSqlTermCustomizer;
 
 import java.util.List;
 import java.util.Objects;
@@ -19,13 +20,17 @@ public class InServiceTreeInSqlTerm<PK> extends TreeStructureSqlTermCustomizer {
 
     private String tableName;
 
+    @Getter
+    private String name;
+
     public InServiceTreeInSqlTerm(QueryService<? extends TreeSupportEntity<PK>, PK> service,
+                                  String name,
                                   String prefix,
-                                  String tableName,
-                                  boolean not, boolean parent) {
-        super(prefix + "-" + (parent ? "parent" : "child") + "-" + (not ? "not-" : "") + "in", not, parent);
+                                  String tableName) {
+        super(prefix);
         this.treeService = service;
         this.tableName = tableName;
+        this.name = name;
     }
 
     @Override

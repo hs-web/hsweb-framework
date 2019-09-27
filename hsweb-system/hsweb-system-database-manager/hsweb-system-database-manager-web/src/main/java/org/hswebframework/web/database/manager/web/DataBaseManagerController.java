@@ -4,16 +4,12 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.hswebframework.web.Sqls;
-import org.hswebframework.web.authorization.Authentication;
-import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.annotation.Authorize;
-import org.hswebframework.web.authorization.exception.AccessDenyException;
 import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.database.manager.DatabaseManagerService;
 import org.hswebframework.web.database.manager.SqlExecuteRequest;
 import org.hswebframework.web.database.manager.SqlExecuteResult;
 import org.hswebframework.web.database.manager.SqlInfo;
-import org.hswebframework.web.database.manager.meta.ObjectMetadata;
 import org.hswebframework.web.database.manager.sql.TransactionInfo;
 import org.hswebframework.web.datasource.DataSourceHolder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +17,6 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -33,23 +28,23 @@ public class DataBaseManagerController {
     @Autowired
     private DatabaseManagerService databaseManagerService;
 
-    @GetMapping("/metas")
-    @Authorize(action = Permission.ACTION_QUERY, description = "获取元数据")
-    @ApiOperation("获取数据库元数据")
-    public ResponseMessage<Map<ObjectMetadata.ObjectType, List<? extends ObjectMetadata>>> parseAllObject() throws Exception {
-        return parseAllObject(null);
-    }
-
-    @GetMapping("/metas/{datasourceId}")
-    @Authorize(action = Permission.ACTION_QUERY, description = "获取元数据")
-    @ApiOperation("获取指定数据源的元数据")
-    public ResponseMessage<Map<ObjectMetadata.ObjectType, List<? extends ObjectMetadata>>> parseAllObject(
-            @PathVariable
-            @ApiParam("数据源ID") String datasourceId) throws Exception {
-
-        DataSourceHolder.switcher().use(datasourceId);
-        return ResponseMessage.ok(databaseManagerService.getMetas());
-    }
+//    @GetMapping("/metas")
+//    @Authorize(action = Permission.ACTION_QUERY, description = "获取元数据")
+//    @ApiOperation("获取数据库元数据")
+//    public ResponseMessage<Map<ObjectMetadata.ObjectType, List<? extends ObjectMetadata>>> parseAllObject() throws Exception {
+//        return parseAllObject(null);
+//    }
+//
+//    @GetMapping("/metas/{datasourceId}")
+//    @Authorize(action = Permission.ACTION_QUERY, description = "获取元数据")
+//    @ApiOperation("获取指定数据源的元数据")
+//    public ResponseMessage<Map<ObjectMetadata.ObjectType, List<? extends ObjectMetadata>>> parseAllObject(
+//            @PathVariable
+//            @ApiParam("数据源ID") String datasourceId) throws Exception {
+//
+//        DataSourceHolder.switcher().use(datasourceId);
+//        return ResponseMessage.ok(databaseManagerService.getMetas());
+//    }
 
     @PostMapping(value = "/execute/{datasourceId}", consumes = MediaType.TEXT_PLAIN_VALUE)
     @Authorize(action = "execute", description = "执行SQL")

@@ -2,29 +2,32 @@ package org.hswebframework.web.starter.init;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.hswebframework.ezorm.rdb.RDBDatabase;
-import org.hswebframework.ezorm.rdb.RDBTable;
-import org.hswebframework.ezorm.rdb.executor.SqlExecutor;
-import org.hswebframework.ezorm.rdb.meta.converter.ClobValueConverter;
-import org.hswebframework.ezorm.rdb.meta.converter.JSONValueConverter;
-import org.hswebframework.ezorm.rdb.meta.converter.NumberValueConverter;
-import org.hswebframework.ezorm.rdb.simple.wrapper.BeanWrapper;
 import org.hswebframework.expands.script.engine.DynamicScriptEngine;
 import org.hswebframework.expands.script.engine.DynamicScriptEngineFactory;
+import org.hswebframework.ezorm.rdb.codec.JsonValueCodec;
+import org.hswebframework.ezorm.rdb.executor.SyncSqlExecutor;
+import org.hswebframework.ezorm.rdb.executor.wrapper.ResultWrappers;
+import org.hswebframework.ezorm.rdb.mapping.wrapper.EntityResultWrapper;
+import org.hswebframework.ezorm.rdb.operator.DatabaseOperator;
+import org.hswebframework.web.bean.FastBeanCopier;
 import org.hswebframework.web.starter.SystemVersion;
 import org.hswebframework.web.starter.init.simple.SimpleDependencyInstaller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StreamUtils;
 
 import java.nio.charset.Charset;
+import java.sql.JDBCType;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
+import static org.hswebframework.ezorm.rdb.executor.wrapper.ResultWrappers.*;
 import static org.hswebframework.web.starter.SystemVersion.Property.*;
 
 /**
@@ -33,8 +36,7 @@ import static org.hswebframework.web.starter.SystemVersion.Property.*;
 public class SystemInitialize {
     private Logger logger = LoggerFactory.getLogger(SystemInitialize.class);
 
-    private SqlExecutor   sqlExecutor;
-    private RDBDatabase   database;
+    private DatabaseOperator database;
     //将要安装的信息
     private SystemVersion targetVersion;
 
@@ -54,8 +56,7 @@ public class SystemInitialize {
     private boolean initialized = false;
 
 
-    public SystemInitialize(SqlExecutor sqlExecutor, RDBDatabase database, SystemVersion targetVersion) {
-        this.sqlExecutor = sqlExecutor;
+    public SystemInitialize(SyncSqlExecutor sqlExecutor, DatabaseOperator database, SystemVersion targetVersion) {
         this.database = database;
         this.targetVersion = targetVersion;
     }
@@ -65,10 +66,9 @@ public class SystemInitialize {
         if (initialized) {
             return;
         }
-        if (!CollectionUtils.isEmpty(excludeTables)) {
-            this.database = new SkipCreateOrAlterRDBDatabase(database, excludeTables, sqlExecutor);
-        }
-        scriptContext.put("sqlExecutor", sqlExecutor);
+//        if (!CollectionUtils.isEmpty(excludeTables)) {
+//            this.database = new SkipCreateOrAlterRDBDatabase(database, excludeTables, sqlExecutor);
+//        }
         scriptContext.put("database", database);
         scriptContext.put("logger", logger);
         initialized = true;
@@ -79,9 +79,14 @@ public class SystemInitialize {
     }
 
     protected void syncSystemVersion() throws SQLException {
-        RDBTable<SystemVersion> rdbTable = database.getTable("s_system");
+        Map<String ,Object> mapVersion = FastBeanCopier.copy(targetVersion, HashMap::new);
+
         if (installed == null) {
-            rdbTable.createInsert().value(targetVersion).exec();
+            database.dml()
+                    .insert("s_system")
+                    .value(mapVersion)
+                    .execute()
+                    .sync();
         } else {
             //合并已安装的依赖
             //修复如果删掉了依赖，再重启会丢失依赖信息的问题
@@ -91,8 +96,12 @@ public class SystemInitialize {
                     targetVersion.getDependencies().add(dependency);
                 }
             }
-
-            rdbTable.createUpdate().set(targetVersion).where().is("name", targetVersion.getName()).exec();
+            database.dml()
+                    .update("s_system")
+                    .set(mapVersion)
+                    .where(dsl -> dsl.is(targetVersion::getName))
+                    .execute()
+                    .sync();
         }
     }
 
@@ -163,32 +172,36 @@ public class SystemInitialize {
 
     }
 
-    protected void initInstallInfo() throws SQLException {
-        boolean tableInstall = sqlExecutor.tableExists("s_system");
-        database.createOrAlter("s_system")
+    protected void initInstallInfo() {
+        boolean tableInstall = database.getMetadata().getTable("s_system").isPresent();
+        database.ddl().createOrAlter("s_system")
                 .addColumn().name("name").varchar(128).comment("系统名称").commit()
-                .addColumn().name("major_version").alias(majorVersion).number(32).javaType(Integer.class).comment("主版本号").commit()
-                .addColumn().name("minor_version").alias(minorVersion).number(32).javaType(Integer.class).comment("次版本号").commit()
-                .addColumn().name("revision_version").alias(revisionVersion).number(32).javaType(Integer.class).comment("修订版").commit()
-                .addColumn().name("snapshot").number(1).javaType(Boolean.class)
-                .custom(column -> column.setValueConverter(new NumberValueConverter(Boolean.class)))
+                .addColumn().name("major_version").alias(majorVersion).integer().comment("主版本号").commit()
+                .addColumn().name("minor_version").alias(minorVersion).integer().comment("次版本号").commit()
+                .addColumn().name("revision_version").alias(revisionVersion).integer().comment("修订版").commit()
+                .addColumn().name("snapshot").type(JDBCType.TINYINT, Boolean.class)
                 .comment("是否快照版").commit()
                 .addColumn().name("comment").varchar(2000).comment("系统说明").commit()
                 .addColumn().name("website").varchar(2000).comment("系统网址").commit()
                 .addColumn().name("framework_version").notNull().alias(frameworkVersion).clob()
-                .custom(column -> column.setValueConverter(new JSONValueConverter(SystemVersion.FrameworkVersion.class, new ClobValueConverter()))).notNull().comment("框架版本").commit()
+                .custom(column -> column.setValueCodec(JsonValueCodec.of(SystemVersion.FrameworkVersion.class))).notNull().comment("框架版本").commit()
                 .addColumn().name("dependencies").notNull().alias(dependencies).clob()
-                .custom(column -> column.setValueConverter(new JSONValueConverter(SystemVersion.Dependency.class, new ClobValueConverter()))).notNull().comment("依赖详情").commit()
+                .custom(column -> column.setValueCodec(JsonValueCodec.of(SystemVersion.Dependency.class))).notNull().comment("依赖详情").commit()
                 .comment("系统信息")
-                .custom(table -> table.setObjectWrapper(new BeanWrapper<SystemVersion>(SystemVersion::new, table)))
-                .commit();
+                .commit()
+                .sync();
 
         if (!tableInstall) {
             installed = null;
             return;
         }
-        RDBTable<SystemVersion> rdbTable = database.getTable("s_system");
-        installed = rdbTable.createQuery().where("name", targetVersion.getName()).single();
+        installed = database.dml().query("s_system")
+                .where(dsl -> dsl.is("name", targetVersion.getName()))
+                .paging(0, 1)
+                .fetch(optional(single(new EntityResultWrapper<>(SystemVersion::new))))
+                .sync()
+                .orElse(null)
+        ;
     }
 
 

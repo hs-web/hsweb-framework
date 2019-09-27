@@ -1,6 +1,5 @@
 package org.hswebframework.web.service.organizational.simple;
 
-import org.hswebframework.web.dao.organizational.RelationInfoDao;
 import org.hswebframework.web.entity.organizational.RelationInfoEntity;
 import org.hswebframework.web.organizational.authorization.relation.*;
 import org.hswebframework.web.service.DefaultDSLQueryService;
@@ -23,8 +22,6 @@ import java.util.stream.Collectors;
 public class SimpleRelationInfoService extends GenericEntityService<RelationInfoEntity, String>
         implements RelationInfoService {
 
-    @Autowired
-    private RelationInfoDao relationInfoDao;
 
     @Override
     protected IDGenerator<String> getIDGenerator() {
@@ -32,23 +29,19 @@ public class SimpleRelationInfoService extends GenericEntityService<RelationInfo
     }
 
     @Override
-    public RelationInfoDao getDao() {
-        return relationInfoDao;
-    }
-
-    @Override
     public Relations getRelations(String relationTypeFrom, String target) {
         Objects.requireNonNull(relationTypeFrom);
         Objects.requireNonNull(target);
         //获取关系
-        List<RelationInfoEntity> relationInfoList = DefaultDSLQueryService.createQuery(relationInfoDao)
+        List<RelationInfoEntity> relationInfoList = getDao()
+                .createQuery()
                 //where type_from='person' and(relation_from='personId' or relation_to='personId')
                 .where(RelationInfoEntity.relationTypeFrom, relationTypeFrom)
                 .nest()
                 .is(RelationInfoEntity.relationFrom, target)
                 .or(RelationInfoEntity.relationTo, target)
                 .end()
-                .listNoPaging();
+                .fetch();
 
         List<Relation> relations = relationInfoList.stream()
                 .map(info -> {

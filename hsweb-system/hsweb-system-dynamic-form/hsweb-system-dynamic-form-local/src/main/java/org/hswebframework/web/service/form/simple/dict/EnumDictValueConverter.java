@@ -3,7 +3,7 @@ package org.hswebframework.web.service.form.simple.dict;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.hswebframework.ezorm.core.ValueConverter;
+import org.hswebframework.ezorm.core.ValueCodec;
 import org.hswebframework.web.dict.EnumDict;
 import org.springframework.util.StringUtils;
 
@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Slf4j
-public class EnumDictValueConverter<T extends EnumDict> implements ValueConverter {
+public class EnumDictValueConverter<T extends EnumDict> implements ValueCodec {
 
     protected Supplier<List<T>> allOptionSupplier;
 
@@ -59,7 +59,7 @@ public class EnumDictValueConverter<T extends EnumDict> implements ValueConverte
 
     @Override
     @SuppressWarnings("all")
-    public Object getData(Object value) {
+    public Object encode(Object value) {
         if (StringUtils.isEmpty(value)) {
             return value;
         }
@@ -99,7 +99,7 @@ public class EnumDictValueConverter<T extends EnumDict> implements ValueConverte
     }
 
     @Override
-    public Object getValue(Object data) {
+    public Object decode(Object data) {
         if (multi) {
             if (dataToMask) {
                 Long mask = null;

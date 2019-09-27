@@ -1,7 +1,7 @@
 package org.hswebframework.web.service.form.simple.dict;
 
-import org.hswebframework.ezorm.core.OptionConverter;
-import org.hswebframework.ezorm.core.ValueConverter;
+import org.hswebframework.ezorm.core.DictionaryCodec;
+import org.hswebframework.ezorm.core.ValueCodec;
 import org.hswebframework.web.entity.form.DictConfig;
 
 /**
@@ -21,7 +21,7 @@ public interface OptionalConvertBuilderStrategy {
      * @param dictConfig 配置内容
      * @return 转换器对象
      */
-    OptionConverter build(DictConfig dictConfig);
+    DictionaryCodec build(DictConfig dictConfig);
 
-    ValueConverter buildValueConverter(DictConfig dictConfig);
+    ValueCodec buildValueConverter(DictConfig dictConfig);
 }

@@ -16,10 +16,9 @@
  */
 package org.hswebframework.web.service.organizational.simple;
 
+import org.hswebframework.ezorm.rdb.mapping.SyncRepository;
 import org.hswebframework.web.BusinessException;
 import org.hswebframework.web.commons.entity.DataStatus;
-import org.hswebframework.web.dao.organizational.DepartmentDao;
-import org.hswebframework.web.dao.organizational.OrganizationalDao;
 import org.hswebframework.web.entity.organizational.DepartmentEntity;
 import org.hswebframework.web.entity.organizational.OrganizationalEntity;
 import org.hswebframework.web.id.IDGenerator;
@@ -31,7 +30,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,19 +46,12 @@ import java.util.Objects;
 @CacheConfig(cacheNames = "organizational")
 public class SimpleOrganizationalService extends EnableCacheAllEvictTreeSortService<OrganizationalEntity, String>
         implements OrganizationalService {
-    @Autowired
-    private OrganizationalDao organizationalDao;
 
     @Autowired
-    private DepartmentDao departmentDao;
+    private SyncRepository<DepartmentEntity,String> departmentDao;
 
     @Autowired
     private ApplicationEventPublisher publisher;
-
-    @Override
-    public OrganizationalDao getDao() {
-        return organizationalDao;
-    }
 
     @Override
     protected IDGenerator<String> getIDGenerator() {
@@ -72,7 +63,7 @@ public class SimpleOrganizationalService extends EnableCacheAllEvictTreeSortServ
     public OrganizationalEntity deleteByPk(String id) {
         if (DefaultDSLQueryService.createQuery(departmentDao)
                 .where(DepartmentEntity.orgId, id)
-                .total() > 0) {
+                .count() > 0) {
             throw new BusinessException("机构下存在部门信息,无法删除");
         }
         publisher.publishEvent(new ClearPersonCacheEvent());
@@ -100,7 +91,7 @@ public class SimpleOrganizationalService extends EnableCacheAllEvictTreeSortServ
         createUpdate()
                 .set(OrganizationalEntity.status, DataStatus.STATUS_DISABLED)
                 .where(OrganizationalEntity.id, id)
-                .exec();
+                .execute();
         publisher.publishEvent(new ClearPersonCacheEvent());
     }
 
@@ -111,7 +102,7 @@ public class SimpleOrganizationalService extends EnableCacheAllEvictTreeSortServ
         createUpdate()
                 .set(OrganizationalEntity.status, DataStatus.STATUS_ENABLED)
                 .where(OrganizationalEntity.id, id)
-                .exec();
+                .execute();
         publisher.publishEvent(new ClearPersonCacheEvent());
     }
 
@@ -122,7 +113,9 @@ public class SimpleOrganizationalService extends EnableCacheAllEvictTreeSortServ
         if (StringUtils.isEmpty(code)) {
             return null;
         }
-        return createQuery().where(OrganizationalEntity.code, code).single();
+        return createQuery().where(OrganizationalEntity.code, code)
+                .fetchOne()
+                .orElse(null);
     }
 
     @Override
@@ -133,6 +126,8 @@ public class SimpleOrganizationalService extends EnableCacheAllEvictTreeSortServ
             return null;
         }
 
-        return createQuery().where(OrganizationalEntity.name, name).single();
+        return createQuery().where(OrganizationalEntity.name, name)
+                .fetchOne()
+                .orElse(null);
     }
 }

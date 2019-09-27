@@ -18,39 +18,22 @@
 
 package org.hswebframework.web.service;
 
-import org.hswebframework.ezorm.core.dsl.Delete;
-import org.hswebframework.web.commons.entity.param.DeleteParamEntity;
-import org.hswebframework.web.dao.dynamic.DeleteByEntityDao;
+import org.hswebframework.ezorm.rdb.mapping.SyncDelete;
+import org.hswebframework.ezorm.rdb.mapping.SyncRepository;
 
 /**
  * @author zhouhao
  */
 public interface DefaultDSLDeleteService<E, PK> extends DefaultDeleteService<E, PK> {
-    DeleteByEntityDao getDao();
+    SyncRepository<E,PK> getDao();
 
-    default Delete<DeleteParamEntity> createDelete() {
-        Delete<DeleteParamEntity> delete = new Delete<>(new DeleteParamEntity());
-        delete.setExecutor(getDao()::delete);
-        return delete;
+    default SyncDelete createDelete() {
+        return getDao().createDelete();
     }
 
-    static Delete<DeleteParamEntity> createDelete(DeleteByEntityDao deleteDao) {
-        Delete<DeleteParamEntity> update = new Delete<>(new DeleteParamEntity());
-        update.setExecutor(deleteDao::delete);
-        return update;
+    static SyncDelete createDelete(SyncRepository<?,?> deleteDao) {
+        return deleteDao.createDelete();
     }
 
-    /**
-     * 自定义一个删除执行器。创建dsl数据删除操作对象
-     *
-     * @param executor 执行器
-     * @return {@link Delete}
-     * @since 3.0
-     */
-    static Delete<DeleteParamEntity> createDelete(Delete.Executor<DeleteParamEntity> executor) {
-        Delete<DeleteParamEntity> update = new Delete<>(new DeleteParamEntity());
-        update.setExecutor(executor);
-        return update;
-    }
 
 }

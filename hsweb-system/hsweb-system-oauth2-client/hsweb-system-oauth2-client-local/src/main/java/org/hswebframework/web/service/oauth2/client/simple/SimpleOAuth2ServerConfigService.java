@@ -18,12 +18,10 @@ package org.hswebframework.web.service.oauth2.client.simple;
 
 import org.hswebframework.web.authorization.oauth2.client.OAuth2ServerConfig;
 import org.hswebframework.web.authorization.oauth2.client.simple.OAuth2ServerConfigRepository;
-import org.hswebframework.web.dao.oauth2.server.client.OAuth2ServerConfigDao;
 import org.hswebframework.web.entity.oauth2.client.OAuth2ServerConfigEntity;
 import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.service.GenericEntityService;
 import org.hswebframework.web.service.oauth2.client.OAuth2ServerConfigService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -40,17 +38,9 @@ import java.util.List;
 @CacheConfig(cacheNames = "oauth2-server-config")
 public class SimpleOAuth2ServerConfigService extends GenericEntityService<OAuth2ServerConfigEntity, String>
         implements OAuth2ServerConfigService, OAuth2ServerConfigRepository {
-    @Autowired
-    private OAuth2ServerConfigDao oAuth2ServerConfigDao;
-
     @Override
     protected IDGenerator<String> getIDGenerator() {
         return IDGenerator.MD5;
-    }
-
-    @Override
-    public OAuth2ServerConfigDao getDao() {
-        return oAuth2ServerConfigDao;
     }
 
     @Override

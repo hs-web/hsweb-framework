@@ -1,11 +1,9 @@
 package org.hswebframework.web.service.form.simple.dict;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import org.hswebframework.ezorm.core.OptionConverter;
-import org.hswebframework.ezorm.core.ValueConverter;
-import org.hswebframework.ezorm.rdb.meta.RDBColumnMetaData;
-import org.hswebframework.web.dao.mybatis.mapper.dict.DictInTermTypeMapper;
+import org.hswebframework.ezorm.core.DictionaryCodec;
+import org.hswebframework.ezorm.core.ValueCodec;
+import org.hswebframework.ezorm.rdb.metadata.RDBColumnMetadata;
 import org.hswebframework.web.dict.DictDefineRepository;
 import org.hswebframework.web.dict.EnumDict;
 import org.hswebframework.web.entity.form.DictConfig;
@@ -36,7 +34,7 @@ public class DictionaryOptionalConvertBuilderStrategy implements OptionalConvert
 
 
     @Override
-    public OptionConverter build(DictConfig dictConfig) {
+    public DictionaryCodec build(DictConfig dictConfig) {
         JSONObject conf = new JSONObject(dictConfig.getConfig());
         String dictId = conf.getString("dictId");
         String fieldName = dictConfig.getToField();
@@ -54,7 +52,7 @@ public class DictionaryOptionalConvertBuilderStrategy implements OptionalConvert
     }
 
     @Override
-    public ValueConverter buildValueConverter(DictConfig dictConfig) {
+    public ValueCodec buildValueConverter(DictConfig dictConfig) {
         JSONObject conf = new JSONObject(dictConfig.getConfig());
         String dictId = conf.getString("dictId");
         boolean multi = !"false".equalsIgnoreCase(conf.getString("multi"));
@@ -64,10 +62,10 @@ public class DictionaryOptionalConvertBuilderStrategy implements OptionalConvert
         EnumDictValueConverter<EnumDict<Object>> converter = new EnumDictValueConverter<>(supplier);
         converter.setMulti(multi);
 
-        RDBColumnMetaData column = dictConfig.getColumn();
-        if (multi && (column.getJdbcType() == JDBCType.NUMERIC || column.getJdbcType() == JDBCType.BIGINT)) {
+        RDBColumnMetadata column = dictConfig.getColumn();
+        if (multi && (column.getSqlType() == JDBCType.NUMERIC || column.getSqlType() == JDBCType.BIGINT)) {
             if (supplier.get().size() < 64) {
-                column.setProperty(DictInTermTypeMapper.USE_DICT_MASK_FLAG, true);
+               // column.setProperty(DictInTermTypeMapper.USE_DICT_MASK_FLAG, true);
                 converter.setDataToMask(true);
             } else {
                 throw new UnsupportedOperationException("数据类型为数字,并且数据字典选项数量超过64个,不支持多选!");

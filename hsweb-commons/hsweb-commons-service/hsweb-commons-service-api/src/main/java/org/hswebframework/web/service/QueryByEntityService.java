@@ -20,6 +20,7 @@ package org.hswebframework.web.service;
 
 import org.hswebframework.web.commons.entity.Entity;
 import org.hswebframework.web.commons.entity.PagerResult;
+import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 
 import java.util.List;
 
@@ -39,7 +40,7 @@ public interface QueryByEntityService<E> extends Service {
      * @param param 参数
      * @return 分页查询结果
      */
-    PagerResult<E> selectPager(Entity param);
+    PagerResult<E> selectPager(QueryParamEntity param);
 
     /**
      * 直接查询
@@ -47,7 +48,7 @@ public interface QueryByEntityService<E> extends Service {
      * @param param 查询参数
      * @return 查询结果
      */
-    List<E> select(Entity param);
+    List<E> select(QueryParamEntity param);
 
     /**
      * 查询总数
@@ -55,7 +56,7 @@ public interface QueryByEntityService<E> extends Service {
      * @param param 查询参数
      * @return 总数
      */
-    int count(Entity param);
+    int count(QueryParamEntity param);
 
     /**
      * 查询单条数据,如果存在多条数据,则返回第一条
@@ -63,5 +64,5 @@ public interface QueryByEntityService<E> extends Service {
      * @param param 查询参数
      * @return 查询结果
      */
-    E selectSingle(Entity param);
+    E selectSingle(QueryParamEntity param);
 }

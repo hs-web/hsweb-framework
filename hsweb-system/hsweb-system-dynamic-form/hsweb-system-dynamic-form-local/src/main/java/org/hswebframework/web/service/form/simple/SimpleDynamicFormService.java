@@ -1,23 +1,22 @@
 package org.hswebframework.web.service.form.simple;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.hswebframework.ezorm.core.ObjectWrapperFactory;
-import org.hswebframework.ezorm.core.Trigger;
-import org.hswebframework.ezorm.core.ValidatorFactory;
-import org.hswebframework.ezorm.core.ValueConverter;
-import org.hswebframework.ezorm.rdb.RDBDatabase;
-import org.hswebframework.ezorm.rdb.meta.Correlation;
-import org.hswebframework.ezorm.rdb.meta.RDBColumnMetaData;
-import org.hswebframework.ezorm.rdb.meta.RDBTableMetaData;
-import org.hswebframework.ezorm.rdb.meta.converter.*;
-import org.hswebframework.ezorm.rdb.render.dialect.Dialect;
-import org.hswebframework.ezorm.rdb.simple.trigger.ScriptTraggerSupport;
-import org.hswebframework.expands.script.engine.DynamicScriptEngine;
-import org.hswebframework.expands.script.engine.DynamicScriptEngineFactory;
-import org.hswebframework.web.BusinessException;
+import org.hswebframework.ezorm.core.OriginalValueCodec;
+import org.hswebframework.ezorm.core.RuntimeDefaultValue;
+import org.hswebframework.ezorm.core.ValueCodec;
+import org.hswebframework.ezorm.rdb.codec.BlobValueCodec;
+import org.hswebframework.ezorm.rdb.codec.DateTimeCodec;
+import org.hswebframework.ezorm.rdb.codec.JsonValueCodec;
+import org.hswebframework.ezorm.rdb.codec.NumberValueCodec;
+import org.hswebframework.ezorm.rdb.mapping.SyncRepository;
+import org.hswebframework.ezorm.rdb.metadata.RDBColumnMetadata;
+import org.hswebframework.ezorm.rdb.metadata.RDBSchemaMetadata;
+import org.hswebframework.ezorm.rdb.metadata.RDBTableMetadata;
+import org.hswebframework.ezorm.rdb.metadata.dialect.Dialect;
+import org.hswebframework.ezorm.rdb.operator.DatabaseOperator;
+import org.hswebframework.ezorm.rdb.operator.builder.fragments.NativeSql;
+import org.hswebframework.ezorm.rdb.operator.dml.query.SortOrder;
+import org.hswebframework.web.NotFoundException;
 import org.hswebframework.web.commons.entity.DataStatus;
 import org.hswebframework.web.dao.form.DynamicFormColumnDao;
 import org.hswebframework.web.dao.form.DynamicFormDao;
@@ -30,9 +29,7 @@ import org.hswebframework.web.service.DefaultDSLUpdateService;
 import org.hswebframework.web.service.GenericEntityService;
 import org.hswebframework.web.service.form.*;
 import org.hswebframework.web.service.form.events.FormDeployEvent;
-import org.hswebframework.web.service.form.initialize.ColumnInitializeContext;
 import org.hswebframework.web.service.form.initialize.DynamicFormInitializeCustomizer;
-import org.hswebframework.web.service.form.initialize.TableInitializeContext;
 import org.hswebframework.web.service.form.simple.dict.EnumDictValueConverter;
 import org.hswebframework.web.validator.group.CreateGroup;
 import org.hswebframework.web.validator.group.UpdateGroup;
@@ -46,15 +43,17 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.JDBCType;
-import java.sql.SQLException;
+import java.sql.SQLType;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static org.hswebframework.ezorm.core.meta.DefaultObjectType.database;
+import static org.hswebframework.ezorm.rdb.operator.dml.query.SortOrder.*;
 
 /**
  * 默认的服务实现
@@ -76,12 +75,6 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
     private String[] loadOnlyTags;
 
     @Autowired
-    private DynamicFormDao dynamicFormDao;
-
-    @Autowired
-    private DynamicFormColumnDao formColumnDao;
-
-    @Autowired
     private DatabaseRepository databaseRepository;
 
     @Autowired
@@ -94,10 +87,7 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
     private List<DynamicFormInitializeCustomizer> initializeCustomizers;
 
     @Autowired
-    private ValidatorFactory validatorFactory;
-
-    @Autowired(required = false)
-    private ObjectWrapperFactory objectWrapperFactory;
+    private SyncRepository<DynamicFormColumnEntity, String> formColumnDao;
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;
@@ -105,11 +95,6 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
     @Override
     protected IDGenerator<String> getIDGenerator() {
         return IDGenerator.MD5;
-    }
-
-    @Override
-    public DynamicFormDao getDao() {
-        return dynamicFormDao;
     }
 
     @Override
@@ -129,7 +114,7 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
                 .where(DynamicFormEntity.deployed, true)
                 .and()
                 .in(DynamicFormEntity.tags, tags)
-                .listNoPaging();
+                .fetch();
         if (logger.isDebugEnabled()) {
             logger.debug("do deploy all form , size:{}", entities.size());
         }
@@ -149,7 +134,7 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
     public void deployAll() {
         createQuery()
                 .select(DynamicFormEntity.id)
-                .listNoPaging()
+                .fetch()
                 .forEach(form -> this.deploy(form.getId()));
     }
 
@@ -202,11 +187,13 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
         entity.setVersion(null);
         entity.setDeployed(null);
         entity.setUpdateTime(System.currentTimeMillis());
-        getDao().incrementVersion(id);
+        getDao().createUpdate()
+                .set(DynamicFormEntity::getVersion, NativeSql.of("version+1"))
+                .execute();
         return super.updateByPk(id, entity);
     }
 
-    protected void initDatabase(RDBDatabase database) {
+    protected void initDatabase(RDBTableMetadata database) {
 
     }
 
@@ -221,19 +208,22 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
         //取消发布
         dynamicFormDeployLogService.cancelDeployed(formId);
         //移除表结构定义
-        RDBDatabase database = StringUtils.isEmpty(form.getDataSourceId())
+        DatabaseOperator database = StringUtils.isEmpty(form.getDataSourceId())
                 ? databaseRepository.getDefaultDatabase(form.getDatabaseName())
-                : databaseRepository.getDatabase(form.getDataSourceId(),form.getDatabaseName());
-        database.removeTable(form.getDatabaseTableName());
-        createUpdate().set(DynamicFormEntity.deployed, false).where(DynamicFormEntity.id, formId).exec();
+                : databaseRepository.getDatabase(form.getDataSourceId(), form.getDatabaseName());
+        database.getMetadata().getCurrentSchema().removeTableOrView(form.getDatabaseTableName());
+        createUpdate().set(DynamicFormEntity.deployed, false)
+                .where(DynamicFormEntity.id, formId)
+                .execute();
         eventPublisher.publishEvent(new FormDeployEvent(formId));
     }
 
     private String saveOrUpdate0(DynamicFormColumnEntity columnEntity) {
         if (StringUtils.isEmpty(columnEntity.getId())
                 || DefaultDSLQueryService.createQuery(formColumnDao)
-                .where(DynamicFormColumnEntity.id, columnEntity.getId())
-                .total() == 0) {
+                .where(
+                        DynamicFormColumnEntity.id, columnEntity.getId())
+                .count() == 0) {
             if (StringUtils.isEmpty(columnEntity.getId())) {
                 columnEntity.setId(getIDGenerator().generate());
             }
@@ -244,7 +234,7 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
             DefaultDSLUpdateService
                     .createUpdate(formColumnDao, columnEntity)
                     .where(DynamicFormColumnEntity.id, columnEntity.getId())
-                    .exec();
+                    .execute();
         }
         return columnEntity.getId();
     }
@@ -259,7 +249,7 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
     )
     public String saveOrUpdateColumn(DynamicFormColumnEntity columnEntity) {
         String id = saveOrUpdate0(columnEntity);
-        getDao().incrementVersion(columnEntity.getFormId());
+        getDao().createUpdate().set(DynamicFormEntity::getVersion, NativeSql.of("version+1")).execute();
         return id;
     }
 
@@ -273,7 +263,7 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
                 .map(this::saveOrUpdateColumn)
                 .collect(Collectors.toList());
 
-        formId.forEach(getDao()::incrementVersion);
+        getDao().createUpdate().set(DynamicFormEntity::getVersion, NativeSql.of("version+1")).execute();
         return columnIds;
 
     }
@@ -313,11 +303,13 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
         DynamicFormColumnEntity oldColumn = DefaultDSLQueryService
                 .createQuery(formColumnDao)
                 .where(DynamicFormColumnEntity.id, formId)
-                .single();
+                .fetchOne()
+                .orElseThrow(() -> new NotFoundException("表单不存在"));
+
         assertNotNull(oldColumn);
         DefaultDSLDeleteService.createDelete(formColumnDao)
                 .where(DynamicFormDeployLogEntity.id, formId)
-                .exec();
+                .execute();
         return oldColumn;
     }
 
@@ -332,7 +324,7 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
 
         DefaultDSLDeleteService.createDelete(formColumnDao)
                 .where(DynamicFormColumnEntity.formId, id)
-                .exec();
+                .execute();
         return super.deleteByPk(id);
     }
 
@@ -347,11 +339,11 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
                 .createQuery(formColumnDao)
                 .where()
                 .in(DynamicFormColumnEntity.id, ids)
-                .listNoPaging();
+                .fetch();
 
         DefaultDSLDeleteService.createDelete(formColumnDao)
                 .where().in(DynamicFormDeployLogEntity.id, ids)
-                .exec();
+                .execute();
         return oldColumns;
     }
 
@@ -360,8 +352,8 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
         Objects.requireNonNull(formId);
         return DefaultDSLQueryService.createQuery(formColumnDao)
                 .where(DynamicFormColumnEntity.formId, formId)
-                .orderByAsc(DynamicFormColumnEntity.sortIndex)
-                .listNoPaging();
+                .orderBy(asc(DynamicFormColumnEntity.sortIndex))
+                .fetch();
     }
 
     @Override
@@ -415,7 +407,7 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
         }
         List<DynamicFormColumnEntity> columns = selectColumnsByFormId(formId);
         deploy(formEntity, columns, true);
-        createUpdate().set(DynamicFormEntity.deployed, true).where(DynamicFormEntity.id, formId).exec();
+        createUpdate().set(DynamicFormEntity.deployed, true).where(DynamicFormEntity.id, formId).execute();
         try {
             dynamicFormDeployLogService.insert(createDeployLog(formEntity, columns));
             eventPublisher.publishEvent(new FormDeployEvent(formId));
@@ -426,161 +418,77 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
     }
 
     public void deploy(DynamicFormEntity form, List<DynamicFormColumnEntity> columns, boolean updateMeta) {
-        RDBDatabase database = StringUtils.isEmpty(form.getDataSourceId())
-                ? databaseRepository.getDefaultDatabase(form.getDatabaseName())
-                : databaseRepository.getDatabase(form.getDataSourceId(),form.getDatabaseName());
-
-        initDatabase(database);
-        RDBTableMetaData metaData = buildTable(database, form, columns);
-        try {
-            if (!database.getMeta().getParser().tableExists(metaData.getName())) {
-                database.createTable(metaData);
-            } else {
-                if (!updateMeta) {
-                    database.reloadTable(metaData);
-                } else {
-                    database.alterTable(metaData);
-                }
-            }
-        } catch (SQLException e) {
-            throw new DynamicFormException("部署失败:" + e.getMessage(), e);
-        }
+//        RDBDatabase database = StringUtils.isEmpty(form.getDataSourceId())
+//                ? databaseRepository.getDefaultDatabase(form.getDatabaseName())
+//                : databaseRepository.getDatabase(form.getDataSourceId(),form.getDatabaseName());
+//
+//
+//        RDBTableMetaData metaData = buildTable(database, form, columns);
+//        try {
+//            if (!database.getMeta().getParser().tableExists(metaData.getName())) {
+//                database.createTable(metaData);
+//            } else {
+//                if (!updateMeta) {
+//                    database.reloadTable(metaData);
+//                } else {
+//                    database.alterTable(metaData);
+//                }
+//            }
+//        } catch (SQLException e) {
+//            throw new DynamicFormException("部署失败:" + e.getMessage(), e);
+//        }
     }
 
-    protected Set<Correlation> buildCorrelations(String correlations) {
-        if (StringUtils.isEmpty(correlations)) {
-            return new LinkedHashSet<>();
-        }
-        JSONArray correlationsConfig = JSON.parseArray(correlations);
-        Set<Correlation> correlations1 = new LinkedHashSet<>();
-        for (int i = 0; i < correlationsConfig.size(); i++) {
-            JSONObject single = correlationsConfig.getJSONObject(i);
+    protected RDBTableMetadata buildTable(RDBSchemaMetadata schema, DynamicFormEntity form, List<DynamicFormColumnEntity> columns) {
+        RDBTableMetadata table = schema.newTable(form.getDatabaseTableName());
+        table.setComment(form.getDescribe());
 
-            String target = single.getString("target");
-            String alias = single.getString("alias");
-            String condition = single.getString("condition");
-            Objects.requireNonNull(target);
-            Objects.requireNonNull(condition);
-            Correlation correlation = new Correlation(target, alias, condition);
-            correlation.setJoin(Correlation.JOIN.valueOf(String.valueOf(single.getOrDefault("join", "LEFT")).toUpperCase()));
-            JSONObject properties = single.getJSONObject("properties");
-
-            if (properties != null) {
-                properties.forEach(correlation::setProperty);
-            }
-            correlations1.add(correlation);
-        }
-
-        return correlations1;
-
-    }
-
-    protected Map<String, Trigger> buildTrigger(String config) {
-        if (StringUtils.isEmpty(config)) {
-            return new HashMap<>();
-        }
-        JSONArray triggerConfig = JSON.parseArray(config);
-        Map<String, Trigger> triggers = new HashMap<>();
-        for (int i = 0; i < triggerConfig.size(); i++) {
-            JSONObject single = triggerConfig.getJSONObject(i);
-            String trigger = single.getString("trigger");
-            String language = single.getString("language");
-            String script = single.getString("script");
-            String scriptId = DigestUtils.md5Hex(script);
-            try {
-                DynamicScriptEngine engine = DynamicScriptEngineFactory.getEngine(language);
-                if (engine == null) {
-                    throw new UnsupportedOperationException("not support script language : " + language);
-                }
-                if (!engine.compiled(scriptId)) {
-                    engine.compile(scriptId, script);
-                }
-                Trigger singleTrigger = new ScriptTraggerSupport(engine, scriptId);
-                triggers.put(trigger, singleTrigger);
-            } catch (Exception e) {
-                throw new BusinessException("compile script error :" + e.getMessage(), e);
-            }
-        }
-        return triggers;
-    }
-
-    protected RDBTableMetaData buildTable(RDBDatabase database, DynamicFormEntity form, List<DynamicFormColumnEntity> columns) {
-        RDBTableMetaData metaData = new RDBTableMetaData();
-        metaData.setComment(form.getDescribe());
-        metaData.setName(form.getDatabaseTableName());
-        if (null != form.getProperties()) {
-            metaData.setProperties(form.getProperties());
-        }
-        metaData.setProperty("version", form.getVersion());
-        metaData.setProperty("formId", form.getId());
-
-        metaData.setAlias(form.getAlias());
-        metaData.setCorrelations(buildCorrelations(form.getCorrelations()));
-        metaData.setDatabaseMetaData(database.getMeta());
-        buildTrigger(form.getTriggers()).forEach(metaData::on);
-
+        table.setAlias(form.getAlias());
         columns.forEach(column -> {
-            RDBColumnMetaData columnMeta = new RDBColumnMetaData();
+            RDBColumnMetadata columnMeta = table.newColumn();
             columnMeta.setName(column.getColumnName());
             columnMeta.setAlias(column.getAlias());
             columnMeta.setComment(column.getDescribe());
             columnMeta.setLength(column.getLength() == null ? 0 : column.getLength());
             columnMeta.setPrecision(column.getPrecision() == null ? 0 : column.getPrecision());
             columnMeta.setScale(column.getScale() == null ? 0 : column.getScale());
-            columnMeta.setJdbcType(JDBCType.valueOf(column.getJdbcType()));
-            columnMeta.setJavaType(getJavaType(column.getJavaType()));
+            columnMeta.setJdbcType(JDBCType.valueOf(column.getJdbcType()), getJavaType(column.getJavaType()));
+
             columnMeta.setProperties(column.getProperties() == null ? new HashMap<>() : column.getProperties());
-            if (!CollectionUtils.isEmpty(column.getValidator())) {
-                columnMeta.setValidator(new HashSet<>(column.getValidator()));
-            }
-            if (StringUtils.isEmpty(column.getDataType())) {
-                Dialect dialect = database.getMeta().getDialect();
-                columnMeta.setDataType(dialect.buildDataType(columnMeta));
-            } else {
-                columnMeta.setDataType(column.getDataType());
-            }
-            columnMeta.setValueConverter(initColumnValueConvert(columnMeta.getJdbcType(), columnMeta.getJavaType()));
+
+            columnMeta.setValueCodec(initColumnValueConvert(columnMeta.getType().getSqlType(), columnMeta.getJavaType()));
 
             if (optionalConvertBuilder != null && null != column.getDictConfig()) {
                 try {
                     DictConfig config = JSON.parseObject(column.getDictConfig(), DictConfig.class);
                     config.setColumn(columnMeta);
-                    columnMeta.setOptionConverter(optionalConvertBuilder.build(config));
-                    ValueConverter converter = optionalConvertBuilder.buildValueConverter(config);
+
+                    columnMeta.setDictionaryCodec(optionalConvertBuilder.build(config));
+                    ValueCodec converter = optionalConvertBuilder.buildValueConverter(config);
                     if (null != converter) {
-                        columnMeta.setValueConverter(converter);
+                        columnMeta.setValueCodec(converter);
                     }
                 } catch (Exception e) {
                     logger.warn("创建字典转换器失败", e);
                 }
             }
-            customColumnSetting(database, form, metaData, column, columnMeta);
-            metaData.addColumn(columnMeta);
+            table.addColumn(columnMeta);
         });
-        if (objectWrapperFactory != null) {
-            metaData.setObjectWrapper(objectWrapperFactory.createObjectWrapper(metaData));
-        }
-        metaData.setValidator(validatorFactory.createValidator(metaData));
 
-        customTableSetting(database, form, metaData);
         //没有主键并且没有id字段
-        if (metaData.getColumns().stream().noneMatch(RDBColumnMetaData::isPrimaryKey) && metaData.findColumn("id") == null) {
-            RDBColumnMetaData primaryKey = createPrimaryKeyColumn();
-            Dialect dialect = database.getMeta().getDialect();
-            primaryKey.setDataType(dialect.buildDataType(primaryKey));
-            metaData.addColumn(primaryKey);
+        if (table.getColumns().stream().noneMatch(RDBColumnMetadata::isPrimaryKey) &&! table.findColumn("id").isPresent()) {
+            table.addColumn(createPrimaryKeyColumn(table));
         }
 
-        return metaData;
+        return table;
     }
 
-    protected RDBColumnMetaData createPrimaryKeyColumn() {
-        RDBColumnMetaData id = new RDBColumnMetaData();
+    protected RDBColumnMetadata createPrimaryKeyColumn(RDBTableMetadata schemaMetadata) {
+        RDBColumnMetadata id = schemaMetadata.newColumn();
         id.setName("id");
-        id.setJdbcType(JDBCType.VARCHAR);
-        id.setJavaType(String.class);
+        id.setJdbcType(JDBCType.VARCHAR, String.class);
         id.setLength(32);
-        id.setDefaultValue(IDGenerator.MD5::generate);
+        id.setDefaultValue((RuntimeDefaultValue) IDGenerator.MD5::generate);
         id.setComment("主键");
         id.setPrimaryKey(true);
         id.setNotNull(true);
@@ -588,111 +496,37 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
         return id;
     }
 
-    protected void customTableSetting(RDBDatabase database
-            , DynamicFormEntity formEntity
-            , RDBTableMetaData table) {
-        TableInitializeContext context = new TableInitializeContext() {
-            @Override
-            public RDBDatabase getDatabase() {
-                return database;
-            }
 
-            @Override
-            public DynamicFormEntity getFormEntity() {
-                return formEntity;
-            }
-
-            @Override
-            public RDBTableMetaData getTable() {
-                return table;
-            }
-        };
-        if (!CollectionUtils.isEmpty(initializeCustomizers)) {
-            initializeCustomizers.forEach(customizer -> customizer.customTableSetting(context));
-        }
-    }
-
-    protected void customColumnSetting(RDBDatabase database
-            , DynamicFormEntity formEntity
-            , RDBTableMetaData table
-            , DynamicFormColumnEntity columnEntity
-            , RDBColumnMetaData column) {
-        ColumnInitializeContext context = new ColumnInitializeContext() {
-            @Override
-            public DynamicFormColumnEntity getColumnEntity() {
-                return columnEntity;
-            }
-
-            @Override
-            public RDBColumnMetaData getColumn() {
-                return column;
-            }
-
-            @Override
-            public RDBDatabase getDatabase() {
-                return database;
-            }
-
-            @Override
-            public DynamicFormEntity getFormEntity() {
-                return formEntity;
-            }
-
-            @Override
-            public RDBTableMetaData getTable() {
-                return table;
-            }
-        };
-        if (!CollectionUtils.isEmpty(initializeCustomizers)) {
-            initializeCustomizers.forEach(customer -> customer.customTableColumnSetting(context));
-        }
-    }
-
-    protected ValueConverter initColumnValueConvert(JDBCType jdbcType, Class javaType) {
+    protected ValueCodec initColumnValueConvert(SQLType jdbcType, Class javaType) {
         boolean isBasicClass = !classMapping
                 .values()
-                .contains(javaType) || javaType != Map.class || javaType != List.class;
+                .contains(javaType)
+                && javaType != Map.class
+                && javaType != List.class;
 
         if (javaType.isEnum() && EnumDict.class.isAssignableFrom(javaType)) {
             return new EnumDictValueConverter<EnumDict>(() -> (List) Arrays.asList(javaType.getEnumConstants()));
         }
-        switch (jdbcType) {
+        switch (((JDBCType) jdbcType)) {
             case BLOB:
                 if (!isBasicClass) {
-                    return new JSONValueConverter(javaType, new BlobValueConverter());
+                    return JsonValueCodec.of(javaType);
                 }
-                return new BlobValueConverter();
-            case CLOB:
-                if (!isBasicClass) {
-                    return new JSONValueConverter(javaType, new ClobValueConverter());
-                }
-                return new ClobValueConverter();
+                return BlobValueCodec.INSTANCE;
             case NUMERIC:
             case BIGINT:
             case INTEGER:
             case SMALLINT:
             case TINYINT:
-                return new NumberValueConverter(javaType);
+                return new NumberValueCodec(javaType);
             case DATE:
             case TIMESTAMP:
             case TIME:
-                return new DateTimeConverter("yyyy-MM-dd HH:mm:ss", javaType);
+                return new DateTimeCodec("yyyy-MM-dd HH:mm:ss", javaType);
             default:
-                if (!isBasicClass) {
-                    return new JSONValueConverter(javaType, new DefaultValueConverter());
-                }
-                if (javaType == String.class && (jdbcType == JDBCType.VARCHAR || jdbcType == JDBCType.NVARCHAR)) {
-                    return new DefaultValueConverter() {
-                        @Override
-                        public Object getData(Object value) {
-                            if (value instanceof Number) {
-                                return value.toString();
-                            }
-                            return super.getData(value);
-                        }
-                    };
-                }
-                return new DefaultValueConverter();
+
+
+                return OriginalValueCodec.INSTANCE;
         }
 
     }

@@ -27,7 +27,6 @@ import org.hswebframework.web.authorization.twofactor.TwoFactorTokenManager;
 import org.hswebframework.web.authorization.twofactor.defaults.HashMapTwoFactorTokenManager;
 import org.hswebframework.web.service.authorization.simple.SimpleAuthenticationManager;
 import org.hswebframework.web.service.authorization.simple.totp.TotpTwoFactorProvider;
-import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.*;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -42,7 +41,6 @@ import org.springframework.context.annotation.Primary;
 @Configuration
 @ComponentScan({"org.hswebframework.web.service.authorization.simple"
         , "org.hswebframework.web.authorization.controller"})
-@MapperScan("org.hswebframework.web.authorization.dao")
 @AutoConfigureBefore(value = {
         DefaultAuthorizationAutoConfiguration.class
 }, name = "org.hswebframework.web.authorization.basic.configuration.AuthorizingHandlerAutoConfiguration")

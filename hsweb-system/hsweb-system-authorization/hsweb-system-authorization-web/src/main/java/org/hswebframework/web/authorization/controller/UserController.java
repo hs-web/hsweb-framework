@@ -47,7 +47,7 @@ import static org.hswebframework.web.controller.message.ResponseMessage.ok;
 @Authorize(permission = "user", description = "用户管理")
 @Api(value = "用户管理", tags = "权限-用户管理")
 public class UserController implements
-        QueryController<UserEntity, String, QueryParamEntity>,
+        QueryController<UserEntity, String>,
         CreateController<BindRoleUserEntity, String, BindRoleUserEntity> {
 
     @Autowired
