@@ -15,8 +15,8 @@
         <result property="updateTime" column="update_time" javaType="Long" jdbcType="DECIMAL"/>
         <result property="deployed" column="is_deployed" javaType="Boolean" jdbcType="DECIMAL"/>
         <result property="alias" column="alias" javaType="String" jdbcType="VARCHAR"/>
-        <result property="triggers" column="triggers" javaType="String" jdbcType="CLOB"/>
-        <result property="correlations" column="correlations" javaType="String" jdbcType="CLOB"/>
+        <result property="triggers" column="triggers" javaType="String" jdbcType="LONGVARCHAR"/>
+        <result property="correlations" column="correlations" javaType="String" jdbcType="LONGVARCHAR"/>
         <result property="dataSourceId" column="data_source_id" javaType="String" jdbcType="VARCHAR"/>
         <result property="properties" column="properties" javaType="java.util.Map" jdbcType="CLOB"/>
         <result property="type" column="type" javaType="String" jdbcType="VARCHAR"/>

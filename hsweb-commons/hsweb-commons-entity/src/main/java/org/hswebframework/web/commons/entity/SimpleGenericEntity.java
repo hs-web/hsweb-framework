@@ -20,6 +20,8 @@ package org.hswebframework.web.commons.entity;
 
 import lombok.SneakyThrows;
 
+import javax.persistence.Column;
+import javax.persistence.Id;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -31,6 +33,8 @@ public abstract class SimpleGenericEntity<PK> implements GenericEntity<PK> {
 
     private static final long serialVersionUID = 4546315942526096290L;
 
+    @Column
+    @Id
     private PK id;
 
     private Map<String, Object> properties;

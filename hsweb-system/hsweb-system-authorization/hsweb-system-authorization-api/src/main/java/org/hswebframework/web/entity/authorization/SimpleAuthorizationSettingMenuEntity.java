@@ -19,8 +19,12 @@ package org.hswebframework.web.entity.authorization;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hswebframework.ezorm.rdb.mapping.annotation.ColumnType;
 import org.hswebframework.web.commons.entity.SimpleTreeSortSupportEntity;
 
+import javax.persistence.Column;
+import javax.persistence.Table;
+import java.sql.JDBCType;
 import java.util.List;
 
 /**
@@ -31,16 +35,23 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
+@Table(name = "s_autz_menu")
 public class SimpleAuthorizationSettingMenuEntity extends SimpleTreeSortSupportEntity<String> implements AuthorizationSettingMenuEntity {
     private static final long serialVersionUID = 4311480526446922229L;
     //菜单id
+    @Column(name = "menu_id",length = 32)
     private String menuId;
     //设置id
+    @Column(name = "setting_id",length = 32)
     private String settingId;
     //状态
+    @Column
     private Byte   status;
     //其他配置内容
+    @Column
+    @ColumnType(jdbcType = JDBCType.LONGVARCHAR)
     private String config;
+
     private List<AuthorizationSettingMenuEntity> children;
 
 }

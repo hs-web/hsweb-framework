@@ -23,6 +23,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hswebframework.web.commons.entity.SimpleTreeSortSupportEntity;
 
+import javax.persistence.Column;
+import javax.persistence.Table;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,26 +37,33 @@ import java.util.stream.Collectors;
 @Getter
 @Setter
 @NoArgsConstructor
+@Table(name = "s_menu")
 public class SimpleMenuEntity extends SimpleTreeSortSupportEntity<String>
         implements MenuEntity {
 
     private static final long serialVersionUID = 6942822850955576468L;
     //菜单名称
+    @Column
     private String name;
 
     //备注
+    @Column
     private String describe;
 
     //权限ID
+    @Column(name = "permission_id")
     private String permissionId;
 
     //菜单对应的url
+    @Column(length = 1024)
     private String url;
 
     //图标
+    @Column(length = 32)
     private String icon;
 
     //状态
+    @Column
     private Byte status;
 
     //子菜单

@@ -3,62 +3,47 @@ package org.hswebframework.web.starter.easyorm;
 
 import lombok.SneakyThrows;
 import org.hswebframework.ezorm.core.meta.Feature;
-import org.hswebframework.ezorm.rdb.executor.SyncSqlExecutor;
 import org.hswebframework.ezorm.rdb.mapping.EntityColumnMapping;
 import org.hswebframework.ezorm.rdb.mapping.EntityManager;
 import org.hswebframework.ezorm.rdb.mapping.MappingFeatureType;
 import org.hswebframework.ezorm.rdb.mapping.jpa.JpaEntityTableMetadataParser;
-import org.hswebframework.ezorm.rdb.mapping.parser.DataTypeResolver;
 import org.hswebframework.ezorm.rdb.mapping.parser.EntityTableMetadataParser;
-import org.hswebframework.ezorm.rdb.mapping.parser.ValueCodecResolver;
 import org.hswebframework.ezorm.rdb.metadata.RDBDatabaseMetadata;
 import org.hswebframework.ezorm.rdb.operator.DatabaseOperator;
 import org.hswebframework.ezorm.rdb.operator.DefaultDatabaseOperator;
+import org.hswebframework.web.commons.entity.factory.EntityFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import javax.sql.DataSource;
 import java.util.List;
-import java.util.Optional;
 
 @Configuration
 @EnableConfigurationProperties(EasyormProperties.class)
+@EnableEasyormRepository("org.hswebframework.web.**.*Entity")
 public class EasyOrmConfiguration {
 
     @Autowired
     private EasyormProperties properties;
 
     @Bean
-    @ConditionalOnBean(DataSource.class)
-    public SyncSqlExecutor syncSqlExecutor(DataSource dataSource) {
-        return new DataSourceJdbcSyncSqlExecutor() {
-            @Override
-            protected DataSource getDataSource() {
-                return dataSource;
-            }
-        };
-    }
-
-    @Bean
     @ConditionalOnMissingBean
-    public EntityManager entityManager(EntityTableMetadataResolver resolver) {
+    public EntityManager entityManager(EntityTableMetadataResolver resolver, EntityFactory entityFactory) {
         return new EntityManager() {
             @Override
             @SneakyThrows
             public <E> E newInstance(Class<E> type) {
-                return type.newInstance();
+                return entityFactory.newInstance(type);
             }
 
             @Override
             public EntityColumnMapping getMapping(Class entity) {
 
-                return resolver.resolve(entity)
+                return resolver.resolve(entityFactory.getInstanceType(entity))
                         .getFeature(MappingFeatureType.columnPropertyMapping.createFeatureId(entity))
                         .map(EntityColumnMapping.class::cast)
                         .orElse(null);
@@ -81,14 +66,12 @@ public class EasyOrmConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public EntityTableMetadataParser jpaEntityTableMetadataParser(DatabaseOperator operator,
-                                                                  Optional<DataTypeResolver> resolver,
-                                                                  Optional<ValueCodecResolver> codecResolver) {
+    public EntityTableMetadataParser jpaEntityTableMetadataParser(DatabaseOperator operator) {
         JpaEntityTableMetadataParser parser = new JpaEntityTableMetadataParser();
         parser.setDatabaseMetadata(operator.getMetadata());
-
-        resolver.ifPresent(parser::setDataTypeResolver);
-        codecResolver.ifPresent(parser::setValueCodecResolver);
+//
+//        resolver.ifPresent(parser::setDataTypeResolver);
+//        codecResolver.ifPresent(parser::setValueCodecResolver);
 
         return parser;
     }

@@ -33,6 +33,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.hibernate.javax.persistence</groupId>
+            <artifactId>hibernate-jpa-2.1-api</artifactId>
+            <version>1.0.2.Final</version>
+        </dependency>
+        <dependency>
             <groupId>${project.parent.groupId}</groupId>
             <artifactId>hsweb-core</artifactId>
             <version>${project.parent.version}</version>

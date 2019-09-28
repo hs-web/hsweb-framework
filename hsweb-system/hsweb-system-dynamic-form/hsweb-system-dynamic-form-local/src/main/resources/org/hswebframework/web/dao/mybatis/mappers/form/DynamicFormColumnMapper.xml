@@ -16,10 +16,10 @@
         <result property="length" column="length" javaType="Integer" jdbcType="DECIMAL"/>
         <result property="precision" column="precision" javaType="Integer" jdbcType="DECIMAL"/>
         <result property="scale" column="scale" javaType="Integer" jdbcType="DECIMAL"/>
-        <result property="dictConfig" column="dict_config" javaType="String" jdbcType="CLOB"/>
+        <result property="dictConfig" column="dict_config" javaType="String" jdbcType="LONGVARCHAR"/>
         <result property="sortIndex" column="sort_index" javaType="Long" jdbcType="DECIMAL"/>
-        <result property="properties" column="properties" javaType="java.util.Map" jdbcType="CLOB"/>
-        <result property="validator" column="validator" javaType="java.util.List" jdbcType="CLOB"/>
+        <result property="properties" column="properties" javaType="java.util.Map" jdbcType="LONGVARCHAR"/>
+        <result property="validator" column="validator" javaType="java.util.List" jdbcType="LONGVARCHAR"/>
     </resultMap>
 
     <!--用于动态生成sql所需的配置-->
