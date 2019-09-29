@@ -33,7 +33,7 @@ public abstract class SimpleGenericEntity<PK> implements GenericEntity<PK> {
 
     private static final long serialVersionUID = 4546315942526096290L;
 
-    @Column
+    @Column(length = 32)
     @Id
     private PK id;
 

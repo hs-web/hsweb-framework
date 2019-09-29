@@ -1,5 +1,6 @@
 package org.hswebframework.web.starter.init.simple;
 
+import org.hswebframework.web.starter.Dependency;
 import org.hswebframework.web.starter.SystemVersion;
 import org.hswebframework.web.starter.init.DependencyInstaller;
 import org.hswebframework.web.starter.init.InitializeCallBack;
@@ -14,7 +15,7 @@ import java.util.Map;
  * @author zhouhao
  */
 public class SimpleDependencyInstaller implements DependencyInstaller {
-    SystemVersion.Dependency dependency;
+    Dependency dependency;
     InstallerCallBack        installer;
     UpgradeCallBack          upgrader;
     InstallerCallBack        unInstaller;
@@ -24,7 +25,7 @@ public class SimpleDependencyInstaller implements DependencyInstaller {
     public SimpleDependencyInstaller() {
     }
 
-    public SystemVersion.Dependency getDependency() {
+    public Dependency getDependency() {
         return dependency;
     }
 
@@ -52,7 +53,7 @@ public class SimpleDependencyInstaller implements DependencyInstaller {
         }
     }
 
-    public void doUpgrade(Map<String, Object> context, SystemVersion.Dependency installed) {
+    public void doUpgrade(Map<String, Object> context, Dependency installed) {
         SimpleDependencyUpgrader simpleDependencyUpgrader =
                 new SimpleDependencyUpgrader(installed, dependency, context);
         context.put("upgrader", simpleDependencyUpgrader);
@@ -62,7 +63,7 @@ public class SimpleDependencyInstaller implements DependencyInstaller {
     }
 
     @Override
-    public DependencyInstaller setup(SystemVersion.Dependency dependency) {
+    public DependencyInstaller setup(Dependency dependency) {
         this.dependency = dependency;
         return this;
     }

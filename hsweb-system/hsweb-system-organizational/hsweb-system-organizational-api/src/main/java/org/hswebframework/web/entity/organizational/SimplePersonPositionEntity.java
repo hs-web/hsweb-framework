@@ -21,6 +21,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hswebframework.web.commons.entity.SimpleGenericEntity;
+import org.hswebframework.web.commons.entity.annotation.ImplementFor;
+
+import javax.persistence.Column;
+import javax.persistence.Index;
+import javax.persistence.Table;
 
 /**
  * 人员职位关联
@@ -31,11 +36,19 @@ import org.hswebframework.web.commons.entity.SimpleGenericEntity;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class SimplePersonPositionEntity extends SimpleGenericEntity<String> implements PersonPositionEntity {
+@Table(name = "s_person_position",indexes = {
+        @Index(name = "idx_person_per_pid",columnList = "person_id"),
+        @Index(name = "idx_person_pos_pid",columnList = "position_id")
+
+})
+@ImplementFor(PersonPositionEntity.class)
+public class SimplePersonPositionEntity  implements PersonPositionEntity {
     private static final long serialVersionUID = -7102840729564722732L;
     //人员id
+    @Column(name = "person_id")
     private String personId;
     //职位id
+    @Column(name = "position_id")
     private String positionId;
 
 }

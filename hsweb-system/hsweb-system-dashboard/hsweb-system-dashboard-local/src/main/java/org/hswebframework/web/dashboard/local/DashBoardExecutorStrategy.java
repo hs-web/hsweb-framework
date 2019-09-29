@@ -1,7 +1,7 @@
 package org.hswebframework.web.dashboard.local;
 
 import org.hswebframework.web.authorization.Authentication;
-import org.hswebframework.web.dashboard.DashBoardConfigEntity;
+import org.hswebframework.web.dashboard.entity.DashBoardConfigEntity;
 
 public interface DashBoardExecutorStrategy {
 

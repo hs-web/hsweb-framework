@@ -6,7 +6,7 @@ import org.hswebframework.expands.script.engine.DynamicScriptEngineFactory;
 import org.hswebframework.ezorm.rdb.executor.SqlRequests;
 import org.hswebframework.ezorm.rdb.executor.SyncSqlExecutor;
 import org.hswebframework.web.authorization.Authentication;
-import org.hswebframework.web.dashboard.DashBoardConfigEntity;
+import org.hswebframework.web.dashboard.entity.DashBoardConfigEntity;
 import org.hswebframework.web.dashboard.local.DashBoardExecutorStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

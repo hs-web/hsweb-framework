@@ -20,6 +20,7 @@ import lombok.*;
 import org.hswebframework.web.commons.entity.SimpleTreeSortSupportEntity;
 
 import javax.persistence.Column;
+import javax.persistence.Index;
 import javax.persistence.Table;
 import java.util.List;
 
@@ -33,7 +34,9 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "s_department")
+@Table(name = "s_department",indexes = {
+        @Index(name = "idx_dept_org_id",columnList = "org_id")
+})
 public class SimpleDepartmentEntity extends SimpleTreeSortSupportEntity<String> implements DepartmentEntity {
     private static final long serialVersionUID = -2137579829759620323L;
     //名称

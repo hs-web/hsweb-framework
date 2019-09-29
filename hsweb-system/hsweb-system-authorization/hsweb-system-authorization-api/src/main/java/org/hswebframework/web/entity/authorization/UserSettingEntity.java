@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.validator.constraints.NotBlank;
 import org.hswebframework.ezorm.rdb.mapping.annotation.ColumnType;
+import org.hswebframework.ezorm.rdb.mapping.annotation.EnumCodec;
 import org.hswebframework.web.authorization.setting.UserSettingPermission;
 import org.hswebframework.web.commons.entity.SimpleGenericEntity;
 import org.hswebframework.web.validator.group.CreateGroup;
@@ -53,7 +54,8 @@ public class UserSettingEntity extends SimpleGenericEntity<String> {
     private Date updateTime;
 
     @Column(name = "permission")
-    @ColumnType(jdbcType = JDBCType.VARCHAR, javaType = String.class)
+    @ColumnType(javaType = String.class)
+    @EnumCodec
     private UserSettingPermission permission;
 
     public boolean hasPermission(UserSettingPermission... permissions) {

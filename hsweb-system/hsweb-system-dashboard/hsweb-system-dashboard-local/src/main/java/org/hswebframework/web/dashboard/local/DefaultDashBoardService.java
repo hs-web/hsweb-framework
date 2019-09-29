@@ -1,8 +1,8 @@
 package org.hswebframework.web.dashboard.local;
 
 import org.hswebframework.web.dao.CrudDao;
-import org.hswebframework.web.dashboard.DashBoardConfigEntity;
 import org.hswebframework.web.dashboard.DashBoardService;
+import org.hswebframework.web.dashboard.entity.DashBoardConfigEntity;
 import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.service.EnableCacheAllEvictGenericEntityService;
 import org.springframework.cache.annotation.CacheConfig;

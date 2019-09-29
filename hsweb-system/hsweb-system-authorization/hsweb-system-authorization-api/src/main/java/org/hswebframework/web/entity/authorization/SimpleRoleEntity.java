@@ -20,7 +20,6 @@ public class SimpleRoleEntity extends SimpleGenericEntity<String> implements Rol
     private static final long serialVersionUID = -2857131363164004807L;
 
     @Column
-    @Id
     private String name;
 
     @Column

@@ -17,3 +17,6 @@ logging:
     org.springframework: WARN
     org.hswebframework: WARN
     org.hswebframework.web: DEBUG
+    org.hswebframework.ezorm: DEBUG
+easyorm:
+  default-schema: PUBLIC

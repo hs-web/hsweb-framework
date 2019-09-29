@@ -1,22 +1,34 @@
 package org.hswebframework.web.entity.form;
 
+import org.hswebframework.ezorm.rdb.mapping.annotation.ColumnType;
 import org.hswebframework.web.commons.entity.SimpleGenericEntity;
+
+import javax.persistence.Column;
+import javax.persistence.Table;
+import java.sql.JDBCType;
 
 /**
  * 表单发布日志
  *
  * @author hsweb-generator-online
  */
+@Table(name = "s_dyn_form_log")
 public class SimpleDynamicFormDeployLogEntity extends SimpleGenericEntity<String> implements DynamicFormDeployLogEntity {
     //表单ID
+    @Column(name = "form_id", length = 32)
     private String formId;
     //发布的版本
-    private Long   version;
+    @Column
+    private Long version;
     //发布时间
-    private Long   deployTime;
+    @Column(name = "deploy_time")
+    private Long deployTime;
     //部署的元数据
+    @Column(name = "meta_data")
+    @ColumnType(jdbcType = JDBCType.LONGVARCHAR)
     private String metaData;
     //部署状态
+    @Column
     private Byte status;
 
     /**

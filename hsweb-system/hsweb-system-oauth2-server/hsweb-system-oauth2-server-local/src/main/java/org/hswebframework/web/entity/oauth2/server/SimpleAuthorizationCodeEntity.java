@@ -19,81 +19,45 @@
 package org.hswebframework.web.entity.oauth2.server;
 
 
+import lombok.Getter;
+import lombok.Setter;
+import org.hswebframework.ezorm.rdb.mapping.annotation.ColumnType;
+import org.hswebframework.ezorm.rdb.mapping.annotation.JsonCodec;
+import org.hswebframework.web.commons.entity.annotation.ImplementFor;
+
+import javax.persistence.Column;
+import javax.persistence.Table;
+import java.sql.JDBCType;
 import java.util.Set;
 
 /**
  * @author zhouhao
  */
+@Getter
+@Setter
+@Table(name = "s_oauth2_auth_code")
+@ImplementFor(AuthorizationCodeEntity.class)
 public class SimpleAuthorizationCodeEntity implements AuthorizationCodeEntity {
+
+    @Column(name = "client_id")
     private String clientId;
 
+    @Column(name = "user_id")
     private String userId;
 
+    @Column
     private String code;
 
+    @Column(name = "create_time")
     private Long createTime;
 
+    @Column
+    @ColumnType(jdbcType = JDBCType.LONGVARCHAR)
+    @JsonCodec
     private Set<String> scope;
 
+    @Column(name = "redirect_uri", length = 1024)
     private String redirectUri;
 
-    @Override
-    public String getRedirectUri() {
-        return redirectUri;
-    }
 
-    @Override
-    public void setRedirectUri(String redirectUri) {
-        this.redirectUri = redirectUri;
-    }
-
-    @Override
-    public Set<String> getScope() {
-        return scope;
-    }
-
-    @Override
-    public void setScope(Set<String> scope) {
-        this.scope = scope;
-    }
-
-    @Override
-    public String getClientId() {
-        return clientId;
-    }
-
-    @Override
-    public void setClientId(String clientId) {
-        this.clientId = clientId;
-    }
-
-    @Override
-    public String getUserId() {
-        return userId;
-    }
-
-    @Override
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
-    @Override
-    public String getCode() {
-        return code;
-    }
-
-    @Override
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    @Override
-    public Long getCreateTime() {
-        return createTime;
-    }
-
-    @Override
-    public void setCreateTime(Long createTime) {
-        this.createTime = createTime;
-    }
 }

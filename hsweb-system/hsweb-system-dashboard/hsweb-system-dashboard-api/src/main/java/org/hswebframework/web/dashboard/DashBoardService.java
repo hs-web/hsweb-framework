@@ -1,5 +1,6 @@
 package org.hswebframework.web.dashboard;
 
+import org.hswebframework.web.dashboard.entity.DashBoardConfigEntity;
 import org.hswebframework.web.service.CrudService;
 
 import java.util.List;

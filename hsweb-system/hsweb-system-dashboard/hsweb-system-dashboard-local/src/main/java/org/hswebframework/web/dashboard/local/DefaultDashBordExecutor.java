@@ -2,7 +2,7 @@ package org.hswebframework.web.dashboard.local;
 
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.AuthenticationPredicate;
-import org.hswebframework.web.dashboard.DashBoardConfigEntity;
+import org.hswebframework.web.dashboard.entity.DashBoardConfigEntity;
 import org.hswebframework.web.dashboard.executor.DashBoardExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

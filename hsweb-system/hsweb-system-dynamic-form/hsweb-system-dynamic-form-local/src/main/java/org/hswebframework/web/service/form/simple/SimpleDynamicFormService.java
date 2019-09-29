@@ -9,6 +9,7 @@ import org.hswebframework.ezorm.rdb.codec.DateTimeCodec;
 import org.hswebframework.ezorm.rdb.codec.JsonValueCodec;
 import org.hswebframework.ezorm.rdb.codec.NumberValueCodec;
 import org.hswebframework.ezorm.rdb.mapping.SyncRepository;
+import org.hswebframework.ezorm.rdb.mapping.defaults.record.Record;
 import org.hswebframework.ezorm.rdb.metadata.RDBColumnMetadata;
 import org.hswebframework.ezorm.rdb.metadata.RDBSchemaMetadata;
 import org.hswebframework.ezorm.rdb.metadata.RDBTableMetadata;
@@ -46,6 +47,7 @@ import java.math.BigInteger;
 import java.sql.JDBCType;
 import java.sql.SQLType;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import static org.hswebframework.ezorm.rdb.operator.dml.query.SortOrder.asc;
@@ -86,6 +88,8 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;
+
+    private Map<String, SyncRepository<Record, String>> formRepositoryCache = new ConcurrentHashMap<>();
 
     @Override
     protected IDGenerator<String> getIDGenerator() {
@@ -211,6 +215,7 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
                 .where(DynamicFormEntity.id, formId)
                 .execute();
         eventPublisher.publishEvent(new FormDeployEvent(formId));
+        formRepositoryCache.remove(formId);
     }
 
     private String saveOrUpdate0(DynamicFormColumnEntity columnEntity) {
@@ -372,6 +377,12 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
     }
 
     @Override
+    public SyncRepository<Record, String> getRepository(String formId) {
+
+        return formRepositoryCache.get(formId);
+    }
+
+    @Override
     @Cacheable(value = "dyn-form-deploy", key = "'form-deploy:'+#formId+':latest'")
     public DynamicFormColumnBindEntity selectLatestDeployed(String formId) {
         DynamicFormDeployLogEntity entity = dynamicFormDeployLogService.selectLastDeployed(formId);
@@ -405,6 +416,7 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
         createUpdate().set(DynamicFormEntity.deployed, true).where(DynamicFormEntity.id, formId).execute();
         try {
             dynamicFormDeployLogService.insert(createDeployLog(formEntity, columns));
+
             eventPublisher.publishEvent(new FormDeployEvent(formId));
         } catch (Exception e) {
             unDeploy(formId);
@@ -413,25 +425,18 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
     }
 
     public void deploy(DynamicFormEntity form, List<DynamicFormColumnEntity> columns, boolean updateMeta) {
-//        RDBDatabase database = StringUtils.isEmpty(form.getDataSourceId())
-//                ? databaseRepository.getDefaultDatabase(form.getDatabaseName())
-//                : databaseRepository.getDatabase(form.getDataSourceId(),form.getDatabaseName());
-//
-//
-//        RDBTableMetaData metaData = buildTable(database, form, columns);
-//        try {
-//            if (!database.getMeta().getParser().tableExists(metaData.getName())) {
-//                database.createTable(metaData);
-//            } else {
-//                if (!updateMeta) {
-//                    database.reloadTable(metaData);
-//                } else {
-//                    database.alterTable(metaData);
-//                }
-//            }
-//        } catch (SQLException e) {
-//            throw new DynamicFormException("部署失败:" + e.getMessage(), e);
-//        }
+        DatabaseOperator operator = StringUtils.isEmpty(form.getDataSourceId())
+                ? databaseRepository.getDefaultDatabase(form.getDatabaseName())
+                : databaseRepository.getDatabase(form.getDataSourceId(), form.getDatabaseName());
+
+        RDBTableMetadata metadata = buildTable(operator.getMetadata().getCurrentSchema(), form, columns);
+
+        operator.ddl()
+                .createOrAlter(metadata)
+                .commit()
+                .sync();
+        formRepositoryCache.put(form.getId(),operator.dml().createRepository(form.getDatabaseTableName()));
+ 
     }
 
     protected RDBTableMetadata buildTable(RDBSchemaMetadata schema, DynamicFormEntity form, List<DynamicFormColumnEntity> columns) {
@@ -471,7 +476,7 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
         });
 
         //没有主键并且没有id字段
-        if (table.getColumns().stream().noneMatch(RDBColumnMetadata::isPrimaryKey) &&! table.findColumn("id").isPresent()) {
+        if (table.getColumns().stream().noneMatch(RDBColumnMetadata::isPrimaryKey) && !table.findColumn("id").isPresent()) {
             table.addColumn(createPrimaryKeyColumn(table));
         }
 

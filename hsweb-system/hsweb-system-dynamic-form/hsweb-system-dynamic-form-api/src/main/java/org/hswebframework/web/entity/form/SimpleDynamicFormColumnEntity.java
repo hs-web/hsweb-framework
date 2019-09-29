@@ -2,8 +2,13 @@ package org.hswebframework.web.entity.form;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hswebframework.ezorm.rdb.mapping.annotation.ColumnType;
+import org.hswebframework.ezorm.rdb.mapping.annotation.JsonCodec;
 import org.hswebframework.web.commons.entity.SimpleGenericEntity;
 
+import javax.persistence.Column;
+import javax.persistence.Table;
+import java.sql.JDBCType;
 import java.util.List;
 
 /**
@@ -13,33 +18,50 @@ import java.util.List;
  */
 @Getter
 @Setter
+@Table(name = "s_dyn_form_column")
 public class SimpleDynamicFormColumnEntity extends SimpleGenericEntity<String> implements DynamicFormColumnEntity {
     //表单ID
-    private String       formId;
+    @Column(name = "form_id", length = 32)
+    private String formId;
     //字段名称
-    private String       name;
+    @Column
+    private String name;
     //数据库列
-    private String       columnName;
+    @Column(name = "column_name")
+    private String columnName;
     //备注
-    private String       describe;
+    @Column
+    private String describe;
     //别名
-    private String       alias;
+    @Column
+    private String alias;
     //java类型
-    private String       javaType;
+    @Column(name = "java_type")
+    private String javaType;
     //jdbc类型
-    private String       jdbcType;
+    @Column(name = "jdbc_type")
+    private String jdbcType;
     //数据类型
-    private String       dataType;
+    @Column(name = "data_type")
+    private String dataType;
     //长度
-    private Integer      length;
+    @Column
+    private Integer length;
     //精度
-    private Integer      precision;
+    @Column
+    private Integer precision;
     //小数点位数
-    private Integer      scale;
+    @Column
+    private Integer scale;
     //数据字典配置
-    private String       dictConfig;
+    @Column(name = "dict_config")
+    private String dictConfig;
     //序号
-    private Long         sortIndex;
+    @Column(name = "sort_index")
+    private Long sortIndex;
     //验证器配置
+    @Column
+    @ColumnType(jdbcType = JDBCType.CLOB)
+    @JsonCodec
     private List<String> validator;
 }

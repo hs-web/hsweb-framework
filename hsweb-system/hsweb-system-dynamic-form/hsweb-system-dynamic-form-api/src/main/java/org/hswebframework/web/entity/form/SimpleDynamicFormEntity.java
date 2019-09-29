@@ -2,7 +2,12 @@ package org.hswebframework.web.entity.form;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hswebframework.ezorm.rdb.mapping.annotation.ColumnType;
 import org.hswebframework.web.commons.entity.SimpleGenericEntity;
+
+import javax.persistence.Column;
+import javax.persistence.Table;
+import java.sql.JDBCType;
 
 /**
  * 动态表单
@@ -11,36 +16,54 @@ import org.hswebframework.web.commons.entity.SimpleGenericEntity;
  */
 @Getter
 @Setter
+@Table(name = "s_dyn_form")
 public class SimpleDynamicFormEntity extends SimpleGenericEntity<String> implements DynamicFormEntity {
     //表单名称
-    private String  name;
+    @Column
+    private String name;
     //数据库名
+    @Column(name = "db_name")
     private String databaseName;
     //数据库表名
-    private String  databaseTableName;
+    @Column(name = "t_name")
+    private String databaseTableName;
     //备注
-    private String  describe;
+    @Column
+    private String describe;
     //版本
-    private Long    version;
+    @Column
+    private Long version;
     //创建人id
-    private String  creatorId;
+    @Column(name = "creator_id")
+    private String creatorId;
     //创建时间
-    private Long    createTime;
+    @Column(name = "creator_time")
+    private Long createTime;
     //修改时间
-    private Long    updateTime;
+    @Column(name = "update_time")
+    private Long updateTime;
     //是否已发布
+    @Column(name = "is_deployed")
     private Boolean deployed;
     //别名
-    private String  alias;
+    @Column
+    private String alias;
     //触发器
-    private String  triggers;
+    @Column
+    @ColumnType(jdbcType = JDBCType.LONGNVARCHAR)
+    private String triggers;
     //表链接
-    private String  correlations;
+    @Column
+    @ColumnType(jdbcType = JDBCType.LONGNVARCHAR)
+    private String correlations;
     //数据源id,为空使用默认数据源
-    private String  dataSourceId;
+    @Column(name = "data_source_id")
+    @ColumnType(jdbcType = JDBCType.LONGNVARCHAR)
+    private String dataSourceId;
     //表单类型
-    private String  type;
-
+    @Column
+    private String type;
+    @Column(length = 1024)
     private String tags;
 
 

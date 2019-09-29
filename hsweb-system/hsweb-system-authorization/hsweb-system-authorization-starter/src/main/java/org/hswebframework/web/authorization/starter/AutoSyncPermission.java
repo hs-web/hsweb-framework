@@ -2,6 +2,7 @@ package org.hswebframework.web.authorization.starter;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.extern.slf4j.Slf4j;
+import org.hswebframework.ezorm.rdb.mapping.annotation.Comment;
 import org.hswebframework.utils.ClassUtils;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.define.AopAuthorizeDefinition;
@@ -124,6 +125,8 @@ public class AutoSyncPermission implements ApplicationListener<AuthorizeDefiniti
                             continue;
                         }
                         ApiModelProperty property = field.getAnnotation(ApiModelProperty.class);
+                        Comment comment = field.getAnnotation(Comment.class);
+
                         OptionalField optionalField = new OptionalField();
                         optionalField.setName(field.getName());
                         if (null != property) {
@@ -131,6 +134,9 @@ public class AutoSyncPermission implements ApplicationListener<AuthorizeDefiniti
                                 continue;
                             }
                             optionalField.setDescribe(property.value());
+                        }
+                        if(comment!=null){
+                            optionalField.setDescribe(comment.value());
                         }
                         optionalFields.add(optionalField);
                     }
@@ -148,7 +154,7 @@ public class AutoSyncPermission implements ApplicationListener<AuthorizeDefiniti
         Map<String, PermissionEntity> oldCache = permissionService
                 .select()
                 .stream()
-                .collect(Collectors.toMap(PermissionEntity::getId, Function.identity()));
+                .collect(Collectors.toMap(PermissionEntity::getId, Function.identity(), (_1, _2) -> _1));
 
         waitToSyncPermissions.forEach((permissionId, permission) -> {
             log.info("try sync permission[{}].{}", permissionId, permission.getActions());

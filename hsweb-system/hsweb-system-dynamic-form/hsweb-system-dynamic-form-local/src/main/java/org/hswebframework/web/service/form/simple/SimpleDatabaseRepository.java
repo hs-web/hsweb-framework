@@ -19,7 +19,9 @@ import java.util.Objects;
 @Service
 public class SimpleDatabaseRepository implements DatabaseRepository {
 
-    private volatile DatabaseOperator defaultDatabase = null;
+    @Autowired
+    private DatabaseOperator defaultDatabase ;
+
     private SyncSqlExecutor sqlExecutor = null;
 
     @Value("${hsweb.dynamic-form.cluster:false}")
@@ -38,8 +40,6 @@ public class SimpleDatabaseRepository implements DatabaseRepository {
     @PostConstruct
     public void init() {
         Objects.requireNonNull(sqlExecutor);
-
-
     }
 
     @Override
@@ -62,9 +62,7 @@ public class SimpleDatabaseRepository implements DatabaseRepository {
 
 
     private DatabaseOperator initDatabase(DatabaseType databaseType, String databaseName) {
-        // TODO: 2019-09-27
-        throw new UnsupportedOperationException();
-//        eventPublisher.publishEvent(new DatabaseInitEvent(database));
-//        return database;
+
+      return defaultDatabase;
     }
 }

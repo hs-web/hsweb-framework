@@ -3,6 +3,7 @@ package org.hswebframework.web.starter.easyorm;
 
 import lombok.SneakyThrows;
 import org.hswebframework.ezorm.core.meta.Feature;
+import org.hswebframework.ezorm.rdb.executor.SyncSqlExecutor;
 import org.hswebframework.ezorm.rdb.mapping.EntityColumnMapping;
 import org.hswebframework.ezorm.rdb.mapping.EntityManager;
 import org.hswebframework.ezorm.rdb.mapping.MappingFeatureType;
@@ -12,6 +13,7 @@ import org.hswebframework.ezorm.rdb.metadata.RDBDatabaseMetadata;
 import org.hswebframework.ezorm.rdb.operator.DatabaseOperator;
 import org.hswebframework.ezorm.rdb.operator.DefaultDatabaseOperator;
 import org.hswebframework.web.commons.entity.factory.EntityFactory;
+import org.hswebframework.web.datasource.DefaultJdbcExecutor;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -24,11 +26,17 @@ import java.util.List;
 
 @Configuration
 @EnableConfigurationProperties(EasyormProperties.class)
-@EnableEasyormRepository("org.hswebframework.web.**.*Entity")
+@EnableEasyormRepository("org.hswebframework.web.**.entity")
 public class EasyOrmConfiguration {
 
     @Autowired
     private EasyormProperties properties;
+
+    @Bean
+    @ConditionalOnMissingBean
+    public SyncSqlExecutor syncSqlExecutor() {
+        return new DefaultJdbcExecutor();
+    }
 
     @Bean
     @ConditionalOnMissingBean
@@ -78,9 +86,9 @@ public class EasyOrmConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public DatabaseOperator databaseOperator() {
+    public DatabaseOperator databaseOperator(SyncSqlExecutor executor) {
         RDBDatabaseMetadata metadata = properties.createDatabaseMetadata();
-
+        metadata.addFeature(executor);
         return DefaultDatabaseOperator.of(metadata);
     }
 

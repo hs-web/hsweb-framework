@@ -22,6 +22,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hswebframework.web.commons.entity.SimpleTreeSortSupportEntity;
 
+import javax.persistence.Column;
+import javax.persistence.Index;
+import javax.persistence.Table;
 import java.util.List;
 
 /**
@@ -33,31 +36,32 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "s_organization",indexes = {
+        @Index(name = "idx_org_name",columnList = "name"),
+        @Index(name = "idx_org_path",columnList = "path"),
+        @Index(name = "idx_org_parent_id",columnList = "parent_id"),
+        @Index(name = "idx_org_area_id",columnList = "area_id"),
+
+})
 public class SimpleOrganizationalEntity extends SimpleTreeSortSupportEntity<String> implements OrganizationalEntity {
     private static final long serialVersionUID = -1610547249282278768L;
     //名称
+    @Column
     private String name;
     //全称
+    @Column(name = "full_name")
     private String fullName;
     //机构编码
+    @Column
     private String code;
-    //可选角色
-    private java.util.List<String> optionalRoles;
     //是否启用
+    @Column
     private Byte status;
+
+    @Column(name = "district_id",length = 32)
+    private String districtId;
+
     //子级组织
     private List<OrganizationalEntity> children;
 
-    private String areaId;
-
-
-    @Override
-    public String getDistrictId() {
-        return areaId;
-    }
-
-    @Override
-    public void setDistrictId(String districtId) {
-        setAreaId(districtId);
-    }
 }

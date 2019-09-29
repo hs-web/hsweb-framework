@@ -2,4 +2,5 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
 org.hswebframework.web.starter.HswebAutoConfiguration,\
 org.hswebframework.web.starter.SystemInitializeAutoConfiguration,\
-org.hswebframework.web.starter.CorsAutoConfiguration
+org.hswebframework.web.starter.CorsAutoConfiguration,\
+org.hswebframework.web.starter.easyorm.EasyOrmConfiguration

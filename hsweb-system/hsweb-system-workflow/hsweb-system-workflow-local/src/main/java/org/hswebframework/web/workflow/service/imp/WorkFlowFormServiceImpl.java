@@ -5,6 +5,7 @@ import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.hswebframework.ezorm.core.RuntimeDefaultValue;
 import org.hswebframework.ezorm.rdb.codec.DateTimeCodec;
+import org.hswebframework.ezorm.rdb.mapping.defaults.record.Record;
 import org.hswebframework.ezorm.rdb.metadata.RDBColumnMetadata;
 import org.hswebframework.ezorm.rdb.metadata.RDBTableMetadata;
 import org.hswebframework.ezorm.rdb.metadata.dialect.Dialect;
@@ -65,7 +66,7 @@ public class WorkFlowFormServiceImpl extends AbstractFlowableService implements 
 
     @Override
     @Transactional(readOnly = true)
-    public <T> PagerResult<T> selectProcessForm(String processDefineId, QueryParamEntity queryParam) {
+    public   PagerResult<Record> selectProcessForm(String processDefineId, QueryParamEntity queryParam) {
         ProcessDefineConfigEntity entity = processDefineConfigService.selectByProcessDefineId(processDefineId);
 
         if (entity == null || StringUtils.isEmpty(entity.getFormId())) {
@@ -77,7 +78,7 @@ public class WorkFlowFormServiceImpl extends AbstractFlowableService implements 
 
     @Override
     @Transactional(readOnly = true)
-    public <T> PagerResult<T> selectTaskForm(String processDefineId, String activityId, QueryParamEntity queryParam) {
+    public   PagerResult<Record> selectTaskForm(String processDefineId, String activityId, QueryParamEntity queryParam) {
         Objects.requireNonNull(processDefineId, "processDefineId can not be null");
         Objects.requireNonNull(activityId, "activityId can not be null");
 

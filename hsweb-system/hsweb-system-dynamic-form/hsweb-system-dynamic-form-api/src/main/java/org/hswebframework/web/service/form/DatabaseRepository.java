@@ -1,5 +1,7 @@
 package org.hswebframework.web.service.form;
 
+import org.hswebframework.ezorm.rdb.mapping.SyncRepository;
+import org.hswebframework.ezorm.rdb.mapping.defaults.record.Record;
 import org.hswebframework.ezorm.rdb.operator.DatabaseOperator;
 
 /**
@@ -10,6 +12,7 @@ import org.hswebframework.ezorm.rdb.operator.DatabaseOperator;
  * @since 3.0
  */
 public interface DatabaseRepository {
+
     DatabaseOperator getDefaultDatabase(String databaseName);
 
     DatabaseOperator getDatabase(String datasourceId,String databaseName);

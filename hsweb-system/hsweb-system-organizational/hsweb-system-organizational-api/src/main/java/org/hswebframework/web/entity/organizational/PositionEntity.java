@@ -75,16 +75,6 @@ public interface PositionEntity extends TreeSortSupportEntity<String>, Departmen
     void setName(String name);
 
     /**
-     * @return 持有的角色
-     */
-    List<String> getRoles();
-
-    /**
-     * 设置 持有的角色
-     */
-    void setRoles(List<String> roles);
-
-    /**
      * @return 备注
      */
     String getRemark();

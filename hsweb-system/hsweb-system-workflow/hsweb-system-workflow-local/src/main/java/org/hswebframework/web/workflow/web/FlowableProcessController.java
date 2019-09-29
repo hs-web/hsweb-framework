@@ -21,6 +21,7 @@ import org.activiti.engine.task.TaskQuery;
 import org.hswebframework.ezorm.core.Conditional;
 import org.hswebframework.ezorm.core.NestConditional;
 import org.hswebframework.ezorm.core.dsl.Query;
+import org.hswebframework.ezorm.rdb.mapping.defaults.record.Record;
 import org.hswebframework.web.NotFoundException;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.Permission;
@@ -246,7 +247,7 @@ public class FlowableProcessController {
     @ApiOperation("获取自己可查看的流程表单数据")
     @Authorize(merge = false)
     @SuppressWarnings("all")
-    public ResponseMessage<PagerResult<Object>> getFormData(@PathVariable Type type,
+    public ResponseMessage<PagerResult<Record>> getFormData(@PathVariable Type type,
                                                             @PathVariable String processDefineId,
                                                             QueryParamEntity query,
                                                             Authentication authentication) {
@@ -260,7 +261,7 @@ public class FlowableProcessController {
     @GetMapping("/task/form/{processDefineId}/{taskDefineKey}")
     @ApiOperation("获取流程任务表单数据")
     @Authorize(merge = false)
-    public ResponseMessage<PagerResult<Object>> getTaskFormData(@PathVariable String processDefineId,
+    public ResponseMessage<PagerResult<Record>> getTaskFormData(@PathVariable String processDefineId,
                                                                 @PathVariable String taskDefineKey,
                                                                 QueryParamEntity query) {
         return ResponseMessage.ok(workFlowFormService.selectTaskForm(processDefineId, taskDefineKey, query));

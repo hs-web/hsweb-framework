@@ -1,7 +1,13 @@
 package org.hswebframework.web.entity.datasource;
 
 import lombok.*;
+import org.hswebframework.ezorm.rdb.mapping.annotation.ColumnType;
 import org.hswebframework.web.commons.entity.SimpleGenericEntity;
+
+import javax.persistence.Column;
+import javax.persistence.Table;
+import java.sql.JDBCType;
+import java.util.Map;
 
 /**
  * 数据源配置
@@ -13,13 +19,28 @@ import org.hswebframework.web.commons.entity.SimpleGenericEntity;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "s_datasource_conf")
 public class SimpleDataSourceConfigEntity extends SimpleGenericEntity<String> implements DataSourceConfigEntity {
     //数据源名称
-    private String         name;
+    @Column
+    private String name;
+
     //是否启用
-    private Long           enabled;
+    @Column
+    private Long enabled;
+
     //创建日期
+    @Column(name = "create_date")
     private java.util.Date createDate;
+
     //备注
-    private String         describe;
+    @Column
+    private String describe;
+
+    @Override
+    @Column
+    @ColumnType(jdbcType = JDBCType.CLOB)
+    public Map<String, Object> getProperties() {
+        return super.getProperties();
+    }
 }

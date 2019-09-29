@@ -22,6 +22,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hswebframework.web.commons.entity.SimpleTreeSortSupportEntity;
 
+import javax.persistence.Column;
+import javax.persistence.Index;
+import javax.persistence.Table;
 import java.util.List;
 
 /**
@@ -33,15 +36,21 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "s_position",indexes = {
+        @Index(name = "idx_position_dept_id",columnList = "department_id")
+
+})
 public class SimplePositionEntity extends SimpleTreeSortSupportEntity<String> implements PositionEntity {
     private static final long serialVersionUID = -8912215943657734192L;
     //职位名称
+    @Column
     private String name;
     //部门id
+    @Column(name = "department_id" ,length = 32)
     private String departmentId;
-    //持有的角色
-    private List<String> roles;
+
     //备注
+    @Column
     private String remark;
 
     private List<PositionEntity> children;

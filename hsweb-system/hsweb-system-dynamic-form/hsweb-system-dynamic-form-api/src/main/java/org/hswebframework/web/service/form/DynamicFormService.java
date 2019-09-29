@@ -1,5 +1,7 @@
 package org.hswebframework.web.service.form;
 
+import org.hswebframework.ezorm.rdb.mapping.SyncRepository;
+import org.hswebframework.ezorm.rdb.mapping.defaults.record.Record;
 import org.hswebframework.web.entity.form.DynamicFormColumnBindEntity;
 import org.hswebframework.web.entity.form.DynamicFormColumnEntity;
 import org.hswebframework.web.entity.form.DynamicFormEntity;
@@ -40,4 +42,7 @@ public interface DynamicFormService extends CrudService<DynamicFormEntity, Strin
     DynamicFormColumnBindEntity selectDeployed(String formId, int version);
 
     long selectDeployedVersion(String formId);
+
+
+    SyncRepository<Record,String> getRepository(String formId);
 }

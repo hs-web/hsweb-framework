@@ -5,6 +5,7 @@ import java.util.Set;
 /**
  * @author zhouhao
  */
+
 public class SimplePersonAuthBindEntity extends SimplePersonEntity implements PersonAuthBindEntity {
     private PersonUserEntity personUser;
     //职务ID集合

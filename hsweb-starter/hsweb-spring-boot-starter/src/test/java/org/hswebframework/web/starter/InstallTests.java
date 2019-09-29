@@ -25,6 +25,7 @@ import org.hswebframework.ezorm.rdb.metadata.RDBDatabaseMetadata;
 import org.hswebframework.ezorm.rdb.metadata.dialect.Dialect;
 import org.hswebframework.ezorm.rdb.operator.DatabaseOperator;
 import org.hswebframework.ezorm.rdb.operator.DefaultDatabaseOperator;
+import org.hswebframework.ezorm.rdb.supports.h2.H2SchemaMetadata;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -58,7 +59,10 @@ public class InstallTests {
             }
         };
         RDBDatabaseMetadata databaseMetaData=new RDBDatabaseMetadata(Dialect.H2);
-
+        databaseMetaData.addFeature(sqlExecutor);
+        H2SchemaMetadata schema = new H2SchemaMetadata("PUBLIC");
+        databaseMetaData.addSchema(schema);
+        databaseMetaData.setCurrentSchema(schema);
         database = DefaultDatabaseOperator.of(databaseMetaData);
     }
 

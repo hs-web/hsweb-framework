@@ -26,6 +26,9 @@ public final class DataSourceHolder {
 
     static volatile DatabaseSwitcher databaseSwitcher = new DefaultDatabaseSwitcher();
 
+    public static boolean isDynamicDataSourceReady() {
+        return dynamicDataSourceService != null;
+    }
 
     public static void checkDynamicDataSourceReady() {
         if (dynamicDataSourceService == null) {

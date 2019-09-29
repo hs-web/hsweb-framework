@@ -18,21 +18,20 @@
 
 package org.hswebframework.web.starter.init;
 
+import org.hswebframework.web.starter.Dependency;
 import org.hswebframework.web.starter.SystemVersion;
 
 import java.util.Map;
 
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public interface DependencyInstaller {
-    DependencyInstaller setup(SystemVersion.Dependency dependency);
+    DependencyInstaller setup(Dependency dependency);
 
     default DependencyInstaller setup(Map<String, Object> mapDependency) {
-        return setup(SystemVersion.Dependency.fromMap(mapDependency));
+        return setup(Dependency.fromMap(mapDependency));
     }
 
     DependencyInstaller onInstall(InstallerCallBack callBack);

@@ -54,17 +54,6 @@
             <artifactId>javax.servlet-api</artifactId>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-spring-boot-starter</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-authorization-basic</artifactId>
-            <version>${project.version}</version>
-            <optional>true</optional>
-        </dependency>
+
     </dependencies>
 </project>

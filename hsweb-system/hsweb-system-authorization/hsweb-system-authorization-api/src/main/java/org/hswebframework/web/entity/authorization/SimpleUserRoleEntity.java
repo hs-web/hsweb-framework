@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.SneakyThrows;
+import org.hswebframework.web.commons.entity.annotation.ImplementFor;
 
 import javax.persistence.Column;
 import javax.persistence.Table;
@@ -15,6 +16,7 @@ import javax.persistence.Table;
 @Setter
 @NoArgsConstructor
 @Table(name = "s_user_role")
+@ImplementFor(UserRoleEntity.class)
 public class SimpleUserRoleEntity implements UserRoleEntity {
 
     private static final long serialVersionUID = -8831232608833695774L;

@@ -44,10 +44,6 @@ public interface OrganizationalEntity extends TreeSortSupportEntity<String>, Dis
      */
     String code          = "code";
     /**
-     * 可选角色
-     */
-    String optionalRoles = "optionalRoles";
-    /**
      * 上级机构id
      */
     String parentId      = "parentId";
@@ -97,18 +93,6 @@ public interface OrganizationalEntity extends TreeSortSupportEntity<String>, Dis
      * 设置 机构编码
      */
     void setCode(String code);
-
-    /**
-     * @return 可选角色
-     */
-    @Deprecated
-    java.util.List<String> getOptionalRoles();
-
-    /**
-     * 设置 可选角色
-     */
-    @Deprecated
-    void setOptionalRoles(java.util.List<String> optionalRoles);
 
     void setChildren(List<OrganizationalEntity> children);
 

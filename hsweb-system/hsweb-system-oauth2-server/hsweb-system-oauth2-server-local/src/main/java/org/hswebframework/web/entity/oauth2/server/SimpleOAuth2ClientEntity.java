@@ -19,8 +19,12 @@
 package org.hswebframework.web.entity.oauth2.server;
 
 import lombok.*;
+import org.hswebframework.ezorm.rdb.mapping.annotation.ColumnType;
 import org.hswebframework.web.commons.entity.SimpleGenericEntity;
 
+import javax.persistence.Column;
+import javax.persistence.Table;
+import java.sql.JDBCType;
 import java.util.Set;
 
 /**
@@ -31,28 +35,43 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Table(name = "s_oauth2_client")
 public class SimpleOAuth2ClientEntity extends SimpleGenericEntity<String> implements OAuth2ClientEntity {
     private static final long serialVersionUID = -8370400980996896599L;
+
+    @Column
     private String name;
 
+    @Column
     private String secret;
 
+    @Column(name = "redirect_uri")
     private String redirectUri;
 
+    @Column(name = "owner_id")
     private String ownerId;
 
+    @Column(name = "creator_id")
     private String creatorId;
 
+    @Column(name = "create_time")
     private Long createTime;
 
+    @Column
     private String type;
 
+    @Column
     private String describe;
 
+    @Column(name = "support_grant_types")
+    @ColumnType(jdbcType = JDBCType.LONGVARCHAR)
     private Set<String> supportGrantTypes;
 
+    @Column(name = "default_grant_scope")
+    @ColumnType(jdbcType = JDBCType.LONGVARCHAR)
     private Set<String> defaultGrantScope;
 
+    @Column
     private Byte status;
 
 }
