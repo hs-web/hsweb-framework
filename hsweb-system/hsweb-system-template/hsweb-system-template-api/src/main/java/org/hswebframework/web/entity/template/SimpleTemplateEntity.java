@@ -6,6 +6,7 @@ import org.hswebframework.ezorm.rdb.mapping.annotation.ColumnType;
 import org.hswebframework.web.commons.entity.SimpleGenericEntity;
 
 import javax.persistence.Column;
+import javax.persistence.Id;
 import javax.persistence.Table;
 import java.sql.JDBCType;
 
@@ -44,5 +45,11 @@ public class SimpleTemplateEntity extends SimpleGenericEntity<String> implements
     @Column
     private String classified;
 
+    @Override
+    @Id
+    @Column(name = "u_id")
+    public String getId() {
+        return super.getId();
+    }
 
 }

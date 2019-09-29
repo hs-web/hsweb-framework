@@ -22,6 +22,7 @@ import lombok.Setter;
 import org.hswebframework.web.commons.entity.SimpleGenericEntity;
 
 import javax.persistence.Column;
+import javax.persistence.Id;
 import javax.persistence.Table;
 import java.util.List;
 
@@ -53,5 +54,11 @@ public class SimpleAuthorizationSettingEntity extends SimpleGenericEntity<String
 
     private List<AuthorizationSettingDetailEntity> details;
 
+    @Override
+    @Id
+    @Column(name = "u_id")
+    public String getId() {
+        return super.getId();
+    }
 
 }

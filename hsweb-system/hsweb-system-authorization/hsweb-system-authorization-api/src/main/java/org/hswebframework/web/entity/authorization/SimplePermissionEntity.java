@@ -9,6 +9,7 @@ import org.hswebframework.ezorm.rdb.mapping.annotation.JsonCodec;
 import org.hswebframework.web.commons.entity.SimpleGenericEntity;
 
 import javax.persistence.Column;
+import javax.persistence.Id;
 import javax.persistence.Table;
 import java.sql.JDBCType;
 import java.util.ArrayList;
@@ -76,6 +77,13 @@ public class SimplePermissionEntity extends SimpleGenericEntity<String> implemen
             target.setSupportDataAccessTypes(new ArrayList<>(supportDataAccessTypes));
         }
         return target;
+    }
+
+    @Override
+    @Id
+    @Column(name = "u_id")
+    public String getId() {
+        return super.getId();
     }
 
 }

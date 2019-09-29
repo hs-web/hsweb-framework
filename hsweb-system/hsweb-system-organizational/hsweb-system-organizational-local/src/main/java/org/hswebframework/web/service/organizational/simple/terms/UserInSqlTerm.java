@@ -63,6 +63,7 @@ public abstract class UserInSqlTerm<PK> extends AbstractSqlTermCustomizer {
         boolean parent = term.getOptions().contains("parent");
 
         if (!child && !parent) {
+            fragments.addSql(table);
             super.appendCondition(fragments, column, values);
         } else {
             List<String> paths = getTreePathByTerm(values)

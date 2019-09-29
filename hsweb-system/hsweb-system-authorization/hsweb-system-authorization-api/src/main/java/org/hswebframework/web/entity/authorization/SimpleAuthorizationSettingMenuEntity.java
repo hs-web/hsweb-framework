@@ -23,6 +23,7 @@ import org.hswebframework.ezorm.rdb.mapping.annotation.ColumnType;
 import org.hswebframework.web.commons.entity.SimpleTreeSortSupportEntity;
 
 import javax.persistence.Column;
+import javax.persistence.Id;
 import javax.persistence.Table;
 import java.sql.JDBCType;
 import java.util.List;
@@ -54,4 +55,10 @@ public class SimpleAuthorizationSettingMenuEntity extends SimpleTreeSortSupportE
 
     private List<AuthorizationSettingMenuEntity> children;
 
+    @Override
+    @Id
+    @Column(name = "u_id")
+    public String getId() {
+        return super.getId();
+    }
 }

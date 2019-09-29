@@ -11,6 +11,7 @@ import org.hswebframework.web.commons.entity.SimpleGenericEntity;
 import org.hswebframework.web.validator.group.CreateGroup;
 
 import javax.persistence.Column;
+import javax.persistence.Id;
 import javax.persistence.Table;
 import java.sql.JDBCType;
 import java.util.Date;
@@ -68,5 +69,12 @@ public class UserSettingEntity extends SimpleGenericEntity<String> {
 
         return permission.in(permissions);
 
+    }
+
+    @Override
+    @Id
+    @Column(name = "u_id")
+    public String getId() {
+        return super.getId();
     }
 }

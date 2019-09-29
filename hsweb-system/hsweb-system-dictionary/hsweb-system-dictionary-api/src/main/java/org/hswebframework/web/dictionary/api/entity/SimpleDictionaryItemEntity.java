@@ -25,6 +25,7 @@ import org.hswebframework.web.commons.entity.SimpleTreeSortSupportEntity;
 import org.hswebframework.web.validator.group.CreateGroup;
 
 import javax.persistence.Column;
+import javax.persistence.Id;
 import javax.persistence.Table;
 import java.util.List;
 
@@ -86,5 +87,12 @@ public class SimpleDictionaryItemEntity extends SimpleTreeSortSupportEntity<Stri
         jsonObject.put("status", getStatus());
         jsonObject.put("describe", getDescribe());
         return jsonObject;
+    }
+
+    @Override
+    @Id
+    @Column(name = "u_id")
+    public String getId() {
+        return super.getId();
     }
 }

@@ -9,6 +9,7 @@ import org.hswebframework.web.commons.entity.SimpleGenericEntity;
 import org.hswebframework.web.validator.group.CreateGroup;
 
 import javax.persistence.Column;
+import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
@@ -71,4 +72,10 @@ public class ProcessDefineConfigEntity extends SimpleGenericEntity<String> {
     @ColumnType(jdbcType = JDBCType.LONGVARCHAR)
     private List<ListenerConfig> listeners;
 
+    @Override
+    @Id
+    @Column(name = "u_id")
+    public String getId() {
+        return super.getId();
+    }
 }

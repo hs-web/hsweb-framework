@@ -24,6 +24,7 @@ import org.hswebframework.ezorm.rdb.mapping.annotation.JsonCodec;
 import org.hswebframework.web.commons.entity.SimpleGenericEntity;
 
 import javax.persistence.Column;
+import javax.persistence.Id;
 import javax.persistence.Table;
 import java.sql.JDBCType;
 import java.util.List;
@@ -73,4 +74,10 @@ public class SimpleAuthorizationSettingDetailEntity extends SimpleGenericEntity<
     @Column
     private Boolean                merge;
 
+    @Override
+    @Id
+    @Column(name = "u_id")
+    public String getId() {
+        return super.getId();
+    }
 }

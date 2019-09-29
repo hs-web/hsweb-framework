@@ -25,6 +25,7 @@ import org.hibernate.validator.constraints.NotBlank;
 import org.hswebframework.web.commons.entity.SimpleGenericEntity;
 
 import javax.persistence.Column;
+import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.Table;
 
@@ -69,5 +70,10 @@ public class SimplePersonEntity extends SimpleGenericEntity<String> implements P
     @Column
     private String remark;
 
-
+    @Override
+    @Id
+    @Column(name = "u_id")
+    public String getId() {
+        return super.getId();
+    }
 }

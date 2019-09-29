@@ -6,6 +6,7 @@ import org.hswebframework.ezorm.rdb.mapping.annotation.ColumnType;
 import org.hswebframework.web.commons.entity.SimpleGenericEntity;
 
 import javax.persistence.Column;
+import javax.persistence.Id;
 import javax.persistence.Table;
 import java.sql.JDBCType;
 
@@ -66,5 +67,11 @@ public class SimpleDynamicFormEntity extends SimpleGenericEntity<String> impleme
     @Column(length = 1024)
     private String tags;
 
+    @Override
+    @Id
+    @Column(name = "u_id")
+    public String getId() {
+        return super.getId();
+    }
 
 }

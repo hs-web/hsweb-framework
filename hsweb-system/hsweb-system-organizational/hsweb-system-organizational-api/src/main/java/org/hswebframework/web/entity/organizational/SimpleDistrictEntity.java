@@ -4,6 +4,7 @@ import lombok.*;
 import org.hswebframework.web.commons.entity.SimpleTreeSortSupportEntity;
 
 import javax.persistence.Column;
+import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.Table;
 import java.util.List;
@@ -47,5 +48,10 @@ public class SimpleDistrictEntity extends SimpleTreeSortSupportEntity<String> im
     private Byte status;
 
     private List<DistrictEntity> children;
-
+    @Override
+    @Id
+    @Column(name = "u_id")
+    public String getId() {
+        return super.getId();
+    }
 }

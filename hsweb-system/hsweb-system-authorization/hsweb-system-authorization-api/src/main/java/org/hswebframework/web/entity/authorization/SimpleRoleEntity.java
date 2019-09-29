@@ -32,4 +32,12 @@ public class SimpleRoleEntity extends SimpleGenericEntity<String> implements Rol
     public SimpleRoleEntity clone() {
         return ((SimpleRoleEntity) super.clone());
     }
+
+    @Override
+    @Id
+    @Column(name = "u_id")
+    public String getId() {
+        return super.getId();
+    }
+
 }

@@ -2,9 +2,11 @@ package org.hswebframework.web.entity.datasource;
 
 import lombok.*;
 import org.hswebframework.ezorm.rdb.mapping.annotation.ColumnType;
+import org.hswebframework.ezorm.rdb.mapping.annotation.JsonCodec;
 import org.hswebframework.web.commons.entity.SimpleGenericEntity;
 
 import javax.persistence.Column;
+import javax.persistence.Id;
 import javax.persistence.Table;
 import java.sql.JDBCType;
 import java.util.Map;
@@ -39,8 +41,16 @@ public class SimpleDataSourceConfigEntity extends SimpleGenericEntity<String> im
 
     @Override
     @Column
-    @ColumnType(jdbcType = JDBCType.CLOB)
+    @ColumnType(jdbcType = JDBCType.LONGNVARCHAR)
+    @JsonCodec
     public Map<String, Object> getProperties() {
         return super.getProperties();
+    }
+
+    @Override
+    @Id
+    @Column(name = "u_id")
+    public String getId() {
+        return super.getId();
     }
 }

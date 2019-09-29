@@ -23,6 +23,7 @@ import org.hswebframework.ezorm.rdb.mapping.annotation.ColumnType;
 import org.hswebframework.web.commons.entity.SimpleGenericEntity;
 
 import javax.persistence.Column;
+import javax.persistence.Id;
 import javax.persistence.Table;
 import java.sql.JDBCType;
 import java.util.Set;
@@ -38,7 +39,12 @@ import java.util.Set;
 @Table(name = "s_oauth2_client")
 public class SimpleOAuth2ClientEntity extends SimpleGenericEntity<String> implements OAuth2ClientEntity {
     private static final long serialVersionUID = -8370400980996896599L;
-
+    @Override
+    @Id
+    @Column(name = "u_id")
+    public String getId() {
+        return super.getId();
+    }
     @Column
     private String name;
 

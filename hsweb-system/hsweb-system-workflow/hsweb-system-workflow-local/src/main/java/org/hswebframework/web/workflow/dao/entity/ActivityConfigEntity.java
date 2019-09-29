@@ -9,13 +9,13 @@ import org.hswebframework.web.commons.entity.SimpleGenericEntity;
 import org.hswebframework.web.validator.group.CreateGroup;
 
 import javax.persistence.Column;
+import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import java.sql.JDBCType;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 @Getter
 @Setter
@@ -77,4 +77,10 @@ public class ActivityConfigEntity extends SimpleGenericEntity<String> {
     @JsonCodec
     private List<ListenerConfig> listeners;
 
+    @Override
+    @Id
+    @Column(name = "u_id")
+    public String getId() {
+        return super.getId();
+    }
 }

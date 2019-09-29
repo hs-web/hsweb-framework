@@ -79,6 +79,10 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
     @Autowired
     private SyncRepository<AuthorizationSettingDetailEntity, String> authorizationSettingDetailDao;
 
+    @Autowired
+    private SyncRepository<AuthorizationSettingMenuEntity, String> menuEntityStringSyncRepository;
+
+
     private AuthorizationSettingMenuService authorizationSettingMenuService;
 
     private MenuService menuService;
@@ -104,8 +108,16 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
         return createQuery().where(AuthorizationSettingEntity.type, type)
                 .and(AuthorizationSettingEntity.settingFor, settingFor)
                 .fetchOne()
+                .map(entity -> {
+                    entity.setDetails(authorizationSettingDetailDao.createQuery()
+                            .where(AuthorizationSettingDetailEntity::getSettingId, entity.getId()).fetch());
+                    entity.setMenus(menuEntityStringSyncRepository.createQuery()
+                            .where(AuthorizationSettingMenuEntity::getSettingId, entity.getId()).fetch());
+                    return entity;
+                })
                 .orElse(null);
     }
+
 
     @Override
     @CacheEvict(cacheNames = {CacheConstants.USER_AUTH_CACHE_NAME, CacheConstants.USER_MENU_CACHE_NAME}, allEntries = true)

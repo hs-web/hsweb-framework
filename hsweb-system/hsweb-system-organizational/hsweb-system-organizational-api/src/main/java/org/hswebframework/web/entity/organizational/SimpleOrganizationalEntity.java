@@ -23,6 +23,7 @@ import lombok.Setter;
 import org.hswebframework.web.commons.entity.SimpleTreeSortSupportEntity;
 
 import javax.persistence.Column;
+import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.Table;
 import java.util.List;
@@ -63,5 +64,10 @@ public class SimpleOrganizationalEntity extends SimpleTreeSortSupportEntity<Stri
 
     //子级组织
     private List<OrganizationalEntity> children;
-
+    @Override
+    @Id
+    @Column(name = "u_id")
+    public String getId() {
+        return super.getId();
+    }
 }

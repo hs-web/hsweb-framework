@@ -7,6 +7,7 @@ import lombok.Setter;
 import org.hswebframework.web.commons.entity.SimpleGenericEntity;
 
 import javax.persistence.Column;
+import javax.persistence.Id;
 import javax.persistence.Table;
 
 /**
@@ -39,4 +40,11 @@ public class SimpleRelationInfoEntity extends SimpleGenericEntity<String> implem
     //状态
     @Column
     private Byte status;
+
+    @Override
+    @Id
+    @Column(name = "u_id")
+    public String getId() {
+        return super.getId();
+    }
 }

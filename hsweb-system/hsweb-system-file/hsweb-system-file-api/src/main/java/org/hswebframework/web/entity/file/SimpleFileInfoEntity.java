@@ -4,6 +4,7 @@ import lombok.*;
 import org.hswebframework.web.commons.entity.SimpleGenericEntity;
 
 import javax.persistence.Column;
+import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.Table;
 
@@ -49,4 +50,10 @@ public class SimpleFileInfoEntity extends SimpleGenericEntity<String> implements
     @Column(name = "creator_id")
     private String creatorId;
 
+    @Override
+    @Id
+    @Column(name = "u_id")
+    public String getId() {
+        return super.getId();
+    }
 }

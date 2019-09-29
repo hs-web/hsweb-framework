@@ -9,6 +9,7 @@ import org.hswebframework.web.commons.entity.SimpleGenericEntity;
 import org.hswebframework.web.validator.group.CreateGroup;
 
 import javax.persistence.Column;
+import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import java.sql.JDBCType;
@@ -68,5 +69,12 @@ public class DashBoardConfigEntity extends SimpleGenericEntity<String> implement
             return 1;
         }
         return Long.compare(sortIndex, o.sortIndex);
+    }
+
+    @Override
+    @Id
+    @Column(name = "u_id")
+    public String getId() {
+        return super.getId();
     }
 }

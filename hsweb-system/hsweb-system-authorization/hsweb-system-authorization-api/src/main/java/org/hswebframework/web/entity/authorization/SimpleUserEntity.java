@@ -8,6 +8,7 @@ import org.hswebframework.web.bean.ToString;
 import org.hswebframework.web.commons.entity.SimpleGenericEntity;
 
 import javax.persistence.Column;
+import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.Table;
 
@@ -52,5 +53,12 @@ public class SimpleUserEntity extends SimpleGenericEntity<String> implements Use
     @Override
     public SimpleUserEntity clone() {
         return ((SimpleUserEntity) super.clone());
+    }
+
+    @Override
+    @Id
+    @Column(name = "u_id")
+    public String getId() {
+        return super.getId();
     }
 }

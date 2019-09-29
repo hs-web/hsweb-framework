@@ -32,4 +32,6 @@ public class SimpleUserRoleEntity implements UserRoleEntity {
     public SimpleUserRoleEntity clone() {
         return (SimpleUserRoleEntity)super.clone();
     }
+
+
 }

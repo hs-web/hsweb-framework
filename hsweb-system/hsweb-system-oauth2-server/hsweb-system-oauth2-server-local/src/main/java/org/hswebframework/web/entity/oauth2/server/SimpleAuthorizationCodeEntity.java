@@ -60,4 +60,5 @@ public class SimpleAuthorizationCodeEntity implements AuthorizationCodeEntity {
     private String redirectUri;
 
 
+
 }

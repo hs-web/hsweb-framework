@@ -24,6 +24,7 @@ import lombok.Setter;
 import org.hswebframework.web.commons.entity.SimpleTreeSortSupportEntity;
 
 import javax.persistence.Column;
+import javax.persistence.Id;
 import javax.persistence.Table;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -79,5 +80,12 @@ public class SimpleMenuEntity extends SimpleTreeSortSupportEntity<String>
                     .collect(Collectors.toList()));
         }
         return target;
+    }
+
+    @Override
+    @Id
+    @Column(name = "u_id")
+    public String getId() {
+        return super.getId();
     }
 }

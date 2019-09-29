@@ -7,6 +7,7 @@ import org.hswebframework.ezorm.rdb.mapping.annotation.JsonCodec;
 import org.hswebframework.web.commons.entity.SimpleGenericEntity;
 
 import javax.persistence.Column;
+import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import java.sql.JDBCType;
@@ -73,4 +74,11 @@ public class ProcessHistoryEntity extends SimpleGenericEntity<String> {
 
     @Column(name = "task_name")
     private String taskName;
+
+    @Override
+    @Id
+    @Column(name = "u_id")
+    public String getId() {
+        return super.getId();
+    }
 }
