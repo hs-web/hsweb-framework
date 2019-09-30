@@ -188,6 +188,7 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
         entity.setUpdateTime(System.currentTimeMillis());
         getDao().createUpdate()
                 .set(DynamicFormEntity::getVersion, NativeSql.of("version+1"))
+                .where(entity::getId)
                 .execute();
         return super.updateByPk(id, entity);
     }
@@ -249,7 +250,9 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
     )
     public String saveOrUpdateColumn(DynamicFormColumnEntity columnEntity) {
         String id = saveOrUpdate0(columnEntity);
-        getDao().createUpdate().set(DynamicFormEntity::getVersion, NativeSql.of("version+1")).execute();
+        getDao().createUpdate().set(DynamicFormEntity::getVersion, NativeSql.of("version+1"))
+                .where(DynamicFormEntity::getId,columnEntity.getFormId())
+                .execute();
         return id;
     }
 
@@ -263,7 +266,9 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
                 .map(this::saveOrUpdateColumn)
                 .collect(Collectors.toList());
 
-        getDao().createUpdate().set(DynamicFormEntity::getVersion, NativeSql.of("version+1")).execute();
+        getDao().createUpdate().set(DynamicFormEntity::getVersion, NativeSql.of("version+1"))
+                .where().in(DynamicFormEntity::getId,formId)
+                .execute();
         return columnIds;
 
     }
@@ -436,7 +441,7 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
                 .commit()
                 .sync();
         formRepositoryCache.put(form.getId(),operator.dml().createRepository(form.getDatabaseTableName()));
- 
+
     }
 
     protected RDBTableMetadata buildTable(RDBSchemaMetadata schema, DynamicFormEntity form, List<DynamicFormColumnEntity> columns) {
