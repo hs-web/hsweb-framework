@@ -29,7 +29,7 @@ public class CompositeEntityTableMetadataResolver implements EntityTableMetadata
 
     private RDBTableMetadata doResolve(Class<?> entityClass) {
         return resolvers.stream()
-                .map(resolver -> resolver.parseTable(entityClass))
+                .map(resolver -> resolver.parseTableMetadata(entityClass))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .reduce((t1, t2) -> {
