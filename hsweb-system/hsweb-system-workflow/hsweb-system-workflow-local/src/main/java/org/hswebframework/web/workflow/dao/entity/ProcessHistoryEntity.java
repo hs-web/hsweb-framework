@@ -63,7 +63,7 @@ public class ProcessHistoryEntity extends SimpleGenericEntity<String> {
 
     @Column(name = "biz_data")
     @JsonCodec
-    @ColumnType(jdbcType = JDBCType.LONGNVARCHAR)
+    @ColumnType(jdbcType = JDBCType.LONGVARCHAR)
     private Map<String, Object> data = new HashMap<>();
 
     @Column(name = "task_id",length = 64)

@@ -51,15 +51,15 @@ public class SimpleDynamicFormEntity extends SimpleGenericEntity<String> impleme
     private String alias;
     //触发器
     @Column
-    @ColumnType(jdbcType = JDBCType.LONGNVARCHAR)
+    @ColumnType(jdbcType = JDBCType.LONGVARCHAR)
     private String triggers;
     //表链接
     @Column
-    @ColumnType(jdbcType = JDBCType.LONGNVARCHAR)
+    @ColumnType(jdbcType = JDBCType.LONGVARCHAR)
     private String correlations;
     //数据源id,为空使用默认数据源
     @Column(name = "data_source_id")
-    @ColumnType(jdbcType = JDBCType.LONGNVARCHAR)
+    @ColumnType(jdbcType = JDBCType.LONGVARCHAR)
     private String dataSourceId;
     //表单类型
     @Column

@@ -30,11 +30,11 @@ public class DashBoardConfigEntity extends SimpleGenericEntity<String> implement
     private String type;
 
     @Column
-    @ColumnType(jdbcType = JDBCType.LONGNVARCHAR)
+    @ColumnType(jdbcType = JDBCType.LONGVARCHAR)
     private String template;
 
     @Column
-    @ColumnType(jdbcType = JDBCType.LONGNVARCHAR)
+    @ColumnType(jdbcType = JDBCType.LONGVARCHAR)
     private String script;
 
     @Column(name = "script_language")

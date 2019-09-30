@@ -58,7 +58,7 @@ public class ActivityConfigEntity extends SimpleGenericEntity<String> {
      * 节点办理候选人维度,用于设置该环节的办理人,json格式,由CandidateDimensionParser解析
      */
     @Column(name = "candidate_dimension")
-    @ColumnType(jdbcType = JDBCType.LONGNVARCHAR)
+    @ColumnType(jdbcType = JDBCType.LONGVARCHAR)
     private String candidateDimension;
 
     @NotNull(groups = CreateGroup.class)
@@ -73,7 +73,7 @@ public class ActivityConfigEntity extends SimpleGenericEntity<String> {
     private Byte status;
 
     @Column
-    @ColumnType(jdbcType = JDBCType.LONGNVARCHAR)
+    @ColumnType(jdbcType = JDBCType.LONGVARCHAR)
     @JsonCodec
     private List<ListenerConfig> listeners;
 

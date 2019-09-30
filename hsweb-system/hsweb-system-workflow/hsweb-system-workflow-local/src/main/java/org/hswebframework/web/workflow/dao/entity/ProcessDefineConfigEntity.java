@@ -51,7 +51,7 @@ public class ProcessDefineConfigEntity extends SimpleGenericEntity<String> {
      * 权限维度,用于控制不同人,可发起不同的流程
      */
     @Column(name = "permission_dimension")
-    @ColumnType(jdbcType = JDBCType.LONGNVARCHAR)
+    @ColumnType(jdbcType = JDBCType.LONGVARCHAR)
     private String permissionDimension;
 
     @Column(name = "create_time")

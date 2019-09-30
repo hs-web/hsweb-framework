@@ -41,7 +41,7 @@ public class SimpleDataSourceConfigEntity extends SimpleGenericEntity<String> im
 
     @Override
     @Column
-    @ColumnType(jdbcType = JDBCType.LONGNVARCHAR)
+    @ColumnType(jdbcType = JDBCType.LONGVARCHAR)
     @JsonCodec
     public Map<String, Object> getProperties() {
         return super.getProperties();

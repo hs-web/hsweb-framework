@@ -41,7 +41,7 @@ import java.util.List;
         @Index(name = "idx_org_name",columnList = "name"),
         @Index(name = "idx_org_path",columnList = "path"),
         @Index(name = "idx_org_parent_id",columnList = "parent_id"),
-        @Index(name = "idx_org_area_id",columnList = "area_id"),
+        @Index(name = "idx_org_district_id",columnList = "district_id"),
 
 })
 public class SimpleOrganizationalEntity extends SimpleTreeSortSupportEntity<String> implements OrganizationalEntity {
