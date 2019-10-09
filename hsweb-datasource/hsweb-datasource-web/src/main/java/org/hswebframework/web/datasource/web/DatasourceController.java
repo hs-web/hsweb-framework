@@ -4,7 +4,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.annotation.Authorize;
-import org.hswebframework.web.controller.message.ResponseMessage;
 import org.hswebframework.web.datasource.config.DynamicDataSourceConfig;
 import org.hswebframework.web.datasource.config.DynamicDataSourceConfigRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,8 +25,8 @@ public class DatasourceController {
     @GetMapping
     @Authorize(action = Permission.ACTION_QUERY)
     @ApiOperation("获取全部数据源信息")
-    public ResponseMessage<List<? extends DynamicDataSourceConfig>> getAllConfig() {
-        return ResponseMessage.ok(repository.findAll());
+    public  List<? extends DynamicDataSourceConfig> getAllConfig() {
+        return repository.findAll();
     }
 
 }

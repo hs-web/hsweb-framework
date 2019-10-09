@@ -11,7 +11,7 @@ import org.hswebframework.web.dict.EnumDict;
  */
 @AllArgsConstructor
 @Getter
-@Dict(id = "user-setting-permission")
+@Dict("user-setting-permission")
 public enum UserSettingPermission implements EnumDict<String> {
     NONE("无"),
     R("读"),

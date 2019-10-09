@@ -8,14 +8,15 @@ import org.hswebframework.web.authorization.AuthenticationRequest;
 import org.hswebframework.web.authorization.builder.DataAccessConfigBuilderFactory;
 import org.hswebframework.web.authorization.simple.PlainTextUsernamePasswordAuthenticationRequest;
 import org.hswebframework.web.authorization.simple.builder.SimpleDataAccessConfigBuilderFactory;
-import org.hswebframework.web.validate.ValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.util.StringUtils;
+import reactor.core.publisher.Mono;
 
 import javax.annotation.PostConstruct;
+import javax.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -46,7 +47,7 @@ public class EmbedAuthenticationManager implements AuthenticationManager {
                 for (Map<String, Object> objectMap : permissionInfo.getDataAccesses()) {
                     for (Map.Entry<String, Object> stringObjectEntry : objectMap.entrySet()) {
                         if (stringObjectEntry.getValue() instanceof Map) {
-                            Map mapVal = ((Map) stringObjectEntry.getValue());
+                            Map<?, ?> mapVal = ((Map) stringObjectEntry.getValue());
                             boolean maybeIsList = mapVal.keySet().stream().allMatch(org.hswebframework.utils.StringUtils::isInt);
                             if (maybeIsList) {
                                 stringObjectEntry.setValue(mapVal.values());
@@ -60,33 +61,27 @@ public class EmbedAuthenticationManager implements AuthenticationManager {
     }
 
     @Override
-    public Authentication authenticate(AuthenticationRequest request) {
-        if (request instanceof PlainTextUsernamePasswordAuthenticationRequest) {
-            return sync(users.values().stream()
-                    .filter(user ->
-                            ((PlainTextUsernamePasswordAuthenticationRequest) request).getUsername().equals(user.getUsername())
-                                    && ((PlainTextUsernamePasswordAuthenticationRequest) request).getPassword().equals(user.getPassword()))
-                    .findFirst()
-                    .map(properties -> authentications.get(properties.getId()))
-                    .orElseThrow(() -> new ValidationException("用户不存在")));
-        }
-
-        throw new UnsupportedOperationException("不支持的授权类型:" + request);
+    public Mono<Authentication> authenticate(Mono<AuthenticationRequest> request) {
+        return request.filter(r -> r instanceof PlainTextUsernamePasswordAuthenticationRequest)
+                .map(PlainTextUsernamePasswordAuthenticationRequest.class::cast)
+                .map(pwdReq -> users.values()
+                        .stream()
+                        .filter(user ->
+                                pwdReq.getUsername().equals(user.getUsername())
+                                        && pwdReq.getPassword().equals(user.getPassword()))
+                        .findFirst()
+                        .map(EmbedAuthenticationProperties::getId)
+                        .map(authentications::get)
+                        .orElseThrow(() -> new ValidationException("用户不存在")));
 
     }
 
     @Override
-    public Authentication getByUserId(String userId) {
-        return authentications.get(userId);
-    }
-
-    @Override
-    public Authentication sync(Authentication authentication) {
-        authentications.put(authentication.getUser().getId(), authentication);
-        return authentication;
+    public Mono<Authentication> getByUserId(String userId) {
+        return Mono.just(authentications.get(userId));
     }
 
     void addAuthentication(Authentication authentication) {
-        sync(authentication);
+        authentications.put(authentication.getUser().getId(), authentication);
     }
 }

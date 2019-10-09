@@ -2,7 +2,7 @@ package org.hswebframework.web.datasource.strategy;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hswebframework.web.boost.aop.context.MethodInterceptorContext;
+import org.hswebframework.web.aop.MethodInterceptorContext;
 import org.springframework.util.ClassUtils;
 
 import java.lang.reflect.Method;

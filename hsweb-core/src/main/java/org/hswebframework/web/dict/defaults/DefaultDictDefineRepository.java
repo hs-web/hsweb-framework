@@ -42,7 +42,7 @@ public class DefaultDictDefineRepository implements DictDefineRepository {
             define.setAlias(type.getName());
             define.setComments(type.getSimpleName());
         }
-        define.setItems(new ArrayList<>(Arrays.asList(type.getEnumConstants())));
+       // define.setItems(new ArrayList<>(Arrays.<T>asList(type.getEnumConstants())));
 
         return define;
 

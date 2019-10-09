@@ -13,21 +13,6 @@
     <packaging>pom</packaging>
     <modules>
         <module>hsweb-system-authorization</module>
-        <module>hsweb-system-dynamic-form</module>
-        <module>hsweb-system-config</module>
-        <module>hsweb-system-database-manager</module>
-        <module>hsweb-system-datasource</module>
-        <module>hsweb-system-workflow</module>
-        <module>hsweb-system-schedule</module>
-        <module>hsweb-system-organizational</module>
-        <module>hsweb-system-file</module>
-        <module>hsweb-system-template</module>
-        <module>hsweb-system-script</module>
-        <module>hsweb-system-dictionary</module>
-        <module>hsweb-system-oauth2-server</module>
-        <module>hsweb-system-oauth2-client</module>
-        <module>hsweb-system-dashboard</module>
-        <module>hsweb-system-dev-tools</module>
     </modules>
     <artifactId>hsweb-system</artifactId>
 

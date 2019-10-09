@@ -18,6 +18,9 @@
 
 package org.hswebframework.web.authorization.token;
 
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -36,7 +39,7 @@ public interface UserTokenManager {
      * @param token token
      * @return 令牌信息, 未授权时返回null
      */
-    UserToken getByToken(String token);
+    Mono<UserToken> getByToken(String token);
 
     /**
      * 根据用户id，获取全部令牌信息，如果没有则返回空集合而不是<code>null</code>
@@ -44,48 +47,41 @@ public interface UserTokenManager {
      * @param userId 用户id
      * @return 授权信息
      */
-    List<UserToken> getByUserId(String userId);
+    Flux<UserToken> getByUserId(String userId);
 
     /**
      * @param userId 用户ID
      * @return 用户是否已经授权
      */
-    boolean userIsLoggedIn(String userId);
+    Mono<Boolean> userIsLoggedIn(String userId);
 
     /**
      * @param token token
      * @return token是否已登记
      */
-    boolean tokenIsLoggedIn(String token);
+    Mono<Boolean> tokenIsLoggedIn(String token);
 
     /**
      * @return 总用户数量，一个用户多个地方登陆数量算1
      */
-    long totalUser();
+    Mono<Integer> totalUser();
 
     /**
      * @return 总token数量
      */
-    long totalToken();
+    Mono<Integer> totalToken();
 
     /**
      * @return 所有token
      */
-    List<UserToken> allLoggedUser();
-
-    /**
-     * 遍历全部token信息
-     *
-     * @param consumer token消费者
-     */
-    void allLoggedUser(Consumer<UserToken> consumer);
+    Flux<UserToken> allLoggedUser();
 
     /**
      * 删除用户授权信息
      *
      * @param userId 用户ID
      */
-    void signOutByUserId(String userId);
+    Mono<Void> signOutByUserId(String userId);
 
     /**
      * 根据token删除
@@ -93,7 +89,7 @@ public interface UserTokenManager {
      * @param token 令牌
      * @see org.hswebframework.web.authorization.token.event.UserTokenRemovedEvent
      */
-    void signOutByToken(String token);
+    Mono<Void> signOutByToken(String token);
 
     /**
      * 修改userId的状态
@@ -103,7 +99,7 @@ public interface UserTokenManager {
      * @see org.hswebframework.web.authorization.token.event.UserTokenChangedEvent
      * @see this#changeTokenState
      */
-    void changeUserState(String userId, TokenState state);
+    Mono<Void> changeUserState(String userId, TokenState state);
 
     /**
      * 修改token的状态
@@ -112,7 +108,7 @@ public interface UserTokenManager {
      * @param state 状态
      * @see org.hswebframework.web.authorization.token.event.UserTokenChangedEvent
      */
-    void changeTokenState(String token, TokenState state);
+    Mono<Void> changeTokenState(String token, TokenState state);
 
     /**
      * 登记一个用户的token
@@ -123,20 +119,20 @@ public interface UserTokenManager {
      * @param maxInactiveInterval 最大不活动时间,超过后令牌状态{@link UserToken#getState()}将变为过期{@link TokenState#expired}
      * @see org.hswebframework.web.authorization.token.event.UserTokenCreatedEvent
      */
-    UserToken signIn(String token, String type, String userId, long maxInactiveInterval);
+    Mono<UserToken> signIn(String token, String type, String userId, long maxInactiveInterval);
 
     /**
      * 更新token,使其不过期
      *
      * @param token token
      */
-    void touch(String token);
+    Mono<Void> touch(String token);
 
     /**
      * 检查已过期的token,并将其remove
      *
      * @see this#signOutByToken(String)
      */
-    void checkExpiredToken();
+    Mono<Void> checkExpiredToken();
 
 }

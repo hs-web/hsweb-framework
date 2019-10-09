@@ -30,7 +30,6 @@ import java.util.Map;
  * @see 3.0
  */
 public interface AuthenticationManager {
-    String USER_AUTH_CACHE_NAME = "user-auth-";
 
     /**
      * 进行授权操作
@@ -38,7 +37,7 @@ public interface AuthenticationManager {
      * @param request 授权请求
      * @return 授权成功则返回用户权限信息
      */
-    Mono<Authentication> authenticate(AuthenticationRequest request);
+    Mono<Authentication> authenticate(Mono<AuthenticationRequest> request);
 
     /**
      * 根据用户ID获取权限信息
@@ -48,15 +47,5 @@ public interface AuthenticationManager {
      */
     Mono<Authentication> getByUserId(String userId);
 
-    /**
-     * 同步授权信息,在调用了{@link Authentication#setAttribute(String, Serializable)}或者
-     * {@link Authentication#setAttributes(Map)} 后,需要调用次方法进行同步.
-     * 因为如果权限信息不是存在于内存中,而是redis或者其他方案.
-     * 在调用了上述方法后,实际的存储值并不会发生改变.
-     * 注意: Authentication的实现类应该实现自动同步功能。
-     *
-     * @param authentication 要同步的权限信息
-     * @return 同步后的权限信息
-     */
-    Mono<Authentication> sync(Authentication authentication);
+
 }

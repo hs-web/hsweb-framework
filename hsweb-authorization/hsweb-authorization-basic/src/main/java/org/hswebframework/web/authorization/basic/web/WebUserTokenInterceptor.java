@@ -30,10 +30,10 @@ public class WebUserTokenInterceptor extends HandlerInterceptorAdapter {
 
     private boolean enableBasicAuthorization = false;
 
-    public WebUserTokenInterceptor(UserTokenManager userTokenManager, List<UserTokenParser> userTokenParser,AopMethodAuthorizeDefinitionParser definitionParser) {
+    public WebUserTokenInterceptor(UserTokenManager userTokenManager, List<UserTokenParser> userTokenParser, AopMethodAuthorizeDefinitionParser definitionParser) {
         this.userTokenManager = userTokenManager;
         this.userTokenParser = userTokenParser;
-        this.parser=definitionParser;
+        this.parser = definitionParser;
 
         enableBasicAuthorization = userTokenParser.stream()
                 .filter(UserTokenForTypeParser.class::isInstance)
@@ -60,18 +60,19 @@ public class WebUserTokenInterceptor extends HandlerInterceptorAdapter {
         for (ParsedToken parsedToken : tokens) {
             UserToken userToken = null;
             String token = parsedToken.getToken();
-            if (userTokenManager.tokenIsLoggedIn(token)) {
-                userToken = userTokenManager.getByToken(token);
+            if (userTokenManager.tokenIsLoggedIn(token).blockOptional().orElse(false)) {
+                userToken = userTokenManager.getByToken(token).blockOptional().orElse(null);
             }
             if ((userToken == null || userToken.isExpired()) && parsedToken instanceof AuthorizedToken) {
                 //先踢出旧token
-                userTokenManager.signOutByToken(token);
+                userTokenManager.signOutByToken(token).subscribe();
 
                 userToken = userTokenManager
-                        .signIn(parsedToken.getToken(), parsedToken.getType(), ((AuthorizedToken) parsedToken).getUserId(), ((AuthorizedToken) parsedToken).getMaxInactiveInterval());
+                        .signIn(parsedToken.getToken(), parsedToken.getType(), ((AuthorizedToken) parsedToken).getUserId(), ((AuthorizedToken) parsedToken).getMaxInactiveInterval())
+                        .block();
             }
             if (null != userToken) {
-                userTokenManager.touch(token);
+                userTokenManager.touch(token).subscribe();
                 UserTokenHolder.setCurrent(userToken);
             }
         }

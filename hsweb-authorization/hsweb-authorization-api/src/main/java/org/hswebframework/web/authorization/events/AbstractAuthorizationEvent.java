@@ -40,7 +40,7 @@ public abstract class AbstractAuthorizationEvent extends ApplicationEvent implem
     private transient Function<String, Object> parameterGetter;
 
     /**
-     * 带参构造方法,所有参数不能为null
+     * 所有参数不能为null
      *
      * @param username        用户名
      * @param password        密码

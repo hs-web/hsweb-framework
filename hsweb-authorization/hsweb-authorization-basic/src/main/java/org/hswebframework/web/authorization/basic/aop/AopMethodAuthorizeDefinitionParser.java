@@ -1,7 +1,7 @@
 package org.hswebframework.web.authorization.basic.aop;
 
+import org.hswebframework.web.aop.MethodInterceptorContext;
 import org.hswebframework.web.authorization.define.AuthorizeDefinition;
-import org.hswebframework.web.boost.aop.context.MethodInterceptorContext;
 
 import java.lang.reflect.Method;
 import java.util.List;

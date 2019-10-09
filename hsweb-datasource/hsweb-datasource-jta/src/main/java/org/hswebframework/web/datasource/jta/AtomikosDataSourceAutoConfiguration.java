@@ -33,11 +33,6 @@ public class AtomikosDataSourceAutoConfiguration {
         return new InMemoryAtomikosDataSourceRepository();
     }
 
-    @Bean
-    @Primary
-    public DynamicDataSourceService jtaDynamicDataSourceService(DynamicDataSourceConfigRepository<AtomikosDataSourceConfig> repository
-            , DataSource dataSource) throws SQLException {
-        return new JtaDynamicDataSourceService(repository, dataSource);
-    }
+
 
 }

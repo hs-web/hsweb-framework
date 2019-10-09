@@ -1,13 +1,10 @@
 package org.hswebframework.web.authorization;
 
 import org.hswebframework.web.authorization.builder.AuthenticationBuilder;
-import org.hswebframework.web.authorization.exception.AccessDenyException;
-import org.hswebframework.web.authorization.exception.UnAuthorizedException;
 import org.hswebframework.web.authorization.simple.builder.SimpleAuthenticationBuilder;
 import org.hswebframework.web.authorization.simple.builder.SimpleDataAccessConfigBuilderFactory;
 import org.hswebframework.web.authorization.token.*;
 import org.hswebframework.web.context.ContextKey;
-import org.hswebframework.web.context.ContextUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -101,8 +98,8 @@ public class AuthenticationTests {
         //初始化权限管理器,用于获取用户的权限信息
         AuthenticationManager authenticationManager = new AuthenticationManager() {
             @Override
-            public Mono<Authentication> authenticate(AuthenticationRequest request) {
-                return null;
+            public Mono<Authentication> authenticate(Mono<AuthenticationRequest> request) {
+                return Mono.empty();
             }
 
             @Override
@@ -113,20 +110,16 @@ public class AuthenticationTests {
                 return Mono.empty();
             }
 
-            @Override
-            public Mono<Authentication> sync(Authentication authentication) {
-                return Mono.just(authentication);
-            }
         };
-        AuthenticationHolder.addSupplier(new UserTokenAuthenticationSupplier(authenticationManager));
+        ReactiveAuthenticationHolder.addSupplier(new UserTokenReactiveAuthenticationSupplier(authenticationManager));
 
         //绑定用户token
         UserTokenManager userTokenManager = new DefaultUserTokenManager();
-        UserToken token = userTokenManager.signIn("test", "token-test", "admin", -1);
+        UserToken token = userTokenManager.signIn("test", "token-test", "admin", -1).block();
 
         //获取当前登录用户
         Authentication
-                .current()
+                .currentReactive()
                 .map(Authentication::getUser)
                 .map(User::getId)
                 .subscriberContext(acceptContext(ctx->ctx.put(ContextKey.of(UserToken.class),token)))

@@ -31,7 +31,7 @@ import java.util.*;
  * </ul>
  *
  * @author zhouhao
- * @see AuthenticationHolder
+ * @see ReactiveAuthenticationHolder
  * @see AuthenticationManager
  * @since 3.0
  */
@@ -49,10 +49,19 @@ public interface Authentication extends Serializable {
      * </pre>
      *
      * @return 返回Optional对象进行操作
-     * @see Optional
-     * @see AuthenticationHolder
+     * @see ReactiveAuthenticationHolder
      */
-    static Mono<Authentication> current() {
+    static Mono<Authentication> currentReactive() {
+        return ReactiveAuthenticationHolder.get();
+    }
+
+    /**
+     * 非响应式环境适用
+     *
+     * @return 当前用户权限信息
+     * @see Optional
+     */
+    static Optional<Authentication> current() {
         return AuthenticationHolder.get();
     }
 

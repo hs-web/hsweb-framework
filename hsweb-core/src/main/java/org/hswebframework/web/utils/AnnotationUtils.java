@@ -25,6 +25,7 @@ import org.springframework.util.ReflectionUtils;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 public final class AnnotationUtils {
 
@@ -49,16 +50,15 @@ public final class AnnotationUtils {
                 if(aClass==null){
                     continue;
                 }
-                Method ims[] = new Method[1];
-
+                AtomicReference<Method> methodRef = new AtomicReference<>();
                 ReflectionUtils.doWithMethods(aClass, im -> {
                     if (im.getName().equals(method.getName()) && im.getParameterCount() == method.getParameterCount()) {
-                        ims[0] = im;
+                        methodRef.set(im);
                     }
                 });
 
-                if (ims[0] != null) {
-                    a = findMethodAnnotation(aClass, ims[0], annClass);
+                if (methodRef.get() != null) {
+                    a = findMethodAnnotation(aClass, methodRef.get(), annClass);
                     if (a != null) {
                         return a;
                     }

@@ -10,13 +10,11 @@ import org.hswebframework.web.authorization.basic.handler.UserAllowPermissionHan
 import org.hswebframework.web.authorization.basic.handler.access.DefaultDataAccessController;
 import org.hswebframework.web.authorization.basic.twofactor.TwoFactorHandlerInterceptorAdapter;
 import org.hswebframework.web.authorization.basic.web.*;
-import org.hswebframework.web.authorization.basic.web.session.UserTokenAutoExpiredListener;
 import org.hswebframework.web.authorization.token.UserTokenManager;
 import org.hswebframework.web.authorization.twofactor.TwoFactorValidatorManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.condition.*;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
@@ -106,11 +104,6 @@ public class AuthorizingHandlerAutoConfiguration {
     @Bean
     public UserOnSignOut userOnSignOut(UserTokenManager userTokenManager) {
         return new UserOnSignOut(userTokenManager);
-    }
-
-    @Bean
-    public UserTokenAutoExpiredListener userTokenAutoExpiredListener(UserTokenManager userTokenManager) {
-        return new UserTokenAutoExpiredListener(userTokenManager);
     }
 
     @Bean

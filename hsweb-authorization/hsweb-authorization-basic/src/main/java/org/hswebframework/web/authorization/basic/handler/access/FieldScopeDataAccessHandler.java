@@ -2,6 +2,7 @@ package org.hswebframework.web.authorization.basic.handler.access;
 
 import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.beanutils.PropertyUtilsBean;
+import org.hswebframework.ezorm.core.param.QueryParam;
 import org.hswebframework.ezorm.core.param.Term;
 import org.hswebframework.ezorm.core.param.TermType;
 import org.hswebframework.web.authorization.Permission;
@@ -10,13 +11,10 @@ import org.hswebframework.web.authorization.access.DataAccessHandler;
 import org.hswebframework.web.authorization.access.FieldScopeDataAccessConfig;
 import org.hswebframework.web.authorization.define.AuthorizingContext;
 import org.hswebframework.web.authorization.define.Phased;
-import org.hswebframework.web.commons.entity.param.QueryParamEntity;
-import org.hswebframework.web.controller.QueryController;
-import org.hswebframework.web.service.QueryService;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -63,21 +61,21 @@ public class FieldScopeDataAccessHandler implements DataAccessHandler {
         Object id = context.getParamContext().<String>getParameter(context.getDefinition().getDataAccessDefinition().getIdParameterName()).orElse(null);
         //通过QueryController获取QueryService
         //然后调用selectByPk 查询旧的数据,进行对比
-        if (controller instanceof QueryController) {
-            QueryService queryService = (QueryService) ((QueryController) controller).getService();
-            Object oldData = queryService.selectByPk(id);
-            if (oldData != null) {
-                try {
-                    Object value = propertyUtilsBean.getProperty(oldData, access.getField());
-                    return access.getScope().contains(value);
-                } catch (Exception e) {
-                    logger.error("can't read property {}", access.getField(), e);
-                }
-                return false;
-            }
-        } else {
-            logger.warn("controller is not instanceof QueryController");
-        }
+//        if (controller instanceof QueryController) {
+//            QueryService queryService = (QueryService) ((QueryController) controller).getService();
+//            Object oldData = queryService.selectByPk(id);
+//            if (oldData != null) {
+//                try {
+//                    Object value = propertyUtilsBean.getProperty(oldData, access.getField());
+//                    return access.getScope().contains(value);
+//                } catch (Exception e) {
+//                    logger.error("can't read property {}", access.getField(), e);
+//                }
+//                return false;
+//            }
+//        } else {
+//            logger.warn("controller is not instanceof QueryController");
+//        }
         return true;
     }
 
@@ -85,10 +83,10 @@ public class FieldScopeDataAccessHandler implements DataAccessHandler {
     @SuppressWarnings("all")
     protected boolean doQueryAccess(FieldScopeDataAccessConfig access, AuthorizingContext context) {
         if (context.getDefinition().getDataAccessDefinition().getPhased() == Phased.before) {
-            QueryParamEntity entity = context.getParamContext().getParams()
+            QueryParam entity = context.getParamContext().getParams()
                     .values().stream()
-                    .filter(QueryParamEntity.class::isInstance)
-                    .map(QueryParamEntity.class::cast)
+                    .filter(QueryParam.class::isInstance)
+                    .map(QueryParam.class::cast)
                     .findAny().orElse(null);
             if (entity == null) {
                 logger.warn("try validate query access, but query entity is null or not instance of org.hswebframework.web.commons.entity.Entity");

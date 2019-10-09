@@ -1,7 +1,7 @@
 package org.hswebframework.web.authorization.basic.web;
 
-import org.hswebframework.web.WebUtil;
 import org.hswebframework.web.authorization.Authentication;
+import org.hswebframework.web.utils.WebUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.Serializable;
@@ -22,7 +22,7 @@ public class SessionIdUserTokenGenerator implements UserTokenGenerator, Serializ
 
     @Override
     public GeneratedToken generate(Authentication authentication) {
-        HttpServletRequest request = WebUtil.getHttpServletRequest();
+        HttpServletRequest request = WebUtils.getHttpServletRequest();
         if (null == request) {
             throw new UnsupportedOperationException();
         }

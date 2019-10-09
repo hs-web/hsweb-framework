@@ -2,6 +2,7 @@ package org.hswebframework.web.datasource;
 
 import org.hswebframework.web.datasource.exception.DataSourceNotFoundException;
 import org.hswebframework.web.datasource.switcher.*;
+import reactor.core.publisher.Mono;
 
 /**
  * 用于操作动态数据源,如获取当前使用的数据源,使用switcher切换数据源等
@@ -11,21 +12,18 @@ import org.hswebframework.web.datasource.switcher.*;
  */
 public final class DataSourceHolder {
 
-    private static final DataSourceSwitcher defaultSwitcher = new DefaultDataSourceSwitcher();
 
-    /**
-     * 动态数据源切换器
-     */
-    static volatile DataSourceSwitcher dataSourceSwitcher = defaultSwitcher;
     /**
      * 动态数据源服务
      */
     static volatile DynamicDataSourceService dynamicDataSourceService;
 
-    static volatile TableSwitcher tableSwitcher = new DefaultTableSwitcher();
+    static volatile JdbcSwitcher jdbcSwitcher = new DefaultJdbcSwitcher();
+    static volatile R2dbcSwitcher r2dbcSwitcher = new DefaultR2dbcSwicher();
 
-    static volatile DatabaseSwitcher databaseSwitcher = new DefaultDatabaseSwitcher();
-
+    public static boolean isDynamicDataSourceReady() {
+        return dynamicDataSourceService != null;
+    }
 
     public static void checkDynamicDataSourceReady() {
         if (dynamicDataSourceService == null) {
@@ -36,32 +34,20 @@ public final class DataSourceHolder {
     /**
      * @return 动态数据源切换器
      */
-    public static DataSourceSwitcher switcher() {
-        return dataSourceSwitcher;
+    public static JdbcSwitcher switcher() {
+        return jdbcSwitcher;
     }
 
-    /**
-     * @return 表切换器, 用于动态切换系统功能表
-     */
-    public static TableSwitcher tableSwitcher() {
-        return tableSwitcher;
+    public static R2dbcSwitcher r2dbcSwitcher() {
+        return r2dbcSwitcher;
     }
-
-    /**
-     * @return 数据库切换器
-     * @since 3.0.8
-     */
-    public static DatabaseSwitcher databaseSwitcher() {
-        return databaseSwitcher;
-    }
-
 
     /**
      * @return 默认数据源
      */
-    public static DynamicDataSource defaultDataSource() {
+    public static JdbcDataSource defaultDataSource() {
         checkDynamicDataSourceReady();
-        return dynamicDataSourceService.getDefaultDataSource();
+        return (JdbcDataSource) dynamicDataSourceService.getDefaultDataSource();
     }
 
     /**
@@ -71,28 +57,36 @@ public final class DataSourceHolder {
      * @return 动态数据源
      * @throws DataSourceNotFoundException 如果数据源不存在将抛出此异常
      */
-    public static DynamicDataSource dataSource(String dataSourceId) {
+    public static JdbcDataSource dataSource(String dataSourceId) {
         checkDynamicDataSourceReady();
         return dynamicDataSourceService.getDataSource(dataSourceId);
     }
 
+
     /**
      * @return 当前使用的数据源
      */
-    public static DynamicDataSource currentDataSource() {
-        String id = dataSourceSwitcher.currentDataSourceId();
-        if (id == null) {
-            return defaultDataSource();
-        }
-        checkDynamicDataSourceReady();
-        return dynamicDataSourceService.getDataSource(id);
+    public static JdbcDataSource currentDataSource() {
+        return jdbcSwitcher.datasource()
+                .current()
+                .map(dynamicDataSourceService::getDataSource)
+                .orElseGet(DataSourceHolder::defaultDataSource);
+    }
+
+    public static Mono<R2dbcDataSource> currentR2dbc() {
+        return r2dbcSwitcher.datasource()
+                .current()
+                .flatMap(dynamicDataSourceService::getR2dbcDataSource)
+                .switchIfEmpty(Mono.defer(() ->
+                        Mono.just(dynamicDataSourceService.getDefaultDataSource())
+                                .map(R2dbcDataSource.class::cast)));
     }
 
     /**
      * @return 当前使用的数据源是否为默认数据源
      */
     public static boolean currentIsDefault() {
-        return dataSourceSwitcher.currentDataSourceId() == null;
+        return !jdbcSwitcher.datasource().current().isPresent();
     }
 
     /**

@@ -1,23 +1,16 @@
 package org.hswebframework.web.authorization.basic.handler.access;
 
 import org.apache.commons.beanutils.BeanUtilsBean;
+import org.hswebframework.ezorm.core.param.QueryParam;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.access.DataAccessConfig;
 import org.hswebframework.web.authorization.access.DataAccessHandler;
 import org.hswebframework.web.authorization.access.FieldFilterDataAccessConfig;
 import org.hswebframework.web.authorization.define.AuthorizingContext;
 import org.hswebframework.web.authorization.define.Phased;
-import org.hswebframework.web.commons.entity.Entity;
-import org.hswebframework.web.commons.entity.param.QueryParamEntity;
-import org.hswebframework.web.commons.model.Model;
-import org.hswebframework.web.controller.message.ResponseMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.ResponseEntity;
-
-import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -63,10 +56,10 @@ public class FieldFilterDataAccessHandler implements DataAccessHandler {
     protected boolean doUpdateAccess(FieldFilterDataAccessConfig accesses, AuthorizingContext params) {
         Map<String, Object> paramsMap = params.getParamContext().getParams();
 
-        Object supportParam = paramsMap.size() == 0 ?
+        Object supportParam = paramsMap.size() == 1 ?
                 paramsMap.values().iterator().next() :
                 paramsMap.values().stream()
-                        .filter(param -> (param instanceof Entity) || (param instanceof Model) || (param instanceof Map))
+                       // .filter(param -> (param instanceof Entity) || (param instanceof Model) || (param instanceof Map))
                         .findAny()
                         .orElse(null);
         if (null != supportParam) {
@@ -89,10 +82,10 @@ public class FieldFilterDataAccessHandler implements DataAccessHandler {
     @SuppressWarnings("all")
     protected boolean doQueryAccess(FieldFilterDataAccessConfig access, AuthorizingContext context) {
         if (context.getDefinition().getDataAccessDefinition().getPhased() == Phased.before) {
-            QueryParamEntity entity = context.getParamContext().getParams()
+            QueryParam entity = context.getParamContext().getParams()
                     .values().stream()
-                    .filter(QueryParamEntity.class::isInstance)
-                    .map(QueryParamEntity.class::cast)
+                    .filter(QueryParam.class::isInstance)
+                    .map(QueryParam.class::cast)
                     .findAny().orElse(null);
             if (entity == null) {
                 logger.warn("try validate query access, but query entity is null or not instance of org.hswebframework.web.commons.entity.Entity");

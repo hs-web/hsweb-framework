@@ -1,14 +1,14 @@
 package org.hswebframework.web.authorization.basic.aop;
 
 import lombok.extern.slf4j.Slf4j;
-import org.hswebframework.web.AopUtils;
+import org.hswebframework.web.aop.MethodInterceptorContext;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.annotation.RequiresDataAccess;
 import org.hswebframework.web.authorization.annotation.RequiresExpression;
 import org.hswebframework.web.authorization.basic.define.DefaultBasicAuthorizeDefinition;
 import org.hswebframework.web.authorization.basic.define.EmptyAuthorizeDefinition;
 import org.hswebframework.web.authorization.define.AuthorizeDefinition;
-import org.hswebframework.web.boost.aop.context.MethodInterceptorContext;
+import org.hswebframework.web.utils.AnnotationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
@@ -71,14 +71,14 @@ public class DefaultAopMethodAuthorizeDefinitionParser implements AopMethodAutho
                 return definition;
             }
         }
-        Authorize classAuth = AopUtils.findAnnotation(target, Authorize.class);
-        Authorize methodAuth = AopUtils.findMethodAnnotation(target, method, Authorize.class);
+        Authorize classAuth = AnnotationUtils.findAnnotation(target, Authorize.class);
+        Authorize methodAuth = AnnotationUtils.findMethodAnnotation(target, method, Authorize.class);
 
-        RequiresDataAccess classDataAccess = AopUtils.findAnnotation(target, RequiresDataAccess.class);
+        RequiresDataAccess classDataAccess = AnnotationUtils.findAnnotation(target, RequiresDataAccess.class);
 
-        RequiresDataAccess methodDataAccess = AopUtils.findMethodAnnotation(target, method, RequiresDataAccess.class);
+        RequiresDataAccess methodDataAccess = AnnotationUtils.findMethodAnnotation(target, method, RequiresDataAccess.class);
 
-        RequiresExpression expression = AopUtils.findAnnotation(target, RequiresExpression.class);
+        RequiresExpression expression = AnnotationUtils.findAnnotation(target, RequiresExpression.class);
 
         if (classAuth == null && methodAuth == null && classDataAccess == null && methodDataAccess == null && expression == null) {
             cache.put(key, EmptyAuthorizeDefinition.instance);

@@ -1,9 +1,11 @@
 package org.hswebframework.web.system.authorization.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 import org.hswebframework.web.bean.ToString;
 import org.hswebframework.web.crud.entity.Entity;
+import org.hswebframework.web.crud.entity.GenericEntity;
 import org.hswebframework.web.crud.entity.RecordCreationEntity;
 
 import javax.persistence.Column;
@@ -17,11 +19,7 @@ import javax.validation.constraints.NotBlank;
 @Table(name = "s_user", indexes =
 @Index(name = "user_username_idx", columnList = "username", unique = true)
 )
-public class UserEntity implements RecordCreationEntity, Entity {
-
-    @Id
-    @Column(length = 32)
-    private String id;
+public class UserEntity extends GenericEntity<String> implements RecordCreationEntity {
 
     @Column(length = 128, nullable = false)
     @NotBlank(message = "姓名不能为空")
@@ -32,10 +30,12 @@ public class UserEntity implements RecordCreationEntity, Entity {
 
     @Column(nullable = false)
     @ToString.Ignore(cover = false)
+    @JsonIgnore
     private String password;
 
     @Column(nullable = false)
     @ToString.Ignore(cover = false)
+    @JsonIgnore
     private String salt;
 
     @Column
@@ -49,6 +49,5 @@ public class UserEntity implements RecordCreationEntity, Entity {
 
     @Column(name = "create_time", updatable = false)
     private Long createTime;
-
 
 }

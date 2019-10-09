@@ -30,7 +30,7 @@ public class SessionIdUserTokenParser implements UserTokenParser {
 
         if (session != null) {
             String sessionId = session.getId();
-            UserToken token = userTokenManager.getByToken(sessionId);
+            UserToken token = userTokenManager.getByToken(sessionId).block();
             long interval = session.getMaxInactiveInterval();
             //当前已登录token已失效但是session未失效
             if (token != null && token.isExpired()) {

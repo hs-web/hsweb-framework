@@ -11,15 +11,21 @@ import java.util.function.Function;
  */
 public class ContextUtils {
 
+    private static ThreadLocal<Context> contextThreadLocal = ThreadLocal.withInitial(MapContext::new);
 
-    public static Mono<Context> currentContext() {
+
+    public static Context currentContext() {
+        return contextThreadLocal.get();
+    }
+
+    public static Mono<Context> reactiveContext() {
         return Mono.subscriberContext()
                 .<Context>handle((context, sink) -> {
                     if (context.hasKey(Context.class)) {
                         sink.next(context.get(Context.class));
                     }
                 })
-                .subscriberContext(acceptContext(ctx->{
+                .subscriberContext(acceptContext(ctx -> {
 
                 }));
     }

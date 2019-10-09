@@ -1,11 +1,11 @@
 package org.hswebframework.web.datasource;
 
 import org.aopalliance.intercept.MethodInterceptor;
-import org.hswebframework.web.ExpressionUtils;
-import org.hswebframework.web.boost.aop.context.MethodInterceptorContext;
-import org.hswebframework.web.boost.aop.context.MethodInterceptorHolder;
+import org.hswebframework.web.aop.MethodInterceptorContext;
+import org.hswebframework.web.aop.MethodInterceptorHolder;
 import org.hswebframework.web.datasource.exception.DataSourceNotFoundException;
 import org.hswebframework.web.datasource.strategy.*;
+import org.hswebframework.web.utils.ExpressionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
+import reactor.core.publisher.Flux;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -105,7 +106,7 @@ public class AopDataSourceSwitcherAutoConfiguration {
                         } else {
                             logger.debug("switch datasource. use strategy:{}", strategy);
                             if (strategy.isUseDefaultDataSource()) {
-                                DataSourceHolder.switcher().useDefault();
+                                DataSourceHolder.switcher().datasource().useDefault();
                             } else {
                                 try {
                                     String id = strategy.getDataSourceId();
@@ -115,12 +116,12 @@ public class AopDataSourceSwitcherAutoConfiguration {
                                         }
                                         if (!DataSourceHolder.existing(id)) {
                                             if (strategy.isFallbackDefault()) {
-                                                DataSourceHolder.switcher().useDefault();
+                                                DataSourceHolder.switcher().datasource().useDefault();
                                             } else {
                                                 throw new DataSourceNotFoundException("数据源[" + id + "]不存在");
                                             }
                                         } else {
-                                            DataSourceHolder.switcher().use(id);
+                                            DataSourceHolder.switcher().datasource().use(id);
                                         }
                                         dataSourceChanged.set(true);
                                     }
@@ -134,7 +135,7 @@ public class AopDataSourceSwitcherAutoConfiguration {
                             }
                             if (StringUtils.hasText(strategy.getDatabase())) {
                                 databaseChanged.set(true);
-                                DataSourceHolder.databaseSwitcher().use(strategy.getDatabase());
+                                DataSourceHolder.switcher().datasource().use(strategy.getDatabase());
                             }
                         }
                     });
@@ -144,25 +145,30 @@ public class AopDataSourceSwitcherAutoConfiguration {
                         TableSwitchStrategyMatcher.Strategy strategy = tableMatcher.getStrategy(context);
                         if (null != strategy) {
                             logger.debug("switch table. use strategy:{}", strategy);
-                            strategy.getMapping().forEach(DataSourceHolder.tableSwitcher()::use);
+                           // strategy.getMapping().forEach(DataSourceHolder.switcher()::use);
                         } else {
                             logger.warn("table strategy matcher found:{}, but strategy is null!", matcher);
                         }
                     });
                 }
 
+                Class<?> returnType= methodInvocation.getMethod().getReturnType();
+
+                if(returnType.isAssignableFrom(Flux.class)){
+                    // TODO: 2019-10-08
+                }
                 MethodInterceptorHolder holder = MethodInterceptorHolder.create(methodInvocation);
                 before.accept(holder.createParamContext());
                 try {
                     return methodInvocation.proceed();
                 } finally {
                     if (dataSourceChanged.get()) {
-                        DataSourceHolder.switcher().useLast();
+                        DataSourceHolder.switcher().datasource().useLast();
                     }
                     if (databaseChanged.get()) {
-                        DataSourceHolder.databaseSwitcher().useLast();
+                        DataSourceHolder.switcher().datasource().useLast();
                     }
-                    DataSourceHolder.tableSwitcher().reset();
+                  //  DataSourceHolder.tableSwitcher().reset();
                 }
             });
         }

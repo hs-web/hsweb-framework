@@ -33,6 +33,7 @@
         <module>hsweb-datasource</module>
         <module>hsweb-commons</module>
         <module>hsweb-logging</module>
+        <module>hsweb-tests</module>
     </modules>
 
     <packaging>pom</packaging>
@@ -78,7 +79,7 @@
         <java.version>1.8</java.version>
         <project.build.jdk>${java.version}</project.build.jdk>
 
-        <spring.boot.version>2.2.0.M6</spring.boot.version>
+        <spring.boot.version>2.2.0.RC1</spring.boot.version>
 
         <javassist.version>3.20.0-GA</javassist.version>
         <activiti.version>5.19.0.2</activiti.version>
@@ -88,13 +89,14 @@
         <mysql.version>5.1.39</mysql.version>
         <cglib.version>3.2.2</cglib.version>
         <aspectj.version>1.6.12</aspectj.version>
-        <hibernate.validator.version>5.1.1.Final</hibernate.validator.version>
 
         <hsweb.ezorm.version>4.0.0-SNAPSHOT</hsweb.ezorm.version>
         <hsweb.utils.version>3.0.2</hsweb.utils.version>
         <hsweb.expands.version>3.0.2</hsweb.expands.version>
-
         <swagger.version>2.7.0</swagger.version>
+
+        <reactor.version>Dysprosium-RELEASE</reactor.version>
+        <r2dbc.version>Arabba-RC2</r2dbc.version>
     </properties>
 
     <profiles>
@@ -295,10 +297,33 @@
             <version>1.1.7</version>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-test</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <dependencyManagement>
         <dependencies>
+
+            <dependency>
+                <groupId>io.r2dbc</groupId>
+                <artifactId>r2dbc-bom</artifactId>
+                <version>${r2dbc.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework.boot.experimental</groupId>
+                <artifactId>spring-boot-bom-r2dbc</artifactId>
+                <version>0.1.0.M2</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
             <dependency>
                 <groupId>org.hibernate.javax.persistence</groupId>
                 <artifactId>hibernate-jpa-2.1-api</artifactId>
@@ -310,44 +335,32 @@
                 <artifactId>vavr</artifactId>
                 <version>0.9.2</version>
             </dependency>
+
             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
                 <version>1.16.18</version>
             </dependency>
-            <dependency>
-                <groupId>io.reactivex.rxjava2</groupId>
-                <artifactId>rxjava</artifactId>
-                <version>2.1.8</version>
-            </dependency>
+
             <dependency>
                 <groupId>org.jooq</groupId>
                 <artifactId>jool-java-8</artifactId>
                 <version>0.9.13</version>
             </dependency>
+
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
                 <version>4.12</version>
                 <scope>test</scope>
             </dependency>
+
             <dependency>
                 <groupId>com.alibaba</groupId>
                 <artifactId>fastjson</artifactId>
                 <version>${fastjson.version}</version>
             </dependency>
 
-            <dependency>
-                <groupId>io.springfox</groupId>
-                <artifactId>springfox-swagger2</artifactId>
-                <version>${swagger.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>io.springfox</groupId>
-                <artifactId>springfox-swagger-ui</artifactId>
-                <version>${swagger.version}</version>
-            </dependency>
             <dependency>
                 <groupId>io.swagger</groupId>
                 <artifactId>swagger-annotations</artifactId>

@@ -2,7 +2,8 @@ package org.hswebframework.web.authorization.basic.aop;
 
 import lombok.extern.slf4j.Slf4j;
 import org.aopalliance.intercept.MethodInterceptor;
-import org.hswebframework.web.AopUtils;
+import org.hswebframework.web.aop.MethodInterceptorContext;
+import org.hswebframework.web.aop.MethodInterceptorHolder;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.basic.handler.AuthorizingHandler;
@@ -11,8 +12,7 @@ import org.hswebframework.web.authorization.define.AuthorizeDefinitionInitialize
 import org.hswebframework.web.authorization.define.AuthorizingContext;
 import org.hswebframework.web.authorization.define.Phased;
 import org.hswebframework.web.authorization.exception.UnAuthorizedException;
-import org.hswebframework.web.boost.aop.context.MethodInterceptorContext;
-import org.hswebframework.web.boost.aop.context.MethodInterceptorHolder;
+import org.hswebframework.web.utils.AnnotationUtils;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -112,9 +112,9 @@ public class AopAuthorizingController extends StaticMethodMatcherPointcutAdvisor
 
     @Override
     public boolean matches(Method method, Class<?> aClass) {
-        boolean support = AopUtils.findAnnotation(aClass, Controller.class) != null
-                || AopUtils.findAnnotation(aClass, RestController.class) != null
-                || AopUtils.findAnnotation(aClass, method, Authorize.class) != null;
+        boolean support = AnnotationUtils.findAnnotation(aClass, Controller.class) != null
+                || AnnotationUtils.findAnnotation(aClass, RestController.class) != null
+                || AnnotationUtils.findAnnotation(aClass, method, Authorize.class) != null;
 
         if (support && autoParse) {
             defaultParser.parse(aClass, method);

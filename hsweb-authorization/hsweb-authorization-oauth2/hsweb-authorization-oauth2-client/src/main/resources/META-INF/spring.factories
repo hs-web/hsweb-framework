@@ -1,3 +1,0 @@
-# Auto Configure
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-org.hswebframework.web.authorization.oauth2.client.OAuth2ClientAutoConfiguration

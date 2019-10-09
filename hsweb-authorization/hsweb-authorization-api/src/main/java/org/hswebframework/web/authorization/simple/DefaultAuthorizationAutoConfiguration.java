@@ -1,7 +1,7 @@
 package org.hswebframework.web.authorization.simple;
 
 import org.hswebframework.web.authorization.Authentication;
-import org.hswebframework.web.authorization.AuthenticationHolder;
+import org.hswebframework.web.authorization.ReactiveAuthenticationHolder;
 import org.hswebframework.web.authorization.AuthenticationManager;
 import org.hswebframework.web.authorization.builder.AuthenticationBuilderFactory;
 import org.hswebframework.web.authorization.builder.DataAccessConfigBuilderFactory;
@@ -9,7 +9,7 @@ import org.hswebframework.web.authorization.simple.builder.DataAccessConfigConve
 import org.hswebframework.web.authorization.simple.builder.SimpleAuthenticationBuilderFactory;
 import org.hswebframework.web.authorization.simple.builder.SimpleDataAccessConfigBuilderFactory;
 import org.hswebframework.web.authorization.token.DefaultUserTokenManager;
-import org.hswebframework.web.authorization.token.UserTokenAuthenticationSupplier;
+import org.hswebframework.web.authorization.token.UserTokenReactiveAuthenticationSupplier;
 import org.hswebframework.web.authorization.token.UserTokenManager;
 import org.hswebframework.web.authorization.twofactor.TwoFactorValidatorManager;
 import org.hswebframework.web.authorization.twofactor.defaults.DefaultTwoFactorValidatorManager;
@@ -41,9 +41,9 @@ public class DefaultAuthorizationAutoConfiguration {
 
     @Bean
     @ConditionalOnBean(AuthenticationManager.class)
-    public UserTokenAuthenticationSupplier userTokenAuthenticationSupplier(AuthenticationManager authenticationManager) {
-        UserTokenAuthenticationSupplier supplier = new UserTokenAuthenticationSupplier(authenticationManager);
-        AuthenticationHolder.addSupplier(supplier);
+    public UserTokenReactiveAuthenticationSupplier userTokenAuthenticationSupplier(AuthenticationManager authenticationManager) {
+        UserTokenReactiveAuthenticationSupplier supplier = new UserTokenReactiveAuthenticationSupplier(authenticationManager);
+        ReactiveAuthenticationHolder.addSupplier(supplier);
         return supplier;
     }
 

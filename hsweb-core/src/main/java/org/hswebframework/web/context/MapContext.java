@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 
 @SuppressWarnings("all")
 class MapContext implements Context {
@@ -17,8 +18,8 @@ class MapContext implements Context {
     }
 
     @Override
-    public <T> T getOrDefault(ContextKey<T> key, T defaultValue) {
-        return (T) map.computeIfAbsent(key.getKey(), __ -> defaultValue);
+    public <T> T getOrDefault(ContextKey<T> key, Supplier<? extends T> defaultValue) {
+        return (T) map.computeIfAbsent(key.getKey(), __ -> defaultValue.get());
     }
 
     @Override
@@ -27,7 +28,18 @@ class MapContext implements Context {
     }
 
     @Override
+    public <T> T remove(ContextKey<T> key) {
+        return (T)map.remove(key);
+    }
+
+    @Override
     public Map<String, Object> getAll() {
         return new HashMap<>(map);
     }
+
+    @Override
+    public void clean() {
+        map.clear();
+    }
+
 }

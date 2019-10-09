@@ -18,13 +18,12 @@
 
 package org.hswebframework.web.authorization;
 
-import org.hswebframework.web.ThreadLocalUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Function;
@@ -50,20 +49,19 @@ public final class AuthenticationHolder {
 
     private static final ReadWriteLock lock = new ReentrantReadWriteLock();
 
-    private static Mono<Authentication> get(Function<AuthenticationSupplier, Mono<Authentication>> function) {
+    private static Optional<Authentication> get(Function<AuthenticationSupplier, Authentication> function) {
 
-        return Flux.concat(suppliers.stream()
-                .map(function)
-                .collect(Collectors.toList()))
+        return Flux.fromStream(suppliers.stream().map(function))
                 .reduceWith(CompositeAuthentication::new, CompositeAuthentication::merge)
                 .filter(CompositeAuthentication::isNotEmpty)
-                .map(Authentication.class::cast);
+                .map(Authentication.class::cast)
+                .blockOptional();
     }
 
     /**
      * @return 当前登录的用户权限信息
      */
-    public static Mono<Authentication> get() {
+    public static Optional<Authentication> get() {
 
         return get(AuthenticationSupplier::get);
     }
@@ -74,7 +72,7 @@ public final class AuthenticationHolder {
      * @param userId 用户ID
      * @return 权限信息
      */
-    public static Mono<Authentication> get(String userId) {
+    public static Optional<Authentication> get(String userId) {
         return get(supplier -> supplier.get(userId));
     }
 

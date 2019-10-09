@@ -23,7 +23,6 @@ public class CompositeAuthentication implements Authentication {
         return !isEmpty();
     }
 
-
     @Override
     public User getUser() {
 

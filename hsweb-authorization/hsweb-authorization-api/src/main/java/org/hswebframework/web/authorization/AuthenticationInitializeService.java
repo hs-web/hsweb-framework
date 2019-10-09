@@ -19,12 +19,13 @@
 package org.hswebframework.web.authorization;
 
 import org.hswebframework.web.authorization.events.AuthorizationInitializeEvent;
+import reactor.core.publisher.Mono;
 
 /**
  * 授权信息初始化服务接口,使用该接口初始化用的权限信息
  *
  * @author zhouhao
- * @since 3.0
+ * @since 4.0
  */
 public interface AuthenticationInitializeService {
     /**
@@ -34,6 +35,6 @@ public interface AuthenticationInitializeService {
      * @return 权限信息
      * @see AuthorizationInitializeEvent
      */
-    Authentication initUserAuthorization(String userId);
+    Mono<Authentication> initUserAuthorization(String userId);
 
 }

@@ -1,14 +1,14 @@
 package org.hswebframework.web.loggin.aop;
 
 import org.aopalliance.intercept.MethodInterceptor;
-import org.hswebframework.web.WebUtil;
-import org.hswebframework.web.boost.aop.context.MethodInterceptorHolder;
+import org.hswebframework.web.aop.MethodInterceptorHolder;
 import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.logging.AccessLoggerInfo;
 import org.hswebframework.web.logging.AccessLoggerListener;
 import org.hswebframework.web.logging.LoggerDefine;
 import org.hswebframework.web.logging.events.AccessLoggerAfterEvent;
 import org.hswebframework.web.logging.events.AccessLoggerBeforeEvent;
+import org.hswebframework.web.utils.WebUtils;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -94,10 +94,10 @@ public class AopAccessLoggerSupport extends StaticMethodMatcherPointcutAdvisor {
         info.setTarget(holder.getTarget().getClass());
         info.setMethod(holder.getMethod());
 
-        HttpServletRequest request = WebUtil.getHttpServletRequest();
+        HttpServletRequest request = WebUtils.getHttpServletRequest();
         if (null != request) {
-            info.setHttpHeaders(WebUtil.getHeaders(request));
-            info.setIp(WebUtil.getIpAddr(request));
+            info.setHttpHeaders(WebUtils.getHeaders(request));
+            info.setIp(WebUtils.getIpAddr(request));
             info.setHttpMethod(request.getMethod());
             info.setUrl(request.getRequestURL().toString());
         }

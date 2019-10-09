@@ -25,8 +25,8 @@ import java.util.function.Supplier;
  * @author zhouhao
  * @see Supplier
  * @see Authentication
- * @see AuthenticationHolder
+ * @see ReactiveAuthenticationHolder
  */
-public interface AuthenticationSupplier extends Supplier<Mono<Authentication>> {
-    Mono<Authentication> get(String userId);
+public interface AuthenticationSupplier extends Supplier<Authentication> {
+    Authentication get(String userId);
 }
