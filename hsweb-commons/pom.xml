@@ -32,13 +32,6 @@
     <artifactId>hsweb-commons</artifactId>
     <packaging>pom</packaging>
     <modules>
-        <module>hsweb-commons-entity</module>
-        <module>hsweb-commons-dao</module>
-        <module>hsweb-commons-service</module>
-        <module>hsweb-commons-controller</module>
-        <module>hsweb-commons-utils</module>
-        <module>hsweb-commons-model</module>
-        <module>hsweb-commons-bean</module>
         <module>hsweb-commons-crud</module>
     </modules>
 

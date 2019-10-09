@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Collection;
 import java.util.Collections;
 
 public interface ReactiveCrudService<E, K> {
@@ -40,13 +41,26 @@ public interface ReactiveCrudService<E, K> {
         return publisher.flatMap(e -> findById(Mono.just(e)));
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Throwable.class)
     default Mono<SaveResult> save(Publisher<E> entityPublisher) {
         return getRepository()
                 .save(entityPublisher);
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Throwable.class)
+    default Mono<Integer> insertBatch(Publisher<? extends Collection<E>> entityPublisher) {
+        return getRepository()
+                .insertBatch(entityPublisher);
+    }
+
+    @Transactional(rollbackFor = Throwable.class)
+    default Mono<Integer> insert(Publisher<E> entityPublisher) {
+        return getRepository()
+                .insert(entityPublisher);
+    }
+
+
+    @Transactional(rollbackFor = Throwable.class)
     default Mono<Integer> deleteById(Publisher<K> idPublisher) {
         return getRepository()
                 .deleteById(idPublisher);

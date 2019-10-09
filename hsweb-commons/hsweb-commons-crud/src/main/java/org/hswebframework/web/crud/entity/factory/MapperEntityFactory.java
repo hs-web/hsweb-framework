@@ -63,7 +63,7 @@ public class MapperEntityFactory implements EntityFactory, BeanFactory {
     public MapperEntityFactory() {
     }
 
-    public <T> MapperEntityFactory(Map<Class<T>, Mapper> realTypeMapper) {
+    public   MapperEntityFactory(Map<Class<?>, Mapper> realTypeMapper) {
         this.realTypeMapper.putAll(realTypeMapper);
     }
 
@@ -119,7 +119,7 @@ public class MapperEntityFactory implements EntityFactory, BeanFactory {
         if (iterator.hasNext()) {
             realType = (Class<T>) iterator.next().getClass();
         }
-        //尝试使用 Simple类，如: package.SimpleUserBean
+
         if (realType == null) {
             mapper = defaultMapperFactory.apply(beanClass);
         }
