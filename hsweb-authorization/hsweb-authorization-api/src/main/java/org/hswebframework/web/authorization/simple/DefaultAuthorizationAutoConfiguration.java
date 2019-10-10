@@ -41,8 +41,9 @@ public class DefaultAuthorizationAutoConfiguration {
 
     @Bean
     @ConditionalOnBean(AuthenticationManager.class)
-    public UserTokenReactiveAuthenticationSupplier userTokenAuthenticationSupplier(AuthenticationManager authenticationManager) {
-        UserTokenReactiveAuthenticationSupplier supplier = new UserTokenReactiveAuthenticationSupplier(authenticationManager);
+    public UserTokenReactiveAuthenticationSupplier userTokenAuthenticationSupplier(UserTokenManager userTokenManager,
+                                                                                   AuthenticationManager authenticationManager) {
+        UserTokenReactiveAuthenticationSupplier supplier = new UserTokenReactiveAuthenticationSupplier(userTokenManager, authenticationManager);
         ReactiveAuthenticationHolder.addSupplier(supplier);
         return supplier;
     }

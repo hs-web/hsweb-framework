@@ -41,5 +41,8 @@ public interface User extends Serializable {
      */
     String getName();
 
+    /**
+     * @return 用户类型
+     */
     String getType();
 }

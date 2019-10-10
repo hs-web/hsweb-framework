@@ -33,6 +33,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>hsweb-commons-crud</module>
+        <module>hsweb-commons-api</module>
     </modules>
 
 </project>

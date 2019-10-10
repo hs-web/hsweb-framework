@@ -1,14 +1,14 @@
 package org.hswebframework.web.crud.configuration;
 
-import lombok.SneakyThrows;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.ezorm.rdb.mapping.defaults.DefaultReactiveRepository;
 import org.hswebframework.ezorm.rdb.mapping.defaults.DefaultSyncRepository;
 import org.hswebframework.utils.ClassUtils;
 import org.hswebframework.web.crud.annotation.EnableEasyormRepository;
-import org.hswebframework.web.crud.annotation.ImplementFor;
+import org.hswebframework.web.api.crud.entity.ImplementFor;
 import org.hswebframework.web.crud.annotation.Reactive;
-import org.hswebframework.web.crud.entity.GenericEntity;
+import org.hswebframework.web.api.crud.entity.GenericEntity;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -54,7 +54,7 @@ public class EasyormRepositoryRegistrar implements ImportBeanDefinitionRegistrar
 
         Class<Annotation>[] anno = (Class[]) attr.get("annotation");
 
-        List<Class> allEntities = new ArrayList<>();
+        Set<EntityInfo> entityInfos = new HashSet<>();
 
         for (Resource resource : resourcePatternResolver.getResources(path)) {
             MetadataReader reader = metadataReaderFactory.getMetadataReader(resource);
@@ -64,7 +64,7 @@ public class EasyormRepositoryRegistrar implements ImportBeanDefinitionRegistrar
                     .noneMatch(ann -> AnnotationUtils.findAnnotation(entityType, ann) != null)) {
                 continue;
             }
-            allEntities.add(entityType);
+
             ImplementFor implementFor = AnnotationUtils.findAnnotation(entityType, ImplementFor.class);
             Reactive reactive = AnnotationUtils.findAnnotation(entityType, Reactive.class);
             Class genericType = Optional.ofNullable(implementFor)
@@ -75,6 +75,8 @@ public class EasyormRepositoryRegistrar implements ImportBeanDefinitionRegistrar
                                 .findFirst()
                                 .orElse(entityType);
                     });
+
+
             Class idType = null;
             if (implementFor == null || implementFor.idType() == Void.class) {
                 try {
@@ -91,28 +93,41 @@ public class EasyormRepositoryRegistrar implements ImportBeanDefinitionRegistrar
             } else {
                 idType = implementFor.idType();
             }
-            if(reactive!=null){
-                log.debug("register ReactiveRepository<{},{}>", genericType.getName(), idType.getSimpleName());
 
-                ResolvableType repositoryType = ResolvableType.forClassWithGenerics(DefaultReactiveRepository.class, genericType, idType);
+            EntityInfo entityInfo = new EntityInfo(genericType, entityType, idType, reactive == null || reactive.enable());
+            if (!entityInfos.contains(entityInfo) || implementFor != null) {
+                entityInfos.add(entityInfo);
+            }
+
+        }
+        boolean reactive=false;
+        for (EntityInfo entityInfo : entityInfos) {
+            Class entityType = entityInfo.getEntityType();
+            Class idType = entityInfo.getIdType();
+            Class realType = entityInfo.getRealType();
+            if (entityInfo.isReactive()) {
+                reactive=true;
+                log.debug("register ReactiveRepository<{},{}>", entityType.getName(), idType.getSimpleName());
+
+                ResolvableType repositoryType = ResolvableType.forClassWithGenerics(DefaultReactiveRepository.class, entityType, idType);
 
                 RootBeanDefinition definition = new RootBeanDefinition();
                 definition.setTargetType(repositoryType);
                 definition.setBeanClass(ReactiveRepositoryFactoryBean.class);
                 definition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
-                definition.getPropertyValues().add("entityType", entityType);
-                registry.registerBeanDefinition(entityType.getSimpleName().concat("ReactiveRepository"), definition);
-            }else {
-                log.debug("register SyncRepository<{},{}>", genericType.getName(), idType.getSimpleName());
+                definition.getPropertyValues().add("entityType", realType);
+                registry.registerBeanDefinition(realType.getSimpleName().concat("ReactiveRepository"), definition);
+            } else {
+                log.debug("register SyncRepository<{},{}>", entityType.getName(), idType.getSimpleName());
 
-                ResolvableType repositoryType = ResolvableType.forClassWithGenerics(DefaultSyncRepository.class, genericType, idType);
+                ResolvableType repositoryType = ResolvableType.forClassWithGenerics(DefaultSyncRepository.class, entityType, idType);
 
                 RootBeanDefinition definition = new RootBeanDefinition();
                 definition.setTargetType(repositoryType);
                 definition.setBeanClass(SyncRepositoryFactoryBean.class);
                 definition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
-                definition.getPropertyValues().add("entityType", entityType);
-                registry.registerBeanDefinition(entityType.getSimpleName().concat("SyncRepository"), definition);
+                definition.getPropertyValues().add("entityType", realType);
+                registry.registerBeanDefinition(realType.getSimpleName().concat("SyncRepository"), definition);
             }
         }
 
@@ -120,7 +135,8 @@ public class EasyormRepositoryRegistrar implements ImportBeanDefinitionRegistrar
         definition.setTargetType(AutoDDLProcessor.class);
         definition.setBeanClass(AutoDDLProcessor.class);
         definition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
-        definition.getPropertyValues().add("entities", allEntities);
+        definition.getPropertyValues().add("entities", entityInfos);
+        definition.getPropertyValues().add("reactive", reactive);
         definition.setInitMethodName("init");
         registry.registerBeanDefinition(AutoDDLProcessor.class.getName(), definition);
 

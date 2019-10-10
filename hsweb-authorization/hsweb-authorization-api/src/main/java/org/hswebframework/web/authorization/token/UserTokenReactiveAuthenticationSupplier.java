@@ -19,10 +19,13 @@ public class UserTokenReactiveAuthenticationSupplier implements ReactiveAuthenti
 
     private AuthenticationManager defaultAuthenticationManager;
 
+    private UserTokenManager userTokenManager;
+
     private Map<String, ThirdPartAuthenticationManager> thirdPartAuthenticationManager = new HashMap<>();
 
-    public UserTokenReactiveAuthenticationSupplier(AuthenticationManager defaultAuthenticationManager) {
+    public UserTokenReactiveAuthenticationSupplier(UserTokenManager userTokenManager, AuthenticationManager defaultAuthenticationManager) {
         this.defaultAuthenticationManager = defaultAuthenticationManager;
+        this.userTokenManager=userTokenManager;
     }
 
     @Autowired(required = false)
@@ -64,9 +67,9 @@ public class UserTokenReactiveAuthenticationSupplier implements ReactiveAuthenti
     public Mono<Authentication> get() {
         return ContextUtils.reactiveContext()
                 .flatMap(context ->
-                        context.get(ContextKey.of(UserToken.class))
-                                .filter(UserToken::validate)
-                                .map(token -> get(thirdPartAuthenticationManager.get(token.getType()), token.getUserId()))
+                        context.get(ContextKey.of(ParsedToken.class))
+                                .map(t -> userTokenManager.getByToken(t.getToken()))
+                                .map(tokenMono -> tokenMono.flatMap(token -> get(thirdPartAuthenticationManager.get(token.getType()), token.getUserId())))
                                 .orElseGet(Mono::empty));
 
     }

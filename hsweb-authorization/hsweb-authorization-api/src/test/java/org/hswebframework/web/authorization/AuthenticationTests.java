@@ -111,18 +111,28 @@ public class AuthenticationTests {
             }
 
         };
-        ReactiveAuthenticationHolder.addSupplier(new UserTokenReactiveAuthenticationSupplier(authenticationManager));
-
         //绑定用户token
         UserTokenManager userTokenManager = new DefaultUserTokenManager();
         UserToken token = userTokenManager.signIn("test", "token-test", "admin", -1).block();
 
+        ReactiveAuthenticationHolder.addSupplier(new UserTokenReactiveAuthenticationSupplier(userTokenManager, authenticationManager));
+        ParsedToken parsedToken=new ParsedToken() {
+            @Override
+            public String getToken() {
+                return token.getToken();
+            }
+
+            @Override
+            public String getType() {
+                return  token.getType();
+            }
+        };
         //获取当前登录用户
         Authentication
                 .currentReactive()
                 .map(Authentication::getUser)
                 .map(User::getId)
-                .subscriberContext(acceptContext(ctx->ctx.put(ContextKey.of(UserToken.class),token)))
+                .subscriberContext(acceptContext(ctx -> ctx.put(ContextKey.of(ParsedToken.class), parsedToken)))
                 .as(StepVerifier::create)
                 .expectNext("admin")
                 .verifyComplete();

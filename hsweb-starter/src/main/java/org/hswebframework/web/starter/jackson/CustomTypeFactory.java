@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.type.*;
 import com.fasterxml.jackson.databind.util.ArrayBuilders;
 import com.fasterxml.jackson.databind.util.LRUMap;
-import org.hswebframework.web.crud.entity.factory.EntityFactory;
+import org.hswebframework.web.api.crud.entity.EntityFactory;
 
 public class CustomTypeFactory extends TypeFactory {
 

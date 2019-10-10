@@ -10,4 +10,5 @@ import java.lang.annotation.*;
 @Inherited
 @Documented
 public @interface Reactive {
+    boolean enable() default true;
 }

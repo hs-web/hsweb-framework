@@ -40,15 +40,14 @@ public interface Authentication extends Serializable {
     /**
      * 获取当前登录的用户权限信息
      * <pre>
-     *
-     *   Authentication auth= Authentication.current().get();
-     *   //如果权限信息不存在将抛出{@link NoSuchElementException}建议使用下面的方式获取
-     *   Authentication auth=Authentication.current().orElse(null);
-     *   //或者
-     *   Authentication auth=Authentication.current().orElseThrow(UnAuthorizedException::new);
+     *     public Mono&lt;User&gt; getUser(){
+     *         return Authentication.currentReactive()
+     *                 .switchIfEmpty(Mono.error(new UnAuthorizedException()))
+     *                 .flatMap(autz->findUserByUserId(autz.getUser().getId()));
+     *     }
      * </pre>
      *
-     * @return 返回Optional对象进行操作
+     * @return 当前用户权限信息
      * @see ReactiveAuthenticationHolder
      */
     static Mono<Authentication> currentReactive() {
@@ -57,6 +56,14 @@ public interface Authentication extends Serializable {
 
     /**
      * 非响应式环境适用
+     * <pre>
+     *
+     *   Authentication auth= Authentication.current().get();
+     *   //如果权限信息不存在将抛出{@link NoSuchElementException}建议使用下面的方式获取
+     *   Authentication auth=Authentication.current().orElse(null);
+     *   //或者
+     *   Authentication auth=Authentication.current().orElseThrow(UnAuthorizedException::new);
+     * </pre>
      *
      * @return 当前用户权限信息
      * @see Optional
@@ -74,6 +81,11 @@ public interface Authentication extends Serializable {
      * @return 用户持有的角色集合
      */
     List<Role> getRoles();
+
+//    /**
+//     * @return 用户所有维度
+//     */
+//    List<Dimension> getDimensions();
 
     /**
      * @return 用户持有的权限集合

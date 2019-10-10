@@ -8,16 +8,17 @@
         <version>4.0.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
+    <packaging>pom</packaging>
 
     <description>业务模块-权限管理</description>
+    <modules>
+        <module>hsweb-system-authorization-api</module>
+        <module>hsweb-system-authorization-starter</module>
+        <module>hsweb-system-authorization-web</module>
+        <module>hsweb-system-authorization-default</module>
+    </modules>
     <artifactId>hsweb-system-authorization</artifactId>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-commons-crud</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-    </dependencies>
+
 
 </project>

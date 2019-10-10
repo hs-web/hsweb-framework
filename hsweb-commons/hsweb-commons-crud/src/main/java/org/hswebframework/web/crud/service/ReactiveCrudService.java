@@ -7,6 +7,7 @@ import org.hswebframework.ezorm.rdb.mapping.ReactiveRepository;
 import org.hswebframework.ezorm.rdb.mapping.ReactiveUpdate;
 import org.hswebframework.ezorm.rdb.mapping.defaults.SaveResult;
 import org.hswebframework.web.crud.entity.PagerResult;
+import org.hswebframework.web.id.IDGenerator;
 import org.reactivestreams.Publisher;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;

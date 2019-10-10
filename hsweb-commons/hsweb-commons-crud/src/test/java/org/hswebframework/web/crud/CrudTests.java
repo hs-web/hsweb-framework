@@ -1,8 +1,8 @@
 package org.hswebframework.web.crud;
 
-import org.hswebframework.ezorm.rdb.mapping.ReactiveRepository;
 import org.hswebframework.web.crud.entity.TestEntity;
 import org.hswebframework.web.crud.service.TestEntityService;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,10 +20,12 @@ public class CrudTests  {
 
     @Test
     public void test(){
-        Mono.just(TestEntity.of("test",100))
+        TestEntity entity = TestEntity.of("test",100);
+        Mono.just(entity)
                 .as(service::insert)
                 .as(StepVerifier::create)
                 .expectNext(1)
                 .verifyComplete();
+        Assert.assertNotNull(entity.getId());
     }
 }
