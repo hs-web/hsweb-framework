@@ -1,4 +1,4 @@
-package org.hswebframework.web.authorization.basic.web;
+package org.hswebframework.web.authorization.token;
 
 /**
  * 令牌解析结果

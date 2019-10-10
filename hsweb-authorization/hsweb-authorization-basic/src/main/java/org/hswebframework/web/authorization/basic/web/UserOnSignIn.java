@@ -57,7 +57,7 @@ public class UserOnSignIn implements ApplicationListener<AuthorizationSuccessEve
 
         if (token != null) {
             //先退出已登陆的用户
-            userTokenManager.signOutByToken(token.getToken());
+            userTokenManager.signOutByToken(token.getToken()).block();
         }
         //创建token
         GeneratedToken newToken = userTokenGenerators.stream()
@@ -66,7 +66,8 @@ public class UserOnSignIn implements ApplicationListener<AuthorizationSuccessEve
                 .orElseThrow(() -> new UnsupportedOperationException(tokenType))
                 .generate(event.getAuthentication());
         //登入
-        userTokenManager.signIn(newToken.getToken(), newToken.getType(), event.getAuthentication().getUser().getId(), newToken.getTimeout());
+        userTokenManager.signIn(newToken.getToken(), newToken.getType(), event.getAuthentication().getUser().getId(), newToken.getTimeout())
+        .block();
 
         //响应结果
         event.getResult().putAll(newToken.getResponse());

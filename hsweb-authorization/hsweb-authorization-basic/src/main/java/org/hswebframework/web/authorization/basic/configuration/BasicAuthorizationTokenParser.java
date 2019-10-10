@@ -4,7 +4,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.AuthenticationManager;
 import org.hswebframework.web.authorization.basic.web.AuthorizedToken;
-import org.hswebframework.web.authorization.basic.web.ParsedToken;
+import org.hswebframework.web.authorization.token.ParsedToken;
 import org.hswebframework.web.authorization.basic.web.UserTokenForTypeParser;
 import org.hswebframework.web.authorization.simple.PlainTextUsernamePasswordAuthenticationRequest;
 import org.hswebframework.web.authorization.token.UserToken;

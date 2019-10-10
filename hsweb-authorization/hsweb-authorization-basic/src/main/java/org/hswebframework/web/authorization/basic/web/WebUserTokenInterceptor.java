@@ -2,10 +2,10 @@ package org.hswebframework.web.authorization.basic.web;
 
 import org.hswebframework.web.authorization.basic.aop.AopMethodAuthorizeDefinitionParser;
 import org.hswebframework.web.authorization.define.AuthorizeDefinition;
+import org.hswebframework.web.authorization.token.ParsedToken;
 import org.hswebframework.web.authorization.token.UserToken;
 import org.hswebframework.web.authorization.token.UserTokenHolder;
 import org.hswebframework.web.authorization.token.UserTokenManager;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 

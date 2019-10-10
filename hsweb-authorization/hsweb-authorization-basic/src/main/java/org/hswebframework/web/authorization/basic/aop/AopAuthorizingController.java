@@ -2,15 +2,13 @@ package org.hswebframework.web.authorization.basic.aop;
 
 import lombok.extern.slf4j.Slf4j;
 import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
 import org.hswebframework.web.aop.MethodInterceptorContext;
 import org.hswebframework.web.aop.MethodInterceptorHolder;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.basic.handler.AuthorizingHandler;
-import org.hswebframework.web.authorization.define.AuthorizeDefinition;
-import org.hswebframework.web.authorization.define.AuthorizeDefinitionInitializedEvent;
-import org.hswebframework.web.authorization.define.AuthorizingContext;
-import org.hswebframework.web.authorization.define.Phased;
+import org.hswebframework.web.authorization.define.*;
 import org.hswebframework.web.authorization.exception.UnAuthorizedException;
 import org.hswebframework.web.utils.AnnotationUtils;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
@@ -19,6 +17,8 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -29,12 +29,19 @@ import java.util.stream.Collectors;
  * @see AuthorizeDefinitionInitializedEvent
  */
 @Slf4j
-public class AopAuthorizingController extends StaticMethodMatcherPointcutAdvisor implements CommandLineRunner {
+@SuppressWarnings("all")
+public class AopAuthorizingController extends StaticMethodMatcherPointcutAdvisor implements CommandLineRunner, MethodInterceptor {
 
     private static final long serialVersionUID = 1154190623020670672L;
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;
+
+    @Autowired
+    private AuthorizingHandler authorizingHandler;
+
+    @Autowired
+    private AopMethodAuthorizeDefinitionParser aopMethodAuthorizeDefinitionParser;
 
     private DefaultAopMethodAuthorizeDefinitionParser defaultParser = new DefaultAopMethodAuthorizeDefinitionParser();
 
@@ -44,70 +51,155 @@ public class AopAuthorizingController extends StaticMethodMatcherPointcutAdvisor
         this.autoParse = autoParse;
     }
 
-    public AopAuthorizingController(AuthorizingHandler authorizingHandler, AopMethodAuthorizeDefinitionParser aopMethodAuthorizeDefinitionParser) {
-        super((MethodInterceptor) methodInvocation -> {
+    protected Mono<?> handleReactive(AuthorizeDefinition definition, MethodInterceptorHolder holder, AuthorizingContext context, Mono<?> mono) {
 
-            MethodInterceptorHolder holder = MethodInterceptorHolder.create(methodInvocation);
+        return Authentication.currentReactive()
+                .switchIfEmpty(Mono.error(new UnAuthorizedException()))
+                .flatMap(auth -> {
+                    DataAccessDefinition dataAccessDefinition = definition.getDataAccessDefinition();
 
-            MethodInterceptorContext paramContext = holder.createParamContext();
+                    context.setAuthentication(auth);
+                    if (definition.getPhased() == Phased.before) {
+                        authorizingHandler.handRBAC(context);
+                        if (dataAccessDefinition != null && dataAccessDefinition.getPhased() == Phased.before) {
+                            authorizingHandler.handleDataAccess(context);
+                        } else {
+                            return mono.doOnNext(res -> {
+                                context.setParamContext(holder.createParamContext(res));
+                                authorizingHandler.handleDataAccess(context);
+                            });
+                        }
+                    } else {
+                        if (dataAccessDefinition != null && dataAccessDefinition.getPhased() == Phased.before) {
+                            authorizingHandler.handleDataAccess(context);
+                            return mono.doOnNext(res -> {
+                                context.setParamContext(holder.createParamContext(res));
+                                authorizingHandler.handRBAC(context);
+                            });
+                        } else {
+                            return mono.doOnNext(res -> {
+                                context.setParamContext(holder.createParamContext(res));
+                                authorizingHandler.handle(context);
+                            });
+                        }
 
-            AuthorizeDefinition definition = aopMethodAuthorizeDefinitionParser.parse(methodInvocation.getThis().getClass(), methodInvocation.getMethod(), paramContext);
-            Object result = null;
-            boolean isControl = false;
-            if (null != definition) {
-                Authentication authentication = Authentication.current().orElseThrow(UnAuthorizedException::new);
-                //空配置也进行权限控制
-//                if (!definition.isEmpty()) {
-
-                AuthorizingContext context = new AuthorizingContext();
-                context.setAuthentication(authentication);
-                context.setDefinition(definition);
-                context.setParamContext(paramContext);
-                isControl = true;
-
-                Phased dataAccessPhased = null;
-                if (definition.getDataAccessDefinition() != null) {
-                    dataAccessPhased = definition.getDataAccessDefinition().getPhased();
-                }
-                if (definition.getPhased() == Phased.before) {
-                    //RDAC before
-                    authorizingHandler.handRBAC(context);
-
-                    //方法调用前验证数据权限
-                    if (dataAccessPhased == Phased.before) {
-                        authorizingHandler.handleDataAccess(context);
                     }
+                    return mono;
+                });
+    }
 
-                    result = methodInvocation.proceed();
+    protected Flux<?> handleReactive(AuthorizeDefinition definition, MethodInterceptorHolder holder, AuthorizingContext context, Flux<?> flux) {
 
-                    //方法调用后验证数据权限
-                    if (dataAccessPhased == Phased.after) {
-                        context.setParamContext(holder.createParamContext(result));
-                        authorizingHandler.handleDataAccess(context);
+        return Authentication.currentReactive()
+                .switchIfEmpty(Mono.error(new UnAuthorizedException()))
+                .flatMapMany(auth -> {
+                    context.setAuthentication(auth);
+                    if (definition.getPhased() == Phased.before) {
+                        authorizingHandler.handRBAC(context);
+                        if (definition.getDataAccessDefinition().getPhased() == Phased.before) {
+                            authorizingHandler.handleDataAccess(context);
+                        } else {
+                            return flux.doOnNext(res -> {
+                                context.setParamContext(holder.createParamContext(res));
+                                authorizingHandler.handleDataAccess(context);
+                            });
+                        }
+                    } else {
+
+                        if (definition.getDataAccessDefinition().getPhased() == Phased.before) {
+                            authorizingHandler.handleDataAccess(context);
+                            return flux.doOnNext(res -> {
+                                context.setParamContext(holder.createParamContext(res));
+                                authorizingHandler.handRBAC(context);
+                            });
+                        } else {
+                            return flux.doOnNext(res -> {
+                                context.setParamContext(holder.createParamContext(res));
+                                authorizingHandler.handle(context);
+                            });
+                        }
+
                     }
-                } else {
-                    //方法调用前验证数据权限
-                    if (dataAccessPhased == Phased.before) {
-                        authorizingHandler.handleDataAccess(context);
-                    }
+                    return flux;
+                });
+    }
 
-                    result = methodInvocation.proceed();
-                    context.setParamContext(holder.createParamContext(result));
 
-                    authorizingHandler.handRBAC(context);
+    @Override
+    public Object invoke(MethodInvocation methodInvocation) throws Throwable {
+        MethodInterceptorHolder holder = MethodInterceptorHolder.create(methodInvocation);
 
-                    //方法调用后验证数据权限
-                    if (dataAccessPhased == Phased.after) {
-                        authorizingHandler.handleDataAccess(context);
-                    }
-                }
-//                }
+        MethodInterceptorContext paramContext = holder.createParamContext();
+
+        AuthorizeDefinition definition = aopMethodAuthorizeDefinitionParser.parse(methodInvocation.getThis().getClass(), methodInvocation.getMethod(), paramContext);
+        Object result = null;
+        boolean isControl = false;
+        if (null != definition) {
+            AuthorizingContext context = new AuthorizingContext();
+            context.setDefinition(definition);
+            context.setParamContext(paramContext);
+
+            Class<?> returnType = methodInvocation.getMethod().getReturnType();
+            //handle reactive method
+            if (Mono.class.isAssignableFrom(returnType)) {
+                return handleReactive(definition, holder, context, ((Mono<?>) methodInvocation.proceed()));
+            } else if (Flux.class.isAssignableFrom(returnType)) {
+                return handleReactive(definition, holder, context, ((Flux<?>) methodInvocation.proceed()));
             }
-            if (!isControl) {
+
+            Authentication authentication = Authentication.current().orElseThrow(UnAuthorizedException::new);
+
+            context.setAuthentication(authentication);
+            isControl = true;
+
+            Phased dataAccessPhased = null;
+            if (definition.getDataAccessDefinition() != null) {
+                dataAccessPhased = definition.getDataAccessDefinition().getPhased();
+            }
+            if (definition.getPhased() == Phased.before) {
+                //RDAC before
+                authorizingHandler.handRBAC(context);
+
+                //方法调用前验证数据权限
+                if (dataAccessPhased == Phased.before) {
+                    authorizingHandler.handleDataAccess(context);
+                }
+
                 result = methodInvocation.proceed();
+
+                //方法调用后验证数据权限
+                if (dataAccessPhased == Phased.after) {
+                    context.setParamContext(holder.createParamContext(result));
+                    authorizingHandler.handleDataAccess(context);
+                }
+            } else {
+                //方法调用前验证数据权限
+                if (dataAccessPhased == Phased.before) {
+                    authorizingHandler.handleDataAccess(context);
+                }
+
+                result = methodInvocation.proceed();
+                context.setParamContext(holder.createParamContext(result));
+
+                authorizingHandler.handRBAC(context);
+
+                //方法调用后验证数据权限
+                if (dataAccessPhased == Phased.after) {
+                    authorizingHandler.handleDataAccess(context);
+                }
             }
-            return result;
-        });
+        }
+        if (!isControl) {
+            result = methodInvocation.proceed();
+        }
+        return result;
+
+    }
+
+    public AopAuthorizingController(AuthorizingHandler authorizingHandler, AopMethodAuthorizeDefinitionParser aopMethodAuthorizeDefinitionParser) {
+        this.authorizingHandler = authorizingHandler;
+        this.aopMethodAuthorizeDefinitionParser = aopMethodAuthorizeDefinitionParser;
+        setAdvice(this);
     }
 
     @Override
@@ -127,12 +219,12 @@ public class AopAuthorizingController extends StaticMethodMatcherPointcutAdvisor
         if (autoParse) {
             List<AuthorizeDefinition> definitions = defaultParser.getAllParsed()
                     .stream().filter(def -> !def.isEmpty()).collect(Collectors.toList());
-
-
             log.info("publish AuthorizeDefinitionInitializedEvent,definition size:{}", definitions.size());
             eventPublisher.publishEvent(new AuthorizeDefinitionInitializedEvent(definitions));
 
             defaultParser.destroy();
         }
     }
+
+
 }

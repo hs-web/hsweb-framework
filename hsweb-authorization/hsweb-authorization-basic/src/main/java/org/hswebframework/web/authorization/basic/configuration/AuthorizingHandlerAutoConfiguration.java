@@ -15,6 +15,7 @@ import org.hswebframework.web.authorization.twofactor.TwoFactorValidatorManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.condition.*;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
@@ -44,22 +45,23 @@ public class AuthorizingHandlerAutoConfiguration {
         return new DefaultAuthorizingHandler(dataAccessController);
     }
 
-
     @Bean
     @ConditionalOnMissingBean(UserTokenParser.class)
+    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
     public UserTokenParser userTokenParser() {
         return new SessionIdUserTokenParser();
     }
 
     @Bean
+    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
     public SessionIdUserTokenGenerator sessionIdUserTokenGenerator() {
         return new SessionIdUserTokenGenerator();
     }
 
-
     @Bean
     @ConditionalOnProperty(prefix = "hsweb.authorize.two-factor", name = "enable", havingValue = "true")
     @Order(100)
+    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
     public WebMvcConfigurer twoFactorHandlerConfigurer(TwoFactorValidatorManager manager) {
         return new WebMvcConfigurerAdapter() {
             @Override
@@ -71,7 +73,14 @@ public class AuthorizingHandlerAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
+    public UserTokenWebFilter userTokenWebFilter(){
+        return new UserTokenWebFilter();
+    }
+
+    @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE)
+    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
     public WebMvcConfigurer webUserTokenInterceptorConfigurer(UserTokenManager userTokenManager,
                                                               AopMethodAuthorizeDefinitionParser parser,
                                                               List<UserTokenParser> userTokenParser) {
@@ -97,13 +106,22 @@ public class AuthorizingHandlerAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
     public UserOnSignIn userOnSignIn(UserTokenManager userTokenManager) {
         return new UserOnSignIn(userTokenManager);
     }
 
     @Bean
+    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
     public UserOnSignOut userOnSignOut(UserTokenManager userTokenManager) {
         return new UserOnSignOut(userTokenManager);
+    }
+
+    @Bean
+    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
+    @ConfigurationProperties(prefix = "hsweb.authorize.token.default")
+    public DefaultUserTokenGenPar defaultUserTokenGenPar(){
+        return new DefaultUserTokenGenPar();
     }
 
     @Bean
@@ -136,9 +154,12 @@ public class AuthorizingHandlerAutoConfiguration {
         }
     }
 
+
+
     @Configuration
     @ConditionalOnProperty(prefix = "hsweb.authorize", name = "basic-authorization", havingValue = "true")
     @ConditionalOnClass(UserTokenForTypeParser.class)
+    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
     public static class BasicAuthorizationConfiguration {
         @Bean
         public BasicAuthorizationTokenParser basicAuthorizationTokenParser(AuthenticationManager authenticationManager,

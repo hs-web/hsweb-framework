@@ -63,8 +63,8 @@ public class AuthorizationController {
     @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation("用户名密码登录,json方式")
     public Mono<Map<String, Object>> authorizeByJson(@ApiParam(example = "{\"username\":\"admin\",\"password\":\"admin\"}")
-                                                     @RequestBody Mono<Map<String, Object>> parameter) {
-        return doLogin(parameter);
+                                                     @RequestBody Map<String, Object> parameter) {
+        return doLogin(Mono.just(parameter));
     }
 
     @PostMapping(value = "/login", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)

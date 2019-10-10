@@ -1,0 +1,9 @@
+hsweb:
+  users:
+    admin:
+      username: admin
+      password: admin
+      permissions-simple:
+          user-token:
+            - get
+            - update

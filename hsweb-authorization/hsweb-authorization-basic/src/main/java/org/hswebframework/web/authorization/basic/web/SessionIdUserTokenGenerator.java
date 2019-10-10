@@ -50,7 +50,7 @@ public class SessionIdUserTokenGenerator implements UserTokenGenerator, Serializ
             }
 
             @Override
-            public int getTimeout() {
+            public long getTimeout() {
                 return timeout;
             }
         };

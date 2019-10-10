@@ -29,5 +29,5 @@ public interface GeneratedToken extends Serializable {
     /**
      * @return 令牌有效期（单位毫秒）
      */
-    int getTimeout();
+    long getTimeout();
 }
