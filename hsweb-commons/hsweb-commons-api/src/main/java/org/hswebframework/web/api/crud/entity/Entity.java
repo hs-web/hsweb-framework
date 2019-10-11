@@ -19,6 +19,9 @@
 package org.hswebframework.web.api.crud.entity;
 
 
+import org.hswebframework.web.bean.FastBeanCopier;
+import org.hswebframework.web.validator.ValidatorUtils;
+
 import java.io.Serializable;
 
 /**
@@ -29,5 +32,16 @@ import java.io.Serializable;
  */
 public interface Entity extends Serializable {
 
+    default void tryValidate(Class<?>... groups) {
+        ValidatorUtils.tryValidate(this, groups);
+    }
 
+    default <T> T copyTo(Class<T> target, String... ignoreProperties) {
+        return FastBeanCopier.copy(this, target, ignoreProperties);
+    }
+
+    @SuppressWarnings("all")
+    default <T> T copyFrom(Object target, String... ignoreProperties) {
+        return (T) FastBeanCopier.copy(target, this, ignoreProperties);
+    }
 }

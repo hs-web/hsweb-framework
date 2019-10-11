@@ -10,9 +10,5 @@ import org.springframework.context.annotation.Configuration;
 public class HswebAutoConfiguration  {
 
 
-    @Bean
-    @ConditionalOnMissingBean
-    public EntityFactory entityFactory(){
-        return new MapperEntityFactory();
-    }
+
 }

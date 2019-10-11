@@ -6,19 +6,20 @@ import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.ezorm.rdb.operator.DatabaseOperator;
 import org.hswebframework.web.api.crud.entity.EntityFactory;
 import org.hswebframework.web.crud.entity.factory.MapperEntityFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.ReactiveTransactionManager;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Getter
 @Setter
 @Slf4j
-public class AutoDDLProcessor {
+public class AutoDDLProcessor implements InitializingBean {
 
     private Set<EntityInfo> entities = new HashSet<>();
 
@@ -36,7 +37,9 @@ public class AutoDDLProcessor {
 
     private boolean reactive;
 
-    public void init() {
+
+    @Override
+    public void afterPropertiesSet() {
         if(entityFactory instanceof MapperEntityFactory){
             MapperEntityFactory factory= ((MapperEntityFactory) entityFactory);
 
@@ -44,7 +47,6 @@ public class AutoDDLProcessor {
                 factory.addMapping(entity.getEntityType(),MapperEntityFactory.defaultMapper(entity.getRealType()));
             }
         }
-
         if (properties.isAutoDdl()) {
             List<Class> entities = this.entities.stream().map(EntityInfo::getRealType).collect(Collectors.toList());
             if(reactive){
@@ -64,7 +66,7 @@ public class AutoDDLProcessor {
                                 .commit()
                                 .sync();
                     } catch (Exception e) {
-                        log.error(e.getMessage(), e);
+                        log.warn(e.getMessage(), e);
                     }
                 }
             }

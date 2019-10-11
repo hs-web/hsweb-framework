@@ -48,7 +48,7 @@ public class DimensionUserEntity extends GenericEntity<String> {
     private String relationName;
 
     @Column(name = "features")
-    @ColumnType(jdbcType = JDBCType.NUMERIC)
+    @ColumnType(jdbcType = JDBCType.NUMERIC, javaType = Long.class)
     @EnumCodec(toMask = true)
     private DimensionUserFeature[] features;
 

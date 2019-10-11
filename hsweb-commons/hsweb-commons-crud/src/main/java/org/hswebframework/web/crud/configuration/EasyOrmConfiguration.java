@@ -1,12 +1,10 @@
 package org.hswebframework.web.crud.configuration;
 
 
-import io.r2dbc.spi.ConnectionFactory;
 import lombok.SneakyThrows;
 import org.hswebframework.ezorm.core.meta.Feature;
 import org.hswebframework.ezorm.rdb.executor.SyncSqlExecutor;
 import org.hswebframework.ezorm.rdb.executor.reactive.ReactiveSqlExecutor;
-import org.hswebframework.ezorm.rdb.executor.reactive.ReactiveSyncSqlExecutor;
 import org.hswebframework.ezorm.rdb.mapping.EntityColumnMapping;
 import org.hswebframework.ezorm.rdb.mapping.EntityManager;
 import org.hswebframework.ezorm.rdb.mapping.MappingFeatureType;
@@ -15,25 +13,23 @@ import org.hswebframework.ezorm.rdb.mapping.parser.EntityTableMetadataParser;
 import org.hswebframework.ezorm.rdb.metadata.RDBDatabaseMetadata;
 import org.hswebframework.ezorm.rdb.operator.DatabaseOperator;
 import org.hswebframework.ezorm.rdb.operator.DefaultDatabaseOperator;
+import org.hswebframework.web.api.crud.entity.EntityFactory;
+import org.hswebframework.web.crud.annotation.EnableEasyormRepository;
+import org.hswebframework.web.crud.entity.factory.MapperEntityFactory;
 import org.hswebframework.web.crud.generator.MD5Generator;
 import org.hswebframework.web.crud.generator.SnowFlakeStringIdGenerator;
-import org.hswebframework.web.crud.sql.DefaultJdbcExecutor;
-import org.hswebframework.web.crud.annotation.EnableEasyormRepository;
-import org.hswebframework.web.api.crud.entity.EntityFactory;
-import org.hswebframework.web.crud.sql.DefaultJdbcReactiveExecutor;
-import org.hswebframework.web.crud.sql.DefaultR2dbcExecutor;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
-import javax.sql.DataSource;
 import java.util.List;
+import java.util.Optional;
 
 @Configuration
 @EnableConfigurationProperties(EasyormProperties.class)
@@ -43,37 +39,10 @@ public class EasyOrmConfiguration {
     @Autowired
     private EasyormProperties properties;
 
-    @Configuration
-    @ConditionalOnBean(DataSource.class)
-    public static class JdbcSqlExecutorConfiguration {
-        @Bean
-        @ConditionalOnMissingBean
-        public SyncSqlExecutor syncSqlExecutor() {
-            return new DefaultJdbcExecutor();
-        }
-
-        @Bean
-        @ConditionalOnMissingBean
-        public ReactiveSqlExecutor reactiveSqlExecutor() {
-            return new DefaultJdbcReactiveExecutor();
-        }
-
-    }
-
-    @Configuration
-    @ConditionalOnClass(ConnectionFactory.class)
-    public static class R2dbcSqlExecutorConfiguration {
-        @Bean
-        @ConditionalOnMissingBean
-        public ReactiveSqlExecutor reactiveSqlExecutor() {
-            return new DefaultR2dbcExecutor();
-        }
-
-        @Bean
-        @ConditionalOnMissingBean
-        public SyncSqlExecutor syncSqlExecutor(ReactiveSqlExecutor reactiveSqlExecutor) {
-            return ReactiveSyncSqlExecutor.of(reactiveSqlExecutor);
-        }
+    @Bean
+    @ConditionalOnMissingBean
+    public EntityFactory entityFactory(){
+        return new MapperEntityFactory();
     }
 
     @Bean
@@ -121,15 +90,34 @@ public class EasyOrmConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public RDBDatabaseMetadata databaseMetadata(){
-        return properties.createDatabaseMetadata();
+    @SuppressWarnings("all")
+    public RDBDatabaseMetadata databaseMetadata(Optional<SyncSqlExecutor> syncSqlExecutor,
+                                                Optional<ReactiveSqlExecutor> reactiveSqlExecutor) {
+        RDBDatabaseMetadata metadata = properties.createDatabaseMetadata();
+        syncSqlExecutor.ifPresent(metadata::addFeature);
+        reactiveSqlExecutor.ifPresent(metadata::addFeature);
+
+        return metadata;
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public DatabaseOperator databaseOperator(RDBDatabaseMetadata metadata, List<Feature> features) {
-        features.forEach(metadata::addFeature);
+    public DatabaseOperator databaseOperator(RDBDatabaseMetadata metadata) {
+
         return DefaultDatabaseOperator.of(metadata);
+    }
+
+    @Bean
+    public BeanPostProcessor autoRegisterFeature(RDBDatabaseMetadata metadata) {
+        return new BeanPostProcessor() {
+            @Override
+            public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+                if (bean instanceof Feature) {
+                    metadata.addFeature(((Feature) bean));
+                }
+                return bean;
+            }
+        };
     }
 
     @Bean

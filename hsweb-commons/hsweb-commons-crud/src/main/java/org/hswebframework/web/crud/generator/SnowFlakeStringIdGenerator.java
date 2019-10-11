@@ -1,10 +1,8 @@
 package org.hswebframework.web.crud.generator;
 
-import org.hswebframework.ezorm.core.DefaultValue;
 import org.hswebframework.ezorm.core.DefaultValueGenerator;
 import org.hswebframework.ezorm.core.RuntimeDefaultValue;
 import org.hswebframework.web.id.IDGenerator;
-import org.springframework.stereotype.Component;
 
 public class SnowFlakeStringIdGenerator implements DefaultValueGenerator {
     @Override
@@ -13,8 +11,8 @@ public class SnowFlakeStringIdGenerator implements DefaultValueGenerator {
     }
 
     @Override
-    public DefaultValue generate() {
-        return (RuntimeDefaultValue) IDGenerator.SNOW_FLAKE_STRING::generate;
+    public RuntimeDefaultValue generate() {
+        return IDGenerator.SNOW_FLAKE_STRING::generate;
     }
 
     @Override

@@ -12,6 +12,7 @@
     <artifactId>hsweb-system-authorization-default</artifactId>
 
     <dependencies>
+
         <dependency>
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-system-authorization-api</artifactId>
@@ -23,6 +24,50 @@
             <artifactId>hsweb-commons-crud</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jdbc</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot.experimental</groupId>
+            <artifactId>spring-boot-starter-data-r2dbc</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/com.zaxxer/HikariCP -->
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+            <version>3.4.1</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>io.r2dbc</groupId>
+            <artifactId>r2dbc-h2</artifactId>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
 </project>

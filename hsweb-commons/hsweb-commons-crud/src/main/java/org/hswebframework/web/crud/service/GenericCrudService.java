@@ -3,7 +3,7 @@ package org.hswebframework.web.crud.service;
 import org.hswebframework.ezorm.rdb.mapping.SyncRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class GenericCrudService<E,K> implements CrudService<E,K> {
+public abstract class GenericCrudService<E,K> implements CrudService<E,K> {
 
     @Autowired
     private SyncRepository<E, K> repository;

@@ -1,15 +1,17 @@
 package org.hswebframework.web.crud.service;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.hswebframework.ezorm.core.param.QueryParam;
 import org.hswebframework.ezorm.rdb.mapping.SyncDelete;
 import org.hswebframework.ezorm.rdb.mapping.SyncQuery;
 import org.hswebframework.ezorm.rdb.mapping.SyncRepository;
 import org.hswebframework.ezorm.rdb.mapping.SyncUpdate;
 import org.hswebframework.ezorm.rdb.mapping.defaults.SaveResult;
-import org.hswebframework.web.crud.entity.PagerResult;
+import org.hswebframework.web.api.crud.entity.PagerResult;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,6 +38,9 @@ public interface CrudService<E, K> {
 
     @Transactional(readOnly = true)
     default List<E> findById(Collection<K> id) {
+        if (CollectionUtils.isEmpty(id)) {
+            return Collections.emptyList();
+        }
         return getRepository()
                 .findById(id);
     }

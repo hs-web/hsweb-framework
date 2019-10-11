@@ -16,7 +16,7 @@
  *
  */
 
-package org.hswebframework.web.crud.entity;
+package org.hswebframework.web.api.crud.entity;
 
 
 import lombok.Getter;

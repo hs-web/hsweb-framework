@@ -17,7 +17,6 @@ import java.util.Map;
 @Getter
 @Setter
 @Table(name = "s_dimension",indexes = {
-        @Index(name = "idx_dims_ass_id",columnList = "association_relation,association_id"),
         @Index(name = "idx_dims_path",columnList = "path")
 })
 public class DimensionEntity extends GenericTreeSortSupportEntity<String> {

@@ -45,6 +45,13 @@ public class EasyormRepositoryRegistrar implements ImportBeanDefinitionRegistrar
         if (attr == null) {
             return;
         }
+        boolean reactivePrecent = false;
+        try {
+            Class.forName("io.r2dbc.spi.ConnectionFactory");
+            reactivePrecent = true;
+        } catch (Exception e) {
+
+        }
         String[] arr = (String[]) attr.get("value");
         String path = Arrays.stream(arr)
                 .map(str -> ResourcePatternResolver
@@ -94,19 +101,19 @@ public class EasyormRepositoryRegistrar implements ImportBeanDefinitionRegistrar
                 idType = implementFor.idType();
             }
 
-            EntityInfo entityInfo = new EntityInfo(genericType, entityType, idType, reactive == null || reactive.enable());
+            EntityInfo entityInfo = new EntityInfo(genericType, entityType, idType, reactivePrecent && (reactive == null || reactive.enable()));
             if (!entityInfos.contains(entityInfo) || implementFor != null) {
                 entityInfos.add(entityInfo);
             }
 
         }
-        boolean reactive=false;
+        boolean reactive = false;
         for (EntityInfo entityInfo : entityInfos) {
             Class entityType = entityInfo.getEntityType();
             Class idType = entityInfo.getIdType();
             Class realType = entityInfo.getRealType();
             if (entityInfo.isReactive()) {
-                reactive=true;
+                reactive = true;
                 log.debug("register ReactiveRepository<{},{}>", entityType.getName(), idType.getSimpleName());
 
                 ResolvableType repositoryType = ResolvableType.forClassWithGenerics(DefaultReactiveRepository.class, entityType, idType);
@@ -117,18 +124,18 @@ public class EasyormRepositoryRegistrar implements ImportBeanDefinitionRegistrar
                 definition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
                 definition.getPropertyValues().add("entityType", realType);
                 registry.registerBeanDefinition(realType.getSimpleName().concat("ReactiveRepository"), definition);
-            } else {
-                log.debug("register SyncRepository<{},{}>", entityType.getName(), idType.getSimpleName());
-
-                ResolvableType repositoryType = ResolvableType.forClassWithGenerics(DefaultSyncRepository.class, entityType, idType);
-
-                RootBeanDefinition definition = new RootBeanDefinition();
-                definition.setTargetType(repositoryType);
-                definition.setBeanClass(SyncRepositoryFactoryBean.class);
-                definition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
-                definition.getPropertyValues().add("entityType", realType);
-                registry.registerBeanDefinition(realType.getSimpleName().concat("SyncRepository"), definition);
             }
+
+            log.debug("register SyncRepository<{},{}>", entityType.getName(), idType.getSimpleName());
+
+            ResolvableType repositoryType = ResolvableType.forClassWithGenerics(DefaultSyncRepository.class, entityType, idType);
+
+            RootBeanDefinition definition = new RootBeanDefinition();
+            definition.setTargetType(repositoryType);
+            definition.setBeanClass(SyncRepositoryFactoryBean.class);
+            definition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
+            definition.getPropertyValues().add("entityType", realType);
+            registry.registerBeanDefinition(realType.getSimpleName().concat("SyncRepository"), definition);
         }
 
         RootBeanDefinition definition = new RootBeanDefinition();
@@ -137,7 +144,6 @@ public class EasyormRepositoryRegistrar implements ImportBeanDefinitionRegistrar
         definition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
         definition.getPropertyValues().add("entities", entityInfos);
         definition.getPropertyValues().add("reactive", reactive);
-        definition.setInitMethodName("init");
         registry.registerBeanDefinition(AutoDDLProcessor.class.getName(), definition);
 
     }

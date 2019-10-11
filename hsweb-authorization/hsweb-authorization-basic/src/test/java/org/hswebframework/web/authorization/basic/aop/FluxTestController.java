@@ -13,6 +13,7 @@ public class FluxTestController {
 
     @GetMapping
     public Mono<Authentication> getUser() {
+
         return Authentication
                 .currentReactive()
                 .switchIfEmpty(Mono.error(UnAuthorizedException::new));

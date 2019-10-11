@@ -34,7 +34,7 @@ import javax.persistence.Id;
 @Setter
 public class GenericEntity<PK> implements Entity {
 
-    @Column(length = 32)
+    @Column(length = 32,updatable = false)
     @Id
     private PK id;
 
