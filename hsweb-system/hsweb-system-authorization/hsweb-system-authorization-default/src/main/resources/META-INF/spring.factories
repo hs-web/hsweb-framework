@@ -1,0 +1,4 @@
+# Auto Configure
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+org.hswebframework.web.system.authorization.defaults.configuration.AuthorizationServiceAutoConfiguration,\
+org.hswebframework.web.system.authorization.defaults.configuration.AuthorizationWebAutoConfiguration

@@ -1,10 +1,12 @@
 package org.hswebframework.web.authorization.basic.configuration;
 
 import org.hswebframework.web.authorization.AuthenticationManager;
+import org.hswebframework.web.authorization.ReactiveAuthenticationManager;
 import org.hswebframework.web.authorization.access.DataAccessController;
 import org.hswebframework.web.authorization.access.DataAccessHandler;
 import org.hswebframework.web.authorization.basic.aop.AopMethodAuthorizeDefinitionParser;
-import org.hswebframework.web.authorization.basic.embed.EmbedAuthenticationManager;
+import org.hswebframework.web.authorization.basic.embed.EmbedAuthenticationProperties;
+import org.hswebframework.web.authorization.basic.embed.EmbedReactiveAuthenticationManager;
 import org.hswebframework.web.authorization.basic.handler.DefaultAuthorizingHandler;
 import org.hswebframework.web.authorization.basic.handler.UserAllowPermissionHandler;
 import org.hswebframework.web.authorization.basic.handler.access.DefaultDataAccessController;
@@ -16,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.condition.*;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
@@ -33,6 +36,7 @@ import java.util.List;
  * @since 3.0
  */
 @Configuration
+@EnableConfigurationProperties(EmbedAuthenticationProperties.class)
 public class AuthorizingHandlerAutoConfiguration {
 
     @Bean
@@ -85,19 +89,19 @@ public class AuthorizingHandlerAutoConfiguration {
                                                               AopMethodAuthorizeDefinitionParser parser,
                                                               List<UserTokenParser> userTokenParser) {
 
-        return new WebMvcConfigurerAdapter() {
+        return new WebMvcConfigurer() {
             @Override
             public void addInterceptors(InterceptorRegistry registry) {
                 registry.addInterceptor(new WebUserTokenInterceptor(userTokenManager, userTokenParser, parser));
-                super.addInterceptors(registry);
+
             }
         };
     }
 
     @Bean
-    @ConditionalOnMissingBean(AuthenticationManager.class)
-    public AuthenticationManager embedAuthenticationManager() {
-        return new EmbedAuthenticationManager();
+    @ConditionalOnMissingBean(ReactiveAuthenticationManager.class)
+    public ReactiveAuthenticationManager embedAuthenticationManager(EmbedAuthenticationProperties properties) {
+        return new EmbedReactiveAuthenticationManager(properties);
     }
 
     @Bean
@@ -130,8 +134,9 @@ public class AuthorizingHandlerAutoConfiguration {
     }
 
     @Bean
-    public UserTokenController userTokenController() {
-        return new UserTokenController();
+    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
+    public ReactiveUserTokenController userTokenController() {
+        return new ReactiveUserTokenController();
     }
 
     @Configuration

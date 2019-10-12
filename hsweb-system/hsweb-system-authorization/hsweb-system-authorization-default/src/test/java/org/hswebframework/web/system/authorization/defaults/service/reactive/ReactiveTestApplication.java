@@ -1,6 +1,9 @@
 package org.hswebframework.web.system.authorization.defaults.service.reactive;
 
 import org.hswebframework.web.crud.configuration.JdbcSqlExecutorConfiguration;
+import org.hswebframework.web.system.authorization.api.UserPermissionDimensionProvider;
+import org.hswebframework.web.system.authorization.defaults.service.DefaultReactiveAuthenticationInitializeService;
+import org.hswebframework.web.system.authorization.defaults.service.DefaultReactiveAuthenticationManager;
 import org.hswebframework.web.system.authorization.defaults.service.DefaultReactiveUserService;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -17,11 +20,5 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @ImportAutoConfiguration(ReactiveTransactionAutoConfiguration.class)
 public class ReactiveTestApplication {
 
-
-    @Bean
-    public DefaultReactiveUserService defaultReactiveUserService(){
-
-        return new DefaultReactiveUserService();
-    }
 
 }

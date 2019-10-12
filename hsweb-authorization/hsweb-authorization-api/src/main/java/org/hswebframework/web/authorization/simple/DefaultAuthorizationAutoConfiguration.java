@@ -1,14 +1,13 @@
 package org.hswebframework.web.authorization.simple;
 
-import org.hswebframework.web.authorization.Authentication;
-import org.hswebframework.web.authorization.ReactiveAuthenticationHolder;
-import org.hswebframework.web.authorization.AuthenticationManager;
+import org.hswebframework.web.authorization.*;
 import org.hswebframework.web.authorization.builder.AuthenticationBuilderFactory;
 import org.hswebframework.web.authorization.builder.DataAccessConfigBuilderFactory;
 import org.hswebframework.web.authorization.simple.builder.DataAccessConfigConvert;
 import org.hswebframework.web.authorization.simple.builder.SimpleAuthenticationBuilderFactory;
 import org.hswebframework.web.authorization.simple.builder.SimpleDataAccessConfigBuilderFactory;
 import org.hswebframework.web.authorization.token.DefaultUserTokenManager;
+import org.hswebframework.web.authorization.token.UserTokenAuthenticationSupplier;
 import org.hswebframework.web.authorization.token.UserTokenReactiveAuthenticationSupplier;
 import org.hswebframework.web.authorization.token.UserTokenManager;
 import org.hswebframework.web.authorization.twofactor.TwoFactorValidatorManager;
@@ -40,11 +39,20 @@ public class DefaultAuthorizationAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnBean(AuthenticationManager.class)
-    public UserTokenReactiveAuthenticationSupplier userTokenAuthenticationSupplier(UserTokenManager userTokenManager,
-                                                                                   AuthenticationManager authenticationManager) {
+    @ConditionalOnBean(ReactiveAuthenticationManager.class)
+    public UserTokenReactiveAuthenticationSupplier userTokenReactiveAuthenticationSupplier(UserTokenManager userTokenManager,
+                                                                                   ReactiveAuthenticationManager authenticationManager) {
         UserTokenReactiveAuthenticationSupplier supplier = new UserTokenReactiveAuthenticationSupplier(userTokenManager, authenticationManager);
         ReactiveAuthenticationHolder.addSupplier(supplier);
+        return supplier;
+    }
+
+    @Bean
+    @ConditionalOnBean(AuthenticationManager.class)
+    public UserTokenAuthenticationSupplier userTokenAuthenticationSupplier(UserTokenManager userTokenManager,
+                                                                           AuthenticationManager authenticationManager) {
+        UserTokenAuthenticationSupplier supplier = new UserTokenAuthenticationSupplier(userTokenManager, authenticationManager);
+        AuthenticationHolder.addSupplier(supplier);
         return supplier;
     }
 

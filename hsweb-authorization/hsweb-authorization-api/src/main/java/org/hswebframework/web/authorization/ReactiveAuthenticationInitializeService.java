@@ -27,7 +27,7 @@ import reactor.core.publisher.Mono;
  * @author zhouhao
  * @since 4.0
  */
-public interface AuthenticationInitializeService {
+public interface ReactiveAuthenticationInitializeService {
     /**
      * 根据用户ID初始化权限信息
      *

@@ -1,7 +1,7 @@
 package org.hswebframework.web.authorization.token;
 
 import org.hswebframework.web.authorization.Authentication;
-import org.hswebframework.web.authorization.AuthenticationManager;
+import org.hswebframework.web.authorization.ReactiveAuthenticationManager;
 import org.hswebframework.web.authorization.ReactiveAuthenticationSupplier;
 import org.hswebframework.web.context.ContextKey;
 import org.hswebframework.web.context.ContextUtils;
@@ -17,20 +17,20 @@ import java.util.Map;
  */
 public class UserTokenReactiveAuthenticationSupplier implements ReactiveAuthenticationSupplier {
 
-    private AuthenticationManager defaultAuthenticationManager;
+    private ReactiveAuthenticationManager defaultAuthenticationManager;
 
     private UserTokenManager userTokenManager;
 
-    private Map<String, ThirdPartAuthenticationManager> thirdPartAuthenticationManager = new HashMap<>();
+    private Map<String, ThirdPartReactiveAuthenticationManager> thirdPartAuthenticationManager = new HashMap<>();
 
-    public UserTokenReactiveAuthenticationSupplier(UserTokenManager userTokenManager, AuthenticationManager defaultAuthenticationManager) {
+    public UserTokenReactiveAuthenticationSupplier(UserTokenManager userTokenManager, ReactiveAuthenticationManager defaultAuthenticationManager) {
         this.defaultAuthenticationManager = defaultAuthenticationManager;
         this.userTokenManager=userTokenManager;
     }
 
     @Autowired(required = false)
-    public void setThirdPartAuthenticationManager(List<ThirdPartAuthenticationManager> thirdPartAuthenticationManager) {
-        for (ThirdPartAuthenticationManager manager : thirdPartAuthenticationManager) {
+    public void setThirdPartAuthenticationManager(List<ThirdPartReactiveAuthenticationManager> thirdPartReactiveAuthenticationManager) {
+        for (ThirdPartReactiveAuthenticationManager manager : thirdPartReactiveAuthenticationManager) {
             this.thirdPartAuthenticationManager.put(manager.getTokenType(), manager);
         }
     }
@@ -43,7 +43,7 @@ public class UserTokenReactiveAuthenticationSupplier implements ReactiveAuthenti
         return get(this.defaultAuthenticationManager, userId);
     }
 
-    protected Mono<Authentication> get(ThirdPartAuthenticationManager authenticationManager, String userId) {
+    protected Mono<Authentication> get(ThirdPartReactiveAuthenticationManager authenticationManager, String userId) {
         if (null == userId) {
             return null;
         }
@@ -53,7 +53,7 @@ public class UserTokenReactiveAuthenticationSupplier implements ReactiveAuthenti
         return authenticationManager.getByUserId(userId);
     }
 
-    protected Mono<Authentication> get(AuthenticationManager authenticationManager, String userId) {
+    protected Mono<Authentication> get(ReactiveAuthenticationManager authenticationManager, String userId) {
         if (null == userId) {
             return null;
         }
@@ -69,7 +69,8 @@ public class UserTokenReactiveAuthenticationSupplier implements ReactiveAuthenti
                 .flatMap(context ->
                         context.get(ContextKey.of(ParsedToken.class))
                                 .map(t -> userTokenManager.getByToken(t.getToken()))
-                                .map(tokenMono -> tokenMono.flatMap(token -> get(thirdPartAuthenticationManager.get(token.getType()), token.getUserId())))
+                                .map(tokenMono -> tokenMono
+                                        .flatMap(token -> get(thirdPartAuthenticationManager.get(token.getType()), token.getUserId())))
                                 .orElseGet(Mono::empty));
 
     }

@@ -30,7 +30,6 @@ import java.io.Serializable;
  * @author zhouhao
  * @see CustomDataAccessConfig
  * @see OwnCreatedDataAccessConfig
- * @see ScriptDataAccessConfig
  */
 public interface DataAccessConfig extends Serializable {
 
@@ -72,18 +71,11 @@ public interface DataAccessConfig extends Serializable {
         String FIELD_SCOPE = "FIELD_SCOPE";
 
         /**
-         * 字段过滤,黑名单
+         * 禁止操作字段
          *
          * @see FieldFilterDataAccessConfig#getType()
          */
         String DENY_FIELDS = "DENY_FIELDS";
-
-        /**
-         * 自定义脚本方式
-         *
-         * @see ScriptDataAccessConfig#getType()
-         */
-        String SCRIPT = "SCRIPT";
 
         /**
          * 自定义控制器

@@ -60,8 +60,8 @@ public class BasicAuthorizationTokenParser implements UserTokenForTypeParser {
             if (usernameAndPassword.contains(":")) {
                 String[] arr = usernameAndPassword.split("[:]");
                 Authentication authentication = authenticationManager
-                        .authenticate(Mono.just(new PlainTextUsernamePasswordAuthenticationRequest(arr[0], arr[1])))
-                        .blockOptional().orElse(null);
+                        .authenticate(new PlainTextUsernamePasswordAuthenticationRequest(arr[0], arr[1]))
+                        ;
                 if (authentication != null) {
                     return new AuthorizedToken() {
                         @Override

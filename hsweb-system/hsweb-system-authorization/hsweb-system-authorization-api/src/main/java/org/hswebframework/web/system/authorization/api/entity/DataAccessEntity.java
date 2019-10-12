@@ -10,7 +10,7 @@ import java.util.Set;
 @Setter
 public class DataAccessEntity {
 
-    private Set<String> actions;
+    private String action;
 
     private String type;
 

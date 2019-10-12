@@ -49,9 +49,11 @@ public final class AuthenticationHolder {
 
     private static final ReadWriteLock lock = new ReentrantReadWriteLock();
 
-    private static Optional<Authentication> get(Function<AuthenticationSupplier, Authentication> function) {
+    private static Optional<Authentication> get(Function<AuthenticationSupplier, Optional<Authentication>> function) {
 
         return Flux.fromStream(suppliers.stream().map(function))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
                 .reduceWith(CompositeAuthentication::new, CompositeAuthentication::merge)
                 .filter(CompositeAuthentication::isNotEmpty)
                 .map(Authentication.class::cast)

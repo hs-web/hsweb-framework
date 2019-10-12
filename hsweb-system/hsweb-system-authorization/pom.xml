@@ -13,8 +13,6 @@
     <description>业务模块-权限管理</description>
     <modules>
         <module>hsweb-system-authorization-api</module>
-        <module>hsweb-system-authorization-starter</module>
-        <module>hsweb-system-authorization-web</module>
         <module>hsweb-system-authorization-default</module>
     </modules>
     <artifactId>hsweb-system-authorization</artifactId>

@@ -19,6 +19,7 @@ package org.hswebframework.web.authorization;
 
 import reactor.core.publisher.Mono;
 
+import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
@@ -27,6 +28,7 @@ import java.util.function.Supplier;
  * @see Authentication
  * @see ReactiveAuthenticationHolder
  */
-public interface AuthenticationSupplier extends Supplier<Authentication> {
-    Authentication get(String userId);
+public interface AuthenticationSupplier extends Supplier<Optional<Authentication>> {
+
+    Optional<Authentication> get(String userId);
 }

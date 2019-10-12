@@ -23,6 +23,7 @@ import io.swagger.annotations.ApiParam;
 import lombok.SneakyThrows;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.AuthenticationManager;
+import org.hswebframework.web.authorization.ReactiveAuthenticationManager;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.events.*;
 import org.hswebframework.web.authorization.simple.PlainTextUsernamePasswordAuthenticationRequest;
@@ -48,7 +49,7 @@ import java.util.function.Function;
 public class AuthorizationController {
 
     @Autowired
-    private AuthenticationManager authenticationManager;
+    private ReactiveAuthenticationManager authenticationManager;
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;

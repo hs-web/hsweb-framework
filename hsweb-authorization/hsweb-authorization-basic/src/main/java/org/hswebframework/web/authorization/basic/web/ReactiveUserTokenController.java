@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiOperation;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.AuthenticationManager;
 import org.hswebframework.web.authorization.Permission;
+import org.hswebframework.web.authorization.ReactiveAuthenticationManager;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.exception.UnAuthorizedException;
 import org.hswebframework.web.authorization.token.TokenState;
@@ -22,10 +23,10 @@ import reactor.core.publisher.Mono;
 @RequestMapping
 @Authorize(permission = "user-token", description = "用户令牌信息管理")
 @Api(tags = "权限-用户令牌管理", value = "权限-用户令牌管理")
-public class UserTokenController {
+public class ReactiveUserTokenController {
     private UserTokenManager userTokenManager;
 
-    private AuthenticationManager authenticationManager;
+    private ReactiveAuthenticationManager authenticationManager;
 
     @Autowired
     @Lazy
@@ -35,7 +36,7 @@ public class UserTokenController {
 
     @Autowired
     @Lazy
-    public void setAuthenticationManager(AuthenticationManager authenticationManager) {
+    public void setAuthenticationManager(ReactiveAuthenticationManager authenticationManager) {
         this.authenticationManager = authenticationManager;
     }
 

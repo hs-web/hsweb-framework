@@ -9,6 +9,8 @@ import org.hswebframework.web.crud.annotation.EnableEasyormRepository;
 import org.hswebframework.web.api.crud.entity.ImplementFor;
 import org.hswebframework.web.crud.annotation.Reactive;
 import org.hswebframework.web.api.crud.entity.GenericEntity;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -138,13 +140,21 @@ public class EasyormRepositoryRegistrar implements ImportBeanDefinitionRegistrar
             registry.registerBeanDefinition(realType.getSimpleName().concat("SyncRepository"), definition);
         }
 
-        RootBeanDefinition definition = new RootBeanDefinition();
-        definition.setTargetType(AutoDDLProcessor.class);
-        definition.setBeanClass(AutoDDLProcessor.class);
-        definition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
-        definition.getPropertyValues().add("entities", entityInfos);
-        definition.getPropertyValues().add("reactive", reactive);
-        registry.registerBeanDefinition(AutoDDLProcessor.class.getName(), definition);
+
+        try {
+            BeanDefinition definition = registry.getBeanDefinition(AutoDDLProcessor.class.getName());
+            Set<EntityInfo> infos = (Set) definition.getPropertyValues().get("entities");
+            infos.addAll(entityInfos);
+        } catch (NoSuchBeanDefinitionException e) {
+            RootBeanDefinition definition = new RootBeanDefinition();
+            definition.setTargetType(AutoDDLProcessor.class);
+            definition.setBeanClass(AutoDDLProcessor.class);
+            definition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
+            definition.getPropertyValues().add("entities", entityInfos);
+            definition.getPropertyValues().add("reactive", reactive);
+            registry.registerBeanDefinition(AutoDDLProcessor.class.getName(), definition);
+        }
+
 
     }
 

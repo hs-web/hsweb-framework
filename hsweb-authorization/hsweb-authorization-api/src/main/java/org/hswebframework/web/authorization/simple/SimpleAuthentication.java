@@ -58,6 +58,9 @@ public class SimpleAuthentication implements Authentication {
 
     @Override
     public List<Permission> getPermissions() {
+        if(permissions==null){
+            return Collections.emptyList();
+        }
         return new ArrayList<>(permissions);
     }
 

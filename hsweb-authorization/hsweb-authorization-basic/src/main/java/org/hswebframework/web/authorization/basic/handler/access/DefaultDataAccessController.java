@@ -31,7 +31,6 @@ public final class DefaultDataAccessController implements DataAccessController {
         }
         this.parent = parent;
         addHandler(new CustomDataAccessHandler()).
-                addHandler(new ScriptDataAccessHandler()).
                 addHandler(new FieldFilterDataAccessHandler()).
                 addHandler(new FieldScopeDataAccessHandler());
     }

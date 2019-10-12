@@ -18,7 +18,7 @@
 
 package org.hswebframework.web.authorization;
 
-import java.util.Optional;
+import reactor.core.publisher.Mono;
 
 /**
  * 授权信息管理器,用于获取用户授权和同步授权信息
@@ -26,7 +26,7 @@ import java.util.Optional;
  * @author zhouhao
  * @see 3.0
  */
-public interface AuthenticationManager {
+public interface ReactiveAuthenticationManager {
 
     /**
      * 进行授权操作
@@ -34,7 +34,7 @@ public interface AuthenticationManager {
      * @param request 授权请求
      * @return 授权成功则返回用户权限信息
      */
-    Authentication authenticate(AuthenticationRequest request);
+    Mono<Authentication> authenticate(Mono<AuthenticationRequest> request);
 
     /**
      * 根据用户ID获取权限信息
@@ -42,7 +42,7 @@ public interface AuthenticationManager {
      * @param userId 用户ID
      * @return 权限信息
      */
-    Optional<Authentication> getByUserId(String userId);
+    Mono<Authentication> getByUserId(String userId);
 
 
 }

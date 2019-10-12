@@ -81,9 +81,6 @@ public class SimpleDataAccessConfigBuilderFactory implements DataAccessConfigBui
             converts.add(createConfig(OWN_CREATED, (action, config) -> new SimpleOwnCreatedDataAccessConfig(action)));
         }
 
-        if (defaultSupportConvert.contains(SCRIPT)) {
-            converts.add(createJsonConfig(SCRIPT, SimpleScriptDataAccessConfig.class));
-        }
 
         if (defaultSupportConvert.contains(CUSTOM)) {
             converts.add(createConfig(CUSTOM, (action, config) -> new SimpleCustomDataAccessConfigConfig(config)));

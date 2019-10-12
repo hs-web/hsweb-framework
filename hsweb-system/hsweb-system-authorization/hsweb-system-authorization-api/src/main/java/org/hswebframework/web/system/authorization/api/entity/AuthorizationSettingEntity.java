@@ -7,10 +7,7 @@ import org.hswebframework.ezorm.rdb.mapping.annotation.Comment;
 import org.hswebframework.ezorm.rdb.mapping.annotation.JsonCodec;
 import org.hswebframework.web.api.crud.entity.Entity;
 
-import javax.persistence.Column;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.sql.JDBCType;
 import java.util.List;
 import java.util.Set;
@@ -23,6 +20,7 @@ import java.util.Set;
 public class AuthorizationSettingEntity implements Entity {
     @Id
     @Column(length = 32)
+    @GeneratedValue(generator = "md5")
     private String id;
 
     @Column(length = 32, nullable = false, updatable = false)
@@ -55,10 +53,15 @@ public class AuthorizationSettingEntity implements Entity {
     @Comment("可操作权限")
     private Set<String> actions;
 
-    @Column
+    @Column(name = "data_accesses")
     @ColumnType(jdbcType = JDBCType.CLOB)
     @JsonCodec
     @Comment("数据权限")
     private List<DataAccessEntity> dataAccesses;
 
+    @Column
+    private Integer priority;
+
+    @Column
+    private Boolean merge;
 }

@@ -1,23 +1,27 @@
 package org.hswebframework.web.authorization.basic.embed;
 
-import com.alibaba.fastjson.JSON;
 import lombok.Getter;
 import lombok.Setter;
 import org.hswebframework.web.authorization.Authentication;
-import org.hswebframework.web.authorization.Permission;
-import org.hswebframework.web.authorization.Role;
+import org.hswebframework.web.authorization.AuthenticationRequest;
 import org.hswebframework.web.authorization.builder.DataAccessConfigBuilderFactory;
-import org.hswebframework.web.authorization.simple.SimpleAuthentication;
-import org.hswebframework.web.authorization.simple.SimplePermission;
-import org.hswebframework.web.authorization.simple.SimpleRole;
-import org.hswebframework.web.authorization.simple.SimpleUser;
+import org.hswebframework.web.authorization.simple.PlainTextUsernamePasswordAuthenticationRequest;
+import org.hswebframework.web.authorization.simple.builder.SimpleDataAccessConfigBuilderFactory;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.util.StringUtils;
+import reactor.core.publisher.Mono;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import javax.validation.ValidationException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * <pre>
  * hsweb:
+ *    auth:
  *      users:
  *          admin:
  *            name: 超级管理员
@@ -42,72 +46,61 @@ import java.util.stream.Collectors;
  */
 @Getter
 @Setter
-public class EmbedAuthenticationProperties {
+@ConfigurationProperties(prefix = "hsweb.auth")
+public class EmbedAuthenticationProperties implements InitializingBean {
 
-    private String id;
-
-    private String name;
-
-    private String username;
-
-    private String type;
-
-    private String password;
-
-    private List<SimpleRole> roles = new ArrayList<>();
-
-    private List<PermissionInfo> permissions = new ArrayList<>();
-
-    private Map<String, List<String>> permissionsSimple = new HashMap<>();
+    private Map<String, Authentication> authentications = new HashMap<>();
 
     @Getter
     @Setter
-    public static class PermissionInfo {
-        private String id;
+    private Map<String, EmbedAuthenticationInfo> users = new HashMap<>();
 
-        private String name;
+    @Autowired(required = false)
+    private DataAccessConfigBuilderFactory dataAccessConfigBuilderFactory = new SimpleDataAccessConfigBuilderFactory();
 
-        private Set<String> actions = new HashSet<>();
-
-        private List<Map<String, Object>> dataAccesses = new ArrayList<>();
+    @Override
+    public void afterPropertiesSet() {
+        users.forEach((id, properties) -> {
+            if (StringUtils.isEmpty(properties.getId())) {
+                properties.setId(id);
+            }
+            for (EmbedAuthenticationInfo.PermissionInfo permissionInfo : properties.getPermissions()) {
+                for (Map<String, Object> objectMap : permissionInfo.getDataAccesses()) {
+                    for (Map.Entry<String, Object> stringObjectEntry : objectMap.entrySet()) {
+                        if (stringObjectEntry.getValue() instanceof Map) {
+                            Map<?, ?> mapVal = ((Map) stringObjectEntry.getValue());
+                            boolean maybeIsList = mapVal.keySet().stream().allMatch(org.hswebframework.utils.StringUtils::isInt);
+                            if (maybeIsList) {
+                                stringObjectEntry.setValue(mapVal.values());
+                            }
+                        }
+                    }
+                }
+            }
+            authentications.put(id, properties.toAuthentication(dataAccessConfigBuilderFactory));
+        });
     }
 
-    public Authentication toAuthentication(DataAccessConfigBuilderFactory factory) {
-        SimpleAuthentication authentication = new SimpleAuthentication();
-        SimpleUser user = new SimpleUser();
-        user.setId(id);
-        user.setName(name);
-        user.setUsername(username);
-        user.setType(type);
-        authentication.setUser(user);
-        authentication.setRoles((List) roles);
-        List<Permission> permissionList = new ArrayList<>();
+    public Authentication authenticate(AuthenticationRequest request) {
+        if(request instanceof PlainTextUsernamePasswordAuthenticationRequest){
+            PlainTextUsernamePasswordAuthenticationRequest pwdReq = ((PlainTextUsernamePasswordAuthenticationRequest) request);
+            return users.values()
+                    .stream()
+                    .filter(user ->
+                            pwdReq.getUsername().equals(user.getUsername())
+                                    && pwdReq.getPassword().equals(user.getPassword()))
+                    .findFirst()
+                    .map(EmbedAuthenticationInfo::getId)
+                    .map(authentications::get)
+                    .orElseThrow(() -> new ValidationException("用户不存在"));
+        }
 
-        permissionList.addAll(permissions.stream()
-                .map(info -> {
-                    SimplePermission permission = new SimplePermission();
-                    permission.setId(info.getId());
-                    permission.setName(info.getName());
-                    permission.setActions(info.getActions());
-                    permission.setDataAccesses(info.getDataAccesses()
-                            .stream().map(conf -> factory.create()
-                                    .fromJson(JSON.toJSONString(conf))
-                                    .build()).collect(Collectors.toSet()));
-                    return permission;
-
-                })
-                .collect(Collectors.toList()));
-
-        permissionList.addAll(permissionsSimple.entrySet().stream()
-                .map(entry -> {
-                    SimplePermission permission = new SimplePermission();
-                    permission.setId(entry.getKey());
-                    permission.setActions(new HashSet<>(entry.getValue()));
-                    return permission;
-                }).collect(Collectors.toList()));
-
-        authentication.setPermissions(permissionList);
-        return authentication;
+        throw new UnsupportedOperationException("不支持的授权请求:"+request);
     }
+
+    public Optional<Authentication> getAuthentication(String userId) {
+        return Optional.ofNullable(authentications.get(userId));
+    }
+
 
 }

@@ -3,13 +3,11 @@ package org.hswebframework.web.authorization.token;
 import org.hswebframework.web.authorization.Authentication;
 import reactor.core.publisher.Mono;
 
-import java.util.Optional;
-
 /**
  * @author zhouhao
  * @since 1.0
  */
-public interface ThirdPartAuthenticationManager {
+public interface ThirdPartReactiveAuthenticationManager {
 
     /**
      * @return 支持的tokenType
@@ -22,6 +20,6 @@ public interface ThirdPartAuthenticationManager {
      * @param userId 用户ID
      * @return 权限信息
      */
-    Optional<Authentication> getByUserId(String userId);
+    Mono<Authentication> getByUserId(String userId);
 
 }

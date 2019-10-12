@@ -96,7 +96,7 @@ public class AuthenticationTests {
                 .build();
 
         //初始化权限管理器,用于获取用户的权限信息
-        AuthenticationManager authenticationManager = new AuthenticationManager() {
+        ReactiveAuthenticationManager authenticationManager = new ReactiveAuthenticationManager() {
             @Override
             public Mono<Authentication> authenticate(Mono<AuthenticationRequest> request) {
                 return Mono.empty();

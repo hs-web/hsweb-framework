@@ -1,5 +1,6 @@
 hsweb:
-  users:
+  auth:
+   users:
     admin:
       username: admin
       password: admin
