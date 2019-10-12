@@ -14,6 +14,8 @@ import org.hswebframework.ezorm.rdb.operator.DatabaseOperator;
 import org.hswebframework.ezorm.rdb.operator.DefaultDatabaseOperator;
 import org.hswebframework.web.commons.entity.factory.EntityFactory;
 import org.hswebframework.web.datasource.DefaultJdbcExecutor;
+import org.hswebframework.web.starter.easyorm.generator.MD5Generator;
+import org.hswebframework.web.starter.easyorm.generator.SnowFlakeStringIdGenerator;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -74,26 +76,29 @@ public class EasyOrmConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public EntityTableMetadataParser jpaEntityTableMetadataParser(DatabaseOperator operator) {
+    public EntityTableMetadataParser jpaEntityTableMetadataParser(RDBDatabaseMetadata metadata) {
         JpaEntityTableMetadataParser parser = new JpaEntityTableMetadataParser();
-        parser.setDatabaseMetadata(operator.getMetadata());
-//
-//        resolver.ifPresent(parser::setDataTypeResolver);
-//        codecResolver.ifPresent(parser::setValueCodecResolver);
-
+        parser.setDatabaseMetadata(metadata);
         return parser;
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public DatabaseOperator databaseOperator(SyncSqlExecutor executor) {
+    public RDBDatabaseMetadata databaseMetadata(SyncSqlExecutor syncSqlExecutor) {
         RDBDatabaseMetadata metadata = properties.createDatabaseMetadata();
-        metadata.addFeature(executor);
+        metadata.addFeature(syncSqlExecutor);
+        return metadata;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public DatabaseOperator databaseOperator(RDBDatabaseMetadata metadata) {
+
         return DefaultDatabaseOperator.of(metadata);
     }
 
     @Bean
-    public BeanPostProcessor autoRegisterFeature(DatabaseOperator operator) {
+    public BeanPostProcessor autoRegisterFeature(RDBDatabaseMetadata metadata) {
         return new BeanPostProcessor() {
             @Override
             public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
@@ -103,11 +108,22 @@ public class EasyOrmConfiguration {
             @Override
             public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
                 if (bean instanceof Feature) {
-                    operator.getMetadata().addFeature(((Feature) bean));
+                    metadata.addFeature(((Feature) bean));
                 }
                 return bean;
             }
         };
     }
+
+    @Bean
+    public MD5Generator md5Generator() {
+        return new MD5Generator();
+    }
+
+    @Bean
+    public SnowFlakeStringIdGenerator snowFlakeStringIdGenerator() {
+        return new SnowFlakeStringIdGenerator();
+    }
+
 
 }

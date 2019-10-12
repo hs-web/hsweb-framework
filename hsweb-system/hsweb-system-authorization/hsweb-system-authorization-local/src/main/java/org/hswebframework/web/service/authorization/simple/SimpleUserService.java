@@ -201,7 +201,7 @@ public class SimpleUserService extends AbstractService<UserEntity, String>
         }
         //修改数据
         createUpdate(getDao(), userEntity)
-                .excludes(excludeProperties.toArray(new String[excludeProperties.size()]))
+                .excludes(excludeProperties.toArray(new String[0]))
                 .where(GenericEntity.id, userEntity.getId())
                 .execute();
         if (userEntity instanceof BindRoleUserEntity) {
