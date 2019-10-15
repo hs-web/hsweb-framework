@@ -1,6 +1,7 @@
 package org.hswebframework.web.api.crud.entity;
 
-import org.hswebframework.web.api.crud.entity.Entity;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * 记录创建信息的实体类,包括创建人和创建时间。
@@ -23,6 +24,7 @@ public interface RecordCreationEntity extends Entity {
         setCreateTime(System.currentTimeMillis());
     }
 
+    @JsonIgnore
     default String getCreatorIdProperty() {
         return "creatorId";
     }

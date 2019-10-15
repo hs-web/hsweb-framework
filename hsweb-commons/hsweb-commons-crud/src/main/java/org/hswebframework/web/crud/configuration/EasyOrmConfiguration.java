@@ -16,17 +16,18 @@ import org.hswebframework.ezorm.rdb.operator.DefaultDatabaseOperator;
 import org.hswebframework.web.api.crud.entity.EntityFactory;
 import org.hswebframework.web.crud.annotation.EnableEasyormRepository;
 import org.hswebframework.web.crud.entity.factory.MapperEntityFactory;
+import org.hswebframework.web.crud.generator.CurrentTimeGenerator;
+import org.hswebframework.web.crud.generator.DefaultIdGenerator;
 import org.hswebframework.web.crud.generator.MD5Generator;
 import org.hswebframework.web.crud.generator.SnowFlakeStringIdGenerator;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 
 import java.util.List;
 import java.util.Optional;
@@ -41,7 +42,7 @@ public class EasyOrmConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public EntityFactory entityFactory(){
+    public EntityFactory entityFactory() {
         return new MapperEntityFactory();
     }
 
@@ -121,13 +122,25 @@ public class EasyOrmConfiguration {
     }
 
     @Bean
-    public MD5Generator md5Generator(){
+    @ConfigurationProperties(prefix = "easyorm.default-value-generator")
+    public DefaultIdGenerator defaultIdGenerator() {
+
+        return new DefaultIdGenerator();
+    }
+
+    @Bean
+    public MD5Generator md5Generator() {
         return new MD5Generator();
     }
 
     @Bean
-    public SnowFlakeStringIdGenerator snowFlakeStringIdGenerator(){
+    public SnowFlakeStringIdGenerator snowFlakeStringIdGenerator() {
         return new SnowFlakeStringIdGenerator();
+    }
+
+    @Bean
+    public CurrentTimeGenerator currentTimeGenerator() {
+        return new CurrentTimeGenerator();
     }
 
 }

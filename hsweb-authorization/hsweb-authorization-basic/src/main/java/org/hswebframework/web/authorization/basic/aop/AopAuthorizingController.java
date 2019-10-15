@@ -93,10 +93,12 @@ public class AopAuthorizingController extends StaticMethodMatcherPointcutAdvisor
         return Authentication.currentReactive()
                 .switchIfEmpty(Mono.error(new UnAuthorizedException()))
                 .flatMapMany(auth -> {
+                    DataAccessDefinition dataAccessDefinition = definition.getDataAccessDefinition();
+
                     context.setAuthentication(auth);
                     if (definition.getPhased() == Phased.before) {
                         authorizingHandler.handRBAC(context);
-                        if (definition.getDataAccessDefinition().getPhased() == Phased.before) {
+                        if (dataAccessDefinition != null && dataAccessDefinition.getPhased() == Phased.before) {
                             authorizingHandler.handleDataAccess(context);
                         } else {
                             return flux.doOnNext(res -> {
@@ -106,7 +108,7 @@ public class AopAuthorizingController extends StaticMethodMatcherPointcutAdvisor
                         }
                     } else {
 
-                        if (definition.getDataAccessDefinition().getPhased() == Phased.before) {
+                        if (dataAccessDefinition != null && dataAccessDefinition.getPhased() == Phased.before) {
                             authorizingHandler.handleDataAccess(context);
                             return flux.doOnNext(res -> {
                                 context.setParamContext(holder.createParamContext(res));

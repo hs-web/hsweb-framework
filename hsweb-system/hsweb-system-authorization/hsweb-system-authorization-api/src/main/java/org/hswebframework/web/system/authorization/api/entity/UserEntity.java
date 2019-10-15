@@ -3,6 +3,7 @@ package org.hswebframework.web.system.authorization.api.entity;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
+import org.hswebframework.ezorm.rdb.mapping.annotation.DefaultValue;
 import org.hswebframework.web.api.crud.entity.GenericEntity;
 import org.hswebframework.web.api.crud.entity.RecordCreationEntity;
 import org.hswebframework.web.bean.ToString;
@@ -31,13 +32,13 @@ public class UserEntity extends GenericEntity<String> implements RecordCreationE
 
     @Column(nullable = false)
     @ToString.Ignore(cover = false)
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @NotBlank(message = "密码不能为空", groups = CreateGroup.class)
     private String password;
 
     @Column(nullable = false)
     @ToString.Ignore(cover = false)
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private String salt;
 
     @Column
@@ -50,10 +51,10 @@ public class UserEntity extends GenericEntity<String> implements RecordCreationE
     private String creatorId;
 
     @Column(name = "create_time", updatable = false)
+    @DefaultValue(generator = "current_time")
     private Long createTime;
 
     @Override
-    @GeneratedValue(generator = "md5")
     public String getId() {
         return super.getId();
     }

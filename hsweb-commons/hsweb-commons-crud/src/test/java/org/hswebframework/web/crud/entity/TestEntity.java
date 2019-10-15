@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hswebframework.web.api.crud.entity.GenericEntity;
+import org.hswebframework.web.crud.generator.Generators;
 
 import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
@@ -24,7 +25,7 @@ public class TestEntity extends GenericEntity<String> {
     private Integer age;
 
     @Override
-    @GeneratedValue(generator = "md5")
+    @GeneratedValue(generator = Generators.DEFAULT_ID_GENERATOR)
     public String getId() {
         return super.getId();
     }

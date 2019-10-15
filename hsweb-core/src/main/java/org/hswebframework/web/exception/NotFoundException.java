@@ -27,6 +27,6 @@ public class NotFoundException extends BusinessException {
     }
 
     public NotFoundException() {
-        this("data not found");
+        this("记录不存在");
     }
 }

@@ -23,6 +23,7 @@ import lombok.Setter;
 import org.hswebframework.web.bean.ToString;
 
 import javax.persistence.Column;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
 
@@ -36,6 +37,7 @@ public class GenericEntity<PK> implements Entity {
 
     @Column(length = 32,updatable = false)
     @Id
+    @GeneratedValue(generator = "default_id")
     private PK id;
 
     public String toString(String... ignoreProperty) {

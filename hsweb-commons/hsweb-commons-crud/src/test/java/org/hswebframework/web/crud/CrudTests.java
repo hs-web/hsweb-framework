@@ -18,8 +18,6 @@ public class CrudTests  {
     @Autowired
     private TestEntityService service;
 
-    @Autowired
-    private TestEntityService service2;
 
     @Test
     public void test(){
