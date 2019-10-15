@@ -1,6 +1,5 @@
 package org.hswebframework.web.crud.events;
 
-import org.hswebframework.ezorm.rdb.events.ContextKeys;
 import org.hswebframework.ezorm.rdb.events.EventContext;
 import org.hswebframework.ezorm.rdb.events.EventListener;
 import org.hswebframework.ezorm.rdb.events.EventType;
@@ -10,7 +9,7 @@ import org.hswebframework.web.api.crud.entity.Entity;
 import org.hswebframework.web.validator.CreateGroup;
 import org.hswebframework.web.validator.UpdateGroup;
 
-public class ValidateEventHandler implements EventListener {
+public class ValidateEventListener implements EventListener {
 
 
     @Override

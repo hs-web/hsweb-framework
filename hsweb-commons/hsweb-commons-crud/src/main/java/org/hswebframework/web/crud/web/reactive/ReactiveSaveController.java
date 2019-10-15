@@ -9,13 +9,15 @@ import org.hswebframework.web.authorization.annotation.Authorize;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
+import javax.validation.Valid;
+
 public interface ReactiveSaveController<E, K> {
 
     ReactiveRepository<E, K> getRepository();
 
     default E applyCreationEntity(Authentication authentication, E entity) {
         RecordCreationEntity creationEntity = ((RecordCreationEntity) entity);
-        creationEntity.setCreateTime(System.currentTimeMillis());
+        creationEntity.setCreateTimeNow();
         creationEntity.setCreatorId(authentication.getUser().getId());
 
         return entity;

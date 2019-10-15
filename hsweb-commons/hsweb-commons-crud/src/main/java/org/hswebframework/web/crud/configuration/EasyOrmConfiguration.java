@@ -3,6 +3,7 @@ package org.hswebframework.web.crud.configuration;
 
 import lombok.SneakyThrows;
 import org.hswebframework.ezorm.core.meta.Feature;
+import org.hswebframework.ezorm.rdb.events.EventListener;
 import org.hswebframework.ezorm.rdb.executor.SyncSqlExecutor;
 import org.hswebframework.ezorm.rdb.executor.reactive.ReactiveSqlExecutor;
 import org.hswebframework.ezorm.rdb.mapping.EntityColumnMapping;
@@ -16,6 +17,8 @@ import org.hswebframework.ezorm.rdb.operator.DefaultDatabaseOperator;
 import org.hswebframework.web.api.crud.entity.EntityFactory;
 import org.hswebframework.web.crud.annotation.EnableEasyormRepository;
 import org.hswebframework.web.crud.entity.factory.MapperEntityFactory;
+import org.hswebframework.web.crud.events.CompositeEventListener;
+import org.hswebframework.web.crud.events.ValidateEventListener;
 import org.hswebframework.web.crud.generator.CurrentTimeGenerator;
 import org.hswebframework.web.crud.generator.DefaultIdGenerator;
 import org.hswebframework.web.crud.generator.MD5Generator;
@@ -110,15 +113,26 @@ public class EasyOrmConfiguration {
 
     @Bean
     public BeanPostProcessor autoRegisterFeature(RDBDatabaseMetadata metadata) {
+        CompositeEventListener eventListener = new CompositeEventListener();
+        metadata.addFeature(eventListener);
         return new BeanPostProcessor() {
             @Override
             public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
                 if (bean instanceof Feature) {
                     metadata.addFeature(((Feature) bean));
                 }
+                if (bean instanceof EventListener) {
+                    eventListener.addListener(((EventListener) bean));
+                }
                 return bean;
             }
         };
+    }
+
+
+    @Bean
+    public ValidateEventListener validateEventListener() {
+        return new ValidateEventListener();
     }
 
     @Bean
