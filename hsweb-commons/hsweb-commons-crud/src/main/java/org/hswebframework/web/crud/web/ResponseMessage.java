@@ -1,5 +1,6 @@
 package org.hswebframework.web.crud.web;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
 import java.io.Serializable;
@@ -9,6 +10,7 @@ import java.io.Serializable;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ResponseMessage<T> implements Serializable {
 
     private static final long serialVersionUID = 8992436576262574064L;
