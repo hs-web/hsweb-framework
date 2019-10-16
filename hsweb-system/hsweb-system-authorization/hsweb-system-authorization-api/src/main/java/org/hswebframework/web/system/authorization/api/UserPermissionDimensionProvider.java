@@ -1,22 +1,14 @@
 package org.hswebframework.web.system.authorization.api;
 
+import org.hswebframework.web.authorization.DefaultDimensionType;
 import reactor.core.publisher.Flux;
 
 public class UserPermissionDimensionProvider implements PermissionDimensionProvider {
-    @Override
-    public String getDimension() {
-        return "user";
-    }
-
-    @Override
-    public String getName() {
-        return "用户";
-    }
 
     @Override
     public Flux<PermissionDimension> getDimensionByUserId(String userId) {
         return Flux.just(userId)
-                .map(PermissionDimension::of);
+                .map(id -> PermissionDimension.of(userId, DefaultDimensionType.user));
     }
 
     @Override

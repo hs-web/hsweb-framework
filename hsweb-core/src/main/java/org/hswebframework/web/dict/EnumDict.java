@@ -9,12 +9,28 @@ import com.alibaba.fastjson.parser.JSONToken;
 import com.alibaba.fastjson.parser.deserializer.ObjectDeserializer;
 import com.alibaba.fastjson.serializer.JSONSerializable;
 import com.alibaba.fastjson.serializer.JSONSerializer;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.deser.std.EnumDeserializer;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.util.EnumResolver;
+import lombok.extern.slf4j.Slf4j;
+import org.hswebframework.web.exception.ValidationException;
+import org.springframework.beans.BeanUtils;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 枚举字典,使用枚举来实现数据字典,可通过集成此接口来实现一些有趣的功能.
@@ -28,6 +44,7 @@ import java.util.function.Supplier;
  * @see JSONSerializable
  */
 @JSONType(deserializer = EnumDict.EnumDictJSONDeserializer.class)
+@JsonDeserialize(contentUsing = EnumDict.EnumDictJSONDeserializer.class)
 public interface EnumDict<V> extends JSONSerializable {
 
     /**
@@ -108,6 +125,13 @@ public interface EnumDict<V> extends JSONSerializable {
         return getText();
     }
 
+    @JsonCreator
+    default EnumDict<V> fromJsonNode(Object val) {
+
+        return null;
+    }
+
+
     /**
      * 从指定的枚举类中查找想要的枚举,并返回一个{@link Optional},如果未找到,则返回一个{@link Optional#empty()}
      *
@@ -125,6 +149,15 @@ public interface EnumDict<V> extends JSONSerializable {
             }
         }
         return Optional.empty();
+    }
+
+    static <T extends Enum & EnumDict> List<T> findList(Class<T> type, Predicate<T> predicate) {
+        if (type.isEnum()) {
+            return Arrays.stream(type.getEnumConstants())
+                    .filter(predicate)
+                    .collect(Collectors.toList());
+        }
+        return Collections.emptyList();
     }
 
     /**
@@ -236,13 +269,18 @@ public interface EnumDict<V> extends JSONSerializable {
      * @return 最终序列化的值
      * @see this#isWriteJSONObjectEnabled()
      */
+    @JsonValue
     default Object getWriteJSONObject() {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("value", getValue());
-        jsonObject.put("text", getText());
-        jsonObject.put("index", index());
-        jsonObject.put("mask", getMask());
-        return jsonObject;
+        if (isWriteJSONObjectEnabled()) {
+            Map<String, Object> jsonObject = new HashMap<>();
+            jsonObject.put("value", getValue());
+            jsonObject.put("text", getText());
+            // jsonObject.put("index", index());
+            // jsonObject.put("mask", getMask());
+            return jsonObject;
+        }
+
+        return this.getValue();
     }
 
     @Override
@@ -257,7 +295,8 @@ public interface EnumDict<V> extends JSONSerializable {
     /**
      * 自定义fastJson枚举序列化
      */
-    class EnumDictJSONDeserializer implements ObjectDeserializer {
+    @Slf4j
+    class EnumDictJSONDeserializer extends JsonDeserializer implements ObjectDeserializer {
 
         @Override
         @SuppressWarnings("all")
@@ -302,6 +341,59 @@ public interface EnumDict<V> extends JSONSerializable {
         @Override
         public int getFastMatchToken() {
             return JSONToken.LITERAL_STRING;
+        }
+
+        @Override
+        @SuppressWarnings("all")
+        public Object deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+            JsonNode node = jp.getCodec().readTree(jp);
+
+            String currentName = jp.currentName();
+            Object currentValue = jp.getCurrentValue();
+            Class findPropertyType;
+            if (currentName == null || currentValue == null) {
+                return null;
+            } else {
+                findPropertyType = BeanUtils.findPropertyType(currentName, currentValue.getClass());
+            }
+
+            if (EnumDict.class.isAssignableFrom(findPropertyType) && findPropertyType.isEnum()) {
+                if (node.isObject()) {
+                    return (EnumDict) EnumDict
+                            .findByValue(findPropertyType, node.get("value").textValue())
+                            .orElse(null);
+                }
+                if (node.isNumber()) {
+                    return (EnumDict) EnumDict
+                            .find(findPropertyType, node.numberValue())
+                            .orElse(null);
+                }
+                if (node.isTextual()) {
+                    return (EnumDict) EnumDict
+                            .find(findPropertyType, node.textValue())
+                            .orElse(null);
+                }
+                throw new ValidationException("参数[" + currentName + "]在选项中不存在", Arrays.asList(
+                        new ValidationException.Detail(currentName, "选项中不存在此值", null)
+                ));
+            }
+            if (findPropertyType.isEnum()) {
+                return Stream.of(findPropertyType.getEnumConstants())
+                        .filter(o -> {
+                            if (node.isTextual()) {
+                                return node.textValue().equalsIgnoreCase(((Enum) o).name());
+                            }
+                            if (node.isNumber()) {
+                                return node.intValue() == ((Enum) o).ordinal();
+                            }
+                            return false;
+                        })
+                        .findAny()
+                        .orElse(null);
+            }
+
+            log.warn("unsupported deserialize enum json : {}", node);
+            return null;
         }
     }
 

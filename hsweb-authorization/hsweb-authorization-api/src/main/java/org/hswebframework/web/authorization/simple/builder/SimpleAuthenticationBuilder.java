@@ -19,8 +19,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * TODO 完成注释
- *
  * @author zhouhao
  */
 public class SimpleAuthenticationBuilder implements AuthenticationBuilder {
@@ -55,14 +53,14 @@ public class SimpleAuthenticationBuilder implements AuthenticationBuilder {
                 .id(user.get("id"))
                 .username(user.get("username"))
                 .name(user.get("name"))
-                .type(user.get("type"))
+                .userType(user.get("type"))
                 .build());
         return this;
     }
 
     @Override
     public AuthenticationBuilder role(List<Role> role) {
-        authentication.setRoles(role);
+        authentication.getDimensions().addAll(role);
         return this;
     }
 
@@ -106,13 +104,13 @@ public class SimpleAuthenticationBuilder implements AuthenticationBuilder {
 
     @Override
     public AuthenticationBuilder attributes(String attributes) {
-        authentication.setAttributes(JSON.<Map<String, Serializable>>parseObject(attributes, Map.class));
+        authentication.getAttributes().putAll(JSON.<Map<String, Serializable>>parseObject(attributes, Map.class));
         return this;
     }
 
     @Override
     public AuthenticationBuilder attributes(Map<String, Serializable> permission) {
-        authentication.setAttributes(permission);
+        authentication.getAttributes().putAll(permission);
         return this;
     }
 

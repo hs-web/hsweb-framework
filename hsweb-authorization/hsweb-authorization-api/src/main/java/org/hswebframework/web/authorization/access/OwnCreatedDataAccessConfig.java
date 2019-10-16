@@ -7,7 +7,7 @@ package org.hswebframework.web.authorization.access;
  */
 public interface OwnCreatedDataAccessConfig extends DataAccessConfig {
     @Override
-    default String getType() {
-        return DefaultType.OWN_CREATED;
+    default DataAccessType getType() {
+        return DefaultDataAccessType.USER_OWN_DATA;
     }
 }

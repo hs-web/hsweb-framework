@@ -28,6 +28,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import static org.hswebframework.web.authorization.access.DataAccessConfig.DefaultType.DENY_FIELDS;
 
@@ -52,6 +53,10 @@ public interface Permission extends Serializable {
      * 新增
      */
     String ACTION_ADD = "add";
+    /**
+     * 保存
+     */
+    String ACTION_SAVE = "save";
     /**
      * 更新
      */
@@ -108,6 +113,12 @@ public interface Permission extends Serializable {
     Set<DataAccessConfig> getDataAccesses();
 
 
+    default  Set<DataAccessConfig> getDataAccesses(String action){
+        return getDataAccesses()
+                .stream()
+                .filter(conf->conf.getAction().equals(action))
+                .collect(Collectors.toSet());
+    }
     /**
      * 查找数据权限配置
      *

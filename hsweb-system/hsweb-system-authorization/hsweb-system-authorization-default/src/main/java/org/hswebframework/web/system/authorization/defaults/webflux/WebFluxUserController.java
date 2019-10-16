@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/user")
-@Authorize(permission = "user",description = "用户管理")
+@Authorize
 public class WebFluxUserController {
 
 

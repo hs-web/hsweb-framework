@@ -18,6 +18,11 @@
         </dependency>
         <dependency>
             <groupId>org.hswebframework.web</groupId>
+            <artifactId>hsweb-authorization-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-commons-api</artifactId>
             <version>${project.version}</version>
         </dependency>

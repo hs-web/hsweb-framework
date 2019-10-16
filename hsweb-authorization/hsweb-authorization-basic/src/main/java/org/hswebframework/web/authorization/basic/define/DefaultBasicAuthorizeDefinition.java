@@ -1,18 +1,15 @@
 package org.hswebframework.web.authorization.basic.define;
 
 import lombok.*;
-import org.hswebframework.web.authorization.access.DataAccessController;
-import org.hswebframework.web.authorization.annotation.Authorize;
-import org.hswebframework.web.authorization.annotation.Logical;
-import org.hswebframework.web.authorization.annotation.RequiresDataAccess;
-import org.hswebframework.web.authorization.annotation.RequiresExpression;
+import org.hswebframework.web.authorization.annotation.*;
 import org.hswebframework.web.authorization.define.*;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * 默认权限权限定义
@@ -26,91 +23,183 @@ import java.util.Set;
 @AllArgsConstructor
 @ToString
 public class DefaultBasicAuthorizeDefinition implements AopAuthorizeDefinition {
-    private boolean dataAccessControl;
-
-    private String[] permissionDescription = {};
-
-    private String[] actionDescription = {};
-
-    private Set<String> permissions = new LinkedHashSet<>();
-
-    private Set<String> actions = new LinkedHashSet<>();
-
-    private Set<String> roles = new LinkedHashSet<>();
-
-    private Set<String> user = new LinkedHashSet<>();
-
-    private Script script;
-
-    private String message = "{un_authorized}";
-
-    private Logical logical = Logical.DEFAULT;
-
-    private DataAccessDefinition dataAccessDefinition;
-
-    private Phased phased = Phased.before;
 
     private Class targetClass;
 
     private Method targetMethod;
 
-    @Override
-    public Phased getPhased() {
-        return phased;
-    }
+    private ResourcesDefinition resources = new ResourcesDefinition();
+    private DimensionsDefinition dimensions = new DimensionsDefinition();
 
-    @Override
-    public int getPriority() {
-        return Integer.MIN_VALUE;
-    }
+    private String message;
+
+    private Phased phased;
 
     @Override
     public boolean isEmpty() {
-        return permissions.isEmpty() && roles.isEmpty() && user.isEmpty() && script == null && dataAccessDefinition == null;
+        return resources.getResources().isEmpty() && dimensions.getDimensions().isEmpty();
     }
 
-    public void put(Authorize authorize) {
-        if (null == authorize || authorize.ignore()) {
+    private static final Set<Class<? extends Annotation>> types = new HashSet<>(Arrays.asList(
+            Authorize.class,
+            DataAccess.class,
+            Dimension.class,
+            Resource.class,
+            ResourceAction.class,
+            DataAccessType.class
+    ));
+
+    public static AopAuthorizeDefinition from(Class targetClass, Method method) {
+        DefaultBasicAuthorizeDefinition definition = new DefaultBasicAuthorizeDefinition();
+        definition.setTargetClass(targetClass);
+        definition.setTargetMethod(method);
+
+        Set<Annotation> annotations = AnnotatedElementUtils.findAllMergedAnnotations(method, types);
+
+        Set<Annotation> classAnnotation = AnnotatedElementUtils.findAllMergedAnnotations(targetClass, types);
+
+        Map<Class, Annotation> classAnnotationMap = classAnnotation
+                .stream()
+                .collect(Collectors.toMap(Annotation::annotationType, Function.identity()));
+
+        Map<Class, Annotation> mapping = annotations
+                .stream()
+                .collect(Collectors.toMap(Annotation::annotationType, Function.identity()));
+
+        for (Annotation annotation : classAnnotation) {
+            if (annotation instanceof Authorize) {
+                definition.putAnnotation(((Authorize) annotation));
+            }
+            if (annotation instanceof Resource) {
+                definition.putAnnotation(((Resource) annotation));
+            }
+        }
+
+        for (Annotation annotation : annotations) {
+            if (annotation instanceof Authorize) {
+                definition.putAnnotation(((Authorize) annotation));
+            }
+            if (annotation instanceof Resource) {
+                definition.putAnnotation(((Resource) annotation));
+            }
+            if (annotation instanceof Dimension) {
+                definition.putAnnotation(((Dimension) annotation));
+            }
+        }
+
+        for (Annotation annotation : annotations) {
+
+            if (annotation instanceof ResourceAction) {
+                Optional.ofNullable(mapping.getOrDefault(Resource.class, classAnnotationMap.get(Resource.class)))
+                        .map(Resource.class::cast)
+                        .flatMap(res -> definition.getResources().getResource(res.id()))
+                        .ifPresent(res -> {
+
+                            ResourceAction ra = (ResourceAction) annotation;
+                            ResourceActionDefinition action = definition.putAnnotation(res, ra);
+
+                            Optional.ofNullable(mapping.get(DataAccessType.class))
+                                    .map(DataAccessType.class::cast)
+                                    .ifPresent(dat -> definition.putAnnotation(action, dat));
+                        });
+            }
+            if (annotation instanceof DataAccess) {
+                Optional.ofNullable(mapping.getOrDefault(Resource.class, classAnnotationMap.get(Resource.class)))
+                        .map(Resource.class::cast)
+                        .flatMap(res -> definition.getResources().getResource(res.id()))
+                        .flatMap(res -> Optional.ofNullable(mapping.get(ResourceAction.class))
+                                .map(ResourceAction.class::cast)
+                                .flatMap(ra -> res.getAction(ra.id())))
+                        .ifPresent(ra -> {
+                            definition.putAnnotation(ra, (DataAccess) annotation);
+                            Optional.ofNullable(mapping.get(DataAccessType.class))
+                                    .map(DataAccessType.class::cast)
+                                    .ifPresent(dat -> definition.putAnnotation(ra, dat));
+
+                        });
+            }
+
+        }
+
+        return definition;
+    }
+
+    public void putAnnotation(Authorize ann) {
+        if (!ann.merge()) {
+            getResources().getResources().clear();
+            getDimensions().getDimensions().clear();
+        }
+        getResources().setPhased(ann.phased());
+        for (Resource resource : ann.resources()) {
+            putAnnotation(resource);
+        }
+        for (Dimension dimension : ann.dimension()) {
+            putAnnotation(dimension);
+        }
+    }
+
+    public void putAnnotation(Dimension ann) {
+        if (ann.ignore()) {
+            getDimensions().getDimensions().clear();
             return;
         }
-        permissions.addAll(Arrays.asList(authorize.permission()));
-        actions.addAll(Arrays.asList(authorize.action()));
-        roles.addAll(Arrays.asList(authorize.role()));
-        user.addAll(Arrays.asList(authorize.user()));
-        if (authorize.logical() != Logical.DEFAULT) {
-            logical = authorize.logical();
-        }
-        message = authorize.message();
-        phased = authorize.phased();
-        put(authorize.dataAccess());
+        DimensionDefinition definition = new DimensionDefinition();
+        definition.setTypeId(ann.type());
+        definition.setDimensionId(new HashSet<>(Arrays.asList(ann.id())));
+        definition.setLogical(ann.logical());
+        getDimensions().addDimension(definition);
     }
 
-    public void put(RequiresExpression expression) {
-        if (null == expression) {
+    public void putAnnotation(Resource ann) {
+        ResourceDefinition resource = new ResourceDefinition();
+        resource.setId(ann.id());
+        resource.setName(ann.name());
+        resource.setLogical(ann.logical());
+        resource.setDescription(String.join("\n", ann.description()));
+        for (ResourceAction action : ann.actions()) {
+            putAnnotation(resource, action);
+        }
+        resources.addResource(resource, ann.merge());
+    }
+
+    public ResourceActionDefinition putAnnotation(ResourceDefinition definition, ResourceAction ann) {
+        ResourceActionDefinition actionDefinition = new ResourceActionDefinition();
+        actionDefinition.setId(ann.id());
+        actionDefinition.setName(ann.name());
+        actionDefinition.setDescription(String.join("\n", ann.description()));
+        for (DataAccess dataAccess : ann.dataAccess()) {
+            putAnnotation(actionDefinition, dataAccess);
+        }
+        definition.addAction(actionDefinition);
+        return actionDefinition;
+    }
+
+
+    public void putAnnotation(ResourceActionDefinition definition, DataAccess ann) {
+        if (ann.ignore()) {
             return;
         }
-        script = new DefaultScript(expression.language(), expression.value());
+        DataAccessTypeDefinition typeDefinition = new DataAccessTypeDefinition();
+        for (DataAccessType dataAccessType : ann.type()) {
+            typeDefinition.setId(dataAccessType.id());
+            typeDefinition.setName(dataAccessType.name());
+            typeDefinition.setController(dataAccessType.controller());
+            typeDefinition.setDescription(String.join("\n", dataAccessType.description()));
+        }
+        definition.getDataAccess()
+                .getDataAccessTypes()
+                .add(typeDefinition);
     }
 
-    public void put(RequiresDataAccess dataAccess) {
-        if (null == dataAccess || dataAccess.ignore()) {
-            return;
-        }
-        if (!"".equals(dataAccess.permission())) {
-            permissions.add(dataAccess.permission());
-        }
-        actions.addAll(Arrays.asList(dataAccess.action()));
-        DefaultDataAccessDefinition definition = new DefaultDataAccessDefinition();
-        definition.setEntityType(dataAccess.entityType());
-        definition.setPhased(dataAccess.phased());
-        if (!"".equals(dataAccess.controllerBeanName())) {
-            definition.setController(dataAccess.controllerBeanName());
-        } else if (DataAccessController.class != dataAccess.controllerClass()) {
-            definition.setController(dataAccess.getClass().getName());
-        }
-        dataAccessDefinition = definition;
-        dataAccessControl = true;
+    public void putAnnotation(ResourceActionDefinition definition, DataAccessType dataAccessType) {
+        DataAccessTypeDefinition typeDefinition = new DataAccessTypeDefinition();
+        typeDefinition.setId(dataAccessType.id());
+        typeDefinition.setName(dataAccessType.name());
+        typeDefinition.setController(dataAccessType.controller());
+        typeDefinition.setDescription(String.join("\n", dataAccessType.description()));
+        definition.getDataAccess()
+                .getDataAccessTypes()
+                .add(typeDefinition);
     }
-
 
 }

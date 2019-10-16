@@ -1,10 +1,7 @@
 package org.hswebframework.web.authorization;
 
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -29,6 +26,15 @@ public class CompositeAuthentication implements Authentication {
         return userAuthentication
                 .get(currentUser)
                 .getUser();
+    }
+
+    @Override
+    public List<Dimension> getDimensions() {
+        return userAuthentication.values()
+                .stream()
+                .map(Authentication::getDimensions)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -60,23 +66,12 @@ public class CompositeAuthentication implements Authentication {
     }
 
     @Override
-    public void setAttribute(String name, Serializable object) {
-
-    }
-
-    @Override
-    public void setAttributes(Map<String, Serializable> attributes) {
-
-    }
-
-    @Override
-    public <T extends Serializable> T removeAttributes(String name) {
-        return null;
-    }
-
-    @Override
     public Map<String, Serializable> getAttributes() {
-        return null;
+        return userAuthentication.values()
+                .stream()
+                .map(Authentication::getAttributes)
+                .filter(Objects::nonNull)
+                .reduce(new HashMap<>(),(r,s)->{r.putAll(s);return r;});
     }
 
     public CompositeAuthentication merge(Authentication authentication) {

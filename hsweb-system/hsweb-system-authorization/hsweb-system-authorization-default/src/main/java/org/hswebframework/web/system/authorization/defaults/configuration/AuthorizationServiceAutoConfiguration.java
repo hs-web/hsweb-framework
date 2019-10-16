@@ -18,7 +18,7 @@ import org.springframework.context.annotation.Configuration;
 public class AuthorizationServiceAutoConfiguration {
 
 
-    // TODO: 2019-10-12 condition reactive enabled
+
     @Configuration
     static class ReactiveAuthorizationServiceAutoConfiguration{
         @ConditionalOnBean(ReactiveRepository.class)

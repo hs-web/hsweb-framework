@@ -17,36 +17,37 @@
 
 package org.hswebframework.web.authorization.annotation;
 
+import org.hswebframework.web.authorization.access.DataAccessController;
+
 import java.lang.annotation.*;
 
 /**
- * 使用表达式进行验证,默认支持spel,ognl表达式。
+ * 数据级权限控制注解,用于进行需要数据级别权限控制的声明.
+ * <p>
+ * 此注解仅用于声明此方法需要进行数据级权限控制,具体权限控制方式由控制器实{@link DataAccessController}现
+ * </p>
  *
  * @author zhouhao
+ * @see DataAccessController
+ * @see Authorize#dataAccess()
  * @since 3.0
  */
-@Target({ElementType.TYPE, ElementType.METHOD})
+@Target({ElementType.ANNOTATION_TYPE,ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface RequiresExpression {
+public @interface DataAccess {
+
+    DataAccessType[] type() default {};
 
     /**
-     * 表达式内容,表达式可以调用方法的参数值以及当前的用户信息和spring管理的bean
-     * 例如:
-     * <pre>
-     * &#064;RequestMapping
-     * &#064;RequiresExpression("#param!=null")
-     * public ResponseMessage requestHandle(String param){
-     *  return ok();
-     * }
-     * </pre>
-     *
-     * @return 表达式
+     * @return logical
      */
-    String value();
+    Logical logical() default Logical.AND;
 
     /**
-     * @return 表达式语言 ，支持spel,ognl,groovy,javascript
+     * @return 是否忽略, 忽略后将不进行权限控制
      */
-    String language() default "spel";
+    boolean ignore() default false;
+
+
 }

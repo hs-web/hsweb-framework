@@ -16,7 +16,9 @@ import java.util.List;
 @RestController
 @RequestMapping("/datasource")
 @Api(tags = "开发人员工具-数据源", value = "数据源")
-@Authorize(permission = "datasource", description = "数据源管理")
+@Authorize(permission =
+    @Authorize.Resource(value = "datasource", description = "数据源管理")
+)
 public class DatasourceController {
 
     @Autowired
@@ -25,7 +27,7 @@ public class DatasourceController {
     @GetMapping
     @Authorize(action = Permission.ACTION_QUERY)
     @ApiOperation("获取全部数据源信息")
-    public  List<? extends DynamicDataSourceConfig> getAllConfig() {
+    public List<? extends DynamicDataSourceConfig> getAllConfig() {
         return repository.findAll();
     }
 

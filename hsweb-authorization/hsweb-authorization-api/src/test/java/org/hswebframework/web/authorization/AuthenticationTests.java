@@ -35,7 +35,7 @@ public class AuthenticationTests {
      */
     @Test
     public void testInitUserRoleAndPermission() {
-        Authentication authentication = builder.user("{\"id\":\"admin\",\"username\":\"admin\",\"name\":\"Administrator\",\"type\":\"default\"}")
+        Authentication authentication = builder.user("{\"id\":\"admin\",\"username\":\"admin\",\"name\":\"Administrator\",\"userType\":\"default\"}")
                 .role("[{\"id\":\"admin-role\",\"name\":\"admin\"}]")
                 .permission("[{\"id\":\"user-manager\",\"actions\":[\"query\",\"get\",\"update\"]" +
                         ",\"dataAccesses\":[{\"action\":\"query\",\"field\":\"test\",\"fields\":[\"1\",\"2\",\"3\"],\"scopeType\":\"CUSTOM_SCOPE\",\"type\":\"DENY_FIELDS\"}]}]")
@@ -45,12 +45,12 @@ public class AuthenticationTests {
         assertEquals(authentication.getUser().getId(), "admin");
         assertEquals(authentication.getUser().getUsername(), "admin");
         assertEquals(authentication.getUser().getName(), "Administrator");
-        assertEquals(authentication.getUser().getType(), "default");
+        assertEquals(authentication.getUser().getUserType(), "default");
 
         //test role
-        assertNotNull(authentication.getRole("admin-role").orElse(null));
-        assertEquals(authentication.getRole("admin-role").get().getName(), "admin");
-        assertTrue(authentication.hasRole("admin-role"));
+        assertNotNull(authentication.getDimension("role","admin-role").orElse(null));
+        assertEquals(authentication.getDimension("role","admin-role").get().getName(), "admin");
+        assertTrue(authentication.hasDimension("role","admin-role"));
 
 
         //test permission
@@ -60,12 +60,12 @@ public class AuthenticationTests {
         assertFalse(authentication.hasPermission("user-manager", "delete"));
 
         boolean has = AuthenticationPredicate.has("permission:user-manager")
-                .or(AuthenticationPredicate.role("admin-role"))
+                .or(AuthenticationPredicate.dimension("role","admin-role"))
                 .test(authentication);
 
         Assert.assertTrue(has);
         has = AuthenticationPredicate.has("permission:user-manager:test")
-                .and(AuthenticationPredicate.role("admin-role"))
+                .and(AuthenticationPredicate.dimension("role","admin-role"))
                 .test(authentication);
         Assert.assertFalse(has);
 
@@ -78,12 +78,12 @@ public class AuthenticationTests {
         Assert.assertTrue(has);
 
         //获取数据权限配置
-        Set<String> fields = authentication.getPermission("user-manager")
-                .map(permission -> permission.findDenyFields(Permission.ACTION_QUERY))
-                .orElseGet(Collections::emptySet);
+//        Set<String> fields = authentication.getPermission("user-manager")
+//                .map(permission -> permission.findDenyFields(Permission.ACTION_QUERY))
+//                .orElseGet(Collections::emptySet);
 
-        Assert.assertEquals(fields.size(), 3);
-        System.out.println(fields);
+//        Assert.assertEquals(fields.size(), 3);
+//        System.out.println(fields);
 
     }
 

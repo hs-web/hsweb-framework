@@ -3,13 +3,15 @@ package org.hswebframework.web.authorization.basic.aop;
 import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.web.aop.MethodInterceptorContext;
 import org.hswebframework.web.authorization.annotation.Authorize;
-import org.hswebframework.web.authorization.annotation.RequiresDataAccess;
-import org.hswebframework.web.authorization.annotation.RequiresExpression;
+import org.hswebframework.web.authorization.annotation.DataAccess;
+import org.hswebframework.web.authorization.annotation.Dimension;
 import org.hswebframework.web.authorization.basic.define.DefaultBasicAuthorizeDefinition;
 import org.hswebframework.web.authorization.basic.define.EmptyAuthorizeDefinition;
 import org.hswebframework.web.authorization.define.AuthorizeDefinition;
 import org.hswebframework.web.utils.AnnotationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 
@@ -71,67 +73,17 @@ public class DefaultAopMethodAuthorizeDefinitionParser implements AopMethodAutho
                 return definition;
             }
         }
-        Authorize classAuth = AnnotationUtils.findAnnotation(target, Authorize.class);
-        Authorize methodAuth = AnnotationUtils.findMethodAnnotation(target, method, Authorize.class);
 
-        RequiresDataAccess classDataAccess = AnnotationUtils.findAnnotation(target, RequiresDataAccess.class);
+        Authorize annotation = AnnotationUtils.findAnnotation(target, method, Authorize.class);
 
-        RequiresDataAccess methodDataAccess = AnnotationUtils.findMethodAnnotation(target, method, RequiresDataAccess.class);
-
-        RequiresExpression expression = AnnotationUtils.findAnnotation(target, RequiresExpression.class);
-
-        if (classAuth == null && methodAuth == null && classDataAccess == null && methodDataAccess == null && expression == null) {
-            cache.put(key, EmptyAuthorizeDefinition.instance);
-            return null;
-        }
-
-        if ((methodAuth != null && methodAuth.ignore()) || (classAuth != null && classAuth.ignore())) {
+        if (annotation != null && annotation.ignore()) {
             cache.put(key, EmptyAuthorizeDefinition.instance);
             return null;
         }
         synchronized (cache) {
-            DefaultBasicAuthorizeDefinition authorizeDefinition = new DefaultBasicAuthorizeDefinition();
-            authorizeDefinition.setTargetClass(target);
-            authorizeDefinition.setTargetMethod(method);
-            if (methodAuth == null || methodAuth.merge()) {
-                authorizeDefinition.put(classAuth);
-            }
-
-            authorizeDefinition.put(methodAuth);
-
-            authorizeDefinition.put(expression);
-
-            authorizeDefinition.put(classDataAccess);
-
-            authorizeDefinition.put(methodDataAccess);
-
-            if (authorizeDefinition.getPermissionDescription().length == 0) {
-                if (classAuth != null) {
-                    authorizeDefinition.put(classAuth.dataAccess());
-                    String[] desc = classAuth.description();
-                    if (desc.length > 0) {
-                        authorizeDefinition.setPermissionDescription(desc);
-                    }
-                }
-            }
-
-            if (authorizeDefinition.getActionDescription().length == 0) {
-                if (methodAuth != null) {
-                    if (methodAuth.description().length != 0) {
-                        authorizeDefinition.setActionDescription(methodAuth.description());
-                    }
-                }
-            }
-
-            log.info("parsed authorizeDefinition {}.{} => {}.{} permission:{} actions:{}",
-                    target.getSimpleName(),
-                    method.getName(),
-                    authorizeDefinition.getPermissionDescription(),
-                    authorizeDefinition.getActionDescription(),
-                    authorizeDefinition.getPermissions(),
-                    authorizeDefinition.getActions());
-            cache.put(key, authorizeDefinition);
-            return authorizeDefinition;
+            return cache.computeIfAbsent(key, (__) -> {
+                return DefaultBasicAuthorizeDefinition.from(target, method);
+            });
         }
     }
 
@@ -140,7 +92,7 @@ public class DefaultAopMethodAuthorizeDefinitionParser implements AopMethodAutho
     }
 
     class CacheKey {
-        private Class  type;
+        private Class type;
         private Method method;
 
         public CacheKey(Class type, Method method) {

@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hswebframework.web.authorization.DimensionType;
 
 import java.util.Map;
 
@@ -15,9 +16,11 @@ public class PermissionDimension {
 
     private String id;
 
+    private DimensionType dimensionType;
+
     private Map<String, Object> properties;
 
-    public static PermissionDimension of(String id) {
-        return of(id, null);
+    public static PermissionDimension of(String id, DimensionType dimensionType) {
+        return of(id, dimensionType, null);
     }
 }

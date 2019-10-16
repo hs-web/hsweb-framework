@@ -1,5 +1,7 @@
 package org.hswebframework.web.authorization.simple;
 
+import org.hswebframework.web.authorization.access.DataAccessType;
+import org.hswebframework.web.authorization.access.DefaultDataAccessType;
 import org.hswebframework.web.authorization.access.FieldFilterDataAccessConfig;
 
 import java.util.Arrays;
@@ -37,7 +39,7 @@ public class SimpleFieldFilterDataAccessConfig extends AbstractDataAccessConfig 
     }
 
     @Override
-    public String getType() {
-        return DENY_FIELDS;
+    public DataAccessType getType() {
+        return DefaultDataAccessType.FIELD_DENY;
     }
 }

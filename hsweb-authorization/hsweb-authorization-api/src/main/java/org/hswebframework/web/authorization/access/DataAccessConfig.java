@@ -28,7 +28,6 @@ import java.io.Serializable;
  * 具体的控制逻辑由控制器{@link DataAccessController}实现
  *
  * @author zhouhao
- * @see CustomDataAccessConfig
  * @see OwnCreatedDataAccessConfig
  */
 public interface DataAccessConfig extends Serializable {
@@ -51,7 +50,7 @@ public interface DataAccessConfig extends Serializable {
      * @return 控制方式
      * @see DefaultType
      */
-    String getType();
+    DataAccessType getType();
 
     /**
      * 内置的控制方式
@@ -77,11 +76,6 @@ public interface DataAccessConfig extends Serializable {
          */
         String DENY_FIELDS = "DENY_FIELDS";
 
-        /**
-         * 自定义控制器
-         *
-         * @see CustomDataAccessConfig#getType()
-         */
-        String CUSTOM = "CUSTOM";
+
     }
 }

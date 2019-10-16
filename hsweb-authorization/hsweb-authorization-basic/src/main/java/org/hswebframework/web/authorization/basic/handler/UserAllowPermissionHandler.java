@@ -12,16 +12,17 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.PathMatcher;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * <pre>
  *     hsweb:
  *        authorize:
  *            allows:
- *               users:
+ *               user:
  *                  admin: *
  *                  guest: **.query*
- *               roles:
+ *               role:
  *                  admin: *
  *
  * </pre>
@@ -53,26 +54,30 @@ public class UserAllowPermissionHandler {
                 .concat(context.getParamContext()
                         .getMethod().getName());
 
-        String userId = context.getAuthentication().getUser().getId();
-        boolean allow;
-        allow = Optional.ofNullable(allows.get("users"))
-                .map(users -> users.get(userId))
-                .filter(pattern -> "*".equals(pattern) || pathMatcher.match(pattern, path))
-                .isPresent();
-        if (allow) {
-            event.setAllow(true);
-            return;
+        AtomicBoolean allow = new AtomicBoolean();
+        for (Map.Entry<String, Map<String, String>> entry : allows.entrySet()) {
+            String dimension = entry.getKey();
+            if ("user".equals(dimension)) {
+                String userId = context.getAuthentication().getUser().getId();
+                allow.set(Optional.ofNullable(entry.getValue().get(userId))
+                        .filter(pattern -> "*".equals(pattern) || pathMatcher.match(pattern, path))
+                        .isPresent());
+            } else { //其他维度
+                for (Map.Entry<String, String> confEntry : entry.getValue().entrySet()) {
+                    context.getAuthentication()
+                            .getDimension(dimension, confEntry.getKey())
+                            .ifPresent(dim -> {
+                                String pattern = confEntry.getValue();
+                                allow.set("*".equals(pattern) || pathMatcher.match(confEntry.getValue(), path));
+                            });
+                }
+            }
+            if (allow.get()) {
+                event.setAllow(true);
+                return;
+            }
         }
-        allow = context.getAuthentication()
-                .getRoles()
-                .stream()
-                .map(role -> allows.getOrDefault("roles", Collections.emptyMap()).get(role.getId()))
-                .filter(Objects::nonNull)
-                .anyMatch(pattern -> "*".equals(pattern) || pathMatcher.match(pattern, path));
-        if (allow) {
-            event.setAllow(true);
-            return;
-        }
+
     }
 
 }

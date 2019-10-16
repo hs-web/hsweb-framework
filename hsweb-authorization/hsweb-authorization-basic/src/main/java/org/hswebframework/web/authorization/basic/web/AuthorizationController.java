@@ -26,6 +26,7 @@ import org.hswebframework.web.authorization.AuthenticationManager;
 import org.hswebframework.web.authorization.ReactiveAuthenticationManager;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.events.*;
+import org.hswebframework.web.authorization.exception.UnAuthorizedException;
 import org.hswebframework.web.authorization.simple.PlainTextUsernamePasswordAuthenticationRequest;
 import org.hswebframework.web.logging.AccessLogger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,29 +58,30 @@ public class AuthorizationController {
     @GetMapping("/me")
     @Authorize
     @ApiOperation("当前登录用户权限信息")
-    public Mono<Authentication> me(@ApiParam(hidden = true) Mono<Authentication> authentication) {
-        return authentication;
+    public Mono<Authentication> me() {
+        return Authentication.currentReactive()
+                .switchIfEmpty(Mono.error(UnAuthorizedException::new));
     }
 
     @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation("用户名密码登录,json方式")
     public Mono<Map<String, Object>> authorizeByJson(@ApiParam(example = "{\"username\":\"admin\",\"password\":\"admin\"}")
-                                                     @RequestBody Map<String, Object> parameter) {
-        return doLogin(Mono.just(parameter));
+                                                     @RequestBody Mono<Map<String, Object>> parameter) {
+        return doLogin(parameter);
     }
 
     @PostMapping(value = "/login", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     @ApiOperation("用户名密码登录,参数方式")
-    public Mono<Map<String, Object>> authorizeByUrlEncoded(@ApiParam(hidden = true) @RequestParam Mono<Map<String, Object>> parameter) {
+    public Mono<Map<String, Object>> authorizeByUrlEncoded(@ApiParam(hidden = true) @RequestParam Map<String, Object> parameter) {
 
-        return doLogin(parameter);
+        return doLogin(Mono.just(parameter));
     }
 
     /**
-     * <img src="https://raw.githubusercontent.com/hs-web/hsweb-framework/3.0.x/hsweb-authorization/hsweb-authorization-basic/img/autz-flow.png">
+     * <img src="https://raw.githubusercontent.com/hs-web/hsweb-framework/4.0.x/hsweb-authorization/hsweb-authorization-basic/img/autz-flow.png">
      */
     @SneakyThrows
-    protected Mono<Map<String, Object>> doLogin(Mono<Map<String, Object>> parameter) {
+    private Mono<Map<String, Object>> doLogin(Mono<Map<String, Object>> parameter) {
 
         return parameter.flatMap(parameters -> {
             String username = (String) parameters.get("username");

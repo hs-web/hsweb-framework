@@ -81,7 +81,7 @@ public class FieldFilterDataAccessHandler implements DataAccessHandler {
 
     @SuppressWarnings("all")
     protected boolean doQueryAccess(FieldFilterDataAccessConfig access, AuthorizingContext context) {
-        if (context.getDefinition().getDataAccessDefinition().getPhased() == Phased.before) {
+        if (context.getDefinition().getResources().getPhased() == Phased.before) {
             QueryParam entity = context.getParamContext().getParams()
                     .values().stream()
                     .filter(QueryParam.class::isInstance)

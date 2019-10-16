@@ -18,9 +18,6 @@
 
 package org.hswebframework.web.authorization.annotation;
 
-import org.hswebframework.web.authorization.Permission;
-import org.hswebframework.web.authorization.Role;
-import org.hswebframework.web.authorization.User;
 import org.hswebframework.web.authorization.define.Phased;
 
 import java.lang.annotation.*;
@@ -31,6 +28,10 @@ import java.lang.annotation.*;
  * @author zhouhao
  * @see org.hswebframework.web.authorization.Authentication
  * @see org.hswebframework.web.authorization.define.AuthorizeDefinition
+ * @see Resource
+ * @see ResourceAction
+ * @see Dimension
+ * @see DataAccess
  * @since 3.0
  */
 @Target({ElementType.TYPE, ElementType.METHOD})
@@ -39,44 +40,16 @@ import java.lang.annotation.*;
 @Documented
 public @interface Authorize {
 
-    /**
-     * 对角色授权,当使用按角色授权时，对模块以及操作级别授权方式失效
-     *
-     * @return 进 role id array
-     * @see Role#getId()
-     */
-    String[] role() default {};
+    Resource[] resources() default {};
 
-    /**
-     * 对模块授权
-     *
-     * @return permission id array
-     * @see Permission#getId()
-     */
-    String[] permission() default {};
-
-    /**
-     * 如增删改查等
-     *
-     * @return action array
-     * @see Permission#getActions()
-     */
-    String[] action() default {};
-
-    /**
-     * 验证是否为指定user
-     *
-     * @return username array
-     * @see User#getUsername()
-     */
-    String[] user() default {};
+    Dimension[] dimension() default {};
 
     /**
      * 验证失败时返回的消息
      *
      * @return 验证失败提示的消息
      */
-    String message() default "无权限";
+    String message() default "无访问权限";
 
     /**
      * 是否合并类上的注解
@@ -102,10 +75,6 @@ public @interface Authorize {
      */
     boolean ignore() default false;
 
-    /**
-     * @return 数据权限控制
-     */
-    RequiresDataAccess dataAccess() default @RequiresDataAccess(ignore = true);
 
     String[] description() default {};
 }

@@ -17,15 +17,13 @@
 
 package org.hswebframework.web.authorization;
 
-import java.io.Serializable;
-
 /**
  * 用户信息
  *
  * @author zhouhao
  * @since 3.0
  */
-public interface User extends Serializable {
+public interface User extends Dimension {
     /**
      * @return 用户ID
      */
@@ -44,5 +42,10 @@ public interface User extends Serializable {
     /**
      * @return 用户类型
      */
-    String getType();
+    String getUserType();
+
+    @Override
+    default DimensionType getType() {
+        return DefaultDimensionType.user;
+    }
 }

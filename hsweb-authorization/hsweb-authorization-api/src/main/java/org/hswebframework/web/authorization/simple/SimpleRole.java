@@ -1,7 +1,11 @@
 package org.hswebframework.web.authorization.simple;
 
 import lombok.*;
+import org.hswebframework.web.authorization.Dimension;
 import org.hswebframework.web.authorization.Role;
+
+import java.io.Serializable;
+import java.util.Map;
 
 /**
  * @author zhouhao
@@ -18,4 +22,14 @@ public class SimpleRole implements Role {
     private String id;
 
     private String name;
+
+    private Map<String, Object> options;
+
+    public static Role of(Dimension dimension) {
+        return SimpleRole.builder()
+                .name(dimension.getName())
+                .id(dimension.getId())
+                .options(dimension.getOptions())
+                .build();
+    }
 }

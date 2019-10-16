@@ -29,7 +29,7 @@ public class ValidationException extends BusinessException {
         if (null != violations && !violations.isEmpty()) {
             details = new ArrayList<>();
             for (ConstraintViolation<?> violation : violations) {
-                details.add(new Detail(violation.getPropertyPath().toString(), violation.getMessage()));
+                details.add(new Detail(violation.getPropertyPath().toString(), violation.getMessage(), null));
             }
         }
     }
@@ -41,5 +41,7 @@ public class ValidationException extends BusinessException {
         String property;
 
         String message;
+
+        Object detail;
     }
 }

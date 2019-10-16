@@ -1,6 +1,5 @@
 package org.hswebframework.web.authorization.basic.embed;
 
-import com.alibaba.fastjson.JSON;
 import lombok.Getter;
 import lombok.Setter;
 import org.hswebframework.web.authorization.Authentication;
@@ -77,9 +76,9 @@ public class EmbedAuthenticationInfo {
         user.setId(id);
         user.setName(name);
         user.setUsername(username);
-        user.setType(type);
+        user.setUserType(type);
         authentication.setUser(user);
-        authentication.setRoles((List) roles);
+        authentication.getDimensions().addAll(roles);
         List<Permission> permissionList = new ArrayList<>();
 
         permissionList.addAll(permissions.stream()

@@ -17,7 +17,8 @@
 
 package org.hswebframework.web.authorization;
 
-import java.io.Serializable;
+
+import org.hswebframework.web.authorization.simple.SimpleRole;
 
 /**
  * 角色信息
@@ -25,7 +26,7 @@ import java.io.Serializable;
  * @author zhouhao
  * @since 3.0
  */
-public interface Role extends Serializable {
+public interface Role extends Dimension {
 
     /**
      * @return 角色ID
@@ -36,4 +37,13 @@ public interface Role extends Serializable {
      * @return 角色名
      */
     String getName();
+
+    @Override
+    default DimensionType getType() {
+        return DefaultDimensionType.role;
+    }
+
+    static Role fromDimension(Dimension dimension){
+        return SimpleRole.of(dimension);
+    }
 }

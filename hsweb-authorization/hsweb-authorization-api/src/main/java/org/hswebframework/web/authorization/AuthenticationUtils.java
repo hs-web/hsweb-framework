@@ -13,11 +13,11 @@ public class AuthenticationUtils {
             return (authentication -> false);
         }
         AuthenticationPredicate main = null;
-        // permission:user:add or update
+        // resource:user:add or update
         AuthenticationPredicate temp = null;
         boolean lastAnd = true;
         for (String conf : expression.split("[ ]")) {
-            if (conf.startsWith("permission:")) {
+            if (conf.startsWith("resource:")||conf.startsWith("permission:")) {
                 String[] permissionAndActions = conf.split("[:]", 2);
                 if (permissionAndActions.length < 2) {
                     temp = authentication -> !authentication.getPermissions().isEmpty();
@@ -27,19 +27,19 @@ public class AuthenticationUtils {
                             AuthenticationPredicate.permission(real[0], real[1].split("[,]"))
                             : AuthenticationPredicate.permission(real[0]);
                 }
-            } else if (conf.startsWith("role")) {
-                String[] real = conf.split("[:]", 2);
-                if (real.length < 2) {
-                    temp = authentication -> !authentication.getRoles().isEmpty();
-                } else {
-                    temp = AuthenticationPredicate.role(real[1]);
-                }
             } else if (main != null && conf.equalsIgnoreCase("and")) {
                 lastAnd = true;
                 main = main.and(temp);
             } else if (main != null && conf.equalsIgnoreCase("or")) {
                 main = main.or(temp);
                 lastAnd = false;
+            } else {
+                String[] real = conf.split("[:]", 2);
+                if (real.length < 2) {
+                    temp = AuthenticationPredicate.dimension(real[0]);
+                } else {
+                    temp = AuthenticationPredicate.dimension(real[0], real[1].split(","));
+                }
             }
             if (main == null) {
                 main = temp;

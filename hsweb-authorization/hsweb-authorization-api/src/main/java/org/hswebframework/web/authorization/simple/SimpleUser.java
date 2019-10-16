@@ -3,6 +3,9 @@ package org.hswebframework.web.authorization.simple;
 import lombok.*;
 import org.hswebframework.web.authorization.User;
 
+import java.io.Serializable;
+import java.util.Map;
+
 /**
  * @author zhouhao
  */
@@ -20,6 +23,8 @@ public class SimpleUser implements User {
     private String username;
 
     private String name;
-    
-    private String type;
+
+    private String userType;
+
+    private Map<String, Object> options;
 }

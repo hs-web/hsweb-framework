@@ -14,7 +14,6 @@ import java.util.Objects;
 import java.util.function.BiFunction;
 
 import static org.hswebframework.web.authorization.access.DataAccessConfig.DefaultType.*;
-import static org.hswebframework.web.authorization.access.DataAccessConfig.DefaultType.CUSTOM;
 import static org.hswebframework.web.authorization.access.DataAccessConfig.DefaultType.OWN_CREATED;
 
 /**
@@ -23,7 +22,6 @@ import static org.hswebframework.web.authorization.access.DataAccessConfig.Defau
 public class SimpleDataAccessConfigBuilderFactory implements DataAccessConfigBuilderFactory {
 
     private List<String> defaultSupportConvert = Arrays.asList(
-            CUSTOM,
             OWN_CREATED,
             FIELD_SCOPE,
             DENY_FIELDS);
@@ -69,9 +67,7 @@ public class SimpleDataAccessConfigBuilderFactory implements DataAccessConfigBui
 
     @PostConstruct
     public void init() {
-        if (defaultSupportConvert.contains(FIELD_SCOPE)) {
-            converts.add(createJsonConfig(FIELD_SCOPE, SimpleFiledScopeDataAccessConfig.class));
-        }
+
 
         if (defaultSupportConvert.contains(DENY_FIELDS)) {
             converts.add(createJsonConfig(DENY_FIELDS, SimpleFieldFilterDataAccessConfig.class));
@@ -81,10 +77,6 @@ public class SimpleDataAccessConfigBuilderFactory implements DataAccessConfigBui
             converts.add(createConfig(OWN_CREATED, (action, config) -> new SimpleOwnCreatedDataAccessConfig(action)));
         }
 
-
-        if (defaultSupportConvert.contains(CUSTOM)) {
-            converts.add(createConfig(CUSTOM, (action, config) -> new SimpleCustomDataAccessConfigConfig(config)));
-        }
     }
 
     @Override

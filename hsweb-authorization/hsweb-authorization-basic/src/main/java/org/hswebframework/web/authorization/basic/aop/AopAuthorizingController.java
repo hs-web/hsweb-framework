@@ -56,12 +56,12 @@ public class AopAuthorizingController extends StaticMethodMatcherPointcutAdvisor
         return Authentication.currentReactive()
                 .switchIfEmpty(Mono.error(new UnAuthorizedException()))
                 .flatMap(auth -> {
-                    DataAccessDefinition dataAccessDefinition = definition.getDataAccessDefinition();
+                    ResourcesDefinition resources = definition.getResources();
 
                     context.setAuthentication(auth);
                     if (definition.getPhased() == Phased.before) {
                         authorizingHandler.handRBAC(context);
-                        if (dataAccessDefinition != null && dataAccessDefinition.getPhased() == Phased.before) {
+                        if (resources != null && resources.getPhased() == Phased.before) {
                             authorizingHandler.handleDataAccess(context);
                         } else {
                             return mono.doOnNext(res -> {
@@ -70,7 +70,7 @@ public class AopAuthorizingController extends StaticMethodMatcherPointcutAdvisor
                             });
                         }
                     } else {
-                        if (dataAccessDefinition != null && dataAccessDefinition.getPhased() == Phased.before) {
+                        if (resources != null && resources.getPhased() == Phased.before) {
                             authorizingHandler.handleDataAccess(context);
                             return mono.doOnNext(res -> {
                                 context.setParamContext(holder.createParamContext(res));
@@ -93,12 +93,12 @@ public class AopAuthorizingController extends StaticMethodMatcherPointcutAdvisor
         return Authentication.currentReactive()
                 .switchIfEmpty(Mono.error(new UnAuthorizedException()))
                 .flatMapMany(auth -> {
-                    DataAccessDefinition dataAccessDefinition = definition.getDataAccessDefinition();
+                    ResourcesDefinition resources = definition.getResources();
 
                     context.setAuthentication(auth);
                     if (definition.getPhased() == Phased.before) {
                         authorizingHandler.handRBAC(context);
-                        if (dataAccessDefinition != null && dataAccessDefinition.getPhased() == Phased.before) {
+                        if (resources != null && resources.getPhased() == Phased.before) {
                             authorizingHandler.handleDataAccess(context);
                         } else {
                             return flux.doOnNext(res -> {
@@ -108,7 +108,7 @@ public class AopAuthorizingController extends StaticMethodMatcherPointcutAdvisor
                         }
                     } else {
 
-                        if (dataAccessDefinition != null && dataAccessDefinition.getPhased() == Phased.before) {
+                        if (resources != null && resources.getPhased() == Phased.before) {
                             authorizingHandler.handleDataAccess(context);
                             return flux.doOnNext(res -> {
                                 context.setParamContext(holder.createParamContext(res));
@@ -155,9 +155,7 @@ public class AopAuthorizingController extends StaticMethodMatcherPointcutAdvisor
             isControl = true;
 
             Phased dataAccessPhased = null;
-            if (definition.getDataAccessDefinition() != null) {
-                dataAccessPhased = definition.getDataAccessDefinition().getPhased();
-            }
+            dataAccessPhased = definition.getResources().getPhased();
             if (definition.getPhased() == Phased.before) {
                 //RDAC before
                 authorizingHandler.handRBAC(context);
@@ -220,7 +218,8 @@ public class AopAuthorizingController extends StaticMethodMatcherPointcutAdvisor
     public void run(String... args) throws Exception {
         if (autoParse) {
             List<AuthorizeDefinition> definitions = defaultParser.getAllParsed()
-                    .stream().filter(def -> !def.isEmpty()).collect(Collectors.toList());
+                    .stream().filter(def -> !def.isEmpty())
+                    .collect(Collectors.toList());
             log.info("publish AuthorizeDefinitionInitializedEvent,definition size:{}", definitions.size());
             eventPublisher.publishEvent(new AuthorizeDefinitionInitializedEvent(definitions));
 

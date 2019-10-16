@@ -17,6 +17,7 @@
 
 package org.hswebframework.web.authorization.simple;
 
+import lombok.Getter;
 import org.hswebframework.web.authorization.*;
 
 import java.io.Serializable;
@@ -28,10 +29,11 @@ public class SimpleAuthentication implements Authentication {
 
     private User user;
 
-    private List<Role> roles;
-
     private List<Permission> permissions;
 
+    private List<Dimension> dimensions;
+
+    @Getter
     private Map<String, Serializable> attributes = new HashMap<>();
 
     @Override
@@ -43,47 +45,30 @@ public class SimpleAuthentication implements Authentication {
         this.user = user;
     }
 
-    public void setRoles(List<Role> roles) {
-        this.roles = roles;
-    }
-
     public void setPermissions(List<Permission> permissions) {
         this.permissions = permissions;
     }
 
     @Override
-    public List<Role> getRoles() {
-        return new ArrayList<>(roles);
+    public List<Permission> getPermissions() {
+        if (permissions == null) {
+            return permissions = new ArrayList<>();
+        }
+        return new ArrayList<>(permissions);
     }
 
     @Override
-    public List<Permission> getPermissions() {
-        if(permissions==null){
-            return Collections.emptyList();
+    public List<Dimension> getDimensions() {
+        if (dimensions == null) {
+            return dimensions = new ArrayList<>();
         }
-        return new ArrayList<>(permissions);
+        return dimensions;
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public <T extends Serializable> Optional<T> getAttribute(String name) {
         return Optional.ofNullable((T) attributes.get(name));
-    }
-
-    @Override
-    public void setAttribute(String name, Serializable object) {
-        attributes.put(name, object);
-    }
-
-    @Override
-    public void setAttributes(Map<String, Serializable> attributes) {
-        this.attributes.putAll(attributes);
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T extends Serializable> T removeAttributes(String name) {
-        return (T) attributes.remove(name);
     }
 
     @Override
