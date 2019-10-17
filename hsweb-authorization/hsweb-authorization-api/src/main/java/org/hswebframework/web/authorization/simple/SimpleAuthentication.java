@@ -18,53 +18,31 @@
 package org.hswebframework.web.authorization.simple;
 
 import lombok.Getter;
+import lombok.Setter;
 import org.hswebframework.web.authorization.*;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
+@Getter
+@Setter
 public class SimpleAuthentication implements Authentication {
 
     private static final long serialVersionUID = -2898863220255336528L;
 
     private User user;
 
-    private List<Permission> permissions;
+    private List<Permission> permissions = new ArrayList<>();
 
-    private List<Dimension> dimensions;
+    private List<Dimension> dimensions = new ArrayList<>();
 
-    @Getter
     private Map<String, Serializable> attributes = new HashMap<>();
 
-    @Override
-    public User getUser() {
-        return user;
+    public static Authentication of(){
+        return new SimpleAuthentication();
     }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public void setPermissions(List<Permission> permissions) {
-        this.permissions = permissions;
-    }
-
-    @Override
-    public List<Permission> getPermissions() {
-        if (permissions == null) {
-            return permissions = new ArrayList<>();
-        }
-        return new ArrayList<>(permissions);
-    }
-
-    @Override
-    public List<Dimension> getDimensions() {
-        if (dimensions == null) {
-            return dimensions = new ArrayList<>();
-        }
-        return dimensions;
-    }
-
     @Override
     @SuppressWarnings("unchecked")
     public <T extends Serializable> Optional<T> getAttribute(String name) {
@@ -74,5 +52,29 @@ public class SimpleAuthentication implements Authentication {
     @Override
     public Map<String, Serializable> getAttributes() {
         return attributes;
+    }
+
+    public SimpleAuthentication merge(Authentication authentication) {
+        Map<String, Permission> mePermissionGroup = permissions.stream()
+                .collect(Collectors.toMap(Permission::getId, Function.identity()));
+        user = authentication.getUser();
+        attributes.putAll(authentication.getAttributes());
+        for (Permission permission : authentication.getPermissions()) {
+            Permission me = mePermissionGroup.get(permission.getId());
+            if (me == null) {
+                permissions.add(permission.copy());
+                continue;
+            }
+            me.getActions().addAll(permission.getActions());
+            me.getDataAccesses().addAll(permission.getDataAccesses());
+        }
+
+
+        for (Dimension dimension : authentication.getDimensions()) {
+            if (!getDimension(dimension.getType(), dimension.getId()).isPresent()) {
+                dimensions.add(dimension);
+            }
+        }
+        return this;
     }
 }

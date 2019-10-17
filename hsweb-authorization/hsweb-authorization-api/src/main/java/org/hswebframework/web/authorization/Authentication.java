@@ -183,4 +183,6 @@ public interface Authentication extends Serializable {
      */
     Map<String, Serializable> getAttributes();
 
+    Authentication merge(Authentication source);
+
 }

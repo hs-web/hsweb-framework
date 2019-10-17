@@ -18,6 +18,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
@@ -33,15 +34,22 @@ public class DefaultAuthorizationAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(UserTokenManager.class)
-    @ConfigurationProperties(prefix = "hsweb.authorize")
+    @ConfigurationProperties(prefix = "hsweb.user-token")
     public UserTokenManager userTokenManager() {
         return new DefaultUserTokenManager();
     }
 
     @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnBean(ReactiveAuthenticationManagerProvider.class)
+    public ReactiveAuthenticationManager reactiveAuthenticationManager(List<ReactiveAuthenticationManagerProvider> providers) {
+        return new CompositeReactiveAuthenticationManager(providers);
+    }
+
+    @Bean
     @ConditionalOnBean(ReactiveAuthenticationManager.class)
     public UserTokenReactiveAuthenticationSupplier userTokenReactiveAuthenticationSupplier(UserTokenManager userTokenManager,
-                                                                                   ReactiveAuthenticationManager authenticationManager) {
+                                                                                           ReactiveAuthenticationManager authenticationManager) {
         UserTokenReactiveAuthenticationSupplier supplier = new UserTokenReactiveAuthenticationSupplier(userTokenManager, authenticationManager);
         ReactiveAuthenticationHolder.addSupplier(supplier);
         return supplier;

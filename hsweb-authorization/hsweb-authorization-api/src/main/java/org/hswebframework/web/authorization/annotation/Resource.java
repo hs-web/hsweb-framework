@@ -22,5 +22,7 @@ public @interface Resource {
 
     String[] description() default {};
 
+    String[] group() default {};
+
     boolean merge() default true;
 }

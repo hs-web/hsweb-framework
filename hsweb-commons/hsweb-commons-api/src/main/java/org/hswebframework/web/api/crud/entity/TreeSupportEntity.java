@@ -78,6 +78,13 @@ public interface TreeSupportEntity<PK> extends Entity {
         }
     }
 
+    static <T extends TreeSupportEntity<PK>, PK> List<T> expandTree2List(T parent, IDGenerator<PK> idGenerator) {
+        List<T> list = new LinkedList<>();
+        expandTree2List(parent, list, idGenerator);
+
+        return list;
+    }
+
     static <T extends TreeSupportEntity<PK>, PK> void expandTree2List(T parent, List<T> target, IDGenerator<PK> idGenerator) {
         expandTree2List(parent, target, idGenerator, null);
     }
@@ -95,18 +102,6 @@ public interface TreeSupportEntity<PK> extends Entity {
      * @param <PK>        主键类型
      */
     static <T extends TreeSupportEntity<PK>, PK> void expandTree2List(T root, List<T> target, IDGenerator<PK> idGenerator, BiConsumer<T, List<T>> childConsumer) {
-
-        if (CollectionUtils.isEmpty(root.getChildren())) {
-            target.add(root);
-            return;
-        }
-
-        //尝试设置id
-        PK parentId = root.getId();
-        if (parentId == null) {
-            parentId = idGenerator.generate();
-            root.setId(parentId);
-        }
         //尝试设置树路径path
         if (root.getPath() == null) {
             root.setPath(RandomUtil.randomChar(4));
@@ -121,6 +116,18 @@ public interface TreeSupportEntity<PK> extends Entity {
             if (null == index) {
                 sortableRoot.setSortIndex(1L);
             }
+        }
+
+        if (CollectionUtils.isEmpty(root.getChildren())) {
+            target.add(root);
+            return;
+        }
+
+        //尝试设置id
+        PK parentId = root.getId();
+        if (parentId == null) {
+            parentId = idGenerator.generate();
+            root.setId(parentId);
         }
 
         //所有节点处理队列
@@ -199,12 +206,13 @@ public interface TreeSupportEntity<PK> extends Entity {
         Objects.requireNonNull(childConsumer, "child consumer can not be null");
         Objects.requireNonNull(predicateFunction, "root predicate function can not be null");
 
-        Supplier<Stream<N>> streamSupplier = () -> dataList.size() < 50000 ? dataList.stream() : dataList.parallelStream();
+        Supplier<Stream<N>> streamSupplier = () -> dataList.stream();
         // id,node
         Map<PK, N> cache = new HashMap<>();
         // parentId,children
         Map<PK, List<N>> treeCache = streamSupplier.get()
                 .peek(node -> cache.put(node.getId(), node))
+                .filter(e -> e.getParentId() != null)
                 .collect(Collectors.groupingBy(TreeSupportEntity::getParentId));
 
         Predicate<N> rootNodePredicate = predicateFunction.apply(new TreeHelper<N, PK>() {

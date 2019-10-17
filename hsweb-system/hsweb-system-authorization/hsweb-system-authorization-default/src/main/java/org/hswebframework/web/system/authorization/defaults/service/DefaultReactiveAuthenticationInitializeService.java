@@ -3,16 +3,17 @@ package org.hswebframework.web.system.authorization.defaults.service;
 import org.apache.commons.collections.CollectionUtils;
 import org.hswebframework.ezorm.rdb.mapping.ReactiveRepository;
 import org.hswebframework.web.authorization.Authentication;
+import org.hswebframework.web.authorization.Dimension;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.ReactiveAuthenticationInitializeService;
 import org.hswebframework.web.authorization.access.DataAccessConfig;
+import org.hswebframework.web.authorization.access.DataAccessType;
 import org.hswebframework.web.authorization.builder.DataAccessConfigBuilderFactory;
 import org.hswebframework.web.authorization.simple.SimpleAuthentication;
 import org.hswebframework.web.authorization.simple.SimplePermission;
 import org.hswebframework.web.authorization.simple.SimpleUser;
 import org.hswebframework.web.authorization.simple.builder.SimpleDataAccessConfigBuilderFactory;
-import org.hswebframework.web.system.authorization.api.PermissionDimension;
-import org.hswebframework.web.system.authorization.api.PermissionDimensionProvider;
+import org.hswebframework.web.authorization.DimensionProvider;
 import org.hswebframework.web.system.authorization.api.entity.AuthorizationSettingEntity;
 import org.hswebframework.web.system.authorization.api.entity.PermissionEntity;
 import org.hswebframework.web.system.authorization.api.entity.UserEntity;
@@ -41,7 +42,7 @@ public class DefaultReactiveAuthenticationInitializeService
     private DataAccessConfigBuilderFactory builderFactory = new SimpleDataAccessConfigBuilderFactory();
 
     @Autowired(required = false)
-    private List<PermissionDimensionProvider> dimensionProviders = new ArrayList<>();
+    private List<DimensionProvider> dimensionProviders = new ArrayList<>();
 
     @Override
     public Mono<Authentication> initUserAuthorization(String userId) {
@@ -68,13 +69,14 @@ public class DefaultReactiveAuthenticationInitializeService
         return Flux.fromIterable(dimensionProviders)
                 .flatMap(provider -> provider.getDimensionByUserId(authentication.getUser().getId()))
                 .collectList()
+                .doOnNext(authentication::setDimensions)
                 .flatMap(allDimension -> Mono.zip(getAllPermission(),
                         settingRepository
                                 .createQuery()
                                 .where(AuthorizationSettingEntity::getState, 1)
                                 .in(AuthorizationSettingEntity::getDimension, allDimension
                                         .stream()
-                                        .map(PermissionDimension::getId)
+                                        .map(Dimension::getId)
                                         .collect(Collectors.toList()))
                                 .fetch()
                                 .collect(Collectors.groupingBy(AuthorizationSettingEntity::getPermission))
@@ -83,10 +85,11 @@ public class DefaultReactiveAuthenticationInitializeService
     }
 
     protected SimpleAuthentication handlePermission(SimpleAuthentication authentication,
-                                                    List<PermissionDimension> dimensionList,
+                                                    List<Dimension> dimensionList,
                                                     Map<String, PermissionEntity> permissions,
                                                     Map<String, List<AuthorizationSettingEntity>> settings) {
         List<Permission> permissionList = new ArrayList<>();
+
         for (PermissionEntity value : permissions.values()) {
             List<AuthorizationSettingEntity> permissionSettings = settings.get(value.getId());
             if (CollectionUtils.isEmpty(permissionSettings)) {
@@ -96,7 +99,7 @@ public class DefaultReactiveAuthenticationInitializeService
             SimplePermission permission = new SimplePermission();
             permission.setId(value.getId());
             permission.setName(value.getName());
-            Map<String, DataAccessConfig> configs = new HashMap<>();
+            Map<DataAccessType, DataAccessConfig> configs = new HashMap<>();
 
             for (AuthorizationSettingEntity permissionSetting : permissionSettings) {
 

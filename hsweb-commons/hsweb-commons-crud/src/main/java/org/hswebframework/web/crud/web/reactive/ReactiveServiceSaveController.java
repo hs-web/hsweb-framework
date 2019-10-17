@@ -1,21 +1,18 @@
 package org.hswebframework.web.crud.web.reactive;
 
-import org.hswebframework.ezorm.rdb.mapping.ReactiveRepository;
 import org.hswebframework.web.api.crud.entity.RecordCreationEntity;
 import org.hswebframework.web.api.crud.entity.RecordModifierEntity;
 import org.hswebframework.web.authorization.Authentication;
-import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.annotation.SaveAction;
+import org.hswebframework.web.crud.service.ReactiveCrudService;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
-import javax.validation.Valid;
-
-public interface ReactiveSaveController<E, K> {
+public interface ReactiveServiceSaveController<E,K>  {
 
     @Authorize(ignore = true)
-    ReactiveRepository<E, K> getRepository();
+    ReactiveCrudService<E,K> getService();
 
     @Authorize(ignore = true)
     default E applyCreationEntity(Authentication authentication, E entity) {
@@ -52,7 +49,7 @@ public interface ReactiveSaveController<E, K> {
         return Authentication.currentReactive()
                 .zipWith(payload, this::applyAuthentication)
                 .switchIfEmpty(payload)
-                .flatMap(entity -> getRepository().save(Mono.just(entity)).thenReturn(entity));
+                .flatMap(entity -> getService().save(Mono.just(entity)).thenReturn(entity));
     }
 
     @PostMapping
@@ -61,7 +58,7 @@ public interface ReactiveSaveController<E, K> {
         return  Authentication.currentReactive()
                 .zipWith(payload, this::applyAuthentication)
                 .switchIfEmpty(payload)
-                .flatMap(entity -> getRepository().insert(Mono.just(entity)).thenReturn(entity));
+                .flatMap(entity -> getService().insert(Mono.just(entity)).thenReturn(entity));
     }
 
     @PutMapping("/{id}")
@@ -70,6 +67,6 @@ public interface ReactiveSaveController<E, K> {
         return  Authentication.currentReactive()
                 .zipWith(payload, this::applyAuthentication)
                 .switchIfEmpty(payload)
-                .flatMap(entity -> getRepository().updateById(id,Mono.just(entity)).thenReturn(entity));
+                .flatMap(entity -> getService().updateById(id,Mono.just(entity)).thenReturn(entity));
     }
 }

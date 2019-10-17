@@ -7,13 +7,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.ezorm.core.DefaultValue;
 import org.hswebframework.ezorm.core.DefaultValueGenerator;
 import org.hswebframework.ezorm.rdb.metadata.RDBColumnMetadata;
+import org.hswebframework.web.id.IDGenerator;
 import reactor.core.publisher.Mono;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
-public class DefaultIdGenerator implements DefaultValueGenerator<RDBColumnMetadata> {
+public class DefaultIdGenerator implements DefaultValueGenerator<RDBColumnMetadata>  {
 
     @Getter
     @Setter
@@ -45,4 +46,5 @@ public class DefaultIdGenerator implements DefaultValueGenerator<RDBColumnMetada
     public String getName() {
         return "默认ID生成器";
     }
+
 }

@@ -20,4 +20,6 @@ public class MD5Generator implements DefaultValueGenerator<RDBColumnMetadata> {
     public String getName() {
         return "MD5";
     }
+
+
 }

@@ -6,6 +6,8 @@ import org.hswebframework.ezorm.rdb.mapping.defaults.SaveResult;
 import org.hswebframework.web.api.crud.entity.QueryParamEntity;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.annotation.Authorize;
+import org.hswebframework.web.authorization.annotation.QueryAction;
+import org.hswebframework.web.authorization.annotation.Resource;
 import org.hswebframework.web.exception.NotFoundException;
 import org.hswebframework.web.system.authorization.api.entity.PermissionEntity;
 import org.reactivestreams.Publisher;
@@ -18,14 +20,15 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/permission")
-@Authorize(permission = "permission", description = "权限管理")
+@Authorize
+@Resource(id = "permission",name = "权限管理",group = "system")
 public class WebFluxPermissionController {
 
     @Autowired
     private ReactiveRepository<PermissionEntity, String> repository;
 
     @GetMapping
-    @Authorize(action = Permission.ACTION_QUERY)
+    @QueryAction
     public Flux<PermissionEntity> findAllPermission(QueryParamEntity paramEntity) {
         return repository.createQuery()
                 .setParam(paramEntity)
@@ -33,7 +36,7 @@ public class WebFluxPermissionController {
     }
 
     @GetMapping("/{id}")
-    @Authorize(action = Permission.ACTION_QUERY)
+    @QueryAction
     public Mono<PermissionEntity> getPermission(@PathVariable String id) {
         return Mono.just(id)
                 .as(repository::findById)
@@ -41,7 +44,7 @@ public class WebFluxPermissionController {
     }
 
     @GetMapping("/count")
-    @Authorize(action = Permission.ACTION_QUERY)
+    @QueryAction
     public Mono<Integer> countAllPermission(QueryParamEntity paramEntity) {
         return repository.createQuery()
                 .setParam(paramEntity)
@@ -50,13 +53,13 @@ public class WebFluxPermissionController {
     }
 
     @PatchMapping
-    @Authorize(action = Permission.ACTION_UPDATE)
+    @QueryAction
     public Mono<SaveResult> savePermission(@RequestBody Publisher<PermissionEntity> paramEntity) {
         return repository.save(paramEntity);
     }
 
     @PutMapping("/status/{status}")
-    @Authorize(action = Permission.ACTION_UPDATE)
+    @QueryAction
     public Mono<Integer> changePermissionState(@PathVariable Byte status, @RequestBody List<String> idList) {
 
         return Mono.just(idList)

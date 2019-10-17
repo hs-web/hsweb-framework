@@ -17,18 +17,19 @@
 
 package org.hswebframework.web.authorization.basic.web;
 
-import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.SneakyThrows;
 import org.hswebframework.web.authorization.Authentication;
-import org.hswebframework.web.authorization.AuthenticationManager;
 import org.hswebframework.web.authorization.ReactiveAuthenticationManager;
 import org.hswebframework.web.authorization.annotation.Authorize;
-import org.hswebframework.web.authorization.events.*;
+import org.hswebframework.web.authorization.events.AuthorizationBeforeEvent;
+import org.hswebframework.web.authorization.events.AuthorizationDecodeEvent;
+import org.hswebframework.web.authorization.events.AuthorizationFailedEvent;
+import org.hswebframework.web.authorization.events.AuthorizationSuccessEvent;
 import org.hswebframework.web.authorization.exception.UnAuthorizedException;
+import org.hswebframework.web.authorization.simple.CompositeReactiveAuthenticationManager;
 import org.hswebframework.web.authorization.simple.PlainTextUsernamePasswordAuthenticationRequest;
-import org.hswebframework.web.logging.AccessLogger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.MediaType;
@@ -36,7 +37,6 @@ import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -45,15 +45,14 @@ import java.util.function.Function;
  */
 @RestController
 @RequestMapping("${hsweb.web.mappings.authorize:authorize}")
-@AccessLogger("授权")
-@Api(tags = "权限-用户授权", value = "授权")
 public class AuthorizationController {
 
-    @Autowired
-    private ReactiveAuthenticationManager authenticationManager;
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;
+
+    @Autowired
+    private ReactiveAuthenticationManager authenticationManager;
 
     @GetMapping("/me")
     @Authorize
@@ -65,6 +64,7 @@ public class AuthorizationController {
 
     @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation("用户名密码登录,json方式")
+    @Authorize(ignore = true)
     public Mono<Map<String, Object>> authorizeByJson(@ApiParam(example = "{\"username\":\"admin\",\"password\":\"admin\"}")
                                                      @RequestBody Mono<Map<String, Object>> parameter) {
         return doLogin(parameter);
@@ -72,6 +72,7 @@ public class AuthorizationController {
 
     @PostMapping(value = "/login", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     @ApiOperation("用户名密码登录,参数方式")
+    @Authorize(ignore = true)
     public Mono<Map<String, Object>> authorizeByUrlEncoded(@ApiParam(hidden = true) @RequestParam Map<String, Object> parameter) {
 
         return doLogin(Mono.just(parameter));
@@ -102,6 +103,7 @@ public class AuthorizationController {
                 // 验证通过
                 return authenticationManager
                         .authenticate(Mono.just(new PlainTextUsernamePasswordAuthenticationRequest(username, password)))
+                        .switchIfEmpty(Mono.error(() -> new IllegalArgumentException("密码错误")))
                         .map(auth -> {
                             //触发授权成功事件
                             AuthorizationSuccessEvent event = new AuthorizationSuccessEvent(auth, parameterGetter);

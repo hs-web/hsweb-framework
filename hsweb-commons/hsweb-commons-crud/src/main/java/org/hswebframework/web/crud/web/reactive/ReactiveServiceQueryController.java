@@ -1,12 +1,11 @@
 package org.hswebframework.web.crud.web.reactive;
 
 import org.hswebframework.ezorm.core.param.QueryParam;
-import org.hswebframework.ezorm.rdb.mapping.ReactiveRepository;
 import org.hswebframework.web.api.crud.entity.PagerResult;
 import org.hswebframework.web.api.crud.entity.QueryParamEntity;
-import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.annotation.QueryAction;
+import org.hswebframework.web.crud.service.ReactiveCrudService;
 import org.hswebframework.web.exception.NotFoundException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,15 +15,15 @@ import reactor.core.publisher.Mono;
 
 import java.util.Collections;
 
-public interface ReactiveQueryController<E, K> {
+public interface ReactiveServiceQueryController<E, K> {
 
     @Authorize(ignore = true)
-    ReactiveRepository<E, K> getRepository();
+    ReactiveCrudService<E, K> getService();
 
     @GetMapping("/_query/no-paging")
     @QueryAction
     default Flux<E> query(QueryParamEntity query) {
-        return getRepository()
+        return getService()
                 .createQuery()
                 .setParam(query)
                 .fetch();
@@ -39,7 +38,7 @@ public interface ReactiveQueryController<E, K> {
     @GetMapping("/_count")
     @QueryAction
     default Mono<Integer> count(QueryParamEntity query) {
-        return getRepository()
+        return getService()
                 .createQuery()
                 .setParam(query)
                 .count();
@@ -75,7 +74,7 @@ public interface ReactiveQueryController<E, K> {
     @GetMapping("/{id:.+}")
     @QueryAction
     default Mono<E> getById(@PathVariable K id) {
-        return getRepository()
+        return getService()
                 .findById(Mono.just(id))
                 .switchIfEmpty(Mono.error(NotFoundException::new));
     }

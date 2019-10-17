@@ -19,7 +19,7 @@ import java.util.Map;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PermissionEntity  extends GenericEntity<String> {
+public class PermissionEntity extends GenericEntity<String> {
 
     @Column
     @Comment("权限名称")

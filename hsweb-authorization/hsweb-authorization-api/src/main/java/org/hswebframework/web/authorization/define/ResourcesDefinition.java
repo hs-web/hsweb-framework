@@ -20,7 +20,6 @@ public class ResourcesDefinition {
 
     private Phased phased = Phased.before;
 
-
     public void addResource(ResourceDefinition resource, boolean merge) {
         ResourceDefinition definition = getResource(resource.getId()).orElse(null);
         if (definition != null) {
@@ -49,12 +48,19 @@ public class ResourcesDefinition {
     }
 
     public boolean hasPermission(Permission permission) {
+        if (CollectionUtils.isEmpty(resources)) {
+            return true;
+        }
         return getResource(permission.getId())
                 .filter(resource -> resource.hasAction(permission.getActions()))
                 .isPresent();
     }
 
     public boolean hasPermission(Collection<Permission> permissions) {
+
+        if (CollectionUtils.isEmpty(resources)) {
+            return true;
+        }
         if (CollectionUtils.isEmpty(permissions)) {
             return false;
         }

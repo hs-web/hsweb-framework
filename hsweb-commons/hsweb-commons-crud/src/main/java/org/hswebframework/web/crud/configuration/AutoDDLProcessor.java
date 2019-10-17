@@ -37,7 +37,6 @@ public class AutoDDLProcessor implements InitializingBean {
 
     private boolean reactive;
 
-
     @Override
     public void afterPropertiesSet() {
         if(entityFactory instanceof MapperEntityFactory){

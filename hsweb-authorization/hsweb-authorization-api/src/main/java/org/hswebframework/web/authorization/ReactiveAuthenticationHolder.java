@@ -18,6 +18,7 @@
 
 package org.hswebframework.web.authorization;
 
+import org.hswebframework.web.authorization.simple.SimpleAuthentication;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -53,9 +54,8 @@ public final class ReactiveAuthenticationHolder {
         return Flux.concat(suppliers.stream()
                 .map(function)
                 .collect(Collectors.toList()))
-                .reduceWith(CompositeAuthentication::new, CompositeAuthentication::merge)
-                .filter(CompositeAuthentication::isNotEmpty)
-                .map(Authentication.class::cast);
+                .reduceWith(SimpleAuthentication::new, Authentication::merge)
+                .filter(a -> a.getUser() != null);
     }
 
     /**

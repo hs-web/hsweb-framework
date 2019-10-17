@@ -42,4 +42,14 @@ public class SimplePermission implements Permission {
         }
         return dataAccesses;
     }
+
+    public Permission copy(){
+        SimplePermission permission =new SimplePermission();
+
+        permission.setId(id);
+        permission.setName(name);
+        permission.setActions(new HashSet<>(getActions()));
+        permission.setDataAccesses(new HashSet<>(getDataAccesses()));
+        return permission;
+    }
 }

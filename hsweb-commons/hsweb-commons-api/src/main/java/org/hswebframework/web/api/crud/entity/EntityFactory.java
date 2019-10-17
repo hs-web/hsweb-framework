@@ -97,7 +97,11 @@ public interface EntityFactory {
      * @param <T>         泛型
      * @return 实体类型
      */
-    <T> Class<T> getInstanceType(Class<T> entityClass);
+   default  <T> Class<T> getInstanceType(Class<T> entityClass){
+       return getInstanceType(entityClass,false);
+   }
+
+    <T> Class<T> getInstanceType(Class<T> entityClass,boolean autoRegister);
 
     /**
      * 拷贝对象的属性

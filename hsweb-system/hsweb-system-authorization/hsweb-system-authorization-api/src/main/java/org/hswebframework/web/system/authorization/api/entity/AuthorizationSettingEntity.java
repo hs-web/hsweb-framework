@@ -4,10 +4,14 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hswebframework.ezorm.rdb.mapping.annotation.ColumnType;
 import org.hswebframework.ezorm.rdb.mapping.annotation.Comment;
+import org.hswebframework.ezorm.rdb.mapping.annotation.DefaultValue;
 import org.hswebframework.ezorm.rdb.mapping.annotation.JsonCodec;
 import org.hswebframework.web.api.crud.entity.Entity;
+import org.hswebframework.web.validator.CreateGroup;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.sql.JDBCType;
 import java.util.List;
 import java.util.Set;
@@ -25,10 +29,12 @@ public class AuthorizationSettingEntity implements Entity {
 
     @Column(length = 32, nullable = false, updatable = false)
     @Comment("权限ID")
+    @NotBlank(message = "权限ID不能为空",groups = CreateGroup.class)
     private String permission;
 
-    @Column(length = 32, updatable = false)
+    @Column(length = 32, nullable = false,updatable = false)
     @Comment("维度")//如:user,role
+    @NotBlank(message = "维度不能为空",groups = CreateGroup.class)
     private String dimension;
 
     @Column(name = "dimension_name", length = 64)
@@ -37,6 +43,7 @@ public class AuthorizationSettingEntity implements Entity {
 
     @Column(name = "setting_target", length = 32, updatable = false)
     @Comment("维度目标")//具体的某个维度实例ID
+    @NotBlank(message = "维度目标不能为空",groups = CreateGroup.class)
     private String settingTarget;
 
     @Column(name = "setting_target_name", length = 64, updatable = false)
@@ -45,6 +52,7 @@ public class AuthorizationSettingEntity implements Entity {
 
     @Column(name = "state", nullable = false)
     @Comment("状态")
+    @NotNull(message = "状态不能为空",groups = CreateGroup.class)
     private Byte state;
 
     @Column
@@ -60,8 +68,10 @@ public class AuthorizationSettingEntity implements Entity {
     private List<DataAccessEntity> dataAccesses;
 
     @Column
+    @Comment("优先级")
     private Integer priority;
 
     @Column
+    @Comment("是否合并")
     private Boolean merge;
 }

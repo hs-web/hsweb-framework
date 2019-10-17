@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.AuthenticationRequest;
 import org.hswebframework.web.authorization.ReactiveAuthenticationManager;
+import org.hswebframework.web.authorization.ReactiveAuthenticationManagerProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -16,7 +17,7 @@ import reactor.core.publisher.Mono;
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @AllArgsConstructor
-public class EmbedReactiveAuthenticationManager implements ReactiveAuthenticationManager {
+public class EmbedReactiveAuthenticationManager implements ReactiveAuthenticationManagerProvider {
 
     private EmbedAuthenticationProperties properties;
 

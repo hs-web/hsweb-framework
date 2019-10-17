@@ -2,6 +2,7 @@ package org.hswebframework.web.authorization.basic.configuration;
 
 import org.hswebframework.web.authorization.AuthenticationManager;
 import org.hswebframework.web.authorization.ReactiveAuthenticationManager;
+import org.hswebframework.web.authorization.ReactiveAuthenticationManagerProvider;
 import org.hswebframework.web.authorization.access.DataAccessController;
 import org.hswebframework.web.authorization.access.DataAccessHandler;
 import org.hswebframework.web.authorization.basic.aop.AopMethodAuthorizeDefinitionParser;
@@ -99,8 +100,8 @@ public class AuthorizingHandlerAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(ReactiveAuthenticationManager.class)
-    public ReactiveAuthenticationManager embedAuthenticationManager(EmbedAuthenticationProperties properties) {
+//    @ConditionalOnMissingBean(ReactiveAuthenticationManager.class)
+    public ReactiveAuthenticationManagerProvider embedAuthenticationManager(EmbedAuthenticationProperties properties) {
         return new EmbedReactiveAuthenticationManager(properties);
     }
 

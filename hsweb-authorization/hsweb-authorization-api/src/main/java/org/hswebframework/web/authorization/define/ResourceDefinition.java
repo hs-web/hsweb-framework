@@ -20,6 +20,8 @@ public class ResourceDefinition {
 
     private List<ResourceActionDefinition> actions=new ArrayList<>();
 
+    private List<String> group;
+
     @Setter(value = AccessLevel.PRIVATE)
     private volatile Set<String> actionIds;
 

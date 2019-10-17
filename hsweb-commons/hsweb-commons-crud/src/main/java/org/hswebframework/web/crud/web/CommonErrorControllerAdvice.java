@@ -79,7 +79,7 @@ public class CommonErrorControllerAdvice {
                 .stream()
                 .filter(FieldError.class::isInstance)
                 .map(FieldError.class::cast)
-                .map(err -> new ValidationException.Detail(err.getField(), err.getDefaultMessage()))
+                .map(err -> new ValidationException.Detail(err.getField(), err.getDefaultMessage(),null))
                 .collect(Collectors.toList())));
     }
 
@@ -90,7 +90,7 @@ public class CommonErrorControllerAdvice {
                 .stream()
                 .filter(FieldError.class::isInstance)
                 .map(FieldError.class::cast)
-                .map(err -> new ValidationException.Detail(err.getField(), err.getDefaultMessage()))
+                .map(err -> new ValidationException.Detail(err.getField(), err.getDefaultMessage(),null))
                 .collect(Collectors.toList())));
     }
 
@@ -102,7 +102,7 @@ public class CommonErrorControllerAdvice {
                 .stream()
                 .filter(FieldError.class::isInstance)
                 .map(FieldError.class::cast)
-                .map(err -> new ValidationException.Detail(err.getField(), err.getDefaultMessage()))
+                .map(err -> new ValidationException.Detail(err.getField(), err.getDefaultMessage(),null))
                 .collect(Collectors.toList())));
     }
 
@@ -122,28 +122,28 @@ public class CommonErrorControllerAdvice {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Mono<ResponseMessage<?>> handleException(RuntimeException e) {
-        log.error(e.getMessage());
+        log.error(e.getMessage(), e);
         return Mono.just(ResponseMessage.error(e.getMessage()));
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Mono<ResponseMessage<?>> handleException(NullPointerException e) {
-        log.error(e.getMessage());
+        log.error(e.getMessage(), e);
         return Mono.just(ResponseMessage.error(e.getMessage()));
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Mono<ResponseMessage<?>> handleException(IllegalArgumentException e) {
-        log.error(e.getMessage());
-        return Mono.just(ResponseMessage.error("illegal_argument", e.getMessage()));
+        log.error(e.getMessage(), e);
+        return Mono.just(ResponseMessage.error(400,"illegal_argument", e.getMessage()));
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
     public Mono<ResponseMessage<?>> handleException(MediaTypeNotSupportedStatusException e) {
-        log.error(e.getMessage());
+        log.error(e.getMessage(), e);
         return Mono.just(ResponseMessage
                 .error(415, "unsupported_media_type", "不支持的请求类型")
                 .result(e.getSupportedMediaTypes()));

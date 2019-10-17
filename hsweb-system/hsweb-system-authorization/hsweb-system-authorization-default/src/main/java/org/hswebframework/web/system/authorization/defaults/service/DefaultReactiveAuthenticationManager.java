@@ -1,9 +1,6 @@
 package org.hswebframework.web.system.authorization.defaults.service;
 
-import org.hswebframework.web.authorization.Authentication;
-import org.hswebframework.web.authorization.AuthenticationRequest;
-import org.hswebframework.web.authorization.ReactiveAuthenticationInitializeService;
-import org.hswebframework.web.authorization.ReactiveAuthenticationManager;
+import org.hswebframework.web.authorization.*;
 import org.hswebframework.web.authorization.exception.AccessDenyException;
 import org.hswebframework.web.authorization.simple.PlainTextUsernamePasswordAuthenticationRequest;
 import org.hswebframework.web.system.authorization.api.entity.UserEntity;
@@ -13,7 +10,7 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cache.support.SimpleValueWrapper;
 import reactor.core.publisher.Mono;
 
-public class DefaultReactiveAuthenticationManager implements ReactiveAuthenticationManager {
+public class DefaultReactiveAuthenticationManager implements ReactiveAuthenticationManagerProvider {
 
     @Autowired
     private ReactiveUserService reactiveUserService;

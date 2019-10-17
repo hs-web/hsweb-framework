@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 public class AuthorizationWebAutoConfiguration {
 
 
-    @Configuration
+    @Configuration(proxyBeanMethods = false)
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
     public static class WebFluxAuthorizationConfiguration {
 

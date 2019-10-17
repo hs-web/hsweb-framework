@@ -62,7 +62,7 @@ public class EasyOrmConfiguration {
             @Override
             public EntityColumnMapping getMapping(Class entity) {
 
-                return resolver.resolve(entityFactory.getInstanceType(entity))
+                return resolver.resolve(entityFactory.getInstanceType(entity,true))
                         .getFeature(MappingFeatureType.columnPropertyMapping.createFeatureId(entity))
                         .map(EntityColumnMapping.class::cast)
                         .orElse(null);

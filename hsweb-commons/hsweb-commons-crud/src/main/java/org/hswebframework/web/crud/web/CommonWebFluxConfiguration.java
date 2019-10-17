@@ -1,5 +1,6 @@
 package org.hswebframework.web.crud.web;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
@@ -13,6 +14,7 @@ import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 public class CommonWebFluxConfiguration {
 
     @Bean
+    @ConditionalOnMissingBean
     public CommonErrorControllerAdvice commonErrorControllerAdvice(){
         return new CommonErrorControllerAdvice();
     }

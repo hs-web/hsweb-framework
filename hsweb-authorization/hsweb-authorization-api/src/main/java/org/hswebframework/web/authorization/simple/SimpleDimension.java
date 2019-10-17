@@ -1,6 +1,8 @@
 package org.hswebframework.web.authorization.simple;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hswebframework.web.authorization.Dimension;
 import org.hswebframework.web.authorization.DimensionType;
@@ -9,6 +11,8 @@ import java.util.Map;
 
 @Getter
 @Setter
+@AllArgsConstructor(staticName = "of")
+@NoArgsConstructor
 public class SimpleDimension implements Dimension {
 
     private String id;
@@ -19,11 +23,5 @@ public class SimpleDimension implements Dimension {
 
     private Map<String,Object> options;
 
-    public boolean typeIs(DimensionType type) {
-        return this.type == type || this.type.getId().equals(type.getId());
-    }
 
-    public boolean typeIs(String type) {
-        return this.type.getId().equals(type);
-    }
 }

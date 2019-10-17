@@ -91,15 +91,14 @@ public class DefaultReactiveUserService extends GenericReactiveCrudService<UserE
 
     }
 
-
     @Override
-    @Transactional(readOnly = true, transactionManager = "connectionFactoryTransactionManager")
+    @Transactional(readOnly = true, transactionManager = TransactionManagers.r2dbcTransactionManager)
     public Mono<UserEntity> findById(String id) {
         return getRepository().findById(Mono.just(id));
     }
 
     @Override
-    @Transactional(readOnly = true, transactionManager = "connectionFactoryTransactionManager")
+    @Transactional(readOnly = true, transactionManager = TransactionManagers.r2dbcTransactionManager)
     public Mono<UserEntity> findByUsername(String username) {
         return Mono.justOrEmpty(username)
                 .flatMap(_name -> repository.createQuery()
@@ -108,7 +107,7 @@ public class DefaultReactiveUserService extends GenericReactiveCrudService<UserE
     }
 
     @Override
-    @Transactional(readOnly = true, transactionManager = "connectionFactoryTransactionManager")
+    @Transactional(readOnly = true, transactionManager = TransactionManagers.r2dbcTransactionManager)
     public Mono<UserEntity> findByUsernameAndPassword(String username, String plainPassword) {
         return Mono.justOrEmpty(username)
                 .flatMap(_name -> repository
@@ -120,7 +119,7 @@ public class DefaultReactiveUserService extends GenericReactiveCrudService<UserE
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class, transactionManager = "connectionFactoryTransactionManager")
+    @Transactional(rollbackFor = Exception.class, transactionManager = TransactionManagers.r2dbcTransactionManager)
     public Mono<Integer> changeState(Publisher<String> userId, byte state) {
         return Flux.from(userId)
                 .collectList()
@@ -133,7 +132,7 @@ public class DefaultReactiveUserService extends GenericReactiveCrudService<UserE
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class, transactionManager = "connectionFactoryTransactionManager")
+    @Transactional(rollbackFor = Exception.class, transactionManager =TransactionManagers.r2dbcTransactionManager)
     public Mono<Boolean> changePassword(String userId, String oldPassword, String newPassword) {
         return findById(userId)
                 .switchIfEmpty(Mono.error(NotFoundException::new))
@@ -147,7 +146,7 @@ public class DefaultReactiveUserService extends GenericReactiveCrudService<UserE
     }
 
     @Override
-    @Transactional(readOnly = true, transactionManager = "connectionFactoryTransactionManager")
+    @Transactional(readOnly = true, transactionManager = TransactionManagers.r2dbcTransactionManager)
     public Flux<UserEntity> findUser(QueryParam queryParam) {
         return repository
                 .createQuery()
@@ -156,7 +155,7 @@ public class DefaultReactiveUserService extends GenericReactiveCrudService<UserE
     }
 
     @Override
-    @Transactional(readOnly = true, transactionManager = "connectionFactoryTransactionManager")
+    @Transactional(readOnly = true, transactionManager = TransactionManagers.r2dbcTransactionManager)
     public Mono<Integer> countUser(QueryParam queryParam) {
         return repository
                 .createQuery()

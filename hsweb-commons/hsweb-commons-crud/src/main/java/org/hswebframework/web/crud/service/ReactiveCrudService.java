@@ -42,26 +42,31 @@ public interface ReactiveCrudService<E, K> {
         return publisher.flatMap(e -> findById(Mono.just(e)));
     }
 
-    @Transactional(rollbackFor = Throwable.class)
+    @Transactional
     default Mono<SaveResult> save(Publisher<E> entityPublisher) {
         return getRepository()
                 .save(entityPublisher);
     }
 
-    @Transactional(rollbackFor = Throwable.class)
+    @Transactional
+    default Mono<Integer> updateById(K id, Mono<E> entityPublisher) {
+        return getRepository()
+                .updateById(id, entityPublisher);
+    }
+
+    @Transactional
     default Mono<Integer> insertBatch(Publisher<? extends Collection<E>> entityPublisher) {
         return getRepository()
                 .insertBatch(entityPublisher);
     }
 
-    @Transactional(rollbackFor = Throwable.class)
+    @Transactional
     default Mono<Integer> insert(Publisher<E> entityPublisher) {
         return getRepository()
                 .insert(entityPublisher);
     }
 
-
-    @Transactional(rollbackFor = Throwable.class)
+    @Transactional
     default Mono<Integer> deleteById(Publisher<K> idPublisher) {
         return getRepository()
                 .deleteById(idPublisher);

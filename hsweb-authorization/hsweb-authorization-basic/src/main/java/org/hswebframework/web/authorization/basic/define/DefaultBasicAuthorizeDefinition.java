@@ -159,6 +159,7 @@ public class DefaultBasicAuthorizeDefinition implements AopAuthorizeDefinition {
         for (ResourceAction action : ann.actions()) {
             putAnnotation(resource, action);
         }
+        resource.setGroup(new ArrayList<>(Arrays.asList(ann.group())));
         resources.addResource(resource, ann.merge());
     }
 

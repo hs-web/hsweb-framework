@@ -13,7 +13,7 @@
  *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
- *  
+ *
  */
 
 package org.hswebframework.web.crud.entity.factory;
@@ -37,9 +37,9 @@ import java.util.function.Supplier;
  */
 @SuppressWarnings("unchecked")
 public class MapperEntityFactory implements EntityFactory, BeanFactory {
-    private Map<Class, Mapper>          realTypeMapper = new HashMap<>();
-    private Logger                      logger         = LoggerFactory.getLogger(this.getClass());
-    private Map<String, PropertyCopier> copierCache    = new HashMap<>();
+    private Map<Class, Mapper> realTypeMapper = new HashMap<>();
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private Map<String, PropertyCopier> copierCache = new HashMap<>();
 
     private static final DefaultMapperFactory DEFAULT_MAPPER_FACTORY = clazz -> {
         String simpleClassName = clazz.getPackage().getName().concat(".Simple").concat(clazz.getSimpleName());
@@ -64,7 +64,7 @@ public class MapperEntityFactory implements EntityFactory, BeanFactory {
     public MapperEntityFactory() {
     }
 
-    public   MapperEntityFactory(Map<Class<?>, Mapper> realTypeMapper) {
+    public MapperEntityFactory(Map<Class<?>, Mapper> realTypeMapper) {
         this.realTypeMapper.putAll(realTypeMapper);
     }
 
@@ -175,19 +175,28 @@ public class MapperEntityFactory implements EntityFactory, BeanFactory {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T> Class<T> getInstanceType(Class<T> beanClass) {
+    public <T> Class<T> getInstanceType(Class<T> beanClass, boolean autoRegister) {
+        if (beanClass == null
+                || beanClass.isPrimitive()
+                || beanClass.isArray()
+                || beanClass.isEnum()) {
+            return null;
+        }
         Mapper<T> mapper = realTypeMapper.get(beanClass);
         if (null != mapper) {
             return mapper.getTarget();
         }
-        mapper = initCache(beanClass);
-        if (mapper != null) {
-            return mapper.getTarget();
-        }
+        if (autoRegister) {
+            mapper = initCache(beanClass);
+            if (mapper != null) {
+                return mapper.getTarget();
+            }
 
-        return Modifier.isAbstract(beanClass.getModifiers())
-                || Modifier.isInterface(beanClass.getModifiers())
-                ? null : beanClass;
+            return Modifier.isAbstract(beanClass.getModifiers())
+                    || Modifier.isInterface(beanClass.getModifiers())
+                    ? null : beanClass;
+        }
+        return null;
     }
 
     public void setDefaultMapperFactory(DefaultMapperFactory defaultMapperFactory) {
@@ -200,7 +209,7 @@ public class MapperEntityFactory implements EntityFactory, BeanFactory {
     }
 
     public static class Mapper<T> {
-        Class<T>    target;
+        Class<T> target;
         Supplier<T> instanceGetter;
 
         public Mapper(Class<T> target, Supplier<T> instanceGetter) {

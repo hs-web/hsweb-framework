@@ -17,7 +17,6 @@
 
 package org.hswebframework.web.authorization;
 
-import lombok.NonNull;
 import org.hswebframework.web.authorization.access.DataAccessConfig;
 import org.hswebframework.web.authorization.access.FieldFilterDataAccessConfig;
 import org.hswebframework.web.authorization.access.ScopeDataAccessConfig;
@@ -146,7 +145,6 @@ public interface Permission extends Serializable {
         return findDataAccess(conf -> FieldFilterDataAccessConfig.class.isInstance(conf) && conf.getAction().equals(action));
     }
 
-
     /**
      * 获取不能执行操作的字段
      *
@@ -199,7 +197,7 @@ public interface Permission extends Serializable {
                         && scopeType.equals(((ScopeDataAccessConfig) config).getScopeType());
     }
 
-
+    Permission copy();
     /**
      * 数据权限查找判断逻辑接口
      *
