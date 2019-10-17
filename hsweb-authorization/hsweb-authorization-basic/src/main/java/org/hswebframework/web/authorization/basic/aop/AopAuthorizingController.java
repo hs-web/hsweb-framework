@@ -43,7 +43,7 @@ public class AopAuthorizingController extends StaticMethodMatcherPointcutAdvisor
     @Autowired
     private AopMethodAuthorizeDefinitionParser aopMethodAuthorizeDefinitionParser;
 
-    private DefaultAopMethodAuthorizeDefinitionParser defaultParser = new DefaultAopMethodAuthorizeDefinitionParser();
+//    private DefaultAopMethodAuthorizeDefinitionParser defaultParser = new DefaultAopMethodAuthorizeDefinitionParser();
 
     private boolean autoParse = false;
 
@@ -209,7 +209,7 @@ public class AopAuthorizingController extends StaticMethodMatcherPointcutAdvisor
                 || AnnotationUtils.findAnnotation(aClass, method, Authorize.class) != null;
 
         if (support && autoParse) {
-            defaultParser.parse(aClass, method);
+            aopMethodAuthorizeDefinitionParser.parse(aClass, method);
         }
         return support;
     }
@@ -217,13 +217,14 @@ public class AopAuthorizingController extends StaticMethodMatcherPointcutAdvisor
     @Override
     public void run(String... args) throws Exception {
         if (autoParse) {
-            List<AuthorizeDefinition> definitions = defaultParser.getAllParsed()
-                    .stream().filter(def -> !def.isEmpty())
+            List<AuthorizeDefinition> definitions = aopMethodAuthorizeDefinitionParser.getAllParsed()
+                    .stream()
+                    .filter(def -> !def.isEmpty())
                     .collect(Collectors.toList());
             log.info("publish AuthorizeDefinitionInitializedEvent,definition size:{}", definitions.size());
             eventPublisher.publishEvent(new AuthorizeDefinitionInitializedEvent(definitions));
 
-            defaultParser.destroy();
+          //  defaultParser.destroy();
         }
     }
 

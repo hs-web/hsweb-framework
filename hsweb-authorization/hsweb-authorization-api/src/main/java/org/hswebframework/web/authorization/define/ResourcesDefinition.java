@@ -1,5 +1,6 @@
 package org.hswebframework.web.authorization.define;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
@@ -40,6 +41,7 @@ public class ResourcesDefinition {
                 .findAny();
     }
 
+    @JsonIgnore
     public List<ResourceDefinition> getDataAccessResources() {
         return resources
                 .stream()

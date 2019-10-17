@@ -25,7 +25,7 @@ public class EnumDictTest {
 
         String val = mapper.writer().writeValueAsString(new TestEntity());
 
-
+        System.out.println(val);
         TestEntity testEntity = mapper.readerFor(TestEntity.class)
                 .readValue(val);
 

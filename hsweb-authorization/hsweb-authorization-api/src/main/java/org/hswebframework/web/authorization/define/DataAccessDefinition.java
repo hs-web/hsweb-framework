@@ -13,7 +13,6 @@ public class DataAccessDefinition {
 
     List<DataAccessTypeDefinition> dataAccessTypes=new ArrayList<>();
 
-
     public Optional<DataAccessTypeDefinition> getType(String typeId){
         return dataAccessTypes
                 .stream()

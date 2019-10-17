@@ -1,5 +1,6 @@
 package org.hswebframework.web.authorization.basic.define;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.hswebframework.web.authorization.annotation.*;
 import org.hswebframework.web.authorization.define.*;
@@ -24,8 +25,11 @@ import java.util.stream.Collectors;
 @ToString
 public class DefaultBasicAuthorizeDefinition implements AopAuthorizeDefinition {
 
+    @JsonIgnore
     private Class targetClass;
 
+
+    @JsonIgnore
     private Method targetMethod;
 
     private ResourcesDefinition resources = new ResourcesDefinition();

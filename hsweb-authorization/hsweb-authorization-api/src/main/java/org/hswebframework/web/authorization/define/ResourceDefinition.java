@@ -1,5 +1,6 @@
 package org.hswebframework.web.authorization.define;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -18,22 +19,23 @@ public class ResourceDefinition {
 
     private String description;
 
-    private List<ResourceActionDefinition> actions=new ArrayList<>();
+    private List<ResourceActionDefinition> actions = new ArrayList<>();
 
     private List<String> group;
 
     @Setter(value = AccessLevel.PRIVATE)
+    @JsonIgnore
     private volatile Set<String> actionIds;
 
     private Logical logical = Logical.DEFAULT;
 
-    public void addAction(ResourceActionDefinition action){
+    public void addAction(ResourceActionDefinition action) {
         actions.add(action);
     }
 
-    public Optional<ResourceActionDefinition> getAction(String action){
+    public Optional<ResourceActionDefinition> getAction(String action) {
         return actions.stream()
-                .filter(act->act.getId().equalsIgnoreCase(action))
+                .filter(act -> act.getId().equalsIgnoreCase(action))
                 .findAny();
     }
 
@@ -47,15 +49,16 @@ public class ResourceDefinition {
         return actionIds;
     }
 
-    public List<ResourceActionDefinition> getDataAccessAction(){
+    @JsonIgnore
+    public List<ResourceActionDefinition> getDataAccessAction() {
         return actions.stream()
-                .filter(act->act.getDataAccess()!=null)
+                .filter(act -> CollectionUtils.isNotEmpty(act.getDataAccess().getDataAccessTypes()))
                 .collect(Collectors.toList());
     }
 
-    public boolean hasDataAccessAction(){
+    public boolean hasDataAccessAction() {
         return actions.stream()
-                .anyMatch(act->act.getDataAccess()!=null);
+                .anyMatch(act -> CollectionUtils.isNotEmpty(act.getDataAccess().getDataAccessTypes()));
     }
 
     public boolean hasAction(Collection<String> actions) {
