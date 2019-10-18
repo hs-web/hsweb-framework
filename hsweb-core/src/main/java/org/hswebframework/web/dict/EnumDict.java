@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.deser.std.EnumDeserializer;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.util.EnumResolver;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.web.exception.ValidationException;
 import org.springframework.beans.BeanUtils;
@@ -345,6 +346,7 @@ public interface EnumDict<V> extends JSONSerializable {
 
         @Override
         @SuppressWarnings("all")
+        @SneakyThrows
         public Object deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
             JsonNode node = jp.getCodec().readTree(jp);
 
@@ -356,22 +358,36 @@ public interface EnumDict<V> extends JSONSerializable {
             } else {
                 findPropertyType = BeanUtils.findPropertyType(currentName, currentValue.getClass());
             }
+            Supplier<ValidationException> exceptionSupplier = () -> {
+               List<Object> values= Stream.of(findPropertyType.getEnumConstants())
+                        .map(Enum.class::cast)
+                        .map(e->{
+                            if(e instanceof EnumDict){
+                                return ((EnumDict) e).getValue();
+                            }
+                            return e.name();
+                        }).collect(Collectors.toList());
 
+                return new ValidationException("参数[" + currentName + "]在选项中不存在",
+                        Arrays.asList(
+                                new ValidationException.Detail(currentName, "选项中不存在此值", values)
+                        ));
+            };
             if (EnumDict.class.isAssignableFrom(findPropertyType) && findPropertyType.isEnum()) {
                 if (node.isObject()) {
                     return (EnumDict) EnumDict
                             .findByValue(findPropertyType, node.get("value").textValue())
-                            .orElse(null);
+                            .orElseThrow(exceptionSupplier);
                 }
                 if (node.isNumber()) {
                     return (EnumDict) EnumDict
                             .find(findPropertyType, node.numberValue())
-                            .orElse(null);
+                            .orElseThrow(exceptionSupplier);
                 }
                 if (node.isTextual()) {
                     return (EnumDict) EnumDict
                             .find(findPropertyType, node.textValue())
-                            .orElse(null);
+                            .orElseThrow(exceptionSupplier);
                 }
                 throw new ValidationException("参数[" + currentName + "]在选项中不存在", Arrays.asList(
                         new ValidationException.Detail(currentName, "选项中不存在此值", null)
@@ -389,7 +405,7 @@ public interface EnumDict<V> extends JSONSerializable {
                             return false;
                         })
                         .findAny()
-                        .orElse(null);
+                        .orElseThrow(exceptionSupplier);
             }
 
             log.warn("unsupported deserialize enum json : {}", node);
