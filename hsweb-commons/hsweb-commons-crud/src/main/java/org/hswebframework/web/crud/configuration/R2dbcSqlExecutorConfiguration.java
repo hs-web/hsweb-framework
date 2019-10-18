@@ -18,8 +18,11 @@ import org.springframework.context.annotation.Configuration;
 public class R2dbcSqlExecutorConfiguration {
     @Bean
     @ConditionalOnMissingBean
-    public ReactiveSqlExecutor reactiveSqlExecutor() {
-        return new DefaultR2dbcExecutor();
+    public ReactiveSqlExecutor reactiveSqlExecutor(EasyormProperties properties) {
+        DefaultR2dbcExecutor executor = new DefaultR2dbcExecutor();
+        executor.setBindSymbol(properties.getDialect().getBindSymbol());
+        executor.setBindCustomSymbol(!executor.getBindSymbol().equals("?"));
+        return executor;
     }
 
     @Bean

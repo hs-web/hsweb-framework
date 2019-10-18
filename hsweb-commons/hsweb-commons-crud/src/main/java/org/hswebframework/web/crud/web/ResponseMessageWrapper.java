@@ -44,7 +44,9 @@ public class ResponseMessageWrapper extends ResponseBodyResultHandler {
     public Mono<Void> handleResult(ServerWebExchange exchange, HandlerResult result) {
         Object body = result.getReturnValue();
         if (body instanceof Mono) {
-            body = ((Mono) body).map(ResponseMessage::ok);
+            body = ((Mono) body)
+                    .switchIfEmpty(Mono.just(ResponseMessage.ok()))
+                    .map(ResponseMessage::ok);
         }
         if (body == null) {
             body = Mono.just(ResponseMessage.ok());

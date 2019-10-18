@@ -1,6 +1,5 @@
 package org.hswebframework.web.crud.web.reactive;
 
-import org.hswebframework.ezorm.core.param.QueryParam;
 import org.hswebframework.web.api.crud.entity.PagerResult;
 import org.hswebframework.web.api.crud.entity.QueryParamEntity;
 import org.hswebframework.web.authorization.annotation.Authorize;
@@ -13,7 +12,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.Collections;
 
 public interface ReactiveServiceQueryController<E, K> {
 
@@ -54,15 +52,7 @@ public interface ReactiveServiceQueryController<E, K> {
     @QueryAction
     @SuppressWarnings("all")
     default Mono<PagerResult<E>> queryPager(Mono<QueryParamEntity> query) {
-        return count(query)
-                .zipWhen(total -> {
-                    if (total == 0) {
-                        return Mono.just(Collections.<E>emptyList());
-                    }
-                    return query
-                            .map(QueryParam::clone)
-                            .flatMap(q -> query(Mono.just(q.rePaging(total))).collectList());
-                }, PagerResult::of);
+        return getService().queryPager(query);
     }
 
     @PostMapping("/_count")

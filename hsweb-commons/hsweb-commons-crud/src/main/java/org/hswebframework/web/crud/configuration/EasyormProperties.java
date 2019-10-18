@@ -73,31 +73,31 @@ public class EasyormProperties {
     @Getter
     @AllArgsConstructor
     public enum DialectEnum {
-        mysql(Dialect.MYSQL) {
+        mysql(Dialect.MYSQL,"?") {
             @Override
             public RDBSchemaMetadata createSchema(String name) {
                 return new MysqlSchemaMetadata(name);
             }
         },
-        mssql(Dialect.MSSQL) {
+        mssql(Dialect.MSSQL,"@arg") {
             @Override
             public RDBSchemaMetadata createSchema(String name) {
                 return new SqlServerSchemaMetadata(name);
             }
         },
-        oracle(Dialect.ORACLE) {
+        oracle(Dialect.ORACLE,"?") {
             @Override
             public RDBSchemaMetadata createSchema(String name) {
                 return new OracleSchemaMetadata(name);
             }
         },
-        postgres(Dialect.POSTGRES) {
+        postgres(Dialect.POSTGRES,"$") {
             @Override
             public RDBSchemaMetadata createSchema(String name) {
                 return new PostgresqlSchemaMetadata(name);
             }
         },
-        h2(Dialect.H2) {
+        h2(Dialect.H2,"$") {
             @Override
             public RDBSchemaMetadata createSchema(String name) {
                 return new H2SchemaMetadata(name);
@@ -105,7 +105,8 @@ public class EasyormProperties {
         },
         ;
 
-        Dialect dialect;
+        private Dialect dialect;
+        private String bindSymbol;
 
         public abstract RDBSchemaMetadata createSchema(String name);
     }
