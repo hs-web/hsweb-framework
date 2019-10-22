@@ -6,6 +6,7 @@ import org.hswebframework.web.authorization.ReactiveAuthenticationManager;
 import org.hswebframework.web.authorization.ReactiveAuthenticationManagerProvider;
 import org.hswebframework.web.system.authorization.api.UserDimensionProvider;
 import org.hswebframework.web.system.authorization.api.service.reactive.ReactiveUserService;
+import org.hswebframework.web.system.authorization.defaults.service.DefaultDimensionService;
 import org.hswebframework.web.system.authorization.defaults.service.DefaultReactiveAuthenticationInitializeService;
 import org.hswebframework.web.system.authorization.defaults.service.DefaultReactiveAuthenticationManager;
 import org.hswebframework.web.system.authorization.defaults.service.DefaultReactiveUserService;
@@ -37,6 +38,11 @@ public class AuthorizationServiceAutoConfiguration {
         @ConditionalOnBean(ReactiveUserService.class)
         public ReactiveAuthenticationInitializeService reactiveAuthenticationInitializeService() {
             return new DefaultReactiveAuthenticationInitializeService();
+        }
+
+        @Bean
+        public DefaultDimensionService defaultDimensionService() {
+            return new DefaultDimensionService();
         }
 
         @Bean

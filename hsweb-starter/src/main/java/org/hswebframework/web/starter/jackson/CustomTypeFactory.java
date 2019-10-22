@@ -15,9 +15,9 @@ public class CustomTypeFactory extends TypeFactory {
         this.entityFactory = factory;
     }
 
-    protected CustomTypeFactory(LRUMap<Object,JavaType> typeCache, TypeParser p,
-                          TypeModifier[] mods, ClassLoader classLoader){
-        super(typeCache,p,mods,classLoader);
+    protected CustomTypeFactory(LRUMap<Object, JavaType> typeCache, TypeParser p,
+                                TypeModifier[] mods, ClassLoader classLoader) {
+        super(typeCache, p, mods, classLoader);
     }
 
 
@@ -33,7 +33,7 @@ public class CustomTypeFactory extends TypeFactory {
 
     @Override
     public TypeFactory withModifier(TypeModifier mod) {
-        LRUMap<Object,JavaType> typeCache = _typeCache;
+        LRUMap<Object, JavaType> typeCache = _typeCache;
         TypeModifier[] mods;
         if (mod == null) { // mostly for unit tests
             mods = null;
@@ -41,7 +41,7 @@ public class CustomTypeFactory extends TypeFactory {
             //    in this case; can't recall why, but keeping the same
             typeCache = null;
         } else if (_modifiers == null) {
-            mods = new TypeModifier[] { mod };
+            mods = new TypeModifier[]{mod};
             // 29-Jul-2019, tatu: Actually I think we better clear cache in this case
             //    as well to ensure no leakage occurs (see [databind#2395])
             typeCache = null;
@@ -54,11 +54,11 @@ public class CustomTypeFactory extends TypeFactory {
 
     @Override
     protected JavaType _fromWellKnownInterface(ClassStack context, Class<?> rawType, TypeBindings bindings, JavaType superClass, JavaType[] superInterfaces) {
-        JavaType javaType= super._fromWellKnownInterface(context, rawType, bindings, superClass, superInterfaces);
-        if(javaType==null){
+        JavaType javaType = super._fromWellKnownInterface(context, rawType, bindings, superClass, superInterfaces);
+        if (javaType == null) {
             rawType = entityFactory.getInstanceType(rawType);
-            if(rawType!=null){
-                javaType =SimpleType.constructUnsafe(rawType);
+            if (rawType != null) {
+                javaType = SimpleType.constructUnsafe(rawType);
             }
         }
         return javaType;
@@ -67,18 +67,16 @@ public class CustomTypeFactory extends TypeFactory {
     @Override
     protected JavaType _fromWellKnownClass(ClassStack context, Class<?> rawType, TypeBindings bindings, JavaType superClass, JavaType[] superInterfaces) {
 
-        JavaType javaType= super._fromWellKnownClass(context, rawType, bindings, superClass, superInterfaces);
-        if(javaType==null){
+        JavaType javaType = super._fromWellKnownClass(context, rawType, bindings, superClass, superInterfaces);
+        if (javaType == null) {
             rawType = entityFactory.getInstanceType(rawType);
-            if(rawType!=null){
-                javaType =SimpleType.constructUnsafe(rawType);
+            if (rawType != null) {
+                javaType = SimpleType.constructUnsafe(rawType);
             }
         }
 
         return javaType;
     }
-
-
 
 
 }
