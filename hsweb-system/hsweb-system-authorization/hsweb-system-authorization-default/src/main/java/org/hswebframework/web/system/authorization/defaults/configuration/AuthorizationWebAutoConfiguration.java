@@ -1,5 +1,7 @@
 package org.hswebframework.web.system.authorization.defaults.configuration;
 
+import org.hswebframework.web.system.authorization.defaults.webflux.WebFluxAuthorizationSettingController;
+import org.hswebframework.web.system.authorization.defaults.webflux.WebFluxDimensionController;
 import org.hswebframework.web.system.authorization.defaults.webflux.WebFluxPermissionController;
 import org.hswebframework.web.system.authorization.defaults.webflux.WebFluxUserController;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -18,6 +20,17 @@ public class AuthorizationWebAutoConfiguration {
         public WebFluxPermissionController webFluxPermissionController() {
             return new WebFluxPermissionController();
         }
+
+        @Bean
+        public WebFluxAuthorizationSettingController webFluxAuthorizationSettingController() {
+            return new WebFluxAuthorizationSettingController();
+        }
+
+        @Bean
+        public WebFluxDimensionController webFluxDimensionController() {
+            return new WebFluxDimensionController();
+        }
+
 
         @Bean
         public WebFluxUserController webFluxUserController() {
