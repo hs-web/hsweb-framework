@@ -8,6 +8,7 @@ import org.hswebframework.web.crud.service.GenericReactiveCrudService;
 import org.hswebframework.web.crud.service.ReactiveTreeSortEntityService;
 import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.system.authorization.api.entity.DimensionEntity;
+import org.hswebframework.web.system.authorization.api.entity.DimensionTypeEntity;
 import org.hswebframework.web.system.authorization.api.entity.DimensionUserEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
@@ -24,6 +25,9 @@ public class DefaultDimensionService
 
     @Autowired
     private ReactiveRepository<DimensionUserEntity, String> dimensionUserRepository;
+
+    @Autowired
+    private ReactiveRepository<DimensionTypeEntity, String> dimensionTypeRepository;
 
     @Override
     public IDGenerator<String> getIDGenerator() {
@@ -43,9 +47,10 @@ public class DefaultDimensionService
 
     @Override
     public Flux<DimensionType> getAllType() {
-        return createQuery()
+        return dimensionTypeRepository
+                .createQuery()
                 .fetch()
-                .map(DynamicDimensionType::of);
+                .cast(DimensionType.class);
     }
 
     @Override
