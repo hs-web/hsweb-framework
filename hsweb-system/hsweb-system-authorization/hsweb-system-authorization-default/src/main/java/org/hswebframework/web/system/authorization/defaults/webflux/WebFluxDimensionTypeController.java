@@ -35,9 +35,10 @@ public class WebFluxDimensionTypeController implements ReactiveCrudController<Di
 
     @GetMapping("/all")
     @QueryAction
-    public Flux<DimensionType> findAllType() {
+    public Flux<DimensionTypeResponse> findAllType() {
         return Flux.fromIterable(dimensionProviders)
-                .flatMap(DimensionProvider::getAllType);
+                .flatMap(DimensionProvider::getAllType)
+                .map(DimensionTypeResponse::of);
     }
 
     @Override
