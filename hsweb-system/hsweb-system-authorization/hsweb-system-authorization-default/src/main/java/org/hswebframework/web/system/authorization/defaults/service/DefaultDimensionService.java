@@ -44,7 +44,6 @@ public class DefaultDimensionService
         return entity.getChildren();
     }
 
-
     @Override
     public Flux<DimensionType> getAllType() {
         return dimensionTypeRepository
@@ -55,13 +54,14 @@ public class DefaultDimensionService
 
     @Override
     public Flux<Dimension> getDimensionByUserId(String userId) {
-        return createQuery().fetch()
-                .map(DynamicDimensionType::of)
+        return getAllType()
                 .collect(Collectors.toMap(DimensionType::getId, Function.identity()))
-                .flatMapMany(typeGrouping -> dimensionUserRepository.createQuery()
-                        .where(DimensionUserEntity::getUserId, userId)
-                        .fetch()
-                        .map(entity -> DynamicDimension.of(entity, typeGrouping.get(entity.getDimensionId()))));
+                .flatMapMany(typeGrouping ->
+                        dimensionUserRepository
+                                .createQuery()
+                                .where(DimensionUserEntity::getUserId, userId)
+                                .fetch()
+                                .map(entity -> DynamicDimension.of(entity, typeGrouping.get(entity.getDimensionId()))));
 
     }
 
