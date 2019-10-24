@@ -38,6 +38,11 @@ public class AuthorizationWebAutoConfiguration {
         public WebFluxDimensionUserController webFluxDimensionUserController() {
             return new WebFluxDimensionUserController();
         }
+
+        @Bean
+        public WebFluxDimensionTypeController webFluxDimensionTypeController() {
+            return new WebFluxDimensionTypeController();
+        }
     }
 
 }
