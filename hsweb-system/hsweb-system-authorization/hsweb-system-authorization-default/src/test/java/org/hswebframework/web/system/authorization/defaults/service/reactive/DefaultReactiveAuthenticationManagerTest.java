@@ -68,6 +68,8 @@ public class DefaultReactiveAuthenticationManagerTest {
                     setting.setActions(Collections.singleton("add"));
                     setting.setDimension(entity.getId());
                     setting.setDimensionName("测试用户");
+                    setting.setSettingTarget("admin");
+                    setting.setSettingTargetName("admin");
                     setting.setState((byte) 1);
                     return setting;
                 })

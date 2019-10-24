@@ -30,6 +30,8 @@ public class EasyormProperties {
 
     private boolean allowAlter = false;
 
+    private boolean allowTypeAlter = true;
+
     private DialectEnum dialect = DialectEnum.h2;
 
     private Class<? extends Dialect> dialectType;
@@ -73,31 +75,31 @@ public class EasyormProperties {
     @Getter
     @AllArgsConstructor
     public enum DialectEnum {
-        mysql(Dialect.MYSQL,"?") {
+        mysql(Dialect.MYSQL, "?") {
             @Override
             public RDBSchemaMetadata createSchema(String name) {
                 return new MysqlSchemaMetadata(name);
             }
         },
-        mssql(Dialect.MSSQL,"@arg") {
+        mssql(Dialect.MSSQL, "@arg") {
             @Override
             public RDBSchemaMetadata createSchema(String name) {
                 return new SqlServerSchemaMetadata(name);
             }
         },
-        oracle(Dialect.ORACLE,"?") {
+        oracle(Dialect.ORACLE, "?") {
             @Override
             public RDBSchemaMetadata createSchema(String name) {
                 return new OracleSchemaMetadata(name);
             }
         },
-        postgres(Dialect.POSTGRES,"$") {
+        postgres(Dialect.POSTGRES, "$") {
             @Override
             public RDBSchemaMetadata createSchema(String name) {
                 return new PostgresqlSchemaMetadata(name);
             }
         },
-        h2(Dialect.H2,"$") {
+        h2(Dialect.H2, "$") {
             @Override
             public RDBSchemaMetadata createSchema(String name) {
                 return new H2SchemaMetadata(name);

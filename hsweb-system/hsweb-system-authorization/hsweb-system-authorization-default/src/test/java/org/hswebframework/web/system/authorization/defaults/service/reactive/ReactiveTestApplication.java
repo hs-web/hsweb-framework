@@ -1,5 +1,6 @@
 package org.hswebframework.web.system.authorization.defaults.service.reactive;
 
+import org.hswebframework.web.authorization.simple.DefaultAuthorizationAutoConfiguration;
 import org.hswebframework.web.crud.configuration.JdbcSqlExecutorConfiguration;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -9,7 +10,10 @@ import org.springframework.boot.autoconfigure.transaction.reactive.ReactiveTrans
          //TransactionAutoConfiguration.class,
         JdbcSqlExecutorConfiguration.class
 })
-@ImportAutoConfiguration(ReactiveTransactionAutoConfiguration.class)
+@ImportAutoConfiguration({
+        ReactiveTransactionAutoConfiguration.class,
+        DefaultAuthorizationAutoConfiguration.class
+})
 public class ReactiveTestApplication {
 
 

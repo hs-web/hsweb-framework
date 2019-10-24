@@ -23,4 +23,7 @@ public class WebFluxAuthorizationSettingController implements ReactiveCrudContro
     public ReactiveRepository<AuthorizationSettingEntity, String> getRepository() {
         return reactiveRepository;
     }
+
+
+
 }
