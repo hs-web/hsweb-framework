@@ -22,7 +22,7 @@ import java.util.Map;
 public class DimensionEntity extends GenericTreeSortSupportEntity<String> {
 
     @Comment("维度类型ID")
-    @Column(length = 32)
+    @Column(length = 32,name = "type_id")
     private String typeId;
 
     @Comment("维度名称")
