@@ -66,10 +66,10 @@ public class DefaultReactiveAuthenticationManagerTest {
                 .map(setting -> {
                     setting.setPermission("test");
                     setting.setActions(Collections.singleton("add"));
-                    setting.setDimension(entity.getId());
-                    setting.setDimensionName("测试用户");
-                    setting.setSettingTarget("admin");
-                    setting.setSettingTargetName("admin");
+                    setting.setDimensionType("user");
+                    setting.setDimensionTypeName("测试用户");
+                    setting.setDimensionTarget(entity.getId());
+                    setting.setDimensionTargetName("admin");
                     setting.setState((byte) 1);
                     return setting;
                 })

@@ -65,20 +65,24 @@ public class DefaultReactiveAuthenticationInitializeService
 
     }
 
+    protected Flux<AuthorizationSettingEntity> getSettings(List<Dimension> dimensions) {
+        return Flux.fromIterable(dimensions)
+                .groupBy(d -> d.getType().getId(), (Function<Dimension, Object>) Dimension::getId)
+                .flatMap(group -> group.collectList()
+                        .flatMapMany(list -> settingRepository
+                                .createQuery()
+                                .where(AuthorizationSettingEntity::getState, 1)
+                                .and(AuthorizationSettingEntity::getDimensionType, group.key())
+                                .in(AuthorizationSettingEntity::getDimensionTarget, list)
+                                .fetch()));
+    }
+
     protected Mono<Authentication> initPermission(SimpleAuthentication authentication) {
         return Flux.fromIterable(dimensionProviders)
                 .flatMap(provider -> provider.getDimensionByUserId(authentication.getUser().getId()))
                 .collectList()
                 .doOnNext(authentication::setDimensions)
-                .flatMap(allDimension -> Mono.zip(getAllPermission(),
-                        settingRepository
-                                .createQuery()
-                                .where(AuthorizationSettingEntity::getState, 1)
-                                .in(AuthorizationSettingEntity::getDimension, allDimension
-                                        .stream()
-                                        .map(Dimension::getId)
-                                        .collect(Collectors.toList()))
-                                .fetch()
+                .flatMap(allDimension -> Mono.zip(getAllPermission(), getSettings(allDimension)
                                 .collect(Collectors.groupingBy(AuthorizationSettingEntity::getPermission))
                         , (_p, _s) -> handlePermission(authentication, allDimension, _p, _s)));
 
