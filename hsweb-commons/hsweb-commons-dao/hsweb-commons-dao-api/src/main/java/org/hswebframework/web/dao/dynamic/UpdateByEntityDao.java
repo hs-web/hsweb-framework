@@ -19,6 +19,7 @@
 package org.hswebframework.web.dao.dynamic;
 
 import org.hswebframework.web.commons.entity.Entity;
+import org.hswebframework.web.dao.Dao;
 
 /**
  * 根据实体类进行更新,实体类支持动态条件或者普通实体类。
@@ -27,6 +28,6 @@ import org.hswebframework.web.commons.entity.Entity;
  * @author zhouhao
  * @since 3.0
  */
-public interface UpdateByEntityDao {
+public interface UpdateByEntityDao extends Dao {
     int update(Entity entity);
 }
