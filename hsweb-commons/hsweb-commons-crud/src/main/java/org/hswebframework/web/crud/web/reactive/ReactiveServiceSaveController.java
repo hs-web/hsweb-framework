@@ -54,7 +54,7 @@ public interface ReactiveServiceSaveController<E,K>  {
                 .as(getService()::save);
     }
 
-    @PostMapping("/batch")
+    @PostMapping("/_batch")
     @SaveAction
     default Mono<Integer> add(@RequestBody Flux<E> payload) {
 

@@ -7,6 +7,8 @@ import org.hswebframework.web.exception.BusinessException;
 import org.hswebframework.web.exception.NotFoundException;
 import org.hswebframework.web.exception.ValidationException;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.codec.DecodingException;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindException;
@@ -29,6 +31,7 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
 @Slf4j
+@Order
 public class CommonErrorControllerAdvice {
 
     @ExceptionHandler
@@ -123,6 +126,7 @@ public class CommonErrorControllerAdvice {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @Order
     public Mono<ResponseMessage<?>> handleException(RuntimeException e) {
         log.error(e.getMessage(), e);
         return Mono.just(ResponseMessage.error(e.getMessage()));
