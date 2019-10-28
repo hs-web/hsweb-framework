@@ -6,25 +6,15 @@ import org.hswebframework.web.authorization.annotation.Resource;
 import org.hswebframework.web.authorization.annotation.ResourceAction;
 import org.hswebframework.web.file.FileUploadProperties;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.http.codec.multipart.Part;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.channels.AsynchronousFileChannel;
-import java.nio.channels.Channels;
-import java.nio.channels.FileChannel;
-import java.nio.channels.ReadableByteChannel;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 
 @RestController
 @Resource(id = "file", name = "文件上传")

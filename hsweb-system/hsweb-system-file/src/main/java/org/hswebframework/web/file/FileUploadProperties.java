@@ -24,13 +24,13 @@ public class FileUploadProperties {
         String filePath = DateFormatter.toString(new Date(), "yyyyMMdd");
         String absPath = staticFilePath.concat("/").concat(filePath);
         //文件后缀
-        String suffix =  name.contains(".") ?
+        String suffix = name.contains(".") ?
                 name.substring(name.lastIndexOf(".")) : "";
 
         new File(absPath).mkdirs();
         StaticFileInfo info = new StaticFileInfo();
 
-        info.location = staticLocation + "/" + fileName + suffix;
+        info.location = staticLocation + "/" + filePath + "/" + fileName + suffix;
         info.savePath = absPath + "/" + fileName + suffix;
 
         return info;
