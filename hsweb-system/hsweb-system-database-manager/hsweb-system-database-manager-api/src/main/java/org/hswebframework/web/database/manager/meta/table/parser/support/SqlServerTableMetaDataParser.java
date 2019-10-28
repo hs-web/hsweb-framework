@@ -18,8 +18,9 @@ public class SqlServerTableMetaDataParser extends AbstractSqlTableMetaDataParser
             "left join sys.extended_properties p on c.id=p.major_id and c.colid=p.minor_id\n" +
             "WHERE c.id = object_id(#{table})";
 
-    private static String TABLE_COMMENT_SQL = "select cast(p.value as varchar(500)) as [comment] from sys.extended_properties p " +
-            " where p.major_id=object_id(#{table}) and p.minor_id=0";
+    private static String TABLE_COMMENT_SQL = "select o.name as [name], p.value as [comment] from sysobjects o " +
+            "left join sys.extended_properties p " +
+            "on p.major_id=object_id(o.name) and p.minor_id=0 where o.name=#{table} and o.xtype='U'";
 
     public SqlServerTableMetaDataParser(SqlExecutor sqlExecutor) {
         super(sqlExecutor, DatabaseType.sqlserver, DatabaseType.jtds_sqlserver);
