@@ -10,9 +10,12 @@ import java.util.Map;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(of = "action")
 public class ActionEntity implements Entity {
 
     private String action;
+
+    private String name;
 
     private String describe;
 

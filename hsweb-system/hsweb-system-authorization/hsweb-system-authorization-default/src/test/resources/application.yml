@@ -5,7 +5,12 @@ logging:
     org.springframework.data.r2dbc.connectionfactory: debug
 #spring:
 #  r2dbc:
-
+spring:
+  aop:
+    proxy-target-class: true
+hsweb:
+  authorize:
+    auto-parse: true
 easyorm:
   default-schema: PUBLIC
   dialect: h2

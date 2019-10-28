@@ -6,10 +6,7 @@ import org.hswebframework.web.authorization.ReactiveAuthenticationManagerProvide
 import org.hswebframework.web.authorization.simple.DefaultAuthorizationAutoConfiguration;
 import org.hswebframework.web.system.authorization.api.UserDimensionProvider;
 import org.hswebframework.web.system.authorization.api.service.reactive.ReactiveUserService;
-import org.hswebframework.web.system.authorization.defaults.service.DefaultDimensionService;
-import org.hswebframework.web.system.authorization.defaults.service.DefaultReactiveAuthenticationInitializeService;
-import org.hswebframework.web.system.authorization.defaults.service.DefaultReactiveAuthenticationManager;
-import org.hswebframework.web.system.authorization.defaults.service.DefaultReactiveUserService;
+import org.hswebframework.web.system.authorization.defaults.service.*;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -22,7 +19,7 @@ public class AuthorizationServiceAutoConfiguration {
 
     @Configuration(proxyBeanMethods = false)
     @AutoConfigureBefore(DefaultAuthorizationAutoConfiguration.class)
-    static class ReactiveAuthorizationServiceAutoConfiguration{
+    static class ReactiveAuthorizationServiceAutoConfiguration {
         @ConditionalOnBean(ReactiveRepository.class)
         @Bean
         public ReactiveUserService reactiveUserService() {
@@ -42,12 +39,17 @@ public class AuthorizationServiceAutoConfiguration {
         }
 
         @Bean
+        public PermissionSynchronization permissionSynchronization() {
+            return new PermissionSynchronization();
+        }
+
+        @Bean
         public DefaultDimensionService defaultDimensionService() {
             return new DefaultDimensionService();
         }
 
         @Bean
-        public UserDimensionProvider userPermissionDimensionProvider(){
+        public UserDimensionProvider userPermissionDimensionProvider() {
             return new UserDimensionProvider();
         }
     }

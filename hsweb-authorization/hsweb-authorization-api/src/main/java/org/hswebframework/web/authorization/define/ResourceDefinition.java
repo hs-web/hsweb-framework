@@ -2,16 +2,20 @@ package org.hswebframework.web.authorization.define;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
 import org.hswebframework.web.authorization.annotation.Logical;
+import org.hswebframework.web.bean.FastBeanCopier;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Getter
 @Setter
+@EqualsAndHashCode(of = "id")
 public class ResourceDefinition {
     private String id;
 
@@ -19,7 +23,7 @@ public class ResourceDefinition {
 
     private String description;
 
-    private List<ResourceActionDefinition> actions = new ArrayList<>();
+    private Set<ResourceActionDefinition> actions = new HashSet<>();
 
     private List<String> group;
 
@@ -29,8 +33,35 @@ public class ResourceDefinition {
 
     private Logical logical = Logical.DEFAULT;
 
-    public void addAction(ResourceActionDefinition action) {
+    public static ResourceDefinition of(String id, String name) {
+        ResourceDefinition definition = new ResourceDefinition();
+        definition.setId(id);
+        definition.setName(name);
+        return definition;
+    }
+
+    public ResourceDefinition copy() {
+        ResourceDefinition definition = FastBeanCopier.copy(this, ResourceDefinition::new);
+        definition.setActions(actions.stream().map(ResourceActionDefinition::copy).collect(Collectors.toSet()));
+        return definition;
+    }
+
+    public ResourceDefinition addAction(String id, String name) {
+        ResourceActionDefinition action = new ResourceActionDefinition();
+        action.setId(id);
+        action.setName(name);
+        return addAction(action);
+    }
+
+    public synchronized ResourceDefinition addAction(ResourceActionDefinition action) {
+        actionIds = null;
+        ResourceActionDefinition old = getAction(action.getId()).orElse(null);
+        if (old != null) {
+            old.getDataAccess().getDataAccessTypes()
+                    .addAll(action.getDataAccess().getDataAccessTypes());
+        }
         actions.add(action);
+        return this;
     }
 
     public Optional<ResourceActionDefinition> getAction(String action) {
