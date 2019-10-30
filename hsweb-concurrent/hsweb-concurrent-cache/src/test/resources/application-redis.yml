@@ -1,0 +1,5 @@
+hsweb:
+  cache:
+    redis:
+      local-cache-type: none
+    type: redis

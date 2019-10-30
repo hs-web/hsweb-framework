@@ -34,6 +34,7 @@
         <module>hsweb-commons</module>
         <module>hsweb-logging</module>
         <module>hsweb-tests</module>
+        <module>hsweb-concurrent</module>
     </modules>
 
     <packaging>pom</packaging>

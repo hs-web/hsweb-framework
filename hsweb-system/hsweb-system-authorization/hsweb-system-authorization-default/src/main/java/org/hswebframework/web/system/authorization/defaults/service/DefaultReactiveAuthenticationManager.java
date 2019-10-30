@@ -3,6 +3,7 @@ package org.hswebframework.web.system.authorization.defaults.service;
 import org.hswebframework.web.authorization.*;
 import org.hswebframework.web.authorization.exception.AccessDenyException;
 import org.hswebframework.web.authorization.simple.PlainTextUsernamePasswordAuthenticationRequest;
+import org.hswebframework.web.cache.ReactiveCacheManager;
 import org.hswebframework.web.system.authorization.api.entity.UserEntity;
 import org.hswebframework.web.system.authorization.api.service.reactive.ReactiveUserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +20,7 @@ public class DefaultReactiveAuthenticationManager implements ReactiveAuthenticat
     private ReactiveAuthenticationInitializeService initializeService;
 
     @Autowired(required = false)
-    private CacheManager cacheManager;
+    private ReactiveCacheManager cacheManager;
 
     @Override
     public Mono<Authentication> authenticate(Mono<AuthenticationRequest> request) {
@@ -38,14 +39,9 @@ public class DefaultReactiveAuthenticationManager implements ReactiveAuthenticat
 
         return Mono.justOrEmpty(userId)
                 .flatMap(_id -> Mono.justOrEmpty(cacheManager)
-                        .map(cm -> cm.getCache("user-auth"))
-                        .flatMap(cache -> Mono.justOrEmpty(cache.get(userId))
-                                .switchIfEmpty(initializeService.initUserAuthorization(_id)
-                                        .doOnNext(autz -> cache.put(userId, autz))
-                                        .map(SimpleValueWrapper::new)))
-                        .flatMap(valueWrapper -> Mono.justOrEmpty(valueWrapper.get())))
-                .cast(Authentication.class)
-                .switchIfEmpty(initializeService.initUserAuthorization(userId))
-                .cache();
+                        .map(cm -> cacheManager.<Authentication>getCache("user-auth"))
+                        .flatMap(cache -> cache.mono(userId).onCacheMissResume(() -> initializeService.initUserAuthorization(userId)))
+                        .cast(Authentication.class)
+                        .switchIfEmpty(initializeService.initUserAuthorization(userId)));
     }
 }
