@@ -52,6 +52,16 @@ public class AuthorizationServiceAutoConfiguration {
         public UserDimensionProvider userPermissionDimensionProvider() {
             return new UserDimensionProvider();
         }
+
+        @Bean
+        public DefaultDimensionUserService defaultDimensionUserService(){
+            return new DefaultDimensionUserService();
+        }
+
+        @Bean
+        public DefaultAuthorizationSettingService defaultAuthorizationSettingService(){
+            return new DefaultAuthorizationSettingService();
+        }
     }
 
 

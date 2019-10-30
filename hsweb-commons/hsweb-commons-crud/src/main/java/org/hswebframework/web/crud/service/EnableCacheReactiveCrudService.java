@@ -1,5 +1,6 @@
 package org.hswebframework.web.crud.service;
 
+import org.hswebframework.ezorm.rdb.mapping.ReactiveDelete;
 import org.hswebframework.ezorm.rdb.mapping.ReactiveUpdate;
 import org.hswebframework.ezorm.rdb.mapping.defaults.SaveResult;
 import org.hswebframework.web.cache.ReactiveCache;
@@ -56,6 +57,12 @@ public interface EnableCacheReactiveCrudService<E, K> extends ReactiveCrudServic
     @Override
     default ReactiveUpdate<E> createUpdate() {
         return ReactiveCrudService.super.createUpdate()
+                .onExecute(s -> s.doFinally((__) -> getCache().clear().subscribe()));
+    }
+
+    @Override
+    default ReactiveDelete createDelete() {
+        return ReactiveCrudService.super.createDelete()
                 .onExecute(s -> s.doFinally((__) -> getCache().clear().subscribe()));
     }
 }

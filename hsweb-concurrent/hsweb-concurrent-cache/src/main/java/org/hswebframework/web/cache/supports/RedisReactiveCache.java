@@ -7,8 +7,11 @@ import org.springframework.data.redis.core.ReactiveRedisOperations;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.function.Function;
+import java.util.stream.StreamSupport;
 
 @SuppressWarnings("all")
 public class RedisReactiveCache<E> implements ReactiveCache<E> {
@@ -73,7 +76,7 @@ public class RedisReactiveCache<E> implements ReactiveCache<E> {
                                 .then(localCache.put(key, data))
                                 .then(operations.convertAndSend(topicName, key));
 
-                    }) .then();
+                    }).then();
         }
         if (data instanceof Flux) {
             return ((Flux) data)
@@ -90,12 +93,37 @@ public class RedisReactiveCache<E> implements ReactiveCache<E> {
     }
 
     @Override
+    public Mono<Void> evictAll(Iterable<?> key) {
+        return operations.opsForHash()
+                .remove(redisKey, StreamSupport.stream(key.spliterator(), false).toArray())
+                .then(localCache.evictAll(key))
+                .flatMap(nil -> Flux.fromIterable(key).flatMap(k -> operations.convertAndSend(topicName, key)))
+                .then();
+    }
+
+    @Override
+    public Flux<E> getAll(Object... keys) {
+        if (keys.length == 0) {
+            return operations
+                    .opsForHash()
+                    .values(redisKey)
+                    .map(r -> (E) r);
+        }
+        return operations.opsForHash()
+                .multiGet(redisKey, Arrays.asList(keys))
+                .flatMapIterable(Function.identity())
+                .map(r -> (E) r);
+    }
+
+
+    @Override
     public Mono<Void> evict(Object key) {
         return operations
                 .opsForHash()
                 .remove(redisKey, key)
                 .then(localCache.evict(key))
-                .then(operations.convertAndSend(topicName, key));
+                .then(operations.convertAndSend(topicName, key))
+                .then();
     }
 
     @Override

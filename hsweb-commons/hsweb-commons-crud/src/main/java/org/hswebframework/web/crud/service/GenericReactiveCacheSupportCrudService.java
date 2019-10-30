@@ -22,7 +22,6 @@ public abstract class GenericReactiveCacheSupportCrudService<E, K> implements En
 
     protected ReactiveCache<E> cache;
 
-
     @Override
     public ReactiveCache<E> getCache() {
         if (cache != null) {

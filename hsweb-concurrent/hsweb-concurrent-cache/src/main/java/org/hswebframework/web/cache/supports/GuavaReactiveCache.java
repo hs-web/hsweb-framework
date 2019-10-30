@@ -7,6 +7,9 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Arrays;
+import java.util.Collection;
+
 @SuppressWarnings("all")
 @AllArgsConstructor
 public class GuavaReactiveCache<E> implements ReactiveCache<E> {
@@ -56,9 +59,22 @@ public class GuavaReactiveCache<E> implements ReactiveCache<E> {
     }
 
     @Override
+    public Mono<Void> evictAll(Iterable<?> key) {
+        return Mono.fromRunnable(() -> cache.invalidateAll(key));
+    }
+
+    @Override
     public Mono<Void> evict(Object key) {
         return Mono.fromRunnable(() -> cache.invalidate(key));
     }
+    @Override
+    public Flux<E> getAll(Object... keys) {
+        return Flux.<E>defer(() -> {
+            return Flux.fromIterable(cache.getAllPresent(Arrays.asList(keys)).values())
+                    .map(e -> (E) e);
+        });
+    }
+
 
     @Override
     public Mono<Void> clear() {

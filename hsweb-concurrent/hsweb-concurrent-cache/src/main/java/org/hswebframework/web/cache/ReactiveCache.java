@@ -6,6 +6,7 @@ import reactor.cache.CacheMono;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Collection;
 import java.util.function.Function;
 
 public interface ReactiveCache<E> {
@@ -17,6 +18,10 @@ public interface ReactiveCache<E> {
     Mono<Void> put(Object key, Publisher<E> data);
 
     Mono<Void> evict(Object key);
+
+    Flux<E> getAll(Object... keys);
+
+    Mono<Void> evictAll(Iterable<?> key);
 
     Mono<Void> clear();
 
