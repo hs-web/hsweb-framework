@@ -40,7 +40,8 @@ public interface ReactiveCrudService<E, K> {
 
     @Transactional(readOnly = true)
     default Flux<E> findById(Flux<K> publisher) {
-        return publisher.flatMap(e -> findById(Mono.just(e)));
+        return getRepository()
+                .findById(publisher);
     }
 
     @Transactional
