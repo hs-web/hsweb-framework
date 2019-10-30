@@ -4,8 +4,12 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.hswebframework.web.cache.ReactiveCache;
 import org.reactivestreams.Publisher;
+import reactor.cache.CacheFlux;
+import reactor.cache.CacheMono;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.function.Supplier;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class UnSupportedReactiveCache<E> implements ReactiveCache<E> {
@@ -39,5 +43,15 @@ public class UnSupportedReactiveCache<E> implements ReactiveCache<E> {
     @Override
     public Mono<Void> clear() {
         return Mono.empty();
+    }
+
+    @Override
+    public CacheMono.MonoCacheBuilderMapMiss<E> mono(Object key) {
+        return Supplier::get;
+    }
+
+    @Override
+    public CacheFlux.FluxCacheBuilderMapMiss<E> flux(Object key) {
+        return Supplier::get;
     }
 }

@@ -62,6 +62,6 @@ public class CaffeineReactiveCache<E> implements ReactiveCache<E> {
 
     @Override
     public Mono<Void> clear() {
-        return Mono.fromRunnable(() -> cache.cleanUp());
+        return Mono.fromRunnable(() -> cache.invalidateAll());
     }
 }
