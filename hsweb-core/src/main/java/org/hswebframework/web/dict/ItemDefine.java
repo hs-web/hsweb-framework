@@ -20,6 +20,5 @@ public interface ItemDefine extends EnumDict<String> {
         return getOrdinal();
     }
 
-    List<ItemDefine> getChildren();
 
 }

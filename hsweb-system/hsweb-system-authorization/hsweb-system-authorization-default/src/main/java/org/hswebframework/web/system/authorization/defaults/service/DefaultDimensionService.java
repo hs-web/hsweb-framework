@@ -40,11 +40,6 @@ public class DefaultDimensionService
     }
 
     @Override
-    public List<DimensionEntity> getChildren(DimensionEntity entity) {
-        return entity.getChildren();
-    }
-
-    @Override
     public Flux<DimensionType> getAllType() {
         return dimensionTypeRepository
                 .createQuery()

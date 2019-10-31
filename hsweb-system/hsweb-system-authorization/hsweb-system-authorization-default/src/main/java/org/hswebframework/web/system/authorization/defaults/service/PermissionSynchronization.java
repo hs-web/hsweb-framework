@@ -34,7 +34,7 @@ public class PermissionSynchronization implements CommandLineRunner {
                 .describe(definition.getDescription())
                 .status((byte) 1)
                 .build());
-
+        entity.setId(definition.getId());
 
         Map<String, ActionEntity> oldAction = new HashMap<>();
         if (entity.getActions() != null) {

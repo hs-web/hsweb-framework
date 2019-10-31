@@ -13,12 +13,6 @@ public enum TokenState implements EnumDict<String> {
     /**
      * 正常，有效
      */
-    @Deprecated
-    effective("effective", "正常"),
-
-    /**
-     * 正常，有效
-     */
     normal("normal","正常"),
 
     /**
