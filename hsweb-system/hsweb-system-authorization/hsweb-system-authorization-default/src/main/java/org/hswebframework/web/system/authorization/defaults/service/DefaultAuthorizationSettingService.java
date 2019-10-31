@@ -74,26 +74,27 @@ public class DefaultAuthorizationSettingService extends GenericReactiveCrudServi
     public ReactiveUpdate<AuthorizationSettingEntity> createUpdate() {
         ReactiveUpdate<AuthorizationSettingEntity> update = super.createUpdate();
 
-
-        return update.onExecute(r -> r.doOnSuccess(i -> {
-            createQuery()
-                    .setParam(update.toQueryParam())
-                    .fetch()
-                    .collectList()
-                    .subscribe(this::clearUserAuthCache);
-        }));
+        return update.onExecute(r ->
+                r.doOnSuccess(i -> {
+                    createQuery()
+                            .setParam(update.toQueryParam())
+                            .fetch()
+                            .collectList()
+                            .subscribe(this::clearUserAuthCache);
+                }));
     }
 
     @Override
     public ReactiveDelete createDelete() {
         ReactiveDelete delete = super.createDelete();
-        return delete.onExecute(r -> r.doOnSuccess(i -> {
-            createQuery()
-                    .setParam(delete.toQueryParam())
-                    .fetch()
-                    .collectList()
-                    .subscribe(this::clearUserAuthCache);
-        }));
+        return delete.onExecute(r ->
+                r.doOnSuccess(i -> {
+                    createQuery()
+                            .setParam(delete.toQueryParam())
+                            .fetch()
+                            .collectList()
+                            .subscribe(this::clearUserAuthCache);
+                }));
     }
 
     protected void clearUserAuthCache(List<AuthorizationSettingEntity> settings) {

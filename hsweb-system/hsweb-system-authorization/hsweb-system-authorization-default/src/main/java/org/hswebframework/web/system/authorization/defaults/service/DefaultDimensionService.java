@@ -61,7 +61,7 @@ public class DefaultDimensionService
                                 .createQuery()
                                 .where(DimensionUserEntity::getUserId, userId)
                                 .fetch()
-                                .map(entity -> DynamicDimension.of(entity, typeGrouping.get(entity.getDimensionId()))));
+                                .map(entity -> DynamicDimension.of(entity, typeGrouping.get(entity.getDimensionTypeId()))));
 
     }
 

@@ -67,7 +67,7 @@ public class DefaultReactiveAuthenticationInitializeService
 
     protected Flux<AuthorizationSettingEntity> getSettings(List<Dimension> dimensions) {
         return Flux.fromIterable(dimensions)
-                .groupBy(d -> d.getType().getId(), (Function<Dimension, Object>) Dimension::getId)
+                .groupBy(d -> d.getType() == null ? "unknown" : d.getType().getId(), (Function<Dimension, Object>) Dimension::getId)
                 .flatMap(group ->
                         group.collectList()
                                 .flatMapMany(list -> settingRepository
