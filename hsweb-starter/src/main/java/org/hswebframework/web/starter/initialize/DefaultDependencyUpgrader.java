@@ -13,13 +13,13 @@ import java.util.stream.Collectors;
  */
 public class DefaultDependencyUpgrader implements DependencyUpgrader {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
-    SystemVersion.Dependency  installed;
-    SystemVersion.Dependency  dependency;
+    Dependency installed;
+    Dependency  dependency;
     List<Map<String, Object>> shouldUpdateVersionList;
     private Map<String, Object> context;
     private boolean             firstInstall;
 
-    public DefaultDependencyUpgrader(SystemVersion.Dependency installed, SystemVersion.Dependency dependency, Map<String, Object> context) {
+    public DefaultDependencyUpgrader(Dependency installed, Dependency dependency, Map<String, Object> context) {
         this.firstInstall = installed == null;
         if (firstInstall) {
             this.installed = dependency;

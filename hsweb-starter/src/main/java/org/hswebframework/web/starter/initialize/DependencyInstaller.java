@@ -25,10 +25,10 @@ import java.util.Map;
  * @author zhouhao
  */
 public interface DependencyInstaller {
-    DependencyInstaller setup(SystemVersion.Dependency dependency);
+    DependencyInstaller setup(Dependency dependency);
 
     default DependencyInstaller setup(Map<String, Object> mapDependency) {
-        return setup(SystemVersion.Dependency.fromMap(mapDependency));
+        return setup(Dependency.fromMap(mapDependency));
     }
 
     DependencyInstaller onInstall(CallBack callBack);

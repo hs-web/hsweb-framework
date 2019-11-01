@@ -9,7 +9,7 @@ import java.util.Map;
  * @author zhouhao
  */
 public class SimpleDependencyInstaller implements DependencyInstaller {
-    SystemVersion.Dependency dependency;
+    Dependency dependency;
     CallBack installer;
     CallBack upgrader;
     CallBack unInstaller;
@@ -19,7 +19,7 @@ public class SimpleDependencyInstaller implements DependencyInstaller {
     public SimpleDependencyInstaller() {
     }
 
-    public SystemVersion.Dependency getDependency() {
+    public Dependency getDependency() {
         return dependency;
     }
 
@@ -47,7 +47,7 @@ public class SimpleDependencyInstaller implements DependencyInstaller {
         }
     }
 
-    public void doUpgrade(Map<String, Object> context, SystemVersion.Dependency installed) {
+    public void doUpgrade(Map<String, Object> context, Dependency installed) {
         DefaultDependencyUpgrader defaultDependencyUpgrader =
                 new DefaultDependencyUpgrader(installed, dependency, context);
         context.put("upgrader", defaultDependencyUpgrader);
@@ -57,7 +57,7 @@ public class SimpleDependencyInstaller implements DependencyInstaller {
     }
 
     @Override
-    public DependencyInstaller setup(SystemVersion.Dependency dependency) {
+    public DependencyInstaller setup(Dependency dependency) {
         this.dependency = dependency;
         return this;
     }

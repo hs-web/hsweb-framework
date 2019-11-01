@@ -13,7 +13,7 @@ public class AppProperties {
     private boolean      autoInit = true;
     private List<String> initTableExcludes;
 
-    private String name;
+    private String name = "default";
     private String comment;
     private String website;
     private String version;
