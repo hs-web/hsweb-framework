@@ -49,7 +49,7 @@ public class DictionaryEntity extends GenericEntity<String> implements RecordCre
     @Column(nullable = false)
     private String                     describe;
     //创建时间
-    @Column
+    @Column(name = "create_time")
     private Long                       createTime;
     //创建人id
     @Column(name = "creator_id")

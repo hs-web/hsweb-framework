@@ -34,6 +34,10 @@ public class PermissionEntity extends GenericEntity<String> {
     private Byte status;
 
     @Column
+    @Comment("类型")
+    private String type;
+
+    @Column
     @ColumnType(jdbcType = JDBCType.LONGVARCHAR)
     @JsonCodec
     @Comment("可选操作")
