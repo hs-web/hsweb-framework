@@ -22,7 +22,7 @@ import java.util.Set;
 @Data
 public class EasyormProperties {
 
-    private String defaultSchema;
+    private String defaultSchema="PUBLIC";
 
     private String[] schemas = {};
 

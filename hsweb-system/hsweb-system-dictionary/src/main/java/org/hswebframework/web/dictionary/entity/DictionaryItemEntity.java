@@ -33,7 +33,7 @@ import java.util.List;
 @Getter
 @Setter
 @Table(name = "s_dictionary_item",indexes = {
-        @Index(name = "idx_dic_item_dic_id",columnList = "dic_id"),
+        @Index(name = "idx_dic_item_dic_id",columnList = "dict_id"),
         @Index(name = "idx_dic_item_ordinal",columnList = "ordinal"),
         @Index(name = "idx_dic_item_path",columnList = "path")
 })
