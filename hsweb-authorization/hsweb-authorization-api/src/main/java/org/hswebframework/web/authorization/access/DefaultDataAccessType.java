@@ -2,6 +2,7 @@ package org.hswebframework.web.authorization.access;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.hswebframework.web.dict.Dict;
 import org.hswebframework.web.dict.EnumDict;
 
 @Getter

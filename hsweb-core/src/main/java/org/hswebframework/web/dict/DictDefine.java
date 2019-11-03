@@ -14,6 +14,6 @@ public interface DictDefine extends Serializable {
 
     String getComments();
 
-    List<EnumDict<Object>> getItems();
+    List<? extends EnumDict<?>> getItems();
 
 }

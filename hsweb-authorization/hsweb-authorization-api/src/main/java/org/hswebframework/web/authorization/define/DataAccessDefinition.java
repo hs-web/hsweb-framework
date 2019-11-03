@@ -3,20 +3,18 @@ package org.hswebframework.web.authorization.define;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Getter
 @Setter
 public class DataAccessDefinition {
 
-    List<DataAccessTypeDefinition> dataAccessTypes=new ArrayList<>();
+    Set<DataAccessTypeDefinition> dataAccessTypes=new HashSet<>();
 
     public Optional<DataAccessTypeDefinition> getType(String typeId){
         return dataAccessTypes
                 .stream()
-                .filter(datd->datd.getId().equalsIgnoreCase(typeId))
+                .filter(type->type.getId().equalsIgnoreCase(typeId))
                 .findAny();
     }
 }

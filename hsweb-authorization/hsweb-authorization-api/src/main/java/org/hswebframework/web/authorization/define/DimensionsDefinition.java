@@ -7,13 +7,15 @@ import org.hswebframework.web.authorization.Dimension;
 import org.hswebframework.web.authorization.annotation.Logical;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
 public class DimensionsDefinition {
 
-    private List<DimensionDefinition> dimensions = new ArrayList<>();
+    private Set<DimensionDefinition> dimensions = new HashSet<>();
 
     private Logical logical = Logical.DEFAULT;
 

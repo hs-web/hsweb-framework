@@ -32,9 +32,9 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
     default Mono<Integer> insertBatch(Publisher<? extends Collection<E>> entityPublisher) {
         return this.getRepository()
                 .insertBatch(Flux.from(entityPublisher)
-                .flatMap(Flux::fromIterable)
-                .flatMap(e -> Flux.fromIterable(TreeSupportEntity.expandTree2List(e, getIDGenerator())))
-                .collectList());
+                        .flatMap(Flux::fromIterable)
+                        .flatMap(e -> Flux.fromIterable(TreeSupportEntity.expandTree2List(e, getIDGenerator())))
+                        .collectList());
     }
 
     @Override
@@ -68,9 +68,11 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
 
     void setChildren(E entity, List<E> children);
 
-    List<E> getChildren(E entity);
+    default List<E> getChildren(E entity) {
+        return entity.getChildren();
+    }
 
-   default boolean isRootNode(E entity){
-       return StringUtils.isEmpty(entity.getParentId()) || "-1".equals(String.valueOf(entity.getParentId()));
-   }
+    default boolean isRootNode(E entity) {
+        return StringUtils.isEmpty(entity.getParentId()) || "-1".equals(String.valueOf(entity.getParentId()));
+    }
 }

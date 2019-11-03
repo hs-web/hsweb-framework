@@ -43,7 +43,7 @@ public class UserTokenManagerTests {
 
         Assert.assertEquals(userToken.getState(), TokenState.deny);
 
-        userTokenManager.changeUserState("admin", TokenState.effective).subscribe();
+        userTokenManager.changeUserState("admin", TokenState.normal).subscribe();
 
         Thread.sleep(1200);
 

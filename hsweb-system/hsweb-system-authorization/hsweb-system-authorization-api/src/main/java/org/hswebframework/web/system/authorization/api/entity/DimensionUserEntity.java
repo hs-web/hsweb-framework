@@ -18,10 +18,15 @@ import java.sql.JDBCType;
 @Setter
 @Table(name = "s_dimension_user", indexes = {
         @Index(name = "idx_dimsu_dimension_id", columnList = "dimension_id"),
+        @Index(name = "idx_dimsu_dimension_type_id", columnList = "dimension_type_id"),
         @Index(name = "idx_dimsu_user_id", columnList = "user_id"),
 
 })
 public class DimensionUserEntity extends GenericEntity<String> {
+
+    @Comment("维度类型ID")
+    @Column(name = "dimension_type_id", nullable = false, length = 32)
+    private String dimensionTypeId;
 
     @Comment("维度ID")
     @Column(name = "dimension_id", nullable = false, length = 32)

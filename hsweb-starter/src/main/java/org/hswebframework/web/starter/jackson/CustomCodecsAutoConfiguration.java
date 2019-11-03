@@ -27,10 +27,10 @@ public class CustomCodecsAutoConfiguration {
 		@Order(1)
 		@ConditionalOnBean(ObjectMapper.class)
 		CodecCustomizer jacksonDecoderCustomizer(EntityFactory entityFactory, ObjectMapper objectMapper) {
-			objectMapper.setTypeFactory(new CustomTypeFactory(entityFactory));
+		//	objectMapper.setTypeFactory(new CustomTypeFactory(entityFactory));
 			SimpleModule module = new SimpleModule();
-			JsonDeserializer<EnumDict> deserialize = new EnumDict.EnumDictJSONDeserializer();
-			module.addDeserializer(Enum.class, (JsonDeserializer) deserialize);
+			JsonDeserializer deserializer = new EnumDict.EnumDictJSONDeserializer();
+			module.addDeserializer(Enum.class,  deserializer);
 			objectMapper.registerModule(module);
 
 

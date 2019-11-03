@@ -55,15 +55,19 @@ public interface ReactiveQueryController<E, K> {
     @QueryAction
     @SuppressWarnings("all")
     default Mono<PagerResult<E>> queryPager(Mono<QueryParamEntity> query) {
-        return count(query)
-                .zipWhen(total -> {
-                    if (total == 0) {
-                        return Mono.just(Collections.<E>emptyList());
-                    }
-                    return query
-                            .map(QueryParam::clone)
-                            .flatMap(q -> query(Mono.just(q.rePaging(total))).collectList());
-                }, PagerResult::of);
+        return  query
+                .flatMap(param->{
+                    return getRepository().createQuery().setParam(param).count()
+                            .flatMap(total->{
+                                if (total == 0) {
+                                    return Mono.just(PagerResult.empty());
+                                }
+                                return query
+                                        .map(QueryParam::clone)
+                                        .flatMap(q -> query(Mono.just(q.rePaging(total))).collectList())
+                                        .map(list->PagerResult.of(total,list,param));
+                            });
+                });
     }
 
     @PostMapping("/_count")

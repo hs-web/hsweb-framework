@@ -13,6 +13,8 @@
     <packaging>pom</packaging>
     <modules>
         <module>hsweb-system-authorization</module>
+        <module>hsweb-system-file</module>
+        <module>hsweb-system-dictionary</module>
     </modules>
     <artifactId>hsweb-system</artifactId>
 

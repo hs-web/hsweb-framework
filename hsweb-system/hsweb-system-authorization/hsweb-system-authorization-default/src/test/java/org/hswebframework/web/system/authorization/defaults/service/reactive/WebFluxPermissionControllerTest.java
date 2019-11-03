@@ -5,11 +5,13 @@ import org.hswebframework.web.crud.configuration.EasyOrmConfiguration;
 import org.hswebframework.web.crud.configuration.JdbcSqlExecutorConfiguration;
 import org.hswebframework.web.crud.configuration.R2dbcSqlExecutorConfiguration;
 import org.hswebframework.web.system.authorization.api.entity.PermissionEntity;
+import org.hswebframework.web.system.authorization.defaults.configuration.AuthorizationServiceAutoConfiguration;
 import org.hswebframework.web.system.authorization.defaults.configuration.AuthorizationWebAutoConfiguration;
 import org.hswebframework.web.system.authorization.defaults.webflux.WebFluxPermissionController;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.data.r2dbc.R2dbcTransactionManagerAutoConfiguration;
 import org.springframework.boot.autoconfigure.r2dbc.ConnectionFactoryAutoConfiguration;
@@ -26,7 +28,9 @@ import reactor.core.publisher.Mono;
 @RunWith(SpringRunner.class)
 @WebFluxTest(WebFluxPermissionController.class)
 @ImportAutoConfiguration(value = {
-        AuthorizationWebAutoConfiguration.class, EasyOrmConfiguration.class,
+        AuthorizationWebAutoConfiguration.class,
+        AuthorizationServiceAutoConfiguration.class,
+        EasyOrmConfiguration.class,
         R2dbcSqlExecutorConfiguration.class, ConnectionFactoryAutoConfiguration.class,
         R2dbcTransactionManagerAutoConfiguration.class,
         ReactiveTransactionAutoConfiguration.class
@@ -34,7 +38,8 @@ import reactor.core.publisher.Mono;
         JdbcSqlExecutorConfiguration.class,
         TransactionAutoConfiguration.class
 })
-@EnableTransactionManagement
+@EnableTransactionManagement(proxyTargetClass = true)
+@EnableAutoConfiguration
 public class WebFluxPermissionControllerTest {
 
     @Autowired

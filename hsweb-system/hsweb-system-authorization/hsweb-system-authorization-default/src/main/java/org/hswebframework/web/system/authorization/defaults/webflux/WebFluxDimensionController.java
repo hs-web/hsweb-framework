@@ -1,6 +1,8 @@
 package org.hswebframework.web.system.authorization.defaults.webflux;
 
 import org.hswebframework.web.api.crud.entity.QueryParamEntity;
+import org.hswebframework.web.authorization.DimensionProvider;
+import org.hswebframework.web.authorization.DimensionType;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.annotation.QueryAction;
 import org.hswebframework.web.authorization.annotation.Resource;
@@ -18,8 +20,9 @@ import java.util.List;
 @RestController
 @RequestMapping("/dimension")
 @Authorize
-@Resource(id = "dimension",name = "权限维度管理",group = "system")
+@Resource(id = "dimension", name = "权限维度管理", group = "system")
 public class WebFluxDimensionController implements ReactiveServiceCrudController<DimensionEntity, String> {
+
 
     @Autowired
     private DefaultDimensionService defaultDimensionService;
@@ -34,4 +37,5 @@ public class WebFluxDimensionController implements ReactiveServiceCrudController
     public DefaultDimensionService getService() {
         return defaultDimensionService;
     }
+
 }

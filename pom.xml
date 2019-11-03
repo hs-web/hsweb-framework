@@ -34,6 +34,7 @@
         <module>hsweb-commons</module>
         <module>hsweb-logging</module>
         <module>hsweb-tests</module>
+        <module>hsweb-concurrent</module>
     </modules>
 
     <packaging>pom</packaging>
@@ -79,7 +80,7 @@
         <java.version>1.8</java.version>
         <project.build.jdk>${java.version}</project.build.jdk>
 
-        <spring.boot.version>2.2.0.RC1</spring.boot.version>
+        <spring.boot.version>2.2.0.RELEASE</spring.boot.version>
 
         <javassist.version>3.20.0-GA</javassist.version>
         <activiti.version>5.19.0.2</activiti.version>
@@ -272,6 +273,11 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-context-indexer</artifactId>
 <!--            <scope>provided</scope>-->
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.codehaus.groovy</groupId>

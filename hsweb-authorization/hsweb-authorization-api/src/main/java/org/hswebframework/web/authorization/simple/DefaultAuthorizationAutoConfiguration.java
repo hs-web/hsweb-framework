@@ -41,7 +41,7 @@ public class DefaultAuthorizationAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    @ConditionalOnBean(ReactiveAuthenticationManagerProvider.class)
+//    @ConditionalOnBean(ReactiveAuthenticationManagerProvider.class)
     public ReactiveAuthenticationManager reactiveAuthenticationManager(List<ReactiveAuthenticationManagerProvider> providers) {
         return new CompositeReactiveAuthenticationManager(providers);
     }

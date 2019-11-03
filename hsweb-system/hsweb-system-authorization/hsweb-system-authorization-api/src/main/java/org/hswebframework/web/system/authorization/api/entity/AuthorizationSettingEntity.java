@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Set;
 
 @Table(name = "s_autz_setting_info", indexes = {
-        @Index(name = "idx_sasi_dss", columnList = "dimension,setting_target,state desc")
+        @Index(name = "idx_sasi_dss", columnList = "dimension_type,dimension_target,state desc")
 })
 @Getter
 @Setter
@@ -32,23 +32,23 @@ public class AuthorizationSettingEntity implements Entity {
     @NotBlank(message = "权限ID不能为空",groups = CreateGroup.class)
     private String permission;
 
-    @Column(length = 32, nullable = false,updatable = false)
-    @Comment("维度")//如:user,role
+    @Column(name = "dimension_type",length = 32, nullable = false,updatable = false)
+    @Comment("维度类型")//如:user,role
     @NotBlank(message = "维度不能为空",groups = CreateGroup.class)
-    private String dimension;
+    private String dimensionType;
 
-    @Column(name = "dimension_name", length = 64)
-    @Comment("维度名称")//如:用户,角色
-    private String dimensionName;
+    @Column(name = "dimension_type_name", length = 64)
+    @Comment("维度类型名称")//如:用户,角色
+    private String dimensionTypeName;
 
-    @Column(name = "setting_target", length = 32, updatable = false)
+    @Column(name = "dimension_target", length = 32, updatable = false)
     @Comment("维度目标")//具体的某个维度实例ID
     @NotBlank(message = "维度目标不能为空",groups = CreateGroup.class)
-    private String settingTarget;
+    private String dimensionTarget;
 
-    @Column(name = "setting_target_name", length = 64, updatable = false)
+    @Column(name = "dimension_target_name", length = 64, updatable = false)
     @Comment("维度目标名称")//维度实例名称.如: 用户名. 角色名
-    private String settingTargetName;
+    private String dimensionTargetName;
 
     @Column(name = "state", nullable = false)
     @Comment("状态")

@@ -34,12 +34,14 @@ public interface ReactiveCrudService<E, K> {
 
     @Transactional(readOnly = true)
     default Mono<E> findById(Mono<K> publisher) {
-        return getRepository().findById(publisher);
+        return getRepository()
+                .findById(publisher);
     }
 
     @Transactional(readOnly = true)
     default Flux<E> findById(Flux<K> publisher) {
-        return publisher.flatMap(e -> findById(Mono.just(e)));
+        return getRepository()
+                .findById(publisher);
     }
 
     @Transactional
@@ -83,15 +85,21 @@ public interface ReactiveCrudService<E, K> {
 
     @Transactional(readOnly = true)
     default Mono<PagerResult<E>> queryPager(Mono<? extends QueryParam> queryParamMono) {
-        return count(queryParamMono)
-                .zipWhen(total -> {
-                    if (total == 0) {
-                        return Mono.just(Collections.<E>emptyList());
-                    }
-                    return queryParamMono
-                            .map(QueryParam::clone)
-                            .flatMap(q -> query(Mono.just(q.rePaging(total))).collectList());
-                }, PagerResult::of);
+        return queryParamMono
+                .cast(QueryParam.class)
+                .flatMap(param -> getRepository()
+                        .createQuery()
+                        .setParam(param)
+                        .count()
+                        .flatMap(total -> {
+                            if (total == 0) {
+                                return Mono.just(PagerResult.empty());
+                            }
+                            return queryParamMono
+                                    .map(QueryParam::clone)
+                                    .flatMap(q -> query(Mono.just(q.rePaging(total))).collectList())
+                                    .map(list -> PagerResult.of(total, list, param));
+                        }));
     }
 
     @Transactional(readOnly = true)

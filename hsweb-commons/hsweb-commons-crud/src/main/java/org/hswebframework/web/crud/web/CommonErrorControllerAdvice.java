@@ -7,6 +7,9 @@ import org.hswebframework.web.exception.BusinessException;
 import org.hswebframework.web.exception.NotFoundException;
 import org.hswebframework.web.exception.ValidationException;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
+import org.springframework.core.codec.DecodingException;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
@@ -18,6 +21,7 @@ import org.springframework.web.bind.support.WebExchangeBindException;
 import org.springframework.web.server.MediaTypeNotSupportedStatusException;
 import org.springframework.web.server.MethodNotAllowedException;
 import org.springframework.web.server.NotAcceptableStatusException;
+import org.springframework.web.server.ServerWebInputException;
 import reactor.core.publisher.Mono;
 
 import javax.validation.ConstraintViolationException;
@@ -27,6 +31,7 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
 @Slf4j
+@Order
 public class CommonErrorControllerAdvice {
 
     @ExceptionHandler
@@ -79,7 +84,7 @@ public class CommonErrorControllerAdvice {
                 .stream()
                 .filter(FieldError.class::isInstance)
                 .map(FieldError.class::cast)
-                .map(err -> new ValidationException.Detail(err.getField(), err.getDefaultMessage(),null))
+                .map(err -> new ValidationException.Detail(err.getField(), err.getDefaultMessage(), null))
                 .collect(Collectors.toList())));
     }
 
@@ -90,7 +95,7 @@ public class CommonErrorControllerAdvice {
                 .stream()
                 .filter(FieldError.class::isInstance)
                 .map(FieldError.class::cast)
-                .map(err -> new ValidationException.Detail(err.getField(), err.getDefaultMessage(),null))
+                .map(err -> new ValidationException.Detail(err.getField(), err.getDefaultMessage(), null))
                 .collect(Collectors.toList())));
     }
 
@@ -102,7 +107,7 @@ public class CommonErrorControllerAdvice {
                 .stream()
                 .filter(FieldError.class::isInstance)
                 .map(FieldError.class::cast)
-                .map(err -> new ValidationException.Detail(err.getField(), err.getDefaultMessage(),null))
+                .map(err -> new ValidationException.Detail(err.getField(), err.getDefaultMessage(), null))
                 .collect(Collectors.toList())));
     }
 
@@ -115,12 +120,13 @@ public class CommonErrorControllerAdvice {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.GATEWAY_TIMEOUT)
     public Mono<ResponseMessage<?>> handleException(TimeoutException e) {
-        log.error(e.getMessage(),e);
+        log.error(e.getMessage(), e);
         return Mono.just(ResponseMessage.error(504, "timeout", e.getMessage()));
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @Order
     public Mono<ResponseMessage<?>> handleException(RuntimeException e) {
         log.error(e.getMessage(), e);
         return Mono.just(ResponseMessage.error(e.getMessage()));
@@ -137,7 +143,7 @@ public class CommonErrorControllerAdvice {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Mono<ResponseMessage<?>> handleException(IllegalArgumentException e) {
         log.error(e.getMessage(), e);
-        return Mono.just(ResponseMessage.error(400,"illegal_argument", e.getMessage()));
+        return Mono.just(ResponseMessage.error(400, "illegal_argument", e.getMessage()));
     }
 
     @ExceptionHandler
@@ -167,5 +173,19 @@ public class CommonErrorControllerAdvice {
                 .result(e.getSupportedMethods()));
     }
 
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Mono<ResponseMessage<?>> handleException(ServerWebInputException e) {
+        Throwable exception=e;
+        do {
+            exception = exception.getCause();
+            if (exception instanceof ValidationException) {
+                return handleException(((ValidationException) exception));
+            }
+
+        } while (exception != null && exception != e);
+
+        return Mono.just(ResponseMessage.error(400, "illegal_argument", e.getMessage()));
+    }
 
 }

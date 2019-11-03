@@ -21,5 +21,4 @@ public class DefaultItemDefine implements ItemDefine {
     private String value;
     private String comments;
     private int ordinal;
-    private List<ItemDefine> children;
 }
