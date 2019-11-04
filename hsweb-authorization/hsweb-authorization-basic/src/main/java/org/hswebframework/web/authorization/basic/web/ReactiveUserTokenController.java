@@ -8,6 +8,7 @@ import org.hswebframework.web.authorization.annotation.QueryAction;
 import org.hswebframework.web.authorization.annotation.Resource;
 import org.hswebframework.web.authorization.annotation.SaveAction;
 import org.hswebframework.web.authorization.exception.UnAuthorizedException;
+import org.hswebframework.web.authorization.token.ParsedToken;
 import org.hswebframework.web.authorization.token.TokenState;
 import org.hswebframework.web.authorization.token.UserToken;
 import org.hswebframework.web.authorization.token.UserTokenManager;
@@ -45,7 +46,7 @@ public class ReactiveUserTokenController {
     @ApiOperation("重置当前用户的令牌")
     public Mono<Boolean> resetToken() {
         return ContextUtils.reactiveContext()
-                .map(context -> context.get(ContextKey.of(UserToken.class)).orElseThrow(UnAuthorizedException::new))
+                .map(context -> context.get(ContextKey.of(ParsedToken.class)).orElseThrow(UnAuthorizedException::new))
                 .flatMap(token -> userTokenManager.signOutByToken(token.getToken()))
                 .thenReturn(true);
     }
