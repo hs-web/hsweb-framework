@@ -78,7 +78,7 @@ public class PermissionSynchronization implements CommandLineRunner {
                         .as(permissionRepository::save))
                 .doOnError(err -> log.warn("sync permission error", err))
                 .subscribe(l -> {
-                    log.warn("sync permission success:{}", l);
+                    log.info("sync permission success:{}", l);
                 });
 
     }

@@ -1,5 +1,6 @@
 package org.hswebframework.web.system.authorization.defaults.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.hswebframework.ezorm.rdb.mapping.ReactiveRepository;
 import org.hswebframework.web.authorization.Authentication;
@@ -28,6 +29,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+@Slf4j
 public class DefaultReactiveAuthenticationInitializeService
         implements ReactiveAuthenticationInitializeService {
 
@@ -101,76 +103,76 @@ public class DefaultReactiveAuthenticationInitializeService
                                                     Map<String, List<AuthorizationSettingEntity>> settings) {
         Map<String, PermissionEntity> permissionMap = new HashMap<>();
         Map<String, SimplePermission> allowed = new HashMap<>();
-
-        for (PermissionEntity permissionEntity : permissions.values()) {
-            permissionMap.put(permissionEntity.getId(), permissionEntity);
-            List<AuthorizationSettingEntity> permissionSettings = settings.get(permissionEntity.getId());
-            if (CollectionUtils.isEmpty(permissionSettings)) {
-                continue;
-            }
-            permissionSettings.sort(Comparator.comparingInt(e -> e.getPriority() == null ? 0 : e.getPriority()));
-            SimplePermission permission = new SimplePermission();
-            permission.setId(permissionEntity.getId());
-            permission.setName(permissionEntity.getName());
-            Map<DataAccessType, DataAccessConfig> configs = new HashMap<>();
-
-            for (AuthorizationSettingEntity permissionSetting : permissionSettings) {
-
-                boolean merge = Boolean.TRUE.equals(permissionSetting.getMerge());
-
-                if (!merge) {
-                    permission.getActions().clear();
-                }
-
-                if (permissionSetting.getDataAccesses() != null) {
-                    permissionSetting.getDataAccesses()
-                            .stream()
-                            .map(conf -> builderFactory.create().fromMap(conf.getConfig()).build())
-                            .forEach(access -> configs.put(access.getType(), access));
-                }
-                if (CollectionUtils.isNotEmpty(permissionSetting.getActions())) {
-                    permission.getActions().addAll(permissionSetting.getActions());
-                }
-
-            }
-            allowed.put(permissionEntity.getId(), permission);
-            permission.setDataAccesses(new HashSet<>(configs.values()));
-        }
-
-        //处理关联权限
-        for (PermissionEntity permissionEntity : permissions.values()) {
-            SimplePermission allow = allowed.get(permissionEntity.getId());
-            if (allow == null || CollectionUtils.isEmpty(permissionEntity.getParents())) {
-                continue;
-            }
-            for (ParentPermission parent : permissionEntity.getParents()) {
-                if (StringUtils.isEmpty(parent.getPermission())) {
+        try {
+            for (PermissionEntity permissionEntity : permissions.values()) {
+                permissionMap.put(permissionEntity.getId(), permissionEntity);
+                List<AuthorizationSettingEntity> permissionSettings = settings.get(permissionEntity.getId());
+                if (CollectionUtils.isEmpty(permissionSettings)) {
                     continue;
                 }
-                Set<String> pre = parent.getPreActions();
-                //满足前置条件
-                if (CollectionUtils.isEmpty(pre) || allow.getActions().containsAll(pre)) {
-                    PermissionEntity mergePermission = permissionMap.get(parent.getPermission());
-                    if (mergePermission == null) {
+                permissionSettings.sort(Comparator.comparingInt(e -> e.getPriority() == null ? 0 : e.getPriority()));
+                SimplePermission permission = new SimplePermission();
+                permission.setId(permissionEntity.getId());
+                permission.setName(permissionEntity.getName());
+                Map<DataAccessType, DataAccessConfig> configs = new HashMap<>();
+
+                for (AuthorizationSettingEntity permissionSetting : permissionSettings) {
+
+                    boolean merge = Boolean.TRUE.equals(permissionSetting.getMerge());
+
+                    if (!merge) {
+                        permission.getActions().clear();
+                    }
+
+                    if (permissionSetting.getDataAccesses() != null) {
+                        permissionSetting.getDataAccesses()
+                                .stream()
+                                .map(conf -> builderFactory.create().fromMap(conf.toMap()).build())
+                                .forEach(access -> configs.put(access.getType(), access));
+                    }
+                    if (CollectionUtils.isNotEmpty(permissionSetting.getActions())) {
+                        permission.getActions().addAll(permissionSetting.getActions());
+                    }
+
+                }
+                allowed.put(permissionEntity.getId(), permission);
+                permission.setDataAccesses(new HashSet<>(configs.values()));
+            }
+
+            //处理关联权限
+            for (PermissionEntity permissionEntity : permissions.values()) {
+                SimplePermission allow = allowed.get(permissionEntity.getId());
+                if (allow == null || CollectionUtils.isEmpty(permissionEntity.getParents())) {
+                    continue;
+                }
+                for (ParentPermission parent : permissionEntity.getParents()) {
+                    if (StringUtils.isEmpty(parent.getPermission())) {
                         continue;
                     }
-                    SimplePermission merge = allowed.get(parent.getPermission());
-                    if (merge == null) {
-                        merge = new SimplePermission();
-                        merge.setName(mergePermission.getName());
-                        merge.setId(mergePermission.getId());
-                        allowed.put(merge.getId(), merge);
-                    }
-                    if (CollectionUtils.isNotEmpty(parent.getActions())) {
-                        merge.getActions().addAll(parent.getActions());
+                    Set<String> pre = parent.getPreActions();
+                    //满足前置条件
+                    if (CollectionUtils.isEmpty(pre) || allow.getActions().containsAll(pre)) {
+                        PermissionEntity mergePermission = permissionMap.get(parent.getPermission());
+                        if (mergePermission == null) {
+                            continue;
+                        }
+                        SimplePermission merge = allowed.get(parent.getPermission());
+                        if (merge == null) {
+                            merge = new SimplePermission();
+                            merge.setName(mergePermission.getName());
+                            merge.setId(mergePermission.getId());
+                            allowed.put(merge.getId(), merge);
+                        }
+                        if (CollectionUtils.isNotEmpty(parent.getActions())) {
+                            merge.getActions().addAll(parent.getActions());
+                        }
                     }
                 }
             }
+            authentication.setPermissions(new ArrayList<>(allowed.values()));
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
         }
-
-
-        authentication.setPermissions(new ArrayList<>(allowed.values()));
-
         return authentication;
     }
 

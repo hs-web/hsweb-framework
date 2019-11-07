@@ -71,12 +71,7 @@ public class UserTokenReactiveAuthenticationSupplier implements ReactiveAuthenti
                         context.get(ContextKey.of(ParsedToken.class))
                                 .map(t -> userTokenManager
                                         .getByToken(t.getToken())
-                                        .map(token -> {
-                                            if (!token.isNormal()) {
-                                                throw new UnAuthorizedException(token.getState());
-                                            }
-                                            return token;
-                                        }))
+                                        .filter(UserToken::validate))
                                 .map(tokenMono -> tokenMono
                                         .doOnNext(token->userTokenManager.touch(token.getToken()))
                                         .flatMap(token -> get(thirdPartAuthenticationManager.get(token.getType()), token.getUserId())))

@@ -15,7 +15,7 @@ import reactor.core.publisher.Mono;
  * @since 3.0.0-RC
  */
 
-@Order(Ordered.HIGHEST_PRECEDENCE)
+@Order(10)
 @AllArgsConstructor
 public class EmbedReactiveAuthenticationManager implements ReactiveAuthenticationManagerProvider {
 

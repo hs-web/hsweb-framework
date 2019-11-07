@@ -12,9 +12,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.support.SimpleValueWrapper;
 import org.springframework.context.event.EventListener;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import reactor.core.publisher.Mono;
 
 @Slf4j
+@Order(100)
 public class DefaultReactiveAuthenticationManager implements ReactiveAuthenticationManagerProvider {
 
     @Autowired
@@ -65,7 +68,6 @@ public class DefaultReactiveAuthenticationManager implements ReactiveAuthenticat
                 .flatMap(_id -> Mono.justOrEmpty(cacheManager)
                         .map(cm -> cacheManager.<Authentication>getCache("user-auth"))
                         .flatMap(cache -> cache.mono(userId).onCacheMissResume(() -> initializeService.initUserAuthorization(userId)))
-                        .cast(Authentication.class)
-                        .switchIfEmpty(initializeService.initUserAuthorization(userId)));
+                        .cast(Authentication.class));
     }
 }

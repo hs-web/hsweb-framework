@@ -51,14 +51,6 @@ public interface UserToken extends Serializable, Comparable<UserToken> {
 
     long getMaxInactiveInterval();
 
-    /**
-     * @return 是否正常
-     */
-    @Deprecated
-    default boolean isEffective() {
-        return isNormal();
-    }
-
     default boolean isNormal() {
         return getState() == TokenState.normal;
     }

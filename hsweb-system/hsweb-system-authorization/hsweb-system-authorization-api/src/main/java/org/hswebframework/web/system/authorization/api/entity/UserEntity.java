@@ -32,13 +32,13 @@ public class UserEntity extends GenericEntity<String> implements RecordCreationE
 
     @Column(nullable = false)
     @ToString.Ignore(cover = false)
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @NotBlank(message = "密码不能为空", groups = CreateGroup.class)
     private String password;
 
     @Column(nullable = false)
     @ToString.Ignore(cover = false)
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String salt;
 
     @Column

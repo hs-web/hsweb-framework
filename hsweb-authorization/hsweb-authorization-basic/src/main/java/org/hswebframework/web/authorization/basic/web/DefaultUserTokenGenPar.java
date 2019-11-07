@@ -10,6 +10,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @Getter
@@ -54,10 +55,11 @@ public class DefaultUserTokenGenPar implements ReactiveUserTokenGenerator, React
 
     @Override
     public Mono<ParsedToken> parseToken(ServerWebExchange exchange) {
-        String token =exchange.getRequest()
+        String token = Optional.ofNullable(exchange.getRequest()
                 .getHeaders()
-                .getFirst(headerName);
-        if(token==null){
+                .getFirst(headerName))
+                .orElseGet(() -> exchange.getRequest().getQueryParams().getFirst(":X_Access_Token"));
+        if (token == null) {
             return Mono.empty();
         }
         return Mono.just(new ParsedToken() {
