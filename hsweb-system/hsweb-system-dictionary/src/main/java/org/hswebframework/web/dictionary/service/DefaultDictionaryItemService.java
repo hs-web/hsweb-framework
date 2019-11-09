@@ -35,42 +35,42 @@ public class DefaultDictionaryItemService extends GenericReactiveCrudService<Dic
     @Override
     public Mono<Integer> insert(Publisher<DictionaryItemEntity> entityPublisher) {
         return super.insert(entityPublisher)
-                .doOnSuccess(r->eventPublisher.publishEvent(ClearDictionaryCacheEvent.of()));
+                .doOnSuccess(r -> eventPublisher.publishEvent(ClearDictionaryCacheEvent.of()));
     }
 
     @Override
     public Mono<Integer> insertBatch(Publisher<? extends Collection<DictionaryItemEntity>> entityPublisher) {
         return super.insertBatch(entityPublisher)
-                .doOnSuccess(r->eventPublisher.publishEvent(ClearDictionaryCacheEvent.of()));
+                .doOnSuccess(r -> eventPublisher.publishEvent(ClearDictionaryCacheEvent.of()));
     }
 
     @Override
     public Mono<Integer> updateById(String id, Mono<DictionaryItemEntity> entityPublisher) {
-        return super.updateById(id,entityPublisher)
-                .doOnSuccess(r->eventPublisher.publishEvent(ClearDictionaryCacheEvent.of()));
+        return super.updateById(id, entityPublisher)
+                .doOnSuccess(r -> eventPublisher.publishEvent(ClearDictionaryCacheEvent.of()));
     }
 
     @Override
     public Mono<Integer> deleteById(Publisher<String> idPublisher) {
         return super.deleteById(idPublisher)
-                .doOnSuccess(r->eventPublisher.publishEvent(ClearDictionaryCacheEvent.of()));
+                .doOnSuccess(r -> eventPublisher.publishEvent(ClearDictionaryCacheEvent.of()));
     }
 
     @Override
     public Mono<SaveResult> save(Publisher<DictionaryItemEntity> entityPublisher) {
         return super.save(entityPublisher)
-                .doOnSuccess(r->eventPublisher.publishEvent(ClearDictionaryCacheEvent.of()));
+                .doOnSuccess(r -> eventPublisher.publishEvent(ClearDictionaryCacheEvent.of()));
     }
 
     @Override
     public ReactiveUpdate<DictionaryItemEntity> createUpdate() {
         return super.createUpdate()
-                .onExecute(r->r.doOnSuccess(l->eventPublisher.publishEvent(ClearDictionaryCacheEvent.of())));
+                .onExecute((ignore, r) -> r.doOnSuccess(l -> eventPublisher.publishEvent(ClearDictionaryCacheEvent.of())));
     }
 
     @Override
     public ReactiveDelete createDelete() {
         return super.createDelete()
-                .onExecute(r->r.doOnSuccess(l->eventPublisher.publishEvent(ClearDictionaryCacheEvent.of())));
+                .onExecute((ignore, r) -> r.doOnSuccess(l -> eventPublisher.publishEvent(ClearDictionaryCacheEvent.of())));
     }
 }

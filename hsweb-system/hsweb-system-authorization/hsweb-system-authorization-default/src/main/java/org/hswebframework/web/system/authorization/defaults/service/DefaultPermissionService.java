@@ -37,13 +37,13 @@ public class DefaultPermissionService extends GenericReactiveCrudService<Permiss
     @Override
     public ReactiveDelete createDelete() {
         return super.createDelete()
-                .onExecute(i -> i.doOnSuccess(r -> eventPublisher.publishEvent(ClearUserAuthorizationCacheEvent.of())));
+                .onExecute((ignore,i) -> i.doOnSuccess(r -> eventPublisher.publishEvent(ClearUserAuthorizationCacheEvent.of())));
     }
 
     @Override
     public ReactiveUpdate<PermissionEntity> createUpdate() {
         return super.createUpdate()
-                .onExecute(i -> i.doOnSuccess(r -> eventPublisher.publishEvent(ClearUserAuthorizationCacheEvent.of())));
+                .onExecute((ignore,i) -> i.doOnSuccess(r -> eventPublisher.publishEvent(ClearUserAuthorizationCacheEvent.of())));
     }
 
 

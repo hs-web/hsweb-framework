@@ -62,9 +62,8 @@ public class DefaultDimensionUserService extends GenericReactiveCrudService<Dime
     @Override
     @SuppressWarnings("all")
     public ReactiveUpdate<DimensionUserEntity> createUpdate() {
-        ReactiveUpdate<DimensionUserEntity> update = super.createUpdate();
-        return update
-                .onExecute(r -> r.doOnSuccess(i -> {
+        return super.createUpdate()
+                .onExecute((update, r) -> r.doOnSuccess(i -> {
                     createQuery()
                             .select(DimensionUserEntity::getUserId)
                             .setParam(update.toQueryParam())
@@ -79,9 +78,8 @@ public class DefaultDimensionUserService extends GenericReactiveCrudService<Dime
     @Override
     @SuppressWarnings("all")
     public ReactiveDelete createDelete() {
-        ReactiveDelete delete = super.createDelete();
-        return delete
-                .onExecute(r -> r.doOnSuccess(i -> {
+        return super.createDelete()
+                .onExecute((delete, r) -> r.doOnSuccess(i -> {
                     createQuery()
                             .select(DimensionUserEntity::getUserId)
                             .setParam(delete.toQueryParam())

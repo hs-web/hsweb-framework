@@ -1,5 +1,6 @@
 package org.hswebframework.web.system.authorization.defaults.service;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.hswebframework.ezorm.rdb.mapping.ReactiveDelete;
 import org.hswebframework.ezorm.rdb.mapping.ReactiveUpdate;
 import org.hswebframework.ezorm.rdb.mapping.defaults.SaveResult;
@@ -11,6 +12,7 @@ import org.hswebframework.web.system.authorization.api.event.ClearUserAuthorizat
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
@@ -28,9 +30,17 @@ public class DefaultAuthorizationSettingService extends GenericReactiveCrudServi
     private List<DimensionProvider> providers;
 
 
+    protected AuthorizationSettingEntity generateId(AuthorizationSettingEntity entity) {
+        if (StringUtils.isEmpty(entity.getId())) {
+            entity.setId(DigestUtils.md5Hex(entity.getPermission() + entity.getDimensionType() + entity.getDimensionTarget()));
+        }
+        return entity;
+    }
+
     @Override
     public Mono<SaveResult> save(Publisher<AuthorizationSettingEntity> entityPublisher) {
         return Flux.from(entityPublisher)
+                .map(this::generateId)
                 .collectList()
                 .flatMap(autz -> super.save(Flux.fromIterable(autz)).doOnSuccess(r -> clearUserAuthCache(autz)));
     }
@@ -57,6 +67,7 @@ public class DefaultAuthorizationSettingService extends GenericReactiveCrudServi
     public Mono<Integer> insert(Publisher<AuthorizationSettingEntity> entityPublisher) {
 
         return Flux.from(entityPublisher)
+                .map(this::generateId)
                 .collectList()
                 .flatMap(list -> super.insert(Flux.fromIterable(list))
                         .doOnSuccess(i -> clearUserAuthCache(list)));
@@ -66,15 +77,17 @@ public class DefaultAuthorizationSettingService extends GenericReactiveCrudServi
     public Mono<Integer> insertBatch(Publisher<? extends Collection<AuthorizationSettingEntity>> entityPublisher) {
         return Flux.from(entityPublisher)
                 .collectList()
-                .flatMap(list -> super.insertBatch(Flux.fromIterable(list))
+                .flatMap(list -> super.insertBatch(Flux.fromStream(list.stream()
+                        .map(lst -> lst.stream()
+                                .map(this::generateId)
+                                .collect(Collectors.toList()))))
                         .doOnSuccess(i -> clearUserAuthCache(list.stream().flatMap(Collection::stream).collect(Collectors.toList()))));
     }
 
     @Override
     public ReactiveUpdate<AuthorizationSettingEntity> createUpdate() {
-        ReactiveUpdate<AuthorizationSettingEntity> update = super.createUpdate();
 
-        return update.onExecute(r ->
+        return super.createUpdate().onExecute((update, r) ->
                 r.doOnSuccess(i -> {
                     createQuery()
                             .setParam(update.toQueryParam())
@@ -86,15 +99,15 @@ public class DefaultAuthorizationSettingService extends GenericReactiveCrudServi
 
     @Override
     public ReactiveDelete createDelete() {
-        ReactiveDelete delete = super.createDelete();
-        return delete.onExecute(r ->
-                r.doOnSuccess(i -> {
-                    createQuery()
-                            .setParam(delete.toQueryParam())
-                            .fetch()
-                            .collectList()
-                            .subscribe(this::clearUserAuthCache);
-                }));
+        return super.createDelete()
+                .onExecute((delete, r) ->
+                        r.doOnSuccess(i -> {
+                            createQuery()
+                                    .setParam(delete.toQueryParam())
+                                    .fetch()
+                                    .collectList()
+                                    .subscribe(this::clearUserAuthCache);
+                        }));
     }
 
     protected void clearUserAuthCache(List<AuthorizationSettingEntity> settings) {

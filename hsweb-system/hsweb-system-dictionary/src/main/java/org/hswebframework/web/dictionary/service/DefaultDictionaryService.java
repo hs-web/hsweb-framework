@@ -60,13 +60,13 @@ public class DefaultDictionaryService extends GenericReactiveCrudService<Diction
     @Override
     public ReactiveUpdate<DictionaryEntity> createUpdate() {
         return super.createUpdate()
-                .onExecute(r->r.doOnSuccess(l->eventPublisher.publishEvent(ClearDictionaryCacheEvent.of())));
+                .onExecute((ignore,r)->r.doOnSuccess(l->eventPublisher.publishEvent(ClearDictionaryCacheEvent.of())));
     }
 
     @Override
     public ReactiveDelete createDelete() {
         return super.createDelete()
-                .onExecute(r->r.doOnSuccess(l->eventPublisher.publishEvent(ClearDictionaryCacheEvent.of())));
+                .onExecute((ignore,r)->r.doOnSuccess(l->eventPublisher.publishEvent(ClearDictionaryCacheEvent.of())));
     }
 
 
