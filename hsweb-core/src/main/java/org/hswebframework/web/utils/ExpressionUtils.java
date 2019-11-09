@@ -1,5 +1,7 @@
 package org.hswebframework.web.utils;
 
+import lombok.SneakyThrows;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.hswebframework.expands.script.engine.DynamicScriptEngine;
 import org.hswebframework.expands.script.engine.DynamicScriptEngineFactory;
 import org.hswebframework.expands.script.engine.ExecuteResult;
@@ -70,31 +72,37 @@ public class ExpressionUtils {
      * @param vars       变量
      * @param language   表达式语言
      * @return 解析结果
-     * @throws Exception 解析错误
      */
-    public static String analytical(String expression, Map<String, Object> vars, String language) throws Exception {
-        Matcher matcher = PATTERN.matcher(expression);
+    @SneakyThrows
+    public static String analytical(String expression, Map<String, Object> vars, String language) {
+        if(!expression.contains("${")){
+            return expression;
+        }
         DynamicScriptEngine engine = DynamicScriptEngineFactory.getEngine(language);
         if (engine == null) {
             return expression;
         }
-        vars = new HashMap<>(vars);
-        vars.putAll(getDefaultVar());
-        while (matcher.find()) {
-            String real_expression = matcher.group();
-            String e_id = String.valueOf(real_expression.hashCode());
-            if (!engine.compiled(e_id)) {
-                engine.compile(e_id, real_expression);
+
+        return TemplateParser.parse(expression, var -> {
+            Object fast = vars.get(var);
+            if (fast != null) {
+                return fast.toString();
             }
-            ExecuteResult result = engine.execute(e_id, vars);
-            if (!result.isSuccess()) {
-                throw new RuntimeException(result.getMessage(), result.getException());
+            String id = DigestUtils.md5Hex(var);
+
+            try {
+                if (!engine.compiled(id)) {
+
+                    engine.compile(id, var);
+
+                }
+                return String.valueOf(engine.execute(id, vars).getIfSuccess());
+            } catch (RuntimeException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
-            String obj = String.valueOf(result.get());
-            // expression = matcher.replaceFirst(obj);
-            expression = expression.replace("${" + real_expression + "}", obj);
-        }
-        return expression;
+        });
     }
 
 }
