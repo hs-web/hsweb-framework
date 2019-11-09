@@ -13,6 +13,15 @@ import java.util.List;
 
 public class ValidateEventListener implements EventListener {
 
+    @Override
+    public String getId() {
+        return "validate-listener";
+    }
+
+    @Override
+    public String getName() {
+        return "验证器监听器";
+    }
 
     @Override
     @SuppressWarnings("all")

@@ -57,12 +57,12 @@ public interface EnableCacheReactiveCrudService<E, K> extends ReactiveCrudServic
     @Override
     default ReactiveUpdate<E> createUpdate() {
         return ReactiveCrudService.super.createUpdate()
-                .onExecute(s -> s.doFinally((__) -> getCache().clear().subscribe()));
+                .onExecute((update,s) -> s.doFinally((__) -> getCache().clear().subscribe()));
     }
 
     @Override
     default ReactiveDelete createDelete() {
         return ReactiveCrudService.super.createDelete()
-                .onExecute(s -> s.doFinally((__) -> getCache().clear().subscribe()));
+                .onExecute((update,s) -> s.doFinally((__) -> getCache().clear().subscribe()));
     }
 }
