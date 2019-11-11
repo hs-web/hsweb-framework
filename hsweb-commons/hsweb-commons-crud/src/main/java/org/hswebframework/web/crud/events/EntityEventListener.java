@@ -1,6 +1,7 @@
 package org.hswebframework.web.crud.events;
 
 
+import org.apache.commons.collections.CollectionUtils;
 import org.hswebframework.ezorm.core.GlobalConfig;
 import org.hswebframework.ezorm.rdb.events.*;
 import org.hswebframework.ezorm.rdb.mapping.*;
@@ -14,10 +15,12 @@ import org.hswebframework.web.crud.annotation.EnableEntityEvent;
 import org.hswebframework.web.event.GenericsPayloadApplicationEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 @SuppressWarnings("all")
 public class EntityEventListener implements EventListener {
@@ -106,14 +109,21 @@ public class EntityEventListener implements EventListener {
         if (repo instanceof ReactiveRepository) {
             context.get(MappingContextKeys.reactiveResultHolder)
                     .ifPresent(holder -> {
+                        AtomicReference<List<?>> updated = new AtomicReference<>();
+                        holder.after(v -> {
+                            return Mono.fromRunnable(() -> {
+                                List<?> _tmp = updated.getAndSet(null);
+                                if (CollectionUtils.isNotEmpty(_tmp)) {
+                                    sendUpdateEvent(_tmp, context);
+                                }
+                            });
+                        });
                         holder.before(
                                 ((ReactiveRepository<?, ?>) repo).createQuery()
                                         .setParam(update.toQueryParam())
                                         .fetch()
                                         .collectList()
-                                        .doOnSuccess(list -> {
-                                            sendUpdateEvent(list, context);
-                                        })
+                                        .doOnSuccess(updated::set)
                                         .then()
                         );
                     });
@@ -139,14 +149,21 @@ public class EntityEventListener implements EventListener {
                     if (repo instanceof ReactiveRepository) {
                         context.get(MappingContextKeys.reactiveResultHolder)
                                 .ifPresent(holder -> {
+                                    AtomicReference<List<?>> deleted = new AtomicReference<>();
+                                    holder.after(v -> {
+                                        return Mono.fromRunnable(() -> {
+                                            List<?> _tmp = deleted.getAndSet(null);
+                                            if (CollectionUtils.isNotEmpty(_tmp)) {
+                                                sendDeleteEvent(_tmp, context);
+                                            }
+                                        });
+                                    });
                                     holder.before(
                                             ((ReactiveRepository<?, ?>) repo).createQuery()
                                                     .setParam(dslUpdate.toQueryParam())
                                                     .fetch()
                                                     .collectList()
-                                                    .doOnSuccess(list -> {
-                                                        sendDeleteEvent(list, context);
-                                                    })
+                                                    .doOnSuccess(deleted::set)
                                                     .then()
                                     );
                                 });
@@ -173,7 +190,7 @@ public class EntityEventListener implements EventListener {
                 .filter(Entity.class::isInstance)
                 .map(Entity.class::cast)
                 .ifPresent(entity -> {
-                    eventPublisher.publishEvent(new GenericsPayloadApplicationEvent<>(this, new EntityCreatedEvent(Collections.singletonList(entity),clazz), clazz));
+                    eventPublisher.publishEvent(new GenericsPayloadApplicationEvent<>(this, new EntityCreatedEvent(Collections.singletonList(entity), clazz), clazz));
                 });
     }
 }
