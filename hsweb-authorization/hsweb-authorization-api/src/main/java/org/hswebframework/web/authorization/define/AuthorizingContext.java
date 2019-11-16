@@ -21,27 +21,4 @@ public class AuthorizingContext {
 
     private MethodInterceptorContext paramContext;
 
-    public AuthorizeDefinition getDefinition() {
-        return definition;
-    }
-
-    public void setDefinition(AuthorizeDefinition definition) {
-        this.definition = definition;
-    }
-
-    public Authentication getAuthentication() {
-        return authentication;
-    }
-
-    public void setAuthentication(Authentication authentication) {
-        this.authentication = authentication;
-    }
-
-    public MethodInterceptorContext getParamContext() {
-        return paramContext;
-    }
-
-    public void setParamContext(MethodInterceptorContext paramContext) {
-        this.paramContext = paramContext;
-    }
 }

@@ -40,7 +40,7 @@ public class MyDataAccessHandler implements org.hswebframework.web.authorization
         @Override
         public boolean handle(DataAccessConfig access, MethodInterceptorParamContext context) {
             //被拦截的方法参数
-           Map<String,Object> param= context.getParams();
+           Map<String,Object> param= context.getNamedArguments();
            // 判断逻辑
            //...
             return true;

@@ -29,7 +29,7 @@ import java.lang.annotation.*;
  *
  * @author zhouhao
  * @see DataAccessController
- * @see Authorize#dataAccess()
+ * @see ResourceAction#dataAccess()
  * @since 3.0
  */
 @Target({ElementType.ANNOTATION_TYPE,ElementType.METHOD})
