@@ -90,7 +90,7 @@ public class AopAccessLoggerSupport extends StaticMethodMatcherPointcutAdvisor {
             info.setAction(define.getAction());
             info.setDescribe(define.getDescribe());
         }
-        info.setParameters(holder.getArgs());
+        info.setParameters(holder.getNamedArguments());
         info.setTarget(holder.getTarget().getClass());
         info.setMethod(holder.getMethod());
 

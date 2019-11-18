@@ -18,11 +18,14 @@
 
 package org.hswebframework.web.aop;
 
+import org.reactivestreams.Publisher;
+
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * AOP拦截到方法的参数上下文，用于获取当前进行操作的方法的各种参数信息，如:当前所在类实例，参数集合，注解
@@ -55,7 +58,7 @@ public interface MethodInterceptorContext extends Serializable {
      * @param <T>  参数泛型
      * @return Optional
      */
-    <T> Optional<T> getParameter(String name);
+    <T> Optional<T> getArgument(String name);
 
     /**
      * 获取当前操作方法或实例上指定类型的泛型,如果方法上未获取到,则获取实例类上的注解。实例类上未获取到,则返回null
@@ -70,9 +73,16 @@ public interface MethodInterceptorContext extends Serializable {
      * 获取全部参数
      *
      * @return 参数集合
-     * @see this#getParameter(String)
+     * @see this#getArgument(String)
      */
-    Map<String, Object> getParams();
+    Map<String, Object> getNamedArguments();
+
+    Object[] getArguments();
+
+    boolean handleReactiveArguments(Function<Publisher<?>, Publisher<?>> handler);
 
     Object getInvokeResult();
+
+    void setInvokeResult(Object result);
+
 }

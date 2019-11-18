@@ -1,5 +1,6 @@
 package org.hswebframework.web.authorization.basic.aop;
 
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -11,10 +12,12 @@ import org.hswebframework.web.authorization.basic.handler.AuthorizingHandler;
 import org.hswebframework.web.authorization.define.*;
 import org.hswebframework.web.authorization.exception.UnAuthorizedException;
 import org.hswebframework.web.utils.AnnotationUtils;
+import org.reactivestreams.Publisher;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
@@ -22,6 +25,10 @@ import reactor.core.publisher.Mono;
 
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -51,81 +58,48 @@ public class AopAuthorizingController extends StaticMethodMatcherPointcutAdvisor
         this.autoParse = autoParse;
     }
 
-    protected Mono<?> handleReactive(AuthorizeDefinition definition, MethodInterceptorHolder holder, AuthorizingContext context, Mono<?> mono) {
 
-        return Authentication.currentReactive()
-                .switchIfEmpty(Mono.error(new UnAuthorizedException()))
-                .flatMap(auth -> {
-                    ResourcesDefinition resources = definition.getResources();
-
-                    context.setAuthentication(auth);
-                    if (definition.getPhased() == Phased.before) {
-                        authorizingHandler.handRBAC(context);
-                        if (resources != null && resources.getPhased() == Phased.before) {
-                            authorizingHandler.handleDataAccess(context);
-                        } else {
-                            return mono.doOnNext(res -> {
-                                context.setParamContext(holder.createParamContext(res));
-                                authorizingHandler.handleDataAccess(context);
-                            });
-                        }
-                    } else {
-                        if (resources != null && resources.getPhased() == Phased.before) {
-                            authorizingHandler.handleDataAccess(context);
-                            return mono.doOnNext(res -> {
-                                context.setParamContext(holder.createParamContext(res));
-                                authorizingHandler.handRBAC(context);
-                            });
-                        } else {
-                            return mono.doOnNext(res -> {
-                                context.setParamContext(holder.createParamContext(res));
-                                authorizingHandler.handle(context);
-                            });
-                        }
-
-                    }
-                    return mono;
-                });
-    }
-
-    protected Flux<?> handleReactive(AuthorizeDefinition definition, MethodInterceptorHolder holder, AuthorizingContext context, Flux<?> flux) {
+    protected Publisher<?> handleReactive0(AuthorizeDefinition definition,
+                                           MethodInterceptorHolder holder,
+                                           AuthorizingContext context,
+                                           Supplier<? extends Publisher<?>> invoker) {
 
         return Authentication.currentReactive()
                 .switchIfEmpty(Mono.error(new UnAuthorizedException()))
                 .flatMapMany(auth -> {
-                    ResourcesDefinition resources = definition.getResources();
-
                     context.setAuthentication(auth);
-                    if (definition.getPhased() == Phased.before) {
+                    Function<Runnable, Publisher> afterRuner = runnable -> {
+                        MethodInterceptorContext interceptorContext = holder.createParamContext(invoker.get());
+                        runnable.run();
+                        return (Publisher<?>) interceptorContext.getInvokeResult();
+                    };
+                    if (context.getDefinition().getPhased() != Phased.after) {
                         authorizingHandler.handRBAC(context);
-                        if (resources != null && resources.getPhased() == Phased.before) {
+                        if (context.getDefinition().getResources().getPhased() != Phased.after) {
                             authorizingHandler.handleDataAccess(context);
+                            return invoker.get();
                         } else {
-                            return flux.doOnNext(res -> {
-                                context.setParamContext(holder.createParamContext(res));
+                            return afterRuner.apply(() -> authorizingHandler.handleDataAccess(context));
+                        }
+
+                    } else {
+                        if (context.getDefinition().getResources().getPhased() != Phased.after) {
+                            authorizingHandler.handleDataAccess(context);
+                            return invoker.get();
+                        } else {
+                            return afterRuner.apply(() -> {
+                                authorizingHandler.handRBAC(context);
                                 authorizingHandler.handleDataAccess(context);
                             });
                         }
-                    } else {
-
-                        if (resources != null && resources.getPhased() == Phased.before) {
-                            authorizingHandler.handleDataAccess(context);
-                            return flux.doOnNext(res -> {
-                                context.setParamContext(holder.createParamContext(res));
-                                authorizingHandler.handRBAC(context);
-                            });
-                        } else {
-                            return flux.doOnNext(res -> {
-                                context.setParamContext(holder.createParamContext(res));
-                                authorizingHandler.handle(context);
-                            });
-                        }
-
                     }
-                    return flux;
                 });
     }
 
+    @SneakyThrows
+    private <T> T doProceed(MethodInvocation invocation) {
+        return (T) invocation.proceed();
+    }
 
     @Override
     public Object invoke(MethodInvocation methodInvocation) throws Throwable {
@@ -136,17 +110,20 @@ public class AopAuthorizingController extends StaticMethodMatcherPointcutAdvisor
         AuthorizeDefinition definition = aopMethodAuthorizeDefinitionParser.parse(methodInvocation.getThis().getClass(), methodInvocation.getMethod(), paramContext);
         Object result = null;
         boolean isControl = false;
-        if (null != definition) {
+        if (null != definition && !definition.isEmpty()) {
             AuthorizingContext context = new AuthorizingContext();
             context.setDefinition(definition);
             context.setParamContext(paramContext);
 
             Class<?> returnType = methodInvocation.getMethod().getReturnType();
             //handle reactive method
-            if (Mono.class.isAssignableFrom(returnType)) {
-                return handleReactive(definition, holder, context, ((Mono<?>) methodInvocation.proceed()));
-            } else if (Flux.class.isAssignableFrom(returnType)) {
-                return handleReactive(definition, holder, context, ((Flux<?>) methodInvocation.proceed()));
+            if (Publisher.class.isAssignableFrom(returnType)) {
+                Publisher publisher = handleReactive0(definition, holder, context, () -> doProceed(methodInvocation));
+                if (Mono.class.isAssignableFrom(returnType)) {
+                    return Mono.from(publisher);
+                } else if (Flux.class.isAssignableFrom(returnType)) {
+                    return Flux.from(publisher);
+                }
             }
 
             Authentication authentication = Authentication.current().orElseThrow(UnAuthorizedException::new);
@@ -224,7 +201,7 @@ public class AopAuthorizingController extends StaticMethodMatcherPointcutAdvisor
             log.info("publish AuthorizeDefinitionInitializedEvent,definition size:{}", definitions.size());
             eventPublisher.publishEvent(new AuthorizeDefinitionInitializedEvent(definitions));
 
-          //  defaultParser.destroy();
+            //  defaultParser.destroy();
         }
     }
 

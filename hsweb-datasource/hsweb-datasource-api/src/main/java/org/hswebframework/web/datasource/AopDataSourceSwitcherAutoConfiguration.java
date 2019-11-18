@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 import static org.hswebframework.web.datasource.strategy.AnnotationDataSourceSwitchStrategyMatcher.*;
 
@@ -112,7 +111,7 @@ public class AopDataSourceSwitcherAutoConfiguration {
                                     String id = strategy.getDataSourceId();
                                     if (StringUtils.hasText(id)) {
                                         if (id.contains("${")) {
-                                            id = ExpressionUtils.analytical(id, context.getParams(), "spel");
+                                            id = ExpressionUtils.analytical(id, context.getNamedArguments(), "spel");
                                         }
                                         if (!DataSourceHolder.existing(id)) {
                                             if (strategy.isFallbackDefault()) {
