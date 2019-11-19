@@ -8,3 +8,8 @@ hsweb:
           user-token:
             - get
             - update
+easyorm:
+  dialect: h2
+logging:
+  level:
+    org.hswebframework: debug

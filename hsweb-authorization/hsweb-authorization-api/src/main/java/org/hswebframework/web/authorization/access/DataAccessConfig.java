@@ -62,12 +62,6 @@ public interface DataAccessConfig extends Serializable {
          * @see OwnCreatedDataAccessConfig#getType()
          */
         String OWN_CREATED = "OWN_CREATED";
-        /**
-         * 字段值范围
-         *
-         * @see FieldScopeDataAccessConfig#getType()
-         */
-        String FIELD_SCOPE = "FIELD_SCOPE";
 
         /**
          * 禁止操作字段
@@ -75,6 +69,13 @@ public interface DataAccessConfig extends Serializable {
          * @see FieldFilterDataAccessConfig#getType()
          */
         String DENY_FIELDS = "DENY_FIELDS";
+
+        /**
+         * 禁止操作字段
+         *
+         * @see org.hswebframework.web.authorization.simple.DimensionDataAccessConfig#getType()
+         */
+        String DIMENSION_SCOPE = "DIMENSION_SCOPE";
 
 
     }

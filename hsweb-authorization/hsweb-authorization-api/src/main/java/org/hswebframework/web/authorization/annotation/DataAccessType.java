@@ -1,5 +1,6 @@
 package org.hswebframework.web.authorization.annotation;
 
+import org.hswebframework.web.authorization.access.DataAccessConfiguration;
 import org.hswebframework.web.authorization.access.DataAccessController;
 
 import java.lang.annotation.*;
@@ -19,5 +20,8 @@ public @interface DataAccessType {
     /**
      * @see DataAccessController
      */
-    Class<? extends DataAccessController> controller() default  DataAccessController.class;
+    Class<? extends DataAccessController> controller() default DataAccessController.class;
+
+    Class<? extends DataAccessConfiguration> configuration() default DataAccessConfiguration.class;
+
 }

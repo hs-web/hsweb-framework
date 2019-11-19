@@ -32,6 +32,12 @@
 
         <dependency>
             <groupId>org.hswebframework.web</groupId>
+            <artifactId>hsweb-commons-crud</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-access-logging-api</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -45,6 +51,7 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-webmvc</artifactId>
+            <optional>true</optional>
         </dependency>
 
         <dependency>
@@ -70,6 +77,18 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot.experimental</groupId>
+            <artifactId>spring-boot-starter-data-r2dbc</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>io.r2dbc</groupId>
+            <artifactId>r2dbc-h2</artifactId>
             <scope>test</scope>
         </dependency>
 

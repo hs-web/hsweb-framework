@@ -4,9 +4,9 @@ import reactor.core.publisher.Flux;
 
 public interface DimensionProvider {
 
-    Flux<DimensionType> getAllType();
+    Flux<? extends DimensionType> getAllType();
 
-    Flux<Dimension> getDimensionByUserId(String userId);
+    Flux<? extends Dimension> getDimensionByUserId(String userId);
 
     Flux<String> getUserIdByDimensionId(String dimensionId);
 

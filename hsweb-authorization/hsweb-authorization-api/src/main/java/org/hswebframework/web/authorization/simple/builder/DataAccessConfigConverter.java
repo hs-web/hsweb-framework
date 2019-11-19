@@ -5,7 +5,7 @@ import org.hswebframework.web.authorization.access.DataAccessConfig;
 /**
  * @author zhouhao
  */
-public interface DataAccessConfigConvert {
+public interface DataAccessConfigConverter {
 
     boolean isSupport(String type, String action, String config);
 

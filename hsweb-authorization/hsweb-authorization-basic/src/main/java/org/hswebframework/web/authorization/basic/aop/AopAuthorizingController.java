@@ -70,6 +70,7 @@ public class AopAuthorizingController extends StaticMethodMatcherPointcutAdvisor
                     context.setAuthentication(auth);
                     Function<Runnable, Publisher> afterRuner = runnable -> {
                         MethodInterceptorContext interceptorContext = holder.createParamContext(invoker.get());
+                        context.setParamContext(interceptorContext);
                         runnable.run();
                         return (Publisher<?>) interceptorContext.getInvokeResult();
                     };

@@ -15,12 +15,12 @@ import java.util.Objects;
  */
 public class SimpleDataAccessConfigBuilder implements DataAccessConfigBuilder {
 
-    private List<DataAccessConfigConvert> converts;
+    private List<DataAccessConfigConverter> converts;
 
     private Map<String, Object> config = new HashMap<>();
 
 
-    public SimpleDataAccessConfigBuilder(List<DataAccessConfigConvert> converts) {
+    public SimpleDataAccessConfigBuilder(List<DataAccessConfigConverter> converts) {
         Objects.requireNonNull(converts);
         this.converts = converts;
     }

@@ -39,6 +39,7 @@ public class FieldFilterDataAccessHandler implements DataAccessHandler {
             case Permission.ACTION_GET:
                 return doQueryAccess(filterDataAccessConfig, context);
             case Permission.ACTION_ADD:
+            case Permission.ACTION_SAVE:
             case Permission.ACTION_UPDATE:
                 return doUpdateAccess(filterDataAccessConfig, context);
             default:

@@ -101,6 +101,9 @@ public class QueryParamEntity extends QueryParam {
         if (null != before) {
             before.accept(query);
         }
+        if(terms.isEmpty()){
+            return query;
+        }
         return query
                 .nest()
                 .each(terms, NestConditional::accept)

@@ -1,5 +1,7 @@
 package org.hswebframework.web.authorization.annotation;
 
+import org.hswebframework.web.authorization.define.Phased;
+
 import java.lang.annotation.*;
 
 /**

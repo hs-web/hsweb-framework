@@ -163,6 +163,7 @@ public class DefaultBasicAuthorizeDefinition implements AopAuthorizeDefinition {
         resource.setId(ann.id());
         resource.setName(ann.name());
         resource.setLogical(ann.logical());
+        resource.setPhased(ann.phased());
         resource.setDescription(String.join("\n", ann.description()));
         for (ResourceAction action : ann.actions()) {
             putAnnotation(resource, action);
@@ -193,6 +194,7 @@ public class DefaultBasicAuthorizeDefinition implements AopAuthorizeDefinition {
             typeDefinition.setId(dataAccessType.id());
             typeDefinition.setName(dataAccessType.name());
             typeDefinition.setController(dataAccessType.controller());
+            typeDefinition.setConfiguration(dataAccessType.configuration());
             typeDefinition.setDescription(String.join("\n", dataAccessType.description()));
         }
         definition.getDataAccess()
@@ -205,6 +207,7 @@ public class DefaultBasicAuthorizeDefinition implements AopAuthorizeDefinition {
         typeDefinition.setId(dataAccessType.id());
         typeDefinition.setName(dataAccessType.name());
         typeDefinition.setController(dataAccessType.controller());
+        typeDefinition.setConfiguration(dataAccessType.configuration());
         typeDefinition.setDescription(String.join("\n", dataAccessType.description()));
         definition.getDataAccess()
                 .getDataAccessTypes()

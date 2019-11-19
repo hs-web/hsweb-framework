@@ -18,6 +18,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -46,15 +47,14 @@ public class DefaultDimensionService
     }
 
     @Override
-    public Flux<DimensionType> getAllType() {
+    public Flux<DimensionTypeEntity> getAllType() {
         return dimensionTypeRepository
                 .createQuery()
-                .fetch()
-                .cast(DimensionType.class);
+                .fetch();
     }
 
     @Override
-    public Flux<Dimension> getDimensionByUserId(String userId) {
+    public Flux<DynamicDimension> getDimensionByUserId(String userId) {
         return getAllType()
                 .collect(Collectors.toMap(DimensionType::getId, Function.identity()))
                 .flatMapMany(typeGrouping ->
@@ -62,7 +62,19 @@ public class DefaultDimensionService
                                 .createQuery()
                                 .where(DimensionUserEntity::getUserId, userId)
                                 .fetch()
-                                .map(entity -> DynamicDimension.of(entity, typeGrouping.get(entity.getDimensionTypeId()))));
+                                .collectList()
+                                .flatMapMany(list -> {
+                                    //查询所有的维度
+                                    return this.findById(Flux.fromIterable(list.stream()
+                                            .map(DimensionUserEntity::getDimensionId)
+                                            .collect(Collectors.toSet())))
+                                            .map(dimension ->
+                                                    DynamicDimension.of(dimension, typeGrouping.get(dimension.getTypeId()))
+                                            )
+                                            ;
+
+                                })
+                );
     }
 
     @Override

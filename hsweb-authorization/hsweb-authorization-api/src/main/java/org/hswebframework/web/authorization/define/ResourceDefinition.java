@@ -33,6 +33,8 @@ public class ResourceDefinition {
 
     private Logical logical = Logical.DEFAULT;
 
+    private Phased phased = Phased.before;
+
     public static ResourceDefinition of(String id, String name) {
         ResourceDefinition definition = new ResourceDefinition();
         definition.setId(id);
