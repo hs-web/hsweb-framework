@@ -15,7 +15,6 @@
         <module>hsweb-system-authorization</module>
         <module>hsweb-system-file</module>
         <module>hsweb-system-dictionary</module>
-        <module>hsweb-system-organizational</module>
     </modules>
     <artifactId>hsweb-system</artifactId>
 
