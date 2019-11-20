@@ -1,7 +1,6 @@
 package org.hswebframework.web.authorization.basic.configuration;
 
 import org.hswebframework.web.authorization.AuthenticationManager;
-import org.hswebframework.web.authorization.ReactiveAuthenticationManager;
 import org.hswebframework.web.authorization.ReactiveAuthenticationManagerProvider;
 import org.hswebframework.web.authorization.access.DataAccessController;
 import org.hswebframework.web.authorization.access.DataAccessHandler;
@@ -50,57 +49,70 @@ public class AuthorizingHandlerAutoConfiguration {
         return new DefaultAuthorizingHandler(dataAccessController);
     }
 
-    @Bean
-    @ConditionalOnMissingBean(UserTokenParser.class)
-    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
-    public UserTokenParser userTokenParser() {
-        return new SessionIdUserTokenParser();
-    }
-
-    @Bean
-    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
-    public SessionIdUserTokenGenerator sessionIdUserTokenGenerator() {
-        return new SessionIdUserTokenGenerator();
-    }
-
-    @Bean
-    @ConditionalOnProperty(prefix = "hsweb.authorize.two-factor", name = "enable", havingValue = "true")
-    @Order(100)
-    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
-    public WebMvcConfigurer twoFactorHandlerConfigurer(TwoFactorValidatorManager manager) {
-        return new WebMvcConfigurerAdapter() {
-            @Override
-            public void addInterceptors(InterceptorRegistry registry) {
-                registry.addInterceptor(new TwoFactorHandlerInterceptorAdapter(manager));
-                super.addInterceptors(registry);
-            }
-        };
-    }
 
     @Bean
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
-    public UserTokenWebFilter userTokenWebFilter(){
+    public UserTokenWebFilter userTokenWebFilter() {
         return new UserTokenWebFilter();
     }
 
-    @Bean
-    @Order(Ordered.HIGHEST_PRECEDENCE)
+
+    @Configuration
+    @ConditionalOnClass(name = "org.springframework.web.servlet.config.annotation.WebMvcConfigurer")
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
-    public WebMvcConfigurer webUserTokenInterceptorConfigurer(UserTokenManager userTokenManager,
-                                                              AopMethodAuthorizeDefinitionParser parser,
-                                                              List<UserTokenParser> userTokenParser) {
+    static class WebMvcAuthorizingConfiguration {
+        @Bean
+        @Order(Ordered.HIGHEST_PRECEDENCE)
+        public WebMvcConfigurer webUserTokenInterceptorConfigurer(UserTokenManager userTokenManager,
+                                                                  AopMethodAuthorizeDefinitionParser parser,
+                                                                  List<UserTokenParser> userTokenParser) {
 
-        return new WebMvcConfigurer() {
-            @Override
-            public void addInterceptors(InterceptorRegistry registry) {
-                registry.addInterceptor(new WebUserTokenInterceptor(userTokenManager, userTokenParser, parser));
+            return new WebMvcConfigurer() {
+                @Override
+                public void addInterceptors(InterceptorRegistry registry) {
+                    registry.addInterceptor(new WebUserTokenInterceptor(userTokenManager, userTokenParser, parser));
+                }
+            };
+        }
 
-            }
-        };
+        @Bean
+        public UserOnSignIn userOnSignIn(UserTokenManager userTokenManager) {
+            return new UserOnSignIn(userTokenManager);
+        }
+
+        @Bean
+        public UserOnSignOut userOnSignOut(UserTokenManager userTokenManager) {
+            return new UserOnSignOut(userTokenManager);
+        }
+
+
+        @Bean
+        @ConditionalOnMissingBean(UserTokenParser.class)
+        public UserTokenParser userTokenParser() {
+            return new SessionIdUserTokenParser();
+        }
+
+        @Bean
+        public SessionIdUserTokenGenerator sessionIdUserTokenGenerator() {
+            return new SessionIdUserTokenGenerator();
+        }
+
+        @Bean
+        @ConditionalOnProperty(prefix = "hsweb.authorize.two-factor", name = "enable", havingValue = "true")
+        @Order(100)
+        public WebMvcConfigurer twoFactorHandlerConfigurer(TwoFactorValidatorManager manager) {
+            return new WebMvcConfigurerAdapter() {
+                @Override
+                public void addInterceptors(InterceptorRegistry registry) {
+                    registry.addInterceptor(new TwoFactorHandlerInterceptorAdapter(manager));
+                    super.addInterceptors(registry);
+                }
+            };
+        }
+
     }
 
     @Bean
-//    @ConditionalOnMissingBean(ReactiveAuthenticationManager.class)
     public ReactiveAuthenticationManagerProvider embedAuthenticationManager(EmbedAuthenticationProperties properties) {
         return new EmbedReactiveAuthenticationManager(properties);
     }
@@ -111,21 +123,9 @@ public class AuthorizingHandlerAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
-    public UserOnSignIn userOnSignIn(UserTokenManager userTokenManager) {
-        return new UserOnSignIn(userTokenManager);
-    }
-
-    @Bean
-    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
-    public UserOnSignOut userOnSignOut(UserTokenManager userTokenManager) {
-        return new UserOnSignOut(userTokenManager);
-    }
-
-    @Bean
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
     @ConfigurationProperties(prefix = "hsweb.authorize.token.default")
-    public DefaultUserTokenGenPar defaultUserTokenGenPar(){
+    public DefaultUserTokenGenPar defaultUserTokenGenPar() {
         return new DefaultUserTokenGenPar();
     }
 
@@ -159,7 +159,6 @@ public class AuthorizingHandlerAutoConfiguration {
             return bean;
         }
     }
-
 
 
     @Configuration
