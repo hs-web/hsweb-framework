@@ -3,6 +3,7 @@ package org.hswebframework.web.dictionary.configuration;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.web.dict.EnumDict;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.io.Resource;
@@ -21,25 +22,31 @@ import java.util.Set;
 @ConfigurationProperties(prefix = "hsweb.dict")
 @Getter
 @Setter
+@Slf4j
 public class DictionaryProperties {
 
-    private Set<String> enumPackages=new HashSet<>();
+    private Set<String> enumPackages = new HashSet<>();
 
     @SneakyThrows
-    public List<Class> doScanEnum(){
+    public List<Class> doScanEnum() {
         Set<String> packages = new HashSet<>(enumPackages);
         packages.add("org.hswebframework.web");
         CachingMetadataReaderFactory metadataReaderFactory = new CachingMetadataReaderFactory();
         ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
         List<Class> classes = new ArrayList<>();
         for (String enumPackage : packages) {
-            String path = "classpath*:"+ ClassUtils.convertClassNameToResourcePath(enumPackage)+"/**/*.class";
+            String path = "classpath*:" + ClassUtils.convertClassNameToResourcePath(enumPackage) + "/**/*.class";
             Resource[] resources = resourcePatternResolver.getResources(path);
             for (Resource resource : resources) {
-                MetadataReader reader = metadataReaderFactory.getMetadataReader(resource);
-                Class clazz=Class.forName(reader.getClassMetadata().getClassName());
-                if(clazz.isEnum()&& EnumDict.class.isAssignableFrom(clazz)){
-                    classes.add(clazz);
+                try {
+                    MetadataReader reader = metadataReaderFactory.getMetadataReader(resource);
+                    String name = reader.getClassMetadata().getClassName();
+                    Class clazz = Class.forName(name);
+                    if (clazz.isEnum() && EnumDict.class.isAssignableFrom(clazz)) {
+                        classes.add(clazz);
+                    }
+                } catch (Throwable e) {
+
                 }
             }
         }
