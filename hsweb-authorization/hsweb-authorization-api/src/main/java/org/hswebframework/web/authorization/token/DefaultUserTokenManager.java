@@ -30,13 +30,9 @@ import org.springframework.context.ApplicationEventPublisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import javax.validation.constraints.NotNull;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 /**
  * 默认到用户令牌管理器，使用ConcurrentMap来存储令牌信息
@@ -46,7 +42,7 @@ import java.util.stream.Collectors;
  */
 public class DefaultUserTokenManager implements UserTokenManager {
 
-    protected final ConcurrentMap<String, SimpleUserToken> tokenStorage;
+    protected final ConcurrentMap<String, LocalUserToken> tokenStorage;
 
     protected final ConcurrentMap<String, Set<String>> userStorage;
 
@@ -61,11 +57,11 @@ public class DefaultUserTokenManager implements UserTokenManager {
 
     }
 
-    public DefaultUserTokenManager(ConcurrentMap<String, SimpleUserToken> tokenStorage) {
+    public DefaultUserTokenManager(ConcurrentMap<String, LocalUserToken> tokenStorage) {
         this(tokenStorage, new ConcurrentHashMap<>());
     }
 
-    public DefaultUserTokenManager(ConcurrentMap<String, SimpleUserToken> tokenStorage, ConcurrentMap<String, Set<String>> userStorage) {
+    public DefaultUserTokenManager(ConcurrentMap<String, LocalUserToken> tokenStorage, ConcurrentMap<String, Set<String>> userStorage) {
         this.tokenStorage = tokenStorage;
         this.userStorage = userStorage;
     }
@@ -183,7 +179,7 @@ public class DefaultUserTokenManager implements UserTokenManager {
         if (token == null) {
             return;
         }
-        SimpleUserToken tokenObject = tokenStorage.remove(token);
+        LocalUserToken tokenObject = tokenStorage.remove(token);
         if (tokenObject != null) {
             String userId = tokenObject.getUserId();
             if (removeUserToken) {
@@ -212,8 +208,8 @@ public class DefaultUserTokenManager implements UserTokenManager {
 
     public Mono<Void> changeTokenState(UserToken userToken, TokenState state) {
         if (null != userToken) {
-            SimpleUserToken token = ((SimpleUserToken) userToken);
-            SimpleUserToken copy = token.copy();
+            LocalUserToken token = ((LocalUserToken) userToken);
+            LocalUserToken copy = token.copy();
 
             token.setState(state);
             syncToken(userToken);
@@ -239,7 +235,7 @@ public class DefaultUserTokenManager implements UserTokenManager {
     public Mono<UserToken> signIn(String token, String type, String userId, long maxInactiveInterval) {
 
         return Mono.defer(() -> {
-            SimpleUserToken detail = new SimpleUserToken(userId, token);
+            LocalUserToken detail = new LocalUserToken(userId, token);
             detail.setType(type);
             detail.setMaxInactiveInterval(maxInactiveInterval);
             detail.setState(TokenState.normal);
@@ -278,7 +274,7 @@ public class DefaultUserTokenManager implements UserTokenManager {
 
     @Override
     public Mono<Void> touch(String token) {
-        SimpleUserToken userToken = tokenStorage.get(token);
+        LocalUserToken userToken = tokenStorage.get(token);
         if (null != userToken) {
             userToken.touch();
             syncToken(userToken);
