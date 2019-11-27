@@ -1,5 +1,6 @@
 package org.hswebframework.web.authorization.simple;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.hswebframework.web.authorization.DimensionType;
@@ -12,6 +13,7 @@ import java.util.Set;
 
 @Getter
 @Setter
+@EqualsAndHashCode(callSuper = true)
 public class DimensionDataAccessConfig extends AbstractDataAccessConfig implements ScopeDataAccessConfig {
 
     private Set<Object> scope;

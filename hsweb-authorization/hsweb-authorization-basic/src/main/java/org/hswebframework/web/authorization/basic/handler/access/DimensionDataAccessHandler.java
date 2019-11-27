@@ -344,12 +344,12 @@ public class DimensionDataAccessHandler implements DataAccessHandler {
             Set<Annotation> methodAnnotation = AnnotatedElementUtils.findAllMergedAnnotations(method, ann);
             Set<Annotation> classAnnotation = AnnotatedElementUtils.findAllMergedAnnotations(target, ann);
 
-            if (CollectionUtils.isEmpty(methodAnnotation)) {
-                return Collections.emptyMap();
-            }
+
             List<Annotation> all = new ArrayList<>(classAnnotation);
             all.addAll(methodAnnotation);
-
+            if (CollectionUtils.isEmpty(all)) {
+                return Collections.emptyMap();
+            }
             Map<String, MappingInfo> mappingInfoMap = new HashMap<>();
             for (Annotation annotation : all) {
                 if (annotation instanceof DimensionDataAccess) {
