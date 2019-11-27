@@ -64,7 +64,8 @@ public class DefaultReactiveAuthenticationInitializeService
                     .username(user.getUsername())
                     .userType(user.getType())
                     .build());
-            return initPermission(authentication);
+            return initPermission(authentication)
+                    .switchIfEmpty(Mono.just(authentication));
         });
 
     }
@@ -92,7 +93,8 @@ public class DefaultReactiveAuthenticationInitializeService
                 .flatMap(allDimension ->
                         Mono.zip(
                                 getAllPermission()
-                                , getSettings(allDimension).collect(Collectors.groupingBy(AuthorizationSettingEntity::getPermission))
+                                , getSettings(allDimension)
+                                        .collect(Collectors.groupingBy(AuthorizationSettingEntity::getPermission))
                                 , (_p, _s) -> handlePermission(authentication, allDimension, _p, _s)
                         ));
 
@@ -190,7 +192,8 @@ public class DefaultReactiveAuthenticationInitializeService
                 .createQuery()
                 .where(PermissionEntity::getStatus, 1)
                 .fetch()
-                .collect(Collectors.toMap(PermissionEntity::getId, Function.identity()));
+                .collect(Collectors.toMap(PermissionEntity::getId, Function.identity()))
+                .switchIfEmpty(Mono.just(Collections.emptyMap()));
     }
 
 }
