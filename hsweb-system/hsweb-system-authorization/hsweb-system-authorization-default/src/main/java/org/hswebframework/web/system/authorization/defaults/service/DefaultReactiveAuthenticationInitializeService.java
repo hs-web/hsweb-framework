@@ -65,7 +65,11 @@ public class DefaultReactiveAuthenticationInitializeService
                     .userType(user.getType())
                     .build());
             return initPermission(authentication)
-                    .switchIfEmpty(Mono.just(authentication));
+                    .switchIfEmpty(Mono.just(authentication))
+                    .onErrorResume(err -> {
+                        log.warn(err.getMessage(), err);
+                        return Mono.just(authentication);
+                    });
         });
 
     }

@@ -129,6 +129,23 @@ public class DefaultBasicAuthorizeDefinition implements AopAuthorizeDefinition {
 
         }
 
+
+        for (Annotation annotation : classAnnotation) {
+            if (annotation instanceof DataAccessType||
+                    annotation instanceof DataAccess) {
+                for (ResourceDefinition resource : definition.getResources().getResources()) {
+                    for (ResourceActionDefinition action : resource.getActions()) {
+                        if(annotation instanceof DataAccessType) {
+                            definition.putAnnotation(action, (DataAccessType) annotation);
+                        }else{
+                            definition.putAnnotation(action, (DataAccess) annotation);
+                        }
+                    }
+                }
+            }
+        }
+
+
         return definition;
     }
 
