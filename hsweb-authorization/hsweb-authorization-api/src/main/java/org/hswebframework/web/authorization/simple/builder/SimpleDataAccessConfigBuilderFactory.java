@@ -23,6 +23,7 @@ public class SimpleDataAccessConfigBuilderFactory implements DataAccessConfigBui
 
     private List<String> defaultSupportConvert = Arrays.asList(
             OWN_CREATED,
+            DIMENSION_SCOPE,
             DENY_FIELDS);
 
     private List<DataAccessConfigConverter> converts = new LinkedList<>();

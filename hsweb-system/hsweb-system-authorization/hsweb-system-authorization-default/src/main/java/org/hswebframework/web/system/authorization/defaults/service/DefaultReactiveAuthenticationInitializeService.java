@@ -86,6 +86,7 @@ public class DefaultReactiveAuthenticationInitializeService
     protected Mono<Authentication> initPermission(SimpleAuthentication authentication) {
         return Flux.fromIterable(dimensionProviders)
                 .flatMap(provider -> provider.getDimensionByUserId(authentication.getUser().getId()))
+                .cast(Dimension.class)
                 .collectList()
                 .doOnNext(authentication::setDimensions)
                 .flatMap(allDimension ->
@@ -127,7 +128,14 @@ public class DefaultReactiveAuthenticationInitializeService
                     if (permissionSetting.getDataAccesses() != null) {
                         permissionSetting.getDataAccesses()
                                 .stream()
-                                .map(conf -> builderFactory.create().fromMap(conf.toMap()).build())
+                                .map(conf -> {
+                                    DataAccessConfig config = builderFactory.create().fromMap(conf.toMap()).build();
+                                    if (config == null) {
+                                        log.warn("unsupported data access:{}", conf.toMap());
+                                    }
+                                    return config;
+                                })
+                                .filter(Objects::nonNull)
                                 .forEach(access -> configs.put(access.getType(), access));
                     }
                     if (CollectionUtils.isNotEmpty(permissionSetting.getActions())) {
