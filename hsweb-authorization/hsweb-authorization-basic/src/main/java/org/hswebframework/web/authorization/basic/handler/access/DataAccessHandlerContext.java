@@ -8,6 +8,7 @@ import org.hswebframework.web.aop.MethodInterceptorContext;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.Dimension;
 import org.hswebframework.web.authorization.DimensionType;
+import org.hswebframework.web.authorization.define.AuthorizeDefinition;
 import org.hswebframework.web.authorization.define.AuthorizingContext;
 import org.hswebframework.web.crud.web.reactive.*;
 
@@ -27,13 +28,15 @@ public class DataAccessHandlerContext {
 
     private MethodInterceptorContext paramContext;
 
+    private AuthorizeDefinition definition;
+
     public static DataAccessHandlerContext of(AuthorizingContext context, String type) {
         DataAccessHandlerContext requestContext = new DataAccessHandlerContext();
         Authentication authentication = context.getAuthentication();
         requestContext.setDimensions(authentication.getDimensions(type));
         requestContext.setAuthentication(context.getAuthentication());
         requestContext.setParamContext(context.getParamContext());
-
+        requestContext.setDefinition(context.getDefinition());
         Object target = context.getParamContext().getTarget();
         Class entityType = ClassUtils.getGenericType(org.springframework.util.ClassUtils.getUserClass(target));
         if (entityType != Object.class) {

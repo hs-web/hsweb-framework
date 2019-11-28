@@ -17,10 +17,10 @@ import org.hswebframework.web.authorization.access.DataAccessConfig;
 import org.hswebframework.web.authorization.access.DataAccessHandler;
 import org.hswebframework.web.authorization.annotation.DimensionDataAccess;
 import org.hswebframework.web.authorization.define.AuthorizingContext;
+import org.hswebframework.web.authorization.define.Phased;
 import org.hswebframework.web.authorization.exception.AccessDenyException;
 import org.hswebframework.web.authorization.simple.DimensionDataAccessConfig;
 import org.hswebframework.web.bean.FastBeanCopier;
-import org.hswebframework.web.utils.AnnotationUtils;
 import org.reactivestreams.Publisher;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.util.ClassUtils;
@@ -110,10 +110,10 @@ public class DimensionDataAccessHandler implements DataAccessHandler {
     }
 
     @SuppressWarnings("all")
-    protected Object handleUpdateById(DimensionDataAccessConfig config,
-                                      DataAccessHandlerContext context,
-                                      MappingInfo mappingInfo,
-                                      Object id) {
+    protected Object handleById(DimensionDataAccessConfig config,
+                                DataAccessHandlerContext context,
+                                MappingInfo mappingInfo,
+                                Object id) {
         List<Dimension> dimensions = context.getDimensions();
 
         Set<Object> scope = CollectionUtils.isNotEmpty(config.getScope()) ?
@@ -153,18 +153,14 @@ public class DimensionDataAccessHandler implements DataAccessHandler {
         Object result = context.getParamContext().getInvokeResult();
         if (result instanceof Mono) {
             context.getParamContext()
-                    .setInvokeResult(((Mono) result)
-                            .flatMap(res -> {
-                                return reactiveCheck.apply(idVal).thenReturn(res);
-                            }));
+                    .setInvokeResult(reactiveCheck.apply(idVal).then(((Mono) result)));
+
         } else if (result instanceof Flux) {
             context.getParamContext()
-                    .setInvokeResult(((Flux) result)
-                            .flatMap(res -> {
-                                return reactiveCheck.apply(idVal).thenReturn(res);
-                            }));
+                    .setInvokeResult(reactiveCheck.apply(idVal).thenMany(((Flux) result)));
         } else {
             // TODO: 2019-11-19 非响应式处理
+            log.warn("unsupported handle data access by id :{}", context.getParamContext().getMethod());
         }
         return id;
     }
@@ -175,7 +171,7 @@ public class DimensionDataAccessHandler implements DataAccessHandler {
         if (info != null) {
             if (info.idParamIndex != -1) {
                 Object param = context.getParamContext().getArguments()[info.idParamIndex];
-                context.getParamContext().getArguments()[info.idParamIndex] = handleUpdateById(cfg, context, info, param);
+                context.getParamContext().getArguments()[info.idParamIndex] = handleById(cfg, context, info, param);
                 return true;
             }
         } else {
@@ -265,13 +261,52 @@ public class DimensionDataAccessHandler implements DataAccessHandler {
         return Mono.fromRunnable(() -> applyUpdatePayload(config, info, payloads, context));
     }
 
-    protected boolean doHandleQuery(DimensionDataAccessConfig cfg, DataAccessHandlerContext requestContext) {
-        boolean reactive = requestContext.getParamContext().handleReactiveArguments(publisher -> {
+    protected boolean hasAccessByProperty(Set<Object> scope, String property, Object payload) {
+        Map<String, Object> values = FastBeanCopier.copy(payload, new HashMap<>(), FastBeanCopier.include(property));
+        Object val = values.get(property);
+        return val == null || scope.contains(val);
+    }
+
+    @SuppressWarnings("all")
+    protected boolean doHandleQuery(DimensionDataAccessConfig cfg, DataAccessHandlerContext context) {
+        MappingInfo mappingInfo = getMappingInfo(context).get(cfg.getScopeType());
+
+        //根据结果控制
+        if (context.getDefinition().getPhased() == Phased.after) {
+            Object result = context.getParamContext().getInvokeResult();
+            Set<Object> scope = CollectionUtils.isNotEmpty(cfg.getScope()) ?
+                    cfg.getScope() :
+                    context.getDimensions()
+                            .stream()
+                            .map(Dimension::getId)
+                            .collect(Collectors.toSet());
+            String property = mappingInfo.getProperty();
+
+            if (result instanceof Mono) {
+                context.getParamContext().setInvokeResult(((Mono) result).
+                        filter(data -> hasAccessByProperty(scope, property, data)));
+                return true;
+            } else if (result instanceof Flux) {
+                context.getParamContext().setInvokeResult(((Flux) result).
+                        filter(data -> hasAccessByProperty(scope, property, data)));
+                return true;
+            }
+            return hasAccessByProperty(scope, property, result);
+        }
+        //根据id控制
+        if (mappingInfo.getIdParamIndex() >= 0) {
+            Object param = context.getParamContext().getArguments()[mappingInfo.idParamIndex];
+            context.getParamContext().getArguments()[mappingInfo.idParamIndex] = handleById(cfg, context, mappingInfo, param);
+            return true;
+        }
+
+        //根据查询条件控制
+        boolean reactive = context.getParamContext().handleReactiveArguments(publisher -> {
             if (publisher instanceof Mono) {
                 return Mono
                         .from(publisher)
                         .flatMap(param -> this
-                                .applyReactiveQueryParam(cfg, requestContext, param)
+                                .applyReactiveQueryParam(cfg, context, param)
                                 .thenReturn(param));
             }
 
@@ -279,8 +314,8 @@ public class DimensionDataAccessHandler implements DataAccessHandler {
         });
 
         if (!reactive) {
-            Object[] args = requestContext.getParamContext().getArguments();
-            this.applyQueryParam(cfg, requestContext, args);
+            Object[] args = context.getParamContext().getArguments();
+            this.applyQueryParam(cfg, context, args);
         }
         return true;
     }
