@@ -6,6 +6,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -21,8 +22,15 @@ import org.springframework.context.annotation.Configuration;
 public class AopAccessLoggerSupportAutoConfiguration {
 
     @Bean
+    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
     public AopAccessLoggerSupport aopAccessLoggerSupport() {
         return new AopAccessLoggerSupport();
+    }
+
+    @Bean
+    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
+    public ReactiveAopAccessLoggerSupport reactiveAopAccessLoggerSupport() {
+        return new ReactiveAopAccessLoggerSupport();
     }
 
     @Bean
@@ -36,29 +44,10 @@ public class AopAccessLoggerSupportAutoConfiguration {
         return new SwaggerAccessLoggerParser();
     }
 
-//    @Bean
-//    public ListenerProcessor listenerProcessor() {
-//        return new ListenerProcessor();
-//    }
-//
-//    public static class ListenerProcessor implements BeanPostProcessor {
-//
-//        @Autowired
-//        private AopAccessLoggerSupport aopAccessLoggerSupport;
-//
-//        @Override
-//        public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-//            return bean;
-//        }
-//
-//        @Override
-//        public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-//            if (bean instanceof AccessLoggerListener) {
-//                aopAccessLoggerSupport.addListener(((AccessLoggerListener) bean));
-//            }  if (bean instanceof AccessLoggerParser) {
-//                aopAccessLoggerSupport.addParser(((AccessLoggerParser) bean));
-//            }
-//            return bean;
-//        }
-//    }
+
+    @Bean
+    @ConditionalOnClass(name = "org.hswebframework.web.authorization.annotation.Resource")
+    public ResourceAccessLoggerParser resourceAccessLoggerParser(){
+        return new ResourceAccessLoggerParser();
+    }
 }

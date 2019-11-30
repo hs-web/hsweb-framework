@@ -6,6 +6,7 @@ import org.hswebframework.web.authorization.ReactiveAuthenticationSupplier;
 import org.hswebframework.web.authorization.exception.UnAuthorizedException;
 import org.hswebframework.web.context.ContextKey;
 import org.hswebframework.web.context.ContextUtils;
+import org.hswebframework.web.logger.ReactiveLogger;
 import org.springframework.beans.factory.annotation.Autowired;
 import reactor.core.publisher.Mono;
 
@@ -73,9 +74,11 @@ public class UserTokenReactiveAuthenticationSupplier implements ReactiveAuthenti
                                         .getByToken(t.getToken())
                                         .filter(UserToken::validate))
                                 .map(tokenMono -> tokenMono
-                                        .doOnNext(token->userTokenManager.touch(token.getToken()))
+                                        .doOnNext(token -> userTokenManager.touch(token.getToken()))
                                         .flatMap(token -> get(thirdPartAuthenticationManager.get(token.getType()), token.getUserId())))
-                                .orElseGet(Mono::empty));
+                                .orElseGet(Mono::empty))
+                .flatMap(auth -> ReactiveLogger.mdc("userId", auth.getUser().getId()).thenReturn(auth))
+                ;
 
     }
 }

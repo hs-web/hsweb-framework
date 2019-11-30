@@ -9,11 +9,13 @@ import org.hswebframework.web.logging.LoggerDefine;
 import org.hswebframework.web.logging.events.AccessLoggerAfterEvent;
 import org.hswebframework.web.logging.events.AccessLoggerBeforeEvent;
 import org.hswebframework.web.utils.WebUtils;
+import org.reactivestreams.Publisher;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.Ordered;
 import org.springframework.util.ClassUtils;
+import reactor.core.publisher.Mono;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
@@ -29,37 +31,19 @@ import java.util.List;
 public class AopAccessLoggerSupport extends StaticMethodMatcherPointcutAdvisor {
 
     @Autowired(required = false)
-    private final List<AccessLoggerListener> listeners = new ArrayList<>();
-
-    @Autowired(required = false)
     private final List<AccessLoggerParser> loggerParsers = new ArrayList<>();
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;
 
 
-    public AopAccessLoggerSupport addListener(AccessLoggerListener loggerListener) {
-        if (!listeners.contains(loggerListener)) {
-            listeners.add(loggerListener);
-        }
-        return this;
-    }
-
-    public AopAccessLoggerSupport addParser(AccessLoggerParser parser) {
-        if (!loggerParsers.contains(parser)) {
-            loggerParsers.add(parser);
-        }
-        return this;
-    }
-
     public AopAccessLoggerSupport() {
         setAdvice((MethodInterceptor) methodInvocation -> {
             MethodInterceptorHolder methodInterceptorHolder = MethodInterceptorHolder.create(methodInvocation);
             AccessLoggerInfo info = createLogger(methodInterceptorHolder);
-            Object response;
+            Object response = null;
             try {
                 eventPublisher.publishEvent(new AccessLoggerBeforeEvent(info));
-                listeners.forEach(listener -> listener.onLogBefore(info));
                 response = methodInvocation.proceed();
                 info.setResponse(response);
             } catch (Throwable e) {
@@ -69,7 +53,6 @@ public class AopAccessLoggerSupport extends StaticMethodMatcherPointcutAdvisor {
                 info.setResponseTime(System.currentTimeMillis());
                 //触发监听
                 eventPublisher.publishEvent(new AccessLoggerAfterEvent(info));
-                listeners.forEach(listener -> listener.onLogger(info));
             }
             return response;
         });

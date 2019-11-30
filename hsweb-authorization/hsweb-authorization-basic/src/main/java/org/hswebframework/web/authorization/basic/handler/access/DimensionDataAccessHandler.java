@@ -114,6 +114,13 @@ public class DimensionDataAccessHandler implements DataAccessHandler {
                                 DataAccessHandlerContext context,
                                 MappingInfo mappingInfo,
                                 Object id) {
+
+        if (id instanceof Param || id instanceof Entity) {
+
+            applyQueryParam(config, context, id);
+            return id;
+        }
+
         List<Dimension> dimensions = context.getDimensions();
 
         Set<Object> scope = CollectionUtils.isNotEmpty(config.getScope()) ?
@@ -138,11 +145,25 @@ public class DimensionDataAccessHandler implements DataAccessHandler {
         if (id instanceof Publisher) {
             if (id instanceof Mono) {
                 return ((Mono) id)
-                        .flatMap(r -> reactiveCheck.apply(r instanceof Collection ? ((Collection) r) : Collections.singleton(r)))
+                        .flatMap(r -> {
+                            if (r instanceof Param) {
+                                applyQueryParam(config, context, r);
+                                return Mono.just(r);
+                            }
+                            return reactiveCheck.apply(r instanceof Collection ? ((Collection) r) : Collections.singleton(r));
+
+                        })
                         .then((Mono) id);
             }
             if (id instanceof Flux) {
                 return ((Flux) id)
+                        .filter(v -> {
+                            if (v instanceof Param) {
+                                applyQueryParam(config, context, v);
+                                return false;
+                            }
+                            return true;
+                        })
                         .collectList()
                         .flatMap(reactiveCheck)
                         .thenMany((Flux) id);
@@ -272,7 +293,7 @@ public class DimensionDataAccessHandler implements DataAccessHandler {
         MappingInfo mappingInfo = getMappingInfo(context).get(cfg.getScopeType());
 
         //根据结果控制
-        if (context.getDefinition().getPhased() == Phased.after) {
+        if (context.getDefinition().getResources().getPhased() == Phased.after) {
             Object result = context.getParamContext().getInvokeResult();
             Set<Object> scope = CollectionUtils.isNotEmpty(cfg.getScope()) ?
                     cfg.getScope() :
@@ -283,12 +304,14 @@ public class DimensionDataAccessHandler implements DataAccessHandler {
             String property = mappingInfo.getProperty();
 
             if (result instanceof Mono) {
-                context.getParamContext().setInvokeResult(((Mono) result).
-                        filter(data -> hasAccessByProperty(scope, property, data)));
+                context.getParamContext()
+                        .setInvokeResult(((Mono) result).
+                                filter(data -> hasAccessByProperty(scope, property, data)));
                 return true;
             } else if (result instanceof Flux) {
-                context.getParamContext().setInvokeResult(((Flux) result).
-                        filter(data -> hasAccessByProperty(scope, property, data)));
+                context.getParamContext()
+                        .setInvokeResult(((Flux) result).
+                                filter(data -> hasAccessByProperty(scope, property, data)));
                 return true;
             }
             return hasAccessByProperty(scope, property, result);

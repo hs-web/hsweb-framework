@@ -5,10 +5,12 @@ import org.hswebframework.web.authorization.simple.builder.SimpleAuthenticationB
 import org.hswebframework.web.authorization.simple.builder.SimpleDataAccessConfigBuilderFactory;
 import org.hswebframework.web.authorization.token.*;
 import org.hswebframework.web.context.ContextKey;
+import org.hswebframework.web.logger.ReactiveLogger;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.SignalType;
 import reactor.test.StepVerifier;
 
 import java.util.Collections;
@@ -127,12 +129,17 @@ public class AuthenticationTests {
                 return  token.getType();
             }
         };
+
         //获取当前登录用户
         Authentication
                 .currentReactive()
                 .map(Authentication::getUser)
                 .map(User::getId)
+                .doOnEach(ReactiveLogger.on(SignalType.ON_NEXT,(ctx,signal)->{
+                    System.out.println(ctx);
+                }))
                 .subscriberContext(acceptContext(ctx -> ctx.put(ContextKey.of(ParsedToken.class), parsedToken)))
+               // .subscriberContext(ReactiveLogger.start("rid","1"))
                 .as(StepVerifier::create)
                 .expectNext("admin")
                 .verifyComplete();

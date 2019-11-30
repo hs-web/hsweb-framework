@@ -52,14 +52,17 @@ public class MethodInterceptorHolder {
         String[] argNames = nameDiscoverer.getParameterNames(invocation.getMethod());
         Object[] args = invocation.getArguments();
         Map<String, Object> argMap = new LinkedHashMap<>();
+        String[] names = new String[args.length];
         for (int i = 0, len = args.length; i < len; i++) {
-            argMap.put((argNames == null || argNames[i] == null) ? "arg" + i : argNames[i], args[i]);
+            names[i] = (argNames == null || argNames.length <= i || argNames[i] == null) ? "arg" + i : argNames[i];
+            argMap.put(names[i], args[i]);
         }
 
         return new MethodInterceptorHolder(id,
                 invocation.getMethod(),
                 invocation.getThis(),
                 args,
+                names,
                 argMap);
     }
 
@@ -70,6 +73,8 @@ public class MethodInterceptorHolder {
     private Object target;
 
     private Object[] arguments;
+
+    private String[] argumentsNames;
 
     private Map<String, Object> namedArguments;
 

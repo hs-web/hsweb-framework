@@ -5,6 +5,7 @@ import org.hswebframework.web.authorization.events.AuthorizationSuccessEvent;
 import org.hswebframework.web.authorization.token.ParsedToken;
 import org.hswebframework.web.authorization.token.UserTokenManager;
 import org.hswebframework.web.context.ContextUtils;
+import org.hswebframework.web.logger.ReactiveLogger;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -42,7 +43,9 @@ public class UserTokenWebFilter implements WebFilter, BeanPostProcessor {
                 .subscriberContext(ContextUtils.acceptContext(ctx ->
                         Flux.fromIterable(parsers)
                                 .flatMap(parser -> parser.parseToken(exchange))
-                                .subscribe(token -> ctx.put(ParsedToken.class, token))));
+                                .subscribe(token -> ctx.put(ParsedToken.class, token))))
+                .subscriberContext(ReactiveLogger.start("requestId", exchange.getRequest().getId()))
+                ;
     }
 
     @EventListener
