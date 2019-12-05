@@ -3,6 +3,7 @@ package org.hswebframework.web.loggin.aop;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.hswebframework.web.aop.MethodInterceptorHolder;
 import org.hswebframework.web.id.IDGenerator;
+import org.hswebframework.web.logger.ReactiveLogger;
 import org.hswebframework.web.logging.RequestInfo;
 import org.hswebframework.web.logging.AccessLoggerInfo;
 import org.hswebframework.web.logging.AccessLoggerListener;
@@ -65,12 +66,13 @@ public class ReactiveAopAccessLoggerSupport extends StaticMethodMatcherPointcutA
                 .doFinally(f -> {
                     loggerInfo.setResponseTime(System.currentTimeMillis());
                     eventPublisher.publishEvent(new AccessLoggerAfterEvent(loggerInfo));
-                });
+                }).subscriberContext(ReactiveLogger.start("accessLogId",loggerInfo.getId()));
     }
 
     protected Mono<?> wrapMonoResponse(Mono<?> mono, AccessLoggerInfo loggerInfo) {
         return Mono.subscriberContext()
-                .<RequestInfo>flatMap(ctx -> Mono.justOrEmpty(ctx.getOrEmpty(RequestInfo.class)))
+                .<RequestInfo>flatMap(ctx -> Mono.<RequestInfo>justOrEmpty(ctx.getOrEmpty(RequestInfo.class))
+                        .doOnNext(info -> ReactiveLogger.log(ctx, info::setContext)))
                 .doOnNext(loggerInfo::putAccessInfo)
                 .then(mono)
                 .doOnError(loggerInfo::setException)
@@ -78,7 +80,7 @@ public class ReactiveAopAccessLoggerSupport extends StaticMethodMatcherPointcutA
                 .doFinally(f -> {
                     loggerInfo.setResponseTime(System.currentTimeMillis());
                     eventPublisher.publishEvent(new AccessLoggerAfterEvent(loggerInfo));
-                });
+                }).subscriberContext(ReactiveLogger.start("accessLogId",loggerInfo.getId()));
     }
 
     @SuppressWarnings("all")

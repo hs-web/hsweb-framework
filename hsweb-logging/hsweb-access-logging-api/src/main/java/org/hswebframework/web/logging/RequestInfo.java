@@ -19,7 +19,13 @@ public class RequestInfo {
 
     private String requestMethod;
 
+    private String userId;
+
+    private String username;
+
     private Map<String,String> headers;
+
+    private Map<String,String> context;
 
 
 }

@@ -22,7 +22,7 @@ public class ReactiveLoggerTest {
                 .doOnEach(ReactiveLogger.onNext(v -> {
                     log.info("test:{}", v);
                 }))
-                .subscriberContext(ReactiveLogger.start("r","1"))
+                .subscriberContext(ReactiveLogger.start("r", "1"))
                 .as(StepVerifier::create)
                 .expectNextCount(5)
                 .verifyComplete();
@@ -30,4 +30,18 @@ public class ReactiveLoggerTest {
 
     }
 
+    @Test
+    public void testHandle() {
+        Flux.range(0, 5)
+                .delayElements(Duration.ofSeconds(2))
+                .flatMap(i -> ReactiveLogger.mdc("requestId", "test").thenReturn(i))
+                .handle(ReactiveLogger.handle((o, fluxSink) -> {
+                    log.info("test:{}", fluxSink.currentContext());
+                    fluxSink.next(o);
+                })).subscriberContext(ReactiveLogger.start("r", "1"))
+                .as(StepVerifier::create)
+                .expectNextCount(5)
+                .verifyComplete();
+
+    }
 }

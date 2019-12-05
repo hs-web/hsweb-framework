@@ -73,6 +73,11 @@ public class AccessLoggerInfo {
     private Map<String, String> httpHeaders;
 
     /**
+     * 上下文
+     */
+    private Map<String, String> context;
+
+    /**
      * http 请求方法, GET,POST...
      */
     private String httpMethod;
@@ -130,7 +135,7 @@ public class AccessLoggerInfo {
         map.put("response", objectFilter.apply(response));
         map.put("requestTime", requestTime);
         map.put("responseTime", responseTime);
-        map.put("id",id);
+        map.put("id", id);
         map.put("useTime", responseTime - requestTime);
         if (exception != null) {
             StringWriter writer = new StringWriter();
@@ -141,10 +146,11 @@ public class AccessLoggerInfo {
     }
 
 
-    public void putAccessInfo(RequestInfo info){
+    public void putAccessInfo(RequestInfo info) {
         setIp(info.getIpAddr());
         setHttpMethod(info.getRequestMethod());
         setHttpHeaders(info.getHeaders());
         setUrl(info.getPath());
+        setContext(info.getContext());
     }
 }

@@ -2,9 +2,7 @@ package org.hswebframework.web.logger;
 
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
-import reactor.core.publisher.Mono;
-import reactor.core.publisher.Signal;
-import reactor.core.publisher.SignalType;
+import reactor.core.publisher.*;
 import reactor.util.context.Context;
 
 import java.util.*;
@@ -87,6 +85,14 @@ public class ReactiveLogger {
                     }
                 })
                 .then();
+    }
+
+    public static <T, R> BiConsumer<T, SynchronousSink<R>> handle(BiConsumer<T, SynchronousSink<R>> logger) {
+        return (t, rFluxSink) -> {
+            log(rFluxSink.currentContext(), context -> {
+                logger.accept(t, rFluxSink);
+            });
+        };
     }
 
     public static <T> Consumer<Signal<T>> onNext(Consumer<T> logger) {
