@@ -6,6 +6,7 @@ import org.hswebframework.web.authorization.exception.UnAuthorizedException;
 import org.hswebframework.web.exception.BusinessException;
 import org.hswebframework.web.exception.NotFoundException;
 import org.hswebframework.web.exception.ValidationException;
+import org.hswebframework.web.logger.ReactiveLogger;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -36,9 +37,9 @@ public class CommonErrorControllerAdvice {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Mono<ResponseMessage<?>> handleException(BusinessException e) {
-        log.error(e.getMessage(), e);
-        return Mono.just(ResponseMessage.error(e.getCode(), e.getMessage()));
+    public Mono<ResponseMessage<Object>> handleException(BusinessException e) {
+        return Mono.just(ResponseMessage.error(e.getCode(), e.getMessage()))
+                .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getMessage(), e)));
     }
 
     @ExceptionHandler
@@ -119,64 +120,67 @@ public class CommonErrorControllerAdvice {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.GATEWAY_TIMEOUT)
-    public Mono<ResponseMessage<?>> handleException(TimeoutException e) {
-        log.error(e.getMessage(), e);
-        return Mono.just(ResponseMessage.error(504, "timeout", e.getMessage()));
+    public Mono<ResponseMessage<Object>> handleException(TimeoutException e) {
+        return Mono.just(ResponseMessage.error(504, "timeout", e.getMessage()))
+                .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getMessage(), e)));
+
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @Order
-    public Mono<ResponseMessage<?>> handleException(RuntimeException e) {
-        log.error(e.getMessage(), e);
-        return Mono.just(ResponseMessage.error(e.getMessage()));
+    public Mono<ResponseMessage<Object>> handleException(RuntimeException e) {
+        return Mono.just(ResponseMessage.error(e.getMessage()))
+                .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getMessage(), e)));
+
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Mono<ResponseMessage<?>> handleException(NullPointerException e) {
-        log.error(e.getMessage(), e);
-        return Mono.just(ResponseMessage.error(e.getMessage()));
+    public Mono<ResponseMessage<Object>> handleException(NullPointerException e) {
+
+        return Mono.just(ResponseMessage.error(e.getMessage()))
+                .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getMessage(), e)));
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Mono<ResponseMessage<?>> handleException(IllegalArgumentException e) {
-        log.error(e.getMessage(), e);
-        return Mono.just(ResponseMessage.error(400, "illegal_argument", e.getMessage()));
+    public Mono<ResponseMessage<Object>> handleException(IllegalArgumentException e) {
+        return Mono.just(ResponseMessage.error(400, "illegal_argument", e.getMessage()))
+                .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getMessage(), e)));
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
-    public Mono<ResponseMessage<?>> handleException(MediaTypeNotSupportedStatusException e) {
-        log.error(e.getMessage(), e);
+    public Mono<ResponseMessage<Object>> handleException(MediaTypeNotSupportedStatusException e) {
         return Mono.just(ResponseMessage
                 .error(415, "unsupported_media_type", "不支持的请求类型")
-                .result(e.getSupportedMediaTypes()));
+                .result(e.getSupportedMediaTypes()))
+                .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getMessage(), e)));
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
-    public Mono<ResponseMessage<?>> handleException(NotAcceptableStatusException e) {
-        log.error(e.getMessage(), e);
+    public Mono<ResponseMessage<Object>> handleException(NotAcceptableStatusException e) {
         return Mono.just(ResponseMessage
                 .error(406, "not_acceptable_media_type", "不支持的响应类型")
-                .result(e.getSupportedMediaTypes()));
+                .result(e.getSupportedMediaTypes()))
+                .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getMessage(), e)));
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
-    public Mono<ResponseMessage<?>> handleException(MethodNotAllowedException e) {
-        log.error(e.getMessage(), e);
+    public Mono<ResponseMessage<Object>> handleException(MethodNotAllowedException e) {
         return Mono.just(ResponseMessage
                 .error(405, "method_not_allowed", "不支持的请求方法:" + e.getHttpMethod())
-                .result(e.getSupportedMethods()));
+                .result(e.getSupportedMethods()))
+                .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getMessage(), e)));
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Mono<ResponseMessage<?>> handleException(ServerWebInputException e) {
-        Throwable exception=e;
+        Throwable exception = e;
         do {
             exception = exception.getCause();
             if (exception instanceof ValidationException) {

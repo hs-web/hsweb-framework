@@ -77,7 +77,9 @@ public class UserTokenReactiveAuthenticationSupplier implements ReactiveAuthenti
                                         .doOnNext(token -> userTokenManager.touch(token.getToken()))
                                         .flatMap(token -> get(thirdPartAuthenticationManager.get(token.getType()), token.getUserId())))
                                 .orElseGet(Mono::empty))
-                .flatMap(auth -> ReactiveLogger.mdc("userId", auth.getUser().getId()).thenReturn(auth))
+                .flatMap(auth -> ReactiveLogger.mdc("userId", auth.getUser().getId())
+                        .then(ReactiveLogger.mdc("username", auth.getUser().getName()))
+                        .thenReturn(auth))
                 ;
 
     }

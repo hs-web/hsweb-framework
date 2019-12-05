@@ -139,7 +139,7 @@ public class AuthenticationTests {
                     System.out.println(ctx);
                 }))
                 .subscriberContext(acceptContext(ctx -> ctx.put(ContextKey.of(ParsedToken.class), parsedToken)))
-               // .subscriberContext(ReactiveLogger.start("rid","1"))
+                .subscriberContext(ReactiveLogger.start("rid","1"))
                 .as(StepVerifier::create)
                 .expectNext("admin")
                 .verifyComplete();
