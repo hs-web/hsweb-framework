@@ -33,6 +33,18 @@ public interface ReactiveCrudService<E, K> {
     }
 
     @Transactional(readOnly = true)
+    default Mono<E> findById(K publisher) {
+        return getRepository()
+                .findById(publisher);
+    }
+
+    @Transactional(readOnly = true)
+    default Flux<E> findById(Collection<K> publisher) {
+        return getRepository()
+                .findById(publisher);
+    }
+
+    @Transactional(readOnly = true)
     default Mono<E> findById(Mono<K> publisher) {
         return getRepository()
                 .findById(publisher);
@@ -77,10 +89,15 @@ public interface ReactiveCrudService<E, K> {
     @Transactional(readOnly = true)
     default Flux<E> query(Mono<? extends QueryParam> queryParamMono) {
         return queryParamMono
-                .flatMapMany(param -> getRepository()
-                        .createQuery()
-                        .setParam(param)
-                        .fetch());
+                .flatMapMany(this::query);
+    }
+
+    @Transactional(readOnly = true)
+    default Flux<E> query(QueryParam param) {
+        return getRepository()
+                .createQuery()
+                .setParam(param)
+                .fetch();
     }
 
     @Transactional(readOnly = true)

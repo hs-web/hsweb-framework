@@ -1,6 +1,9 @@
 package org.hswebframework.web.system.authorization.defaults.service;
 
+import org.hswebframework.ezorm.rdb.mapping.ReactiveDelete;
 import org.hswebframework.ezorm.rdb.mapping.ReactiveRepository;
+import org.hswebframework.ezorm.rdb.mapping.ReactiveUpdate;
+import org.hswebframework.ezorm.rdb.mapping.defaults.SaveResult;
 import org.hswebframework.web.authorization.Dimension;
 import org.hswebframework.web.authorization.DimensionProvider;
 import org.hswebframework.web.authorization.DimensionType;
@@ -11,8 +14,10 @@ import org.hswebframework.web.system.authorization.api.entity.AuthorizationSetti
 import org.hswebframework.web.system.authorization.api.entity.DimensionEntity;
 import org.hswebframework.web.system.authorization.api.entity.DimensionTypeEntity;
 import org.hswebframework.web.system.authorization.api.entity.DimensionUserEntity;
+import org.hswebframework.web.system.authorization.api.event.ClearUserAuthorizationCacheEvent;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -35,6 +40,9 @@ public class DefaultDimensionService
 
     @Autowired
     private ReactiveRepository<AuthorizationSettingEntity, String> settingRepository;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     @Override
     public IDGenerator<String> getIDGenerator() {
@@ -65,13 +73,12 @@ public class DefaultDimensionService
                                 .collectList()
                                 .flatMapMany(list -> {
                                     //查询所有的维度
-                                    return this.findById(Flux.fromIterable(list.stream()
+                                    return this.findIncludeChildren(list.stream()
                                             .map(DimensionUserEntity::getDimensionId)
-                                            .collect(Collectors.toSet())))
+                                            .collect(Collectors.toSet()))
                                             .map(dimension ->
                                                     DynamicDimension.of(dimension, typeGrouping.get(dimension.getTypeId()))
-                                            )
-                                            ;
+                                            );
 
                                 })
                 );
@@ -86,6 +93,30 @@ public class DefaultDimensionService
                 .where(DimensionUserEntity::getDimensionId, dimensionId)
                 .fetch()
                 .map(DimensionUserEntity::getUserId);
+    }
+
+    @Override
+    public Mono<SaveResult> save(Publisher<DimensionEntity> entityPublisher) {
+        return super.save(entityPublisher)
+                .doOnSuccess((r) -> eventPublisher.publishEvent(ClearUserAuthorizationCacheEvent.all()));
+    }
+
+    @Override
+    public Mono<Integer> updateById(String id, Mono<DimensionEntity> entityPublisher) {
+        return super.updateById(id, entityPublisher)
+                .doOnSuccess((r) -> eventPublisher.publishEvent(ClearUserAuthorizationCacheEvent.all()));
+    }
+
+    @Override
+    public ReactiveUpdate<DimensionEntity> createUpdate() {
+        return super.createUpdate()
+                .onExecute((update, result) -> result.doOnSuccess((r) -> eventPublisher.publishEvent(ClearUserAuthorizationCacheEvent.all())));
+    }
+
+    @Override
+    public ReactiveDelete createDelete() {
+        return super.createDelete()
+                .onExecute((delete, result) -> result.doOnSuccess((r) -> eventPublisher.publishEvent(ClearUserAuthorizationCacheEvent.all())));
     }
 
     @Override
@@ -105,7 +136,9 @@ public class DefaultDimensionService
                                                 .where(AuthorizationSettingEntity::getDimensionType, grouping.key())
                                                 .in(AuthorizationSettingEntity::getDimensionTarget, dimensionId).execute()))
                                 .collect(Collectors.summarizingInt(Integer::intValue))
-                        ).thenReturn(list.size()));
+                        )
+                        .doOnSuccess((r) -> eventPublisher.publishEvent(ClearUserAuthorizationCacheEvent.all()))
+                        .thenReturn(list.size()));
     }
 
 }

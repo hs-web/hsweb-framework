@@ -23,6 +23,22 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
                 .map(list -> TreeSupportEntity.list2tree(list, this::setChildren, this::isRootNode));
     }
 
+    default Flux<E> findIncludeChildren(Collection<K> idList) {
+        return findById(idList)
+                .flatMap(e -> createQuery()
+                        .where()
+                        .like$("path", e.getPath())
+                        .fetch());
+    }
+
+    default Flux<E> findIncludeChildren(QueryParam queryParam) {
+        return query(queryParam)
+                .flatMap(e -> createQuery()
+                        .where()
+                        .like$("path", e.getPath())
+                        .fetch());
+    }
+
     @Override
     default Mono<Integer> insert(Publisher<E> entityPublisher) {
         return insertBatch(Flux.from(entityPublisher).collectList());

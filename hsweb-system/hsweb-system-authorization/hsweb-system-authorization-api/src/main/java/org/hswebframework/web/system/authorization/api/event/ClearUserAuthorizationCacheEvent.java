@@ -28,6 +28,10 @@ public class ClearUserAuthorizationCacheEvent {
         return event;
     }
 
+    public static ClearUserAuthorizationCacheEvent all() {
+        return ClearUserAuthorizationCacheEvent.of((String[]) null);
+    }
+
     public static ClearUserAuthorizationCacheEvent of(String... userId) {
 
         return of(userId == null ? null : Arrays.asList(userId));
