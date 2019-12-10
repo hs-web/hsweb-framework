@@ -97,7 +97,7 @@
         <swagger.version>2.7.0</swagger.version>
 
         <reactor.version>Dysprosium-RELEASE</reactor.version>
-        <r2dbc.version>Arabba-RC2</r2dbc.version>
+        <r2dbc.version>Arabba-RELEASE</r2dbc.version>
     </properties>
 
     <profiles>
