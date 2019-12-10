@@ -78,14 +78,15 @@ public class ResponseMessageWrapper extends ResponseBodyResultHandler {
 
         if (body instanceof Mono) {
             body = ((Mono) body)
-                    .switchIfEmpty(Mono.just(ResponseMessage.ok()))
-                    .map(ResponseMessage::ok);
+                    .map(ResponseMessage::ok)
+                    .switchIfEmpty(Mono.just(ResponseMessage.ok()));
         }
         if (body instanceof Flux) {
             body = ((Flux) body)
                     .collectList()
-                    .switchIfEmpty(Mono.just(ResponseMessage.ok()))
-                    .map(ResponseMessage::ok);
+                    .map(ResponseMessage::ok)
+                    .switchIfEmpty(Mono.just(ResponseMessage.ok()));
+
         }
         if (body == null) {
             body = Mono.just(ResponseMessage.ok());
