@@ -4,7 +4,6 @@ import org.hswebframework.ezorm.rdb.mapping.ReactiveDelete;
 import org.hswebframework.ezorm.rdb.mapping.ReactiveRepository;
 import org.hswebframework.ezorm.rdb.mapping.ReactiveUpdate;
 import org.hswebframework.ezorm.rdb.mapping.defaults.SaveResult;
-import org.hswebframework.web.authorization.Dimension;
 import org.hswebframework.web.authorization.DimensionProvider;
 import org.hswebframework.web.authorization.DimensionType;
 import org.hswebframework.web.crud.service.GenericReactiveCrudService;
@@ -18,12 +17,10 @@ import org.hswebframework.web.system.authorization.api.event.ClearUserAuthorizat
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -73,7 +70,7 @@ public class DefaultDimensionService
                                 .collectList()
                                 .flatMapMany(list -> {
                                     //查询所有的维度
-                                    return this.findIncludeChildren(list.stream()
+                                    return this.queryIncludeChildren(list.stream()
                                             .map(DimensionUserEntity::getDimensionId)
                                             .collect(Collectors.toSet()))
                                             .map(dimension ->

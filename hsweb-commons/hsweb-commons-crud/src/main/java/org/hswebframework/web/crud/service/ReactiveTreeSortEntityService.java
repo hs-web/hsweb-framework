@@ -2,7 +2,7 @@ package org.hswebframework.web.crud.service;
 
 import org.hswebframework.ezorm.core.param.QueryParam;
 import org.hswebframework.ezorm.rdb.mapping.defaults.SaveResult;
-import org.hswebframework.web.api.crud.entity.QueryParamEntity;
+import org.hswebframework.utils.RandomUtil;
 import org.hswebframework.web.api.crud.entity.TreeSortSupportEntity;
 import org.hswebframework.web.api.crud.entity.TreeSupportEntity;
 import org.hswebframework.web.id.IDGenerator;
@@ -18,12 +18,22 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
         extends ReactiveCrudService<E, K> {
 
     default Mono<List<E>> queryResultToTree(Mono<? extends QueryParam> paramEntity) {
+        return paramEntity.flatMap(this::queryResultToTree);
+    }
+
+    default Mono<List<E>> queryResultToTree(QueryParam paramEntity) {
         return query(paramEntity)
                 .collectList()
                 .map(list -> TreeSupportEntity.list2tree(list, this::setChildren, this::isRootNode));
     }
 
-    default Flux<E> findIncludeChildren(Collection<K> idList) {
+    default Mono<List<E>> queryIncludeChildrenTree(QueryParam paramEntity) {
+        return queryIncludeChildren(paramEntity)
+                .collectList()
+                .map(list -> TreeSupportEntity.list2tree(list, this::setChildren, this::isRootNode));
+    }
+
+    default Flux<E> queryIncludeChildren(Collection<K> idList) {
         return findById(idList)
                 .flatMap(e -> createQuery()
                         .where()
@@ -31,7 +41,7 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
                         .fetch());
     }
 
-    default Flux<E> findIncludeChildren(QueryParam queryParam) {
+    default Flux<E> queryIncludeChildren(QueryParam queryParam) {
         return query(queryParam)
                 .flatMap(e -> createQuery()
                         .where()
@@ -50,7 +60,18 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
                 .insertBatch(Flux.from(entityPublisher)
                         .flatMap(Flux::fromIterable)
                         .flatMap(e -> Flux.fromIterable(TreeSupportEntity.expandTree2List(e, getIDGenerator())))
+                        .flatMap(this::applyTreeProperty)
                         .collectList());
+    }
+
+    default Mono<E> applyTreeProperty(E ele) {
+        if (StringUtils.hasText(ele.getPath()) ||
+                StringUtils.isEmpty(ele.getParentId())) {
+            return Mono.just(ele);
+        }
+        return findById(ele.getParentId())
+                .doOnNext(parent -> ele.setPath(parent.getPath() + "-" + RandomUtil.randomChar(4)))
+                .thenReturn(ele);
     }
 
     @Override
@@ -58,16 +79,16 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
         return this.getRepository()
                 .save(Flux.from(entityPublisher)
                         //把树结构平铺
-                        .flatMap(e -> Flux.fromIterable(TreeSupportEntity.expandTree2List(e, getIDGenerator()))));
+                        .flatMap(e -> Flux.fromIterable(TreeSupportEntity.expandTree2List(e, getIDGenerator())))
+                        .flatMap(this::applyTreeProperty)
+                );
     }
 
     @Override
     default Mono<Integer> updateById(K id, Mono<E> entityPublisher) {
         return save(entityPublisher
-                .map(e -> {
-                    e.setId(id);
-                    return e;
-                })).map(SaveResult::getTotal);
+                .doOnNext(e -> e.setId(id)))
+                .map(SaveResult::getTotal);
     }
 
     @Override
