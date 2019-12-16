@@ -17,6 +17,7 @@
 
 package org.hswebframework.web.authorization;
 
+import org.springframework.util.StringUtils;
 import reactor.core.publisher.Mono;
 
 import java.io.Serializable;
@@ -107,6 +108,9 @@ public interface Authentication extends Serializable {
     }
 
     default Optional<Dimension> getDimension(String type, String id) {
+        if (StringUtils.isEmpty(type)) {
+            return Optional.empty();
+        }
         return getDimensions()
                 .stream()
                 .filter(dimension -> dimension.getId().equals(id) && type.equalsIgnoreCase(dimension.getType().getId()))
@@ -114,6 +118,9 @@ public interface Authentication extends Serializable {
     }
 
     default Optional<Dimension> getDimension(DimensionType type, String id) {
+        if (type == null) {
+            return Optional.empty();
+        }
         return getDimensions()
                 .stream()
                 .filter(dimension -> dimension.getId().equals(id) && type.isSameType(dimension.getType()))
@@ -122,6 +129,9 @@ public interface Authentication extends Serializable {
 
 
     default List<Dimension> getDimensions(String type) {
+        if (StringUtils.isEmpty(type)) {
+            return Collections.emptyList();
+        }
         return getDimensions()
                 .stream()
                 .filter(dimension -> dimension.getType().isSameType(type))
@@ -129,6 +139,9 @@ public interface Authentication extends Serializable {
     }
 
     default List<Dimension> getDimensions(DimensionType type) {
+        if (type == null) {
+            return Collections.emptyList();
+        }
         return getDimensions()
                 .stream()
                 .filter(dimension -> dimension.getType().isSameType(type))

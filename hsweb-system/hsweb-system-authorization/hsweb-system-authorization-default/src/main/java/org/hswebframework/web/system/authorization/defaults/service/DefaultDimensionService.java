@@ -1,5 +1,6 @@
 package org.hswebframework.web.system.authorization.defaults.service;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.hswebframework.ezorm.rdb.mapping.ReactiveDelete;
 import org.hswebframework.ezorm.rdb.mapping.ReactiveRepository;
 import org.hswebframework.ezorm.rdb.mapping.ReactiveUpdate;
@@ -68,11 +69,13 @@ public class DefaultDimensionService
                                 .where(DimensionUserEntity::getUserId, userId)
                                 .fetch()
                                 .collectList()
+                                .filter(CollectionUtils::isNotEmpty)
                                 .flatMapMany(list -> {
                                     //查询所有的维度
                                     return this.queryIncludeChildren(list.stream()
                                             .map(DimensionUserEntity::getDimensionId)
                                             .collect(Collectors.toSet()))
+                                            .filter(dimension -> typeGrouping.containsKey(dimension.getTypeId()))
                                             .map(dimension ->
                                                     DynamicDimension.of(dimension, typeGrouping.get(dimension.getTypeId()))
                                             );
