@@ -10,6 +10,7 @@ import org.hswebframework.web.logging.AccessLoggerListener;
 import org.hswebframework.web.logging.LoggerDefine;
 import org.hswebframework.web.logging.events.AccessLoggerAfterEvent;
 import org.hswebframework.web.logging.events.AccessLoggerBeforeEvent;
+import org.hswebframework.web.utils.ReactiveWebUtils;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -66,7 +67,7 @@ public class ReactiveAopAccessLoggerSupport extends StaticMethodMatcherPointcutA
                 .doFinally(f -> {
                     loggerInfo.setResponseTime(System.currentTimeMillis());
                     eventPublisher.publishEvent(new AccessLoggerAfterEvent(loggerInfo));
-                }).subscriberContext(ReactiveLogger.start("accessLogId",loggerInfo.getId()));
+                }).subscriberContext(ReactiveLogger.start("accessLogId", loggerInfo.getId()));
     }
 
     protected Mono<?> wrapMonoResponse(Mono<?> mono, AccessLoggerInfo loggerInfo) {
@@ -80,7 +81,7 @@ public class ReactiveAopAccessLoggerSupport extends StaticMethodMatcherPointcutA
                 .doFinally(f -> {
                     loggerInfo.setResponseTime(System.currentTimeMillis());
                     eventPublisher.publishEvent(new AccessLoggerAfterEvent(loggerInfo));
-                }).subscriberContext(ReactiveLogger.start("accessLogId",loggerInfo.getId()));
+                }).subscriberContext(ReactiveLogger.start("accessLogId", loggerInfo.getId()));
     }
 
     @SuppressWarnings("all")
@@ -162,9 +163,7 @@ public class ReactiveAopAccessLoggerSupport extends StaticMethodMatcherPointcutA
         info.setRequestMethod(request.getMethodValue());
         info.setHeaders(request.getHeaders().toSingleValueMap());
 
-        Optional.ofNullable(request.getRemoteAddress())
-                .map(InetSocketAddress::getAddress)
-                .map(InetAddress::getHostAddress)
+        Optional.ofNullable(ReactiveWebUtils.getIpAddr(request))
                 .ifPresent(info::setIpAddr);
 
         return info;
