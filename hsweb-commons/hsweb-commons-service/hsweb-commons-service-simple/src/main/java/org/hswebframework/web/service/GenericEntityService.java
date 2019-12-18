@@ -119,6 +119,10 @@ public abstract class GenericEntityService<E extends GenericEntity<PK>, PK>
         Assert.notNull(entity, "entity can not be null");
         entity.setId(pk);
 
+        if (entity instanceof RecordModifierEntity) {
+            ((RecordModifierEntity) entity).setModifyTimeNow();
+        }
+
         tryValidate(entity, UpdateGroup.class);
         //尝试推送 EntityModifyEvent 事件.
         if (eventPublisher != null && pushModifyEvent()) {
@@ -126,8 +130,8 @@ public abstract class GenericEntityService<E extends GenericEntity<PK>, PK>
             eventPublisher.publishEvent(new GenericsPayloadApplicationEvent<>(this, new EntityModifyEvent<>(old, entity, getEntityType()), getEntityType()));
         }
         return createUpdate(entity)
-                //如果是RecordCreationEntity则不修改creator_id和creator_time
-                .when(entity instanceof RecordCreationEntity,
+            //如果是RecordCreationEntity则不修改creator_id和creator_time
+            .when(entity instanceof RecordCreationEntity,
                         update -> update.and().excludes(((RecordCreationEntity) entity).getCreatorIdProperty(), RecordCreationEntity.createTime))
                 .where(GenericEntity.id, pk)
                 .exec();
