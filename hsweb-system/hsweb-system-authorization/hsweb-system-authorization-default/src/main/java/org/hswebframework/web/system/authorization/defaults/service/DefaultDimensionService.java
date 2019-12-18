@@ -8,6 +8,8 @@ import org.hswebframework.ezorm.rdb.mapping.defaults.SaveResult;
 import org.hswebframework.web.authorization.DimensionProvider;
 import org.hswebframework.web.authorization.DimensionType;
 import org.hswebframework.web.crud.service.GenericReactiveCrudService;
+import org.hswebframework.web.crud.service.GenericReactiveTreeSupportCrudService;
+import org.hswebframework.web.crud.service.ReactiveCrudService;
 import org.hswebframework.web.crud.service.ReactiveTreeSortEntityService;
 import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.system.authorization.api.entity.AuthorizationSettingEntity;
@@ -26,8 +28,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class DefaultDimensionService
-        extends GenericReactiveCrudService<DimensionEntity, String>
-        implements ReactiveTreeSortEntityService<DimensionEntity, String>,
+        extends GenericReactiveTreeSupportCrudService<DimensionEntity, String>
+        implements
         DimensionProvider {
 
     @Autowired
@@ -121,22 +123,24 @@ public class DefaultDimensionService
 
     @Override
     public Mono<Integer> deleteById(Publisher<String> idPublisher) {
+
         return Flux.from(idPublisher)
                 .collectList()
-                .flatMap(list -> super.deleteById(Flux.fromIterable(list))
-                        .then(dimensionUserRepository.createDelete() //删除维度用户关联
+                .flatMap(list -> super.queryIncludeChildren(list)
+                        .flatMap(dimension -> dimensionUserRepository.createDelete() //删除维度用户关联
                                 .where()
-                                .in(DimensionUserEntity::getDimensionId, list)
-                                .execute())
-                        .then(findById(Flux.fromIterable(list))
-                                .groupBy(DimensionEntity::getTypeId, DimensionEntity::getId)//按维度类型分组
-                                .flatMap(grouping -> grouping.collectList()
-                                        .flatMap(dimensionId -> settingRepository //删除权限设置
-                                                .createDelete()
-                                                .where(AuthorizationSettingEntity::getDimensionType, grouping.key())
-                                                .in(AuthorizationSettingEntity::getDimensionTarget, dimensionId).execute()))
-                                .collect(Collectors.summarizingInt(Integer::intValue))
+                                .is(DimensionUserEntity::getDimensionId, dimension.getId())
+                                .execute()
+                                .then(getRepository().deleteById(Mono.just(dimension.getId())))
+                                .thenReturn(dimension)
                         )
+                        .groupBy(DimensionEntity::getTypeId, DimensionEntity::getId)//按维度类型分组
+                        .flatMap(grouping -> grouping.collectList()
+                                .flatMap(dimensionId -> settingRepository //删除权限设置
+                                        .createDelete()
+                                        .where(AuthorizationSettingEntity::getDimensionType, grouping.key())
+                                        .in(AuthorizationSettingEntity::getDimensionTarget, dimensionId).execute()))
+                        .collect(Collectors.summarizingInt(Integer::intValue))
                         .doOnSuccess((r) -> eventPublisher.publishEvent(ClearUserAuthorizationCacheEvent.all()))
                         .thenReturn(list.size()));
     }
