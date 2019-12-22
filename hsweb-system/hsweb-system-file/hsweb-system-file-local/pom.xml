@@ -12,8 +12,12 @@
 
     <artifactId>hsweb-system-file-local</artifactId>
 
-
     <dependencies>
+        <dependency>
+            <groupId>org.hswebframework.web</groupId>
+            <artifactId>hsweb-system-file-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-commons-service-simple</artifactId>
@@ -21,7 +25,7 @@
         </dependency>
         <dependency>
             <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-system-file-api</artifactId>
+            <artifactId>hsweb-commons-dao-mybatis</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -29,11 +33,6 @@
             <artifactId>fastdfs-spring-boot-starter</artifactId>
             <version>0.2.0</version>
             <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-commons-dao-mybatis</artifactId>
-            <version>${project.version}</version>
         </dependency>
     </dependencies>
 </project>

@@ -28,14 +28,14 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <description>日志模块</description>
-
     <artifactId>hsweb-logging</artifactId>
     <packaging>pom</packaging>
+
+    <description>日志模块</description>
+
     <modules>
         <module>hsweb-access-logging-api</module>
         <module>hsweb-access-logging-aop</module>
     </modules>
-
 
 </project>

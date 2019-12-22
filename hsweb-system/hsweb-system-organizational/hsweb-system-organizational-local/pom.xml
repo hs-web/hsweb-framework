@@ -17,13 +17,11 @@
             <artifactId>hsweb-commons-service-simple</artifactId>
             <version>${project.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-system-organizational-api</artifactId>
             <version>${project.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-system-authorization-api</artifactId>

@@ -18,8 +18,7 @@
 
 package org.hswebframework.web.authorization.controller.model;
 
-
-import org.hibernate.validator.constraints.NotBlank;
+import javax.validation.constraints.NotBlank;
 
 /**
  * @author zhouhao

@@ -28,13 +28,14 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <artifactId>hsweb-system-oauth2-server</artifactId>
+    <packaging>pom</packaging>
+
     <modules>
         <module>hsweb-system-oauth2-server-starter</module>
         <module>hsweb-system-oauth2-server-local</module>
         <module>hsweb-system-oauth2-server-web</module>
     </modules>
-    <packaging>pom</packaging>
-    <artifactId>hsweb-system-oauth2-server</artifactId>
 
 
 </project>

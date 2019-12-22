@@ -48,14 +48,6 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>fastjson</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.hswebframework</groupId>
-            <artifactId>hsweb-easy-orm-rdb</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-access-logging-api</artifactId>
             <version>${project.version}</version>
@@ -66,13 +58,21 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-webmvc</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-commons-model</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hswebframework</groupId>
+            <artifactId>hsweb-easy-orm-rdb</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
         </dependency>
     </dependencies>
 </project>

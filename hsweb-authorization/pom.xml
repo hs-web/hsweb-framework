@@ -11,6 +11,8 @@
 
     <artifactId>hsweb-authorization</artifactId>
     <packaging>pom</packaging>
+    <description>认证、授权模块</description>
+
     <modules>
         <module>hsweb-authorization-api</module>
         <module>hsweb-authorization-oauth2</module>

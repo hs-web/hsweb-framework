@@ -18,8 +18,9 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
+            <groupId>org.hswebframework.web</groupId>
+            <artifactId>hsweb-authorization-api</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.hswebframework.web</groupId>
@@ -27,26 +28,24 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-authorization-api</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-aspects</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>20.0</version>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-tests</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-aspects</artifactId>
         </dependency>
     </dependencies>
 </project>

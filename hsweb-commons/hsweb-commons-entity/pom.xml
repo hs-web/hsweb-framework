@@ -33,18 +33,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>${project.parent.groupId}</groupId>
+            <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-core</artifactId>
             <version>${project.parent.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.hswebframework</groupId>
-            <artifactId>hsweb-easy-orm-rdb</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.hswebframework</groupId>
-            <artifactId>hsweb-utils</artifactId>
         </dependency>
         <dependency>
             <groupId>org.hswebframework.web</groupId>
@@ -52,7 +43,16 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.hibernate</groupId>
+            <groupId>org.hswebframework.web</groupId>
+            <artifactId>hsweb-commons-bean</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hswebframework</groupId>
+            <artifactId>hsweb-utils</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate.validator</groupId>
             <artifactId>hibernate-validator</artifactId>
         </dependency>
         <dependency>
@@ -64,9 +64,19 @@
             <artifactId>slf4j-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-commons-bean</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.hswebframework</groupId>
+            <artifactId>hsweb-easy-orm-rdb</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

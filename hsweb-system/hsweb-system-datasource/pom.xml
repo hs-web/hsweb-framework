@@ -8,12 +8,12 @@
         <version>3.0.11-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>hsweb-system-datasource</artifactId>
+    <packaging>pom</packaging>
 
     <description>动态数据源配置父模块</description>
-
-    <modelVersion>4.0.0</modelVersion>
-    <packaging>pom</packaging>
-    <artifactId>hsweb-system-datasource</artifactId>
 
     <modules>
         <module>hsweb-system-datasource-starter</module>

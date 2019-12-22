@@ -2,7 +2,11 @@ package org.hswebframework.web.authorization;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.annotation.RequiresDataAccess;
 import org.hswebframework.web.authorization.basic.aop.AopMethodAuthorizeDefinitionParser;
@@ -12,7 +16,11 @@ import org.hswebframework.web.authorization.basic.handler.access.DefaultDataAcce
 import org.hswebframework.web.authorization.define.AuthorizeDefinition;
 import org.hswebframework.web.authorization.define.AuthorizingContext;
 import org.hswebframework.web.authorization.define.Phased;
-import org.hswebframework.web.authorization.simple.*;
+import org.hswebframework.web.authorization.simple.AbstractDataAccessConfig;
+import org.hswebframework.web.authorization.simple.SimpleFieldFilterDataAccessConfig;
+import org.hswebframework.web.authorization.simple.SimpleFiledScopeDataAccessConfig;
+import org.hswebframework.web.authorization.simple.SimplePermission;
+import org.hswebframework.web.authorization.simple.SimpleUser;
 import org.hswebframework.web.boost.aop.context.MethodInterceptorContext;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.controller.message.ResponseMessage;
@@ -21,15 +29,16 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Optional;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class AuthorizeTests {
 
     @Mock

@@ -10,9 +10,9 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <description>动态数据源配置整合,集成springMvc,和local实现</description>
-
     <artifactId>hsweb-system-datasource-starter</artifactId>
+
+    <description>动态数据源配置整合,集成springMvc,和local实现</description>
 
     <build>
         <resources>
@@ -29,7 +29,6 @@
             <artifactId>hsweb-system-datasource-local</artifactId>
             <version>${project.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-system-datasource-web</artifactId>
@@ -48,28 +47,23 @@
             <artifactId>h2</artifactId>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>druid</artifactId>
-            <version>1.0.26</version>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-spring-boot-starter</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-tests</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>

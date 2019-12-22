@@ -21,7 +21,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,13 +29,15 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.when;
 
 /**
  * @author zhouhao
  * @since 1.0
  */
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class AutoSyncPermissionTest {
     @Mock
     private PermissionService permissionService;
@@ -49,7 +51,7 @@ public class AutoSyncPermissionTest {
     public void init() throws NoSuchMethodException {
         when(permissionService.selectByPk(anyString())).thenReturn(null);
         when(permissionService.insert(any())).then(invocationOnMock -> {
-            newPermissionEntity.add(invocationOnMock.getArgumentAt(0, PermissionEntity.class));
+            newPermissionEntity.add(invocationOnMock.getArgument(0));
             return "new Id";
         });
         autoSyncPermission.setEntityFactory(new MapperEntityFactory());

@@ -5,32 +5,27 @@ import org.hswebframework.web.dao.CrudDao;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.experimental.theories.suppliers.TestedOn;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import javax.validation.Validation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 /**
  * @author zhouhao
  * @since 3.0
  */
-@SpringBootTest(classes = SpringTestApplication.class)
-@RunWith(value = SpringRunner.class)
+@SpringBootTest(
+    classes = SpringTestApplication.class
+)
+@RunWith(SpringRunner.class)
 public class EnableCacheTests {
 
     @Autowired
@@ -47,7 +42,7 @@ public class EnableCacheTests {
 
     @Before
     public void init() {
-        CrudDao<TestEntity, String> dao = Mockito.mock(CrudDao.class);
+        CrudDao<TestEntity, String> dao = mock(CrudDao.class);
         enableCacheTestService.setEntityFactory(new MapperEntityFactory());
 
         TestEntity entity = TestEntity.builder()

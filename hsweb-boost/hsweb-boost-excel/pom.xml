@@ -15,14 +15,24 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.hswebframework.web</groupId>
+            <artifactId>hsweb-commons-entity</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.hswebframework</groupId>
             <artifactId>hsweb-expands-office</artifactId>
             <version>${hsweb.expands.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-commons-entity</artifactId>
-            <version>${project.version}</version>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

@@ -20,38 +20,33 @@
             </resource>
         </resources>
     </build>
-    <dependencies>
 
+    <dependencies>
         <dependency>
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-commons-dao-mybatis</artifactId>
             <version>${project.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-commons-service-simple</artifactId>
             <version>${project.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.flowable</groupId>
             <artifactId>flowable-spring-boot-starter-basic</artifactId>
             <version>${flowable.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.flowable</groupId>
             <artifactId>flowable-json-converter</artifactId>
             <version>${flowable.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-parser</artifactId>
             <version>${batik.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-transcoder</artifactId>

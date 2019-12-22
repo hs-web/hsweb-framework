@@ -15,16 +15,16 @@
     <description>通用增删改查-通用Bean模块</description>
 
     <dependencies>
-
         <dependency>
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.hibernate</groupId>
+            <groupId>org.hibernate.validator</groupId>
             <artifactId>hibernate-validator</artifactId>
         </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
@@ -36,11 +36,9 @@
             <artifactId>spock-core</artifactId>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>com.athaydes</groupId>
             <artifactId>spock-reports</artifactId>
-            <version>1.2.13</version>
             <scope>test</scope>
         </dependency>
         <dependency>

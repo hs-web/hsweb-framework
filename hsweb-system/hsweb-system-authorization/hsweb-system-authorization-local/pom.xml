@@ -11,6 +11,8 @@
 
     <artifactId>hsweb-system-authorization-local</artifactId>
 
+    <description>业务模块-权限管理本地实现</description>
+
     <build>
         <resources>
             <resource>
@@ -24,30 +26,25 @@
         </resources>
     </build>
 
-    <description>业务模块-权限管理本地实现</description>
     <dependencies>
-        <dependency>
-            <groupId>org.hswebframework</groupId>
-            <artifactId>hsweb-expands-security</artifactId>
-            <version>${hsweb.expands.version}</version>
-        </dependency>
-
         <dependency>
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-system-authorization-api</artifactId>
             <version>${project.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-commons-dao-mybatis</artifactId>
             <version>${project.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-commons-service-simple</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hswebframework</groupId>
+            <artifactId>hsweb-expands-security</artifactId>
         </dependency>
     </dependencies>
 </project>

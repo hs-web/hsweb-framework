@@ -12,13 +12,7 @@
 
     <artifactId>hsweb-system-dynamic-form-web</artifactId>
 
-
     <dependencies>
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <optional>true</optional>
-        </dependency>
         <dependency>
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-system-dynamic-form-api</artifactId>
@@ -29,10 +23,16 @@
             <artifactId>hsweb-commons-controller</artifactId>
             <version>${project.version}</version>
         </dependency>
+
         <dependency>
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-authorization-basic</artifactId>
             <version>${project.version}</version>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
             <optional>true</optional>
         </dependency>
     </dependencies>

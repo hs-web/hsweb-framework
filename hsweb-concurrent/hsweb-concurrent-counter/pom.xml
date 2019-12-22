@@ -26,10 +26,11 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <description>计数器</description>
-
     <artifactId>hsweb-concurrent-counter</artifactId>
     <packaging>pom</packaging>
+
+    <description>计数器</description>
+
     <modules>
         <module>hsweb-concurrent-counter-api</module>
         <module>hsweb-concurrent-counter-redis</module>

@@ -9,14 +9,23 @@ import org.hswebframework.web.authorization.basic.handler.DefaultAuthorizingHand
 import org.hswebframework.web.authorization.basic.handler.UserAllowPermissionHandler;
 import org.hswebframework.web.authorization.basic.handler.access.DefaultDataAccessController;
 import org.hswebframework.web.authorization.basic.twofactor.TwoFactorHandlerInterceptorAdapter;
-import org.hswebframework.web.authorization.basic.web.*;
+import org.hswebframework.web.authorization.basic.web.AuthorizationController;
+import org.hswebframework.web.authorization.basic.web.SessionIdUserTokenGenerator;
+import org.hswebframework.web.authorization.basic.web.SessionIdUserTokenParser;
+import org.hswebframework.web.authorization.basic.web.UserOnSignIn;
+import org.hswebframework.web.authorization.basic.web.UserOnSignOut;
+import org.hswebframework.web.authorization.basic.web.UserTokenController;
+import org.hswebframework.web.authorization.basic.web.UserTokenForTypeParser;
+import org.hswebframework.web.authorization.basic.web.UserTokenParser;
+import org.hswebframework.web.authorization.basic.web.WebUserTokenInterceptor;
 import org.hswebframework.web.authorization.basic.web.session.UserTokenAutoExpiredListener;
 import org.hswebframework.web.authorization.token.UserTokenManager;
 import org.hswebframework.web.authorization.twofactor.TwoFactorValidatorManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.boot.autoconfigure.condition.*;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
@@ -114,11 +123,13 @@ public class AuthorizingHandlerAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean
     public AuthorizationController authorizationController() {
         return new AuthorizationController();
     }
 
     @Bean
+    @ConditionalOnMissingBean
     public UserTokenController userTokenController() {
         return new UserTokenController();
     }

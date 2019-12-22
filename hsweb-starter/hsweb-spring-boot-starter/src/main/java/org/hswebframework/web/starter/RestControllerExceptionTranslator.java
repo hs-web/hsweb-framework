@@ -30,7 +30,6 @@ import org.hswebframework.web.validate.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -73,14 +72,14 @@ public class RestControllerExceptionTranslator {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     ResponseMessage<Object> handleException(org.hswebframework.ezorm.rdb.exception.ValidationException exception) {
         return ResponseMessage.error(400, exception.getMessage())
-                .result(exception.getValidateResult());
+            .result(exception.getValidateResult());
     }
 
     @ExceptionHandler(ValidationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     ResponseMessage<List<ValidateResults.Result>> handleException(ValidationException exception) {
         return ResponseMessage.<List<ValidateResults.Result>>error(400, exception.getMessage())
-                .result(exception.getResults());
+            .result(exception.getResults());
     }
 
     @ExceptionHandler(BusinessException.class)
@@ -119,8 +118,8 @@ public class RestControllerExceptionTranslator {
         }
         List<ValidateResults.Result> errorResults = results.getResults();
         return ResponseMessage
-                .error(400, errorResults.isEmpty() ? "" : errorResults.get(0).getMessage())
-                .result(errorResults);
+            .error(400, errorResults.isEmpty() ? "" : errorResults.get(0).getMessage())
+            .result(errorResults);
     }
 
     @ExceptionHandler(BindException.class)
@@ -128,10 +127,10 @@ public class RestControllerExceptionTranslator {
     ResponseMessage handleException(BindException e) {
         SimpleValidateResults results = new SimpleValidateResults();
         e.getBindingResult().getAllErrors()
-                .stream()
-                .filter(FieldError.class::isInstance)
-                .map(FieldError.class::cast)
-                .forEach(fieldError -> results.addResult(fieldError.getField(), fieldError.getDefaultMessage()));
+            .stream()
+            .filter(FieldError.class::isInstance)
+            .map(FieldError.class::cast)
+            .forEach(fieldError -> results.addResult(fieldError.getField(), fieldError.getDefaultMessage()));
 
         return ResponseMessage.error(400, results.getResults().isEmpty() ? e.getMessage() : results.getResults().get(0).getMessage()).result(results.getResults());
     }
@@ -141,10 +140,10 @@ public class RestControllerExceptionTranslator {
     ResponseMessage handleException(MethodArgumentNotValidException e) {
         SimpleValidateResults results = new SimpleValidateResults();
         e.getBindingResult().getAllErrors()
-                .stream()
-                .filter(FieldError.class::isInstance)
-                .map(FieldError.class::cast)
-                .forEach(fieldError -> results.addResult(fieldError.getField(), fieldError.getDefaultMessage()));
+            .stream()
+            .filter(FieldError.class::isInstance)
+            .map(FieldError.class::cast)
+            .forEach(fieldError -> results.addResult(fieldError.getField(), fieldError.getDefaultMessage()));
 
         return ResponseMessage.error(400, results.getResults().isEmpty() ? e.getMessage() : results.getResults().get(0).getMessage()).result(results.getResults());
     }
@@ -153,7 +152,7 @@ public class RestControllerExceptionTranslator {
     @ResponseStatus(HttpStatus.GATEWAY_TIMEOUT)
     ResponseMessage handleException(TimeoutException exception) {
         String msg = Optional.ofNullable(exception.getMessage())
-                .orElse("访问服务超时");
+            .orElse("访问服务超时");
         logger.warn(exception.getMessage(), exception);
         return ResponseMessage.error(504, msg);
     }
@@ -162,7 +161,7 @@ public class RestControllerExceptionTranslator {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     ResponseMessage handleException(RuntimeException exception) {
         String msg = Optional.ofNullable(exception.getMessage())
-                .orElse("服务器内部错误");
+            .orElse("服务器内部错误");
         logger.error(exception.getMessage(), exception);
         return ResponseMessage.error(500, msg);
     }
@@ -185,7 +184,7 @@ public class RestControllerExceptionTranslator {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     ResponseMessage handleException(NullPointerException exception) {
         String msg = Optional.ofNullable(exception.getMessage())
-                .orElse("服务器内部错误");
+            .orElse("服务器内部错误");
         logger.error(exception.getMessage(), exception);
         return ResponseMessage.error(500, msg);
     }
@@ -211,9 +210,9 @@ public class RestControllerExceptionTranslator {
     @ResponseStatus(HttpStatus.FORBIDDEN)
     ResponseMessage handleException(NeedTwoFactorException e) {
         return ResponseMessage
-                .error(403, e.getMessage())
-                .code("need_tow_factor")
-                .result(e.getProvider());
+            .error(403, e.getMessage())
+            .code("need_tow_factor")
+            .result(e.getProvider());
     }
 
     /**
@@ -224,8 +223,8 @@ public class RestControllerExceptionTranslator {
     @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
     ResponseMessage handleException(HttpRequestMethodNotSupportedException exception) {
         return ResponseMessage
-                .error(HttpStatus.METHOD_NOT_ALLOWED.value(), "不支持的请求方式")
-                .result(exception.getSupportedHttpMethods());
+            .error(HttpStatus.METHOD_NOT_ALLOWED.value(), "不支持的请求方式")
+            .result(exception.getSupportedHttpMethods());
     }
 
     /**
@@ -256,11 +255,11 @@ public class RestControllerExceptionTranslator {
     @ResponseStatus(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
     ResponseMessage handleException(HttpMediaTypeNotSupportedException exception) {
         return ResponseMessage.error(HttpStatus.UNSUPPORTED_MEDIA_TYPE.value(),
-                "不支持的请求类型:" + exception.getContentType().toString())
-                .result(exception.getSupportedMediaTypes()
-                        .stream()
-                        .map(MediaType::toString)
-                        .collect(Collectors.toList()));
+            "不支持的请求类型:" + exception.getContentType().toString())
+            .result(exception.getSupportedMediaTypes()
+                .stream()
+                .map(MediaType::toString)
+                .collect(Collectors.toList()));
     }
 
     /**
@@ -270,7 +269,7 @@ public class RestControllerExceptionTranslator {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     ResponseMessage handleException(MissingServletRequestParameterException exception) {
         return ResponseMessage
-                .error(HttpStatus.BAD_REQUEST.value(), "参数[" + exception.getParameterName() + "]不能为空");
+            .error(HttpStatus.BAD_REQUEST.value(), "参数[" + exception.getParameterName() + "]不能为空");
     }
 
 }

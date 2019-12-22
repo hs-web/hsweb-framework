@@ -11,6 +11,7 @@
 
     <artifactId>hsweb-system-file</artifactId>
     <packaging>pom</packaging>
+
     <modules>
         <module>hsweb-system-file-starter</module>
         <module>hsweb-system-file-api</module>

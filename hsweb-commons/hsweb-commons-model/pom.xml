@@ -27,19 +27,19 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <description>通用增删改查-通用model模块</description>
-
     <artifactId>hsweb-commons-model</artifactId>
 
+    <description>通用增删改查-通用model模块</description>
+
     <dependencies>
-        <dependency>
-            <groupId>io.swagger</groupId>
-            <artifactId>swagger-annotations</artifactId>
-        </dependency>
         <dependency>
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-commons-bean</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-annotations</artifactId>
         </dependency>
     </dependencies>
 </project>

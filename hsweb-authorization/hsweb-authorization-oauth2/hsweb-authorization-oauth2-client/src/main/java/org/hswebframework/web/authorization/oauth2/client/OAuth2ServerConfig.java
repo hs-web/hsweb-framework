@@ -1,6 +1,10 @@
 package org.hswebframework.web.authorization.oauth2.client;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.io.Serializable;
 
@@ -14,7 +18,9 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OAuth2ServerConfig implements Serializable {
+
     private static final long serialVersionUID = 2915370625863707033L;
+
     private String id;
     //服务名称
     private String name;

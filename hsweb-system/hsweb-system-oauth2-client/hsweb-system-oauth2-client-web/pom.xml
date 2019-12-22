@@ -11,13 +11,7 @@
 
     <artifactId>hsweb-system-oauth2-client-web</artifactId>
 
-
     <dependencies>
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <optional>true</optional>
-        </dependency>
         <dependency>
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-commons-controller</artifactId>
@@ -32,6 +26,11 @@
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-authorization-oauth2-client</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <optional>true</optional>
         </dependency>
     </dependencies>
 </project>

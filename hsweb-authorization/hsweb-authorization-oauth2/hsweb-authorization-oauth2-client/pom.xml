@@ -34,7 +34,7 @@
     <dependencies>
         <dependency>
             <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-concurrent-lock-starter</artifactId>
+            <artifactId>hsweb-authorization-oauth2-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -44,17 +44,13 @@
         </dependency>
         <dependency>
             <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-authorization-oauth2-core</artifactId>
+            <artifactId>hsweb-commons-controller</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
+            <groupId>org.hswebframework.web</groupId>
+            <artifactId>hsweb-concurrent-lock-starter</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.hswebframework</groupId>
@@ -62,9 +58,24 @@
             <version>${hsweb.expands.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-commons-controller</artifactId>
-            <version>${project.version}</version>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

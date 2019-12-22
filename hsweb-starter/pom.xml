@@ -11,7 +11,9 @@
 
     <artifactId>hsweb-starter</artifactId>
     <packaging>pom</packaging>
+
     <modules>
         <module>hsweb-spring-boot-starter</module>
     </modules>
+
 </project>

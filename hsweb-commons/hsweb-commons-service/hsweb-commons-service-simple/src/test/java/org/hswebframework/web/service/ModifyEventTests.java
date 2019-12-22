@@ -1,6 +1,5 @@
 package org.hswebframework.web.service;
 
-import org.hswebframework.web.commons.entity.events.EntityModifyEvent;
 import org.hswebframework.web.commons.entity.factory.MapperEntityFactory;
 import org.hswebframework.web.dao.CrudDao;
 import org.junit.Assert;
@@ -11,8 +10,6 @@ import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.event.EventListener;
-import org.springframework.stereotype.Component;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.ArrayList;
@@ -26,9 +23,11 @@ import static org.mockito.Mockito.*;
  * @author zhouhao
  * @since 3.0
  */
-@SpringBootTest(classes = SpringTestApplication.class)
-@RunWith(value = SpringRunner.class)
-@Component
+@SpringBootTest(
+    classes = SpringTestApplication.class,
+    properties = "spring.main.allow-bean-definition-overriding=true"
+)
+@RunWith(SpringRunner.class)
 public class ModifyEventTests {
 
     @Autowired

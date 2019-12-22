@@ -28,13 +28,13 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.hswebframework</groupId>
-            <artifactId>hsweb-expands-request</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-commons-dao-mybatis</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hswebframework</groupId>
+            <artifactId>hsweb-expands-request</artifactId>
         </dependency>
     </dependencies>
 </project>

@@ -10,16 +10,11 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <description>动态数据源配置web管理模块</description>
-
     <artifactId>hsweb-system-datasource-web</artifactId>
 
+    <description>动态数据源配置web管理模块</description>
+
     <dependencies>
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <optional>true</optional>
-        </dependency>
         <dependency>
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-system-datasource-api</artifactId>
@@ -29,6 +24,12 @@
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-commons-controller</artifactId>
             <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <optional>true</optional>
         </dependency>
     </dependencies>
 </project>

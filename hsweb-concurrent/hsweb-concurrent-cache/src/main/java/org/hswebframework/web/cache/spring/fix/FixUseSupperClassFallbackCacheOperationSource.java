@@ -18,16 +18,15 @@ package org.hswebframework.web.cache.spring.fix;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.cache.interceptor.CacheOperation;
 import org.springframework.cache.interceptor.CacheOperationSource;
-import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.MethodClassKey;
 import org.springframework.util.ClassUtils;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -35,21 +34,19 @@ import java.util.concurrent.ConcurrentHashMap;
  * Abstract implementation of {@link CacheOperation} that caches attributes
  * for methods and implements a fallback policy: 1. specific target method;
  * 2. target class; 3. declaring method; 4. declaring class/interface.
- * <p>
+ *
  * <p>Defaults to using the target class's caching attribute if none is
  * associated with the target method. Any caching attribute associated with
  * the target method completely overrides a class caching attribute.
  * If none found on the target class, the interface that the invoked method
  * has been called through (in case of a JDK proxy) will be checked.
- * <p>
+ *
  * <p>This implementation caches attributes by method after they are first
  * used. If it is ever desirable to allow dynamic changing of cacheable
  * attributes (which is very unlikely), caching could be made configurable.
  *
  * @author Costin Leau
  * @author Juergen Hoeller
- * @author zhouhao
- * @see org.springframework.cache.interceptor.AbstractFallbackCacheOperationSource
  * @since 3.1
  */
 public abstract class FixUseSupperClassFallbackCacheOperationSource implements CacheOperationSource {
@@ -132,10 +129,7 @@ public abstract class FixUseSupperClassFallbackCacheOperationSource implements C
 
         // The method may be on an interface, but we need attributes from the target class.
         // If the target class is null, the method will be unchanged.
-        Method specificMethod = ClassUtils.getMostSpecificMethod(method, targetClass);
-        // If we are dealing with method with generic parameters, find the original method.
-        specificMethod = BridgeMethodResolver.findBridgedMethod(specificMethod);
-
+        Method specificMethod = AopUtils.getMostSpecificMethod(method, targetClass);
 
         // First try is the method in the target class.
         // 解决@CacheConfig不能继承的问题

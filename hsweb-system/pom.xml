@@ -9,8 +9,12 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <description>业务模块</description>
+
+    <artifactId>hsweb-system</artifactId>
     <packaging>pom</packaging>
+
+    <description>业务模块</description>
+
     <modules>
         <module>hsweb-system-authorization</module>
         <module>hsweb-system-dynamic-form</module>
@@ -29,6 +33,5 @@
         <module>hsweb-system-dashboard</module>
         <module>hsweb-system-dev-tools</module>
     </modules>
-    <artifactId>hsweb-system</artifactId>
 
 </project>

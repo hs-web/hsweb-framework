@@ -14,7 +14,6 @@
 
     <artifactId>hsweb-system-datasource-local</artifactId>
 
-
     <dependencies>
         <dependency>
             <groupId>org.hswebframework.web</groupId>
@@ -36,6 +35,7 @@
             <artifactId>hsweb-datasource-api</artifactId>
             <version>${project.version}</version>
         </dependency>
+
         <dependency>
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-datasource-jta</artifactId>

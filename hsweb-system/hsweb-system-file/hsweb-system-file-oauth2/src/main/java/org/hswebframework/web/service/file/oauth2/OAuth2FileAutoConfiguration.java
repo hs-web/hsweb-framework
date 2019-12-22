@@ -14,13 +14,13 @@ import org.springframework.context.annotation.Configuration;
 @ConditionalOnBean(OAuth2RequestService.class)
 public class OAuth2FileAutoConfiguration {
 
-    @ConfigurationProperties(prefix = "hsweb.oauth2.file-server")
+    @ConfigurationProperties(prefix = "hsweb.oauth2.file-info")
     @Bean
     public OAuth2FileInfoService oAuth2FileInfoService() {
         return new OAuth2FileInfoService();
     }
 
-    @ConfigurationProperties(prefix = "hsweb.oauth2.file-server")
+    @ConfigurationProperties(prefix = "hsweb.oauth2.file-service")
     @Bean
     public OAuth2FileService oAuth2FileService() {
         return new OAuth2FileService();

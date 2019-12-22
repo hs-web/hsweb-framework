@@ -28,9 +28,9 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <description>通用增删改查-通用服务接口模块</description>
-
     <artifactId>hsweb-commons-service-api</artifactId>
+
+    <description>通用增删改查-通用服务接口模块</description>
 
     <dependencies>
         <dependency>

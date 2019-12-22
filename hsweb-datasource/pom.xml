@@ -6,15 +6,15 @@
         <artifactId>hsweb-framework</artifactId>
         <groupId>org.hswebframework.web</groupId>
         <version>3.0.11-SNAPSHOT</version>
-
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <description>数据源,多数据源,动态数据源</description>
-
     <artifactId>hsweb-datasource</artifactId>
     <packaging>pom</packaging>
+
+    <description>数据源,多数据源,动态数据源</description>
+
     <modules>
         <module>hsweb-datasource-api</module>
         <module>hsweb-datasource-jta</module>

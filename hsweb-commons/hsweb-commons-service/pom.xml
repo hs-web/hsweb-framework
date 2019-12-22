@@ -24,15 +24,15 @@
         <artifactId>hsweb-commons</artifactId>
         <groupId>org.hswebframework.web</groupId>
         <version>3.0.11-SNAPSHOT</version>
-
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <description>通用增删改查-通用服务模块</description>
-
     <artifactId>hsweb-commons-service</artifactId>
     <packaging>pom</packaging>
+
+    <description>通用增删改查-通用服务模块</description>
+
     <modules>
         <module>hsweb-commons-service-simple</module>
         <module>hsweb-commons-service-api</module>
@@ -41,13 +41,13 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.hswebframework</groupId>
-            <artifactId>hsweb-easy-orm-rdb</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-commons-entity</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hswebframework</groupId>
+            <artifactId>hsweb-easy-orm-rdb</artifactId>
         </dependency>
     </dependencies>
 

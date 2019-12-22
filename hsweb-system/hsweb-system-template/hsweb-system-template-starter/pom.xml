@@ -11,7 +11,6 @@
 
     <artifactId>hsweb-system-template-starter</artifactId>
 
-
     <build>
         <resources>
             <resource>
@@ -27,7 +26,6 @@
             <artifactId>hsweb-system-template-local</artifactId>
             <version>${project.version}</version>
         </dependency>
-      
         <dependency>
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-system-template-web</artifactId>
@@ -39,28 +37,23 @@
             <artifactId>h2</artifactId>
             <scope>test</scope>
         </dependency>
-      
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>druid</artifactId>
-            <version>1.0.26</version>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-spring-boot-starter</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-tests</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>

@@ -8,17 +8,15 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.runners.MockitoJUnitRunner;
-import org.mockito.stubbing.Answer;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyList;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.when;
 
 /**
  * TODO 完成注释
@@ -52,7 +50,7 @@ public class DefaultDictionaryWrapperTest {
                 .thenReturn(Arrays.asList(infos.get(0)));
 
         when(dictionaryInfoService.insert(anyList())).then(invocationOnMock -> {
-            System.out.println(invocationOnMock.getArgumentAt(0, List.class));
+            System.out.println((List) invocationOnMock.getArgument(0));
             return null;
         });
 

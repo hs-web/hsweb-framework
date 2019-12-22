@@ -12,19 +12,17 @@
     <artifactId>hsweb-system-authorization-api</artifactId>
 
     <description>业务模块-权限管理API</description>
-    <dependencies>
-        <dependency>
-            <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-commons-service-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
 
+    <dependencies>
         <dependency>
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-authorization-api</artifactId>
             <version>${project.version}</version>
         </dependency>
-
-
+        <dependency>
+            <groupId>org.hswebframework.web</groupId>
+            <artifactId>hsweb-commons-service-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 </project>

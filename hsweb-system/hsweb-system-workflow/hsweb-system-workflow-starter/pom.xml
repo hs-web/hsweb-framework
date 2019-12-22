@@ -12,7 +12,6 @@
 
     <artifactId>hsweb-system-workflow-starter</artifactId>
 
-
     <dependencies>
         <dependency>
             <groupId>org.hswebframework.web</groupId>

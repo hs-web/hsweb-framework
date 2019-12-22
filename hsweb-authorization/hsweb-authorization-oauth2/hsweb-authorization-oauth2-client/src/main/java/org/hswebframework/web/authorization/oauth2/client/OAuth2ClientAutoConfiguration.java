@@ -6,7 +6,11 @@ import org.hswebframework.expands.request.SimpleRequestBuilder;
 import org.hswebframework.web.authorization.builder.AuthenticationBuilderFactory;
 import org.hswebframework.web.authorization.oauth2.client.exception.OAuth2RequestException;
 import org.hswebframework.web.authorization.oauth2.client.request.DefaultResponseJudge;
-import org.hswebframework.web.authorization.oauth2.client.simple.*;
+import org.hswebframework.web.authorization.oauth2.client.simple.MemoryOAuth2ServerConfigRepository;
+import org.hswebframework.web.authorization.oauth2.client.simple.MemoryOAuth2UserTokenRepository;
+import org.hswebframework.web.authorization.oauth2.client.simple.OAuth2ServerConfigRepository;
+import org.hswebframework.web.authorization.oauth2.client.simple.OAuth2UserTokenRepository;
+import org.hswebframework.web.authorization.oauth2.client.simple.SimpleOAuth2RequestService;
 import org.hswebframework.web.authorization.oauth2.client.simple.provider.HswebResponseConvertSupport;
 import org.hswebframework.web.authorization.oauth2.client.simple.provider.HswebResponseJudgeSupport;
 import org.hswebframework.web.authorization.oauth2.client.simple.request.builder.SimpleOAuth2RequestBuilderFactory;
@@ -80,6 +84,7 @@ public class OAuth2ClientAutoConfiguration {
 
     @RestControllerAdvice
     public static class OAuth2RequestExceptionTranslator {
+
         @ExceptionHandler(OAuth2RequestException.class)
         @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
         @ResponseBody

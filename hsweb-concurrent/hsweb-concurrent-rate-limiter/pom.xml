@@ -11,6 +11,7 @@
 
     <artifactId>hsweb-concurrent-rate-limiter</artifactId>
     <packaging>pom</packaging>
+
     <modules>
         <module>hsweb-concurrent-rate-limiter-api</module>
         <module>hsweb-concurrent-rate-limiter-starter</module>

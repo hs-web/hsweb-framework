@@ -1,6 +1,5 @@
 package org.hswebframework.web.starter;
 
-import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.Range;
 import org.junit.Assert;
 import org.junit.Test;
@@ -8,6 +7,7 @@ import org.junit.Test;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.ValidatorFactory;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.Set;
 

@@ -34,18 +34,13 @@
     <dependencies>
         <dependency>
             <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-commons-entity</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-authorization-oauth2-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <optional>true</optional>
+            <groupId>org.hswebframework.web</groupId>
+            <artifactId>hsweb-commons-entity</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.hswebframework.web</groupId>
@@ -57,6 +52,15 @@
             <artifactId>hsweb-concurrent-lock-api</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.hswebframework.web</groupId>
+            <artifactId>hsweb-commons-controller</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -64,13 +68,14 @@
             <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-webmvc</artifactId>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-commons-controller</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
         </dependency>
     </dependencies>
 </project>

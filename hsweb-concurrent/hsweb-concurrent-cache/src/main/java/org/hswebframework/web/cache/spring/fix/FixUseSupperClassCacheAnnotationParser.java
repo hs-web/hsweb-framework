@@ -13,5 +13,5 @@ import java.util.Collection;
  */
 public interface FixUseSupperClassCacheAnnotationParser extends CacheAnnotationParser {
 
-    Collection<CacheOperation> parseCacheAnnotations(Class targetClass, Method method);
+    Collection<CacheOperation> parseCacheAnnotations(Class<?> targetClass, Method method);
 }

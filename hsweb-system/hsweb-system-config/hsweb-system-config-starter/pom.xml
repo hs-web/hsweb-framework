@@ -22,7 +22,6 @@
     </build>
 
     <dependencies>
-
         <dependency>
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-system-config-local</artifactId>
@@ -42,10 +41,8 @@
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>druid</artifactId>
-            <version>1.0.26</version>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-spring-boot-starter</artifactId>

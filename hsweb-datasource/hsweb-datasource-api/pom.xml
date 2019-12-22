@@ -13,7 +13,7 @@
 
     <artifactId>hsweb-datasource-api</artifactId>
 
-     <description>数据源管理API,以及简单的多数据源实现,支持aop,表达式等多种方式切换数据源</description>
+    <description>数据源管理API,以及简单的多数据源实现,支持aop,表达式等多种方式切换数据源</description>
 
     <dependencies>
         <dependency>
@@ -27,6 +27,11 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.hswebframework.web</groupId>
+            <artifactId>hsweb-boost-aop</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
         </dependency>
@@ -35,21 +40,23 @@
             <artifactId>aspectjweaver</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.hswebframework.web</groupId>
-            <artifactId>hsweb-boost-aop</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.hswebframework</groupId>
             <artifactId>hsweb-easy-orm-rdb</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-jdbc</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

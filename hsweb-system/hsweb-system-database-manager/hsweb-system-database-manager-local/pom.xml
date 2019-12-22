@@ -10,6 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>hsweb-system-database-manager-local</artifactId>
+
     <build>
         <resources>
             <resource>
@@ -18,6 +19,7 @@
             </resource>
         </resources>
     </build>
+
     <dependencies>
         <dependency>
             <groupId>org.hswebframework.web</groupId>

@@ -1,33 +1,26 @@
 package org.hswebframework.web.starter.convert;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.parser.ParserConfig;
-import com.alibaba.fastjson.parser.deserializer.JavaBeanDeserializer;
-import com.alibaba.fastjson.parser.deserializer.ObjectDeserializer;
 import com.alibaba.fastjson.serializer.PropertyFilter;
 import com.alibaba.fastjson.serializer.SerializeFilter;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.serializer.SimplePropertyPreFilter;
-import org.hswebframework.utils.ClassUtils;
+import org.hswebframework.utils.StringUtils;
 import org.hswebframework.web.ThreadLocalUtils;
 import org.hswebframework.web.controller.message.ResponseMessage;
-import org.hswebframework.utils.StringUtils;
 import org.hswebframework.web.convert.CustomMessageConverter;
-import org.hswebframework.web.dict.DictSupportApi;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.AbstractHttpMessageConverter;
-import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.http.converter.HttpMessageNotWritableException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +31,7 @@ public class FastJsonHttpMessageConverter extends AbstractHttpMessageConverter<O
 //    @Autowired(required = false)
 //    private DictSupportApi dictSupportApi;
 
-    public final static Charset UTF8 = Charset.forName("UTF-8");
+    public final static Charset UTF8 = StandardCharsets.UTF_8;
 
     private Charset charset = UTF8;
 

@@ -1,13 +1,14 @@
 package org.hswebframework.web.service;
 
-import lombok.*;
-import org.hibernate.validator.constraints.NotBlank;
-import org.hswebframework.web.commons.entity.RecordModifierEntity;
-import org.hswebframework.web.commons.entity.SimpleGenericEntity;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import org.hswebframework.web.commons.entity.SimpleTreeSortSupportEntity;
-import org.hswebframework.web.validator.LogicPrimaryKey;
 import org.hswebframework.web.validator.group.CreateGroup;
 
+import javax.validation.constraints.NotBlank;
 import java.util.List;
 
 /**

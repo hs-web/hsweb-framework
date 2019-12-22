@@ -1,38 +1,30 @@
 package org.hswebframework.web.commons.bean;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.context.annotation.Bean;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Configuration;
 
-import javax.validation.Validation;
 import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
+import java.util.Objects;
 
 /**
  * @author zhouhao
  * @since 3.0
  */
 @Configuration
-public class BeanValidatorAutoConfiguration implements BeanPostProcessor {
-    @Bean(name = "validator")
-    @ConditionalOnMissingBean(Validator.class)
-    public Validator validator() {
-        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-        return factory.getValidator();
+public class BeanValidatorAutoConfiguration implements ApplicationContextAware, InitializingBean {
+
+    private ApplicationContext applicationContext;
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
     }
 
     @Override
-    public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-        return bean;
-    }
-
-    @Override
-    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        if (bean instanceof Validator) {
-            BeanValidator.validator = ((Validator) bean);
-        }
-        return bean;
+    public void afterPropertiesSet() {
+        BeanValidator.validator = Objects.requireNonNull(applicationContext.getBean(Validator.class), "The bean of type Validator are required.");
     }
 }

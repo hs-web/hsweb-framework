@@ -26,10 +26,11 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <description>锁模块</description>
-    
     <artifactId>hsweb-concurrent-lock</artifactId>
     <packaging>pom</packaging>
+
+    <description>锁模块</description>
+
     <modules>
         <module>hsweb-concurrent-lock-api</module>
         <module>hsweb-concurrent-lock-redis</module>

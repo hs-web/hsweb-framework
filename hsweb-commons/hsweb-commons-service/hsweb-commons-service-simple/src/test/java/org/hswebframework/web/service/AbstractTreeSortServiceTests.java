@@ -2,7 +2,6 @@ package org.hswebframework.web.service;
 
 import com.alibaba.fastjson.JSON;
 import org.hswebframework.web.commons.entity.factory.MapperEntityFactory;
-import org.hswebframework.web.commons.entity.param.QueryParamEntity;
 import org.hswebframework.web.dao.CrudDao;
 import org.junit.Assert;
 import org.junit.Before;
@@ -10,27 +9,22 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.runners.MockitoJUnitRunner;
-import org.mockito.stubbing.Answer;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import javax.validation.Validation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 /**
  * @author zhouhao
  * @since 3.0
  */
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class AbstractTreeSortServiceTests {
 
     @InjectMocks
@@ -64,13 +58,13 @@ public class AbstractTreeSortServiceTests {
 
         //  doNothing().when(dao).insert(anyObject());
         doAnswer(invocationOnMock -> {
-            TestEntity t = invocationOnMock.getArgumentAt(0, TestEntity.class);
+            TestEntity t = invocationOnMock.getArgument(0);
             entities.add(t);
             return t.getId();
         }).when(dao).insert(anyObject());
 
         doAnswer(invocationOnMock -> {
-            TestEntity t = invocationOnMock.getArgumentAt(0, TestEntity.class);
+            TestEntity t = invocationOnMock.getArgument(0);
             entities.add(t);
             return t.getId();
         }).when(dao).update(anyObject());

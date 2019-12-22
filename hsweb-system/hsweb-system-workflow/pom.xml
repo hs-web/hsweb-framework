@@ -12,10 +12,12 @@
 
     <artifactId>hsweb-system-workflow</artifactId>
     <packaging>pom</packaging>
+
     <properties>
         <batik.version>1.7</batik.version>
         <flowable.version>5.23.0</flowable.version>
     </properties>
+
     <modules>
         <module>hsweb-system-workflow-starter</module>
         <module>hsweb-system-workflow-local</module>

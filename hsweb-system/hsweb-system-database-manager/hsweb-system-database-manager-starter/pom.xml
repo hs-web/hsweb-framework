@@ -26,7 +26,6 @@
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>druid</artifactId>
-            <version>1.0.26</version>
             <scope>test</scope>
         </dependency>
         <dependency>

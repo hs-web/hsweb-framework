@@ -28,12 +28,12 @@
 
     <artifactId>hsweb-system-dictionary</artifactId>
     <packaging>pom</packaging>
+
     <modules>
         <module>hsweb-system-dictionary-starter</module>
         <module>hsweb-system-dictionary-api</module>
         <module>hsweb-system-dictionary-local</module>
         <module>hsweb-system-dictionary-web</module>
     </modules>
-
 
 </project>

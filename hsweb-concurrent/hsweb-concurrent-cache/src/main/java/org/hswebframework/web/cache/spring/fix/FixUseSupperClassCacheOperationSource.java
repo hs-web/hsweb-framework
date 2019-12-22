@@ -22,7 +22,12 @@ import org.springframework.util.Assert;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * Implementation of the {@link org.springframework.cache.interceptor.CacheOperationSource
@@ -41,7 +46,7 @@ import java.util.*;
 @SuppressWarnings("serial")
 public class FixUseSupperClassCacheOperationSource extends FixUseSupperClassFallbackCacheOperationSource implements Serializable {
 
-    private boolean publicMethodsOnly;
+    private final boolean publicMethodsOnly;
 
     private final Set<FixUseSupperClassCacheAnnotationParser> annotationParsers;
 
@@ -64,8 +69,7 @@ public class FixUseSupperClassCacheOperationSource extends FixUseSupperClassFall
      */
     public FixUseSupperClassCacheOperationSource(boolean publicMethodsOnly) {
         this.publicMethodsOnly = publicMethodsOnly;
-        this.annotationParsers = new LinkedHashSet<>(1);
-        this.annotationParsers.add(new FixUseSupperClassAnnotationParser());
+        this.annotationParsers = Collections.singleton(new FixUseSupperClassAnnotationParser());
     }
 
     /**
@@ -87,9 +91,7 @@ public class FixUseSupperClassCacheOperationSource extends FixUseSupperClassFall
     public FixUseSupperClassCacheOperationSource(FixUseSupperClassCacheAnnotationParser... annotationParsers) {
         this.publicMethodsOnly = true;
         Assert.notEmpty(annotationParsers, "At least one CacheAnnotationParser needs to be specified");
-        Set<FixUseSupperClassCacheAnnotationParser> parsers = new LinkedHashSet<>(annotationParsers.length);
-        Collections.addAll(parsers, annotationParsers);
-        this.annotationParsers = parsers;
+        this.annotationParsers = new LinkedHashSet<>(Arrays.asList(annotationParsers));
     }
 
     /**
@@ -114,10 +116,10 @@ public class FixUseSupperClassCacheOperationSource extends FixUseSupperClassFall
         return determineCacheOperations(parser -> parser.parseCacheAnnotations(clazz));
     }
 
-//	@Override
-//	protected Collection<CacheOperation> findCacheOperations(final Method method) {
-//		return determineCacheOperations(parser -> parser.parseCacheAnnotations(method));
-//	}
+    //	@Override
+    //	protected Collection<CacheOperation> findCacheOperations(final Method method) {
+    //		return determineCacheOperations(parser -> parser.parseCacheAnnotations(method));
+    //	}
 
     /**
      * Determine the cache operation(s) for the given {@link CacheOperationProvider}.
@@ -163,7 +165,7 @@ public class FixUseSupperClassCacheOperationSource extends FixUseSupperClassFall
         }
         FixUseSupperClassCacheOperationSource otherCos = (FixUseSupperClassCacheOperationSource) other;
         return (this.annotationParsers.equals(otherCos.annotationParsers) &&
-                this.publicMethodsOnly == otherCos.publicMethodsOnly);
+            this.publicMethodsOnly == otherCos.publicMethodsOnly);
     }
 
     @Override
@@ -171,14 +173,11 @@ public class FixUseSupperClassCacheOperationSource extends FixUseSupperClassFall
         return this.annotationParsers.hashCode();
     }
 
-    public void setPublicMethodsOnly(boolean publicMethodsOnly) {
-        this.publicMethodsOnly = publicMethodsOnly;
-    }
-
     /**
      * Callback interface providing {@link CacheOperation} instance(s) based on
      * a given {@link CacheAnnotationParser}.
      */
+    @FunctionalInterface
     protected interface CacheOperationProvider {
 
         /**

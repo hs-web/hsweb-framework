@@ -11,6 +11,7 @@
 
     <artifactId>hsweb-system-script</artifactId>
     <packaging>pom</packaging>
+
     <modules>
         <module>hsweb-system-script-starter</module>
         <module>hsweb-system-script-api</module>

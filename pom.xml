@@ -25,6 +25,8 @@
     <groupId>org.hswebframework.web</groupId>
     <artifactId>hsweb-framework</artifactId>
     <version>3.0.11-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
     <modules>
         <module>hsweb-starter</module>
         <module>hsweb-core</module>
@@ -38,8 +40,6 @@
         <module>hsweb-boost</module>
         <module>hsweb-thirdparty</module>
     </modules>
-
-    <packaging>pom</packaging>
 
     <name>hsweb framework</name>
     <url>http://www.hswebframework.org</url>
@@ -74,32 +74,49 @@
         <tag>${project.version}</tag>
     </scm>
 
-
     <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.build.locales>zh_CN</project.build.locales>
-
         <java.version>1.8</java.version>
         <project.build.jdk>${java.version}</project.build.jdk>
-
-
-        <spring.boot.version>1.5.19.RELEASE</spring.boot.version>
-
-        <javassist.version>3.20.0-GA</javassist.version>
-        <activiti.version>5.19.0.2</activiti.version>
-
-        <fastjson.version>1.2.47</fastjson.version>
-        <h2.version>1.4.191</h2.version>
-        <mysql.version>5.1.39</mysql.version>
-        <cglib.version>3.2.2</cglib.version>
-        <aspectj.version>1.6.12</aspectj.version>
-        <hibernate.validator.version>5.1.1.Final</hibernate.validator.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.build.locales>zh_CN</project.build.locales>
 
         <hsweb.ezorm.version>3.0.6</hsweb.ezorm.version>
         <hsweb.utils.version>3.0.2</hsweb.utils.version>
         <hsweb.expands.version>3.0.2</hsweb.expands.version>
 
-        <swagger.version>2.7.0</swagger.version>
+        <spring.boot.version>2.1.11.RELEASE</spring.boot.version>
+        <mybatis-spring.version>2.0.3</mybatis-spring.version>
+        <mybatis-spring-boot-starter.version>2.1.1</mybatis-spring-boot-starter.version>
+        <mysql.version>5.1.48</mysql.version>
+        <druid.version>1.0.26</druid.version>
+        <fastjson.version>1.2.47</fastjson.version>
+        <guava.version>20.0</guava.version>
+        <groovy.version>2.5.8</groovy.version>
+        <commons-net.version>3.6</commons-net.version>
+        <commons-beanutils.version>1.9.4</commons-beanutils.version>
+        <commons-fileupload.version>1.3.3</commons-fileupload.version>
+        <!-- swagger -->
+        <swagger.version>1.5.22</swagger.version>
+        <springfox-swagger.version>2.9.2</springfox-swagger.version>
+        <swagger-bootstrap-ui.version>1.9.5</swagger-bootstrap-ui.version>
+        <swagger-spring-boot-starter.version>1.9.0.RELEASE</swagger-spring-boot-starter.version>
+        <!-- es -->
+        <elasticsearch.version>6.8.1</elasticsearch.version>
+        <spring-data-elasticsearch.version>3.2.0.RELEASE</spring-data-elasticsearch.version>
+
+        <jjwt.version>0.7.0</jjwt.version>
+        <redisson.version>3.10.6</redisson.version>
+        <javassist.version>3.20.0-GA</javassist.version>
+        <vavr.version>0.9.2</vavr.version>
+        <jool-java-8.version>0.9.13</jool-java-8.version>
+        <hibernate-jpa-2.1-api.version>1.0.2.Final</hibernate-jpa-2.1-api.version>
+        <javaparser-core.version>3.6.27</javaparser-core.version>
+        <quartz.version>2.3.2</quartz.version>
+        <activiti.version>5.19.0.2</activiti.version>
+
+        <!-- test -->
+        <spock.version>1.2-groovy-2.5</spock.version>
+        <spock-reports.version>1.6.2</spock-reports.version>
     </properties>
 
     <profiles>
@@ -175,8 +192,8 @@
             </distributionManagement>
         </profile>
     </profiles>
-    <build>
 
+    <build>
         <plugins>
             <plugin>
                 <groupId>org.jacoco</groupId>
@@ -254,7 +271,8 @@
                     <dependency>
                         <groupId>org.codehaus.groovy</groupId>
                         <artifactId>groovy-all</artifactId>
-                        <version>2.4.15</version>
+                        <version>${groovy.version}</version>
+                        <type>pom</type>
                     </dependency>
                 </dependencies>
             </plugin>
@@ -276,103 +294,15 @@
     </build>
 
     <dependencies>
-        <!--<dependency>-->
-        <!--<groupId>io.reactivex.rxjava2</groupId>-->
-        <!--<artifactId>rxjava</artifactId>-->
-        <!--</dependency>-->
-        <dependency>
-            <groupId>org.codehaus.groovy</groupId>
-            <artifactId>groovy-all</artifactId>
-            <version>2.4.15</version>
-            <type>pom</type>
-        </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-            <version>1.10.19</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.1.7</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>io.vavr</groupId>
-                <artifactId>vavr</artifactId>
-                <version>0.9.2</version>
-            </dependency>
-            <dependency>
-                <groupId>org.projectlombok</groupId>
-                <artifactId>lombok</artifactId>
-                <version>1.16.18</version>
-            </dependency>
-            <dependency>
-                <groupId>io.reactivex.rxjava2</groupId>
-                <artifactId>rxjava</artifactId>
-                <version>2.1.8</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jooq</groupId>
-                <artifactId>jool-java-8</artifactId>
-                <version>0.9.13</version>
-            </dependency>
-            <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>4.12</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.alibaba</groupId>
-                <artifactId>fastjson</artifactId>
-                <version>${fastjson.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>io.springfox</groupId>
-                <artifactId>springfox-swagger2</artifactId>
-                <version>${swagger.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>io.springfox</groupId>
-                <artifactId>springfox-swagger-ui</artifactId>
-                <version>${swagger.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.swagger</groupId>
-                <artifactId>swagger-annotations</artifactId>
-                <version>1.5.10</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.redisson</groupId>
-                <artifactId>redisson</artifactId>
-                <version>3.10.6</version>
-            </dependency>
-
-            <dependency>
-                <groupId>commons-beanutils</groupId>
-                <artifactId>commons-beanutils</artifactId>
-                <version>1.9.3</version>
-            </dependency>
-
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
@@ -380,75 +310,147 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-
+            <dependency>
+                <groupId>org.spockframework</groupId>
+                <artifactId>spock-bom</artifactId>
+                <version>${spock.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <dependency>
                 <groupId>org.hswebframework</groupId>
                 <artifactId>hsweb-easy-orm</artifactId>
                 <version>${hsweb.ezorm.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.hswebframework</groupId>
-                        <artifactId>hsweb-expands-script</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.alibaba</groupId>
-                        <artifactId>fastjson</artifactId>
-                    </exclusion>
-                </exclusions>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-
             <dependency>
                 <groupId>org.hswebframework</groupId>
                 <artifactId>hsweb-expands</artifactId>
                 <version>${hsweb.expands.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.springframework</groupId>
-                        <artifactId>spring-expression</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.alibaba</groupId>
-                        <artifactId>fastjson</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
 
             <dependency>
                 <groupId>org.hswebframework</groupId>
                 <artifactId>hsweb-utils</artifactId>
                 <version>${hsweb.utils.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>com.alibaba</groupId>
-                        <artifactId>fastjson</artifactId>
-                    </exclusion>
-                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.hswebframework</groupId>
+                <artifactId>hsweb-expands-security</artifactId>
+                <version>${hsweb.expands.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.javassist</groupId>
+                <artifactId>javassist</artifactId>
+                <version>${javassist.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.vavr</groupId>
+                <artifactId>vavr</artifactId>
+                <version>${vavr.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jooq</groupId>
+                <artifactId>jool-java-8</artifactId>
+                <version>${jool-java-8.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.athaydes</groupId>
+                <artifactId>spock-reports</artifactId>
+                <version>${spock-reports.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>fastjson</artifactId>
+                <version>${fastjson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.swagger</groupId>
+                <artifactId>swagger-annotations</artifactId>
+                <version>${swagger.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.springfox</groupId>
+                <artifactId>springfox-swagger2</artifactId>
+                <version>${springfox-swagger.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.springfox</groupId>
+                <artifactId>springfox-swagger-ui</artifactId>
+                <version>${springfox-swagger.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.redisson</groupId>
+                <artifactId>redisson</artifactId>
+                <version>${redisson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-beanutils</groupId>
+                <artifactId>commons-beanutils</artifactId>
+                <version>${commons-beanutils.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-net</groupId>
+                <artifactId>commons-net</artifactId>
+                <version>${commons-net.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt</artifactId>
+                <version>${jjwt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>druid</artifactId>
+                <version>${druid.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mybatis.spring.boot</groupId>
+                <artifactId>mybatis-spring-boot-starter</artifactId>
+                <version>${mybatis-spring-boot-starter.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mybatis</groupId>
+                <artifactId>mybatis-spring</artifactId>
+                <version>${mybatis-spring.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.hibernate.javax.persistence</groupId>
+                <artifactId>hibernate-jpa-2.1-api</artifactId>
+                <version>${hibernate-jpa-2.1-api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-fileupload</groupId>
+                <artifactId>commons-fileupload</artifactId>
+                <version>${commons-fileupload.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.javaparser</groupId>
+                <artifactId>javaparser-core</artifactId>
+                <version>${javaparser-core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.quartz-scheduler</groupId>
+                <artifactId>quartz</artifactId>
+                <version>${quartz.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.codehaus.groovy</groupId>
+                <artifactId>groovy-all</artifactId>
+                <version>${groovy.version}</version>
+                <type>pom</type>
             </dependency>
         </dependencies>
     </dependencyManagement>
-
-    <repositories>
-        <repository>
-            <id>hsweb-nexus</id>
-            <name>Nexus Release Repository</name>
-            <url>http://nexus.hsweb.me/content/groups/public/</url>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>
-                    always
-                </updatePolicy>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>aliyun-nexus</id>
-            <name>aliyun</name>
-            <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
-        </repository>
-    </repositories>
 
     <distributionManagement>
         <repository>
@@ -462,6 +464,23 @@
             <url>http://nexus.hsweb.me/content/repositories/snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
+
+    <repositories>
+        <repository>
+            <id>hsweb-nexus</id>
+            <name>Nexus Release Repository</name>
+            <url>http://nexus.hsweb.me/content/groups/public/</url>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>aliyun-nexus</id>
+            <name>aliyun</name>
+            <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
+        </repository>
+    </repositories>
 
     <pluginRepositories>
         <pluginRepository>

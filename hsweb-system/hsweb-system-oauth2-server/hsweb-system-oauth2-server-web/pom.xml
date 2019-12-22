@@ -12,8 +12,6 @@
 
     <artifactId>hsweb-system-oauth2-server-web</artifactId>
 
-
-    <description></description>
     <dependencies>
         <dependency>
             <groupId>org.hswebframework.web</groupId>

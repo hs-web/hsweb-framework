@@ -3,9 +3,9 @@ package org.hswebframework.web.entity.authorization;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.validator.constraints.NotBlank;
 import org.hswebframework.web.commons.entity.SimpleGenericEntity;
 
+import javax.validation.constraints.NotBlank;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 public class SimplePermissionEntity extends SimpleGenericEntity<String> implements PermissionEntity {
     private static final long   serialVersionUID = -5505339187716888516L;
+
     @NotBlank
     private              String name;
 

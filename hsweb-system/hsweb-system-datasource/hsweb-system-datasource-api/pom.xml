@@ -10,8 +10,8 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <description>动态数据源配置api</description>
     <artifactId>hsweb-system-datasource-api</artifactId>
+    <description>动态数据源配置api</description>
 
     <dependencies>
         <dependency>

@@ -10,10 +10,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>hsweb-authorization-oauth2</artifactId>
+    <packaging>pom</packaging>
 
     <description>OAuth2相关实现</description>
 
-    <packaging>pom</packaging>
     <modules>
         <module>hsweb-authorization-oauth2-auth-server</module>
         <module>hsweb-authorization-oauth2-client</module>

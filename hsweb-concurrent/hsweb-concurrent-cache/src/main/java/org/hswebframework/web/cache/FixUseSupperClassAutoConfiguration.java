@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Role;
  */
 @Configuration
 public class FixUseSupperClassAutoConfiguration {
+
     @Bean
     @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
     public CacheOperationSource cacheOperationSource() {

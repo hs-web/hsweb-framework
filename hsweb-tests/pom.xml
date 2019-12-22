@@ -35,6 +35,10 @@
         </dependency>
 
         <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.spockframework</groupId>
             <artifactId>spock-core</artifactId>
         </dependency>
@@ -43,13 +47,11 @@
             <groupId>org.spockframework</groupId>
             <artifactId>spock-spring</artifactId>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/com.athaydes/spock-reports -->
         <dependency>
             <groupId>com.athaydes</groupId>
             <artifactId>spock-reports</artifactId>
-            <version>1.2.13</version>
-            <!--<scope>test</scope>-->
         </dependency>
+
         <dependency>
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-spring-boot-starter</artifactId>
@@ -64,13 +66,13 @@
             <artifactId>spring-boot-starter-jdbc</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+        </dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
         </dependency>
     </dependencies>
 </project>

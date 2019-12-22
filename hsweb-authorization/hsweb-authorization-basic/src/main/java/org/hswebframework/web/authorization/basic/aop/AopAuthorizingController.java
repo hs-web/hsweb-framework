@@ -38,6 +38,9 @@ public class AopAuthorizingController extends StaticMethodMatcherPointcutAdvisor
 
     private DefaultAopMethodAuthorizeDefinitionParser defaultParser = new DefaultAopMethodAuthorizeDefinitionParser();
 
+    /**
+     * 是否自动解析代码中的权限定义信息并触发AuthorizeDefinitionInitializedEvent事件.
+     */
     private boolean autoParse = false;
 
     public void setAutoParse(boolean autoParse) {

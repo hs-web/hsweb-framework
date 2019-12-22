@@ -11,6 +11,7 @@
 
     <artifactId>hsweb-system-dashboard</artifactId>
     <packaging>pom</packaging>
+
     <modules>
         <module>hsweb-system-dashboard-api</module>
         <module>hsweb-system-dashboard-local</module>

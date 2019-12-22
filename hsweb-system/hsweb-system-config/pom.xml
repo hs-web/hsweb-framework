@@ -29,6 +29,7 @@
 
     <artifactId>hsweb-system-config</artifactId>
     <packaging>pom</packaging>
+
     <modules>
         <module>hsweb-system-config-web</module>
         <module>hsweb-system-config-api</module>

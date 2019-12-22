@@ -10,8 +10,9 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <description>文件服务api</description>
     <artifactId>hsweb-system-file-api</artifactId>
+
+    <description>文件服务api</description>
 
     <dependencies>
         <dependency>

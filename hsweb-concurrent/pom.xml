@@ -26,10 +26,11 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <description>并发包</description>
-
     <artifactId>hsweb-concurrent</artifactId>
     <packaging>pom</packaging>
+
+    <description>并发包</description>
+
     <modules>
         <module>hsweb-concurrent-cache</module>
         <module>hsweb-concurrent-lock</module>
@@ -37,6 +38,5 @@
         <module>hsweb-concurrent-async-job</module>
         <module>hsweb-concurrent-rate-limiter</module>
     </modules>
-
 
 </project>

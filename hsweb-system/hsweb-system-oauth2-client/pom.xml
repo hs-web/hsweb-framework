@@ -29,12 +29,12 @@
 
     <artifactId>hsweb-system-oauth2-client</artifactId>
     <packaging>pom</packaging>
+
     <modules>
         <module>hsweb-system-oauth2-client-starter</module>
         <module>hsweb-system-oauth2-client-api</module>
         <module>hsweb-system-oauth2-client-local</module>
         <module>hsweb-system-oauth2-client-web</module>
     </modules>
-
 
 </project>

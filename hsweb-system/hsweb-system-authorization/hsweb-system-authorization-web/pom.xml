@@ -10,7 +10,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>hsweb-system-authorization-web</artifactId>
+
     <description>业务模块-权限管理WEB API模块</description>
+
     <build>
         <resources>
             <resource>
@@ -19,13 +21,8 @@
             </resource>
         </resources>
     </build>
-    <dependencies>
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
 
+    <dependencies>
         <dependency>
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-system-authorization-api</artifactId>
@@ -35,6 +32,11 @@
             <groupId>org.hswebframework.web</groupId>
             <artifactId>hsweb-commons-controller</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

@@ -6,7 +6,6 @@
         <artifactId>hsweb-commons-service</artifactId>
         <groupId>org.hswebframework.web</groupId>
         <version>3.0.11-SNAPSHOT</version>
-
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -27,5 +26,15 @@
             <version>${project.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>

@@ -11,7 +11,9 @@
 
     <artifactId>hsweb-system-database-manager</artifactId>
     <packaging>pom</packaging>
+
     <description>数据库在线维护模块</description>
+
     <modules>
         <module>hsweb-system-database-manager-api</module>
         <module>hsweb-system-database-manager-local</module>

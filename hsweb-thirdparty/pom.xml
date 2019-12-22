@@ -11,9 +11,9 @@
 
     <artifactId>hsweb-thirdparty</artifactId>
     <packaging>pom</packaging>
+
     <modules>
         <module>hsweb-thirdparty-ueditor</module>
     </modules>
-
 
 </project>

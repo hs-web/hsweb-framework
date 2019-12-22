@@ -42,8 +42,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -57,7 +55,6 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.sql.DataSource;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.List;
@@ -82,9 +79,9 @@ public class HswebAutoConfiguration {
     public FastJsonHttpMessageConverter fastJsonHttpMessageConverter() {
         FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();
         converter.setFeatures(
-                SerializerFeature.WriteNullListAsEmpty,
-                SerializerFeature.WriteNullNumberAsZero,
-                SerializerFeature.WriteNullBooleanAsFalse
+            SerializerFeature.WriteNullListAsEmpty,
+            SerializerFeature.WriteNullNumberAsZero,
+            SerializerFeature.WriteNullBooleanAsFalse
         );
         converter.setConverters(converters);
         return converter;
@@ -97,9 +94,9 @@ public class HswebAutoConfiguration {
         JSON.DEFAULT_PARSER_FEATURE |= Feature.DisableFieldSmartMatch.getMask();
         FastJsonGenericHttpMessageConverter converter = new FastJsonGenericHttpMessageConverter();
         converter.setFeatures(
-                SerializerFeature.WriteNullListAsEmpty,
-                SerializerFeature.WriteNullNumberAsZero,
-                SerializerFeature.WriteNullBooleanAsFalse
+            SerializerFeature.WriteNullListAsEmpty,
+            SerializerFeature.WriteNullNumberAsZero,
+            SerializerFeature.WriteNullBooleanAsFalse
         );
         converter.setConverters(converters);
         ParserConfig.global = new ParserConfig() {
@@ -185,16 +182,6 @@ public class HswebAutoConfiguration {
     @ConditionalOnBean(MapperEntityFactory.class)
     public EntityFactoryInitConfiguration entityFactoryInitConfiguration() {
         return new EntityFactoryInitConfiguration();
-    }
-
-    @ConditionalOnMissingBean(DataSource.class)
-    @ConditionalOnProperty(name = "spring.datasource.type")
-    static class DataSourceAutoConfiguration {
-        @Bean
-        @ConfigurationProperties("spring.datasource")
-        public DataSource dataSource(DataSourceProperties properties) {
-            return properties.initializeDataSourceBuilder().build();
-        }
     }
 
     @Bean
