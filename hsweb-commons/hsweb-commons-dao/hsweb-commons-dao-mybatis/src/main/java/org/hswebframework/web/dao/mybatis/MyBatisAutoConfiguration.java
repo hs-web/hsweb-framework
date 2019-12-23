@@ -18,6 +18,7 @@
 
 package org.hswebframework.web.dao.mybatis;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.mapping.DatabaseIdProvider;
 import org.apache.ibatis.plugin.Interceptor;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -42,6 +43,7 @@ import org.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
 
+@Slf4j
 @Configuration
 @EnableConfigurationProperties(MybatisProperties.class)
 public class MyBatisAutoConfiguration {
@@ -86,7 +88,7 @@ public class MyBatisAutoConfiguration {
         factory.setDataSource(dataSource);
         if (StringUtils.hasText(mybatisProperties.getConfigLocation())) {
             factory.setConfigLocation(this.resourceLoader.getResource(mybatisProperties
-                    .getConfigLocation()));
+                .getConfigLocation()));
         }
         if (mybatisProperties.getConfiguration() != null) {
             factory.setConfiguration(mybatisProperties.getConfiguration());
@@ -115,6 +117,7 @@ public class MyBatisAutoConfiguration {
             Class.forName("javax.persistence.Table");
             EasyOrmSqlBuilder.getInstance().useJpa = mybatisProperties.isUseJpa();
         } catch (@SuppressWarnings("all") Exception ignore) {
+            log.warn("'javax.persistence.Table' Class Not Found, EasyOrmSqlBuilder [useJpa] property will be ignore.");
         }
         EasyOrmSqlBuilder.getInstance().entityFactory = entityFactory;
 
