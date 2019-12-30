@@ -23,6 +23,9 @@ import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.beanutils.PropertyUtilsBean;
 import org.apache.ibatis.mapping.ResultMap;
 import org.apache.ibatis.mapping.ResultMapping;
+import org.apache.ibatis.type.JdbcType;
+import org.apache.ibatis.type.TypeHandler;
+import org.apache.ibatis.type.TypeHandlerRegistry;
 import org.hswebframework.ezorm.core.ValueConverter;
 import org.hswebframework.ezorm.core.param.*;
 import org.hswebframework.ezorm.rdb.meta.RDBColumnMetaData;
@@ -175,16 +178,17 @@ public class EasyOrmSqlBuilder {
             column.setJdbcType(jdbcType);
             column.setName(org.springframework.util.StringUtils.hasText(columnName)
                     ? columnName.concat(".").concat(resultMapping.getColumn()) : resultMapping.getColumn());
+            column.setJavaType(resultMapping.getJavaType());
 
-            if (resultMapping.getTypeHandler() != null) {
-                column.setProperty("typeHandler", resultMapping.getTypeHandler().getClass().getName());
-            }
+//            if (resultMapping.getTypeHandler() != null) {
+//                column.setProperty("typeHandler", resultMapping.getTypeHandler().getClass().getName());
+//            }
             if (!StringUtils.isNullOrEmpty(resultMapping.getProperty())) {
                 column.setAlias(org.springframework.util.StringUtils.hasText(prefix)
                         ? prefix.concat(".").concat(resultMapping.getProperty()) : resultMapping.getProperty());
 
             }
-            column.setJavaType(resultMapping.getJavaType());
+
             column.setProperty("resultMapping", resultMapping);
             metaData.add(column);
         }
@@ -235,6 +239,12 @@ public class EasyOrmSqlBuilder {
             }
         }
         for (RDBColumnMetaData column : rdbTableMetaData.getColumns()) {
+            //fix 150
+            TypeHandler handler = MybatisUtils.getSqlSession().getConfiguration().getTypeHandlerRegistry()
+                    .getTypeHandler(column.getJavaType(), JdbcType.forCode(column.getJdbcType().getVendorTypeNumber()));
+            if (handler != null) {
+                column.setProperty("typeHandler", handler.getClass().getName());
+            }
             //时间
             if (column.getJdbcType() == JDBCType.DATE || column.getJdbcType() == JDBCType.TIMESTAMP) {
                 ValueConverter dateConvert = new DateTimeConverter("yyyy-MM-dd HH:mm:ss", column.getJavaType()) {
@@ -250,6 +260,8 @@ public class EasyOrmSqlBuilder {
             } else if (column.getJavaType() == boolean.class || column.getJavaType() == Boolean.class) {
                 column.setValueConverter(new BooleanValueConverter(column.getJdbcType()));
                 column.setProperty("typeHandler", NumberBooleanTypeHandler.class.getName());
+            } else if (column.getJavaType().isEnum()) {
+                //ignore
             } else if (TypeUtils.isNumberType(column)) { //数字
                 //数字
                 column.setValueConverter(new NumberValueConverter(column.getJavaType()));
