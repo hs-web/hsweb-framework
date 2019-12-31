@@ -180,15 +180,13 @@ public class EasyOrmSqlBuilder {
                     ? columnName.concat(".").concat(resultMapping.getColumn()) : resultMapping.getColumn());
             column.setJavaType(resultMapping.getJavaType());
 
-//            if (resultMapping.getTypeHandler() != null) {
-//                column.setProperty("typeHandler", resultMapping.getTypeHandler().getClass().getName());
-//            }
+            if (resultMapping.getTypeHandler() != null) {
+                column.setProperty("typeHandler", resultMapping.getTypeHandler().getClass().getName());
+            }
             if (!StringUtils.isNullOrEmpty(resultMapping.getProperty())) {
                 column.setAlias(org.springframework.util.StringUtils.hasText(prefix)
                         ? prefix.concat(".").concat(resultMapping.getProperty()) : resultMapping.getProperty());
-
             }
-
             column.setProperty("resultMapping", resultMapping);
             metaData.add(column);
         }
@@ -226,7 +224,7 @@ public class EasyOrmSqlBuilder {
                 .forEach(rdbTableMetaData::addColumn);
 
         if (useJpa) {
-            Class type = entityFactory == null ? resultMaps.getType() : entityFactory.getInstanceType(resultMaps.getType());
+            Class<?> type = entityFactory == null ? resultMaps.getType() : entityFactory.getInstanceType(resultMaps.getType());
             RDBTableMetaData parseResult = JpaAnnotationParser.parseMetaDataFromEntity(type);
             if (parseResult != null) {
                 for (RDBColumnMetaData columnMetaData : parseResult.getColumns()) {
@@ -240,7 +238,7 @@ public class EasyOrmSqlBuilder {
         }
         for (RDBColumnMetaData column : rdbTableMetaData.getColumns()) {
             //fix 150
-            TypeHandler handler = MybatisUtils.getSqlSession().getConfiguration().getTypeHandlerRegistry()
+            TypeHandler<?> handler = MybatisUtils.getSqlSession().getConfiguration().getTypeHandlerRegistry()
                     .getTypeHandler(column.getJavaType(), JdbcType.forCode(column.getJdbcType().getVendorTypeNumber()));
             if (handler != null) {
                 column.setProperty("typeHandler", handler.getClass().getName());
