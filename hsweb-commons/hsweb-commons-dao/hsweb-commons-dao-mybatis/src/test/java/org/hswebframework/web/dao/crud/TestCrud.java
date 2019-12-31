@@ -1,5 +1,6 @@
 package org.hswebframework.web.dao.crud;
 
+import com.alibaba.fastjson.JSONObject;
 import lombok.SneakyThrows;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.hswebframework.ezorm.core.param.QueryParam;
@@ -21,6 +22,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @RunWith(SpringRunner.class)
@@ -50,7 +52,8 @@ public class TestCrud extends AbstractTransactionalJUnit4SpringContextTests {
                 "  name VARCHAR(32) ,\n" +
                 "  create_time DATETIME,\n" +
                 "  data_type SMALLINT,\n" +
-                "  data_types BIGINT\n" +
+                "  data_types BIGINT,\n" +
+                "  json_field CLOB" +
                 ")");
         sqlExecutor.exec("\n" +
                 "create table h_nest_table(\n" +
@@ -69,6 +72,7 @@ public class TestCrud extends AbstractTransactionalJUnit4SpringContextTests {
         entity.setName("测试");
         entity.setDataType(DataType.TYPE1);
         entity.setDataTypes(new DataType[]{DataType.TYPE1, DataType.TYPE3});
+        entity.setJsonField(new JSONObject(Collections.singletonMap("test","test")));
         testDao.insert(entity);
         Assert.assertNotNull(entity.getId());
         sqlExecutor.insert("insert into h_nest_table (id,name) values(#{id},'1234')",entity);

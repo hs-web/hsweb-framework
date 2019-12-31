@@ -6,6 +6,8 @@
         <id property="id" column="id" javaType="Long" jdbcType="INTEGER"/>
         <id property="name" column="name" javaType="String" jdbcType="VARCHAR"/>
         <id property="dataType" column="data_type" javaType="org.hswebframework.web.dao.crud.DataType" jdbcType="BIGINT"/>
+        <id property="jsonField" column="json_field" typeHandler="org.hswebframework.web.dao.mybatis.handler.JsonMapHandler"
+            javaType="com.alibaba.fastjson.JSONObject" jdbcType="CLOB"/>
 
     </resultMap>
 
