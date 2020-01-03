@@ -132,7 +132,7 @@ public class DefaultReactiveUserService extends GenericReactiveCrudService<UserE
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class, transactionManager =TransactionManagers.r2dbcTransactionManager)
+    @Transactional(rollbackFor = Exception.class, transactionManager = TransactionManagers.r2dbcTransactionManager)
     public Mono<Boolean> changePassword(String userId, String oldPassword, String newPassword) {
         return findById(userId)
                 .switchIfEmpty(Mono.error(NotFoundException::new))
@@ -161,5 +161,11 @@ public class DefaultReactiveUserService extends GenericReactiveCrudService<UserE
                 .createQuery()
                 .setParam(queryParam)
                 .count();
+    }
+
+    @Override
+    public Mono<Boolean> deleteUser(String userId) {
+        return deleteById(Mono.just(userId))
+                .map(integer -> integer > 0);
     }
 }

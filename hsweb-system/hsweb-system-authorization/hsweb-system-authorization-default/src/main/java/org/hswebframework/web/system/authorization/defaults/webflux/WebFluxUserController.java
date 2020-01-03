@@ -5,6 +5,7 @@ import lombok.Setter;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.User;
 import org.hswebframework.web.authorization.annotation.Authorize;
+import org.hswebframework.web.authorization.annotation.DeleteAction;
 import org.hswebframework.web.authorization.annotation.Resource;
 import org.hswebframework.web.authorization.annotation.SaveAction;
 import org.hswebframework.web.authorization.exception.UnAuthorizedException;
@@ -44,6 +45,12 @@ public class WebFluxUserController implements ReactiveServiceQueryController<Use
         return reactiveUserService.changeState(Mono.just(id), state);
     }
 
+    @DeleteMapping("/{id:.+}")
+    @DeleteAction
+    public Mono<Boolean> deleteUser(@PathVariable String id) {
+        return reactiveUserService.deleteUser(id);
+    }
+
     @PutMapping("/passwd")
     @Authorize(merge = false)
     public Mono<Boolean> changePassword(@RequestBody ChangePasswordRequest request) {
@@ -53,6 +60,17 @@ public class WebFluxUserController implements ReactiveServiceQueryController<Use
                 .map(Authentication::getUser)
                 .map(User::getId)
                 .flatMap(userId -> reactiveUserService.changePassword(userId, request.getOldPassword(), request.getNewPassword()));
+    }
+
+    @PutMapping("/me")
+    @Authorize(merge = false)
+    public Mono<Boolean> updateLoginUserInfo(@RequestBody UserEntity request) {
+        return Authentication
+                .currentReactive()
+                .switchIfEmpty(Mono.error(UnAuthorizedException::new))
+                .map(Authentication::getUser)
+                .map(User::getId)
+                .flatMap(userId -> reactiveUserService.updateById(userId, Mono.just(request)).map(integer -> integer > 0));
     }
 
     @Override

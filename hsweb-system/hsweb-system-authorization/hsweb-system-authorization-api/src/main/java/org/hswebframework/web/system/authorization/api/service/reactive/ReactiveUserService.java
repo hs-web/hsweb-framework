@@ -27,4 +27,6 @@ public interface ReactiveUserService {
 
     Mono<Integer> countUser(QueryParam queryParam);
 
+    Mono<Boolean> deleteUser(String userId);
+
 }
