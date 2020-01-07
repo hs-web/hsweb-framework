@@ -258,7 +258,8 @@ public class EasyOrmSqlBuilder {
             } else if (column.getJavaType() == boolean.class || column.getJavaType() == Boolean.class) {
                 column.setValueConverter(new BooleanValueConverter(column.getJdbcType()));
                 column.setProperty("typeHandler", NumberBooleanTypeHandler.class.getName());
-            } else if (column.getJavaType().isEnum()) {
+            } else if (column.getJavaType().isEnum() || (
+                    column.getJavaType().isArray() && column.getJavaType().getComponentType().isEnum())) {
                 //ignore
             } else if (TypeUtils.isNumberType(column)) { //数字
                 //数字
