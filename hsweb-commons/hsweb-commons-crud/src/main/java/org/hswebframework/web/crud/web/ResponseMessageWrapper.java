@@ -17,7 +17,10 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 
 public class ResponseMessageWrapper extends ResponseBodyResultHandler {
-    public ResponseMessageWrapper(List<HttpMessageWriter<?>> writers, RequestedContentTypeResolver resolver, ReactiveAdapterRegistry registry) {
+
+    public ResponseMessageWrapper(List<HttpMessageWriter<?>> writers,
+                                  RequestedContentTypeResolver resolver,
+                                  ReactiveAdapterRegistry registry) {
         super(writers, resolver, registry);
         setOrder(90);
     }

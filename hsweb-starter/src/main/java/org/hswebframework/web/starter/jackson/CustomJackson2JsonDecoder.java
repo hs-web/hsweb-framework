@@ -43,7 +43,8 @@ public class CustomJackson2JsonDecoder extends Jackson2CodecSupport implements H
 
     @Override
     public boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType) {
-        JavaType javaType = getObjectMapper().getTypeFactory().constructType(elementType.getType());
+        Type type = elementType.resolve() == null ? elementType.getType() : elementType.resolve();
+        JavaType javaType = getObjectMapper().getTypeFactory().constructType(type);
         // Skip String: CharSequenceDecoder + "*/*" comes after
         return (!CharSequence.class.isAssignableFrom(elementType.toClass()) &&
                 getObjectMapper().canDeserialize(javaType) && supportsMimeType(mimeType));

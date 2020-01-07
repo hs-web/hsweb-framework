@@ -5,6 +5,7 @@ import org.hswebframework.web.authorization.Dimension;
 import org.hswebframework.web.authorization.DimensionProvider;
 import org.hswebframework.web.authorization.DimensionType;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 public class UserDimensionProvider implements DimensionProvider {
 
@@ -17,6 +18,12 @@ public class UserDimensionProvider implements DimensionProvider {
     public Flux<Dimension> getDimensionByUserId(String userId) {
         return Flux.just(userId)
                 .map(id -> Dimension.of(userId, userId, DefaultDimensionType.user));
+    }
+
+    @Override
+    public Mono<? extends Dimension> getDimensionById(DimensionType type, String id) {
+        return Mono.just(id)
+                .map(userId -> Dimension.of(userId, userId, DefaultDimensionType.user));
     }
 
     @Override

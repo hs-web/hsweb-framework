@@ -47,7 +47,7 @@ public class AuthorizationSettingEntity implements Entity {
     @NotBlank(message = "维度目标不能为空",groups = CreateGroup.class)
     private String dimensionTarget;
 
-    @Column(name = "dimension_target_name", length = 64, updatable = false)
+    @Column(name = "dimension_target_name", length = 64)
     @Comment("维度目标名称")//维度实例名称.如: 用户名. 角色名
     private String dimensionTargetName;
 
