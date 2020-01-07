@@ -41,7 +41,7 @@ public class DynamicDataSourceAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(DynamicDataSourceConfigRepository.class)
-    public DynamicDataSourceConfigRepository inSpringDynamicDataSourceConfigRepository() {
+    public InSpringDynamicDataSourceConfigRepository inSpringDynamicDataSourceConfigRepository() {
         return new InSpringDynamicDataSourceConfigRepository();
     }
 
