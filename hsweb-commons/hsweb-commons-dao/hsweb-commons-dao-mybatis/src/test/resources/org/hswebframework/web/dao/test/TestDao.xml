@@ -4,22 +4,25 @@
 
     <resultMap id="TestResultMap" type="org.hswebframework.web.dao.crud.TestEntity">
         <id property="id" column="id" javaType="Long" jdbcType="INTEGER"/>
-        <id property="name" column="name" javaType="String" jdbcType="VARCHAR"/>
-        <id property="dataType" column="data_type" javaType="org.hswebframework.web.dao.crud.DataType" jdbcType="BIGINT"/>
-        <id property="jsonField" column="json_field" typeHandler="org.hswebframework.web.dao.mybatis.handler.JsonMapHandler"
-            javaType="com.alibaba.fastjson.JSONObject" jdbcType="CLOB"/>
-
+        <result property="name" column="name" javaType="String" jdbcType="VARCHAR"/>
+        <result property="dataType" column="data_type" javaType="org.hswebframework.web.dao.crud.DataType"
+                jdbcType="BIGINT"/>
+        <result property="jsonField" column="json_field" javaType="com.alibaba.fastjson.JSONObject" jdbcType="CLOB"
+                typeHandler="org.hswebframework.web.dao.mybatis.handler.JsonMapHandler"/>
     </resultMap>
 
     <resultMap id="TestNestResultMap" type="org.hswebframework.web.dao.crud.TestEntity">
         <id property="id" column="id" javaType="Long" jdbcType="INTEGER"/>
-<!--                <result property="nest2.name" column="nest_table2.name" javaType="String" jdbcType="VARCHAR"/>-->
-<!--        <association property="nest" javaType="org.hswebframework.web.dao.crud.NestEntity" columnPrefix="nest_table." column="nest_table">-->
-<!--            <result property="name" column="name" jdbcType="VARCHAR" javaType="String"/>-->
-<!--        </association>-->
-<!--        <association property="nest2" javaType="org.hswebframework.web.dao.crud.NestEntity" columnPrefix="nest_table2." column="nest_table2">-->
-<!--            <result property="name" column="name" jdbcType="VARCHAR" javaType="String"/>-->
-<!--        </association>-->
+        <result property="dataType" column="data_type" jdbcType="SMALLINT"/>
+        <result property="jsonField" column="json_field" jdbcType="CLOB"
+                typeHandler="org.hswebframework.web.dao.mybatis.handler.JsonMapHandler"/>
+        <!--                <result property="nest2.name" column="nest_table2.name" javaType="String" jdbcType="VARCHAR"/>-->
+        <!--        <association property="nest" javaType="org.hswebframework.web.dao.crud.NestEntity" columnPrefix="nest_table." column="nest_table">-->
+        <!--            <result property="name" column="name" jdbcType="VARCHAR" javaType="String"/>-->
+        <!--        </association>-->
+        <!--        <association property="nest2" javaType="org.hswebframework.web.dao.crud.NestEntity" columnPrefix="nest_table2." column="nest_table2">-->
+        <!--            <result property="name" column="name" jdbcType="VARCHAR" javaType="String"/>-->
+        <!--        </association>-->
     </resultMap>
 
     <!--用于动态生成sql所需的配置-->

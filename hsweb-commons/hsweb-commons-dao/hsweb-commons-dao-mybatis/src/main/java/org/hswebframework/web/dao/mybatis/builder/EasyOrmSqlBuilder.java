@@ -23,11 +23,12 @@ import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.beanutils.PropertyUtilsBean;
 import org.apache.ibatis.mapping.ResultMap;
 import org.apache.ibatis.mapping.ResultMapping;
-import org.apache.ibatis.type.JdbcType;
-import org.apache.ibatis.type.TypeHandler;
-import org.apache.ibatis.type.TypeHandlerRegistry;
 import org.hswebframework.ezorm.core.ValueConverter;
-import org.hswebframework.ezorm.core.param.*;
+import org.hswebframework.ezorm.core.param.InsertParam;
+import org.hswebframework.ezorm.core.param.Param;
+import org.hswebframework.ezorm.core.param.QueryParam;
+import org.hswebframework.ezorm.core.param.Term;
+import org.hswebframework.ezorm.core.param.UpdateParam;
 import org.hswebframework.ezorm.rdb.meta.RDBColumnMetaData;
 import org.hswebframework.ezorm.rdb.meta.RDBDatabaseMetaData;
 import org.hswebframework.ezorm.rdb.meta.RDBTableMetaData;
@@ -37,23 +38,35 @@ import org.hswebframework.ezorm.rdb.meta.converter.NumberValueConverter;
 import org.hswebframework.ezorm.rdb.render.Sql;
 import org.hswebframework.ezorm.rdb.render.SqlAppender;
 import org.hswebframework.ezorm.rdb.render.SqlRender;
-import org.hswebframework.ezorm.rdb.render.dialect.*;
+import org.hswebframework.ezorm.rdb.render.dialect.Dialect;
+import org.hswebframework.ezorm.rdb.render.dialect.H2RDBDatabaseMetaData;
+import org.hswebframework.ezorm.rdb.render.dialect.MSSQLRDBDatabaseMetaData;
+import org.hswebframework.ezorm.rdb.render.dialect.MysqlRDBDatabaseMetaData;
+import org.hswebframework.ezorm.rdb.render.dialect.OracleRDBDatabaseMetaData;
+import org.hswebframework.ezorm.rdb.render.dialect.PGRDBDatabaseMetaData;
 import org.hswebframework.ezorm.rdb.render.support.simple.CommonSqlRender;
 import org.hswebframework.ezorm.rdb.render.support.simple.SimpleWhereSqlBuilder;
+import org.hswebframework.utils.StringUtils;
 import org.hswebframework.web.BusinessException;
 import org.hswebframework.web.bean.FastBeanCopier;
 import org.hswebframework.web.commons.entity.Entity;
 import org.hswebframework.web.commons.entity.factory.EntityFactory;
+import org.hswebframework.web.dao.mybatis.MybatisUtils;
 import org.hswebframework.web.dao.mybatis.builder.jpa.JpaAnnotationParser;
 import org.hswebframework.web.dao.mybatis.handler.NumberBooleanTypeHandler;
 import org.hswebframework.web.dao.mybatis.plgins.pager.Pager;
-import org.hswebframework.web.dao.mybatis.MybatisUtils;
-import org.hswebframework.utils.StringUtils;
 import org.hswebframework.web.datasource.DataSourceHolder;
 import org.hswebframework.web.datasource.DatabaseType;
 
 import java.sql.JDBCType;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -238,11 +251,11 @@ public class EasyOrmSqlBuilder {
         }
         for (RDBColumnMetaData column : rdbTableMetaData.getColumns()) {
             //fix 150
-            TypeHandler<?> handler = MybatisUtils.getSqlSession().getConfiguration().getTypeHandlerRegistry()
-                    .getTypeHandler(column.getJavaType(), JdbcType.forCode(column.getJdbcType().getVendorTypeNumber()));
-            if (handler != null) {
-                column.setProperty("typeHandler", handler.getClass().getName());
-            }
+            // TypeHandler<?> handler = MybatisUtils.getSqlSession().getConfiguration().getTypeHandlerRegistry()
+            //         .getTypeHandler(column.getJavaType(), JdbcType.forCode(column.getJdbcType().getVendorTypeNumber()));
+            // if (handler != null) {
+            //     column.setProperty("typeHandler", handler.getClass().getName());
+            // }
             //时间
             if (column.getJdbcType() == JDBCType.DATE || column.getJdbcType() == JDBCType.TIMESTAMP) {
                 ValueConverter dateConvert = new DateTimeConverter("yyyy-MM-dd HH:mm:ss", column.getJavaType()) {
