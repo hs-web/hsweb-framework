@@ -39,23 +39,26 @@ public class AutoDDLProcessor implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() {
-        if(entityFactory instanceof MapperEntityFactory){
-            MapperEntityFactory factory= ((MapperEntityFactory) entityFactory);
+        if (entityFactory instanceof MapperEntityFactory) {
+            MapperEntityFactory factory = ((MapperEntityFactory) entityFactory);
             for (EntityInfo entity : entities) {
-                factory.addMapping(entity.getEntityType(),MapperEntityFactory.defaultMapper(entity.getRealType()));
+                factory.addMapping(entity.getEntityType(), MapperEntityFactory.defaultMapper(entity.getRealType()));
             }
         }
         if (properties.isAutoDdl()) {
             List<Class> entities = this.entities.stream().map(EntityInfo::getRealType).collect(Collectors.toList());
-            if(reactive){
+            if (reactive) {
                 Flux.fromIterable(entities)
                         .doOnNext(type -> log.info("auto ddl for {}", type))
                         .map(resolver::resolve)
-                        .concatMap(meta -> operator.ddl().createOrAlter(meta).commit().reactive())
+                        .flatMap(meta -> operator.ddl()
+                                .createOrAlter(meta)
+                                .commit()
+                                .reactive())
                         .onErrorContinue((err, a) -> log.warn(err.getMessage(), err))
                         .then()
                         .block();
-            }else{
+            } else {
                 for (Class<?> entity : entities) {
                     log.warn("auto ddl for {}", entity);
                     try {
