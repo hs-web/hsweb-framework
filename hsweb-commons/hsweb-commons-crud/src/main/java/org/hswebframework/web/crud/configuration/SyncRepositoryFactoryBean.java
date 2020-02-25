@@ -13,17 +13,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class SyncRepositoryFactoryBean<E, PK>
         implements FactoryBean<SyncRepository<E, PK>> {
 
-
     @Autowired
     private DatabaseOperator operator;
 
     @Autowired
     private EntityTableMetadataResolver resolver;
 
-    private Class<E> entityType;
-
     @Autowired
     private EntityResultWrapperFactory wrapperFactory;
+
+    private Class<E> entityType;
 
     @Override
     public SyncRepository<E, PK> getObject() {

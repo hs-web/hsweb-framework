@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -49,11 +50,15 @@ public class DefaultReactiveUserServiceTest {
                 .expectNext(true)
                 .verifyComplete();
 
-         userService.findByUsernameAndPassword("admin", "admin")
+        userService.findByUsernameAndPassword("admin", "admin")
                 .as(StepVerifier::create)
-                 .expectNextCount(1)
+                .expectNextCount(1)
                 .verifyComplete();
 
+        userService.deleteUser(userEntity.getId())
+                .as(StepVerifier::create)
+                .expectNext(true)
+                .verifyComplete();
 
     }
 

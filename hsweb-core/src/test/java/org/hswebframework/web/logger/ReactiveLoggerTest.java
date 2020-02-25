@@ -17,7 +17,7 @@ public class ReactiveLoggerTest {
     public void test() {
 
         Flux.range(0, 5)
-                .delayElements(Duration.ofSeconds(2))
+                .delayElements(Duration.ofSeconds(1))
                 .flatMap(i -> ReactiveLogger.mdc("requestId", "test").thenReturn(i))
                 .doOnEach(ReactiveLogger.onNext(v -> {
                     log.info("test:{}", v);
@@ -33,7 +33,7 @@ public class ReactiveLoggerTest {
     @Test
     public void testHandle() {
         Flux.range(0, 5)
-                .delayElements(Duration.ofSeconds(2))
+                .delayElements(Duration.ofSeconds(1))
                 .flatMap(i -> ReactiveLogger.mdc("requestId", "test").thenReturn(i))
                 .handle(ReactiveLogger.handle((o, fluxSink) -> {
                     log.info("test:{}", fluxSink.currentContext());

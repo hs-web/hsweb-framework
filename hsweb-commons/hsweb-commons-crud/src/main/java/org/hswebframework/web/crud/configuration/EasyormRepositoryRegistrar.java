@@ -47,13 +47,7 @@ public class EasyormRepositoryRegistrar implements ImportBeanDefinitionRegistrar
         if (attr == null) {
             return;
         }
-        boolean reactivePrecent = false;
-        try {
-            Class.forName("io.r2dbc.spi.ConnectionFactory");
-            reactivePrecent = true;
-        } catch (Exception e) {
-
-        }
+        boolean reactivePrecent = org.springframework.util.ClassUtils.isPresent("io.r2dbc.spi.ConnectionFactory", this.getClass().getClassLoader());
         String[] arr = (String[]) attr.get("value");
         String path = Arrays.stream(arr)
                 .map(str -> ResourcePatternResolver
@@ -126,18 +120,17 @@ public class EasyormRepositoryRegistrar implements ImportBeanDefinitionRegistrar
                 definition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
                 definition.getPropertyValues().add("entityType", realType);
                 registry.registerBeanDefinition(realType.getSimpleName().concat("ReactiveRepository"), definition);
+            } else {
+                log.debug("register SyncRepository<{},{}>", entityType.getName(), idType.getSimpleName());
+                ResolvableType repositoryType = ResolvableType.forClassWithGenerics(DefaultSyncRepository.class, entityType, idType);
+                RootBeanDefinition definition = new RootBeanDefinition();
+                definition.setTargetType(repositoryType);
+                definition.setBeanClass(SyncRepositoryFactoryBean.class);
+                definition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
+                definition.getPropertyValues().add("entityType", realType);
+                registry.registerBeanDefinition(realType.getSimpleName().concat("SyncRepository"), definition);
             }
 
-            log.debug("register SyncRepository<{},{}>", entityType.getName(), idType.getSimpleName());
-
-            ResolvableType repositoryType = ResolvableType.forClassWithGenerics(DefaultSyncRepository.class, entityType, idType);
-
-            RootBeanDefinition definition = new RootBeanDefinition();
-            definition.setTargetType(repositoryType);
-            definition.setBeanClass(SyncRepositoryFactoryBean.class);
-            definition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
-            definition.getPropertyValues().add("entityType", realType);
-            registry.registerBeanDefinition(realType.getSimpleName().concat("SyncRepository"), definition);
         }
 
 

@@ -68,7 +68,7 @@ public class ReactiveCacheProperties {
             } else {
                 operations = (ReactiveRedisOperations) context.getBeanProvider(ResolvableType.forClassWithGenerics(ReactiveRedisOperations.class, Object.class, Object.class)).getIfAvailable();
             }
-            return new RedisLocalReactiveCacheManager(operations, createCacheManager(type));
+            return new RedisLocalReactiveCacheManager(operations, createCacheManager(redis.localCacheType));
         }
 
         return createCacheManager(type);
@@ -110,7 +110,7 @@ public class ReactiveCacheProperties {
         }
 
         CacheBuilder<Object, Object> createBuilder() {
-            CacheBuilder builder = CacheBuilder.newBuilder()
+            CacheBuilder<Object,Object> builder = CacheBuilder.newBuilder()
                     .expireAfterAccess(expireAfterAccess)
                     .expireAfterWrite(expireAfterWrite)
                     .maximumSize(maximumSize);
@@ -141,7 +141,7 @@ public class ReactiveCacheProperties {
         }
 
         Caffeine<Object, Object> createBuilder() {
-            Caffeine builder = Caffeine.newBuilder()
+            Caffeine<Object,Object> builder = Caffeine.newBuilder()
                     .expireAfterAccess(expireAfterAccess)
                     .expireAfterWrite(expireAfterWrite)
                     .maximumSize(maximumSize);

@@ -14,6 +14,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -89,6 +90,10 @@ public class DefaultReactiveAuthenticationManagerTest {
                 .verifyComplete();
 
         authenticationMono.map(autz->autz.hasPermission("test","add"))
+                .as(StepVerifier::create)
+                .expectNext(true)
+                .verifyComplete();
+        userService.deleteUser(entity.getId())
                 .as(StepVerifier::create)
                 .expectNext(true)
                 .verifyComplete();

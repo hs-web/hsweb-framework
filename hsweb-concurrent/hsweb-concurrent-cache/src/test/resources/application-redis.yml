@@ -1,5 +1,5 @@
 hsweb:
   cache:
     redis:
-      local-cache-type: none
+      local-cache-type: caffeine
     type: redis
