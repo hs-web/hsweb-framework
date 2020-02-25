@@ -2,6 +2,10 @@ language: java
 sudo: false
 jdk:
   - openjdk8
+service:
+  - redis-server
+before_script:
+  - sudo redis-server /etc/redis/redis.conf --port 6379
 before_install:
   - chmod +x mvnw
 script:
