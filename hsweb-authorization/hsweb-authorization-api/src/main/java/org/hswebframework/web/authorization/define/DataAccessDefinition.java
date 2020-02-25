@@ -9,12 +9,12 @@ import java.util.*;
 @Setter
 public class DataAccessDefinition {
 
-    Set<DataAccessTypeDefinition> dataAccessTypes=new HashSet<>();
+    Set<DataAccessTypeDefinition> dataAccessTypes = new HashSet<>();
 
-    public Optional<DataAccessTypeDefinition> getType(String typeId){
+    public Optional<DataAccessTypeDefinition> getType(String typeId) {
         return dataAccessTypes
                 .stream()
-                .filter(type->type.getId().equalsIgnoreCase(typeId))
+                .filter(type -> type.getId() != null && type.getId().equalsIgnoreCase(typeId))
                 .findAny();
     }
 }

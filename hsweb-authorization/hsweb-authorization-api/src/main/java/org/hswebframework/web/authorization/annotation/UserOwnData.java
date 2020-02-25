@@ -9,7 +9,6 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
-@DataAccess
 @DataAccessType(id = "user_own_data", name = "用户自己的数据")
 public @interface UserOwnData {
 

@@ -33,6 +33,7 @@ public class TestController implements ReactiveCrudController<TestEntity, String
 
     @QueryAction
     @FieldDataAccess
+    @DimensionDataAccess(ignore = true)
     public Mono<QueryParam> queryUser(QueryParam queryParam) {
         return Mono.just(queryParam);
     }

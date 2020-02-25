@@ -5,12 +5,14 @@ import lombok.*;
 import org.hswebframework.web.authorization.annotation.*;
 import org.hswebframework.web.authorization.define.*;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.util.StringUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 默认权限权限定义
@@ -54,99 +56,7 @@ public class DefaultBasicAuthorizeDefinition implements AopAuthorizeDefinition {
     ));
 
     public static AopAuthorizeDefinition from(Class targetClass, Method method) {
-        DefaultBasicAuthorizeDefinition definition = new DefaultBasicAuthorizeDefinition();
-        definition.setTargetClass(targetClass);
-        definition.setTargetMethod(method);
-
-        Set<Annotation> methodAnnotation = AnnotatedElementUtils.findAllMergedAnnotations(method, types);
-
-        Set<Annotation> classAnnotation = AnnotatedElementUtils.findAllMergedAnnotations(targetClass, types);
-
-        Map<Class, Annotation> classAnnotationMap = classAnnotation
-                .stream()
-                .collect(Collectors.toMap(Annotation::annotationType, Function.identity()));
-
-        Map<Class, Annotation> mapping = methodAnnotation
-                .stream()
-                .collect(Collectors.toMap(Annotation::annotationType, Function.identity()));
-
-        for (Annotation annotation : classAnnotation) {
-            if (annotation instanceof Authorize) {
-                definition.putAnnotation(((Authorize) annotation));
-            }
-            if (annotation instanceof Resource) {
-                definition.putAnnotation(((Resource) annotation));
-            }
-        }
-
-        for (Annotation annotation : methodAnnotation) {
-            if (annotation instanceof Authorize) {
-                definition.putAnnotation(((Authorize) annotation));
-            }
-            if (annotation instanceof Resource) {
-                definition.putAnnotation(((Resource) annotation));
-            }
-            if (annotation instanceof Dimension) {
-                definition.putAnnotation(((Dimension) annotation));
-            }
-        }
-
-        for (Annotation annotation : methodAnnotation) {
-
-            if (annotation instanceof ResourceAction) {
-                Optional.ofNullable(mapping.getOrDefault(Resource.class, classAnnotationMap.get(Resource.class)))
-                        .map(Resource.class::cast)
-                        .flatMap(res -> definition.getResources().getResource(res.id()))
-                        .ifPresent(res -> {
-
-                            ResourceAction ra = (ResourceAction) annotation;
-                            ResourceActionDefinition action = definition.putAnnotation(res, ra);
-
-                            Optional.ofNullable(mapping.get(DataAccessType.class))
-                                    .map(DataAccessType.class::cast)
-                                    .ifPresent(dat -> definition.putAnnotation(action, dat));
-                        });
-            }
-            Optional<ResourceActionDefinition> actionDefinition = Optional.ofNullable(mapping.getOrDefault(Resource.class, classAnnotationMap.get(Resource.class)))
-                    .map(Resource.class::cast)
-                    .flatMap(res -> definition.getResources().getResource(res.id()))
-                    .flatMap(res -> Optional.ofNullable(mapping.get(ResourceAction.class))
-                            .map(ResourceAction.class::cast)
-                            .flatMap(ra -> res.getAction(ra.id())));
-
-            if (annotation instanceof DataAccessType) {
-                actionDefinition.ifPresent(ra -> definition.putAnnotation(ra, (DataAccessType) annotation));
-            }
-
-            if (annotation instanceof DataAccess) {
-                actionDefinition.ifPresent(ra -> {
-                            definition.putAnnotation(ra, (DataAccess) annotation);
-                            Optional.ofNullable(mapping.get(DataAccessType.class))
-                                    .map(DataAccessType.class::cast)
-                                    .ifPresent(dat -> definition.putAnnotation(ra, dat));
-                        });
-            }
-
-        }
-
-
-        for (Annotation annotation : classAnnotation) {
-            if (annotation instanceof DataAccessType||
-                    annotation instanceof DataAccess) {
-                for (ResourceDefinition resource : definition.getResources().getResources()) {
-                    for (ResourceActionDefinition action : resource.getActions()) {
-                        if(annotation instanceof DataAccessType) {
-                            definition.putAnnotation(action, (DataAccessType) annotation);
-                        }else{
-                            definition.putAnnotation(action, (DataAccess) annotation);
-                        }
-                    }
-                }
-            }
-        }
-
-
-        return definition;
+        return new AopAuthorizeDefinitionParser(targetClass,method).parse();
     }
 
     public void putAnnotation(Authorize ann) {
@@ -208,11 +118,17 @@ public class DefaultBasicAuthorizeDefinition implements AopAuthorizeDefinition {
         }
         DataAccessTypeDefinition typeDefinition = new DataAccessTypeDefinition();
         for (DataAccessType dataAccessType : ann.type()) {
+            if(dataAccessType.ignore()){
+                continue;
+            }
             typeDefinition.setId(dataAccessType.id());
             typeDefinition.setName(dataAccessType.name());
             typeDefinition.setController(dataAccessType.controller());
             typeDefinition.setConfiguration(dataAccessType.configuration());
             typeDefinition.setDescription(String.join("\n", dataAccessType.description()));
+        }
+        if(StringUtils.isEmpty(typeDefinition.getId())){
+            return;
         }
         definition.getDataAccess()
                 .getDataAccessTypes()
@@ -220,6 +136,9 @@ public class DefaultBasicAuthorizeDefinition implements AopAuthorizeDefinition {
     }
 
     public void putAnnotation(ResourceActionDefinition definition, DataAccessType dataAccessType) {
+        if(dataAccessType.ignore()){
+            return;
+        }
         DataAccessTypeDefinition typeDefinition = new DataAccessTypeDefinition();
         typeDefinition.setId(dataAccessType.id());
         typeDefinition.setName(dataAccessType.name());

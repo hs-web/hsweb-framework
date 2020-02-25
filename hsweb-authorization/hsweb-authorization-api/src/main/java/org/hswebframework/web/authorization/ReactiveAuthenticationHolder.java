@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
  *
  * @author zhouhao
  * @see ReactiveAuthenticationSupplier
- * @since 3.0
+ * @since 4.0
  */
 public final class ReactiveAuthenticationHolder {
     private static final List<ReactiveAuthenticationSupplier> suppliers = new ArrayList<>();
@@ -84,6 +84,16 @@ public final class ReactiveAuthenticationHolder {
     public static void addSupplier(ReactiveAuthenticationSupplier supplier) {
         lock.writeLock().lock();
         try {
+            suppliers.add(supplier);
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
+
+    public static void setSupplier(ReactiveAuthenticationSupplier supplier){
+        lock.writeLock().lock();
+        try {
+            suppliers.clear();
             suppliers.add(supplier);
         } finally {
             lock.writeLock().unlock();

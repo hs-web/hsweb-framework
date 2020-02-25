@@ -10,6 +10,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -32,7 +33,7 @@ public class AopAuthorizingControllerTest {
         authentication.setUser(SimpleUser.builder().id("test").username("test").build());
 //        authentication.setPermissions(Arrays.asList(SimplePermission.builder().id("test").build()));
         authentication.setPermissions(Collections.emptyList());
-        ReactiveAuthenticationHolder.addSupplier(new ReactiveAuthenticationSupplier() {
+        ReactiveAuthenticationHolder.setSupplier(new ReactiveAuthenticationSupplier() {
             @Override
             public Mono<Authentication> get(String userId) {
                 return Mono.empty();
@@ -73,7 +74,7 @@ public class AopAuthorizingControllerTest {
                 .dataAccesses(Collections.singleton(config))
                 .id("test").build()));
 
-        ReactiveAuthenticationHolder.addSupplier(new ReactiveAuthenticationSupplier() {
+        ReactiveAuthenticationHolder.setSupplier(new ReactiveAuthenticationSupplier() {
             @Override
             public Mono<Authentication> get(String userId) {
                 return Mono.empty();
@@ -109,7 +110,7 @@ public class AopAuthorizingControllerTest {
         DimensionDataAccessConfig config2 = new DimensionDataAccessConfig();
         config2.setAction("save");
         config2.setScopeType("role");
-        ReactiveAuthenticationHolder.addSupplier(new ReactiveAuthenticationSupplier() {
+        ReactiveAuthenticationHolder.setSupplier(new ReactiveAuthenticationSupplier() {
             @Override
             public Mono<Authentication> get(String userId) {
                 return Mono.empty();

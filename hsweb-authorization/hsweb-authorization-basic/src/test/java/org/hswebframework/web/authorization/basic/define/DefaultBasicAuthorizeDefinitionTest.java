@@ -26,7 +26,7 @@ public class DefaultBasicAuthorizeDefinitionTest {
         Assert.assertTrue(resource.hasAction(Arrays.asList("add")));
 
         Assert.assertTrue(resource.getAction("add")
-                .map(act->act.getDataAccess().getType("user_own"))
+                .map(act->act.getDataAccess().getType("user_own_data"))
                 .isPresent());
     }
 

@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
  * <ul>
  * <li>springmvc 入参方式: ResponseMessage myTest(Authorization auth){}</li>
  * <li>静态方法方式:AuthorizationHolder.get();</li>
+ * <li>响应式方式: return Authentication.currentReactive().map(auth->....)</li>
  * </ul>
  *
  * @author zhouhao
@@ -51,6 +52,7 @@ public interface Authentication extends Serializable {
      *
      * @return 当前用户权限信息
      * @see ReactiveAuthenticationHolder
+     * @since 4.0
      */
     static Mono<Authentication> currentReactive() {
         return ReactiveAuthenticationHolder.get();
@@ -81,6 +83,7 @@ public interface Authentication extends Serializable {
 
     /**
      * @return 用户所有维度
+     * @since 4.0
      */
     List<Dimension> getDimensions();
 
@@ -196,6 +199,12 @@ public interface Authentication extends Serializable {
      */
     Map<String, Serializable> getAttributes();
 
+    /**
+     * 合并权限
+     *
+     * @param source 源权限信息
+     * @return 合并后的信息
+     */
     Authentication merge(Authentication source);
 
 }

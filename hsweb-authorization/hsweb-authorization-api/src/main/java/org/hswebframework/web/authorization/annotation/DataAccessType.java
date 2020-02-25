@@ -24,4 +24,5 @@ public @interface DataAccessType {
 
     Class<? extends DataAccessConfiguration> configuration() default DataAccessConfiguration.class;
 
+    boolean ignore() default false;
 }

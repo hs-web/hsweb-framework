@@ -15,7 +15,10 @@ public @interface DimensionDataAccess {
     Mapping[] mapping() default {};
 
     @AliasFor(annotation = Authorize.class)
-    Phased phased() default  Phased.before;
+    Phased phased() default Phased.before;
+
+    @AliasFor(annotation = DataAccessType.class)
+    boolean ignore() default false;
 
     @Retention(RetentionPolicy.RUNTIME)
     @Documented
