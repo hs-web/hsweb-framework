@@ -9,7 +9,7 @@ before_script:
 before_install:
   - chmod +x mvnw
 script:
-  - mvn -q test
+  - ./mvnw -q test
 after_success:
   - bash <(curl -s https://codecov.io/bash)
 cache:
