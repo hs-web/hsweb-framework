@@ -4,8 +4,9 @@ import org.hswebframework.web.authorization.basic.configuration.EnableAopAuthori
 import org.hswebframework.web.crud.annotation.EnableEasyormRepository;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 
-@SpringBootApplication
+@SpringBootApplication(exclude = DataSourceAutoConfiguration.class)
 @EnableAopAuthorize
 @EnableEasyormRepository("org.hswebframework.web.authorization.basic.aop")
 public class TestApplication {
