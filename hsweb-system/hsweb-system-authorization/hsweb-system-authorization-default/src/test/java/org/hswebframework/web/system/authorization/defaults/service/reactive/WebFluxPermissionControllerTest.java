@@ -24,7 +24,10 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.function.Function;
 
 @RunWith(SpringRunner.class)
 @WebFluxTest(WebFluxPermissionController.class)
@@ -49,7 +52,7 @@ public class WebFluxPermissionControllerTest {
     @Test
     public void test(){
         byte[] data=client.get()
-                .uri("/permission/count")
+                .uri("/permission/_count")
                 //.contentType(MediaType.APPLICATION_JSON)
 //                .body(Mono.just(PermissionEntity
 //                        .builder()
