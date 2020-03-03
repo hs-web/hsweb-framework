@@ -68,6 +68,11 @@ public class RedisUserTokenManagerTest {
                 .as(StepVerifier::create)
                 .expectNext(TokenState.normal)
                 .verifyComplete();
+
+        tokenManager.signOutByToken("test-token")
+                .as(StepVerifier::create)
+                .verifyComplete();
+
     }
 
 

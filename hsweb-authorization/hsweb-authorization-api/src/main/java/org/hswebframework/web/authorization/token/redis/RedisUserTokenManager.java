@@ -57,7 +57,7 @@ public class RedisUserTokenManager implements UserTokenManager {
         return userTokenStore
                 .entries(getTokenRedisKey(token))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
-                .filter(map->!map.isEmpty())
+                .filter(map -> !map.isEmpty())
                 .map(SimpleUserToken::of);
     }
 
@@ -127,7 +127,7 @@ public class RedisUserTokenManager implements UserTokenManager {
         // srem user token
         return getByToken(token)
                 .flatMap(t -> operations.delete(getTokenRedisKey(t.getToken()))
-                        .then(userTokenMapping.remove(getUserRedisKey(t.getToken())))).then();
+                        .then(userTokenMapping.remove(getUserRedisKey(t.getToken()),token))).then();
     }
 
     @Override
@@ -167,7 +167,7 @@ public class RedisUserTokenManager implements UserTokenManager {
                             }
                             return Mono.empty();
                         }))
-                        .then(userTokenMapping.add(getUserRedisKey(userId),token))
+                        .then(userTokenMapping.add(getUserRedisKey(userId), token))
                         .thenReturn(SimpleUserToken.of(map));
             });
 
