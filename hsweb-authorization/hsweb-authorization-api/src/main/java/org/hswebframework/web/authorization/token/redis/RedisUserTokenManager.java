@@ -202,11 +202,9 @@ public class RedisUserTokenManager implements UserTokenManager {
         return getByToken(token)
                 .flatMap(userToken -> {
                     if (userToken.getMaxInactiveInterval() > 0) {
-                        return userTokenStore
-                                .increment(getTokenRedisKey(token), token, 1L)
-                                .then(operations
-                                        .expire(getTokenRedisKey(token), Duration.ofMillis(userToken.getMaxInactiveInterval()))
-                                        .then());
+                        return operations
+                                .expire(getTokenRedisKey(token), Duration.ofMillis(userToken.getMaxInactiveInterval()))
+                                .then();
                     }
                     return Mono.empty();
                 });
