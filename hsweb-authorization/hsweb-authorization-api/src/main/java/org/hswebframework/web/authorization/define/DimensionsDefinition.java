@@ -23,6 +23,10 @@ public class DimensionsDefinition {
         dimensions.add(definition);
     }
 
+    public boolean isEmpty(){
+        return CollectionUtils.isEmpty(this.dimensions);
+    }
+
     public boolean hasDimension(Dimension dimension) {
         return dimensions
                 .stream()
@@ -33,12 +37,6 @@ public class DimensionsDefinition {
 
     public boolean hasDimension(List<Dimension> dimensions) {
 
-        if (CollectionUtils.isEmpty(this.dimensions)) {
-            return true;
-        }
-        if (CollectionUtils.isEmpty(this.dimensions)) {
-            return false;
-        }
         if (logical == Logical.AND) {
             return dimensions.stream().allMatch(this::hasDimension);
         }

@@ -28,7 +28,7 @@ import java.util.stream.Stream;
 public class DefaultBasicAuthorizeDefinition implements AopAuthorizeDefinition {
 
     @JsonIgnore
-    private Class targetClass;
+    private Class<?> targetClass;
 
 
     @JsonIgnore
@@ -43,7 +43,7 @@ public class DefaultBasicAuthorizeDefinition implements AopAuthorizeDefinition {
 
     @Override
     public boolean isEmpty() {
-        return resources.getResources().isEmpty() && dimensions.getDimensions().isEmpty();
+        return false;
     }
 
     private static final Set<Class<? extends Annotation>> types = new HashSet<>(Arrays.asList(
@@ -55,7 +55,7 @@ public class DefaultBasicAuthorizeDefinition implements AopAuthorizeDefinition {
             DataAccessType.class
     ));
 
-    public static AopAuthorizeDefinition from(Class targetClass, Method method) {
+    public static AopAuthorizeDefinition from(Class<?> targetClass, Method method) {
         return new AopAuthorizeDefinitionParser(targetClass,method).parse();
     }
 

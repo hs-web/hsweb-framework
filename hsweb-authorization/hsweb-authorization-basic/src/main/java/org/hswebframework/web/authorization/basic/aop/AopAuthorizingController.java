@@ -65,7 +65,7 @@ public class AopAuthorizingController extends StaticMethodMatcherPointcutAdvisor
                                            Supplier<? extends Publisher<?>> invoker) {
 
         return Authentication.currentReactive()
-                .switchIfEmpty(Mono.error(new UnAuthorizedException()))
+                .switchIfEmpty(Mono.error(UnAuthorizedException::new))
                 .flatMapMany(auth -> {
                     context.setAuthentication(auth);
                     Function<Runnable, Publisher> afterRuner = runnable -> {
@@ -125,6 +125,7 @@ public class AopAuthorizingController extends StaticMethodMatcherPointcutAdvisor
                 } else if (Flux.class.isAssignableFrom(returnType)) {
                     return Flux.from(publisher);
                 }
+                throw new UnsupportedOperationException("unsupported reactive type:" + returnType);
             }
 
             Authentication authentication = Authentication.current().orElseThrow(UnAuthorizedException::new);
@@ -182,9 +183,11 @@ public class AopAuthorizingController extends StaticMethodMatcherPointcutAdvisor
 
     @Override
     public boolean matches(Method method, Class<?> aClass) {
+        Authorize authorize;
         boolean support = AnnotationUtils.findAnnotation(aClass, Controller.class) != null
                 || AnnotationUtils.findAnnotation(aClass, RestController.class) != null
-                || AnnotationUtils.findAnnotation(aClass, method, Authorize.class) != null;
+                || ((authorize = AnnotationUtils.findAnnotation(aClass, method, Authorize.class)) != null && !authorize.ignore()
+        );
 
         if (support && autoParse) {
             aopMethodAuthorizeDefinitionParser.parse(aClass, method);
