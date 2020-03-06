@@ -37,6 +37,7 @@ public class ResourcesDefinition {
 
     }
 
+
     public Optional<ResourceDefinition> getResource(String id) {
         return resources
                 .stream()
@@ -59,6 +60,10 @@ public class ResourcesDefinition {
         return getResource(permission.getId())
                 .filter(resource -> resource.hasAction(permission.getActions()))
                 .isPresent();
+    }
+
+    public boolean isEmpty(){
+        return resources.isEmpty();
     }
 
     public boolean hasPermission(Collection<Permission> permissions) {

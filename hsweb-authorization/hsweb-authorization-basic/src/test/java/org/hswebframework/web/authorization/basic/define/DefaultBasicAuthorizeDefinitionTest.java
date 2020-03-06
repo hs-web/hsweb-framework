@@ -35,7 +35,7 @@ public class DefaultBasicAuthorizeDefinitionTest {
     public void testNoMerge() {
         AopAuthorizeDefinition definition =
                 DefaultBasicAuthorizeDefinition.from(TestController.class, TestController.class.getMethod("noMerge"));
-        Assert.assertTrue(definition.isEmpty());
+        Assert.assertTrue(definition.getResources().isEmpty());
     }
 
 
