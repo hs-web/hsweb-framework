@@ -1,24 +1,36 @@
 package org.hswebframework.web.system.authorization.defaults.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.ezorm.rdb.mapping.ReactiveDelete;
 import org.hswebframework.ezorm.rdb.mapping.ReactiveUpdate;
 import org.hswebframework.ezorm.rdb.mapping.defaults.SaveResult;
 import org.hswebframework.web.crud.service.GenericReactiveCrudService;
 import org.hswebframework.web.system.authorization.api.entity.DimensionUserEntity;
 import org.hswebframework.web.system.authorization.api.event.ClearUserAuthorizationCacheEvent;
+import org.hswebframework.web.system.authorization.api.event.UserDeletedEvent;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.event.EventListener;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
 
+@Slf4j
 public class DefaultDimensionUserService extends GenericReactiveCrudService<DimensionUserEntity, String> {
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;
+
+    @EventListener
+    public void handleUserDeleteEntity(UserDeletedEvent event) {
+        createDelete()
+                .where(DimensionUserEntity::getUserId, event.getUser().getId())
+                .execute()
+                .subscribe(i -> log.debug("user deleted,clear user dimension!"));
+    }
 
     @Override
     public Mono<SaveResult> save(Publisher<DimensionUserEntity> entityPublisher) {
