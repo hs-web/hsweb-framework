@@ -45,6 +45,7 @@ public class UserEntity extends GenericEntity<String> implements RecordCreationE
     private String type;
 
     @Column
+    @DefaultValue("1")
     private Byte status;
 
     @Column(name = "creator_id", updatable = false)
