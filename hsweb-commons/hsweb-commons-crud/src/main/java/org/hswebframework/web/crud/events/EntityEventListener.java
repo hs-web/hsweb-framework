@@ -2,7 +2,6 @@ package org.hswebframework.web.crud.events;
 
 
 import org.apache.commons.collections.CollectionUtils;
-import org.hswebframework.ezorm.core.GlobalConfig;
 import org.hswebframework.ezorm.rdb.events.*;
 import org.hswebframework.ezorm.rdb.mapping.*;
 import org.hswebframework.ezorm.rdb.mapping.events.MappingContextKeys;
@@ -21,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiFunction;
 
 @SuppressWarnings("all")
 public class EntityEventListener implements EventListener {
@@ -54,9 +54,17 @@ public class EntityEventListener implements EventListener {
         if (type == MappingEventTypes.insert_after) {
             boolean single = context.get(MappingContextKeys.type).map("single"::equals).orElse(false);
             if (single) {
-                handleInsertSingle(mapping.getEntityType(), context);
+                handleSingleOperation(mapping.getEntityType(), context, EntityCreatedEvent::new);
             } else {
-                handleInsertBatch(mapping.getEntityType(), context);
+                handleBatchOperation(mapping.getEntityType(), context, EntityCreatedEvent::new);
+            }
+        }
+        if (type == MappingEventTypes.save_after) {
+            boolean single = context.get(MappingContextKeys.type).map("single"::equals).orElse(false);
+            if (single) {
+                handleSingleOperation(mapping.getEntityType(), context, EntitySavedEvent::new);
+            } else {
+                handleBatchOperation(mapping.getEntityType(), context, EntitySavedEvent::new);
             }
         }
         if (type == MappingEventTypes.update_before) {
@@ -175,22 +183,22 @@ public class EntityEventListener implements EventListener {
 
     }
 
-    protected void handleInsertBatch(Class clazz, EventContext context) {
+    protected void handleBatchOperation(Class clazz, EventContext context, BiFunction<List<?>, Class, Object> mapper) {
 
         context.get(MappingContextKeys.instance)
                 .filter(List.class::isInstance)
                 .map(List.class::cast)
                 .ifPresent(lst -> {
-                    eventPublisher.publishEvent(new GenericsPayloadApplicationEvent<>(this, new EntityCreatedEvent(lst, clazz), clazz));
+                    eventPublisher.publishEvent(new GenericsPayloadApplicationEvent<>(this, mapper.apply(lst, clazz), clazz));
                 });
     }
 
-    protected void handleInsertSingle(Class clazz, EventContext context) {
+    protected void handleSingleOperation(Class clazz, EventContext context, BiFunction<List<?>, Class, Object> mapper) {
         context.get(MappingContextKeys.instance)
                 .filter(Entity.class::isInstance)
                 .map(Entity.class::cast)
                 .ifPresent(entity -> {
-                    eventPublisher.publishEvent(new GenericsPayloadApplicationEvent<>(this, new EntityCreatedEvent(Collections.singletonList(entity), clazz), clazz));
+                    eventPublisher.publishEvent(new GenericsPayloadApplicationEvent<>(this, mapper.apply(Collections.singletonList(entity), clazz), clazz));
                 });
     }
 }

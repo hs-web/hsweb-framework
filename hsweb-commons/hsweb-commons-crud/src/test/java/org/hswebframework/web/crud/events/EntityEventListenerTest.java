@@ -71,6 +71,14 @@ public class EntityEventListenerTest {
 
         Assert.assertEquals(listener.deleted.getAndSet(0), 2);
 
+        reactiveRepository.save(EventTestEntity.of("test2", 1))
+                .then()
+                .as(StepVerifier::create)
+                .expectComplete()
+                .verify();
+
+        Assert.assertEquals(listener.saved.getAndSet(0), 1);
+
     }
 
     @Test

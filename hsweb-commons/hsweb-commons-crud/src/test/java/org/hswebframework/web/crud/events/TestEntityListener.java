@@ -15,6 +15,7 @@ public class TestEntityListener {
 
     AtomicInteger modified = new AtomicInteger();
 
+    AtomicInteger saved = new AtomicInteger();
 
     @EventListener
     public void handleCreated(EntityCreatedEvent<EventTestEntity> event) {
@@ -32,5 +33,11 @@ public class TestEntityListener {
     public void handleModify(EntityModifyEvent<EventTestEntity> event) {
         System.out.println(event);
         modified.addAndGet(event.getAfter().size());
+    }
+
+    @EventListener
+    public void handleSave(EntitySavedEvent<EventTestEntity> event) {
+        System.out.println(event);
+        saved.addAndGet(event.getEntity().size());
     }
 }
