@@ -21,6 +21,10 @@ public abstract class CompareUtils {
         if (source.equals(target)) {
             return true;
         }
+
+        if (source instanceof Boolean) {
+            return compare(((Boolean) source), target);
+        }
         if (source instanceof Number) {
             return compare(((Number) source), target);
         }
@@ -178,9 +182,9 @@ public abstract class CompareUtils {
                 DateFormatter dateFormatter = DateFormatter.getFormatter(stringValue);
                 return (dateFormatter.toString(new Date(number.longValue())).equals(stringValue));
             }
-            try{
+            try {
                 return new BigDecimal(stringValue).doubleValue() == number.doubleValue();
-            }catch (NumberFormatException e){
+            } catch (NumberFormatException e) {
                 return false;
             }
         }
@@ -230,6 +234,18 @@ public abstract class CompareUtils {
         }
         if (target instanceof Collection) {
             return compare(((Collection) target), string);
+        }
+
+        return false;
+    }
+
+    public static boolean compare(Boolean bool, Object target) {
+        if (bool.equals(target)) {
+            return true;
+        }
+
+        if (bool && "true".equals(target)) {
+            return true;
         }
 
         return false;
