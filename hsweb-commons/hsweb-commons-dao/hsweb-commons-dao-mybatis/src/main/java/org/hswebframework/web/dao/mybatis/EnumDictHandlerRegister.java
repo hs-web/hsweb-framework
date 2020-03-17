@@ -119,6 +119,7 @@ public class EnumDictHandlerRegister {
     @MappedJdbcTypes({JdbcType.VARCHAR, JdbcType.BIT,
             JdbcType.BOOLEAN, JdbcType.NUMERIC,
             JdbcType.TINYINT, JdbcType.INTEGER,
+            JdbcType.SMALLINT,
             JdbcType.BIGINT, JdbcType.DECIMAL,
             JdbcType.CHAR})
     static class EnumDictHandler<T extends Enum & EnumDict> implements TypeHandler<T> {

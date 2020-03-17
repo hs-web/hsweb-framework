@@ -2,10 +2,12 @@ package org.hswebframework.web.commons.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.hswebframework.web.dict.Dict;
 import org.hswebframework.web.dict.EnumDict;
 
 @AllArgsConstructor
 @Getter
+//@Dict(id = "data-status")
 public enum DataStatusEnum implements EnumDict<Byte> {
     ENABLED((byte) 1, "正常"),
     DISABLED((byte) 0, "禁用"),

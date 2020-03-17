@@ -140,7 +140,7 @@ public class SimpleDynamicFormOperationService implements DynamicFormOperationSe
                 .filter(RDBColumnMetaData::isPrimaryKey)
                 .findFirst()
                 .map(RDBColumnMetaData::getAlias)
-                .orElseThrow(() -> new BusinessException("表[" + tableMetaData.getComment() + "]未设置主键字段"));
+                .orElseThrow(() -> new BusinessException("表[" + tableMetaData.getName() + "]未设置主键字段"));
     }
 
     @SneakyThrows
