@@ -152,6 +152,11 @@ public abstract class CompareUtils {
         return compare(Arrays.asList(number), target);
     }
 
+    public static boolean compare(Boolean bool, Object target) {
+        return bool.equals(target) || String.valueOf(bool).equals(target);
+    }
+
+
     public static boolean compare(Number number, Object target) {
         if (number == target) {
             return true;
@@ -178,9 +183,9 @@ public abstract class CompareUtils {
                 DateFormatter dateFormatter = DateFormatter.getFormatter(stringValue);
                 return (dateFormatter.toString(new Date(number.longValue())).equals(stringValue));
             }
-            try{
+            try {
                 return new BigDecimal(stringValue).doubleValue() == number.doubleValue();
-            }catch (NumberFormatException e){
+            } catch (NumberFormatException e) {
                 return false;
             }
         }
