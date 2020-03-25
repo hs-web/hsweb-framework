@@ -2,6 +2,7 @@ package org.hswebframework.web.crud.service;
 
 import org.hswebframework.ezorm.core.param.QueryParam;
 import org.hswebframework.ezorm.rdb.mapping.defaults.SaveResult;
+import org.hswebframework.web.api.crud.entity.QueryParamEntity;
 import org.hswebframework.web.crud.entity.TestTreeSortEntity;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -46,7 +47,7 @@ public class ReactiveTreeSortEntityServiceTest {
                 .expectNext(2)
                 .verifyComplete();
 
-        sortEntityService.queryResultToTree(Mono.just(new QueryParam()))
+        sortEntityService.queryResultToTree(QueryParamEntity.of())
                 .map(List::size)
                 .as(StepVerifier::create)
                 .expectNext(1)
