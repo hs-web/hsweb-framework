@@ -6,6 +6,7 @@ import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.annotation.QueryAction;
 import org.hswebframework.web.crud.service.ReactiveTreeSortEntityService;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -32,6 +33,24 @@ public interface ReactiveTreeServiceQueryController<E extends TreeSortSupportEnt
     @QueryAction
     default Mono<List<E>> findAllChildrenTree(QueryParamEntity paramEntity) {
         return getService().queryIncludeChildrenTree(paramEntity);
+    }
+
+    @PostMapping("/_query/tree")
+    @QueryAction
+    default Mono<List<E>> findAllTree(Mono<QueryParamEntity> paramEntity) {
+        return getService().queryResultToTree(paramEntity);
+    }
+
+    @PostMapping("/_query/_children")
+    @QueryAction
+    default Flux<E> findAllChildren(Mono<QueryParamEntity> paramEntity) {
+        return paramEntity.flatMapMany(param -> getService().queryIncludeChildren(param));
+    }
+
+    @PostMapping("/_query/_children/tree")
+    @QueryAction
+    default Mono<List<E>> findAllChildrenTree(Mono<QueryParamEntity> paramEntity) {
+        return paramEntity.flatMap(param -> getService().queryIncludeChildrenTree(param));
     }
 
 }
