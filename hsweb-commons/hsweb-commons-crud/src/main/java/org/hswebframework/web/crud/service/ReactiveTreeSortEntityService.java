@@ -3,6 +3,7 @@ package org.hswebframework.web.crud.service;
 import org.hswebframework.ezorm.core.param.QueryParam;
 import org.hswebframework.ezorm.rdb.mapping.defaults.SaveResult;
 import org.hswebframework.utils.RandomUtil;
+import org.hswebframework.web.api.crud.entity.QueryParamEntity;
 import org.hswebframework.web.api.crud.entity.TreeSortSupportEntity;
 import org.hswebframework.web.api.crud.entity.TreeSupportEntity;
 import org.hswebframework.web.id.IDGenerator;
@@ -22,17 +23,17 @@ import java.util.stream.Collectors;
 public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K>, K>
         extends ReactiveCrudService<E, K> {
 
-    default Mono<List<E>> queryResultToTree(Mono<? extends QueryParam> paramEntity) {
+    default Mono<List<E>> queryResultToTree(Mono<? extends QueryParamEntity> paramEntity) {
         return paramEntity.flatMap(this::queryResultToTree);
     }
 
-    default Mono<List<E>> queryResultToTree(QueryParam paramEntity) {
+    default Mono<List<E>> queryResultToTree(QueryParamEntity paramEntity) {
         return query(paramEntity)
                 .collectList()
                 .map(list -> TreeSupportEntity.list2tree(list, this::setChildren, this::isRootNode));
     }
 
-    default Mono<List<E>> queryIncludeChildrenTree(QueryParam paramEntity) {
+    default Mono<List<E>> queryIncludeChildrenTree(QueryParamEntity paramEntity) {
         return queryIncludeChildren(paramEntity)
                 .collectList()
                 .map(list -> TreeSupportEntity.list2tree(list, this::setChildren, this::isRootNode));
@@ -46,7 +47,7 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
                         .fetch());
     }
 
-    default Flux<E> queryIncludeChildren(QueryParam queryParam) {
+    default Flux<E> queryIncludeChildren(QueryParamEntity queryParam) {
         return query(queryParam)
                 .flatMap(e -> createQuery()
                         .where()
