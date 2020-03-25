@@ -45,7 +45,7 @@ public interface ReactiveServiceQueryController<E, K> {
     @GetMapping("/_query")
     @QueryAction
     default Mono<PagerResult<E>> queryPager(QueryParamEntity query) {
-        return queryPager(Mono.just(query));
+        return getService().queryPager(query);
     }
 
     @PostMapping("/_query")
