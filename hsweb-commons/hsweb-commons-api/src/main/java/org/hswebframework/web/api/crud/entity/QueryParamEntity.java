@@ -33,6 +33,12 @@ public class QueryParamEntity extends QueryParam {
     @Getter
     private String termExpression;
 
+    @Getter
+    private String where;
+
+    @Getter
+    private String orderBy;
+
     /**
      * 创建一个空的查询参数实体,该实体无任何参数.
      *
@@ -101,7 +107,7 @@ public class QueryParamEntity extends QueryParam {
         if (null != before) {
             before.accept(query);
         }
-        if(terms.isEmpty()){
+        if (terms.isEmpty()) {
             return query;
         }
         return query
@@ -125,6 +131,27 @@ public class QueryParamEntity extends QueryParam {
     public void setTermExpression(String termExpression) {
         this.termExpression = termExpression;
         setTerms(TermExpressionParser.parse(termExpression));
+    }
+
+    /**
+     * 表达式方式排序
+     *
+     * @param orderBy 表达式
+     * @see 4.0.1
+     */
+    public void setOrderBy(String orderBy) {
+        this.orderBy = orderBy;
+        setSorts(TermExpressionParser.parseOrder(orderBy));
+    }
+
+    /**
+     * 表达式查询条件
+     *
+     * @param where 表达式
+     */
+    public void setWhere(String where) {
+        this.where = where;
+        setTermExpression(where);
     }
 
     @Override

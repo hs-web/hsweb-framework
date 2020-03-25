@@ -2,16 +2,23 @@ package org.hswebframework.web.api.crud.entity;
 
 import org.hswebframework.ezorm.core.NestConditional;
 import org.hswebframework.ezorm.core.dsl.Query;
+import org.hswebframework.ezorm.core.param.Sort;
 import org.hswebframework.ezorm.core.param.Term;
 import org.hswebframework.ezorm.core.param.TermType;
 import org.hswebframework.web.api.crud.entity.QueryParamEntity;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 动态条件表达式解析器
  * name=测试 and age=test
+ *
+ * @author zhouhao
+ * @since 3.0.10
  */
 public class TermExpressionParser {
 
@@ -160,6 +167,29 @@ public class TermExpressionParser {
             }
         }
         return conditional.getParam().getTerms();
+    }
+
+    /**
+     * 解析排序表达式
+     * <pre>
+     *     age asc,score desc
+     * </pre>
+     *
+     * @param expression 表达式
+     * @return 排序集合
+     * @since 4.0.1
+     */
+    public static List<Sort> parseOrder(String expression) {
+        return Stream.of(expression.split("[,]"))
+                .map(str -> str.split("[ ]"))
+                .map(arr -> {
+                    Sort sort = new Sort();
+                    sort.setName(arr[0]);
+                    if (arr.length > 1 && "desc".equalsIgnoreCase(arr[1])) {
+                        sort.desc();
+                    }
+                    return sort;
+                }).collect(Collectors.toList());
     }
 
     private static String convertTermType(String termType) {
