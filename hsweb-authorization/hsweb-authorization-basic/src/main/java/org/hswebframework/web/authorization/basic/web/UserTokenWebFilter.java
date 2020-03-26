@@ -58,7 +58,10 @@ public class UserTokenWebFilter implements WebFilter, BeanPostProcessor {
             event.getResult().put("token", token.getToken());
             event.getResult().putAll(token.getResponse());
 
-            long expires = event.<String>getParameter("expires").map(Long::parseLong).orElse(token.getTimeout());
+            long expires = event.getParameter("expires")
+                    .map(String::valueOf)
+                    .map(Long::parseLong)
+                    .orElse(token.getTimeout());
 
             userTokenManager
                     .signIn(token.getToken(), token.getType(), event.getAuthentication().getUser().getId(), expires)
