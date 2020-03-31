@@ -24,7 +24,7 @@
 
     <groupId>org.hswebframework.web</groupId>
     <artifactId>hsweb-framework</artifactId>
-    <version>4.0.2</version>
+    <version>4.0.1</version>
     <modules>
         <module>hsweb-starter</module>
         <module>hsweb-core</module>
@@ -90,7 +90,7 @@
         <cglib.version>3.2.2</cglib.version>
         <aspectj.version>1.6.12</aspectj.version>
 
-        <hsweb.ezorm.version>4.0.2</hsweb.ezorm.version>
+        <hsweb.ezorm.version>4.0.1</hsweb.ezorm.version>
         <hsweb.utils.version>3.0.2</hsweb.utils.version>
         <hsweb.expands.version>3.0.2</hsweb.expands.version>
         <swagger.version>2.7.0</swagger.version>
