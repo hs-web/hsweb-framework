@@ -163,7 +163,7 @@ public class QueryParamEntity extends QueryParam {
      */
     public void setWhere(String where) {
         this.where = where;
-        setTerms(TermExpressionParser.parse(termExpression));
+        setTerms(TermExpressionParser.parse(where));
     }
 
     @Override
