@@ -74,7 +74,9 @@ public class UserTokenReactiveAuthenticationSupplier implements ReactiveAuthenti
                                         .getByToken(t.getToken())
                                         .filter(UserToken::validate))
                                 .map(tokenMono -> tokenMono
-                                        .flatMap(token -> userTokenManager.touch(token.getToken()).thenReturn(token))
+                                        .flatMap(token -> userTokenManager
+                                                .touch(token.getToken())
+                                                .thenReturn(token))
                                         .flatMap(token -> get(thirdPartAuthenticationManager.get(token.getType()), token.getUserId())))
                                 .orElseGet(Mono::empty))
                 .flatMap(auth -> ReactiveLogger.mdc("userId", auth.getUser().getId())

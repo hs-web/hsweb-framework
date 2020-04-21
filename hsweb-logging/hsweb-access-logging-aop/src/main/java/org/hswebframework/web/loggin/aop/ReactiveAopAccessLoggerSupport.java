@@ -50,9 +50,9 @@ public class ReactiveAopAccessLoggerSupport extends StaticMethodMatcherPointcutA
             AccessLoggerInfo info = createLogger(methodInterceptorHolder);
             Object response = methodInvocation.proceed();
             if (response instanceof Mono) {
-                return wrapMonoResponse(((Mono) response), info);
+                return wrapMonoResponse(((Mono<?>) response), info);
             } else if (response instanceof Flux) {
-                return wrapFluxResponse(((Flux) response), info);
+                return wrapFluxResponse(((Flux<?>) response), info);
             }
             return response;
         });
@@ -60,7 +60,8 @@ public class ReactiveAopAccessLoggerSupport extends StaticMethodMatcherPointcutA
 
     protected Flux<?> wrapFluxResponse(Flux<?> flux, AccessLoggerInfo loggerInfo) {
         return Mono.subscriberContext()
-                .<RequestInfo>flatMap(ctx -> Mono.justOrEmpty(ctx.getOrEmpty(RequestInfo.class)))
+                .<RequestInfo>flatMap(ctx -> Mono.<RequestInfo>justOrEmpty(ctx.getOrEmpty(RequestInfo.class))
+                        .doOnNext(info -> ReactiveLogger.log(ctx, info::setContext)))
                 .doOnNext(loggerInfo::putAccessInfo)
                 .thenMany(flux)
                 .doOnError(loggerInfo::setException)
