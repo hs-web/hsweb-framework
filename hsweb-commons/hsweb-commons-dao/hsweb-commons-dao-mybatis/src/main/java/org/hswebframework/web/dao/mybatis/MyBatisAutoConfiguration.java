@@ -38,6 +38,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
@@ -112,7 +113,7 @@ public class MyBatisAutoConfiguration {
         EnumDictHandlerRegister.register("org.hswebframework.web;" + mybatisProperties.getTypeHandlersPackage());
 
         try {
-            Class.forName("javax.persistence.Table");
+            ClassUtils.forName("javax.persistence.Table", null);
             EasyOrmSqlBuilder.getInstance().useJpa = mybatisProperties.isUseJpa();
         } catch (@SuppressWarnings("all") Exception ignore) {
         }
