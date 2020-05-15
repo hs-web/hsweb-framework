@@ -22,11 +22,20 @@ public class ExpressionUtilsTest {
 
     @Test
     public void testComplete(){
-
         TemplateParser.parse("${#data[payload][a_name]} ${#data[payload][b_name]} 发生 ${#data[payload][alarm_type_name]}",e->{
             System.out.println(e);
             return e;
         });
+    }
+
+    @Test
+    public void testJson(){
+
+       Assert.assertEquals("{\"name\":\"test\"}",TemplateParser.parse("{\"name\":\"${#name}\"}",e->{
+            System.out.println(e);
+            Assert.assertEquals(e,"#name");
+            return "test";
+        }));
 
     }
 }
