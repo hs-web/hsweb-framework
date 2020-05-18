@@ -46,6 +46,11 @@ public class AutoDDLProcessor implements InitializingBean {
             }
         }
         if (properties.isAutoDdl()) {
+            //加载全部表信息
+            operator.getMetadata()
+                    .getCurrentSchema()
+                    .loadAllTable();
+
             List<Class> entities = this.entities.stream().map(EntityInfo::getRealType).collect(Collectors.toList());
             if (reactive) {
                 Flux.fromIterable(entities)
