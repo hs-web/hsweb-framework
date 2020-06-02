@@ -560,6 +560,7 @@ public class SimpleAuthorizationSettingService extends GenericEntityService<Auth
                     dataAccessConfigs.addAll(detail.getDataAccesses()
                             .stream()
                             .map(dataAccessFactory::create)
+                            .filter(Objects::nonNull)
                             .collect(Collectors.toSet()));
                 }
             }
