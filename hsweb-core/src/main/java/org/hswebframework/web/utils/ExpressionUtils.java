@@ -1,10 +1,13 @@
 package org.hswebframework.web.utils;
 
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.beanutils.BeanUtilsBean2;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.hswebframework.expands.script.engine.DynamicScriptEngine;
 import org.hswebframework.expands.script.engine.DynamicScriptEngineFactory;
 import org.hswebframework.expands.script.engine.ExecuteResult;
+import org.springframework.util.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,6 +20,7 @@ import java.util.regex.Pattern;
  * @author zhouhao
  * @since 3.0
  */
+@Slf4j
 public class ExpressionUtils {
 
     //表达式提取正则 ${.+?}
@@ -75,7 +79,7 @@ public class ExpressionUtils {
      */
     @SneakyThrows
     public static String analytical(String expression, Map<String, Object> vars, String language) {
-        if(!expression.contains("${")){
+        if (!expression.contains("${")) {
             return expression;
         }
         DynamicScriptEngine engine = DynamicScriptEngineFactory.getEngine(language);
@@ -84,24 +88,37 @@ public class ExpressionUtils {
         }
 
         return TemplateParser.parse(expression, var -> {
-            Object fast = vars.get(var);
-            if (fast != null) {
-                return fast.toString();
+            if (StringUtils.isEmpty(var)) {
+                return "";
+            }
+
+            if (!var.startsWith("#")) {
+                try {
+                    Object fast = BeanUtilsBean2.getInstance().getProperty(vars, var);
+                    if (fast != null) {
+                        return fast.toString();
+                    }
+                } catch (Exception ignore) {
+                    //ignore
+                }
             }
             String id = DigestUtils.md5Hex(var);
-
             try {
                 if (!engine.compiled(id)) {
-
                     engine.compile(id, var);
-
                 }
-                return String.valueOf(engine.execute(id, vars).getIfSuccess());
             } catch (RuntimeException e) {
                 throw e;
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
+            try {
+                return String.valueOf(engine.execute(id, vars).getIfSuccess());
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+                return "";
+            }
+
         });
     }
 

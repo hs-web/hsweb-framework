@@ -1,5 +1,6 @@
 package org.hswebframework.web.utils;
 
+import com.alibaba.fastjson.JSON;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -37,5 +38,29 @@ public class ExpressionUtilsTest {
             return "test";
         }));
 
+    }
+
+    @Test
+    public void testJson2(){
+        String js = ExpressionUtils.analytical("{\n" +
+                "     \"msgtype\": \"markdown\",\n" +
+                "     \"markdown\": {\n" +
+                "         \"title\":\"消息类型:${messageType}\",\n" +
+                "         \"text\": \" - 设备ID: `${deviceId}` \\n - 设备型号: `${headers.productId}`\\n - 设备名称: `${headers.deviceName}`\"" +
+                "     },\n" +
+                "      \"at\": {\n" +
+                "          \"isAtAll\": false\n" +
+                "      }\n" +
+                "}", JSON.parseObject("{\n" +
+                "  \"deviceId\": \"VIS-Mandrake-12289\",\n" +
+                "  \"headers\": {\n" +
+                "    \"productId\": \"VIS-Mandrake\",\n" +
+                "    \"deviceName\": \"能见度仪-曼德克-01\"\n" +
+                "  },\n" +
+                "  \"messageType\": \"OFFLINE\",\n" +
+                "  \"timestamp\": 1592098397277\n" +
+                "}"), "spel");
+
+        System.out.println(js);
     }
 }
