@@ -47,7 +47,7 @@ public class ExpressionUtilsTest {
                 "     \"markdown\": {\n" +
                 "         \"title\":\"消息类型:${messageType}\",\n" +
                 "         \"text\": \" - 设备ID: `${deviceId}` \\n - 设备型号: `${headers.productId}`\\n - 设备名称: `${headers.deviceName}`\"" +
-                "     },\n" +
+                "     \n},\n" +
                 "      \"at\": {\n" +
                 "          \"isAtAll\": false\n" +
                 "      }\n" +
