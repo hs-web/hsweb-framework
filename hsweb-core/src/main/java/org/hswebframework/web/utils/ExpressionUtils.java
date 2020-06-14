@@ -92,7 +92,7 @@ public class ExpressionUtils {
                 return "";
             }
 
-            if (!var.startsWith("#")) {
+            if ("spel".equalsIgnoreCase(language) && !var.startsWith("#")) {
                 try {
                     Object fast = BeanUtilsBean2.getInstance().getProperty(vars, var);
                     if (fast != null) {
@@ -100,6 +100,7 @@ public class ExpressionUtils {
                     }
                 } catch (Exception ignore) {
                     //ignore
+                    return "";
                 }
             }
             String id = DigestUtils.md5Hex(var);
