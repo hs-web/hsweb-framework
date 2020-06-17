@@ -115,9 +115,6 @@ public class DefaultToStringOperator<T> implements ToStringOperator<T> {
             long propertyFeature = 0;
             try {
                 Field field = ReflectionUtils.findField(targetType, descriptor.getName());
-                if (null == field) {
-                    log.debug("无法获取字段{},该字段将不会被打码!", descriptor.getName());
-                }
                 propertyIgnore = field.getAnnotation(ToString.Ignore.class);
                 features = AnnotationUtils.getAnnotation(field, ToString.Features.class);
                 if (propertyIgnore != null) {
@@ -128,8 +125,7 @@ public class DefaultToStringOperator<T> implements ToStringOperator<T> {
                 if (null != features && features.value().length > 0) {
                     propertyFeature = ToString.Feature.createFeatures(features.value());
                 }
-            } catch (Exception e) {
-                log.debug("无法获取字段{},该字段将不会被打码!", descriptor.getName());
+            } catch (Exception ignore) {
             }
             //是否设置了打码
             boolean cover = (propertyIgnore == null && defaultCover) || (propertyIgnore != null && propertyIgnore.cover());

@@ -103,7 +103,7 @@ public class TemplateParser {
         while (next()) {
             if (isPrepare()) {
                 inPrepare = true;
-            } else if (isPrepareEnd()) {
+            } else if (inPrepare&&isPrepareEnd()) {
                 inPrepare = false;
                 setParsed(propertyMapping.apply(new String(expression, 0, expressionPos)).toCharArray());
                 expressionPos = 0;
