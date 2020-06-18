@@ -23,11 +23,11 @@ import java.util.stream.Collectors;
 
 public class RedisUserTokenManager implements UserTokenManager {
 
-    private ReactiveRedisOperations<Object, Object> operations;
+    private final ReactiveRedisOperations<Object, Object> operations;
 
-    private ReactiveHashOperations<Object, String, Object> userTokenStore;
+    private final ReactiveHashOperations<Object, String, Object> userTokenStore;
 
-    private ReactiveSetOperations<Object, Object> userTokenMapping;
+    private final ReactiveSetOperations<Object, Object> userTokenMapping;
 
     public RedisUserTokenManager(ReactiveRedisOperations<Object, Object> operations) {
         this.operations = operations;
@@ -69,7 +69,7 @@ public class RedisUserTokenManager implements UserTokenManager {
                 .map(String::valueOf)
                 .flatMap(token -> getByToken(token)
                         .switchIfEmpty(Mono.defer(() -> userTokenMapping
-                                .remove(redisKey, userId)
+                                .remove(redisKey, token)
                                 .then(Mono.empty()))));
     }
 
