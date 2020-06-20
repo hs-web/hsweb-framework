@@ -160,8 +160,7 @@ public class DefaultAuthorizingHandler implements AuthorizingHandler {
         // 控制权限
         if (!definition.getPermissions().isEmpty()) {
             if (logger.isInfoEnabled()) {
-                logger.info("执行权限控制:权限{}({}),操作{}.",
-                        definition.getPermissionDescription(),
+                logger.info("执行权限控制:权限{},操作{}.",
                         permissionsDef,
                         actionsDef);
             }
@@ -192,35 +191,39 @@ public class DefaultAuthorizingHandler implements AuthorizingHandler {
                     CollectionUtils.isNotEmpty(permissions) :
                     //权限数量和配置的数量相同
                     permissions.size() == permissionsDef.size();
+        } else {
+            access = false;
         }
         //控制角色
         if (!rolesDef.isEmpty()) {
-            if (logger.isInfoEnabled()) {
-                logger.info("do role access handle : roles{} , definition:{}", rolesDef, definition.getRoles());
-            }
-            Function<Predicate<Role>, Boolean> func = logicalIsOr
-                    ? authentication.getRoles().stream()::anyMatch
-                    : authentication.getRoles().stream()::allMatch;
+            Set<String> roleIds = authentication.getRoles().stream().map(Role::getId).collect(Collectors.toSet());
+
+            Function<Predicate<String>, Boolean> func = logicalIsOr
+                    ? roleIds.stream()::anyMatch
+                    : roleIds.stream()::allMatch;
 
             access = logicalIsOr
-                    ? access || func.apply(role -> rolesDef.contains(role.getId()))
-                    : access && func.apply(role -> rolesDef.contains(role.getId()));
+                    ? access || func.apply(rolesDef::contains)
+                    : access && func.apply(rolesDef::contains);
+            if (logger.isInfoEnabled()) {
+                logger.info("执行角色权限控制{},当前角色:{},限制角色:{}.", access ? "通过" : "拒绝", roleIds, rolesDef);
+            }
         }
         //控制用户
         if (!usersDef.isEmpty()) {
-            if (logger.isInfoEnabled()) {
-                logger.info("do user access handle : users{} , definition:{} ", usersDef, definition.getUser());
-            }
+            String username = authentication.getUser().getUsername();
             Function<Predicate<String>, Boolean> func = logicalIsOr
                     ? usersDef.stream()::anyMatch
                     : usersDef.stream()::allMatch;
             access = logicalIsOr
-                    ? access || func.apply(authentication.getUser().getUsername()::equals)
-                    : access && func.apply(authentication.getUser().getUsername()::equals);
-
-        }
-        if (!access) {
-            throw new AccessDenyException(definition.getMessage());
+                    ? access || func.apply(username::equals)
+                    : access && func.apply(username::equals);
+            if (logger.isInfoEnabled()) {
+                logger.info("执行用户权限控制{},当前用户:{},限制用户:{}.", access ? "通过" : "拒绝", username, usersDef);
+            }
+            if (!access) {
+                throw new AccessDenyException(definition.getMessage());
+            }
         }
     }
 }
