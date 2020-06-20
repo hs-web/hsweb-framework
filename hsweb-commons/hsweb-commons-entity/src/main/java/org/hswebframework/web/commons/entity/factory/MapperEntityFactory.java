@@ -13,21 +13,29 @@
  *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
- *  
+ *
  */
 
 package org.hswebframework.web.commons.entity.factory;
 
 import lombok.SneakyThrows;
-import org.hswebframework.web.NotFoundException;
 import org.hswebframework.utils.ClassUtils;
+import org.hswebframework.web.NotFoundException;
 import org.hswebframework.web.bean.BeanFactory;
 import org.hswebframework.web.bean.FastBeanCopier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.ServiceLoader;
+import java.util.Set;
 import java.util.function.Supplier;
 
 /**
@@ -43,7 +51,7 @@ public class MapperEntityFactory implements EntityFactory, BeanFactory {
     private static final DefaultMapperFactory DEFAULT_MAPPER_FACTORY = clazz -> {
         String simpleClassName = clazz.getPackage().getName().concat(".Simple").concat(clazz.getSimpleName());
         try {
-            return defaultMapper(Class.forName(simpleClassName));
+            return defaultMapper(org.springframework.util.ClassUtils.forName(simpleClassName, null));
         } catch (ClassNotFoundException ignore) {
             // throw new NotFoundException(e.getMessage());
         }

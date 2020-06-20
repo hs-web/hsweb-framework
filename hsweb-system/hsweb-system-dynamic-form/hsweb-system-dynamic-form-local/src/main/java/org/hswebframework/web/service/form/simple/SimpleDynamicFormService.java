@@ -4,6 +4,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.hswebframework.expands.script.engine.DynamicScriptEngine;
+import org.hswebframework.expands.script.engine.DynamicScriptEngineFactory;
 import org.hswebframework.ezorm.core.ObjectWrapperFactory;
 import org.hswebframework.ezorm.core.Trigger;
 import org.hswebframework.ezorm.core.ValidatorFactory;
@@ -12,23 +14,34 @@ import org.hswebframework.ezorm.rdb.RDBDatabase;
 import org.hswebframework.ezorm.rdb.meta.Correlation;
 import org.hswebframework.ezorm.rdb.meta.RDBColumnMetaData;
 import org.hswebframework.ezorm.rdb.meta.RDBTableMetaData;
-import org.hswebframework.ezorm.rdb.meta.converter.*;
+import org.hswebframework.ezorm.rdb.meta.converter.BlobValueConverter;
+import org.hswebframework.ezorm.rdb.meta.converter.ClobValueConverter;
+import org.hswebframework.ezorm.rdb.meta.converter.DateTimeConverter;
+import org.hswebframework.ezorm.rdb.meta.converter.DefaultValueConverter;
+import org.hswebframework.ezorm.rdb.meta.converter.JSONValueConverter;
+import org.hswebframework.ezorm.rdb.meta.converter.NumberValueConverter;
 import org.hswebframework.ezorm.rdb.render.dialect.Dialect;
 import org.hswebframework.ezorm.rdb.simple.trigger.ScriptTraggerSupport;
-import org.hswebframework.expands.script.engine.DynamicScriptEngine;
-import org.hswebframework.expands.script.engine.DynamicScriptEngineFactory;
 import org.hswebframework.web.BusinessException;
 import org.hswebframework.web.commons.entity.DataStatus;
 import org.hswebframework.web.dao.form.DynamicFormColumnDao;
 import org.hswebframework.web.dao.form.DynamicFormDao;
 import org.hswebframework.web.dict.EnumDict;
-import org.hswebframework.web.entity.form.*;
+import org.hswebframework.web.entity.form.DictConfig;
+import org.hswebframework.web.entity.form.DynamicFormColumnBindEntity;
+import org.hswebframework.web.entity.form.DynamicFormColumnEntity;
+import org.hswebframework.web.entity.form.DynamicFormDeployLogEntity;
+import org.hswebframework.web.entity.form.DynamicFormEntity;
 import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.service.DefaultDSLDeleteService;
 import org.hswebframework.web.service.DefaultDSLQueryService;
 import org.hswebframework.web.service.DefaultDSLUpdateService;
 import org.hswebframework.web.service.GenericEntityService;
-import org.hswebframework.web.service.form.*;
+import org.hswebframework.web.service.form.DatabaseRepository;
+import org.hswebframework.web.service.form.DynamicFormDeployLogService;
+import org.hswebframework.web.service.form.DynamicFormService;
+import org.hswebframework.web.service.form.FormDeployService;
+import org.hswebframework.web.service.form.OptionalConvertBuilder;
 import org.hswebframework.web.service.form.events.FormDeployEvent;
 import org.hswebframework.web.service.form.initialize.ColumnInitializeContext;
 import org.hswebframework.web.service.form.initialize.DynamicFormInitializeCustomizer;
@@ -46,6 +59,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -747,7 +761,7 @@ public class SimpleDynamicFormService extends GenericEntityService<DynamicFormEn
         Class clazz = classMapping.get(type);
         if (clazz == null) {
             try {
-                clazz = Class.forName(type);
+                clazz = ClassUtils.forName(type, null);
             } catch (ClassNotFoundException e) {
                 throw new RuntimeException(e);
             }
