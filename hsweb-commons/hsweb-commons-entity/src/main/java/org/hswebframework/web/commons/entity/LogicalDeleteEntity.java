@@ -10,7 +10,7 @@ public interface LogicalDeleteEntity {
 
     Boolean getDeleted();
 
-    void setDeleted(boolean deleted);
+    void setDeleted(Boolean deleted);
 
     Long getDeleteTime();
 
