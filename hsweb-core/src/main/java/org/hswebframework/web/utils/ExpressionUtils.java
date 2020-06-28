@@ -92,7 +92,7 @@ public class ExpressionUtils {
                 return "";
             }
 
-            if ("spel".equalsIgnoreCase(language) && !var.startsWith("#")) {
+            if ("spel".equalsIgnoreCase(language) && !var.contains("#")) {
                 try {
                     Object fast = BeanUtilsBean2.getInstance().getProperty(vars, var);
                     if (fast != null) {
