@@ -4,11 +4,18 @@ import com.alibaba.fastjson.JSON;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 
 public class ExpressionUtilsTest {
 
+    @Test
+    public void testArray() {
+        String expression = ExpressionUtils.analytical("test-${array}", Collections.singletonMap("array", Arrays.asList(1,2,3)), "spel");
+
+        Assert.assertEquals(expression,"test-[1, 2, 3]");
+    }
 
     @Test
     public void test() {
