@@ -36,7 +36,7 @@ public class AuthorizationFailedEvent extends AbstractAuthorizationEvent {
     /**
      * 异常信息
      */
-    private Exception exception;
+    private Throwable exception;
 
     public AuthorizationFailedEvent(String username,
                                     String password,
@@ -46,11 +46,11 @@ public class AuthorizationFailedEvent extends AbstractAuthorizationEvent {
         this.reason = reason;
     }
 
-    public Exception getException() {
+    public Throwable getException() {
         return exception;
     }
 
-    public void setException(Exception exception) {
+    public void setException(Throwable exception) {
         this.exception = exception;
     }
 

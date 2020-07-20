@@ -85,15 +85,18 @@ public class AuthorizationController {
     private Mono<Map<String, Object>> doLogin(Mono<Map<String, Object>> parameter) {
 
         return parameter.flatMap(parameters -> {
-            String username = (String) parameters.get("username");
-            String password = (String) parameters.get("password");
+            String username_ = (String) parameters.get("username");
+            String password_ = (String) parameters.get("password");
 
-            Assert.hasLength(username, "用户名不能为空");
-            Assert.hasLength(password, "密码不能为空");
+            Assert.hasLength(username_, "用户名不能为空");
+            Assert.hasLength(password_, "密码不能为空");
 
             AuthorizationFailedEvent.Reason reason = AuthorizationFailedEvent.Reason.OTHER;
             Function<String, Object> parameterGetter = parameters::get;
-            try {
+            return Mono.defer(() -> {
+                String username = username_;
+                String password = password_;
+
                 AuthorizationDecodeEvent decodeEvent = new AuthorizationDecodeEvent(username, password, parameterGetter);
                 eventPublisher.publishEvent(decodeEvent);
                 username = decodeEvent.getUsername();
@@ -111,12 +114,12 @@ public class AuthorizationController {
                             eventPublisher.publishEvent(event);
                             return event.getResult();
                         });
-            } catch (Exception e) {
-                AuthorizationFailedEvent failedEvent = new AuthorizationFailedEvent(username, password, parameterGetter, reason);
-                failedEvent.setException(e);
+            }).onErrorResume(err -> {
+                AuthorizationFailedEvent failedEvent = new AuthorizationFailedEvent(username_, password_, parameterGetter, reason);
+                failedEvent.setException(err);
                 eventPublisher.publishEvent(failedEvent);
                 return Mono.error(failedEvent.getException());
-            }
+            });
         });
 
     }
