@@ -94,31 +94,34 @@ public class AuthorizationController {
             AuthorizationFailedEvent.Reason reason = AuthorizationFailedEvent.Reason.OTHER;
             Function<String, Object> parameterGetter = parameters::get;
             return Mono.defer(() -> {
-                String username = username_;
-                String password = password_;
+                AuthorizationDecodeEvent decodeEvent = new AuthorizationDecodeEvent(username_, password_, parameterGetter);
+                return decodeEvent
+                        .publish(eventPublisher)
+                        .then(Mono.defer(() -> {
+                            String username = decodeEvent.getUsername();
+                            String password = decodeEvent.getPassword();
+                            AuthorizationBeforeEvent beforeEvent = new AuthorizationBeforeEvent(username, password, parameterGetter);
+                            return beforeEvent
+                                    .publish(eventPublisher)
+                                    .then(authenticationManager
+                                            .authenticate(Mono.just(new PlainTextUsernamePasswordAuthenticationRequest(username, password)))
+                                            .switchIfEmpty(Mono.error(() -> new IllegalArgumentException("密码错误")))
+                                            .flatMap(auth -> {
+                                                //触发授权成功事件
+                                                AuthorizationSuccessEvent event = new AuthorizationSuccessEvent(auth, parameterGetter);
+                                                event.getResult().put("userId", auth.getUser().getId());
+                                                return event
+                                                        .publish(eventPublisher)
+                                                        .then(Mono.fromCallable(event::getResult));
+                                            }));
 
-                AuthorizationDecodeEvent decodeEvent = new AuthorizationDecodeEvent(username, password, parameterGetter);
-                eventPublisher.publishEvent(decodeEvent);
-                username = decodeEvent.getUsername();
-                password = decodeEvent.getPassword();
-                AuthorizationBeforeEvent beforeEvent = new AuthorizationBeforeEvent(username, password, parameterGetter);
-                eventPublisher.publishEvent(beforeEvent);
-                // 验证通过
-                return authenticationManager
-                        .authenticate(Mono.just(new PlainTextUsernamePasswordAuthenticationRequest(username, password)))
-                        .switchIfEmpty(Mono.error(() -> new IllegalArgumentException("密码错误")))
-                        .map(auth -> {
-                            //触发授权成功事件
-                            AuthorizationSuccessEvent event = new AuthorizationSuccessEvent(auth, parameterGetter);
-                            event.getResult().put("userId", auth.getUser().getId());
-                            eventPublisher.publishEvent(event);
-                            return event.getResult();
-                        });
+                        }));
             }).onErrorResume(err -> {
                 AuthorizationFailedEvent failedEvent = new AuthorizationFailedEvent(username_, password_, parameterGetter, reason);
                 failedEvent.setException(err);
-                eventPublisher.publishEvent(failedEvent);
-                return Mono.error(failedEvent.getException());
+                return failedEvent
+                        .publish(eventPublisher)
+                        .then(Mono.error(failedEvent.getException()));
             });
         });
 

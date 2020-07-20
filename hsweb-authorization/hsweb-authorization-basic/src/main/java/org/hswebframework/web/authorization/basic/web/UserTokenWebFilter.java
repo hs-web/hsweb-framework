@@ -28,9 +28,9 @@ import java.util.Map;
 @Slf4j
 public class UserTokenWebFilter implements WebFilter, BeanPostProcessor {
 
-    private List<ReactiveUserTokenParser> parsers = new ArrayList<>();
+    private final List<ReactiveUserTokenParser> parsers = new ArrayList<>();
 
-    private Map<String, ReactiveUserTokenGenerator> tokenGeneratorMap = new HashMap<>();
+    private final Map<String, ReactiveUserTokenGenerator> tokenGeneratorMap = new HashMap<>();
 
     @Autowired
     private UserTokenManager userTokenManager;
@@ -62,12 +62,12 @@ public class UserTokenWebFilter implements WebFilter, BeanPostProcessor {
                     .map(String::valueOf)
                     .map(Long::parseLong)
                     .orElse(token.getTimeout());
+            event.getResult().put("expires", expires);
 
-            userTokenManager
+            event.async(userTokenManager
                     .signIn(token.getToken(), token.getType(), event.getAuthentication().getUser().getId(), expires)
-                    .subscribe(t -> {
-                        log.debug("user [{}] sign in", t.getUserId());
-                    });
+                    .doOnNext(t -> log.debug("user [{}] sign in", t.getUserId()))
+                    .then());
         }
 
     }

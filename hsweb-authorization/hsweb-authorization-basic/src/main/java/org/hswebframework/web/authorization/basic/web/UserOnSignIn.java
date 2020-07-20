@@ -7,6 +7,7 @@ import org.hswebframework.web.authorization.token.UserTokenHolder;
 import org.hswebframework.web.authorization.token.UserTokenManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.EventListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,10 +22,11 @@ import java.util.List;
  * @see UserTokenGenerator
  * @since 3.0
  */
-public class UserOnSignIn implements ApplicationListener<AuthorizationSuccessEvent> {
+public class UserOnSignIn {
 
     /**
      * 默认到令牌类型
+     *
      * @see UserToken#getType()
      * @see SessionIdUserTokenGenerator#getSupportTokenType()
      */
@@ -50,14 +52,14 @@ public class UserOnSignIn implements ApplicationListener<AuthorizationSuccessEve
         this.userTokenGenerators = userTokenGenerators;
     }
 
-    @Override
+    @EventListener
     public void onApplicationEvent(AuthorizationSuccessEvent event) {
         UserToken token = UserTokenHolder.currentToken();
         String tokenType = (String) event.getParameter("token_type").orElse(defaultTokenType);
 
         if (token != null) {
             //先退出已登陆的用户
-            userTokenManager.signOutByToken(token.getToken()).block();
+            event.async(userTokenManager.signOutByToken(token.getToken()));
         }
         //创建token
         GeneratedToken newToken = userTokenGenerators.stream()
@@ -66,8 +68,7 @@ public class UserOnSignIn implements ApplicationListener<AuthorizationSuccessEve
                 .orElseThrow(() -> new UnsupportedOperationException(tokenType))
                 .generate(event.getAuthentication());
         //登入
-        userTokenManager.signIn(newToken.getToken(), newToken.getType(), event.getAuthentication().getUser().getId(), newToken.getTimeout())
-        .block();
+        event.async(userTokenManager.signIn(newToken.getToken(), newToken.getType(), event.getAuthentication().getUser().getId(), newToken.getTimeout()).then());
 
         //响应结果
         event.getResult().putAll(newToken.getResponse());

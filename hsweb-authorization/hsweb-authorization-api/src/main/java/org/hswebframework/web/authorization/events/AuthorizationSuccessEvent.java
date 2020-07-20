@@ -19,7 +19,7 @@
 package org.hswebframework.web.authorization.events;
 
 import org.hswebframework.web.authorization.Authentication;
-import org.springframework.context.ApplicationEvent;
+import org.hswebframework.web.event.DefaultAsyncEvent;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,16 +33,15 @@ import java.util.function.Function;
  * @see Authentication
  * @since 3.0
  */
-public class AuthorizationSuccessEvent extends ApplicationEvent implements AuthorizationEvent {
+public class AuthorizationSuccessEvent extends DefaultAsyncEvent implements AuthorizationEvent {
     private static final long serialVersionUID = -2452116314154155058L;
-    private Authentication authentication;
+    private final Authentication authentication;
 
-    private transient Function<String, Object> parameterGetter;
+    private final transient Function<String, Object> parameterGetter;
 
     private Map<String, Object> result = new HashMap<>();
 
     public AuthorizationSuccessEvent(Authentication authentication, Function<String, Object> parameterGetter) {
-        super(authentication);
         this.authentication = authentication;
         this.parameterGetter = parameterGetter;
     }
