@@ -2,6 +2,7 @@ package org.hswebframework.web.crud.web;
 
 import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.web.authorization.exception.AccessDenyException;
+import org.hswebframework.web.authorization.exception.AuthenticationException;
 import org.hswebframework.web.authorization.exception.UnAuthorizedException;
 import org.hswebframework.web.exception.BusinessException;
 import org.hswebframework.web.exception.NotFoundException;
@@ -148,6 +149,12 @@ public class CommonErrorControllerAdvice {
     public Mono<ResponseMessage<Object>> handleException(IllegalArgumentException e) {
         return Mono.just(ResponseMessage.error(400, "illegal_argument", e.getMessage()))
                 .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getMessage(), e)));
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Mono<ResponseMessage<Object>> handleException(AuthenticationException e) {
+        return Mono.just(ResponseMessage.error(400, e.getCode(), e.getMessage()));
     }
 
     @ExceptionHandler
