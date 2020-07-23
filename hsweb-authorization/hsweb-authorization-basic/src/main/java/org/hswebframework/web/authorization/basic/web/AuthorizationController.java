@@ -27,9 +27,11 @@ import org.hswebframework.web.authorization.events.AuthorizationBeforeEvent;
 import org.hswebframework.web.authorization.events.AuthorizationDecodeEvent;
 import org.hswebframework.web.authorization.events.AuthorizationFailedEvent;
 import org.hswebframework.web.authorization.events.AuthorizationSuccessEvent;
+import org.hswebframework.web.authorization.exception.AuthenticationException;
 import org.hswebframework.web.authorization.exception.UnAuthorizedException;
 import org.hswebframework.web.authorization.simple.CompositeReactiveAuthenticationManager;
 import org.hswebframework.web.authorization.simple.PlainTextUsernamePasswordAuthenticationRequest;
+import org.hswebframework.web.logging.AccessLogger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.MediaType;
@@ -65,17 +67,10 @@ public class AuthorizationController {
     @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation("用户名密码登录,json方式")
     @Authorize(ignore = true)
+    @AccessLogger(ignore = true)
     public Mono<Map<String, Object>> authorizeByJson(@ApiParam(example = "{\"username\":\"admin\",\"password\":\"admin\"}")
                                                      @RequestBody Mono<Map<String, Object>> parameter) {
         return doLogin(parameter);
-    }
-
-    @PostMapping(value = "/login", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    @ApiOperation("用户名密码登录,参数方式")
-    @Authorize(ignore = true)
-    public Mono<Map<String, Object>> authorizeByUrlEncoded(@ApiParam(hidden = true) @RequestParam Map<String, Object> parameter) {
-
-        return doLogin(Mono.just(parameter));
     }
 
     /**
@@ -105,7 +100,7 @@ public class AuthorizationController {
                                     .publish(eventPublisher)
                                     .then(authenticationManager
                                             .authenticate(Mono.just(new PlainTextUsernamePasswordAuthenticationRequest(username, password)))
-                                            .switchIfEmpty(Mono.error(() -> new IllegalArgumentException("密码错误")))
+                                            .switchIfEmpty(Mono.error(() -> new AuthenticationException(AuthenticationException.ILLEGAL_PASSWORD,"密码错误")))
                                             .flatMap(auth -> {
                                                 //触发授权成功事件
                                                 AuthorizationSuccessEvent event = new AuthorizationSuccessEvent(auth, parameterGetter);
@@ -114,7 +109,6 @@ public class AuthorizationController {
                                                         .publish(eventPublisher)
                                                         .then(Mono.fromCallable(event::getResult));
                                             }));
-
                         }));
             }).onErrorResume(err -> {
                 AuthorizationFailedEvent failedEvent = new AuthorizationFailedEvent(username_, password_, parameterGetter, reason);

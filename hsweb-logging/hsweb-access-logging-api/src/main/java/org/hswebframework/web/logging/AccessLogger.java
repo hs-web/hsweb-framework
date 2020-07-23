@@ -33,7 +33,7 @@ public @interface AccessLogger {
      * @return 对类或方法的简单说明
      * @see AccessLoggerInfo#getAction()
      */
-    String value();
+    String value() default "";
 
     /**
      * @return 对类或方法的详细描述

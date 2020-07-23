@@ -31,6 +31,7 @@ public class AuthorizationFailedEvent extends AbstractAuthorizationEvent {
     /**
      * 失败原因
      */
+    @Deprecated//已弃用，请根据exception判断
     private Reason reason;
 
     /**
@@ -58,6 +59,7 @@ public class AuthorizationFailedEvent extends AbstractAuthorizationEvent {
         return reason;
     }
 
+    @Deprecated//已弃用，请根据exception判断
     public enum Reason {
         PASSWORD_ERROR,
         USER_DISABLED,
