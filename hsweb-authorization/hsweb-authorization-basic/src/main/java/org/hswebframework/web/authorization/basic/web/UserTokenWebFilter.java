@@ -13,6 +13,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.event.EventListener;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
@@ -55,19 +56,19 @@ public class UserTokenWebFilter implements WebFilter, BeanPostProcessor {
                 .orElseGet(() -> tokenGeneratorMap.get("default"));
         if (generator != null) {
             GeneratedToken token = generator.generate(event.getAuthentication());
-            event.getResult().put("token", token.getToken());
             event.getResult().putAll(token.getResponse());
-
-            long expires = event.getParameter("expires")
-                    .map(String::valueOf)
-                    .map(Long::parseLong)
-                    .orElse(token.getTimeout());
-            event.getResult().put("expires", expires);
-
-            event.async(userTokenManager
-                    .signIn(token.getToken(), token.getType(), event.getAuthentication().getUser().getId(), expires)
-                    .doOnNext(t -> log.debug("user [{}] sign in", t.getUserId()))
-                    .then());
+            if (StringUtils.hasText(token.getToken())) {
+                event.getResult().put("token", token.getToken());
+                long expires = event.getParameter("expires")
+                        .map(String::valueOf)
+                        .map(Long::parseLong)
+                        .orElse(token.getTimeout());
+                event.getResult().put("expires", expires);
+                event.async(userTokenManager
+                        .signIn(token.getToken(), token.getType(), event.getAuthentication().getUser().getId(), expires)
+                        .doOnNext(t -> log.debug("user [{}] sign in", t.getUserId()))
+                        .then());
+            }
         }
 
     }
