@@ -152,6 +152,9 @@ public class QueryParamEntity extends QueryParam {
      */
     public void setOrderBy(String orderBy) {
         this.orderBy = orderBy;
+        if (StringUtils.isEmpty(where)) {
+            return;
+        }
         setSorts(TermExpressionParser.parseOrder(orderBy));
     }
 
@@ -163,6 +166,9 @@ public class QueryParamEntity extends QueryParam {
      */
     public void setWhere(String where) {
         this.where = where;
+        if (StringUtils.isEmpty(where)) {
+            return;
+        }
         setTerms(TermExpressionParser.parse(where));
     }
 
