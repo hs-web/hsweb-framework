@@ -3,16 +3,10 @@ package org.hswebframework.web.authorization.simple.builder;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import org.hswebframework.web.authorization.Authentication;
-import org.hswebframework.web.authorization.Permission;
-import org.hswebframework.web.authorization.Role;
-import org.hswebframework.web.authorization.User;
+import org.hswebframework.web.authorization.*;
 import org.hswebframework.web.authorization.builder.AuthenticationBuilder;
 import org.hswebframework.web.authorization.builder.DataAccessConfigBuilderFactory;
-import org.hswebframework.web.authorization.simple.SimpleAuthentication;
-import org.hswebframework.web.authorization.simple.SimplePermission;
-import org.hswebframework.web.authorization.simple.SimpleRole;
-import org.hswebframework.web.authorization.simple.SimpleUser;
+import org.hswebframework.web.authorization.simple.*;
 
 import java.io.Serializable;
 import java.util.*;
@@ -114,15 +108,42 @@ public class SimpleAuthenticationBuilder implements AuthenticationBuilder {
         return this;
     }
 
+    public AuthenticationBuilder dimension(JSONArray json) {
+
+        if (json == null) {
+            return this;
+        }
+        List<Dimension> dimensions = new ArrayList<>();
+
+        for (int i = 0; i < json.size(); i++) {
+            JSONObject jsonObject = json.getJSONObject(i);
+            Object type = jsonObject.get("type");
+
+            dimensions.add( SimpleDimension.of(
+                    jsonObject.getString("id"),
+                    jsonObject.getString("name"),
+                    type instanceof String?SimpleDimensionType.of(String.valueOf(type)):jsonObject.getJSONObject("type").toJavaObject(SimpleDimensionType.class),
+                    jsonObject.getJSONObject("options")
+            ));
+        }
+        authentication.setDimensions(dimensions);
+
+        return this;
+
+    }
+
     @Override
     public AuthenticationBuilder json(String json) {
         JSONObject jsonObject = JSON.parseObject(json);
         user(jsonObject.getObject("user", SimpleUser.class));
-        if(jsonObject.containsKey("roles")){
+        if (jsonObject.containsKey("roles")) {
             role(jsonObject.getJSONArray("roles").toJSONString());
         }
-        if(jsonObject.containsKey("permissions")){
+        if (jsonObject.containsKey("permissions")) {
             permission(jsonObject.getJSONArray("permissions").toJSONString());
+        }
+        if (jsonObject.containsKey("dimensions")) {
+            dimension(jsonObject.getJSONArray("dimensions"));
         }
         return this;
     }
