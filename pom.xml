@@ -24,7 +24,7 @@
 
     <groupId>org.hswebframework.web</groupId>
     <artifactId>hsweb-framework</artifactId>
-    <version>4.0.5-SNAPSHOT</version>
+    <version>4.0.5</version>
     <modules>
         <module>hsweb-starter</module>
         <module>hsweb-core</module>
