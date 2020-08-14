@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@AutoConfigureAfter(name = "org.springframework.boot.autoconfigure.r2dbc.ConnectionFactoryAutoConfiguration")
+@AutoConfigureAfter(name = "org.springframework.boot.autoconfigure.r2dbc.R2dbcAutoConfiguration")
 @ConditionalOnBean(ConnectionFactory.class)
 public class R2dbcSqlExecutorConfiguration {
     @Bean

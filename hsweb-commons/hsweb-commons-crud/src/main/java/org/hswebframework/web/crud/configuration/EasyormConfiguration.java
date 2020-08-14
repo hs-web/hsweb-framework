@@ -39,7 +39,7 @@ import java.util.Optional;
 @Configuration
 @EnableConfigurationProperties(EasyormProperties.class)
 @EnableEasyormRepository("org.hswebframework.web.**.entity")
-public class EasyOrmConfiguration {
+public class EasyormConfiguration {
 
     @Autowired
     private EasyormProperties properties;

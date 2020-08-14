@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.ezorm.rdb.executor.SqlRequest;
 import org.hswebframework.ezorm.rdb.executor.jdbc.JdbcSyncSqlExecutor;
 import org.hswebframework.ezorm.rdb.executor.wrapper.ResultWrapper;
+import org.hswebframework.web.api.crud.entity.TransactionManagers;
 import org.hswebframework.web.datasource.DataSourceHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.datasource.DataSourceUtils;
@@ -63,19 +64,19 @@ public class DefaultJdbcExecutor extends JdbcSyncSqlExecutor {
     }
 
     @Override
-    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    @Transactional(propagation = Propagation.NOT_SUPPORTED, transactionManager = TransactionManagers.jdbcTransactionManager)
     public void execute(SqlRequest request) {
         super.execute(request);
     }
 
-    @Transactional(rollbackFor = Throwable.class)
+    @Transactional(rollbackFor = Throwable.class, transactionManager = TransactionManagers.jdbcTransactionManager)
     @Override
     public int update(SqlRequest request) {
         return super.update(request);
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, transactionManager = TransactionManagers.jdbcTransactionManager)
     public <T, R> R select(SqlRequest request, ResultWrapper<T, R> wrapper) {
         return super.select(request, wrapper);
     }

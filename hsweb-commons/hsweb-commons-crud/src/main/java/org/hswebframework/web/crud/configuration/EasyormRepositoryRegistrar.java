@@ -34,9 +34,9 @@ import java.util.stream.Stream;
 @Slf4j
 public class EasyormRepositoryRegistrar implements ImportBeanDefinitionRegistrar {
 
-    private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
+    private final ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
 
-    private MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
+    private final MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
 
     @Override
     @SneakyThrows

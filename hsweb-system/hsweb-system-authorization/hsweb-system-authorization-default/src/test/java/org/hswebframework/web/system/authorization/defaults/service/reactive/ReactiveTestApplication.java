@@ -4,8 +4,8 @@ import org.hswebframework.web.authorization.simple.DefaultAuthorizationAutoConfi
 import org.hswebframework.web.crud.configuration.JdbcSqlExecutorConfiguration;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.data.r2dbc.R2dbcTransactionManagerAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
-import org.springframework.boot.autoconfigure.transaction.reactive.ReactiveTransactionAutoConfiguration;
 
 @SpringBootApplication(exclude = {
          //TransactionAutoConfiguration.class,
@@ -13,7 +13,7 @@ import org.springframework.boot.autoconfigure.transaction.reactive.ReactiveTrans
         DataSourceAutoConfiguration.class
 })
 @ImportAutoConfiguration({
-        ReactiveTransactionAutoConfiguration.class,
+        R2dbcTransactionManagerAutoConfiguration.class,
         DefaultAuthorizationAutoConfiguration.class
 })
 public class ReactiveTestApplication {

@@ -8,6 +8,8 @@ import org.hswebframework.ezorm.rdb.mapping.SyncRepository;
 import org.hswebframework.ezorm.rdb.mapping.SyncUpdate;
 import org.hswebframework.ezorm.rdb.mapping.defaults.SaveResult;
 import org.hswebframework.web.api.crud.entity.PagerResult;
+import org.hswebframework.web.api.crud.entity.QueryParamEntity;
+import org.hswebframework.web.api.crud.entity.TransactionManagers;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
@@ -30,52 +32,60 @@ public interface CrudService<E, K> {
         return getRepository().createDelete();
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, transactionManager = TransactionManagers.jdbcTransactionManager)
     default Optional<E> findById(K id) {
         return getRepository()
                 .findById(id);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, transactionManager = TransactionManagers.jdbcTransactionManager)
     default List<E> findById(Collection<K> id) {
         if (CollectionUtils.isEmpty(id)) {
             return Collections.emptyList();
         }
-        return getRepository()
+        return this
+                .getRepository()
                 .findById(id);
     }
 
-    @Transactional
-    default SaveResult save(E... entityArr) {
-        return getRepository()
-                .save(entityArr);
-    }
-
-    @Transactional
+    @Transactional(transactionManager = TransactionManagers.jdbcTransactionManager)
     default SaveResult save(Collection<E> entityArr) {
         return getRepository()
                 .save(entityArr);
     }
 
-    @Transactional
-    default int deleteById(K... idArr) {
-        return getRepository().deleteById(idArr);
+    @Transactional(transactionManager = TransactionManagers.jdbcTransactionManager)
+    default int insert(Collection<E> entityArr) {
+        return getRepository()
+                .insertBatch(entityArr);
     }
 
-    @Transactional
+    @Transactional(transactionManager = TransactionManagers.jdbcTransactionManager)
+    default void insert(E entityArr) {
+        getRepository()
+                .insert(entityArr);
+    }
+
+    @Transactional(transactionManager = TransactionManagers.jdbcTransactionManager)
+    default int updateById(K id, E entityArr) {
+        return getRepository()
+                .updateById(id, entityArr);
+    }
+
+    @Transactional(transactionManager = TransactionManagers.jdbcTransactionManager)
     default int deleteById(Collection<K> idArr) {
         return getRepository().deleteById(idArr);
     }
 
-    @Transactional(readOnly = true)
-    default List<E> query(QueryParam queryParam) {
+    @Transactional(readOnly = true, transactionManager = TransactionManagers.jdbcTransactionManager)
+    default List<E> query(QueryParamEntity queryParam) {
         return createQuery().setParam(queryParam).fetch();
     }
 
-    @Transactional(readOnly = true)
-    default PagerResult<E> queryPager(QueryParam param) {
+    @Transactional(readOnly = true, transactionManager = TransactionManagers.jdbcTransactionManager)
+    default PagerResult<E> queryPager(QueryParamEntity param) {
 
-        int count = count(param);
+        int count = param.getTotal() == null ? count(param) : param.getTotal();
         if (count == 0) {
             return PagerResult.empty();
         }
@@ -84,8 +94,8 @@ public interface CrudService<E, K> {
         return PagerResult.of(count, query(param), param);
     }
 
-    @Transactional(readOnly = true)
-    default Integer count(QueryParam param) {
+    @Transactional(readOnly = true, transactionManager = TransactionManagers.jdbcTransactionManager)
+    default int count(QueryParam param) {
         return getRepository()
                 .createQuery()
                 .setParam(param)

@@ -7,13 +7,12 @@ import lombok.Setter;
 import org.hswebframework.ezorm.rdb.executor.SqlRequest;
 import org.hswebframework.ezorm.rdb.executor.reactive.r2dbc.R2dbcReactiveSqlExecutor;
 import org.hswebframework.ezorm.rdb.executor.wrapper.ResultWrapper;
-import org.hswebframework.web.crud.configuration.EasyormProperties;
+import org.hswebframework.web.api.crud.entity.TransactionManagers;
 import org.hswebframework.web.datasource.DataSourceHolder;
 import org.hswebframework.web.datasource.R2dbcDataSource;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.r2dbc.connectionfactory.ConnectionFactoryUtils;
-import org.springframework.transaction.NoTransactionException;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
@@ -86,19 +85,19 @@ public class DefaultR2dbcExecutor extends R2dbcReactiveSqlExecutor {
     }
 
     @Override
-    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    @Transactional(propagation = Propagation.NOT_SUPPORTED, transactionManager = TransactionManagers.r2dbcTransactionManager)
     public Mono<Void> execute(Publisher<SqlRequest> request) {
         return super.execute(request);
     }
 
     @Override
-    @Transactional
+    @Transactional(transactionManager = TransactionManagers.r2dbcTransactionManager)
     public Mono<Integer> update(Publisher<SqlRequest> request) {
         return super.update(request);
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, transactionManager = TransactionManagers.r2dbcTransactionManager)
     public <E> Flux<E> select(Publisher<SqlRequest> request, ResultWrapper<E, ?> wrapper) {
         return super.select(request, wrapper);
     }

@@ -1,6 +1,6 @@
 # Auto Configure
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-org.hswebframework.web.crud.configuration.EasyOrmConfiguration,\
+org.hswebframework.web.crud.configuration.EasyormConfiguration,\
 org.hswebframework.web.crud.configuration.JdbcSqlExecutorConfiguration,\
 org.hswebframework.web.crud.configuration.R2dbcSqlExecutorConfiguration,\
 org.hswebframework.web.crud.web.CommonWebFluxConfiguration
