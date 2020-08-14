@@ -34,10 +34,6 @@ public class QueryParamEntity extends QueryParam {
     private static final long serialVersionUID = 8097500947924037523L;
 
     @Getter
-    @Deprecated
-    private String termExpression;
-
-    @Getter
     private String where;
 
     @Getter
@@ -125,24 +121,6 @@ public class QueryParamEntity extends QueryParam {
                 .end();
     }
 
-    /**
-     * 设置条件表达式,可以通过表达式的方式快速构建查询条件. 表达式是类似sql条件的语法,如:
-     * <pre>
-     *     name is 测试 and age gte 10
-     * </pre>
-     * <pre>
-     *     name is 测试 and (age gt 10 or age lte 90 )
-     * </pre>
-     *
-     * @param termExpression 表达式
-     * @since 3.0.5
-     */
-    @Deprecated
-    public void setTermExpression(String termExpression) {
-        this.termExpression = termExpression;
-        log.warn("termExpression is deprecated,please use where.");
-        setWhere(termExpression);
-    }
 
     /**
      * 表达式方式排序
@@ -175,8 +153,8 @@ public class QueryParamEntity extends QueryParam {
     @Override
     public List<Term> getTerms() {
         List<Term> terms = super.getTerms();
-        if (CollectionUtils.isEmpty(terms) && StringUtils.hasText(termExpression)) {
-            setTerms(terms = TermExpressionParser.parse(termExpression));
+        if (CollectionUtils.isEmpty(terms) && StringUtils.hasText(where)) {
+            setTerms(terms = TermExpressionParser.parse(where));
         }
         return terms;
     }
