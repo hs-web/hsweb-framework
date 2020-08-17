@@ -68,7 +68,7 @@ public class DefaultDictDefineRepository implements DictDefineRepository {
 //            define.setComments();
         }
         define.setItems(items);
-        log.debug("parse enum dict : {} as : {}", type, define.getId());
+        log.trace("parse enum dict : {} as : {}", type, define.getId());
         return define;
 
     }

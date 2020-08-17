@@ -110,7 +110,7 @@ public class EasyormRepositoryRegistrar implements ImportBeanDefinitionRegistrar
             Class realType = entityInfo.getRealType();
             if (entityInfo.isReactive()) {
                 reactive = true;
-                log.debug("register ReactiveRepository<{},{}>", entityType.getName(), idType.getSimpleName());
+                log.trace("register ReactiveRepository<{},{}>", entityType.getName(), idType.getSimpleName());
 
                 ResolvableType repositoryType = ResolvableType.forClassWithGenerics(DefaultReactiveRepository.class, entityType, idType);
 
@@ -121,7 +121,7 @@ public class EasyormRepositoryRegistrar implements ImportBeanDefinitionRegistrar
                 definition.getPropertyValues().add("entityType", realType);
                 registry.registerBeanDefinition(realType.getSimpleName().concat("ReactiveRepository"), definition);
             } else {
-                log.debug("register SyncRepository<{},{}>", entityType.getName(), idType.getSimpleName());
+                log.trace("register SyncRepository<{},{}>", entityType.getName(), idType.getSimpleName());
                 ResolvableType repositoryType = ResolvableType.forClassWithGenerics(DefaultSyncRepository.class, entityType, idType);
                 RootBeanDefinition definition = new RootBeanDefinition();
                 definition.setTargetType(repositoryType);
