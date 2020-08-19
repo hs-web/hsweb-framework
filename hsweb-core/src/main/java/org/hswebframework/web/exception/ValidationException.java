@@ -3,20 +3,28 @@ package org.hswebframework.web.exception;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.validation.ConstraintViolation;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
 @Getter
 @Setter
+@ResponseStatus(HttpStatus.BAD_REQUEST)
 public class ValidationException extends BusinessException {
 
     private List<Detail> details;
 
     public ValidationException(String message) {
         super(message);
+    }
+
+    public ValidationException(String property, String message) {
+        this(message, Collections.singletonList(new Detail(property, message, null)));
     }
 
     public ValidationException(String message, List<Detail> details) {
