@@ -56,6 +56,7 @@ public final class AuthenticationHolder {
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .reduceWith(SimpleAuthentication::new, SimpleAuthentication::merge)
+                .filter(auth->auth.getUser()!=null)
                 .map(Authentication.class::cast)
                 .blockOptional();
     }

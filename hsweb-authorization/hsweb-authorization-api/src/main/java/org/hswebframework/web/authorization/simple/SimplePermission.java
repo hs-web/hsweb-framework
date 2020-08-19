@@ -4,9 +4,7 @@ import lombok.*;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.access.DataAccessConfig;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author zhouhao
@@ -28,6 +26,7 @@ public class SimplePermission implements Permission {
 
     private Set<DataAccessConfig> dataAccesses;
 
+    private Map<String, Object> options;
 
     public Set<String> getActions() {
         if (actions == null) {
@@ -43,13 +42,16 @@ public class SimplePermission implements Permission {
         return dataAccesses;
     }
 
-    public Permission copy(){
-        SimplePermission permission =new SimplePermission();
+    public Permission copy() {
+        SimplePermission permission = new SimplePermission();
 
         permission.setId(id);
         permission.setName(name);
         permission.setActions(new HashSet<>(getActions()));
         permission.setDataAccesses(new HashSet<>(getDataAccesses()));
+        if (options != null) {
+            permission.setOptions(new HashMap<>(options));
+        }
         return permission;
     }
 }

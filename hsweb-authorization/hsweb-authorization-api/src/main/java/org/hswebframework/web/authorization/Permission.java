@@ -22,10 +22,7 @@ import org.hswebframework.web.authorization.access.FieldFilterDataAccessConfig;
 import org.hswebframework.web.authorization.access.ScopeDataAccessConfig;
 
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -89,7 +86,20 @@ public interface Permission extends Serializable {
      */
     String getId();
 
+    /**
+     * @return 权限名称
+     */
     String getName();
+
+    /**
+     * @return 其他拓展字段
+     */
+    Map<String, Object> getOptions();
+
+    default Optional<Object> getOption(String key) {
+        return Optional.ofNullable(getOptions())
+                .map(map -> map.get(key));
+    }
 
     /**
      * 用户对此权限的可操作事件(按钮)
@@ -112,12 +122,13 @@ public interface Permission extends Serializable {
     Set<DataAccessConfig> getDataAccesses();
 
 
-    default  Set<DataAccessConfig> getDataAccesses(String action){
+    default Set<DataAccessConfig> getDataAccesses(String action) {
         return getDataAccesses()
                 .stream()
-                .filter(conf->conf.getAction().equals(action))
+                .filter(conf -> conf.getAction().equals(action))
                 .collect(Collectors.toSet());
     }
+
     /**
      * 查找数据权限配置
      *
@@ -198,6 +209,7 @@ public interface Permission extends Serializable {
     }
 
     Permission copy();
+
     /**
      * 数据权限查找判断逻辑接口
      *
