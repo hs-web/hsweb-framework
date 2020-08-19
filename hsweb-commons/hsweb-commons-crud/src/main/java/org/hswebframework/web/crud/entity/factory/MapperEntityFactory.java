@@ -44,7 +44,7 @@ public class MapperEntityFactory implements EntityFactory, BeanFactory {
     private static final DefaultMapperFactory DEFAULT_MAPPER_FACTORY = clazz -> {
         String simpleClassName = clazz.getPackage().getName().concat(".Simple").concat(clazz.getSimpleName());
         try {
-            return defaultMapper(Class.forName(simpleClassName));
+            return defaultMapper(org.springframework.util.ClassUtils.forName(simpleClassName,null));
         } catch (ClassNotFoundException ignore) {
             // throw new NotFoundException(e.getMessage());
         }

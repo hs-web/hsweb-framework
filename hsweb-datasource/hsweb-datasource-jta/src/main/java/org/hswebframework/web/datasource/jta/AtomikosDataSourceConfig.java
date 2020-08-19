@@ -7,6 +7,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.web.bean.FastBeanCopier;
 import org.hswebframework.web.datasource.config.DynamicDataSourceConfig;
+import org.springframework.util.ClassUtils;
 
 import javax.sql.XADataSource;
 import java.sql.SQLException;
@@ -42,7 +43,7 @@ public class AtomikosDataSourceConfig extends DynamicDataSourceConfig {
             xaProperties.entrySet().forEach(entry -> entry.setValue(String.valueOf(entry.getValue())));
         }
         //fix #87
-        XADataSource dataSource = (XADataSource) Class.forName(getXaDataSourceClassName()).newInstance();
+        XADataSource dataSource = (XADataSource) ClassUtils.forName(getXaDataSourceClassName(),null).newInstance();
         FastBeanCopier.copy(xaProperties, dataSource);
         atomikosDataSourceBean.setXaDataSource(dataSource);
 

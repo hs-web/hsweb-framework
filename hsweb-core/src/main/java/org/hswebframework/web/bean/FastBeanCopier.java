@@ -33,7 +33,7 @@ public final class FastBeanCopier {
 
     private static final PropertyUtilsBean propertyUtils = BeanUtilsBean.getInstance().getPropertyUtils();
 
-    private static final Map<Class, Class> wrapperClassMapping = new HashMap<>();
+    private static final Map<Class<?>, Class<?>> wrapperClassMapping = new HashMap<>();
 
     @SuppressWarnings("all")
     public static final Class[] EMPTY_CLASS_ARRAY = new Class[0];
@@ -63,6 +63,7 @@ public final class FastBeanCopier {
         BEAN_FACTORY = new BeanFactory() {
             @Override
             @SneakyThrows
+            @SuppressWarnings("all")
             public <T> T newInstance(Class<T> beanType) {
                 return beanType == Map.class ? (T) new HashMap<>() : beanType.newInstance();
             }
@@ -114,14 +115,14 @@ public final class FastBeanCopier {
         return target;
     }
 
-    static Class getUserClass(Object object) {
+    static Class<?> getUserClass(Object object) {
         if (object instanceof Map) {
             return Map.class;
         }
-        Class type = ClassUtils.getUserClass(object);
+        Class<?> type = ClassUtils.getUserClass(object);
 
         if (java.lang.reflect.Proxy.isProxyClass(type)) {
-            Class[] interfaces= type.getInterfaces();
+            Class<?>[] interfaces= type.getInterfaces();
             return interfaces[0];
         }
 
@@ -129,8 +130,8 @@ public final class FastBeanCopier {
     }
 
     public static Copier getCopier(Object source, Object target, boolean autoCreate) {
-        Class sourceType = getUserClass(source);
-        Class targetType = getUserClass(target);
+        Class<?> sourceType = getUserClass(source);
+        Class<?> targetType = getUserClass(target);
         CacheKey key = createCacheKey(sourceType, targetType);
         if (autoCreate) {
             return CACHE.computeIfAbsent(key, k -> createCopier(sourceType, targetType));
@@ -140,11 +141,11 @@ public final class FastBeanCopier {
 
     }
 
-    private static CacheKey createCacheKey(Class source, Class target) {
+    private static CacheKey createCacheKey(Class<?> source, Class<?> target) {
         return new CacheKey(source, target);
     }
 
-    public static Copier createCopier(Class source, Class target) {
+    public static Copier createCopier(Class<?> source, Class<?> target) {
         String sourceName = source.getName();
         String tartName = target.getName();
         if (sourceName.startsWith("package ")) {
@@ -173,7 +174,7 @@ public final class FastBeanCopier {
         }
     }
 
-    private static Map<String, ClassProperty> createProperty(Class type) {
+    private static Map<String, ClassProperty> createProperty(Class<?> type) {
 
         List<String> fieldNames = Arrays.stream(type.getDeclaredFields())
                 .map(Field::getName).collect(Collectors.toList());
@@ -192,7 +193,7 @@ public final class FastBeanCopier {
                 .collect(Collectors.toMap(ClassProperty::getName, Function.identity(), (k, k2) -> k, LinkedHashMap::new));
     }
 
-    private static String createCopierCode(Class source, Class target) {
+    private static String createCopierCode(Class<?> source, Class<?> target) {
         Map<String, ClassProperty> sourceProperties = null;
 
         Map<String, ClassProperty> targetProperties = null;
@@ -259,16 +260,16 @@ public final class FastBeanCopier {
         protected String writeMethodName;
 
         @Getter
-        protected BiFunction<Class, Class, String> getter;
+        protected BiFunction<Class<?>, Class<?>, String> getter;
 
         @Getter
-        protected BiFunction<Class, String, String> setter;
+        protected BiFunction<Class<?>, String, String> setter;
 
         @Getter
-        protected Class type;
+        protected Class<?> type;
 
         @Getter
-        protected Class beanType;
+        protected Class<?> beanType;
 
         public String getReadMethod() {
             return readMethodName + "()";
@@ -282,7 +283,7 @@ public final class FastBeanCopier {
             return getTypeName(type);
         }
 
-        public String getTypeName(Class type) {
+        public String getTypeName(Class<?> type) {
             String targetTypeName = type.getName();
             if (type.isArray()) {
                 targetTypeName = type.getComponentType().getName() + "[]";
@@ -294,7 +295,7 @@ public final class FastBeanCopier {
             return isPrimitive(getType());
         }
 
-        public boolean isPrimitive(Class type) {
+        public boolean isPrimitive(Class<?> type) {
             return type.isPrimitive();
         }
 
@@ -302,11 +303,11 @@ public final class FastBeanCopier {
             return isWrapper(getType());
         }
 
-        public boolean isWrapper(Class type) {
-            return wrapperClassMapping.values().contains(type);
+        public boolean isWrapper(Class<?> type) {
+            return wrapperClassMapping.containsValue(type);
         }
 
-        protected Class getPrimitiveType(Class type) {
+        protected Class<?> getPrimitiveType(Class<?> type) {
             return wrapperClassMapping.entrySet().stream()
                     .filter(entry -> entry.getValue() == type)
                     .map(Map.Entry::getKey)
@@ -314,7 +315,7 @@ public final class FastBeanCopier {
                     .orElse(null);
         }
 
-        protected Class getWrapperType() {
+        protected Class<?> getWrapperType() {
             return wrapperClassMapping.get(type);
         }
 
@@ -322,7 +323,7 @@ public final class FastBeanCopier {
             return getWrapperType().getSimpleName().concat(".valueOf(").concat(getter).concat(")");
         }
 
-        public BiFunction<Class, Class, String> createGetterFunction() {
+        public BiFunction<Class<?>, Class<?>, String> createGetterFunction() {
 
             return (targetBeanType, targetType) -> {
                 String getterCode = "$$__source." + getReadMethod();
@@ -349,9 +350,9 @@ public final class FastBeanCopier {
                 if (targetType != getType()) {
                     if (isPrimitive(targetType)) {
                         boolean sourceIsWrapper = isWrapper();
-                        Class targetWrapperClass = wrapperClassMapping.get(targetType);
+                        Class<?> targetWrapperClass = wrapperClassMapping.get(targetType);
 
-                        Class sourcePrimitive = getPrimitiveType(getType());
+                        Class<?> sourcePrimitive = getPrimitiveType(getType());
                         //目标字段是基本数据类型,源字段是包装器类型
                         // source.getField().intValue();
                         if (sourceIsWrapper) {
@@ -416,15 +417,15 @@ public final class FastBeanCopier {
             };
         }
 
-        public BiFunction<Class, String, String> createSetterFunction(Function<String, String> settingNameSupplier) {
+        public BiFunction<Class<?>, String, String> createSetterFunction(Function<String, String> settingNameSupplier) {
             return (sourceType, paramGetter) -> settingNameSupplier.apply(paramGetter);
         }
 
-        public String generateGetter(Class targetBeanType, Class targetType) {
+        public String generateGetter(Class<?> targetBeanType, Class<?> targetType) {
             return getGetter().apply(targetBeanType, targetType);
         }
 
-        public String generateSetter(Class targetType, String getter) {
+        public String generateSetter(Class<?> targetType, String getter) {
             return getSetter().apply(targetType, getter);
         }
     }
@@ -474,7 +475,7 @@ public final class FastBeanCopier {
             this.beanFactory = beanFactory;
         }
 
-        public Collection newCollection(Class targetClass) {
+        public Collection<?> newCollection(Class<?> targetClass) {
 
             if (targetClass == List.class) {
                 return new ArrayList<>();
@@ -484,7 +485,7 @@ public final class FastBeanCopier {
                 return new LinkedList<>();
             } else {
                 try {
-                    return (Collection) targetClass.newInstance();
+                    return (Collection<?>) targetClass.newInstance();
                 } catch (Exception e) {
                     throw new UnsupportedOperationException("不支持的类型:" + targetClass, e);
                 }
@@ -602,9 +603,9 @@ public final class FastBeanCopier {
     @AllArgsConstructor
     public static class CacheKey {
 
-        private Class targetType;
+        private final Class<?> targetType;
 
-        private Class sourceType;
+        private final Class<?> sourceType;
 
         @Override
         public boolean equals(Object obj) {
