@@ -4,6 +4,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.web.authorization.annotation.Resource;
 import org.hswebframework.web.authorization.annotation.ResourceAction;
+import org.hswebframework.web.authorization.exception.AccessDenyException;
 import org.hswebframework.web.file.FileUploadProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.codec.multipart.FilePart;
@@ -29,14 +30,18 @@ public class ReactiveFileController {
     @PostMapping("/static")
     @SneakyThrows
     public Mono<String> uploadStatic(@RequestPart("file") Part part) {
-        FileUploadProperties.StaticFileInfo name ;
-        if(part instanceof FilePart){
-            name = properties.createStaticSavePath(((FilePart)part).filename());
-            return ((FilePart)part)
+        FileUploadProperties.StaticFileInfo name;
+        if (part instanceof FilePart) {
+            FilePart filePart = ((FilePart) part);
+            if (properties.denied(filePart.filename(), filePart.headers().getContentType())) {
+                throw new AccessDenyException();
+            }
+            name = properties.createStaticSavePath(filePart.filename());
+            return ((FilePart) part)
                     .transferTo(new File(name.getSavePath()))
                     .thenReturn(name.getLocation());
-        }else{
-           return Mono.error(()->new IllegalArgumentException("[file] part is not a file"));
+        } else {
+            return Mono.error(() -> new IllegalArgumentException("[file] part is not a file"));
         }
 
     }
