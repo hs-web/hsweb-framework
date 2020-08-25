@@ -9,6 +9,8 @@ import org.hswebframework.web.crud.service.GenericReactiveCrudService;
 import org.hswebframework.web.exception.NotFoundException;
 import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.system.authorization.api.PasswordEncoder;
+import org.hswebframework.web.system.authorization.api.PasswordValidator;
+import org.hswebframework.web.system.authorization.api.UsernameValidator;
 import org.hswebframework.web.system.authorization.api.entity.UserEntity;
 import org.hswebframework.web.system.authorization.api.event.UserCreatedEvent;
 import org.hswebframework.web.system.authorization.api.event.UserDeletedEvent;
@@ -33,6 +35,15 @@ public class DefaultReactiveUserService extends GenericReactiveCrudService<UserE
 
     @Autowired(required = false)
     private PasswordEncoder passwordEncoder = (password, salt) -> DigestUtils.md5Hex(String.format("hsweb.%s.framework.%s", password, salt));
+
+    @Autowired(required = false)
+    private PasswordValidator passwordValidator = (password) -> {
+    };
+
+    @Autowired(required = false)
+    private UsernameValidator usernameValidator = (username) -> {
+
+    };
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;
@@ -60,6 +71,8 @@ public class DefaultReactiveUserService extends GenericReactiveCrudService<UserE
 
         return Mono.defer(() -> {
             userEntity.setSalt(IDGenerator.RANDOM.generate());
+            usernameValidator.validate(userEntity.getUsername());
+            passwordValidator.validate(userEntity.getPassword());
             userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword(), userEntity.getSalt()));
             return Mono.just(userEntity)
                     .doOnNext(e -> e.tryValidate(CreateGroup.class))
@@ -80,6 +93,7 @@ public class DefaultReactiveUserService extends GenericReactiveCrudService<UserE
             boolean passwordChanged = StringUtils.hasText(userEntity.getPassword());
             if (passwordChanged) {
                 userEntity.setSalt(IDGenerator.RANDOM.generate());
+                passwordValidator.validate(userEntity.getPassword());
                 userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword(), userEntity.getSalt()));
             }
             return getRepository()
@@ -138,6 +152,7 @@ public class DefaultReactiveUserService extends GenericReactiveCrudService<UserE
     @Override
     @Transactional(rollbackFor = Exception.class, transactionManager = TransactionManagers.r2dbcTransactionManager)
     public Mono<Boolean> changePassword(String userId, String oldPassword, String newPassword) {
+        passwordValidator.validate(newPassword);
         return findById(userId)
                 .switchIfEmpty(Mono.error(NotFoundException::new))
                 .filter(user -> passwordEncoder.encode(oldPassword, user.getSalt()).equals(user.getPassword()))
