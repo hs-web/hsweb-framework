@@ -16,7 +16,7 @@
  *
  */
 
-package org.hswebframework.web.loggin.aop;
+package org.hswebframework.web.logging.aop;
 
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 

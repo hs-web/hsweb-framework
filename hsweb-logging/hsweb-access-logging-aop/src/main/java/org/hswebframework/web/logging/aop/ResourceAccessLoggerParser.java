@@ -1,4 +1,4 @@
-package org.hswebframework.web.loggin.aop;
+package org.hswebframework.web.logging.aop;
 
 
 import org.hswebframework.web.aop.MethodInterceptorHolder;
@@ -6,7 +6,6 @@ import org.hswebframework.web.authorization.annotation.Resource;
 import org.hswebframework.web.authorization.annotation.ResourceAction;
 import org.hswebframework.web.logging.LoggerDefine;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.ClassUtils;
 
 import java.lang.annotation.Annotation;

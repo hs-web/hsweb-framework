@@ -1,4 +1,4 @@
-package org.hswebframework.web.loggin.aop;
+package org.hswebframework.web.logging.aop;
 
 
 import org.hswebframework.web.aop.MethodInterceptorHolder;
