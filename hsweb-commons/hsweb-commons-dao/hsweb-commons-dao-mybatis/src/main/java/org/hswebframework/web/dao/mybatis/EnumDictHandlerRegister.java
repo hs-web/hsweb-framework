@@ -58,7 +58,7 @@ public class EnumDictHandlerRegister {
                 for (Resource resource : resources) {
                     try {
                         MetadataReader reader = metadataReaderFactory.getMetadataReader(resource);
-                        Class enumType = Class.forName(reader.getClassMetadata().getClassName());
+                        Class enumType = ClassUtils.forName(reader.getClassMetadata().getClassName(), null);
                         if (enumType.isEnum() && EnumDict.class.isAssignableFrom(enumType)) {
                             log.debug("register enum dict:{}", enumType);
                             DefaultDictDefineRepository.registerDefine(DefaultDictDefineRepository.parseEnumDict(enumType));
@@ -68,8 +68,8 @@ public class EnumDictHandlerRegister {
                             //注册枚举数组类型
                             typeHandlerRegistry.register(Array.newInstance(enumType, 0).getClass(), new EnumDictArrayHandler(enumType));
                         }
-                    } catch (Exception | Error ignore) {
-
+                    } catch (Exception | Error e) {
+                        log.warn("register enum dict error", e.getMessage());
                     }
                 }
             } catch (IOException e) {
@@ -122,6 +122,7 @@ public class EnumDictHandlerRegister {
     @MappedJdbcTypes({JdbcType.VARCHAR, JdbcType.BIT,
             JdbcType.BOOLEAN, JdbcType.NUMERIC,
             JdbcType.TINYINT, JdbcType.INTEGER,
+            JdbcType.SMALLINT,
             JdbcType.BIGINT, JdbcType.DECIMAL,
             JdbcType.CHAR})
     static class EnumDictHandler<T extends Enum & EnumDict> implements TypeHandler<T> {

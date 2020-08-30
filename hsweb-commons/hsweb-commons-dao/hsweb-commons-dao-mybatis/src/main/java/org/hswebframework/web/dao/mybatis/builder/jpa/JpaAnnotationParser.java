@@ -89,16 +89,16 @@ public class JpaAnnotationParser {
         });
 
         jdbcTypeConvert.add((type, property) -> {
-            boolean isArray = type.isArray();
+            Class<?> propertyType = property.getPropertyType();
+            boolean isArray = propertyType.isArray();
             if (isArray) {
-                type = type.getComponentType();
-
+                propertyType = propertyType.getComponentType();
             }
-            if (type.isEnum() && EnumDict.class.isAssignableFrom(type)) {
-                Class genType = ClassUtils.getGenericType(type);
+            if (propertyType.isEnum() && EnumDict.class.isAssignableFrom(propertyType)) {
                 if (isArray) {
                     return JDBCType.BIGINT;
                 }
+                Class<?> genType = ((EnumDict<?>) propertyType.getEnumConstants()[0]).getValue().getClass();
                 return jdbcTypeMapping.getOrDefault(genType, JDBCType.VARCHAR);
             }
             return null;

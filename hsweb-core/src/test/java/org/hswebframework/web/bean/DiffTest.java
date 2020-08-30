@@ -15,11 +15,15 @@ public class DiffTest {
         Map<String, Object> before = new HashMap<>();
         before.put("name", "name");
         before.put("age",21);
+        before.put("bool", true);
+        before.put("bool", false);
         before.put("birthday", DateFormatter.fromString("19910101"));
 
         Map<String, Object> after = new HashMap<>();
         after.put("name", "name");
         after.put("age", "21");
+        after.put("bool", "true");
+        after.put("bool", "false");
         after.put("birthday", "1991-01-01");
 
 

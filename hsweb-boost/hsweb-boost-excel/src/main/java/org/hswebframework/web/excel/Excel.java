@@ -55,6 +55,6 @@ public @interface Excel {
      * @return 实例必须注入到spring容器中
      * @see org.springframework.context.ApplicationContext#getBean(Class)
      */
-    Class<ExcelCellConverter> converter() default ExcelCellConverter.class;
+    Class<? extends ExcelCellConverter> converter() default ExcelCellConverter.class;
 
 }

@@ -94,7 +94,7 @@ public class DefaultExcelImporter implements ExcelImporter {
     }
 
     @SneakyThrows
-    protected <T> ExcelCellConverter<T> createConvert(Class<ExcelCellConverter> converterClass, Class<T> type) {
+    protected <T> ExcelCellConverter<T> createConvert(Class<? extends ExcelCellConverter> converterClass, Class<T> type) {
         if (converterClass != ExcelCellConverter.class) {
             try {
                 return ApplicationContextHolder.get().getBean(converterClass);

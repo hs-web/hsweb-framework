@@ -12,6 +12,7 @@ import org.hswebframework.web.authorization.basic.handler.access.DefaultDataAcce
 import org.hswebframework.web.authorization.define.AuthorizeDefinition;
 import org.hswebframework.web.authorization.define.AuthorizingContext;
 import org.hswebframework.web.authorization.define.Phased;
+import org.hswebframework.web.authorization.exception.AccessDenyException;
 import org.hswebframework.web.authorization.simple.*;
 import org.hswebframework.web.boost.aop.context.MethodInterceptorContext;
 import org.hswebframework.web.commons.entity.param.QueryParamEntity;
@@ -36,6 +37,12 @@ public class AuthorizeTests {
     private MethodInterceptorContext queryById;
     @Mock
     private MethodInterceptorContext dynamicQuery;
+
+    @Mock
+    private MethodInterceptorContext handleRole;
+
+    @Mock
+    private MethodInterceptorContext handleEmpty;
 
     @Mock
     private Authentication authentication;
@@ -67,6 +74,16 @@ public class AuthorizeTests {
         when(dynamicQuery.getParams()).thenReturn(Collections.singletonMap("paramEntity", entity));
         when(dynamicQuery.getParameter("paramEntity")).thenReturn(Optional.of(entity));
 
+        //mock MethodInterceptorContext
+        when(handleRole.getMethod()).thenReturn(TestClass.class.getMethod("handleRoleDeny", QueryParamEntity.class));
+        when(handleRole.getTarget()).thenReturn(testClass);
+        when(handleRole.getParams()).thenReturn(Collections.singletonMap("paramEntity", entity));
+        when(handleRole.getParameter("paramEntity")).thenReturn(Optional.of(entity));
+
+
+        //mock MethodInterceptorContext
+        when(handleEmpty.getMethod()).thenReturn(TestClass.class.getMethod("handleEmpty"));
+        when(handleEmpty.getTarget()).thenReturn(testClass);
 
         //过滤字段
         AbstractDataAccessConfig fieldFilter = new SimpleFieldFilterDataAccessConfig("password", "salt");
@@ -111,9 +128,39 @@ public class AuthorizeTests {
         authorizingContext.setParamContext(queryById);
 
         handler.handRBAC(authorizingContext);
-
-
     }
+
+    @Test
+    public void testIssue164() {
+        DefaultAuthorizingHandler handler = new DefaultAuthorizingHandler();
+
+        AuthorizeDefinition definition = parser.parse(handleRole.getTarget().getClass(), handleRole.getMethod());
+
+        AuthorizingContext authorizingContext = new AuthorizingContext();
+        authorizingContext.setAuthentication(authentication);
+        authorizingContext.setDefinition(definition);
+        authorizingContext.setParamContext(handleRole);
+
+        try {
+            handler.handRBAC(authorizingContext);
+            Assert.fail("role access handle fail");
+        } catch (AccessDenyException ignore) {
+
+        }
+    }
+    @Test
+    public void testIssue164Empty() {
+        DefaultAuthorizingHandler handler = new DefaultAuthorizingHandler();
+
+        AuthorizeDefinition definition = parser.parse(handleEmpty.getTarget().getClass(), handleEmpty.getMethod());
+
+        AuthorizingContext authorizingContext = new AuthorizingContext();
+        authorizingContext.setAuthentication(authentication);
+        authorizingContext.setDefinition(definition);
+        authorizingContext.setParamContext(handleRole);
+        handler.handRBAC(authorizingContext);
+    }
+
 
     /**
      * 测试数据权限控制s
@@ -188,6 +235,17 @@ public class AuthorizeTests {
         @RequiresDataAccess
         public void dynamicQuery(QueryParamEntity paramEntity) {
             System.out.println(JSON.toJSON(paramEntity));
+        }
+
+
+        @Authorize(role = "admin",merge = false)
+        public void handleRoleDeny(QueryParamEntity paramEntity) {
+            System.out.println(JSON.toJSON(paramEntity));
+        }
+
+        @Authorize(merge = false)
+        public void handleEmpty() {
+
         }
 
     }

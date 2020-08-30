@@ -114,9 +114,23 @@ public final class FastBeanCopier {
         return target;
     }
 
+    static Class getUserClass(Object object) {
+        if (object instanceof Map) {
+            return Map.class;
+        }
+        Class type = ClassUtils.getUserClass(object);
+
+        if (java.lang.reflect.Proxy.isProxyClass(type)) {
+            Class[] interfaces= type.getInterfaces();
+            return interfaces[0];
+        }
+
+        return type;
+    }
+
     public static Copier getCopier(Object source, Object target, boolean autoCreate) {
-        Class sourceType = source instanceof Map ? Map.class : ClassUtils.getUserClass(source);
-        Class targetType = target instanceof Map ? Map.class : ClassUtils.getUserClass(target);
+        Class sourceType = getUserClass(source);
+        Class targetType = getUserClass(target);
         CacheKey key = createCacheKey(sourceType, targetType);
         if (autoCreate) {
             return CACHE.computeIfAbsent(key, k -> createCopier(sourceType, targetType));
@@ -541,7 +555,7 @@ public final class FastBeanCopier {
 
             if (targetClass.isEnum()) {
                 if (EnumDict.class.isAssignableFrom(targetClass)) {
-                    String strVal=String.valueOf(source);
+                    String strVal = String.valueOf(source);
 
                     Object val = EnumDict.find((Class) targetClass, e -> {
                         return e.eq(source) || e.name().equalsIgnoreCase(strVal);
@@ -564,7 +578,7 @@ public final class FastBeanCopier {
             if (targetClass.isArray()) {
                 Class<?> componentType = targetClass.getComponentType();
                 List<?> val = convert(source, List.class, new Class[]{componentType});
-                return (T) val.toArray((Object[])Array.newInstance(componentType,val.size()));
+                return (T) val.toArray((Object[]) Array.newInstance(componentType, val.size()));
             }
 
             try {

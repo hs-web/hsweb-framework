@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 http://www.hswebframework.org
+ * Copyright 2020 http://www.hswebframework.org
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ public class SimpleRoleService extends GenericEntityService<RoleEntity, String> 
     @Override
     public void enable(String roleId) {
         tryValidateProperty(StringUtils.hasLength(roleId), RoleEntity.id, "{id_is_null}");
-        DefaultDSLUpdateService.createUpdate(getDao())
+        createUpdate()
                 .set(RoleEntity.status, DataStatus.STATUS_ENABLED)
                 .where(RoleEntity.id, roleId)
                 .exec();
@@ -73,7 +73,7 @@ public class SimpleRoleService extends GenericEntityService<RoleEntity, String> 
     @Override
     public void disable(String roleId) {
         tryValidateProperty(StringUtils.hasLength(roleId), RoleEntity.id, "{id_is_null}");
-        DefaultDSLUpdateService.createUpdate(getDao())
+       createUpdate()
                 .set(RoleEntity.status, DataStatus.STATUS_DISABLED)
                 .where(RoleEntity.id, roleId)
                 .exec();
