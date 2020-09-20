@@ -19,6 +19,7 @@
 package org.hswebframework.web.api.crud.entity;
 
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 import org.hswebframework.ezorm.core.param.QueryParam;
@@ -46,12 +47,16 @@ public class PagerResult<E> {
         return pagerResult;
     }
 
+    @Schema(description = "页码")
     private int pageIndex;
 
+    @Schema(description = "每页数据量")
     private int pageSize;
 
+    @Schema(description = "数据总量")
     private int total;
 
+    @Schema(description = "数据列表")
     private List<E> data;
 
     public PagerResult() {
