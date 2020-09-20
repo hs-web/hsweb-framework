@@ -71,13 +71,13 @@ public class QueryParamEntity extends QueryParam {
     }
 
     @Override
-    @Schema(description = "指定要查询的列,多列使用逗号分隔")
+    @Schema(description = "指定要查询的列")
     public Set<String> getIncludes() {
         return super.getIncludes();
     }
 
     @Override
-    @Schema(description = "指定不查询的列,多列使用逗号分隔")
+    @Schema(description = "指定不查询的列")
     public Set<String> getExcludes() {
         return super.getExcludes();
     }
