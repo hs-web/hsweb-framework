@@ -93,6 +93,8 @@ public @interface QueryNoPagingOperation {
     Parameter[] parameters() default {
             @Parameter(name = "where", description = "条件表达式,和terms参数冲突", example = "id = 1", schema = @Schema(implementation = String.class), in = ParameterIn.QUERY),
             @Parameter(name = "orderBy", description = "排序表达式,和sorts参数冲突", example = "id desc", schema = @Schema(implementation = String.class), in = ParameterIn.QUERY),
+            @Parameter(name = "includes", description = "指定要查询的列,多列使用逗号分隔", example = "id", schema = @Schema(implementation = String.class), in = ParameterIn.QUERY),
+            @Parameter(name = "excludes", description = "指定不查询的列,多列使用逗号分隔",  schema = @Schema(implementation = String.class), in = ParameterIn.QUERY),
             @Parameter(name = "terms[0].column", description = "指定条件字段", schema = @Schema(implementation = String.class), in = ParameterIn.QUERY),
             @Parameter(name = "terms[0].termType", description = "条件类型", schema = @Schema(implementation = String.class), example = "like", in = ParameterIn.QUERY),
             @Parameter(name = "terms[0].type", description = "多个条件组合方式", schema = @Schema(implementation = Term.Type.class), in = ParameterIn.QUERY),

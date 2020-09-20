@@ -18,6 +18,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 
 /**
@@ -36,7 +37,6 @@ import java.util.function.Consumer;
 public class QueryParamEntity extends QueryParam {
 
     private static final long serialVersionUID = 8097500947924037523L;
-
 
     @Getter
     @Schema(description = "where条件表达式,与terms参数冲突.")
@@ -68,6 +68,18 @@ public class QueryParamEntity extends QueryParam {
     @Hidden
     public int getPageIndexTmp() {
         return super.getPageIndexTmp();
+    }
+
+    @Override
+    @Schema(description = "指定要查询的列,多列使用逗号分隔")
+    public Set<String> getIncludes() {
+        return super.getIncludes();
+    }
+
+    @Override
+    @Schema(description = "指定不查询的列,多列使用逗号分隔")
+    public Set<String> getExcludes() {
+        return super.getExcludes();
     }
 
     /**
@@ -192,6 +204,6 @@ public class QueryParamEntity extends QueryParam {
 
     @Override
     public QueryParamEntity clone() {
-        return (QueryParamEntity)super.clone();
+        return (QueryParamEntity) super.clone();
     }
 }
