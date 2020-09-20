@@ -1,5 +1,9 @@
 package org.hswebframework.web.api.crud.entity;
 
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -33,16 +37,38 @@ public class QueryParamEntity extends QueryParam {
 
     private static final long serialVersionUID = 8097500947924037523L;
 
+
     @Getter
+    @Schema(description = "where条件表达式,与terms参数冲突.")
     private String where;
 
     @Getter
+    @Schema(description = "orderBy条件表达式,与sorts参数冲突.")
     private String orderBy;
 
     //总数,设置了此值时,在分页查询的时候将不执行count.
     @Getter
     @Setter
+    @Schema(description = "设置了此值后将不重复执行count查询总数")
     private Integer total;
+
+    @Override
+    @Hidden
+    public boolean isForUpdate() {
+        return super.isForUpdate();
+    }
+
+    @Override
+    @Hidden
+    public int getThinkPageIndex() {
+        return super.getThinkPageIndex();
+    }
+
+    @Override
+    @Hidden
+    public int getPageIndexTmp() {
+        return super.getPageIndexTmp();
+    }
 
     /**
      * 创建一个空的查询参数实体,该实体无任何参数.
@@ -164,4 +190,8 @@ public class QueryParamEntity extends QueryParam {
         return this;
     }
 
+    @Override
+    public QueryParamEntity clone() {
+        return (QueryParamEntity)super.clone();
+    }
 }

@@ -7,7 +7,7 @@ import java.lang.reflect.Method;
  * @since 1.0
  */
 public interface AopAuthorizeDefinition extends AuthorizeDefinition {
-    Class getTargetClass();
+    Class<?> getTargetClass();
 
     Method getTargetMethod();
 }

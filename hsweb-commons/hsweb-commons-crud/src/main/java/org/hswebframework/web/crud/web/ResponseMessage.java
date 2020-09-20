@@ -1,6 +1,7 @@
 package org.hswebframework.web.crud.web;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
 import java.io.Serializable;
@@ -15,14 +16,19 @@ public class ResponseMessage<T> implements Serializable {
 
     private static final long serialVersionUID = 8992436576262574064L;
 
+    @Schema(description = "错误消息提示")
     protected String message;
 
+    @Schema(description = "数据内容")
     protected T result;
 
+    @Schema(description = "状态码")
     private int status;
 
+    @Schema(description = "错误码")
     protected String code;
 
+    @Schema(description = "时间戳(毫秒)")
     protected Long timestamp = System.currentTimeMillis();
 
     public static <T> ResponseMessage<T> ok() {

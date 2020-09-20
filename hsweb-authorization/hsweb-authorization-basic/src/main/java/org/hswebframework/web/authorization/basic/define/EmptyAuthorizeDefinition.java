@@ -4,11 +4,13 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.hswebframework.web.authorization.define.*;
 
+import java.lang.reflect.Method;
+
 /**
  * @author zhouhao
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class EmptyAuthorizeDefinition implements AuthorizeDefinition {
+public class EmptyAuthorizeDefinition implements AopAuthorizeDefinition {
 
     public static EmptyAuthorizeDefinition instance = new EmptyAuthorizeDefinition();
 
@@ -39,5 +41,15 @@ public class EmptyAuthorizeDefinition implements AuthorizeDefinition {
     @Override
     public boolean isEmpty() {
         return true;
+    }
+
+    @Override
+    public Class<?> getTargetClass() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Method getTargetMethod() {
+        throw new UnsupportedOperationException();
     }
 }

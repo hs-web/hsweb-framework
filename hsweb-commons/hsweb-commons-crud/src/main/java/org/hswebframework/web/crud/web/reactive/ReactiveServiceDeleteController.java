@@ -1,5 +1,6 @@
 package org.hswebframework.web.crud.web.reactive;
 
+import io.swagger.v3.oas.annotations.Operation;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.annotation.DeleteAction;
 import org.hswebframework.web.crud.service.ReactiveCrudService;
@@ -14,6 +15,7 @@ public interface ReactiveServiceDeleteController<E, K> {
 
     @DeleteMapping("/{id:.+}")
     @DeleteAction
+    @Operation(summary = "根据ID删除")
     default Mono<E> delete(@PathVariable K id) {
         return getService()
                 .findById(Mono.just(id))

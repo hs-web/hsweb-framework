@@ -11,5 +11,5 @@ import java.lang.reflect.Method;
  * @author zhouhao
  */
 public interface AopMethodAuthorizeDefinitionCustomizerParser {
-    AuthorizeDefinition parse(Class target, Method method, MethodInterceptorContext context);
+    AuthorizeDefinition parse(Class<?> target, Method method, MethodInterceptorContext context);
 }

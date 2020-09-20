@@ -1,5 +1,6 @@
 package org.hswebframework.web.authorization.basic.aop;
 
+import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.web.aop.MethodInterceptorContext;
 import org.hswebframework.web.authorization.annotation.Authorize;
@@ -29,11 +30,11 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class DefaultAopMethodAuthorizeDefinitionParser implements AopMethodAuthorizeDefinitionParser {
 
-    private Map<CacheKey, AuthorizeDefinition> cache = new ConcurrentHashMap<>();
+    private final Map<CacheKey, AuthorizeDefinition> cache = new ConcurrentHashMap<>();
 
     private List<AopMethodAuthorizeDefinitionCustomizerParser> parserCustomizers;
 
-    private static Set<String> excludeMethodName = new HashSet<>(Arrays.asList("toString", "clone", "hashCode", "getClass"));
+    private static final Set<String> excludeMethodName = new HashSet<>(Arrays.asList("toString", "clone", "hashCode", "getClass"));
 
     @Autowired(required = false)
     public void setParserCustomizers(List<AopMethodAuthorizeDefinitionCustomizerParser> parserCustomizers) {
@@ -47,7 +48,7 @@ public class DefaultAopMethodAuthorizeDefinitionParser implements AopMethodAutho
 
     @Override
     @SuppressWarnings("all")
-    public AuthorizeDefinition parse(Class target, Method method, MethodInterceptorContext context) {
+    public AuthorizeDefinition parse(Class<?> target, Method method, MethodInterceptorContext context) {
         if (excludeMethodName.contains(method.getName())) {
             return null;
         }
@@ -87,27 +88,18 @@ public class DefaultAopMethodAuthorizeDefinitionParser implements AopMethodAutho
         }
     }
 
-    public CacheKey buildCacheKey(Class target, Method method) {
+    public CacheKey buildCacheKey(Class<?> target, Method method) {
         return new CacheKey(ClassUtils.getUserClass(target), method);
     }
 
-    class CacheKey {
-        private Class type;
-        private Method method;
+    @EqualsAndHashCode
+    static class CacheKey {
+        private final Class<?> type;
+        private final Method method;
 
-        public CacheKey(Class type, Method method) {
+        public CacheKey(Class<?> type, Method method) {
             this.type = type;
             this.method = method;
-        }
-
-        @Override
-        public int hashCode() {
-            return Arrays.asList(type, method).hashCode();
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            return obj != null && this.hashCode() == obj.hashCode();
         }
     }
 

@@ -1,5 +1,6 @@
 package org.hswebframework.web.crud.web.reactive;
 
+import io.swagger.v3.oas.annotations.Operation;
 import org.hswebframework.ezorm.rdb.mapping.ReactiveRepository;
 import org.hswebframework.ezorm.rdb.mapping.defaults.SaveResult;
 import org.hswebframework.web.api.crud.entity.RecordCreationEntity;
@@ -50,6 +51,7 @@ public interface ReactiveSaveController<E, K> {
 
     @PatchMapping
     @SaveAction
+    @Operation(summary = "保存数据", description = "如果传入了id,并且对应数据存在,则尝试覆盖,不存在则新增.")
     default Mono<SaveResult> save(@RequestBody Flux<E> payload) {
         return Authentication.currentReactive()
                 .flatMapMany(auth -> payload.map(entity -> applyAuthentication(entity, auth)))
@@ -59,6 +61,7 @@ public interface ReactiveSaveController<E, K> {
 
     @PostMapping("/_batch")
     @SaveAction
+    @Operation(summary = "批量新增数据")
     default Mono<Integer> add(@RequestBody Flux<E> payload) {
 
         return Authentication.currentReactive()
@@ -70,6 +73,7 @@ public interface ReactiveSaveController<E, K> {
 
     @PostMapping
     @SaveAction
+    @Operation(summary = "新增单个数据,并返回新增后的数据.")
     default Mono<E> add(@RequestBody Mono<E> payload) {
         return Authentication.currentReactive()
                 .flatMap(auth -> payload.map(entity -> applyAuthentication(entity, auth)))
@@ -80,6 +84,7 @@ public interface ReactiveSaveController<E, K> {
 
     @PutMapping("/{id}")
     @SaveAction
+    @Operation(summary = "根据ID修改数据")
     default Mono<Boolean> update(@PathVariable K id, @RequestBody Mono<E> payload) {
 
         return Authentication.currentReactive()

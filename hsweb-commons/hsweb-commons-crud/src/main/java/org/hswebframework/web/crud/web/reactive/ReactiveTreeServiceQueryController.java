@@ -1,5 +1,8 @@
 package org.hswebframework.web.crud.web.reactive;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import org.hswebframework.web.api.crud.entity.QueryOperation;
 import org.hswebframework.web.api.crud.entity.QueryParamEntity;
 import org.hswebframework.web.api.crud.entity.TreeSortSupportEntity;
 import org.hswebframework.web.authorization.annotation.Authorize;
@@ -19,36 +22,42 @@ public interface ReactiveTreeServiceQueryController<E extends TreeSortSupportEnt
 
     @GetMapping("/_query/tree")
     @QueryAction
-    default Mono<List<E>> findAllTree(QueryParamEntity paramEntity) {
+    @QueryOperation(summary = "使用GET动态查询并返回树形结构")
+    default Mono<List<E>> findAllTree(@Parameter(hidden = true) QueryParamEntity paramEntity) {
         return getService().queryResultToTree(paramEntity);
     }
 
     @GetMapping("/_query/_children")
     @QueryAction
-    default Flux<E> findAllChildren(QueryParamEntity paramEntity) {
+    @QueryOperation(summary = "使用GET动态查询并返回子节点数据")
+    default Flux<E> findAllChildren(@Parameter(hidden = true) QueryParamEntity paramEntity) {
         return getService().queryIncludeChildren(paramEntity);
     }
 
     @GetMapping("/_query/_children/tree")
     @QueryAction
-    default Mono<List<E>> findAllChildrenTree(QueryParamEntity paramEntity) {
+    @QueryOperation(summary = "使用GET动态查询并返回子节点树形结构数据")
+    default Mono<List<E>> findAllChildrenTree(@Parameter(hidden = true) QueryParamEntity paramEntity) {
         return getService().queryIncludeChildrenTree(paramEntity);
     }
 
     @PostMapping("/_query/tree")
     @QueryAction
+    @Operation(summary = "使用POST动态查询并返回树形结构")
     default Mono<List<E>> findAllTree(Mono<QueryParamEntity> paramEntity) {
         return getService().queryResultToTree(paramEntity);
     }
 
     @PostMapping("/_query/_children")
     @QueryAction
+    @Operation(summary = "使用POST动态查询并返回子节点数据")
     default Flux<E> findAllChildren(Mono<QueryParamEntity> paramEntity) {
         return paramEntity.flatMapMany(param -> getService().queryIncludeChildren(param));
     }
 
     @PostMapping("/_query/_children/tree")
     @QueryAction
+    @Operation(summary = "使用POST动态查询并返回子节点树形结构数据")
     default Mono<List<E>> findAllChildrenTree(Mono<QueryParamEntity> paramEntity) {
         return paramEntity.flatMap(param -> getService().queryIncludeChildrenTree(param));
     }

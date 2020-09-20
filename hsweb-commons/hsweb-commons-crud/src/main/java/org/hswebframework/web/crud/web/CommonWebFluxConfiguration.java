@@ -3,6 +3,7 @@ package org.hswebframework.web.crud.web;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.ReactiveAdapterRegistry;
@@ -21,7 +22,8 @@ public class CommonWebFluxConfiguration {
 
 
     @Bean
-    @ConditionalOnProperty(prefix = "hsweb.webflux",name = "response-wrapper",havingValue = "enabled",matchIfMissing = true)
+    @ConditionalOnProperty(prefix = "hsweb.webflux.response-wrapper",name = "enabled",havingValue = "true",matchIfMissing = true)
+    @ConfigurationProperties(prefix = "hsweb.webflux.response-wrapper")
     public ResponseMessageWrapper responseMessageWrapper(ServerCodecConfigurer codecConfigurer,
                                                          RequestedContentTypeResolver resolver,
                                                          ReactiveAdapterRegistry registry){

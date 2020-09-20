@@ -1,7 +1,10 @@
 package org.hswebframework.web.crud.web.reactive;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import org.hswebframework.ezorm.rdb.mapping.ReactiveRepository;
 import org.hswebframework.web.api.crud.entity.PagerResult;
+import org.hswebframework.web.api.crud.entity.QueryOperation;
 import org.hswebframework.web.api.crud.entity.QueryParamEntity;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.annotation.QueryAction;
@@ -38,7 +41,9 @@ public interface ReactiveQueryController<E, K> {
      */
     @GetMapping("/_query/no-paging")
     @QueryAction
-    default Flux<E> query(QueryParamEntity query) {
+    @QueryOperation(summary = "使用GET方式分页动态查询(不返回总数)",
+            description = "此操作不返回分页总数,如果需要获取全部数据,请设置参数paging=false")
+    default Flux<E> query(@Parameter(hidden = true)  QueryParamEntity query) {
         return getRepository()
                 .createQuery()
                 .setParam(query)
@@ -72,28 +77,12 @@ public interface ReactiveQueryController<E, K> {
      */
     @PostMapping("/_query/no-paging")
     @QueryAction
+    @Operation(summary = "使用POST方式分页动态查询(不返回总数)",
+            description = "此操作不返回分页总数,如果需要获取全部数据,请设置参数paging=false")
     default Flux<E> query(@RequestBody Mono<QueryParamEntity> query) {
         return query.flatMapMany(this::query);
     }
 
-    /**
-     * 统计查询
-     *
-     * <pre>
-     *     GET /_count
-     * </pre>
-     *
-     * @param query 查询条件
-     * @return 统计结果
-     */
-    @GetMapping("/_count")
-    @QueryAction
-    default Mono<Integer> count(QueryParamEntity query) {
-        return getRepository()
-                .createQuery()
-                .setParam(query)
-                .count();
-    }
 
     /**
      * GET方式分页查询
@@ -108,7 +97,8 @@ public interface ReactiveQueryController<E, K> {
      */
     @GetMapping("/_query")
     @QueryAction
-    default Mono<PagerResult<E>> queryPager(QueryParamEntity query) {
+    @QueryOperation(summary = "使用GET方式分页动态查询")
+    default Mono<PagerResult<E>> queryPager(@Parameter(hidden = true) QueryParamEntity query) {
         if (query.getTotal() != null) {
             return getRepository()
                     .createQuery()
@@ -117,41 +107,58 @@ public interface ReactiveQueryController<E, K> {
                     .collectList()
                     .map(list -> PagerResult.of(query.getTotal(), list, query));
         }
-        return getRepository()
-                .createQuery()
-                .setParam(query)
-                .count()
-                .flatMap(total -> {
-                    if (total == 0) {
-                        return Mono.just(PagerResult.empty());
-                    }
-                    return query(query.clone().rePaging(total))
-                            .collectList()
-                            .map(list -> PagerResult.of(total, list, query));
-                });
+
+        return Mono.zip(
+                getRepository().createQuery().setParam(query).count(),
+                query(query.clone()).collectList(),
+                (total, data) -> PagerResult.of(total, data, query)
+        );
+
     }
 
 
     @PostMapping("/_query")
     @QueryAction
     @SuppressWarnings("all")
+    @Operation(summary = "使用POST方式分页动态查询")
     default Mono<PagerResult<E>> queryPager(@RequestBody Mono<QueryParamEntity> query) {
         return query.flatMap(q -> queryPager(q));
     }
 
     @PostMapping("/_count")
     @QueryAction
+    @Operation(summary = "使用POST方式查询总数")
     default Mono<Integer> count(@RequestBody Mono<QueryParamEntity> query) {
         return query.flatMap(this::count);
     }
 
+    /**
+     * 统计查询
+     *
+     * <pre>
+     *     GET /_count
+     * </pre>
+     *
+     * @param query 查询条件
+     * @return 统计结果
+     */
+    @GetMapping("/_count")
+    @QueryAction
+    @QueryOperation(summary = "使用GET方式查询总数")
+    default Mono<Integer> count(@Parameter(hidden = true) QueryParamEntity query) {
+        return getRepository()
+                .createQuery()
+                .setParam(query)
+                .count();
+    }
+
     @GetMapping("/{id:.+}")
     @QueryAction
+    @Operation(summary = "根据ID查询")
     default Mono<E> getById(@PathVariable K id) {
         return getRepository()
                 .findById(Mono.just(id))
                 .switchIfEmpty(Mono.error(NotFoundException::new));
     }
-
 
 }

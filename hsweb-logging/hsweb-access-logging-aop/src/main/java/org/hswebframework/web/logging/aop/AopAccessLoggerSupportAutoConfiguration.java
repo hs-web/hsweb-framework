@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 
 /**
  * AOP 访问日志记录自动配置
@@ -31,20 +32,28 @@ public class AopAccessLoggerSupportAutoConfiguration {
     }
 
     @Bean
-    public DefaultAccessLoggerParser defaultAccessLoggerParser(){
+    public DefaultAccessLoggerParser defaultAccessLoggerParser() {
         return new DefaultAccessLoggerParser();
     }
 
     @Bean
     @ConditionalOnClass(name = "io.swagger.annotations.Api")
-    public SwaggerAccessLoggerParser swaggerAccessLoggerParser(){
+    @Order(10)
+    public SwaggerAccessLoggerParser swaggerAccessLoggerParser() {
         return new SwaggerAccessLoggerParser();
     }
 
+    @Bean
+    @ConditionalOnClass(name = "io.swagger.v3.oas.annotations.tags.Tag")
+    @Order(1)
+    public Swagger3AccessLoggerParser swagger3AccessLoggerParser() {
+        return new Swagger3AccessLoggerParser();
+    }
 
     @Bean
     @ConditionalOnClass(name = "org.hswebframework.web.authorization.annotation.Resource")
-    public ResourceAccessLoggerParser resourceAccessLoggerParser(){
+    @Order(999)
+    public ResourceAccessLoggerParser resourceAccessLoggerParser() {
         return new ResourceAccessLoggerParser();
     }
 }

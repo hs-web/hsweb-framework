@@ -21,9 +21,9 @@ public interface AopMethodAuthorizeDefinitionParser {
      * @param method method
      * @return 权限控制定义, 如果不进行权限控制则返回{@code null}
      */
-    AuthorizeDefinition parse(Class target, Method method, MethodInterceptorContext context);
+    AuthorizeDefinition parse(Class<?> target, Method method, MethodInterceptorContext context);
 
-    default AuthorizeDefinition parse(Class target, Method method) {
+    default AuthorizeDefinition parse(Class<?> target, Method method) {
         return parse(target, method, null);
     }
 

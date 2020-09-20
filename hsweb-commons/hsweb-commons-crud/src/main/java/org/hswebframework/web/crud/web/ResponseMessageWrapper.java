@@ -1,12 +1,16 @@
 package org.hswebframework.web.crud.web;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.HttpMessageWriter;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.MimeType;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.result.method.annotation.ResponseBodyResultHandler;
@@ -14,7 +18,9 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class ResponseMessageWrapper extends ResponseBodyResultHandler {
 
@@ -40,9 +46,24 @@ public class ResponseMessageWrapper extends ResponseBodyResultHandler {
         return Mono.empty();
     }
 
+    @Setter
+    @Getter
+    private Set<String> excludes = new HashSet<>();
+
     @Override
     public boolean supports(HandlerResult result) {
-        Class gen = result.getReturnType().resolveGeneric(0);
+
+        if (!CollectionUtils.isEmpty(excludes) && result.getHandler() instanceof HandlerMethod) {
+            HandlerMethod method = (HandlerMethod) result.getHandler();
+
+            String typeName = method.getMethod().getDeclaringClass().getName() + "." + method.getMethod().getName();
+            for (String exclude : excludes) {
+                if (typeName.startsWith(exclude)) {
+                    return false;
+                }
+            }
+        }
+        Class<?> gen = result.getReturnType().resolveGeneric(0);
 
         boolean isAlreadyResponse = gen == ResponseMessage.class || gen == ResponseEntity.class;
 
@@ -61,6 +82,7 @@ public class ResponseMessageWrapper extends ResponseBodyResultHandler {
                 return false;
             }
         }
+
         return isStream
                 && super.supports(result)
                 && !isAlreadyResponse;

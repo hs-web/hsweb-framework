@@ -18,6 +18,7 @@
 
 package org.hswebframework.web.api.crud.entity;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 import org.hswebframework.web.bean.ToString;
@@ -35,9 +36,10 @@ import javax.persistence.Id;
 @Setter
 public class GenericEntity<PK> implements Entity {
 
-    @Column(length = 64,updatable = false)
+    @Column(length = 64, updatable = false)
     @Id
     @GeneratedValue(generator = "default_id")
+    @Schema(description = "id")
     private PK id;
 
     public String toString(String... ignoreProperty) {

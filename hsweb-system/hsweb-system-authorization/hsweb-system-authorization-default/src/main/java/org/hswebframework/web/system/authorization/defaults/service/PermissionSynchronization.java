@@ -34,9 +34,9 @@ public class PermissionSynchronization implements CommandLineRunner {
     @Autowired
     private ReactiveRepository<PermissionEntity, String> permissionRepository;
 
-    private MergedAuthorizeDefinition definition = new MergedAuthorizeDefinition();
+    private final MergedAuthorizeDefinition definition = new MergedAuthorizeDefinition();
 
-    private Map<String, List<OptionalField>> entityFieldsMapping = new HashMap<>();
+    private final Map<String, List<OptionalField>> entityFieldsMapping = new HashMap<>();
 
     @EventListener
     public void handleResourceParseEvent(AuthorizeDefinitionInitializedEvent event) {
@@ -50,10 +50,10 @@ public class PermissionSynchronization implements CommandLineRunner {
                 return;
             }
             if (authorizeDefinition instanceof AopAuthorizeDefinition) {
-                Class target = ((AopAuthorizeDefinition) authorizeDefinition).getTargetClass();
+                Class<?> target = ((AopAuthorizeDefinition) authorizeDefinition).getTargetClass();
                 if (ReactiveQueryController.class.isAssignableFrom(target)
                         || ReactiveServiceQueryController.class.isAssignableFrom(target)) {
-                    Class entity = ClassUtils.getGenericType(target);
+                    Class<?> entity = ClassUtils.getGenericType(target);
                     if (Entity.class.isAssignableFrom(entity)) {
                         Set<OptionalField> fields = new HashSet<>();
                         ReflectionUtils.doWithFields(entity, field -> {

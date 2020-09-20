@@ -5,6 +5,7 @@ import org.hswebframework.web.authorization.define.AopAuthorizeDefinition;
 import org.hswebframework.web.authorization.define.ResourceActionDefinition;
 import org.hswebframework.web.authorization.define.ResourceDefinition;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.util.CollectionUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -24,15 +25,15 @@ public class AopAuthorizeDefinitionParser {
             DataAccessType.class
     ));
 
-    private Set<Annotation> methodAnnotation;
+    private final Set<Annotation> methodAnnotation;
 
-    private Set<Annotation> classAnnotation;
+    private final Set<Annotation> classAnnotation;
 
-    private Map<Class<? extends Annotation>, List<Annotation>> classAnnotationGroup;
+    private final Map<Class<? extends Annotation>, List<Annotation>> classAnnotationGroup;
 
-    private Map<Class<? extends Annotation>, List<Annotation>> methodAnnotationGroup;
+    private final Map<Class<? extends Annotation>, List<Annotation>> methodAnnotationGroup;
 
-    private DefaultBasicAuthorizeDefinition definition;
+    private final DefaultBasicAuthorizeDefinition definition;
 
     AopAuthorizeDefinitionParser(Class<?> targetClass, Method method) {
         definition = new DefaultBasicAuthorizeDefinition();
@@ -77,7 +78,7 @@ public class AopAuthorizeDefinitionParser {
         }
     }
 
-    private void initClassDataAccessAnnotation(){
+    private void initClassDataAccessAnnotation() {
         for (Annotation annotation : classAnnotation) {
             if (annotation instanceof DataAccessType ||
                     annotation instanceof DataAccess) {
@@ -135,7 +136,11 @@ public class AopAuthorizeDefinitionParser {
         }
     }
 
-     AopAuthorizeDefinition parse() {
+    AopAuthorizeDefinition parse() {
+        //没有任何注解
+        if (CollectionUtils.isEmpty(classAnnotation) && CollectionUtils.isEmpty(methodAnnotation)) {
+            return EmptyAuthorizeDefinition.instance;
+        }
         initClassAnnotation();
         initClassDataAccessAnnotation();
         initMethodAnnotation();
