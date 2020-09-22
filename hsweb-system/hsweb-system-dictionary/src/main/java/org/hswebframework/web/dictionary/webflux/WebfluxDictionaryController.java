@@ -1,5 +1,8 @@
 package org.hswebframework.web.dictionary.webflux;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.annotation.Resource;
 import org.hswebframework.web.crud.service.ReactiveCrudService;
@@ -20,6 +23,7 @@ import reactor.core.publisher.Flux;
 @RestController
 @RequestMapping("/dictionary")
 @Resource(id = "dictionary", name = "数据字典")
+@Tag(name = "数据字典管理")
 public class WebfluxDictionaryController implements ReactiveServiceCrudController<DictionaryEntity, String> {
 
     @Autowired
@@ -35,6 +39,7 @@ public class WebfluxDictionaryController implements ReactiveServiceCrudControlle
 
     @GetMapping("/{id:.+}/items")
     @Authorize(merge = false)
+    @Operation(summary = "获取数据字段的所有选项")
     public Flux<EnumDict<?>> getItemDefineById(@PathVariable String id) {
         return repository.getDefine(id)
                 .flatMapIterable(DictDefine::getItems);
@@ -42,6 +47,7 @@ public class WebfluxDictionaryController implements ReactiveServiceCrudControlle
 
     @GetMapping("/_all")
     @Authorize(merge = false)
+    @Schema(description = "获取全部数据字典")
     public Flux<DictDefine> getAllDict() {
         return repository.getAllDefine();
     }

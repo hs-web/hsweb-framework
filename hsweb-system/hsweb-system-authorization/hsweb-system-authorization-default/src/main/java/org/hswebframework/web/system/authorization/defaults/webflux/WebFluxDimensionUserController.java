@@ -1,5 +1,8 @@
 package org.hswebframework.web.system.authorization.defaults.webflux;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.annotation.DeleteAction;
 import org.hswebframework.web.authorization.annotation.Resource;
@@ -18,6 +21,7 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/dimension-user")
 @Authorize
 @Resource(id = "dimension", name = "权限维度管理", group = "system")
+@Tag(name = "权限维度用户关联管理")
 public class WebFluxDimensionUserController implements ReactiveServiceCrudController<DimensionUserEntity, String> {
 
     @Autowired
@@ -31,7 +35,11 @@ public class WebFluxDimensionUserController implements ReactiveServiceCrudContro
 
     @DeleteAction
     @DeleteMapping("/user/{userId}/dimension/{dimensionId}")
-    public Mono<Integer> deleteByUserAndDimensionId(@PathVariable String userId, @PathVariable String dimensionId) {
+    @Operation(summary = "解除用户关联的指定维度")
+    public Mono<Integer> deleteByUserAndDimensionId(@PathVariable
+                                                    @Parameter(description = "用户ID") String userId,
+                                                    @PathVariable
+                                                    @Parameter(description = "维度ID") String dimensionId) {
         return dimensionUserService
                 .createDelete()
                 .where(DimensionUserEntity::getUserId, userId)
@@ -41,7 +49,9 @@ public class WebFluxDimensionUserController implements ReactiveServiceCrudContro
 
     @DeleteAction
     @DeleteMapping("/user/{userId}")
-    public Mono<Integer> deleteByUserId(@PathVariable String userId) {
+    @Operation(summary = "解除用户关联的全部维度")
+    public Mono<Integer> deleteByUserId(@PathVariable
+                                        @Parameter(description = "用户ID") String userId) {
         return dimensionUserService
                 .createDelete()
                 .where(DimensionUserEntity::getUserId, userId)
@@ -50,7 +60,9 @@ public class WebFluxDimensionUserController implements ReactiveServiceCrudContro
 
     @DeleteAction
     @DeleteMapping("/dimension/{dimensionId}")
-    public Mono<Integer> deleteByDimension(@PathVariable String dimensionId) {
+    @Operation(summary = "解除全部用户关联的指定维度")
+    public Mono<Integer> deleteByDimension(@PathVariable
+                                           @Parameter(description = "维度ID") String dimensionId) {
         return dimensionUserService
                 .createDelete()
                 .where(DimensionUserEntity::getDimensionId, dimensionId)

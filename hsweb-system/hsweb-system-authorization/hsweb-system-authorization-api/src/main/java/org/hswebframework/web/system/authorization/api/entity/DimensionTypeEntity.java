@@ -1,5 +1,6 @@
 package org.hswebframework.web.system.authorization.api.entity;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 import org.hswebframework.ezorm.rdb.mapping.annotation.Comment;
@@ -20,10 +21,12 @@ public class DimensionTypeEntity extends GenericEntity<String> implements Dimens
     @Comment("维度类型名称")
     @Column(length = 32, nullable = false)
     @NotBlank(message = "名称不能为空", groups = CreateGroup.class)
+    @Schema(description = "类型名称")
     private String name;
 
     @Comment("维度类型描述")
     @Column(length = 256)
+    @Schema(description = "说明")
     private String describe;
 
 }

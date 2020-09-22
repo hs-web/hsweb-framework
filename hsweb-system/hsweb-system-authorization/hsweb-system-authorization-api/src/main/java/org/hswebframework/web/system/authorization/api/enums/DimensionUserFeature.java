@@ -10,7 +10,7 @@ public enum DimensionUserFeature implements EnumDict<String> {
     mergeChildrenPermission("合并子级维度权限")
     ;
 
-    private String text;
+    private final String text;
 
     @Override
     public String getValue() {

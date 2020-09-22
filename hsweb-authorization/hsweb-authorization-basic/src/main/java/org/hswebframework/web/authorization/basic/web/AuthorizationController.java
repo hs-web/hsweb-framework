@@ -19,6 +19,10 @@ package org.hswebframework.web.authorization.basic.web;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.SneakyThrows;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.ReactiveAuthenticationManager;
@@ -34,6 +38,7 @@ import org.hswebframework.web.authorization.simple.PlainTextUsernamePasswordAuth
 import org.hswebframework.web.logging.AccessLogger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
@@ -47,6 +52,7 @@ import java.util.function.Function;
  */
 @RestController
 @RequestMapping("${hsweb.web.mappings.authorize:authorize}")
+@Tag(name = "授权接口")
 public class AuthorizationController {
 
 
@@ -58,7 +64,7 @@ public class AuthorizationController {
 
     @GetMapping("/me")
     @Authorize
-    @ApiOperation("当前登录用户权限信息")
+    @Operation(summary = "当前登录用户权限信息")
     public Mono<Authentication> me() {
         return Authentication.currentReactive()
                 .switchIfEmpty(Mono.error(UnAuthorizedException::new));
@@ -68,7 +74,8 @@ public class AuthorizationController {
     @ApiOperation("用户名密码登录,json方式")
     @Authorize(ignore = true)
     @AccessLogger(ignore = true)
-    public Mono<Map<String, Object>> authorizeByJson(@ApiParam(example = "{\"username\":\"admin\",\"password\":\"admin\"}")
+    @Operation(summary = "登录",description = "必要参数:username,password.根据配置不同,其他参数也不同,如:验证码等.")
+    public Mono<Map<String, Object>> authorizeByJson(@Parameter(example = "{\"username\":\"admin\",\"password\":\"admin\"}")
                                                      @RequestBody Mono<Map<String, Object>> parameter) {
         return doLogin(parameter);
     }

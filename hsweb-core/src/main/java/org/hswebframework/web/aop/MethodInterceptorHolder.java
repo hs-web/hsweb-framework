@@ -66,17 +66,17 @@ public class MethodInterceptorHolder {
                 argMap);
     }
 
-    private String id;
+    private final String id;
 
-    private Method method;
+    private final Method method;
 
-    private Object target;
+    private final Object target;
 
-    private Object[] arguments;
+    private final Object[] arguments;
 
-    private String[] argumentsNames;
+    private final String[] argumentsNames;
 
-    private Map<String, Object> namedArguments;
+    private final Map<String, Object> namedArguments;
 
 
     public <T extends Annotation> T findMethodAnnotation(Class<T> annClass) {

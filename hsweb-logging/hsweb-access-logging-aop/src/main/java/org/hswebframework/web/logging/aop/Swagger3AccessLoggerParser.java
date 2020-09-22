@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.hswebframework.web.aop.MethodInterceptorHolder;
 import org.hswebframework.web.logging.LoggerDefine;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.StringUtils;
 
@@ -22,7 +23,7 @@ public class Swagger3AccessLoggerParser implements AccessLoggerParser {
     @Override
     public LoggerDefine parse(MethodInterceptorHolder holder) {
         Tag api = holder.findAnnotation(Tag.class);
-        Operation operation = holder.findAnnotation(Operation.class);
+        Operation operation = AnnotatedElementUtils.findMergedAnnotation(holder.getMethod(),Operation.class);
         String action = "";
         if (api != null) {
             action = action.concat(api.name());

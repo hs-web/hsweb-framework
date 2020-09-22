@@ -19,6 +19,7 @@
 package org.hswebframework.web.api.crud.entity;
 
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 import org.hswebframework.ezorm.rdb.mapping.annotation.Comment;
@@ -37,6 +38,7 @@ public abstract class GenericTreeSortSupportEntity<PK> extends GenericEntity<PK>
      */
     @Column(name = "parent_id", length = 32)
     @Comment("父级ID")
+    @Schema(description = "父节点ID")
     private PK parentId;
 
     /**
@@ -45,6 +47,7 @@ public abstract class GenericTreeSortSupportEntity<PK> extends GenericEntity<PK>
      */
     @Column(name = "path", length = 128)
     @Comment("树路径")
+    @Schema(description = "树结构路径")
     private String path;
 
     /**
@@ -52,10 +55,12 @@ public abstract class GenericTreeSortSupportEntity<PK> extends GenericEntity<PK>
      */
     @Column(name = "sort_index", precision = 32)
     @Comment("排序序号")
+    @Schema(description = "排序序号")
     private Long sortIndex;
 
     @Column(name = "_level", precision = 32)
     @Comment("树层级")
+    @Schema(description = "树层级")
     private Integer level;
 
 

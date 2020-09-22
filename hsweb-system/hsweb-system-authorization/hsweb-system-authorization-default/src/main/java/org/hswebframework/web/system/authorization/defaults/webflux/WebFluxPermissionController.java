@@ -1,5 +1,8 @@
 package org.hswebframework.web.system.authorization.defaults.webflux;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.collections.CollectionUtils;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.annotation.QueryAction;
@@ -17,8 +20,9 @@ import java.util.List;
 @RestController
 @RequestMapping("/permission")
 @Authorize
-@Resource(id = "permission",name = "权限管理",group = "system")
-public class WebFluxPermissionController implements ReactiveServiceCrudController<PermissionEntity,String> {
+@Resource(id = "permission", name = "权限管理", group = "system")
+@Tag(name = "权限管理")
+public class WebFluxPermissionController implements ReactiveServiceCrudController<PermissionEntity, String> {
 
     @Autowired
     private DefaultPermissionService permissionService;
@@ -30,7 +34,8 @@ public class WebFluxPermissionController implements ReactiveServiceCrudControlle
 
     @PutMapping("/status/{status}")
     @QueryAction
-    public Mono<Integer> changePermissionState(@PathVariable Byte status, @RequestBody List<String> idList) {
+    @Operation(summary = "批量修改权限状态")
+    public Mono<Integer> changePermissionState(@PathVariable @Parameter(description = "状态值:0禁用,1启用.") Byte status, @RequestBody List<String> idList) {
 
         return Mono.just(idList)
                 .filter(CollectionUtils::isNotEmpty)

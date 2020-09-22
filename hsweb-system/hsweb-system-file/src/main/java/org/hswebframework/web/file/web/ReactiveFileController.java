@@ -1,5 +1,9 @@
 package org.hswebframework.web.file.web;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterStyle;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.web.authorization.annotation.Resource;
@@ -21,15 +25,18 @@ import java.io.File;
 @Resource(id = "file", name = "文件上传")
 @Slf4j
 @RequestMapping("/file")
+@Tag(name = "文件上传")
 public class ReactiveFileController {
 
     @Autowired
     private FileUploadProperties properties;
 
-    @ResourceAction(id = "upload-static", name = "静态文件")
     @PostMapping("/static")
     @SneakyThrows
-    public Mono<String> uploadStatic(@RequestPart("file") Part part) {
+    @ResourceAction(id = "upload-static", name = "静态文件")
+    @Operation(summary = "上传静态文件")
+    public Mono<String> uploadStatic(@RequestPart("file")
+                                     @Parameter(name = "file", description = "文件", style = ParameterStyle.FORM) Part part) {
         FileUploadProperties.StaticFileInfo name;
         if (part instanceof FilePart) {
             FilePart filePart = ((FilePart) part);

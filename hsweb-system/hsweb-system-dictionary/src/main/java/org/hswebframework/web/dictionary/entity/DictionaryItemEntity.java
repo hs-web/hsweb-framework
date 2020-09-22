@@ -17,8 +17,10 @@
 package org.hswebframework.web.dictionary.entity;
 
 import com.alibaba.fastjson.JSONObject;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
+import org.hswebframework.ezorm.rdb.mapping.annotation.DefaultValue;
 import org.hswebframework.web.api.crud.entity.GenericTreeSortSupportEntity;
 import org.hswebframework.web.dict.EnumDict;
 
@@ -40,31 +42,41 @@ import java.util.List;
 public class DictionaryItemEntity extends GenericTreeSortSupportEntity<String> implements EnumDict<String> {
     //字典id
     @Column(name = "dict_id", length = 32, updatable = false, nullable = false)
+    @Schema(description = "数据字典ID")
     private String dictId;
     //名称
     @Column
+    @Schema(description = "选项名称")
     private String name;
     //字典值
     @Column
+    @Schema(description = "值")
     private String value;
     //字典文本
     @Column
+    @Schema(description = "文本内容")
     private String text;
     //字典值类型
     @Column(name = "value_type")
+    @Schema(description = "值类型")
     private String valueType;
     //是否启用
     @Column
+    @Schema(description = "状态，0禁用，1启用")
+    @DefaultValue("1")
     private Byte status;
     //说明
     @Column
+    @Schema(description = "说明")
     private String describe;
 
     //快速搜索码
     @Column(name = "search_code")
+    @Schema(description = "检索码")
     private String searchCode;
 
     @Column(name = "ordinal", nullable = false, updatable = false)
+    @Schema(description = "序列号,同一个字典中的选项不能重复,且不能修改.")
     private Integer ordinal;
 
     @Override
@@ -72,6 +84,7 @@ public class DictionaryItemEntity extends GenericTreeSortSupportEntity<String> i
         return ordinal == null ? 0 : ordinal;
     }
 
+    @Schema(description = "子节点")
     private List<DictionaryItemEntity> children;
 
     @Override
