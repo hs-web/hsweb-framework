@@ -16,7 +16,7 @@ public class ResponseMessage<T> implements Serializable {
 
     private static final long serialVersionUID = 8992436576262574064L;
 
-    @Schema(description = "错误消息提示")
+    @Schema(description = "消息提示")
     protected String message;
 
     @Schema(description = "数据内容")
@@ -25,7 +25,7 @@ public class ResponseMessage<T> implements Serializable {
     @Schema(description = "状态码")
     private int status;
 
-    @Schema(description = "错误码")
+    @Schema(description = "业务码")
     protected String code;
 
     @Schema(description = "时间戳(毫秒)")
