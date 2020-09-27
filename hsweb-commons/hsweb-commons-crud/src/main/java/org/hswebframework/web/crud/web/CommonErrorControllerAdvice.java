@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.web.authorization.exception.AccessDenyException;
 import org.hswebframework.web.authorization.exception.AuthenticationException;
 import org.hswebframework.web.authorization.exception.UnAuthorizedException;
+import org.hswebframework.web.authorization.token.TokenState;
 import org.hswebframework.web.exception.BusinessException;
 import org.hswebframework.web.exception.NotFoundException;
 import org.hswebframework.web.exception.ValidationException;
@@ -27,6 +28,7 @@ import org.springframework.web.server.ServerWebInputException;
 import reactor.core.publisher.Mono;
 
 import javax.validation.ConstraintViolationException;
+import java.util.List;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
@@ -51,8 +53,8 @@ public class CommonErrorControllerAdvice {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public Mono<ResponseMessage<?>> handleException(UnAuthorizedException e) {
-        return Mono.just(ResponseMessage.error(401, "unauthorized", e.getMessage()).result(e.getState()));
+    public Mono<ResponseMessage<TokenState>> handleException(UnAuthorizedException e) {
+        return Mono.just(ResponseMessage.<TokenState>error(401, "unauthorized", e.getMessage()).result(e.getState()));
     }
 
     @ExceptionHandler
@@ -69,19 +71,19 @@ public class CommonErrorControllerAdvice {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Mono<ResponseMessage<?>> handleException(ValidationException e) {
-        return Mono.just(ResponseMessage.error(400, "illegal_argument", e.getMessage()).result(e.getDetails()));
+    public Mono<ResponseMessage<List<ValidationException.Detail>>> handleException(ValidationException e) {
+        return Mono.just(ResponseMessage.<List<ValidationException.Detail>>error(400, "illegal_argument", e.getMessage()).result(e.getDetails()));
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Mono<ResponseMessage<?>> handleException(ConstraintViolationException e) {
+    public Mono<ResponseMessage<List<ValidationException.Detail>>> handleException(ConstraintViolationException e) {
         return handleException(new ValidationException(e.getMessage(), e.getConstraintViolations()));
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Mono<ResponseMessage<?>> handleException(BindException e) {
+    public Mono<ResponseMessage<List<ValidationException.Detail>>> handleException(BindException e) {
         return handleException(new ValidationException(e.getMessage(), e.getBindingResult().getAllErrors()
                 .stream()
                 .filter(FieldError.class::isInstance)
@@ -92,7 +94,7 @@ public class CommonErrorControllerAdvice {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Mono<ResponseMessage<?>> handleException(WebExchangeBindException e) {
+    public Mono<ResponseMessage<List<ValidationException.Detail>>> handleException(WebExchangeBindException e) {
         return handleException(new ValidationException(e.getMessage(), e.getBindingResult().getAllErrors()
                 .stream()
                 .filter(FieldError.class::isInstance)
@@ -104,7 +106,7 @@ public class CommonErrorControllerAdvice {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Mono<ResponseMessage<?>> handleException(MethodArgumentNotValidException e) {
+    public Mono<ResponseMessage<List<ValidationException.Detail>>> handleException(MethodArgumentNotValidException e) {
         return handleException(new ValidationException(e.getMessage(), e.getBindingResult().getAllErrors()
                 .stream()
                 .filter(FieldError.class::isInstance)
@@ -186,7 +188,7 @@ public class CommonErrorControllerAdvice {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Mono<ResponseMessage<?>> handleException(ServerWebInputException e) {
+    public Mono<ResponseMessage<List<ValidationException.Detail>>> handleException(ServerWebInputException e) {
         Throwable exception = e;
         do {
             exception = exception.getCause();

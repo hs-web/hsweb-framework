@@ -1,5 +1,6 @@
 package org.hswebframework.web.exception;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -32,7 +33,7 @@ public class ValidationException extends BusinessException {
         this.details = details;
     }
 
-    public ValidationException(String message, Set<? extends ConstraintViolation> violations) {
+    public ValidationException(String message, Set<? extends ConstraintViolation<?>> violations) {
         super(message);
         if (null != violations && !violations.isEmpty()) {
             details = new ArrayList<>();
@@ -46,10 +47,13 @@ public class ValidationException extends BusinessException {
     @Setter
     @AllArgsConstructor
     public static class Detail {
+        @Schema(description = "字段")
         String property;
 
+        @Schema(description = "说明")
         String message;
 
+        @Schema(description = "详情")
         Object detail;
     }
 }
