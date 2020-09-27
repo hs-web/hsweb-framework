@@ -39,11 +39,11 @@ public class QueryParamEntity extends QueryParam {
     private static final long serialVersionUID = 8097500947924037523L;
 
     @Getter
-    @Schema(description = "where条件表达式,与terms参数冲突.")
+    @Schema(description = "where条件表达式,与terms参数不能共存.语法: name = 张三 and age > 16")
     private String where;
 
     @Getter
-    @Schema(description = "orderBy条件表达式,与sorts参数冲突.")
+    @Schema(description = "orderBy条件表达式,与sorts参数不能共存.语法: age asc,createTime desc")
     private String orderBy;
 
     //总数,设置了此值时,在分页查询的时候将不执行count.
