@@ -6,17 +6,9 @@
         <artifactId>hsweb-framework</artifactId>
         <groupId>org.hswebframework.web</groupId>
         <version>4.0.7-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <description>业务模块</description>
-    <packaging>pom</packaging>
-    <modules>
-        <module>hsweb-system-authorization</module>
-        <module>hsweb-system-file</module>
-        <module>hsweb-system-dictionary</module>
-        <module>hsweb-system-oauth2</module>
-    </modules>
-    <artifactId>hsweb-system</artifactId>
+
+    <artifactId>hsweb-system-oauth2</artifactId>
 
 </project>
