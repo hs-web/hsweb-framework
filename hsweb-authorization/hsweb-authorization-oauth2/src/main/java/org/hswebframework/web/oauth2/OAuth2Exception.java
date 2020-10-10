@@ -1,13 +1,14 @@
 package org.hswebframework.web.oauth2;
 
 import lombok.Getter;
+import org.hswebframework.web.exception.BusinessException;
 
 @Getter
-public class OAuth2Exception extends RuntimeException {
+public class OAuth2Exception extends BusinessException {
     private final ErrorType type;
 
     public OAuth2Exception(ErrorType type) {
-        super(type.message());
+        super(type.message(), type.name(), type.code());
         this.type = type;
     }
 

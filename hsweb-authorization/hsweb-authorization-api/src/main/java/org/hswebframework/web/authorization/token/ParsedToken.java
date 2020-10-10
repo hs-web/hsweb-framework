@@ -15,4 +15,8 @@ public interface ParsedToken {
      * @return 令牌类型
      */
     String getType();
+
+    static ParsedToken of(String type, String token) {
+        return SimpleParsedToken.of(type, token);
+    }
 }

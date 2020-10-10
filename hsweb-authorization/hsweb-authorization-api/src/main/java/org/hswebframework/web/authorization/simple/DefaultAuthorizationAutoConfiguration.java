@@ -6,10 +6,7 @@ import org.hswebframework.web.authorization.builder.DataAccessConfigBuilderFacto
 import org.hswebframework.web.authorization.simple.builder.DataAccessConfigConverter;
 import org.hswebframework.web.authorization.simple.builder.SimpleAuthenticationBuilderFactory;
 import org.hswebframework.web.authorization.simple.builder.SimpleDataAccessConfigBuilderFactory;
-import org.hswebframework.web.authorization.token.DefaultUserTokenManager;
-import org.hswebframework.web.authorization.token.UserTokenAuthenticationSupplier;
-import org.hswebframework.web.authorization.token.UserTokenReactiveAuthenticationSupplier;
-import org.hswebframework.web.authorization.token.UserTokenManager;
+import org.hswebframework.web.authorization.token.*;
 import org.hswebframework.web.authorization.twofactor.TwoFactorValidatorManager;
 import org.hswebframework.web.authorization.twofactor.defaults.DefaultTwoFactorValidatorManager;
 import org.hswebframework.web.convert.CustomMessageConverter;

@@ -7,7 +7,9 @@ public interface AccessTokenManager {
 
     Mono<Authentication> getAuthenticationByToken(String accessToken);
 
-    Mono<AccessToken> createAccessToken(String clientId, Authentication authentication);
+    Mono<AccessToken> createAccessToken(String clientId,
+                                        Authentication authentication,
+                                        boolean singleton);
 
     Mono<AccessToken> refreshAccessToken(String clientId, String refreshToken);
 

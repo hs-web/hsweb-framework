@@ -13,11 +13,6 @@ import reactor.core.publisher.Mono;
 public interface AuthorizationCodeGranter extends OAuth2Granter {
 
     /**
-     * @return 申请授权码界面
-     */
-    String getLoginUrl();
-
-    /**
      * 申请授权码
      *
      * @param request 请求

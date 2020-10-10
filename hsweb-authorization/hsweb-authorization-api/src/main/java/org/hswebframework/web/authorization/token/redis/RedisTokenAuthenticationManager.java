@@ -39,6 +39,13 @@ public class RedisTokenAuthenticationManager implements TokenAuthenticationManag
     }
 
     @Override
+    public Mono<Void> removeToken(String token) {
+        return operations
+                .delete(token)
+                .then();
+    }
+
+    @Override
     public Mono<Void> putAuthentication(String token, Authentication auth, Duration ttl) {
         return ttl.isNegative()
                 ? operations

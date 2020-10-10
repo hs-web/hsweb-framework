@@ -2,77 +2,93 @@ package org.hswebframework.web.oauth2.server.web;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import org.hswebframework.web.authorization.Authentication;
-import org.hswebframework.web.authorization.AuthenticationManager;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.exception.UnAuthorizedException;
-import org.hswebframework.web.authorization.token.TokenAuthenticationManager;
-import org.hswebframework.web.oauth2.server.*;
+import org.hswebframework.web.oauth2.ErrorType;
+import org.hswebframework.web.oauth2.OAuth2Exception;
+import org.hswebframework.web.oauth2.server.AccessToken;
+import org.hswebframework.web.oauth2.server.OAuth2Client;
+import org.hswebframework.web.oauth2.server.OAuth2ClientManager;
+import org.hswebframework.web.oauth2.server.OAuth2GrantService;
 import org.hswebframework.web.oauth2.server.code.AuthorizationCodeRequest;
 import org.hswebframework.web.oauth2.server.code.AuthorizationCodeTokenRequest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import java.net.URLEncoder;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/oauth2")
 @AllArgsConstructor
+@Tag(name = "OAuth2认证")
 public class OAuth2AuthorizeController {
 
     private final OAuth2GrantService oAuth2GrantService;
 
     private final OAuth2ClientManager clientManager;
 
-    @PostMapping(value = "/authorize", params = "response_type=code")
+
+    @GetMapping(value = "/authorize", params = "response_type=code")
     @Operation(summary = "申请授权码,并获取重定向地址", parameters = {
-            @Parameter(description = "client_id"),
-            @Parameter(description = "redirect_uri"),
-            @Parameter(description = "state")
+            @Parameter(name = "client_id", required = true),
+            @Parameter(name = "redirect_uri", required = true),
+            @Parameter(name = "state"),
+            @Parameter(name = "response_type", description = "固定值为code")
     })
-    public Mono<String> authorizeByCode(@RequestBody Mono<Map<String, Object>> params) {
+    public Mono<String> authorizeByCode(ServerWebExchange exchange) {
+        Map<String, Object> param = new HashMap<>(exchange.getRequest().getQueryParams().toSingleValueMap());
 
         return Authentication
                 .currentReactive()
                 .switchIfEmpty(Mono.error(UnAuthorizedException::new))
-                .flatMap(auth -> params
-                        .flatMap(param -> this
-                                .getOAuth2Client((String) param.get("client_id"))
-                                .flatMap(client -> {
-                                    String redirectUri = (String) param.getOrDefault("redirect_uri", client.getRedirectUrl());
-                                    client.validateRedirectUri(redirectUri);
-                                    return oAuth2GrantService
-                                            .code()
-                                            .requestCode(new AuthorizationCodeRequest(client, auth, param))
-                                            .map(authorizationCodeResponse -> buildRedirect(redirectUri, authorizationCodeResponse.getParameters()));
-                                })));
+                .flatMap(auth -> this
+                        .getOAuth2Client((String) param.get("client_id"))
+                        .switchIfEmpty(Mono.error(() -> new OAuth2Exception(ErrorType.ILLEGAL_CLIENT_ID)))
+                        .flatMap(client -> {
+                            String redirectUri = (String) param.getOrDefault("redirect_uri", client.getRedirectUrl());
+                            client.validateRedirectUri(redirectUri);
+                            return oAuth2GrantService
+                                    .authorizationCode()
+                                    .requestCode(new AuthorizationCodeRequest(client, auth, param))
+                                    .doOnNext(response -> {
+                                        Optional.ofNullable(param.get("state")).ifPresent(state -> response.with("state", state));
+                                    })
+                                    .map(response -> buildRedirect(redirectUri, response.getParameters()));
+                        }));
     }
 
-    @PostMapping(value = "/token", params = "grant_type=authorization_code")
-    @Operation(summary = "使用授权码申请token",parameters = {
-            @Parameter(description = "client_id"),
-            @Parameter(description = "client_secret"),
-            @Parameter(description = "code")
+    @GetMapping(value = "/token", params = "grant_type=authorization_code")
+    @Operation(summary = "使用授权码申请token", parameters = {
+            @Parameter(name = "client_id"),
+            @Parameter(name = "client_secret"),
+            @Parameter(name = "code"),
+            @Parameter(name = "grant_type", description = "固定值为authorization_code")
     })
     @Authorize(ignore = true)
-    public Mono<ResponseEntity<AccessToken>> requestTokenByCode(@RequestBody Mono<Map<String, Object>> params) {
+    public Mono<ResponseEntity<AccessToken>> requestTokenByCode(ServerWebExchange exchange) {
+        Map<String, String> params = exchange.getRequest().getQueryParams().toSingleValueMap();
 
-        return params
-                .flatMap(param -> this
-                        .getOAuth2Client((String) param.get("client_id"))
-                        .flatMap(client -> oAuth2GrantService
-                                .code()
-                                .requestToken(new AuthorizationCodeTokenRequest(client, param))))
+        return doRequestCode(new HashMap<>(params))
                 .map(ResponseEntity::ok);
+    }
+
+    private Mono<AccessToken> doRequestCode(Map<String, Object> param) {
+        return this
+                .getOAuth2Client((String) param.get("client_id"))
+                .switchIfEmpty(Mono.error(() -> new OAuth2Exception(ErrorType.ILLEGAL_CLIENT_ID)))
+                .flatMap(client -> oAuth2GrantService
+                        .authorizationCode()
+                        .requestToken(new AuthorizationCodeTokenRequest(client, param)));
     }
 
 
@@ -81,7 +97,7 @@ public class OAuth2AuthorizeController {
         return URLEncoder.encode(url, "utf-8");
     }
 
-    public String buildRedirect(String redirectUri, Map<String, Object> params) {
+    static String buildRedirect(String redirectUri, Map<String, Object> params) {
         String paramsString = params.entrySet()
                 .stream()
                 .map(e -> e.getKey() + "=" + urlEncode(String.valueOf(e.getValue())))

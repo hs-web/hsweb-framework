@@ -22,6 +22,8 @@ import reactor.core.publisher.Mono;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.function.BiPredicate;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -207,4 +209,13 @@ public interface Authentication extends Serializable {
      */
     Authentication merge(Authentication source);
 
+    /**
+     * copy为新的权限信息
+     *
+     * @param permissionFilter 权限过滤
+     * @param dimension        维度过滤
+     * @return 新的权限信息
+     */
+    Authentication copy(BiPredicate<Permission, String> permissionFilter,
+                        Predicate<Dimension> dimension);
 }

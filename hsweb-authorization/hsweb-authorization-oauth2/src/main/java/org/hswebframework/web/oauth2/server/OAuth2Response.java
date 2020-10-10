@@ -5,12 +5,13 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
 @Getter
 @Setter
-public class OAuth2Response {
+public class OAuth2Response implements Serializable {
     @Hidden
     private Map<String,Object> parameters;
 

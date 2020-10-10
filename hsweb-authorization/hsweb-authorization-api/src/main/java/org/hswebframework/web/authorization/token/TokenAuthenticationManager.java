@@ -31,4 +31,10 @@ public interface TokenAuthenticationManager {
      */
     Mono<Void> putAuthentication(String token, Authentication auth, Duration ttl);
 
+    /**
+     * 删除token
+     * @param token token
+     * @return void
+     */
+    Mono<Void> removeToken(String token);
 }

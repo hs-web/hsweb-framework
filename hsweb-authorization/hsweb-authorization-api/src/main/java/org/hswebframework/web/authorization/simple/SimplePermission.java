@@ -5,6 +5,8 @@ import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.access.DataAccessConfig;
 
 import java.util.*;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * @author zhouhao
@@ -42,16 +44,22 @@ public class SimplePermission implements Permission {
         return dataAccesses;
     }
 
-    public Permission copy() {
+    @Override
+    public Permission copy(Predicate<String> actionFilter,
+                           Predicate<DataAccessConfig> dataAccessFilter) {
         SimplePermission permission = new SimplePermission();
 
         permission.setId(id);
         permission.setName(name);
-        permission.setActions(new HashSet<>(getActions()));
-        permission.setDataAccesses(new HashSet<>(getDataAccesses()));
+        permission.setActions(getActions().stream().filter(actionFilter).collect(Collectors.toSet()));
+        permission.setDataAccesses(getDataAccesses().stream().filter(dataAccessFilter).collect(Collectors.toSet()));
         if (options != null) {
             permission.setOptions(new HashMap<>(options));
         }
         return permission;
+    }
+
+    public Permission copy() {
+        return copy(action -> true, conf -> true);
     }
 }
