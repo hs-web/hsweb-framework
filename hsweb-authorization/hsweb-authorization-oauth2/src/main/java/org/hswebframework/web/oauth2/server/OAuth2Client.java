@@ -2,6 +2,9 @@ package org.hswebframework.web.oauth2.server;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hswebframework.web.oauth2.ErrorType;
+import org.hswebframework.web.oauth2.OAuth2Exception;
+import org.springframework.util.StringUtils;
 
 import javax.validation.constraints.NotBlank;
 
@@ -26,8 +29,10 @@ public class OAuth2Client {
     //client 所属用户
     private String userId;
 
-    public void validateRedirectUri(String redirectUri){
-
+    public void validateRedirectUri(String redirectUri) {
+        if (StringUtils.isEmpty(redirectUri) || (!redirectUri.startsWith(this.redirectUrl))) {
+            throw new OAuth2Exception(ErrorType.ILLEGAL_REDIRECT_URI);
+        }
     }
 
 }
