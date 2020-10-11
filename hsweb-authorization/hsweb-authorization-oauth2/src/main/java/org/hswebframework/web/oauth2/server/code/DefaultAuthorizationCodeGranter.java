@@ -63,7 +63,7 @@ public class DefaultAuthorizationCodeGranter implements AuthorizationCodeGranter
         if (StringUtils.isEmpty(scopeStr)) {
             return ((permission, s) -> false);
         }
-        String[] scopes = scopeStr.split("[,]");
+        String[] scopes = scopeStr.split("[ ,\n]");
         Map<String, Set<String>> actions = new HashMap<>();
         for (String scope : scopes) {
             String[] permissions = scope.split("[:]");

@@ -19,7 +19,7 @@ public class DefaultAuthorizationCodeGranterTest {
 
     @Test
     public void testPermission() {
-        BiPredicate<Permission, String> predicate = DefaultAuthorizationCodeGranter.createPredicate("user:info,device:query");
+        BiPredicate<Permission, String> predicate = DefaultAuthorizationCodeGranter.createPredicate("user:info device:query");
 
         {
             SimplePermission permission=new SimplePermission();
