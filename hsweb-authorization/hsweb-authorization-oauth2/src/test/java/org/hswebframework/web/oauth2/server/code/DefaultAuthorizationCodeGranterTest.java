@@ -16,33 +16,6 @@ import static org.junit.Assert.*;
 
 public class DefaultAuthorizationCodeGranterTest {
 
-
-    @Test
-    public void testPermission() {
-        BiPredicate<Permission, String> predicate = DefaultAuthorizationCodeGranter.createPredicate("user:info device:query");
-
-        {
-            SimplePermission permission=new SimplePermission();
-            permission.setId("user");
-            permission.setActions(Collections.singleton("info"));
-
-
-            assertTrue(predicate.test(permission,"info"));
-            assertFalse(predicate.test(permission,"info2"));
-        }
-
-        {
-            SimplePermission permission=new SimplePermission();
-            permission.setId("device");
-            permission.setActions(Collections.singleton("query"));
-
-
-            assertTrue(predicate.test(permission,"query"));
-            assertFalse(predicate.test(permission,"query2"));
-        }
-
-    }
-
     @Test
     public void testRequestToken() {
 
