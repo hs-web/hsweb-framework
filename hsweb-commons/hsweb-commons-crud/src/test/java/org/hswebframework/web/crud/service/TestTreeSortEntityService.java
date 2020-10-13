@@ -25,9 +25,5 @@ public class TestTreeSortEntityService extends GenericReactiveCrudService<TestTr
         return entity.getChildren();
     }
 
-    @Override
-    public boolean isRootNode(TestTreeSortEntity entity) {
-        return entity.getParentId()==null;
-    }
 
 }
