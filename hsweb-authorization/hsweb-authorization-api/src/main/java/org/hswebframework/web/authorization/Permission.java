@@ -153,7 +153,7 @@ public interface Permission extends Serializable {
      * @see FieldFilterDataAccessConfig#getFields()
      */
     default Optional<FieldFilterDataAccessConfig> findFieldFilter(String action) {
-        return findDataAccess(conf -> FieldFilterDataAccessConfig.class.isInstance(conf) && conf.getAction().equals(action));
+        return findDataAccess(conf -> conf instanceof FieldFilterDataAccessConfig && conf.getAction().equals(action));
     }
 
     /**
@@ -164,7 +164,7 @@ public interface Permission extends Serializable {
      */
     default Set<String> findDenyFields(String action) {
         return findFieldFilter(action)
-                .filter(conf -> DENY_FIELDS.equals(conf.getType()))
+                .filter(conf -> DENY_FIELDS.equals(conf.getType().getId()))
                 .map(FieldFilterDataAccessConfig::getFields)
                 .orElseGet(Collections::emptySet);
     }
@@ -209,6 +209,8 @@ public interface Permission extends Serializable {
     }
 
     Permission copy();
+
+    Permission copy(Predicate<String> actionFilter,Predicate<DataAccessConfig> dataAccessFilter);
 
     /**
      * 数据权限查找判断逻辑接口

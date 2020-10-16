@@ -24,7 +24,7 @@
 
     <groupId>org.hswebframework.web</groupId>
     <artifactId>hsweb-framework</artifactId>
-    <version>4.0.7</version>
+    <version>4.0.8-SNAPSHOT</version>
     <modules>
         <module>hsweb-starter</module>
         <module>hsweb-core</module>
@@ -84,13 +84,13 @@
         <javassist.version>3.20.0-GA</javassist.version>
         <activiti.version>5.19.0.2</activiti.version>
 
-        <fastjson.version>1.2.47</fastjson.version>
+        <fastjson.version>1.2.74</fastjson.version>
         <h2.version>1.4.200</h2.version>
         <mysql.version>5.1.39</mysql.version>
         <cglib.version>3.2.2</cglib.version>
         <aspectj.version>1.6.12</aspectj.version>
 
-        <hsweb.ezorm.version>4.0.7</hsweb.ezorm.version>
+        <hsweb.ezorm.version>4.0.6-SNAPSHOT</hsweb.ezorm.version>
         <hsweb.utils.version>3.0.2</hsweb.utils.version>
         <hsweb.expands.version>3.0.2</hsweb.expands.version>
         <swagger.version>2.7.0</swagger.version>
@@ -301,7 +301,6 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.1.7</version>
             <scope>test</scope>
         </dependency>
 
@@ -360,7 +359,7 @@
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
-                <version>4.12</version>
+                <version>4.13.1</version>
                 <scope>test</scope>
             </dependency>
 
@@ -391,7 +390,7 @@
             <dependency>
                 <groupId>commons-beanutils</groupId>
                 <artifactId>commons-beanutils</artifactId>
-                <version>1.9.3</version>
+                <version>1.9.4</version>
             </dependency>
 
             <dependency>

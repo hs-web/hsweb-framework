@@ -19,13 +19,14 @@ import java.util.Map;
  */
 public class UserTokenReactiveAuthenticationSupplier implements ReactiveAuthenticationSupplier {
 
-    private ReactiveAuthenticationManager defaultAuthenticationManager;
+    private final ReactiveAuthenticationManager defaultAuthenticationManager;
 
-    private UserTokenManager userTokenManager;
+    private final UserTokenManager userTokenManager;
 
-    private Map<String, ThirdPartReactiveAuthenticationManager> thirdPartAuthenticationManager = new HashMap<>();
+    private final Map<String, ThirdPartReactiveAuthenticationManager> thirdPartAuthenticationManager = new HashMap<>();
 
-    public UserTokenReactiveAuthenticationSupplier(UserTokenManager userTokenManager, ReactiveAuthenticationManager defaultAuthenticationManager) {
+    public UserTokenReactiveAuthenticationSupplier(UserTokenManager userTokenManager,
+                                                   ReactiveAuthenticationManager defaultAuthenticationManager) {
         this.defaultAuthenticationManager = defaultAuthenticationManager;
         this.userTokenManager = userTokenManager;
     }

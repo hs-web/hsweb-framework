@@ -23,7 +23,9 @@ import org.hswebframework.web.authorization.*;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.function.BiPredicate;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Getter
@@ -40,9 +42,10 @@ public class SimpleAuthentication implements Authentication {
 
     private Map<String, Serializable> attributes = new HashMap<>();
 
-    public static Authentication of(){
+    public static Authentication of() {
         return new SimpleAuthentication();
     }
+
     @Override
     @SuppressWarnings("unchecked")
     public <T extends Serializable> Optional<T> getAttribute(String name) {
@@ -76,5 +79,20 @@ public class SimpleAuthentication implements Authentication {
             }
         }
         return this;
+    }
+
+    @Override
+    public Authentication copy(BiPredicate<Permission, String> permissionFilter,
+                               Predicate<Dimension> dimension) {
+        SimpleAuthentication authentication = new SimpleAuthentication();
+        authentication.setUser(user);
+        authentication.setDimensions(dimensions.stream().filter(dimension).collect(Collectors.toList()));
+        authentication.setPermissions(permissions
+                .stream()
+                .map(permission -> permission.copy(action -> permissionFilter.test(permission, action), conf -> true))
+                .filter(per -> !per.getActions().isEmpty())
+                .collect(Collectors.toList())
+        );
+        return authentication;
     }
 }
