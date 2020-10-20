@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.hswebframework.ezorm.rdb.metadata.RDBTableMetadata;
 import org.hswebframework.ezorm.rdb.operator.DatabaseOperator;
 import org.hswebframework.web.api.crud.entity.EntityFactory;
 import org.hswebframework.web.crud.entity.factory.MapperEntityFactory;
@@ -53,13 +54,13 @@ public class AutoDDLProcessor implements InitializingBean {
                 factory.addMapping(entity.getEntityType(), MapperEntityFactory.defaultMapper(entity.getRealType()));
             }
         }
+        List<Class> entities = this.entities.stream().map(EntityInfo::getRealType).collect(Collectors.toList());
+
         if (properties.isAutoDdl()) {
-            //加载全部表信息
             operator.getMetadata()
                     .getCurrentSchema()
                     .loadAllTable();
-
-            List<Class> entities = this.entities.stream().map(EntityInfo::getRealType).collect(Collectors.toList());
+            //加载全部表信息
 //            if (reactive) {
 //                Flux.fromIterable(entities)
 //                        .doOnNext(type -> log.info("auto ddl for {}", type))
@@ -86,6 +87,13 @@ public class AutoDDLProcessor implements InitializingBean {
                 }
             }
 //            }
+        } else {
+            for (Class<?> entity : entities) {
+                RDBTableMetadata metadata = resolver.resolve(entity);
+                operator.getMetadata()
+                        .getCurrentSchema()
+                        .addTable(metadata);
+            }
         }
     }
 }
