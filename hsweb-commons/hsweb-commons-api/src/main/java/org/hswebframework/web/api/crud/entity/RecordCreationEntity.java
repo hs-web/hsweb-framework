@@ -20,6 +20,10 @@ public interface RecordCreationEntity extends Entity {
 
     void setCreateTime(Long createTime);
 
+    default void setCreatorName(String name) {
+
+    }
+
     default void setCreateTimeNow() {
         setCreateTime(System.currentTimeMillis());
     }

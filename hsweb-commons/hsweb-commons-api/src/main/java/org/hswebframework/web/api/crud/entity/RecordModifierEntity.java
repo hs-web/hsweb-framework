@@ -1,6 +1,6 @@
 package org.hswebframework.web.api.crud.entity;
 
-import org.hswebframework.web.api.crud.entity.Entity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * 记录修改信息的实体类,包括修改人和修改时间。
@@ -17,6 +17,10 @@ public interface RecordModifierEntity extends Entity {
 
     void setModifierId(String modifierId);
 
+    default void setModifierName(String modifierName) {
+
+    }
+
     Long getModifyTime();
 
     void setModifyTime(Long modifyTime);
@@ -25,6 +29,7 @@ public interface RecordModifierEntity extends Entity {
         setModifyTime(System.currentTimeMillis());
     }
 
+    @JsonIgnore
     default String getModifierIdProperty() {
         return modifierId;
     }

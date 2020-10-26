@@ -25,16 +25,16 @@ public interface ReactiveSaveController<E, K> {
         RecordCreationEntity creationEntity = ((RecordCreationEntity) entity);
         creationEntity.setCreateTimeNow();
         creationEntity.setCreatorId(authentication.getUser().getId());
-
+        creationEntity.setCreatorName(authentication.getUser().getName());
         return entity;
     }
 
     @Authorize(ignore = true)
     default E applyModifierEntity(Authentication authentication, E entity) {
-        RecordModifierEntity creationEntity = ((RecordModifierEntity) entity);
-        creationEntity.setModifyTimeNow();
-        creationEntity.setModifierId(authentication.getUser().getId());
-
+        RecordModifierEntity modifierEntity = ((RecordModifierEntity) entity);
+        modifierEntity.setModifyTimeNow();
+        modifierEntity.setModifierId(authentication.getUser().getId());
+        modifierEntity.setModifierName(authentication.getUser().getName());
         return entity;
     }
 
