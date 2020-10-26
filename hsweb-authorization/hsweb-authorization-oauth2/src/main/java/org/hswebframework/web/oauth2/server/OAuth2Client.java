@@ -35,4 +35,10 @@ public class OAuth2Client {
         }
     }
 
+    public void validateSecret(String secret) {
+        if (StringUtils.isEmpty(secret) || (!secret.equals(this.clientSecret))) {
+            throw new OAuth2Exception(ErrorType.ILLEGAL_CLIENT_SECRET);
+        }
+    }
+
 }

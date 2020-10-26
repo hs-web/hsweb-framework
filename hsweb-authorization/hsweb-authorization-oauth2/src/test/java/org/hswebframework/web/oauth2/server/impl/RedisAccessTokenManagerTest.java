@@ -26,6 +26,23 @@ public class RedisAccessTokenManagerTest {
     }
 
     @Test
+    public void testRefreshToken() {
+        RedisAccessTokenManager tokenManager = new RedisAccessTokenManager(RedisHelper.factory);
+
+        SimpleAuthentication authentication = new SimpleAuthentication();
+
+        tokenManager
+                .createAccessToken("test", authentication, false)
+                .zipWhen(token -> tokenManager.refreshAccessToken("test", token.getRefreshToken()))
+                .as(StepVerifier::create)
+                .expectNextMatches(tp2 -> {
+                    return tp2.getT1().getRefreshToken().equals(tp2.getT2().getRefreshToken());
+                })
+        ;
+
+    }
+
+    @Test
     public void testCreateSingletonAccessToken() {
         RedisAccessTokenManager tokenManager = new RedisAccessTokenManager(RedisHelper.factory);
 

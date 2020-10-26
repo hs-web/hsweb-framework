@@ -2,7 +2,7 @@ package org.hswebframework.web.oauth2.server.impl;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.hswebframework.web.oauth2.server.ClientCredentialGranter;
+import org.hswebframework.web.oauth2.server.credential.ClientCredentialGranter;
 import org.hswebframework.web.oauth2.server.OAuth2GrantService;
 import org.hswebframework.web.oauth2.server.code.AuthorizationCodeGranter;
 

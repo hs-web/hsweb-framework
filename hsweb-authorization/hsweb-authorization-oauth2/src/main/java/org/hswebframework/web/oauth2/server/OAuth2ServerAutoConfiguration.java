@@ -1,10 +1,13 @@
 package org.hswebframework.web.oauth2.server;
 
 import org.hswebframework.web.authorization.ReactiveAuthenticationHolder;
+import org.hswebframework.web.authorization.ReactiveAuthenticationManager;
 import org.hswebframework.web.authorization.basic.web.ReactiveUserTokenParser;
 import org.hswebframework.web.oauth2.server.auth.ReactiveOAuth2AccessTokenParser;
 import org.hswebframework.web.oauth2.server.code.AuthorizationCodeGranter;
 import org.hswebframework.web.oauth2.server.code.DefaultAuthorizationCodeGranter;
+import org.hswebframework.web.oauth2.server.credential.ClientCredentialGranter;
+import org.hswebframework.web.oauth2.server.credential.DefaultClientCredentialGranter;
 import org.hswebframework.web.oauth2.server.impl.CompositeOAuth2GrantService;
 import org.hswebframework.web.oauth2.server.impl.RedisAccessTokenManager;
 import org.hswebframework.web.oauth2.server.web.OAuth2AuthorizeController;
@@ -45,6 +48,12 @@ public class OAuth2ServerAutoConfiguration {
             return new RedisAccessTokenManager(redisConnectionFactory);
         }
 
+        @Bean
+        @ConditionalOnMissingBean
+        public ClientCredentialGranter clientCredentialGranter(ReactiveAuthenticationManager authenticationManager,
+                                                               AccessTokenManager accessTokenManager) {
+            return new DefaultClientCredentialGranter(authenticationManager, accessTokenManager);
+        }
 
         @Bean
         @ConditionalOnMissingBean
