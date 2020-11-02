@@ -10,6 +10,7 @@ import org.hswebframework.web.authorization.annotation.Resource;
 import org.hswebframework.web.authorization.annotation.ResourceAction;
 import org.hswebframework.web.authorization.exception.AccessDenyException;
 import org.hswebframework.web.file.FileUploadProperties;
+import org.hswebframework.web.file.service.FileStorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.http.codec.multipart.Part;
@@ -28,8 +29,14 @@ import java.io.File;
 @Tag(name = "文件上传")
 public class ReactiveFileController {
 
-    @Autowired
-    private FileUploadProperties properties;
+    private final FileUploadProperties properties;
+
+    private final FileStorageService fileStorageService;
+
+    public ReactiveFileController(FileUploadProperties properties, FileStorageService fileStorageService) {
+        this.properties = properties;
+        this.fileStorageService = fileStorageService;
+    }
 
     @PostMapping("/static")
     @SneakyThrows
@@ -37,16 +44,12 @@ public class ReactiveFileController {
     @Operation(summary = "上传静态文件")
     public Mono<String> uploadStatic(@RequestPart("file")
                                      @Parameter(name = "file", description = "文件", style = ParameterStyle.FORM) Part part) {
-        FileUploadProperties.StaticFileInfo name;
         if (part instanceof FilePart) {
             FilePart filePart = ((FilePart) part);
             if (properties.denied(filePart.filename(), filePart.headers().getContentType())) {
                 throw new AccessDenyException();
             }
-            name = properties.createStaticSavePath(filePart.filename());
-            return ((FilePart) part)
-                    .transferTo(new File(name.getSavePath()))
-                    .thenReturn(name.getLocation());
+            return fileStorageService.saveFile(filePart);
         } else {
             return Mono.error(() -> new IllegalArgumentException("[file] part is not a file"));
         }

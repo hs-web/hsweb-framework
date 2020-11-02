@@ -1,5 +1,7 @@
 package org.hswebframework.web.file;
 
+import org.hswebframework.web.file.service.FileStorageService;
+import org.hswebframework.web.file.service.LocalFileStorageService;
 import org.hswebframework.web.file.web.ReactiveFileController;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -16,10 +18,18 @@ public class FileServiceConfiguration {
     static class ReactiveConfiguration {
 
         @Bean
-        @ConditionalOnMissingBean(name = "reactiveFileController")
-        private ReactiveFileController reactiveFileController() {
-            return new ReactiveFileController();
+        @ConditionalOnMissingBean(FileStorageService.class)
+        public FileStorageService fileStorageService(FileUploadProperties properties) {
+            return new LocalFileStorageService(properties);
         }
+
+        @Bean
+        @ConditionalOnMissingBean(name = "reactiveFileController")
+        public ReactiveFileController reactiveFileController(FileUploadProperties properties,
+                                                             FileStorageService storageService) {
+            return new ReactiveFileController(properties, storageService);
+        }
+
     }
 
 }
