@@ -87,7 +87,6 @@ public class AuthorizationController {
             Assert.hasLength(username_, "用户名不能为空");
             Assert.hasLength(password_, "密码不能为空");
 
-            AuthorizationFailedEvent.Reason reason = AuthorizationFailedEvent.Reason.OTHER;
             Function<String, Object> parameterGetter = parameters::get;
             return Mono.defer(() -> {
                 AuthorizationDecodeEvent decodeEvent = new AuthorizationDecodeEvent(username_, password_, parameterGetter);
@@ -112,7 +111,7 @@ public class AuthorizationController {
                                             }));
                         }));
             }).onErrorResume(err -> {
-                AuthorizationFailedEvent failedEvent = new AuthorizationFailedEvent(username_, password_, parameterGetter, reason);
+                AuthorizationFailedEvent failedEvent = new AuthorizationFailedEvent(username_, password_, parameterGetter);
                 failedEvent.setException(err);
                 return failedEvent
                         .publish(eventPublisher)
