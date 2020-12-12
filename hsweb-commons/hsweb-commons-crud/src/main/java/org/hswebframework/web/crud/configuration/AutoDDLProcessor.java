@@ -75,6 +75,7 @@ public class AutoDDLProcessor implements InitializingBean {
                 try {
                     operator.ddl()
                             .createOrAlter(resolver.resolve(entity))
+                            .autoLoad(false)
                             .commit()
                             .sync();
                 } catch (Exception e) {

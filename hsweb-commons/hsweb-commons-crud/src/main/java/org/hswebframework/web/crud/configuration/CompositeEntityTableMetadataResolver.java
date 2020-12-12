@@ -13,9 +13,9 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class CompositeEntityTableMetadataResolver implements EntityTableMetadataResolver {
 
-    private List<EntityTableMetadataParser> resolvers = new ArrayList<>();
+    private final List<EntityTableMetadataParser> resolvers = new ArrayList<>();
 
-    private Map<Class, AtomicReference<RDBTableMetadata>> cache = new ConcurrentHashMap<>();
+    private final Map<Class, AtomicReference<RDBTableMetadata>> cache = new ConcurrentHashMap<>();
 
     public void addParser(EntityTableMetadataParser resolver) {
         resolvers.add(resolver);
