@@ -26,8 +26,11 @@ public class AccessDenyException extends RuntimeException {
         super(message);
     }
 
+    public AccessDenyException(String message, String code) {
+        this(message, code, null);
+    }
     public AccessDenyException(String message, Throwable cause) {
-        this(message,"access_denied", cause);
+        this(message, "access_denied", cause);
     }
 
     public AccessDenyException(String message, String code, Throwable cause) {

@@ -106,7 +106,7 @@ public class DefaultAuthorizingHandler implements AuthorizingHandler {
         ResourcesDefinition resources = definition.getResources();
 
         if (!resources.hasPermission(authentication.getPermissions())) {
-            throw new AccessDenyException();
+            throw new AccessDenyException(definition.getMessage(),definition.getDescription());
         }
     }
 }
