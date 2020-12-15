@@ -9,6 +9,8 @@ import org.hswebframework.ezorm.rdb.mapping.annotation.EnumCodec;
 import org.hswebframework.web.api.crud.entity.GenericEntity;
 import org.hswebframework.web.dict.EnumDict;
 import org.hswebframework.web.system.authorization.api.enums.DimensionUserFeature;
+import org.springframework.util.DigestUtils;
+import org.springframework.util.StringUtils;
 
 import javax.persistence.Column;
 import javax.persistence.Index;
@@ -67,6 +69,16 @@ public class DimensionUserEntity extends GenericEntity<String> {
     @EnumCodec(toMask = true)
     @Schema(description = "其他功能")
     private DimensionUserFeature[] features;
+
+    public void generateId() {
+        if (StringUtils.isEmpty(getId())) {
+            String id = DigestUtils
+                    .md5DigestAsHex(String.format("%s-%s-%s",
+                                                  dimensionTypeId,
+                                                  dimensionId, userId).getBytes());
+            setId(id);
+        }
+    }
 
     public boolean hasFeature(DimensionUserFeature feature) {
         return features != null && EnumDict.in(feature, features);

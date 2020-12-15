@@ -28,11 +28,11 @@ import java.util.stream.Collectors;
  * @author zhouhao
  */
 public class SystemInitialize {
-    private Logger logger = LoggerFactory.getLogger(SystemInitialize.class);
+    private final Logger logger = LoggerFactory.getLogger(SystemInitialize.class);
 
-    private DatabaseOperator database;
+    private final DatabaseOperator database;
     //将要安装的信息
-    private SystemVersion targetVersion;
+    private final SystemVersion targetVersion;
 
     //已安装的信息
     private SystemVersion installed;
