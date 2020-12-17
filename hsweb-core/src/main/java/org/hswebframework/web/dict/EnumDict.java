@@ -20,6 +20,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.web.exception.ValidationException;
 import org.springframework.beans.BeanUtils;
+import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -349,7 +350,7 @@ public interface EnumDict<V> extends JSONSerializable {
             String currentName = jp.currentName();
             Object currentValue = jp.getCurrentValue();
             Class findPropertyType;
-            if (currentName == null || currentValue == null) {
+            if (StringUtils.isEmpty(currentName) || StringUtils.isEmpty(currentValue)) {
                 return null;
             } else {
                 findPropertyType = BeanUtils.findPropertyType(currentName, currentValue.getClass());
