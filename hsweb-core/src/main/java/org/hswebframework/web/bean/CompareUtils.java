@@ -21,6 +21,10 @@ public abstract class CompareUtils {
         if (source.equals(target)) {
             return true;
         }
+
+        if (source instanceof Boolean) {
+            return compare(((Boolean) source), target);
+        }
         if (source instanceof Number) {
             return compare(((Number) source), target);
         }
@@ -239,6 +243,11 @@ public abstract class CompareUtils {
 
         return false;
     }
+
+    public static boolean compare(Boolean bool, Object target) {
+        return bool.equals(target) || String.valueOf(bool).equals(target);
+    }
+
 
     public static boolean compare(Date date, Object target) {
         if (date == target) {
