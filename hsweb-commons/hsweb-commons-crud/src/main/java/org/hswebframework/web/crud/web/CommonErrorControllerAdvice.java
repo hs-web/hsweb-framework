@@ -1,5 +1,7 @@
 package org.hswebframework.web.crud.web;
 
+import io.r2dbc.spi.R2dbcDataIntegrityViolationException;
+import io.r2dbc.spi.R2dbcNonTransientException;
 import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.web.authorization.exception.AccessDenyException;
 import org.hswebframework.web.authorization.exception.AuthenticationException;
@@ -42,7 +44,7 @@ public class CommonErrorControllerAdvice {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Mono<ResponseMessage<Object>> handleException(BusinessException e) {
         return Mono.just(ResponseMessage.error(e.getCode(), e.getMessage()))
-                .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getMessage(), e)));
+                   .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getMessage(), e)));
     }
 
     @ExceptionHandler
@@ -72,7 +74,8 @@ public class CommonErrorControllerAdvice {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Mono<ResponseMessage<List<ValidationException.Detail>>> handleException(ValidationException e) {
-        return Mono.just(ResponseMessage.<List<ValidationException.Detail>>error(400, "illegal_argument", e.getMessage()).result(e.getDetails()));
+        return Mono.just(ResponseMessage.<List<ValidationException.Detail>>error(400, "illegal_argument", e.getMessage())
+                                 .result(e.getDetails()));
     }
 
     @ExceptionHandler
@@ -84,7 +87,8 @@ public class CommonErrorControllerAdvice {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Mono<ResponseMessage<List<ValidationException.Detail>>> handleException(BindException e) {
-        return handleException(new ValidationException(e.getMessage(), e.getBindingResult().getAllErrors()
+        return handleException(new ValidationException(e.getMessage(), e
+                .getBindingResult().getAllErrors()
                 .stream()
                 .filter(FieldError.class::isInstance)
                 .map(FieldError.class::cast)
@@ -95,7 +99,8 @@ public class CommonErrorControllerAdvice {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Mono<ResponseMessage<List<ValidationException.Detail>>> handleException(WebExchangeBindException e) {
-        return handleException(new ValidationException(e.getMessage(), e.getBindingResult().getAllErrors()
+        return handleException(new ValidationException(e.getMessage(), e
+                .getBindingResult().getAllErrors()
                 .stream()
                 .filter(FieldError.class::isInstance)
                 .map(FieldError.class::cast)
@@ -107,7 +112,8 @@ public class CommonErrorControllerAdvice {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Mono<ResponseMessage<List<ValidationException.Detail>>> handleException(MethodArgumentNotValidException e) {
-        return handleException(new ValidationException(e.getMessage(), e.getBindingResult().getAllErrors()
+        return handleException(new ValidationException(e.getMessage(), e
+                .getBindingResult().getAllErrors()
                 .stream()
                 .filter(FieldError.class::isInstance)
                 .map(FieldError.class::cast)
@@ -125,7 +131,7 @@ public class CommonErrorControllerAdvice {
     @ResponseStatus(HttpStatus.GATEWAY_TIMEOUT)
     public Mono<ResponseMessage<Object>> handleException(TimeoutException e) {
         return Mono.just(ResponseMessage.error(504, "timeout", e.getMessage()))
-                .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getMessage(), e)));
+                   .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getMessage(), e)));
 
     }
 
@@ -134,7 +140,7 @@ public class CommonErrorControllerAdvice {
     @Order
     public Mono<ResponseMessage<Object>> handleException(RuntimeException e) {
         return Mono.just(ResponseMessage.error(e.getMessage()))
-                .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getMessage(), e)));
+                   .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getMessage(), e)));
 
     }
 
@@ -143,14 +149,14 @@ public class CommonErrorControllerAdvice {
     public Mono<ResponseMessage<Object>> handleException(NullPointerException e) {
 
         return Mono.just(ResponseMessage.error(e.getMessage()))
-                .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getMessage(), e)));
+                   .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getMessage(), e)));
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Mono<ResponseMessage<Object>> handleException(IllegalArgumentException e) {
         return Mono.just(ResponseMessage.error(400, "illegal_argument", e.getMessage()))
-                .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getMessage(), e)));
+                   .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getMessage(), e)));
     }
 
     @ExceptionHandler
@@ -163,28 +169,39 @@ public class CommonErrorControllerAdvice {
     @ResponseStatus(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
     public Mono<ResponseMessage<Object>> handleException(MediaTypeNotSupportedStatusException e) {
         return Mono.just(ResponseMessage
-                .error(415, "unsupported_media_type", "不支持的请求类型")
-                .result(e.getSupportedMediaTypes()))
-                .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getMessage(), e)));
+                                 .error(415, "unsupported_media_type", "不支持的请求类型")
+                                 .result(e.getSupportedMediaTypes()))
+                   .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getMessage(), e)));
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
     public Mono<ResponseMessage<Object>> handleException(NotAcceptableStatusException e) {
         return Mono.just(ResponseMessage
-                .error(406, "not_acceptable_media_type", "不支持的响应类型")
-                .result(e.getSupportedMediaTypes()))
-                .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getMessage(), e)));
+                                 .error(406, "not_acceptable_media_type", "不支持的响应类型")
+                                 .result(e.getSupportedMediaTypes()))
+                   .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getMessage(), e)));
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
     public Mono<ResponseMessage<Object>> handleException(MethodNotAllowedException e) {
         return Mono.just(ResponseMessage
-                .error(405, "method_not_allowed", "不支持的请求方法:" + e.getHttpMethod())
-                .result(e.getSupportedMethods()))
-                .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getMessage(), e)));
+                                 .error(405, "method_not_allowed", "不支持的请求方法:" + e.getHttpMethod())
+                                 .result(e.getSupportedMethods()))
+                   .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getMessage(), e)));
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Mono<ResponseMessage<Object>> handleException(R2dbcDataIntegrityViolationException exception) {
+        if (exception.getMessage().contains("Duplicate")) {
+            return Mono.just(ResponseMessage.error("存在重复的数据"));
+        }
+        log.warn(exception.getMessage(), exception);
+        return Mono.just(ResponseMessage.error("数据错误"));
+    }
+
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
