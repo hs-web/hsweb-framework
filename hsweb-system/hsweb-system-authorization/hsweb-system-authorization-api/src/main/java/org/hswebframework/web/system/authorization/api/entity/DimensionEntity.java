@@ -7,10 +7,12 @@ import org.hswebframework.ezorm.rdb.mapping.annotation.ColumnType;
 import org.hswebframework.ezorm.rdb.mapping.annotation.Comment;
 import org.hswebframework.ezorm.rdb.mapping.annotation.JsonCodec;
 import org.hswebframework.web.api.crud.entity.GenericTreeSortSupportEntity;
+import org.hswebframework.web.validator.CreateGroup;
 
 import javax.persistence.Column;
 import javax.persistence.Index;
 import javax.persistence.Table;
+import javax.validation.constraints.NotBlank;
 import java.sql.JDBCType;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +32,7 @@ public class DimensionEntity extends GenericTreeSortSupportEntity<String> {
     @Comment("维度名称")
     @Column(length = 32)
     @Schema(description = "维度名称")
+    @NotBlank(message = "名称不能为空",groups = CreateGroup.class)
     private String name;
 
     @Comment("描述")
