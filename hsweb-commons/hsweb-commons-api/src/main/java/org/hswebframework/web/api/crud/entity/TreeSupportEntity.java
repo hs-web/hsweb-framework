@@ -52,6 +52,7 @@ public interface TreeSupportEntity<PK> extends Entity {
 
     @Override
     default void tryValidate(Class<?>... groups) {
+        Entity.super.tryValidate(groups);
         if (getId() != null && Objects.equals(getId(), getParentId())) {
             throw new ValidationException("parentId", "子节点ID不能与父节点ID相同");
         }
