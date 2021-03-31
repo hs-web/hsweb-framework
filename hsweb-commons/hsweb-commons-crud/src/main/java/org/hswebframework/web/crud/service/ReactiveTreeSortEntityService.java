@@ -89,6 +89,9 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
 
     //校验是否有循环依赖,修改父节点为自己的子节点?
     default Mono<E> checkCyclicDependency(K id, E ele) {
+        if (StringUtils.isEmpty(id)) {
+            return Mono.empty();
+        }
         return this
                 .queryIncludeChildren(Collections.singletonList(id))
                 .doOnNext(e -> {
