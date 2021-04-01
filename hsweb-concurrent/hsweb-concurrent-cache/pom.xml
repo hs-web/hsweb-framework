@@ -5,7 +5,7 @@
     <parent>
         <artifactId>hsweb-concurrent</artifactId>
         <groupId>org.hswebframework.web</groupId>
-        <version>4.0.10-SNAPSHOT</version>
+        <version>4.0.9</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -40,6 +40,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
+            <version>29.0-jre</version>
             <optional>true</optional>
         </dependency>
 
