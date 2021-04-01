@@ -32,16 +32,16 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
         return query(paramEntity)
                 .collectList()
                 .map(list -> TreeSupportEntity.list2tree(list,
-                        this::setChildren,
-                        this::createRootNodePredicate));
+                                                         this::setChildren,
+                                                         this::createRootNodePredicate));
     }
 
     default Mono<List<E>> queryIncludeChildrenTree(QueryParamEntity paramEntity) {
         return queryIncludeChildren(paramEntity)
                 .collectList()
                 .map(list -> TreeSupportEntity.list2tree(list,
-                        this::setChildren,
-                        this::createRootNodePredicate));
+                                                         this::setChildren,
+                                                         this::createRootNodePredicate));
     }
 
     default Flux<E> queryIncludeChildren(Collection<K> idList) {
@@ -68,11 +68,11 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
     @Override
     default Mono<Integer> insertBatch(Publisher<? extends Collection<E>> entityPublisher) {
         return this.getRepository()
-                .insertBatch(Flux.from(entityPublisher)
-                        .flatMap(Flux::fromIterable)
-                        .flatMap(this::applyTreeProperty)
-                        .flatMap(e -> Flux.fromIterable(TreeSupportEntity.expandTree2List(e, getIDGenerator())))
-                        .collectList());
+                   .insertBatch(Flux.from(entityPublisher)
+                                    .flatMap(Flux::fromIterable)
+                                    .flatMap(this::applyTreeProperty)
+                                    .flatMap(e -> Flux.fromIterable(TreeSupportEntity.expandTree2List(e, getIDGenerator())))
+                                    .collectList());
     }
 
     default Mono<E> applyTreeProperty(E ele) {
@@ -80,25 +80,42 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
                 StringUtils.isEmpty(ele.getParentId())) {
             return Mono.just(ele);
         }
-        return findById(ele.getParentId())
-                .doOnNext(parent -> ele.setPath(parent.getPath() + "-" + RandomUtil.randomChar(4)))
-                .thenReturn(ele);
+
+        return this.checkCyclicDependency(ele.getId(), ele)
+                   .then(this.findById(ele.getParentId())
+                             .doOnNext(parent -> ele.setPath(parent.getPath() + "-" + RandomUtil.randomChar(4))))
+                   .thenReturn(ele);
+    }
+
+    //校验是否有循环依赖,修改父节点为自己的子节点?
+    default Mono<E> checkCyclicDependency(K id, E ele) {
+        if (StringUtils.isEmpty(id)) {
+            return Mono.empty();
+        }
+        return this
+                .queryIncludeChildren(Collections.singletonList(id))
+                .doOnNext(e -> {
+                    if (Objects.equals(ele.getParentId(), e.getId())) {
+                        throw new IllegalArgumentException("不能修改父节点为自己或者自己的子节点");
+                    }
+                })
+                .then(Mono.just(ele));
     }
 
     @Override
     default Mono<SaveResult> save(Publisher<E> entityPublisher) {
         return this.getRepository()
-                .save(Flux.from(entityPublisher)
-                        .flatMap(this::applyTreeProperty)
-                        //把树结构平铺
-                        .flatMap(e -> Flux.fromIterable(TreeSupportEntity.expandTree2List(e, getIDGenerator())))
-                );
+                   .save(Flux.from(entityPublisher)
+                             .flatMap(this::applyTreeProperty)
+                             //把树结构平铺
+                             .flatMap(e -> Flux.fromIterable(TreeSupportEntity.expandTree2List(e, getIDGenerator())))
+                   );
     }
 
     @Override
     default Mono<Integer> updateById(K id, Mono<E> entityPublisher) {
-        return save(entityPublisher
-                .doOnNext(e -> e.setId(id)))
+        return this
+                .save(entityPublisher.doOnNext(e -> e.setId(id)))
                 .map(SaveResult::getTotal);
     }
 

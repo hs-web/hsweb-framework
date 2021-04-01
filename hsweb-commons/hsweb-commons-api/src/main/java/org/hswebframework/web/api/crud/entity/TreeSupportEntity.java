@@ -20,6 +20,7 @@ package org.hswebframework.web.api.crud.entity;
 
 
 import org.hswebframework.utils.RandomUtil;
+import org.hswebframework.web.exception.ValidationException;
 import org.hswebframework.web.id.IDGenerator;
 import org.springframework.util.CollectionUtils;
 
@@ -48,6 +49,14 @@ public interface TreeSupportEntity<PK> extends Entity {
     void setLevel(Integer level);
 
     <T extends TreeSupportEntity<PK>> List<T> getChildren();
+
+    @Override
+    default void tryValidate(Class<?>... groups) {
+        Entity.super.tryValidate(groups);
+        if (getId() != null && Objects.equals(getId(), getParentId())) {
+            throw new ValidationException("parentId", "子节点ID不能与父节点ID相同");
+        }
+    }
 
     /**
      * 根据path获取父节点的path
@@ -180,7 +189,8 @@ public interface TreeSupportEntity<PK> extends Entity {
      * @return 树形结构集合
      */
     static <N extends TreeSupportEntity<PK>, PK> List<N> list2tree(Collection<N> dataList, BiConsumer<N, List<N>> childConsumer) {
-        return list2tree(dataList, childConsumer, (Function<TreeHelper<N, PK>, Predicate<N>>) predicate -> node -> node == null || predicate.getNode(node.getParentId()) == null);
+        return list2tree(dataList, childConsumer, (Function<TreeHelper<N, PK>, Predicate<N>>) predicate -> node -> node == null || predicate
+                .getNode(node.getParentId()) == null);
     }
 
     static <N extends TreeSupportEntity<PK>, PK> List<N> list2tree(Collection<N> dataList,
@@ -211,9 +221,9 @@ public interface TreeSupportEntity<PK> extends Entity {
         Map<PK, N> cache = new HashMap<>();
         // parentId,children
         Map<PK, List<N>> treeCache = streamSupplier.get()
-                .peek(node -> cache.put(node.getId(), node))
-                .filter(e -> e.getParentId() != null)
-                .collect(Collectors.groupingBy(TreeSupportEntity::getParentId));
+                                                   .peek(node -> cache.put(node.getId(), node))
+                                                   .filter(e -> e.getParentId() != null)
+                                                   .collect(Collectors.groupingBy(TreeSupportEntity::getParentId));
 
         Predicate<N> rootNodePredicate = predicateFunction.apply(new TreeHelper<N, PK>() {
             @Override
@@ -228,11 +238,11 @@ public interface TreeSupportEntity<PK> extends Entity {
         });
 
         return streamSupplier.get()
-                //设置每个节点的子节点
-                .peek(node -> childConsumer.accept(node, treeCache.get(node.getId())))
-                //获取根节点
-                .filter(rootNodePredicate)
-                .collect(Collectors.toList());
+                             //设置每个节点的子节点
+                             .peek(node -> childConsumer.accept(node, treeCache.get(node.getId())))
+                             //获取根节点
+                             .filter(rootNodePredicate)
+                             .collect(Collectors.toList());
     }
 
     /**

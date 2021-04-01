@@ -17,6 +17,7 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -29,7 +30,7 @@ import java.util.stream.Stream;
  */
 @Slf4j
 public final class FastBeanCopier {
-    private static final Map<CacheKey, Copier> CACHE = new HashMap<>();
+    private static final Map<CacheKey, Copier> CACHE = new ConcurrentHashMap<>();
 
     private static final PropertyUtilsBean propertyUtils = BeanUtilsBean.getInstance().getPropertyUtils();
 
@@ -96,7 +97,7 @@ public final class FastBeanCopier {
     }
 
     public static <T, S> T copy(S source, T target, Converter converter, String... ignore) {
-        return copy(source, target, converter, (ignore == null || ignore.length == 0) ? new java.util.HashSet<>() : new HashSet<>(Arrays.asList(ignore)));
+        return copy(source, target, converter, (ignore == null || ignore.length == 0) ? Collections.emptySet() : new HashSet<>(Arrays.asList(ignore)));
     }
 
     public static <T, S> T copy(S source, T target, Set<String> ignore) {

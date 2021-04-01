@@ -38,6 +38,14 @@ public class EasyormRepositoryRegistrar implements ImportBeanDefinitionRegistrar
 
     private final MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
 
+    @SneakyThrows
+    private Stream<Resource> doGetResources(String packageStr) {
+        String path = ResourcePatternResolver
+                .CLASSPATH_ALL_URL_PREFIX
+                .concat(packageStr.replace(".", "/")).concat("/**/*.class");
+        return Arrays.stream(resourcePatternResolver.getResources(path));
+    }
+
     @Override
     @SneakyThrows
     @SuppressWarnings("all")
@@ -47,33 +55,36 @@ public class EasyormRepositoryRegistrar implements ImportBeanDefinitionRegistrar
         if (attr == null) {
             return;
         }
-        boolean reactivePrecent = org.springframework.util.ClassUtils.isPresent("io.r2dbc.spi.ConnectionFactory", this.getClass().getClassLoader());
+        boolean reactivePrecent = org.springframework.util.ClassUtils.isPresent("io.r2dbc.spi.ConnectionFactory", this
+                .getClass()
+                .getClassLoader());
         String[] arr = (String[]) attr.get("value");
-        String path = Arrays.stream(arr)
-                .map(str -> ResourcePatternResolver
-                        .CLASSPATH_ALL_URL_PREFIX
-                        .concat(str.replace(".", "/")).concat("/**/*.class"))
-                .collect(Collectors.joining());
+        Set<Resource> resources = Arrays
+                .stream(arr)
+                .flatMap(this::doGetResources)
+                .collect(Collectors.toSet());
 
         Class<Annotation>[] anno = (Class[]) attr.get("annotation");
 
         Set<EntityInfo> entityInfos = new HashSet<>();
 
-        for (Resource resource : resourcePatternResolver.getResources(path)) {
+        for (Resource resource : resources) {
             MetadataReader reader = metadataReaderFactory.getMetadataReader(resource);
             String className = reader.getClassMetadata().getClassName();
-            Class<?> entityType = org.springframework.util.ClassUtils.forName(className,null);
+            Class<?> entityType = org.springframework.util.ClassUtils.forName(className, null);
             if (Arrays.stream(anno)
-                    .noneMatch(ann -> AnnotationUtils.findAnnotation(entityType, ann) != null)) {
+                      .noneMatch(ann -> AnnotationUtils.findAnnotation(entityType, ann) != null)) {
                 continue;
             }
 
             ImplementFor implementFor = AnnotationUtils.findAnnotation(entityType, ImplementFor.class);
             Reactive reactive = AnnotationUtils.findAnnotation(entityType, Reactive.class);
-            Class genericType = Optional.ofNullable(implementFor)
+            Class genericType = Optional
+                    .ofNullable(implementFor)
                     .map(ImplementFor::value)
                     .orElseGet(() -> {
-                        return Stream.of(entityType.getInterfaces())
+                        return Stream
+                                .of(entityType.getInterfaces())
                                 .filter(e -> GenericEntity.class.isAssignableFrom(e))
                                 .findFirst()
                                 .orElse(entityType);
@@ -97,7 +108,8 @@ public class EasyormRepositoryRegistrar implements ImportBeanDefinitionRegistrar
                 idType = implementFor.idType();
             }
 
-            EntityInfo entityInfo = new EntityInfo(genericType, entityType, idType, reactivePrecent && (reactive == null || reactive.enable()));
+            EntityInfo entityInfo = new EntityInfo(genericType, entityType, idType, reactivePrecent && (reactive == null || reactive
+                    .enable()));
             if (!entityInfos.contains(entityInfo) || implementFor != null) {
                 entityInfos.add(entityInfo);
             }
