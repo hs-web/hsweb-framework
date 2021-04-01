@@ -156,10 +156,6 @@ public abstract class CompareUtils {
         return compare(Arrays.asList(number), target);
     }
 
-    public static boolean compare(Boolean bool, Object target) {
-        return bool.equals(target) || String.valueOf(bool).equals(target);
-    }
-
 
     public static boolean compare(Number number, Object target) {
         if (number == target) {
