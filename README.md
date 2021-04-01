@@ -1,7 +1,6 @@
 # hsweb4 基于spring-boot2,全响应式的后台管理框架
 [![Codecov](https://codecov.io/gh/hs-web/hsweb-framework/branch/4.0.x/graph/badge.svg)](https://codecov.io/gh/hs-web/hsweb-framework/branch/master)
-[![Build Status](https://api.travis-ci.com/hs-web/hsweb-framework.svg?branch=4.0.x)](https://travis-ci.
-com/hs-web/hsweb-framework)
+[![Build Status](https://api.travis-ci.com/hs-web/hsweb-framework.svg?branch=4.0.x)](https://travis-ci.com/hs-web/hsweb-framework)
 [![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg?style=flat-square)](https://www.apache.org/licenses/LICENSE-2.0.html)
 
 # 功能,特性
