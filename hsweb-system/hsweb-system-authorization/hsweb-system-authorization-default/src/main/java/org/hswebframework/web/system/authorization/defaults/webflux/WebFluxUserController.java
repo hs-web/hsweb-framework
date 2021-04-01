@@ -71,6 +71,7 @@ public class WebFluxUserController implements ReactiveServiceQueryController<Use
 
     @PutMapping("/passwd")
     @ResourceAction(id = "update-self-pwd",name = "修改当前用户密码")
+    @Operation(summary = "修改当前用户密码")
     public Mono<Boolean> changePassword(@RequestBody ChangePasswordRequest request) {
         return Authentication
                 .currentReactive()
