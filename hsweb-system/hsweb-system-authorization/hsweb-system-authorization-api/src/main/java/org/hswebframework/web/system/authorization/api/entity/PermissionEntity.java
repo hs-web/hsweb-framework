@@ -4,11 +4,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import org.hswebframework.ezorm.rdb.mapping.annotation.ColumnType;
 import org.hswebframework.ezorm.rdb.mapping.annotation.Comment;
+import org.hswebframework.ezorm.rdb.mapping.annotation.DefaultValue;
 import org.hswebframework.ezorm.rdb.mapping.annotation.JsonCodec;
 import org.hswebframework.web.api.crud.entity.GenericEntity;
+import org.hswebframework.web.validator.CreateGroup;
 
 import javax.persistence.Column;
 import javax.persistence.Table;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.sql.JDBCType;
 import java.util.List;
@@ -25,6 +28,7 @@ public class PermissionEntity extends GenericEntity<String> {
     @Column
     @Comment("权限名称")
     @Schema(description = "权限名称")
+    @NotBlank(message = "权限名称不能为空",groups = CreateGroup.class)
     private String name;
 
     @Column
@@ -35,6 +39,7 @@ public class PermissionEntity extends GenericEntity<String> {
     @Column(nullable = false)
     @Comment("状态")
     @Schema(description = "状态")
+    @DefaultValue("1")
     private Byte status;
 
     @Column
