@@ -2,6 +2,7 @@ package org.hswebframework.web.crud.sql;
 
 import io.r2dbc.spi.Connection;
 import io.r2dbc.spi.ConnectionFactory;
+import io.r2dbc.spi.Result;
 import io.r2dbc.spi.Statement;
 import lombok.Setter;
 import org.hswebframework.ezorm.rdb.executor.SqlRequest;
@@ -21,6 +22,7 @@ import reactor.core.publisher.SignalType;
 
 import java.time.ZoneOffset;
 import java.util.Date;
+import java.util.Map;
 
 public class DefaultR2dbcExecutor extends R2dbcReactiveSqlExecutor {
 
@@ -81,7 +83,13 @@ public class DefaultR2dbcExecutor extends R2dbcReactiveSqlExecutor {
 
     @Override
     protected void releaseConnection(SignalType type, Connection connection) {
+        //所有方法都被事务接管,不用手动释放
+    }
 
+    @Override
+    @Transactional(propagation = Propagation.NOT_SUPPORTED, transactionManager = TransactionManagers.r2dbcTransactionManager)
+    public Mono<Void> execute(SqlRequest request) {
+        return super.execute(request);
     }
 
     @Override
@@ -97,8 +105,38 @@ public class DefaultR2dbcExecutor extends R2dbcReactiveSqlExecutor {
     }
 
     @Override
+    @Transactional(transactionManager = TransactionManagers.r2dbcTransactionManager)
+    public Mono<Integer> update(SqlRequest request) {
+        return super.update(request);
+    }
+
+    @Override
+    @Transactional(transactionManager = TransactionManagers.r2dbcTransactionManager)
+    public Mono<Integer> update(String sql, Object... args) {
+        return super.update(sql,args);
+    }
+
+    @Override
     @Transactional(readOnly = true, transactionManager = TransactionManagers.r2dbcTransactionManager)
     public <E> Flux<E> select(Publisher<SqlRequest> request, ResultWrapper<E, ?> wrapper) {
         return super.select(request, wrapper);
+    }
+
+    @Override
+    @Transactional(readOnly = true, transactionManager = TransactionManagers.r2dbcTransactionManager)
+    public Flux<Map<String, Object>> select(String sql, Object... args) {
+        return super.select(sql,args);
+    }
+
+    @Override
+    @Transactional(readOnly = true, transactionManager = TransactionManagers.r2dbcTransactionManager)
+    public <E> Flux<E> select(String sql, ResultWrapper<E, ?> wrapper) {
+        return super.select(sql,wrapper);
+    }
+
+    @Override
+    @Transactional(readOnly = true, transactionManager = TransactionManagers.r2dbcTransactionManager)
+    public <E> Flux<E> select(SqlRequest sqlRequest, ResultWrapper<E, ?> wrapper) {
+        return super.select(sqlRequest,wrapper);
     }
 }
