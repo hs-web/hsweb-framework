@@ -87,13 +87,13 @@ public class DefaultR2dbcExecutor extends R2dbcReactiveSqlExecutor {
     }
 
     @Override
-    @Transactional(propagation = Propagation.NOT_SUPPORTED, transactionManager = TransactionManagers.r2dbcTransactionManager)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, transactionManager = TransactionManagers.r2dbcTransactionManager)
     public Mono<Void> execute(SqlRequest request) {
         return super.execute(request);
     }
 
     @Override
-    @Transactional(propagation = Propagation.NOT_SUPPORTED, transactionManager = TransactionManagers.r2dbcTransactionManager)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, transactionManager = TransactionManagers.r2dbcTransactionManager)
     public Mono<Void> execute(Publisher<SqlRequest> request) {
         return super.execute(request);
     }
