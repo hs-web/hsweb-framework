@@ -567,8 +567,10 @@ public final class FastBeanCopier {
                     }
                     return convert(val, targetClass, genericType);
                 }
+                String strSource=String.valueOf(source);
                 for (T t : targetClass.getEnumConstants()) {
-                    if (((Enum) t).name().equalsIgnoreCase(String.valueOf(source))) {
+                    if (((Enum) t).name().equalsIgnoreCase(strSource)
+                            ||Objects.equals(String.valueOf(((Enum<?>) t).ordinal()),strSource)) {
                         return t;
                     }
                 }
