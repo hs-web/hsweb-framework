@@ -52,6 +52,11 @@ public class QueryParamEntity extends QueryParam {
     @Schema(description = "设置了此值后将不重复执行count查询总数")
     private Integer total;
 
+    @Getter
+    @Setter
+    @Schema(description = "是否进行并行分页")
+    private boolean parallelPager = false;
+
     @Override
     @Hidden
     public boolean isForUpdate() {

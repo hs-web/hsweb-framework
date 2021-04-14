@@ -100,12 +100,7 @@ public interface ReactiveServiceQueryController<E, K> {
                     .collectList()
                     .map(list -> PagerResult.of(query.getTotal(), list, query));
         }
-
-        return Mono.zip(
-                getService().createQuery().setParam(query).count(),
-                getService().createQuery().setParam(query).fetch().collectList(),
-                (total, data) -> PagerResult.of(total, data, query)
-        );
+        return getService().queryPager(query);
 
     }
 

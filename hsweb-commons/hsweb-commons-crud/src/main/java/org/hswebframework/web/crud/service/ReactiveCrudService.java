@@ -116,6 +116,15 @@ public interface ReactiveCrudService<E, K> {
                     .collectList()
                     .map(list -> PagerResult.of(query.getTotal(), list, query));
         }
+        //并行分页
+        if (query.isParallelPager()) {
+            return Mono
+                    .zip(
+                            createQuery().setParam(query).count(),
+                            createQuery().setParam(query.clone()).fetch().map(mapper).collectList(),
+                            (total, data) -> PagerResult.of(total, data, query)
+                    );
+        }
         return getRepository()
                 .createQuery()
                 .setParam(query)
