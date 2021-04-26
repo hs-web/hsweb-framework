@@ -28,10 +28,11 @@ public class DefaultDimensionUserService extends GenericReactiveCrudService<Dime
 
     @EventListener
     public void handleUserDeleteEntity(UserDeletedEvent event) {
-        createDelete()
-                .where(DimensionUserEntity::getUserId, event.getUser().getId())
-                .execute()
-                .subscribe(i -> log.debug("user deleted,clear user dimension!"));
+        event.async(this.createDelete()
+                        .where(DimensionUserEntity::getUserId, event.getUser().getId())
+                        .execute()
+                        .doOnSuccess(i -> log.debug("user deleted,clear user dimension!"))
+        );
     }
 
     @Override

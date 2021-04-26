@@ -2,6 +2,7 @@ package org.hswebframework.web.system.authorization.api.event;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.hswebframework.web.event.DefaultAsyncEvent;
 import org.hswebframework.web.system.authorization.api.entity.UserEntity;
 
 /**
@@ -14,7 +15,7 @@ import org.hswebframework.web.system.authorization.api.entity.UserEntity;
  */
 @AllArgsConstructor
 @Getter
-public class UserModifiedEvent {
+public class UserModifiedEvent extends DefaultAsyncEvent {
     private UserEntity userEntity;
 
     private boolean passwordModified;

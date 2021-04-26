@@ -69,41 +69,45 @@ public class DefaultReactiveUserService extends GenericReactiveCrudService<UserE
 
     protected Mono<UserEntity> doAdd(UserEntity userEntity) {
 
-        return Mono.defer(() -> {
-            userEntity.setSalt(IDGenerator.RANDOM.generate());
-            usernameValidator.validate(userEntity.getUsername());
-            passwordValidator.validate(userEntity.getPassword());
-            userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword(), userEntity.getSalt()));
-            return Mono.just(userEntity)
-                    .doOnNext(e -> e.tryValidate(CreateGroup.class))
-                    .filterWhen(e -> createQuery()
-                            .where(userEntity::getUsername)
-                            .count().map(i -> i == 0))
-                    .switchIfEmpty(Mono.error(() -> new ValidationException("用户名已存在")))
-                    .as(getRepository()::insert)
-                    .thenReturn(userEntity)
-                    .doOnSuccess(e -> eventPublisher.publishEvent(new UserCreatedEvent(e)));
-        });
+        return Mono
+                .defer(() -> {
+                    userEntity.setSalt(IDGenerator.RANDOM.generate());
+                    usernameValidator.validate(userEntity.getUsername());
+                    passwordValidator.validate(userEntity.getPassword());
+                    userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword(), userEntity.getSalt()));
+                    return Mono.just(userEntity)
+                               .doOnNext(e -> e.tryValidate(CreateGroup.class))
+                               .filterWhen(e -> createQuery()
+                                       .where(userEntity::getUsername)
+                                       .count().map(i -> i == 0))
+                               .switchIfEmpty(Mono.error(() -> new ValidationException("用户名已存在")))
+                               .as(getRepository()::insert)
+                               .thenReturn(userEntity)
+                               .flatMap(user -> new UserCreatedEvent(user)
+                                       .publish(eventPublisher)
+                                       .thenReturn(user));
+                });
 
     }
 
 
     protected Mono<UserEntity> doUpdate(UserEntity userEntity) {
-        return Mono.defer(() -> {
-            boolean passwordChanged = StringUtils.hasText(userEntity.getPassword());
-            if (passwordChanged) {
-                userEntity.setSalt(IDGenerator.RANDOM.generate());
-                passwordValidator.validate(userEntity.getPassword());
-                userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword(), userEntity.getSalt()));
-            }
-            return getRepository()
-                    .createUpdate()
-                    .set(userEntity)
-                    .where(userEntity::getId)
-                    .execute()
-                    .doOnSuccess(__ -> eventPublisher.publishEvent(new UserModifiedEvent(userEntity, passwordChanged)))
-                    .thenReturn(userEntity);
-        });
+        return Mono
+                .defer(() -> {
+                    boolean passwordChanged = StringUtils.hasText(userEntity.getPassword());
+                    if (passwordChanged) {
+                        userEntity.setSalt(IDGenerator.RANDOM.generate());
+                        passwordValidator.validate(userEntity.getPassword());
+                        userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword(), userEntity.getSalt()));
+                    }
+                    return getRepository()
+                            .createUpdate()
+                            .set(userEntity)
+                            .where(userEntity::getId)
+                            .execute()
+                            .flatMap(__ -> new UserModifiedEvent(userEntity, passwordChanged).publish(eventPublisher))
+                            .thenReturn(userEntity);
+                });
 
     }
 
@@ -117,36 +121,38 @@ public class DefaultReactiveUserService extends GenericReactiveCrudService<UserE
     @Transactional(readOnly = true, transactionManager = TransactionManagers.r2dbcTransactionManager)
     public Mono<UserEntity> findByUsername(String username) {
         return Mono.justOrEmpty(username)
-                .flatMap(_name -> repository.createQuery()
-                        .where(UserEntity::getUsername, _name)
-                        .fetchOne());
+                   .flatMap(_name -> repository
+                           .createQuery()
+                           .where(UserEntity::getUsername, _name)
+                           .fetchOne());
     }
 
     @Override
     @Transactional(readOnly = true, transactionManager = TransactionManagers.r2dbcTransactionManager)
     public Mono<UserEntity> findByUsernameAndPassword(String username, String plainPassword) {
         return Mono.justOrEmpty(username)
-                .flatMap(_name -> repository
-                        .createQuery()
-                        .where(UserEntity::getUsername, _name)
-                        .fetchOne())
-                .filter(user -> passwordEncoder.encode(plainPassword, user.getSalt())
-                        .equals(user.getPassword()));
+                   .flatMap(_name -> repository
+                           .createQuery()
+                           .where(UserEntity::getUsername, _name)
+                           .fetchOne())
+                   .filter(user -> passwordEncoder
+                           .encode(plainPassword, user.getSalt())
+                           .equals(user.getPassword()));
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class, transactionManager = TransactionManagers.r2dbcTransactionManager)
     public Mono<Integer> changeState(Publisher<String> userId, byte state) {
         return Flux.from(userId)
-                .collectList()
-                .filter(CollectionUtils::isNotEmpty)
-                .flatMap(list -> repository
-                        .createUpdate()
-                        .set(UserEntity::getStatus, state)
-                        .where()
-                        .in(UserEntity::getId, list)
-                        .execute())
-                .defaultIfEmpty(0);
+                   .collectList()
+                   .filter(CollectionUtils::isNotEmpty)
+                   .flatMap(list -> repository
+                           .createUpdate()
+                           .set(UserEntity::getStatus, state)
+                           .where()
+                           .in(UserEntity::getId, list)
+                           .execute())
+                   .defaultIfEmpty(0);
     }
 
     @Override
@@ -157,7 +163,8 @@ public class DefaultReactiveUserService extends GenericReactiveCrudService<UserE
                 .switchIfEmpty(Mono.error(NotFoundException::new))
                 .filter(user -> passwordEncoder.encode(oldPassword, user.getSalt()).equals(user.getPassword()))
                 .switchIfEmpty(Mono.error(() -> new ValidationException("密码错误")))
-                .flatMap(user -> repository.createUpdate()
+                .flatMap(user -> repository
+                        .createUpdate()
                         .set(UserEntity::getPassword, passwordEncoder.encode(newPassword, user.getSalt()))
                         .where(user::getId)
                         .execute())
@@ -183,11 +190,13 @@ public class DefaultReactiveUserService extends GenericReactiveCrudService<UserE
     }
 
     @Override
+    @Transactional(readOnly = true, transactionManager = TransactionManagers.r2dbcTransactionManager)
     public Mono<Boolean> deleteUser(String userId) {
-        return this.findById(userId)
+        return this
+                .findById(userId)
                 .flatMap(user -> this
                         .deleteById(Mono.just(userId))
-                        .doOnNext(i -> eventPublisher.publishEvent(new UserDeletedEvent(user)))
+                        .flatMap(i -> new UserDeletedEvent(user).publish(eventPublisher))
                         .thenReturn(true));
     }
 }
