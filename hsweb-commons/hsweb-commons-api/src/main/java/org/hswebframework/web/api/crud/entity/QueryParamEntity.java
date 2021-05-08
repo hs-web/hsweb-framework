@@ -207,6 +207,11 @@ public class QueryParamEntity extends QueryParam {
         return this;
     }
 
+    public QueryParamEntity doNotSort(){
+        this.setSorts(new ArrayList<>());
+        return this;
+    }
+
     @Override
     public QueryParamEntity clone() {
         return (QueryParamEntity) super.clone();
