@@ -76,4 +76,8 @@ public class AuthorizationServiceAutoConfiguration {
         return new UserDimensionTerm();
     }
 
+    @Bean
+    public PermissionProperties permissionProperties(){
+        return new PermissionProperties();
+    }
 }

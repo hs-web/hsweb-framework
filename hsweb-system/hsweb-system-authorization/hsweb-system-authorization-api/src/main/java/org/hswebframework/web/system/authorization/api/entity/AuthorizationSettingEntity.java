@@ -8,7 +8,9 @@ import org.hswebframework.ezorm.rdb.mapping.annotation.Comment;
 import org.hswebframework.ezorm.rdb.mapping.annotation.DefaultValue;
 import org.hswebframework.ezorm.rdb.mapping.annotation.JsonCodec;
 import org.hswebframework.web.api.crud.entity.Entity;
+import org.hswebframework.web.bean.FastBeanCopier;
 import org.hswebframework.web.validator.CreateGroup;
+import org.springframework.util.CollectionUtils;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
@@ -16,6 +18,8 @@ import javax.validation.constraints.NotNull;
 import java.sql.JDBCType;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @Table(name = "s_autz_setting_info", indexes = {
         @Index(name = "idx_sasi_dss", columnList = "dimension_type,dimension_target,state desc"),
@@ -86,4 +90,16 @@ public class AuthorizationSettingEntity implements Entity {
     @Comment("是否合并")
     @Schema(description = "冲突时,是否合并")
     private Boolean merge;
+
+    public AuthorizationSettingEntity copy(Predicate<String> actionFilter,
+                                           Predicate<DataAccessEntity> dataAccessFilter){
+        AuthorizationSettingEntity newSetting= FastBeanCopier.copy(this,new AuthorizationSettingEntity());
+        if(!CollectionUtils.isEmpty(newSetting.getActions())){
+            newSetting.setActions(newSetting.getActions().stream().filter(actionFilter).collect(Collectors.toSet()));
+        }
+        if(!CollectionUtils.isEmpty(newSetting.getDataAccesses())){
+            newSetting.setDataAccesses(newSetting.getDataAccesses().stream().filter(dataAccessFilter).collect(Collectors.toList()));
+        }
+        return newSetting;
+    }
 }

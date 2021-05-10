@@ -9,6 +9,7 @@ import org.hswebframework.web.authorization.DimensionType;
 import org.hswebframework.web.crud.service.GenericReactiveCrudService;
 import org.hswebframework.web.system.authorization.api.entity.AuthorizationSettingEntity;
 import org.hswebframework.web.system.authorization.api.event.ClearUserAuthorizationCacheEvent;
+import org.hswebframework.web.system.authorization.defaults.configuration.PermissionProperties;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
