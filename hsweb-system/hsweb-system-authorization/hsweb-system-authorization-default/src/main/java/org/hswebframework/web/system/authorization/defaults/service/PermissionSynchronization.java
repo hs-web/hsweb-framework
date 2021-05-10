@@ -1,5 +1,6 @@
 package org.hswebframework.web.system.authorization.defaults.service;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.ezorm.rdb.mapping.ReactiveRepository;
 import org.hswebframework.ezorm.rdb.mapping.annotation.Comment;
@@ -60,8 +61,8 @@ public class PermissionSynchronization implements CommandLineRunner {
                             if (null != field.getAnnotation(Column.class) && !"id".equals(field.getName())) {
                                 OptionalField optionalField = new OptionalField();
                                 optionalField.setName(field.getName());
-                                Optional.ofNullable(field.getAnnotation(Comment.class))
-                                        .map(Comment::value)
+                                Optional.ofNullable(field.getAnnotation(Schema.class))
+                                        .map(Schema::description)
                                         .ifPresent(optionalField::setDescribe);
                                 fields.add(optionalField);
                             }
