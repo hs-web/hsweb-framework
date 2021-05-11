@@ -15,7 +15,7 @@ public class AuthorizationCodeTokenRequest extends OAuth2Request {
 
     private OAuth2Client client;
 
-    public AuthorizationCodeTokenRequest(OAuth2Client client, Map<String, Object> parameters) {
+    public AuthorizationCodeTokenRequest(OAuth2Client client, Map<String, String> parameters) {
         super(parameters);
         this.client = client;
     }

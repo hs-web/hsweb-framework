@@ -13,15 +13,15 @@ import java.util.Optional;
 @AllArgsConstructor
 public class OAuth2Request {
 
-    private Map<String, Object> parameters;
+    private Map<String, String> parameters;
 
 
-    public Optional<Object> getParameter(String key) {
+    public Optional<String> getParameter(String key) {
         return Optional.ofNullable(parameters)
                 .map(params -> params.get(key));
     }
 
-    public OAuth2Request with(String parameter, Object key) {
+    public OAuth2Request with(String parameter, String key) {
         if (parameters == null) {
             parameters = new HashMap<>();
         }
