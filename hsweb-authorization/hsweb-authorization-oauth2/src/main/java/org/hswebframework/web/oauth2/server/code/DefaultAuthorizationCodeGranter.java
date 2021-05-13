@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.oauth2.ErrorType;
+import org.hswebframework.web.oauth2.OAuth2Constants;
 import org.hswebframework.web.oauth2.OAuth2Exception;
 import org.hswebframework.web.oauth2.server.AccessToken;
 import org.hswebframework.web.oauth2.server.AccessTokenManager;
@@ -44,7 +45,7 @@ public class DefaultAuthorizationCodeGranter implements AuthorizationCodeGranter
         Authentication authentication = request.getAuthentication();
         AuthorizationCodeCache codeCache = new AuthorizationCodeCache();
         String code = IDGenerator.MD5.generate();
-        request.getParameter("scope").map(String::valueOf).ifPresent(codeCache::setScope);
+        request.getParameter(OAuth2Constants.scope).map(String::valueOf).ifPresent(codeCache::setScope);
         codeCache.setCode(code);
         codeCache.setClientId(client.getClientId());
         ScopePredicate permissionPredicate = OAuth2ScopeUtils.createScopePredicate(codeCache.getScope());

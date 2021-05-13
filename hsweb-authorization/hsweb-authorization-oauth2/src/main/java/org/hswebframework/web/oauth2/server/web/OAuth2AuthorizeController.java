@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import org.hswebframework.web.authorization.Authentication;
-import org.hswebframework.web.authorization.ReactiveAuthenticationManager;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.exception.UnAuthorizedException;
 import org.hswebframework.web.oauth2.ErrorType;
@@ -19,6 +18,7 @@ import org.hswebframework.web.oauth2.server.OAuth2GrantService;
 import org.hswebframework.web.oauth2.server.code.AuthorizationCodeRequest;
 import org.hswebframework.web.oauth2.server.code.AuthorizationCodeTokenRequest;
 import org.hswebframework.web.oauth2.server.credential.ClientCredentialRequest;
+import org.hswebframework.web.oauth2.server.refresh.RefreshTokenRequest;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
@@ -130,6 +130,14 @@ public class OAuth2AuthorizeController {
                 return service
                         .clientCredential()
                         .requestToken(new ClientCredentialRequest(client, param));
+            }
+        },
+        refresh_token{
+            @Override
+            Mono<AccessToken> requestToken(OAuth2GrantService service, OAuth2Client client, Map<String, String> param) {
+                return service
+                        .refreshToken()
+                        .requestToken(new RefreshTokenRequest(client, param));
             }
         };
 
