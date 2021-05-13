@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 public class UserDimensionTerm extends AbstractTermFragmentBuilder {
     public UserDimensionTerm() {
-        super("in-dimension", "在维度中的用户");
+        super("in-dimension", "在维度中的用户数据");
     }
 
     @Override
