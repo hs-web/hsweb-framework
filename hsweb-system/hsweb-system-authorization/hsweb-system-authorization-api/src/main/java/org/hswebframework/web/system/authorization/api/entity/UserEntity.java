@@ -17,6 +17,15 @@ import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 
+/**
+ * 系统用户实体
+ *
+ * @author zhouhao
+ * @see org.hswebframework.web.system.authorization.api.event.UserDeletedEvent
+ * @see org.hswebframework.web.system.authorization.api.event.UserCreatedEvent
+ * @see org.hswebframework.web.system.authorization.api.event.UserModifiedEvent
+ * @since 4.0.0
+ */
 @Getter
 @Setter
 @Table(name = "s_user",
