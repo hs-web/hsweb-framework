@@ -3,6 +3,7 @@ package org.hswebframework.web.crud.web.reactive;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import org.hswebframework.web.api.crud.entity.PagerResult;
+import org.hswebframework.web.api.crud.entity.QueryNoPagingOperation;
 import org.hswebframework.web.api.crud.entity.QueryOperation;
 import org.hswebframework.web.api.crud.entity.QueryParamEntity;
 import org.hswebframework.web.authorization.annotation.Authorize;
@@ -35,7 +36,7 @@ public interface ReactiveServiceQueryController<E, K> {
      */
     @GetMapping("/_query/no-paging")
     @QueryAction
-    @QueryOperation(summary = "使用GET方式分页动态查询(不返回总数)",
+    @QueryNoPagingOperation(summary = "使用GET方式分页动态查询(不返回总数)",
             description = "此操作不返回分页总数,如果需要获取全部数据,请设置参数paging=false")
     default Flux<E> query(@Parameter(hidden = true) QueryParamEntity query) {
         return getService()
@@ -71,9 +72,9 @@ public interface ReactiveServiceQueryController<E, K> {
      */
     @PostMapping("/_query/no-paging")
     @QueryAction
-    @Operation(summary = "使用POST方式分页动态查询(不返回总数)",
+    @QueryNoPagingOperation(summary = "使用POST方式分页动态查询(不返回总数)",
             description = "此操作不返回分页总数,如果需要获取全部数据,请设置参数paging=false")
-    default Flux<E> query(@RequestBody Mono<QueryParamEntity> query) {
+    default Flux<E> query(@Parameter(hidden = true)@RequestBody Mono<QueryParamEntity> query) {
         return query.flatMapMany(this::query);
     }
 
@@ -107,15 +108,15 @@ public interface ReactiveServiceQueryController<E, K> {
     @PostMapping("/_query")
     @QueryAction
     @SuppressWarnings("all")
-    @Operation(summary = "使用POST方式分页动态查询")
-    default Mono<PagerResult<E>> queryPager(@RequestBody Mono<QueryParamEntity> query) {
+    @QueryOperation(summary = "使用POST方式分页动态查询")
+    default Mono<PagerResult<E>> queryPager(@Parameter(hidden = true) @RequestBody Mono<QueryParamEntity> query) {
         return query.flatMap(q -> queryPager(q));
     }
 
     @PostMapping("/_count")
     @QueryAction
-    @Operation(summary = "使用POST方式查询总数")
-    default Mono<Integer> count(@RequestBody Mono<QueryParamEntity> query) {
+    @QueryNoPagingOperation(summary = "使用POST方式查询总数")
+    default Mono<Integer> count(@Parameter(hidden = true) @RequestBody Mono<QueryParamEntity> query) {
         return query.flatMap(this::count);
     }
 
@@ -131,7 +132,7 @@ public interface ReactiveServiceQueryController<E, K> {
      */
     @GetMapping("/_count")
     @QueryAction
-    @QueryOperation(summary = "使用GET方式查询总数")
+    @QueryNoPagingOperation(summary = "使用GET方式查询总数")
     default Mono<Integer> count(@Parameter(hidden = true) QueryParamEntity query) {
         return getService()
                 .createQuery()
