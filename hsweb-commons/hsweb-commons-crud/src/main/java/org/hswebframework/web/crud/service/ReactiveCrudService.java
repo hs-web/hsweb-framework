@@ -16,21 +16,73 @@ import reactor.core.publisher.Mono;
 import java.util.Collection;
 import java.util.function.Function;
 
+/**
+ * 响应式增删改查通用服务类,增删改查,实现此接口.
+ * 利用{@link ReactiveRepository}来实现.
+ *
+ * @param <E> 实体类类型
+ * @param <K> 主键类型
+ * @see ReactiveRepository
+ * @see GenericReactiveCrudService
+ * @see GenericReactiveTreeSupportCrudService
+ * @see EnableCacheReactiveCrudService
+ */
 public interface ReactiveCrudService<E, K> {
 
+    /**
+     * @return 响应式实体操作仓库
+     */
     ReactiveRepository<E, K> getRepository();
 
+    /**
+     * 创建一个DSL的动态查询接口,可使用DSL方式进行链式调用来构造动态查询条件.例如:
+     * <pre>
+     *Flux&lt;MyEntity&gt; flux=
+     *     service
+     *     .createQuery()
+     *     .where(MyEntity::getName,name)
+     *     .in(MyEntity::getState,state1,state2)
+     *     .fetch()
+     * </pre>
+     * @return 动态查询接口
+     */
     default ReactiveQuery<E> createQuery() {
         return getRepository().createQuery();
     }
 
+    /**
+     * 创建一个DSL动态更新接口,可使用DSL方式进行链式调用来构造动态更新条件.例如:
+     * <pre>
+     *Mono&lt;Integer&gt; flux=
+     *     service
+     *     .createUpdate()
+     *     .set(entity::getState)
+     *     .where(MyEntity::getName,name)
+     *     .in(MyEntity::getState,state1,state2)
+     *     .execute()
+     * </pre>
+     * @return 动态更新接口
+     */
     default ReactiveUpdate<E> createUpdate() {
         return getRepository().createUpdate();
     }
 
+    /**
+     * 创建一个DSL动态删除接口,可使用DSL方式进行链式调用来构造动态删除条件.例如:
+     * <pre>
+     *Mono&lt;Integer&gt; flux=
+     *     service
+     *     .createDelete()
+     *     .where(MyEntity::getName,name)
+     *     .in(MyEntity::getState,state1,state2)
+     *     .execute()
+     * </pre>
+     * @return 动态更新接口
+     */
     default ReactiveDelete createDelete() {
         return getRepository().createDelete();
     }
+
 
     @Transactional(readOnly = true, transactionManager = TransactionManagers.r2dbcTransactionManager)
     default Mono<E> findById(K id) {

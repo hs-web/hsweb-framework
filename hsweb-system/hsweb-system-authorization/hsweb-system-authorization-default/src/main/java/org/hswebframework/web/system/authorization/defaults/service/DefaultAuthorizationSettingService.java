@@ -41,90 +41,98 @@ public class DefaultAuthorizationSettingService extends GenericReactiveCrudServi
     @Override
     public Mono<SaveResult> save(Publisher<AuthorizationSettingEntity> entityPublisher) {
         return Flux.from(entityPublisher)
-                .map(this::generateId)
-                .collectList()
-                .flatMap(autz -> super.save(Flux.fromIterable(autz)).doOnSuccess(r -> clearUserAuthCache(autz)));
+                   .map(this::generateId)
+                   .collectList()
+                   .flatMap(autz -> super.save(Flux.fromIterable(autz)).doOnSuccess(r -> clearUserAuthCache(autz)));
     }
 
     @Override
     public Mono<Integer> updateById(String id, Mono<AuthorizationSettingEntity> entityPublisher) {
         return entityPublisher
                 .flatMap(autz -> super.updateById(id, Mono.just(autz))
-                        .doOnSuccess((r) -> clearUserAuthCache(Collections.singletonList(autz))));
+                                      .doOnSuccess((r) -> clearUserAuthCache(Collections.singletonList(autz))));
     }
 
     @Override
     public Mono<Integer> deleteById(Publisher<String> idPublisher) {
-        return Flux.from(idPublisher)
+        Flux<String> cache = Flux.from(idPublisher);
+
+        return this
+                .findById(cache)
                 .collectList()
-                .flatMap(list -> super.deleteById(Flux.fromIterable(list))
-                        .flatMap(r -> findById(Flux.fromIterable(list))
-                                .collectList()
-                                .doOnSuccess(this::clearUserAuthCache)
-                                .thenReturn(r)));
+                .flatMap(list -> this
+                        .deleteById(cache)
+                        .doOnSuccess((i) -> clearUserAuthCache(list))
+                );
     }
 
     @Override
     public Mono<Integer> insert(Publisher<AuthorizationSettingEntity> entityPublisher) {
 
         return Flux.from(entityPublisher)
-                .map(this::generateId)
-                .collectList()
-                .flatMap(list -> super.insert(Flux.fromIterable(list))
-                        .doOnSuccess(i -> clearUserAuthCache(list)));
+                   .map(this::generateId)
+                   .collectList()
+                   .flatMap(list -> super
+                           .insert(Flux.fromIterable(list))
+                           .doOnSuccess(i -> clearUserAuthCache(list)));
     }
 
     @Override
     public Mono<Integer> insertBatch(Publisher<? extends Collection<AuthorizationSettingEntity>> entityPublisher) {
-        return Flux.from(entityPublisher)
+        return Flux
+                .from(entityPublisher)
                 .collectList()
-                .flatMap(list -> super.insertBatch(Flux.fromStream(list.stream()
-                        .map(lst -> lst.stream()
-                                .map(this::generateId)
-                                .collect(Collectors.toList()))))
-                        .doOnSuccess(i -> clearUserAuthCache(list.stream().flatMap(Collection::stream).collect(Collectors.toList()))));
+                .flatMap(list -> super
+                        .insertBatch(Flux.fromStream(list.stream()
+                                                         .map(lst -> lst.stream()
+                                                                        .map(this::generateId)
+                                                                        .collect(Collectors.toList()))))
+                        .doOnSuccess(i -> clearUserAuthCache(list
+                                                                     .stream()
+                                                                     .flatMap(Collection::stream)
+                                                                     .collect(Collectors.toList()))));
     }
 
     @Override
     public ReactiveUpdate<AuthorizationSettingEntity> createUpdate() {
 
-        return super.createUpdate().onExecute((update, r) ->
-                r.doOnSuccess(i -> {
-                    createQuery()
-                            .setParam(update.toQueryParam())
-                            .fetch()
-                            .collectList()
-                            .subscribe(this::clearUserAuthCache);
-                }));
+        return super
+                .createUpdate()
+                .onExecute((update, r) -> r
+                        .doOnSuccess(i -> this
+                                .createQuery()
+                                .setParam(update.toQueryParam())
+                                .fetch()
+                                .collectList()
+                                .subscribe(this::clearUserAuthCache)));
     }
 
     @Override
     public ReactiveDelete createDelete() {
         return super.createDelete()
-                .onExecute((delete, r) ->
-                        r.doOnSuccess(i -> {
-                            createQuery()
+                    .onExecute((delete, r) -> r
+                            .doOnSuccess(i -> this
+                                    .createQuery()
                                     .setParam(delete.toQueryParam())
                                     .fetch()
                                     .collectList()
-                                    .subscribe(this::clearUserAuthCache);
-                        }));
+                                    .subscribe(this::clearUserAuthCache)));
     }
 
     protected void clearUserAuthCache(List<AuthorizationSettingEntity> settings) {
         Flux.fromIterable(providers)
-                .flatMap(provider ->
-                        //按维度类型进行映射
-                        provider.getAllType()
-                                .map(DimensionType::getId)
-                                .map(t -> Tuples.of(t, provider)))
-                .collect(Collectors.toMap(Tuple2::getT1, Tuple2::getT2))
-                .flatMapMany(typeProviderMapping -> Flux
-                        .fromIterable(settings)//根据维度获取所有userId
-                        .flatMap(setting -> Mono.justOrEmpty(typeProviderMapping.get(setting.getDimensionType()))
-                                .flatMapMany(provider -> provider.getUserIdByDimensionId(setting.getDimensionTarget()))))
-                .collectList()
-                .map(ClearUserAuthorizationCacheEvent::of)
-                .subscribe(eventPublisher::publishEvent);
+            .flatMap(provider ->
+                             //按维度类型进行映射
+                             provider.getAllType()
+                                     .map(DimensionType::getId)
+                                     .map(t -> Tuples.of(t, provider)))
+            .collect(Collectors.toMap(Tuple2::getT1, Tuple2::getT2))
+            .flatMapMany(typeProviderMapping -> Flux
+                    .fromIterable(settings)//根据维度获取所有userId
+                    .flatMap(setting -> Mono.justOrEmpty(typeProviderMapping.get(setting.getDimensionType()))
+                                            .flatMapMany(provider -> provider.getUserIdByDimensionId(setting.getDimensionTarget()))))
+            .collectList()
+            .map(ClearUserAuthorizationCacheEvent::of)
+            .subscribe(eventPublisher::publishEvent);
     }
 }
