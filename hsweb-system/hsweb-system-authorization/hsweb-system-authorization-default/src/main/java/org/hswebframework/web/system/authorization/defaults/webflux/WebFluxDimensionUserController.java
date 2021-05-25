@@ -72,10 +72,10 @@ public class WebFluxDimensionUserController implements ReactiveServiceCrudContro
     @PostMapping("/user/{dimensionType}/{dimensionId}/_unbind")
     @Operation(summary = "解除用户关联的指定维度")
     public Mono<Integer> deleteUserDimension(@PathVariable
-                                             @Parameter(description = "维度类型") String dimensionType,
+                                             @Parameter(description = "维度类型,比如: role") String dimensionType,
                                              @PathVariable
-                                             @Parameter(description = "维度ID") String dimensionId,
-                                             @Parameter(description = "用户ID") Mono<List<String>> userId) {
+                                             @Parameter(description = "维度ID,比如: 角色ID") String dimensionId,
+                                             @Parameter(description = "用户ID") @RequestBody Mono<List<String>> userId) {
         return userId
                 .flatMap(userIdList -> dimensionUserService
                         .createDelete()
