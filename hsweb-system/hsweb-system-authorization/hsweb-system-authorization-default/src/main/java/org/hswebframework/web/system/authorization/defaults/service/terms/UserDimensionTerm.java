@@ -10,6 +10,13 @@ import org.hswebframework.ezorm.rdb.operator.builder.fragments.term.AbstractTerm
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * 查询和用户维度绑定的数据,如: 查询机构下的用户
+ * where id$in-dimension$org = orgId
+ *
+ * @author zhouhao
+ * @since 4.0.10
+ */
 public class UserDimensionTerm extends AbstractTermFragmentBuilder {
     public UserDimensionTerm() {
         super("in-dimension", "在维度中的用户数据");
@@ -24,11 +31,27 @@ public class UserDimensionTerm extends AbstractTermFragmentBuilder {
         }
 
         PrepareSqlFragments fragments = PrepareSqlFragments.of();
+        List<String> options = term.getOptions();
 
-        fragments.addSql("exists(select 1 from s_dimension_user d where d.user_id =", columnFullName, "and d.dimension_id in(",
-                values.stream().map(r -> "?").collect(Collectors.joining(",")), "))")
-                .addParameter(values);
+        if (options.contains("not")) {
+            fragments.addSql("not");
+        }
 
+        fragments.addSql("exists(select 1 from s_dimension_user d where d.user_id =", columnFullName);
+
+        if (options.size() > 0) {
+            String typeId = options.get(0);
+            if (!"not".equals(typeId) && !"any".equals(typeId)) {
+                fragments.addSql("and d.dimension_type_id = ?").addParameter(typeId);
+            }
+        }
+
+        if (!options.contains("any")) {
+            fragments.addSql("and d.dimension_id in(",
+                             values.stream().map(r -> "?").collect(Collectors.joining(",")), ")")
+                     .addParameter(values);
+        }
+        fragments.addSql(")");
 
         return fragments;
     }
