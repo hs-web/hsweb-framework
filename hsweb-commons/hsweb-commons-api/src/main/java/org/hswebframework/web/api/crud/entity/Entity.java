@@ -40,6 +40,10 @@ public interface Entity extends Serializable {
         return FastBeanCopier.copy(this, target, ignoreProperties);
     }
 
+    default <T> T copyTo(T target, String... ignoreProperties) {
+        return FastBeanCopier.copy(this, target, ignoreProperties);
+    }
+
     @SuppressWarnings("all")
     default <T> T copyFrom(Object target, String... ignoreProperties) {
         return (T) FastBeanCopier.copy(target, this, ignoreProperties);
