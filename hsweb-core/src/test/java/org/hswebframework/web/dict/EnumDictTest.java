@@ -27,18 +27,30 @@ public class EnumDictTest {
 
         System.out.println(val);
         TestEntity testEntity = mapper.readerFor(TestEntity.class)
-                .readValue(val);
+                                      .readValue(val);
 
         Assert.assertEquals(testEntity.testEnum, TestEnum.E1);
         testEntity = mapper.readerFor(TestEntity.class)
-                .readValue("{\"testEnum\":\"E1\"}");
+                           .readValue("{\"testEnum\":\"E1\"}");
         Assert.assertEquals(testEntity.testEnum, TestEnum.E1);
 
         testEntity = mapper.readerFor(TestEntity.class)
-                .readValue("{\"testEnum\":\"e1\"}");
+                           .readValue("{\"testEnum\":\"e1\"}");
         Assert.assertEquals(testEntity.testEnum, TestEnum.E1);
 
         System.out.println((Object) mapper.readerFor(TestEnum.class).readValue("\"E1\""));
+
+    }
+
+    @Test
+    public void testEq() {
+        assertFalse(EnumDict.find(TestEnum.class, 1)
+                            .isPresent());
+
+        assertTrue(EnumDict.find(TestEnum.class, "e1")
+                           .isPresent());
+        assertTrue(EnumDict.find(TestEnum.class, "E1")
+                           .isPresent());
 
     }
 
@@ -50,8 +62,8 @@ public class EnumDictTest {
         private SimpleEnum simpleEnum = SimpleEnum.A;
     }
 
-    public  enum SimpleEnum{
-        A,B
+    public enum SimpleEnum {
+        A, B
     }
 
 }
