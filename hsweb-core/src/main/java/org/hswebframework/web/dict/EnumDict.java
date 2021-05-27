@@ -99,9 +99,9 @@ public interface EnumDict<V> extends JSONSerializable {
         return this == v
                 || getValue() == v
                 || getValue().equals(v)
-                || (v instanceof Number ? in(((Number) v).longValue()) : false)
+//                || (v instanceof Number ? in(((Number) v).longValue()) : false)
                 || String.valueOf(getValue()).equalsIgnoreCase(String.valueOf(v))
-                || v.equals(getMask())
+//                || v.equals(getMask())
                 || getText().equalsIgnoreCase(String.valueOf(v)
         );
     }
