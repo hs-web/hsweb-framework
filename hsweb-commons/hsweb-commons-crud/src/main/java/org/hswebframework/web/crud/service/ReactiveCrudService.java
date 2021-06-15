@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.function.Function;
 
@@ -37,13 +38,14 @@ public interface ReactiveCrudService<E, K> {
     /**
      * 创建一个DSL的动态查询接口,可使用DSL方式进行链式调用来构造动态查询条件.例如:
      * <pre>
-     *Flux&lt;MyEntity&gt; flux=
+     * Flux&lt;MyEntity&gt; flux=
      *     service
      *     .createQuery()
      *     .where(MyEntity::getName,name)
      *     .in(MyEntity::getState,state1,state2)
      *     .fetch()
      * </pre>
+     *
      * @return 动态查询接口
      */
     default ReactiveQuery<E> createQuery() {
@@ -53,7 +55,7 @@ public interface ReactiveCrudService<E, K> {
     /**
      * 创建一个DSL动态更新接口,可使用DSL方式进行链式调用来构造动态更新条件.例如:
      * <pre>
-     *Mono&lt;Integer&gt; flux=
+     * Mono&lt;Integer&gt; flux=
      *     service
      *     .createUpdate()
      *     .set(entity::getState)
@@ -61,6 +63,7 @@ public interface ReactiveCrudService<E, K> {
      *     .in(MyEntity::getState,state1,state2)
      *     .execute()
      * </pre>
+     *
      * @return 动态更新接口
      */
     default ReactiveUpdate<E> createUpdate() {
@@ -70,13 +73,14 @@ public interface ReactiveCrudService<E, K> {
     /**
      * 创建一个DSL动态删除接口,可使用DSL方式进行链式调用来构造动态删除条件.例如:
      * <pre>
-     *Mono&lt;Integer&gt; flux=
+     * Mono&lt;Integer&gt; flux=
      *     service
      *     .createDelete()
      *     .where(MyEntity::getName,name)
      *     .in(MyEntity::getState,state1,state2)
      *     .execute()
      * </pre>
+     *
      * @return 动态更新接口
      */
     default ReactiveDelete createDelete() {
@@ -183,7 +187,7 @@ public interface ReactiveCrudService<E, K> {
                 .count()
                 .flatMap(total -> {
                     if (total == 0) {
-                        return Mono.just(PagerResult.empty());
+                        return Mono.just(PagerResult.of(0, new ArrayList<>(), query));
                     }
                     return query(query.clone().rePaging(total))
                             .map(mapper)
