@@ -6,7 +6,6 @@ import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.AuthenticationInitializeService;
 import org.hswebframework.web.authorization.AuthenticationManager;
 import org.hswebframework.web.authorization.AuthenticationRequest;
-import org.hswebframework.web.authorization.listener.event.AuthorizationFailedEvent;
 import org.hswebframework.web.authorization.simple.PlainTextUsernamePasswordAuthenticationRequest;
 import org.hswebframework.web.commons.entity.DataStatus;
 import org.hswebframework.web.entity.authorization.UserEntity;
@@ -16,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
 
 import java.util.function.Supplier;
 
@@ -98,7 +96,7 @@ public class SimpleAuthenticationManager implements AuthenticationManager {
         if (null != cacheManager) {
             Cache cache = cacheManager.getCache(USER_AUTH_CACHE_NAME);
             Cache.ValueWrapper wrapper = cache.get(userId);
-            if (wrapper == null) {
+            if (wrapper == null || wrapper.get() == null) {
                 Authentication authentication = supplier.get();
                 cache.put(userId, authentication);
                 return authentication;
