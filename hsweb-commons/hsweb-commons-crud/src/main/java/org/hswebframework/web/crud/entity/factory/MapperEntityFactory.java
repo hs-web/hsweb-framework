@@ -172,7 +172,7 @@ public class MapperEntityFactory implements EntityFactory, BeanFactory {
             return (T) new HashSet<>();
         }
 
-        throw new NotFoundException("error.cant_create_instance",beanClass);
+        throw new NotFoundException("无法初始化实体类:"+beanClass);
     }
 
     @Override
