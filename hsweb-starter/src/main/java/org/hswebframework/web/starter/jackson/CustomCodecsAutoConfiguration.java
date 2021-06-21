@@ -29,14 +29,15 @@ public class CustomCodecsAutoConfiguration {
 		CodecCustomizer jacksonDecoderCustomizer(EntityFactory entityFactory, ObjectMapper objectMapper) {
 		//	objectMapper.setTypeFactory(new CustomTypeFactory(entityFactory));
 			SimpleModule module = new SimpleModule();
-			JsonDeserializer deserializer = new EnumDict.EnumDictJSONDeserializer();
+			@SuppressWarnings("all")
+			JsonDeserializer<Enum<?>> deserializer = new EnumDict.EnumDictJSONDeserializer();
 			module.addDeserializer(Enum.class,  deserializer);
 			objectMapper.registerModule(module);
 
 
 			return (configurer) -> {
 				CodecConfigurer.DefaultCodecs defaults = configurer.defaultCodecs();
-				defaults.jackson2JsonDecoder(new CustomJackson2JsonDecoder(objectMapper));
+				defaults.jackson2JsonDecoder(new CustomJackson2JsonDecoder(entityFactory,objectMapper));
 			};
 		}
 

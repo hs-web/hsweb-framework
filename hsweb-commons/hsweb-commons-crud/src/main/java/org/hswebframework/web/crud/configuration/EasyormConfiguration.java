@@ -17,6 +17,7 @@ import org.hswebframework.ezorm.rdb.operator.DatabaseOperator;
 import org.hswebframework.ezorm.rdb.operator.DefaultDatabaseOperator;
 import org.hswebframework.web.api.crud.entity.EntityFactory;
 import org.hswebframework.web.crud.annotation.EnableEasyormRepository;
+import org.hswebframework.web.crud.entity.factory.EntityMappingCustomizer;
 import org.hswebframework.web.crud.entity.factory.MapperEntityFactory;
 import org.hswebframework.web.crud.events.CompositeEventListener;
 import org.hswebframework.web.crud.events.EntityEventListener;
@@ -26,6 +27,7 @@ import org.hswebframework.web.crud.generator.DefaultIdGenerator;
 import org.hswebframework.web.crud.generator.MD5Generator;
 import org.hswebframework.web.crud.generator.SnowFlakeStringIdGenerator;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -52,8 +54,12 @@ public class EasyormConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public EntityFactory entityFactory() {
-        return new MapperEntityFactory();
+    public EntityFactory entityFactory(ObjectProvider<EntityMappingCustomizer> customizers) {
+        MapperEntityFactory factory= new MapperEntityFactory();
+        for (EntityMappingCustomizer customizer : customizers) {
+            customizer.custom(factory);
+        }
+        return factory;
     }
 
     @Bean

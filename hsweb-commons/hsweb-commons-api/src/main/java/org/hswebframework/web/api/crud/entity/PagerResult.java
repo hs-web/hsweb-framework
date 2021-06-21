@@ -20,7 +20,9 @@ package org.hswebframework.web.api.crud.entity;
 
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hswebframework.ezorm.core.param.QueryParam;
 
@@ -33,15 +35,20 @@ public class PagerResult<E> {
     private static final long serialVersionUID = -6171751136953308027L;
 
     public static <E> PagerResult<E> empty() {
-        return new PagerResult<>(0, new ArrayList<>());
+        return of(0, new ArrayList<>());
     }
 
+    @SuppressWarnings("all")
     public static <E> PagerResult<E> of(int total, List<E> list) {
-        return new PagerResult<>(total, list);
+        PagerResult<E> result;
+        result = EntityFactoryHolder.newInstance(PagerResult.class, PagerResult::new);
+        result.setTotal(total);
+        result.setData(list);
+        return result;
     }
 
     public static <E> PagerResult<E> of(int total, List<E> list, QueryParam entity) {
-        PagerResult<E> pagerResult = new PagerResult<>(total, list);
+        PagerResult<E> pagerResult = of(total, list);
         pagerResult.setPageIndex(entity.getThinkPageIndex());
         pagerResult.setPageSize(entity.getPageSize());
         return pagerResult;

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
 import com.fasterxml.jackson.databind.util.TokenBuffer;
+import org.hswebframework.web.api.crud.entity.EntityFactory;
 import org.reactivestreams.Publisher;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
@@ -19,12 +20,14 @@ import org.springframework.http.codec.HttpMessageDecoder;
 import org.springframework.http.codec.json.Jackson2CodecSupport;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
@@ -33,11 +36,14 @@ import java.util.Map;
 
 public class CustomJackson2JsonDecoder extends Jackson2CodecSupport implements HttpMessageDecoder<Object> {
 
+    private final EntityFactory entityFactory;
+
     /**
      * Constructor with a Jackson {@link ObjectMapper} to use.
      */
-    public CustomJackson2JsonDecoder(ObjectMapper mapper, MimeType... mimeTypes) {
+    public CustomJackson2JsonDecoder(EntityFactory entityFactory, ObjectMapper mapper, MimeType... mimeTypes) {
         super(mapper, mimeTypes);
+        this.entityFactory = entityFactory;
     }
 
 
@@ -51,7 +57,8 @@ public class CustomJackson2JsonDecoder extends Jackson2CodecSupport implements H
     }
 
     @Override
-    public Flux<Object> decode(Publisher<DataBuffer> input, ResolvableType elementType,
+    @NonNull
+    public Flux<Object> decode(@NonNull Publisher<DataBuffer> input, @NonNull ResolvableType elementType,
                                @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
         ObjectMapper mapper = getObjectMapper();
@@ -74,15 +81,17 @@ public class CustomJackson2JsonDecoder extends Jackson2CodecSupport implements H
     }
 
     @Override
-    public Mono<Object> decodeToMono(Publisher<DataBuffer> input, ResolvableType elementType,
+    @NonNull
+    public Mono<Object> decodeToMono(@NonNull Publisher<DataBuffer> input, @NonNull ResolvableType elementType,
                                      @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
         return DataBufferUtils.join(input)
-                .map(dataBuffer -> decode(dataBuffer, elementType, mimeType, hints));
+                              .map(dataBuffer -> decode(dataBuffer, elementType, mimeType, hints));
     }
 
     @Override
-    public Object decode(DataBuffer dataBuffer, ResolvableType targetType,
+    @NonNull
+    public Object decode(@NonNull DataBuffer dataBuffer, @NonNull ResolvableType targetType,
                          @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) throws DecodingException {
 
         try {
@@ -101,8 +110,13 @@ public class CustomJackson2JsonDecoder extends Jackson2CodecSupport implements H
         Assert.notNull(elementType, "'elementType' must not be null");
         MethodParameter param = getParameter(elementType);
         Class<?> contextClass = (param != null ? param.getContainingClass() : null);
-        Type type = elementType.resolve() == null ? elementType.getType() : elementType.resolve();
-
+        Type type = elementType.resolve() == null ? elementType.getType() : elementType.toClass();
+        if (type instanceof Class) {
+            Class<?> realType = entityFactory.getInstanceType(((Class<?>) type), false);
+            if (realType != null) {
+                type = realType;
+            }
+        }
         JavaType javaType = getJavaType(type, contextClass);
         Class<?> jsonView = (hints != null ? (Class<?>) hints.get(Jackson2CodecSupport.JSON_VIEW_HINT) : null);
         return jsonView != null ?
@@ -135,13 +149,15 @@ public class CustomJackson2JsonDecoder extends Jackson2CodecSupport implements H
     // HttpMessageDecoder...
 
     @Override
-    public Map<String, Object> getDecodeHints(ResolvableType actualType, ResolvableType elementType,
-                                              ServerHttpRequest request, ServerHttpResponse response) {
+    @NonNull
+    public Map<String, Object> getDecodeHints(@NonNull ResolvableType actualType, @NonNull ResolvableType elementType,
+                                              @NonNull ServerHttpRequest request, @NonNull ServerHttpResponse response) {
 
         return getHints(actualType);
     }
 
     @Override
+    @NonNull
     public List<MimeType> getDecodableMimeTypes() {
         return getMimeTypes();
     }
@@ -149,7 +165,7 @@ public class CustomJackson2JsonDecoder extends Jackson2CodecSupport implements H
     // Jackson2CodecSupport ...
 
     @Override
-    protected <A extends Annotation> A getAnnotation(MethodParameter parameter, Class<A> annotType) {
+    protected <A extends Annotation> A getAnnotation(MethodParameter parameter, @NonNull Class<A> annotType) {
         return parameter.getParameterAnnotation(annotType);
     }
 
