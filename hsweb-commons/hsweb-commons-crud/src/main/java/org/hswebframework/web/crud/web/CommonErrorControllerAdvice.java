@@ -1,7 +1,6 @@
 package org.hswebframework.web.crud.web;
 
 import io.r2dbc.spi.R2dbcDataIntegrityViolationException;
-import io.r2dbc.spi.R2dbcNonTransientException;
 import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.web.authorization.exception.AccessDenyException;
 import org.hswebframework.web.authorization.exception.AuthenticationException;
@@ -10,11 +9,11 @@ import org.hswebframework.web.authorization.token.TokenState;
 import org.hswebframework.web.exception.BusinessException;
 import org.hswebframework.web.exception.NotFoundException;
 import org.hswebframework.web.exception.ValidationException;
+import org.hswebframework.web.i18n.LocaleUtils;
 import org.hswebframework.web.logger.ReactiveLogger;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
-import org.springframework.core.Ordered;
+import org.springframework.context.MessageSource;
 import org.springframework.core.annotation.Order;
-import org.springframework.core.codec.DecodingException;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
@@ -40,11 +39,20 @@ import java.util.stream.Collectors;
 @Order
 public class CommonErrorControllerAdvice {
 
+
+    private final MessageSource messageSource;
+
+    public CommonErrorControllerAdvice(MessageSource messageSource) {
+        this.messageSource = messageSource;
+    }
+
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Mono<ResponseMessage<Object>> handleException(BusinessException e) {
-        return Mono.just(ResponseMessage.error(e.getCode(), e.getMessage()))
-                   .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getMessage(), e)));
+        return LocaleUtils
+                .resolveThrowable(messageSource,
+                                  e,
+                                  (err, msg) -> ResponseMessage.error(err.getStatus(), err.getCode(), msg));
     }
 
     @ExceptionHandler

@@ -24,11 +24,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.NOT_FOUND)
 public class NotFoundException extends BusinessException {
-    public NotFoundException(String message) {
-        super(message, 404);
+    public NotFoundException(String message, Object... args) {
+        super(message, 404, args);
     }
 
     public NotFoundException() {
-        this("记录不存在");
+        this("error.not_found");
     }
 }

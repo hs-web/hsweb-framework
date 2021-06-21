@@ -55,5 +55,5 @@ public @interface TwoFactor {
      * @return 错误提示
      * @since 3.0.6
      */
-    String message() default "需要进行双因子验证";
+    String message() default "assert.verify_code_error";
 }

@@ -1,9 +1,10 @@
 package org.hswebframework.web.authorization.exception;
 
 import lombok.Getter;
+import org.hswebframework.web.exception.I18nSupportException;
 
 @Getter
-public class AuthenticationException extends RuntimeException {
+public class AuthenticationException extends I18nSupportException {
 
 
     public static String ILLEGAL_PASSWORD = "illegal_password";
@@ -12,6 +13,10 @@ public class AuthenticationException extends RuntimeException {
 
 
     private final String code;
+
+    public AuthenticationException(String code) {
+        this(code, "error." + code);
+    }
 
     public AuthenticationException(String code, String message) {
         super(message);

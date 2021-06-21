@@ -75,7 +75,7 @@ public class PermissionProperties {
                                               .map(Permission::getActions)
                                               .orElseGet(Collections::emptySet));
 
-                    throw new AccessDenyException("当前用户无权限:" + setting.getPermission() + "" +actions);
+                    throw new AccessDenyException(setting.getPermission(), actions);
                 }
             };
 

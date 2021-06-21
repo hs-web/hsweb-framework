@@ -22,7 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 @AllArgsConstructor
 public class TwoFactorHandlerInterceptorAdapter extends HandlerInterceptorAdapter {
 
-    private TwoFactorValidatorManager validatorManager;
+    private final TwoFactorValidatorManager validatorManager;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -45,9 +45,9 @@ public class TwoFactorHandlerInterceptorAdapter extends HandlerInterceptorAdapte
                 code = request.getHeader(factor.parameter());
             }
             if (StringUtils.isEmpty(code)) {
-                throw new NeedTwoFactorException(factor.message(), factor.provider());
+                throw new NeedTwoFactorException("assert.need_two_factor_verify", factor.provider());
             } else if (!validator.verify(code, factor.timeout())) {
-                throw new NeedTwoFactorException("验证码错误", factor.provider());
+                throw new NeedTwoFactorException(factor.message(), factor.provider());
             }
         }
         return super.preHandle(request, response, handler);
