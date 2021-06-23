@@ -42,27 +42,27 @@ public class EnumDictTest {
         mapper.registerModule(module);
 
 
-//        String val = mapper.writer().writeValueAsString(new TestEntity());
-//
-//        System.out.println(val);
-//        TestEntity testEntity = mapper.readerFor(TestEntity.class)
-//                                      .readValue(val);
-//
-//        Assert.assertEquals(testEntity.testEnum, TestEnum.E1);
-//        testEntity = mapper.readerFor(TestEntity.class)
-//                           .readValue("{\"testEnum\":\"E1\"}");
-//        Assert.assertEquals(testEntity.testEnum, TestEnum.E1);
-//
-//        testEntity = mapper.readerFor(TestEntity.class)
-//                           .readValue("{\"testEnum\":\"e1\"}");
-//        Assert.assertEquals(testEntity.testEnum, TestEnum.E1);
-//
-//        System.out.println((Object) mapper.readerFor(TestEnum.class).readValue("\"E1\""));
+        String val = mapper.writer().writeValueAsString(new TestEntity());
 
+        System.out.println(val);
         TestEntity testEntity = mapper.readerFor(TestEntity.class)
-                                      .readValue("{\"testEnums\":[\"E1\"]}");
-        System.out.println(testEntity.getTestEnums());
-//        Assert.assertArrayEquals(testEntity.getSimpleEnums(), new TestEnum[]{TestEnum.E1});
+                                      .readValue(val);
+
+        Assert.assertEquals(testEntity.testEnum, TestEnum.E1);
+        testEntity = mapper.readerFor(TestEntity.class)
+                           .readValue("{\"testEnum\":\"E1\"}");
+        Assert.assertEquals(testEntity.testEnum, TestEnum.E1);
+
+        testEntity = mapper.readerFor(TestEntity.class)
+                           .readValue("{\"testEnum\":\"e1\"}");
+        Assert.assertEquals(testEntity.testEnum, TestEnum.E1);
+
+        System.out.println((Object) mapper.readerFor(TestEnum.class).readValue("\"E1\""));
+
+        testEntity = mapper.readerFor(TestEntity.class)
+                           .readValue("{\"testEnums\":[\"E1\"]}");
+//        System.out.println(testEntity.getTestEnums());
+        Assert.assertArrayEquals(testEntity.getTestEnums(), new TestEnum[]{TestEnum.E1});
 
     }
 
