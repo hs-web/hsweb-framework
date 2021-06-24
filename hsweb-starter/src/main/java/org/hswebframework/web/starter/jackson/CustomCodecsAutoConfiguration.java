@@ -1,8 +1,10 @@
 package org.hswebframework.web.starter.jackson;
 
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.deser.std.EnumDeserializer;
+import com.fasterxml.jackson.databind.module.SimpleDeserializers;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.type.ClassKey;
 import org.hswebframework.web.api.crud.entity.EntityFactory;
 import org.hswebframework.web.dict.EnumDict;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -23,16 +25,29 @@ public class CustomCodecsAutoConfiguration {
 	@ConditionalOnClass(ObjectMapper.class)
 	static class JacksonDecoderConfiguration {
 
-		@Bean
-		@Order(1)
-		@ConditionalOnBean(ObjectMapper.class)
-		CodecCustomizer jacksonDecoderCustomizer(EntityFactory entityFactory, ObjectMapper objectMapper) {
-		//	objectMapper.setTypeFactory(new CustomTypeFactory(entityFactory));
-			SimpleModule module = new SimpleModule();
-			@SuppressWarnings("all")
-			JsonDeserializer<Enum<?>> deserializer = new EnumDict.EnumDictJSONDeserializer();
-			module.addDeserializer(Enum.class,  deserializer);
-			objectMapper.registerModule(module);
+        @Bean
+        @Order(1)
+        @ConditionalOnBean(ObjectMapper.class)
+        CodecCustomizer jacksonDecoderCustomizer(EntityFactory entityFactory, ObjectMapper objectMapper) {
+            //	objectMapper.setTypeFactory(new CustomTypeFactory(entityFactory));
+            SimpleModule module = new SimpleModule();
+            module.setDeserializers(new SimpleDeserializers() {
+                @Override
+                public JsonDeserializer<?> findEnumDeserializer(Class<?> type,
+                                                                DeserializationConfig config,
+                                                                BeanDescription beanDesc) {
+                    JsonDeserializer<?> deser = null;
+                    if (type.isEnum()) {
+                        if (EnumDict.class.isAssignableFrom(type)) {
+                            deser = new EnumDict.EnumDictJSONDeserializer(val -> EnumDict
+                                    .find((Class) type, val)
+                                    .orElse(null));
+                        }
+                    }
+                    return deser;
+                }
+            });
+            objectMapper.registerModule(module);
 
 
 			return (configurer) -> {
