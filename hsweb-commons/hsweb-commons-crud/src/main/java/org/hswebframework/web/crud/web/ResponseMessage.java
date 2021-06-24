@@ -39,7 +39,7 @@ public class ResponseMessage<T> implements Serializable {
 
     @SuppressWarnings("all")
     public static <T> ResponseMessage<T> ok(T result) {
-        return of("success", null, 200, null, System.currentTimeMillis());
+        return of("success", result, 200, null, System.currentTimeMillis());
     }
 
     public static <T> ResponseMessage<T> error(String message) {
