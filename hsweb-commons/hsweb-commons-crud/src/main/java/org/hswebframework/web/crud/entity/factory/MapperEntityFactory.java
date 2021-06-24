@@ -44,7 +44,7 @@ public class MapperEntityFactory implements EntityFactory, BeanFactory {
     private static final DefaultMapperFactory DEFAULT_MAPPER_FACTORY = clazz -> {
         String simpleClassName = clazz.getPackage().getName().concat(".Simple").concat(clazz.getSimpleName());
         try {
-            return defaultMapper(org.springframework.util.ClassUtils.forName(simpleClassName,null));
+            return defaultMapper(org.springframework.util.ClassUtils.forName(simpleClassName, null));
         } catch (ClassNotFoundException ignore) {
             // throw new NotFoundException(e.getMessage());
         }
@@ -64,7 +64,7 @@ public class MapperEntityFactory implements EntityFactory, BeanFactory {
     public MapperEntityFactory() {
     }
 
-    public MapperEntityFactory(Map<Class<?>, Mapper> realTypeMapper) {
+    public MapperEntityFactory(Map<Class<?>, Mapper<?>> realTypeMapper) {
         this.realTypeMapper.putAll(realTypeMapper);
     }
 
@@ -73,9 +73,9 @@ public class MapperEntityFactory implements EntityFactory, BeanFactory {
         return this;
     }
 
-    public MapperEntityFactory addCopier(PropertyCopier copier) {
-        Class source = ClassUtils.getGenericType(copier.getClass(), 0);
-        Class target = ClassUtils.getGenericType(copier.getClass(), 1);
+    public <S, T> MapperEntityFactory addCopier(PropertyCopier<S, T> copier) {
+        Class<S> source = (Class<S>) ClassUtils.getGenericType(copier.getClass(), 0);
+        Class<T> target = (Class<T>) ClassUtils.getGenericType(copier.getClass(), 1);
         if (source == null || source == Object.class) {
             throw new UnsupportedOperationException("generic type " + source + " not support");
         }
@@ -91,7 +91,7 @@ public class MapperEntityFactory implements EntityFactory, BeanFactory {
         return this;
     }
 
-    private String getCopierCacheKey(Class source, Class target) {
+    private String getCopierCacheKey(Class<?> source, Class<?> target) {
         return source.getName().concat("->").concat(target.getName());
     }
 
@@ -122,11 +122,13 @@ public class MapperEntityFactory implements EntityFactory, BeanFactory {
         }
 
         if (realType == null) {
-            mapper = defaultMapperFactory.apply(beanClass);
+            if (!Modifier.isInterface(beanClass.getModifiers()) && !Modifier.isAbstract(beanClass.getModifiers())) {
+                realType = beanClass;
+            }else {
+                mapper = defaultMapperFactory.apply(beanClass);
+            }
         }
-        if (!Modifier.isInterface(beanClass.getModifiers()) && !Modifier.isAbstract(beanClass.getModifiers())) {
-            realType = beanClass;
-        }
+
         if (mapper == null && realType != null) {
             if (logger.isDebugEnabled() && realType != beanClass) {
                 logger.debug("use instance {} for {}", realType, beanClass);
@@ -170,7 +172,7 @@ public class MapperEntityFactory implements EntityFactory, BeanFactory {
             return (T) new HashSet<>();
         }
 
-        throw new NotFoundException("can't create instance for " + beanClass);
+        throw new NotFoundException("无法初始化实体类:"+beanClass);
     }
 
     @Override

@@ -13,11 +13,13 @@
  *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
- *  
+ *
  */
 
 package org.hswebframework.web.api.crud.entity;
 
+
+import javax.annotation.Nullable;
 
 /**
  * 实体工厂接口,系统各个地方使用此接口来创建实体,在实际编码中也应该使用此接口来创建实体,而不是使用new方式来创建
@@ -97,11 +99,12 @@ public interface EntityFactory {
      * @param <T>         泛型
      * @return 实体类型
      */
-   default  <T> Class<T> getInstanceType(Class<T> entityClass){
-       return getInstanceType(entityClass,false);
-   }
+    default <T> Class<T> getInstanceType(Class<T> entityClass) {
+        return getInstanceType(entityClass, false);
+    }
 
-    <T> Class<T> getInstanceType(Class<T> entityClass,boolean autoRegister);
+    @Nullable
+    <T> Class<T> getInstanceType(Class<T> entityClass, boolean autoRegister);
 
     /**
      * 拷贝对象的属性

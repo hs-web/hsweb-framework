@@ -7,6 +7,7 @@ import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.HttpMessageWriter;
+import org.springframework.lang.NonNull;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MimeType;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -51,7 +52,7 @@ public class ResponseMessageWrapper extends ResponseBodyResultHandler {
     private Set<String> excludes = new HashSet<>();
 
     @Override
-    public boolean supports(HandlerResult result) {
+    public boolean supports(@NonNull HandlerResult result) {
 
         if (!CollectionUtils.isEmpty(excludes) && result.getHandler() instanceof HandlerMethod) {
             HandlerMethod method = (HandlerMethod) result.getHandler();
