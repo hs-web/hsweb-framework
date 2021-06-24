@@ -21,13 +21,14 @@ import org.springframework.http.codec.CodecConfigurer;
 @AutoConfigureAfter(JacksonAutoConfiguration.class)
 public class CustomCodecsAutoConfiguration {
 
-	@Configuration(proxyBeanMethods = false)
-	@ConditionalOnClass(ObjectMapper.class)
-	static class JacksonDecoderConfiguration {
+    @Configuration(proxyBeanMethods = false)
+    @ConditionalOnClass(ObjectMapper.class)
+    static class JacksonDecoderConfiguration {
 
         @Bean
         @Order(1)
         @ConditionalOnBean(ObjectMapper.class)
+        @SuppressWarnings("all")
         CodecCustomizer jacksonDecoderCustomizer(EntityFactory entityFactory, ObjectMapper objectMapper) {
             //	objectMapper.setTypeFactory(new CustomTypeFactory(entityFactory));
             SimpleModule module = new SimpleModule();
@@ -37,26 +38,23 @@ public class CustomCodecsAutoConfiguration {
                                                                 DeserializationConfig config,
                                                                 BeanDescription beanDesc) {
                     JsonDeserializer<?> deser = null;
-                    if (type.isEnum()) {
-                        if (EnumDict.class.isAssignableFrom(type)) {
-                            deser = new EnumDict.EnumDictJSONDeserializer(val -> EnumDict
-                                    .find((Class) type, val)
-                                    .orElse(null));
-                        }
+                    if (type.isEnum() && EnumDict.class.isAssignableFrom(type)) {
+                        deser = new EnumDict.EnumDictJSONDeserializer(val -> EnumDict
+                                .find((Class) type, val)
+                                .orElse(null));
                     }
                     return deser;
                 }
             });
             objectMapper.registerModule(module);
 
+            return (configurer) -> {
+                CodecConfigurer.DefaultCodecs defaults = configurer.defaultCodecs();
+                defaults.jackson2JsonDecoder(new CustomJackson2JsonDecoder(entityFactory, objectMapper));
+            };
+        }
 
-			return (configurer) -> {
-				CodecConfigurer.DefaultCodecs defaults = configurer.defaultCodecs();
-				defaults.jackson2JsonDecoder(new CustomJackson2JsonDecoder(entityFactory,objectMapper));
-			};
-		}
-
-	}
+    }
 
 
 }
