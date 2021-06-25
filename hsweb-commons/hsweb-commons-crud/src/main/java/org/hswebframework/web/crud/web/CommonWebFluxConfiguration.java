@@ -10,12 +10,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
+import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
+import org.springframework.web.server.i18n.LocaleContextResolver;
 import reactor.core.publisher.Mono;
 
 @Configuration
@@ -38,13 +40,6 @@ public class CommonWebFluxConfiguration {
         return new ResponseMessageWrapper(codecConfigurer.getWriters(), resolver, registry);
     }
 
-    @Bean
-    public MessageSource messageSource() {
-        ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
-        messageSource.setBasenames("i18n/messages");
-        messageSource.setDefaultEncoding("UTF-8");
-        return messageSource;
-    }
 
     @Bean
     public WebFilter localeWebFilter() {

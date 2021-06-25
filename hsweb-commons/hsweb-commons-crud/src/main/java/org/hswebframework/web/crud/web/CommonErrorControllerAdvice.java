@@ -22,10 +22,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.support.WebExchangeBindException;
-import org.springframework.web.server.MediaTypeNotSupportedStatusException;
-import org.springframework.web.server.MethodNotAllowedException;
-import org.springframework.web.server.NotAcceptableStatusException;
-import org.springframework.web.server.ServerWebInputException;
+import org.springframework.web.server.*;
 import reactor.core.publisher.Mono;
 
 import javax.validation.ConstraintViolationException;
@@ -38,7 +35,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @Order
 public class CommonErrorControllerAdvice {
-
 
     private final MessageSource messageSource;
 
@@ -58,25 +54,31 @@ public class CommonErrorControllerAdvice {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Mono<ResponseMessage<?>> handleException(UnsupportedOperationException e) {
-        return Mono.just(ResponseMessage.error("unsupported", e.getMessage()));
+        return LocaleUtils
+                .resolveThrowable(messageSource, e, (err, msg) -> (ResponseMessage.<TokenState>error(401, "unsupported", msg)));
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public Mono<ResponseMessage<TokenState>> handleException(UnAuthorizedException e) {
-        return Mono.just(ResponseMessage.<TokenState>error(401, "unauthorized", e.getMessage()).result(e.getState()));
+        return LocaleUtils
+                .resolveThrowable(messageSource, e, (err, msg) -> (ResponseMessage.<TokenState>error(401, "unauthorized", msg).result(e.getState())));
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    public Mono<ResponseMessage<?>> handleException(AccessDenyException e) {
-        return Mono.just(ResponseMessage.error(403, e.getCode(), e.getMessage()));
+    public Mono<ResponseMessage<Object>> handleException(AccessDenyException e) {
+        return LocaleUtils
+                .resolveThrowable(messageSource, e, (err, msg) -> ResponseMessage.error(403, e.getCode(), e.getMessage()))
+                ;
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public Mono<ResponseMessage<?>> handleException(NotFoundException e) {
-        return Mono.just(ResponseMessage.error(404, "not_found", e.getMessage()));
+    public Mono<ResponseMessage<Object>> handleException(NotFoundException e) {
+        return LocaleUtils
+                .resolveThrowable(messageSource, e, (err, msg) -> ResponseMessage.error(404, "not_found", msg))
+                ;
     }
 
     @ExceptionHandler
@@ -138,6 +140,7 @@ public class CommonErrorControllerAdvice {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.GATEWAY_TIMEOUT)
     public Mono<ResponseMessage<Object>> handleException(TimeoutException e) {
+
         return Mono.just(ResponseMessage.error(504, "timeout", e.getMessage()))
                    .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getMessage(), e)));
 
@@ -163,51 +166,70 @@ public class CommonErrorControllerAdvice {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Mono<ResponseMessage<Object>> handleException(IllegalArgumentException e) {
-        return Mono.just(ResponseMessage.error(400, "illegal_argument", e.getMessage()))
-                   .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getMessage(), e)));
+
+        return LocaleUtils
+                .resolveThrowable(messageSource, e, (err, msg) -> ResponseMessage.error(400, "illegal_argument", msg))
+                .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getMessage(), e)))
+                ;
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Mono<ResponseMessage<Object>> handleException(AuthenticationException e) {
-        return Mono.just(ResponseMessage.error(400, e.getCode(), e.getMessage()));
+        return LocaleUtils
+                .resolveThrowable(messageSource, e, (err, msg) -> ResponseMessage.error(400, e.getCode(), msg))
+                .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getMessage(), e)))
+                ;
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
-    public Mono<ResponseMessage<Object>> handleException(MediaTypeNotSupportedStatusException e) {
-        return Mono.just(ResponseMessage
-                                 .error(415, "unsupported_media_type", "不支持的请求类型")
-                                 .result(e.getSupportedMediaTypes()))
-                   .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getMessage(), e)));
+    public Mono<ResponseMessage<Object>> handleException(UnsupportedMediaTypeStatusException e) {
+        return LocaleUtils
+                .resolveMessage(messageSource, "error.unsupported_media_type")
+                .map(msg -> ResponseMessage
+                        .error(415, "unsupported_media_type", msg)
+                        .result(e.getSupportedMediaTypes()))
+                .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getMessage(), e)));
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
     public Mono<ResponseMessage<Object>> handleException(NotAcceptableStatusException e) {
-        return Mono.just(ResponseMessage
-                                 .error(406, "not_acceptable_media_type", "不支持的响应类型")
-                                 .result(e.getSupportedMediaTypes()))
-                   .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getMessage(), e)));
+
+        return LocaleUtils
+                .resolveMessage(messageSource, "error.not_acceptable_media_type")
+                .map(msg -> ResponseMessage
+                        .error(406, "not_acceptable_media_type", msg)
+                        .result(e.getSupportedMediaTypes()))
+                .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getMessage(), e)));
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
     public Mono<ResponseMessage<Object>> handleException(MethodNotAllowedException e) {
-        return Mono.just(ResponseMessage
-                                 .error(405, "method_not_allowed", "不支持的请求方法:" + e.getHttpMethod())
-                                 .result(e.getSupportedMethods()))
-                   .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getMessage(), e)));
+        return LocaleUtils
+                .resolveMessage(messageSource, "error.method_not_allowed")
+                .map(msg -> ResponseMessage
+                        .error(406, "method_not_allowed", msg)
+                        .result(e.getSupportedMethods()))
+                .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getMessage(), e)));
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Mono<ResponseMessage<Object>> handleException(R2dbcDataIntegrityViolationException exception) {
-        if (exception.getMessage().contains("Duplicate")) {
-            return Mono.just(ResponseMessage.error("存在重复的数据"));
+    public Mono<ResponseMessage<Object>> handleException(R2dbcDataIntegrityViolationException e) {
+        String code;
+
+        if (e.getMessage().contains("Duplicate")) {
+            code = "error.duplicate_data";
+        } else {
+            code = "error.data_error";
+            log.warn(e.getMessage(), e);
         }
-        log.warn(exception.getMessage(), exception);
-        return Mono.just(ResponseMessage.error("数据错误"));
+        return LocaleUtils
+                .resolveMessage(messageSource, code)
+                .map(msg -> ResponseMessage.error(400, code, msg));
     }
 
 
@@ -223,7 +245,10 @@ public class CommonErrorControllerAdvice {
 
         } while (exception != null && exception != e);
 
-        return Mono.just(ResponseMessage.error(400, "illegal_argument", e.getMessage()));
+        return LocaleUtils
+                .resolveThrowable(messageSource,
+                                  exception,
+                                  (err, msg) -> ResponseMessage.error(400, "illegal_argument", msg));
     }
 
 }

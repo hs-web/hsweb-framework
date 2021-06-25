@@ -127,7 +127,6 @@ public interface EnumDict<V> extends JSONSerializable {
     }
 
 
-
     /**
      * 从指定的枚举类中查找想要的枚举,并返回一个{@link Optional},如果未找到,则返回一个{@link Optional#empty()}
      *
@@ -150,8 +149,8 @@ public interface EnumDict<V> extends JSONSerializable {
     static <T extends Enum & EnumDict> List<T> findList(Class<T> type, Predicate<T> predicate) {
         if (type.isEnum()) {
             return Arrays.stream(type.getEnumConstants())
-                    .filter(predicate)
-                    .collect(Collectors.toList());
+                         .filter(predicate)
+                         .collect(Collectors.toList());
         }
         return Collections.emptyList();
     }
@@ -162,7 +161,9 @@ public interface EnumDict<V> extends JSONSerializable {
      * @see this#find(Class, Predicate)
      */
     static <T extends Enum & EnumDict<?>> Optional<T> findByValue(Class<T> type, Object value) {
-        return find(type, e -> e.getValue() == value || e.getValue().equals(value) || String.valueOf(e.getValue()).equalsIgnoreCase(String.valueOf(value)));
+        return find(type, e -> e.getValue() == value || e.getValue().equals(value) || String
+                .valueOf(e.getValue())
+                .equalsIgnoreCase(String.valueOf(value)));
     }
 
     /**
@@ -203,8 +204,8 @@ public interface EnumDict<V> extends JSONSerializable {
         if (all.length >= 64) {
             List<T> list = Arrays.asList(t);
             return Arrays.stream(all)
-                    .map(EnumDict.class::cast)
-                    .anyMatch(list::contains);
+                         .map(EnumDict.class::cast)
+                         .anyMatch(list::contains);
         }
         return maskIn(toMask(t), target);
     }
@@ -295,7 +296,7 @@ public interface EnumDict<V> extends JSONSerializable {
     @AllArgsConstructor
     @NoArgsConstructor
     class EnumDictJSONDeserializer extends JsonDeserializer implements ObjectDeserializer {
-        private Function<Object,Object> mapper;
+        private Function<Object, Object> mapper;
 
         @Override
         @SuppressWarnings("all")
@@ -324,8 +325,10 @@ public interface EnumDict<V> extends JSONSerializable {
                     value = parser.parse();
                     if (value instanceof Map) {
                         return (T) EnumDict.find(((Class) type), ((Map) value).get("value"))
-                                .orElseGet(() ->
-                                        EnumDict.find(((Class) type), ((Map) value).get("text")).orElse(null));
+                                           .orElseGet(() ->
+                                                              EnumDict
+                                                                      .find(((Class) type), ((Map) value).get("text"))
+                                                                      .orElse(null));
                     }
                 }
 
@@ -347,11 +350,11 @@ public interface EnumDict<V> extends JSONSerializable {
         @SneakyThrows
         public Object deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
             JsonNode node = jp.getCodec().readTree(jp);
-            if(mapper!=null){
-                if(node.isTextual()){
+            if (mapper != null) {
+                if (node.isTextual()) {
                     return mapper.apply(node.asText());
                 }
-                if(node.isNumber()){
+                if (node.isNumber()) {
                     return mapper.apply(node.asLong());
                 }
             }
@@ -364,19 +367,20 @@ public interface EnumDict<V> extends JSONSerializable {
                 findPropertyType = BeanUtils.findPropertyType(currentName, currentValue.getClass());
             }
             Supplier<ValidationException> exceptionSupplier = () -> {
-               List<Object> values= Stream.of(findPropertyType.getEnumConstants())
+                List<Object> values = Stream
+                        .of(findPropertyType.getEnumConstants())
                         .map(Enum.class::cast)
-                        .map(e->{
-                            if(e instanceof EnumDict){
+                        .map(e -> {
+                            if (e instanceof EnumDict) {
                                 return ((EnumDict) e).getValue();
                             }
                             return e.name();
                         }).collect(Collectors.toList());
 
-                return new ValidationException("参数[" + currentName + "]在选项中不存在",
-                        Arrays.asList(
-                                new ValidationException.Detail(currentName, "选项中不存在此值", values)
-                        ));
+                return new ValidationException("validation.parameter_does_not_exist_in_enums",
+                                               Arrays.asList(
+                                                       new ValidationException.Detail(currentName, "选项中不存在此值", values)
+                                               ), currentName);
             };
             if (EnumDict.class.isAssignableFrom(findPropertyType) && findPropertyType.isEnum()) {
                 if (node.isObject()) {
@@ -394,12 +398,13 @@ public interface EnumDict<V> extends JSONSerializable {
                             .find(findPropertyType, node.textValue())
                             .orElseThrow(exceptionSupplier);
                 }
-                throw new ValidationException("参数[" + currentName + "]在选项中不存在", Arrays.asList(
+                throw new ValidationException("validation.parameter_does_not_exist_in_enums", Arrays.asList(
                         new ValidationException.Detail(currentName, "选项中不存在此值", null)
-                ));
+                ), currentName);
             }
             if (findPropertyType.isEnum()) {
-                return Stream.of(findPropertyType.getEnumConstants())
+                return Stream
+                        .of(findPropertyType.getEnumConstants())
                         .filter(o -> {
                             if (node.isTextual()) {
                                 return node.textValue().equalsIgnoreCase(((Enum) o).name());

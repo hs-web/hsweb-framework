@@ -43,10 +43,6 @@ public class BusinessException extends I18nSupportException {
         this(message, null, status, args);
     }
 
-    public BusinessException(String message, String code, Object... args) {
-        this(message, code, 500, args);
-    }
-
     public BusinessException(String message, String code, int status, Object... args) {
         super(message, args);
         this.code = code;

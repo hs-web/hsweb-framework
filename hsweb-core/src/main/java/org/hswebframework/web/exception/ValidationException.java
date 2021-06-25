@@ -28,8 +28,8 @@ public class ValidationException extends BusinessException {
         this(message, Collections.singletonList(new Detail(property, message, null)));
     }
 
-    public ValidationException(String message, List<Detail> details) {
-        super(message);
+    public ValidationException(String message, List<Detail> details,Object... args) {
+        super(message,400,args);
         this.details = details;
     }
 

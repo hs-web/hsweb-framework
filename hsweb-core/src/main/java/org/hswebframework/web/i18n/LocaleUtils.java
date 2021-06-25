@@ -49,9 +49,9 @@ public class LocaleUtils {
                 });
     }
 
-    public static Mono<String> reactiveMessage(MessageSource messageSource,
-                                               String code,
-                                               Object... args) {
+    public static Mono<String> resolveMessage(MessageSource messageSource,
+                                              String code,
+                                              Object... args) {
         return reactive()
                 .map(ctx -> resolveMessage(messageSource, code, ctx.getLocale(), code, args));
     }

@@ -8,7 +8,7 @@ public class OAuth2Exception extends BusinessException {
     private final ErrorType type;
 
     public OAuth2Exception(ErrorType type) {
-        super(type.message(), type.name(), type.code());
+        super(type.message(), type.name(), type.code(), (Object[]) null);
         this.type = type;
     }
 
