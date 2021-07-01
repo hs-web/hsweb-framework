@@ -118,7 +118,7 @@ public interface EnumDict<V> extends JSONSerializable {
     }
 
     /**
-     * 枚举选项的描述,对一个选项进行详细的描述有时候是必要的.默认值为{@link this#getText()}
+     * 枚举选项的描述,对一个选项进行详细的描述有时候是必要的.默认值为{@link EnumDict#getText()}
      *
      * @return 描述
      */
@@ -158,7 +158,7 @@ public interface EnumDict<V> extends JSONSerializable {
     /**
      * 根据枚举的{@link EnumDict#getValue()}来查找.
      *
-     * @see this#find(Class, Predicate)
+     * @see EnumDict#find(Class, Predicate)
      */
     static <T extends Enum & EnumDict<?>> Optional<T> findByValue(Class<T> type, Object value) {
         return find(type, e -> e.getValue() == value || e.getValue().equals(value) || String
@@ -169,7 +169,7 @@ public interface EnumDict<V> extends JSONSerializable {
     /**
      * 根据枚举的{@link EnumDict#getText()} 来查找.
      *
-     * @see this#find(Class, Predicate)
+     * @see EnumDict#find(Class, Predicate)
      */
     static <T extends Enum & EnumDict> Optional<T> findByText(Class<T> type, String text) {
         return find(type, e -> e.getText().equalsIgnoreCase(text));
@@ -178,7 +178,7 @@ public interface EnumDict<V> extends JSONSerializable {
     /**
      * 根据枚举的{@link EnumDict#getValue()},{@link EnumDict#getText()}来查找.
      *
-     * @see this#find(Class, Predicate)
+     * @see EnumDict#find(Class, Predicate)
      */
     static <T extends Enum & EnumDict> Optional<T> find(Class<T> type, Object target) {
         return find(type, v -> v.eq(target));
@@ -254,7 +254,7 @@ public interface EnumDict<V> extends JSONSerializable {
 
     /**
      * @return 是否在序列化为json的时候, 将枚举以对象方式序列化
-     * @see this#DEFAULT_WRITE_JSON_OBJECT
+     * @see EnumDict#DEFAULT_WRITE_JSON_OBJECT
      */
     default boolean isWriteJSONObjectEnabled() {
         return DEFAULT_WRITE_JSON_OBJECT;
@@ -269,10 +269,10 @@ public interface EnumDict<V> extends JSONSerializable {
     }
 
     /**
-     * 当{@link this#isWriteJSONObjectEnabled()}返回true时,在序列化为json的时候,会写出此方法返回的对象
+     * 当{@link EnumDict#isWriteJSONObjectEnabled()}返回true时,在序列化为json的时候,会写出此方法返回的对象
      *
      * @return 最终序列化的值
-     * @see this#isWriteJSONObjectEnabled()
+     * @see EnumDict#isWriteJSONObjectEnabled()
      */
     @JsonValue
     default Object getWriteJSONObject() {
