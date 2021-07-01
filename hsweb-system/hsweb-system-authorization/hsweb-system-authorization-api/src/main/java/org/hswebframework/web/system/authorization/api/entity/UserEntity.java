@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.hswebframework.ezorm.rdb.mapping.annotation.DefaultValue;
 import org.hswebframework.web.api.crud.entity.GenericEntity;
 import org.hswebframework.web.api.crud.entity.RecordCreationEntity;
@@ -77,5 +78,9 @@ public class UserEntity extends GenericEntity<String> implements RecordCreationE
     @Override
     public String getId() {
         return super.getId();
+    }
+
+    public void generateId(){
+       setId(DigestUtils.md5Hex(username));
     }
 }
