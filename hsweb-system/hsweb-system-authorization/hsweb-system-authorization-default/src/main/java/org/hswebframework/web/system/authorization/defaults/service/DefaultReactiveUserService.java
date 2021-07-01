@@ -71,21 +71,19 @@ public class DefaultReactiveUserService extends GenericReactiveCrudService<UserE
 
         return Mono
                 .defer(() -> {
-                    userEntity.setSalt(IDGenerator.RANDOM.generate());
                     usernameValidator.validate(userEntity.getUsername());
                     passwordValidator.validate(userEntity.getPassword());
+                    userEntity.generateId();
+                    userEntity.setSalt(IDGenerator.RANDOM.generate());
                     userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword(), userEntity.getSalt()));
-                    return Mono.just(userEntity)
-                               .doOnNext(e -> e.tryValidate(CreateGroup.class))
-                               .filterWhen(e -> createQuery()
-                                       .where(userEntity::getUsername)
-                                       .count().map(i -> i == 0))
-                               .switchIfEmpty(Mono.error(() -> new ValidationException("用户名已存在")))
-                               .as(getRepository()::insert)
-                               .thenReturn(userEntity)
-                               .flatMap(user -> new UserCreatedEvent(user)
-                                       .publish(eventPublisher)
-                                       .thenReturn(user));
+                    return Mono
+                            .just(userEntity)
+                            .doOnNext(e -> e.tryValidate(CreateGroup.class))
+                            .as(getRepository()::save)
+                            .thenReturn(userEntity)
+                            .flatMap(user -> new UserCreatedEvent(user)
+                                    .publish(eventPublisher)
+                                    .thenReturn(user));
                 });
 
     }
