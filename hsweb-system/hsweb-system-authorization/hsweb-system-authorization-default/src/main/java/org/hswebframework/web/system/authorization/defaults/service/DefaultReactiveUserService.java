@@ -3,6 +3,7 @@ package org.hswebframework.web.system.authorization.defaults.service;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hswebframework.ezorm.core.param.QueryParam;
+import org.hswebframework.ezorm.rdb.exception.DuplicateKeyException;
 import org.hswebframework.ezorm.rdb.mapping.ReactiveRepository;
 import org.hswebframework.web.api.crud.entity.TransactionManagers;
 import org.hswebframework.web.crud.service.GenericReactiveCrudService;
@@ -63,7 +64,7 @@ public class DefaultReactiveUserService extends GenericReactiveCrudService<UserE
                     }
                     return findById(userEntity.getId())
                             .flatMap(ignore -> doUpdate(userEntity))
-                            .switchIfEmpty(doAdd(userEntity));
+                            .switchIfEmpty(Mono.error(NotFoundException::new));
                 }).thenReturn(true);
     }
 
@@ -76,14 +77,22 @@ public class DefaultReactiveUserService extends GenericReactiveCrudService<UserE
                     userEntity.generateId();
                     userEntity.setSalt(IDGenerator.RANDOM.generate());
                     userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword(), userEntity.getSalt()));
-                    return Mono
-                            .just(userEntity)
+                    return this
+                            .createQuery()
+                            .where(userEntity::getUsername)
+                            .fetch()
+                            .doOnNext(u -> {
+                                throw new org.hswebframework.web.exception.ValidationException("用户已存在");
+                            })
+                            .then(Mono.just(userEntity))
                             .doOnNext(e -> e.tryValidate(CreateGroup.class))
-                            .as(getRepository()::save)
+                            .as(getRepository()::insert)
+                            .onErrorMap(DuplicateKeyException.class, e -> {
+                                throw new org.hswebframework.web.exception.ValidationException("用户已存在");
+                            })
                             .thenReturn(userEntity)
-                            .flatMap(user -> new UserCreatedEvent(user)
-                                    .publish(eventPublisher)
-                                    .thenReturn(user));
+                            .flatMap(user -> new UserCreatedEvent(user).publish(eventPublisher))
+                            .thenReturn(userEntity);
                 });
 
     }
