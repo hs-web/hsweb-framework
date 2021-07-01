@@ -8,7 +8,6 @@ import com.alibaba.fastjson.parser.JSONToken;
 import com.alibaba.fastjson.parser.deserializer.ObjectDeserializer;
 import com.alibaba.fastjson.serializer.JSONSerializable;
 import com.alibaba.fastjson.serializer.JSONSerializer;
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -21,6 +20,7 @@ import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.web.exception.ValidationException;
+import org.hswebframework.web.i18n.LocaleUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.StringUtils;
 
@@ -260,6 +260,14 @@ public interface EnumDict<V> extends JSONSerializable {
         return DEFAULT_WRITE_JSON_OBJECT;
     }
 
+    default String getI18nCode() {
+        return getText();
+    }
+
+    default String getI18nMessage(Locale locale) {
+        return LocaleUtils.resolveMessage(getI18nCode(), locale, getText());
+    }
+
     /**
      * 当{@link this#isWriteJSONObjectEnabled()}返回true时,在序列化为json的时候,会写出此方法返回的对象
      *
@@ -271,7 +279,7 @@ public interface EnumDict<V> extends JSONSerializable {
         if (isWriteJSONObjectEnabled()) {
             Map<String, Object> jsonObject = new HashMap<>();
             jsonObject.put("value", getValue());
-            jsonObject.put("text", getText());
+            jsonObject.put("text", getI18nMessage(LocaleUtils.current()));
             // jsonObject.put("index", index());
             // jsonObject.put("mask", getMask());
             return jsonObject;
@@ -281,7 +289,7 @@ public interface EnumDict<V> extends JSONSerializable {
     }
 
     @Override
-    default void write(JSONSerializer jsonSerializer, Object o, Type type, int i) throws IOException {
+    default void write(JSONSerializer jsonSerializer, Object o, Type type, int i) {
         if (isWriteJSONObjectEnabled()) {
             jsonSerializer.write(getWriteJSONObject());
         } else {

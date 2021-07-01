@@ -1,6 +1,7 @@
 package org.hswebframework.web.starter.i18n;
 
 import org.hswebframework.web.exception.BusinessException;
+import org.hswebframework.web.i18n.MessageSourceInitializer;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.context.MessageSource;
@@ -31,6 +32,7 @@ public class I18nConfiguration {
     public MessageSource compositeMessageSource(ObjectProvider<MessageSource> objectProvider) {
         CompositeMessageSource messageSource = new CompositeMessageSource();
         messageSource.addMessageSources(objectProvider.stream().collect(Collectors.toList()));
+        MessageSourceInitializer.init(messageSource);
         return messageSource;
     }
 

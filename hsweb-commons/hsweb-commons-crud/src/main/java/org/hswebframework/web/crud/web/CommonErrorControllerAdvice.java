@@ -186,7 +186,7 @@ public class CommonErrorControllerAdvice {
     @ResponseStatus(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
     public Mono<ResponseMessage<Object>> handleException(UnsupportedMediaTypeStatusException e) {
         return LocaleUtils
-                .resolveMessage(messageSource, "error.unsupported_media_type")
+                .resolveMessageReactive(messageSource, "error.unsupported_media_type")
                 .map(msg -> ResponseMessage
                         .error(415, "unsupported_media_type", msg)
                         .result(e.getSupportedMediaTypes()))
@@ -198,7 +198,7 @@ public class CommonErrorControllerAdvice {
     public Mono<ResponseMessage<Object>> handleException(NotAcceptableStatusException e) {
 
         return LocaleUtils
-                .resolveMessage(messageSource, "error.not_acceptable_media_type")
+                .resolveMessageReactive(messageSource, "error.not_acceptable_media_type")
                 .map(msg -> ResponseMessage
                         .error(406, "not_acceptable_media_type", msg)
                         .result(e.getSupportedMediaTypes()))
@@ -209,7 +209,7 @@ public class CommonErrorControllerAdvice {
     @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
     public Mono<ResponseMessage<Object>> handleException(MethodNotAllowedException e) {
         return LocaleUtils
-                .resolveMessage(messageSource, "error.method_not_allowed")
+                .resolveMessageReactive(messageSource, "error.method_not_allowed")
                 .map(msg -> ResponseMessage
                         .error(406, "method_not_allowed", msg)
                         .result(e.getSupportedMethods()))
@@ -228,7 +228,7 @@ public class CommonErrorControllerAdvice {
             log.warn(e.getMessage(), e);
         }
         return LocaleUtils
-                .resolveMessage(messageSource, code)
+                .resolveMessageReactive(messageSource, code)
                 .map(msg -> ResponseMessage.error(400, code, msg));
     }
 

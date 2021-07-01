@@ -10,6 +10,7 @@ import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class CompositeMessageSource implements MessageSource {
@@ -27,12 +28,12 @@ public class CompositeMessageSource implements MessageSource {
     @Override
     public String getMessage(@Nonnull String code, Object[] args, String defaultMessage, @Nonnull Locale locale) {
         for (MessageSource messageSource : messageSources) {
-            String result = messageSource.getMessage(code, args, defaultMessage, locale);
+            String result = messageSource.getMessage(code, args, null, locale);
             if (StringUtils.hasText(result)) {
                 return result;
             }
         }
-        return null;
+        return defaultMessage;
     }
 
     @Override
