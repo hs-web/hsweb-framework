@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
 import com.fasterxml.jackson.databind.util.TokenBuffer;
 import org.hswebframework.web.api.crud.entity.EntityFactory;
+import org.hswebframework.web.i18n.LocaleUtils;
 import org.reactivestreams.Publisher;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
@@ -67,17 +68,23 @@ public class CustomJackson2JsonDecoder extends Jackson2CodecSupport implements H
 
         ObjectReader reader = getObjectReader(elementType, hints);
 
-        return tokens.handle((tokenBuffer, sink) -> {
-            try {
-                Object value = reader.readValue(tokenBuffer.asParser(getObjectMapper()));
-                logValue(value, hints);
-                if (value != null) {
-                    sink.next(value);
-                }
-            } catch (IOException ex) {
-                sink.error(processException(ex));
-            }
-        });
+        return LocaleUtils
+                .currentReactive()
+                .flatMapMany(locale -> tokens
+                        .handle((tokenBuffer, sink) -> {
+                            LocaleUtils.doWith(locale, l -> {
+                                try {
+                                    Object value = reader.readValue(tokenBuffer.asParser(getObjectMapper()));
+                                    logValue(value, hints);
+                                    if (value != null) {
+                                        sink.next(value);
+                                    }
+                                } catch (IOException ex) {
+                                    sink.error(processException(ex));
+                                }
+                            });
+
+                        }));
     }
 
     @Override
@@ -85,8 +92,15 @@ public class CustomJackson2JsonDecoder extends Jackson2CodecSupport implements H
     public Mono<Object> decodeToMono(@NonNull Publisher<DataBuffer> input, @NonNull ResolvableType elementType,
                                      @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-        return DataBufferUtils.join(input)
-                              .map(dataBuffer -> decode(dataBuffer, elementType, mimeType, hints));
+        return LocaleUtils
+                .currentReactive()
+                .flatMap(locale -> DataBufferUtils
+                        .join(input)
+                        .map(dataBuffer -> LocaleUtils
+                                .doWith(dataBuffer,
+                                        locale,
+                                        (buf, l) -> decode(buf, elementType, mimeType, hints)))
+                );
     }
 
     @Override

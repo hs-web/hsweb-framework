@@ -385,10 +385,7 @@ public interface EnumDict<V> extends JSONSerializable {
                             return e.name();
                         }).collect(Collectors.toList());
 
-                return new ValidationException("validation.parameter_does_not_exist_in_enums",
-                                               Arrays.asList(
-                                                       new ValidationException.Detail(currentName, "选项中不存在此值", values)
-                                               ), currentName);
+                return new ValidationException(currentName,"validation.parameter_does_not_exist_in_enums", currentName);
             };
             if (EnumDict.class.isAssignableFrom(findPropertyType) && findPropertyType.isEnum()) {
                 if (node.isObject()) {
@@ -406,9 +403,7 @@ public interface EnumDict<V> extends JSONSerializable {
                             .find(findPropertyType, node.textValue())
                             .orElseThrow(exceptionSupplier);
                 }
-                throw new ValidationException("validation.parameter_does_not_exist_in_enums", Arrays.asList(
-                        new ValidationException.Detail(currentName, "选项中不存在此值", null)
-                ), currentName);
+                return exceptionSupplier.get();
             }
             if (findPropertyType.isEnum()) {
                 return Stream

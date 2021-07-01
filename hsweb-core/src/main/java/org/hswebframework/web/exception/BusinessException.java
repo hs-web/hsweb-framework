@@ -31,7 +31,6 @@ public class BusinessException extends I18nSupportException {
 
     @Getter
     private int status = 500;
-
     @Getter
     private String code;
 
@@ -42,6 +41,11 @@ public class BusinessException extends I18nSupportException {
     public BusinessException(String message, int status, Object... args) {
         this(message, null, status, args);
     }
+
+    public BusinessException(String message, String code) {
+        this(message, code, 500);
+    }
+
 
     public BusinessException(String message, String code, int status, Object... args) {
         super(message, args);

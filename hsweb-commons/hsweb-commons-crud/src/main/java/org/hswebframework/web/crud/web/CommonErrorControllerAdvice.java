@@ -62,7 +62,8 @@ public class CommonErrorControllerAdvice {
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public Mono<ResponseMessage<TokenState>> handleException(UnAuthorizedException e) {
         return LocaleUtils
-                .resolveThrowable(messageSource, e, (err, msg) -> (ResponseMessage.<TokenState>error(401, "unauthorized", msg).result(e.getState())));
+                .resolveThrowable(messageSource, e, (err, msg) -> (ResponseMessage.<TokenState>error(401, "unauthorized", msg)
+                        .result(e.getState())));
     }
 
     @ExceptionHandler
@@ -84,14 +85,17 @@ public class CommonErrorControllerAdvice {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Mono<ResponseMessage<List<ValidationException.Detail>>> handleException(ValidationException e) {
-        return Mono.just(ResponseMessage.<List<ValidationException.Detail>>error(400, "illegal_argument", e.getMessage())
-                                 .result(e.getDetails()));
+        return LocaleUtils
+                .resolveThrowable(messageSource, e, (err, msg) -> ResponseMessage
+                        .<List<ValidationException.Detail>>error(400, "illegal_argument",msg)
+                        .result(e.getDetails()))
+                ;
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Mono<ResponseMessage<List<ValidationException.Detail>>> handleException(ConstraintViolationException e) {
-        return handleException(new ValidationException(e.getMessage(), e.getConstraintViolations()));
+        return handleException(new ValidationException(e.getConstraintViolations()));
     }
 
     @ExceptionHandler
@@ -178,7 +182,7 @@ public class CommonErrorControllerAdvice {
     public Mono<ResponseMessage<Object>> handleException(AuthenticationException e) {
         return LocaleUtils
                 .resolveThrowable(messageSource, e, (err, msg) -> ResponseMessage.error(400, e.getCode(), msg))
-                .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getMessage(), e)))
+                .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getLocalizedMessage(), e)))
                 ;
     }
 
@@ -190,7 +194,7 @@ public class CommonErrorControllerAdvice {
                 .map(msg -> ResponseMessage
                         .error(415, "unsupported_media_type", msg)
                         .result(e.getSupportedMediaTypes()))
-                .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getMessage(), e)));
+                .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getLocalizedMessage(), e)));
     }
 
     @ExceptionHandler

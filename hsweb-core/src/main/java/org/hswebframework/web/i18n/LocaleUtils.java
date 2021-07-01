@@ -2,12 +2,15 @@ package org.hswebframework.web.i18n;
 
 import org.hswebframework.web.exception.I18nSupportException;
 import org.springframework.context.MessageSource;
-import org.springframework.context.i18n.LocaleContext;
-import org.springframework.context.i18n.SimpleLocaleContext;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.Signal;
+import reactor.core.publisher.SignalType;
+import reactor.util.context.Context;
 
 import java.util.Locale;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -18,9 +21,9 @@ import java.util.function.Function;
  */
 public class LocaleUtils {
 
-    public static final LocaleContext DEFAULT_CONTEXT = new SimpleLocaleContext(Locale.getDefault());
+    public static final Locale DEFAULT_LOCALE = Locale.getDefault();
 
-    private static final ThreadLocal<LocaleContext> CONTEXT_THREAD_LOCAL = new ThreadLocal<>();
+    private static final ThreadLocal<Locale> CONTEXT_THREAD_LOCAL = new ThreadLocal<>();
 
     static MessageSource messageSource;
 
@@ -30,11 +33,11 @@ public class LocaleUtils {
      * @return Locale
      */
     public static Locale current() {
-        LocaleContext context = CONTEXT_THREAD_LOCAL.get();
-        if (context == null || context.getLocale() == null) {
-            context = DEFAULT_CONTEXT;
+        Locale locale = CONTEXT_THREAD_LOCAL.get();
+        if (locale == null) {
+            locale = DEFAULT_LOCALE;
         }
-        return context.getLocale();
+        return locale;
     }
 
     /**
@@ -51,8 +54,21 @@ public class LocaleUtils {
      */
     public static <T, R> R doWith(T data, Locale locale, BiFunction<T, Locale, R> mapper) {
         try {
-            CONTEXT_THREAD_LOCAL.set(new SimpleLocaleContext(locale));
+            CONTEXT_THREAD_LOCAL.set(locale);
             return mapper.apply(data, locale);
+        } finally {
+            CONTEXT_THREAD_LOCAL.remove();
+        }
+    }
+
+    public static Function<Context, Context> useLocale(Locale locale) {
+        return ctx -> ctx.put(Locale.class, locale);
+    }
+
+    public static void doWith(Locale locale, Consumer<Locale> consumer) {
+        try {
+            CONTEXT_THREAD_LOCAL.set(locale);
+            consumer.accept(locale);
         } finally {
             CONTEXT_THREAD_LOCAL.remove();
         }
@@ -60,18 +76,25 @@ public class LocaleUtils {
 
     /**
      * 响应式方式获取当前语言地区
+     *
      * @return 语言地区
      */
+    @SuppressWarnings("all")
     public static Mono<Locale> currentReactive() {
         return Mono
                 .subscriberContext()
-                .map(ctx -> ctx
-                        .<LocaleContext>getOrEmpty(LocaleContext.class)
-                        .map(LocaleContext::getLocale)
-                        .orElseGet(Locale::getDefault)
-                );
+                .map(ctx -> ctx.getOrDefault(Locale.class, DEFAULT_LOCALE));
     }
 
+    public static <T> void onNext(Signal<T> signal, BiConsumer<T, Locale> consumer) {
+        if (signal.getType() != SignalType.ON_NEXT) {
+            return;
+        }
+        Locale locale = signal.getContext().getOrDefault(Locale.class, DEFAULT_LOCALE);
+
+        doWith(locale, l -> consumer.accept(signal.get(), l));
+
+    }
 
     public static <S extends I18nSupportException, R> Mono<R> resolveThrowable(S source,
                                                                                BiFunction<S, String, R> mapper) {
@@ -81,7 +104,7 @@ public class LocaleUtils {
     public static <S extends I18nSupportException, R> Mono<R> resolveThrowable(MessageSource messageSource,
                                                                                S source,
                                                                                BiFunction<S, String, R> mapper) {
-        return doWithReactive(messageSource, source, Throwable::getMessage, mapper, source.getArgs());
+        return doWithReactive(messageSource, source, I18nSupportException::getCode, mapper, source.getArgs());
     }
 
     public static <S extends Throwable, R> Mono<R> resolveThrowable(S source,
