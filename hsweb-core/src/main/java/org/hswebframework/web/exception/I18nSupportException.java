@@ -30,7 +30,7 @@ public class I18nSupportException extends RuntimeException {
 
     @Override
     public String getMessage() {
-        return code;
+        return super.getMessage() != null ? super.getMessage() : getLocalizedMessage();
     }
 
     @Override

@@ -1,4 +1,3 @@
 # Auto Configure
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-org.hswebframework.web.authorization.simple.DefaultAuthorizationAutoConfiguration,\
-org.hswebframework.web.authorization.configuration.AuthorizationI18nConfiguration
+org.hswebframework.web.authorization.simple.DefaultAuthorizationAutoConfiguration
