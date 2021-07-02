@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hswebframework.web.dict.EnumDict;
+import org.hswebframework.web.i18n.LocaleUtils;
 import org.hswebframework.web.i18n.MessageSourceInitializer;
 import org.junit.Before;
 import org.junit.Test;
@@ -55,7 +56,7 @@ public class CustomJackson2jsonEncoderTest {
                .as(DataBufferUtils::join)
                .map(buf -> buf.toString(StandardCharsets.UTF_8))
                .doOnNext(System.out::println)
-               .subscriberContext(ctx->ctx.put(LocaleContext.class,new SimpleLocaleContext(locale)))
+               .subscriberContext(LocaleUtils.useLocale(locale))
                .as(StepVerifier::create)
                .expectNextMatches(verify)
                .verifyComplete();
