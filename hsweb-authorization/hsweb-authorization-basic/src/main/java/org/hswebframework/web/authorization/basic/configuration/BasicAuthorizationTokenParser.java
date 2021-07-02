@@ -15,9 +15,9 @@ import javax.servlet.http.HttpServletRequest;
 
 public class BasicAuthorizationTokenParser implements UserTokenForTypeParser {
 
-    private AuthenticationManager authenticationManager;
+    private final AuthenticationManager authenticationManager;
 
-    private UserTokenManager userTokenManager;
+    private final UserTokenManager userTokenManager;
 
     @Override
     public String getTokenType() {
