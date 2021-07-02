@@ -16,6 +16,8 @@ import java.util.*;
 @ResponseStatus(HttpStatus.BAD_REQUEST)
 public class ValidationException extends I18nSupportException {
 
+    private static final boolean propertyI18nEnabled = Boolean.getBoolean("i18n.validation.property.enabled");
+
     private List<Detail> details;
 
     public ValidationException(String message) {
@@ -42,8 +44,15 @@ public class ValidationException extends I18nSupportException {
         } else {
             setCode("validation.property_validate_failed");
         }
+        String property = first.getPropertyPath().toString();
+
         //{0} 属性 ，{1} 验证消息
-        setArgs(new Object[]{first.getPropertyPath().toString(), first.getMessage()});
+        //property也支持国际化?
+        String resolveMessage = propertyI18nEnabled ?
+                LocaleUtils.resolveMessage(first.getRootBeanClass().getName() + "." + property, property)
+                : property;
+
+        setArgs(new Object[]{resolveMessage, first.getMessage()});
 
         details = new ArrayList<>(violations.size());
         for (ConstraintViolation<?> violation : violations) {

@@ -25,7 +25,7 @@ public class LocaleUtils {
 
     private static final ThreadLocal<Locale> CONTEXT_THREAD_LOCAL = new ThreadLocal<>();
 
-    static MessageSource messageSource;
+    static MessageSource messageSource = UnsupportedMessageSource.instance();
 
     /**
      * 获取当前的语言地区,如果没有设置则返回系统默认语言

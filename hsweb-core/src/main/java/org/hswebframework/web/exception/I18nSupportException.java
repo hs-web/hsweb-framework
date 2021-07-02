@@ -28,6 +28,10 @@ public class I18nSupportException extends RuntimeException {
         this.code = code;
     }
 
+    @Override
+    public String getMessage() {
+        return code;
+    }
 
     @Override
     public String getLocalizedMessage() {
