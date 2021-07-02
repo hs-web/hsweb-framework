@@ -8,7 +8,6 @@ import com.alibaba.fastjson.parser.JSONToken;
 import com.alibaba.fastjson.parser.deserializer.ObjectDeserializer;
 import com.alibaba.fastjson.serializer.JSONSerializable;
 import com.alibaba.fastjson.serializer.JSONSerializer;
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -21,6 +20,7 @@ import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.web.exception.ValidationException;
+import org.hswebframework.web.i18n.LocaleUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.StringUtils;
 
@@ -118,14 +118,13 @@ public interface EnumDict<V> extends JSONSerializable {
     }
 
     /**
-     * 枚举选项的描述,对一个选项进行详细的描述有时候是必要的.默认值为{@link this#getText()}
+     * 枚举选项的描述,对一个选项进行详细的描述有时候是必要的.默认值为{@link EnumDict#getText()}
      *
      * @return 描述
      */
     default String getComments() {
         return getText();
     }
-
 
 
     /**
@@ -150,8 +149,8 @@ public interface EnumDict<V> extends JSONSerializable {
     static <T extends Enum & EnumDict> List<T> findList(Class<T> type, Predicate<T> predicate) {
         if (type.isEnum()) {
             return Arrays.stream(type.getEnumConstants())
-                    .filter(predicate)
-                    .collect(Collectors.toList());
+                         .filter(predicate)
+                         .collect(Collectors.toList());
         }
         return Collections.emptyList();
     }
@@ -159,16 +158,18 @@ public interface EnumDict<V> extends JSONSerializable {
     /**
      * 根据枚举的{@link EnumDict#getValue()}来查找.
      *
-     * @see this#find(Class, Predicate)
+     * @see EnumDict#find(Class, Predicate)
      */
     static <T extends Enum & EnumDict<?>> Optional<T> findByValue(Class<T> type, Object value) {
-        return find(type, e -> e.getValue() == value || e.getValue().equals(value) || String.valueOf(e.getValue()).equalsIgnoreCase(String.valueOf(value)));
+        return find(type, e -> e.getValue() == value || e.getValue().equals(value) || String
+                .valueOf(e.getValue())
+                .equalsIgnoreCase(String.valueOf(value)));
     }
 
     /**
      * 根据枚举的{@link EnumDict#getText()} 来查找.
      *
-     * @see this#find(Class, Predicate)
+     * @see EnumDict#find(Class, Predicate)
      */
     static <T extends Enum & EnumDict> Optional<T> findByText(Class<T> type, String text) {
         return find(type, e -> e.getText().equalsIgnoreCase(text));
@@ -177,7 +178,7 @@ public interface EnumDict<V> extends JSONSerializable {
     /**
      * 根据枚举的{@link EnumDict#getValue()},{@link EnumDict#getText()}来查找.
      *
-     * @see this#find(Class, Predicate)
+     * @see EnumDict#find(Class, Predicate)
      */
     static <T extends Enum & EnumDict> Optional<T> find(Class<T> type, Object target) {
         return find(type, v -> v.eq(target));
@@ -203,8 +204,8 @@ public interface EnumDict<V> extends JSONSerializable {
         if (all.length >= 64) {
             List<T> list = Arrays.asList(t);
             return Arrays.stream(all)
-                    .map(EnumDict.class::cast)
-                    .anyMatch(list::contains);
+                         .map(EnumDict.class::cast)
+                         .anyMatch(list::contains);
         }
         return maskIn(toMask(t), target);
     }
@@ -253,24 +254,32 @@ public interface EnumDict<V> extends JSONSerializable {
 
     /**
      * @return 是否在序列化为json的时候, 将枚举以对象方式序列化
-     * @see this#DEFAULT_WRITE_JSON_OBJECT
+     * @see EnumDict#DEFAULT_WRITE_JSON_OBJECT
      */
     default boolean isWriteJSONObjectEnabled() {
         return DEFAULT_WRITE_JSON_OBJECT;
     }
 
+    default String getI18nCode() {
+        return getText();
+    }
+
+    default String getI18nMessage(Locale locale) {
+        return LocaleUtils.resolveMessage(getI18nCode(), locale, getText());
+    }
+
     /**
-     * 当{@link this#isWriteJSONObjectEnabled()}返回true时,在序列化为json的时候,会写出此方法返回的对象
+     * 当{@link EnumDict#isWriteJSONObjectEnabled()}返回true时,在序列化为json的时候,会写出此方法返回的对象
      *
      * @return 最终序列化的值
-     * @see this#isWriteJSONObjectEnabled()
+     * @see EnumDict#isWriteJSONObjectEnabled()
      */
     @JsonValue
     default Object getWriteJSONObject() {
         if (isWriteJSONObjectEnabled()) {
             Map<String, Object> jsonObject = new HashMap<>();
             jsonObject.put("value", getValue());
-            jsonObject.put("text", getText());
+            jsonObject.put("text", getI18nMessage(LocaleUtils.current()));
             // jsonObject.put("index", index());
             // jsonObject.put("mask", getMask());
             return jsonObject;
@@ -280,7 +289,7 @@ public interface EnumDict<V> extends JSONSerializable {
     }
 
     @Override
-    default void write(JSONSerializer jsonSerializer, Object o, Type type, int i) throws IOException {
+    default void write(JSONSerializer jsonSerializer, Object o, Type type, int i) {
         if (isWriteJSONObjectEnabled()) {
             jsonSerializer.write(getWriteJSONObject());
         } else {
@@ -295,7 +304,7 @@ public interface EnumDict<V> extends JSONSerializable {
     @AllArgsConstructor
     @NoArgsConstructor
     class EnumDictJSONDeserializer extends JsonDeserializer implements ObjectDeserializer {
-        private Function<Object,Object> mapper;
+        private Function<Object, Object> mapper;
 
         @Override
         @SuppressWarnings("all")
@@ -324,8 +333,10 @@ public interface EnumDict<V> extends JSONSerializable {
                     value = parser.parse();
                     if (value instanceof Map) {
                         return (T) EnumDict.find(((Class) type), ((Map) value).get("value"))
-                                .orElseGet(() ->
-                                        EnumDict.find(((Class) type), ((Map) value).get("text")).orElse(null));
+                                           .orElseGet(() ->
+                                                              EnumDict
+                                                                      .find(((Class) type), ((Map) value).get("text"))
+                                                                      .orElse(null));
                     }
                 }
 
@@ -347,11 +358,11 @@ public interface EnumDict<V> extends JSONSerializable {
         @SneakyThrows
         public Object deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
             JsonNode node = jp.getCodec().readTree(jp);
-            if(mapper!=null){
-                if(node.isTextual()){
+            if (mapper != null) {
+                if (node.isTextual()) {
                     return mapper.apply(node.asText());
                 }
-                if(node.isNumber()){
+                if (node.isNumber()) {
                     return mapper.apply(node.asLong());
                 }
             }
@@ -364,19 +375,17 @@ public interface EnumDict<V> extends JSONSerializable {
                 findPropertyType = BeanUtils.findPropertyType(currentName, currentValue.getClass());
             }
             Supplier<ValidationException> exceptionSupplier = () -> {
-               List<Object> values= Stream.of(findPropertyType.getEnumConstants())
+                List<Object> values = Stream
+                        .of(findPropertyType.getEnumConstants())
                         .map(Enum.class::cast)
-                        .map(e->{
-                            if(e instanceof EnumDict){
+                        .map(e -> {
+                            if (e instanceof EnumDict) {
                                 return ((EnumDict) e).getValue();
                             }
                             return e.name();
                         }).collect(Collectors.toList());
 
-                return new ValidationException("参数[" + currentName + "]在选项中不存在",
-                        Arrays.asList(
-                                new ValidationException.Detail(currentName, "选项中不存在此值", values)
-                        ));
+                return new ValidationException(currentName,"validation.parameter_does_not_exist_in_enums", currentName);
             };
             if (EnumDict.class.isAssignableFrom(findPropertyType) && findPropertyType.isEnum()) {
                 if (node.isObject()) {
@@ -394,12 +403,11 @@ public interface EnumDict<V> extends JSONSerializable {
                             .find(findPropertyType, node.textValue())
                             .orElseThrow(exceptionSupplier);
                 }
-                throw new ValidationException("参数[" + currentName + "]在选项中不存在", Arrays.asList(
-                        new ValidationException.Detail(currentName, "选项中不存在此值", null)
-                ));
+                return exceptionSupplier.get();
             }
             if (findPropertyType.isEnum()) {
-                return Stream.of(findPropertyType.getEnumConstants())
+                return Stream
+                        .of(findPropertyType.getEnumConstants())
                         .filter(o -> {
                             if (node.isTextual()) {
                                 return node.textValue().equalsIgnoreCase(((Enum) o).name());

@@ -82,13 +82,12 @@ public class DefaultReactiveUserService extends GenericReactiveCrudService<UserE
                             .where(userEntity::getUsername)
                             .fetch()
                             .doOnNext(u -> {
-                                throw new org.hswebframework.web.exception.ValidationException("用户已存在");
+                                throw new org.hswebframework.web.exception.ValidationException("error.user_already_exists");
                             })
                             .then(Mono.just(userEntity))
-                            .doOnNext(e -> e.tryValidate(CreateGroup.class))
                             .as(getRepository()::insert)
                             .onErrorMap(DuplicateKeyException.class, e -> {
-                                throw new org.hswebframework.web.exception.ValidationException("用户已存在");
+                                throw new org.hswebframework.web.exception.ValidationException("error.user_already_exists");
                             })
                             .thenReturn(userEntity)
                             .flatMap(user -> new UserCreatedEvent(user).publish(eventPublisher))

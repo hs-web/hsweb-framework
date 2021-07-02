@@ -51,6 +51,7 @@ public class CustomCodecsAutoConfiguration {
             return (configurer) -> {
                 CodecConfigurer.DefaultCodecs defaults = configurer.defaultCodecs();
                 defaults.jackson2JsonDecoder(new CustomJackson2JsonDecoder(entityFactory, objectMapper));
+                defaults.jackson2JsonEncoder(new CustomJackson2jsonEncoder(objectMapper));
             };
         }
 

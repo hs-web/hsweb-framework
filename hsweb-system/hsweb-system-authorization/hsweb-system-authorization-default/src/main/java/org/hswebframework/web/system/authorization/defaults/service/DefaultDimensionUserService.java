@@ -59,7 +59,7 @@ public class DefaultDimensionUserService extends GenericReactiveCrudService<Dime
         return this
                 .publishEvent(entityPublisher, DimensionBindEvent::new)
                 .as(super::insert)
-                .onErrorMap(DuplicateKeyException.class, (err) -> new BusinessException("重复的绑定请求"));
+                .onErrorMap(DuplicateKeyException.class, (err) -> new BusinessException("error.duplicate_key"));
     }
 
     @Override

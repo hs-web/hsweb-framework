@@ -34,7 +34,6 @@ import org.hswebframework.web.authorization.simple.PlainTextUsernamePasswordAuth
 import org.hswebframework.web.logging.AccessLogger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.event.EventListener;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
@@ -85,8 +84,8 @@ public class AuthorizationController {
             String username_ = (String) parameters.get("username");
             String password_ = (String) parameters.get("password");
 
-            Assert.hasLength(username_, "用户名不能为空");
-            Assert.hasLength(password_, "密码不能为空");
+            Assert.hasLength(username_, "validation.username_must_not_be_empty");
+            Assert.hasLength(password_, "validation.password_must_not_be_empty");
 
             Function<String, Object> parameterGetter = parameters::get;
             return Mono.defer(() -> {
@@ -101,7 +100,7 @@ public class AuthorizationController {
                                     .publish(eventPublisher)
                                     .then(authenticationManager
                                             .authenticate(Mono.just(new PlainTextUsernamePasswordAuthenticationRequest(username, password)))
-                                            .switchIfEmpty(Mono.error(() -> new AuthenticationException(AuthenticationException.ILLEGAL_PASSWORD,"密码错误")))
+                                            .switchIfEmpty(Mono.error(() -> new AuthenticationException(AuthenticationException.ILLEGAL_PASSWORD)))
                                             .flatMap(auth -> {
                                                 //触发授权成功事件
                                                 AuthorizationSuccessEvent event = new AuthorizationSuccessEvent(auth, parameterGetter);

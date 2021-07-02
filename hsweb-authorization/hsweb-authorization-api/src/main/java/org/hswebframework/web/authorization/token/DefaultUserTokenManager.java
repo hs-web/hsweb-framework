@@ -253,7 +253,7 @@ public class DefaultUserTokenManager implements UserTokenManager {
                         .flatMap(this::checkTimeout)
                         .filterWhen(t -> {
                             if (t.isNormal()) {
-                                return Mono.error(new AccessDenyException("该用户已在其他地方登陆"));
+                                return Mono.error(new AccessDenyException("error.logged_in_elsewhere"));
                             }
                             return Mono.empty();
                         })

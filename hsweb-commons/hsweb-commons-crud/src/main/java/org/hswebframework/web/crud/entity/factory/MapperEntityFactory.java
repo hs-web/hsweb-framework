@@ -124,7 +124,7 @@ public class MapperEntityFactory implements EntityFactory, BeanFactory {
         if (realType == null) {
             if (!Modifier.isInterface(beanClass.getModifiers()) && !Modifier.isAbstract(beanClass.getModifiers())) {
                 realType = beanClass;
-            }else {
+            } else {
                 mapper = defaultMapperFactory.apply(beanClass);
             }
         }
@@ -172,7 +172,7 @@ public class MapperEntityFactory implements EntityFactory, BeanFactory {
             return (T) new HashSet<>();
         }
 
-        throw new NotFoundException("无法初始化实体类:"+beanClass);
+        throw new NotFoundException("error.cant_create_instance", beanClass);
     }
 
     @Override

@@ -26,12 +26,11 @@ import lombok.Getter;
  * @author zhouhao
  * @since 2.0
  */
-public class BusinessException extends RuntimeException {
+public class BusinessException extends I18nSupportException {
     private static final long serialVersionUID = 5441923856899380112L;
 
     @Getter
     private int status = 500;
-
     @Getter
     private String code;
 
@@ -39,20 +38,21 @@ public class BusinessException extends RuntimeException {
         this(message, 500);
     }
 
+    public BusinessException(String message, int status, Object... args) {
+        this(message, null, status, args);
+    }
+
     public BusinessException(String message, String code) {
         this(message, code, 500);
     }
 
-    public BusinessException(String message, String code, int status) {
-        super(message);
+
+    public BusinessException(String message, String code, int status, Object... args) {
+        super(message, args);
         this.code = code;
         this.status = status;
     }
 
-    public BusinessException(String message, int status) {
-        super(message);
-        this.status = status;
-    }
 
     public BusinessException(String message, Throwable cause) {
         super(message, cause);
