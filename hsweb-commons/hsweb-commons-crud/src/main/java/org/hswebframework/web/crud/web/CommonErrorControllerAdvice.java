@@ -7,6 +7,7 @@ import org.hswebframework.web.authorization.exception.AuthenticationException;
 import org.hswebframework.web.authorization.exception.UnAuthorizedException;
 import org.hswebframework.web.authorization.token.TokenState;
 import org.hswebframework.web.exception.BusinessException;
+import org.hswebframework.web.exception.I18nSupportException;
 import org.hswebframework.web.exception.NotFoundException;
 import org.hswebframework.web.exception.ValidationException;
 import org.hswebframework.web.i18n.LocaleUtils;
@@ -253,6 +254,15 @@ public class CommonErrorControllerAdvice {
                 .resolveThrowable(messageSource,
                                   exception,
                                   (err, msg) -> ResponseMessage.error(400, "illegal_argument", msg));
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Mono<ResponseMessage<Object>> handleException(I18nSupportException e) {
+        return LocaleUtils
+                .resolveThrowable(messageSource,
+                                  e,
+                                  (err, msg) -> ResponseMessage.error(400, err.getCode(), msg));
     }
 
 }

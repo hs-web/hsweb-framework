@@ -10,7 +10,7 @@ package org.hswebframework.web.dict;
  * &#64;AllArgsConstructor
  * &#64;Getter
  * &#64;Dict("device-state")
- * public enum DeviceState implements I18nEnumDict<String> {
+ * public enum DeviceState implements I18nEnumDict&lt;String&gt; {
  *     notActive("未启用"),
  *     offline("离线"),
  *     online("在线");
@@ -21,6 +21,7 @@ package org.hswebframework.web.dict;
  *     public String getValue() {
  *         return name();
  *     }
+ *   }
  * </pre>
  * <p>
  * 在resources下添加文件: <code>i18n/{path}/{name}_zh_CN.properties</code>
