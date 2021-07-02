@@ -2,6 +2,7 @@ package org.hswebframework.web.crud.web;
 
 import io.r2dbc.spi.R2dbcDataIntegrityViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.hswebframework.web.CodeConstants;
 import org.hswebframework.web.authorization.exception.AccessDenyException;
 import org.hswebframework.web.authorization.exception.AuthenticationException;
 import org.hswebframework.web.authorization.exception.UnAuthorizedException;
@@ -13,7 +14,6 @@ import org.hswebframework.web.exception.ValidationException;
 import org.hswebframework.web.i18n.LocaleUtils;
 import org.hswebframework.web.logger.ReactiveLogger;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
-import org.springframework.context.MessageSource;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindException;
@@ -37,18 +37,11 @@ import java.util.stream.Collectors;
 @Order
 public class CommonErrorControllerAdvice {
 
-    private final MessageSource messageSource;
-
-    public CommonErrorControllerAdvice(MessageSource messageSource) {
-        this.messageSource = messageSource;
-    }
-
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Mono<ResponseMessage<Object>> handleException(BusinessException e) {
         return LocaleUtils
-                .resolveThrowable(messageSource,
-                                  e,
+                .resolveThrowable(e,
                                   (err, msg) -> ResponseMessage.error(err.getStatus(), err.getCode(), msg));
     }
 
@@ -56,14 +49,14 @@ public class CommonErrorControllerAdvice {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Mono<ResponseMessage<?>> handleException(UnsupportedOperationException e) {
         return LocaleUtils
-                .resolveThrowable(messageSource, e, (err, msg) -> (ResponseMessage.<TokenState>error(401, "unsupported", msg)));
+                .resolveThrowable(e, (err, msg) -> (ResponseMessage.<TokenState>error(401, CodeConstants.Error.unsupported, msg)));
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public Mono<ResponseMessage<TokenState>> handleException(UnAuthorizedException e) {
         return LocaleUtils
-                .resolveThrowable(messageSource, e, (err, msg) -> (ResponseMessage.<TokenState>error(401, "unauthorized", msg)
+                .resolveThrowable(e, (err, msg) -> (ResponseMessage.<TokenState>error(401, CodeConstants.Error.unauthorized, msg)
                         .result(e.getState())));
     }
 
@@ -71,7 +64,7 @@ public class CommonErrorControllerAdvice {
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public Mono<ResponseMessage<Object>> handleException(AccessDenyException e) {
         return LocaleUtils
-                .resolveThrowable(messageSource, e, (err, msg) -> ResponseMessage.error(403, e.getCode(), e.getMessage()))
+                .resolveThrowable(e, (err, msg) -> ResponseMessage.error(403, e.getCode(), e.getMessage()))
                 ;
     }
 
@@ -79,7 +72,7 @@ public class CommonErrorControllerAdvice {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public Mono<ResponseMessage<Object>> handleException(NotFoundException e) {
         return LocaleUtils
-                .resolveThrowable(messageSource, e, (err, msg) -> ResponseMessage.error(404, "not_found", msg))
+                .resolveThrowable(e, (err, msg) -> ResponseMessage.error(404, CodeConstants.Error.not_found, msg))
                 ;
     }
 
@@ -87,8 +80,8 @@ public class CommonErrorControllerAdvice {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Mono<ResponseMessage<List<ValidationException.Detail>>> handleException(ValidationException e) {
         return LocaleUtils
-                .resolveThrowable(messageSource, e, (err, msg) -> ResponseMessage
-                        .<List<ValidationException.Detail>>error(400, "illegal_argument",msg)
+                .resolveThrowable(e, (err, msg) -> ResponseMessage
+                        .<List<ValidationException.Detail>>error(400, CodeConstants.Error.illegal_argument, msg)
                         .result(e.getDetails()))
                 ;
     }
@@ -139,14 +132,14 @@ public class CommonErrorControllerAdvice {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Mono<ResponseMessage<?>> handleException(javax.validation.ValidationException e) {
-        return Mono.just(ResponseMessage.error(400, "illegal_argument", e.getMessage()));
+        return Mono.just(ResponseMessage.error(400, CodeConstants.Error.illegal_argument, e.getMessage()));
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.GATEWAY_TIMEOUT)
     public Mono<ResponseMessage<Object>> handleException(TimeoutException e) {
 
-        return Mono.just(ResponseMessage.error(504, "timeout", e.getMessage()))
+        return Mono.just(ResponseMessage.error(504, CodeConstants.Error.timeout, e.getMessage()))
                    .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getMessage(), e)));
 
     }
@@ -173,7 +166,7 @@ public class CommonErrorControllerAdvice {
     public Mono<ResponseMessage<Object>> handleException(IllegalArgumentException e) {
 
         return LocaleUtils
-                .resolveThrowable(messageSource, e, (err, msg) -> ResponseMessage.error(400, "illegal_argument", msg))
+                .resolveThrowable(e, (err, msg) -> ResponseMessage.error(400, CodeConstants.Error.illegal_argument, msg))
                 .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getMessage(), e)))
                 ;
     }
@@ -182,7 +175,7 @@ public class CommonErrorControllerAdvice {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Mono<ResponseMessage<Object>> handleException(AuthenticationException e) {
         return LocaleUtils
-                .resolveThrowable(messageSource, e, (err, msg) -> ResponseMessage.error(400, e.getCode(), msg))
+                .resolveThrowable(e, (err, msg) -> ResponseMessage.error(400, e.getCode(), msg))
                 .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getLocalizedMessage(), e)))
                 ;
     }
@@ -191,7 +184,7 @@ public class CommonErrorControllerAdvice {
     @ResponseStatus(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
     public Mono<ResponseMessage<Object>> handleException(UnsupportedMediaTypeStatusException e) {
         return LocaleUtils
-                .resolveMessageReactive(messageSource, "error.unsupported_media_type")
+                .resolveMessageReactive("error.unsupported_media_type")
                 .map(msg -> ResponseMessage
                         .error(415, "unsupported_media_type", msg)
                         .result(e.getSupportedMediaTypes()))
@@ -203,7 +196,7 @@ public class CommonErrorControllerAdvice {
     public Mono<ResponseMessage<Object>> handleException(NotAcceptableStatusException e) {
 
         return LocaleUtils
-                .resolveMessageReactive(messageSource, "error.not_acceptable_media_type")
+                .resolveMessageReactive("error.not_acceptable_media_type")
                 .map(msg -> ResponseMessage
                         .error(406, "not_acceptable_media_type", msg)
                         .result(e.getSupportedMediaTypes()))
@@ -214,7 +207,7 @@ public class CommonErrorControllerAdvice {
     @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
     public Mono<ResponseMessage<Object>> handleException(MethodNotAllowedException e) {
         return LocaleUtils
-                .resolveMessageReactive(messageSource, "error.method_not_allowed")
+                .resolveMessageReactive("error.method_not_allowed")
                 .map(msg -> ResponseMessage
                         .error(406, "method_not_allowed", msg)
                         .result(e.getSupportedMethods()))
@@ -233,7 +226,7 @@ public class CommonErrorControllerAdvice {
             log.warn(e.getMessage(), e);
         }
         return LocaleUtils
-                .resolveMessageReactive(messageSource, code)
+                .resolveMessageReactive(code)
                 .map(msg -> ResponseMessage.error(400, code, msg));
     }
 
@@ -251,17 +244,15 @@ public class CommonErrorControllerAdvice {
         } while (exception != null && exception != e);
 
         return LocaleUtils
-                .resolveThrowable(messageSource,
-                                  exception,
-                                  (err, msg) -> ResponseMessage.error(400, "illegal_argument", msg));
+                .resolveThrowable(exception,
+                                  (err, msg) -> ResponseMessage.error(400, CodeConstants.Error.illegal_argument, msg));
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Mono<ResponseMessage<Object>> handleException(I18nSupportException e) {
         return LocaleUtils
-                .resolveThrowable(messageSource,
-                                  e,
+                .resolveThrowable(e,
                                   (err, msg) -> ResponseMessage.error(400, err.getCode(), msg));
     }
 

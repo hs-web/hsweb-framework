@@ -1,7 +1,9 @@
 package org.hswebframework.web.i18n;
 
 import org.hswebframework.web.exception.I18nSupportException;
+import org.reactivestreams.Publisher;
 import org.springframework.context.MessageSource;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Signal;
 import reactor.core.publisher.SignalType;
@@ -15,11 +17,19 @@ import java.util.function.Function;
 
 /**
  * 用于进行国际化消息转换
+ * 常用方法:
+ *
+ * <ul>
+ *  <li>{@link LocaleUtils#current()} </li>
+ *  <li>{@link LocaleUtils#currentReactive()}</li>
+ *  <li>{@link LocaleUtils#resolveMessageReactive(String, Object...)}</li>
+ *  <li>{@link LocaleUtils#doOnNext(BiConsumer)}</li>
+ * </ul>
  *
  * @author zhouhao
  * @since 4.0.11
  */
-public class LocaleUtils {
+public final class LocaleUtils {
 
     public static final Locale DEFAULT_LOCALE = Locale.getDefault();
 
@@ -245,6 +255,19 @@ public class LocaleUtils {
     }
 
     /**
+     * 使用默认的消息源，响应式方式解析消息
+     *
+     * @param code 消息编码
+     * @param args 参数
+     * @return 解析后的消息
+     */
+    public static Mono<String> resolveMessageReactive(String code,
+                                                      Object... args) {
+        return currentReactive()
+                .map(locale -> resolveMessage(messageSource, locale, code, code, args));
+    }
+
+    /**
      * 使用指定的消息源，响应式方式解析消息
      *
      * @param messageSource 消息源
@@ -350,14 +373,77 @@ public class LocaleUtils {
         };
     }
 
-    /* SignalType.ON_NEXT */
-    public static <T> Consumer<Signal<T>> onNext(BiConsumer<T, Locale> operation) {
-        return on(SignalType.ON_NEXT, (s, l) -> operation.accept(s.get(), l));
+    /**
+     * 在响应式的各个周期获取地区并执行指定的操作
+     *
+     * <pre>
+     *     monoOrFlux
+     *     .as(LocaleUtils.doOn(ON_NEXT,(signal,locale)-> ... ))
+     *     ...
+     * </pre>
+     *
+     * @param type      周期类型
+     * @param operation 操作
+     * @param <E>       响应式流中元素类型
+     * @param <T>       响应式流类型
+     * @return 原始流
+     */
+    @SuppressWarnings("all")
+    public static <E, T extends Publisher<E>> Function<T, T> doOn(SignalType type, BiConsumer<Signal<E>, Locale> operation) {
+        return publisher -> {
+            if (publisher instanceof Mono) {
+                return (T) Mono
+                        .from(publisher)
+                        .doOnEach(on(type, operation));
+            }
+            return (T) Flux
+                    .from(publisher)
+                    .doOnEach(on(type, operation));
+        };
     }
 
-    /* SignalType.ON_ERROR */
-    public static <T> Consumer<Signal<T>> onError(BiConsumer<Throwable, Locale> operation) {
-        return on(SignalType.ON_ERROR, (s, l) -> operation.accept(s.getThrowable(), l));
+    /**
+     * <pre>
+     * monoOrFlux
+     * .as(LocaleUtils.doOnNext(element-> .... ))
+     * ...
+     * </pre>
+     */
+    public static <E, T extends Publisher<E>> Function<T, T> doOnNext(Consumer<E> operation) {
+        return doOn(SignalType.ON_NEXT, (s, l) -> operation.accept(s.get()));
+    }
+
+    /**
+     * <pre>
+     * monoOrFlux
+     * .as(LocaleUtils.doOnNext((element,locale)-> .... ))
+     * ...
+     * </pre>
+     */
+    public static <E, T extends Publisher<E>> Function<T, T> doOnNext(BiConsumer<E, Locale> operation) {
+        return doOn(SignalType.ON_NEXT, (s, l) -> operation.accept(s.get(), l));
+    }
+
+    /**
+     * <pre>
+     * monoOrFlux
+     * .as(LocaleUtils.doOnError(error-> .... ))
+     * ...
+     * </pre>
+     */
+    public static <E, T extends Publisher<E>> Function<T, T> doOnError(Consumer<Throwable> operation) {
+        return doOn(SignalType.ON_ERROR, (s, l) -> operation.accept(s.getThrowable()));
+    }
+
+    /**
+     * <pre>
+     * monoOrFlux
+     * .as(LocaleUtils.doOnError((error,locale)-> .... ))
+     * ...
+     * </pre>
+     */
+    public static <E, T extends Publisher<E>> Function<T, T> doOnError(BiConsumer<Throwable, Locale> operation) {
+        return doOn(SignalType.ON_ERROR, (s, l) -> operation.accept(s.getThrowable(), l));
     }
 
 }
