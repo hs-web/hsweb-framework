@@ -98,7 +98,7 @@ public class QueryParamEntity extends QueryParam {
 
 
     /**
-     * @see this#of(String, Object)
+     * @see QueryParamEntity#of(String, Object)
      */
     public static QueryParamEntity of(String field, Object value) {
         return of().and(field, TermType.eq, value);
