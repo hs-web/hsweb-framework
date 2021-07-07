@@ -64,7 +64,7 @@ public class CommonErrorControllerAdvice {
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public Mono<ResponseMessage<Object>> handleException(AccessDenyException e) {
         return LocaleUtils
-                .resolveThrowable(e, (err, msg) -> ResponseMessage.error(403, e.getCode(), e.getMessage()))
+                .resolveThrowable(e, (err, msg) -> ResponseMessage.error(403, e.getCode(),msg))
                 ;
     }
 
@@ -175,7 +175,7 @@ public class CommonErrorControllerAdvice {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Mono<ResponseMessage<Object>> handleException(AuthenticationException e) {
         return LocaleUtils
-                .resolveThrowable(e, (err, msg) -> ResponseMessage.error(400, e.getCode(), msg))
+                .resolveThrowable(e, (err, msg) -> ResponseMessage.error(400, err.getCode(), msg))
                 .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getLocalizedMessage(), e)))
                 ;
     }
