@@ -64,7 +64,7 @@ public class CommonErrorControllerAdvice {
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public Mono<ResponseMessage<Object>> handleException(AccessDenyException e) {
         return LocaleUtils
-                .resolveThrowable(e, (err, msg) -> ResponseMessage.error(403, e.getCode(),msg))
+                .resolveThrowable(e, (err, msg) -> ResponseMessage.error(403, e.getCode(), msg))
                 ;
     }
 
@@ -138,19 +138,18 @@ public class CommonErrorControllerAdvice {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.GATEWAY_TIMEOUT)
     public Mono<ResponseMessage<Object>> handleException(TimeoutException e) {
-
-        return Mono.just(ResponseMessage.error(504, CodeConstants.Error.timeout, e.getMessage()))
-                   .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getMessage(), e)));
-
+        return LocaleUtils
+                .resolveThrowable(e, (err, msg) -> ResponseMessage.error(504, CodeConstants.Error.timeout,msg))
+                .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getMessage(), e)));
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @Order
     public Mono<ResponseMessage<Object>> handleException(RuntimeException e) {
-        return Mono.just(ResponseMessage.error(e.getMessage()))
-                   .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getMessage(), e)));
-
+        return LocaleUtils
+                .resolveThrowable(e, (err, msg) -> ResponseMessage.error(msg))
+                .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getMessage(), e)));
     }
 
     @ExceptionHandler
