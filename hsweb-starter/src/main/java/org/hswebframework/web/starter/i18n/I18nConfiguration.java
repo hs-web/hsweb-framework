@@ -15,6 +15,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.util.StringUtils;
 
+import java.util.Arrays;
 import java.util.stream.Collectors;
 
 @Configuration(proxyBeanMethods = false)
@@ -33,11 +34,14 @@ public class I18nConfiguration {
         for (Resource resource : resources) {
             String path = resource.getURL().getPath();
             if (StringUtils.hasText(path) && (path.endsWith(".properties") || path.endsWith(".xml"))) {
-                String name = path.substring(path.lastIndexOf("i18n"),path.indexOf("_"));
+                path = path.substring(path.lastIndexOf("i18n"));
+                String[] split = path.split("[/|\\\\]");
+                String name = split[split.length - 1];
+                name = name.contains("_") ? name.substring(0, name.indexOf("_")) : name;
+                split[split.length - 1] = name;
+                log.info("register i18n message resource {} -> {}", path, name);
 
-                log.info("register i18n message resource {} -> {}", path,name);
-
-                messageSource.addBasenames(name);
+                messageSource.addBasenames(String.join("/", split));
             }
         }
         return messageSource;
