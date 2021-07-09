@@ -47,9 +47,10 @@ public class CommonErrorControllerAdvice {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Mono<ResponseMessage<?>> handleException(UnsupportedOperationException e) {
+    public Mono<ResponseMessage<Object>> handleException(UnsupportedOperationException e) {
         return LocaleUtils
-                .resolveThrowable(e, (err, msg) -> (ResponseMessage.<TokenState>error(401, CodeConstants.Error.unsupported, msg)));
+                .resolveThrowable(e, (err, msg) -> (ResponseMessage.error(500, CodeConstants.Error.unsupported, msg)))
+                .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getMessage(), e)));
     }
 
     @ExceptionHandler
