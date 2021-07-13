@@ -253,7 +253,7 @@ public class CommonErrorControllerAdvice {
     public Mono<ResponseMessage<Object>> handleException(I18nSupportException e) {
         return LocaleUtils
                 .resolveThrowable(e,
-                                  (err, msg) -> ResponseMessage.error(400, err.getCode(), msg));
+                                  (err, msg) -> ResponseMessage.error(400, err.getI18nCode(), msg));
     }
 
 }

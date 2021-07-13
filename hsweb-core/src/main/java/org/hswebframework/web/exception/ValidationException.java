@@ -40,9 +40,9 @@ public class ValidationException extends I18nSupportException {
         ConstraintViolation<?> first = violations.iterator().next();
         if (Objects.equals(first.getMessageTemplate(), first.getMessage())) {
             //模版和消息相同,说明是自定义的message,而不是已经通过i18n获取的.
-            setCode(first.getMessage());
+            setI18nCode(first.getMessage());
         } else {
-            setCode("validation.property_validate_failed");
+            setI18nCode("validation.property_validate_failed");
         }
         String property = first.getPropertyPath().toString();
 

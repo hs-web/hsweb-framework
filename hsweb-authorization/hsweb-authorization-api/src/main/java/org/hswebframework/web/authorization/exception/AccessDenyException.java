@@ -42,7 +42,7 @@ public class AccessDenyException extends I18nSupportException {
     }
 
     public AccessDenyException(String message, String code, Throwable cause) {
-        super(message, cause);
+        super(message, cause,code);
         this.code = code;
     }
 }

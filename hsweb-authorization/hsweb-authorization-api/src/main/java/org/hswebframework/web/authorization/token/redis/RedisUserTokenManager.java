@@ -244,7 +244,7 @@ public class RedisUserTokenManager implements UserTokenManager {
                         return userIsLoggedIn(userId)
                                 .flatMap(r -> {
                                     if (r) {
-                                        return Mono.error(new AccessDenyException("error.logged_in_elsewhere", TokenState.deny.getValue(), null));
+                                        return Mono.error(new AccessDenyException("error.logged_in_elsewhere", TokenState.deny.getValue()));
                                     }
                                     return doSign;
                                 });

@@ -6,8 +6,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hswebframework.web.i18n.LocaleUtils;
 
-import java.util.Locale;
-
 /**
  * 支持国际化消息的异常,code为
  *
@@ -22,7 +20,7 @@ public class I18nSupportException extends RuntimeException {
     /**
      * 消息code,在message.properties文件中定义的key
      */
-    private String code;
+    private String i18nCode;
 
     /**
      * 消息参数
@@ -35,14 +33,14 @@ public class I18nSupportException extends RuntimeException {
 
     public I18nSupportException(String code, Object... args) {
         super(code);
-        this.code = code;
+        this.i18nCode = code;
         this.args = args;
     }
 
     public I18nSupportException(String code, Throwable cause, Object... args) {
         super(code, cause);
         this.args = args;
-        this.code = code;
+        this.i18nCode = code;
     }
 
     @Override
@@ -52,6 +50,6 @@ public class I18nSupportException extends RuntimeException {
 
     @Override
     public String getLocalizedMessage() {
-        return LocaleUtils.resolveMessage(code, args);
+        return LocaleUtils.resolveMessage(i18nCode, args);
     }
 }

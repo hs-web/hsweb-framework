@@ -154,7 +154,7 @@ public final class LocaleUtils {
     public static <S extends I18nSupportException, R> Mono<R> resolveThrowable(MessageSource messageSource,
                                                                                S source,
                                                                                BiFunction<S, String, R> mapper) {
-        return doWithReactive(messageSource, source, I18nSupportException::getCode, mapper, source.getArgs());
+        return doWithReactive(messageSource, source, I18nSupportException::getI18nCode, mapper, source.getArgs());
     }
 
     /**
