@@ -140,7 +140,7 @@ public class CommonErrorControllerAdvice {
     @ResponseStatus(HttpStatus.GATEWAY_TIMEOUT)
     public Mono<ResponseMessage<Object>> handleException(TimeoutException e) {
         return LocaleUtils
-                .resolveThrowable(e, (err, msg) -> ResponseMessage.error(504, CodeConstants.Error.timeout,msg))
+                .resolveThrowable(e, (err, msg) -> ResponseMessage.error(504, CodeConstants.Error.timeout, msg))
                 .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getMessage(), e)));
     }
 
@@ -242,7 +242,11 @@ public class CommonErrorControllerAdvice {
             }
 
         } while (exception != null && exception != e);
-
+        if (exception == null) {
+            return Mono.just(
+                    ResponseMessage.error(400, CodeConstants.Error.illegal_argument, e.getMessage())
+            );
+        }
         return LocaleUtils
                 .resolveThrowable(exception,
                                   (err, msg) -> ResponseMessage.error(400, CodeConstants.Error.illegal_argument, msg));
