@@ -18,6 +18,7 @@
 
 package org.hswebframework.web.authorization;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.hswebframework.web.authorization.simple.SimpleAuthentication;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -48,12 +49,22 @@ public final class ReactiveAuthenticationHolder {
     private static Mono<Authentication> get(Function<ReactiveAuthenticationSupplier, Mono<Authentication>> function) {
 
         return Flux
-                .concat(suppliers
-                                .stream()
-                                .map(function)
-                                .collect(Collectors.toList()))
-                .reduceWith(SimpleAuthentication::new, Authentication::merge)
-                .filter(a -> a.getUser() != null);
+                .merge(suppliers
+                               .stream()
+                               .map(function)
+                               .collect(Collectors.toList()))
+                .collectList()
+                .filter(CollectionUtils::isNotEmpty)
+                .map(all -> {
+                    if (all.size() == 1) {
+                        return all.get(0);
+                    }
+                    SimpleAuthentication authentication = new SimpleAuthentication();
+                    for (Authentication auth : all) {
+                        authentication.merge(auth);
+                    }
+                    return authentication;
+                });
     }
 
     /**
