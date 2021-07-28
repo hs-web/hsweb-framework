@@ -88,67 +88,98 @@ public interface ReactiveCrudService<E, K> {
     }
 
 
-    @Transactional(readOnly = true, transactionManager = TransactionManagers.r2dbcTransactionManager)
+    @Transactional(readOnly = true, transactionManager = TransactionManagers.reactiveTransactionManager)
     default Mono<E> findById(K id) {
         return getRepository()
                 .findById(id);
     }
 
-    @Transactional(readOnly = true, transactionManager = TransactionManagers.r2dbcTransactionManager)
+    @Transactional(readOnly = true, transactionManager = TransactionManagers.reactiveTransactionManager)
     default Flux<E> findById(Collection<K> publisher) {
         return getRepository()
                 .findById(publisher);
     }
 
-    @Transactional(readOnly = true, transactionManager = TransactionManagers.r2dbcTransactionManager)
+    @Transactional(readOnly = true, transactionManager = TransactionManagers.reactiveTransactionManager)
     default Mono<E> findById(Mono<K> publisher) {
         return getRepository()
                 .findById(publisher);
     }
 
-    @Transactional(readOnly = true, transactionManager = TransactionManagers.r2dbcTransactionManager)
+    @Transactional(readOnly = true, transactionManager = TransactionManagers.reactiveTransactionManager)
     default Flux<E> findById(Flux<K> publisher) {
         return getRepository()
                 .findById(publisher);
     }
 
-    @Transactional(transactionManager = TransactionManagers.r2dbcTransactionManager)
+    @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager)
     default Mono<SaveResult> save(Publisher<E> entityPublisher) {
         return getRepository()
                 .save(entityPublisher);
     }
 
-    @Transactional(transactionManager = TransactionManagers.r2dbcTransactionManager)
+    @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager)
+    default Mono<SaveResult> save(E data) {
+        return getRepository()
+                .save(data);
+    }
+
+    @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager)
+    default Mono<SaveResult> save(Collection<E> collection) {
+        return getRepository()
+                .save(collection);
+    }
+
+    @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager)
     default Mono<Integer> updateById(K id, Mono<E> entityPublisher) {
         return getRepository()
                 .updateById(id, entityPublisher);
     }
 
-    @Transactional(transactionManager = TransactionManagers.r2dbcTransactionManager)
+    @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager)
+    default Mono<Integer> updateById(K id, E data) {
+        return getRepository()
+                .updateById(id, Mono.just(data));
+    }
+
+    @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager)
     default Mono<Integer> insertBatch(Publisher<? extends Collection<E>> entityPublisher) {
         return getRepository()
                 .insertBatch(entityPublisher);
     }
 
-    @Transactional(transactionManager = TransactionManagers.r2dbcTransactionManager)
+    @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager)
     default Mono<Integer> insert(Publisher<E> entityPublisher) {
         return getRepository()
                 .insert(entityPublisher);
     }
 
-    @Transactional(transactionManager = TransactionManagers.r2dbcTransactionManager)
+    @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager)
+    default Mono<Integer> insert(E data) {
+        return getRepository()
+                .insert(Mono.just(data));
+    }
+
+    @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager)
     default Mono<Integer> deleteById(Publisher<K> idPublisher) {
         return getRepository()
                 .deleteById(idPublisher);
     }
 
-    @Transactional(readOnly = true, transactionManager = TransactionManagers.r2dbcTransactionManager)
+    @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager)
+    default Mono<Integer> deleteById(K id) {
+        return getRepository()
+                .deleteById(Mono.just(id));
+    }
+
+
+    @Transactional(readOnly = true, transactionManager = TransactionManagers.reactiveTransactionManager)
     default Flux<E> query(Mono<? extends QueryParamEntity> queryParamMono) {
         return queryParamMono
                 .flatMapMany(this::query);
     }
 
-    @Transactional(readOnly = true, transactionManager = TransactionManagers.r2dbcTransactionManager)
+    @Transactional(readOnly = true, transactionManager = TransactionManagers.reactiveTransactionManager)
     default Flux<E> query(QueryParamEntity param) {
         return getRepository()
                 .createQuery()
@@ -156,12 +187,12 @@ public interface ReactiveCrudService<E, K> {
                 .fetch();
     }
 
-    @Transactional(readOnly = true, transactionManager = TransactionManagers.r2dbcTransactionManager)
+    @Transactional(readOnly = true, transactionManager = TransactionManagers.reactiveTransactionManager)
     default Mono<PagerResult<E>> queryPager(QueryParamEntity queryParamMono) {
         return queryPager(queryParamMono, Function.identity());
     }
 
-    @Transactional(readOnly = true, transactionManager = TransactionManagers.r2dbcTransactionManager)
+    @Transactional(readOnly = true, transactionManager = TransactionManagers.reactiveTransactionManager)
     default <T> Mono<PagerResult<T>> queryPager(QueryParamEntity query, Function<E, T> mapper) {
         if (query.getTotal() != null) {
             return getRepository()
@@ -196,19 +227,19 @@ public interface ReactiveCrudService<E, K> {
                 });
     }
 
-    @Transactional(readOnly = true, transactionManager = TransactionManagers.r2dbcTransactionManager)
+    @Transactional(readOnly = true, transactionManager = TransactionManagers.reactiveTransactionManager)
     default <T> Mono<PagerResult<T>> queryPager(Mono<? extends QueryParamEntity> queryParamMono, Function<E, T> mapper) {
         return queryParamMono
                 .cast(QueryParamEntity.class)
                 .flatMap(param -> queryPager(param, mapper));
     }
 
-    @Transactional(readOnly = true, transactionManager = TransactionManagers.r2dbcTransactionManager)
+    @Transactional(readOnly = true, transactionManager = TransactionManagers.reactiveTransactionManager)
     default Mono<PagerResult<E>> queryPager(Mono<? extends QueryParamEntity> queryParamMono) {
         return queryPager(queryParamMono, Function.identity());
     }
 
-    @Transactional(readOnly = true, transactionManager = TransactionManagers.r2dbcTransactionManager)
+    @Transactional(readOnly = true, transactionManager = TransactionManagers.reactiveTransactionManager)
     default Mono<Integer> count(QueryParamEntity queryParam) {
         return getRepository()
                 .createQuery()
@@ -216,7 +247,7 @@ public interface ReactiveCrudService<E, K> {
                 .count();
     }
 
-    @Transactional(readOnly = true, transactionManager = TransactionManagers.r2dbcTransactionManager)
+    @Transactional(readOnly = true, transactionManager = TransactionManagers.reactiveTransactionManager)
     default Mono<Integer> count(Mono<? extends QueryParamEntity> queryParamMono) {
         return queryParamMono.flatMap(this::count);
     }

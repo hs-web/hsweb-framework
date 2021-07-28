@@ -2,8 +2,14 @@ package org.hswebframework.web.api.crud.entity;
 
 public interface TransactionManagers {
 
-    String r2dbcTransactionManager = "connectionFactoryTransactionManager";// System.getProperty("");
+    /**
+     * 响应式的事务管理器
+     */
+    String reactiveTransactionManager = "connectionFactoryTransactionManager";
 
+    /**
+     * JDBC事务管理器
+     */
     String jdbcTransactionManager = "transactionManager";
 
 }

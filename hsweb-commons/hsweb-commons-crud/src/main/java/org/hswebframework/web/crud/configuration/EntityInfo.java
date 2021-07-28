@@ -17,4 +17,6 @@ public class EntityInfo {
     private Class idType;
 
     private boolean reactive;
+
+    private boolean nonReactive;
 }

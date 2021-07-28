@@ -1,6 +1,5 @@
 package org.hswebframework.web.crud.web;
 
-import io.r2dbc.spi.R2dbcDataIntegrityViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.web.CodeConstants;
 import org.hswebframework.web.authorization.exception.AccessDenyException;
@@ -32,7 +31,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
-@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
+//@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
 @Slf4j
 @Order
 public class CommonErrorControllerAdvice {
@@ -212,22 +211,6 @@ public class CommonErrorControllerAdvice {
                         .error(406, "method_not_allowed", msg)
                         .result(e.getSupportedMethods()))
                 .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getMessage(), e)));
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Mono<ResponseMessage<Object>> handleException(R2dbcDataIntegrityViolationException e) {
-        String code;
-
-        if (e.getMessage().contains("Duplicate")) {
-            code = "error.duplicate_data";
-        } else {
-            code = "error.data_error";
-            log.warn(e.getMessage(), e);
-        }
-        return LocaleUtils
-                .resolveMessageReactive(code)
-                .map(msg -> ResponseMessage.error(400, code, msg));
     }
 
 

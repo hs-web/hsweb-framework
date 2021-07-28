@@ -17,7 +17,6 @@ import org.hswebframework.web.system.authorization.api.event.UserCreatedEvent;
 import org.hswebframework.web.system.authorization.api.event.UserDeletedEvent;
 import org.hswebframework.web.system.authorization.api.event.UserModifiedEvent;
 import org.hswebframework.web.system.authorization.api.service.reactive.ReactiveUserService;
-import org.hswebframework.web.validator.CreateGroup;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -55,7 +54,7 @@ public class DefaultReactiveUserService extends GenericReactiveCrudService<UserE
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class, transactionManager = TransactionManagers.r2dbcTransactionManager)
+    @Transactional(rollbackFor = Exception.class, transactionManager = TransactionManagers.reactiveTransactionManager)
     public Mono<Boolean> saveUser(Mono<UserEntity> request) {
         return request
                 .flatMap(userEntity -> {
@@ -118,13 +117,13 @@ public class DefaultReactiveUserService extends GenericReactiveCrudService<UserE
     }
 
     @Override
-    @Transactional(readOnly = true, transactionManager = TransactionManagers.r2dbcTransactionManager)
+    @Transactional(readOnly = true, transactionManager = TransactionManagers.reactiveTransactionManager)
     public Mono<UserEntity> findById(String id) {
         return getRepository().findById(Mono.just(id));
     }
 
     @Override
-    @Transactional(readOnly = true, transactionManager = TransactionManagers.r2dbcTransactionManager)
+    @Transactional(readOnly = true, transactionManager = TransactionManagers.reactiveTransactionManager)
     public Mono<UserEntity> findByUsername(String username) {
         return Mono.justOrEmpty(username)
                    .flatMap(_name -> repository
@@ -134,7 +133,7 @@ public class DefaultReactiveUserService extends GenericReactiveCrudService<UserE
     }
 
     @Override
-    @Transactional(readOnly = true, transactionManager = TransactionManagers.r2dbcTransactionManager)
+    @Transactional(readOnly = true, transactionManager = TransactionManagers.reactiveTransactionManager)
     public Mono<UserEntity> findByUsernameAndPassword(String username, String plainPassword) {
         return Mono.justOrEmpty(username)
                    .flatMap(_name -> repository
@@ -147,7 +146,7 @@ public class DefaultReactiveUserService extends GenericReactiveCrudService<UserE
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class, transactionManager = TransactionManagers.r2dbcTransactionManager)
+    @Transactional(rollbackFor = Exception.class, transactionManager = TransactionManagers.reactiveTransactionManager)
     public Mono<Integer> changeState(Publisher<String> userId, byte state) {
         return Flux.from(userId)
                    .collectList()
@@ -162,7 +161,7 @@ public class DefaultReactiveUserService extends GenericReactiveCrudService<UserE
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class, transactionManager = TransactionManagers.r2dbcTransactionManager)
+    @Transactional(rollbackFor = Exception.class, transactionManager = TransactionManagers.reactiveTransactionManager)
     public Mono<Boolean> changePassword(String userId, String oldPassword, String newPassword) {
         passwordValidator.validate(newPassword);
         return findById(userId)
@@ -178,7 +177,7 @@ public class DefaultReactiveUserService extends GenericReactiveCrudService<UserE
     }
 
     @Override
-    @Transactional(readOnly = true, transactionManager = TransactionManagers.r2dbcTransactionManager)
+    @Transactional(readOnly = true, transactionManager = TransactionManagers.reactiveTransactionManager)
     public Flux<UserEntity> findUser(QueryParam queryParam) {
         return repository
                 .createQuery()
@@ -187,7 +186,7 @@ public class DefaultReactiveUserService extends GenericReactiveCrudService<UserE
     }
 
     @Override
-    @Transactional(readOnly = true, transactionManager = TransactionManagers.r2dbcTransactionManager)
+    @Transactional(readOnly = true, transactionManager = TransactionManagers.reactiveTransactionManager)
     public Mono<Integer> countUser(QueryParam queryParam) {
         return repository
                 .createQuery()
@@ -196,7 +195,7 @@ public class DefaultReactiveUserService extends GenericReactiveCrudService<UserE
     }
 
     @Override
-    @Transactional(readOnly = true, transactionManager = TransactionManagers.r2dbcTransactionManager)
+    @Transactional(readOnly = true, transactionManager = TransactionManagers.reactiveTransactionManager)
     public Mono<Boolean> deleteUser(String userId) {
         return this
                 .findById(userId)

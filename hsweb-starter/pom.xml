@@ -33,9 +33,11 @@
             <artifactId>hsweb-commons-crud</artifactId>
             <version>${project.version}</version>
         </dependency>
+
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-webflux</artifactId>
+            <optional>true</optional>
         </dependency>
 
         <dependency>

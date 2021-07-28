@@ -30,5 +30,8 @@ public @interface EnableEasyormRepository {
      */
     Class<? extends Annotation>[] annotation() default Table.class;
 
+    boolean reactive() default true;
+
+    boolean nonReactive() default false;
 
 }

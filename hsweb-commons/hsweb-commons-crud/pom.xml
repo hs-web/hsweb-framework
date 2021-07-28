@@ -74,9 +74,22 @@
         </dependency>
 
         <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jdbc</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>io.r2dbc</groupId>
+            <artifactId>r2dbc-spi</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-r2dbc</artifactId>
             <scope>compile</scope>
+            <optional>true</optional>
         </dependency>
 
         <dependency>
@@ -123,6 +136,12 @@
         <dependency>
             <groupId>io.swagger.core.v3</groupId>
             <artifactId>swagger-annotations</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+            <optional>true</optional>
         </dependency>
     </dependencies>
 

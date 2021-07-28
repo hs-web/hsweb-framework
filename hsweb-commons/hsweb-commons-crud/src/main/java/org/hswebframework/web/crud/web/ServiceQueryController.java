@@ -1,4 +1,4 @@
-package org.hswebframework.web.crud.web.reactive;
+package org.hswebframework.web.crud.web;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -9,25 +9,27 @@ import org.hswebframework.web.api.crud.entity.QueryOperation;
 import org.hswebframework.web.api.crud.entity.QueryParamEntity;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.annotation.QueryAction;
+import org.hswebframework.web.crud.service.CrudService;
 import org.hswebframework.web.exception.NotFoundException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
- * 基于{@link ReactiveRepository}的响应式查询控制器.
+ * 基于{@link CrudService}的查询控制器.
  *
  * @param <E> 实体类
  * @param <K> 主键类型
- * @see ReactiveRepository
+ * @see CrudService
  */
-public interface ReactiveQueryController<E, K> {
+public interface ServiceQueryController<E, K> {
 
     @Authorize(ignore = true)
-    ReactiveRepository<E, K> getRepository();
+    CrudService<E, K> getService();
 
     /**
      * 查询,但是不返回分页结果.
@@ -44,8 +46,8 @@ public interface ReactiveQueryController<E, K> {
     @QueryAction
     @QueryOperation(summary = "使用GET方式分页动态查询(不返回总数)",
             description = "此操作不返回分页总数,如果需要获取全部数据,请设置参数paging=false")
-    default Flux<E> query(@Parameter(hidden = true)  QueryParamEntity query) {
-        return getRepository()
+    default List<E> query(@Parameter(hidden = true) QueryParamEntity query) {
+        return getService()
                 .createQuery()
                 .setParam(query)
                 .fetch();
@@ -80,8 +82,8 @@ public interface ReactiveQueryController<E, K> {
     @QueryAction
     @Operation(summary = "使用POST方式分页动态查询(不返回总数)",
             description = "此操作不返回分页总数,如果需要获取全部数据,请设置参数paging=false")
-    default Flux<E> query(@RequestBody Mono<QueryParamEntity> query) {
-        return query.flatMapMany(this::query);
+    default List<E> postQuery(@RequestBody QueryParamEntity query) {
+        return this.query(query);
     }
 
 
@@ -99,22 +101,26 @@ public interface ReactiveQueryController<E, K> {
     @GetMapping("/_query")
     @QueryAction
     @QueryOperation(summary = "使用GET方式分页动态查询")
-    default Mono<PagerResult<E>> queryPager(@Parameter(hidden = true) QueryParamEntity query) {
+    default PagerResult<E> queryPager(@Parameter(hidden = true) QueryParamEntity query) {
         if (query.getTotal() != null) {
-            return getRepository()
-                    .createQuery()
-                    .setParam(query.rePaging(query.getTotal()))
-                    .fetch()
-                    .collectList()
-                    .map(list -> PagerResult.of(query.getTotal(), list, query));
+            return PagerResult
+                    .of(query.getTotal(),
+                        getService()
+                                .createQuery()
+                                .setParam(query.rePaging(query.getTotal()))
+                                .fetch(), query)
+                    ;
         }
-
-        return Mono.zip(
-                getRepository().createQuery().setParam(query).count(),
-                query(query.clone()).collectList(),
-                (total, data) -> PagerResult.of(total, data, query)
-        );
-
+        int total = getService().createQuery().setParam(query).count();
+        if (total == 0) {
+            return PagerResult.of(0, Collections.emptyList(), query);
+        }
+        return PagerResult
+                .of(total,
+                    getService()
+                            .createQuery()
+                            .setParam(query.rePaging(total))
+                            .fetch(), query);
     }
 
 
@@ -122,15 +128,15 @@ public interface ReactiveQueryController<E, K> {
     @QueryAction
     @SuppressWarnings("all")
     @Operation(summary = "使用POST方式分页动态查询")
-    default Mono<PagerResult<E>> queryPager(@RequestBody Mono<QueryParamEntity> query) {
-        return query.flatMap(q -> queryPager(q));
+    default PagerResult<E> postQueryPager(@RequestBody QueryParamEntity query) {
+        return queryPager(query);
     }
 
     @PostMapping("/_count")
     @QueryAction
-    @QueryNoPagingOperation(summary = "使用POST方式查询总数")
-    default Mono<Integer> count(@Parameter(hidden = true) @RequestBody Mono<QueryParamEntity> query) {
-        return query.flatMap(this::count);
+    @Operation(summary = "使用POST方式查询总数")
+    default int postCount(@RequestBody QueryParamEntity query) {
+         return this.count(query);
     }
 
     /**
@@ -145,9 +151,9 @@ public interface ReactiveQueryController<E, K> {
      */
     @GetMapping("/_count")
     @QueryAction
-    @Operation(summary = "使用GET方式查询总数")
-    default Mono<Integer> count(QueryParamEntity query) {
-        return getRepository()
+    @QueryNoPagingOperation(summary = "使用GET方式查询总数")
+    default int count(@Parameter(hidden = true) QueryParamEntity query) {
+        return getService()
                 .createQuery()
                 .setParam(query)
                 .count();
@@ -156,10 +162,10 @@ public interface ReactiveQueryController<E, K> {
     @GetMapping("/{id:.+}")
     @QueryAction
     @Operation(summary = "根据ID查询")
-    default Mono<E> getById(@PathVariable K id) {
-        return getRepository()
-                .findById(Mono.just(id))
-                .switchIfEmpty(Mono.error(NotFoundException::new));
+    default E getById(@PathVariable K id) {
+       return getService()
+                .findById(id)
+               .orElseThrow(NotFoundException::new);
     }
 
 }

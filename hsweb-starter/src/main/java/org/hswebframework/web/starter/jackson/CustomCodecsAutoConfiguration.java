@@ -1,10 +1,8 @@
 package org.hswebframework.web.starter.jackson;
 
 import com.fasterxml.jackson.databind.*;
-import com.fasterxml.jackson.databind.deser.std.EnumDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleDeserializers;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.databind.type.ClassKey;
 import org.hswebframework.web.api.crud.entity.EntityFactory;
 import org.hswebframework.web.dict.EnumDict;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -53,6 +51,11 @@ public class CustomCodecsAutoConfiguration {
                 defaults.jackson2JsonDecoder(new CustomJackson2JsonDecoder(entityFactory, objectMapper));
                 defaults.jackson2JsonEncoder(new CustomJackson2jsonEncoder(objectMapper));
             };
+        }
+
+        @Bean
+        CustomMappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter(EntityFactory entityFactory,ObjectMapper objectMapper) {
+            return new CustomMappingJackson2HttpMessageConverter(objectMapper, entityFactory);
         }
 
     }
