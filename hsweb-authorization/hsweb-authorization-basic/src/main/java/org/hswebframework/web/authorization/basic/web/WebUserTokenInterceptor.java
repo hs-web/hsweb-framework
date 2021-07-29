@@ -22,27 +22,31 @@ import java.util.stream.Collectors;
  */
 public class WebUserTokenInterceptor extends HandlerInterceptorAdapter {
 
-    private UserTokenManager userTokenManager;
+    private final UserTokenManager userTokenManager;
 
-    private List<UserTokenParser> userTokenParser;
+    private final List<UserTokenParser> userTokenParser;
 
-    private AopMethodAuthorizeDefinitionParser parser;
+    private final AopMethodAuthorizeDefinitionParser parser;
 
-    private boolean enableBasicAuthorization = false;
+    private final boolean enableBasicAuthorization;
 
-    public WebUserTokenInterceptor(UserTokenManager userTokenManager, List<UserTokenParser> userTokenParser, AopMethodAuthorizeDefinitionParser definitionParser) {
+    public WebUserTokenInterceptor(UserTokenManager userTokenManager,
+                                   List<UserTokenParser> userTokenParser,
+                                   AopMethodAuthorizeDefinitionParser definitionParser) {
         this.userTokenManager = userTokenManager;
         this.userTokenParser = userTokenParser;
         this.parser = definitionParser;
 
-        enableBasicAuthorization = userTokenParser.stream()
+        enableBasicAuthorization = userTokenParser
+                .stream()
                 .filter(UserTokenForTypeParser.class::isInstance)
                 .anyMatch(parser -> "basic".equalsIgnoreCase(((UserTokenForTypeParser) parser).getTokenType()));
     }
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        List<ParsedToken> tokens = userTokenParser.stream()
+        List<ParsedToken> tokens = userTokenParser
+                .stream()
                 .map(parser -> parser.parseToken(request))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
@@ -68,7 +72,8 @@ public class WebUserTokenInterceptor extends HandlerInterceptorAdapter {
                 userTokenManager.signOutByToken(token).subscribe();
 
                 userToken = userTokenManager
-                        .signIn(parsedToken.getToken(), parsedToken.getType(), ((AuthorizedToken) parsedToken).getUserId(), ((AuthorizedToken) parsedToken).getMaxInactiveInterval())
+                        .signIn(parsedToken.getToken(), parsedToken.getType(), ((AuthorizedToken) parsedToken).getUserId(), ((AuthorizedToken) parsedToken)
+                                .getMaxInactiveInterval())
                         .block();
             }
             if (null != userToken) {

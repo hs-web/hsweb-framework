@@ -5,12 +5,13 @@ import org.hswebframework.web.authorization.token.UserToken;
 import org.hswebframework.web.authorization.token.UserTokenHolder;
 import org.hswebframework.web.authorization.token.UserTokenManager;
 import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.EventListener;
 
 /**
  * @author zhouhao
  */
-public class UserOnSignOut implements  ApplicationListener<AuthorizationExitEvent> {
-    private UserTokenManager userTokenManager;
+public class UserOnSignOut {
+    private final UserTokenManager userTokenManager;
 
     public UserOnSignOut(UserTokenManager userTokenManager) {
         this.userTokenManager = userTokenManager;
@@ -21,8 +22,8 @@ public class UserOnSignOut implements  ApplicationListener<AuthorizationExitEven
         return null != token ? token.getToken() : "";
     }
 
-    @Override
+    @EventListener
     public void onApplicationEvent(AuthorizationExitEvent event) {
-        userTokenManager.signOutByToken(geToken());
+        event.async(userTokenManager.signOutByToken(geToken()));
     }
 }

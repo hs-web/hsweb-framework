@@ -68,20 +68,18 @@ public class UserTokenReactiveAuthenticationSupplier implements ReactiveAuthenti
 
     @Override
     public Mono<Authentication> get() {
-        return ContextUtils.reactiveContext()
-                .flatMap(context ->
-                        context.get(ContextKey.of(ParsedToken.class))
-                                .map(t -> userTokenManager
-                                        .getByToken(t.getToken())
-                                        .filter(UserToken::validate))
-                                .map(tokenMono -> tokenMono
-                                        .flatMap(token -> userTokenManager
-                                                .touch(token.getToken())
-                                                .thenReturn(token))
-                                        .flatMap(token -> get(thirdPartAuthenticationManager.get(token.getType()), token.getUserId())))
-                                .orElseGet(Mono::empty))
-                .flatMap(auth -> ReactiveLogger.mdc("userId", auth.getUser().getId())
-                        .then(ReactiveLogger.mdc("username", auth.getUser().getName()))
+        return ContextUtils
+                .reactiveContext()
+                .flatMap(context -> context
+                        .get(ContextKey.of(ParsedToken.class))
+                        .map(t -> userTokenManager.getByToken(t.getToken()).filter(UserToken::validate))
+                        .map(tokenMono -> tokenMono
+                                .flatMap(token -> userTokenManager.touch(token.getToken()).thenReturn(token))
+                                .flatMap(token -> get(thirdPartAuthenticationManager.get(token.getType()), token.getUserId())))
+                        .orElseGet(Mono::empty))
+                .flatMap(auth -> ReactiveLogger
+                        .mdc("userId", auth.getUser().getId(),
+                             "username", auth.getUser().getName())
                         .thenReturn(auth))
                 ;
 

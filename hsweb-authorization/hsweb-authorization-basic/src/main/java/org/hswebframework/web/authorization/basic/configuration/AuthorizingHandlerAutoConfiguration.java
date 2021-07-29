@@ -27,6 +27,7 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 
 /**
@@ -85,6 +86,11 @@ public class AuthorizingHandlerAutoConfiguration {
             return new UserOnSignOut(userTokenManager);
         }
 
+        @SuppressWarnings("all")
+        @ConfigurationProperties(prefix = "hsweb.authorize.token.default")
+        public ServletUserTokenGenPar servletUserTokenGenPar(){
+            return new ServletUserTokenGenPar();
+        }
 
         @Bean
         @ConditionalOnMissingBean(UserTokenParser.class)
@@ -101,11 +107,10 @@ public class AuthorizingHandlerAutoConfiguration {
         @ConditionalOnProperty(prefix = "hsweb.authorize.two-factor", name = "enable", havingValue = "true")
         @Order(100)
         public WebMvcConfigurer twoFactorHandlerConfigurer(TwoFactorValidatorManager manager) {
-            return new WebMvcConfigurerAdapter() {
+            return new WebMvcConfigurer() {
                 @Override
-                public void addInterceptors(InterceptorRegistry registry) {
+                public void addInterceptors(@Nonnull InterceptorRegistry registry) {
                     registry.addInterceptor(new TwoFactorHandlerInterceptorAdapter(manager));
-                    super.addInterceptors(registry);
                 }
             };
         }
