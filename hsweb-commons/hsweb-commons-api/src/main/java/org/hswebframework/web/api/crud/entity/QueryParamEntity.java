@@ -128,7 +128,7 @@ public class QueryParamEntity extends QueryParam {
      * <p>
      * 执行后条件: (name=? or type=?) and userId=?
      *
-     * @see this#toNestQuery(Consumer)
+     * @see QueryParamEntity#toNestQuery(Consumer)
      * @since 3.0.4
      */
     public <T> Query<T, QueryParamEntity> toNestQuery() {

@@ -207,14 +207,14 @@ public interface ReactiveCrudService<E, K> {
         if (query.isParallelPager()) {
             return Mono
                     .zip(
-                            createQuery().setParam(query).count(),
+                            createQuery().setParam(query.clone()).count(),
                             createQuery().setParam(query.clone()).fetch().map(mapper).collectList(),
                             (total, data) -> PagerResult.of(total, data, query)
                     );
         }
         return getRepository()
                 .createQuery()
-                .setParam(query)
+                .setParam(query.clone())
                 .count()
                 .flatMap(total -> {
                     if (total == 0) {

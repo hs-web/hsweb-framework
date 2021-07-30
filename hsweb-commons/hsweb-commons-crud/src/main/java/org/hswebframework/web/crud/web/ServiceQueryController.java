@@ -111,7 +111,7 @@ public interface ServiceQueryController<E, K> {
                                 .fetch(), query)
                     ;
         }
-        int total = getService().createQuery().setParam(query).count();
+        int total = getService().createQuery().setParam(query.clone()).count();
         if (total == 0) {
             return PagerResult.of(0, Collections.emptyList(), query);
         }
