@@ -49,7 +49,24 @@ public interface UserToken extends Serializable, Comparable<UserToken> {
      */
     String getType();
 
+    /**
+     * @return 会话过期时间, 单位毫秒
+     */
     long getMaxInactiveInterval();
+
+    /**
+     * 检查会话是否过期
+     *
+     * @return 是否过期
+     * @since 4.0.10
+     */
+    default boolean checkExpired() {
+        long maxInactiveInterval = getMaxInactiveInterval();
+        if (maxInactiveInterval > 0) {
+            return System.currentTimeMillis() - getLastRequestTime() > maxInactiveInterval;
+        }
+        return false;
+    }
 
     default boolean isNormal() {
         return getState() == TokenState.normal;
@@ -76,7 +93,6 @@ public interface UserToken extends Serializable, Comparable<UserToken> {
     default boolean isDeny() {
         return getState() == TokenState.deny;
     }
-
 
     default boolean validate() {
         if (!isNormal()) {

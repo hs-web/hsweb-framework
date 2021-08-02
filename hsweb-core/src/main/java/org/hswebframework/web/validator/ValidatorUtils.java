@@ -1,12 +1,10 @@
 package org.hswebframework.web.validator;
 
+import org.hibernate.validator.BaseHibernateValidatorConfiguration;
 import org.hswebframework.web.exception.ValidationException;
+import org.hswebframework.web.i18n.ContextLocaleResolver;
 
-import javax.el.ExpressionFactory;
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
+import javax.validation.*;
 import java.util.Set;
 
 public final class ValidatorUtils {
@@ -19,17 +17,26 @@ public final class ValidatorUtils {
     public static Validator getValidator() {
         if (validator == null) {
             synchronized (ValidatorUtils.class) {
-                ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+                Configuration<?> configuration = Validation
+                        .byDefaultProvider()
+                        .configure();
+                configuration.addProperty(BaseHibernateValidatorConfiguration.LOCALE_RESOLVER_CLASSNAME,
+                                          ContextLocaleResolver.class.getName());
+                configuration.messageInterpolator(configuration.getDefaultMessageInterpolator());
+
+                ValidatorFactory factory = configuration.buildValidatorFactory();
+
                 return validator = factory.getValidator();
             }
         }
         return validator;
     }
 
+    @SuppressWarnings("all")
     public static <T> T tryValidate(T bean, Class... group) {
         Set<ConstraintViolation<T>> violations = getValidator().validate(bean, group);
         if (!violations.isEmpty()) {
-            throw new ValidationException(violations.iterator().next().getMessage(), violations);
+            throw new ValidationException(violations);
         }
 
         return bean;

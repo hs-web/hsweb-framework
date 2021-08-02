@@ -10,6 +10,7 @@ import org.hswebframework.web.authorization.annotation.QueryAction;
 import org.hswebframework.web.crud.service.ReactiveTreeSortEntityService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -44,21 +45,21 @@ public interface ReactiveTreeServiceQueryController<E extends TreeSortSupportEnt
     @PostMapping("/_query/tree")
     @QueryAction
     @Operation(summary = "使用POST动态查询并返回树形结构")
-    default Mono<List<E>> findAllTree(Mono<QueryParamEntity> paramEntity) {
+    default Mono<List<E>> findAllTree(@RequestBody Mono<QueryParamEntity> paramEntity) {
         return getService().queryResultToTree(paramEntity);
     }
 
     @PostMapping("/_query/_children")
     @QueryAction
     @Operation(summary = "使用POST动态查询并返回子节点数据")
-    default Flux<E> findAllChildren(Mono<QueryParamEntity> paramEntity) {
+    default Flux<E> findAllChildren(@RequestBody Mono<QueryParamEntity> paramEntity) {
         return paramEntity.flatMapMany(param -> getService().queryIncludeChildren(param));
     }
 
     @PostMapping("/_query/_children/tree")
     @QueryAction
     @Operation(summary = "使用POST动态查询并返回子节点树形结构数据")
-    default Mono<List<E>> findAllChildrenTree(Mono<QueryParamEntity> paramEntity) {
+    default Mono<List<E>> findAllChildrenTree(@RequestBody Mono<QueryParamEntity> paramEntity) {
         return paramEntity.flatMap(param -> getService().queryIncludeChildrenTree(param));
     }
 

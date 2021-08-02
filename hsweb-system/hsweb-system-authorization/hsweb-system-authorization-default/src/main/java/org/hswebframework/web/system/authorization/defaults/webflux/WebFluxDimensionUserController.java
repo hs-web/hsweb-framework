@@ -11,11 +11,10 @@ import org.hswebframework.web.crud.web.reactive.ReactiveServiceCrudController;
 import org.hswebframework.web.system.authorization.api.entity.DimensionUserEntity;
 import org.hswebframework.web.system.authorization.defaults.service.DefaultDimensionUserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/dimension-user")
@@ -67,5 +66,22 @@ public class WebFluxDimensionUserController implements ReactiveServiceCrudContro
                 .createDelete()
                 .where(DimensionUserEntity::getDimensionId, dimensionId)
                 .execute();
+    }
+
+    @DeleteAction
+    @PostMapping("/user/{dimensionType}/{dimensionId}/_unbind")
+    @Operation(summary = "解除用户关联的指定维度")
+    public Mono<Integer> deleteUserDimension(@PathVariable
+                                             @Parameter(description = "维度类型,比如: role") String dimensionType,
+                                             @PathVariable
+                                             @Parameter(description = "维度ID,比如: 角色ID") String dimensionId,
+                                             @Parameter(description = "用户ID") @RequestBody Mono<List<String>> userId) {
+        return userId
+                .flatMap(userIdList -> dimensionUserService
+                        .createDelete()
+                        .where(DimensionUserEntity::getDimensionId, dimensionId)
+                        .and(DimensionUserEntity::getDimensionTypeId, dimensionType)
+                        .in(DimensionUserEntity::getUserId, userIdList)
+                        .execute());
     }
 }

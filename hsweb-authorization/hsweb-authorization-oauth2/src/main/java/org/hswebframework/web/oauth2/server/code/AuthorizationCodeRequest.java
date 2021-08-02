@@ -19,7 +19,7 @@ public class AuthorizationCodeRequest extends OAuth2Request {
 
     public AuthorizationCodeRequest(OAuth2Client client,
                                     Authentication authentication,
-                                    Map<String, Object> parameters) {
+                                    Map<String, String> parameters) {
         super(parameters);
         this.client = client;
         this.authentication = authentication;

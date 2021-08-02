@@ -1,5 +1,5 @@
 /*
- *  Copyright 2019 http://www.hswebframework.org
+ *  Copyright 2020 http://www.hswebframework.org
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -253,7 +253,7 @@ public class DefaultUserTokenManager implements UserTokenManager {
                         .flatMap(this::checkTimeout)
                         .filterWhen(t -> {
                             if (t.isNormal()) {
-                                return Mono.error(new AccessDenyException("该用户已在其他地方登陆"));
+                                return Mono.error(new AccessDenyException("error.logged_in_elsewhere"));
                             }
                             return Mono.empty();
                         })

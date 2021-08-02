@@ -11,7 +11,7 @@ public class ClientCredentialRequest extends OAuth2Request {
 
     private final OAuth2Client client;
 
-    public ClientCredentialRequest(OAuth2Client client, Map<String, Object> parameters) {
+    public ClientCredentialRequest(OAuth2Client client, Map<String, String> parameters) {
         super(parameters);
         this.client = client;
     }

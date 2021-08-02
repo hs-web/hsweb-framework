@@ -30,7 +30,7 @@ public class ReactiveWebUtils {
             }
         }
         return Optional.ofNullable(request.getRemoteAddress())
-                .map(InetSocketAddress::getHostName)
+                .map(addr->addr.getAddress().getHostAddress())
                 .orElse("unknown");
     }
 

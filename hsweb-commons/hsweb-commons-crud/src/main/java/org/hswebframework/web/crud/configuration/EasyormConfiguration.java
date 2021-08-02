@@ -17,6 +17,7 @@ import org.hswebframework.ezorm.rdb.operator.DatabaseOperator;
 import org.hswebframework.ezorm.rdb.operator.DefaultDatabaseOperator;
 import org.hswebframework.web.api.crud.entity.EntityFactory;
 import org.hswebframework.web.crud.annotation.EnableEasyormRepository;
+import org.hswebframework.web.crud.entity.factory.EntityMappingCustomizer;
 import org.hswebframework.web.crud.entity.factory.MapperEntityFactory;
 import org.hswebframework.web.crud.events.CompositeEventListener;
 import org.hswebframework.web.crud.events.EntityEventListener;
@@ -26,6 +27,7 @@ import org.hswebframework.web.crud.generator.DefaultIdGenerator;
 import org.hswebframework.web.crud.generator.MD5Generator;
 import org.hswebframework.web.crud.generator.SnowFlakeStringIdGenerator;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -34,6 +36,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 
@@ -51,8 +54,12 @@ public class EasyormConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public EntityFactory entityFactory() {
-        return new MapperEntityFactory();
+    public EntityFactory entityFactory(ObjectProvider<EntityMappingCustomizer> customizers) {
+        MapperEntityFactory factory= new MapperEntityFactory();
+        for (EntityMappingCustomizer customizer : customizers) {
+            customizer.custom(factory);
+        }
+        return factory;
     }
 
     @Bean
@@ -108,7 +115,8 @@ public class EasyormConfiguration {
         reactiveSqlExecutor.ifPresent(metadata::addFeature);
         if (properties.isAutoDdl()) {
             for (RDBSchemaMetadata schema : metadata.getSchemas()) {
-                schema.loadAllTable();
+                schema.loadAllTableReactive()
+                      .block(Duration.ofSeconds(30));
             }
         }
         return metadata;

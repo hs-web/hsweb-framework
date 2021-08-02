@@ -13,30 +13,30 @@ public enum TokenState implements EnumDict<String> {
     /**
      * 正常，有效
      */
-    normal("normal","正常"),
+    normal("normal","message.token_state_normal"),
 
     /**
      * 已被禁止访问
      */
-    deny("deny", "已被禁止访问"),
+    deny("deny", "message.token_state_deny"),
 
     /**
      * 已过期
      */
-    expired("expired", "用户未登录"),
+    expired("expired", "message.token_state_expired"),
 
     /**
      * 已被踢下线
      * @see AllopatricLoginMode#offlineOther
      */
-    offline("offline", "用户已在其他地方登录"),
+    offline("offline", "message.token_state_offline"),
 
     /**
      * 锁定
      */
-    lock("lock", "登录状态已被锁定");
+    lock("lock", "message.token_state_lock");
 
-    private String value;
+    private final String value;
 
-    private String text;
+    private final String text;
 }

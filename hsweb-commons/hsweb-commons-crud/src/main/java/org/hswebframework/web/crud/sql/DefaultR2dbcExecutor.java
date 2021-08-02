@@ -21,6 +21,7 @@ import reactor.core.publisher.SignalType;
 
 import java.time.ZoneOffset;
 import java.util.Date;
+import java.util.Map;
 
 public class DefaultR2dbcExecutor extends R2dbcReactiveSqlExecutor {
 
@@ -81,24 +82,60 @@ public class DefaultR2dbcExecutor extends R2dbcReactiveSqlExecutor {
 
     @Override
     protected void releaseConnection(SignalType type, Connection connection) {
-
+        //所有方法都被事务接管,不用手动释放
     }
 
     @Override
-    @Transactional(propagation = Propagation.NOT_SUPPORTED, transactionManager = TransactionManagers.r2dbcTransactionManager)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, transactionManager = TransactionManagers.reactiveTransactionManager)
+    public Mono<Void> execute(SqlRequest request) {
+        return super.execute(request);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, transactionManager = TransactionManagers.reactiveTransactionManager)
     public Mono<Void> execute(Publisher<SqlRequest> request) {
         return super.execute(request);
     }
 
     @Override
-    @Transactional(transactionManager = TransactionManagers.r2dbcTransactionManager)
+    @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager)
     public Mono<Integer> update(Publisher<SqlRequest> request) {
         return super.update(request);
     }
 
     @Override
-    @Transactional(readOnly = true, transactionManager = TransactionManagers.r2dbcTransactionManager)
+    @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager)
+    public Mono<Integer> update(SqlRequest request) {
+        return super.update(request);
+    }
+
+    @Override
+    @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager)
+    public Mono<Integer> update(String sql, Object... args) {
+        return super.update(sql,args);
+    }
+
+    @Override
+    @Transactional(readOnly = true, transactionManager = TransactionManagers.reactiveTransactionManager)
     public <E> Flux<E> select(Publisher<SqlRequest> request, ResultWrapper<E, ?> wrapper) {
         return super.select(request, wrapper);
+    }
+
+    @Override
+    @Transactional(readOnly = true, transactionManager = TransactionManagers.reactiveTransactionManager)
+    public Flux<Map<String, Object>> select(String sql, Object... args) {
+        return super.select(sql,args);
+    }
+
+    @Override
+    @Transactional(readOnly = true, transactionManager = TransactionManagers.reactiveTransactionManager)
+    public <E> Flux<E> select(String sql, ResultWrapper<E, ?> wrapper) {
+        return super.select(sql,wrapper);
+    }
+
+    @Override
+    @Transactional(readOnly = true, transactionManager = TransactionManagers.reactiveTransactionManager)
+    public <E> Flux<E> select(SqlRequest sqlRequest, ResultWrapper<E, ?> wrapper) {
+        return super.select(sqlRequest,wrapper);
     }
 }

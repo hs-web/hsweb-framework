@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.hswebframework.ezorm.rdb.mapping.annotation.DefaultValue;
 import org.hswebframework.web.api.crud.entity.GenericEntity;
 import org.hswebframework.web.api.crud.entity.RecordCreationEntity;
@@ -17,6 +18,15 @@ import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 
+/**
+ * 系统用户实体
+ *
+ * @author zhouhao
+ * @see org.hswebframework.web.system.authorization.api.event.UserDeletedEvent
+ * @see org.hswebframework.web.system.authorization.api.event.UserCreatedEvent
+ * @see org.hswebframework.web.system.authorization.api.event.UserModifiedEvent
+ * @since 4.0.0
+ */
 @Getter
 @Setter
 @Table(name = "s_user",
@@ -68,5 +78,9 @@ public class UserEntity extends GenericEntity<String> implements RecordCreationE
     @Override
     public String getId() {
         return super.getId();
+    }
+
+    public void generateId(){
+       setId(DigestUtils.md5Hex(username));
     }
 }

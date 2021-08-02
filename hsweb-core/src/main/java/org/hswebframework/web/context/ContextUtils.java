@@ -18,11 +18,12 @@ public class ContextUtils {
     }
 
     public static Mono<Context> reactiveContext() {
-        return Mono.subscriberContext()
+        return Mono
+                .subscriberContext()
                 .<Context>handle((context, sink) -> {
                     if (context.hasKey(Context.class)) {
                         sink.next(context.get(Context.class));
-                    }else {
+                    } else {
                         sink.complete();
                     }
                 })

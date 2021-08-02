@@ -1,6 +1,6 @@
 /*
  *
- *  * Copyright 2019 http://www.hswebframework.org
+ *  * Copyright 2020 http://www.hswebframework.org
  *  *
  *  * Licensed under the Apache License, Version 2.0 (the "License");
  *  * you may not use this file except in compliance with the License.
@@ -37,6 +37,10 @@ public interface Entity extends Serializable {
     }
 
     default <T> T copyTo(Class<T> target, String... ignoreProperties) {
+        return FastBeanCopier.copy(this, target, ignoreProperties);
+    }
+
+    default <T> T copyTo(T target, String... ignoreProperties) {
         return FastBeanCopier.copy(this, target, ignoreProperties);
     }
 

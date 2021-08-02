@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import org.hswebframework.ezorm.rdb.mapping.ReactiveRepository;
 import org.hswebframework.web.api.crud.entity.PagerResult;
+import org.hswebframework.web.api.crud.entity.QueryNoPagingOperation;
 import org.hswebframework.web.api.crud.entity.QueryOperation;
 import org.hswebframework.web.api.crud.entity.QueryParamEntity;
 import org.hswebframework.web.authorization.annotation.Authorize;
@@ -43,7 +44,7 @@ public interface ReactiveQueryController<E, K> {
     @QueryAction
     @QueryOperation(summary = "使用GET方式分页动态查询(不返回总数)",
             description = "此操作不返回分页总数,如果需要获取全部数据,请设置参数paging=false")
-    default Flux<E> query(@Parameter(hidden = true)  QueryParamEntity query) {
+    default Flux<E> query(@Parameter(hidden = true) QueryParamEntity query) {
         return getRepository()
                 .createQuery()
                 .setParam(query)
@@ -108,11 +109,12 @@ public interface ReactiveQueryController<E, K> {
                     .map(list -> PagerResult.of(query.getTotal(), list, query));
         }
 
-        return Mono.zip(
-                getRepository().createQuery().setParam(query).count(),
-                query(query.clone()).collectList(),
-                (total, data) -> PagerResult.of(total, data, query)
-        );
+        return Mono
+                .zip(
+                        getRepository().createQuery().setParam(query.clone()).count(),
+                        query(query.clone()).collectList(),
+                        (total, data) -> PagerResult.of(total, data, query)
+                );
 
     }
 
@@ -127,8 +129,8 @@ public interface ReactiveQueryController<E, K> {
 
     @PostMapping("/_count")
     @QueryAction
-    @Operation(summary = "使用POST方式查询总数")
-    default Mono<Integer> count(@RequestBody Mono<QueryParamEntity> query) {
+    @QueryNoPagingOperation(summary = "使用POST方式查询总数")
+    default Mono<Integer> count(@Parameter(hidden = true) @RequestBody Mono<QueryParamEntity> query) {
         return query.flatMap(this::count);
     }
 
@@ -144,8 +146,8 @@ public interface ReactiveQueryController<E, K> {
      */
     @GetMapping("/_count")
     @QueryAction
-    @QueryOperation(summary = "使用GET方式查询总数")
-    default Mono<Integer> count(@Parameter(hidden = true) QueryParamEntity query) {
+    @Operation(summary = "使用GET方式查询总数")
+    default Mono<Integer> count(QueryParamEntity query) {
         return getRepository()
                 .createQuery()
                 .setParam(query)

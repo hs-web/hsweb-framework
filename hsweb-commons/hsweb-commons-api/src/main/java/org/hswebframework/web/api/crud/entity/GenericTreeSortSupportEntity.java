@@ -1,6 +1,6 @@
 /*
  *
- *  * Copyright 2019 http://www.hswebframework.org
+ *  * Copyright 2020 http://www.hswebframework.org
  *  *
  *  * Licensed under the Apache License, Version 2.0 (the "License");
  *  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ package org.hswebframework.web.api.crud.entity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.validator.constraints.Length;
 import org.hswebframework.ezorm.rdb.mapping.annotation.Comment;
 
 import javax.persistence.Column;
@@ -48,6 +49,7 @@ public abstract class GenericTreeSortSupportEntity<PK> extends GenericEntity<PK>
     @Column(name = "path", length = 128)
     @Comment("树路径")
     @Schema(description = "树结构路径")
+    @Length(max = 128, message = "目录层级太深")
     private String path;
 
     /**

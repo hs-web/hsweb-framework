@@ -7,10 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.User;
-import org.hswebframework.web.authorization.annotation.Authorize;
-import org.hswebframework.web.authorization.annotation.DeleteAction;
-import org.hswebframework.web.authorization.annotation.Resource;
-import org.hswebframework.web.authorization.annotation.SaveAction;
+import org.hswebframework.web.authorization.annotation.*;
 import org.hswebframework.web.authorization.exception.UnAuthorizedException;
 import org.hswebframework.web.crud.web.reactive.ReactiveServiceQueryController;
 import org.hswebframework.web.system.authorization.api.entity.UserEntity;
@@ -46,8 +43,8 @@ public class WebFluxUserController implements ReactiveServiceQueryController<Use
 
 
     @PutMapping("/me")
-    @Authorize(merge = false)
     @Operation(summary = "修改当前用户信息")
+    @ResourceAction(id = "update-self-info",name = "修改当前用户信息")
     public Mono<Boolean> updateLoginUserInfo(@RequestBody UserEntity request) {
         return Authentication
                 .currentReactive()
@@ -73,7 +70,7 @@ public class WebFluxUserController implements ReactiveServiceQueryController<Use
     }
 
     @PutMapping("/passwd")
-    @Authorize(merge = false)
+    @ResourceAction(id = "update-self-pwd",name = "修改当前用户密码")
     @Operation(summary = "修改当前用户密码")
     public Mono<Boolean> changePassword(@RequestBody ChangePasswordRequest request) {
         return Authentication

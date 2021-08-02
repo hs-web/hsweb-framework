@@ -52,6 +52,11 @@ public class QueryParamEntity extends QueryParam {
     @Schema(description = "设置了此值后将不重复执行count查询总数")
     private Integer total;
 
+    @Getter
+    @Setter
+    @Schema(description = "是否进行并行分页")
+    private boolean parallelPager = false;
+
     @Override
     @Hidden
     public boolean isForUpdate() {
@@ -93,7 +98,7 @@ public class QueryParamEntity extends QueryParam {
 
 
     /**
-     * @see this#of(String, Object)
+     * @see QueryParamEntity#of(String, Object)
      */
     public static QueryParamEntity of(String field, Object value) {
         return of().and(field, TermType.eq, value);
@@ -123,7 +128,7 @@ public class QueryParamEntity extends QueryParam {
      * <p>
      * 执行后条件: (name=? or type=?) and userId=?
      *
-     * @see this#toNestQuery(Consumer)
+     * @see QueryParamEntity#toNestQuery(Consumer)
      * @since 3.0.4
      */
     public <T> Query<T, QueryParamEntity> toNestQuery() {
@@ -199,6 +204,11 @@ public class QueryParamEntity extends QueryParam {
 
     public QueryParamEntity noPaging() {
         setPaging(false);
+        return this;
+    }
+
+    public QueryParamEntity doNotSort(){
+        this.setSorts(new ArrayList<>());
         return this;
     }
 

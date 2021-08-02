@@ -36,7 +36,7 @@ public class DefaultBasicAuthorizeDefinition implements AopAuthorizeDefinition {
     private ResourcesDefinition resources = new ResourcesDefinition();
     private DimensionsDefinition dimensions = new DimensionsDefinition();
 
-    private String message = "权限不足,拒绝访问";
+    private String message = "error.access_denied";
 
     private Phased phased;
 

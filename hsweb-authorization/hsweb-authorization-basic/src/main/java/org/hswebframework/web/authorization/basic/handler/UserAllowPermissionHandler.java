@@ -37,7 +37,7 @@ public class UserAllowPermissionHandler {
     @Setter
     private Map<String, Map<String, String>> allows = new HashMap<>();
 
-    private PathMatcher pathMatcher = new AntPathMatcher(".");
+    private final PathMatcher pathMatcher = new AntPathMatcher(".");
 
     @EventListener
     public void handEvent(AuthorizingHandleBeforeEvent event) {

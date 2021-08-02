@@ -57,33 +57,36 @@ public class AutoDDLProcessor implements InitializingBean {
         List<Class> entities = this.entities.stream().map(EntityInfo::getRealType).collect(Collectors.toList());
         if (properties.isAutoDdl()) {
             //加载全部表信息
-//            if (reactive) {
-//                Flux.fromIterable(entities)
-//                        .doOnNext(type -> log.info("auto ddl for {}", type))
-//                        .map(resolver::resolve)
-//                        .flatMap(meta->operator.ddl()
-//                                .createOrAlter(meta)
-//                                .commit()
-//                                .reactive())
-//                        .doOnError((err) -> log.error(err.getMessage(), err))
-//                        .then()
-//                        .toFuture().get(2, TimeUnit.MINUTES);
-//
-//            } else {
-            for (Class<?> entity : entities) {
-                log.trace("auto ddl for {}", entity);
-                try {
-                    operator.ddl()
-                            .createOrAlter(resolver.resolve(entity))
+            if (reactive) {
+                Flux.fromIterable(entities)
+                    .doOnNext(type -> log.trace("auto ddl for {}", type))
+                    .map(resolver::resolve)
+                    .flatMap(meta -> operator
+                            .ddl()
+                            .createOrAlter(meta)
                             .autoLoad(false)
                             .commit()
-                            .sync();
-                } catch (Exception e) {
-                    log.error(e.getMessage(), e);
-                    throw e;
+                            .reactive()
+                            .subscribeOn(Schedulers.elastic())
+                    )
+                    .doOnError((err) -> log.error(err.getMessage(), err))
+                    .then()
+                    .block(Duration.ofMinutes(5));
+            } else {
+                for (Class<?> entity : entities) {
+                    log.trace("auto ddl for {}", entity);
+                    try {
+                        operator.ddl()
+                                .createOrAlter(resolver.resolve(entity))
+                                .autoLoad(false)
+                                .commit()
+                                .sync();
+                    } catch (Exception e) {
+                        log.error(e.getMessage(), e);
+                        throw e;
+                    }
                 }
             }
-//            }
         } else {
             for (Class<?> entity : entities) {
                 RDBTableMetadata metadata = resolver.resolve(entity);

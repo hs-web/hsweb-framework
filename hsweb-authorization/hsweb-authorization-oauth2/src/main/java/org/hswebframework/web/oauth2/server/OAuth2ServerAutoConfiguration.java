@@ -10,6 +10,8 @@ import org.hswebframework.web.oauth2.server.credential.ClientCredentialGranter;
 import org.hswebframework.web.oauth2.server.credential.DefaultClientCredentialGranter;
 import org.hswebframework.web.oauth2.server.impl.CompositeOAuth2GrantService;
 import org.hswebframework.web.oauth2.server.impl.RedisAccessTokenManager;
+import org.hswebframework.web.oauth2.server.refresh.DefaultRefreshTokenGranter;
+import org.hswebframework.web.oauth2.server.refresh.RefreshTokenGranter;
 import org.hswebframework.web.oauth2.server.web.OAuth2AuthorizeController;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -64,11 +66,19 @@ public class OAuth2ServerAutoConfiguration {
 
         @Bean
         @ConditionalOnMissingBean
+        public RefreshTokenGranter refreshTokenGranter(AccessTokenManager tokenManager) {
+            return new DefaultRefreshTokenGranter(tokenManager);
+        }
+
+        @Bean
+        @ConditionalOnMissingBean
         public OAuth2GrantService oAuth2GrantService(ObjectProvider<AuthorizationCodeGranter> codeProvider,
-                                                     ObjectProvider<ClientCredentialGranter> credentialProvider) {
+                                                     ObjectProvider<ClientCredentialGranter> credentialProvider,
+                                                     ObjectProvider<RefreshTokenGranter> refreshProvider) {
             CompositeOAuth2GrantService grantService = new CompositeOAuth2GrantService();
             grantService.setAuthorizationCodeGranter(codeProvider.getIfAvailable());
             grantService.setClientCredentialGranter(credentialProvider.getIfAvailable());
+            grantService.setRefreshTokenGranter(refreshProvider.getIfAvailable());
 
             return grantService;
         }

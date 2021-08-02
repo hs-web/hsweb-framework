@@ -1,5 +1,5 @@
 /*
- *  Copyright 2019 http://www.hswebframework.org
+ *  Copyright 2020 http://www.hswebframework.org
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -97,7 +97,7 @@ public interface UserTokenManager {
      * @param userId userId
      * @param state  状态
      * @see org.hswebframework.web.authorization.token.event.UserTokenChangedEvent
-     * @see this#changeTokenState
+     * @see UserTokenManager#changeTokenState
      */
     Mono<Void> changeUserState(String userId, TokenState state);
 

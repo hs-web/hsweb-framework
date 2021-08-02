@@ -12,14 +12,13 @@ import reactor.core.publisher.Mono;
 
 /**
  * @author zhouhao
- * @since 3.0.0-RC
+ * @since 4.0.0
  */
-
 @Order(10)
 @AllArgsConstructor
 public class EmbedReactiveAuthenticationManager implements ReactiveAuthenticationManagerProvider {
 
-    private EmbedAuthenticationProperties properties;
+    private final EmbedAuthenticationProperties properties;
 
     @Override
     public Mono<Authentication> authenticate(Mono<AuthenticationRequest> request) {
