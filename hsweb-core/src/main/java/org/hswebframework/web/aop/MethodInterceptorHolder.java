@@ -114,7 +114,7 @@ public class MethodInterceptorHolder {
                 for (int i = 0; i < args.length; i++) {
                     Object arg = args[i];
                     if (arg instanceof Publisher) {
-                        args[i] = handler.apply(((Mono) arg));
+                        args[i] = handler.apply(((Publisher<?>) arg));
                         handled = true;
                     }
                 }
