@@ -29,7 +29,7 @@ public class ValidationException extends I18nSupportException {
     }
 
     public ValidationException(String message, List<Detail> details, Object... args) {
-        super(message, 400, args);
+        super(message, args);
         this.details = details;
         for (Detail detail : this.details) {
             detail.translateI18n(args);
