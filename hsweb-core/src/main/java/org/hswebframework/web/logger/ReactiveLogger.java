@@ -1,6 +1,7 @@
 package org.hswebframework.web.logger;
 
 import lombok.extern.slf4j.Slf4j;
+import org.hswebframework.web.utils.CollectionUtils;
 import org.slf4j.MDC;
 import reactor.core.publisher.*;
 import reactor.util.context.Context;
@@ -20,11 +21,7 @@ public class ReactiveLogger {
     }
 
     public static Function<Context, Context> start(String... keyAndValue) {
-        Map<String, String> map = new HashMap<>();
-        for (int i = 0, len = keyAndValue.length / 2; i < len; i++) {
-            map.put(keyAndValue[i * 2], keyAndValue[i * 2 + 1]);
-        }
-        return start(map);
+        return start(CollectionUtils.pairingArrayMap(keyAndValue));
     }
 
     public static Mono<Void> mdc(String key, String value) {
