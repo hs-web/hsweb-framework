@@ -32,6 +32,7 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -120,17 +121,33 @@ public class CustomJackson2JsonDecoder extends Jackson2CodecSupport implements H
         }
     }
 
+    private Type getRelType(Type type) {
+        if (type instanceof Class) {
+            Class<?> realType = entityFactory.getInstanceType(((Class<?>) type), false);
+            if (realType != null) {
+                return realType;
+            }
+        }
+        return type;
+    }
+
     private ObjectReader getObjectReader(ResolvableType elementType, @Nullable Map<String, Object> hints) {
         Assert.notNull(elementType, "'elementType' must not be null");
         MethodParameter param = getParameter(elementType);
         Class<?> contextClass = (param != null ? param.getContainingClass() : null);
         Type type = elementType.resolve() == null ? elementType.getType() : elementType.toClass();
-        if (type instanceof Class) {
-            Class<?> realType = entityFactory.getInstanceType(((Class<?>) type), false);
-            if (realType != null) {
-                type = realType;
-            }
+
+        if (Iterable.class.isAssignableFrom(elementType.toClass())) {
+            ResolvableType genType = elementType.getGeneric(0);
+            type = ResolvableType
+                    .forClassWithGenerics(
+                            elementType.toClass(),
+                            ResolvableType.forType(getRelType(genType.getType())))
+                    .getType();
+        } else {
+            type = getRelType(type);
         }
+
         JavaType javaType = getJavaType(type, contextClass);
         Class<?> jsonView = (hints != null ? (Class<?>) hints.get(Jackson2CodecSupport.JSON_VIEW_HINT) : null);
         return jsonView != null ?
