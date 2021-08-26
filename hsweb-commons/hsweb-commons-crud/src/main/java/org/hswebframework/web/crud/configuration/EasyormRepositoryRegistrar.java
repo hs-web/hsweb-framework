@@ -15,6 +15,8 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
+import org.springframework.context.index.CandidateComponentsIndex;
+import org.springframework.context.index.CandidateComponentsIndexLoader;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.io.Resource;
@@ -25,6 +27,7 @@ import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
 
+import javax.persistence.Table;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -60,18 +63,26 @@ public class EasyormRepositoryRegistrar implements ImportBeanDefinitionRegistrar
         boolean nonReactiveEnabled = Boolean.TRUE.equals(attr.get("nonReactive"));
 
         String[] arr = (String[]) attr.get("value");
-        Set<Resource> resources = Arrays
-                .stream(arr)
-                .flatMap(this::doGetResources)
-                .collect(Collectors.toSet());
+//        Set<Resource> resources = Arrays
+//                .stream(arr)
+//                .flatMap(this::doGetResources)
+//                .collect(Collectors.toSet());
 
         Class<Annotation>[] anno = (Class[]) attr.get("annotation");
 
         Set<EntityInfo> entityInfos = new HashSet<>();
-
-        for (Resource resource : resources) {
-            MetadataReader reader = metadataReaderFactory.getMetadataReader(resource);
-            String className = reader.getClassMetadata().getClassName();
+        CandidateComponentsIndex index = CandidateComponentsIndexLoader.loadIndex(org.springframework.util.ClassUtils.getDefaultClassLoader());
+        Set<String> entities = Stream
+                .of(arr)
+                .flatMap(_package -> {
+                    return index
+                            .getCandidateTypes(_package, Table.class.getName())
+                            .stream();
+                })
+                .collect(Collectors.toSet());
+        for (String className : entities) {
+//            MetadataReader reader = metadataReaderFactory.getMetadataReader(resource);
+//            String className = reader.getClassMetadata().getClassName();
             Class<?> entityType = org.springframework.util.ClassUtils.forName(className, null);
             if (Arrays.stream(anno)
                       .noneMatch(ann -> AnnotationUtils.findAnnotation(entityType, ann) != null)) {
