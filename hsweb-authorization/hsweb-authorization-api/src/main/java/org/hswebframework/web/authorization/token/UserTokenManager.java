@@ -18,6 +18,7 @@
 
 package org.hswebframework.web.authorization.token;
 
+import org.hswebframework.web.authorization.Authentication;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -116,10 +117,28 @@ public interface UserTokenManager {
      * @param token               token
      * @param type                令牌类型
      * @param userId              用户id
-     * @param maxInactiveInterval 最大不活动时间,超过后令牌状态{@link UserToken#getState()}将变为过期{@link TokenState#expired}
+     * @param maxInactiveInterval 最大不活动时间(单位毫秒),超过后令牌状态{@link UserToken#getState()}将变为过期{@link TokenState#expired}
      * @see org.hswebframework.web.authorization.token.event.UserTokenCreatedEvent
      */
     Mono<UserToken> signIn(String token, String type, String userId, long maxInactiveInterval);
+
+    /**
+     * 登记一个包含认证信息的token
+     *
+     * @param token               token
+     * @param type                令牌类型
+     * @param userId              用户ID
+     * @param maxInactiveInterval 最大不活动时间(单位毫秒),小于0永不过期,超过后令牌状态{@link UserToken#getState()}将变为过期{@link TokenState#expired}
+     * @param authentication      认证信息
+     * @return token信息
+     */
+    default Mono<AuthenticationUserToken> signIn(String token,
+                                                 String type,
+                                                 String userId,
+                                                 long maxInactiveInterval,
+                                                 Authentication authentication) {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * 更新token,使其不过期
@@ -131,7 +150,7 @@ public interface UserTokenManager {
     /**
      * 检查已过期的token,并将其remove
      *
-     * @see this#signOutByToken(String)
+     * @see UserTokenManager#signOutByToken(String)
      */
     Mono<Void> checkExpiredToken();
 

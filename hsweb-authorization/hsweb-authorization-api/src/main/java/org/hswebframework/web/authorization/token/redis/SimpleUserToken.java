@@ -4,6 +4,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.token.TokenState;
 import org.hswebframework.web.authorization.token.UserToken;
 import org.hswebframework.web.bean.FastBeanCopier;
@@ -33,7 +34,10 @@ public class SimpleUserToken implements UserToken {
     private long maxInactiveInterval;
 
     public static SimpleUserToken of(Map<String, Object> map) {
-
+        Object authentication = map.get("authentication");
+        if(authentication instanceof Authentication){
+            return FastBeanCopier.copy(map, new SimpleAuthenticationUserToken(((Authentication) authentication)));
+        }
         return FastBeanCopier.copy(map, new SimpleUserToken());
     }
 

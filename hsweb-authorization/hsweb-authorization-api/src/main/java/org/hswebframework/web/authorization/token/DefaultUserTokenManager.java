@@ -20,6 +20,7 @@ package org.hswebframework.web.authorization.token;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.exception.AccessDenyException;
 import org.hswebframework.web.authorization.token.event.UserTokenChangedEvent;
 import org.hswebframework.web.authorization.token.event.UserTokenCreatedEvent;
@@ -33,6 +34,7 @@ import reactor.core.publisher.Mono;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.function.Supplier;
 
 /**
  * 默认到用户令牌管理器，使用ConcurrentMap来存储令牌信息
@@ -122,9 +124,9 @@ public class DefaultUserTokenManager implements UserTokenManager {
             return Flux.empty();
         }
         return Flux.fromStream(tokens
-                .stream()
-                .map(tokenStorage::get)
-                .filter(Objects::nonNull));
+                                       .stream()
+                                       .map(tokenStorage::get)
+                                       .filter(Objects::nonNull));
     }
 
     @Override
@@ -228,14 +230,23 @@ public class DefaultUserTokenManager implements UserTokenManager {
     @Override
     public Mono<Void> changeUserState(String user, TokenState state) {
         return Mono.from(getByUserId(user)
-                .flatMap(token -> changeTokenState(token.getToken(), state)));
+                                 .flatMap(token -> changeTokenState(token.getToken(), state)));
     }
 
     @Override
     public Mono<UserToken> signIn(String token, String type, String userId, long maxInactiveInterval) {
 
+        return doSignIn(token, type, userId, maxInactiveInterval, LocalUserToken::new)
+                .cast(UserToken.class);
+
+    }
+
+    private <T extends LocalUserToken> Mono<T> doSignIn(String token, String type, String userId, long maxInactiveInterval, Supplier<T> tokenSupplier) {
+
         return Mono.defer(() -> {
-            LocalUserToken detail = new LocalUserToken(userId, token);
+            T detail = tokenSupplier.get();
+            detail.setUserId(userId);
+            detail.setToken(token);
             detail.setType(type);
             detail.setMaxInactiveInterval(maxInactiveInterval);
             detail.setState(TokenState.normal);
@@ -270,6 +281,13 @@ public class DefaultUserTokenManager implements UserTokenManager {
             return Mono.just(detail);
         });
 
+    }
+
+    @Override
+    public Mono<AuthenticationUserToken> signIn(String token, String type, String userId, long maxInactiveInterval, Authentication authentication) {
+        return this
+                .doSignIn(token, type, userId, maxInactiveInterval, () -> new LocalAuthenticationUserToken(authentication))
+                .cast(AuthenticationUserToken.class);
     }
 
     @Override

@@ -2,11 +2,9 @@ package org.hswebframework.web.authorization.token.redis;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.exception.AccessDenyException;
-import org.hswebframework.web.authorization.token.AllopatricLoginMode;
-import org.hswebframework.web.authorization.token.TokenState;
-import org.hswebframework.web.authorization.token.UserToken;
-import org.hswebframework.web.authorization.token.UserTokenManager;
+import org.hswebframework.web.authorization.token.*;
 import org.hswebframework.web.authorization.token.event.UserTokenChangedEvent;
 import org.hswebframework.web.authorization.token.event.UserTokenCreatedEvent;
 import org.hswebframework.web.authorization.token.event.UserTokenRemovedEvent;
@@ -26,6 +24,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -51,14 +50,14 @@ public class RedisUserTokenManager implements UserTokenManager {
                 .subscribe(msg -> localCache.remove(String.valueOf(msg.getMessage())));
 
         Flux.<UserToken>create(sink -> this.touchSink = sink)
-                .buffer(Flux.interval(Duration.ofSeconds(10)), HashSet::new)
-                .flatMap(list -> Flux
-                        .fromIterable(list)
-                        .flatMap(token -> operations
-                                .expire(getTokenRedisKey(token.getToken()), Duration.ofMillis(token.getMaxInactiveInterval()))
-                                .then())
-                        .onErrorResume(err -> Mono.empty()))
-                .subscribe();
+            .buffer(Flux.interval(Duration.ofSeconds(10)), HashSet::new)
+            .flatMap(list -> Flux
+                    .fromIterable(list)
+                    .flatMap(token -> operations
+                            .expire(getTokenRedisKey(token.getToken()), Duration.ofMillis(token.getMaxInactiveInterval()))
+                            .then())
+                    .onErrorResume(err -> Mono.empty()))
+            .subscribe();
 
     }
 
@@ -212,8 +211,11 @@ public class RedisUserTokenManager implements UserTokenManager {
                 });
     }
 
-    @Override
-    public Mono<UserToken> signIn(String token, String type, String userId, long maxInactiveInterval) {
+    private Mono<UserToken> signIn(String token,
+                                   String type,
+                                   String userId,
+                                   long maxInactiveInterval,
+                                   Consumer<Map<String, Object>> cacheBuilder) {
         return Mono
                 .defer(() -> {
                     Mono<SimpleUserToken> doSign = Mono.defer(() -> {
@@ -225,7 +227,7 @@ public class RedisUserTokenManager implements UserTokenManager {
                         map.put("state", TokenState.normal.getValue());
                         map.put("signInTime", System.currentTimeMillis());
                         map.put("lastRequestTime", System.currentTimeMillis());
-
+                        cacheBuilder.accept(map);
                         String key = getTokenRedisKey(token);
                         return userTokenStore
                                 .putAll(key, map)
@@ -265,6 +267,23 @@ public class RedisUserTokenManager implements UserTokenManager {
                 .flatMap(this::onUserTokenCreated);
     }
 
+    @Override
+    public Mono<UserToken> signIn(String token, String type, String userId, long maxInactiveInterval) {
+        return signIn(token, type, userId, maxInactiveInterval, ignore -> {
+        });
+    }
+
+    @Override
+    public Mono<AuthenticationUserToken> signIn(String token,
+                                                String type,
+                                                String userId,
+                                                long maxInactiveInterval,
+                                                Authentication authentication) {
+        return this
+                .signIn(token, type, userId, maxInactiveInterval,
+                        cache -> cache.put("authentication", authentication))
+                .cast(AuthenticationUserToken.class);
+    }
 
     @Override
     public Mono<Void> touch(String token) {

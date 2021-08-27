@@ -5,7 +5,7 @@ import org.hswebframework.web.authorization.events.AuthorizationEvent;
 import org.springframework.context.ApplicationEvent;
 
 public class UserTokenCreatedEvent extends ApplicationEvent implements AuthorizationEvent {
-    private UserToken detail;
+    private final UserToken detail;
 
     public UserTokenCreatedEvent(UserToken detail) {
         super(detail);

@@ -72,10 +72,16 @@ public class UserTokenReactiveAuthenticationSupplier implements ReactiveAuthenti
                 .reactiveContext()
                 .flatMap(context -> context
                         .get(ContextKey.of(ParsedToken.class))
-                        .map(t -> userTokenManager.getByToken(t.getToken()).filter(UserToken::validate))
-                        .map(tokenMono -> tokenMono
-                                .flatMap(token -> userTokenManager.touch(token.getToken()).thenReturn(token))
-                                .flatMap(token -> get(thirdPartAuthenticationManager.get(token.getType()), token.getUserId())))
+                        .map(t -> userTokenManager
+                                .getByToken(t.getToken())
+                                .filter(UserToken::validate)
+                                .flatMap(token -> {
+                                    Mono<Void> before = userTokenManager.touch(token.getToken());
+                                    if (token instanceof AuthenticationUserToken) {
+                                        return before.thenReturn(((AuthenticationUserToken) token).getAuthentication());
+                                    }
+                                    return before.then(get(thirdPartAuthenticationManager.get(token.getType()), token.getUserId()));
+                                }))
                         .orElseGet(Mono::empty))
                 .flatMap(auth -> ReactiveLogger
                         .mdc("userId", auth.getUser().getId(),

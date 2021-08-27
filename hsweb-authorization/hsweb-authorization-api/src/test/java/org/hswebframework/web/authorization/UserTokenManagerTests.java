@@ -1,6 +1,7 @@
 package org.hswebframework.web.authorization;
 
 import org.hswebframework.web.authorization.exception.AccessDenyException;
+import org.hswebframework.web.authorization.simple.SimpleAuthentication;
 import org.hswebframework.web.authorization.token.*;
 import org.junit.Assert;
 import org.junit.Test;
@@ -11,7 +12,8 @@ public class UserTokenManagerTests {
 
     /**
      * 基本功能测试
-     * @throws InterruptedException  Thread.sleep error
+     *
+     * @throws InterruptedException Thread.sleep error
      */
     @Test
     public void testDefaultSetting() throws InterruptedException {
@@ -26,15 +28,15 @@ public class UserTokenManagerTests {
 
         //2个token
         userTokenManager.totalToken()
-                .as(StepVerifier::create)
-                .expectNext(2)
-                .verifyComplete();
+                        .as(StepVerifier::create)
+                        .expectNext(2)
+                        .verifyComplete();
 
         //1个用户
         userTokenManager.totalUser()
-                .as(StepVerifier::create)
-                .expectNext(1)
-                .verifyComplete();
+                        .as(StepVerifier::create)
+                        .expectNext(1)
+                        .verifyComplete();
 
         //改变token状态
         userTokenManager.changeUserState("admin", TokenState.deny).subscribe();
@@ -48,28 +50,28 @@ public class UserTokenManagerTests {
         Thread.sleep(1200);
 
         userTokenManager.getByToken(userToken.getToken())
-                .map(UserToken::isExpired)
-                .as(StepVerifier::create)
-                .expectNext(true)
-                .verifyComplete();
+                        .map(UserToken::isExpired)
+                        .as(StepVerifier::create)
+                        .expectNext(true)
+                        .verifyComplete();
 
         userTokenManager.checkExpiredToken().subscribe();
 
 
         userTokenManager.getByToken(userToken.getToken())
-                .as(StepVerifier::create)
-                .expectNextCount(0)
-                .verifyComplete();
+                        .as(StepVerifier::create)
+                        .expectNextCount(0)
+                        .verifyComplete();
 
         userTokenManager.totalToken()
-                .as(StepVerifier::create)
-                .expectNext(1)
-                .verifyComplete();
+                        .as(StepVerifier::create)
+                        .expectNext(1)
+                        .verifyComplete();
 
         userTokenManager.totalUser()
-                .as(StepVerifier::create)
-                .expectNext(1)
-                .verifyComplete();
+                        .as(StepVerifier::create)
+                        .expectNext(1)
+                        .verifyComplete();
 
     }
 
@@ -99,7 +101,7 @@ public class UserTokenManagerTests {
      * 测试异地登录模式之踢下线
      */
     @Test
-    public void testOffline()   {
+    public void testOffline() {
         DefaultUserTokenManager userTokenManager = new DefaultUserTokenManager();
         userTokenManager.setAllopatricLoginMode(AllopatricLoginMode.offlineOther); //将其他地方登录的用户踢下线
 
@@ -113,5 +115,21 @@ public class UserTokenManagerTests {
 
     }
 
+    @Test
+    public void testAuth() {
+        UserTokenManager userTokenManager = new DefaultUserTokenManager();
+        Authentication authentication = new SimpleAuthentication();
+
+        userTokenManager.signIn("test", "test", "test", 1000, authentication)
+                        .as(StepVerifier::create)
+                        .expectNextMatches(token -> token.getAuthentication() == authentication)
+                        .verifyComplete();
+
+        userTokenManager.getByToken("test")
+                        .cast(AuthenticationUserToken.class)
+                        .as(StepVerifier::create)
+                        .expectNextMatches(token -> token.getAuthentication() == authentication)
+                        .verifyComplete();
+    }
 
 }

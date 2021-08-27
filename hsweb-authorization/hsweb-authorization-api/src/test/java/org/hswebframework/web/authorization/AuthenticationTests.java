@@ -106,16 +106,16 @@ public class AuthenticationTests {
 
             @Override
             public Mono<Authentication> getByUserId(String userId) {
-                if (userId.equals("admin")) {
-                    return Mono.just(authentication);
-                }
+//                if (userId.equals("admin")) {
+//                    return Mono.just(authentication);
+//                }
                 return Mono.empty();
             }
 
         };
         //绑定用户token
         UserTokenManager userTokenManager = new DefaultUserTokenManager();
-        UserToken token = userTokenManager.signIn("test", "token-test", "admin", -1).block();
+        UserToken token = userTokenManager.signIn("test", "token-test", "admin", -1,authentication).block();
 
         ReactiveAuthenticationHolder.addSupplier(new UserTokenReactiveAuthenticationSupplier(userTokenManager, authenticationManager));
         ParsedToken parsedToken=new ParsedToken() {
