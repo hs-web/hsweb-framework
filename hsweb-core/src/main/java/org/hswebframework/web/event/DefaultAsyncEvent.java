@@ -10,7 +10,10 @@ public class DefaultAsyncEvent implements AsyncEvent {
     @Getter
     private Mono<Void> async = Mono.empty();
 
+    private boolean hasListener;
+
     public synchronized void async(Publisher<?> publisher) {
+        hasListener = true;
         this.async = async.then(Mono.from(publisher).then());
     }
 
@@ -20,5 +23,9 @@ public class DefaultAsyncEvent implements AsyncEvent {
         eventPublisher.publishEvent(this);
 
         return this.async;
+    }
+
+    public boolean hasListener() {
+        return hasListener;
     }
 }
