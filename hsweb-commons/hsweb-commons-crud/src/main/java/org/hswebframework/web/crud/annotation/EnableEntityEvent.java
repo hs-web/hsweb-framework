@@ -19,6 +19,11 @@ import java.lang.annotation.*;
  * @see org.hswebframework.web.crud.events.EntityDeletedEvent
  * @see org.hswebframework.web.crud.events.EntityCreatedEvent
  * @see org.hswebframework.web.crud.events.EntitySavedEvent
+ * @see org.hswebframework.web.crud.events.EntityBeforeSaveEvent
+ * @see org.hswebframework.web.crud.events.EntityBeforeModifyEvent
+ * @see org.hswebframework.web.crud.events.EntityBeforeDeleteEvent
+ * @see org.hswebframework.web.crud.events.EntityBeforeCreateEvent
+ * @see org.hswebframework.web.crud.events.EntityBeforeQueryEvent
  */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)

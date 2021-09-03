@@ -8,8 +8,12 @@ import org.hswebframework.ezorm.rdb.metadata.RDBTableMetadata;
 import org.hswebframework.ezorm.rdb.operator.DatabaseOperator;
 import org.hswebframework.web.api.crud.entity.EntityFactory;
 import org.hswebframework.web.crud.entity.factory.MapperEntityFactory;
+import org.hswebframework.web.crud.events.EntityBeforeQueryEvent;
+import org.hswebframework.web.crud.events.EntityDDLEvent;
+import org.hswebframework.web.event.GenericsPayloadApplicationEvent;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.transaction.ReactiveTransactionManager;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,6 +47,9 @@ public class AutoDDLProcessor implements InitializingBean {
     @Autowired
     private EntityFactory entityFactory;
 
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
+
     private boolean reactive;
 
     @Override
@@ -60,7 +67,12 @@ public class AutoDDLProcessor implements InitializingBean {
             if (reactive) {
                 Flux.fromIterable(entities)
                     .doOnNext(type -> log.trace("auto ddl for {}", type))
-                    .map(resolver::resolve)
+                    .map(type -> {
+                        RDBTableMetadata metadata = resolver.resolve(type);
+                        EntityDDLEvent event = new EntityDDLEvent(type,metadata);
+                        eventPublisher.publishEvent(new GenericsPayloadApplicationEvent<>(this, event, type));
+                        return metadata;
+                    })
                     .flatMap(meta -> operator
                             .ddl()
                             .createOrAlter(meta)
@@ -73,11 +85,14 @@ public class AutoDDLProcessor implements InitializingBean {
                     .then()
                     .block(Duration.ofMinutes(5));
             } else {
-                for (Class<?> entity : entities) {
-                    log.trace("auto ddl for {}", entity);
+                for (Class<?> type : entities) {
+                    log.trace("auto ddl for {}", type);
                     try {
+                        RDBTableMetadata metadata = resolver.resolve(type);
+                        EntityDDLEvent event = new EntityDDLEvent(type,metadata);
+                        eventPublisher.publishEvent(new GenericsPayloadApplicationEvent<>(this, event, type));
                         operator.ddl()
-                                .createOrAlter(resolver.resolve(entity))
+                                .createOrAlter(metadata)
                                 .autoLoad(false)
                                 .commit()
                                 .sync();

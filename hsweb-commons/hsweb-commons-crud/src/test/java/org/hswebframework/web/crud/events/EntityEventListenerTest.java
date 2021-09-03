@@ -50,19 +50,32 @@ public class EntityEventListenerTest {
 
     @Test
     public void testInsertBatch() {
+        reactiveRepository.createQuery()
+                          .where(EventTestEntity::getId,"test")
+                          .fetch()
+                          .then()
+                          .as(StepVerifier::create)
+                          .expectComplete()
+                          .verify();
+        Assert.assertEquals(listener.beforeQuery.getAndSet(0), 1);
+
+
         Flux.just(EventTestEntity.of("test2", 1), EventTestEntity.of("test3", 2))
                 .as(reactiveRepository::insert)
                 .as(StepVerifier::create)
                 .expectNext(2)
                 .verifyComplete();
         Assert.assertEquals(listener.created.getAndSet(0), 2);
+        Assert.assertEquals(listener.beforeCreate.getAndSet(0), 2);
 
-        reactiveRepository.createUpdate().set("age",3).where().in("name","test2","test3").execute()
+        reactiveRepository
+                .createUpdate().set("age",3).where().in("name","test2","test3").execute()
                 .as(StepVerifier::create)
                 .expectNext(2)
                 .verifyComplete();
 
         Assert.assertEquals(listener.modified.getAndSet(0), 2);
+        Assert.assertEquals(listener.beforeModify.getAndSet(0), 2);
 
         reactiveRepository.createDelete().where().in("name","test2","test3").execute()
                 .as(StepVerifier::create)
@@ -70,6 +83,7 @@ public class EntityEventListenerTest {
                 .verifyComplete();
 
         Assert.assertEquals(listener.deleted.getAndSet(0), 2);
+        Assert.assertEquals(listener.beforeDelete.getAndSet(0), 2);
 
         reactiveRepository.save(EventTestEntity.of("test2", 1))
                 .then()
@@ -78,6 +92,9 @@ public class EntityEventListenerTest {
                 .verify();
 
         Assert.assertEquals(listener.saved.getAndSet(0), 1);
+        Assert.assertEquals(listener.beforeSave.getAndSet(0), 1);
+
+
 
     }
 
