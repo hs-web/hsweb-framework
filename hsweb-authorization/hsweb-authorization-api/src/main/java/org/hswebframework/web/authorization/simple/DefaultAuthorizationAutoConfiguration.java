@@ -3,6 +3,8 @@ package org.hswebframework.web.authorization.simple;
 import org.hswebframework.web.authorization.*;
 import org.hswebframework.web.authorization.builder.AuthenticationBuilderFactory;
 import org.hswebframework.web.authorization.builder.DataAccessConfigBuilderFactory;
+import org.hswebframework.web.authorization.dimension.DimensionManager;
+import org.hswebframework.web.authorization.dimension.DimensionUserBindProvider;
 import org.hswebframework.web.authorization.simple.builder.DataAccessConfigConverter;
 import org.hswebframework.web.authorization.simple.builder.SimpleAuthenticationBuilderFactory;
 import org.hswebframework.web.authorization.simple.builder.SimpleDataAccessConfigBuilderFactory;
@@ -10,6 +12,7 @@ import org.hswebframework.web.authorization.token.*;
 import org.hswebframework.web.authorization.twofactor.TwoFactorValidatorManager;
 import org.hswebframework.web.authorization.twofactor.defaults.DefaultTwoFactorValidatorManager;
 import org.hswebframework.web.convert.CustomMessageConverter;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -99,5 +102,16 @@ public class DefaultAuthorizationAutoConfiguration {
                 return factory.create().json(json).build();
             }
         };
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(DimensionManager.class)
+    public DimensionManager defaultDimensionManager(ObjectProvider<DimensionUserBindProvider>bindProviders,
+                                                    ObjectProvider<DimensionProvider> providers){
+        DefaultDimensionManager manager =  new DefaultDimensionManager();
+        bindProviders.forEach(manager::addBindProvider);
+        providers.forEach(manager::addProvider);
+
+        return manager;
     }
 }
