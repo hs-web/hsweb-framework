@@ -1,13 +1,18 @@
 package org.hswebframework.web.crud.events;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.hswebframework.ezorm.rdb.metadata.RDBTableMetadata;
+import org.springframework.context.ApplicationEvent;
 
-@AllArgsConstructor
 @Getter
-public class EntityDDLEvent<E> {
-    private Class<E> type;
+public class EntityDDLEvent<E> extends ApplicationEvent {
+    private final Class<E> type;
 
-    private RDBTableMetadata table;
+    private final RDBTableMetadata table;
+
+    public EntityDDLEvent(Object source,Class<E> type,RDBTableMetadata table) {
+        super(source);
+        this.type=type;
+        this.table=table;
+    }
 }

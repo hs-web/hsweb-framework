@@ -34,7 +34,7 @@ public class ValidateEventListener implements EventListener {
         if (resultHolder.isPresent()) {
             resultHolder
                     .ifPresent(holder -> holder
-                            .before(LocaleUtils
+                            .invoke(LocaleUtils
                                             .currentReactive()
                                             .doOnNext(locale -> LocaleUtils.doWith(locale, (l) -> tryValidate(type, context)))
                                             .then()

@@ -8,24 +8,18 @@ import org.hswebframework.ezorm.rdb.metadata.RDBTableMetadata;
 import org.hswebframework.ezorm.rdb.operator.DatabaseOperator;
 import org.hswebframework.web.api.crud.entity.EntityFactory;
 import org.hswebframework.web.crud.entity.factory.MapperEntityFactory;
-import org.hswebframework.web.crud.events.EntityBeforeQueryEvent;
 import org.hswebframework.web.crud.events.EntityDDLEvent;
 import org.hswebframework.web.event.GenericsPayloadApplicationEvent;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.transaction.ReactiveTransactionManager;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
 import java.time.Duration;
-import java.util.*;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Getter
@@ -69,7 +63,7 @@ public class AutoDDLProcessor implements InitializingBean {
                     .doOnNext(type -> log.trace("auto ddl for {}", type))
                     .map(type -> {
                         RDBTableMetadata metadata = resolver.resolve(type);
-                        EntityDDLEvent event = new EntityDDLEvent(type,metadata);
+                        EntityDDLEvent event = new EntityDDLEvent(this,type,metadata);
                         eventPublisher.publishEvent(new GenericsPayloadApplicationEvent<>(this, event, type));
                         return metadata;
                     })
@@ -89,7 +83,7 @@ public class AutoDDLProcessor implements InitializingBean {
                     log.trace("auto ddl for {}", type);
                     try {
                         RDBTableMetadata metadata = resolver.resolve(type);
-                        EntityDDLEvent event = new EntityDDLEvent(type,metadata);
+                        EntityDDLEvent event = new EntityDDLEvent(this,type,metadata);
                         eventPublisher.publishEvent(new GenericsPayloadApplicationEvent<>(this, event, type));
                         operator.ddl()
                                 .createOrAlter(metadata)
