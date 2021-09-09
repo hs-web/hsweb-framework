@@ -19,9 +19,7 @@ import org.hswebframework.web.api.crud.entity.EntityFactory;
 import org.hswebframework.web.crud.annotation.EnableEasyormRepository;
 import org.hswebframework.web.crud.entity.factory.EntityMappingCustomizer;
 import org.hswebframework.web.crud.entity.factory.MapperEntityFactory;
-import org.hswebframework.web.crud.events.CompositeEventListener;
-import org.hswebframework.web.crud.events.EntityEventListener;
-import org.hswebframework.web.crud.events.ValidateEventListener;
+import org.hswebframework.web.crud.events.*;
 import org.hswebframework.web.crud.generator.CurrentTimeGenerator;
 import org.hswebframework.web.crud.generator.DefaultIdGenerator;
 import org.hswebframework.web.crud.generator.MD5Generator;
@@ -33,6 +31,7 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -55,7 +54,7 @@ public class EasyormConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public EntityFactory entityFactory(ObjectProvider<EntityMappingCustomizer> customizers) {
-        MapperEntityFactory factory= new MapperEntityFactory();
+        MapperEntityFactory factory = new MapperEntityFactory();
         for (EntityMappingCustomizer customizer : customizers) {
             customizer.custom(factory);
         }
@@ -149,8 +148,11 @@ public class EasyormConfiguration {
     }
 
     @Bean
-    public EntityEventListener entityEventListener() {
-        return new EntityEventListener();
+    public EntityEventListener entityEventListener(ApplicationEventPublisher eventPublisher,
+                                                   ObjectProvider<EntityEventListenerCustomizer> customizers) {
+        DefaultEntityEventListenerConfigure configure = new DefaultEntityEventListenerConfigure();
+        customizers.forEach(customizer -> customizer.customize(configure));
+        return new EntityEventListener(eventPublisher, configure);
     }
 
     @Bean
