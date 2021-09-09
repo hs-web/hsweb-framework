@@ -2,10 +2,13 @@ package org.hswebframework.web.crud.events;
 
 
 import lombok.AllArgsConstructor;
+import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.collections.CollectionUtils;
 import org.hswebframework.ezorm.core.param.QueryParam;
 import org.hswebframework.ezorm.rdb.events.*;
+import org.hswebframework.ezorm.rdb.events.EventListener;
 import org.hswebframework.ezorm.rdb.events.EventType;
+import org.hswebframework.ezorm.rdb.executor.NullValue;
 import org.hswebframework.ezorm.rdb.mapping.*;
 import org.hswebframework.ezorm.rdb.mapping.events.MappingContextKeys;
 import org.hswebframework.ezorm.rdb.mapping.events.MappingEventTypes;
@@ -25,10 +28,7 @@ import reactor.function.Function3;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 
@@ -153,7 +153,18 @@ public class EntityEventListener implements EventListener {
                         return context
                                 .get(MappingContextKeys.updateColumnInstance)
                                 .map(map -> {
-                                    return FastBeanCopier.copy(map, FastBeanCopier.copy(old, mapping.getEntityType()));
+                                    Object data = FastBeanCopier.copy(map, FastBeanCopier.copy(old, mapping.getEntityType()));
+                                    //set null
+                                    for (Map.Entry<String, Object> stringObjectEntry : map.entrySet()) {
+                                        if (stringObjectEntry.getValue() == null || stringObjectEntry.getValue() instanceof NullValue) {
+                                            try {
+                                                BeanUtilsBean
+                                                        .getInstance()
+                                                        .setProperty(data, stringObjectEntry.getKey(), null);
+                                            }catch (Throwable ignore){}
+                                        }
+                                    }
+                                    return data;
                                 })
                                 .map(Entity.class::cast)
                                 .orElse(null);
