@@ -28,6 +28,7 @@ import java.lang.annotation.*;
  * @see org.hswebframework.web.crud.events.EntityBeforeDeleteEvent
  * @see org.hswebframework.web.crud.events.EntityBeforeCreateEvent
  * @see org.hswebframework.web.crud.events.EntityBeforeQueryEvent
+ * @see org.hswebframework.web.crud.events.EntityEventListenerCustomizer
  */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
@@ -35,6 +36,11 @@ import java.lang.annotation.*;
 @Documented
 public @interface EnableEntityEvent {
 
+    /**
+     * 指定开启的事件类型,也可以通过{@link org.hswebframework.web.crud.events.EntityEventListenerCustomizer}进行自定义
+     * @return 事件类型
+     * @see org.hswebframework.web.crud.events.EntityEventListenerCustomizer
+     */
     EntityEventType[] value() default {
             EntityEventType.create,
             EntityEventType.delete,
