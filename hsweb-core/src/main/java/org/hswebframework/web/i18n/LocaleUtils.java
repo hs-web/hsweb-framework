@@ -207,6 +207,10 @@ public final class LocaleUtils {
                                                                     S source,
                                                                     BiFunction<S, String, R> mapper,
                                                                     Object... args) {
+        if (source instanceof I18nSupportException && args.length == 0) {
+            I18nSupportException ex = ((I18nSupportException) source);
+            return resolveThrowable(ex, (err, msg) -> mapper.apply(source, msg));
+        }
         return doWithReactive(messageSource, source, Throwable::getMessage, mapper, args);
     }
 
