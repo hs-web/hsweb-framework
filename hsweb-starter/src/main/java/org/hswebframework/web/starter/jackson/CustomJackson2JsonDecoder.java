@@ -31,6 +31,7 @@ import reactor.core.publisher.Mono;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.List;
@@ -128,6 +129,19 @@ public class CustomJackson2JsonDecoder extends Jackson2CodecSupport implements H
                 return realType;
             }
         }
+        if (type instanceof ParameterizedType) {
+            ResolvableType elementType = ResolvableType.forType(type);
+            ResolvableType[] generics = elementType.getGenerics();
+            for (int i = 0; i < generics.length; i++) {
+                generics[i] = ResolvableType.forType(getRelType(generics[i].getType()));
+            }
+
+            type = ResolvableType
+                    .forClassWithGenerics(
+                            elementType.toClass(),
+                            generics)
+                    .getType();
+        }
         return type;
     }
 
@@ -137,13 +151,8 @@ public class CustomJackson2JsonDecoder extends Jackson2CodecSupport implements H
         Class<?> contextClass = (param != null ? param.getContainingClass() : null);
         Type type = elementType.resolve() == null ? elementType.getType() : elementType.toClass();
 
-        if (Iterable.class.isAssignableFrom(elementType.toClass())) {
-            ResolvableType genType = elementType.getGeneric(0);
-            type = ResolvableType
-                    .forClassWithGenerics(
-                            elementType.toClass(),
-                            ResolvableType.forType(getRelType(genType.getType())))
-                    .getType();
+        if (elementType.getType() instanceof ParameterizedType) {
+            type = getRelType(elementType.getType());
         } else {
             type = getRelType(type);
         }
