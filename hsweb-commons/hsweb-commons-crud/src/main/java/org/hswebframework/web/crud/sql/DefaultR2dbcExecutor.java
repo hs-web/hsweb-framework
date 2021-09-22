@@ -19,6 +19,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.SignalType;
 
+import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.Map;
@@ -48,6 +49,9 @@ public class DefaultR2dbcExecutor extends R2dbcReactiveSqlExecutor {
     }
 
     protected void bindNull(Statement statement, int index, Class type) {
+        if (type == Date.class) {
+            type = LocalDateTime.class;
+        }
         if (bindCustomSymbol) {
             statement.bindNull(getBindSymbol() + (index + getBindFirstIndex()), type);
             return;
