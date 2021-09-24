@@ -53,7 +53,7 @@ public class ExpressionUtilsTest {
                 "     \"msgtype\": \"markdown\",\n" +
                 "     \"markdown\": {\n" +
                 "         \"title\":\"消息类型:${messageType}\",\n" +
-                "         \"text\": \" - 设备ID: `${deviceId}` \\n - 设备型号: `${headers.productId}`\\n - 设备名称: `${headers.deviceName}`\"" +
+                "         \"text\": \" - 设备ID: `${deviceId}` 值:`${properties.a-r-str}` \\n - 设备型号: `${headers.productId}`\\n - 设备名称: `${headers.deviceName}`\"" +
                 "     \n},\n" +
                 "      \"at\": {\n" +
                 "          \"isAtAll\": false\n" +
@@ -63,7 +63,9 @@ public class ExpressionUtilsTest {
                 "  \"headers\": {\n" +
                 "    \"productId\": \"VIS-Mandrake\",\n" +
                 "    \"deviceName\": \"能见度仪-曼德克-01\"\n" +
-                "  },\n" +
+                "  }, \"properties\": {\n" +
+                "        \"a-r-str\": \"a2\"\n" +
+                "    },\n" +
                 "  \"messageType\": \"OFFLINE\",\n" +
                 "  \"timestamp\": 1592098397277\n" +
                 "}"), "spel");
