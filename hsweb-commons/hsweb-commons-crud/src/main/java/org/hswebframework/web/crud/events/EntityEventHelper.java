@@ -1,8 +1,17 @@
 package org.hswebframework.web.crud.events;
 
+import org.hswebframework.web.api.crud.entity.Entity;
+import org.hswebframework.web.event.AsyncEvent;
+import org.hswebframework.web.event.GenericsPayloadApplicationEvent;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.context.Context;
+
+import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * 实体事件帮助器
@@ -56,5 +65,63 @@ public class EntityEventHelper {
      */
     public static <T> Flux<T> setDoNotFireEvent(Flux<T> stream) {
         return stream.subscriberContext(Context.of(doEventContextKey, false));
+    }
+
+    public static <T> Mono<Void> publishSavedEvent(Object source,
+                                                   Class<T> entityType,
+                                                   List<T> entities,
+                                                   Consumer<GenericsPayloadApplicationEvent<EntitySavedEvent<T>>> publisher) {
+        return publishEvent(source, entityType, () -> new EntitySavedEvent<>(entities, entityType), publisher);
+    }
+
+    public static <T extends Entity> Mono<Void> publishModifyEvent(Object source,
+                                                                   Class<T> entityType,
+                                                                   List<T> before,
+                                                                   Consumer<T> afterTransfer,
+                                                                   Consumer<GenericsPayloadApplicationEvent<EntityModifyEvent<T>>> publisher) {
+        return publishEvent(source,
+                            entityType,
+                            () -> new EntityModifyEvent<>(before,
+                                                          before
+                                                                  .stream()
+                                                                  .map(t -> t.copyTo(entityType))
+                                                                  .peek(afterTransfer)
+                                                                  .collect(Collectors.toList()),
+                                                          entityType),
+                            publisher);
+    }
+
+    public static <T> Mono<Void> publishModifyEvent(Object source,
+                                                    Class<T> entityType,
+                                                    List<T> before,
+                                                    List<T> after,
+                                                    Consumer<GenericsPayloadApplicationEvent<EntityModifyEvent<T>>> publisher) {
+        return publishEvent(source, entityType, () -> new EntityModifyEvent<>(before, after, entityType), publisher);
+    }
+
+    public static <T> Mono<Void> publishDeletedEvent(Object source,
+                                                     Class<T> entityType,
+                                                     List<T> entities,
+                                                     Consumer<GenericsPayloadApplicationEvent<EntityDeletedEvent<T>>> publisher) {
+        return publishEvent(source, entityType, () -> new EntityDeletedEvent<>(entities, entityType), publisher);
+    }
+
+    public static <T> Mono<Void> publishCreatedEvent(Object source,
+                                                     Class<T> entityType,
+                                                     List<T> entities,
+                                                     Consumer<GenericsPayloadApplicationEvent<EntityCreatedEvent<T>>> publisher) {
+        return publishEvent(source, entityType, () -> new EntityCreatedEvent<>(entities, entityType), publisher);
+    }
+
+    public static <T, E extends AsyncEvent> Mono<Void> publishEvent(Object source,
+                                                                    Class<T> entityType,
+                                                                    Supplier<E> eventSupplier,
+                                                                    Consumer<GenericsPayloadApplicationEvent<E>> publisher) {
+        E event = eventSupplier.get();
+        if (event == null) {
+            return Mono.empty();
+        }
+        publisher.accept(new GenericsPayloadApplicationEvent<>(source, event, entityType));
+        return event.getAsync();
     }
 }

@@ -4,6 +4,7 @@ package org.hswebframework.web.crud.events;
 import lombok.AllArgsConstructor;
 import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.collections.CollectionUtils;
+import org.hswebframework.ezorm.core.GlobalConfig;
 import org.hswebframework.ezorm.core.param.QueryParam;
 import org.hswebframework.ezorm.rdb.events.*;
 import org.hswebframework.ezorm.rdb.events.EventListener;
@@ -29,6 +30,8 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
+
+import static org.hswebframework.web.crud.events.EntityEventHelper.*;
 
 @SuppressWarnings("all")
 @AllArgsConstructor
@@ -155,12 +158,9 @@ public class EntityEventListener implements EventListener {
                                     //set null
                                     for (Map.Entry<String, Object> stringObjectEntry : map.entrySet()) {
                                         if (stringObjectEntry.getValue() == null || stringObjectEntry.getValue() instanceof NullValue) {
-                                            try {
-                                                BeanUtilsBean
-                                                        .getInstance()
-                                                        .setProperty(data, stringObjectEntry.getKey(), null);
-                                            } catch (Throwable ignore) {
-                                            }
+                                            GlobalConfig
+                                                    .getPropertyOperator()
+                                                    .setProperty(data, stringObjectEntry.getKey(), null);
                                         }
                                     }
                                     return data;
@@ -181,18 +181,19 @@ public class EntityEventListener implements EventListener {
                                          Class<Object> type,
                                          Function3<List<Object>, List<Object>, Class<Object>, AsyncEvent> mapper) {
 
-        AsyncEvent event = mapper.apply(before, after, type);
-        eventPublisher.publishEvent(new GenericsPayloadApplicationEvent<>(this, event, type));
-        return event.getAsync();
+        return publishEvent(this,
+                            type,
+                            () -> mapper.apply(before, after, type),
+                            eventPublisher::publishEvent);
     }
 
     protected Mono<Void> sendDeleteEvent(List<Object> olds,
                                          Class<Object> type,
                                          BiFunction<List<Object>, Class<Object>, AsyncEvent> eventBuilder) {
-
-        AsyncEvent deletedEvent = eventBuilder.apply(olds, type);
-        eventPublisher.publishEvent(new GenericsPayloadApplicationEvent<>(this, deletedEvent, type));
-        return deletedEvent.getAsync();
+        return publishEvent(this,
+                            type,
+                            () -> eventBuilder.apply(olds, type),
+                            eventPublisher::publishEvent);
     }
 
     protected void handleUpdateBefore(DSLUpdate<?, ?> update, EventContext context) {
@@ -248,17 +249,14 @@ public class EntityEventListener implements EventListener {
                        if (isEnabled(entityType, EntityEventType.modify, EntityEventPhase.after)) {
                            holder.after(v -> this
                                    .doAsyncEvent(() -> {
-                                       return Mono
-                                               .defer(() -> {
-                                                   Tuple2<List<Object>, List<Object>> _tmp = updated.getAndSet(null);
-                                                   if (_tmp != null) {
-                                                       return sendUpdateEvent(_tmp.getT1(),
-                                                                              _tmp.getT2(),
-                                                                              entityType,
-                                                                              EntityModifyEvent::new);
-                                                   }
-                                                   return Mono.empty();
-                                               });
+                                       Tuple2<List<Object>, List<Object>> _tmp = updated.getAndSet(null);
+                                       if (_tmp != null) {
+                                           return sendUpdateEvent(_tmp.getT1(),
+                                                                  _tmp.getT2(),
+                                                                  entityType,
+                                                                  EntityModifyEvent::new);
+                                       }
+                                       return Mono.empty();
                                    }));
                        }
 
@@ -364,8 +362,10 @@ public class EntityEventListener implements EventListener {
                            if (null != prepareEvent && isEnabled(clazz, entityEventType, EntityEventPhase.prepare)) {
                                holder.before(
                                        this.doAsyncEvent(() -> {
-                                           eventPublisher.publishEvent(new GenericsPayloadApplicationEvent<>(this, prepareEvent, clazz));
-                                           return prepareEvent.getAsync();
+                                           return publishEvent(this,
+                                                               clazz,
+                                                               () -> prepareEvent,
+                                                               eventPublisher::publishEvent);
                                        })
                                );
                            }
@@ -373,16 +373,20 @@ public class EntityEventListener implements EventListener {
                            if (null != beforeEvent && isEnabled(clazz, entityEventType, EntityEventPhase.before)) {
                                holder.invoke(
                                        this.doAsyncEvent(() -> {
-                                           eventPublisher.publishEvent(new GenericsPayloadApplicationEvent<>(this, beforeEvent, clazz));
-                                           return beforeEvent.getAsync();
+                                           return publishEvent(this,
+                                                               clazz,
+                                                               () -> beforeEvent,
+                                                               eventPublisher::publishEvent);
                                        })
                                );
                            }
                            if (null != afterEvent && isEnabled(clazz, entityEventType, EntityEventPhase.after)) {
                                holder.after(v -> {
                                    return this.doAsyncEvent(() -> {
-                                       eventPublisher.publishEvent(new GenericsPayloadApplicationEvent<>(this, afterEvent, clazz));
-                                       return afterEvent.getAsync();
+                                       return publishEvent(this,
+                                                           clazz,
+                                                           () -> afterEvent,
+                                                           eventPublisher::publishEvent);
                                    });
                                });
                            }
@@ -426,8 +430,10 @@ public class EntityEventListener implements EventListener {
                            if (null != prepareEvent && isEnabled(clazz, entityEventType, EntityEventPhase.prepare)) {
                                holder.before(
                                        this.doAsyncEvent(() -> {
-                                           eventPublisher.publishEvent(new GenericsPayloadApplicationEvent<>(this, prepareEvent, clazz));
-                                           return prepareEvent.getAsync();
+                                           return publishEvent(this,
+                                                               clazz,
+                                                               () -> prepareEvent,
+                                                               eventPublisher::publishEvent);
                                        })
                                );
                            }
@@ -435,16 +441,20 @@ public class EntityEventListener implements EventListener {
                            if (null != beforeEvent && isEnabled(clazz, entityEventType, EntityEventPhase.before)) {
                                holder.invoke(
                                        this.doAsyncEvent(() -> {
-                                           eventPublisher.publishEvent(new GenericsPayloadApplicationEvent<>(this, beforeEvent, clazz));
-                                           return beforeEvent.getAsync();
+                                           return publishEvent(this,
+                                                               clazz,
+                                                               () -> beforeEvent,
+                                                               eventPublisher::publishEvent);
                                        })
                                );
                            }
                            if (null != afterEvent && isEnabled(clazz, entityEventType, EntityEventPhase.after)) {
                                holder.after(v -> {
                                    return this.doAsyncEvent(() -> {
-                                       eventPublisher.publishEvent(new GenericsPayloadApplicationEvent<>(this, afterEvent, clazz));
-                                       return afterEvent.getAsync();
+                                       return publishEvent(this,
+                                                           clazz,
+                                                           () -> afterEvent,
+                                                           eventPublisher::publishEvent);
                                    });
                                });
                            }
@@ -458,8 +468,7 @@ public class EntityEventListener implements EventListener {
     }
 
     protected Mono<Void> doAsyncEvent(Supplier<Mono<Void>> eventSupplier) {
-        return EntityEventHelper
-                .isDoFireEvent(true)
+        return isDoFireEvent(true)
                 .filter(Boolean::booleanValue)
                 .flatMap(ignore -> {
                     return eventSupplier.get();
