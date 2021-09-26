@@ -22,6 +22,12 @@ public interface AsyncEvent {
     void async(Publisher<?> publisher);
 
     /**
+     * 注册一个优先级高的任务
+     * @param publisher 任务
+     */
+    void first(Publisher<?> publisher);
+
+    /**
      * 推送事件到 ApplicationEventPublisher
      *
      * @param eventPublisher ApplicationEventPublisher
