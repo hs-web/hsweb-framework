@@ -39,10 +39,10 @@ public class EntityEventListenerTest {
     @Test
     public void test() {
         Mono.just(EventTestEntity.of("test", 1))
-                .as(reactiveRepository::insert)
-                .as(StepVerifier::create)
-                .expectNext(1)
-                .verifyComplete();
+            .as(reactiveRepository::insert)
+            .as(StepVerifier::create)
+            .expectNext(1)
+            .verifyComplete();
         Assert.assertEquals(listener.created.getAndSet(0), 1);
 
 
@@ -51,7 +51,7 @@ public class EntityEventListenerTest {
     @Test
     public void testInsertBatch() {
         reactiveRepository.createQuery()
-                          .where(EventTestEntity::getId,"test")
+                          .where(EventTestEntity::getId, "test")
                           .fetch()
                           .then()
                           .as(StepVerifier::create)
@@ -61,15 +61,15 @@ public class EntityEventListenerTest {
 
 
         Flux.just(EventTestEntity.of("test2", 1), EventTestEntity.of("test3", 2))
-                .as(reactiveRepository::insert)
-                .as(StepVerifier::create)
-                .expectNext(2)
-                .verifyComplete();
+            .as(reactiveRepository::insert)
+            .as(StepVerifier::create)
+            .expectNext(2)
+            .verifyComplete();
         Assert.assertEquals(listener.created.getAndSet(0), 2);
         Assert.assertEquals(listener.beforeCreate.getAndSet(0), 2);
 
         reactiveRepository
-                .createUpdate().set("age",3).where().in("name","test2","test3").execute()
+                .createUpdate().set("age", 3).where().in("name", "test2", "test3").execute()
                 .as(StepVerifier::create)
                 .expectNext(2)
                 .verifyComplete();
@@ -77,23 +77,22 @@ public class EntityEventListenerTest {
         Assert.assertEquals(listener.modified.getAndSet(0), 2);
         Assert.assertEquals(listener.beforeModify.getAndSet(0), 2);
 
-        reactiveRepository.createDelete().where().in("name","test2","test3").execute()
-                .as(StepVerifier::create)
-                .expectNext(2)
-                .verifyComplete();
+        reactiveRepository.createDelete().where().in("name", "test2", "test3").execute()
+                          .as(StepVerifier::create)
+                          .expectNext(2)
+                          .verifyComplete();
 
         Assert.assertEquals(listener.deleted.getAndSet(0), 2);
         Assert.assertEquals(listener.beforeDelete.getAndSet(0), 2);
 
         reactiveRepository.save(EventTestEntity.of("test2", 1))
-                .then()
-                .as(StepVerifier::create)
-                .expectComplete()
-                .verify();
+                          .then()
+                          .as(StepVerifier::create)
+                          .expectComplete()
+                          .verify();
 
         Assert.assertEquals(listener.saved.getAndSet(0), 1);
         Assert.assertEquals(listener.beforeSave.getAndSet(0), 1);
-
 
 
     }
@@ -102,14 +101,27 @@ public class EntityEventListenerTest {
     @Ignore
     public void testInsertError() {
         Flux.just(EventTestEntity.of("test2", 1), EventTestEntity.of("test3", 2))
-                .as(reactiveRepository::insert)
-                .flatMap(i -> Mono.error(new RuntimeException()))
-                .as(transactionalOperator::transactional)
-                .as(StepVerifier::create)
-                .verifyError();
+            .as(reactiveRepository::insert)
+            .flatMap(i -> Mono.error(new RuntimeException()))
+            .as(transactionalOperator::transactional)
+            .as(StepVerifier::create)
+            .verifyError();
 
         Assert.assertEquals(listener.created.getAndSet(0), 0);
     }
 
+
+    @Test
+    public void testDoNotFire() {
+        Mono.just(EventTestEntity.of("test", 1))
+            .as(reactiveRepository::insert)
+            .as(EntityEventHelper::setDoNotFireEvent)
+            .as(StepVerifier::create)
+            .expectNext(1)
+            .verifyComplete();
+        Assert.assertEquals(listener.created.getAndSet(0), 0);
+
+
+    }
 
 }
