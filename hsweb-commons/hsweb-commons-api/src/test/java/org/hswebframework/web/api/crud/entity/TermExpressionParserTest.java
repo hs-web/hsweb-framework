@@ -11,6 +11,19 @@ import static org.junit.Assert.*;
 public class TermExpressionParserTest {
 
     @Test
+    public void testUrl(){
+        List<Term> terms = TermExpressionParser.parse("type=email%20and%20provider=test");
+
+        assertEquals(terms.get(0).getTermType(), TermType.eq);
+        assertEquals(terms.get(0).getColumn(), "type");
+        assertEquals(terms.get(0).getValue(), "email");
+
+        assertEquals(terms.get(1).getTermType(), TermType.eq);
+        assertEquals(terms.get(1).getColumn(), "provider");
+        assertEquals(terms.get(1).getValue(), "test");
+
+    }
+    @Test
     public void test() {
         {
             List<Term> terms = TermExpressionParser.parse("name = 1");

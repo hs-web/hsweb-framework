@@ -13,6 +13,7 @@ import org.hswebframework.web.system.authorization.api.PasswordEncoder;
 import org.hswebframework.web.system.authorization.api.PasswordValidator;
 import org.hswebframework.web.system.authorization.api.UsernameValidator;
 import org.hswebframework.web.system.authorization.api.entity.UserEntity;
+import org.hswebframework.web.system.authorization.api.event.ClearUserAuthorizationCacheEvent;
 import org.hswebframework.web.system.authorization.api.event.UserCreatedEvent;
 import org.hswebframework.web.system.authorization.api.event.UserDeletedEvent;
 import org.hswebframework.web.system.authorization.api.event.UserModifiedEvent;
@@ -111,7 +112,10 @@ public class DefaultReactiveUserService extends GenericReactiveCrudService<UserE
                             .where(userEntity::getId)
                             .execute()
                             .flatMap(__ -> new UserModifiedEvent(userEntity, passwordChanged).publish(eventPublisher))
-                            .thenReturn(userEntity);
+                            .thenReturn(userEntity)
+                            .doOnNext(e->{
+                                eventPublisher.publishEvent(ClearUserAuthorizationCacheEvent.of(e.getId()));
+                            });
                 });
 
     }

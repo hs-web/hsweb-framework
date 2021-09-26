@@ -1,5 +1,7 @@
 package org.hswebframework.web.api.crud.entity;
 
+import lombok.SneakyThrows;
+import org.apache.commons.codec.net.URLCodec;
 import org.hswebframework.ezorm.core.NestConditional;
 import org.hswebframework.ezorm.core.dsl.Query;
 import org.hswebframework.ezorm.core.param.Sort;
@@ -22,7 +24,12 @@ import java.util.stream.Stream;
  */
 public class TermExpressionParser {
 
+    static final URLCodec urlCodec = new URLCodec();
+
+    @SneakyThrows
     public static List<Term> parse(String expression) {
+        expression = urlCodec.decode(expression);
+
         Query<?, QueryParamEntity> conditional = QueryParamEntity.newQuery();
 
         NestConditional<?> nest = null;
@@ -181,15 +188,15 @@ public class TermExpressionParser {
      */
     public static List<Sort> parseOrder(String expression) {
         return Stream.of(expression.split("[,]"))
-                .map(str -> str.split("[ ]"))
-                .map(arr -> {
-                    Sort sort = new Sort();
-                    sort.setName(arr[0]);
-                    if (arr.length > 1 && "desc".equalsIgnoreCase(arr[1])) {
-                        sort.desc();
-                    }
-                    return sort;
-                }).collect(Collectors.toList());
+                     .map(str -> str.split("[ ]"))
+                     .map(arr -> {
+                         Sort sort = new Sort();
+                         sort.setName(arr[0]);
+                         if (arr.length > 1 && "desc".equalsIgnoreCase(arr[1])) {
+                             sort.desc();
+                         }
+                         return sort;
+                     }).collect(Collectors.toList());
     }
 
     private static String convertTermType(String termType) {
