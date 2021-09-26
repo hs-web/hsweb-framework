@@ -10,6 +10,7 @@ import org.springframework.http.MediaType;
 
 import java.io.File;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Set;
 
 @Getter
@@ -30,7 +31,7 @@ public class FileUploadProperties {
     private Set<String> denyMediaType;
 
     public boolean denied(String name, MediaType mediaType) {
-        String suffix = name.contains(".") ? name.substring(name.lastIndexOf(".") + 1) : "";
+        String suffix = (name.contains(".") ? name.substring(name.lastIndexOf(".") + 1) : "").toLowerCase(Locale.ROOT);
         boolean defaultDeny = false;
         if (CollectionUtils.isNotEmpty(denyFiles)) {
             if (denyFiles.contains(suffix)) {
