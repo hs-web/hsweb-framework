@@ -7,9 +7,7 @@ import reactor.core.publisher.Mono;
 
 public class DefaultAsyncEvent implements AsyncEvent {
 
-    @Getter
     private Mono<Void> async = Mono.empty();
-    @Getter
     private Mono<Void> first = Mono.empty();
 
     private boolean hasListener;
@@ -26,11 +24,16 @@ public class DefaultAsyncEvent implements AsyncEvent {
     }
 
     @Override
+    public Mono<Void> getAsync() {
+        return this.first.then(this.async);
+    }
+
+    @Override
     public Mono<Void> publish(ApplicationEventPublisher eventPublisher) {
 
         eventPublisher.publishEvent(this);
 
-        return this.first.then(this.async);
+        return getAsync();
     }
 
     public boolean hasListener() {
