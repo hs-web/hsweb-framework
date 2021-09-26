@@ -25,6 +25,7 @@ public class FileUploadPropertiesTest {
         uploadProperties.setAllowFiles(new HashSet<>(Arrays.asList("xls","json")));
 
         assertFalse(uploadProperties.denied("test.xls", MediaType.ALL));
+        assertFalse(uploadProperties.denied("test.XLS", MediaType.ALL));
 
         assertTrue(uploadProperties.denied("test.exe", MediaType.ALL));
     }
