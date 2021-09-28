@@ -56,7 +56,8 @@ public class CommonErrorControllerAdvice {
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public Mono<ResponseMessage<TokenState>> handleException(UnAuthorizedException e) {
         return LocaleUtils
-                .resolveThrowable(e, (err, msg) -> (ResponseMessage.<TokenState>error(401, CodeConstants.Error.unauthorized, msg)
+                .resolveThrowable(e, (err, msg) -> (ResponseMessage
+                        .<TokenState>error(401, CodeConstants.Error.unauthorized, msg)
                         .result(e.getState())));
     }
 
@@ -175,7 +176,6 @@ public class CommonErrorControllerAdvice {
     public Mono<ResponseMessage<Object>> handleException(AuthenticationException e) {
         return LocaleUtils
                 .resolveThrowable(e, (err, msg) -> ResponseMessage.error(400, err.getCode(), msg))
-                .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getLocalizedMessage(), e)))
                 ;
     }
 
