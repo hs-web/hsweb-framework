@@ -19,6 +19,7 @@
 package org.hswebframework.web.id;
 
 import org.hswebframework.utils.RandomUtil;
+import org.hswebframework.web.utils.DigestUtils;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
@@ -41,7 +42,7 @@ public interface IDGenerator<T> {
 
     @SuppressWarnings("unchecked")
     static <T> IDGenerator<T> getNullGenerator() {
-        return (IDGenerator) NULL;
+        return (IDGenerator<T>) NULL;
     }
 
     /**
@@ -55,17 +56,9 @@ public interface IDGenerator<T> {
     IDGenerator<String> RANDOM = RandomUtil::randomChar;
 
     /**
-     * md5(uuid()+random())
+     * md5(uuid())
      */
-    IDGenerator<String> MD5 = () -> {
-        try {
-            MessageDigest md = MessageDigest.getInstance("MD5");
-            md.update(UUID.generate().concat(RandomUtil.randomChar()).getBytes());
-            return new BigInteger(1, md.digest()).toString(16);
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
-    };
+    IDGenerator<String> MD5 = () -> DigestUtils.md5Hex(UUID.generate());
 
     /**
      * 雪花算法
