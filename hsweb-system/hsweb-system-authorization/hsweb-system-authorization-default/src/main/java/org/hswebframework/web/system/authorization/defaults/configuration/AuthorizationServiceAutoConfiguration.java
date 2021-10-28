@@ -4,6 +4,7 @@ import org.hswebframework.ezorm.rdb.mapping.ReactiveRepository;
 import org.hswebframework.web.authorization.ReactiveAuthenticationInitializeService;
 import org.hswebframework.web.authorization.ReactiveAuthenticationManagerProvider;
 import org.hswebframework.web.authorization.simple.DefaultAuthorizationAutoConfiguration;
+import org.hswebframework.web.authorization.token.UserTokenManager;
 import org.hswebframework.web.system.authorization.api.UserDimensionProvider;
 import org.hswebframework.web.system.authorization.api.service.reactive.ReactiveUserService;
 import org.hswebframework.web.system.authorization.defaults.service.*;
@@ -69,6 +70,11 @@ public class AuthorizationServiceAutoConfiguration {
             return new DefaultPermissionService();
         }
 
+        @Bean
+        @ConditionalOnBean(UserTokenManager.class)
+        public RemoveUserTokenWhenUserDisabled removeUserTokenWhenUserDisabled(UserTokenManager tokenManager){
+            return new RemoveUserTokenWhenUserDisabled(tokenManager);
+        }
     }
 
     @Bean
