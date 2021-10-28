@@ -13,10 +13,7 @@ import org.hswebframework.web.system.authorization.api.PasswordEncoder;
 import org.hswebframework.web.system.authorization.api.PasswordValidator;
 import org.hswebframework.web.system.authorization.api.UsernameValidator;
 import org.hswebframework.web.system.authorization.api.entity.UserEntity;
-import org.hswebframework.web.system.authorization.api.event.ClearUserAuthorizationCacheEvent;
-import org.hswebframework.web.system.authorization.api.event.UserCreatedEvent;
-import org.hswebframework.web.system.authorization.api.event.UserDeletedEvent;
-import org.hswebframework.web.system.authorization.api.event.UserModifiedEvent;
+import org.hswebframework.web.system.authorization.api.event.*;
 import org.hswebframework.web.system.authorization.api.service.reactive.ReactiveUserService;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -113,7 +110,7 @@ public class DefaultReactiveUserService extends GenericReactiveCrudService<UserE
                             .execute()
                             .flatMap(__ -> new UserModifiedEvent(userEntity, passwordChanged).publish(eventPublisher))
                             .thenReturn(userEntity)
-                            .doOnNext(e->{
+                            .doOnNext(e -> {
                                 eventPublisher.publishEvent(ClearUserAuthorizationCacheEvent.of(e.getId()));
                             });
                 });
@@ -160,7 +157,13 @@ public class DefaultReactiveUserService extends GenericReactiveCrudService<UserE
                            .set(UserEntity::getStatus, state)
                            .where()
                            .in(UserEntity::getId, list)
-                           .execute())
+                           .execute()
+                           .flatMap(i -> UserStateChangedEvent
+                                   .of(list, state)
+                                   .publish(eventPublisher)
+                                   .thenReturn(i)
+                           )
+                   )
                    .defaultIfEmpty(0);
     }
 
