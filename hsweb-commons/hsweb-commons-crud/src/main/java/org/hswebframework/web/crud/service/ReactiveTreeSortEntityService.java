@@ -1,6 +1,5 @@
 package org.hswebframework.web.crud.service;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.hswebframework.ezorm.rdb.mapping.defaults.SaveResult;
 import org.hswebframework.ezorm.rdb.operator.dml.Terms;
 import org.hswebframework.utils.RandomUtil;
@@ -13,10 +12,8 @@ import org.reactivestreams.Publisher;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.util.function.Tuple3;
 
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -52,7 +49,10 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
 
     default Flux<E> queryIncludeChildren(Collection<K> idList) {
         return findById(idList)
-                .flatMap(e -> createQuery()
+                .flatMap(e -> StringUtils
+                        .isEmpty(e.getPath())
+                        ? Mono.just(e)
+                        : createQuery()
                         .where()
                         .like$("path", e.getPath())
                         .fetch());
@@ -60,7 +60,10 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
 
     default Flux<E> queryIncludeParent(Collection<K> idList) {
         return findById(idList)
-                .flatMap(e -> createQuery()
+                .flatMap(e ->  StringUtils
+                        .isEmpty(e.getPath())
+                        ? Mono.just(e)
+                        : createQuery()
                         .where()
                         .accept(Terms.Like.reversal("path", e.getPath(), false, true))
                         .notEmpty("path")
@@ -70,7 +73,10 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
 
     default Flux<E> queryIncludeChildren(QueryParamEntity queryParam) {
         return query(queryParam)
-                .flatMap(e -> createQuery()
+                .flatMap(e ->  StringUtils
+                        .isEmpty(e.getPath())
+                        ? Mono.just(e)
+                        : createQuery()
                         .where()
                         .like$("path", e.getPath())
                         .fetch());
@@ -193,9 +199,9 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
                                 K parentId = old != null ? old.getParentId() : data.getParentId();
                                 E oldParent = parentId == null ? null : oldMap.get(parentId);
                                 if (old != null) {
-                                    K newParentId=  data.getParentId();
+                                    K newParentId = data.getParentId();
                                     //父节点发生变化，更新所有子节点path
-                                    if (!Objects.equals(parentId,newParentId)) {
+                                    if (!Objects.equals(parentId, newParentId)) {
                                         List<Mono<Void>> jobs = new ArrayList<>();
                                         Consumer<E> childConsumer = child -> {
                                             //更新了父节点,但是同时也传入的对应的子节点
@@ -237,14 +243,14 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
                                             pathRefactor.accept(oldParent);
                                         } else if (parentId != null) {
                                             return findById(parentId)
-                                                    .switchIfEmpty(Mono.fromRunnable(() ->{
+                                                    .switchIfEmpty(Mono.fromRunnable(() -> {
                                                         data.setParentId(null);
                                                         data.setLevel(1);
                                                         data.setPath(old.getPath());
                                                     }))
                                                     .doOnNext(pathRefactor)
                                                     .thenReturn(data);
-                                        }else {
+                                        } else {
                                             data.setPath(old.getPath());
                                         }
 
