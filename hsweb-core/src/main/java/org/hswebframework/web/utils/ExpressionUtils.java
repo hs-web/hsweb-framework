@@ -3,7 +3,6 @@ package org.hswebframework.web.utils;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.beanutils.BeanUtilsBean2;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.hswebframework.expands.script.engine.DynamicScriptEngine;
 import org.hswebframework.expands.script.engine.DynamicScriptEngineFactory;
 import org.hswebframework.expands.script.engine.ExecuteResult;
@@ -91,7 +90,10 @@ public class ExpressionUtils {
             if (StringUtils.isEmpty(var)) {
                 return "";
             }
-
+            Object val = vars.get(var);
+            if (val != null) {
+                return String.valueOf(val);
+            }
             if ("spel".equalsIgnoreCase(language) && !var.contains("#")) {
                 try {
                     Object fast = BeanUtilsBean2.getInstance().getPropertyUtils().getProperty(vars, var);
