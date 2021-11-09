@@ -23,6 +23,25 @@ public class TermExpressionParserTest {
         assertEquals(terms.get(1).getValue(), "test");
 
     }
+
+    @Test
+    public void testChinese() {
+        {
+            List<Term> terms = TermExpressionParser.parse("name = 我");
+
+            assertEquals(terms.get(0).getTermType(), TermType.eq);
+            assertEquals(terms.get(0).getValue(),"我");
+
+        }
+
+        {
+            List<Term> terms = TermExpressionParser.parse("name like %我%");
+
+            assertEquals(terms.get(0).getTermType(), TermType.like);
+            assertEquals(terms.get(0).getValue(),"%我%");
+
+        }
+    }
     @Test
     public void test() {
         {

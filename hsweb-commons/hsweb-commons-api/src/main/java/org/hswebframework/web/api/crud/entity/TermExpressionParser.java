@@ -9,6 +9,8 @@ import org.hswebframework.ezorm.core.param.Term;
 import org.hswebframework.ezorm.core.param.TermType;
 import org.hswebframework.web.api.crud.entity.QueryParamEntity;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -24,12 +26,13 @@ import java.util.stream.Stream;
  */
 public class TermExpressionParser {
 
-    static final URLCodec urlCodec = new URLCodec();
-
     @SneakyThrows
     public static List<Term> parse(String expression) {
-        expression = urlCodec.decode(expression);
+        try {
+            expression = URLDecoder.decode(expression, "utf-8");
+        }catch (Throwable ignore){
 
+        }
         Query<?, QueryParamEntity> conditional = QueryParamEntity.newQuery();
 
         NestConditional<?> nest = null;
