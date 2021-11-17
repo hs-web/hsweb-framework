@@ -153,7 +153,7 @@ public class Proxy<I> {
     @SneakyThrows
     public Class<I> getTargetClass() {
         if (targetClass == null) {
-            targetClass = ctClass.toClass(ClassUtils.getDefaultClassLoader(), null);
+            targetClass = (Class)ctClass.toClass(ClassUtils.getDefaultClassLoader(), null);
         }
         return targetClass;
     }
