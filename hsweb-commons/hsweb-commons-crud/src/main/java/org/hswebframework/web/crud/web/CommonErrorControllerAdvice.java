@@ -16,7 +16,9 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplicat
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindException;
+import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -95,39 +97,44 @@ public class CommonErrorControllerAdvice {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @SuppressWarnings("all")
     public Mono<ResponseMessage<List<ValidationException.Detail>>> handleException(BindException e) {
-        return handleException(new ValidationException(e.getMessage(), e
-                .getBindingResult().getAllErrors()
-                .stream()
-                .filter(FieldError.class::isInstance)
-                .map(FieldError.class::cast)
-                .map(err -> new ValidationException.Detail(err.getField(), err.getDefaultMessage(), null))
-                .collect(Collectors.toList())));
+        return handleBindingResult(e.getBindingResult());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @SuppressWarnings("all")
     public Mono<ResponseMessage<List<ValidationException.Detail>>> handleException(WebExchangeBindException e) {
-        return handleException(new ValidationException(e.getMessage(), e
-                .getBindingResult().getAllErrors()
-                .stream()
-                .filter(FieldError.class::isInstance)
-                .map(FieldError.class::cast)
-                .map(err -> new ValidationException.Detail(err.getField(), err.getDefaultMessage(), null))
-                .collect(Collectors.toList())));
+        return handleBindingResult(e.getBindingResult());
     }
 
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @SuppressWarnings("all")
     public Mono<ResponseMessage<List<ValidationException.Detail>>> handleException(MethodArgumentNotValidException e) {
-        return handleException(new ValidationException(e.getMessage(), e
-                .getBindingResult().getAllErrors()
+        return handleBindingResult(e.getBindingResult());
+    }
+
+    private Mono<ResponseMessage<List<ValidationException.Detail>>> handleBindingResult(BindingResult result) {
+        String message;
+        FieldError fieldError = result.getFieldError();
+        ObjectError globalError = result.getGlobalError();
+
+        if (null != fieldError) {
+            message = fieldError.getDefaultMessage();
+        } else if (null != globalError) {
+            message = globalError.getDefaultMessage();
+        } else {
+            message = CodeConstants.Error.illegal_argument;
+        }
+        List<ValidationException.Detail> details = result
+                .getFieldErrors()
                 .stream()
-                .filter(FieldError.class::isInstance)
-                .map(FieldError.class::cast)
                 .map(err -> new ValidationException.Detail(err.getField(), err.getDefaultMessage(), null))
-                .collect(Collectors.toList())));
+                .collect(Collectors.toList());
+       return handleException(new ValidationException(message, details));
     }
 
     @ExceptionHandler
