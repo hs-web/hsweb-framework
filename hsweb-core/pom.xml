@@ -106,5 +106,16 @@
             <artifactId>reactor-extra</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+
+        <dependency>
+            <artifactId>jctools-core</artifactId>
+            <groupId>org.jctools</groupId>
+            <version>2.1.2</version>
+        </dependency>
+
     </dependencies>
 </project>
