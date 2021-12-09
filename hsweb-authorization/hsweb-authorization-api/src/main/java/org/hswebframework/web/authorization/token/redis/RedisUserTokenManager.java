@@ -184,7 +184,7 @@ public class RedisUserTokenManager implements UserTokenManager {
         return getByToken(token)
                 .flatMap(t -> operations
                         .delete(getTokenRedisKey(t.getToken()))
-                        .then(userTokenMapping.remove(getUserRedisKey(t.getToken()), token))
+                        .then(userTokenMapping.remove(getUserRedisKey(t.getUserId()), token))
                         .then(onTokenRemoved(t))
                 )
                 .then();
