@@ -48,38 +48,48 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
     }
 
     default Flux<E> queryIncludeChildren(Collection<K> idList) {
+        Set<String> duplicateCheck = new HashSet<>();
+
         return findById(idList)
-                .flatMap(e -> StringUtils
-                        .isEmpty(e.getPath())
+                .concatMap(e -> StringUtils
+                        .isEmpty(e.getPath())|| !duplicateCheck.add(e.getPath())
                         ? Mono.just(e)
                         : createQuery()
                         .where()
                         .like$("path", e.getPath())
-                        .fetch());
+                        .fetch())
+                .distinct(TreeSupportEntity::getId);
     }
 
     default Flux<E> queryIncludeParent(Collection<K> idList) {
+        Set<String> duplicateCheck = new HashSet<>();
+
         return findById(idList)
-                .flatMap(e ->  StringUtils
-                        .isEmpty(e.getPath())
+                .concatMap(e -> StringUtils
+                        .isEmpty(e.getPath())|| !duplicateCheck.add(e.getPath())
                         ? Mono.just(e)
                         : createQuery()
                         .where()
                         .accept(Terms.Like.reversal("path", e.getPath(), false, true))
                         .notEmpty("path")
                         .notNull("path")
-                        .fetch());
+                        .fetch())
+                .distinct(TreeSupportEntity::getId);
     }
 
     default Flux<E> queryIncludeChildren(QueryParamEntity queryParam) {
+        Set<String> duplicateCheck = new HashSet<>();
+
         return query(queryParam)
-                .flatMap(e ->  StringUtils
-                        .isEmpty(e.getPath())
+                .concatMap(e -> StringUtils
+                        .isEmpty(e.getPath()) || !duplicateCheck.add(e.getPath())
                         ? Mono.just(e)
                         : createQuery()
                         .where()
                         .like$("path", e.getPath())
-                        .fetch());
+                        .fetch()
+                )
+                .distinct(TreeSupportEntity::getId);
     }
 
     @Override

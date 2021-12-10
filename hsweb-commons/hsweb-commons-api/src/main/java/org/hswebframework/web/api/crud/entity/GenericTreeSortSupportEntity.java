@@ -37,7 +37,7 @@ public abstract class GenericTreeSortSupportEntity<PK> extends GenericEntity<PK>
     /**
      * 父级类别
      */
-    @Column(name = "parent_id", length = 32)
+    @Column(name = "parent_id", length = 64)
     @Comment("父级ID")
     @Schema(description = "父节点ID")
     private PK parentId;
