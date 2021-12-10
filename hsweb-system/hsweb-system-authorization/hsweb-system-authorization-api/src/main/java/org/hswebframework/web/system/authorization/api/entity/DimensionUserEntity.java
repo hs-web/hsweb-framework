@@ -34,7 +34,7 @@ public class DimensionUserEntity extends GenericEntity<String> {
     private String dimensionTypeId;
 
     @Comment("维度ID")
-    @Column(name = "dimension_id", nullable = false, length = 32)
+    @Column(name = "dimension_id", nullable = false, length = 64)
     @Schema(description = "维度ID")
     private String dimensionId;
 
@@ -45,7 +45,7 @@ public class DimensionUserEntity extends GenericEntity<String> {
     private String dimensionName;
 
     @Comment("用户ID")
-    @Column(name = "user_id", nullable = false, length = 32)
+    @Column(name = "user_id", nullable = false, length = 64)
     @Schema(description = "用户ID")
     private String userId;
 

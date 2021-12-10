@@ -41,7 +41,7 @@ import java.util.List;
 })
 public class DictionaryItemEntity extends GenericTreeSortSupportEntity<String> implements EnumDict<String> {
     //字典id
-    @Column(name = "dict_id", length = 32, updatable = false, nullable = false)
+    @Column(name = "dict_id", length = 64, updatable = false, nullable = false)
     @Schema(description = "数据字典ID")
     private String dictId;
     //名称
