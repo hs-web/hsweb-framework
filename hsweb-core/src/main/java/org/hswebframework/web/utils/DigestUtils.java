@@ -6,12 +6,12 @@ import java.security.MessageDigest;
 
 public class DigestUtils {
 
-    public static final MessageDigest md5 = org.apache.commons.codec.digest.DigestUtils.getMd5Digest();
-    public static final MessageDigest sha256 = org.apache.commons.codec.digest.DigestUtils.getSha256Digest();
-    public static final MessageDigest sha1 = org.apache.commons.codec.digest.DigestUtils.getSha1Digest();
+    public static final ThreadLocal<MessageDigest> md5 = ThreadLocal.withInitial(org.apache.commons.codec.digest.DigestUtils::getMd5Digest);
+    public static final ThreadLocal<MessageDigest> sha256 = ThreadLocal.withInitial(org.apache.commons.codec.digest.DigestUtils::getSha256Digest);
+    public static final ThreadLocal<MessageDigest> sha1 = ThreadLocal.withInitial(org.apache.commons.codec.digest.DigestUtils::getSha1Digest);
 
     public static byte[] md5(byte[] data) {
-        return org.apache.commons.codec.digest.DigestUtils.digest(md5, data);
+        return org.apache.commons.codec.digest.DigestUtils.digest(md5.get(), data);
     }
 
     public static byte[] md5(String str) {
@@ -23,7 +23,7 @@ public class DigestUtils {
     }
 
     public static byte[] sha256(byte[] data) {
-        return org.apache.commons.codec.digest.DigestUtils.digest(sha256, data);
+        return org.apache.commons.codec.digest.DigestUtils.digest(sha256.get(), data);
     }
 
     public static byte[] sha256(String str) {
@@ -35,7 +35,7 @@ public class DigestUtils {
     }
 
     public static byte[] sha1(byte[] data) {
-        return org.apache.commons.codec.digest.DigestUtils.digest(sha1, data);
+        return org.apache.commons.codec.digest.DigestUtils.digest(sha1.get(), data);
     }
 
     public static byte[] sha1(String str) {
