@@ -5,6 +5,12 @@ import org.springframework.core.annotation.AliasFor;
 
 import java.lang.annotation.*;
 
+/**
+ * 继承{@link ResourceAction},提供统一的id定义
+ *
+ * @author zhouhao
+ * @since 4.0
+ */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
@@ -12,6 +18,7 @@ import java.lang.annotation.*;
 @ResourceAction(id = Permission.ACTION_SAVE, name = "保存")
 public @interface SaveAction {
 
-    @AliasFor(annotation = ResourceAction.class,attribute = "dataAccess")
+    @Deprecated
+    @AliasFor(annotation = ResourceAction.class, attribute = "dataAccess")
     DataAccess dataAccess() default @DataAccess(ignore = true);
 }

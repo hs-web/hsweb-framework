@@ -37,13 +37,13 @@ public interface ReactiveCrudService<E, K> {
 
     /**
      * 创建一个DSL的动态查询接口,可使用DSL方式进行链式调用来构造动态查询条件.例如:
-     * <pre>
-     * Flux&lt;MyEntity&gt; flux=
-     *     service
+     * <pre>{@code
+     * Flux<MyEntity> flux = service
      *     .createQuery()
      *     .where(MyEntity::getName,name)
      *     .in(MyEntity::getState,state1,state2)
      *     .fetch()
+     * }
      * </pre>
      *
      * @return 动态查询接口
@@ -54,14 +54,14 @@ public interface ReactiveCrudService<E, K> {
 
     /**
      * 创建一个DSL动态更新接口,可使用DSL方式进行链式调用来构造动态更新条件.例如:
-     * <pre>
-     * Mono&lt;Integer&gt; flux=
-     *     service
+     * <pre>{@code
+     * Mono<Integer> result = service
      *     .createUpdate()
      *     .set(entity::getState)
      *     .where(MyEntity::getName,name)
      *     .in(MyEntity::getState,state1,state2)
      *     .execute()
+     *     }
      * </pre>
      *
      * @return 动态更新接口
@@ -72,13 +72,13 @@ public interface ReactiveCrudService<E, K> {
 
     /**
      * 创建一个DSL动态删除接口,可使用DSL方式进行链式调用来构造动态删除条件.例如:
-     * <pre>
-     * Mono&lt;Integer&gt; flux=
-     *     service
+     * <pre>{@code
+     * Mono<Integer> result = service
      *     .createDelete()
      *     .where(MyEntity::getName,name)
      *     .in(MyEntity::getState,state1,state2)
      *     .execute()
+     * }
      * </pre>
      *
      * @return 动态更新接口
@@ -194,6 +194,8 @@ public interface ReactiveCrudService<E, K> {
 
     @Transactional(readOnly = true, transactionManager = TransactionManagers.reactiveTransactionManager)
     default <T> Mono<PagerResult<T>> queryPager(QueryParamEntity query, Function<E, T> mapper) {
+        //如果查询参数指定了总数,表示不需要再进行count操作.
+        //建议前端在使用分页查询时,切换下一页时,将第一次查询到total结果传入查询参数,可以提升查询性能.
         if (query.getTotal() != null) {
             return getRepository()
                     .createQuery()
@@ -203,7 +205,7 @@ public interface ReactiveCrudService<E, K> {
                     .collectList()
                     .map(list -> PagerResult.of(query.getTotal(), list, query));
         }
-        //并行分页
+        //并行分页,更快,所在页码无数据时,会返回空list.
         if (query.isParallelPager()) {
             return Mono
                     .zip(
@@ -220,6 +222,7 @@ public interface ReactiveCrudService<E, K> {
                     if (total == 0) {
                         return Mono.just(PagerResult.of(0, new ArrayList<>(), query));
                     }
+                    //查询前根据数据总数进行重新分页:要跳转的页码没有数据则跳转到最后一页
                     return query(query.clone().rePaging(total))
                             .map(mapper)
                             .collectList()

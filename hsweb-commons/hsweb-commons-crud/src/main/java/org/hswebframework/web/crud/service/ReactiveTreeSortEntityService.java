@@ -20,6 +20,8 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
+ * 树形结构的通用增删改查服务
+ *
  * @param <E> TreeSortSupportEntity
  * @param <K> ID
  * @see GenericReactiveTreeSupportCrudService
@@ -27,10 +29,22 @@ import java.util.stream.Collectors;
 public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K>, K>
         extends ReactiveCrudService<E, K> {
 
+    /**
+     * 动态查询并将查询结构转为树形结构
+     *
+     * @param paramEntity 查询参数
+     * @return 树形结构
+     */
     default Mono<List<E>> queryResultToTree(Mono<? extends QueryParamEntity> paramEntity) {
         return paramEntity.flatMap(this::queryResultToTree);
     }
 
+    /**
+     * 动态查询并将查询结构转为树形结构
+     *
+     * @param paramEntity 查询参数
+     * @return 树形结构
+     */
     default Mono<List<E>> queryResultToTree(QueryParamEntity paramEntity) {
         return query(paramEntity)
                 .collectList()
@@ -39,6 +53,12 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
                                                          this::createRootNodePredicate));
     }
 
+    /**
+     * 动态查询并将查询结构转为树形结构,包含所有子节点
+     *
+     * @param paramEntity 查询参数
+     * @return 树形结构
+     */
     default Mono<List<E>> queryIncludeChildrenTree(QueryParamEntity paramEntity) {
         return queryIncludeChildren(paramEntity)
                 .collectList()
@@ -47,29 +67,43 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
                                                          this::createRootNodePredicate));
     }
 
+    /**
+     * 查询指定ID的实体以及对应的全部子节点
+     *
+     * @param idList ID集合
+     * @return 树形结构
+     */
     default Flux<E> queryIncludeChildren(Collection<K> idList) {
         Set<String> duplicateCheck = new HashSet<>();
 
         return findById(idList)
                 .concatMap(e -> StringUtils
-                        .isEmpty(e.getPath())|| !duplicateCheck.add(e.getPath())
+                        .isEmpty(e.getPath()) || !duplicateCheck.add(e.getPath())
                         ? Mono.just(e)
                         : createQuery()
                         .where()
+                        //使用path快速查询
                         .like$("path", e.getPath())
                         .fetch())
                 .distinct(TreeSupportEntity::getId);
     }
 
+    /**
+     * 查询指定ID的实体以及对应的全部父节点
+     *
+     * @param idList ID集合
+     * @return 树形结构
+     */
     default Flux<E> queryIncludeParent(Collection<K> idList) {
         Set<String> duplicateCheck = new HashSet<>();
 
         return findById(idList)
                 .concatMap(e -> StringUtils
-                        .isEmpty(e.getPath())|| !duplicateCheck.add(e.getPath())
+                        .isEmpty(e.getPath()) || !duplicateCheck.add(e.getPath())
                         ? Mono.just(e)
                         : createQuery()
                         .where()
+                        //where ? like path and path !='' and path not null
                         .accept(Terms.Like.reversal("path", e.getPath(), false, true))
                         .notEmpty("path")
                         .notNull("path")
@@ -77,6 +111,12 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
                 .distinct(TreeSupportEntity::getId);
     }
 
+    /**
+     * 动态查询并将查询结构转为树形结构
+     *
+     * @param queryParam 查询参数
+     * @return 树形结构
+     */
     default Flux<E> queryIncludeChildren(QueryParamEntity queryParam) {
         Set<String> duplicateCheck = new HashSet<>();
 
@@ -134,6 +174,7 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
                 .then(Mono.just(ele));
     }
 
+    //重构子节点的path
     default Mono<Void> refactorChildPath(K id, String path, Consumer<E> pathAccepter) {
         return this
                 .createQuery()
@@ -161,6 +202,7 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
     default Mono<SaveResult> save(Publisher<E> entityPublisher) {
         return Flux
                 .from(entityPublisher)
+                //1.先平铺
                 .flatMapIterable(e -> TreeSupportEntity.expandTree2List(e, getIDGenerator()))
                 .collectList()
                 .flatMapIterable(list -> {
@@ -168,14 +210,17 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
                             .stream()
                             .filter(e -> e.getId() != null)
                             .collect(Collectors.toMap(TreeSupportEntity::getId, Function.identity()));
-
+                    //2. 重新组装树结构
                     return TreeSupportEntity.list2tree(list,
                                                        this::setChildren,
                                                        (Predicate<E>) e -> this.isRootNode(e) || map.get(e.getParentId()) == null);
 
                 })
+                //执行验证
                 .doOnNext(e -> e.tryValidate(CreateGroup.class))
+                //再次平铺为
                 .flatMapIterable(e -> TreeSupportEntity.expandTree2List(e, getIDGenerator()))
+                //重构path
                 .as(this::tryRefactorPath)
                 .as(this.getRepository()::save);
 

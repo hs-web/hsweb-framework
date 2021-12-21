@@ -22,6 +22,24 @@ import java.lang.annotation.Target;
 import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
 import static java.lang.annotation.ElementType.METHOD;
 
+/**
+ * 使用注解继承来对swagger接口文档注解的拓展，用来标识接口不支持分页查询参数.
+ *
+ *
+ * <pre>{@code
+ * @GetMapping
+ * @QueryNoPagingOperation(summary="接口说明")
+ * public Flux<MyEntity> handleRequest(@Parameter(hidden = true) QueryParamEntity query){
+ *  return service.query(query);
+ * }
+ *
+ * }</pre>
+ *
+ * 注意在参数上注解 {@code @Parameter(hidden=true)}
+ * @author zhouhao
+ * @since 4.0.5
+ * @see QueryNoPagingOperation#parameters()
+ */
 @Target({METHOD, ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited

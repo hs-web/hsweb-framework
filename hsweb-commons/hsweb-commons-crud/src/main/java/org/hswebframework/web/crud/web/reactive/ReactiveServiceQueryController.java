@@ -74,7 +74,7 @@ public interface ReactiveServiceQueryController<E, K> {
     @QueryAction
     @QueryNoPagingOperation(summary = "使用POST方式分页动态查询(不返回总数)",
             description = "此操作不返回分页总数,如果需要获取全部数据,请设置参数paging=false")
-    default Flux<E> query(@Parameter(hidden = true)@RequestBody Mono<QueryParamEntity> query) {
+    default Flux<E> query(@Parameter(hidden = true) @RequestBody Mono<QueryParamEntity> query) {
         return query.flatMapMany(this::query);
     }
 
@@ -105,6 +105,31 @@ public interface ReactiveServiceQueryController<E, K> {
 
     }
 
+    /**
+     * POST方式动态查询.
+     *
+     * <pre>
+     *     POST /_query
+     *
+     *     {
+     *         "pageIndex":0,
+     *         "pageSize":20,
+     *         "where":"name like 张%", //放心使用,没有SQL注入
+     *         "orderBy":"id desc",
+     *         "terms":[ //高级条件
+     *             {
+     *                 "column":"name",
+     *                 "termType":"like",
+     *                 "value":"张%"
+     *             }
+     *         ]
+     *     }
+     * </pre>
+     *
+     * @param query 查询条件
+     * @return 结果流
+     * @see QueryParamEntity
+     */
     @PostMapping("/_query")
     @QueryAction
     @SuppressWarnings("all")
@@ -113,6 +138,31 @@ public interface ReactiveServiceQueryController<E, K> {
         return query.flatMap(q -> queryPager(q));
     }
 
+    /**
+     * POST方式动态查询数量.
+     *
+     * <pre>
+     *     POST /_count
+     *
+     *     {
+     *         "pageIndex":0,
+     *         "pageSize":20,
+     *         "where":"name like 张%", //放心使用,没有SQL注入
+     *         "orderBy":"id desc",
+     *         "terms":[ //高级条件
+     *             {
+     *                 "column":"name",
+     *                 "termType":"like",
+     *                 "value":"张%"
+     *             }
+     *         ]
+     *     }
+     * </pre>
+     *
+     * @param query 查询条件
+     * @return 查询结果
+     * @see QueryParamEntity
+     */
     @PostMapping("/_count")
     @QueryAction
     @QueryNoPagingOperation(summary = "使用POST方式查询总数")
@@ -121,14 +171,17 @@ public interface ReactiveServiceQueryController<E, K> {
     }
 
     /**
-     * 统计查询
+     * GET方式动态查询数量.
      *
      * <pre>
-     *     GET /_count
+     *
+     *    GET /_query/_count?pageIndex=0&pageSize=20&where=name is 张三&orderBy=id desc
+     *
      * </pre>
      *
      * @param query 查询条件
-     * @return 统计结果
+     * @return 查询结果
+     * @see QueryParamEntity
      */
     @GetMapping("/_count")
     @QueryAction
@@ -140,6 +193,18 @@ public interface ReactiveServiceQueryController<E, K> {
                 .count();
     }
 
+    /**
+     * 根据ID查询.
+     * <pre>
+     * {@code
+     *     GET /{id}
+     * }
+     * </pre>
+     *
+     * @param id ID
+     * @return 结果流
+     * @see QueryParamEntity
+     */
     @GetMapping("/{id:.+}")
     @QueryAction
     @Operation(summary = "根据ID查询")
