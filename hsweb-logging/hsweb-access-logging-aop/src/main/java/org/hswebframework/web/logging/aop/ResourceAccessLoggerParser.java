@@ -22,7 +22,7 @@ public class ResourceAccessLoggerParser implements AccessLoggerParser {
     ));
 
     @Override
-    public boolean support(Class clazz, Method method) {
+    public boolean support(Class<?> clazz, Method method) {
         Set<Annotation> a1 = AnnotatedElementUtils.findAllMergedAnnotations(method, annotations);
         Set<Annotation> a2 = AnnotatedElementUtils.findAllMergedAnnotations(clazz, annotations);
 
