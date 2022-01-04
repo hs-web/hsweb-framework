@@ -85,7 +85,7 @@
         <activiti.version>5.19.0.2</activiti.version>
 
         <fastjson.version>1.2.74</fastjson.version>
-        <h2.version>1.4.200</h2.version>
+        <h2.version>2.0.202</h2.version>
         <mysql.version>5.1.39</mysql.version>
         <cglib.version>3.2.2</cglib.version>
         <aspectj.version>1.6.12</aspectj.version>
