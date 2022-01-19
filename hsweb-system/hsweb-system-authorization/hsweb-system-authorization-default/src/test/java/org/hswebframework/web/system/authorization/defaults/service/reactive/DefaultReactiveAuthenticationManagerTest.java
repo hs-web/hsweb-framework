@@ -93,9 +93,18 @@ public class DefaultReactiveAuthenticationManagerTest {
                 .as(StepVerifier::create)
                 .expectNext(true)
                 .verifyComplete();
+
         userService.deleteUser(entity.getId())
                 .as(StepVerifier::create)
                 .expectNext(true)
+                .verifyComplete();
+
+        settingRepository.createQuery()
+                .where(AuthorizationSettingEntity::getDimensionType,"user")
+                .and(AuthorizationSettingEntity::getDimensionTarget,entity.getId())
+                .fetch()
+                .as(StepVerifier::create)
+                .expectNextCount(0)
                 .verifyComplete();
 
     }

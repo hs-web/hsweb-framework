@@ -6,13 +6,19 @@ import org.hswebframework.ezorm.rdb.mapping.ReactiveUpdate;
 import org.hswebframework.ezorm.rdb.mapping.defaults.SaveResult;
 import org.hswebframework.web.authorization.DimensionProvider;
 import org.hswebframework.web.authorization.DimensionType;
+import org.hswebframework.web.crud.events.EntityCreatedEvent;
+import org.hswebframework.web.crud.events.EntityDeletedEvent;
+import org.hswebframework.web.crud.events.EntityModifyEvent;
+import org.hswebframework.web.crud.events.EntitySavedEvent;
 import org.hswebframework.web.crud.service.GenericReactiveCrudService;
 import org.hswebframework.web.system.authorization.api.entity.AuthorizationSettingEntity;
 import org.hswebframework.web.system.authorization.api.event.ClearUserAuthorizationCacheEvent;
+import org.hswebframework.web.system.authorization.api.event.DimensionDeletedEvent;
 import org.hswebframework.web.system.authorization.defaults.configuration.PermissionProperties;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.event.EventListener;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -30,7 +36,6 @@ public class DefaultAuthorizationSettingService extends GenericReactiveCrudServi
     @Autowired
     private List<DimensionProvider> providers;
 
-
     protected AuthorizationSettingEntity generateId(AuthorizationSettingEntity entity) {
         if (StringUtils.isEmpty(entity.getId())) {
             entity.setId(DigestUtils.md5Hex(entity.getPermission() + entity.getDimensionType() + entity.getDimensionTarget()));
@@ -42,28 +47,7 @@ public class DefaultAuthorizationSettingService extends GenericReactiveCrudServi
     public Mono<SaveResult> save(Publisher<AuthorizationSettingEntity> entityPublisher) {
         return Flux.from(entityPublisher)
                    .map(this::generateId)
-                   .collectList()
-                   .flatMap(autz -> super.save(Flux.fromIterable(autz)).doOnSuccess(r -> clearUserAuthCache(autz)));
-    }
-
-    @Override
-    public Mono<Integer> updateById(String id, Mono<AuthorizationSettingEntity> entityPublisher) {
-        return entityPublisher
-                .flatMap(autz -> super.updateById(id, Mono.just(autz))
-                                      .doOnSuccess((r) -> clearUserAuthCache(Collections.singletonList(autz))));
-    }
-
-    @Override
-    public Mono<Integer> deleteById(Publisher<String> idPublisher) {
-        Flux<String> cache = Flux.from(idPublisher);
-
-        return this
-                .findById(cache)
-                .collectList()
-                .flatMap(list -> this
-                        .deleteById(cache)
-                        .doOnSuccess((i) -> clearUserAuthCache(list))
-                );
+                   .as(super::save);
     }
 
     @Override
@@ -71,68 +55,82 @@ public class DefaultAuthorizationSettingService extends GenericReactiveCrudServi
 
         return Flux.from(entityPublisher)
                    .map(this::generateId)
-                   .collectList()
-                   .flatMap(list -> super
-                           .insert(Flux.fromIterable(list))
-                           .doOnSuccess(i -> clearUserAuthCache(list)));
+                   .as(super::insert);
     }
 
     @Override
     public Mono<Integer> insertBatch(Publisher<? extends Collection<AuthorizationSettingEntity>> entityPublisher) {
         return Flux
                 .from(entityPublisher)
+                .doOnNext(list -> list.forEach(this::generateId))
+                .as(super::insertBatch);
+    }
+
+    protected Mono<Void> clearUserAuthCache(List<AuthorizationSettingEntity> settings) {
+        return Flux
+                .fromIterable(providers)
+                .flatMap(provider ->
+                                 //按维度类型进行映射
+                                 provider.getAllType()
+                                         .map(DimensionType::getId)
+                                         .map(t -> Tuples.of(t, provider)))
+                .collect(Collectors.toMap(Tuple2::getT1, Tuple2::getT2))
+                .flatMapMany(typeProviderMapping -> Flux
+                        .fromIterable(settings)//根据维度获取所有userId
+                        .flatMap(setting -> Mono
+                                .justOrEmpty(typeProviderMapping.get(setting.getDimensionType()))
+                                .flatMapMany(provider -> provider.getUserIdByDimensionId(setting.getDimensionTarget()))))
                 .collectList()
-                .flatMap(list -> super
-                        .insertBatch(Flux.fromStream(list.stream()
-                                                         .map(lst -> lst.stream()
-                                                                        .map(this::generateId)
-                                                                        .collect(Collectors.toList()))))
-                        .doOnSuccess(i -> clearUserAuthCache(list
-                                                                     .stream()
-                                                                     .flatMap(Collection::stream)
-                                                                     .collect(Collectors.toList()))));
+                .map(ClearUserAuthorizationCacheEvent::of)
+                .doOnNext(eventPublisher::publishEvent)
+                .then();
     }
 
-    @Override
-    public ReactiveUpdate<AuthorizationSettingEntity> createUpdate() {
-
-        return super
-                .createUpdate()
-                .onExecute((update, r) -> r
-                        .doOnSuccess(i -> this
-                                .createQuery()
-                                .setParam(update.toQueryParam())
-                                .fetch()
-                                .collectList()
-                                .subscribe(this::clearUserAuthCache)));
+    @EventListener
+    public void handleAuthSettingDeleted(EntityDeletedEvent<AuthorizationSettingEntity> event) {
+        event.async(
+                clearUserAuthCache(event.getEntity())
+        );
     }
 
-    @Override
-    public ReactiveDelete createDelete() {
-        return super.createDelete()
-                    .onExecute((delete, r) -> r
-                            .doOnSuccess(i -> this
-                                    .createQuery()
-                                    .setParam(delete.toQueryParam())
-                                    .fetch()
-                                    .collectList()
-                                    .subscribe(this::clearUserAuthCache)));
+    @EventListener
+    public void handleAuthSettingChanged(EntityModifyEvent<AuthorizationSettingEntity> event) {
+        event.async(
+                clearUserAuthCache(event.getAfter())
+        );
     }
 
-    protected void clearUserAuthCache(List<AuthorizationSettingEntity> settings) {
-        Flux.fromIterable(providers)
-            .flatMap(provider ->
-                             //按维度类型进行映射
-                             provider.getAllType()
-                                     .map(DimensionType::getId)
-                                     .map(t -> Tuples.of(t, provider)))
-            .collect(Collectors.toMap(Tuple2::getT1, Tuple2::getT2))
-            .flatMapMany(typeProviderMapping -> Flux
-                    .fromIterable(settings)//根据维度获取所有userId
-                    .flatMap(setting -> Mono.justOrEmpty(typeProviderMapping.get(setting.getDimensionType()))
-                                            .flatMapMany(provider -> provider.getUserIdByDimensionId(setting.getDimensionTarget()))))
-            .collectList()
-            .map(ClearUserAuthorizationCacheEvent::of)
-            .subscribe(eventPublisher::publishEvent);
+    @EventListener
+    public void handleAuthSettingSaved(EntitySavedEvent<AuthorizationSettingEntity> event) {
+        event.async(
+                clearUserAuthCache(event.getEntity())
+        );
+    }
+
+    @EventListener
+    public void handleAuthSettingAdded(EntityCreatedEvent<AuthorizationSettingEntity> event) {
+        event.async(
+                clearUserAuthCache(event.getEntity())
+        );
+    }
+
+    @EventListener
+    public void handleDimensionAdd(DimensionDeletedEvent event) {
+        event.async(
+                createDelete()
+                        .where(AuthorizationSettingEntity::getDimensionType, event.getDimensionType())
+                        .and(AuthorizationSettingEntity::getDimensionTarget, event.getDimensionId())
+                        .execute()
+        );
+    }
+
+    @EventListener
+    public void handleDimensionDeletedEvent(DimensionDeletedEvent event) {
+        event.async(
+                createDelete()
+                        .where(AuthorizationSettingEntity::getDimensionType, event.getDimensionType())
+                        .and(AuthorizationSettingEntity::getDimensionTarget, event.getDimensionId())
+                        .execute()
+        );
     }
 }
