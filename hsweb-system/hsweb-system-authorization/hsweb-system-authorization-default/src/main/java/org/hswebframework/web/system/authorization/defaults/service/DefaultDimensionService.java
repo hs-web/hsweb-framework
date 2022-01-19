@@ -1,36 +1,30 @@
 package org.hswebframework.web.system.authorization.defaults.service;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections4.BidiMap;
-import org.apache.commons.collections4.MultiValuedMap;
-import org.apache.commons.collections4.bidimap.DualHashBidiMap;
-import org.apache.commons.collections4.multimap.HashSetValuedHashMap;
-import org.hswebframework.ezorm.rdb.mapping.ReactiveDelete;
 import org.hswebframework.ezorm.rdb.mapping.ReactiveRepository;
-import org.hswebframework.ezorm.rdb.mapping.ReactiveUpdate;
-import org.hswebframework.ezorm.rdb.mapping.defaults.SaveResult;
 import org.hswebframework.web.authorization.Dimension;
 import org.hswebframework.web.authorization.DimensionProvider;
 import org.hswebframework.web.authorization.DimensionType;
 import org.hswebframework.web.authorization.dimension.DimensionUserBind;
 import org.hswebframework.web.authorization.dimension.DimensionUserBindProvider;
-import org.hswebframework.web.crud.service.GenericReactiveCrudService;
+import org.hswebframework.web.crud.events.EntityDeletedEvent;
+import org.hswebframework.web.crud.events.EntityModifyEvent;
+import org.hswebframework.web.crud.events.EntitySavedEvent;
 import org.hswebframework.web.crud.service.GenericReactiveTreeSupportCrudService;
-import org.hswebframework.web.crud.service.ReactiveCrudService;
-import org.hswebframework.web.crud.service.ReactiveTreeSortEntityService;
 import org.hswebframework.web.id.IDGenerator;
-import org.hswebframework.web.system.authorization.api.entity.AuthorizationSettingEntity;
 import org.hswebframework.web.system.authorization.api.entity.DimensionEntity;
 import org.hswebframework.web.system.authorization.api.entity.DimensionTypeEntity;
 import org.hswebframework.web.system.authorization.api.entity.DimensionUserEntity;
 import org.hswebframework.web.system.authorization.api.event.ClearUserAuthorizationCacheEvent;
-import org.reactivestreams.Publisher;
+import org.hswebframework.web.system.authorization.api.event.DimensionDeletedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.event.EventListener;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -44,9 +38,6 @@ public class DefaultDimensionService
 
     @Autowired
     private ReactiveRepository<DimensionTypeEntity, String> dimensionTypeRepository;
-
-    @Autowired
-    private ReactiveRepository<AuthorizationSettingEntity, String> settingRepository;
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;
@@ -131,53 +122,23 @@ public class DefaultDimensionService
                 .map(DimensionUserEntity::getUserId);
     }
 
-    @Override
-    public Mono<SaveResult> save(Publisher<DimensionEntity> entityPublisher) {
-        return super.save(entityPublisher)
-                    .doOnSuccess((r) -> eventPublisher.publishEvent(ClearUserAuthorizationCacheEvent.all()));
+    @EventListener
+    public void handleDimensionChanged(EntitySavedEvent<DimensionEntity> event) {
+        eventPublisher.publishEvent(ClearUserAuthorizationCacheEvent.all());
     }
 
-    @Override
-    public Mono<Integer> updateById(String id, Mono<DimensionEntity> entityPublisher) {
-        return super.updateById(id, entityPublisher)
-                    .doOnSuccess((r) -> eventPublisher.publishEvent(ClearUserAuthorizationCacheEvent.all()));
+    @EventListener
+    public void handleDimensionChanged(EntityModifyEvent<DimensionEntity> event) {
+        eventPublisher.publishEvent(ClearUserAuthorizationCacheEvent.all());
     }
 
-    @Override
-    public ReactiveUpdate<DimensionEntity> createUpdate() {
-        return super.createUpdate()
-                    .onExecute((update, result) -> result.doOnSuccess((r) -> eventPublisher.publishEvent(ClearUserAuthorizationCacheEvent.all())));
-    }
+    @EventListener
+    public void dispatchDimensionDeleteEvent(EntityDeletedEvent<DimensionEntity> event) {
 
-    @Override
-    public ReactiveDelete createDelete() {
-        return super.createDelete()
-                    .onExecute((delete, result) -> result.doOnSuccess((r) -> eventPublisher.publishEvent(ClearUserAuthorizationCacheEvent.all())));
-    }
-
-    @Override
-    public Mono<Integer> deleteById(Publisher<String> idPublisher) {
-
-        return Flux.from(idPublisher)
-                   .collectList()
-                   .flatMap(list -> super.queryIncludeChildren(list)
-                                         .flatMap(dimension -> dimensionUserRepository.createDelete() //删除维度用户关联
-                                                                                      .where()
-                                                                                      .is(DimensionUserEntity::getDimensionId, dimension.getId())
-                                                                                      .execute()
-                                                                                      .then(getRepository().deleteById(Mono.just(dimension.getId())))
-                                                                                      .thenReturn(dimension)
-                                         )
-                                         .groupBy(DimensionEntity::getTypeId, DimensionEntity::getId)//按维度类型分组
-                                         .flatMap(grouping -> grouping.collectList()
-                                                                      .flatMap(dimensionId -> settingRepository //删除权限设置
-                                                                                                                .createDelete()
-                                                                                                                .where(AuthorizationSettingEntity::getDimensionType, grouping.key())
-                                                                                                                .in(AuthorizationSettingEntity::getDimensionTarget, dimensionId)
-                                                                                                                .execute()))
-                                         .collect(Collectors.summarizingInt(Integer::intValue))
-                                         .doOnSuccess((r) -> eventPublisher.publishEvent(ClearUserAuthorizationCacheEvent.all()))
-                                         .thenReturn(list.size()));
+        event.async(
+                Flux.fromIterable(event.getEntity())
+                    .flatMap(e -> new DimensionDeletedEvent(e.getTypeId(), e.getId()).publish(eventPublisher))
+        );
     }
 
 }

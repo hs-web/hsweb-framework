@@ -44,6 +44,18 @@ public class DefaultAuthorizationSettingService extends GenericReactiveCrudServi
     }
 
     @Override
+    public Mono<SaveResult> save(AuthorizationSettingEntity data) {
+        generateId(data);
+        return super.save(data);
+    }
+
+    @Override
+    public Mono<SaveResult> save(Collection<AuthorizationSettingEntity> collection) {
+        collection.forEach(this::generateId);
+        return super.save(collection);
+    }
+
+    @Override
     public Mono<SaveResult> save(Publisher<AuthorizationSettingEntity> entityPublisher) {
         return Flux.from(entityPublisher)
                    .map(this::generateId)

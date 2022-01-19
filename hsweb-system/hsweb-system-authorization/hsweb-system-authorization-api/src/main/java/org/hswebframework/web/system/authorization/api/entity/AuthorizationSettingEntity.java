@@ -67,6 +67,7 @@ public class AuthorizationSettingEntity implements Entity {
     @Comment("状态")
     @NotNull(message = "状态不能为空",groups = CreateGroup.class)
     @Schema(description = "状态,0禁用,1启用")
+    @DefaultValue("1")
     private Byte state;
 
     @Column
