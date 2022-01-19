@@ -12,6 +12,7 @@ import org.reactivestreams.Publisher;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.math.MathFlux;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -335,12 +336,12 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
 
     @Override
     default Mono<Integer> deleteById(Publisher<K> idPublisher) {
-        return findById(Flux.from(idPublisher))
-                .flatMap(e -> createDelete()
-                        .where()
-                        .like$(e::getPath)
-                        .execute())
-                .collect(Collectors.summingInt(Integer::intValue));
+        return this
+                .findById(Flux.from(idPublisher))
+                .concatMap(e -> StringUtils.hasText(e.getPath())
+                        ? createDelete().where().like$(e::getPath).execute()
+                        : getRepository().deleteById(e.getId()))
+                .as(MathFlux::sumInt);
     }
 
     IDGenerator<K> getIDGenerator();
