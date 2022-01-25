@@ -3,12 +3,38 @@ package org.hswebframework.web.utils;
 import org.apache.commons.codec.binary.Hex;
 
 import java.security.MessageDigest;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class DigestUtils {
 
     public static final ThreadLocal<MessageDigest> md5 = ThreadLocal.withInitial(org.apache.commons.codec.digest.DigestUtils::getMd5Digest);
     public static final ThreadLocal<MessageDigest> sha256 = ThreadLocal.withInitial(org.apache.commons.codec.digest.DigestUtils::getSha256Digest);
     public static final ThreadLocal<MessageDigest> sha1 = ThreadLocal.withInitial(org.apache.commons.codec.digest.DigestUtils::getSha1Digest);
+
+    public static byte[] md5(Consumer<MessageDigest> digestHandler) {
+        return digest(md5::get, digestHandler);
+    }
+
+    public static String md5Hex(Consumer<MessageDigest> digestHandler) {
+        return digestHex(md5::get, digestHandler);
+    }
+
+    public static byte[] sha1(Consumer<MessageDigest> digestHandler) {
+        return digest(sha1::get, digestHandler);
+    }
+
+    public static String sha1Hex(Consumer<MessageDigest> digestHandler) {
+        return digestHex(sha1::get, digestHandler);
+    }
+
+    public static byte[] sha256(Consumer<MessageDigest> digestHandler) {
+        return digest(sha256::get, digestHandler);
+    }
+
+    public static String sha256Hex(Consumer<MessageDigest> digestHandler) {
+        return digestHex(sha1::get, digestHandler);
+    }
 
     public static byte[] md5(byte[] data) {
         return org.apache.commons.codec.digest.DigestUtils.digest(md5.get(), data);
@@ -56,5 +82,17 @@ public class DigestUtils {
 
     public static String digestHex(MessageDigest digest, String str) {
         return Hex.encodeHexString(digest(digest, str));
+    }
+
+    private static byte[] digest(Supplier<MessageDigest> digestSupplier,
+                                 Consumer<MessageDigest> digestHandler) {
+        MessageDigest digest = digestSupplier.get();
+        digestHandler.accept(digest);
+        return digest.digest();
+    }
+
+    private static String digestHex(Supplier<MessageDigest> digestSupplier,
+                                    Consumer<MessageDigest> digestHandler) {
+        return Hex.encodeHexString(digest(digestSupplier, digestHandler));
     }
 }
