@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.type.*;
 import com.fasterxml.jackson.databind.util.ArrayBuilders;
 import com.fasterxml.jackson.databind.util.LRUMap;
+import com.fasterxml.jackson.databind.util.LookupCache;
 import org.hswebframework.web.api.crud.entity.EntityFactory;
 
 public class CustomTypeFactory extends TypeFactory {
@@ -11,18 +12,18 @@ public class CustomTypeFactory extends TypeFactory {
     private EntityFactory entityFactory;
 
     public CustomTypeFactory(EntityFactory factory) {
-        super(new LRUMap<>(64, 1024));
+        super((LookupCache)new LRUMap<>(64, 1024));
         this.entityFactory = factory;
     }
 
-    protected CustomTypeFactory(LRUMap<Object, JavaType> typeCache, TypeParser p,
+    protected CustomTypeFactory(LookupCache<Object, JavaType> typeCache, TypeParser p,
                                 TypeModifier[] mods, ClassLoader classLoader) {
         super(typeCache, p, mods, classLoader);
     }
 
 
     @Override
-    public TypeFactory withCache(LRUMap<Object, JavaType> cache) {
+    public TypeFactory withCache(LookupCache<Object, JavaType> cache) {
         return new CustomTypeFactory(cache, _parser, _modifiers, _classLoader);
     }
 
@@ -33,7 +34,7 @@ public class CustomTypeFactory extends TypeFactory {
 
     @Override
     public TypeFactory withModifier(TypeModifier mod) {
-        LRUMap<Object, JavaType> typeCache = _typeCache;
+        LookupCache<Object, JavaType> typeCache = _typeCache;
         TypeModifier[] mods;
         if (mod == null) { // mostly for unit tests
             mods = null;
