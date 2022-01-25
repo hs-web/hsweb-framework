@@ -12,7 +12,7 @@ import java.lang.reflect.Method;
 
 public class Swagger3AccessLoggerParser implements AccessLoggerParser {
     @Override
-    public boolean support(Class clazz, Method method) {
+    public boolean support(Class<?> clazz, Method method) {
 
         Tag api = AnnotationUtils.findAnnotation(clazz, Tag.class);
         Operation operation = AnnotationUtils.findAnnotation(method, Operation.class);

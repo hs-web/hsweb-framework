@@ -7,6 +7,13 @@ import javax.persistence.Table;
 import java.lang.annotation.*;
 
 /**
+ * 在启动类上注解,标识开启自动注册实体通用增删改查接口到spring上下文中.
+ * 在spring中,可直接进行泛型注入使用:
+ * <pre>{@code
+ *   @Autowire
+ *   ReactiveRepository<String, MyEntity> repository;
+ * }</pre>
+ *
  * @see org.hswebframework.ezorm.rdb.mapping.ReactiveRepository
  * @see org.hswebframework.ezorm.rdb.mapping.SyncRepository
  * @since 4.0.0
@@ -30,8 +37,17 @@ public @interface EnableEasyormRepository {
      */
     Class<? extends Annotation>[] annotation() default Table.class;
 
+    /**
+     * @return 是否开启响应式, 默认开启
+     */
     boolean reactive() default true;
 
+    /**
+     * 是否开启非响应式操作,在使用WebFlux时,不建议开启
+     *
+     * @return 开启非响应式
+     * @see org.hswebframework.ezorm.rdb.mapping.SyncRepository
+     */
     boolean nonReactive() default false;
 
 }

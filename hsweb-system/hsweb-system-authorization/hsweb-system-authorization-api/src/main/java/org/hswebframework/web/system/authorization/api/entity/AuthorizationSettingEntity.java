@@ -9,6 +9,7 @@ import org.hswebframework.ezorm.rdb.mapping.annotation.DefaultValue;
 import org.hswebframework.ezorm.rdb.mapping.annotation.JsonCodec;
 import org.hswebframework.web.api.crud.entity.Entity;
 import org.hswebframework.web.bean.FastBeanCopier;
+import org.hswebframework.web.crud.annotation.EnableEntityEvent;
 import org.hswebframework.web.validator.CreateGroup;
 import org.springframework.util.CollectionUtils;
 
@@ -27,6 +28,7 @@ import java.util.stream.Collectors;
 })
 @Getter
 @Setter
+@EnableEntityEvent
 public class AuthorizationSettingEntity implements Entity {
     @Id
     @Column(length = 32)
@@ -65,6 +67,7 @@ public class AuthorizationSettingEntity implements Entity {
     @Comment("状态")
     @NotNull(message = "状态不能为空",groups = CreateGroup.class)
     @Schema(description = "状态,0禁用,1启用")
+    @DefaultValue("1")
     private Byte state;
 
     @Column

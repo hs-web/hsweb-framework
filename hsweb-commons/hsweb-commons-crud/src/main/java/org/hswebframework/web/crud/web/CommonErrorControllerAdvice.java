@@ -32,8 +32,13 @@ import java.util.List;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
+/**
+ * 统一错误处理
+ *
+ * @author zhouhao
+ * @since 4.0
+ */
 @RestControllerAdvice
-//@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
 @Slf4j
 @Order
 public class CommonErrorControllerAdvice {
@@ -134,7 +139,7 @@ public class CommonErrorControllerAdvice {
                 .stream()
                 .map(err -> new ValidationException.Detail(err.getField(), err.getDefaultMessage(), null))
                 .collect(Collectors.toList());
-       return handleException(new ValidationException(message, details));
+        return handleException(new ValidationException(message, details));
     }
 
     @ExceptionHandler

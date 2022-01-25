@@ -18,14 +18,16 @@
 
 package org.hswebframework.web.aop;
 
+import com.google.common.collect.Maps;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 import org.aopalliance.intercept.MethodInvocation;
 import org.hswebframework.web.utils.AnnotationUtils;
+import org.hswebframework.web.utils.DigestUtils;
 import org.reactivestreams.Publisher;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
-import org.springframework.util.DigestUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -48,25 +50,28 @@ public class MethodInterceptorHolder {
     public static final ParameterNameDiscoverer nameDiscoverer = new LocalVariableTableParameterNameDiscoverer();
 
     public static MethodInterceptorHolder create(MethodInvocation invocation) {
-        String id = DigestUtils.md5DigestAsHex(String.valueOf(invocation.getMethod().hashCode()).getBytes());
         String[] argNames = nameDiscoverer.getParameterNames(invocation.getMethod());
         Object[] args = invocation.getArguments();
-        Map<String, Object> argMap = new LinkedHashMap<>();
-        String[] names = new String[args.length];
-        for (int i = 0, len = args.length; i < len; i++) {
-            names[i] = (argNames == null || argNames.length <= i || argNames[i] == null) ? "arg" + i : argNames[i];
-            argMap.put(names[i], args[i]);
-        }
 
-        return new MethodInterceptorHolder(id,
-                invocation.getMethod(),
-                invocation.getThis(),
-                args,
-                names,
-                argMap);
+        String[] names;
+        //参数名与参数长度不一致，则填充argx来作为参数名
+        if (argNames == null || argNames.length != args.length) {
+            names = new String[args.length];
+            for (int i = 0, len = args.length; i < len; i++) {
+                names[i] = (argNames == null || argNames.length <= i || argNames[i] == null) ? "arg" + i : argNames[i];
+            }
+        } else {
+            names = argNames;
+        }
+        return new MethodInterceptorHolder(null,
+                                           invocation.getMethod(),
+                                           invocation.getThis(),
+                                           args,
+                                           names,
+                                           null);
     }
 
-    private final String id;
+    private String id;
 
     private final Method method;
 
@@ -76,8 +81,27 @@ public class MethodInterceptorHolder {
 
     private final String[] argumentsNames;
 
-    private final Map<String, Object> namedArguments;
+    private Map<String, Object> namedArguments;
 
+    public String getId() {
+        if (id == null) {
+            id = DigestUtils.md5Hex(method.toString());
+        }
+        return id;
+    }
+
+    protected Map<String, Object> createNamedArguments() {
+        Map<String, Object> namedArguments = Maps.newLinkedHashMapWithExpectedSize(arguments.length);
+        for (int i = 0, len = arguments.length; i < len; i++) {
+            namedArguments.put(argumentsNames[i], arguments[i]);
+        }
+        return namedArguments;
+
+    }
+
+    public Map<String, Object> getNamedArguments() {
+        return namedArguments == null ? namedArguments = createNamedArguments() : namedArguments;
+    }
 
     public <T extends Annotation> T findMethodAnnotation(Class<T> annClass) {
         return AnnotationUtils.findMethodAnnotation(annClass, method, annClass);

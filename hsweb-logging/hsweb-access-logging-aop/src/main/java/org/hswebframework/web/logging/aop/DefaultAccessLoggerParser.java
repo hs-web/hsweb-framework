@@ -13,7 +13,7 @@ import java.util.stream.Stream;
 
 public class DefaultAccessLoggerParser implements AccessLoggerParser {
     @Override
-    public boolean support(Class clazz, Method method) {
+    public boolean support(Class<?> clazz, Method method) {
         AccessLogger ann = AnnotationUtils.findAnnotation(method, AccessLogger.class);
         //注解了并且未取消
         return null != ann && !ann.ignore();

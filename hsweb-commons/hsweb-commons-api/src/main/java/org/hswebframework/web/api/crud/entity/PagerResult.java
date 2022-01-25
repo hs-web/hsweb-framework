@@ -28,15 +28,42 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 分页查询结果,用于在分页查询时,定义查询结果.如果需要拓展此类,例如自定义json序列化,请使用spi方式定义拓展实现类型:
+ * <pre>
+ * ---resources
+ * -----|--META-INF
+ * -----|----services
+ * -----|------org.hswebframework.web.api.crud.entity.PagerResult
+ * </pre>
+ *
+ * @param <E> 结果类型
+ * @author zhouhao
+ * @since 4.0.0
+ */
 @Getter
 @Setter
 public class PagerResult<E> {
     private static final long serialVersionUID = -6171751136953308027L;
 
+    /**
+     * 创建一个空结果
+     *
+     * @param <E> 结果类型
+     * @return PagerResult
+     */
     public static <E> PagerResult<E> empty() {
         return of(0, new ArrayList<>());
     }
 
+    /**
+     * 创建一个分页结果
+     *
+     * @param total 总数据量
+     * @param list  当前页数据列表
+     * @param <E>   结果类型
+     * @return PagerResult
+     */
     @SuppressWarnings("all")
     public static <E> PagerResult<E> of(int total, List<E> list) {
         PagerResult<E> result;
@@ -46,6 +73,15 @@ public class PagerResult<E> {
         return result;
     }
 
+    /**
+     * 创建一个分页结果,并将查询参数中的分页索引等信息填充到分页结果中
+     *
+     * @param total  总数据量
+     * @param list   当前页数据列表
+     * @param entity 查询参数
+     * @param <E>    结果类型
+     * @return PagerResult
+     */
     public static <E> PagerResult<E> of(int total, List<E> list, QueryParam entity) {
         PagerResult<E> pagerResult = of(total, list);
         pagerResult.setPageIndex(entity.getThinkPageIndex());

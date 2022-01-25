@@ -29,25 +29,82 @@ import java.util.function.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * 支持树结构的实体类
+ *
+ * @param <PK> 主键类型
+ * @author zhouhao
+ * @since 4.0
+ */
 @SuppressWarnings("all")
 public interface TreeSupportEntity<PK> extends Entity {
 
+    /**
+     * 获取主键
+     *
+     * @return ID
+     */
     PK getId();
 
+    /**
+     * 设置主键
+     *
+     * @param id ID
+     */
     void setId(PK id);
 
+    /**
+     * 获取树路径,树路径表示当前节点所在位置
+     * 格式通常为: aBcD-EfgH-iJkl,以-分割,一个分割表示一级.
+     * 比如: aBcD-EfgH-iJkl表示 当前节点在第三级,上一个节点为EfgH.
+     *
+     * @return 树路径
+     */
     String getPath();
 
+    /**
+     * 设置路径,此值通常不需要手动设置,在进行保存时，由service自动进行分配.
+     *
+     * @param path 路径
+     * @see TreeSupportEntity#expandTree2List(TreeSupportEntity, IDGenerator)
+     */
     void setPath(String path);
 
+    /**
+     * 获取上级ID
+     *
+     * @return 上级ID
+     */
     PK getParentId();
 
+    /**
+     * 设置上级节点ID
+     *
+     * @param parentId
+     */
     void setParentId(PK parentId);
 
+    /**
+     * 获取节点层级
+     *
+     * @return 节点层级
+     */
     Integer getLevel();
 
+    /**
+     * 设置节点层级
+     *
+     * @return 节点层级
+     */
     void setLevel(Integer level);
 
+    /**
+     * 获取所有子节点,默认情况下此字段只会返回null.可以使用{@link TreeSupportEntity#list2tree(Collection, BiConsumer)}将
+     * 列表结构转为树形结构
+     *
+     * @param <T> 当前实体类型
+     * @return 自己节点
+     */
     <T extends TreeSupportEntity<PK>> List<T> getChildren();
 
     @Override

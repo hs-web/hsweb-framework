@@ -46,7 +46,7 @@ public class DictionaryEntity extends GenericEntity<String> implements RecordCre
     @Schema(description = "字典名称")
     private String name;
     //分类
-    @Column(length = 32, name = "classified")
+    @Column(length = 64, name = "classified")
     @Schema(description = "分类标识")
     private String classified;
     //说明

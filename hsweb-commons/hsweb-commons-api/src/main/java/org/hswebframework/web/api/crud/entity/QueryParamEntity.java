@@ -25,9 +25,19 @@ import java.util.function.Consumer;
  * 查询参数实体,使用<a href="https://github.com/hs-web/hsweb-easy-orm">easyorm</a>进行动态查询参数构建<br>
  * 可通过静态方法创建:<br>
  * 如:
- * <code>
- * QueryParamEntity.of("id",id);
- * </code>
+ * <pre>
+ *{@code
+ *      QueryParamEntity.of("id",id);
+ *}
+ * </pre>
+ *
+ * 或者使用DSL方式来构造:
+ * <pre>{@code
+ *  QueryParamEntity
+ *  .newQuery()
+ *  .where("id",1)
+ *  .execute(service::query)
+ * }</pre>
  *
  * @author zhouhao
  * @see QueryParam

@@ -7,6 +7,7 @@ import org.hswebframework.ezorm.rdb.mapping.annotation.ColumnType;
 import org.hswebframework.ezorm.rdb.mapping.annotation.Comment;
 import org.hswebframework.ezorm.rdb.mapping.annotation.JsonCodec;
 import org.hswebframework.web.api.crud.entity.GenericTreeSortSupportEntity;
+import org.hswebframework.web.crud.annotation.EnableEntityEvent;
 import org.hswebframework.web.validator.CreateGroup;
 
 import javax.persistence.Column;
@@ -24,6 +25,7 @@ import java.util.Map;
 @Table(name = "s_dimension", indexes = {
         @Index(name = "idx_dims_path", columnList = "path")
 })
+@EnableEntityEvent
 public class DimensionEntity extends GenericTreeSortSupportEntity<String> {
 
     @Override

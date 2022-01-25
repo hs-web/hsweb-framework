@@ -11,7 +11,7 @@ import java.lang.reflect.Method;
 
 public class SwaggerAccessLoggerParser implements AccessLoggerParser {
     @Override
-    public boolean support(Class clazz, Method method) {
+    public boolean support(Class<?> clazz, Method method) {
 
         Api api = AnnotationUtils.findAnnotation(clazz, Api.class);
         ApiOperation operation = AnnotationUtils.findAnnotation(method, ApiOperation.class);

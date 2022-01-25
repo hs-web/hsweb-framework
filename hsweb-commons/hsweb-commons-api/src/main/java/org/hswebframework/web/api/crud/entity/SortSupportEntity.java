@@ -18,18 +18,30 @@
 
 package org.hswebframework.web.api.crud.entity;
 
+import javax.annotation.Nonnull;
+
+/**
+ * 支持排序的实体
+ *
+ * @author zhouhao
+ * @since 4.0.0
+ */
 public interface SortSupportEntity extends Comparable<SortSupportEntity>, Entity {
 
+    /**
+     * @return 排序序号
+     */
     Long getSortIndex();
 
+    /**
+     * 设置排序序号
+     *
+     * @param sortIndex 排序序号
+     */
     void setSortIndex(Long sortIndex);
 
     @Override
-    default int compareTo(SortSupportEntity support) {
-        if (support == null) {
-            return -1;
-        }
-        
+    default int compareTo(@Nonnull SortSupportEntity support) {
         return Long.compare(getSortIndex() == null ? 0 : getSortIndex(), support.getSortIndex() == null ? 0 : support.getSortIndex());
     }
 }

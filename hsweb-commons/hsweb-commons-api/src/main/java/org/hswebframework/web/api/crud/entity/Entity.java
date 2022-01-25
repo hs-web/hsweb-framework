@@ -32,18 +32,48 @@ import java.io.Serializable;
  */
 public interface Entity extends Serializable {
 
+    /**
+     * 使用jsr303对当前实体类进行验证，如果未通过验证则会抛出{@link org.hswebframework.web.exception.ValidationException}异常
+     *
+     * @param groups 分组
+     * @see org.hswebframework.web.exception.ValidationException
+     */
     default void tryValidate(Class<?>... groups) {
         ValidatorUtils.tryValidate(this, groups);
     }
 
+    /**
+     * 将当前实体类复制到指定其他类型中,类型将会被自动实例化,在类型明确时,建议使用{@link Entity#copyFrom(Object, String...)}.
+     *
+     * @param target           目标类型
+     * @param ignoreProperties 忽略复制的属性
+     * @param <T>类型
+     * @return 复制结果
+     */
     default <T> T copyTo(Class<T> target, String... ignoreProperties) {
         return FastBeanCopier.copy(this, target, ignoreProperties);
     }
 
+    /**
+     * 将当前实体类复制到其他对象中
+     *
+     * @param target           目标实体
+     * @param ignoreProperties 忽略复制的属性
+     * @param <T>类型
+     * @return 复制结果
+     */
     default <T> T copyTo(T target, String... ignoreProperties) {
         return FastBeanCopier.copy(this, target, ignoreProperties);
     }
 
+    /**
+     * 从其他对象复制属性到当前对象
+     *
+     * @param target           其他对象
+     * @param ignoreProperties 忽略复制的属性
+     * @param <T>              类型
+     * @return 当前对象
+     */
     @SuppressWarnings("all")
     default <T> T copyFrom(Object target, String... ignoreProperties) {
         return (T) FastBeanCopier.copy(target, this, ignoreProperties);
