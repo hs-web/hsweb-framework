@@ -26,12 +26,19 @@ import java.util.stream.Collectors;
 @Slf4j
 public class PermissionSynchronization implements CommandLineRunner {
 
-    @Autowired
-    private ReactiveRepository<PermissionEntity, String> permissionRepository;
+    private final ReactiveRepository<PermissionEntity, String> permissionRepository;
+
+    private final AuthorizeDefinitionCustomizer customizer;
 
     private final MergedAuthorizeDefinition definition = new MergedAuthorizeDefinition();
 
     private final Map<String, List<OptionalField>> entityFieldsMapping = new HashMap<>();
+
+    public PermissionSynchronization(ReactiveRepository<PermissionEntity, String> permissionRepository,
+                                     AuthorizeDefinitionCustomizer customizer) {
+        this.permissionRepository = permissionRepository;
+        this.customizer = customizer;
+    }
 
     @EventListener
     public void handleResourceParseEvent(AuthorizeDefinitionInitializedEvent event) {
@@ -115,7 +122,10 @@ public class PermissionSynchronization implements CommandLineRunner {
         if (definition.getResources().isEmpty()) {
             return;
         }
-        permissionRepository.createQuery()
+        customizer.custom(definition);
+
+        permissionRepository
+                .createQuery()
                 .fetch()
                 .collect(Collectors.toMap(PermissionEntity::getId, Function.identity()))
                 .flatMap(group -> Flux.fromIterable(definition.getResources())

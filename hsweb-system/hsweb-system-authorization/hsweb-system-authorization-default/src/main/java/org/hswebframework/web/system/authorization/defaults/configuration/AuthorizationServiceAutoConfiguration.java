@@ -3,13 +3,17 @@ package org.hswebframework.web.system.authorization.defaults.configuration;
 import org.hswebframework.ezorm.rdb.mapping.ReactiveRepository;
 import org.hswebframework.web.authorization.ReactiveAuthenticationInitializeService;
 import org.hswebframework.web.authorization.ReactiveAuthenticationManagerProvider;
+import org.hswebframework.web.authorization.define.AuthorizeDefinitionCustomizer;
+import org.hswebframework.web.authorization.define.CompositeAuthorizeDefinitionCustomizer;
 import org.hswebframework.web.authorization.simple.DefaultAuthorizationAutoConfiguration;
 import org.hswebframework.web.authorization.token.UserTokenManager;
 import org.hswebframework.web.system.authorization.api.UserDimensionProvider;
+import org.hswebframework.web.system.authorization.api.entity.PermissionEntity;
 import org.hswebframework.web.system.authorization.api.service.reactive.ReactiveUserService;
 import org.hswebframework.web.system.authorization.defaults.service.*;
 import org.hswebframework.web.system.authorization.defaults.service.terms.DimensionTerm;
 import org.hswebframework.web.system.authorization.defaults.service.terms.UserDimensionTerm;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Bean;
@@ -41,8 +45,9 @@ public class AuthorizationServiceAutoConfiguration {
         }
 
         @Bean
-        public PermissionSynchronization permissionSynchronization() {
-            return new PermissionSynchronization();
+        public PermissionSynchronization permissionSynchronization(ReactiveRepository<PermissionEntity, String> permissionRepository,
+                                                                   ObjectProvider<AuthorizeDefinitionCustomizer> customizer) {
+            return new PermissionSynchronization(permissionRepository, new CompositeAuthorizeDefinitionCustomizer(customizer));
         }
 
         @Bean

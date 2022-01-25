@@ -4,11 +4,11 @@ import java.util.List;
 import java.util.Set;
 
 
-public class MergedAuthorizeDefinition {
+public class MergedAuthorizeDefinition implements AuthorizeDefinitionContext {
 
-    private ResourcesDefinition resources = new ResourcesDefinition();
+    private final ResourcesDefinition resources = new ResourcesDefinition();
 
-    private DimensionsDefinition dimensions = new DimensionsDefinition();
+    private final DimensionsDefinition dimensions = new DimensionsDefinition();
 
     public Set<ResourceDefinition> getResources() {
         return resources.getResources();

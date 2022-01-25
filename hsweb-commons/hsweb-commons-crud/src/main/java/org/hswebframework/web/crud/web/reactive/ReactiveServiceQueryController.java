@@ -72,9 +72,9 @@ public interface ReactiveServiceQueryController<E, K> {
      */
     @PostMapping("/_query/no-paging")
     @QueryAction
-    @QueryNoPagingOperation(summary = "使用POST方式分页动态查询(不返回总数)",
+    @Operation(summary = "使用POST方式分页动态查询(不返回总数)",
             description = "此操作不返回分页总数,如果需要获取全部数据,请设置参数paging=false")
-    default Flux<E> query(@Parameter(hidden = true) @RequestBody Mono<QueryParamEntity> query) {
+    default Flux<E> query(@RequestBody Mono<QueryParamEntity> query) {
         return query.flatMapMany(this::query);
     }
 
@@ -133,8 +133,8 @@ public interface ReactiveServiceQueryController<E, K> {
     @PostMapping("/_query")
     @QueryAction
     @SuppressWarnings("all")
-    @QueryOperation(summary = "使用POST方式分页动态查询")
-    default Mono<PagerResult<E>> queryPager(@Parameter(hidden = true) @RequestBody Mono<QueryParamEntity> query) {
+    @Operation(summary = "使用POST方式分页动态查询")
+    default Mono<PagerResult<E>> queryPager(@RequestBody Mono<QueryParamEntity> query) {
         return query.flatMap(q -> queryPager(q));
     }
 
@@ -165,8 +165,8 @@ public interface ReactiveServiceQueryController<E, K> {
      */
     @PostMapping("/_count")
     @QueryAction
-    @QueryNoPagingOperation(summary = "使用POST方式查询总数")
-    default Mono<Integer> count(@Parameter(hidden = true) @RequestBody Mono<QueryParamEntity> query) {
+    @Operation(summary = "使用POST方式查询总数")
+    default Mono<Integer> count(@RequestBody Mono<QueryParamEntity> query) {
         return query.flatMap(this::count);
     }
 

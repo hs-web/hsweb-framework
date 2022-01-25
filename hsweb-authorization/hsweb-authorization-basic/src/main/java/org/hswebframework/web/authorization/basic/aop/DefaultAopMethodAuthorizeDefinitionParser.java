@@ -6,6 +6,7 @@ import org.hswebframework.web.aop.MethodInterceptorContext;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.annotation.DataAccess;
 import org.hswebframework.web.authorization.annotation.Dimension;
+import org.hswebframework.web.authorization.annotation.ResourceAction;
 import org.hswebframework.web.authorization.basic.define.DefaultBasicAuthorizeDefinition;
 import org.hswebframework.web.authorization.basic.define.EmptyAuthorizeDefinition;
 import org.hswebframework.web.authorization.define.AuthorizeDefinition;
@@ -15,8 +16,10 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -63,7 +66,8 @@ public class DefaultAopMethodAuthorizeDefinitionParser implements AopMethodAutho
         }
         //使用自定义
         if (!CollectionUtils.isEmpty(parserCustomizers)) {
-            definition = parserCustomizers.stream()
+            definition = parserCustomizers
+                    .stream()
                     .map(customizer -> customizer.parse(target, method, context))
                     .filter(Objects::nonNull)
                     .findAny().orElse(null);
@@ -77,7 +81,7 @@ public class DefaultAopMethodAuthorizeDefinitionParser implements AopMethodAutho
 
         Authorize annotation = AnnotationUtils.findAnnotation(target, method, Authorize.class);
 
-        if (annotation != null && annotation.ignore()) {
+        if (isIgnoreMethod(method) || (annotation != null && annotation.ignore())) {
             cache.put(key, EmptyAuthorizeDefinition.instance);
             return null;
         }
@@ -105,6 +109,16 @@ public class DefaultAopMethodAuthorizeDefinitionParser implements AopMethodAutho
 
     public void destroy() {
         cache.clear();
+    }
+
+    static boolean isIgnoreMethod(Method method) {
+        //不是public的方法
+        if(!Modifier.isPublic(method.getModifiers())){
+            return true;
+        }
+        //没有以下注解
+        return null == AnnotatedElementUtils.findMergedAnnotation(method, RequestMapping.class)
+                && null == AnnotatedElementUtils.findMergedAnnotation(method, ResourceAction.class);
     }
 
 }

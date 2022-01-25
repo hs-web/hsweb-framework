@@ -26,19 +26,20 @@ public interface ReactiveCache<E> {
     Mono<Void> clear();
 
     default CacheFlux.FluxCacheBuilderMapMiss<E> flux(Object key) {
-        return otherSupplier ->
-                Flux.defer(() ->
-                        getFlux(key)
-                                .switchIfEmpty(otherSupplier.get()
-                                        .collectList()
-                                        .flatMapMany(values -> put(key, Flux.fromIterable(values))
-                                                .thenMany(Flux.fromIterable(values)))));
+        return otherSupplier -> Flux
+                .defer(() -> this
+                        .getFlux(key)
+                        .switchIfEmpty(otherSupplier.get()
+                                                    .collectList()
+                                                    .flatMapMany(values -> put(key, Flux.fromIterable(values))
+                                                            .thenMany(Flux.fromIterable(values)))));
     }
 
     default CacheMono.MonoCacheBuilderMapMiss<E> mono(Object key) {
-        return otherSupplier ->
-                Mono.defer(() -> getMono(key)
+        return otherSupplier -> Mono
+                .defer(() -> this
+                        .getMono(key)
                         .switchIfEmpty(otherSupplier.get()
-                                .flatMap(value -> put(key, Mono.just(value)).thenReturn(value))));
+                                                    .flatMap(value -> put(key, Mono.just(value)).thenReturn(value))));
     }
 }

@@ -10,9 +10,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.hswebframework.ezorm.core.NestConditional;
 import org.hswebframework.ezorm.core.dsl.Query;
+import org.hswebframework.ezorm.core.param.Param;
 import org.hswebframework.ezorm.core.param.QueryParam;
 import org.hswebframework.ezorm.core.param.Term;
 import org.hswebframework.ezorm.core.param.TermType;
+import org.hswebframework.web.bean.FastBeanCopier;
 import org.springframework.util.StringUtils;
 
 
@@ -26,11 +28,11 @@ import java.util.function.Consumer;
  * 可通过静态方法创建:<br>
  * 如:
  * <pre>
- *{@code
+ * {@code
  *      QueryParamEntity.of("id",id);
- *}
+ * }
  * </pre>
- *
+ * <p>
  * 或者使用DSL方式来构造:
  * <pre>{@code
  *  QueryParamEntity
@@ -95,6 +97,20 @@ public class QueryParamEntity extends QueryParam {
     @Schema(description = "指定不查询的列")
     public Set<String> getExcludes() {
         return super.getExcludes();
+    }
+
+    /**
+     * 基于另外一个条件参数来创建查询条件实体
+     *
+     * @param param 参数
+     * @return 新的查询条件
+     * @since 4.0.14
+     */
+    public static QueryParamEntity of(Param param) {
+        if (param instanceof QueryParamEntity) {
+            return ((QueryParamEntity) param).clone();
+        }
+        return FastBeanCopier.copy(param, new QueryParamEntity());
     }
 
     /**
@@ -217,7 +233,7 @@ public class QueryParamEntity extends QueryParam {
         return this;
     }
 
-    public QueryParamEntity doNotSort(){
+    public QueryParamEntity doNotSort() {
         this.setSorts(new ArrayList<>());
         return this;
     }
