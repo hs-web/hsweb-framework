@@ -15,7 +15,7 @@ public class CompositeEntityTableMetadataResolver implements EntityTableMetadata
 
     private final List<EntityTableMetadataParser> resolvers = new ArrayList<>();
 
-    private final Map<Class, AtomicReference<RDBTableMetadata>> cache = new ConcurrentHashMap<>();
+    private final Map<Class<?>, AtomicReference<RDBTableMetadata>> cache = new ConcurrentHashMap<>();
 
     public void addParser(EntityTableMetadataParser resolver) {
         resolvers.add(resolver);
@@ -33,9 +33,7 @@ public class CompositeEntityTableMetadataResolver implements EntityTableMetadata
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .reduce((t1, t2) -> {
-                    for (RDBColumnMetadata column : t1.getColumns()) {
-                        t2.addColumn(column.clone());
-                    }
+                    t2.merge(t1);
                     return t2;
                 }).orElse(null);
     }

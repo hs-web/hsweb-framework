@@ -10,9 +10,12 @@ import org.hswebframework.ezorm.rdb.mapping.EntityColumnMapping;
 import org.hswebframework.ezorm.rdb.mapping.EntityManager;
 import org.hswebframework.ezorm.rdb.mapping.MappingFeatureType;
 import org.hswebframework.ezorm.rdb.mapping.jpa.JpaEntityTableMetadataParser;
+import org.hswebframework.ezorm.rdb.mapping.jpa.JpaEntityTableMetadataParserProcessor;
 import org.hswebframework.ezorm.rdb.mapping.parser.EntityTableMetadataParser;
+import org.hswebframework.ezorm.rdb.metadata.RDBColumnMetadata;
 import org.hswebframework.ezorm.rdb.metadata.RDBDatabaseMetadata;
 import org.hswebframework.ezorm.rdb.metadata.RDBSchemaMetadata;
+import org.hswebframework.ezorm.rdb.metadata.RDBTableMetadata;
 import org.hswebframework.ezorm.rdb.operator.DatabaseOperator;
 import org.hswebframework.ezorm.rdb.operator.DefaultDatabaseOperator;
 import org.hswebframework.web.api.crud.entity.EntityFactory;
@@ -35,9 +38,13 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.beans.PropertyDescriptor;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Configuration
 @EnableConfigurationProperties(EasyormProperties.class)
@@ -59,49 +66,6 @@ public class EasyormConfiguration {
             customizer.custom(factory);
         }
         return factory;
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public EntityManager entityManager(EntityTableMetadataResolver resolver, EntityFactory entityFactory) {
-        return new EntityManager() {
-            @Override
-            @SneakyThrows
-            public <E> E newInstance(Class<E> type) {
-                return entityFactory.newInstance(type);
-            }
-
-            @Override
-            public EntityColumnMapping getMapping(Class entity) {
-
-                return resolver.resolve(entityFactory.getInstanceType(entity, true))
-                               .getFeature(MappingFeatureType.columnPropertyMapping.createFeatureId(entity))
-                               .map(EntityColumnMapping.class::cast)
-                               .orElse(null);
-            }
-        };
-    }
-
-    @Bean
-    public DefaultEntityResultWrapperFactory defaultEntityResultWrapperFactory(EntityManager entityManager) {
-        return new DefaultEntityResultWrapperFactory(entityManager);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public EntityTableMetadataResolver entityTableMappingResolver(List<EntityTableMetadataParser> parsers) {
-        CompositeEntityTableMetadataResolver resolver = new CompositeEntityTableMetadataResolver();
-        parsers.forEach(resolver::addParser);
-        return resolver;
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public EntityTableMetadataParser jpaEntityTableMetadataParser(RDBDatabaseMetadata metadata) {
-        JpaEntityTableMetadataParser parser = new JpaEntityTableMetadataParser();
-        parser.setDatabaseMetadata(metadata);
-
-        return parser;
     }
 
     @Bean
@@ -182,4 +146,80 @@ public class EasyormConfiguration {
         return new CurrentTimeGenerator();
     }
 
+    @Configuration
+    public static class EntityTableMetadataParserConfiguration {
+
+        @Bean
+        public DefaultEntityResultWrapperFactory defaultEntityResultWrapperFactory(EntityManager entityManager) {
+            return new DefaultEntityResultWrapperFactory(entityManager);
+        }
+
+        @Bean
+        @ConditionalOnMissingBean
+        public EntityManager entityManager(EntityTableMetadataResolver resolver, EntityFactory entityFactory) {
+            return new EntityManager() {
+                @Override
+                @SneakyThrows
+                public <E> E newInstance(Class<E> type) {
+                    return entityFactory.newInstance(type);
+                }
+
+                @Override
+                public EntityColumnMapping getMapping(Class entity) {
+
+                    return resolver.resolve(entityFactory.getInstanceType(entity, true))
+                                   .getFeature(MappingFeatureType.columnPropertyMapping.createFeatureId(entity))
+                                   .map(EntityColumnMapping.class::cast)
+                                   .orElse(null);
+                }
+            };
+        }
+
+        @Bean
+        @ConditionalOnMissingBean
+        public EntityTableMetadataResolver entityTableMappingResolver(ObjectProvider<EntityTableMetadataParser> parsers) {
+            CompositeEntityTableMetadataResolver resolver = new CompositeEntityTableMetadataResolver();
+            parsers.forEach(resolver::addParser);
+            return resolver;
+        }
+
+        @Bean
+        @ConditionalOnMissingBean
+        public EntityTableMetadataParser jpaEntityTableMetadataParser(RDBDatabaseMetadata metadata,
+                                                                      ObjectProvider<TableMetadataCustomizer> customizers) {
+
+            JpaEntityTableMetadataParser parser = new JpaEntityTableMetadataParser() {
+
+                @Override
+                public Optional<RDBTableMetadata> parseTableMetadata(Class<?> entityType) {
+                    Optional<RDBTableMetadata> tableOpt = super.parseTableMetadata(entityType);
+                    tableOpt.ifPresent(table -> {
+                        for (TableMetadataCustomizer customizer : customizers) {
+                            customizer.customTable(entityType, table);
+                        }
+                    });
+                    return tableOpt;
+                }
+
+                @Override
+                protected JpaEntityTableMetadataParserProcessor createProcessor(RDBTableMetadata table, Class<?> type) {
+                    return new JpaEntityTableMetadataParserProcessor(table, type) {
+                        @Override
+                        protected void customColumn(PropertyDescriptor descriptor,
+                                                    Field field,
+                                                    RDBColumnMetadata column,
+                                                    Set<Annotation> annotations) {
+                            super.customColumn(descriptor, field, column, annotations);
+                            for (TableMetadataCustomizer customizer : customizers) {
+                                customizer.customColumn(type, descriptor, field, annotations, column);
+                            }
+                        }
+                    };
+                }
+            };
+            parser.setDatabaseMetadata(metadata);
+
+            return parser;
+        }
+    }
 }
