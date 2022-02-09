@@ -87,6 +87,12 @@ public final class FastBeanCopier {
         };
     }
 
+    public static Object getProperty(Object source, String key) {
+        SingleValueMap<Object,Object> map = new SingleValueMap<>();
+        copy(source, map, include(key));
+        return map.getValue();
+    }
+
     public static <T, S> T copy(S source, T target, String... ignore) {
         return copy(source, target, DEFAULT_CONVERT, ignore);
     }
@@ -571,7 +577,7 @@ public final class FastBeanCopier {
                 return (T) collection;
             }
 
-            if (target.isEnumType()){
+            if (target.isEnumType()) {
                 if (target.isEnumDict()) {
                     String strVal = String.valueOf(source);
 
@@ -609,11 +615,11 @@ public final class FastBeanCopier {
 
                 //快速复制map
                 if (targetClass == Map.class) {
-                    if(source instanceof Map) {
+                    if (source instanceof Map) {
                         return (T) new HashMap(((Map<?, ?>) source));
                     }
                     ClassDescription sourType = ClassDescriptions.getDescription(source.getClass());
-                    return (T)copy(source, Maps.newHashMapWithExpectedSize(sourType.getFieldSize()));
+                    return (T) copy(source, Maps.newHashMapWithExpectedSize(sourType.getFieldSize()));
                 }
 
                 return copy(source, beanFactory.newInstance(targetClass), this);
