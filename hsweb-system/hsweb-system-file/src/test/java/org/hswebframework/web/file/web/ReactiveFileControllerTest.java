@@ -29,6 +29,7 @@ public class ReactiveFileControllerTest {
 
     static {
         System.setProperty("hsweb.file.upload.static-file-path","./target/upload");
+//        System.setProperty("hsweb.file.upload.use-original-file-name","true");
     }
 
     @Autowired

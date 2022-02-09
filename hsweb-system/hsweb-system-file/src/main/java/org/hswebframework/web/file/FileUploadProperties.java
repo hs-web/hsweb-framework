@@ -22,6 +22,9 @@ public class FileUploadProperties {
 
     private String staticLocation = "/static";
 
+    //是否使用原始文件名进行存储
+    private boolean useOriginalFileName = false;
+
     private Set<String> allowFiles;
 
     private Set<String> denyFiles;
@@ -51,7 +54,7 @@ public class FileUploadProperties {
             if (denyMediaType.contains(mediaType.toString())) {
                 return true;
             }
-            defaultDeny =  false;
+            defaultDeny = false;
         }
 
         if (CollectionUtils.isNotEmpty(allowMediaType)) {
@@ -67,16 +70,24 @@ public class FileUploadProperties {
     public StaticFileInfo createStaticSavePath(String name) {
         String fileName = IDGenerator.SNOW_FLAKE_STRING.generate();
         String filePath = DateFormatter.toString(new Date(), "yyyyMMdd");
-        String absPath = staticFilePath.concat("/").concat(filePath);
+
         //文件后缀
         String suffix = name.contains(".") ?
                 name.substring(name.lastIndexOf(".")) : "";
 
-        new File(absPath).mkdirs();
         StaticFileInfo info = new StaticFileInfo();
 
-        info.location = staticLocation + "/" + filePath + "/" + fileName + suffix;
-        info.savePath = absPath + "/" + fileName + suffix;
+        if (useOriginalFileName) {
+            filePath = filePath + "/" + fileName;
+            fileName = name;
+        } else {
+            fileName = fileName + suffix;
+        }
+        String absPath = staticFilePath.concat("/").concat(filePath);
+        new File(absPath).mkdirs();
+
+        info.location = staticLocation + "/" + filePath + "/" + fileName;
+        info.savePath = absPath + "/" + fileName;
 
         return info;
     }

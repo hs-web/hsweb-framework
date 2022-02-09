@@ -5,6 +5,7 @@ import lombok.SneakyThrows;
 import org.hswebframework.web.file.FileUploadProperties;
 import org.springframework.http.codec.multipart.FilePart;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.io.File;
 import java.io.InputStream;
@@ -55,6 +56,7 @@ public class LocalFileStorageService implements FileStorageService {
                         }
                         return info.getLocation();
                     }
-                });
+                })
+                .subscribeOn(Schedulers.boundedElastic());
     }
 }
