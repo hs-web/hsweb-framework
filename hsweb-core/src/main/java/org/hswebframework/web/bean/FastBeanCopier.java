@@ -88,7 +88,7 @@ public final class FastBeanCopier {
     }
 
     public static Object getProperty(Object source, String key) {
-        SingleValueMap<Object,Object> map = new SingleValueMap<>();
+        SingleValueMap<Object, Object> map = new SingleValueMap<>();
         copy(source, map, include(key));
         return map.getValue();
     }
@@ -542,7 +542,11 @@ public final class FastBeanCopier {
             }
             if (targetClass == Date.class) {
                 if (source instanceof String) {
-                    return (T) DateFormatter.fromString((String) source);
+                    T parsed = (T) DateFormatter.fromString((String) source);
+                    if (parsed == null) {
+                        return (T) converterByApache(Date.class, source);
+                    }
+                    return parsed;
                 }
                 if (source instanceof Number) {
                     return (T) new Date(((Number) source).longValue());
@@ -628,6 +632,14 @@ public final class FastBeanCopier {
                 throw new UnsupportedOperationException(e.getMessage(), e);
             }
 //            return null;
+        }
+
+        private Object converterByApache(Class<?> targetClass, Object source) {
+            org.apache.commons.beanutils.Converter converter = convertUtils.lookup(targetClass);
+            if (null != converter) {
+                return converter.convert(targetClass, source);
+            }
+            return null;
         }
     }
 
