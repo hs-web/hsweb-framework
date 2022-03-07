@@ -7,7 +7,10 @@ import org.hswebframework.ezorm.rdb.mapping.annotation.Comment;
 import org.hswebframework.ezorm.rdb.mapping.annotation.DefaultValue;
 import org.hswebframework.ezorm.rdb.mapping.annotation.JsonCodec;
 import org.hswebframework.web.api.crud.entity.GenericEntity;
+import org.hswebframework.web.api.crud.entity.RecordCreationEntity;
+import org.hswebframework.web.api.crud.entity.RecordModifierEntity;
 import org.hswebframework.web.bean.FastBeanCopier;
+import org.hswebframework.web.crud.generator.Generators;
 import org.hswebframework.web.validator.CreateGroup;
 import org.springframework.util.CollectionUtils;
 
@@ -27,7 +30,7 @@ import java.util.stream.Collectors;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PermissionEntity extends GenericEntity<String> {
+public class PermissionEntity extends GenericEntity<String> implements RecordCreationEntity, RecordModifierEntity {
 
     @Override
     @Pattern(regexp = "^[0-9a-zA-Z_\\-]+$", message = "ID只能由数字,字母,下划线和中划线组成", groups = CreateGroup.class)
@@ -79,6 +82,24 @@ public class PermissionEntity extends GenericEntity<String> {
     @Comment("其他配置")
     @Schema(description = "其他配置")
     private Map<String, Object> properties;
+
+    @Schema(description = "创建时间")
+    @Column(updatable = false)
+    @DefaultValue(generator = Generators.CURRENT_TIME)
+    private Long createTime;
+
+    @Schema(description = "创建人ID")
+    @Column(length = 64, updatable = false)
+    private String creatorId;
+
+    @Schema(description = "修改时间")
+    @Column
+    @DefaultValue(generator = Generators.CURRENT_TIME)
+    private Long modifyTime;
+
+    @Schema(description = "修改人ID")
+    @Column(length = 64, updatable = false)
+    private String modifierId;
 
     public PermissionEntity copy(Predicate<ActionEntity> actionFilter,
                                  Predicate<OptionalField> fieldFilter) {
