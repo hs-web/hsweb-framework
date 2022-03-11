@@ -15,7 +15,7 @@ import javax.validation.constraints.NotBlank;
 @Getter
 @Setter
 @Table(name = "s_dimension_type")
-@Comment("纬度类型")
+@Comment("维度类型")
 public class DimensionTypeEntity extends GenericEntity<String> implements DimensionType {
 
 
