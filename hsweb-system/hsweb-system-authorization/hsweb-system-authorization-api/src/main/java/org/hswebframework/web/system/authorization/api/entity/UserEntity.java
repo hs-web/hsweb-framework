@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.hswebframework.ezorm.rdb.mapping.annotation.Comment;
 import org.hswebframework.ezorm.rdb.mapping.annotation.DefaultValue;
 import org.hswebframework.web.api.crud.entity.GenericEntity;
 import org.hswebframework.web.api.crud.entity.RecordCreationEntity;
@@ -32,6 +33,7 @@ import javax.validation.constraints.NotBlank;
 @Table(name = "s_user",
         indexes = @Index(name = "user_username_idx", columnList = "username", unique = true)
 )
+@Comment("用户信息")
 public class UserEntity extends GenericEntity<String> implements RecordCreationEntity {
 
     @Column(length = 128, nullable = false)
@@ -54,6 +56,7 @@ public class UserEntity extends GenericEntity<String> implements RecordCreationE
     @Column(nullable = false)
     @ToString.Ignore(cover = false)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @Schema(description = "加密盐值")
     @Hidden
     private String salt;
 
@@ -67,11 +70,13 @@ public class UserEntity extends GenericEntity<String> implements RecordCreationE
     private Byte status;
 
     @Column(name = "creator_id", updatable = false)
+    @Schema(description = "创建者ID")
     @Hidden
     private String creatorId;
 
     @Column(name = "create_time", updatable = false)
     @DefaultValue(generator = "current_time")
+    @Schema(description = "创建时间")
     @Hidden
     private Long createTime;
 

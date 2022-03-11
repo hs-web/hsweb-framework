@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
         @Index(name = "idx_sasi_dss", columnList = "dimension_type,dimension_target,state desc"),
         @Index(name = "idx_sasi_pdd", columnList = "permission,dimension_type,dimension_target",unique = true)
 })
+@Comment("授权信息")
 @Getter
 @Setter
 @EnableEntityEvent
@@ -33,6 +34,7 @@ public class AuthorizationSettingEntity implements Entity {
     @Id
     @Column(length = 32)
     @GeneratedValue(generator = "md5")
+    @Schema(description = "ID")
     private String id;
 
     @Column(length = 32, nullable = false, updatable = false)

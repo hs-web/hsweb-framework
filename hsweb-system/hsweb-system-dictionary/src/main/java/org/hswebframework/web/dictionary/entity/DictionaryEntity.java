@@ -20,6 +20,7 @@ package org.hswebframework.web.dictionary.entity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
+import org.hswebframework.ezorm.rdb.mapping.annotation.Comment;
 import org.hswebframework.ezorm.rdb.mapping.annotation.DefaultValue;
 import org.hswebframework.web.api.crud.entity.GenericEntity;
 import org.hswebframework.web.api.crud.entity.RecordCreationEntity;
@@ -37,6 +38,7 @@ import java.util.List;
  * @author hsweb-generator-online
  */
 @Table(name = "s_dictionary")
+@Comment("数据字典")
 @Getter
 @Setter
 public class DictionaryEntity extends GenericEntity<String> implements RecordCreationEntity {

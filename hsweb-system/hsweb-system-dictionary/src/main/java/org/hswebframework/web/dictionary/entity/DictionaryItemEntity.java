@@ -20,6 +20,7 @@ import com.alibaba.fastjson.JSONObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
+import org.hswebframework.ezorm.rdb.mapping.annotation.Comment;
 import org.hswebframework.ezorm.rdb.mapping.annotation.DefaultValue;
 import org.hswebframework.web.api.crud.entity.GenericTreeSortSupportEntity;
 import org.hswebframework.web.dict.EnumDict;
@@ -39,6 +40,7 @@ import java.util.List;
         @Index(name = "idx_dic_item_ordinal",columnList = "ordinal"),
         @Index(name = "idx_dic_item_path",columnList = "path")
 })
+@Comment("数据字典选项")
 public class DictionaryItemEntity extends GenericTreeSortSupportEntity<String> implements EnumDict<String> {
     //字典id
     @Column(name = "dict_id", length = 64, updatable = false, nullable = false)

@@ -25,6 +25,7 @@ import java.util.Map;
 @Table(name = "s_dimension", indexes = {
         @Index(name = "idx_dims_path", columnList = "path")
 })
+@Comment("权限维度")
 @EnableEntityEvent
 public class DimensionEntity extends GenericTreeSortSupportEntity<String> {
 
