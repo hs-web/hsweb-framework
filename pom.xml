@@ -79,7 +79,7 @@
         <java.version>1.8</java.version>
         <project.build.jdk>${java.version}</project.build.jdk>
 
-        <spring.boot.version>2.3.11.RELEASE</spring.boot.version>
+        <spring.boot.version>2.3.12.RELEASE</spring.boot.version>
 
         <javassist.version>3.20.0-GA</javassist.version>
         <activiti.version>5.19.0.2</activiti.version>
@@ -96,6 +96,7 @@
         <swagger.version>2.7.0</swagger.version>
 
         <r2dbc.version>Arabba-SR10</r2dbc.version>
+        <spring-framework.version>5.2.19.RELEASE</spring-framework.version>
     </properties>
 
     <profiles>
@@ -397,6 +398,14 @@
                 <groupId>commons-beanutils</groupId>
                 <artifactId>commons-beanutils</artifactId>
                 <version>1.9.4</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-framework-bom</artifactId>
+                <version>${spring-framework.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
 
             <dependency>
