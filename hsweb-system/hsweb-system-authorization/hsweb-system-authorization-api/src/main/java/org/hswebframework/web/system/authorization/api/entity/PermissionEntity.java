@@ -22,6 +22,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Table(name = "s_permission")
+@Comment("权限信息")
 @Getter
 @Setter
 @Builder

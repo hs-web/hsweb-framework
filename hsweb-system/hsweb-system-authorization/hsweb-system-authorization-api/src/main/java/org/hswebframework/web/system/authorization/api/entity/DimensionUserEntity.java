@@ -27,6 +27,7 @@ import java.sql.JDBCType;
         @Index(name = "idx_dimsu_user_id", columnList = "user_id"),
 
 })
+@Comment("用户纬度关联表")
 @EnableEntityEvent
 public class DimensionUserEntity extends GenericEntity<String> {
 

@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 import org.hswebframework.ezorm.rdb.mapping.annotation.ColumnType;
+import org.hswebframework.ezorm.rdb.mapping.annotation.Comment;
 import org.hswebframework.ezorm.rdb.mapping.annotation.DefaultValue;
 import org.hswebframework.ezorm.rdb.mapping.annotation.EnumCodec;
 import org.hswebframework.web.api.crud.entity.GenericEntity;
@@ -17,6 +18,7 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 
 @Table(name = "s_oauth2_client")
+@Comment("OAuth2客户端")
 @Getter
 @Setter
 public class OAuth2ClientEntity extends GenericEntity<String> {
