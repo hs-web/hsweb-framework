@@ -23,11 +23,13 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
 
 import javax.persistence.Table;
+import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -40,7 +42,16 @@ public class EasyormRepositoryRegistrar implements ImportBeanDefinitionRegistrar
 
     private final ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
 
-    private final MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
+    private final MetadataReaderFactory metadataReaderFactory = new CachingMetadataReaderFactory();
+
+    private String getResourceClassName(Resource resource) {
+        try {
+            return metadataReaderFactory.getMetadataReader(resource)
+                                        .getClassMetadata().getClassName();
+        } catch (IOException e) {
+            return null;
+        }
+    }
 
     @SneakyThrows
     private Stream<Resource> doGetResources(String packageStr) {
@@ -48,6 +59,22 @@ public class EasyormRepositoryRegistrar implements ImportBeanDefinitionRegistrar
                 .CLASSPATH_ALL_URL_PREFIX
                 .concat(packageStr.replace(".", "/")).concat("/**/*.class");
         return Arrays.stream(resourcePatternResolver.getResources(path));
+    }
+
+    protected Set<String> scanEntities(String[] packageStr) {
+        CandidateComponentsIndex index = CandidateComponentsIndexLoader.loadIndex(org.springframework.util.ClassUtils.getDefaultClassLoader());
+        if (null == index) {
+            return Stream
+                    .of(packageStr)
+                    .flatMap(this::doGetResources)
+                    .map(this::getResourceClassName)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toSet());
+        }
+        return Stream
+                .of(packageStr)
+                .flatMap(pkg -> index.getCandidateTypes(pkg, Table.class.getName()).stream())
+                .collect(Collectors.toSet());
     }
 
     @Override
@@ -63,26 +90,12 @@ public class EasyormRepositoryRegistrar implements ImportBeanDefinitionRegistrar
         boolean nonReactiveEnabled = Boolean.TRUE.equals(attr.get("nonReactive"));
 
         String[] arr = (String[]) attr.get("value");
-//        Set<Resource> resources = Arrays
-//                .stream(arr)
-//                .flatMap(this::doGetResources)
-//                .collect(Collectors.toSet());
 
         Class<Annotation>[] anno = (Class[]) attr.get("annotation");
 
         Set<EntityInfo> entityInfos = new HashSet<>();
         CandidateComponentsIndex index = CandidateComponentsIndexLoader.loadIndex(org.springframework.util.ClassUtils.getDefaultClassLoader());
-        Set<String> entities = Stream
-                .of(arr)
-                .flatMap(_package -> {
-                    return index
-                            .getCandidateTypes(_package, Table.class.getName())
-                            .stream();
-                })
-                .collect(Collectors.toSet());
-        for (String className : entities) {
-//            MetadataReader reader = metadataReaderFactory.getMetadataReader(resource);
-//            String className = reader.getClassMetadata().getClassName();
+        for (String className : scanEntities(arr)) {
             Class<?> entityType = org.springframework.util.ClassUtils.forName(className, null);
             if (Arrays.stream(anno)
                       .noneMatch(ann -> AnnotationUtils.findAnnotation(entityType, ann) != null)) {
