@@ -29,13 +29,13 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * 权限获取器,用于静态方式获取当前登录用户的权限信息.
+ * 响应式权限保持器,用于响应式方式获取当前登录用户的权限信息.
  * 例如:
- * <pre>
- *     &#064;RequestMapping("/example")
- *     public ResponseMessage example(){
- *         Authorization auth = AuthorizationHolder.get();
- *         return ResponseMessage.ok();
+ * <pre>{@code
+ *     @RequestMapping("/example")
+ *     public Mono<Authorization> example(){
+ *         return ReactiveAuthenticationHolder.get();
+ *     }
  *     }
  * </pre>
  *
