@@ -13,5 +13,13 @@
     <artifactId>hsweb-access-logging-api</artifactId>
 
     <description>访问日志API模块</description>
+    <dependencies>
+        <dependency>
+            <groupId>org.hswebframework.web</groupId>
+            <artifactId>hsweb-core</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
 
 </project>
