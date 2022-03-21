@@ -1,14 +1,15 @@
 package org.hswebframework.web.event;
 
-import lombok.Getter;
 import org.reactivestreams.Publisher;
 import org.springframework.context.ApplicationEventPublisher;
 import reactor.core.publisher.Mono;
 
+import java.util.function.Function;
+
 public class DefaultAsyncEvent implements AsyncEvent {
 
-    private Mono<Void> async = Mono.empty();
-    private Mono<Void> first = Mono.empty();
+    private Mono<?> async = Mono.empty();
+    private Mono<?> first = Mono.empty();
 
     private boolean hasListener;
 
@@ -24,8 +25,18 @@ public class DefaultAsyncEvent implements AsyncEvent {
     }
 
     @Override
+    public void first(Function<Mono<?>, Publisher<?>> mapper) {
+        this.first = Mono.from(mapper.apply(this.first));
+    }
+
+    @Override
+    public void async(Function<Mono<?>, Publisher<?>> mapper) {
+        this.async = Mono.from(mapper.apply(this.async));
+    }
+
+    @Override
     public Mono<Void> getAsync() {
-        return this.first.then(this.async);
+        return this.first.then(this.async).then();
     }
 
     @Override

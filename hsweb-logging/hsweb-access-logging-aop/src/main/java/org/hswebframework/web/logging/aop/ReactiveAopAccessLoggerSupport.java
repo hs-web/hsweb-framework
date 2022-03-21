@@ -76,15 +76,15 @@ public class ReactiveAopAccessLoggerSupport extends StaticMethodMatcherPointcutA
 
     protected Flux<?> wrapFluxResponse(Flux<?> flux, AccessLoggerInfo loggerInfo) {
 
-        Flux<?> cache = this
+        Flux<?> cache = flux.cache();
+        return this
                 .currentRequestInfo()
                 .doOnNext(loggerInfo::putAccessInfo)
-                .then(Mono.defer(() -> new AccessLoggerBeforeEvent(loggerInfo).publish(eventPublisher)))
-                .thenMany(flux)
-                .cache();
-
-        return cache
-                .flatMap(ignore -> Mono.empty())
+                .then(Mono.defer(() -> {
+                    AccessLoggerBeforeEvent event = new AccessLoggerBeforeEvent(loggerInfo);
+                    event.first(cache);
+                    return event.publish(eventPublisher);
+                }))
                 .then(Mono.defer(() -> {
                     loggerInfo.setResponseTime(System.currentTimeMillis());
                     return new AccessLoggerAfterEvent(loggerInfo).publish(eventPublisher);

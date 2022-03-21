@@ -4,6 +4,8 @@ import org.reactivestreams.Publisher;
 import org.springframework.context.ApplicationEventPublisher;
 import reactor.core.publisher.Mono;
 
+import java.util.function.Function;
+
 /**
  * 异步事件,使用响应式编程进行事件监听时,请使用此事件接口
  *
@@ -26,6 +28,10 @@ public interface AsyncEvent {
      * @param publisher 任务
      */
     void first(Publisher<?> publisher);
+
+    void first(Function<Mono<?>,Publisher<?>> mapper);
+
+    void async(Function<Mono<?>,Publisher<?>> mapper);
 
     /**
      * 推送事件到 ApplicationEventPublisher
