@@ -25,12 +25,12 @@ public class DefaultAsyncEvent implements AsyncEvent {
     }
 
     @Override
-    public void first(Function<Mono<?>, Publisher<?>> mapper) {
+    public void transformFirst(Function<Mono<?>, Publisher<?>> mapper) {
         this.first = Mono.from(mapper.apply(this.first));
     }
 
     @Override
-    public void async(Function<Mono<?>, Publisher<?>> mapper) {
+    public void transform(Function<Mono<?>, Publisher<?>> mapper) {
         this.async = Mono.from(mapper.apply(this.async));
     }
 

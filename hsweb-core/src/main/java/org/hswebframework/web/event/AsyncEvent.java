@@ -29,9 +29,9 @@ public interface AsyncEvent {
      */
     void first(Publisher<?> publisher);
 
-    void first(Function<Mono<?>,Publisher<?>> mapper);
+    void transformFirst(Function<Mono<?>,Publisher<?>> mapper);
 
-    void async(Function<Mono<?>,Publisher<?>> mapper);
+    void transform(Function<Mono<?>,Publisher<?>> mapper);
 
     /**
      * 推送事件到 ApplicationEventPublisher
