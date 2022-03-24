@@ -5,6 +5,10 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.hswebframework.web.i18n.LocaleUtils;
+import reactor.core.publisher.Mono;
+
+import java.util.Locale;
+import java.util.Objects;
 
 /**
  * 支持国际化消息的异常,code为
@@ -45,11 +49,24 @@ public class I18nSupportException extends RuntimeException {
 
     @Override
     public String getMessage() {
+        if (Objects.equals(super.getMessage(), this.getI18nCode())) {
+            return getLocalizedMessage();
+        }
         return super.getMessage() != null ? super.getMessage() : getLocalizedMessage();
     }
 
     @Override
-    public String getLocalizedMessage() {
-        return LocaleUtils.resolveMessage(i18nCode, args);
+    public final String getLocalizedMessage() {
+        return getLocalizedMessage(LocaleUtils.current());
+    }
+
+    public String getLocalizedMessage(Locale locale) {
+        return LocaleUtils.resolveMessage(i18nCode, locale, getMessage(), args);
+    }
+
+    public final Mono<String> getLocalizedMessageReactive() {
+        return LocaleUtils
+                .currentReactive()
+                .map(this::getLocalizedMessage);
     }
 }

@@ -6,10 +6,13 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hswebframework.web.i18n.LocaleUtils;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.validation.ConstraintViolation;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -31,9 +34,6 @@ public class ValidationException extends I18nSupportException {
     public ValidationException(String message, List<Detail> details, Object... args) {
         super(message, args);
         this.details = details;
-        for (Detail detail : this.details) {
-            detail.translateI18n(args);
-        }
     }
 
     public ValidationException(Set<? extends ConstraintViolation<?>> violations) {
@@ -48,23 +48,44 @@ public class ValidationException extends I18nSupportException {
 
         //{0} 属性 ，{1} 验证消息
         //property也支持国际化?
-        String resolveMessage = propertyI18nEnabled ?
-                LocaleUtils.resolveMessage(first.getRootBeanClass().getName() + "." + property, property)
+        String propertyI18n = propertyI18nEnabled ?
+                first.getRootBeanClass().getName() + "." + property
                 : property;
 
-        setArgs(new Object[]{resolveMessage, first.getMessage()});
+        setArgs(new Object[]{propertyI18n, first.getMessage()});
 
         details = new ArrayList<>(violations.size());
         for (ConstraintViolation<?> violation : violations) {
-            details.add(new Detail(violation.getPropertyPath().toString(), violation.getMessage(), null));
+            details.add(new Detail(violation.getPropertyPath().toString(),
+                                   violation.getMessage(),
+                                   null));
         }
     }
 
+    public List<Detail> getDetails(Locale locale) {
+        return CollectionUtils.isEmpty(details)
+                ? Collections.emptyList()
+                : details
+                .stream()
+                .map(detail -> detail.translateI18n(locale))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public String getLocalizedMessage(Locale locale) {
+        if (propertyI18nEnabled && "validation.property_validate_failed".equals(getI18nCode()) && getArgs().length > 0) {
+            Object[] args = getArgs().clone();
+            args[0] = LocaleUtils.resolveMessage(String.valueOf(args[0]), locale, String.valueOf(args[0]));
+            return LocaleUtils.resolveMessage(getI18nCode(), locale, getMessage(), args);
+        }
+        return super.getLocalizedMessage(locale);
+    }
 
     @Getter
     @Setter
     @AllArgsConstructor
     public static class Detail {
+
         @Schema(description = "字段")
         String property;
 
@@ -74,10 +95,11 @@ public class ValidationException extends I18nSupportException {
         @Schema(description = "详情")
         Object detail;
 
-        public void translateI18n(Object... args) {
-            if (message.contains(".")) {
-                message = LocaleUtils.resolveMessage(message, message, args);
+        public Detail translateI18n(Locale locale) {
+            if (StringUtils.hasText(message) && message.contains(".")) {
+                return new Detail(property, LocaleUtils.resolveMessage(message, locale, message), detail);
             }
+            return this;
         }
     }
 }
