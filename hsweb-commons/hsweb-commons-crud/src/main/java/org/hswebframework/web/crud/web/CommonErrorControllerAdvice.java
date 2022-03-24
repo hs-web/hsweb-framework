@@ -88,10 +88,12 @@ public class CommonErrorControllerAdvice {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Mono<ResponseMessage<List<ValidationException.Detail>>> handleException(ValidationException e) {
         return LocaleUtils
-                .resolveThrowable(e, (err, msg) -> ResponseMessage
-                        .<List<ValidationException.Detail>>error(400, CodeConstants.Error.illegal_argument, msg)
-                        .result(e.getDetails()))
-                ;
+                .currentReactive()
+                .map(locale -> ResponseMessage
+                        .<List<ValidationException.Detail>>error(400,
+                                                                 CodeConstants.Error.illegal_argument,
+                                                                 e.getLocalizedMessage(locale))
+                        .result(e.getDetails(locale)));
     }
 
     @ExceptionHandler
@@ -250,9 +252,8 @@ public class CommonErrorControllerAdvice {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Mono<ResponseMessage<Object>> handleException(I18nSupportException e) {
-        return LocaleUtils
-                .resolveThrowable(e,
-                                  (err, msg) -> ResponseMessage.error(400, err.getI18nCode(), msg));
+        return e.getLocalizedMessageReactive()
+                .map(msg -> ResponseMessage.error(400, e.getI18nCode(), msg));
     }
 
 }
