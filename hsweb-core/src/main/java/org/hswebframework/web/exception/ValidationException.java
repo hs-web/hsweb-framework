@@ -76,7 +76,7 @@ public class ValidationException extends I18nSupportException {
         if (propertyI18nEnabled && "validation.property_validate_failed".equals(getI18nCode()) && getArgs().length > 0) {
             Object[] args = getArgs().clone();
             args[0] = LocaleUtils.resolveMessage(String.valueOf(args[0]), locale, String.valueOf(args[0]));
-            return LocaleUtils.resolveMessage(getI18nCode(), locale, getMessage(), args);
+            return LocaleUtils.resolveMessage(getI18nCode(), locale, getOriginalMessage(), args);
         }
         return super.getLocalizedMessage(locale);
     }

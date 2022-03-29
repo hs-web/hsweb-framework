@@ -47,11 +47,12 @@ public class I18nSupportException extends RuntimeException {
         this.i18nCode = code;
     }
 
+    public String getOriginalMessage() {
+        return super.getMessage();
+    }
+
     @Override
     public String getMessage() {
-        if (Objects.equals(super.getMessage(), this.getI18nCode())) {
-            return getLocalizedMessage();
-        }
         return super.getMessage() != null ? super.getMessage() : getLocalizedMessage();
     }
 
@@ -61,7 +62,7 @@ public class I18nSupportException extends RuntimeException {
     }
 
     public String getLocalizedMessage(Locale locale) {
-        return LocaleUtils.resolveMessage(i18nCode, locale, getMessage(), args);
+        return LocaleUtils.resolveMessage(i18nCode, locale, getOriginalMessage(), args);
     }
 
     public final Mono<String> getLocalizedMessageReactive() {
