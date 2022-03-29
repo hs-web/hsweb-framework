@@ -19,6 +19,7 @@
 package org.hswebframework.web.api.crud.entity;
 
 
+import org.hswebframework.ezorm.core.StaticMethodReferenceColumn;
 import org.hswebframework.web.bean.FastBeanCopier;
 import org.hswebframework.web.validator.ValidatorUtils;
 
@@ -40,6 +41,26 @@ public interface Entity extends Serializable {
      */
     default void tryValidate(Class<?>... groups) {
         ValidatorUtils.tryValidate(this, groups);
+    }
+
+    /**
+     * 使用jsr303对当前实体类的指定属性进行验证，如果未通过验证则会抛出{@link org.hswebframework.web.exception.ValidationException}异常
+     *
+     * @param groups 分组
+     * @see org.hswebframework.web.exception.ValidationException
+     */
+    default void tryValidate(String property, Class<?>... groups) {
+        ValidatorUtils.tryValidate(this, property, groups);
+    }
+
+    /**
+     * 使用jsr303对当前实体类的指定属性进行验证，如果未通过验证则会抛出{@link org.hswebframework.web.exception.ValidationException}异常
+     *
+     * @param groups 分组
+     * @see org.hswebframework.web.exception.ValidationException
+     */
+    default void tryValidate(StaticMethodReferenceColumn<?> property, Class<?>... groups) {
+        tryValidate(property.getColumn(), groups);
     }
 
     /**

@@ -32,9 +32,17 @@ public final class ValidatorUtils {
         return validator;
     }
 
-    @SuppressWarnings("all")
-    public static <T> T tryValidate(T bean, Class... group) {
+    public static <T> T tryValidate(T bean, Class<?>... group) {
         Set<ConstraintViolation<T>> violations = getValidator().validate(bean, group);
+        if (!violations.isEmpty()) {
+            throw new ValidationException(violations);
+        }
+
+        return bean;
+    }
+
+    public static <T> T tryValidate(T bean, String property, Class<?>... group) {
+        Set<ConstraintViolation<T>> violations = getValidator().validateProperty(bean, property, group);
         if (!violations.isEmpty()) {
             throw new ValidationException(violations);
         }
