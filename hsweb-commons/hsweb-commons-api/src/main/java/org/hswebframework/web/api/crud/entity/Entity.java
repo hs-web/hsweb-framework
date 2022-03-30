@@ -59,7 +59,7 @@ public interface Entity extends Serializable {
      * @param groups 分组
      * @see org.hswebframework.web.exception.ValidationException
      */
-    default void tryValidate(StaticMethodReferenceColumn<?> property, Class<?>... groups) {
+    default <T> void tryValidate(StaticMethodReferenceColumn<T> property, Class<?>... groups) {
         tryValidate(property.getColumn(), groups);
     }
 

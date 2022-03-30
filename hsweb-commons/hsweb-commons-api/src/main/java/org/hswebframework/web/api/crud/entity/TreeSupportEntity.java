@@ -269,37 +269,11 @@ public interface TreeSupportEntity<PK> extends Entity {
     static <N extends TreeSupportEntity<PK>, PK> List<N> list2tree(final Collection<N> dataList,
                                                                    final BiConsumer<N, List<N>> childConsumer,
                                                                    final Function<TreeHelper<N, PK>, Predicate<N>> predicateFunction) {
-        Objects.requireNonNull(dataList, "source list can not be null");
-        Objects.requireNonNull(childConsumer, "child consumer can not be null");
-        Objects.requireNonNull(predicateFunction, "root predicate function can not be null");
-
-        Supplier<Stream<N>> streamSupplier = () -> dataList.stream();
-        // id,node
-        Map<PK, N> cache = new HashMap<>();
-        // parentId,children
-        Map<PK, List<N>> treeCache = streamSupplier.get()
-                                                   .peek(node -> cache.put(node.getId(), node))
-                                                   .filter(e -> e.getParentId() != null)
-                                                   .collect(Collectors.groupingBy(TreeSupportEntity::getParentId));
-
-        Predicate<N> rootNodePredicate = predicateFunction.apply(new TreeHelper<N, PK>() {
-            @Override
-            public List<N> getChildren(PK parentId) {
-                return treeCache.get(parentId);
-            }
-
-            @Override
-            public N getNode(PK id) {
-                return cache.get(id);
-            }
-        });
-
-        return streamSupplier.get()
-                             //设置每个节点的子节点
-                             .peek(node -> childConsumer.accept(node, treeCache.get(node.getId())))
-                             //获取根节点
-                             .filter(rootNodePredicate)
-                             .collect(Collectors.toList());
+        return TreeUtils.list2tree(dataList,
+                                   TreeSupportEntity::getId,
+                                   TreeSupportEntity::getParentId,
+                                   childConsumer,
+                                   (helper, node) -> predicateFunction.apply(helper).test(node));
     }
 
     /**

@@ -26,7 +26,7 @@ import static org.hswebframework.web.bean.ToString.Feature.nullPropertyToEmpty;
 @Slf4j
 public class DefaultToStringOperator<T> implements ToStringOperator<T> {
 
-    private PropertyDescriptor[] descriptors;
+    private final PropertyDescriptor[] descriptors;
 
     private Set<String> defaultIgnoreProperties;
 
@@ -36,10 +36,9 @@ public class DefaultToStringOperator<T> implements ToStringOperator<T> {
 
     private Map<String, BiFunction<Object, ConvertConfig, Object>> converts;
 
-    private Function<Object, String> coverStringConvert = (o) -> coverString(String.valueOf(o), 80);
+    private final Function<Object, String> coverStringConvert = (o) -> coverString(String.valueOf(o), 80);
 
-
-    private Function<Class, BiFunction<Object, ConvertConfig, Object>> simpleConvertBuilder = type -> {
+    private final Function<Class<?>, BiFunction<Object, ConvertConfig, Object>> simpleConvertBuilder = type -> {
         if (Date.class.isAssignableFrom(type)) {
             return (value, f) -> DateFormatter.toString(((Date) value), "yyyy-MM-dd HH:mm:ss");
         } else {
@@ -47,13 +46,14 @@ public class DefaultToStringOperator<T> implements ToStringOperator<T> {
         }
     };
 
-    private Predicate<Class> simpleTypePredicate = ((Predicate<Class>) String.class::isAssignableFrom)
+    private final Predicate<Class<?>> simpleTypePredicate = ((Predicate<Class<?>>) String.class::isAssignableFrom)
             .or(Class::isEnum)
             .or(Class::isPrimitive)
             .or(Date.class::isAssignableFrom)
             .or(Number.class::isAssignableFrom)
             .or(Boolean.class::isAssignableFrom);
-    private Class<T> targetType;
+
+    private final Class<T> targetType;
 
     public DefaultToStringOperator(Class<T> targetType) {
         this.targetType = targetType;
@@ -228,10 +228,9 @@ public class DefaultToStringOperator<T> implements ToStringOperator<T> {
         }
     }
 
-    class ConvertConfig {
+   static class ConvertConfig {
         long features;
         Set<String> ignoreProperty;
-
     }
 
     protected Map<String, Object> convertMap(Map<String, Object> obj, long features, Set<String> ignoreProperty) {
@@ -255,7 +254,7 @@ public class DefaultToStringOperator<T> implements ToStringOperator<T> {
                 }
                 continue;
             }
-            Class type = value.getClass();
+            Class<?> type = value.getClass();
             if (simpleTypePredicate.test(type)) {
                 value = simpleConvertBuilder.apply(type).apply(value, null);
                 if (ignoreProperty.contains(entry.getKey())) {
@@ -292,7 +291,7 @@ public class DefaultToStringOperator<T> implements ToStringOperator<T> {
                 if (ToString.Feature.hasFeature(features, ToString.Feature.nullPropertyToEmpty)) {
                     boolean isSimpleType = false;
                     PropertyDescriptor propertyDescriptor = descriptorMap.get(entry.getKey());
-                    Class propertyType = null;
+                    Class<?> propertyType = null;
                     if (propertyDescriptor != null) {
                         propertyType = propertyDescriptor.getPropertyType();
                         isSimpleType = simpleTypePredicate.test(propertyType);

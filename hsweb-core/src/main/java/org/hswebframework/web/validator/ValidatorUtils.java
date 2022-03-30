@@ -17,6 +17,9 @@ public final class ValidatorUtils {
     public static Validator getValidator() {
         if (validator == null) {
             synchronized (ValidatorUtils.class) {
+                if (validator != null) {
+                    return validator;
+                }
                 Configuration<?> configuration = Validation
                         .byDefaultProvider()
                         .configure();
@@ -48,6 +51,13 @@ public final class ValidatorUtils {
         }
 
         return bean;
+    }
+
+    public static <T> void tryValidate(Class<T> bean, String property, Object value, Class<?>... group) {
+        Set<ConstraintViolation<T>> violations = getValidator().validateValue(bean, property, value, group);
+        if (!violations.isEmpty()) {
+            throw new ValidationException(violations);
+        }
     }
 
 }
