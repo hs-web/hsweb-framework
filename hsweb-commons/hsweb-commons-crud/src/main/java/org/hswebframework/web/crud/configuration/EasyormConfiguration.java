@@ -6,6 +6,7 @@ import org.hswebframework.ezorm.core.meta.Feature;
 import org.hswebframework.ezorm.rdb.events.EventListener;
 import org.hswebframework.ezorm.rdb.executor.SyncSqlExecutor;
 import org.hswebframework.ezorm.rdb.executor.reactive.ReactiveSqlExecutor;
+import org.hswebframework.ezorm.rdb.mapping.DefaultEntityColumnMapping;
 import org.hswebframework.ezorm.rdb.mapping.EntityColumnMapping;
 import org.hswebframework.ezorm.rdb.mapping.EntityManager;
 import org.hswebframework.ezorm.rdb.mapping.MappingFeatureType;
@@ -186,16 +187,25 @@ public class EasyormConfiguration {
         @Bean
         @ConditionalOnMissingBean
         public EntityTableMetadataParser jpaEntityTableMetadataParser(RDBDatabaseMetadata metadata,
+                                                                      EntityFactory factory,
                                                                       ObjectProvider<TableMetadataCustomizer> customizers) {
 
             JpaEntityTableMetadataParser parser = new JpaEntityTableMetadataParser() {
 
                 @Override
                 public Optional<RDBTableMetadata> parseTableMetadata(Class<?> entityType) {
-                    Optional<RDBTableMetadata> tableOpt = super.parseTableMetadata(entityType);
+                    Class<?> realType = factory.getInstanceType(entityType, true);
+                    Optional<RDBTableMetadata> tableOpt = super.parseTableMetadata(realType);
                     tableOpt.ifPresent(table -> {
+                        if (realType != entityType) {
+                            table.addFeature(new DetectEntityColumnMapping(
+                                    entityType,
+                                    table.findFeatureNow(
+                                            MappingFeatureType.columnPropertyMapping.createFeatureId(realType)
+                                    )));
+                        }
                         for (TableMetadataCustomizer customizer : customizers) {
-                            customizer.customTable(entityType, table);
+                            customizer.customTable(realType, table);
                         }
                     });
                     return tableOpt;
@@ -203,7 +213,8 @@ public class EasyormConfiguration {
 
                 @Override
                 protected JpaEntityTableMetadataParserProcessor createProcessor(RDBTableMetadata table, Class<?> type) {
-                    return new JpaEntityTableMetadataParserProcessor(table, type) {
+                    Class<?> realType = factory.getInstanceType(type, true);
+                    return new JpaEntityTableMetadataParserProcessor(table, realType) {
                         @Override
                         protected void customColumn(PropertyDescriptor descriptor,
                                                     Field field,
@@ -211,7 +222,7 @@ public class EasyormConfiguration {
                                                     Set<Annotation> annotations) {
                             super.customColumn(descriptor, field, column, annotations);
                             for (TableMetadataCustomizer customizer : customizers) {
-                                customizer.customColumn(type, descriptor, field, annotations, column);
+                                customizer.customColumn(realType, descriptor, field, annotations, column);
                             }
                         }
                     };

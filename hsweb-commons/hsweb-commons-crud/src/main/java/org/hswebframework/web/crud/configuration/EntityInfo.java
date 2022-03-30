@@ -10,11 +10,11 @@ import lombok.Setter;
 @EqualsAndHashCode(of = "entityType")
 @AllArgsConstructor
 public class EntityInfo {
-    private Class entityType;
+    private Class<?> entityType;
 
-    private Class realType;
+    private Class<?> realType;
 
-    private Class idType;
+    private Class<?> idType;
 
     private boolean reactive;
 

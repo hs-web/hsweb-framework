@@ -1,5 +1,6 @@
 package org.hswebframework.web.crud;
 
+import org.hswebframework.web.crud.entity.CustomTestEntity;
 import org.hswebframework.web.crud.entity.TestEntity;
 import org.hswebframework.web.crud.service.TestEntityService;
 import org.junit.Assert;
@@ -13,22 +14,31 @@ import reactor.test.StepVerifier;
 
 @SpringBootTest
 @RunWith(SpringJUnit4ClassRunner.class)
-public class CrudTests  {
+public class CrudTests {
 
     @Autowired
     private TestEntityService service;
 
 
     @Test
-    public void test(){
+    public void test() {
 
-        TestEntity entity = TestEntity.of("test",100);
-
+        CustomTestEntity entity = new CustomTestEntity();
+        entity.setExt("xxx");
+        entity.setAge(1);
+        entity.setName("test");
+        
         Mono.just(entity)
-                .as(service::insert)
-                .as(StepVerifier::create)
-                .expectNext(1)
-                .verifyComplete();
+            .cast(TestEntity.class)
+            .as(service::insert)
+            .as(StepVerifier::create)
+            .expectNext(1)
+            .verifyComplete();
         Assert.assertNotNull(entity.getId());
+
+        service.findById(entity.getId())
+               .as(StepVerifier::create)
+               .expectNextMatches(e -> e instanceof CustomTestEntity)
+               .verifyComplete();
     }
 }

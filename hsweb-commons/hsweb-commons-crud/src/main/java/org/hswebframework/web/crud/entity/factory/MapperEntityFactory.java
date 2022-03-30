@@ -73,6 +73,11 @@ public class MapperEntityFactory implements EntityFactory, BeanFactory {
         return this;
     }
 
+    public <T> MapperEntityFactory addMappingIfAbsent(Class<T> target, Mapper<? extends T> mapper) {
+        realTypeMapper.putIfAbsent(target, mapper);
+        return this;
+    }
+
     public <S, T> MapperEntityFactory addCopier(PropertyCopier<S, T> copier) {
         Class<S> source = (Class<S>) ClassUtils.getGenericType(copier.getClass(), 0);
         Class<T> target = (Class<T>) ClassUtils.getGenericType(copier.getClass(), 1);

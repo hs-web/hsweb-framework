@@ -46,8 +46,10 @@ public class EasyormRepositoryRegistrar implements ImportBeanDefinitionRegistrar
 
     private String getResourceClassName(Resource resource) {
         try {
-            return metadataReaderFactory.getMetadataReader(resource)
-                                        .getClassMetadata().getClassName();
+            return metadataReaderFactory
+                    .getMetadataReader(resource)
+                    .getClassMetadata()
+                    .getClassName();
         } catch (IOException e) {
             return null;
         }
@@ -98,46 +100,31 @@ public class EasyormRepositoryRegistrar implements ImportBeanDefinitionRegistrar
         for (String className : scanEntities(arr)) {
             Class<?> entityType = org.springframework.util.ClassUtils.forName(className, null);
             if (Arrays.stream(anno)
-                      .noneMatch(ann -> AnnotationUtils.findAnnotation(entityType, ann) != null)) {
+                      .noneMatch(ann -> AnnotationUtils.getAnnotation(entityType, ann) != null)) {
                 continue;
             }
 
-            ImplementFor implementFor = AnnotationUtils.findAnnotation(entityType, ImplementFor.class);
             Reactive reactive = AnnotationUtils.findAnnotation(entityType, Reactive.class);
-            Class genericType = Optional
-                    .ofNullable(implementFor)
-                    .map(ImplementFor::value)
-                    .orElseGet(() -> {
-                        return Stream
-                                .of(entityType.getInterfaces())
-                                .filter(e -> GenericEntity.class.isAssignableFrom(e))
-                                .findFirst()
-                                .orElse(entityType);
-                    });
 
             Class idType = null;
-            if (implementFor == null || implementFor.idType() == Void.class) {
-                try {
-                    if (GenericEntity.class.isAssignableFrom(entityType)) {
-                        idType = ClassUtils.getGenericType(entityType);
-                    }
-                    if (idType == null) {
-                        Method getId = org.springframework.util.ClassUtils.getMethod(entityType, "getId");
-                        idType = getId.getReturnType();
-                    }
-                } catch (Exception e) {
-                    idType = String.class;
+            try {
+                if (GenericEntity.class.isAssignableFrom(entityType)) {
+                    idType = ClassUtils.getGenericType(entityType);
                 }
-            } else {
-                idType = implementFor.idType();
+                if (idType == null) {
+                    Method getId = org.springframework.util.ClassUtils.getMethod(entityType, "getId");
+                    idType = getId.getReturnType();
+                }
+            } catch (Exception e) {
+                idType = String.class;
             }
 
-            EntityInfo entityInfo = new EntityInfo(genericType,
+            EntityInfo entityInfo = new EntityInfo(entityType,
                                                    entityType,
                                                    idType,
                                                    reactiveEnabled,
                                                    nonReactiveEnabled);
-            if (!entityInfos.contains(entityInfo) || implementFor != null) {
+            if (!entityInfos.contains(entityInfo)) {
                 entityInfos.add(entityInfo);
             }
 
@@ -186,15 +173,6 @@ public class EasyormRepositoryRegistrar implements ImportBeanDefinitionRegistrar
             definition.setSynthetic(true);
             registry.registerBeanDefinition(AutoDDLProcessor.class.getName() + "_" + count.incrementAndGet(), definition);
         }
-
-//        try {
-//            BeanDefinition definition = registry.getBeanDefinition(AutoDDLProcessor.class.getName());
-//            Set<EntityInfo> infos = (Set) definition.getPropertyValues().get("entities");
-//            infos.addAll(entityInfos);
-//        } catch (NoSuchBeanDefinitionException e) {
-//
-//        }
-
 
     }
 

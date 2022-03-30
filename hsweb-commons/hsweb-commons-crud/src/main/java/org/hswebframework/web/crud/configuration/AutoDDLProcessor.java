@@ -49,13 +49,11 @@ public class AutoDDLProcessor implements InitializingBean {
     @Override
     @SneakyThrows
     public void afterPropertiesSet() {
-        if (entityFactory instanceof MapperEntityFactory) {
-            MapperEntityFactory factory = ((MapperEntityFactory) entityFactory);
-            for (EntityInfo entity : entities) {
-                factory.addMapping(entity.getEntityType(), MapperEntityFactory.defaultMapper(entity.getRealType()));
-            }
-        }
-        List<Class> entities = this.entities.stream().map(EntityInfo::getRealType).collect(Collectors.toList());
+
+        List<Class<?>> entities = this.entities
+                .stream()
+                .map(e -> entityFactory.getInstanceType(e.getRealType(), true))
+                .collect(Collectors.toList());
         if (properties.isAutoDdl()) {
             //加载全部表信息
             if (reactive) {
@@ -63,7 +61,7 @@ public class AutoDDLProcessor implements InitializingBean {
                     .doOnNext(type -> log.trace("auto ddl for {}", type))
                     .map(type -> {
                         RDBTableMetadata metadata = resolver.resolve(type);
-                        EntityDDLEvent event = new EntityDDLEvent(this,type,metadata);
+                        EntityDDLEvent<?> event = new EntityDDLEvent<>(this, type, metadata);
                         eventPublisher.publishEvent(new GenericsPayloadApplicationEvent<>(this, event, type));
                         return metadata;
                     })
@@ -83,7 +81,7 @@ public class AutoDDLProcessor implements InitializingBean {
                     log.trace("auto ddl for {}", type);
                     try {
                         RDBTableMetadata metadata = resolver.resolve(type);
-                        EntityDDLEvent event = new EntityDDLEvent(this,type,metadata);
+                        EntityDDLEvent<?> event = new EntityDDLEvent<>(this, type, metadata);
                         eventPublisher.publishEvent(new GenericsPayloadApplicationEvent<>(this, event, type));
                         operator.ddl()
                                 .createOrAlter(metadata)

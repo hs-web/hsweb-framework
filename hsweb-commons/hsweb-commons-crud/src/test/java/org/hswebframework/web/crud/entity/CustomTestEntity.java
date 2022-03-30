@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hswebframework.web.api.crud.entity.GenericEntity;
-import org.hswebframework.web.crud.annotation.EnableEntityEvent;
+import org.hswebframework.web.bean.ToString;
 import org.hswebframework.web.crud.generator.Generators;
 
 import javax.persistence.Column;
@@ -14,21 +14,13 @@ import javax.persistence.Table;
 
 @Getter
 @Setter
-@Table(name = "s_test")
 @AllArgsConstructor(staticName = "of")
 @NoArgsConstructor
-@EnableEntityEvent
-public class TestEntity extends GenericEntity<String> {
+public class CustomTestEntity extends TestEntity {
 
-    @Column(length = 32)
-    private String name;
 
     @Column
-    private Integer age;
+    @ToString.Ignore
+    private String ext;
 
-    @Override
-    @GeneratedValue(generator = Generators.DEFAULT_ID_GENERATOR)
-    public String getId() {
-        return super.getId();
-    }
 }
