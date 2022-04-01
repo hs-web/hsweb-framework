@@ -56,7 +56,7 @@ public final class AuthenticationHolder {
             return Optional.empty();
         }
         if (size == 1) {
-            return suppliers.get(0).get();
+            return function.apply(suppliers.get(0));
         }
         SimpleAuthentication merge = new SimpleAuthentication();
         for (AuthenticationSupplier supplier : suppliers) {
