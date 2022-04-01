@@ -126,6 +126,11 @@ public class EasyormConfiguration {
     }
 
     @Bean
+    public CreatorEventListener creatorEventListener() {
+        return new CreatorEventListener();
+    }
+
+    @Bean
     @ConfigurationProperties(prefix = "easyorm.default-value-generator")
     public DefaultIdGenerator defaultIdGenerator() {
 
