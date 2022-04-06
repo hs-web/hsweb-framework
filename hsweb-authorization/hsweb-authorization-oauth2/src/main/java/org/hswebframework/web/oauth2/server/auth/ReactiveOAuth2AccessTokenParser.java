@@ -47,16 +47,11 @@ public class ReactiveOAuth2AccessTokenParser implements ReactiveUserTokenParser,
 
     @Override
     public Mono<Authentication> get() {
-        return ContextUtils
-                .reactiveContext()
-                .flatMap(context -> context
-                        .get(ContextKey.of(ParsedToken.class))
+        return Mono
+                .deferWithContext(context -> context
+                        .<ParsedToken>getOrEmpty(ParsedToken.class)
                         .filter(token -> "oauth2".equals(token.getType()))
                         .map(t -> accessTokenManager.getAuthenticationByToken(t.getToken()))
-                        .orElse(Mono.empty()))
-                .flatMap(auth -> ReactiveLogger
-                        .mdc("userId", auth.getUser().getId(),
-                             "username", auth.getUser().getName())
-                        .thenReturn(auth));
+                        .orElse(Mono.empty()));
     }
 }

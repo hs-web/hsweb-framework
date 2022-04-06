@@ -12,6 +12,7 @@ import org.junit.Test;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.SignalType;
 import reactor.test.StepVerifier;
+import reactor.util.context.Context;
 
 import java.util.Collections;
 import java.util.Set;
@@ -138,7 +139,7 @@ public class AuthenticationTests {
                 .doOnEach(ReactiveLogger.on(SignalType.ON_NEXT,(ctx,signal)->{
                     System.out.println(ctx);
                 }))
-                .subscriberContext(acceptContext(ctx -> ctx.put(ContextKey.of(ParsedToken.class), parsedToken)))
+                .subscriberContext(Context.of(ParsedToken.class, parsedToken))
                 .subscriberContext(ReactiveLogger.start("rid","1"))
                 .as(StepVerifier::create)
                 .expectNext("admin")
