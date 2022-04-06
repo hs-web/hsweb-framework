@@ -1,12 +1,40 @@
 package org.hswebframework.web.api.crud.entity;
 
 import com.google.common.collect.Maps;
+import org.springframework.util.ObjectUtils;
 
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.Collectors;
 
 public class TreeUtils {
+
+
+    /**
+     * 列表结构转为树结构,并返回根节点集合.
+     * <p>
+     * 根节点判断逻辑: parentId为空或者对应的节点数据没有在list中
+     *
+     * @param dataList      数据集合
+     * @param childConsumer 子节点消费接口,用于设置子节点
+     * @param <N>           元素类型
+     * @param <PK>          主键类型
+     * @return 根节点集合
+     */
+    public static <N, PK> List<N> list2tree(Collection<N> dataList,
+                                            Function<N, PK> idGetter,
+                                            Function<N, PK> parentIdGetter,
+                                            BiConsumer<N, List<N>> childConsumer) {
+        return list2tree(dataList,
+                         idGetter,
+                         parentIdGetter,
+                         childConsumer,
+                         (helper, node) -> {
+                             PK parentId = parentIdGetter.apply(node);
+                             return ObjectUtils.isEmpty(parentId)
+                                     || helper.getNode(parentId) == null;
+                         });
+    }
 
     /**
      * 列表结构转为树结构,并返回根节点集合
