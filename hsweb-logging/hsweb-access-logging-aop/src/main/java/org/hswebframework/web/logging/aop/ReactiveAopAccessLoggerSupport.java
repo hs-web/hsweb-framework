@@ -2,6 +2,7 @@ package org.hswebframework.web.logging.aop;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.hswebframework.web.aop.MethodInterceptorHolder;
+import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.logger.ReactiveLogger;
 import org.hswebframework.web.logging.RequestInfo;
@@ -83,7 +84,19 @@ public class ReactiveAopAccessLoggerSupport extends StaticMethodMatcherPointcutA
                 .then(Mono.defer(() -> {
                     AccessLoggerBeforeEvent event = new AccessLoggerBeforeEvent(loggerInfo);
                     event.first(cache);
-                    return event.publish(eventPublisher);
+                    return Authentication
+                            .currentReactive()
+                            .flatMap(auth -> {
+                                loggerInfo.putContext("userId", auth.getUser().getId());
+                                loggerInfo.putContext("username", auth.getUser().getUsername());
+                                loggerInfo.putContext("userName", auth.getUser().getName());
+                                return ReactiveLogger
+                                        .mdc("userId", auth.getUser().getId(),
+                                             "username", auth.getUser().getUsername(),
+                                             "userName", auth.getUser().getName())
+                                        .thenReturn(auth);
+                            })
+                            .then(event.publish(eventPublisher));
                 }))
                 .then(Mono.defer(() -> {
                     loggerInfo.setResponseTime(System.currentTimeMillis());
@@ -166,7 +179,7 @@ public class ReactiveAopAccessLoggerSupport extends StaticMethodMatcherPointcutA
 
     @Override
     public int getOrder() {
-        return Ordered.HIGHEST_PRECEDENCE;
+        return Ordered.LOWEST_PRECEDENCE;
     }
 
     @Override

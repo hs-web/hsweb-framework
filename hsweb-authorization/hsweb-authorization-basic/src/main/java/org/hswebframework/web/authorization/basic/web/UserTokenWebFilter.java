@@ -19,6 +19,7 @@ import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.context.Context;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -47,11 +48,7 @@ public class UserTokenWebFilter implements WebFilter, BeanPostProcessor {
                 .next()
                 .map(token -> chain
                         .filter(exchange)
-                        .subscriberContext(
-                                ContextUtils.acceptContext(
-                                        context -> context.put(ParsedToken.class, token)
-                                )
-                        ))
+                        .subscriberContext(Context.of(ParsedToken.class, token)))
                 .defaultIfEmpty(chain.filter(exchange))
                 .flatMap(Function.identity())
                 .subscriberContext(ReactiveLogger.start("requestId", exchange.getRequest().getId()));
