@@ -3,6 +3,7 @@ package org.hswebframework.web.crud.configuration;
 import org.hswebframework.ezorm.rdb.mapping.EntityColumnMapping;
 import org.hswebframework.ezorm.rdb.mapping.MappingFeatureType;
 import org.hswebframework.ezorm.rdb.metadata.RDBColumnMetadata;
+import org.hswebframework.ezorm.rdb.metadata.TableOrViewMetadata;
 
 import java.util.Map;
 import java.util.Optional;
@@ -42,6 +43,11 @@ class DetectEntityColumnMapping implements EntityColumnMapping {
     @Override
     public Map<String, String> getColumnPropertyMapping() {
         return mapping.getColumnPropertyMapping();
+    }
+
+    @Override
+    public TableOrViewMetadata getTable() {
+        return mapping.getTable();
     }
 
     @Override

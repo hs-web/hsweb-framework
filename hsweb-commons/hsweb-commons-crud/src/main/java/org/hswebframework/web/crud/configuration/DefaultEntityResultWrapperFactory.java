@@ -5,6 +5,7 @@ import lombok.SneakyThrows;
 import org.hswebframework.ezorm.rdb.executor.wrapper.ResultWrapper;
 import org.hswebframework.ezorm.rdb.mapping.EntityManager;
 import org.hswebframework.ezorm.rdb.mapping.wrapper.EntityResultWrapper;
+import org.hswebframework.ezorm.rdb.mapping.wrapper.NestedEntityResultWrapper;
 
 @AllArgsConstructor
 public class DefaultEntityResultWrapperFactory implements EntityResultWrapperFactory {
@@ -14,8 +15,7 @@ public class DefaultEntityResultWrapperFactory implements EntityResultWrapperFac
     @Override
     @SneakyThrows
     public <T> ResultWrapper<T, ?> getWrapper(Class<T> tClass) {
-        return new EntityResultWrapper<>(() -> entityManager.newInstance(tClass),
-                entityManager.getMapping(tClass));
+        return new NestedEntityResultWrapper<>(entityManager.getMapping(tClass));
 
     }
 }
