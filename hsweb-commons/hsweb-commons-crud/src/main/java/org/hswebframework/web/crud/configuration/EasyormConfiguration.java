@@ -173,7 +173,7 @@ public class EasyormConfiguration {
                 @Override
                 public EntityColumnMapping getMapping(Class entity) {
 
-                    return resolver.resolve(entityFactory.getInstanceType(entity, true))
+                    return resolver.resolve(entity)
                                    .getFeature(MappingFeatureType.columnPropertyMapping.createFeatureId(entity))
                                    .map(EntityColumnMapping.class::cast)
                                    .orElse(null);
@@ -207,7 +207,7 @@ public class EasyormConfiguration {
                                     entityType,
                                     table.findFeatureNow(
                                             MappingFeatureType.columnPropertyMapping.createFeatureId(realType)
-                                    )));
+                                    ),factory));
                         }
                         for (TableMetadataCustomizer customizer : customizers) {
                             customizer.customTable(realType, table);
