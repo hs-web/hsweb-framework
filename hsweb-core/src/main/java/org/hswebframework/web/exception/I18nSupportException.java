@@ -48,7 +48,7 @@ public class I18nSupportException extends RuntimeException {
     }
 
     public String getOriginalMessage() {
-        return super.getMessage();
+        return super.getMessage() != null ? super.getMessage() : getI18nCode();
     }
 
     @Override
