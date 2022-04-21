@@ -76,6 +76,8 @@ public class CreatorEventListener implements EventListener {
             if (ObjectUtils.isEmpty(e.getCreatorId())) {
                 e.setCreatorId(auth.getUser().getId());
                 e.setCreatorName(auth.getUser().getName());
+            }
+            if (e.getCreateTime() == null) {
                 e.setCreateTimeNow();
             }
 
@@ -85,6 +87,8 @@ public class CreatorEventListener implements EventListener {
             if (ObjectUtils.isEmpty(e.getModifierId())) {
                 e.setModifierId(auth.getUser().getId());
                 e.setModifierName(auth.getUser().getName());
+            }
+            if (e.getModifyTime() == null) {
                 e.setModifyTimeNow();
             }
         }
