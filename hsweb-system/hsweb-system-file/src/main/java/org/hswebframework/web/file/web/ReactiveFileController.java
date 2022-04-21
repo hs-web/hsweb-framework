@@ -43,16 +43,19 @@ public class ReactiveFileController {
     @ResourceAction(id = "upload-static", name = "静态文件")
     @Operation(summary = "上传静态文件")
     public Mono<String> uploadStatic(@RequestPart("file")
-                                     @Parameter(name = "file", description = "文件", style = ParameterStyle.FORM) Part part) {
-        if (part instanceof FilePart) {
-            FilePart filePart = ((FilePart) part);
-            if (properties.denied(filePart.filename(), filePart.headers().getContentType())) {
-                throw new AccessDenyException();
-            }
-            return fileStorageService.saveFile(filePart);
-        } else {
-            return Mono.error(() -> new IllegalArgumentException("[file] part is not a file"));
-        }
+                                     @Parameter(name = "file", description = "文件", style = ParameterStyle.FORM) Mono<Part> partMono) {
+        return partMono
+                .flatMap(part -> {
+                    if (part instanceof FilePart) {
+                        FilePart filePart = ((FilePart) part);
+                        if (properties.denied(filePart.filename(), filePart.headers().getContentType())) {
+                           return Mono.error( new AccessDenyException());
+                        }
+                        return fileStorageService.saveFile(filePart);
+                    } else {
+                        return Mono.error(() -> new IllegalArgumentException("[file] part is not a file"));
+                    }
+                });
 
     }
 
