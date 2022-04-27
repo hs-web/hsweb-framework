@@ -77,7 +77,7 @@ public class ReactiveAopAccessLoggerSupport extends StaticMethodMatcherPointcutA
 
     protected Flux<?> wrapFluxResponse(Flux<?> flux, AccessLoggerInfo loggerInfo) {
 
-        Flux<?> cache = flux.cache();
+        Flux<?> cache = flux.share();
         return this
                 .currentRequestInfo()
                 .doOnNext(loggerInfo::putAccessInfo)
