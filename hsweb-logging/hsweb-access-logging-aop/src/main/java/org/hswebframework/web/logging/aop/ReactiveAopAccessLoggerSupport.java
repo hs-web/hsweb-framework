@@ -6,10 +6,7 @@ import org.hswebframework.web.aop.MethodInterceptorHolder;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.logger.ReactiveLogger;
-import org.hswebframework.web.logging.RequestInfo;
-import org.hswebframework.web.logging.AccessLoggerInfo;
-import org.hswebframework.web.logging.AccessLoggerListener;
-import org.hswebframework.web.logging.LoggerDefine;
+import org.hswebframework.web.logging.*;
 import org.hswebframework.web.logging.events.AccessLoggerAfterEvent;
 import org.hswebframework.web.logging.events.AccessLoggerBeforeEvent;
 import org.hswebframework.web.utils.FluxCache;
@@ -18,6 +15,7 @@ import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.Ordered;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
@@ -188,6 +186,10 @@ public class ReactiveAopAccessLoggerSupport extends StaticMethodMatcherPointcutA
 
     @Override
     public boolean matches(Method method, Class<?> aClass) {
+        AccessLogger ann = AnnotationUtils.findAnnotation(method, AccessLogger.class);
+        if (ann != null && ann.ignore()) {
+            return false;
+        }
         return loggerParsers
                 .stream()
                 .anyMatch(parser -> parser.support(aClass, method));
