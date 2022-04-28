@@ -18,11 +18,13 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory;
 
 @Configuration(proxyBeanMethods = false)
+@EnableConfigurationProperties(OAuth2Properties.class)
 public class OAuth2ServerAutoConfiguration {
 
 
@@ -46,8 +48,12 @@ public class OAuth2ServerAutoConfiguration {
 
         @Bean
         @ConditionalOnMissingBean
-        public AccessTokenManager accessTokenManager(ReactiveRedisConnectionFactory redisConnectionFactory) {
-            return new RedisAccessTokenManager(redisConnectionFactory);
+        public AccessTokenManager accessTokenManager(ReactiveRedisConnectionFactory redisConnectionFactory,
+                                                     OAuth2Properties properties) {
+            RedisAccessTokenManager manager = new RedisAccessTokenManager(redisConnectionFactory);
+            manager.setTokenExpireIn((int) properties.getTokenExpireIn().getSeconds());
+            manager.setRefreshExpireIn((int) properties.getRefreshTokenIn().getSeconds());
+            return manager;
         }
 
         @Bean
