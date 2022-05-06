@@ -167,7 +167,7 @@ public interface ReactiveServiceQueryController<E, K> {
     @QueryAction
     @Operation(summary = "使用POST方式查询总数")
     default Mono<Integer> count(@RequestBody Mono<QueryParamEntity> query) {
-        return query.flatMap(this::count);
+        return getService().count(query);
     }
 
     /**
@@ -175,7 +175,7 @@ public interface ReactiveServiceQueryController<E, K> {
      *
      * <pre>
      *
-     *    GET /_query/_count?pageIndex=0&pageSize=20&where=name is 张三&orderBy=id desc
+     *    GET /_count?pageIndex=0&pageSize=20&where=name is 张三&orderBy=id desc
      *
      * </pre>
      *
@@ -187,10 +187,39 @@ public interface ReactiveServiceQueryController<E, K> {
     @QueryAction
     @QueryNoPagingOperation(summary = "使用GET方式查询总数")
     default Mono<Integer> count(@Parameter(hidden = true) QueryParamEntity query) {
-        return getService()
-                .createQuery()
-                .setParam(query)
-                .count();
+        return Mono.defer(() -> getService().count(query));
+    }
+
+    @PostMapping("/_exists")
+    @QueryAction
+    @Operation(summary = "使用POST方式判断数据是否存在")
+    default Mono<Boolean> exists(@RequestBody Mono<QueryParamEntity> query) {
+        return query
+                .flatMap(param -> getService()
+                        .createQuery()
+                        .setParam(param)
+                        .fetchOne()
+                        .hasElement());
+    }
+
+    /**
+     * 使用GET方式判断数据是否存在.
+     *
+     * <pre>
+     *
+     *    GET /_exists?where=name is 张三
+     *
+     * </pre>
+     *
+     * @param query 查询条件
+     * @return 查询结果
+     * @see QueryParamEntity
+     */
+    @GetMapping("/_exists")
+    @QueryAction
+    @QueryNoPagingOperation(summary = "使用GET方式判断数据是否存在")
+    default Mono<Boolean> exists(@Parameter(hidden = true) QueryParamEntity query) {
+        return exists(Mono.just(query));
     }
 
     /**
