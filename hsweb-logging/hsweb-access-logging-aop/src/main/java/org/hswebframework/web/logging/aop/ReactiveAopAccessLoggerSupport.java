@@ -1,6 +1,6 @@
 package org.hswebframework.web.logging.aop;
 
-import lombok.SneakyThrows;
+import lombok.*;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.hswebframework.web.aop.MethodInterceptorHolder;
 import org.hswebframework.web.authorization.Authentication;
@@ -47,7 +47,7 @@ public class ReactiveAopAccessLoggerSupport extends StaticMethodMatcherPointcutA
     @Autowired
     private ApplicationEventPublisher eventPublisher;
 
-    private final Map<Method, LoggerDefine> defineCache = new ConcurrentReferenceHashMap<>();
+    private final Map<CacheKey, LoggerDefine> defineCache = new ConcurrentReferenceHashMap<>();
 
     private static final LoggerDefine UNSUPPORTED = new LoggerDefine();
 
@@ -135,7 +135,9 @@ public class ReactiveAopAccessLoggerSupport extends StaticMethodMatcherPointcutA
         info.setId(IDGenerator.MD5.generate());
         info.setRequestTime(System.currentTimeMillis());
 
-        LoggerDefine define = defineCache.computeIfAbsent(holder.getMethod(), method -> createDefine(holder));
+        LoggerDefine define = defineCache.computeIfAbsent(new CacheKey(
+                ClassUtils.getUserClass(holder.getTarget()),
+                holder.getMethod()), method -> createDefine(holder));
 
         if (define != null) {
             info.setAction(define.getAction());
@@ -214,5 +216,11 @@ public class ReactiveAopAccessLoggerSupport extends StaticMethodMatcherPointcutA
                 .ifPresent(info::setIpAddr);
 
         return info;
+    }
+    @AllArgsConstructor
+    @EqualsAndHashCode
+    private static class CacheKey{
+        private Class<?> type;
+        private Method method;
     }
 }
