@@ -86,7 +86,7 @@ public class DefaultAuthorizationSettingService extends GenericReactiveCrudServi
                                  provider.getAllType()
                                          .map(DimensionType::getId)
                                          .map(t -> Tuples.of(t, provider)))
-                .collect(Collectors.toMap(Tuple2::getT1, Tuple2::getT2))
+                .collectMap(Tuple2::getT1, Tuple2::getT2)
                 .flatMapMany(typeProviderMapping -> Flux
                         .fromIterable(settings)//根据维度获取所有userId
                         .flatMap(setting -> Mono

@@ -2,6 +2,7 @@ package org.hswebframework.web.utils;
 
 import org.apache.commons.beanutils.BeanMap;
 import org.hswebframework.utils.time.DateFormatter;
+import org.hswebframework.web.bean.FastBeanCopier;
 
 import java.util.*;
 import java.util.function.Function;
@@ -61,9 +62,7 @@ public class HttpParameterConverter {
         if (bean instanceof Map) {
             beanMap = ((Map) bean);
         } else {
-            beanMap = new HashMap<>((Map) new BeanMap(bean));
-            beanMap.remove("class");
-            beanMap.remove("declaringClass");
+            beanMap = FastBeanCopier.copy(bean,new HashMap<>());
         }
     }
 
