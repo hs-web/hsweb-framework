@@ -73,8 +73,14 @@ public class UserTokenReactiveAuthenticationSupplier implements ReactiveAuthenti
                         .<ParsedToken>getOrEmpty(ParsedToken.class)
                         .map(t -> userTokenManager
                                 .getByToken(t.getToken())
-                                .filter(UserToken::validate)
                                 .flatMap(token -> {
+                                    //已过期则返回空
+                                    if (token.isExpired()) {
+                                        return Mono.empty();
+                                    }
+                                    if(!token.validate()){
+                                        return Mono.empty();
+                                    }
                                     Mono<Void> before = userTokenManager.touch(token.getToken());
                                     if (token instanceof AuthenticationUserToken) {
                                         return before.thenReturn(((AuthenticationUserToken) token).getAuthentication());
