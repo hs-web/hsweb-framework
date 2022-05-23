@@ -9,6 +9,7 @@ import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.annotation.SaveAction;
 import org.hswebframework.web.crud.service.ReactiveCrudService;
+import org.hswebframework.web.exception.NotFoundException;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -174,6 +175,11 @@ public interface ReactiveServiceSaveController<E, K> {
                 .flatMap(auth -> payload.map(entity -> applyAuthentication(entity, auth)))
                 .switchIfEmpty(payload)
                 .flatMap(entity -> getService().updateById(id, Mono.just(entity)))
+                .doOnNext(i -> {
+                    if (i == 0) {
+                        throw new NotFoundException();
+                    }
+                })
                 .thenReturn(true);
 
     }
