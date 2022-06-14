@@ -15,23 +15,23 @@ public class DefaultAsyncEvent implements AsyncEvent {
 
     public synchronized void async(Publisher<?> publisher) {
         hasListener = true;
-        this.async = async.then(Mono.from(publisher).then());
+        this.async = async.then(Mono.fromDirect(publisher).then());
     }
 
     @Override
     public synchronized void first(Publisher<?> publisher) {
         hasListener = true;
-        this.first = Mono.from(publisher).then(first);
+        this.first = Mono.fromDirect(publisher).then(first);
     }
 
     @Override
     public void transformFirst(Function<Mono<?>, Publisher<?>> mapper) {
-        this.first = Mono.from(mapper.apply(this.first));
+        this.first = Mono.fromDirect(mapper.apply(this.first));
     }
 
     @Override
     public void transform(Function<Mono<?>, Publisher<?>> mapper) {
-        this.async = Mono.from(mapper.apply(this.async));
+        this.async = Mono.fromDirect(mapper.apply(this.async));
     }
 
     @Override
