@@ -24,8 +24,11 @@ public class LocalFileStorageService implements FileStorageService {
     @Override
     public Mono<String> saveFile(FilePart filePart) {
         FileUploadProperties.StaticFileInfo info = properties.createStaticSavePath(filePart.filename());
+        File file = new File(info.getSavePath());
+
         return (filePart)
-                .transferTo(new File(info.getSavePath()))
+                .transferTo(file)
+                .then(Mono.fromRunnable(()->properties.applyFilePermission(file)))
                 .thenReturn(info.getLocation());
     }
 
@@ -57,6 +60,7 @@ public class LocalFileStorageService implements FileStorageService {
                         return info.getLocation();
                     }
                 })
+                .doOnSuccess((ignore)-> properties.applyFilePermission(new File(info.getSavePath())))
                 .subscribeOn(Schedulers.boundedElastic());
     }
 }

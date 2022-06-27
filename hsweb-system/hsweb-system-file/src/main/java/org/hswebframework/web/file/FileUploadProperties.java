@@ -9,6 +9,13 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.http.MediaType;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFileAttributeView;
+import java.nio.file.attribute.PosixFilePermission;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Set;
@@ -32,6 +39,24 @@ public class FileUploadProperties {
     private Set<String> allowMediaType;
 
     private Set<String> denyMediaType;
+
+    private Set<PosixFilePermission> permissions;
+
+    public void applyFilePermission(File file) {
+
+        if (CollectionUtils.isEmpty(permissions)) {
+            return;
+        }
+        try {
+            Path path = Paths.get(file.toURI());
+            PosixFileAttributeView view = Files.getFileAttributeView(path, PosixFileAttributeView.class);
+            view.setPermissions(permissions);
+        } catch (Throwable ignore) {
+
+        }
+
+
+    }
 
     public boolean denied(String name, MediaType mediaType) {
         String suffix = (name.contains(".") ? name.substring(name.lastIndexOf(".") + 1) : "").toLowerCase(Locale.ROOT);
