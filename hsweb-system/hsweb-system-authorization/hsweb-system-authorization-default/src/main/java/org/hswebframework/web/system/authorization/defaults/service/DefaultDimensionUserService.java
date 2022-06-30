@@ -123,10 +123,11 @@ public class DefaultDimensionUserService extends GenericReactiveCrudService<Dime
                                 return dimensionIdGroup
                                         .map(DimensionUserEntity::getUserId)
                                         .collectList()
-                                        .flatMap(userIdList -> {
-                                            eventPublisher.publishEvent(ClearUserAuthorizationCacheEvent.of(userIdList));
-                                            return event.apply(type, dimensionId, userIdList).publish(eventPublisher);
-                                        });
+                                        .flatMap(userIdList -> ClearUserAuthorizationCacheEvent
+                                                .of(userIdList)
+                                                .publish(eventPublisher)
+                                                .then(event.apply(type, dimensionId, userIdList)
+                                                           .publish(eventPublisher)));
                             });
                 })
                 .thenMany(cache);
@@ -137,9 +138,7 @@ public class DefaultDimensionUserService extends GenericReactiveCrudService<Dime
                    .map(DimensionUserEntity::getUserId)
                    .distinct()
                    .collectList()
-                   .map(ClearUserAuthorizationCacheEvent::of)
-                   .doOnNext(eventPublisher::publishEvent)
-                   .then();
+                   .flatMap(list -> ClearUserAuthorizationCacheEvent.of(list).publish(eventPublisher));
     }
 
 }

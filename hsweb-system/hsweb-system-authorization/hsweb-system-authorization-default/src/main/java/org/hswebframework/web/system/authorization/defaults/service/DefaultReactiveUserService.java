@@ -110,9 +110,10 @@ public class DefaultReactiveUserService extends GenericReactiveCrudService<UserE
                             .execute()
                             .flatMap(__ -> new UserModifiedEvent(userEntity, passwordChanged).publish(eventPublisher))
                             .thenReturn(userEntity)
-                            .doOnNext(e -> {
-                                eventPublisher.publishEvent(ClearUserAuthorizationCacheEvent.of(e.getId()));
-                            });
+                            .flatMap(e -> ClearUserAuthorizationCacheEvent
+                                    .of(e.getId())
+                                    .publish(eventPublisher)
+                                    .thenReturn(e));
                 });
 
     }

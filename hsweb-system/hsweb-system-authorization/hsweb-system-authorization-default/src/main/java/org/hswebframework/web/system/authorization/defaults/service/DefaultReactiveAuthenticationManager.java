@@ -1,18 +1,17 @@
 package org.hswebframework.web.system.authorization.defaults.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.hswebframework.web.authorization.*;
-import org.hswebframework.web.authorization.exception.AccessDenyException;
+import org.hswebframework.web.authorization.Authentication;
+import org.hswebframework.web.authorization.AuthenticationRequest;
+import org.hswebframework.web.authorization.ReactiveAuthenticationInitializeService;
+import org.hswebframework.web.authorization.ReactiveAuthenticationManagerProvider;
 import org.hswebframework.web.authorization.simple.PlainTextUsernamePasswordAuthenticationRequest;
 import org.hswebframework.web.cache.ReactiveCacheManager;
 import org.hswebframework.web.system.authorization.api.entity.UserEntity;
 import org.hswebframework.web.system.authorization.api.event.ClearUserAuthorizationCacheEvent;
 import org.hswebframework.web.system.authorization.api.service.reactive.ReactiveUserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.CacheManager;
-import org.springframework.cache.support.SimpleValueWrapper;
 import org.springframework.context.event.EventListener;
-import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import reactor.core.publisher.Mono;
 
@@ -32,18 +31,25 @@ public class DefaultReactiveAuthenticationManager implements ReactiveAuthenticat
     @EventListener
     public void handleClearAuthCache(ClearUserAuthorizationCacheEvent event) {
         if (cacheManager != null) {
+            Mono<Void> operator;
             if (event.isAll()) {
-                cacheManager.getCache("user-auth")
+                operator = cacheManager
+                        .getCache("user-auth")
                         .clear()
                         .doOnSuccess(nil -> log.info("clear all user authentication cache success"))
-                        .doOnError(err -> log.error(err.getMessage(), err))
-                        .subscribe();
+                        .doOnError(err -> log.error(err.getMessage(), err));
             } else {
-                cacheManager.getCache("user-auth")
+                operator = cacheManager
+                        .getCache("user-auth")
                         .evictAll(event.getUserId())
                         .doOnError(err -> log.error(err.getMessage(), err))
-                        .doOnSuccess(__ -> log.info("clear user {} authentication cache success", event.getUserId()))
-                        .subscribe();
+                        .doOnSuccess(__ -> log.info("clear user {} authentication cache success", event.getUserId()));
+            }
+            if (event.isAsync()) {
+                event.async(operator);
+            } else {
+                log.warn("please use async for ClearUserAuthorizationCacheEvent");
+                operator.subscribe();
             }
         }
     }
@@ -62,11 +68,16 @@ public class DefaultReactiveAuthenticationManager implements ReactiveAuthenticat
 
     @Override
     public Mono<Authentication> getByUserId(String userId) {
+        if (userId == null) {
+            return Mono.empty();
+        }
+        if (cacheManager == null) {
+            return initializeService.initUserAuthorization(userId);
+        }
 
-        return Mono.justOrEmpty(userId)
-                .flatMap(_id -> Mono.justOrEmpty(cacheManager)
-                        .map(cm -> cacheManager.<Authentication>getCache("user-auth"))
-                        .flatMap(cache -> cache.mono(userId).onCacheMissResume(() -> initializeService.initUserAuthorization(userId)))
-                        .cast(Authentication.class));
+        return cacheManager
+                .<Authentication>getCache("user-auth")
+                .mono(userId)
+                .onCacheMissResume(() -> initializeService.initUserAuthorization(userId));
     }
 }

@@ -93,8 +93,7 @@ public class DefaultAuthorizationSettingService extends GenericReactiveCrudServi
                                 .justOrEmpty(typeProviderMapping.get(setting.getDimensionType()))
                                 .flatMapMany(provider -> provider.getUserIdByDimensionId(setting.getDimensionTarget()))))
                 .collectList()
-                .map(ClearUserAuthorizationCacheEvent::of)
-                .doOnNext(eventPublisher::publishEvent)
+                .flatMap(lst-> ClearUserAuthorizationCacheEvent.of(lst).publish(eventPublisher))
                 .then();
     }
 

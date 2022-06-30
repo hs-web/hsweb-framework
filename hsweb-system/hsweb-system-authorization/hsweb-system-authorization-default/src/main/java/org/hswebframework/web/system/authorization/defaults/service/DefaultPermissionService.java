@@ -19,31 +19,39 @@ public class DefaultPermissionService extends GenericReactiveCrudService<Permiss
     @Override
     public Mono<SaveResult> save(Publisher<PermissionEntity> entityPublisher) {
         return super.save(entityPublisher)
-                .doOnSuccess(r -> eventPublisher.publishEvent(ClearUserAuthorizationCacheEvent.of()));
+                    .flatMap(e -> ClearUserAuthorizationCacheEvent.all().publish(eventPublisher).thenReturn(e));
     }
 
     @Override
     public Mono<Integer> updateById(String id, Mono<PermissionEntity> entityPublisher) {
         return super.updateById(id, entityPublisher)
-                .doOnSuccess(r -> eventPublisher.publishEvent(ClearUserAuthorizationCacheEvent.of()));
+                    .flatMap(e -> ClearUserAuthorizationCacheEvent.all().publish(eventPublisher).thenReturn(e));
     }
 
     @Override
     public Mono<Integer> deleteById(Publisher<String> idPublisher) {
         return super.deleteById(idPublisher)
-                .doOnSuccess(r -> eventPublisher.publishEvent(ClearUserAuthorizationCacheEvent.of()));
+                    .flatMap(e -> ClearUserAuthorizationCacheEvent.all().publish(eventPublisher).thenReturn(e));
     }
 
     @Override
     public ReactiveDelete createDelete() {
         return super.createDelete()
-                .onExecute((ignore,i) -> i.doOnSuccess(r -> eventPublisher.publishEvent(ClearUserAuthorizationCacheEvent.of())));
+                    .onExecute((ignore, i) -> i
+                            .flatMap(e -> ClearUserAuthorizationCacheEvent
+                                    .all()
+                                    .publish(eventPublisher)
+                                    .thenReturn(e)));
     }
 
     @Override
     public ReactiveUpdate<PermissionEntity> createUpdate() {
         return super.createUpdate()
-                .onExecute((ignore,i) -> i.doOnSuccess(r -> eventPublisher.publishEvent(ClearUserAuthorizationCacheEvent.of())));
+                    .onExecute((ignore, i) -> i
+                            .flatMap(e -> ClearUserAuthorizationCacheEvent
+                                    .all()
+                                    .publish(eventPublisher)
+                                    .thenReturn(e)));
     }
 
 
