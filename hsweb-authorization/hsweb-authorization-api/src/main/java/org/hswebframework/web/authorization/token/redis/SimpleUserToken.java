@@ -35,18 +35,25 @@ public class SimpleUserToken implements UserToken {
 
     public static SimpleUserToken of(Map<String, Object> map) {
         Object authentication = map.get("authentication");
-        if(authentication instanceof Authentication){
+        if (authentication instanceof Authentication) {
             return FastBeanCopier.copy(map, new SimpleAuthenticationUserToken(((Authentication) authentication)));
         }
         return FastBeanCopier.copy(map, new SimpleUserToken());
     }
 
-    @Override
-    public boolean isNormal() {
-        if (checkExpired()) {
-            setState(TokenState.expired);
-            return false;
+    public TokenState getState() {
+        if (state == TokenState.normal) {
+            checkExpired();
         }
-        return UserToken.super.isNormal();
+        return state;
+    }
+
+    @Override
+    public boolean checkExpired() {
+        if (UserToken.super.checkExpired()) {
+            setState(TokenState.expired);
+            return true;
+        }
+        return false;
     }
 }

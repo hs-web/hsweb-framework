@@ -74,7 +74,19 @@ public class LocalUserToken implements UserToken {
 
     @Override
     public TokenState getState() {
+        if (state == TokenState.normal) {
+            checkExpired();
+        }
         return state;
+    }
+
+    @Override
+    public boolean checkExpired() {
+        if (UserToken.super.checkExpired()) {
+            setState(TokenState.expired);
+            return true;
+        }
+        return false;
     }
 
     public void setState(TokenState state) {
