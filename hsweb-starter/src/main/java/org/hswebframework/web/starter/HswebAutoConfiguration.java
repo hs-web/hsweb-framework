@@ -37,9 +37,9 @@ public class HswebAutoConfiguration {
     @PostConstruct
     public void init() {
         engines = Stream.of("js", "groovy")
-                .map(DynamicScriptEngineFactory::getEngine)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                        .map(DynamicScriptEngineFactory::getEngine)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList());
 
         addGlobalVariable("logger", LoggerFactory.getLogger("org.hswebframework.script"));
 
@@ -48,11 +48,11 @@ public class HswebAutoConfiguration {
 
     private void addGlobalVariable(String var, Object val) {
         engines.forEach(engine -> {
-                    try {
-                        engine.addGlobalVariable(Collections.singletonMap(var, val));
-                    } catch (NullPointerException ignore) {
-                    }
-                }
+                            try {
+                                engine.addGlobalVariable(Collections.singletonMap(var, val));
+                            } catch (NullPointerException ignore) {
+                            }
+                        }
         );
     }
 
@@ -61,15 +61,21 @@ public class HswebAutoConfiguration {
                                         AppProperties properties) {
 
         addGlobalVariable("database", database);
-        addGlobalVariable("sqlExecutor", database.getMetadata().getFeature(SyncSqlExecutor.ID)
-                .orElseGet(() -> database.getMetadata().getFeature(ReactiveSqlExecutor.ID)
-                        .map(ReactiveSyncSqlExecutor::of).orElse(null)));
+        addGlobalVariable("sqlExecutor", database
+                .getMetadata()
+                .getFeature(SyncSqlExecutor.ID)
+                .orElseGet(() -> database
+                        .getMetadata()
+                        .getFeature(ReactiveSqlExecutor.ID)
+                        .map(ReactiveSyncSqlExecutor::of)
+                        .orElse(null)));
         SystemVersion version = properties.build();
         return args -> {
-
-            SystemInitialize initialize = new SystemInitialize(database, version);
-            initialize.setExcludeTables(properties.getInitTableExcludes());
-            initialize.install();
+            if (properties.isAutoInit()) {
+                SystemInitialize initialize = new SystemInitialize(database, version);
+                initialize.setExcludeTables(properties.getInitTableExcludes());
+                initialize.install();
+            }
         };
     }
 

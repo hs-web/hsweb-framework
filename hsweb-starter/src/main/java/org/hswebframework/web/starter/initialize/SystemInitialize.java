@@ -184,6 +184,7 @@ public class SystemInitialize {
                         .addDecoder(ClobValueCodec.INSTANCE)
                         .addDecoder(JsonValueCodec.ofCollection(List.class, Dependency.class)))).notNull().comment("依赖详情").commit()
                 .comment("系统信息")
+                .allowAlter(false)
                 .commit()
                 .sync();
         system = database.dml().createRepository("s_system");
