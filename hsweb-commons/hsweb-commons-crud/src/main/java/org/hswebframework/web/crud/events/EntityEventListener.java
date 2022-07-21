@@ -16,6 +16,7 @@ import org.hswebframework.ezorm.rdb.mapping.events.MappingEventTypes;
 import org.hswebframework.ezorm.rdb.mapping.events.ReactiveResultHolder;
 import org.hswebframework.ezorm.rdb.metadata.RDBColumnMetadata;
 import org.hswebframework.ezorm.rdb.metadata.TableOrViewMetadata;
+import org.hswebframework.ezorm.rdb.operator.builder.fragments.NativeSql;
 import org.hswebframework.web.api.crud.entity.Entity;
 import org.hswebframework.web.bean.FastBeanCopier;
 import org.hswebframework.web.event.AsyncEvent;
@@ -147,30 +148,23 @@ public class EntityEventListener implements EventListener {
         }
         for (Object old : olds) {
             Object newValue = context
-                    .get(MappingContextKeys.instance)
-                    .filter(Entity.class::isInstance)
-                    .map(Entity.class::cast)
-                    .orElseGet(() -> {
-                        return context
-                                .get(MappingContextKeys.updateColumnInstance)
-                                .map(map -> {
-                                    Object data = FastBeanCopier.copy(map, FastBeanCopier.copy(old, mapping.getEntityType()));
-                                    //set null
-                                    for (Map.Entry<String, Object> stringObjectEntry : map.entrySet()) {
-                                        if (stringObjectEntry.getValue() == null || stringObjectEntry.getValue() instanceof NullValue) {
-                                            GlobalConfig
-                                                    .getPropertyOperator()
-                                                    .setProperty(data, stringObjectEntry.getKey(), null);
-                                        }
-                                    }
-                                    return data;
-                                })
-                                .map(Entity.class::cast)
-                                .orElse(null);
+                    .get(MappingContextKeys.updateColumnInstance)
+                    .map(map -> {
+                        Object data = FastBeanCopier.copy(map, FastBeanCopier.copy(old, mapping.newInstance()));
+                        for (Map.Entry<String, Object> entry : map.entrySet()) {
+                            //set null
+                            if (entry.getValue() == null
+                                    || entry.getValue() instanceof NullValue) {
+                                GlobalConfig
+                                        .getPropertyOperator()
+                                        .setProperty(data, entry.getKey(), null);
+                            }
+                        }
+                        return data;
+                    })
+                    .orElseThrow(() -> {
+                        return new IllegalArgumentException("can not get update instance");
                     });
-            if (newValue != null) {
-                FastBeanCopier.copy(old, newValue, FastBeanCopier.include(idColumn.getAlias()));
-            }
             newValues.add(newValue);
         }
         return newValues;
