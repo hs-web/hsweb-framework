@@ -1,5 +1,7 @@
 package org.hswebframework.web.bean;
 
+import com.google.common.collect.ImmutableMap;
+import jdk.nashorn.internal.objects.annotations.Getter;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -111,6 +113,13 @@ public class FastBeanCopierTest {
         FastBeanCopier.copy(source,test);
 
         Assert.assertEquals(reference.get(),source.getName());
+    }
+
+    @Test
+    public void testGetProperty(){
+
+        Assert.assertEquals(1,FastBeanCopier.getProperty(ImmutableMap.of("a",1,"b",2),"a"));
+
     }
 
 

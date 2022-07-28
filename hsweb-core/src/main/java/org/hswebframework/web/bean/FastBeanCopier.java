@@ -14,6 +14,7 @@ import org.hswebframework.web.proxy.Proxy;
 import org.jctools.maps.NonBlockingHashMap;
 import org.springframework.core.ResolvableType;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils;
 
 import java.beans.PropertyDescriptor;
@@ -88,6 +89,9 @@ public final class FastBeanCopier {
     }
 
     public static Object getProperty(Object source, String key) {
+        if (source instanceof Map) {
+            return ((Map<?, ?>) source).get(key);
+        }
         SingleValueMap<Object, Object> map = new SingleValueMap<>();
         copy(source, map, include(key));
         return map.getValue();
@@ -117,7 +121,16 @@ public final class FastBeanCopier {
     @SuppressWarnings("all")
     public static <T, S> T copy(S source, T target, Converter converter, Set<String> ignore) {
         if (source instanceof Map && target instanceof Map) {
-            ((Map) target).putAll(((Map) source));
+            if (CollectionUtils.isEmpty(ignore)) {
+                ((Map) target).putAll(((Map) source));
+            } else {
+                ((Map) source)
+                        .forEach((k, v) -> {
+                            if (!ignore.contains(k)) {
+                                ((Map) target).put(k, v);
+                            }
+                        });
+            }
             return target;
         }
 
@@ -584,20 +597,29 @@ public final class FastBeanCopier {
             if (target.isEnumType()) {
                 if (target.isEnumDict()) {
                     String strVal = String.valueOf(source);
-
-                    Object val = EnumDict.find((Class) targetClass, e -> {
-                        return e.eq(source) || e.name().equalsIgnoreCase(strVal);
-                    }).orElse(null);
+                    Object val = null;
+                    for (Object anEnum : target.getEnums()) {
+                        EnumDict dic = ((EnumDict) anEnum);
+                        Enum e = ((Enum<?>) anEnum);
+                        if (dic.eq(source) || e.name().equalsIgnoreCase(strVal)) {
+                            val = (T) anEnum;
+                            break;
+                        }
+                    }
+                    if (val == null) {
+                        return null;
+                    }
                     if (targetClass.isInstance(val)) {
                         return ((T) val);
                     }
                     return convert(val, targetClass, genericType);
                 }
                 String strSource = String.valueOf(source);
-                for (T t : targetClass.getEnumConstants()) {
-                    if (((Enum) t).name().equalsIgnoreCase(strSource)
-                            || Objects.equals(String.valueOf(((Enum<?>) t).ordinal()), strSource)) {
-                        return t;
+                for (Object e : target.getEnums()) {
+                    Enum t = ((Enum<?>) e);
+                    if ((t.name().equalsIgnoreCase(strSource)
+                            || Objects.equals(String.valueOf(t.ordinal()), strSource))) {
+                        return (T)e;
                     }
                 }
 

@@ -28,7 +28,7 @@ public class SingleValueMap<K, V> implements Map<K, V> {
 
     @Override
     public V get(Object key) {
-        return null;
+        return Objects.equals(key, this.key) ? value : null;
     }
 
     @Override
@@ -50,9 +50,9 @@ public class SingleValueMap<K, V> implements Map<K, V> {
     }
 
     @Override
-    public void putAll(Map<? extends K,? extends V> m) {
+    public void putAll(Map<? extends K, ? extends V> m) {
         if (m.size() > 0) {
-            Map.Entry<? extends K,? extends V> entry = m.entrySet().iterator().next();
+            Map.Entry<? extends K, ? extends V> entry = m.entrySet().iterator().next();
             this.key = entry.getKey();
             this.value = entry.getValue();
         }

@@ -19,6 +19,8 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.hswebframework.web.bean.ClassDescription;
+import org.hswebframework.web.bean.ClassDescriptions;
 import org.hswebframework.web.exception.ValidationException;
 import org.hswebframework.web.i18n.LocaleUtils;
 import org.springframework.beans.BeanUtils;
@@ -135,20 +137,25 @@ public interface EnumDict<V> extends JSONSerializable {
      * @param <T>       枚举类型
      * @return 查找到的结果
      */
+    @SuppressWarnings("all")
     static <T extends Enum & EnumDict> Optional<T> find(Class<T> type, Predicate<T> predicate) {
-        if (type.isEnum()) {
-            for (T enumDict : type.getEnumConstants()) {
-                if (predicate.test(enumDict)) {
-                    return Optional.of(enumDict);
+        ClassDescription description = ClassDescriptions.getDescription(type);
+        if (description.isEnumType()) {
+            for (Object enumDict : description.getEnums()) {
+                if (predicate.test((T) enumDict)) {
+                    return Optional.of((T) enumDict);
                 }
             }
         }
         return Optional.empty();
     }
 
+    @SuppressWarnings("all")
     static <T extends Enum & EnumDict> List<T> findList(Class<T> type, Predicate<T> predicate) {
-        if (type.isEnum()) {
-            return Arrays.stream(type.getEnumConstants())
+        ClassDescription description = ClassDescriptions.getDescription(type);
+        if (description.isEnumType()) {
+            return Arrays.stream(description.getEnums())
+                         .map(v -> (T) v)
                          .filter(predicate)
                          .collect(Collectors.toList());
         }
@@ -199,7 +206,8 @@ public interface EnumDict<V> extends JSONSerializable {
 
     @SafeVarargs
     static <T extends Enum & EnumDict> boolean in(T target, T... t) {
-        Enum[] all = target.getClass().getEnumConstants();
+        ClassDescription description= ClassDescriptions.getDescription(target.getClass());
+        Object[] all = description.getEnums();
 
         if (all.length >= 64) {
             List<T> list = Arrays.asList(t);
@@ -385,7 +393,7 @@ public interface EnumDict<V> extends JSONSerializable {
                             return e.name();
                         }).collect(Collectors.toList());
 
-                return new ValidationException(currentName,"validation.parameter_does_not_exist_in_enums", currentName);
+                return new ValidationException(currentName, "validation.parameter_does_not_exist_in_enums", currentName);
             };
             if (EnumDict.class.isAssignableFrom(findPropertyType) && findPropertyType.isEnum()) {
                 if (node.isObject()) {
