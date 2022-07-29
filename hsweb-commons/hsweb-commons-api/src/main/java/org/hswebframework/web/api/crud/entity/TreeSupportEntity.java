@@ -224,7 +224,9 @@ public interface TreeSupportEntity<PK> extends Entity {
                     if (child instanceof SortSupportEntity && parent instanceof SortSupportEntity) {
                         SortSupportEntity sortableParent = ((SortSupportEntity) parent);
                         SortSupportEntity sortableChild = ((SortSupportEntity) child);
-                        sortableChild.setSortIndex(sortableParent.getSortIndex() * 100 + index++);
+                        if (sortableChild.getSortIndex() == null) {
+                            sortableChild.setSortIndex(sortableParent.getSortIndex() * 100 + index++);
+                        }
                     }
                     queue.add((T) child);
                 }
