@@ -10,6 +10,7 @@ import org.hswebframework.web.authorization.ReactiveAuthenticationInitializeServ
 import org.hswebframework.web.authorization.access.DataAccessConfig;
 import org.hswebframework.web.authorization.access.DataAccessType;
 import org.hswebframework.web.authorization.builder.DataAccessConfigBuilderFactory;
+import org.hswebframework.web.authorization.events.AuthorizationInitializeEvent;
 import org.hswebframework.web.authorization.simple.SimpleAuthentication;
 import org.hswebframework.web.authorization.simple.SimplePermission;
 import org.hswebframework.web.authorization.simple.SimpleUser;
@@ -21,6 +22,7 @@ import org.hswebframework.web.system.authorization.api.entity.PermissionEntity;
 import org.hswebframework.web.system.authorization.api.entity.UserEntity;
 import org.hswebframework.web.system.authorization.api.service.reactive.ReactiveUserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -48,6 +50,9 @@ public class DefaultReactiveAuthenticationInitializeService
     @Autowired(required = false)
     private List<DimensionProvider> dimensionProviders = new ArrayList<>();
 
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
+
     @Override
     public Mono<Authentication> initUserAuthorization(String userId) {
         return doInit(userService.findById(userId));
@@ -58,17 +63,23 @@ public class DefaultReactiveAuthenticationInitializeService
         return userEntityMono.flatMap(user -> {
             SimpleAuthentication authentication = new SimpleAuthentication();
             authentication.setUser(SimpleUser
-                    .builder()
-                    .id(user.getId())
-                    .name(user.getName())
-                    .username(user.getUsername())
-                    .userType(user.getType())
-                    .build());
+                                           .builder()
+                                           .id(user.getId())
+                                           .name(user.getName())
+                                           .username(user.getUsername())
+                                           .userType(user.getType())
+                                           .build());
             return initPermission(authentication)
                     .switchIfEmpty(Mono.just(authentication))
                     .onErrorResume(err -> {
                         log.warn(err.getMessage(), err);
                         return Mono.just(authentication);
+                    })
+                    .flatMap(auth -> {
+                        AuthorizationInitializeEvent event = new AuthorizationInitializeEvent(auth);
+                        return event
+                                .publish(eventPublisher)
+                                .then(Mono.fromSupplier(event::getAuthentication));
                     });
         });
 
@@ -76,31 +87,31 @@ public class DefaultReactiveAuthenticationInitializeService
 
     protected Flux<AuthorizationSettingEntity> getSettings(List<Dimension> dimensions) {
         return Flux.fromIterable(dimensions)
-                .filter(dimension -> dimension.getType() != null)
-                .groupBy(d -> d.getType().getId(), (Function<Dimension, Object>) Dimension::getId)
-                .flatMap(group ->
-                        group.collectList()
-                                .flatMapMany(list -> settingRepository
-                                        .createQuery()
-                                        .where(AuthorizationSettingEntity::getState, 1)
-                                        .and(AuthorizationSettingEntity::getDimensionType, group.key())
-                                        .in(AuthorizationSettingEntity::getDimensionTarget, list)
-                                        .fetch()));
+                   .filter(dimension -> dimension.getType() != null)
+                   .groupBy(d -> d.getType().getId(), (Function<Dimension, Object>) Dimension::getId)
+                   .flatMap(group ->
+                                    group.collectList()
+                                         .flatMapMany(list -> settingRepository
+                                                 .createQuery()
+                                                 .where(AuthorizationSettingEntity::getState, 1)
+                                                 .and(AuthorizationSettingEntity::getDimensionType, group.key())
+                                                 .in(AuthorizationSettingEntity::getDimensionTarget, list)
+                                                 .fetch()));
     }
 
     protected Mono<Authentication> initPermission(SimpleAuthentication authentication) {
         return Flux.fromIterable(dimensionProviders)
-                .flatMap(provider -> provider.getDimensionByUserId(authentication.getUser().getId()))
-                .cast(Dimension.class)
-                .collectList()
-                .doOnNext(authentication::setDimensions)
-                .flatMap(allDimension ->
-                        Mono.zip(
-                                getAllPermission()
-                                , getSettings(allDimension)
-                                        .collect(Collectors.groupingBy(AuthorizationSettingEntity::getPermission))
-                                , (_p, _s) -> handlePermission(authentication, allDimension, _p, _s)
-                        ));
+                   .flatMap(provider -> provider.getDimensionByUserId(authentication.getUser().getId()))
+                   .cast(Dimension.class)
+                   .collectList()
+                   .doOnNext(authentication::setDimensions)
+                   .flatMap(allDimension ->
+                                    Mono.zip(
+                                            getAllPermission()
+                                            , getSettings(allDimension)
+                                                    .collect(Collectors.groupingBy(AuthorizationSettingEntity::getPermission))
+                                            , (_p, _s) -> handlePermission(authentication, allDimension, _p, _s)
+                                    ));
 
     }
 
@@ -134,16 +145,19 @@ public class DefaultReactiveAuthenticationInitializeService
 
                     if (permissionSetting.getDataAccesses() != null) {
                         permissionSetting.getDataAccesses()
-                                .stream()
-                                .map(conf -> {
-                                    DataAccessConfig config = builderFactory.create().fromMap(conf.toMap()).build();
-                                    if (config == null) {
-                                        log.warn("unsupported data access:{}", conf.toMap());
-                                    }
-                                    return config;
-                                })
-                                .filter(Objects::nonNull)
-                                .forEach(configs::add);
+                                         .stream()
+                                         .map(conf -> {
+                                             DataAccessConfig config = builderFactory
+                                                     .create()
+                                                     .fromMap(conf.toMap())
+                                                     .build();
+                                             if (config == null) {
+                                                 log.warn("unsupported data access:{}", conf.toMap());
+                                             }
+                                             return config;
+                                         })
+                                         .filter(Objects::nonNull)
+                                         .forEach(configs::add);
                     }
                     if (CollectionUtils.isNotEmpty(permissionSetting.getActions())) {
                         permission.getActions().addAll(permissionSetting.getActions());
