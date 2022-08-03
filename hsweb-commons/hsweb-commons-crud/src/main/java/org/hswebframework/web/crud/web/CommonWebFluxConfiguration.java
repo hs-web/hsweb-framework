@@ -1,6 +1,5 @@
 package org.hswebframework.web.crud.web;
 
-import io.r2dbc.spi.R2dbcDataIntegrityViolationException;
 import org.hswebframework.web.i18n.WebFluxLocaleFilter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -32,12 +31,6 @@ public class CommonWebFluxConfiguration {
                                                          ReactiveAdapterRegistry registry) {
         return new ResponseMessageWrapper(codecConfigurer.getWriters(), resolver, registry);
     }
-
-    @Bean
-    public R2dbcDataIntegrityViolationException r2dbcDataIntegrityViolationException(){
-        return new R2dbcDataIntegrityViolationException();
-    }
-
 
     @Bean
     public WebFilter localeWebFilter() {
