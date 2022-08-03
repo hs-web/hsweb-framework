@@ -64,7 +64,8 @@ public class AopAuthorizingController extends StaticMethodMatcherPointcutAdvisor
                                            AuthorizingContext context,
                                            Supplier<? extends Publisher<?>> invoker) {
 
-        return Authentication.currentReactive()
+        return Authentication
+                .currentReactive()
                 .switchIfEmpty(Mono.error(UnAuthorizedException::new))
                 .flatMapMany(auth -> {
                     context.setAuthentication(auth);
@@ -133,8 +134,7 @@ public class AopAuthorizingController extends StaticMethodMatcherPointcutAdvisor
             context.setAuthentication(authentication);
             isControl = true;
 
-            Phased dataAccessPhased = null;
-            dataAccessPhased = definition.getResources().getPhased();
+            Phased dataAccessPhased = definition.getResources().getPhased();
             if (definition.getPhased() == Phased.before) {
                 //RDAC before
                 authorizingHandler.handRBAC(context);
