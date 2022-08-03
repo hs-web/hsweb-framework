@@ -19,7 +19,7 @@ import java.util.Objects;
  */
 @Getter
 @Setter(AccessLevel.PROTECTED)
-public class I18nSupportException extends RuntimeException {
+public class I18nSupportException extends TraceSourceException {
 
     /**
      * 消息code,在message.properties文件中定义的key

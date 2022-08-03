@@ -38,7 +38,7 @@ public final class ValidatorUtils {
     public static <T> T tryValidate(T bean, Class<?>... group) {
         Set<ConstraintViolation<T>> violations = getValidator().validate(bean, group);
         if (!violations.isEmpty()) {
-            throw new ValidationException(violations);
+            throw new ValidationException(violations).withSource(bean);
         }
 
         return bean;
@@ -47,7 +47,7 @@ public final class ValidatorUtils {
     public static <T> T tryValidate(T bean, String property, Class<?>... group) {
         Set<ConstraintViolation<T>> violations = getValidator().validateProperty(bean, property, group);
         if (!violations.isEmpty()) {
-            throw new ValidationException(violations);
+            throw new ValidationException(violations).withSource(bean);
         }
 
         return bean;
@@ -56,7 +56,7 @@ public final class ValidatorUtils {
     public static <T> void tryValidate(Class<T> bean, String property, Object value, Class<?>... group) {
         Set<ConstraintViolation<T>> violations = getValidator().validateValue(bean, property, value, group);
         if (!violations.isEmpty()) {
-            throw new ValidationException(violations);
+            throw new ValidationException(violations).withSource(value);
         }
     }
 
