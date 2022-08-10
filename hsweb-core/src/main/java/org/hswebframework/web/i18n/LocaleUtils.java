@@ -502,8 +502,14 @@ public final class LocaleUtils {
 
         @Override
         public void subscribe(@Nonnull CoreSubscriber<? super T> actual) {
-            source.subscribe(
-                    new LocaleSwitchSubscriber<>(actual)
+            doWith(actual,
+                   actual.currentContext().getOrDefault(Locale.class, DEFAULT_LOCALE),
+                   (a, l) -> {
+                       source.subscribe(
+                               new LocaleSwitchSubscriber<>(a)
+                       );
+                       return null;
+                   }
             );
         }
     }
