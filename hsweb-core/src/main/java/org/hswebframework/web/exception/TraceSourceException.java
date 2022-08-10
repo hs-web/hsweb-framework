@@ -35,7 +35,7 @@ public class TraceSourceException extends RuntimeException {
     }
 
     public TraceSourceException(Throwable e) {
-        super(e);
+        super(e.getMessage(),e);
     }
 
     public TraceSourceException(String message, Throwable e) {

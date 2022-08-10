@@ -35,9 +35,10 @@ public class ValidateEventListener implements EventListener {
             resultHolder
                     .ifPresent(holder -> holder
                             .invoke(LocaleUtils
-                                            .currentReactive()
-                                            .doOnNext(locale -> LocaleUtils.doWith(locale, (l) -> tryValidate(type, context)))
-                                            .then()
+                                            .doInReactive(() -> {
+                                                tryValidate(type, context);
+                                                return null;
+                                            })
                             ));
         } else {
             tryValidate(type, context);
