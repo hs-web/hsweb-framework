@@ -62,16 +62,6 @@ public class DefaultUserTokenGenPar implements ReactiveUserTokenGenerator, React
         if (token == null) {
             return Mono.empty();
         }
-        return Mono.just(new ParsedToken() {
-            @Override
-            public String getToken() {
-                return token;
-            }
-
-            @Override
-            public String getType() {
-                return getTokenType();
-            }
-        });
+        return Mono.just(ParsedToken.of(getTokenType(),token));
     }
 }

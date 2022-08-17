@@ -78,7 +78,6 @@ public class SimpleAuthentication implements Authentication {
             me.getDataAccesses().addAll(permission.getDataAccesses());
         }
 
-
         for (Dimension dimension : authentication.getDimensions()) {
             if (!getDimension(dimension.getType(), dimension.getId()).isPresent()) {
                 dimensions.add(dimension);
@@ -91,7 +90,6 @@ public class SimpleAuthentication implements Authentication {
     public Authentication copy(BiPredicate<Permission, String> permissionFilter,
                                Predicate<Dimension> dimension) {
         SimpleAuthentication authentication = new SimpleAuthentication();
-        authentication.setUser(user);
         authentication.setDimensions(dimensions.stream().filter(dimension).collect(Collectors.toList()));
         authentication.setPermissions(permissions
                                               .stream()
@@ -99,6 +97,12 @@ public class SimpleAuthentication implements Authentication {
                                               .filter(per -> !per.getActions().isEmpty())
                                               .collect(Collectors.toList())
         );
+        authentication.setUser(user);
         return authentication;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+        dimensions.add(user);
     }
 }

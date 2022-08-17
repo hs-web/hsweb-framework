@@ -145,6 +145,12 @@ public class AuthorizingHandlerAutoConfiguration {
         return new ReactiveUserTokenController();
     }
 
+    @Bean
+    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
+    public BearerTokenParser bearerTokenParser() {
+        return new BearerTokenParser();
+    }
+
     @Configuration
     public static class DataAccessHandlerProcessor implements BeanPostProcessor {
 

@@ -69,8 +69,9 @@ public class DefaultReactiveAuthenticationInitializeService
                                            .username(user.getUsername())
                                            .userType(user.getType())
                                            .build());
+
             return initPermission(authentication)
-                    .switchIfEmpty(Mono.just(authentication))
+                    .defaultIfEmpty(authentication)
                     .onErrorResume(err -> {
                         log.warn(err.getMessage(), err);
                         return Mono.just(authentication);
@@ -82,7 +83,6 @@ public class DefaultReactiveAuthenticationInitializeService
                                 .then(Mono.fromSupplier(event::getAuthentication));
                     });
         });
-
     }
 
     protected Flux<AuthorizationSettingEntity> getSettings(List<Dimension> dimensions) {

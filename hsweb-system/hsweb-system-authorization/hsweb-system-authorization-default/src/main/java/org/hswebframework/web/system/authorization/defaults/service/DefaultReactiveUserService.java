@@ -24,6 +24,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.validation.ValidationException;
+import java.util.Objects;
 
 
 public class DefaultReactiveUserService extends GenericReactiveCrudService<UserEntity, String> implements ReactiveUserService {
@@ -61,8 +62,17 @@ public class DefaultReactiveUserService extends GenericReactiveCrudService<UserE
                     }
                     return findById(userEntity.getId())
                             .flatMap(ignore -> doUpdate(userEntity))
-                            .switchIfEmpty(Mono.error(NotFoundException::new));
+                            .switchIfEmpty(
+                                    Objects.equals(userEntity.getId(),userEntity.getUsername()) ?
+                                            doAdd(userEntity) :
+                                            Mono.error(NotFoundException::new)
+                            );
                 }).thenReturn(true);
+    }
+
+    @Override
+    public Mono<UserEntity> addUser(UserEntity userEntity) {
+        return doAdd(userEntity);
     }
 
     protected Mono<UserEntity> doAdd(UserEntity userEntity) {

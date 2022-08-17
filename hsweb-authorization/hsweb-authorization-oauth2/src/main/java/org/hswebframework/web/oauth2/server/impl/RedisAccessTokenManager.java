@@ -4,6 +4,9 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.hswebframework.web.authorization.Authentication;
+import org.hswebframework.web.authorization.token.AuthenticationUserToken;
+import org.hswebframework.web.authorization.token.UserTokenManager;
+import org.hswebframework.web.authorization.token.redis.RedisUserTokenManager;
 import org.hswebframework.web.oauth2.ErrorType;
 import org.hswebframework.web.oauth2.OAuth2Exception;
 import org.hswebframework.web.oauth2.server.AccessToken;
@@ -13,6 +16,7 @@ import org.springframework.data.redis.core.ReactiveRedisOperations;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.RedisSerializer;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
@@ -22,6 +26,8 @@ public class RedisAccessTokenManager implements AccessTokenManager {
 
     private final ReactiveRedisOperations<String, RedisAccessToken> tokenRedis;
 
+    private final UserTokenManager userTokenManager;
+
     @Getter
     @Setter
     private int tokenExpireIn = 7200;//2小时
@@ -30,29 +36,32 @@ public class RedisAccessTokenManager implements AccessTokenManager {
     @Setter
     private int refreshExpireIn = 2592000; //30天
 
-    public RedisAccessTokenManager(ReactiveRedisOperations<String, RedisAccessToken> tokenRedis) {
+    public RedisAccessTokenManager(ReactiveRedisOperations<String, RedisAccessToken> tokenRedis,
+                                   UserTokenManager userTokenManager) {
         this.tokenRedis = tokenRedis;
+        this.userTokenManager = userTokenManager;
     }
 
     @SuppressWarnings("all")
     public RedisAccessTokenManager(ReactiveRedisConnectionFactory connectionFactory) {
-        this(new ReactiveRedisTemplate<>(connectionFactory, RedisSerializationContext
+        ReactiveRedisTemplate redis = new ReactiveRedisTemplate<>(connectionFactory, RedisSerializationContext
                 .newSerializationContext()
                 .key((RedisSerializer) RedisSerializer.string())
                 .value(RedisSerializer.java())
                 .hashKey(RedisSerializer.string())
                 .hashValue(RedisSerializer.java())
-                .build()
-        ));
+                .build());
+        this.tokenRedis = redis;
+        this.userTokenManager = new RedisUserTokenManager(redis);
     }
+
 
     @Override
     public Mono<Authentication> getAuthenticationByToken(String accessToken) {
-
-        return tokenRedis
-                .opsForValue()
-                .get(createTokenRedisKey(accessToken))
-                .map(RedisAccessToken::getAuthentication);
+        return userTokenManager
+                .getByToken(accessToken)
+                .filter(token -> token instanceof AuthenticationUserToken)
+                .map(t -> ((AuthenticationUserToken) t).getAuthentication());
     }
 
     private String createTokenRedisKey(String token) {
@@ -75,12 +84,36 @@ public class RedisAccessTokenManager implements AccessTokenManager {
         return storeToken(accessToken).thenReturn(accessToken);
     }
 
+    private Mono<Void> storeAuthToken(RedisAccessToken token) {
+        if (token.isSingleton()) {
+            return userTokenManager
+                    .signIn(token.getAccessToken(),
+                            "oauth2",
+                            token.getAuthentication().getUser().getId(),
+                            tokenExpireIn * 1000L)
+                    .then();
+        } else {
+            return userTokenManager
+                    .signIn(token.getAccessToken(),
+                            "oauth2",
+                            token.getAuthentication().getUser().getId(),
+                            tokenExpireIn * 1000L,
+                            token.getAuthentication())
+                    .then();
+        }
+    }
+
     private Mono<Void> storeToken(RedisAccessToken token) {
-        return Mono
-                .zip(
-                        tokenRedis.opsForValue().set(createTokenRedisKey(token.getAccessToken()), token, Duration.ofSeconds(tokenExpireIn)),
-                        tokenRedis.opsForValue().set(createRefreshTokenRedisKey(token.getRefreshToken()), token, Duration.ofSeconds(refreshExpireIn))
-                ).then();
+
+        return Flux
+                .merge(storeAuthToken(token),
+                       tokenRedis
+                               .opsForValue()
+                               .set(createTokenRedisKey(token.getAccessToken()), token, Duration.ofSeconds(tokenExpireIn)),
+                       tokenRedis
+                               .opsForValue()
+                               .set(createRefreshTokenRedisKey(token.getRefreshToken()), token, Duration.ofSeconds(refreshExpireIn)))
+                .then();
     }
 
     private Mono<AccessToken> doCreateSingletonAccessToken(String clientId, Authentication authentication) {
@@ -129,10 +162,15 @@ public class RedisAccessTokenManager implements AccessTokenManager {
                             .as(result -> {
                                 // 单例token
                                 if (token.isSingleton()) {
-                                    return tokenRedis
-                                            .opsForValue()
-                                            .set(createSingletonTokenRedisKey(clientId), token, Duration.ofSeconds(tokenExpireIn))
-                                            .then(result);
+                                    return userTokenManager
+                                            .signOutByToken(token.getAccessToken())
+                                            .then(
+                                                    tokenRedis
+                                                            .opsForValue()
+                                                            .set(createSingletonTokenRedisKey(clientId), token, Duration.ofSeconds(tokenExpireIn))
+                                                            .then(result)
+                                            )
+                                            ;
                                 }
                                 return result;
                             })

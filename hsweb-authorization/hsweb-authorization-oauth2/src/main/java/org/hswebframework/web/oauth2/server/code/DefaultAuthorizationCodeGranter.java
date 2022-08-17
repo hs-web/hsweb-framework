@@ -48,9 +48,12 @@ public class DefaultAuthorizationCodeGranter implements AuthorizationCodeGranter
         request.getParameter(OAuth2Constants.scope).map(String::valueOf).ifPresent(codeCache::setScope);
         codeCache.setCode(code);
         codeCache.setClientId(client.getClientId());
+
         ScopePredicate permissionPredicate = OAuth2ScopeUtils.createScopePredicate(codeCache.getScope());
 
-        codeCache.setAuthentication(authentication.copy((permission, action) -> permissionPredicate.test(permission.getId(), action), dimension -> true));
+        codeCache.setAuthentication(authentication.copy(
+                (permission, action) -> permissionPredicate.test(permission.getId(), action),
+                dimension -> permissionPredicate.test(dimension.getType().getId(), dimension.getId())));
 
 
         return redis
