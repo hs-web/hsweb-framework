@@ -39,7 +39,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * @author zhouhao
  * @since 3.0
  */
-public class ReactiveAopAccessLoggerSupport extends StaticMethodMatcherPointcutAdvisor implements WebFilter {
+public class ReactiveAopAccessLoggerSupport extends StaticMethodMatcherPointcutAdvisor implements WebFilter{
 
     @Autowired(required = false)
     private final List<AccessLoggerParser> loggerParsers = new ArrayList<>();
@@ -58,9 +58,11 @@ public class ReactiveAopAccessLoggerSupport extends StaticMethodMatcherPointcutA
             AccessLoggerInfo info = createLogger(methodInterceptorHolder);
             Object response = methodInvocation.proceed();
             if (response instanceof Mono) {
-                return wrapMonoResponse(((Mono<?>) response), info);
+                return wrapMonoResponse(((Mono<?>) response), info)
+                        .subscriberContext(Context.of(AccessLoggerInfo.class, info));
             } else if (response instanceof Flux) {
-                return wrapFluxResponse(((Flux<?>) response), info);
+                return wrapFluxResponse(((Flux<?>) response), info)
+                        .subscriberContext(Context.of(AccessLoggerInfo.class, info));
             }
             return response;
         });
@@ -183,7 +185,7 @@ public class ReactiveAopAccessLoggerSupport extends StaticMethodMatcherPointcutA
 
     @Override
     public int getOrder() {
-        return Ordered.LOWEST_PRECEDENCE;
+        return Ordered.HIGHEST_PRECEDENCE;
     }
 
     @Override
@@ -217,10 +219,12 @@ public class ReactiveAopAccessLoggerSupport extends StaticMethodMatcherPointcutA
 
         return info;
     }
+
     @AllArgsConstructor
     @EqualsAndHashCode
-    private static class CacheKey{
+    private static class CacheKey {
         private Class<?> type;
         private Method method;
     }
+
 }
