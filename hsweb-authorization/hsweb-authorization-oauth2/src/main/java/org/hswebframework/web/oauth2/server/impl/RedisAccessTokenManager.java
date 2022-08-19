@@ -20,6 +20,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 public class RedisAccessTokenManager implements AccessTokenManager {
@@ -205,7 +207,7 @@ public class RedisAccessTokenManager implements AccessTokenManager {
 
     @Override
     public Mono<Void> cancelGrant(String clientId, String userId) {
-        //删除refresh_token
+        //删除最新的refresh_token
         Mono<Void> removeRefreshToken = tokenRedis
                 .opsForValue()
                 .get(createUserTokenRedisKey(clientId, userId))
@@ -222,9 +224,18 @@ public class RedisAccessTokenManager implements AccessTokenManager {
                     if (!(createTokenType(clientId)).equals(token.getType())) {
                         return Mono.empty();
                     }
-                    //移除token
                     return tokenRedis
-                            .delete(createTokenRedisKey(clientId, token.getToken()))
+                            .opsForValue()
+                            .get(createTokenRedisKey(clientId, token.getToken()))
+                            .flatMap(t -> {
+                                //移除token
+                                return tokenRedis
+                                        .delete(createTokenRedisKey(t.getClientId(), t.getAccessToken()))
+                                        //移除token对应的refresh_token
+                                        .then(tokenRedis
+                                                      .opsForValue()
+                                                      .delete(createRefreshTokenRedisKey(t.getClientId(), t.getRefreshToken())));
+                            })
                             .then(userTokenManager.signOutByToken(token.getToken()));
                 })
                 .then();
