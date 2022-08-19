@@ -103,20 +103,17 @@ public class DefaultReactiveAuthenticationInitializeService
         return Flux.fromIterable(dimensionProviders)
                    .flatMap(provider -> provider.getDimensionByUserId(authentication.getUser().getId()))
                    .cast(Dimension.class)
+                   .doOnNext(authentication::addDimension)
                    .collectList()
-                   .doOnNext(authentication::setDimensions)
-                   .flatMap(allDimension ->
-                                    Mono.zip(
-                                            getAllPermission()
-                                            , getSettings(allDimension)
-                                                    .collect(Collectors.groupingBy(AuthorizationSettingEntity::getPermission))
-                                            , (_p, _s) -> handlePermission(authentication, allDimension, _p, _s)
-                                    ));
+                   .then(Mono.defer(() -> Mono
+                           .zip(getAllPermission(),
+                                getSettings(authentication.getDimensions()).collect(Collectors.groupingBy(AuthorizationSettingEntity::getPermission)),
+                                (_p, _s) -> handlePermission(authentication, _p, _s)
+                           )));
 
     }
 
     protected SimpleAuthentication handlePermission(SimpleAuthentication authentication,
-                                                    List<Dimension> dimensionList,
                                                     Map<String, PermissionEntity> permissions,
                                                     Map<String, List<AuthorizationSettingEntity>> settings) {
         Map<String, PermissionEntity> permissionMap = new HashMap<>();
