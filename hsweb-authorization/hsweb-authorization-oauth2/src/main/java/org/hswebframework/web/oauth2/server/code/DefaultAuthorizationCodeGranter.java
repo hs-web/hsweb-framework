@@ -4,13 +4,16 @@ import lombok.AllArgsConstructor;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.oauth2.ErrorType;
+import org.hswebframework.web.oauth2.GrantType;
 import org.hswebframework.web.oauth2.OAuth2Constants;
 import org.hswebframework.web.oauth2.OAuth2Exception;
 import org.hswebframework.web.oauth2.server.AccessToken;
 import org.hswebframework.web.oauth2.server.AccessTokenManager;
 import org.hswebframework.web.oauth2.server.OAuth2Client;
 import org.hswebframework.web.oauth2.server.ScopePredicate;
+import org.hswebframework.web.oauth2.server.event.OAuth2GrantedEvent;
 import org.hswebframework.web.oauth2.server.utils.OAuth2ScopeUtils;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory;
 import org.springframework.data.redis.core.ReactiveRedisOperations;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
@@ -25,11 +28,15 @@ public class DefaultAuthorizationCodeGranter implements AuthorizationCodeGranter
 
     private final AccessTokenManager accessTokenManager;
 
+    private final ApplicationEventPublisher eventPublisher;
+
     private final ReactiveRedisOperations<String, AuthorizationCodeCache> redis;
 
     @SuppressWarnings("all")
-    public DefaultAuthorizationCodeGranter(AccessTokenManager accessTokenManager, ReactiveRedisConnectionFactory connectionFactory) {
-        this(accessTokenManager, new ReactiveRedisTemplate<>(connectionFactory, RedisSerializationContext
+    public DefaultAuthorizationCodeGranter(AccessTokenManager accessTokenManager,
+                                           ApplicationEventPublisher eventPublisher,
+                                           ReactiveRedisConnectionFactory connectionFactory) {
+        this(accessTokenManager, eventPublisher, new ReactiveRedisTemplate<>(connectionFactory, RedisSerializationContext
                 .newSerializationContext()
                 .key((RedisSerializer) RedisSerializer.string())
                 .value(RedisSerializer.java())
@@ -75,16 +82,27 @@ public class DefaultAuthorizationCodeGranter implements AuthorizationCodeGranter
                 .map(this::getRedisKey)
                 .flatMap(redis.opsForValue()::get)
                 .switchIfEmpty(Mono.error(() -> new OAuth2Exception(ErrorType.ILLEGAL_CODE)))
-                .flatMap(cache -> redis
-                        .opsForValue()
-                        .delete(getRedisKey(cache.getCode()))
-                        .thenReturn(cache))
+                //移除code
+                .flatMap(cache -> redis.opsForValue().delete(getRedisKey(cache.getCode())).thenReturn(cache))
                 .flatMap(cache -> {
                     if (!request.getClient().getClientId().equals(cache.getClientId())) {
                         return Mono.error(new OAuth2Exception(ErrorType.ILLEGAL_CLIENT_ID));
                     }
-                    return accessTokenManager.createAccessToken(cache.getClientId(), cache.getAuthentication(), false);
-                });
+                    return accessTokenManager
+                            .createAccessToken(cache.getClientId(), cache.getAuthentication(), false)
+                            .flatMap(token -> new OAuth2GrantedEvent(request.getClient(),
+                                                                     token,
+                                                                     cache.getAuthentication(),
+                                                                     cache.getScope(),
+                                                                     GrantType.authorization_code,
+                                                                     request.getParameters())
+                                    .publish(eventPublisher)
+                                    .onErrorResume(err -> accessTokenManager
+                                            .removeToken(cache.getClientId(), token.getAccessToken())
+                                            .then(Mono.error(err)))
+                                    .thenReturn(token));
+                })
+                ;
 
     }
 }

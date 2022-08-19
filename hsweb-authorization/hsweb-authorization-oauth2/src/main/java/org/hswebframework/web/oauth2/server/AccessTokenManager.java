@@ -40,4 +40,5 @@ public interface AccessTokenManager {
      */
     Mono<AccessToken> refreshAccessToken(String clientId, String refreshToken);
 
+    Mono<Void> removeToken(String clientId,String token);
 }

@@ -178,4 +178,14 @@ public class RedisAccessTokenManager implements AccessTokenManager {
                 });
 
     }
+
+    @Override
+    public Mono<Void> removeToken(String clientId, String token) {
+
+        return Flux
+                .merge(userTokenManager.signOutByToken(token),
+                       tokenRedis.delete(createSingletonTokenRedisKey(clientId)),
+                       tokenRedis.delete(createTokenRedisKey(token)))
+                .then();
+    }
 }

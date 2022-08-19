@@ -21,6 +21,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory;
@@ -64,15 +65,17 @@ public class OAuth2ServerAutoConfiguration {
         @Bean
         @ConditionalOnMissingBean
         public ClientCredentialGranter clientCredentialGranter(ReactiveAuthenticationManager authenticationManager,
-                                                               AccessTokenManager accessTokenManager) {
-            return new DefaultClientCredentialGranter(authenticationManager, accessTokenManager);
+                                                               AccessTokenManager accessTokenManager,
+                                                               ApplicationEventPublisher eventPublisher) {
+            return new DefaultClientCredentialGranter(authenticationManager, accessTokenManager,eventPublisher);
         }
 
         @Bean
         @ConditionalOnMissingBean
         public AuthorizationCodeGranter authorizationCodeGranter(AccessTokenManager tokenManager,
+                                                                 ApplicationEventPublisher eventPublisher,
                                                                  ReactiveRedisConnectionFactory redisConnectionFactory) {
-            return new DefaultAuthorizationCodeGranter(tokenManager, redisConnectionFactory);
+            return new DefaultAuthorizationCodeGranter(tokenManager,eventPublisher, redisConnectionFactory);
         }
 
         @Bean
