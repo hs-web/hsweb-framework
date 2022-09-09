@@ -53,9 +53,13 @@ public class RedisUserTokenManager implements UserTokenManager {
             .buffer(Flux.interval(Duration.ofSeconds(10)), HashSet::new)
             .flatMap(list -> Flux
                     .fromIterable(list)
-                    .flatMap(token -> operations
-                            .expire(getTokenRedisKey(token.getToken()), Duration.ofMillis(token.getMaxInactiveInterval()))
-                            .then())
+                    .flatMap(token -> {
+                        String key = getTokenRedisKey(token.getToken());
+                        return Mono
+                                .zip(userTokenStore.put(key, "lastRequestTime", token.getLastRequestTime()),
+                                     operations.expire(key, Duration.ofMillis(token.getMaxInactiveInterval())))
+                                .then();
+                    })
                     .onErrorResume(err -> Mono.empty()))
             .subscribe();
 
