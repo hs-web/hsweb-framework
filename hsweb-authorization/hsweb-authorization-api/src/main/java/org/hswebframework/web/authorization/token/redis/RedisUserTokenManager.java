@@ -56,8 +56,8 @@ public class RedisUserTokenManager implements UserTokenManager {
                     .flatMap(token -> {
                         String key = getTokenRedisKey(token.getToken());
                         return Mono
-                                .zip(userTokenStore.put(key, "lastRequestTime", token.getLastRequestTime()),
-                                     operations.expire(key, Duration.ofMillis(token.getMaxInactiveInterval())))
+                                .zip(this.userTokenStore.put(key, "lastRequestTime", token.getLastRequestTime()),
+                                     this.operations.expire(key, Duration.ofMillis(token.getMaxInactiveInterval())))
                                 .then();
                     })
                     .onErrorResume(err -> Mono.empty()))
