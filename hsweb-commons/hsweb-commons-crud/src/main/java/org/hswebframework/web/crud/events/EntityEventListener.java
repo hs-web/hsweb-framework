@@ -133,39 +133,37 @@ public class EntityEventListener implements EventListener {
     protected List<Object> createAfterData(List<Object> olds,
                                            EventContext context) {
         List<Object> newValues = new ArrayList<>(olds.size());
+
         EntityColumnMapping mapping = context
                 .get(MappingContextKeys.columnMapping)
                 .orElseThrow(UnsupportedOperationException::new);
-        TableOrViewMetadata table = context.get(ContextKeys.table).orElseThrow(UnsupportedOperationException::new);
-        RDBColumnMetadata idColumn = table
-                .getColumns()
-                .stream()
-                .filter(RDBColumnMetadata::isPrimaryKey)
-                .findFirst()
-                .orElse(null);
-        if (idColumn == null) {
-            return Collections.emptyList();
-        }
+
+        Map<String, Object> columns = context
+                .get(MappingContextKeys.updateColumnInstance)
+                .orElse(Collections.emptyMap());
+
         for (Object old : olds) {
-            Object newValue = context
-                    .get(MappingContextKeys.updateColumnInstance)
-                    .map(map -> {
-                        Object data = FastBeanCopier.copy(map, FastBeanCopier.copy(old, mapping.newInstance()));
-                        for (Map.Entry<String, Object> entry : map.entrySet()) {
-                            //set null
-                            if (entry.getValue() == null
-                                    || entry.getValue() instanceof NullValue) {
-                                GlobalConfig
-                                        .getPropertyOperator()
-                                        .setProperty(data, entry.getKey(), null);
-                            }
-                        }
-                        return data;
-                    })
-                    .orElseThrow(() -> {
-                        return new IllegalArgumentException("can not get update instance");
-                    });
-            newValues.add(newValue);
+            Object data = FastBeanCopier.copy(old, mapping.newInstance());
+            for (Map.Entry<String, Object> entry : columns.entrySet()) {
+
+                RDBColumnMetadata column = mapping.getColumnByName(entry.getKey()).orElse(null);
+                if (column == null) {
+                    continue;
+                }
+
+                Object value = entry.getValue();
+
+                //set null
+                if (value instanceof NullValue) {
+                    value = null;
+                }
+
+                GlobalConfig
+                        .getPropertyOperator()
+                        .setProperty(data, column.getAlias(), value);
+
+            }
+            newValues.add(data);
         }
         return newValues;
     }
