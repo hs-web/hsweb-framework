@@ -12,19 +12,21 @@ import org.hswebframework.web.api.crud.entity.RecordModifierEntity;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.validator.CreateGroup;
 import org.hswebframework.web.validator.UpdateGroup;
+import org.springframework.core.Ordered;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Mono;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
  * 自动填充创建人和修改人信息
  */
-public class CreatorEventListener implements EventListener {
+public class CreatorEventListener implements EventListener, Ordered {
 
     @Override
     public String getId() {
@@ -60,26 +62,44 @@ public class CreatorEventListener implements EventListener {
     }
 
     protected void doApplyCreator(EventType type, EventContext context, Authentication auth) {
-        context.get(MappingContextKeys.instance)
-               .ifPresent(obj -> {
-                   if (obj instanceof Collection) {
-                       applyCreator(auth, ((Collection<?>) obj), type != MappingEventTypes.update_before);
-                   } else {
-                       applyCreator(auth, obj, type != MappingEventTypes.update_before);
-                   }
-               });
+        Object instance = context.get(MappingContextKeys.instance).orElse(null);
+        if (instance != null) {
+            if (instance instanceof Collection) {
+                applyCreator(auth, context, ((Collection<?>) instance), type != MappingEventTypes.update_before);
+            } else {
+                applyCreator(auth, context, instance, type != MappingEventTypes.update_before);
+            }
+        } else {
+            context.get(MappingContextKeys.updateColumnInstance)
+                   .ifPresent(map -> {
+                       applyCreator(auth, context, map, type != MappingEventTypes.update_before);
+                   });
+        }
+
+
     }
 
-    public void applyCreator(Authentication auth, Object entity, boolean updateCreator) {
-        if (updateCreator && entity instanceof RecordCreationEntity) {
-            RecordCreationEntity e = (RecordCreationEntity) entity;
-            if (ObjectUtils.isEmpty(e.getCreatorId())) {
-                e.setCreatorId(auth.getUser().getId());
-                e.setCreatorName(auth.getUser().getName());
+    public void applyCreator(Authentication auth,
+                             EventContext context,
+                             Object entity,
+                             boolean updateCreator) {
+        if (updateCreator) {
+            if (entity instanceof RecordCreationEntity) {
+                RecordCreationEntity e = (RecordCreationEntity) entity;
+                if (ObjectUtils.isEmpty(e.getCreatorId())) {
+                    e.setCreatorId(auth.getUser().getId());
+                    e.setCreatorName(auth.getUser().getName());
+                }
+                if (e.getCreateTime() == null) {
+                    e.setCreateTimeNow();
+                }
+            } else if (entity instanceof Map) {
+                Map<Object, Object> map = ((Map) entity);
+                map.putIfAbsent("creatorId", auth.getUser().getId());
+                map.putIfAbsent("creatorName", auth.getUser().getName());
+                map.putIfAbsent("createTime", auth.getUser().getId());
             }
-            if (e.getCreateTime() == null) {
-                e.setCreateTimeNow();
-            }
+
 
         }
         if (entity instanceof RecordModifierEntity) {
@@ -91,13 +111,24 @@ public class CreatorEventListener implements EventListener {
             if (e.getModifyTime() == null) {
                 e.setModifyTimeNow();
             }
+        } else if (entity instanceof Map) {
+            Map<Object, Object> map = ((Map) entity);
+            map.putIfAbsent("modifierId", auth.getUser().getId());
+            map.putIfAbsent("modifierName", auth.getUser().getName());
+            map.putIfAbsent("modifyTime", auth.getUser().getId());
+
         }
     }
 
-    public void applyCreator(Authentication auth, Collection<?> entities, boolean updateCreator) {
+    public void applyCreator(Authentication auth, EventContext context, Collection<?> entities, boolean updateCreator) {
         for (Object entity : entities) {
-            applyCreator(auth, entity, updateCreator);
+            applyCreator(auth, context, entity, updateCreator);
         }
 
+    }
+
+    @Override
+    public int getOrder() {
+        return Ordered.HIGHEST_PRECEDENCE;
     }
 }

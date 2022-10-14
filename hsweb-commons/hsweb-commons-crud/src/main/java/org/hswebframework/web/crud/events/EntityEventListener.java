@@ -142,6 +142,17 @@ public class EntityEventListener implements EventListener {
                 .get(MappingContextKeys.updateColumnInstance)
                 .orElse(Collections.emptyMap());
 
+        List<Object> newerInstance = context
+                .get(MappingContextKeys.instance)
+                .map(instance -> {
+                    if (instance instanceof List) {
+                        return ((List) instance);
+                    }
+                    return Collections.singletonList(instance);
+                })
+                .orElse(null);
+
+
         for (Object old : olds) {
             Object data = FastBeanCopier.copy(old, mapping.newInstance());
             for (Map.Entry<String, Object> entry : columns.entrySet()) {

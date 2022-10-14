@@ -38,6 +38,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 
 import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
@@ -112,13 +114,12 @@ public class EasyormConfiguration {
         };
     }
 
+
     @Bean
-    public EntityEventListener entityEventListener(ApplicationEventPublisher eventPublisher,
-                                                   ObjectProvider<EntityEventListenerCustomizer> customizers) {
-        DefaultEntityEventListenerConfigure configure = new DefaultEntityEventListenerConfigure();
-        customizers.forEach(customizer -> customizer.customize(configure));
-        return new EntityEventListener(eventPublisher, configure);
+    public CreatorEventListener creatorEventListener() {
+        return new CreatorEventListener();
     }
+
 
     @Bean
     public ValidateEventListener validateEventListener() {
@@ -126,8 +127,11 @@ public class EasyormConfiguration {
     }
 
     @Bean
-    public CreatorEventListener creatorEventListener() {
-        return new CreatorEventListener();
+    public EntityEventListener entityEventListener(ApplicationEventPublisher eventPublisher,
+                                                   ObjectProvider<EntityEventListenerCustomizer> customizers) {
+        DefaultEntityEventListenerConfigure configure = new DefaultEntityEventListenerConfigure();
+        customizers.forEach(customizer -> customizer.customize(configure));
+        return new EntityEventListener(eventPublisher, configure);
     }
 
     @Bean
