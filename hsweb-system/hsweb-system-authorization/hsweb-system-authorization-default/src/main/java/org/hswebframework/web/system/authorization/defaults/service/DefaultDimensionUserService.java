@@ -56,9 +56,6 @@ public class DefaultDimensionUserService extends GenericReactiveCrudService<Dime
     public void dispatchDimensionBind(EntitySavedEvent<DimensionUserEntity> event) {
         event.async(
                 this.publishEvent(Flux.fromIterable(event.getEntity()), DimensionBindEvent::new)
-                    .then(
-                            this.clearUserCache(event.getEntity())
-                    )
         );
     }
 
@@ -67,9 +64,6 @@ public class DefaultDimensionUserService extends GenericReactiveCrudService<Dime
     public void dispatchDimensionBind(EntityCreatedEvent<DimensionUserEntity> event) {
         event.async(
                 this.publishEvent(Flux.fromIterable(event.getEntity()), DimensionBindEvent::new)
-                    .then(
-                            this.clearUserCache(event.getEntity())
-                    )
         );
     }
 
@@ -78,9 +72,6 @@ public class DefaultDimensionUserService extends GenericReactiveCrudService<Dime
     public void dispatchDimensionUnbind(EntityDeletedEvent<DimensionUserEntity> event) {
         event.async(
                 this.publishEvent(Flux.fromIterable(event.getEntity()), DimensionUnbindEvent::new)
-                    .then(
-                            this.clearUserCache(event.getEntity())
-                    )
         );
     }
 
