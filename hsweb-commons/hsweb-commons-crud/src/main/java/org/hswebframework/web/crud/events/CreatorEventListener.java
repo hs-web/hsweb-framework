@@ -69,13 +69,11 @@ public class CreatorEventListener implements EventListener, Ordered {
             } else {
                 applyCreator(auth, context, instance, type != MappingEventTypes.update_before);
             }
-        } else {
-            context.get(MappingContextKeys.updateColumnInstance)
-                   .ifPresent(map -> {
-                       applyCreator(auth, context, map, type != MappingEventTypes.update_before);
-                   });
         }
 
+        context
+                .get(MappingContextKeys.updateColumnInstance)
+                .ifPresent(map -> applyCreator(auth, context, map, type != MappingEventTypes.update_before));
 
     }
 
@@ -83,6 +81,7 @@ public class CreatorEventListener implements EventListener, Ordered {
                              EventContext context,
                              Object entity,
                              boolean updateCreator) {
+        long now = System.currentTimeMillis();
         if (updateCreator) {
             if (entity instanceof RecordCreationEntity) {
                 RecordCreationEntity e = (RecordCreationEntity) entity;
@@ -91,13 +90,13 @@ public class CreatorEventListener implements EventListener, Ordered {
                     e.setCreatorName(auth.getUser().getName());
                 }
                 if (e.getCreateTime() == null) {
-                    e.setCreateTimeNow();
+                    e.setCreateTime(now);
                 }
             } else if (entity instanceof Map) {
                 Map<Object, Object> map = ((Map) entity);
                 map.putIfAbsent("creatorId", auth.getUser().getId());
                 map.putIfAbsent("creatorName", auth.getUser().getName());
-                map.putIfAbsent("createTime", auth.getUser().getId());
+                map.putIfAbsent("createTime", now);
             }
 
 
@@ -109,13 +108,13 @@ public class CreatorEventListener implements EventListener, Ordered {
                 e.setModifierName(auth.getUser().getName());
             }
             if (e.getModifyTime() == null) {
-                e.setModifyTimeNow();
+                e.setModifyTime(now);
             }
         } else if (entity instanceof Map) {
             Map<Object, Object> map = ((Map) entity);
             map.putIfAbsent("modifierId", auth.getUser().getId());
             map.putIfAbsent("modifierName", auth.getUser().getName());
-            map.putIfAbsent("modifyTime", auth.getUser().getId());
+            map.putIfAbsent("modifyTime", now);
 
         }
     }

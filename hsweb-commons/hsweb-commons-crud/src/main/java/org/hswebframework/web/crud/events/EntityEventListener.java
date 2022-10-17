@@ -22,6 +22,7 @@ import org.hswebframework.web.bean.FastBeanCopier;
 import org.hswebframework.web.event.AsyncEvent;
 import org.hswebframework.web.event.GenericsPayloadApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.core.Ordered;
 import reactor.core.publisher.Mono;
 import reactor.function.Function3;
 import reactor.util.function.Tuple2;
@@ -36,7 +37,7 @@ import static org.hswebframework.web.crud.events.EntityEventHelper.*;
 
 @SuppressWarnings("all")
 @AllArgsConstructor
-public class EntityEventListener implements EventListener {
+public class EntityEventListener implements EventListener, Ordered {
 
     private final ApplicationEventPublisher eventPublisher;
 
@@ -142,17 +143,6 @@ public class EntityEventListener implements EventListener {
                 .get(MappingContextKeys.updateColumnInstance)
                 .orElse(Collections.emptyMap());
 
-        List<Object> newerInstance = context
-                .get(MappingContextKeys.instance)
-                .map(instance -> {
-                    if (instance instanceof List) {
-                        return ((List) instance);
-                    }
-                    return Collections.singletonList(instance);
-                })
-                .orElse(null);
-
-
         for (Object old : olds) {
             Object data = FastBeanCopier.copy(old, mapping.newInstance());
             for (Map.Entry<String, Object> entry : columns.entrySet()) {
@@ -239,6 +229,7 @@ public class EntityEventListener implements EventListener {
                            holder.invoke(this.doAsyncEvent(() -> {
                                Tuple2<List<Object>, List<Object>> _tmp = updated.get();
                                if (_tmp != null) {
+
                                    return sendUpdateEvent(_tmp.getT1(),
                                                           _tmp.getT2(),
                                                           entityType,
@@ -476,5 +467,10 @@ public class EntityEventListener implements EventListener {
                 .flatMap(ignore -> {
                     return eventSupplier.get();
                 });
+    }
+
+    @Override
+    public int getOrder() {
+        return Ordered.LOWEST_PRECEDENCE;
     }
 }
