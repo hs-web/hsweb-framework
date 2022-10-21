@@ -23,7 +23,10 @@ public class CompositeReactiveAuthenticationManager implements ReactiveAuthentic
                                    .stream()
                                    .map(manager -> manager
                                            .authenticate(request)
-                                           .onErrorResume((err) -> Mono.empty()))
+                                           .onErrorResume((err) -> {
+                                               log.warn("get user authenticate error", err);
+                                               return Mono.empty();
+                                           }))
                                    .collect(Collectors.toList()))
                    .take(1)
                    .next();
