@@ -15,10 +15,11 @@ import java.util.function.Supplier;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class UnSupportedReactiveCache<E> implements ReactiveCache<E> {
 
-    private static final UnSupportedReactiveCache INSTANCE = new UnSupportedReactiveCache();
+    private static final UnSupportedReactiveCache<?> INSTANCE = new UnSupportedReactiveCache<>();
 
+    @SuppressWarnings("all")
     public static <E> ReactiveCache<E> getInstance() {
-        return INSTANCE;
+        return (UnSupportedReactiveCache)INSTANCE;
     }
 
     @Override

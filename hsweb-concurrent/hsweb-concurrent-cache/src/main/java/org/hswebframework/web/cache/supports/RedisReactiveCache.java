@@ -64,9 +64,8 @@ public class RedisReactiveCache<E> implements ReactiveCache<E> {
     }
 
     protected <T> Mono<T> handleError(Throwable error) {
-        return Mono.fromRunnable(() -> {
-            log.error(error.getMessage(), error);
-        });
+        log.error(error.getMessage(), error);
+        return Mono.empty();
     }
 
     @Override
