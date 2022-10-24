@@ -39,6 +39,9 @@ import static org.hswebframework.web.crud.events.EntityEventHelper.*;
 @AllArgsConstructor
 public class EntityEventListener implements EventListener, Ordered {
 
+    public static final ContextKey<List<Object>> readyToDeleteContextKey = ContextKey.of("readyToDelete");
+    public static final ContextKey<List<Object>> readyToUpdateContextKey = ContextKey.of("readyToUpdate");
+
     private final ApplicationEventPublisher eventPublisher;
 
     private final EntityEventListenerConfigure listenerConfigure;
@@ -214,6 +217,7 @@ public class EntityEventListener implements EventListener, Ordered {
                                            .collectList()
                                            .flatMap((list) -> {
                                                List<Object> after = createAfterData(list, context);
+                                               context.set(readyToUpdateContextKey,after);
                                                updated.set(Tuples.of(list, after));
                                                return sendUpdateEvent(list,
                                                                       after,
@@ -299,6 +303,7 @@ public class EntityEventListener implements EventListener, Ordered {
                                                       .collectList()
                                                       .filter(CollectionUtils::isNotEmpty)
                                                       .flatMap(list -> {
+                                                          context.set(readyToDeleteContextKey,list);
                                                           deleted.set(list);
                                                           return this
                                                                   .sendDeleteEvent(list, (Class) mapping.getEntityType(), EntityBeforeDeleteEvent::new);
