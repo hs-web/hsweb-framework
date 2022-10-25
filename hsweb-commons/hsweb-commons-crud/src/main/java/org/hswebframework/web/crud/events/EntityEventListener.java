@@ -217,7 +217,6 @@ public class EntityEventListener implements EventListener, Ordered {
                                            .collectList()
                                            .flatMap((list) -> {
                                                List<Object> after = createAfterData(list, context);
-                                               context.set(readyToUpdateContextKey,after);
                                                updated.set(Tuples.of(list, after));
                                                return sendUpdateEvent(list,
                                                                       after,
@@ -301,9 +300,11 @@ public class EntityEventListener implements EventListener, Ordered {
                                                       .setParam(dslUpdate.toQueryParam())
                                                       .fetch()
                                                       .collectList()
+                                                      .doOnNext(list->{
+                                                          context.set(readyToDeleteContextKey, list);
+                                                      })
                                                       .filter(CollectionUtils::isNotEmpty)
                                                       .flatMap(list -> {
-                                                          context.set(readyToDeleteContextKey,list);
                                                           deleted.set(list);
                                                           return this
                                                                   .sendDeleteEvent(list, (Class) mapping.getEntityType(), EntityBeforeDeleteEvent::new);
@@ -476,6 +477,6 @@ public class EntityEventListener implements EventListener, Ordered {
 
     @Override
     public int getOrder() {
-        return Ordered.LOWEST_PRECEDENCE;
+        return Ordered.LOWEST_PRECEDENCE - 100;
     }
 }
