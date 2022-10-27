@@ -2,6 +2,7 @@ package org.hswebframework.web.authorization.basic.embed;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.collections4.MapUtils;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.AuthenticationRequest;
 import org.hswebframework.web.authorization.builder.DataAccessConfigBuilderFactory;
@@ -69,7 +70,10 @@ public class EmbedAuthenticationProperties implements InitializingBean {
                     for (Map.Entry<String, Object> stringObjectEntry : objectMap.entrySet()) {
                         if (stringObjectEntry.getValue() instanceof Map) {
                             Map<?, ?> mapVal = ((Map) stringObjectEntry.getValue());
-                            boolean maybeIsList = mapVal.keySet().stream().allMatch(org.hswebframework.utils.StringUtils::isInt);
+                            boolean maybeIsList = mapVal
+                                    .keySet()
+                                    .stream()
+                                    .allMatch(org.hswebframework.utils.StringUtils::isInt);
                             if (maybeIsList) {
                                 stringObjectEntry.setValue(mapVal.values());
                             }
@@ -82,20 +86,23 @@ public class EmbedAuthenticationProperties implements InitializingBean {
     }
 
     public Authentication authenticate(AuthenticationRequest request) {
-        if(request instanceof PlainTextUsernamePasswordAuthenticationRequest){
+        if (MapUtils.isEmpty(users)) {
+            return null;
+        }
+        if (request instanceof PlainTextUsernamePasswordAuthenticationRequest) {
             PlainTextUsernamePasswordAuthenticationRequest pwdReq = ((PlainTextUsernamePasswordAuthenticationRequest) request);
-            return users.values()
-                    .stream()
-                    .filter(user ->
-                            pwdReq.getUsername().equals(user.getUsername())
-                                    && pwdReq.getPassword().equals(user.getPassword()))
-                    .findFirst()
-                    .map(EmbedAuthenticationInfo::getId)
-                    .map(authentications::get)
-                    .orElseThrow(() -> new ValidationException("用户不存在"));
+            for (EmbedAuthenticationInfo user : users.values()) {
+                if (pwdReq.getUsername().equals(user.getUsername())) {
+                    if (pwdReq.getPassword().equals(user.getPassword())) {
+                        return user.toAuthentication(dataAccessConfigBuilderFactory);
+                    }
+                    return null;
+                }
+            }
+            return null;
         }
 
-        throw new UnsupportedOperationException("不支持的授权请求:"+request);
+        throw new UnsupportedOperationException("不支持的授权请求:" + request);
     }
 
     public Optional<Authentication> getAuthentication(String userId) {
