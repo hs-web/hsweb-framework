@@ -578,6 +578,8 @@ public final class FastBeanCopier {
                     sourceCollection = (Collection) source;
                 } else if (source instanceof Object[]) {
                     sourceCollection = Arrays.asList((Object[]) source);
+                } else if (source instanceof Map) {
+                    sourceCollection = ((Map<?, ?>) source).values();
                 } else {
                     if (source instanceof String) {
                         String stringValue = ((String) source);
@@ -646,6 +648,19 @@ public final class FastBeanCopier {
                 if (targetClass == Map.class) {
                     if (source instanceof Map) {
                         return (T) copyMap(((Map<?, ?>) source));
+                    }
+                    if (source instanceof Collection) {
+                        Map<Object, Object> map = new LinkedHashMap<>();
+                        int i = 0;
+                        for (Object o : ((Collection<?>) source)) {
+                            if (genericType.length >= 2) {
+                                map.put(convert(i++, genericType[0], EMPTY_CLASS_ARRAY), convert(o, genericType[1], EMPTY_CLASS_ARRAY));
+                            } else {
+                                map.put(i++, o);
+                            }
+                        }
+                        return (T) map;
+
                     }
                     ClassDescription sourType = ClassDescriptions.getDescription(source.getClass());
                     return (T) copy(source, Maps.newHashMapWithExpectedSize(sourType.getFieldSize()));

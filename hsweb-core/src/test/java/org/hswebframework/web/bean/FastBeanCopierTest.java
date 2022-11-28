@@ -1,16 +1,14 @@
 package org.hswebframework.web.bean;
 
 import com.google.common.collect.ImmutableMap;
-import jdk.nashorn.internal.objects.annotations.Getter;
+import lombok.Getter;
+import lombok.Setter;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Proxy;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -62,6 +60,43 @@ public class FastBeanCopierTest {
     }
 
     @Test
+    public void testMapList() {
+        Map<String, Object> data = new HashMap<>();
+        data.put("templates",   new HashMap() {
+            {
+                put("0", Collections.singletonMap("name", "test"));
+                put("1", Collections.singletonMap("name", "test"));
+            }
+        });
+
+        Config config = FastBeanCopier.copy(data, new Config());
+
+        Assert.assertNotNull(config);
+        Assert.assertNotNull(config.templates);
+        System.out.println(config.templates);
+        Assert.assertEquals(2,config.templates.size());
+
+
+    }
+
+    @Getter
+    @Setter
+    public static class Config {
+        private List<Template> templates;
+    }
+
+    @Getter
+    @Setter
+    public static class Template {
+        private String name;
+
+        @Override
+        public String toString() {
+            return "name:"+name;
+        }
+    }
+
+    @Test
     public void testCopyMap() {
 
 
@@ -87,10 +122,10 @@ public class FastBeanCopierTest {
 
     @Test
     public void testProxy() {
-        AtomicReference<Object> reference=new AtomicReference<>();
+        AtomicReference<Object> reference = new AtomicReference<>();
 
         ProxyTest test = (ProxyTest) Proxy.newProxyInstance(ClassLoader.getSystemClassLoader(),
-                new Class[]{ProxyTest.class}, (proxy, method, args) -> {
+                                                            new Class[]{ProxyTest.class}, (proxy, method, args) -> {
                     if (method.getName().equals("getName")) {
                         return "test";
                     }
@@ -105,20 +140,20 @@ public class FastBeanCopierTest {
 
         Target source = new Target();
 
-        FastBeanCopier.copy(test,source);
-        Assert.assertEquals(source.getName(),test.getName());
+        FastBeanCopier.copy(test, source);
+        Assert.assertEquals(source.getName(), test.getName());
 
 
         source.setName("test2");
-        FastBeanCopier.copy(source,test);
+        FastBeanCopier.copy(source, test);
 
-        Assert.assertEquals(reference.get(),source.getName());
+        Assert.assertEquals(reference.get(), source.getName());
     }
 
     @Test
-    public void testGetProperty(){
+    public void testGetProperty() {
 
-        Assert.assertEquals(1,FastBeanCopier.getProperty(ImmutableMap.of("a",1,"b",2),"a"));
+        Assert.assertEquals(1, FastBeanCopier.getProperty(ImmutableMap.of("a", 1, "b", 2), "a"));
 
     }
 
