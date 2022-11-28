@@ -110,7 +110,7 @@ public class DefaultReactiveUserService extends GenericReactiveCrudService<UserE
                     boolean updatePassword = StringUtils.hasText(newer.getPassword());
 
                     boolean passwordChanged = updatePassword &&
-                            Objects.equals(
+                           !Objects.equals(
                                     passwordEncoder.encode(newer.getPassword(), old.getSalt()),
                                     old.getPassword()
                             );
