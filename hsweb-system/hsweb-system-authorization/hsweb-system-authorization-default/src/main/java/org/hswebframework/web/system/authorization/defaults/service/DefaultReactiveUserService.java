@@ -198,7 +198,7 @@ public class DefaultReactiveUserService extends GenericReactiveCrudService<UserE
 
                     boolean passwordChanged = !Objects.equals(encodePwd, old.getPassword());
                     UserEntity newer = old.copyTo(new UserEntity());
-                    newer.setPassword(passwordEncoder.encode(newPassword, old.getSalt()));
+                    newer.setPassword(encodePwd);
                     return repository
                             .createUpdate()
                             .set(newer::getPassword)
