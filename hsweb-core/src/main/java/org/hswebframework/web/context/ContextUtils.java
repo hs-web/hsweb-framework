@@ -17,6 +17,7 @@ public class ContextUtils {
         return contextThreadLocal.get();
     }
 
+    @Deprecated
     public static Mono<Context> reactiveContext() {
         return Mono
                 .subscriberContext()
@@ -32,6 +33,7 @@ public class ContextUtils {
                 }));
     }
 
+    @Deprecated
     public static Function<reactor.util.context.Context, reactor.util.context.Context> acceptContext(Consumer<Context> contextConsumer) {
         return context -> {
             if (!context.hasKey(Context.class)) {

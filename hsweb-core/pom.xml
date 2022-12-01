@@ -118,7 +118,12 @@
         <dependency>
             <artifactId>jctools-core</artifactId>
             <groupId>org.jctools</groupId>
-            <version>2.1.2</version>
+            <version>4.0.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-common</artifactId>
         </dependency>
 
     </dependencies>

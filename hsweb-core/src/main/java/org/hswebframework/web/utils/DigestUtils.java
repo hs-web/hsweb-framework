@@ -1,5 +1,6 @@
 package org.hswebframework.web.utils;
 
+import io.netty.util.concurrent.FastThreadLocal;
 import org.apache.commons.codec.binary.Hex;
 
 import java.security.MessageDigest;
@@ -8,9 +9,27 @@ import java.util.function.Supplier;
 
 public class DigestUtils {
 
-    public static final ThreadLocal<MessageDigest> md5 = ThreadLocal.withInitial(org.apache.commons.codec.digest.DigestUtils::getMd5Digest);
-    public static final ThreadLocal<MessageDigest> sha256 = ThreadLocal.withInitial(org.apache.commons.codec.digest.DigestUtils::getSha256Digest);
-    public static final ThreadLocal<MessageDigest> sha1 = ThreadLocal.withInitial(org.apache.commons.codec.digest.DigestUtils::getSha1Digest);
+    public static final FastThreadLocal<MessageDigest> md5 = new FastThreadLocal<MessageDigest>() {
+        @Override
+        protected MessageDigest initialValue() {
+            return org.apache.commons.codec.digest.DigestUtils.getMd5Digest();
+        }
+    };
+
+    public static final FastThreadLocal<MessageDigest> sha256 = new FastThreadLocal<MessageDigest>() {
+        @Override
+        protected MessageDigest initialValue() {
+            return org.apache.commons.codec.digest.DigestUtils.getSha256Digest();
+        }
+    };
+    ;
+    public static final FastThreadLocal<MessageDigest> sha1 = new FastThreadLocal<MessageDigest>() {
+        @Override
+        protected MessageDigest initialValue() {
+            return org.apache.commons.codec.digest.DigestUtils.getSha1Digest();
+        }
+    };
+    ;
 
     public static byte[] md5(Consumer<MessageDigest> digestHandler) {
         return digest(md5::get, digestHandler);

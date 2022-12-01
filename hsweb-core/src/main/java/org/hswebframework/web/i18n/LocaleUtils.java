@@ -1,5 +1,6 @@
 package org.hswebframework.web.i18n;
 
+import io.netty.util.concurrent.FastThreadLocal;
 import lombok.AllArgsConstructor;
 import org.hswebframework.web.exception.I18nSupportException;
 import org.reactivestreams.Publisher;
@@ -34,7 +35,7 @@ public final class LocaleUtils {
 
     public static final Locale DEFAULT_LOCALE = Locale.getDefault();
 
-    private static final ThreadLocal<Locale> CONTEXT_THREAD_LOCAL = new ThreadLocal<>();
+    private static final FastThreadLocal<Locale> CONTEXT_THREAD_LOCAL = new FastThreadLocal<>();
 
     static MessageSource messageSource = UnsupportedMessageSource.instance();
 
