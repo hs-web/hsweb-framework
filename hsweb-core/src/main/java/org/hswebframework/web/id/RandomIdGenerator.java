@@ -14,7 +14,7 @@ public class RandomIdGenerator implements IDGenerator<String> {
 
     // java -Dgenerator.random.instance-id=8
     static final RandomIdGenerator GLOBAL = new RandomIdGenerator(
-            Integer.getInteger("generator.random.instance-id", ThreadLocalRandom.current().nextInt()).byteValue()
+            Integer.getInteger("generator.random.instance-id", ThreadLocalRandom.current().nextInt(1,127)).byteValue()
     );
 
     private final static FastThreadLocal<byte[]> HOLDER = new FastThreadLocal<byte[]>() {
@@ -28,10 +28,6 @@ public class RandomIdGenerator implements IDGenerator<String> {
 
     public static RandomIdGenerator create(byte instanceId) {
         return new RandomIdGenerator(instanceId);
-    }
-
-    public static String random() {
-        return GLOBAL.generate();
     }
 
     public String generate() {
@@ -66,17 +62,4 @@ public class RandomIdGenerator implements IDGenerator<String> {
 
     }
 
-
-    public static void main(String[] args) {
-        System.out.println(random());
-        System.out.println(random().length());
-        Set<String> distinct = new HashSet<>(100_0000);
-
-        long time = System.currentTimeMillis();
-        for (int i = 0; i < 100_0000; i++) {
-            distinct.add(random());
-        }
-        System.out.println(distinct.size());
-        System.out.println(System.currentTimeMillis() - time);
-    }
 }
