@@ -10,10 +10,10 @@ import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class RandomIdGenerator {
+public class RandomIdGenerator implements IDGenerator<String> {
 
     // java -Dgenerator.random.instance-id=8
-    private static final RandomIdGenerator GLOBAL = new RandomIdGenerator(
+    static final RandomIdGenerator GLOBAL = new RandomIdGenerator(
             Integer.getInteger("generator.random.instance-id", ThreadLocalRandom.current().nextInt()).byteValue()
     );
 

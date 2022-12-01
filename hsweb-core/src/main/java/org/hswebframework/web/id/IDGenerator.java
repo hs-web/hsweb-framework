@@ -48,7 +48,7 @@ public interface IDGenerator<T> {
     /**
      * 随机字符
      */
-    IDGenerator<String> RANDOM = RandomIdGenerator::random;
+    IDGenerator<String> RANDOM = RandomIdGenerator.GLOBAL;
 
     /**
      * md5(uuid())
