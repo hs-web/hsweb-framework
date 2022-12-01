@@ -42,7 +42,7 @@ public class RandomIdGenerator implements IDGenerator<String> {
         value[5] = (byte) (now);
 
         nextBytes(value, 6, 8);
-        nextBytes(value, 9, 15);
+        nextBytes(value, 8, 16);
         nextBytes(value, 16, 24);
 
         return Base64.getUrlEncoder().encodeToString(value);
