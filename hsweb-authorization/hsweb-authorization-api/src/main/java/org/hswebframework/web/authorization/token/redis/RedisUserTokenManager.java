@@ -107,7 +107,7 @@ public class RedisUserTokenManager implements UserTokenManager {
         return userTokenStore
                 .entries(getTokenRedisKey(token))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
-                .filter(map -> !map.isEmpty())
+                .filter(map -> !map.isEmpty() && map.containsKey("token") && map.containsKey("userId"))
                 .map(SimpleUserToken::of)
                 .doOnNext(userToken -> localCache.put(userToken.getToken(), userToken))
                 .cast(UserToken.class);
