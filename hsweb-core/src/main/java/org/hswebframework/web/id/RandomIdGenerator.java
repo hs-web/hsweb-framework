@@ -5,8 +5,6 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 
 import java.util.Base64;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -16,6 +14,8 @@ public class RandomIdGenerator implements IDGenerator<String> {
     static final RandomIdGenerator GLOBAL = new RandomIdGenerator(
             Integer.getInteger("generator.random.instance-id", ThreadLocalRandom.current().nextInt(1,127)).byteValue()
     );
+
+    static final Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
 
     private final static FastThreadLocal<byte[]> HOLDER = new FastThreadLocal<byte[]>() {
         @Override
@@ -44,8 +44,7 @@ public class RandomIdGenerator implements IDGenerator<String> {
         nextBytes(value, 6, 8);
         nextBytes(value, 8, 16);
         nextBytes(value, 16, 24);
-
-        return Base64.getUrlEncoder().encodeToString(value);
+        return encoder.encodeToString(value);
     }
 
 
