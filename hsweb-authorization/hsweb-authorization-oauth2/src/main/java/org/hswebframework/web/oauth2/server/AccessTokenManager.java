@@ -40,4 +40,21 @@ public interface AccessTokenManager {
      */
     Mono<AccessToken> refreshAccessToken(String clientId, String refreshToken);
 
+    /**
+     * 移除token
+     *
+     * @param clientId clientId
+     * @param token    token
+     * @return void
+     */
+    Mono<Void> removeToken(String clientId, String token);
+
+    /**
+     * 取消对用户的授权
+     *
+     * @param clientId clientId
+     * @param userId   用户ID
+     * @return void
+     */
+    Mono<Void> cancelGrant(String clientId, String userId);
 }

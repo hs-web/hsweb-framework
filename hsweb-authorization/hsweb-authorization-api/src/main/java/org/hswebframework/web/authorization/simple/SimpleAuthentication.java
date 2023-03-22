@@ -58,10 +58,16 @@ public class SimpleAuthentication implements Authentication {
     }
 
     public SimpleAuthentication merge(Authentication authentication) {
-        Map<String, Permission> mePermissionGroup = permissions.stream()
+        Map<String, Permission> mePermissionGroup = permissions
+                .stream()
                 .collect(Collectors.toMap(Permission::getId, Function.identity()));
-        user = authentication.getUser();
+
+        if (authentication.getUser() != null) {
+            user = authentication.getUser();
+        }
+
         attributes.putAll(authentication.getAttributes());
+
         for (Permission permission : authentication.getPermissions()) {
             Permission me = mePermissionGroup.get(permission.getId());
             if (me == null) {
@@ -71,7 +77,6 @@ public class SimpleAuthentication implements Authentication {
             me.getActions().addAll(permission.getActions());
             me.getDataAccesses().addAll(permission.getDataAccesses());
         }
-
 
         for (Dimension dimension : authentication.getDimensions()) {
             if (!getDimension(dimension.getType(), dimension.getId()).isPresent()) {
@@ -85,14 +90,27 @@ public class SimpleAuthentication implements Authentication {
     public Authentication copy(BiPredicate<Permission, String> permissionFilter,
                                Predicate<Dimension> dimension) {
         SimpleAuthentication authentication = new SimpleAuthentication();
-        authentication.setUser(user);
         authentication.setDimensions(dimensions.stream().filter(dimension).collect(Collectors.toList()));
         authentication.setPermissions(permissions
-                .stream()
-                .map(permission -> permission.copy(action -> permissionFilter.test(permission, action), conf -> true))
-                .filter(per -> !per.getActions().isEmpty())
-                .collect(Collectors.toList())
+                                              .stream()
+                                              .map(permission -> permission.copy(action -> permissionFilter.test(permission, action), conf -> true))
+                                              .filter(per -> !per.getActions().isEmpty())
+                                              .collect(Collectors.toList())
         );
+        authentication.setUser(user);
         return authentication;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+        dimensions.add(user);
+    }
+
+    public void setDimensions(List<Dimension> dimensions) {
+        this.dimensions.addAll(dimensions);
+    }
+
+    public void addDimension(Dimension dimension) {
+        this.dimensions.add(dimension);
     }
 }

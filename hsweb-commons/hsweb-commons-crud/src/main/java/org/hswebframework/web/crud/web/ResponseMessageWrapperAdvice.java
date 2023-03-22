@@ -20,6 +20,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;
+import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -82,17 +83,21 @@ public class ResponseMessageWrapperAdvice implements ResponseBodyAdvice<Object> 
         if (body instanceof Mono) {
             return ((Mono<?>) body)
                     .map(ResponseMessage::ok)
-                    .switchIfEmpty(Mono.just(ResponseMessage.ok()));
+                    .switchIfEmpty(Mono.fromSupplier(ResponseMessage::ok));
         }
         if (body instanceof Flux) {
             return ((Flux<?>) body)
                     .collectList()
                     .map(ResponseMessage::ok)
-                    .switchIfEmpty(Mono.just(ResponseMessage.ok()));
+                    .switchIfEmpty(Mono.fromSupplier(ResponseMessage::ok));
         }
-        if (body instanceof String) {
+
+        Method method = returnType.getMethod();
+
+        if (method != null && returnType.getMethod().getReturnType() == String.class) {
             return JSON.toJSONString(ResponseMessage.ok(body));
         }
+
         return ResponseMessage.ok(body);
     }
 

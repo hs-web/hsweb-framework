@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.hswebframework.web.i18n.LocaleUtils;
+import org.springframework.util.StringUtils;
 import reactor.core.publisher.Mono;
 
 import java.util.Locale;
@@ -19,7 +20,7 @@ import java.util.Objects;
  */
 @Getter
 @Setter(AccessLevel.PROTECTED)
-public class I18nSupportException extends RuntimeException {
+public class I18nSupportException extends TraceSourceException {
 
     /**
      * 消息code,在message.properties文件中定义的key
@@ -69,5 +70,30 @@ public class I18nSupportException extends RuntimeException {
         return LocaleUtils
                 .currentReactive()
                 .map(this::getLocalizedMessage);
+    }
+
+    public static String tryGetLocalizedMessage(Throwable error, Locale locale) {
+        if (error instanceof I18nSupportException) {
+            return ((I18nSupportException) error).getLocalizedMessage(locale);
+        }
+        String msg = error.getMessage();
+
+        if (!StringUtils.hasText(msg)) {
+            msg = "error." + error.getClass().getSimpleName();
+        }
+        if (msg.contains(".")) {
+            return LocaleUtils.resolveMessage(msg, locale, msg);
+        }
+        return msg;
+    }
+
+    public static String tryGetLocalizedMessage(Throwable error) {
+        return tryGetLocalizedMessage(error, LocaleUtils.current());
+    }
+
+    public static Mono<String> tryGetLocalizedMessageReactive(Throwable error) {
+        return LocaleUtils
+                .currentReactive()
+                .map(locale -> tryGetLocalizedMessage(error, locale));
     }
 }

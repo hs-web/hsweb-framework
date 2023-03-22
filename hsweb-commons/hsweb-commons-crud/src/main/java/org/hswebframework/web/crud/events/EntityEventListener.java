@@ -22,6 +22,7 @@ import org.hswebframework.web.bean.FastBeanCopier;
 import org.hswebframework.web.event.AsyncEvent;
 import org.hswebframework.web.event.GenericsPayloadApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.core.Ordered;
 import reactor.core.publisher.Mono;
 import reactor.function.Function3;
 import reactor.util.function.Tuple2;
@@ -36,7 +37,10 @@ import static org.hswebframework.web.crud.events.EntityEventHelper.*;
 
 @SuppressWarnings("all")
 @AllArgsConstructor
-public class EntityEventListener implements EventListener {
+public class EntityEventListener implements EventListener, Ordered {
+
+    public static final ContextKey<List<Object>> readyToDeleteContextKey = ContextKey.of("readyToDelete");
+    public static final ContextKey<List<Object>> readyToUpdateContextKey = ContextKey.of("readyToUpdate");
 
     private final ApplicationEventPublisher eventPublisher;
 
@@ -133,39 +137,37 @@ public class EntityEventListener implements EventListener {
     protected List<Object> createAfterData(List<Object> olds,
                                            EventContext context) {
         List<Object> newValues = new ArrayList<>(olds.size());
+
         EntityColumnMapping mapping = context
                 .get(MappingContextKeys.columnMapping)
                 .orElseThrow(UnsupportedOperationException::new);
-        TableOrViewMetadata table = context.get(ContextKeys.table).orElseThrow(UnsupportedOperationException::new);
-        RDBColumnMetadata idColumn = table
-                .getColumns()
-                .stream()
-                .filter(RDBColumnMetadata::isPrimaryKey)
-                .findFirst()
-                .orElse(null);
-        if (idColumn == null) {
-            return Collections.emptyList();
-        }
+
+        Map<String, Object> columns = context
+                .get(MappingContextKeys.updateColumnInstance)
+                .orElse(Collections.emptyMap());
+
         for (Object old : olds) {
-            Object newValue = context
-                    .get(MappingContextKeys.updateColumnInstance)
-                    .map(map -> {
-                        Object data = FastBeanCopier.copy(map, FastBeanCopier.copy(old, mapping.newInstance()));
-                        for (Map.Entry<String, Object> entry : map.entrySet()) {
-                            //set null
-                            if (entry.getValue() == null
-                                    || entry.getValue() instanceof NullValue) {
-                                GlobalConfig
-                                        .getPropertyOperator()
-                                        .setProperty(data, entry.getKey(), null);
-                            }
-                        }
-                        return data;
-                    })
-                    .orElseThrow(() -> {
-                        return new IllegalArgumentException("can not get update instance");
-                    });
-            newValues.add(newValue);
+            Object data = FastBeanCopier.copy(old, mapping.newInstance());
+            for (Map.Entry<String, Object> entry : columns.entrySet()) {
+
+                RDBColumnMetadata column = mapping.getColumnByName(entry.getKey()).orElse(null);
+                if (column == null) {
+                    continue;
+                }
+
+                Object value = entry.getValue();
+
+                //set null
+                if (value instanceof NullValue) {
+                    value = null;
+                }
+
+                GlobalConfig
+                        .getPropertyOperator()
+                        .setProperty(data, column.getAlias(), value);
+
+            }
+            newValues.add(data);
         }
         return newValues;
     }
@@ -230,6 +232,7 @@ public class EntityEventListener implements EventListener {
                            holder.invoke(this.doAsyncEvent(() -> {
                                Tuple2<List<Object>, List<Object>> _tmp = updated.get();
                                if (_tmp != null) {
+
                                    return sendUpdateEvent(_tmp.getT1(),
                                                           _tmp.getT2(),
                                                           entityType,
@@ -297,6 +300,9 @@ public class EntityEventListener implements EventListener {
                                                       .setParam(dslUpdate.toQueryParam())
                                                       .fetch()
                                                       .collectList()
+                                                      .doOnNext(list->{
+                                                          context.set(readyToDeleteContextKey, list);
+                                                      })
                                                       .filter(CollectionUtils::isNotEmpty)
                                                       .flatMap(list -> {
                                                           deleted.set(list);
@@ -467,5 +473,10 @@ public class EntityEventListener implements EventListener {
                 .flatMap(ignore -> {
                     return eventSupplier.get();
                 });
+    }
+
+    @Override
+    public int getOrder() {
+        return Ordered.LOWEST_PRECEDENCE - 100;
     }
 }

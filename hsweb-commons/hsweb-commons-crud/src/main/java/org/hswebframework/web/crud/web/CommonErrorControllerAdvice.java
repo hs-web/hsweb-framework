@@ -1,5 +1,6 @@
 package org.hswebframework.web.crud.web;
 
+import io.r2dbc.spi.R2dbcException;
 import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.web.CodeConstants;
 import org.hswebframework.web.authorization.exception.AccessDenyException;
@@ -15,6 +16,7 @@ import org.hswebframework.web.logger.ReactiveLogger;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
+import org.springframework.transaction.TransactionException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -42,6 +44,25 @@ import java.util.stream.Collectors;
 @Slf4j
 @Order
 public class CommonErrorControllerAdvice {
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public Mono<ResponseMessage<Object>> handleException(TransactionException e) {
+        log.error(e.getMessage(), e);
+        return LocaleUtils
+                .resolveMessageReactive("error.internal_server_error")
+                .map(msg -> ResponseMessage.error(500, "error." + e.getClass().getSimpleName(), msg));
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public Mono<ResponseMessage<Object>> handleException(R2dbcException e) {
+        log.error(e.getMessage(), e);
+        return LocaleUtils
+                .resolveMessageReactive("error.internal_server_error")
+                .map(msg -> ResponseMessage.error(500, "error." + e.getClass().getSimpleName(), msg));
+    }
+
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)

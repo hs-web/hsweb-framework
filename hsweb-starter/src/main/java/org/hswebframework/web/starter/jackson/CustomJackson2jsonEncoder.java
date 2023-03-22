@@ -116,72 +116,55 @@ public class CustomJackson2jsonEncoder extends Jackson2CodecSupport implements H
         Assert.notNull(bufferFactory, "'bufferFactory' must not be null");
         Assert.notNull(elementType, "'elementType' must not be null");
 
-        return LocaleUtils
-                .currentReactive()
-                .flatMapMany(locale -> {
-                    if (inputStream instanceof Mono) {
-                        return Mono.from(inputStream)
-                                   .map(value -> LocaleUtils
-                                           .doWith(value, locale,
-                                                   ((val, loc) ->
-                                                           encodeValue(val, bufferFactory, elementType, mimeType, hints)
-                                                   )
-                                           ))
-                                   .flux();
-                    } else {
-                        byte[] separator = streamSeparator(mimeType);
-                        if (separator != null) { // streaming
-                            try {
-                                ObjectWriter writer = createObjectWriter(elementType, mimeType, hints);
-                                ByteArrayBuilder byteBuilder = new ByteArrayBuilder(writer
-                                                                                            .getFactory()
-                                                                                            ._getBufferRecycler());
-                                JsonEncoding encoding = getJsonEncoding(mimeType);
-                                JsonGenerator generator = getObjectMapper()
-                                        .getFactory()
-                                        .createGenerator(byteBuilder, encoding);
-                                SequenceWriter sequenceWriter = writer.writeValues(generator);
+        if (inputStream instanceof Mono) {
+            return Mono.from(inputStream)
+                       .as(LocaleUtils::transform)
+                       .map(value -> encodeValue(value, bufferFactory, elementType, mimeType, hints))
+                       .flux();
+        } else {
+            byte[] separator = streamSeparator(mimeType);
+            if (separator != null) { // streaming
+                try {
+                    ObjectWriter writer = createObjectWriter(elementType, mimeType, hints);
+                    ByteArrayBuilder byteBuilder = new ByteArrayBuilder(writer
+                                                                                .getFactory()
+                                                                                ._getBufferRecycler());
+                    JsonEncoding encoding = getJsonEncoding(mimeType);
+                    JsonGenerator generator = getObjectMapper()
+                            .getFactory()
+                            .createGenerator(byteBuilder, encoding);
+                    SequenceWriter sequenceWriter = writer.writeValues(generator);
 
-                                return Flux
-                                        .from(inputStream)
-                                        .map(value -> LocaleUtils
-                                                .doWith(value,
-                                                        locale,
-                                                        ((val, loc) -> this
-                                                                .encodeStreamingValue(val,
-                                                                                      bufferFactory,
-                                                                                      hints,
-                                                                                      sequenceWriter,
-                                                                                      byteBuilder,
-                                                                                      separator)
-                                                        )
-                                                ))
-                                        .doAfterTerminate(() -> {
-                                            try {
-                                                byteBuilder.release();
-                                                generator.close();
-                                            } catch (IOException ex) {
-                                                logger.error("Could not close Encoder resources", ex);
-                                            }
-                                        });
-                            } catch (IOException ex) {
-                                return Flux.error(ex);
-                            }
-                        } else { // non-streaming
-                            ResolvableType listType = ResolvableType.forClassWithGenerics(List.class, elementType);
-                            return Flux.from(inputStream)
-                                       .collectList()
-                                       .map(value -> LocaleUtils
-                                               .doWith(value, locale,
-                                                       ((val, loc) ->
-                                                               encodeValue(val, bufferFactory, listType, mimeType, hints)
-                                                       )
-                                               ))
-                                       .flux();
-                        }
+                    return Flux
+                            .from(inputStream)
+                            .as(LocaleUtils::transform)
+                            .map(value -> this.encodeStreamingValue(value,
+                                                                    bufferFactory,
+                                                                    hints,
+                                                                    sequenceWriter,
+                                                                    byteBuilder,
+                                                                    separator))
+                            .doAfterTerminate(() -> {
+                                try {
+                                    byteBuilder.release();
+                                    generator.close();
+                                } catch (IOException ex) {
+                                    logger.error("Could not close Encoder resources", ex);
+                                }
+                            });
+                } catch (IOException ex) {
+                    return Flux.error(ex);
+                }
+            } else { // non-streaming
+                ResolvableType listType = ResolvableType.forClassWithGenerics(List.class, elementType);
+                return Flux.from(inputStream)
+                           .collectList()
+                           .as(LocaleUtils::transform)
+                           .map(value -> encodeValue(value, bufferFactory, listType, mimeType, hints))
+                           .flux();
+            }
 
-                    }
-                });
+        }
     }
 
     @Override

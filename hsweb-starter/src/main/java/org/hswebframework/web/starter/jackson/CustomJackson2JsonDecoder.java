@@ -28,12 +28,10 @@ import org.springframework.util.MimeType;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -70,23 +68,19 @@ public class CustomJackson2JsonDecoder extends Jackson2CodecSupport implements H
 
         ObjectReader reader = getObjectReader(elementType, hints);
 
-        return LocaleUtils
-                .currentReactive()
-                .flatMapMany(locale -> tokens
-                        .handle((tokenBuffer, sink) -> {
-                            LocaleUtils.doWith(locale, l -> {
-                                try {
-                                    Object value = reader.readValue(tokenBuffer.asParser(getObjectMapper()));
-                                    logValue(value, hints);
-                                    if (value != null) {
-                                        sink.next(value);
-                                    }
-                                } catch (IOException ex) {
-                                    sink.error(processException(ex));
-                                }
-                            });
-
-                        }));
+        return tokens
+                .as(LocaleUtils::transform)
+                .handle((tokenBuffer, sink) -> {
+                    try {
+                        Object value = reader.readValue(tokenBuffer.asParser(getObjectMapper()));
+                        logValue(value, hints);
+                        if (value != null) {
+                            sink.next(value);
+                        }
+                    } catch (IOException ex) {
+                        sink.error(processException(ex));
+                    }
+                });
     }
 
     @Override
@@ -94,15 +88,10 @@ public class CustomJackson2JsonDecoder extends Jackson2CodecSupport implements H
     public Mono<Object> decodeToMono(@NonNull Publisher<DataBuffer> input, @NonNull ResolvableType elementType,
                                      @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-        return LocaleUtils
-                .currentReactive()
-                .flatMap(locale -> DataBufferUtils
-                        .join(input)
-                        .map(dataBuffer -> LocaleUtils
-                                .doWith(dataBuffer,
-                                        locale,
-                                        (buf, l) -> decode(buf, elementType, mimeType, hints)))
-                );
+        return DataBufferUtils
+                .join(input)
+                .as(LocaleUtils::transform)
+                .map(dataBuffer -> decode(dataBuffer, elementType, mimeType, hints));
     }
 
     @Override

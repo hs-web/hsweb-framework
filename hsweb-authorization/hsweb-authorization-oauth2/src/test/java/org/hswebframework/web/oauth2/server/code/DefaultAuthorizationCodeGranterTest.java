@@ -7,6 +7,7 @@ import org.hswebframework.web.oauth2.server.OAuth2Client;
 import org.hswebframework.web.oauth2.server.RedisHelper;
 import org.hswebframework.web.oauth2.server.impl.RedisAccessTokenManager;
 import org.junit.Test;
+import org.springframework.context.support.StaticApplicationContext;
 import reactor.test.StepVerifier;
 
 import java.util.Collections;
@@ -20,7 +21,7 @@ public class DefaultAuthorizationCodeGranterTest {
     public void testRequestToken() {
 
         DefaultAuthorizationCodeGranter codeGranter = new DefaultAuthorizationCodeGranter(
-                new RedisAccessTokenManager(RedisHelper.factory), RedisHelper.factory
+                new RedisAccessTokenManager(RedisHelper.factory), new StaticApplicationContext(), RedisHelper.factory
         );
 
         OAuth2Client client = new OAuth2Client();

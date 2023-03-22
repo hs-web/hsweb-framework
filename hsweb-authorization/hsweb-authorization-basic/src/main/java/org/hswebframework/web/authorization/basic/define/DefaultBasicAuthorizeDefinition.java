@@ -38,7 +38,7 @@ public class DefaultBasicAuthorizeDefinition implements AopAuthorizeDefinition {
 
     private String message = "error.access_denied";
 
-    private Phased phased;
+    private Phased phased = Phased.before;
 
     @Override
     public boolean isEmpty() {
@@ -65,6 +65,7 @@ public class DefaultBasicAuthorizeDefinition implements AopAuthorizeDefinition {
             getResources().getResources().clear();
             getDimensions().getDimensions().clear();
         }
+        setPhased(ann.phased());
         getResources().setPhased(ann.phased());
         for (Resource resource : ann.resources()) {
             putAnnotation(resource);
@@ -97,6 +98,8 @@ public class DefaultBasicAuthorizeDefinition implements AopAuthorizeDefinition {
             putAnnotation(resource, action);
         }
         resource.setGroup(new ArrayList<>(Arrays.asList(ann.group())));
+        setPhased(ann.phased());
+        getResources().setPhased(ann.phased());
         resources.addResource(resource, ann.merge());
     }
 
@@ -132,8 +135,8 @@ public class DefaultBasicAuthorizeDefinition implements AopAuthorizeDefinition {
             return;
         }
         definition.getDataAccess()
-                .getDataAccessTypes()
-                .add(typeDefinition);
+                  .getDataAccessTypes()
+                  .add(typeDefinition);
     }
 
     public void putAnnotation(ResourceActionDefinition definition, DataAccessType dataAccessType) {
@@ -147,8 +150,8 @@ public class DefaultBasicAuthorizeDefinition implements AopAuthorizeDefinition {
         typeDefinition.setConfiguration(dataAccessType.configuration());
         typeDefinition.setDescription(String.join("\n", dataAccessType.description()));
         definition.getDataAccess()
-                .getDataAccessTypes()
-                .add(typeDefinition);
+                  .getDataAccessTypes()
+                  .add(typeDefinition);
     }
 
 }

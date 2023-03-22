@@ -27,8 +27,10 @@ import org.hswebframework.web.bean.FastBeanCopier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 /**
@@ -37,9 +39,11 @@ import java.util.function.Supplier;
  */
 @SuppressWarnings("unchecked")
 public class MapperEntityFactory implements EntityFactory, BeanFactory {
-    private Map<Class, Mapper> realTypeMapper = new HashMap<>();
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
-    private Map<String, PropertyCopier> copierCache = new HashMap<>();
+    @SuppressWarnings("all")
+    private final Map<Class<?>, Mapper> realTypeMapper = new ConcurrentHashMap<>();
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    @SuppressWarnings("all")
+    private final Map<String, PropertyCopier> copierCache = new ConcurrentHashMap<>();
 
     private static final DefaultMapperFactory DEFAULT_MAPPER_FACTORY = clazz -> {
         String simpleClassName = clazz.getPackage().getName().concat(".Simple").concat(clazz.getSimpleName());
@@ -66,6 +70,16 @@ public class MapperEntityFactory implements EntityFactory, BeanFactory {
 
     public MapperEntityFactory(Map<Class<?>, Mapper<?>> realTypeMapper) {
         this.realTypeMapper.putAll(realTypeMapper);
+    }
+
+    public <T> MapperEntityFactory addMapping(Class<T> target, Supplier<? extends T> mapper) {
+        realTypeMapper.put(target, new Mapper(target, mapper));
+        return this;
+    }
+
+    public <T> MapperEntityFactory addMappingIfAbsent(Class<T> target, Supplier<? extends T> mapper) {
+        realTypeMapper.putIfAbsent(target, new Mapper(target, mapper));
+        return this;
     }
 
     public <T> MapperEntityFactory addMapping(Class<T> target, Mapper<? extends T> mapper) {
@@ -216,8 +230,8 @@ public class MapperEntityFactory implements EntityFactory, BeanFactory {
     }
 
     public static class Mapper<T> {
-        Class<T> target;
-        Supplier<T> instanceGetter;
+        final Class<T> target;
+        final Supplier<T> instanceGetter;
 
         public Mapper(Class<T> target, Supplier<T> instanceGetter) {
             this.target = target;
@@ -242,16 +256,17 @@ public class MapperEntityFactory implements EntityFactory, BeanFactory {
     }
 
     static class DefaultInstanceGetter<T> implements Supplier<T> {
-        Class<T> type;
+        final Constructor<T> constructor;
 
+        @SneakyThrows
         public DefaultInstanceGetter(Class<T> type) {
-            this.type = type;
+            this.constructor = type.getConstructor();
         }
 
         @Override
         @SneakyThrows
         public T get() {
-            return type.newInstance();
+            return constructor.newInstance();
         }
     }
 }

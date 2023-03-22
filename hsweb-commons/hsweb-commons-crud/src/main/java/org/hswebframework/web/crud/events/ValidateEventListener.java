@@ -10,11 +10,12 @@ import org.hswebframework.web.api.crud.entity.Entity;
 import org.hswebframework.web.i18n.LocaleUtils;
 import org.hswebframework.web.validator.CreateGroup;
 import org.hswebframework.web.validator.UpdateGroup;
+import org.springframework.core.Ordered;
 
 import java.util.List;
 import java.util.Optional;
 
-public class ValidateEventListener implements EventListener {
+public class ValidateEventListener implements EventListener, Ordered {
 
     @Override
     public String getId() {
@@ -35,9 +36,10 @@ public class ValidateEventListener implements EventListener {
             resultHolder
                     .ifPresent(holder -> holder
                             .invoke(LocaleUtils
-                                            .currentReactive()
-                                            .doOnNext(locale -> LocaleUtils.doWith(locale, (l) -> tryValidate(type, context)))
-                                            .then()
+                                            .doInReactive(() -> {
+                                                tryValidate(type, context);
+                                                return null;
+                                            })
                             ));
         } else {
             tryValidate(type, context);
@@ -71,5 +73,10 @@ public class ValidateEventListener implements EventListener {
                    .map(Entity.class::cast)
                    .ifPresent(entity -> entity.tryValidate(UpdateGroup.class));
         }
+    }
+
+    @Override
+    public int getOrder() {
+        return Ordered.LOWEST_PRECEDENCE - 1000;
     }
 }

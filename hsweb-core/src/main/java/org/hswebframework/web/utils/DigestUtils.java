@@ -1,6 +1,9 @@
 package org.hswebframework.web.utils;
 
+import io.netty.util.concurrent.FastThreadLocal;
+import io.seruco.encoding.base62.Base62;
 import org.apache.commons.codec.binary.Hex;
+import org.hswebframework.web.id.RandomIdGenerator;
 
 import java.security.MessageDigest;
 import java.util.function.Consumer;
@@ -8,10 +11,33 @@ import java.util.function.Supplier;
 
 public class DigestUtils {
 
-    public static final ThreadLocal<MessageDigest> md5 = ThreadLocal.withInitial(org.apache.commons.codec.digest.DigestUtils::getMd5Digest);
-    public static final ThreadLocal<MessageDigest> sha256 = ThreadLocal.withInitial(org.apache.commons.codec.digest.DigestUtils::getSha256Digest);
-    public static final ThreadLocal<MessageDigest> sha1 = ThreadLocal.withInitial(org.apache.commons.codec.digest.DigestUtils::getSha1Digest);
+    public static final FastThreadLocal<MessageDigest> md5 = new FastThreadLocal<MessageDigest>() {
+        @Override
+        protected MessageDigest initialValue() {
+            return org.apache.commons.codec.digest.DigestUtils.getMd5Digest();
+        }
+    };
 
+    public static final FastThreadLocal<MessageDigest> sha256 = new FastThreadLocal<MessageDigest>() {
+        @Override
+        protected MessageDigest initialValue() {
+            return org.apache.commons.codec.digest.DigestUtils.getSha256Digest();
+        }
+    };
+
+    public static final FastThreadLocal<MessageDigest> sha1 = new FastThreadLocal<MessageDigest>() {
+        @Override
+        protected MessageDigest initialValue() {
+            return org.apache.commons.codec.digest.DigestUtils.getSha1Digest();
+        }
+    };
+
+    private static final Base62 base62 = Base62.createInstance();
+
+
+    public static Base62 base62(){
+        return base62;
+    }
     public static byte[] md5(Consumer<MessageDigest> digestHandler) {
         return digest(md5::get, digestHandler);
     }
@@ -46,6 +72,9 @@ public class DigestUtils {
 
     public static String md5Hex(String str) {
         return Hex.encodeHexString(md5(str.getBytes()));
+    }
+    public static String md5Base62(String str) {
+        return new String(base62.encode(md5(str.getBytes())));
     }
 
     public static byte[] sha256(byte[] data) {

@@ -29,6 +29,8 @@ public interface ReactiveUserService {
      */
     Mono<Boolean> saveUser(Mono<UserEntity> userEntity);
 
+    Mono<UserEntity> addUser(UserEntity userEntity);
+
     /**
      * 根据用户名查询用户实体，如果用户不存在则返回{@link Mono#empty()}
      *

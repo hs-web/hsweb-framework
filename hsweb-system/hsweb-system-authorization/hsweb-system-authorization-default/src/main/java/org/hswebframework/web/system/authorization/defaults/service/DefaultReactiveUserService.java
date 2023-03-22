@@ -24,6 +24,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.validation.ValidationException;
+import java.util.Objects;
 
 
 public class DefaultReactiveUserService extends GenericReactiveCrudService<UserEntity, String> implements ReactiveUserService {
@@ -60,9 +61,18 @@ public class DefaultReactiveUserService extends GenericReactiveCrudService<UserE
                         return doAdd(userEntity);
                     }
                     return findById(userEntity.getId())
-                            .flatMap(ignore -> doUpdate(userEntity))
-                            .switchIfEmpty(Mono.error(NotFoundException::new));
+                            .flatMap(old -> doUpdate(old, userEntity))
+                            .switchIfEmpty(
+                                    Objects.equals(userEntity.getId(), userEntity.getUsername()) ?
+                                            doAdd(userEntity) :
+                                            Mono.error(NotFoundException::new)
+                            );
                 }).thenReturn(true);
+    }
+
+    @Override
+    public Mono<UserEntity> addUser(UserEntity userEntity) {
+        return doAdd(userEntity);
     }
 
     protected Mono<UserEntity> doAdd(UserEntity userEntity) {
@@ -94,22 +104,29 @@ public class DefaultReactiveUserService extends GenericReactiveCrudService<UserE
     }
 
 
-    protected Mono<UserEntity> doUpdate(UserEntity userEntity) {
+    protected Mono<UserEntity> doUpdate(UserEntity old, UserEntity newer) {
         return Mono
                 .defer(() -> {
-                    boolean passwordChanged = StringUtils.hasText(userEntity.getPassword());
-                    if (passwordChanged) {
-                        userEntity.setSalt(IDGenerator.RANDOM.generate());
-                        passwordValidator.validate(userEntity.getPassword());
-                        userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword(), userEntity.getSalt()));
+                    boolean updatePassword = StringUtils.hasText(newer.getPassword());
+
+                    boolean passwordChanged = updatePassword &&
+                            !Objects.equals(
+                                    passwordEncoder.encode(newer.getPassword(), old.getSalt()),
+                                    old.getPassword()
+                            );
+
+                    if (updatePassword) {
+                        newer.setSalt(IDGenerator.RANDOM.generate());
+                        passwordValidator.validate(newer.getPassword());
+                        newer.setPassword(passwordEncoder.encode(newer.getPassword(), newer.getSalt()));
                     }
                     return getRepository()
                             .createUpdate()
-                            .set(userEntity)
-                            .where(userEntity::getId)
+                            .set(newer)
+                            .where(newer::getId)
                             .execute()
-                            .flatMap(__ -> new UserModifiedEvent(userEntity, passwordChanged).publish(eventPublisher))
-                            .thenReturn(userEntity)
+                            .flatMap(__ -> new UserModifiedEvent(old, newer, passwordChanged).publish(eventPublisher))
+                            .thenReturn(newer)
                             .flatMap(e -> ClearUserAuthorizationCacheEvent
                                     .of(e.getId())
                                     .publish(eventPublisher)
@@ -175,12 +192,22 @@ public class DefaultReactiveUserService extends GenericReactiveCrudService<UserE
         return findById(userId)
                 .switchIfEmpty(Mono.error(NotFoundException::new))
                 .filter(user -> passwordEncoder.encode(oldPassword, user.getSalt()).equals(user.getPassword()))
-                .switchIfEmpty(Mono.error(() -> new ValidationException("密码错误")))
-                .flatMap(user -> repository
-                        .createUpdate()
-                        .set(UserEntity::getPassword, passwordEncoder.encode(newPassword, user.getSalt()))
-                        .where(user::getId)
-                        .execute())
+                .switchIfEmpty(Mono.error(() -> new ValidationException("error.illegal_user_password")))
+                .flatMap(old -> {
+                    String encodePwd = passwordEncoder.encode(newPassword, old.getSalt());
+
+                    boolean passwordChanged = !Objects.equals(encodePwd, old.getPassword());
+                    UserEntity newer = old.copyTo(new UserEntity());
+                    newer.setPassword(encodePwd);
+                    return repository
+                            .createUpdate()
+                            .set(newer::getPassword)
+                            .where(newer::getId)
+                            .execute()
+                            .flatMap(e -> new UserModifiedEvent(old, newer, passwordChanged)
+                                    .publish(eventPublisher)
+                                    .thenReturn(e));
+                })
                 .map(i -> i > 0);
     }
 

@@ -1,6 +1,7 @@
 package org.hswebframework.web.authorization.simple;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.hswebframework.web.authorization.*;
 import reactor.core.publisher.Flux;
@@ -11,6 +12,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @AllArgsConstructor
+@Slf4j
 public class CompositeReactiveAuthenticationManager implements ReactiveAuthenticationManager {
 
     private final List<ReactiveAuthenticationManagerProvider> providers;
@@ -21,7 +23,10 @@ public class CompositeReactiveAuthenticationManager implements ReactiveAuthentic
                                    .stream()
                                    .map(manager -> manager
                                            .authenticate(request)
-                                           .onErrorResume((err) -> Mono.empty()))
+                                           .onErrorResume((err) -> {
+                                               log.warn("get user authenticate error", err);
+                                               return Mono.empty();
+                                           }))
                                    .collect(Collectors.toList()))
                    .take(1)
                    .next();
@@ -34,7 +39,10 @@ public class CompositeReactiveAuthenticationManager implements ReactiveAuthentic
                                     .stream()
                                     .map(manager -> manager
                                             .getByUserId(userId)
-                                            .onErrorResume((err) -> Mono.empty())
+                                            .onErrorResume((err) -> {
+                                                log.warn("get user [{}] authentication error", userId, err);
+                                                return Mono.empty();
+                                            })
                                     ))
                 .flatMap(Function.identity())
                 .collectList()

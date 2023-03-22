@@ -8,10 +8,10 @@ import java.util.function.Function;
 
 public class DefaultAsyncEvent implements AsyncEvent {
 
-    private Mono<?> async = Mono.empty();
-    private Mono<?> first = Mono.empty();
+    private transient Mono<?> async = Mono.empty();
+    private transient Mono<?> first = Mono.empty();
 
-    private boolean hasListener;
+    private transient boolean hasListener;
 
     public synchronized void async(Publisher<?> publisher) {
         hasListener = true;

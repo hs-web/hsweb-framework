@@ -16,6 +16,8 @@ import org.hswebframework.web.system.authorization.api.entity.UserEntity;
 @AllArgsConstructor
 @Getter
 public class UserModifiedEvent extends DefaultAsyncEvent {
+    private UserEntity before;
+
     private UserEntity userEntity;
 
     private boolean passwordModified;

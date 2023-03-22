@@ -4,6 +4,9 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.hswebframework.web.authorization.Authentication;
+import org.hswebframework.web.authorization.token.AuthenticationUserToken;
+import org.hswebframework.web.authorization.token.UserTokenManager;
+import org.hswebframework.web.authorization.token.redis.RedisUserTokenManager;
 import org.hswebframework.web.oauth2.ErrorType;
 import org.hswebframework.web.oauth2.OAuth2Exception;
 import org.hswebframework.web.oauth2.server.AccessToken;
@@ -13,14 +16,19 @@ import org.springframework.data.redis.core.ReactiveRedisOperations;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.RedisSerializer;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 public class RedisAccessTokenManager implements AccessTokenManager {
 
     private final ReactiveRedisOperations<String, RedisAccessToken> tokenRedis;
+
+    private final UserTokenManager userTokenManager;
 
     @Getter
     @Setter
@@ -30,37 +38,49 @@ public class RedisAccessTokenManager implements AccessTokenManager {
     @Setter
     private int refreshExpireIn = 2592000; //30天
 
-    public RedisAccessTokenManager(ReactiveRedisOperations<String, RedisAccessToken> tokenRedis) {
+    public RedisAccessTokenManager(ReactiveRedisOperations<String, RedisAccessToken> tokenRedis,
+                                   UserTokenManager userTokenManager) {
         this.tokenRedis = tokenRedis;
+        this.userTokenManager = userTokenManager;
     }
 
     @SuppressWarnings("all")
     public RedisAccessTokenManager(ReactiveRedisConnectionFactory connectionFactory) {
-        this(new ReactiveRedisTemplate<>(connectionFactory, RedisSerializationContext
+        ReactiveRedisTemplate redis = new ReactiveRedisTemplate<>(connectionFactory, RedisSerializationContext
                 .newSerializationContext()
                 .key((RedisSerializer) RedisSerializer.string())
                 .value(RedisSerializer.java())
                 .hashKey(RedisSerializer.string())
                 .hashValue(RedisSerializer.java())
-                .build()
-        ));
+                .build());
+        this.tokenRedis = redis;
+        this.userTokenManager = new RedisUserTokenManager(redis);
     }
+
 
     @Override
     public Mono<Authentication> getAuthenticationByToken(String accessToken) {
-
-        return tokenRedis
-                .opsForValue()
-                .get(createTokenRedisKey(accessToken))
-                .map(RedisAccessToken::getAuthentication);
+        return userTokenManager
+                .getByToken(accessToken)
+                .filter(token -> token instanceof AuthenticationUserToken)
+                .map(t -> ((AuthenticationUserToken) t).getAuthentication());
     }
 
-    private String createTokenRedisKey(String token) {
-        return "oauth2-token:" + token;
+    private String createTokenRedisKey(String clientId, String token) {
+        return "oauth2-token:" + clientId + ":" + token;
     }
 
-    private String createRefreshTokenRedisKey(String token) {
-        return "oauth2-refresh-token:" + token;
+    private String createUserTokenRedisKey(RedisAccessToken token) {
+        return createUserTokenRedisKey(token.getClientId(), token.getAuthentication().getUser().getId());
+    }
+
+    private String createUserTokenRedisKey(String clientId, String userId) {
+        return "oauth2-user-tokens:" + clientId + ":" + userId;
+    }
+
+
+    private String createRefreshTokenRedisKey(String clientId, String token) {
+        return "oauth2-refresh-token:" + clientId + ":" + token;
     }
 
     private String createSingletonTokenRedisKey(String clientId) {
@@ -75,12 +95,41 @@ public class RedisAccessTokenManager implements AccessTokenManager {
         return storeToken(accessToken).thenReturn(accessToken);
     }
 
+    private Mono<Void> storeAuthToken(RedisAccessToken token) {
+        if (token.isSingleton()) {
+            return userTokenManager
+                    .signIn(token.getAccessToken(),
+                            createTokenType(token.getClientId()),
+                            token.getAuthentication().getUser().getId(),
+                            tokenExpireIn * 1000L)
+                    .then();
+        } else {
+            return userTokenManager
+                    .signIn(token.getAccessToken(),
+                            createTokenType(token.getClientId()),
+                            token.getAuthentication().getUser().getId(),
+                            tokenExpireIn * 1000L,
+                            token.getAuthentication())
+                    .then();
+        }
+    }
+
     private Mono<Void> storeToken(RedisAccessToken token) {
-        return Mono
-                .zip(
-                        tokenRedis.opsForValue().set(createTokenRedisKey(token.getAccessToken()), token, Duration.ofSeconds(tokenExpireIn)),
-                        tokenRedis.opsForValue().set(createRefreshTokenRedisKey(token.getRefreshToken()), token, Duration.ofSeconds(refreshExpireIn))
-                ).then();
+
+        return Flux
+                .merge(storeAuthToken(token),
+                       tokenRedis
+                               .opsForValue()
+                               .set(createUserTokenRedisKey(token), token, Duration.ofSeconds(tokenExpireIn)),
+                       tokenRedis
+                               .opsForValue()
+                               .set(createTokenRedisKey(token.getClientId(),
+                                                        token.getAccessToken()), token, Duration.ofSeconds(tokenExpireIn)),
+                       tokenRedis
+                               .opsForValue()
+                               .set(createRefreshTokenRedisKey(token.getClientId(),
+                                                               token.getRefreshToken()), token, Duration.ofSeconds(refreshExpireIn)))
+                .then();
     }
 
     private Mono<AccessToken> doCreateSingletonAccessToken(String clientId, Authentication authentication) {
@@ -111,7 +160,7 @@ public class RedisAccessTokenManager implements AccessTokenManager {
 
     @Override
     public Mono<AccessToken> refreshAccessToken(String clientId, String refreshToken) {
-        String redisKey = createRefreshTokenRedisKey(refreshToken);
+        String redisKey = createRefreshTokenRedisKey(clientId, refreshToken);
 
         return tokenRedis
                 .opsForValue()
@@ -129,15 +178,74 @@ public class RedisAccessTokenManager implements AccessTokenManager {
                             .as(result -> {
                                 // 单例token
                                 if (token.isSingleton()) {
-                                    return tokenRedis
-                                            .opsForValue()
-                                            .set(createSingletonTokenRedisKey(clientId), token, Duration.ofSeconds(tokenExpireIn))
-                                            .then(result);
+                                    return userTokenManager
+                                            .signOutByToken(token.getAccessToken())
+                                            .then(
+                                                    tokenRedis
+                                                            .opsForValue()
+                                                            .set(createSingletonTokenRedisKey(clientId), token, Duration.ofSeconds(tokenExpireIn))
+                                                            .then(result)
+                                            )
+                                            ;
                                 }
                                 return result;
                             })
                             .thenReturn(token.toAccessToken(tokenExpireIn));
                 });
 
+    }
+
+    @Override
+    public Mono<Void> removeToken(String clientId, String token) {
+
+        return Flux
+                .merge(userTokenManager.signOutByToken(token),
+                       tokenRedis.delete(createSingletonTokenRedisKey(clientId)),
+                       tokenRedis.delete(createTokenRedisKey(clientId, token)))
+                .then();
+    }
+
+    @Override
+    public Mono<Void> cancelGrant(String clientId, String userId) {
+        //删除最新的refresh_token
+        Mono<Void> removeRefreshToken = tokenRedis
+                .opsForValue()
+                .get(createUserTokenRedisKey(clientId, userId))
+                .flatMap(t -> tokenRedis
+                        .opsForValue()
+                        .delete(createRefreshTokenRedisKey(t.getClientId(), t.getRefreshToken())))
+                .then();
+
+        //删除access_token
+        Mono<Void> removeAccessToken = userTokenManager
+                .getByUserId(userId)
+                .flatMap(token -> {
+                    //其他类型的token 忽略
+                    if (!(createTokenType(clientId)).equals(token.getType())) {
+                        return Mono.empty();
+                    }
+                    return tokenRedis
+                            .opsForValue()
+                            .get(createTokenRedisKey(clientId, token.getToken()))
+                            .flatMap(t -> {
+                                //移除token
+                                return tokenRedis
+                                        .delete(createTokenRedisKey(t.getClientId(), t.getAccessToken()))
+                                        //移除token对应的refresh_token
+                                        .then(tokenRedis
+                                                      .opsForValue()
+                                                      .delete(createRefreshTokenRedisKey(t.getClientId(), t.getRefreshToken())));
+                            })
+                            .then(userTokenManager.signOutByToken(token.getToken()));
+                })
+                .then();
+
+        return Flux
+                .merge(removeRefreshToken, removeAccessToken)
+                .then();
+    }
+
+    private String createTokenType(String clientId) {
+        return "oauth2-" + clientId;
     }
 }

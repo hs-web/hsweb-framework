@@ -28,19 +28,19 @@ public class DimensionTerm extends AbstractTermFragmentBuilder {
     }
 
     public static <T extends Conditional<?>> T inject(T query,
-                                                   String column,
-                                                   String dimensionType,
-                                                   List<String> userId) {
+                                                      String column,
+                                                      String dimensionType,
+                                                      List<String> userId) {
         return inject(query, column, dimensionType, false, false, userId);
     }
 
     public static <T extends Conditional<?>> T inject(T query,
-                                                   String column,
-                                                   String dimensionType,
-                                                   boolean not,
-                                                   boolean any,
-                                                   List<String> userId) {
-        return (T)query.accept(column, createTermType(dimensionType, not, any), userId);
+                                                      String column,
+                                                      String dimensionType,
+                                                      boolean not,
+                                                      boolean any,
+                                                      List<String> userId) {
+        return (T) query.accept(column, createTermType(dimensionType, not, any), userId);
     }
 
     public static String createTermType(String dimensionType, boolean not, boolean any) {
@@ -73,7 +73,7 @@ public class DimensionTerm extends AbstractTermFragmentBuilder {
             fragments.addSql("not ");
         }
         fragments
-                .addSql("exists(select 1 from s_dimension_user d where d.dimension_type_id = ? and d.dimension_id =", columnFullName)
+                .addSql("exists(select 1 from", getTableName("s_dimension_user", column), "d where d.dimension_type_id = ? and d.dimension_id =", columnFullName)
                 .addParameter(options.get(0));
 
         if (!options.contains("any")) {

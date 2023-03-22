@@ -18,12 +18,7 @@
 
 package org.hswebframework.web.id;
 
-import org.hswebframework.utils.RandomUtil;
 import org.hswebframework.web.utils.DigestUtils;
-
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 
 /**
  * ID生成器,用于生成ID
@@ -53,7 +48,7 @@ public interface IDGenerator<T> {
     /**
      * 随机字符
      */
-    IDGenerator<String> RANDOM = RandomUtil::randomChar;
+    IDGenerator<String> RANDOM = RandomIdGenerator.GLOBAL;
 
     /**
      * md5(uuid())

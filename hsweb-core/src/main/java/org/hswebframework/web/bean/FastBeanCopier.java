@@ -21,6 +21,7 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -513,6 +514,8 @@ public final class FastBeanCopier {
 
             if (targetClass == List.class) {
                 return new ArrayList<>();
+            } else if (targetClass == ConcurrentHashMap.KeySetView.class) {
+                return ConcurrentHashMap.newKeySet();
             } else if (targetClass == Set.class) {
                 return new HashSet<>();
             } else if (targetClass == Queue.class) {
@@ -568,13 +571,15 @@ public final class FastBeanCopier {
                     return (T) new Date(((Date) source).getTime());
                 }
             }
-            if (Collection.class.isAssignableFrom(targetClass)) {
+            if (target.isCollectionType()) {
                 Collection collection = newCollection(targetClass);
                 Collection sourceCollection;
                 if (source instanceof Collection) {
                     sourceCollection = (Collection) source;
                 } else if (source instanceof Object[]) {
                     sourceCollection = Arrays.asList((Object[]) source);
+                } else if (source instanceof Map) {
+                    sourceCollection = ((Map<?, ?>) source).values();
                 } else {
                     if (source instanceof String) {
                         String stringValue = ((String) source);
@@ -619,7 +624,7 @@ public final class FastBeanCopier {
                     Enum t = ((Enum<?>) e);
                     if ((t.name().equalsIgnoreCase(strSource)
                             || Objects.equals(String.valueOf(t.ordinal()), strSource))) {
-                        return (T)e;
+                        return (T) e;
                     }
                 }
 
@@ -642,7 +647,20 @@ public final class FastBeanCopier {
                 //快速复制map
                 if (targetClass == Map.class) {
                     if (source instanceof Map) {
-                        return (T) new HashMap(((Map<?, ?>) source));
+                        return (T) copyMap(((Map<?, ?>) source));
+                    }
+                    if (source instanceof Collection) {
+                        Map<Object, Object> map = new LinkedHashMap<>();
+                        int i = 0;
+                        for (Object o : ((Collection<?>) source)) {
+                            if (genericType.length >= 2) {
+                                map.put(convert(i++, genericType[0], EMPTY_CLASS_ARRAY), convert(o, genericType[1], EMPTY_CLASS_ARRAY));
+                            } else {
+                                map.put(i++, o);
+                            }
+                        }
+                        return (T) map;
+
                     }
                     ClassDescription sourType = ClassDescriptions.getDescription(source.getClass());
                     return (T) copy(source, Maps.newHashMapWithExpectedSize(sourType.getFieldSize()));
@@ -654,6 +672,22 @@ public final class FastBeanCopier {
                 throw new UnsupportedOperationException(e.getMessage(), e);
             }
 //            return null;
+        }
+
+        private Map<?, ?> copyMap(Map<?, ?> map) {
+            if (map instanceof TreeMap) {
+                return new TreeMap<>(map);
+            }
+
+            if (map instanceof LinkedHashMap) {
+                return new LinkedHashMap<>(map);
+            }
+
+            if (map instanceof ConcurrentHashMap) {
+                return new ConcurrentHashMap<>(map);
+            }
+
+            return new HashMap<>(map);
         }
 
         private Object converterByApache(Class<?> targetClass, Object source) {
