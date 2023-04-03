@@ -48,7 +48,7 @@ public class CommonErrorControllerAdvice {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Mono<ResponseMessage<Object>> handleException(TransactionException e) {
-        log.error(e.getMessage(), e);
+        log.error(e.getLocalizedMessage(), e);
         return LocaleUtils
                 .resolveMessageReactive("error.internal_server_error")
                 .map(msg -> ResponseMessage.error(500, "error." + e.getClass().getSimpleName(), msg));
@@ -57,7 +57,7 @@ public class CommonErrorControllerAdvice {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Mono<ResponseMessage<Object>> handleException(R2dbcException e) {
-        log.error(e.getMessage(), e);
+        log.error(e.getLocalizedMessage(), e);
         return LocaleUtils
                 .resolveMessageReactive("error.internal_server_error")
                 .map(msg -> ResponseMessage.error(500, "error." + e.getClass().getSimpleName(), msg));
@@ -77,7 +77,7 @@ public class CommonErrorControllerAdvice {
     public Mono<ResponseMessage<Object>> handleException(UnsupportedOperationException e) {
         return LocaleUtils
                 .resolveThrowable(e, (err, msg) -> (ResponseMessage.error(500, CodeConstants.Error.unsupported, msg)))
-                .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getMessage(), e)));
+                .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getLocalizedMessage(), e)));
     }
 
     @ExceptionHandler
@@ -176,7 +176,7 @@ public class CommonErrorControllerAdvice {
     public Mono<ResponseMessage<Object>> handleException(TimeoutException e) {
         return LocaleUtils
                 .resolveThrowable(e, (err, msg) -> ResponseMessage.error(504, CodeConstants.Error.timeout, msg))
-                .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getMessage(), e)));
+                .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getLocalizedMessage(), e)));
     }
 
     @ExceptionHandler
@@ -185,7 +185,7 @@ public class CommonErrorControllerAdvice {
     public Mono<ResponseMessage<Object>> handleException(RuntimeException e) {
         return LocaleUtils
                 .resolveThrowable(e, (err, msg) -> ResponseMessage.error(msg))
-                .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getMessage(), e)));
+                .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getLocalizedMessage(), e)));
     }
 
     @ExceptionHandler
@@ -193,7 +193,7 @@ public class CommonErrorControllerAdvice {
     public Mono<ResponseMessage<Object>> handleException(NullPointerException e) {
 
         return Mono.just(ResponseMessage.error(e.getMessage()))
-                   .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getMessage(), e)));
+                   .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getLocalizedMessage(), e)));
     }
 
     @ExceptionHandler
@@ -202,7 +202,7 @@ public class CommonErrorControllerAdvice {
 
         return LocaleUtils
                 .resolveThrowable(e, (err, msg) -> ResponseMessage.error(400, CodeConstants.Error.illegal_argument, msg))
-                .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getMessage(), e)))
+                .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getLocalizedMessage(), e)))
                 ;
     }
 
@@ -234,7 +234,7 @@ public class CommonErrorControllerAdvice {
                 .map(msg -> ResponseMessage
                         .error(406, "not_acceptable_media_type", msg)
                         .result(e.getSupportedMediaTypes()))
-                .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getMessage(), e)));
+                .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getLocalizedMessage(), e)));
     }
 
     @ExceptionHandler
@@ -245,7 +245,7 @@ public class CommonErrorControllerAdvice {
                 .map(msg -> ResponseMessage
                         .error(406, "method_not_allowed", msg)
                         .result(e.getSupportedMethods()))
-                .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getMessage(), e)));
+                .doOnEach(ReactiveLogger.onNext(r -> log.error(e.getLocalizedMessage(), e)));
     }
 
 

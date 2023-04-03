@@ -42,7 +42,7 @@ public abstract class ModuleUtils {
                 ModuleUtils.register(moduleInfo);
             }
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            log.error(e.getLocalizedMessage(), e);
         }
     }
 

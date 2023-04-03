@@ -118,7 +118,7 @@ public class ExpressionUtils {
             try {
                 return String.valueOf(engine.execute(id, vars).getIfSuccess());
             } catch (Exception e) {
-                log.error(e.getMessage(), e);
+                log.error(e.getLocalizedMessage(), e);
                 return "";
             }
 
