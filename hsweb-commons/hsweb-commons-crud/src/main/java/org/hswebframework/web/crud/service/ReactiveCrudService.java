@@ -223,7 +223,7 @@ public interface ReactiveCrudService<E, K> {
                         return Mono.just(PagerResult.of(0, new ArrayList<>(), query));
                     }
                     //查询前根据数据总数进行重新分页:要跳转的页码没有数据则跳转到最后一页
-                    return query(query.clone().rePaging(total))
+                    return query(query.rePaging(total))
                             .map(mapper)
                             .collectList()
                             .map(list -> PagerResult.of(total, list, query));
