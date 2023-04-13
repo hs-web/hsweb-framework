@@ -197,7 +197,7 @@ public class DefaultReactiveAuthenticationInitializeService
             }
             authentication.setPermissions(new ArrayList<>(allowed.values()));
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            log.error(e.getLocalizedMessage(), e);
         }
         return authentication;
     }

@@ -89,7 +89,7 @@ public class AutoDDLProcessor implements InitializingBean {
                                 .commit()
                                 .sync();
                     } catch (Exception e) {
-                        log.error(e.getMessage(), e);
+                        log.error(e.getLocalizedMessage(), e);
                         throw e;
                     }
                 }
