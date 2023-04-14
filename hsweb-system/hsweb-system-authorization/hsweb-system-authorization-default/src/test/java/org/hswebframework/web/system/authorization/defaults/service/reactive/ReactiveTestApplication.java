@@ -4,8 +4,8 @@ import org.hswebframework.web.authorization.simple.DefaultAuthorizationAutoConfi
 import org.hswebframework.web.crud.configuration.JdbcSqlExecutorConfiguration;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.data.r2dbc.R2dbcTransactionManagerAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.boot.autoconfigure.r2dbc.R2dbcTransactionManagerAutoConfiguration;
 
 @SpringBootApplication(exclude = {
          //TransactionAutoConfiguration.class,
