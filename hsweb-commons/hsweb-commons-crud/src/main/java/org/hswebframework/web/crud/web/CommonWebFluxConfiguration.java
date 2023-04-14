@@ -1,6 +1,7 @@
 package org.hswebframework.web.crud.web;
 
 import org.hswebframework.web.i18n.WebFluxLocaleFilter;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -22,6 +23,11 @@ public class CommonWebFluxConfiguration {
         return new CommonErrorControllerAdvice();
     }
 
+    @Bean
+    @ConditionalOnClass(name = "io.r2dbc.spi.R2dbcException")
+    public R2dbcErrorControllerAdvice r2dbcErrorControllerAdvice() {
+        return new R2dbcErrorControllerAdvice();
+    }
 
     @Bean
     @ConditionalOnProperty(prefix = "hsweb.webflux.response-wrapper", name = "enabled", havingValue = "true", matchIfMissing = true)
