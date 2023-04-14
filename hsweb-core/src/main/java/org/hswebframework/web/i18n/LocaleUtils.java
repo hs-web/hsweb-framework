@@ -113,8 +113,7 @@ public final class LocaleUtils {
     @SuppressWarnings("all")
     public static Mono<Locale> currentReactive() {
         return Mono
-                .subscriberContext()
-                .map(ctx -> ctx.getOrDefault(Locale.class, DEFAULT_LOCALE));
+                .deferContextual(ctx -> Mono.just(ctx.getOrDefault(Locale.class, DEFAULT_LOCALE)));
     }
     public static <T> Mono<T> doInReactive(Callable<T> call) {
         return currentReactive()

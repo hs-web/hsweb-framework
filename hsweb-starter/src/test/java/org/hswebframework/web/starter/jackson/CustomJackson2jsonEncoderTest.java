@@ -56,7 +56,7 @@ public class CustomJackson2jsonEncoderTest {
                .as(DataBufferUtils::join)
                .map(buf -> buf.toString(StandardCharsets.UTF_8))
                .doOnNext(System.out::println)
-               .subscriberContext(LocaleUtils.useLocale(locale))
+               .contextWrite(LocaleUtils.useLocale(locale))
                .as(StepVerifier::create)
                .expectNextMatches(verify)
                .verifyComplete();

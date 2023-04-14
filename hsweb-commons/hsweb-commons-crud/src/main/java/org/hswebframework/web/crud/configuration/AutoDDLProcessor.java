@@ -7,16 +7,19 @@ import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.ezorm.rdb.metadata.RDBTableMetadata;
 import org.hswebframework.ezorm.rdb.operator.DatabaseOperator;
 import org.hswebframework.web.api.crud.entity.EntityFactory;
+import org.hswebframework.web.crud.annotation.DDL;
 import org.hswebframework.web.crud.entity.factory.MapperEntityFactory;
 import org.hswebframework.web.crud.events.EntityDDLEvent;
 import org.hswebframework.web.event.GenericsPayloadApplicationEvent;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -50,14 +53,23 @@ public class AutoDDLProcessor implements InitializingBean {
     @SneakyThrows
     public void afterPropertiesSet() {
 
-        List<Class<?>> entities = this.entities
-                .stream()
-                .map(e -> entityFactory.getInstanceType(e.getRealType(), true))
-                .collect(Collectors.toList());
-        if (properties.isAutoDdl()) {
+        List<Class<?>> readyToDDL = new ArrayList<>(this.entities.size());
+        List<Class<?>> nonDDL = new ArrayList<>();
+
+        for (EntityInfo entity : this.entities) {
+            Class<?> type = entityFactory.getInstanceType(entity.getRealType(), true);
+            DDL ddl = AnnotatedElementUtils.findMergedAnnotation(type, DDL.class);
+            if (properties.isAutoDdl() && (ddl == null || ddl.value())) {
+                readyToDDL.add(type);
+            } else {
+                nonDDL.add(type);
+            }
+        }
+
+        if (!readyToDDL.isEmpty()) {
             //加载全部表信息
             if (reactive) {
-                Flux.fromIterable(entities)
+                Flux.fromIterable(readyToDDL)
                     .doOnNext(type -> log.trace("auto ddl for {}", type))
                     .map(type -> {
                         RDBTableMetadata metadata = resolver.resolve(type);
@@ -66,18 +78,18 @@ public class AutoDDLProcessor implements InitializingBean {
                         return metadata;
                     })
                     .flatMap(meta -> operator
-                            .ddl()
-                            .createOrAlter(meta)
-                            .autoLoad(false)
-                            .commit()
-                            .reactive()
-                            .subscribeOn(Schedulers.elastic())
-                    )
+                                     .ddl()
+                                     .createOrAlter(meta)
+                                     .autoLoad(false)
+                                     .commit()
+                                     .reactive()
+                                     .subscribeOn(Schedulers.boundedElastic()),
+                             8)
                     .doOnError((err) -> log.error(err.getMessage(), err))
                     .then()
                     .block(Duration.ofMinutes(5));
             } else {
-                for (Class<?> type : entities) {
+                for (Class<?> type : readyToDDL) {
                     log.trace("auto ddl for {}", type);
                     try {
                         RDBTableMetadata metadata = resolver.resolve(type);
@@ -94,13 +106,14 @@ public class AutoDDLProcessor implements InitializingBean {
                     }
                 }
             }
-        } else {
-            for (Class<?> entity : entities) {
-                RDBTableMetadata metadata = resolver.resolve(entity);
-                operator.getMetadata()
-                        .getCurrentSchema()
-                        .addTable(metadata);
-            }
+        }
+
+        for (Class<?> entity : nonDDL) {
+            RDBTableMetadata metadata = resolver.resolve(entity);
+            operator
+                    .getMetadata()
+                    .getCurrentSchema()
+                    .addTable(metadata);
         }
     }
 }

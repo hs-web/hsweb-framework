@@ -28,10 +28,13 @@ import org.hswebframework.web.crud.generator.CurrentTimeGenerator;
 import org.hswebframework.web.crud.generator.DefaultIdGenerator;
 import org.hswebframework.web.crud.generator.MD5Generator;
 import org.hswebframework.web.crud.generator.SnowFlakeStringIdGenerator;
+import org.hswebframework.web.crud.query.DefaultQueryHelper;
+import org.hswebframework.web.crud.query.QueryHelper;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -79,7 +82,7 @@ public class EasyormConfiguration {
         RDBDatabaseMetadata metadata = properties.createDatabaseMetadata();
         syncSqlExecutor.ifPresent(metadata::addFeature);
         reactiveSqlExecutor.ifPresent(metadata::addFeature);
-        if (properties.isAutoDdl()) {
+        if (properties.isAutoDdl() && reactiveSqlExecutor.isPresent()) {
             for (RDBSchemaMetadata schema : metadata.getSchemas()) {
                 schema.loadAllTableReactive()
                       .block(Duration.ofSeconds(30));
@@ -93,6 +96,11 @@ public class EasyormConfiguration {
     public DatabaseOperator databaseOperator(RDBDatabaseMetadata metadata) {
 
         return DefaultDatabaseOperator.of(metadata);
+    }
+
+    @Bean
+    public QueryHelper queryHelper(DatabaseOperator databaseOperator) {
+        return new DefaultQueryHelper(databaseOperator);
     }
 
     @Bean
@@ -211,7 +219,7 @@ public class EasyormConfiguration {
                                     entityType,
                                     table.findFeatureNow(
                                             MappingFeatureType.columnPropertyMapping.createFeatureId(realType)
-                                    ),factory));
+                                    ), factory));
                         }
                         for (TableMetadataCustomizer customizer : customizers) {
                             customizer.customTable(realType, table);

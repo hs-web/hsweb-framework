@@ -20,15 +20,8 @@ public class ContextUtils {
     @Deprecated
     public static Mono<Context> reactiveContext() {
         return Mono
-                .subscriberContext()
-                .<Context>handle((context, sink) -> {
-                    if (context.hasKey(Context.class)) {
-                        sink.next(context.get(Context.class));
-                    } else {
-                        sink.complete();
-                    }
-                })
-                .subscriberContext(acceptContext(ctx -> {
+                .<Context>deferContextual(context->Mono.justOrEmpty(context.getOrEmpty(Context.class)))
+                .contextWrite(acceptContext(ctx -> {
 
                 }));
     }

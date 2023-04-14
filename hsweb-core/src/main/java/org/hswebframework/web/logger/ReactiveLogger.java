@@ -5,8 +5,10 @@ import org.hswebframework.web.utils.CollectionUtils;
 import org.slf4j.MDC;
 import reactor.core.publisher.*;
 import reactor.util.context.Context;
+import reactor.util.context.ContextView;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -27,13 +29,13 @@ public class ReactiveLogger {
     public static Mono<Void> mdc(String key, String value) {
         return Mono
                 .<Void>empty()
-                .subscriberContext(start(key, value));
+                .contextWrite(start(key, value));
     }
 
     public static Mono<Void> mdc(String... keyAndValue) {
         return Mono
                 .<Void>empty()
-                .subscriberContext(start(keyAndValue));
+                .contextWrite(start(keyAndValue));
     }
 
     public static Function<Context, Context> start(Map<String, String> context) {
@@ -43,13 +45,13 @@ public class ReactiveLogger {
                 maybeContextMap.get().putAll(context);
                 return ctx;
             } else {
-                return ctx.put(CONTEXT_KEY, new LinkedHashMap<>(context));
+                return ctx.put(CONTEXT_KEY, new ConcurrentHashMap<>(context));
             }
         };
     }
 
 
-    public static <T> void log(Context context, Consumer<Map<String, String>> logger) {
+    public static <T> void log(ContextView context, Consumer<Map<String, String>> logger) {
         Optional<Map<String, String>> maybeContextMap = context.getOrEmpty(CONTEXT_KEY);
         if (!maybeContextMap.isPresent()) {
             logger.accept(new HashMap<>());
@@ -70,7 +72,7 @@ public class ReactiveLogger {
                 return;
             }
             Optional<Map<String, String>> maybeContextMap
-                    = signal.getContext().getOrEmpty(CONTEXT_KEY);
+                    = signal.getContextView().getOrEmpty(CONTEXT_KEY);
             if (!maybeContextMap.isPresent()) {
                 logger.accept(new HashMap<>(), signal);
             } else {
@@ -87,8 +89,7 @@ public class ReactiveLogger {
 
     public static Mono<Void> mdc(Consumer<Map<String, String>> consumer) {
         return Mono
-                .subscriberContext()
-                .doOnNext(ctx -> {
+                .deferContextual(ctx -> {
                     Optional<Map<String, String>> maybeContextMap = ctx.getOrEmpty(CONTEXT_KEY);
                     if (maybeContextMap.isPresent()) {
                         consumer.accept(maybeContextMap.get());
@@ -96,13 +97,13 @@ public class ReactiveLogger {
                         consumer.accept(Collections.emptyMap());
                         log.warn("logger context is empty,please call publisher.subscriberContext(ReactiveLogger.mdc()) first!");
                     }
-                })
-                .then();
+                    return Mono.empty();
+                });
     }
 
     public static <T, R> BiConsumer<T, SynchronousSink<R>> handle(BiConsumer<T, SynchronousSink<R>> logger) {
         return (t, rFluxSink) -> {
-            log(rFluxSink.currentContext(), context -> {
+            log(rFluxSink.contextView(), context -> {
                 logger.accept(t, rFluxSink);
             });
         };

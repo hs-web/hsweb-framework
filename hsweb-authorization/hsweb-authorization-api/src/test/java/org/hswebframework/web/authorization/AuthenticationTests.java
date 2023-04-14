@@ -139,8 +139,8 @@ public class AuthenticationTests {
                 .doOnEach(ReactiveLogger.on(SignalType.ON_NEXT,(ctx,signal)->{
                     System.out.println(ctx);
                 }))
-                .subscriberContext(Context.of(ParsedToken.class, parsedToken))
-                .subscriberContext(ReactiveLogger.start("rid","1"))
+                .contextWrite(Context.of(ParsedToken.class, parsedToken))
+                .contextWrite(ReactiveLogger.start("rid","1"))
                 .as(StepVerifier::create)
                 .expectNext("admin")
                 .verifyComplete();

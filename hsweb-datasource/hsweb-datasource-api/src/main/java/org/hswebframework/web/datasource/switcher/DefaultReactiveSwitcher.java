@@ -28,6 +28,7 @@ public class DefaultReactiveSwitcher implements ReactiveSwitcher {
         this.type=type;
     }
 
+    @Deprecated
     private <R> Mono<R> doInContext(Function<Deque<String>, Mono<R>> function) {
         return ContextUtils.reactiveContext()
                 .map(ctx -> ctx.getOrDefault(ContextKey.<Deque<String>>of(this.name), LinkedList::new))
@@ -38,12 +39,12 @@ public class DefaultReactiveSwitcher implements ReactiveSwitcher {
     private <R extends Publisher<?>> R  doInContext(R publisher, Consumer<Deque<String>> consumer) {
         if (publisher instanceof Mono) {
             return (R)((Mono<?>) publisher)
-                    .subscriberContext(ContextUtils.acceptContext(ctx -> {
+                    .contextWrite(ContextUtils.acceptContext(ctx -> {
                         consumer.accept(ctx.getOrDefault(ContextKey.<Deque<String>>of(this.name), LinkedList::new));
                     }));
         } else if (publisher instanceof Flux) {
             return (R)((Flux<?>) publisher)
-                    .subscriberContext(ContextUtils.acceptContext(ctx -> {
+                    .contextWrite(ContextUtils.acceptContext(ctx -> {
                         consumer.accept(ctx.getOrDefault(ContextKey.<Deque<String>>of(this.name), LinkedList::new));
                     }));
         }

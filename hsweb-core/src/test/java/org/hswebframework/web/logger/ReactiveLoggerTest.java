@@ -23,7 +23,7 @@ public class ReactiveLoggerTest {
 
                     log.info("test:{} {}", v, MDC.getCopyOfContextMap());
                 }))
-                .subscriberContext(ReactiveLogger.start("r", "1","t","1"))
+                .contextWrite(ReactiveLogger.start("r", "1","t","1"))
                 .as(StepVerifier::create)
                 .expectNextCount(5)
                 .verifyComplete();
@@ -39,7 +39,7 @@ public class ReactiveLoggerTest {
                 .handle(ReactiveLogger.handle((o, fluxSink) -> {
                     log.info("test:{}", fluxSink.currentContext());
                     fluxSink.next(o);
-                })).subscriberContext(ReactiveLogger.start("r", "1"))
+                })).contextWrite(ReactiveLogger.start("r", "1"))
                 .as(StepVerifier::create)
                 .expectNextCount(5)
                 .verifyComplete();

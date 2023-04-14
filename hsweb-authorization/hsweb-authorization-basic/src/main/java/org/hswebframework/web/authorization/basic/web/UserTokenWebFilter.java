@@ -48,23 +48,17 @@ public class UserTokenWebFilter implements WebFilter, BeanPostProcessor {
                 .next()
                 .map(token -> chain
                         .filter(exchange)
-                        .subscriberContext(Context.of(ParsedToken.class, token)))
+                        .contextWrite(Context.of(ParsedToken.class, token)))
                 .defaultIfEmpty(chain.filter(exchange))
                 .flatMap(Function.identity())
-                .subscriberContext(ReactiveLogger.start("requestId", exchange.getRequest().getId()));
+                .contextWrite(ReactiveLogger.start("requestId", exchange.getRequest().getId()));
 
-//        return chain.filter(exchange)
-//                .subscriberContext(ContextUtils.acceptContext(ctx ->
-//                        Flux.fromIterable(parsers)
-//                                .flatMap(parser -> parser.parseToken(exchange))
-//                                .subscribe(token -> ctx.put(ParsedToken.class, token)))
-//                )
-//                .subscriberContext(ReactiveLogger.start("requestId", exchange.getRequest().getId()))
     }
 
     @EventListener
     public void handleUserSign(AuthorizationSuccessEvent event) {
-        ReactiveUserTokenGenerator generator = event.<String>getParameter("tokenType")
+        ReactiveUserTokenGenerator generator = event
+                .<String>getParameter("tokenType")
                 .map(tokenGeneratorMap::get)
                 .orElseGet(() -> tokenGeneratorMap.get("default"));
         if (generator != null) {

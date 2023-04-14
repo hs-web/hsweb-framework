@@ -16,7 +16,7 @@ public class WebFluxLocaleFilter implements WebFilter {
         return chain
                 .filter(exchange)
                 .as(LocaleUtils::transform)
-                .subscriberContext(LocaleUtils.useLocale(getLocaleContext(exchange)));
+                .contextWrite(LocaleUtils.useLocale(getLocaleContext(exchange)));
     }
 
     public Locale getLocaleContext(ServerWebExchange exchange) {

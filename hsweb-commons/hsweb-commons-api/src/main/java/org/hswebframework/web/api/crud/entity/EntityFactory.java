@@ -103,7 +103,6 @@ public interface EntityFactory {
         return getInstanceType(entityClass, false);
     }
 
-    @Nullable
     <T> Class<T> getInstanceType(Class<T> entityClass, boolean autoRegister);
 
     /**

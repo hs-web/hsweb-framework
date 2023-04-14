@@ -31,8 +31,7 @@ public class EntityEventHelper {
      */
     public static Mono<Boolean> isDoFireEvent(boolean defaultIfEmpty) {
         return Mono
-                .subscriberContext()
-                .flatMap(ctx -> Mono.justOrEmpty(ctx.<Boolean>getOrEmpty(doEventContextKey)))
+                .deferContextual(ctx -> Mono.justOrEmpty(ctx.<Boolean>getOrEmpty(doEventContextKey)))
                 .defaultIfEmpty(defaultIfEmpty);
     }
 
@@ -49,7 +48,7 @@ public class EntityEventHelper {
      * @return 流
      */
     public static <T> Mono<T> setDoNotFireEvent(Mono<T> stream) {
-        return stream.subscriberContext(Context.of(doEventContextKey, false));
+        return stream.contextWrite(Context.of(doEventContextKey, false));
     }
 
     /**
@@ -64,7 +63,7 @@ public class EntityEventHelper {
      * @return 流
      */
     public static <T> Flux<T> setDoNotFireEvent(Flux<T> stream) {
-        return stream.subscriberContext(Context.of(doEventContextKey, false));
+        return stream.contextWrite(Context.of(doEventContextKey, false));
     }
 
     public static <T> Mono<Void> publishSavedEvent(Object source,

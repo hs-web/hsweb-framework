@@ -20,7 +20,7 @@ public class LocaleUtilsTest {
                 assertEquals(i.intValue(), 1);
                 assertEquals(LocaleUtils.current(), Locale.ENGLISH);
             })
-            .subscriberContext(LocaleUtils.useLocale(Locale.ENGLISH))
+            .contextWrite(LocaleUtils.useLocale(Locale.ENGLISH))
             .blockLast();
     }
 
@@ -32,7 +32,7 @@ public class LocaleUtilsTest {
                 assertEquals(LocaleUtils.current(), Locale.ENGLISH);
             })
             .as(LocaleUtils::transform)
-            .subscriberContext(LocaleUtils.useLocale(Locale.ENGLISH))
+            .contextWrite(LocaleUtils.useLocale(Locale.ENGLISH))
             .block();
 
         LocaleUtils
@@ -40,7 +40,7 @@ public class LocaleUtilsTest {
                     assertEquals(LocaleUtils.current(), Locale.ENGLISH);
                     return null;
                 })
-                .subscriberContext(LocaleUtils.useLocale(Locale.ENGLISH))
+                .contextWrite(LocaleUtils.useLocale(Locale.ENGLISH))
                 .block();
     }
 

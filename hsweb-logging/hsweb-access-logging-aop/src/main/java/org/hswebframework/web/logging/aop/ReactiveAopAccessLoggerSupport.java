@@ -1,6 +1,7 @@
 package org.hswebframework.web.logging.aop;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.hswebframework.web.aop.MethodInterceptorHolder;
 import org.hswebframework.web.authorization.Authentication;
@@ -9,7 +10,6 @@ import org.hswebframework.web.logger.ReactiveLogger;
 import org.hswebframework.web.logging.*;
 import org.hswebframework.web.logging.events.AccessLoggerAfterEvent;
 import org.hswebframework.web.logging.events.AccessLoggerBeforeEvent;
-import org.hswebframework.web.utils.FluxCache;
 import org.hswebframework.web.utils.ReactiveWebUtils;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,16 +22,15 @@ import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
-import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.context.Context;
+import reactor.util.context.ContextView;
 
+import javax.annotation.Nonnull;
 import java.lang.reflect.Method;
-import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * 使用AOP记录访问日志,并触发{@link AccessLoggerListener#onLogger(AccessLoggerInfo)}
@@ -39,7 +38,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * @author zhouhao
  * @since 3.0
  */
-public class ReactiveAopAccessLoggerSupport extends StaticMethodMatcherPointcutAdvisor implements WebFilter{
+public class ReactiveAopAccessLoggerSupport extends StaticMethodMatcherPointcutAdvisor implements WebFilter {
 
     @Autowired(required = false)
     private final List<AccessLoggerParser> loggerParsers = new ArrayList<>();
@@ -59,10 +58,10 @@ public class ReactiveAopAccessLoggerSupport extends StaticMethodMatcherPointcutA
             Object response = methodInvocation.proceed();
             if (response instanceof Mono) {
                 return wrapMonoResponse(((Mono<?>) response), info)
-                        .subscriberContext(Context.of(AccessLoggerInfo.class, info));
+                        .contextWrite(Context.of(AccessLoggerInfo.class, info));
             } else if (response instanceof Flux) {
                 return wrapFluxResponse(((Flux<?>) response), info)
-                        .subscriberContext(Context.of(AccessLoggerInfo.class, info));
+                        .contextWrite(Context.of(AccessLoggerInfo.class, info));
             }
             return response;
         });
@@ -70,29 +69,28 @@ public class ReactiveAopAccessLoggerSupport extends StaticMethodMatcherPointcutA
 
     private Mono<RequestInfo> currentRequestInfo() {
         return Mono
-                .subscriberContext()
-                .handle((context, sink) -> {
+                .deferContextual(context -> {
                     if (context.hasKey(RequestInfo.class)) {
                         RequestInfo info = context.get(RequestInfo.class);
                         ReactiveLogger.log(context, ctx -> info.setContext(new HashMap<>(ctx)));
-                        sink.next(info);
+                        return Mono.just(info);
                     }
+                    return Mono.empty();
                 });
     }
 
     protected Flux<?> wrapFluxResponse(Flux<?> flux, AccessLoggerInfo loggerInfo) {
-        return Flux.deferWithContext(ctx -> this
+        return Flux.deferContextual(ctx -> this
                            .currentRequestInfo()
                            .doOnNext(loggerInfo::putAccessInfo)
                            .then(beforeRequest(loggerInfo))
                            .thenMany(flux)
                            .doOnError(loggerInfo::setException)
                            .doFinally(signal -> completeRequest(loggerInfo, ctx)))
-                   .subscriberContext(ReactiveLogger.start("accessLogId", loggerInfo.getId()));
+                   .contextWrite(ReactiveLogger.start("accessLogId", loggerInfo.getId()));
     }
 
     private Mono<Void> beforeRequest(AccessLoggerInfo loggerInfo) {
-
         AccessLoggerBeforeEvent event = new AccessLoggerBeforeEvent(loggerInfo);
         return Authentication
                 .currentReactive()
@@ -106,14 +104,14 @@ public class ReactiveAopAccessLoggerSupport extends StaticMethodMatcherPointcutA
                                  "userName", auth.getUser().getName())
                             .thenReturn(auth);
                 })
-                .then(event.publish(eventPublisher));
+                .then(Mono.defer(() -> event.publish(eventPublisher)));
     }
 
-    private void completeRequest(AccessLoggerInfo loggerInfo, Context ctx) {
+    private void completeRequest(AccessLoggerInfo loggerInfo, ContextView ctx) {
         loggerInfo.setResponseTime(System.currentTimeMillis());
         new AccessLoggerAfterEvent(loggerInfo)
                 .publish(eventPublisher)
-                .subscriberContext(ctx)
+                .contextWrite(ctx)
                 .subscribe();
     }
 
@@ -189,7 +187,7 @@ public class ReactiveAopAccessLoggerSupport extends StaticMethodMatcherPointcutA
     }
 
     @Override
-    public boolean matches(Method method, Class<?> aClass) {
+    public boolean matches(@Nonnull Method method,@Nonnull Class<?> aClass) {
         AccessLogger ann = AnnotationUtils.findAnnotation(method, AccessLogger.class);
         if (ann != null && ann.ignore()) {
             return false;
@@ -200,10 +198,11 @@ public class ReactiveAopAccessLoggerSupport extends StaticMethodMatcherPointcutA
     }
 
     @Override
-    public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
+    @Nonnull
+    public Mono<Void> filter(@Nonnull ServerWebExchange exchange,@Nonnull WebFilterChain chain) {
         return chain
                 .filter(exchange)
-                .subscriberContext(Context.of(RequestInfo.class, createAccessInfo(exchange)));
+                .contextWrite(Context.of(RequestInfo.class, createAccessInfo(exchange)));
     }
 
     private RequestInfo createAccessInfo(ServerWebExchange exchange) {
