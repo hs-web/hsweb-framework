@@ -375,8 +375,21 @@ public class DefaultQueryHelper implements QueryHelper {
 
         @Override
         public SortSpec<R> where(QueryParamEntity param) {
-            query.setParam(this.param = param);
+            query.setParam(this.param = refactorParam(param.clone()));
             return this;
+        }
+
+        private QueryParamEntity refactorParam(QueryParamEntity param) {
+
+            for (Term term : param.getTerms()) {
+                refactorTerm(term);
+            }
+
+            return param;
+        }
+
+        private void refactorTerm(Term term) {
+            term.setColumn(refactorColumn(term.getColumn()));
         }
 
         @Override
@@ -556,6 +569,26 @@ public class DefaultQueryHelper implements QueryHelper {
 
             return orderBy(join.alias + "." + referenceInfo.getColumn(), order);
         }
+
+        public String refactorColumn(String column) {
+            if (null == column) {
+                return null;
+            }
+            if (column.contains(".")) {
+                String[] joinColumn = column.split("[.]");
+                for (ColumnMapping<?> mapping : mappings) {
+                    if (mapping instanceof ColumnMapping.All) {
+                        //传递的是property
+                        if (Objects.equals(joinColumn[0], ((ColumnMapping.All<?, ?>) mapping).targetProperty)) {
+                            JoinConditionalSpecImpl join = ((ColumnMapping.All<?, ?>) mapping).getJoin();
+                            joinColumn[0] = join.alias;
+                            return String.join(".", joinColumn);
+                        }
+                    }
+                }
+            }
+            return column;
+        }
     }
 
     @AllArgsConstructor
@@ -688,20 +721,7 @@ public class DefaultQueryHelper implements QueryHelper {
 
         @Override
         public NestConditional<T> accept(String column, String termType, Object value) {
-            if (column.contains(".")) {
-                String[] joinColumn = column.split("[.]");
-                for (ColumnMapping<?> mapping : parent.mappings) {
-                    if (mapping instanceof ColumnMapping.All) {
-                        //传递的是property
-                        if (Objects.equals(joinColumn[0], ((ColumnMapping.All<?, ?>) mapping).targetProperty)) {
-                            JoinConditionalSpecImpl join = ((ColumnMapping.All<?, ?>) mapping).getJoin();
-                            joinColumn[0] = join.alias;
-                            return super.accept(String.join(".", joinColumn), termType, value);
-                        }
-                    }
-                }
-            }
-            return super.accept(column, termType, value);
+            return super.accept(parent.refactorColumn(column), termType, value);
         }
 
         @Override
@@ -766,10 +786,11 @@ public class DefaultQueryHelper implements QueryHelper {
         final QuerySpec<?> parent;
 
         final Term term;
+
         public NestConditionalImpl(QuerySpec<?> parent, T target, Term term) {
             super(target, term);
             this.parent = parent;
-            this.term=term;
+            this.term = term;
         }
 
         @Override
@@ -784,20 +805,7 @@ public class DefaultQueryHelper implements QueryHelper {
 
         @Override
         public NestConditional<T> accept(String column, String termType, Object value) {
-            if (column.contains(".")) {
-                String[] joinColumn = column.split("[.]");
-                for (ColumnMapping<?> mapping : parent.mappings) {
-                    if (mapping instanceof ColumnMapping.All) {
-                        //传递的是property
-                        if (Objects.equals(joinColumn[0], ((ColumnMapping.All<?, ?>) mapping).targetProperty)) {
-                            JoinConditionalSpecImpl join = ((ColumnMapping.All<?, ?>) mapping).getJoin();
-                            joinColumn[0] = join.alias;
-                            return super.accept(String.join(".", joinColumn), termType, value);
-                        }
-                    }
-                }
-            }
-            return super.accept(column, termType, value);
+            return super.accept(parent.refactorColumn(column), termType, value);
         }
 
         @Override
@@ -818,8 +826,8 @@ public class DefaultQueryHelper implements QueryHelper {
             }
             JoinConditionalSpecImpl join = parent.getJoinByClass(info.getOwner());
 
-             super.accept(join.alias + "." + info.getColumn(), termType, value);
-             return this;
+            super.accept(join.alias + "." + info.getColumn(), termType, value);
+            return this;
         }
 
     }
@@ -873,20 +881,7 @@ public class DefaultQueryHelper implements QueryHelper {
 
         @Override
         public T accept(String column, String termType, Object value) {
-            if (column.contains(".")) {
-                String[] joinColumn = column.split("[.]");
-                for (ColumnMapping<?> mapping : parent.mappings) {
-                    if (mapping instanceof ColumnMapping.All) {
-                        //传递的是property
-                        if (Objects.equals(joinColumn[0], ((ColumnMapping.All<?, ?>) mapping).targetProperty)) {
-                            JoinConditionalSpecImpl join = ((ColumnMapping.All<?, ?>) mapping).getJoin();
-                            joinColumn[0] = join.alias;
-                            return Conditional.super.accept(String.join(".", joinColumn), termType, value);
-                        }
-                    }
-                }
-            }
-            return Conditional.super.accept(column, termType, value);
+            return Conditional.super.accept(parent.refactorColumn(column), termType, value);
         }
 
         @Override
@@ -914,7 +909,7 @@ public class DefaultQueryHelper implements QueryHelper {
         @Override
         public Accepter<T, Object> getAccepter() {
             return (column, termType, value) -> {
-                real.getAccepter().accept(column,termType,value);
+                real.getAccepter().accept(column, termType, value);
                 return castSelf();
             };
         }
