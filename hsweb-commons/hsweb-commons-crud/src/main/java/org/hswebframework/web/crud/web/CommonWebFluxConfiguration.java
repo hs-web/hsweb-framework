@@ -25,6 +25,7 @@ public class CommonWebFluxConfiguration {
 
     @Bean
     @ConditionalOnClass(name = "io.r2dbc.spi.R2dbcException")
+    @ConditionalOnMissingBean
     public R2dbcErrorControllerAdvice r2dbcErrorControllerAdvice() {
         return new R2dbcErrorControllerAdvice();
     }
