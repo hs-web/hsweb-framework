@@ -1,6 +1,7 @@
 package org.hswebframework.web.crud.query;
 
 import org.hswebframework.ezorm.core.Conditional;
+import org.hswebframework.ezorm.rdb.operator.dml.query.SortOrder;
 import org.hswebframework.web.api.crud.entity.PagerResult;
 import org.hswebframework.web.api.crud.entity.QueryParamEntity;
 import reactor.core.publisher.Flux;
@@ -12,34 +13,34 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
+ * 使用DSL方式链式调用来构建复杂查询
+ *
  * <pre>{@code
  *
  * // select a.id as `a.id` ,b.name as b.name from table_a a
  * // left join table_b b on a.id=b.id
  * // where b.name like 'zhang%'
  *
- * class R{
- *
- *
- * }
- *
  *   Flux<R> =  helper
  *      .select(R.class)
  *      .as(A::getName,R::setName)
  *      .as(A::getId,R::setAid)
  *      .from(A.class)
- *      .leftJoin(B.class,spec-> spec.alias('b').is(A::id, B::id))
+ *      .leftJoin(B.class,spec-> spec.is(A::id, B::id))
  *      .where(dsl->dsl.like(B::getName,'zhang%'))
  *      .fetch()
  *
  * }</pre>
+ *
+ * @author zhouhao
+ * @since 4.0.16
  */
 public interface QueryHelper {
 
     /**
      * 创建一个查询构造器
      *
-     * @param resultType 实体类型
+     * @param resultType 实体类型,必须明确定义实体类,不能使用{@link java.util.Map}等类型
      * @param <R>        类型
      * @return 查询构造器
      */
@@ -48,13 +49,13 @@ public interface QueryHelper {
     /**
      * 创建一个查询构造器,并返回指定的实体类型
      *
-     * @param resultType 实体类型
+     * @param resultType 实体类型,必须明确定义实体类,不能使用{@link java.util.Map}等类型
      * @param mapperSpec 实体映射配置
      * @param <R>        类型
      * @return 查询构造器
      */
     <R> SelectSpec<R> select(Class<R> resultType,
-                             Consumer<ColumnMapperSpec<R,?>> mapperSpec);
+                             Consumer<ColumnMapperSpec<R, ?>> mapperSpec);
 
 
     interface SelectSpec<R> {
@@ -62,7 +63,7 @@ public interface QueryHelper {
         /**
          * 指定从哪个表查询
          *
-         * @param clazz  实体类型
+         * @param clazz  实体类型,类上需要注解{@link javax.persistence.Table},并使用{@link javax.persistence.Column}来描述列
          * @param <From> 实体类型
          * @return 查询构造器
          * @see javax.persistence.Table
@@ -71,18 +72,140 @@ public interface QueryHelper {
 
     }
 
-    interface SortSpec<R> extends ExecuteSpec<R> {
 
-        SortSpec<R> sort(String column, String order);
-
-        <T> SortSpec<R> sort(Getter<T, ?> column, String order);
-
-    }
-
+    /**
+     * 查询条件构造器
+     *
+     * @param <R> 查询结果类型
+     */
     interface WhereSpec<R> extends ExecuteSpec<R> {
+
+        /**
+         * 使用动态查询参数来作为查询条件,用于通过参数传递查询条件的场景
+         *
+         * @param param 查询参数
+         * @return 排序描述
+         * @see QueryParamEntity
+         */
         SortSpec<R> where(QueryParamEntity param);
 
+        /**
+         * 使用DSL方式来构造查询条件,用于编程式的构造查询条件
+         * <pre>{@code
+         *
+         *   // where t.name = ? or age > 18
+         *   where(dsl->dsl.is(MyEntity::getName,name).or().gt(MyEntity::getAge,18))
+         *
+         * }</pre>
+         *
+         * @param dsl DSL条件构造接收器
+         * @return 排序描述
+         */
         SortSpec<R> where(Consumer<Conditional<?>> dsl);
+    }
+
+
+    /**
+     * 排序构造器
+     *
+     * @param <R> 查询结果类型
+     */
+    interface SortSpec<R> extends ExecuteSpec<R> {
+
+        /**
+         * 使用指定的列名进行正序排序,多次执行将使用多列排序
+         * <pre>{@code
+         *  // order by a.index asc
+         *  orderByAsc("a.index");
+         * }</pre>
+         *
+         * @param column 列名
+         * @return 排序构造器
+         */
+        default SortSpec<R> orderByAsc(String column) {
+            return orderBy(column, SortOrder.Order.asc);
+        }
+
+        /**
+         * 使用指定的列名进行倒序排序,多次执行将使用多列排序
+         * <pre>{@code
+         *  // order by a.index desc
+         *  orderByDesc("a.index");
+         * }</pre>
+         *
+         * @param column 列名
+         * @return 排序构造器
+         */
+        default SortSpec<R> orderByDesc(String column) {
+            return orderBy(column, SortOrder.Order.desc);
+        }
+
+        /**
+         * 使用指定的列名进行排序,多次执行将使用多列排序
+         * <pre>{@code
+         *  // order by a.index asc
+         *  orderBy("a.index",SortOrder.Order.asc);
+         * }</pre>
+         *
+         * @param column 列名
+         * @param order  排序方式
+         * @return 排序构造器
+         */
+        SortSpec<R> orderBy(String column,
+                            SortOrder.Order order);
+
+
+        /**
+         * 对方法应用对应的列名进行正序排序,多次执行将使用多列排序
+         * <pre>{@code
+         *
+         *  // order by sort_order asc
+         *  orderByAsc(MyEntity::getSortOrder)
+         *
+         * }</pre>
+         *
+         * @param column 方法引用
+         * @param <S>    S
+         * @return 排序构造器
+         */
+        default <S> SortSpec<R> orderByAsc(Getter<S, ?> column) {
+            return orderBy(column, SortOrder.Order.asc);
+        }
+
+        /**
+         * 对方法应用对应的列名进行倒序排序,多次执行将使用多列排序
+         * <pre>{@code
+         *
+         *  // order by sort_order desc
+         *  orderByDesc(MyEntity::getSortOrder)
+         *
+         * }</pre>
+         *
+         * @param column 方法引用
+         * @param <S>    S
+         * @return 排序构造器
+         */
+        default <S> SortSpec<R> orderByDesc(Getter<S, ?> column) {
+            return orderBy(column, SortOrder.Order.desc);
+        }
+
+        /**
+         * 对方法应用对应的列名进行排序,多次执行将使用多列排序
+         * <pre>{@code
+         *
+         *  // order by sort_order desc
+         *  orderBy(MyEntity::getSortOrder,SortOrder.Order.desc)
+         *
+         * }</pre>
+         *
+         * @param column 方法引用
+         * @param <S>    S
+         * @return 排序构造器
+         */
+        <S> SortSpec<R> orderBy(Getter<S, ?> column,
+                                SortOrder.Order order);
+
+
     }
 
     interface FromSpec<R> extends JoinSpec<R>, SortSpec<R> {
@@ -90,55 +213,238 @@ public interface QueryHelper {
 
     }
 
+    /**
+     * 表关联构造器
+     *
+     * @param <R> 查询结果类型
+     */
     interface JoinSpec<R> extends WhereSpec<R> {
 
-        <T> JoinSpec<R> fullJoin(Class<T> type, Consumer<JoinConditionalSpec<?>> on);
 
+        /**
+         * 对指定的实体类进行 left join
+         *
+         * <pre>{@code
+         *   // left join detail on my.id = detail.id
+         *   leftJoin(DetailEntity.class,spec->spec.is(MyEntity::getId,DetailEntity::getId)
+         * }</pre>
+         *
+         * @param type 实体类型,需要注解{@link javax.persistence.Table}
+         * @param on   关联条件构造器
+         * @param <T>  T
+         * @return 表关联构造器
+         */
         <T> JoinSpec<R> leftJoin(Class<T> type, Consumer<JoinConditionalSpec<?>> on);
 
+        /**
+         * 对指定的实体类进行 right join
+         *
+         * <pre>{@code
+         *   // left join detail on my.id = detail.id
+         *   rightJoin(DetailEntity.class,spec->spec.is(MyEntity::getId,DetailEntity::getId)
+         * }</pre>
+         *
+         * @param type 实体类型,需要注解{@link javax.persistence.Table}
+         * @param on   关联条件构造器
+         * @param <T>  T
+         * @return 表关联构造器
+         */
+        <T> JoinSpec<R> rightJoin(Class<T> type, Consumer<JoinConditionalSpec<?>> on);
+
+        /**
+         * 对指定的实体类进行 inner join
+         *
+         * <pre>{@code
+         *   // inner join detail on my.id = detail.id
+         *   innerJoin(DetailEntity.class,spec->spec.is(MyEntity::getId,DetailEntity::getId)
+         * }</pre>
+         *
+         * @param type 实体类型,需要注解{@link javax.persistence.Table}
+         * @param on   关联条件构造器
+         * @param <T>  T
+         * @return 表关联构造器
+         */
         <T> JoinSpec<R> innerJoin(Class<T> type, Consumer<JoinConditionalSpec<?>> on);
 
-        <T> JoinSpec<R> rightJoin(Class<T> type, Consumer<JoinConditionalSpec<?>> on);
+        /**
+         * 对指定的实体类进行 full join
+         *
+         * <pre>{@code
+         *   // join t1 on t1.id = t2.id
+         *   fullJoin(DetailEntity.class,spec->spec.is(MyEntity::getId,DetailEntity::getId)
+         * }</pre>
+         *
+         * @param type 实体类型,需要注解{@link javax.persistence.Table}
+         * @param on   关联条件构造器
+         * @param <T>  T
+         * @return 表关联构造器
+         */
+        <T> JoinSpec<R> fullJoin(Class<T> type, Consumer<JoinConditionalSpec<?>> on);
+
 
     }
 
+    /**
+     * 执行查询
+     *
+     * @param <R>
+     */
     interface ExecuteSpec<R> {
 
+        /**
+         * 执行查询,返回数据流
+         *
+         * @return 数据流
+         */
         Flux<R> fetch();
 
+        /**
+         * 执行分页查询,默认返回第一页的25条数据.
+         *
+         * @return 分页结果
+         */
         Mono<PagerResult<R>> fetchPaged();
 
+        /**
+         * 指定分页执行查询
+         *
+         * @param pageIndex 分页序号,从0开始
+         * @param pageSize  每页数量
+         * @return 分页结果
+         */
         Mono<PagerResult<R>> fetchPaged(int pageIndex, int pageSize);
     }
 
-    interface SelectColumnMapperSpec<R> extends ColumnMapperSpec<R,SelectColumnMapperSpec<R>>, SelectSpec<R> {
+    interface SelectColumnMapperSpec<R> extends ColumnMapperSpec<R, SelectColumnMapperSpec<R>>, SelectSpec<R> {
 
     }
 
-    interface ColumnMapperSpec<R,Self extends ColumnMapperSpec<R,Self>> {
+    /**
+     * 列名映射构造器
+     *
+     * @param <R>    查询结果类型
+     * @param <Self> Self
+     */
+    interface ColumnMapperSpec<R, Self extends ColumnMapperSpec<R, Self>> {
 
+        /**
+         * 查询指定类型对应的表的全部字段.
+         *
+         * @param tableType 类型,只能是from或者join的类型.
+         * @return Self
+         */
         Self all(Class<?> tableType);
 
+        /**
+         * 查询指定类型对应的表的全部字段并映射到结果类型的一个字段中.
+         *
+         * <pre>{@code
+         *   all(DetailEntity.class,MyEntity::setDetail)
+         * }</pre>
+         *
+         * @param tableType 类型,只能是from或者join的类型.
+         * @return Self
+         */
         <V> Self all(Class<?> tableType, Setter<R, V> setter);
 
-        Self all(String table);
+        /**
+         * 查询指定表的全部字段.
+         *
+         * @param tableOrAlias 表名或者join别名,只能是from或者join的表.
+         * @return Self
+         */
+        Self all(String tableOrAlias);
 
-        <V> Self all(String table, Setter<R, V> setter);
+        /**
+         * 查询指定类型对应的表的全部字段并映射到结果类型的一个字段中.
+         *
+         * <pre>{@code
+         *   all("detail",MyEntity::setDetail)
+         * }</pre>
+         *
+         * @param tableOrAlias 表名或者join别名,只能是from或者join的表.
+         * @return Self
+         */
+        <V> Self all(String tableOrAlias, Setter<R, V> setter);
 
-        <S, V> Self as(Getter<S, V> getter, Setter<R, V> setter);
+        /**
+         * 指定查询的列名,以及映射到结果类型的字段.
+         * <pre>{@code
+         *   as(DetailEntity::getName,MyEntity::setDetailName)
+         * }</pre>
+         *
+         * @param column 列名
+         * @param target 结果类型字段
+         * @param <S>    S
+         * @param <V>    V
+         * @return Self
+         */
+        <S, V> Self as(Getter<S, V> column, Setter<R, V> target);
 
-        <S, V> Self as(Getter<S, V> getter, String alias);
+        /**
+         * 指定查询的列名,以及映射到结果类型的字段.
+         * <pre>{@code
+         *   as(DetailEntity::getName,"detail.name")
+         * }</pre>
+         *
+         * @param column 列名
+         * @param target 结果类型字段
+         * @param <S>    S
+         * @param <V>    V
+         * @return Self
+         */
+        <S, V> Self as(Getter<S, V> column, String target);
 
-        <S, V> Self as(String column, Setter<R, V> setter);
+        /**
+         * 指定查询的列名,以及映射到结果类型的字段.
+         *
+         * <pre>{@code
+         *   as("_d.name",MyEntity::setDetailName)
+         * }</pre>
+         *
+         * @param column 列名
+         * @param target 结果类型字段
+         * @return Self
+         */
+        <V> Self as(String column, Setter<R, V> target);
 
-        <S, V> Self as(String column, String alias);
+        /**
+         * 指定查询的列名,以及映射到结果类型的字段.
+         * <pre>{@code
+         *   as("_d.name","detail.name")
+         * }</pre>
+         *
+         * @param column 列名
+         * @param target 结果类型字段
+         * @return Self
+         */
+        Self as(String column, String target);
     }
 
-
+    /**
+     * Getter接口定义,只能使用方法引用实现此接口,如:
+     *
+     * <pre>{@code
+     *   MyEntity::getId
+     * }</pre>
+     *
+     * @param <S>
+     * @param <V>
+     */
     interface Getter<S, V> extends Function<S, V>, Serializable {
 
     }
 
+    /**
+     * Setter接口定义,只能使用方法引用实现此接口,如:
+     *
+     * <pre>{@code
+     *   MyEntity::setId
+     * }</pre>
+     *
+     * @param <S>
+     * @param <V>
+     */
     interface Setter<S, V> extends BiConsumer<S, V>, Serializable {
 
     }

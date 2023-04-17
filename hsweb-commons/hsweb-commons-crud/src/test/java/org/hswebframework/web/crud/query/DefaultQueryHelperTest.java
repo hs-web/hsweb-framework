@@ -56,13 +56,19 @@ class DefaultQueryHelperTest {
               .leftJoin(EventTestEntity.class,
                         join -> join
                                 .alias("e1")
-                                .is(EventTestEntity::getId, TestEntity::getId)
-                                .nest()
                                 .is(EventTestEntity::getId, TestEntity::getId))
+              .leftJoin(EventTestEntity.class,
+                        join -> join
+                                .alias("e2")
+                                .is(EventTestEntity::getId, "e1", EventTestEntity::getId)
+                                .nest()
+                                .is(TestEntity::getId, EventTestEntity::getId))
 
               .where(dsl -> dsl.is(EventTestEntity::getName, "Ename")
                                .orNest()
                                .is(TestEntity::getName, "main"))
+              .orderByAsc(TestEntity::getAge)
+              .orderByDesc(EventTestEntity::getAge)
               .fetch()
               .doOnNext(info -> System.out.println(JSON.toJSONString(info, SerializerFeature.PrettyFormat)))
               .as(StepVerifier::create)

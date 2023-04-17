@@ -16,6 +16,7 @@ import org.hswebframework.ezorm.rdb.operator.dml.JoinType;
 import org.hswebframework.ezorm.rdb.operator.dml.QueryOperator;
 import org.hswebframework.ezorm.rdb.operator.dml.SelectColumnSupplier;
 import org.hswebframework.ezorm.rdb.operator.dml.query.Selects;
+import org.hswebframework.ezorm.rdb.operator.dml.query.SortOrder;
 import org.hswebframework.web.api.crud.entity.PagerResult;
 import org.hswebframework.web.api.crud.entity.QueryParamEntity;
 import org.springframework.core.annotation.AnnotatedElementUtils;
@@ -43,7 +44,7 @@ public class DefaultQueryHelper implements QueryHelper {
     }
 
     @Override
-    public <R> SelectSpec<R> select(Class<R> resultType, Consumer<ColumnMapperSpec<R,?>> mapperSpec) {
+    public <R> SelectSpec<R> select(Class<R> resultType, Consumer<ColumnMapperSpec<R, ?>> mapperSpec) {
         QuerySpec<R> querySpec = new QuerySpec<>(resultType, this);
 
         mapperSpec.accept(querySpec);
@@ -369,23 +370,13 @@ public class DefaultQueryHelper implements QueryHelper {
         }
 
         @Override
-        public SortSpec<R> sort(String column, String order) {
-
-            return this;
-        }
-
-        @Override
-        public <T> SortSpec<R> sort(Getter<T, ?> column, String order) {
-            return sort(MethodReferenceConverter.parse(column).getColumn(), order);
-        }
-
-        @Override
         public SortSpec<R> where(QueryParamEntity param) {
             query.setParam(this.param = param);
             return this;
         }
 
         @Override
+        @SuppressWarnings("all")
         public SortSpec<R> where(Consumer<Conditional<?>> dsl) {
 
             query.where(c -> dsl.accept(new ConditionalImpl(this, c)));
@@ -516,30 +507,51 @@ public class DefaultQueryHelper implements QueryHelper {
         }
 
         @Override
-        public <S, V> SelectColumnMapperSpec<R> as(Getter<S, V> getter, Setter<R, V> setter) {
+        public <S, V> SelectColumnMapperSpec<R> as(Getter<S, V> column, Setter<R, V> target) {
 
-            mappings.add(new ColumnMapping.Default<>(this, null, getter, null, setter));
+            mappings.add(new ColumnMapping.Default<>(this, null, column, null, target));
             return this;
         }
 
         @Override
-        public <S, V> SelectColumnMapperSpec<R> as(Getter<S, V> getter, String alias) {
-            mappings.add(new ColumnMapping.Default<>(this, null, getter, alias, null));
+        public <S, V> SelectColumnMapperSpec<R> as(Getter<S, V> getter, String target) {
+            mappings.add(new ColumnMapping.Default<>(this, null, getter, target, null));
             return this;
         }
 
         @Override
-        public <S, V> SelectColumnMapperSpec<R> as(String column, Setter<R, V> setter) {
-            mappings.add(new ColumnMapping.Default<>(this, column, null, null, setter));
+        public <V> SelectColumnMapperSpec<R> as(String column, Setter<R, V> target) {
+            mappings.add(new ColumnMapping.Default<>(this, column, null, null, target));
             return this;
         }
 
         @Override
-        public <S, V> SelectColumnMapperSpec<R> as(String column, String alias) {
-            mappings.add(new ColumnMapping.Default<>(this, column, null, alias, null));
+        public SelectColumnMapperSpec<R> as(String column, String target) {
+            mappings.add(new ColumnMapping.Default<>(this, column, null, target, null));
             return this;
         }
 
+
+        @Override
+        public SortSpec<R> orderBy(String column, SortOrder.Order order) {
+            SortOrder sortOrder = new SortOrder();
+            sortOrder.setColumn(column);
+            sortOrder.setOrder(order);
+            query.orderBy(sortOrder);
+            return this;
+        }
+
+        @Override
+        public <S> SortSpec<R> orderBy(Getter<S, ?> column, SortOrder.Order order) {
+
+            MethodReferenceInfo referenceInfo = MethodReferenceConverter.parse(column);
+            if (referenceInfo.getOwner() == from) {
+                return orderBy(referenceInfo.getColumn(), order);
+            }
+            JoinConditionalSpecImpl join = getJoinByClass(referenceInfo.getOwner());
+
+            return orderBy(join.alias + "." + referenceInfo.getColumn(), order);
+        }
     }
 
     @AllArgsConstructor
@@ -551,49 +563,47 @@ public class DefaultQueryHelper implements QueryHelper {
         private final Conditional<?> target;
 
         @Override
-        public <T> JoinConditionalSpecImpl applyColumn(String column,
-                                                       String termType,
-                                                       StaticMethodReferenceColumn<T> joinColumn) {
-            MethodReferenceInfo ref = MethodReferenceConverter.parse(joinColumn);
+        public <T, T2> JoinConditionalSpecImpl applyColumn(StaticMethodReferenceColumn<T> mainColumn,
+                                                           String termType,
+                                                           String alias,
+                                                           StaticMethodReferenceColumn<T2> joinColumn) {
+            MethodReferenceInfo main = MethodReferenceConverter.parse(mainColumn);
+            MethodReferenceInfo join = MethodReferenceConverter.parse(joinColumn);
 
-            String joinColumnName = ref.getColumn();
-            Class<?> owner = ref.getOwner();
-            if (owner == parent.from) {
-                return applyColumn(column, termType, parent.table, parent.table.getName(), joinColumnName);
+            //mainColumn是主表的列
+            if (main.getOwner() == parent.from) {
+                return applyColumn(join.getColumn(), termType, parent.table, parent.table.getName(), mainColumn.getColumn());
             }
-            JoinConditionalSpecImpl spec = parent.getJoinByClass(owner);
+            //join为主表
+            if (join.getOwner() == parent.from) {
+                return applyColumn(mainColumn.getColumn(), termType, parent.table, parent.table.getName(), join.getColumn());
+            }
 
-            return applyColumn(column, termType, spec.main, spec.alias, joinColumnName);
+            JoinConditionalSpecImpl spec = alias == null ? parent.getJoinByClass(join.getOwner()) : parent.getJoinByAlias(alias);
+
+            return applyColumn(mainColumn.getColumn(), termType, spec.main, spec.alias, join.getColumn());
         }
 
-        public <T> JoinConditionalSpecImpl applyColumn(String mainColumn,
-                                                       String termType,
-                                                       TableOrViewMetadata join,
-                                                       String alias,
-                                                       String column) {
+        @Override
+        public <T, T2> JoinConditionalSpecImpl applyColumn(StaticMethodReferenceColumn<T> mainColumn,
+                                                           String termType,
+                                                           StaticMethodReferenceColumn<T2> joinColumn) {
+            return applyColumn(mainColumn, termType, null, joinColumn);
+        }
+
+        public JoinConditionalSpecImpl applyColumn(String mainColumn,
+                                                   String termType,
+                                                   TableOrViewMetadata join,
+                                                   String alias,
+                                                   String column) {
 
             RDBColumnMetadata columnMetadata = join
                     .getColumn(column)
                     .orElseThrow(() -> new IllegalArgumentException("column [" + column + "] not found"));
 
-            Term term = new Term();
-            term.setTermType(termType);
-            term.setColumn(mainColumn);
-            term.setValue(NativeSql.of(columnMetadata.getFullName(alias)));
-
-            target.accept(term);
+            getAccepter().accept(mainColumn, termType, NativeSql.of(columnMetadata.getFullName(alias)));
 
             return this;
-        }
-
-        @Override
-        public <T> JoinConditionalSpecImpl applyColumn(String mainColumn,
-                                                       String termType,
-                                                       String alias,
-                                                       String column) {
-            JoinConditionalSpecImpl spec = parent.getJoinByAlias(alias);
-
-            return applyColumn(column, termType, spec.main, spec.alias, column);
         }
 
         @Override
@@ -658,6 +668,7 @@ public class DefaultQueryHelper implements QueryHelper {
             return this;
         }
 
+
     }
 
     static class JoinNestConditionalSpecImpl<T extends TermTypeConditionalSupport> extends SimpleNestConditional<T> implements JoinNestConditionalSpec<T> {
@@ -682,17 +693,32 @@ public class DefaultQueryHelper implements QueryHelper {
         }
 
         @Override
-        public <T1> T applyColumn(String mainColumn, String termType, StaticMethodReferenceColumn<T1> joinColumn) {
-            MethodReferenceInfo ref = MethodReferenceConverter.parse(joinColumn);
+        public <T1, T2> T applyColumn(StaticMethodReferenceColumn<T1> joinColumn,
+                                      String termType,
+                                      String alias,
+                                      StaticMethodReferenceColumn<T2> mainOrJoinColumn) {
+            MethodReferenceInfo main = MethodReferenceConverter.parse(joinColumn);
+            MethodReferenceInfo join = MethodReferenceConverter.parse(joinColumn);
 
-            String joinColumnName = ref.getColumn();
-            Class<?> owner = ref.getOwner();
-            if (owner == parent.from) {
-                return applyColumn(mainColumn, termType, parent.table, parent.table.getName(), joinColumnName);
+            //mainColumn是主表的列
+            if (main.getOwner() == parent.from) {
+                return applyColumn(join.getColumn(), termType, parent.table, parent.table.getName(), joinColumn.getColumn());
             }
-            JoinConditionalSpecImpl spec = parent.getJoinByClass(owner);
+            //join为主表
+            if (join.getOwner() == parent.from) {
+                return applyColumn(joinColumn.getColumn(), termType, parent.table, parent.table.getName(), join.getColumn());
+            }
 
-            return applyColumn(mainColumn, termType, spec.main, spec.alias, joinColumnName);
+            JoinConditionalSpecImpl spec = alias == null ? parent.getJoinByClass(join.getOwner()) : parent.getJoinByAlias(alias);
+
+            return applyColumn(joinColumn.getColumn(), termType, spec.main, spec.alias, join.getColumn());
+        }
+
+        @Override
+        public <T1, T2> T applyColumn(StaticMethodReferenceColumn<T1> mainColumn,
+                                      String termType,
+                                      StaticMethodReferenceColumn<T2> joinColumn) {
+            return applyColumn(joinColumn, termType, null, joinColumn);
         }
 
 
@@ -706,20 +732,12 @@ public class DefaultQueryHelper implements QueryHelper {
                     .getColumn(column)
                     .orElseThrow(() -> new IllegalArgumentException("column [" + column + "] not found"));
 
-            getAccepter().accept(mainColumn,termType,NativeSql.of(columnMetadata.getFullName(alias)));
+            getAccepter().accept(mainColumn, termType, NativeSql.of(columnMetadata.getFullName(alias)));
 
-            return (T)this;
+            return (T) this;
         }
 
-        @Override
-        public T applyColumn(String mainColumn,
-                             String termType,
-                             String alias,
-                             String column) {
-            JoinConditionalSpecImpl spec = parent.getJoinByAlias(alias);
 
-            return applyColumn(column, termType, spec.main, spec.alias, column);
-        }
     }
 
     static class NestConditionalImpl<T extends TermTypeConditionalSupport> extends SimpleNestConditional<T> {
