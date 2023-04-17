@@ -65,8 +65,12 @@ class DefaultQueryHelperTest {
                                 .is(TestEntity::getId, EventTestEntity::getId))
 
               .where(dsl -> dsl.is(EventTestEntity::getName, "Ename")
+                               .is("event.name", "Ename")
                                .orNest()
-                               .is(TestEntity::getName, "main"))
+                               .is(TestEntity::getName, "main")
+                               .is("e2.name", "Ename")
+                               .end()
+              )
               .orderByAsc(TestEntity::getAge)
               .orderByDesc(EventTestEntity::getAge)
               .fetch()

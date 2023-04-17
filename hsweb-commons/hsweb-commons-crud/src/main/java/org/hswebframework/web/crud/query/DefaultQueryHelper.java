@@ -166,6 +166,14 @@ public class DefaultQueryHelper implements QueryHelper {
                         .toArray(SelectColumnSupplier[]::new);
             }
 
+            JoinConditionalSpecImpl getJoin() {
+                if (this.table != null) {
+                    return parent.getJoinByAlias(this.table);
+                } else {
+                    return parent.getJoinByClass(tableType);
+                }
+            }
+
             @Override
             SelectColumnSupplier[] forSelect() {
                 //查询主表
@@ -174,12 +182,8 @@ public class DefaultQueryHelper implements QueryHelper {
                 }
 
                 //join表
-                JoinConditionalSpecImpl join;
-                if (this.table != null) {
-                    join = parent.getJoinByAlias(this.table);
-                } else {
-                    join = parent.getJoinByClass(tableType);
-                }
+                JoinConditionalSpecImpl join = getJoin();
+
                 this.target = join.main;
 
                 return toColumns(this.target, join.alias);
@@ -683,6 +687,24 @@ public class DefaultQueryHelper implements QueryHelper {
         }
 
         @Override
+        public NestConditional<T> accept(String column, String termType, Object value) {
+            if (column.contains(".")) {
+                String[] joinColumn = column.split("[.]");
+                for (ColumnMapping<?> mapping : parent.mappings) {
+                    if (mapping instanceof ColumnMapping.All) {
+                        //传递的是property
+                        if (Objects.equals(joinColumn[0], ((ColumnMapping.All<?, ?>) mapping).targetProperty)) {
+                            JoinConditionalSpecImpl join = ((ColumnMapping.All<?, ?>) mapping).getJoin();
+                            joinColumn[0] = join.alias;
+                            return super.accept(String.join(".", joinColumn), termType, value);
+                        }
+                    }
+                }
+            }
+            return super.accept(column, termType, value);
+        }
+
+        @Override
         public JoinNestConditionalSpec<NestConditional<T>> nest() {
             return new JoinNestConditionalSpecImpl<>(parent, this, term.nest());
         }
@@ -743,9 +765,39 @@ public class DefaultQueryHelper implements QueryHelper {
     static class NestConditionalImpl<T extends TermTypeConditionalSupport> extends SimpleNestConditional<T> {
         final QuerySpec<?> parent;
 
+        final Term term;
         public NestConditionalImpl(QuerySpec<?> parent, T target, Term term) {
             super(target, term);
             this.parent = parent;
+            this.term=term;
+        }
+
+        @Override
+        public NestConditional<NestConditional<T>> nest() {
+            return new NestConditionalImpl<>(parent, this, term.nest());
+        }
+
+        @Override
+        public NestConditional<NestConditional<T>> orNest() {
+            return new NestConditionalImpl<>(parent, this, term.orNest());
+        }
+
+        @Override
+        public NestConditional<T> accept(String column, String termType, Object value) {
+            if (column.contains(".")) {
+                String[] joinColumn = column.split("[.]");
+                for (ColumnMapping<?> mapping : parent.mappings) {
+                    if (mapping instanceof ColumnMapping.All) {
+                        //传递的是property
+                        if (Objects.equals(joinColumn[0], ((ColumnMapping.All<?, ?>) mapping).targetProperty)) {
+                            JoinConditionalSpecImpl join = ((ColumnMapping.All<?, ?>) mapping).getJoin();
+                            joinColumn[0] = join.alias;
+                            return super.accept(String.join(".", joinColumn), termType, value);
+                        }
+                    }
+                }
+            }
+            return super.accept(column, termType, value);
         }
 
         @Override
@@ -766,7 +818,8 @@ public class DefaultQueryHelper implements QueryHelper {
             }
             JoinConditionalSpecImpl join = parent.getJoinByClass(info.getOwner());
 
-            return super.accept(join.alias + "." + info.getColumn(), termType, value);
+             super.accept(join.alias + "." + info.getColumn(), termType, value);
+             return this;
         }
 
     }
@@ -819,6 +872,24 @@ public class DefaultQueryHelper implements QueryHelper {
         }
 
         @Override
+        public T accept(String column, String termType, Object value) {
+            if (column.contains(".")) {
+                String[] joinColumn = column.split("[.]");
+                for (ColumnMapping<?> mapping : parent.mappings) {
+                    if (mapping instanceof ColumnMapping.All) {
+                        //传递的是property
+                        if (Objects.equals(joinColumn[0], ((ColumnMapping.All<?, ?>) mapping).targetProperty)) {
+                            JoinConditionalSpecImpl join = ((ColumnMapping.All<?, ?>) mapping).getJoin();
+                            joinColumn[0] = join.alias;
+                            return Conditional.super.accept(String.join(".", joinColumn), termType, value);
+                        }
+                    }
+                }
+            }
+            return Conditional.super.accept(column, termType, value);
+        }
+
+        @Override
         public <B> T accept(MethodReferenceColumn<B> column, String termType) {
             MethodReferenceInfo info = MethodReferenceConverter.parse(column);
             if (info.getOwner() == parent.from) {
@@ -826,7 +897,7 @@ public class DefaultQueryHelper implements QueryHelper {
             }
             JoinConditionalSpecImpl join = parent.getJoinByClass(info.getOwner());
 
-            return Conditional.super.accept(join.alias + "." + info.getColumn(), termType, column.get());
+            return getAccepter().accept(join.alias + "." + info.getColumn(), termType, column.get());
         }
 
         @Override
@@ -837,12 +908,15 @@ public class DefaultQueryHelper implements QueryHelper {
             }
             JoinConditionalSpecImpl join = parent.getJoinByClass(info.getOwner());
 
-            return Conditional.super.accept(join.alias + "." + info.getColumn(), termType, value);
+            return getAccepter().accept(join.alias + "." + info.getColumn(), termType, value);
         }
 
         @Override
         public Accepter<T, Object> getAccepter() {
-            return real.getAccepter();
+            return (column, termType, value) -> {
+                real.getAccepter().accept(column,termType,value);
+                return castSelf();
+            };
         }
 
         @Override
