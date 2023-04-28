@@ -385,6 +385,7 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
             String column = term.getColumn();
             String alias;
 
+            Dialect dialect = parameter.database.getMetadata().getDialect();
             Table table;
             String columnName = column;
 
@@ -420,7 +421,7 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
                 }
                 return metadata
                         .findFeature(createFeatureId(term.getTermType()))
-                        .map(feature -> feature.createFragments(sTable.alias + "." + c.name, c.metadata, term))
+                        .map(feature -> feature.createFragments(sTable.alias + "." +dialect.quote(c.name), c.metadata, term))
                         .orElse(EmptySqlFragments.INSTANCE);
             }
 

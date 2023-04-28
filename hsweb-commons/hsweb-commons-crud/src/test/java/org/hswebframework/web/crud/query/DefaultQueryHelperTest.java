@@ -53,7 +53,7 @@ class DefaultQueryHelperTest {
                               " where t.age = ? order by t.age desc", 20)
               .where(dsl -> dsl
                       .is("e.id", "helper_testNative")
-                      .is("t.age", 20))
+                      .is("t.age", "20"))
               .fetchPaged()
               .doOnNext(v -> System.out.println(JSON.toJSONString(v, SerializerFeature.PrettyFormat)))
               .as(StepVerifier::create)
