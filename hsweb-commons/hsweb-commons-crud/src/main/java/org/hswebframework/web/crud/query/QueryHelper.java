@@ -1,6 +1,9 @@
 package org.hswebframework.web.crud.query;
 
 import org.hswebframework.ezorm.core.Conditional;
+import org.hswebframework.ezorm.core.dsl.Query;
+import org.hswebframework.ezorm.rdb.mapping.defaults.record.Record;
+import org.hswebframework.ezorm.rdb.operator.dml.FunctionColumn;
 import org.hswebframework.ezorm.rdb.operator.dml.query.SortOrder;
 import org.hswebframework.web.api.crud.entity.PagerResult;
 import org.hswebframework.web.api.crud.entity.QueryParamEntity;
@@ -11,6 +14,7 @@ import java.io.Serializable;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * 使用DSL方式链式调用来构建复杂查询
@@ -28,7 +32,7 @@ import java.util.function.Function;
  *      .from(A.class)
  *      .leftJoin(B.class,spec-> spec.is(A::id, B::id))
  *      .where(dsl->dsl.like(B::getName,'zhang%'))
- *      .fetch()
+ *      .fetch();
  *
  * }</pre>
  *
@@ -36,6 +40,70 @@ import java.util.function.Function;
  * @since 4.0.16
  */
 public interface QueryHelper {
+
+    /**
+     * 基于SQL创建分析器
+     *
+     * @param selectSql SQL
+     * @return QueryAnalyzer
+     */
+    QueryAnalyzer analysis(String selectSql);
+
+    /**
+     * 逻辑和{@link QueryHelper#select(String, Object...)}相同,将查询结果转换为指定的实体类
+     *
+     * @param sql         SQL
+     * @param newInstance 实体类实例化方法
+     * @param args        参数
+     * @param <T>         实体类型
+     * @return NativeQuerySpec
+     */
+    <T> NativeQuerySpec<T> select(String sql,
+                                  Supplier<T> newInstance,
+                                  Object... args);
+
+    /**
+     * 创建原生SQL查询器
+     * <p>
+     * 预编译参数仅支持<code>?</code>,如果要使用模版,请使用{@link org.hswebframework.ezorm.rdb.executor.SqlRequests#template(String, Object)}
+     * 构造sql以及参数
+     * <pre>{@code
+     *
+     *  Flux<Record> records = helper.select("select * from table where type = ?",type)
+     *         //注入动态查询条件
+     *        .where(param)
+     *        //执行查询
+     *        .fetch();
+     * }</pre>
+     * <p>
+     * join逻辑:
+     *
+     * <pre>{@code
+     *
+     *  helper.select("select t1.id,t2.* from table t1"+
+     *                " left join table2 t2 on t1.id = t2.id") ...
+     *
+     *  将返回结构:
+     *   [
+     *     {"id":"t1.id的值",
+     *     "t2":{
+     *         "c1":"t2的字段",
+     *         ...
+     *     }}
+     *   ]
+     *
+     *
+     * }</pre>
+     * <p>
+     * <p>
+     * ⚠️注意：避免动态拼接SQL语句,应该使用预编译参数或者动态注入动态条件来进行条件处理
+     *
+     * @param sql  SQL查询语句
+     * @param args 预编译参数
+     * @return 查询构造器
+     */
+    NativeQuerySpec<Record> select(String sql, Object... args);
+
 
     /**
      * 创建一个查询构造器
@@ -57,6 +125,41 @@ public interface QueryHelper {
     <R> SelectSpec<R> select(Class<R> resultType,
                              Consumer<ColumnMapperSpec<R, ?>> mapperSpec);
 
+
+    interface NativeQuerySpec<T> extends ExecuteSpec<T> {
+
+        /**
+         * 以DSL方式构造查询条件
+         * <pre>{@code
+         *  helper
+         *  .select("select * from table t")
+         *  .where(dsl->dsl.is("type","device"))
+         * }</pre>
+         *
+         * @param dsl DSL
+         * @return this
+         */
+        default ExecuteSpec<T> where(Consumer<Query<?, QueryParamEntity>> dsl) {
+            Query<?, QueryParamEntity> query = QueryParamEntity.newQuery();
+            dsl.accept(query);
+            return where(query.getParam());
+        }
+
+        /**
+         * 指定动态查询条件,通常用于前端动态传入查询条件
+         * <pre>{@code
+         *  helper
+         *  .select("select * from table t")
+         *  .where(param)
+         *  .fetch()
+         * }</pre>
+         *
+         * @param param DSL
+         * @return this
+         */
+        ExecuteSpec<T> where(QueryParamEntity param);
+
+    }
 
     interface SelectSpec<R> {
 

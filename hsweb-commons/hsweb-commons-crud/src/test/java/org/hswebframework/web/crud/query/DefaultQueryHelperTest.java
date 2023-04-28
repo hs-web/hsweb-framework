@@ -30,6 +30,39 @@ class DefaultQueryHelperTest {
 
 
     @Test
+    public void testNative() {
+        database.dml()
+                .insert("s_test_event")
+                .value("id", "helper_testNative")
+                .value("name", "Ename2")
+                .execute()
+                .sync();
+
+        database.dml()
+                .insert("s_test")
+                .value("id", "helper_testNative")
+                .value("name", "main2")
+                .value("age", 20)
+                .execute()
+                .sync();
+
+        DefaultQueryHelper helper = new DefaultQueryHelper(database);
+
+        helper.select("select e.*,t.id as \"id\" from s_test t " +
+                              "left join s_test_event e on e.id = t.id" +
+                              " where t.age = ? order by t.age desc", 20)
+              .where(dsl -> dsl
+                      .is("e.id", "helper_testNative")
+                      .is("t.age", 20))
+              .fetch()
+              .doOnNext(v -> System.out.println(JSON.toJSONString(v, SerializerFeature.PrettyFormat)))
+              .as(StepVerifier::create)
+              .expectNextCount(1)
+              .verifyComplete();
+
+    }
+
+    @Test
     public void test() {
 
         database.dml()

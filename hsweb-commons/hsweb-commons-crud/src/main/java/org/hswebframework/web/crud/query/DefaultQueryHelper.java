@@ -1,16 +1,26 @@
 package org.hswebframework.web.crud.query;
 
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.hswebframework.ezorm.core.*;
 import org.hswebframework.ezorm.core.dsl.Query;
 import org.hswebframework.ezorm.core.param.Term;
+import org.hswebframework.ezorm.rdb.executor.SqlRequest;
+import org.hswebframework.ezorm.rdb.executor.SqlRequests;
+import org.hswebframework.ezorm.rdb.executor.reactive.ReactiveSqlExecutor;
 import org.hswebframework.ezorm.rdb.executor.wrapper.ColumnWrapperContext;
 import org.hswebframework.ezorm.rdb.executor.wrapper.ResultWrapper;
+import org.hswebframework.ezorm.rdb.executor.wrapper.ResultWrappers;
+import org.hswebframework.ezorm.rdb.mapping.defaults.record.DefaultRecord;
+import org.hswebframework.ezorm.rdb.mapping.defaults.record.Record;
 import org.hswebframework.ezorm.rdb.metadata.RDBColumnMetadata;
+import org.hswebframework.ezorm.rdb.metadata.RDBFeatureType;
 import org.hswebframework.ezorm.rdb.metadata.TableOrViewMetadata;
 import org.hswebframework.ezorm.rdb.operator.DatabaseOperator;
+import org.hswebframework.ezorm.rdb.operator.builder.Paginator;
 import org.hswebframework.ezorm.rdb.operator.builder.fragments.NativeSql;
+import org.hswebframework.ezorm.rdb.operator.builder.fragments.PrepareSqlFragments;
 import org.hswebframework.ezorm.rdb.operator.dml.Join;
 import org.hswebframework.ezorm.rdb.operator.dml.JoinType;
 import org.hswebframework.ezorm.rdb.operator.dml.QueryOperator;
@@ -19,7 +29,9 @@ import org.hswebframework.ezorm.rdb.operator.dml.query.Selects;
 import org.hswebframework.ezorm.rdb.operator.dml.query.SortOrder;
 import org.hswebframework.web.api.crud.entity.PagerResult;
 import org.hswebframework.web.api.crud.entity.QueryParamEntity;
+import org.hswebframework.web.bean.FastBeanCopier;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -28,8 +40,9 @@ import javax.persistence.Table;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
-import static org.hswebframework.ezorm.rdb.executor.wrapper.ResultWrappers.column;
 
 @AllArgsConstructor
 public class DefaultQueryHelper implements QueryHelper {
@@ -37,6 +50,27 @@ public class DefaultQueryHelper implements QueryHelper {
     private final DatabaseOperator database;
 
     private final Map<Class<?>, Table> nameMapping = new ConcurrentHashMap<>();
+
+    private final Map<String, QueryAnalyzer> analyzerCaches = new ConcurrentReferenceHashMap<>();
+
+    static final ResultWrapper<Integer, ?> countWrapper = ResultWrappers.column("_total", i -> ((Number) i).intValue());
+
+    @Override
+    public QueryAnalyzer analysis(String selectSql) {
+        return analyzerCaches.computeIfAbsent(selectSql, sql -> new QueryAnalyzerImpl(database, sql));
+    }
+
+    @Override
+    public NativeQuerySpec<Record> select(String sql, Object... args) {
+        return new NativeQuerySpecImpl<>(this, sql, args, DefaultRecord::new);
+    }
+
+    @Override
+    public <T> NativeQuerySpec<T> select(String sql,
+                                         Supplier<T> newInstance,
+                                         Object... args) {
+        return new NativeQuerySpecImpl<>(this, sql, args, map -> FastBeanCopier.copy(map, newInstance));
+    }
 
     @Override
     public <R> SelectColumnMapperSpec<R> select(Class<R> resultType) {
@@ -87,6 +121,94 @@ public class DefaultQueryHelper implements QueryHelper {
         return arr;
     }
 
+    @RequiredArgsConstructor
+    static class NativeQuerySpecImpl<R> implements NativeQuerySpec<R> {
+        private final DefaultQueryHelper parent;
+        private final String sql;
+        private final Object[] args;
+
+        private final Function<Map<String, Object>, R> mapper;
+
+        private QueryParamEntity param;
+
+        private SqlRequest createQuerySql() {
+//            if (param == null) {
+//                return SqlRequests.prepare(sql, args);
+//            }
+            return parent.analysis(sql).inject(param, args);
+        }
+
+        @Override
+        public ExecuteSpec<R> where(QueryParamEntity param) {
+            this.param = param;
+            return this;
+        }
+
+        @Override
+        public Flux<R> fetch() {
+            return parent
+                    .database
+                    .sql()
+                    .reactive()
+                    .select(createQuerySql(), ResultWrappers.map())
+                    .map(mapper);
+        }
+
+        @Override
+        public Mono<PagerResult<R>> fetchPaged() {
+            if (param == null) {
+                return fetchPaged(0, 25);
+            }
+            return fetchPaged(param.getPageIndex(), param.getPageSize());
+        }
+
+        private SqlRequest createPagingSql(SqlRequest request, int pageIndex, int pageSize) {
+            PrepareSqlFragments sql = PrepareSqlFragments.of(request.getSql(), request.getParameters());
+
+            Paginator paginator = parent
+                    .database
+                    .getMetadata()
+                    .getCurrentSchema()
+                    .findFeatureNow(RDBFeatureType.paginator.getId());
+
+            return paginator.doPaging(sql, pageIndex, pageSize).toRequest();
+        }
+
+        @Override
+        public Mono<PagerResult<R>> fetchPaged(int pageIndex, int pageSize) {
+            SqlRequest listSql = createQuerySql();
+
+            SqlRequest countSql = SqlRequests.prepare(
+                    "select count(1) as _total from (" + listSql.getSql() + ") t",
+                    listSql.getParameters()
+            );
+            ReactiveSqlExecutor sqlExecutor = parent.database.sql().reactive();
+
+            QueryParamEntity param = this.param == null ? new QueryParamEntity().doPaging(pageIndex, pageSize) : this.param;
+
+            if (param.getTotal() != null) {
+                return sqlExecutor
+                        .select(createPagingSql(listSql, pageIndex, pageSize), ResultWrappers.map()).map(mapper)
+                        .collectList()
+                        .map(list -> PagerResult.of(param.getTotal(), list, param));
+            }
+
+            return sqlExecutor
+                    .select(countSql, countWrapper)
+                    .single(0)
+                    .flatMap(total -> {
+                        if (total == 0) {
+                            return Mono.just(PagerResult.of(0, new ArrayList<>(), param));
+                        } else {
+                            return sqlExecutor
+                                    .select(createPagingSql(listSql, param.getPageIndex(), param.getPageSize()), ResultWrappers.map())
+                                    .map(mapper)
+                                    .collectList()
+                                    .map(list -> PagerResult.of(total, list, param));
+                        }
+                    });
+        }
+    }
 
     static abstract class ColumnMapping<R> {
         final QuerySpec<R> parent;
@@ -353,9 +475,8 @@ public class DefaultQueryHelper implements QueryHelper {
                     ? Mono.just(param.getTotal())
                     : query.clone()
                            .select(Selects.count1().as("_total"))
-                           .fetch(column("_total", Number.class::cast))
+                           .fetch(countWrapper)
                            .reactive()
-                           .map(Number::intValue)
                            .single(0);
 
             Mono<List<R>> results = createQuery()

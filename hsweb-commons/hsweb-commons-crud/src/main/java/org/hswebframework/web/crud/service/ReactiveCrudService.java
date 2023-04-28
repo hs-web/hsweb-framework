@@ -27,6 +27,8 @@ import java.util.function.Function;
  * @see GenericReactiveCrudService
  * @see GenericReactiveTreeSupportCrudService
  * @see EnableCacheReactiveCrudService
+ * @see org.hswebframework.web.crud.query.QueryHelper
+ * @since 4.0
  */
 public interface ReactiveCrudService<E, K> {
 
