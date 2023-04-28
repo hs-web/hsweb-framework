@@ -33,7 +33,7 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
 
     private String sql;
 
-    private SelectBody parsed;
+    private final SelectBody parsed;
 
     private QueryAnalyzer.Select select;
 
@@ -115,9 +115,7 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
                 parsePlainName(alias),
                 schemaMetadata
                         .getTableOrView(parsePlainName(tableName.getName()), false)
-                        .orElseThrow(() -> {
-                            throw new IllegalStateException("table or view " + tableName.getName() + " not found in " + schemaMetadata.getName());
-                        })
+                        .orElseThrow(() -> new IllegalStateException("table or view " + tableName.getName() + " not found in " + schemaMetadata.getName()))
         );
 
         select = new QueryAnalyzer.Select(new LinkedHashMap<>(), table);
