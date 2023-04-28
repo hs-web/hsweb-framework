@@ -86,10 +86,7 @@ public interface QueryHelper {
      *  将返回结构:
      *   [
      *     {"id":"t1.id的值",
-     *     "t2":{
-     *         "c1":"t2的字段",
-     *         ...
-     *     }}
+     *     "t2.c1":"t2的字段"
      *   ]
      *
      *
@@ -393,6 +390,13 @@ public interface QueryHelper {
      * @param <R>
      */
     interface ExecuteSpec<R> {
+
+        /**
+         * 执行count查询
+         *
+         * @return count
+         */
+        Mono<Integer> count();
 
         /**
          * 执行查询,返回数据流

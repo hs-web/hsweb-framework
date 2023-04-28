@@ -14,7 +14,10 @@ public interface QueryAnalyzer {
 
     String nativeSql();
 
-    SqlRequest inject(QueryParamEntity entity,Object... args);
+    SqlRequest refactor(QueryParamEntity entity, Object... args);
+
+    SqlRequest refactorCount(QueryParamEntity entity, Object... args);
+
 
     Select select();
 

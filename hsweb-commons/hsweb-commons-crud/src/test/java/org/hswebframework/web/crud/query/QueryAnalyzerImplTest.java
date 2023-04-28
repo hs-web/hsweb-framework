@@ -24,13 +24,35 @@ class QueryAnalyzerImplTest {
     void testInject() {
         QueryAnalyzerImpl analyzer = new QueryAnalyzerImpl(database,
                                                            "select count(distinct time) t2, \"name\" n from \"s_test\" t");
-        SqlRequest request = analyzer.inject(
+        SqlRequest request = analyzer.refactor(
                 QueryParamEntity
                         .newQuery()
                         .and("name", "123")
                         .getParam());
 
         System.out.println(request);
+
+        SqlRequest sql = analyzer.refactorCount(
+                QueryParamEntity
+                        .newQuery()
+                        .and("name", "123")
+                        .getParam());
+        System.out.println(sql);
+
+    }
+
+
+    @Test
+    void testUnion() {
+        QueryAnalyzerImpl analyzer = new QueryAnalyzerImpl(database,
+                                                           "select name n from s_test t " +
+                                                                   "union select name n from s_test t");
+
+        assertNotNull(analyzer.select().table.alias, "t");
+        assertNotNull(analyzer.select().table.metadata.getName(), "s_test");
+
+        assertNotNull(analyzer.select().columns.get("n"));
+
     }
 
     @Test
@@ -56,13 +78,13 @@ class QueryAnalyzerImplTest {
         assertNotNull(analyzer.select().getColumns().get("n"));
 
         SqlRequest request = analyzer
-                .inject(QueryParamEntity
+                .refactor(QueryParamEntity
                                 .newQuery()
                                 .where("n", "123")
                                 .getParam());
 
         System.out.println(request);
-        
+
         database.sql()
                 .reactive()
                 .select(request, ResultWrappers.map())

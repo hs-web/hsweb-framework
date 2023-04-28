@@ -54,11 +54,22 @@ class DefaultQueryHelperTest {
               .where(dsl -> dsl
                       .is("e.id", "helper_testNative")
                       .is("t.age", 20))
-              .fetch()
+              .fetchPaged()
               .doOnNext(v -> System.out.println(JSON.toJSONString(v, SerializerFeature.PrettyFormat)))
               .as(StepVerifier::create)
               .expectNextCount(1)
               .verifyComplete();
+
+        helper.select("select id,name from s_test t " +
+                              "union all select id,name from s_test_event")
+              .where(dsl -> dsl
+                      .is("id", "helper_testNative"))
+              .fetchPaged()
+              .doOnNext(v -> System.out.println(JSON.toJSONString(v, SerializerFeature.PrettyFormat)))
+              .as(StepVerifier::create)
+              .expectNextCount(1)
+              .verifyComplete();
+
 
     }
 

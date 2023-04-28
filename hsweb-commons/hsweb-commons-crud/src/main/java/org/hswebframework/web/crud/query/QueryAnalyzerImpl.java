@@ -47,11 +47,19 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
     }
 
     @Override
-    public SqlRequest inject(QueryParamEntity entity, Object... args) {
+    public SqlRequest refactor(QueryParamEntity entity, Object... args) {
         if (injector == null) {
             initInjector();
         }
         return injector.inject(entity, args);
+    }
+
+    @Override
+    public SqlRequest refactorCount(QueryParamEntity entity, Object... args) {
+        if (injector == null) {
+            initInjector();
+        }
+        return injector.injectCount(entity, args);
     }
 
     @Override
@@ -303,7 +311,11 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
 
         FromItem from = select.getFromItem();
 
+        if (from == null) {
+            throw new IllegalArgumentException("select can not be without 'from'");
+        }
         from.accept(this);
+
 
         List<net.sf.jsqlparser.statement.select.Join> joinList = select.getJoins();
 
@@ -334,6 +346,13 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
 
     @Override
     public void visit(SetOperationList setOpList) {
+        //union
+
+        for (SelectBody body : setOpList.getSelects()) {
+            body.accept(this);
+            break;
+        }
+
 
     }
 
@@ -415,42 +434,39 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
         }
     }
 
-
     static QueryAnalyzerTermsFragmentBuilder TERMS_BUILDER = new QueryAnalyzerTermsFragmentBuilder();
 
     class SimpleQueryInjector implements QueryInjector, SelectVisitor {
-        private String prefix;
+        private String from;
+
+        private String columns;
+
         private String where;
+
+        private String orderBy;
+
         private String suffix;
+
+        private boolean fastCount = true;
 
         public SimpleQueryInjector() {
 
         }
 
 
-        @Override
-        public void visit(PlainSelect plainSelect) {
-
-            StringBuilder prefix = new StringBuilder();
-            StringBuilder suffix = new StringBuilder();
-
-            prefix.append("SELECT ");
-
-
+        private void initColumns(StringBuilder columns) {
             int idx = 0;
-
-            if (plainSelect.getDistinct() != null) {
-                prefix.append(plainSelect.getDistinct());
-            }
             Dialect dialect = database.getMetadata().getDialect();
+
 
             for (Map.Entry<String, Column> entry : select.columns.entrySet()) {
                 if (idx++ > 0) {
-                    prefix.append(",");
+                    columns.append(",");
                 }
                 Column column = entry.getValue();
                 if (column instanceof ExpressionColumn) {
-                    prefix.append(((ExpressionColumn) column).expr);
+                    columns.append(((ExpressionColumn) column).expr);
+                    fastCount = false;
                     continue;
                 }
 //                RDBColumnMetadata column=entry.getValue().metadata;
@@ -458,39 +474,45 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
 
                 String columnName = column.owner + "." + dialect.quote(column.name);
 
-                prefix.append(columnName)
-                      .append(" as ")
-                      .append(sameTable
-                                      ? dialect.quote(column.alias, false)
-                                      : dialect.quote(column.owner + "." + column.alias, false));
+                columns.append(columnName)
+                       .append(" as ")
+                       .append(sameTable
+                                       ? dialect.quote(column.alias, false)
+                                       : dialect.quote(column.owner + "." + column.alias, false));
             }
+        }
+
+        @Override
+        public void visit(PlainSelect plainSelect) {
+
+            StringBuilder from = new StringBuilder();
+            StringBuilder columns = new StringBuilder();
+            StringBuilder suffix = new StringBuilder();
+
+
+            if (plainSelect.getDistinct() != null) {
+                columns.append(plainSelect.getDistinct());
+                fastCount = false;
+            }
+
+            initColumns(columns);
 
             //  prefix.append(getStringList(plainSelect.getSelectItems()));
 
             if (null != plainSelect.getFromItem()) {
-                prefix.append(" FROM ");
+                from.append("FROM ");
 
-                prefix.append(plainSelect.getFromItem());
+                from.append(plainSelect.getFromItem());
+            }
 
-                if (plainSelect.getJoins() != null) {
-                    for (net.sf.jsqlparser.statement.select.Join join : plainSelect.getJoins()) {
-                        if (join.isSimple()) {
-                            prefix.append(", ").append(join);
-                        } else {
-                            prefix.append(" ").append(join);
-                        }
+            if (plainSelect.getJoins() != null) {
+                for (net.sf.jsqlparser.statement.select.Join join : plainSelect.getJoins()) {
+                    if (join.isSimple()) {
+                        from.append(", ").append(join);
+                    } else {
+                        from.append(" ").append(join);
                     }
                 }
-
-                if (null != plainSelect.getGroupBy()) {
-                    suffix.append(' ').append(plainSelect.getGroupBy());
-                }
-
-                suffix.append(' ');
-                if (null != plainSelect.getHaving()) {
-                    suffix.append(" HAVING ").append(plainSelect.getHaving());
-                }
-
             }
 
             if (null != plainSelect.getWhere()) {
@@ -498,24 +520,48 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
             }
 
             if (plainSelect.getOrderByElements() != null) {
-                suffix.append(orderByToString(plainSelect.isOracleSiblings(), plainSelect.getOrderByElements()));
+                orderBy = orderByToString(plainSelect.isOracleSiblings(), plainSelect.getOrderByElements());
             }
 
-            if (plainSelect.getLimit() != null) {
-                suffix.append(plainSelect.getLimit());
-            }
-            if (plainSelect.getOffset() != null) {
-                suffix.append(plainSelect.getOffset());
+            if (null != plainSelect.getGroupBy()) {
+                fastCount = false;
+                suffix.append(' ').append(plainSelect.getGroupBy());
             }
 
+            suffix.append(' ');
+            if (null != plainSelect.getHaving()) {
+                suffix.append(" HAVING ").append(plainSelect.getHaving());
+            }
 
-            this.prefix = prefix.toString();
+//            if (plainSelect.getLimit() != null) {
+//                suffix.append(plainSelect.getLimit());
+//            }
+//            if (plainSelect.getOffset() != null) {
+//                suffix.append(plainSelect.getOffset());
+//            }
+
+            this.columns = columns.toString();
+            this.from = from.toString();
             this.suffix = suffix.toString();
 
         }
 
         @Override
         public void visit(SetOperationList setOpList) {
+            StringBuilder from = new StringBuilder();
+            StringBuilder columns = new StringBuilder();
+          //  StringBuilder suffix = new StringBuilder();
+
+            initColumns(columns);
+
+            from.append("from (");
+            from.append(setOpList);
+            from.append(") ");
+            from.append(select.table.alias);
+
+            this.from = from.toString();
+            this.columns = columns.toString();
+            this.suffix = "";
 
         }
 
@@ -531,21 +577,68 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
 
         @Override
         public SqlRequest inject(QueryParamEntity param, Object... args) {
-            PrepareSqlFragments sql = PrepareSqlFragments.of(prefix, args);
+            PrepareSqlFragments sql = PrepareSqlFragments
+                    .of("select", args)
+                    .addSql(columns)
+                    .addSql(from);
 
+            appendWhere(sql, param);
+
+            appendOrderBy(sql, param);
+
+            sql.addSql(suffix);
+
+            return sql.toRequest();
+        }
+
+
+        @Override
+        public SqlRequest injectCount(QueryParamEntity param, Object... args) {
+            PrepareSqlFragments sql = PrepareSqlFragments.of("select", args);
+
+            if (fastCount) {
+                sql.addSql("count(1) as _total");
+
+                sql.addSql(from);
+
+                appendWhere(sql, param);
+
+                sql.addSql(suffix);
+            } else {
+                sql.addSql("count(1) as _total from (select")
+                   .addSql(columns, from);
+
+                appendWhere(sql, param);
+
+                sql.addSql(suffix)
+                   .addSql(")");
+            }
+
+
+            return sql.toRequest();
+        }
+
+
+        private void appendOrderBy(PrepareSqlFragments sql, QueryParamEntity param) {
+            if (orderBy != null) {
+                sql.addSql(orderBy);
+            }
+        }
+
+        private void appendWhere(PrepareSqlFragments sql, QueryParamEntity param) {
             SqlFragments fragments = TERMS_BUILDER.createTermFragments(QueryAnalyzerImpl.this, param.getTerms());
 
-            SqlRequest condition = fragments.toRequest();
-
-            if (condition.isNotEmpty() || StringUtils.hasText(where)) {
+            if (fragments.isNotEmpty() || StringUtils.hasText(where)) {
                 sql.addSql(" WHERE ");
             }
+
             if (StringUtils.hasText(where)) {
                 sql.addSql("(");
                 sql.addSql(where);
                 sql.addSql(")");
             }
-            if (condition.isNotEmpty()) {
+
+            if (fragments.isNotEmpty()) {
                 if (StringUtils.hasText(where)) {
                     sql.addSql("AND");
                 }
@@ -553,10 +646,6 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
                 sql.addFragments(fragments);
                 sql.addSql(")");
             }
-
-            sql.addSql(suffix);
-
-            return sql.toRequest();
         }
 
     }
@@ -565,6 +654,7 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
 
         SqlRequest inject(QueryParamEntity param, Object... args);
 
+        SqlRequest injectCount(QueryParamEntity param, Object... args);
     }
 
 }
