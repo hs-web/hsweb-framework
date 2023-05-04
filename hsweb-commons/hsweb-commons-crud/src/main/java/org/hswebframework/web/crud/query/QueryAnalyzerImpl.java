@@ -543,7 +543,7 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
 
             initColumns(columns);
 
-            from.append("from (");
+            from.append("FROM (");
             from.append(setOpList);
             from.append(") ");
             from.append(select.table.alias);
@@ -567,7 +567,7 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
         @Override
         public SqlRequest refactor(QueryParamEntity param, Object... args) {
             PrepareSqlFragments sql = PrepareSqlFragments
-                    .of("select", args)
+                    .of("SELECT", args)
                     .addSql(columns)
                     .addSql(from);
 
@@ -583,7 +583,7 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
 
         @Override
         public SqlRequest refactorCount(QueryParamEntity param, Object... args) {
-            PrepareSqlFragments sql = PrepareSqlFragments.of("select", args);
+            PrepareSqlFragments sql = PrepareSqlFragments.of("SELECT", args);
 
             if (fastCount) {
                 sql.addSql("count(1) as _total");
@@ -594,7 +594,7 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
 
                 sql.addSql(suffix);
             } else {
-                sql.addSql("count(1) as _total from (select")
+                sql.addSql("count(1) as _total from (SELECT")
                    .addSql(columns, from);
 
                 appendWhere(sql, param);
