@@ -51,7 +51,7 @@ class QueryAnalyzerImplTest {
         assertNotNull(analyzer.select().table.alias, "t");
         assertNotNull(analyzer.select().table.metadata.getName(), "s_test");
 
-        assertNotNull(analyzer.select().columns.get("n"));
+        assertNotNull(analyzer.select().getColumns().get("n"));
 
     }
 
@@ -63,7 +63,7 @@ class QueryAnalyzerImplTest {
         assertNotNull(analyzer.select().table.alias, "t");
         assertNotNull(analyzer.select().table.metadata.getName(), "s_test");
 
-        assertNotNull(analyzer.select().columns.get("n"));
+        assertNotNull(analyzer.select().getColumns().get("n"));
 
 
     }

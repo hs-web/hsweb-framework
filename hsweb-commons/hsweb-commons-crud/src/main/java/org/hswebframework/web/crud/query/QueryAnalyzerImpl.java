@@ -125,7 +125,7 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
                         .orElseThrow(() -> new IllegalStateException("table or view " + tableName.getName() + " not found in " + schemaMetadata.getName()))
         );
 
-        select = new QueryAnalyzer.Select(new LinkedHashMap<>(), table);
+        select = new QueryAnalyzer.Select(new ArrayList<>(), table);
 
     }
 
@@ -137,15 +137,14 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
         String alias = subSelect.getAlias() == null ? null : subSelect.getAlias().getName();
 
         Map<String, Column> columnMap = new LinkedHashMap<>();
-        for (Map.Entry<String, Column> entry : sub.select.columns.entrySet()) {
-            Column val = entry.getValue();
+        for (Column column : sub.select.getColumnList()) {
 
-            columnMap.put(entry.getKey(),
-                          new Column(val.alias, val.getAlias(), val.owner, val.metadata));
+            columnMap.put(column.getAlias(),
+                          new Column(column.alias, column.getAlias(), column.owner, column.metadata));
         }
 
         select = new QueryAnalyzer.Select(
-                new LinkedHashMap<>(),
+                new ArrayList<>(),
                 new QueryAnalyzer.SelectTable(
                         parsePlainName(alias),
                         columnMap,
@@ -183,42 +182,36 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
 
     @Override
     public void visit(AllColumns allColumns) {
-        putSelectColumns(select.table, select.columns);
+        putSelectColumns(select.table, select.columnList);
 
         for (QueryAnalyzer.Join value : new HashSet<>(joins.values())) {
-            putSelectColumns(value.table, select.columns);
+            putSelectColumns(value.table, select.columnList);
         }
     }
 
-    private void putSelectColumns(String prefix, QueryAnalyzer.Table table, Map<String, QueryAnalyzer.Column> container) {
+    private void putSelectColumns(QueryAnalyzer.Table table, List<QueryAnalyzer.Column> container) {
 
         if (table instanceof QueryAnalyzer.SelectTable) {
             QueryAnalyzer.SelectTable selectTable = ((QueryAnalyzer.SelectTable) table);
 
             for (QueryAnalyzer.Column column : selectTable.columns.values()) {
-                container.put(column.getAlias(),
-                              new QueryAnalyzer.Column(
-                                      column.name,
-                                      column.getAlias(),
-                                      table.alias,
-                                      column.metadata
-                              ));
+                container.add(new QueryAnalyzer.Column(
+                        column.name,
+                        column.getAlias(),
+                        table.alias,
+                        column.metadata
+                ));
             }
         } else {
             for (RDBColumnMetadata column : table.metadata.getColumns()) {
-                container.put(column.getAlias(),
-                              new QueryAnalyzer.Column(
-                                      column.getName(),
-                                      column.getAlias(),
-                                      table.alias,
-                                      column
-                              ));
+                container.add(new QueryAnalyzer.Column(
+                        column.getName(),
+                        column.getAlias(),
+                        table.alias,
+                        column
+                ));
             }
         }
-    }
-
-    private void putSelectColumns(QueryAnalyzer.Table table, Map<String, QueryAnalyzer.Column> container) {
-        putSelectColumns(null, table, container);
     }
 
     @Override
@@ -230,7 +223,7 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
         if (join == null) {
             throw new IllegalStateException("table " + table.getName() + " not found in join");
         }
-        putSelectColumns(join.table, select.columns);
+        putSelectColumns(join.table, select.columnList);
     }
 
     private QueryAnalyzer.Table getTable(net.sf.jsqlparser.schema.Table table) {
@@ -270,7 +263,7 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
 
         if (!(expr instanceof net.sf.jsqlparser.schema.Column)) {
             String aliasName = alias == null ? expr.toString() : alias.getName();
-            select.columns.put(aliasName, new ExpressionColumn(aliasName, null, null, selectExpressionItem));
+            select.columnList.add(new ExpressionColumn(aliasName, null, null, selectExpressionItem));
 
             return;
         }
@@ -300,7 +293,7 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
             throw new IllegalStateException("column [" + column.getColumnName() + "] not found in " + table.metadata.getName());
         }
 
-        select.columns.put(aliasName, new QueryAnalyzer.Column(metadata.getName(), aliasName, table.alias, metadata));
+        select.columnList.add(new QueryAnalyzer.Column(metadata.getName(), aliasName, table.alias, metadata));
 
 
     }
@@ -459,11 +452,10 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
             Dialect dialect = database.getMetadata().getDialect();
 
 
-            for (Map.Entry<String, Column> entry : select.columns.entrySet()) {
+            for (Column column : select.columnList) {
                 if (idx++ > 0) {
                     columns.append(",");
                 }
-                Column column = entry.getValue();
                 if (column instanceof ExpressionColumn) {
                     columns.append(((ExpressionColumn) column).expr);
                     fastCount = false;

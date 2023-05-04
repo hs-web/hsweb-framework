@@ -69,9 +69,12 @@ public interface QueryHelper {
      * 构造sql以及参数
      * <pre>{@code
      *
-     *  Flux<Record> records = helper.select("select * from table where type = ?",type)
+     *  Flux<Record> records = helper
+     *        .select("select * from table where type = ?",type)
      *         //注入动态查询条件
      *        .where(param)
+     *        //或者编程式构造动态条件
+     *        .where(dsl->dsl.is("name",name))
      *        //执行查询
      *        .fetch();
      * }</pre>
@@ -85,15 +88,15 @@ public interface QueryHelper {
      *
      *  将返回结构:
      *   [
-     *     {"id":"t1.id的值",
+     *     {
+     *     "id":"t1.id的值",
      *     "t2.c1":"t2的字段"
+     *     }
      *   ]
-     *
-     *
      * }</pre>
+     *
      * <p>
-     * <p>
-     * ⚠️注意：避免动态拼接SQL语句,应该使用预编译参数或者动态注入动态条件来进行条件处理
+     * ⚠️注意：避免动态拼接SQL语句,应该使用预编译参数或者动态注入动态条件来进行条件处理.
      *
      * @param sql  SQL查询语句
      * @param args 预编译参数

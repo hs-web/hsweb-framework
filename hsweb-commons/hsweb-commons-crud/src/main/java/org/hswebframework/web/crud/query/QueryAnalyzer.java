@@ -2,6 +2,7 @@ package org.hswebframework.web.crud.query;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.hswebframework.ezorm.rdb.executor.SqlRequest;
 import org.hswebframework.ezorm.rdb.metadata.RDBColumnMetadata;
 import org.hswebframework.ezorm.rdb.metadata.TableOrViewMetadata;
@@ -9,6 +10,9 @@ import org.hswebframework.web.api.crud.entity.QueryParamEntity;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 public interface QueryAnalyzer {
 
@@ -38,12 +42,22 @@ public interface QueryAnalyzer {
         }
     }
 
-    @AllArgsConstructor
+    @RequiredArgsConstructor
     @Getter
     class Select {
-        final Map<String, Column> columns;
+        private transient Map<String, Column> columns;
+
+        final List<Column> columnList;
+
         final Table table;
 
+        public Map<String, Column> getColumns() {
+            return columns == null
+                    ? columns = columnList
+                    .stream()
+                    .collect(Collectors.toMap(Column::getAlias, Function.identity(), (a, b) -> b))
+                    : columns;
+        }
     }
 
     @Getter
