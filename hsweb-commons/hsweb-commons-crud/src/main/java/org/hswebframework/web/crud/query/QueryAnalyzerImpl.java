@@ -22,7 +22,6 @@ import org.springframework.util.StringUtils;
 
 import java.util.*;
 
-import static net.sf.jsqlparser.statement.select.PlainSelect.getStringList;
 import static net.sf.jsqlparser.statement.select.PlainSelect.orderByToString;
 import static org.hswebframework.ezorm.rdb.operator.builder.fragments.TermFragmentBuilder.createFeatureId;
 
@@ -39,7 +38,7 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
 
     private final Map<String, QueryAnalyzer.Join> joins = new LinkedHashMap<>();
 
-    private QueryInjector injector;
+    private QueryRefactor injector;
 
     @Override
     public String nativeSql() {
@@ -51,7 +50,7 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
         if (injector == null) {
             initInjector();
         }
-        return injector.inject(entity, args);
+        return injector.refactor(entity, args);
     }
 
     @Override
@@ -59,7 +58,7 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
         if (injector == null) {
             initInjector();
         }
-        return injector.injectCount(entity, args);
+        return injector.refactorCount(entity, args);
     }
 
     @Override
@@ -367,7 +366,7 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
     }
 
     private void initInjector() {
-        SimpleQueryInjector injector = new SimpleQueryInjector();
+        SimpleQueryRefactor injector = new SimpleQueryRefactor();
         parsed.accept(injector);
 
         this.injector = injector;
@@ -421,7 +420,7 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
                 }
                 return metadata
                         .findFeature(createFeatureId(term.getTermType()))
-                        .map(feature -> feature.createFragments(sTable.alias + "." +dialect.quote(c.name), c.metadata, term))
+                        .map(feature -> feature.createFragments(sTable.alias + "." + dialect.quote(c.name), c.metadata, term))
                         .orElse(EmptySqlFragments.INSTANCE);
             }
 
@@ -437,7 +436,7 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
 
     static QueryAnalyzerTermsFragmentBuilder TERMS_BUILDER = new QueryAnalyzerTermsFragmentBuilder();
 
-    class SimpleQueryInjector implements QueryInjector, SelectVisitor {
+    class SimpleQueryRefactor implements QueryRefactor, SelectVisitor {
         private String from;
 
         private String columns;
@@ -450,7 +449,7 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
 
         private boolean fastCount = true;
 
-        public SimpleQueryInjector() {
+        public SimpleQueryRefactor() {
 
         }
 
@@ -473,9 +472,7 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
 //                RDBColumnMetadata column=entry.getValue().metadata;
                 boolean sameTable = Objects.equals(column.owner, select.table.alias);
 
-                String columnName = column.owner + "." + dialect.quote(column.name);
-
-                columns.append(columnName)
+                columns.append(column.owner).append('.').append(dialect.quote(column.name))
                        .append(" as ")
                        .append(sameTable
                                        ? dialect.quote(column.alias, false)
@@ -551,7 +548,6 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
         public void visit(SetOperationList setOpList) {
             StringBuilder from = new StringBuilder();
             StringBuilder columns = new StringBuilder();
-          //  StringBuilder suffix = new StringBuilder();
 
             initColumns(columns);
 
@@ -577,7 +573,7 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
         }
 
         @Override
-        public SqlRequest inject(QueryParamEntity param, Object... args) {
+        public SqlRequest refactor(QueryParamEntity param, Object... args) {
             PrepareSqlFragments sql = PrepareSqlFragments
                     .of("select", args)
                     .addSql(columns)
@@ -594,7 +590,7 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
 
 
         @Override
-        public SqlRequest injectCount(QueryParamEntity param, Object... args) {
+        public SqlRequest refactorCount(QueryParamEntity param, Object... args) {
             PrepareSqlFragments sql = PrepareSqlFragments.of("select", args);
 
             if (fastCount) {
@@ -651,11 +647,11 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
 
     }
 
-    private interface QueryInjector {
+    private interface QueryRefactor {
 
-        SqlRequest inject(QueryParamEntity param, Object... args);
+        SqlRequest refactor(QueryParamEntity param, Object... args);
 
-        SqlRequest injectCount(QueryParamEntity param, Object... args);
+        SqlRequest refactorCount(QueryParamEntity param, Object... args);
     }
 
 }

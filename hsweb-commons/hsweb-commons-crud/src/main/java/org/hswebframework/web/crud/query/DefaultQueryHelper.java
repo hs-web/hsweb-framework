@@ -1,13 +1,11 @@
 package org.hswebframework.web.crud.query;
 
 import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.hswebframework.ezorm.core.*;
 import org.hswebframework.ezorm.core.dsl.Query;
 import org.hswebframework.ezorm.core.param.Term;
 import org.hswebframework.ezorm.rdb.executor.SqlRequest;
-import org.hswebframework.ezorm.rdb.executor.SqlRequests;
 import org.hswebframework.ezorm.rdb.executor.reactive.ReactiveSqlExecutor;
 import org.hswebframework.ezorm.rdb.executor.wrapper.ColumnWrapperContext;
 import org.hswebframework.ezorm.rdb.executor.wrapper.MapResultWrapper;
@@ -38,7 +36,10 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.persistence.Table;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -63,14 +64,14 @@ public class DefaultQueryHelper implements QueryHelper {
 
     @Override
     public NativeQuerySpec<Record> select(String sql, Object... args) {
-        return new NativeQuerySpecImpl<>(this, sql, args, DefaultRecord::new);
+        return new NativeQuerySpecImpl<>(this, sql, args, DefaultRecord::new, false);
     }
 
     @Override
     public <T> NativeQuerySpec<T> select(String sql,
                                          Supplier<T> newInstance,
                                          Object... args) {
-        return new NativeQuerySpecImpl<>(this, sql, args, map -> FastBeanCopier.copy(map, newInstance));
+        return new NativeQuerySpecImpl<>(this, sql, args, map -> FastBeanCopier.copy(map, newInstance), true);
     }
 
     @Override
@@ -122,31 +123,36 @@ public class DefaultQueryHelper implements QueryHelper {
         return arr;
     }
 
-    @RequiredArgsConstructor
     static class NativeQuerySpecImpl<R> implements NativeQuerySpec<R> {
+
+        static MapResultWrapper nonNestWrapper = new MapResultWrapper();
+        static MapResultWrapper nestWrapper = new MapResultWrapper();
+
+        static {
+            nonNestWrapper.setWrapperNestObject(false);
+        }
+
         private final DefaultQueryHelper parent;
         private final String sql;
         private final Object[] args;
 
         private final Function<Map<String, Object>, R> mapper;
 
+        private final MapResultWrapper wrapper;
+
         private QueryParamEntity param;
 
-        static MapResultWrapper wrapper = new MapResultWrapper();
 
-        static {
-            wrapper.setWrapperNestObject(false);
-        }
-
-        private SqlRequest createQuerySql() {
-//            if (param == null) {
-//                return SqlRequests.prepare(sql, args);
-//            }
-            return parent.analysis(sql).refactor(param, args);
-        }
-
-        private SqlRequest createCountSql() {
-            return parent.analysis(sql).refactorCount(param, args);
+        NativeQuerySpecImpl(DefaultQueryHelper parent,
+                            String sql,
+                            Object[] args,
+                            Function<Map<String, Object>, R> mapper,
+                            boolean nest) {
+            this.parent = parent;
+            this.sql = sql;
+            this.args = args;
+            this.mapper = mapper;
+            wrapper = nest ? nestWrapper : nonNestWrapper;
         }
 
         @Override
@@ -175,7 +181,7 @@ public class DefaultQueryHelper implements QueryHelper {
                     .database
                     .sql()
                     .reactive()
-                    .select(createQuerySql(), wrapper)
+                    .select(parent.analysis(sql).refactor(param, args), wrapper)
                     .map(mapper);
         }
 
