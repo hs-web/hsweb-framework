@@ -30,6 +30,20 @@ class DefaultQueryHelperTest {
 
 
     @Test
+    public void testGroup() {
+        DefaultQueryHelper helper = new DefaultQueryHelper(database);
+
+        helper.select("select name,count(1) _total from s_test group by name having count(1) > ? ", 0)
+              .where(dsl -> dsl
+                      .is("age", "31"))
+              .fetchPaged()
+              .doOnNext(v -> System.out.println(JSON.toJSONString(v, SerializerFeature.PrettyFormat)))
+              .as(StepVerifier::create)
+              .expectNextCount(1)
+              .verifyComplete();
+    }
+
+    @Test
     public void testNative() {
         database.dml()
                 .insert("s_test_event")
@@ -49,8 +63,8 @@ class DefaultQueryHelperTest {
         DefaultQueryHelper helper = new DefaultQueryHelper(database);
 
         helper.select("select e.*,t.id as \"id\" from s_test t " +
-                              "left join s_test_event e on e.id = t.id" +
-                              " where t.age = ? order by t.age desc", 20)
+                              "left join s_test_event e on e.id = t.id " +
+                              "where t.age = ? order by t.age desc", 20)
               .where(dsl -> dsl
                       .is("e.id", "helper_testNative")
                       .is("t.age", "20"))
