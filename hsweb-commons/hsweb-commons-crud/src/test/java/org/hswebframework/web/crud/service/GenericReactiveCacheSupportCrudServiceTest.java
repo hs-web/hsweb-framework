@@ -25,7 +25,7 @@ public class GenericReactiveCacheSupportCrudServiceTest {
     @Test
     public void test() {
 
-        TestEntity entity = TestEntity.of("test2",100);
+        TestEntity entity = TestEntity.of("test2",100,"testName");
 
         entityService.insert(Mono.just(entity))
                 .as(StepVerifier::create)

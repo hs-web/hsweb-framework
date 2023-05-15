@@ -101,6 +101,7 @@ class DefaultQueryHelperTest {
                 .insert("s_test")
                 .value("id", "helper_test")
                 .value("name", "main")
+                .value("testName","testName")
                 .value("age", 10)
                 .execute()
                 .sync();
@@ -149,6 +150,8 @@ class DefaultQueryHelperTest {
         private String name;
 
         private Integer age;
+
+        private String testName;
 
         private EventTestEntity event;
     }

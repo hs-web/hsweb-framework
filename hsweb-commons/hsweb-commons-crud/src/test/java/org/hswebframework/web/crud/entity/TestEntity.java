@@ -26,6 +26,9 @@ public class TestEntity extends GenericEntity<String> {
     @Column
     private Integer age;
 
+    @Column
+    private String testName;
+
     @Override
     @GeneratedValue(generator = Generators.DEFAULT_ID_GENERATOR)
     public String getId() {
