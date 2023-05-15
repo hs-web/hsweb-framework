@@ -287,20 +287,14 @@ public class DefaultQueryHelper implements QueryHelper {
                 if (column.length > 1) {
                     target.getColumn(column[1])
                           .ifPresent(metadata -> {
-                              if (targetProperty == null) {
-                                  GlobalConfig
-                                          .getPropertyOperator()
-                                          .setProperty(result,
-                                                       metadata.getName(),
-                                                       metadata.decode(sqlValue));
-                              } else {
-                                  ObjectPropertyOperator operator = GlobalConfig.getPropertyOperator();
+                              ObjectPropertyOperator operator = GlobalConfig.getPropertyOperator();
 
+                              if (targetProperty == null) {
+                                  operator.setProperty(result, column[1], metadata.decode(sqlValue));
+                              } else {
                                   Object val = operator.getPropertyOrNew(result, targetProperty);
 
-                                  operator.setProperty(val,
-                                                       column[1],
-                                                       metadata.decode(sqlValue));
+                                  operator.setProperty(val, column[1], metadata.decode(sqlValue));
                               }
 
                           });
@@ -878,7 +872,7 @@ public class DefaultQueryHelper implements QueryHelper {
 
         @Override
         public NestConditional<T> accept(String column, String termType, Object value) {
-            return super.accept(parent.refactorColumn(column), termType, value);
+            return getAccepter().accept(parent.refactorColumn(column), termType, value);
         }
 
         @Override
@@ -936,7 +930,13 @@ public class DefaultQueryHelper implements QueryHelper {
             return (T) this;
         }
 
-
+        @Override
+        public Accepter<NestConditional<T>, Object> getAccepter() {
+            return (column, termType, value) -> {
+                super.getAccepter().accept(column, termType, value);
+                return this;
+            };
+        }
     }
 
     static class NestConditionalImpl<T extends TermTypeConditionalSupport> extends SimpleNestConditional<T> {
