@@ -7,6 +7,7 @@ import org.hswebframework.ezorm.rdb.operator.dml.FunctionColumn;
 import org.hswebframework.ezorm.rdb.operator.dml.query.SortOrder;
 import org.hswebframework.web.api.crud.entity.PagerResult;
 import org.hswebframework.web.api.crud.entity.QueryParamEntity;
+import org.slf4j.Logger;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -127,6 +128,14 @@ public interface QueryHelper {
 
 
     interface NativeQuerySpec<T> extends ExecuteSpec<T> {
+
+        /**
+         * 设置日志,在执行sql等操作时使用次日志进行日志打印.
+         *
+         * @param logger Logger
+         * @return this
+         */
+        NativeQuerySpec<T> logger(Logger logger);
 
         /**
          * 以DSL方式构造查询条件

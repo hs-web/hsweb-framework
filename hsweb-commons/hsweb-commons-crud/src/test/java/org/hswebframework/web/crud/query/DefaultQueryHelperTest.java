@@ -10,6 +10,7 @@ import org.hswebframework.web.crud.entity.EventTestEntity;
 import org.hswebframework.web.crud.entity.TestEntity;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -65,6 +66,7 @@ class DefaultQueryHelperTest {
         helper.select("select e.*,t.id as \"id\" from s_test t " +
                               "left join s_test_event e on e.id = t.id " +
                               "where t.age = ? order by t.age desc", 20)
+              .logger(LoggerFactory.getLogger("org.hswebframework.test.native"))
               .where(dsl -> dsl
                       .is("e.id", "helper_testNative")
                       .is("t.age", "20"))

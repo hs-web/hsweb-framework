@@ -2,6 +2,7 @@ package org.hswebframework.web.crud.query;
 
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.ezorm.core.*;
 import org.hswebframework.ezorm.core.dsl.Query;
 import org.hswebframework.ezorm.core.param.Term;
@@ -29,11 +30,15 @@ import org.hswebframework.ezorm.rdb.operator.dml.query.SortOrder;
 import org.hswebframework.web.api.crud.entity.PagerResult;
 import org.hswebframework.web.api.crud.entity.QueryParamEntity;
 import org.hswebframework.web.bean.FastBeanCopier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.context.Context;
+import reactor.util.context.ContextView;
 
 import javax.persistence.Table;
 import java.util.ArrayList;
@@ -132,6 +137,8 @@ public class DefaultQueryHelper implements QueryHelper {
             nonNestWrapper.setWrapperNestObject(false);
         }
 
+        ContextView logContext = Context.empty();
+
         private final DefaultQueryHelper parent;
         private final String sql;
         private final Object[] args;
@@ -156,17 +163,25 @@ public class DefaultQueryHelper implements QueryHelper {
         }
 
         @Override
+        public NativeQuerySpec<R> logger(Logger logger) {
+            this.logContext = Context.of(Logger.class, logger);
+            return this;
+        }
+
+        @Override
         public Mono<Integer> count() {
 
             SqlRequest countSql = parent
                     .analysis(sql)
                     .refactorCount(param == null ? new QueryParamEntity() : param, args);
+
             return parent
                     .database
                     .sql()
                     .reactive()
                     .select(countSql, countWrapper)
-                    .single(0);
+                    .single(0)
+                    .contextWrite(logContext);
         }
 
         @Override
@@ -182,7 +197,8 @@ public class DefaultQueryHelper implements QueryHelper {
                     .sql()
                     .reactive()
                     .select(parent.analysis(sql).refactor(param, args), wrapper)
-                    .map(mapper);
+                    .map(mapper)
+                    .contextWrite(logContext);
         }
 
         @Override
@@ -218,26 +234,41 @@ public class DefaultQueryHelper implements QueryHelper {
                 return sqlExecutor
                         .select(createPagingSql(listSql, pageIndex, pageSize), wrapper).map(mapper)
                         .collectList()
-                        .map(list -> PagerResult.of(param.getTotal(), list, param));
+                        .map(list -> PagerResult.of(param.getTotal(), list, param))
+                        .contextWrite(logContext);
             }
 
             SqlRequest countSql = analyzer.refactorCount(param, args);
 
+            if (param.isParallelPager()) {
+                return Mono.zip(sqlExecutor
+                                        .select(countSql, countWrapper)
+                                        .single(0),
+                                sqlExecutor
+                                        .select(createPagingSql(listSql, param.getPageIndex(), param.getPageSize()), wrapper)
+                                        .map(mapper)
+                                        .collectList(),
+                                (total, list) -> PagerResult.of(total, list, param))
+                           .contextWrite(logContext);
+            }
+
             return sqlExecutor
                     .select(countSql, countWrapper)
                     .single(0)
-                    .flatMap(total -> {
+                    .<PagerResult<R>>flatMap(total -> {
                         if (total == 0) {
                             return Mono.just(PagerResult.of(0, new ArrayList<>(), param.clone()));
-                        } else {
-                            param.rePaging(total);
-                            return sqlExecutor
-                                    .select(createPagingSql(listSql, param.getPageIndex(), param.getPageSize()), wrapper)
-                                    .map(mapper)
-                                    .collectList()
-                                    .map(list -> PagerResult.of(total, list, param));
                         }
-                    });
+                        QueryParamEntity copy = param.clone();
+                        copy.rePaging(total);
+                        return sqlExecutor
+                                .select(createPagingSql(listSql, copy.getPageIndex(), copy.getPageSize()), wrapper)
+                                .map(mapper)
+                                .collectList()
+                                .map(list -> PagerResult.of(total, list, copy));
+
+                    })
+                    .contextWrite(logContext);
         }
     }
 
@@ -405,6 +436,7 @@ public class DefaultQueryHelper implements QueryHelper {
         }
     }
 
+    @Slf4j
     static class QuerySpec<R> implements SelectSpec<R>, FromSpec<R>, SortSpec<R>, ResultWrapper<R, R>, SelectColumnMapperSpec<R> {
 
         private final Class<R> clazz;
@@ -423,11 +455,13 @@ public class DefaultQueryHelper implements QueryHelper {
         private List<JoinConditionalSpecImpl> joins;
 
         private QueryParamEntity param;
+        final ContextView logContext;
 
 
         public QuerySpec(Class<R> clazz, DefaultQueryHelper parent) {
             this.clazz = clazz;
             this.parent = parent;
+            logContext = Context.of(Context.of(Logger.class, LoggerFactory.getLogger(clazz)));
         }
 
         private List<JoinConditionalSpecImpl> joins() {
@@ -479,11 +513,13 @@ public class DefaultQueryHelper implements QueryHelper {
 
         @Override
         public Mono<Integer> count() {
-            return query.clone()
-                        .select(Selects.count1().as("_total"))
-                        .fetch(countWrapper)
-                        .reactive()
-                        .single(0);
+            return query
+                    .clone()
+                    .select(Selects.count1().as("_total"))
+                    .fetch(countWrapper)
+                    .reactive()
+                    .single(0)
+                    .contextWrite(logContext);
         }
 
         @Override
@@ -491,7 +527,8 @@ public class DefaultQueryHelper implements QueryHelper {
 
             return createQuery()
                     .fetch(this)
-                    .reactive();
+                    .reactive()
+                    .contextWrite(logContext);
         }
 
         @Override
@@ -505,23 +542,43 @@ public class DefaultQueryHelper implements QueryHelper {
         @Override
         public Mono<PagerResult<R>> fetchPaged(int pageIndex, int pageSize) {
 
-            Mono<Integer> count = param != null && param.getTotal() != null
-                    ? Mono.just(param.getTotal())
-                    : count();
+            if (param != null && param.getTotal() != null) {
+                return createQuery()
+                        .paging(pageIndex, pageSize)
+                        .fetch(this)
+                        .reactive()
+                        .collectList()
+                        .map(list -> PagerResult.of(param.getTotal(), list, param));
+            }
 
-            Mono<List<R>> results = createQuery()
-                    .paging(pageIndex, pageSize)
-                    .fetch(this)
-                    .reactive()
-                    .collectList();
+            if (param != null && param.isParallelPager()) {
+                return Mono.zip(
+                        count(),
+                        createQuery()
+                                .paging(pageIndex, pageSize)
+                                .fetch(this)
+                                .reactive()
+                                .collectList(),
+                        (total, list) -> PagerResult.of(total, list, param)
+                );
+            }
 
-            return Mono.zip(
-                    count,
-                    results,
-                    (total, data) -> param != null ?
-                            PagerResult.of(total, data, param) :
-                            PagerResult.of(total, data)
-            );
+            QueryParamEntity copy = param != null ? param.clone() : new QueryParamEntity().doPaging(pageIndex, pageSize);
+
+            return this
+                    .count()
+                    .flatMap(i -> {
+                        if (i == 0) {
+                            return Mono.just(PagerResult.of(0, new ArrayList<>(), copy));
+                        }
+                        copy.rePaging(i);
+                        return createQuery()
+                                .paging(copy.getPageIndex(), copy.getPageSize())
+                                .fetch(this)
+                                .reactive()
+                                .collectList()
+                                .map(list -> PagerResult.of(i, list, copy));
+                    });
         }
 
         @Override
