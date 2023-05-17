@@ -5,6 +5,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.ezorm.core.*;
 import org.hswebframework.ezorm.core.dsl.Query;
+import org.hswebframework.ezorm.core.param.QueryParam;
 import org.hswebframework.ezorm.core.param.Term;
 import org.hswebframework.ezorm.rdb.executor.SqlRequest;
 import org.hswebframework.ezorm.rdb.executor.reactive.ReactiveSqlExecutor;
@@ -25,6 +26,7 @@ import org.hswebframework.ezorm.rdb.operator.dml.Join;
 import org.hswebframework.ezorm.rdb.operator.dml.JoinType;
 import org.hswebframework.ezorm.rdb.operator.dml.QueryOperator;
 import org.hswebframework.ezorm.rdb.operator.dml.SelectColumnSupplier;
+import org.hswebframework.ezorm.rdb.operator.dml.query.BuildParameterQueryOperator;
 import org.hswebframework.ezorm.rdb.operator.dml.query.Selects;
 import org.hswebframework.ezorm.rdb.operator.dml.query.SortOrder;
 import org.hswebframework.web.api.crud.entity.PagerResult;
@@ -41,10 +43,7 @@ import reactor.util.context.Context;
 import reactor.util.context.ContextView;
 
 import javax.persistence.Table;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -513,8 +512,11 @@ public class DefaultQueryHelper implements QueryHelper {
 
         @Override
         public Mono<Integer> count() {
-            return query
-                    .clone()
+            BuildParameterQueryOperator operator = (BuildParameterQueryOperator) query.clone();
+            operator.getParameter().setPageIndex(null);
+            operator.getParameter().setPageSize(null);
+            operator.getParameter().setOrderBy(new ArrayList<>());
+            return operator
                     .select(Selects.count1().as("_total"))
                     .fetch(countWrapper)
                     .reactive()

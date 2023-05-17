@@ -134,7 +134,7 @@ class DefaultQueryHelperTest {
               )
               .orderByAsc(TestEntity::getAge)
               .orderByDesc(EventTestEntity::getAge)
-              .fetch()
+              .fetchPaged()
               .doOnNext(info -> System.out.println(JSON.toJSONString(info, SerializerFeature.PrettyFormat)))
               .as(StepVerifier::create)
               .expectNextCount(1)
