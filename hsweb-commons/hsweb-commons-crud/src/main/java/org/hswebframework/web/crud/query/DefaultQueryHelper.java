@@ -550,19 +550,19 @@ public class DefaultQueryHelper implements QueryHelper {
                         .fetch(this)
                         .reactive()
                         .collectList()
-                        .map(list -> PagerResult.of(param.getTotal(), list, param));
+                        .map(list -> PagerResult.of(param.getTotal(), list, param))
+                        .contextWrite(logContext);
             }
 
             if (param != null && param.isParallelPager()) {
-                return Mono.zip(
-                        count(),
-                        createQuery()
-                                .paging(pageIndex, pageSize)
-                                .fetch(this)
-                                .reactive()
-                                .collectList(),
-                        (total, list) -> PagerResult.of(total, list, param)
-                );
+                return Mono.zip(count(),
+                                createQuery()
+                                        .paging(pageIndex, pageSize)
+                                        .fetch(this)
+                                        .reactive()
+                                        .collectList(),
+                                (total, list) -> PagerResult.of(total, list, param))
+                           .contextWrite(logContext);
             }
 
             QueryParamEntity copy = param != null ? param.clone() : new QueryParamEntity().doPaging(pageIndex, pageSize);
@@ -579,7 +579,8 @@ public class DefaultQueryHelper implements QueryHelper {
                                 .fetch(this)
                                 .reactive()
                                 .collectList()
-                                .map(list -> PagerResult.of(i, list, copy));
+                                .map(list -> PagerResult.of(i, list, copy))
+                                .contextWrite(logContext);
                     });
         }
 
