@@ -6,7 +6,9 @@ import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.select.*;
 import net.sf.jsqlparser.statement.values.ValuesStatement;
+import org.apache.commons.collections4.CollectionUtils;
 import org.hswebframework.ezorm.core.meta.FeatureSupportedMetadata;
+import org.hswebframework.ezorm.core.param.Sort;
 import org.hswebframework.ezorm.core.param.Term;
 import org.hswebframework.ezorm.rdb.executor.SqlRequest;
 import org.hswebframework.ezorm.rdb.metadata.RDBColumnMetadata;
@@ -20,9 +22,12 @@ import org.hswebframework.ezorm.rdb.operator.builder.fragments.SqlFragments;
 import org.hswebframework.web.api.crud.entity.QueryParamEntity;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import reactor.function.Function3;
 
 import java.util.*;
+import java.util.function.BiFunction;
 
+import static net.sf.jsqlparser.statement.select.PlainSelect.getFormatedList;
 import static net.sf.jsqlparser.statement.select.PlainSelect.orderByToString;
 import static org.hswebframework.ezorm.rdb.operator.builder.fragments.TermFragmentBuilder.createFeatureId;
 
@@ -40,6 +45,8 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
     private final Map<String, QueryAnalyzer.Join> joins = new LinkedHashMap<>();
 
     private QueryRefactor injector;
+
+    private volatile Map<String, Column> columnMappings;
 
     @Override
     public String nativeSql() {
@@ -76,6 +83,37 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
         this(database, parse(sql));
         this.sql = sql;
     }
+
+    private Map<String, Column> getColumnMappings() {
+        if (columnMappings == null) {
+            synchronized (this) {
+                if (columnMappings == null) {
+                    columnMappings = new HashMap<>();
+                    // 主表
+                    for (RDBColumnMetadata column : select.table.metadata.getColumns()) {
+                        Column col = new Column(column.getName(), column.getAlias(), select.table.alias, column);
+                        columnMappings.put(column.getName(), col);
+                        columnMappings.put(column.getAlias(), col);
+                        columnMappings.put(select.table.alias + "." + column.getName(), col);
+                        columnMappings.put(select.table.alias + "." + column.getAlias(), col);
+                    }
+                    //关联表
+                    for (Join join : joins.values()) {
+                        for (RDBColumnMetadata column : join.table.metadata.getColumns()) {
+                            Column col = new Column(column.getName(), column.getAlias(), join.alias, column);
+                            columnMappings.putIfAbsent(column.getName(), col);
+                            columnMappings.putIfAbsent(column.getAlias(), col);
+
+                            columnMappings.put(join.alias + "." + column.getName(), col);
+                            columnMappings.put(join.alias + "." + column.getAlias(), col);
+                        }
+                    }
+                }
+            }
+        }
+        return columnMappings;
+    }
+
 
     @SneakyThrows
     private static SelectBody parse(String sql) {
@@ -374,56 +412,36 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
         }
 
         @Override
-        public SqlFragments createTermFragments(QueryAnalyzerImpl parameter, Term term) {
-            String column = term.getColumn();
-            String alias;
+        public SqlFragments createTermFragments(QueryAnalyzerImpl impl, Term term) {
+            Dialect dialect = impl.database.getMetadata().getDialect();
 
-            Dialect dialect = parameter.database.getMetadata().getDialect();
             Table table;
-            String columnName = column;
+            String column = term.getColumn();
 
-            if (column.contains(".")) {
-                String[] split = column.split("[.]");
-                alias = split[0];
-                columnName = split[1];
-                if (Objects.equals(parameter.select.table.alias, alias)) {
-                    table = parameter.select.table;
-                } else {
-                    QueryAnalyzer.Join join = parameter.joins.get(alias);
-                    if (null != join) {
-                        table = join.table;
-                    } else {
-                        throw new IllegalArgumentException("undefined column [" + column + "]");
-                    }
-                }
+            Column col = impl.getColumnMappings().get(column);
 
+            if (col == null) {
+                throw new IllegalArgumentException("undefined column [" + column + "]");
+            }
+
+            if (Objects.equals(impl.select.table.alias, col.getOwner())) {
+                table = impl.select.table;
             } else {
-                table = parameter.select.table;
-                alias = parameter.select.table.alias;
+                QueryAnalyzer.Join join = impl.joins.get(col.getOwner());
+                if (null != join) {
+                    table = join.table;
+                } else {
+                    throw new IllegalArgumentException("undefined column [" + column + "]");
+                }
             }
 
-            if (table instanceof SelectTable) {
-                SelectTable sTable = ((SelectTable) table);
-                Column c = sTable.columns.get(columnName);
-                if (c == null) {
-                    return EmptySqlFragments.INSTANCE;
-                }
-                FeatureSupportedMetadata metadata = c.metadata;
-                if (c.metadata == null) {
-                    metadata = table.metadata;
-                }
-                return metadata
-                        .findFeature(createFeatureId(term.getTermType()))
-                        .map(feature -> feature.createFragments(sTable.alias + "." + dialect.quote(c.name), c.metadata, term))
-                        .orElse(EmptySqlFragments.INSTANCE);
+            FeatureSupportedMetadata metadata = col.metadata;
+            if (col.metadata == null) {
+                metadata = table.metadata;
             }
-
-            return table
-                    .metadata
-                    .getColumn(columnName)
-                    .flatMap(metadata -> metadata
-                            .findFeature(createFeatureId(term.getTermType()))
-                            .map(feature -> feature.createFragments(metadata.getFullName(alias), metadata, term)))
+            return metadata
+                    .findFeature(createFeatureId(term.getTermType()))
+                    .map(feature -> feature.createFragments(table.alias + "." + dialect.quote(col.name), col.metadata, term))
                     .orElse(EmptySqlFragments.INSTANCE);
         }
     }
@@ -519,7 +537,7 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
             }
 
             if (plainSelect.getOrderByElements() != null) {
-                orderBy = orderByToString(plainSelect.isOracleSiblings(), plainSelect.getOrderByElements());
+                orderBy = getFormatedList(plainSelect.getOrderByElements(), "");
             }
 
             if (plainSelect.getGroupBy() != null) {
@@ -635,11 +653,75 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
                     .toRequest();
         }
 
-
         private void appendOrderBy(PrepareSqlFragments sql, QueryParamEntity param) {
-            if (orderBy != null) {
-                sql.addSql(orderBy);
+
+            if (CollectionUtils.isNotEmpty(param.getSorts())) {
+                int index = 0;
+                PrepareSqlFragments orderByValue = null;
+                PrepareSqlFragments orderByColumn = null;
+                for (Sort sort : param.getSorts()) {
+                    String name = sort.getName();
+                    Column column = getColumnMappings().get(name);
+
+                    if (column == null) {
+                        continue;
+                    }
+                    boolean desc = "desc".equalsIgnoreCase(sort.getOrder());
+                    String columnName = org.hswebframework.ezorm.core.utils.StringUtils
+                            .concat(column.getOwner(),
+                                    ".",
+                                    database.getMetadata().getDialect().quote(column.getName()));
+                    //按固定值排序
+                    if (sort.getValue() != null) {
+                        if (orderByValue == null) {
+                            orderByValue = PrepareSqlFragments.of();
+                            orderByValue.addSql("case");
+                        }
+                        orderByValue.addSql("when");
+                        orderByValue.addSql(columnName, "= ?").addParameter(sort.getValue());
+                        orderByValue.addSql("then").addSql(String.valueOf(desc ? 10000 + index++ : index++));
+                    } else {
+                        if (orderByColumn == null) {
+                            orderByColumn = PrepareSqlFragments.of();
+                        } else {
+                            orderByColumn.addSql(",");
+                        }
+                        //todo function支持
+                        orderByColumn
+                                .addSql(columnName)
+                                .addSql(desc ? "DESC" : "ASC");
+                    }
+                }
+
+                boolean customOrder = (orderByValue != null || orderByColumn != null);
+
+                if (customOrder || orderBy != null) {
+                    sql.addSql("ORDER BY");
+                }
+                //按固定值
+                if (orderByValue != null) {
+                    orderByValue.addSql("else 10000 end");
+                    sql.addFragments(orderByValue);
+                }
+                //按列
+                if (orderByColumn != null) {
+                    if (orderByValue != null) {
+                        sql.addSql(",");
+                    }
+                    sql.addFragments(orderByColumn);
+                }
+                if (orderBy != null) {
+                    if (customOrder) {
+                        sql.addSql(",");
+                    }
+                    sql.addSql(orderBy);
+                }
+            } else {
+                if (orderBy != null) {
+                    sql.addSql("ORDER BY", orderBy);
+                }
             }
+
         }
 
         private void appendWhere(PrepareSqlFragments sql, QueryParamEntity param) {

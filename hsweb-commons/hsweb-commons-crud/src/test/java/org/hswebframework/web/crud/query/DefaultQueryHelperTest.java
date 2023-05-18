@@ -5,7 +5,9 @@ import com.alibaba.fastjson.serializer.SerializerFeature;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.hswebframework.ezorm.core.param.Sort;
 import org.hswebframework.ezorm.rdb.operator.DatabaseOperator;
+import org.hswebframework.web.api.crud.entity.QueryParamEntity;
 import org.hswebframework.web.crud.entity.EventTestEntity;
 import org.hswebframework.web.crud.entity.TestEntity;
 import org.junit.jupiter.api.Test;
@@ -62,14 +64,32 @@ class DefaultQueryHelperTest {
                 .sync();
 
         DefaultQueryHelper helper = new DefaultQueryHelper(database);
+        QueryParamEntity param = QueryParamEntity
+                .newQuery()
+                .is("e.id", "helper_testNative")
+                .is("t.age", "20")
+                .orderByAsc("t.age")
+                .getParam();
+
+        {
+            Sort sortByValue = new Sort();
+            sortByValue.setName("t.id");
+            sortByValue.setValue("1");
+            param.getSorts().add(sortByValue);
+        }
+        {
+            Sort sortByValue = new Sort();
+            sortByValue.setName("t.id");
+            sortByValue.setValue("2");
+            param.getSorts().add(sortByValue);
+        }
+
 
         helper.select("select e.*,t.id as \"id\" from s_test t " +
                               "left join s_test_event e on e.id = t.id " +
-                              "where t.age = ? order by t.age desc", 20)
+                              "where t.age = ?", 20)
               .logger(LoggerFactory.getLogger("org.hswebframework.test.native"))
-              .where(dsl -> dsl
-                      .is("e.id", "helper_testNative")
-                      .is("t.age", "20"))
+              .where(param)
               .fetchPaged()
               .doOnNext(v -> System.out.println(JSON.toJSONString(v, SerializerFeature.PrettyFormat)))
               .as(StepVerifier::create)
@@ -79,7 +99,8 @@ class DefaultQueryHelperTest {
         helper.select("select id,name from s_test t " +
                               "union all select id,name from s_test_event")
               .where(dsl -> dsl
-                      .is("id", "helper_testNative"))
+                      .is("id", "helper_testNative")
+                      .orderByAsc("name"))
               .fetchPaged()
               .doOnNext(v -> System.out.println(JSON.toJSONString(v, SerializerFeature.PrettyFormat)))
               .as(StepVerifier::create)
@@ -103,7 +124,7 @@ class DefaultQueryHelperTest {
                 .insert("s_test")
                 .value("id", "helper_test")
                 .value("name", "main")
-                .value("testName","testName")
+                .value("testName", "testName")
                 .value("age", 10)
                 .execute()
                 .sync();
