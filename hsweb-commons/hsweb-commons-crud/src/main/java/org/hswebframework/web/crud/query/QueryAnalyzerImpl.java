@@ -257,6 +257,13 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
     public void visit(AllTableColumns allTableColumns) {
         net.sf.jsqlparser.schema.Table table = allTableColumns.getTable();
 
+        String name = table.getName();
+
+        if (Objects.equals(select.table.alias, name)) {
+            putSelectColumns(select.table, select.columnList);
+            return;
+        }
+
         QueryAnalyzer.Join join = joins.get(parsePlainName(table.getName()));
 
         if (join == null) {

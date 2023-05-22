@@ -85,7 +85,7 @@ class DefaultQueryHelperTest {
         }
 
 
-        helper.select("select e.*,t.id as \"id\" from s_test t " +
+        helper.select("select e.*,t.* from s_test t " +
                               "left join s_test_event e on e.id = t.id " +
                               "where t.age = ?", 20)
               .logger(LoggerFactory.getLogger("org.hswebframework.test.native"))
