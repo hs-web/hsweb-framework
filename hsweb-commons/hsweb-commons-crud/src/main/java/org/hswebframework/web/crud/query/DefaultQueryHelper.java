@@ -127,24 +127,16 @@ public class DefaultQueryHelper implements QueryHelper {
         return arr;
     }
 
-    static class NativeQuerySpecImpl<R> implements NativeQuerySpec<R> {
-
-        static MapResultWrapper nonNestWrapper = new MapResultWrapper();
-        static MapResultWrapper nestWrapper = new MapResultWrapper();
-
-        static {
-            nonNestWrapper.setWrapperNestObject(false);
-        }
+    static class NativeQuerySpecImpl<R> extends MapResultWrapper implements NativeQuerySpec<R> {
 
         ContextView logContext = Context.empty();
 
         private final DefaultQueryHelper parent;
-        private final String sql;
+        private final QueryAnalyzer analyzer;
         private final Object[] args;
 
         private final Function<Map<String, Object>, R> mapper;
 
-        private final MapResultWrapper wrapper;
 
         private QueryParamEntity param;
 
@@ -155,10 +147,23 @@ public class DefaultQueryHelper implements QueryHelper {
                             Function<Map<String, Object>, R> mapper,
                             boolean nest) {
             this.parent = parent;
-            this.sql = sql;
+            this.analyzer = parent.analysis(sql);
             this.args = args;
             this.mapper = mapper;
-            wrapper = nest ? nestWrapper : nonNestWrapper;
+            setWrapperNestObject(nest);
+        }
+
+        @Override
+        public void wrapColumn(ColumnWrapperContext<Map<String, Object>> context) {
+            Map<String, Object> instance = context.getRowInstance();
+            String column = context.getColumnLabel();
+            QueryAnalyzer.Column col = analyzer.findColumn(column).orElse(null);
+
+            if (col != null) {
+                doWrap(instance, column, col.metadata.decode(context.getResult()));
+            } else {
+                doWrap(instance, column, getCodec().decode(context.getResult()));
+            }
         }
 
         @Override
@@ -170,9 +175,7 @@ public class DefaultQueryHelper implements QueryHelper {
         @Override
         public Mono<Integer> count() {
 
-            SqlRequest countSql = parent
-                    .analysis(sql)
-                    .refactorCount(param == null ? new QueryParamEntity() : param, args);
+            SqlRequest countSql = analyzer.refactorCount(param == null ? new QueryParamEntity() : param, args);
 
             return parent
                     .database
@@ -195,7 +198,7 @@ public class DefaultQueryHelper implements QueryHelper {
                     .database
                     .sql()
                     .reactive()
-                    .select(parent.analysis(sql).refactor(param, args), wrapper)
+                    .select(analyzer.refactor(param, args), this)
                     .map(mapper)
                     .contextWrite(logContext);
         }
@@ -222,7 +225,6 @@ public class DefaultQueryHelper implements QueryHelper {
 
         @Override
         public Mono<PagerResult<R>> fetchPaged(int pageIndex, int pageSize) {
-            QueryAnalyzer analyzer = parent.analysis(sql);
             QueryParamEntity param = this.param == null ? new QueryParamEntity().doPaging(pageIndex, pageSize) : this.param.clone();
 
             SqlRequest listSql = analyzer.refactor(param, args);
@@ -231,7 +233,7 @@ public class DefaultQueryHelper implements QueryHelper {
 
             if (param.getTotal() != null) {
                 return sqlExecutor
-                        .select(createPagingSql(listSql, pageIndex, pageSize), wrapper).map(mapper)
+                        .select(createPagingSql(listSql, pageIndex, pageSize), this).map(mapper)
                         .collectList()
                         .map(list -> PagerResult.of(param.getTotal(), list, param))
                         .contextWrite(logContext);
@@ -244,7 +246,7 @@ public class DefaultQueryHelper implements QueryHelper {
                                         .select(countSql, countWrapper)
                                         .single(0),
                                 sqlExecutor
-                                        .select(createPagingSql(listSql, param.getPageIndex(), param.getPageSize()), wrapper)
+                                        .select(createPagingSql(listSql, param.getPageIndex(), param.getPageSize()), this)
                                         .map(mapper)
                                         .collectList(),
                                 (total, list) -> PagerResult.of(total, list, param))
@@ -261,7 +263,7 @@ public class DefaultQueryHelper implements QueryHelper {
                         QueryParamEntity copy = param.clone();
                         copy.rePaging(total);
                         return sqlExecutor
-                                .select(createPagingSql(listSql, copy.getPageIndex(), copy.getPageSize()), wrapper)
+                                .select(createPagingSql(listSql, copy.getPageIndex(), copy.getPageSize()), this)
                                 .map(mapper)
                                 .collectList()
                                 .map(list -> PagerResult.of(total, list, copy));

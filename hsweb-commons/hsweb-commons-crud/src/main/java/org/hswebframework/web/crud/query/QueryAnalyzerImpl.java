@@ -75,6 +75,11 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
     }
 
     @Override
+    public Optional<Column> findColumn(String name) {
+        return Optional.ofNullable(columnMappings.get(name));
+    }
+
+    @Override
     public List<Join> joins() {
         return new ArrayList<>(joins.values());
     }
