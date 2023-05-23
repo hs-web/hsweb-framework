@@ -3,7 +3,6 @@ package org.hswebframework.web.crud.query;
 import org.hswebframework.ezorm.core.Conditional;
 import org.hswebframework.ezorm.core.dsl.Query;
 import org.hswebframework.ezorm.rdb.mapping.defaults.record.Record;
-import org.hswebframework.ezorm.rdb.operator.dml.FunctionColumn;
 import org.hswebframework.ezorm.rdb.operator.dml.query.SortOrder;
 import org.hswebframework.web.api.crud.entity.PagerResult;
 import org.hswebframework.web.api.crud.entity.QueryParamEntity;
@@ -36,6 +35,14 @@ import java.util.function.Supplier;
  *      .fetch();
  *
  * }</pre>
+ * <p>
+ * 使用原生SQL方式来构建动态条件查询
+ * <pre>{@code
+ *      helper
+ *       .select("select * from table_a a left join table_b b on a.id=b.id",R::new)
+ *       .where(dsl->dsl.like(R::getName,'zhang%'))
+ *       .fetch();
+ *  }</pre>
  *
  * @author zhouhao
  * @since 4.0.16

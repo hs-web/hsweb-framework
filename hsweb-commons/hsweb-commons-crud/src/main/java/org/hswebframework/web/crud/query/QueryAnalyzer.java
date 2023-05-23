@@ -12,22 +12,58 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
+/**
+ * 查询分析器,用于分析SQL查询语句以及对SQL进行重构,追加查询条件等操作
+ *
+ * @author zhouhao
+ * @see 4.0.16
+ */
 public interface QueryAnalyzer {
 
-    String nativeSql();
+    /**
+     * @return 原始SQL
+     */
+    String originalSql();
 
+    /**
+     * 基于{@link QueryParamEntity}动态条件来重构SQL,将根据动态条件添加where条件,排序等操作.
+     *
+     * @param entity 查询条件
+     * @param args   原始SQL中的预编译参数
+     * @return 重构后的SQL
+     */
     SqlRequest refactor(QueryParamEntity entity, Object... args);
 
+    /**
+     * 基于{@link QueryParamEntity}动态条件来重构用于查询count的SQL,通常用于分页时查询总数.
+     * <pre>{@code
+     *  select count(1) _total from .....
+     * }</pre>
+     *
+     * @param entity 查询条件
+     * @param args   原始SQL中的预编译参数
+     * @return 重构后的SQL
+     */
     SqlRequest refactorCount(QueryParamEntity entity, Object... args);
 
-
+    /**
+     * @return 查询信息
+     */
     Select select();
 
+    /**
+     * 根据名称或者别名,查找查询语句中的列信息.
+     *
+     * @param name 列名、别名或者列全名
+     * @return 列信息
+     */
     Optional<Column> findColumn(String name);
 
+    /**
+     * @return 关联表信息
+     */
     List<Join> joins();
 
     @AllArgsConstructor
@@ -74,9 +110,13 @@ public interface QueryAnalyzer {
     @AllArgsConstructor
     @Getter
     class Column {
+        //列名
         String name;
+        //别名
         String alias;
+        //所有者
         String owner;
+        //元数据信息
         RDBColumnMetadata metadata;
     }
 

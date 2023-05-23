@@ -5,7 +5,6 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.ezorm.core.*;
 import org.hswebframework.ezorm.core.dsl.Query;
-import org.hswebframework.ezorm.core.param.QueryParam;
 import org.hswebframework.ezorm.core.param.Term;
 import org.hswebframework.ezorm.rdb.executor.SqlRequest;
 import org.hswebframework.ezorm.rdb.executor.reactive.ReactiveSqlExecutor;
@@ -57,7 +56,7 @@ public class DefaultQueryHelper implements QueryHelper {
 
     private final Map<Class<?>, Table> nameMapping = new ConcurrentHashMap<>();
 
-    private final Map<String, QueryAnalyzer> analyzerCaches = new ConcurrentReferenceHashMap<>();
+    private final Map<String, QueryAnalyzer> analyzerCaches = new ConcurrentHashMap<>();
 
     static final ResultWrapper<Integer, ?> countWrapper = ResultWrappers.column("_total", i -> ((Number) i).intValue());
 

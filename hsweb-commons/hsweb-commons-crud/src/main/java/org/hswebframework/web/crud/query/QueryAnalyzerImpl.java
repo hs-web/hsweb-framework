@@ -2,7 +2,10 @@ package org.hswebframework.web.crud.query;
 
 import lombok.Getter;
 import lombok.SneakyThrows;
-import net.sf.jsqlparser.expression.*;
+import net.sf.jsqlparser.expression.Alias;
+import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.ExpressionVisitorAdapter;
+import net.sf.jsqlparser.expression.JdbcParameter;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.select.*;
 import net.sf.jsqlparser.statement.values.ValuesStatement;
@@ -22,13 +25,10 @@ import org.hswebframework.ezorm.rdb.operator.builder.fragments.SqlFragments;
 import org.hswebframework.web.api.crud.entity.QueryParamEntity;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-import reactor.function.Function3;
 
 import java.util.*;
-import java.util.function.BiFunction;
 
 import static net.sf.jsqlparser.statement.select.PlainSelect.getFormatedList;
-import static net.sf.jsqlparser.statement.select.PlainSelect.orderByToString;
 import static org.hswebframework.ezorm.rdb.operator.builder.fragments.TermFragmentBuilder.createFeatureId;
 
 
@@ -49,7 +49,7 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
     private volatile Map<String, Column> columnMappings;
 
     @Override
-    public String nativeSql() {
+    public String originalSql() {
         return sql;
     }
 
@@ -474,7 +474,7 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
 
         private boolean fastCount = true;
 
-        public SimpleQueryRefactor() {
+        SimpleQueryRefactor() {
 
         }
 
@@ -492,7 +492,6 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
                     fastCount = false;
                     continue;
                 }
-//                RDBColumnMetadata column=entry.getValue().metadata;
                 boolean sameTable = Objects.equals(column.owner, select.table.alias);
 
                 columns.append(column.owner).append('.').append(dialect.quote(column.name))
