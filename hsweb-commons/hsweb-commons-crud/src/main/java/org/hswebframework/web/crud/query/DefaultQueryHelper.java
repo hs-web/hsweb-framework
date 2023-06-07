@@ -1,5 +1,6 @@
 package org.hswebframework.web.crud.query;
 
+import io.netty.util.concurrent.FastThreadLocal;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +35,6 @@ import org.hswebframework.web.bean.FastBeanCopier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -42,7 +42,10 @@ import reactor.util.context.Context;
 import reactor.util.context.ContextView;
 
 import javax.persistence.Table;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -161,8 +164,40 @@ public class DefaultQueryHelper implements QueryHelper {
             if (col != null) {
                 doWrap(instance, column, col.metadata.decode(context.getResult()));
             } else {
-                doWrap(instance, column, getCodec().decode(context.getResult()));
+                doWrap(instance, toHump(column), getCodec().decode(context.getResult()));
             }
+        }
+
+        static final FastThreadLocal<StringBuilder> HUMP_HOLDER = new FastThreadLocal<StringBuilder>() {
+            @Override
+            protected StringBuilder initialValue() throws Exception {
+                return new StringBuilder();
+            }
+        };
+
+        private String toHump(String col) {
+            StringBuilder builder = HUMP_HOLDER.get();
+            builder.setLength(0);
+            boolean hasUpper = false, hasLower = false;
+            for (int i = 0, len = col.length(); i < len; i++) {
+                char c = col.charAt(i);
+                if (Character.isLowerCase(c)) {
+                    hasLower = true;
+                }
+                if (Character.isUpperCase(c)) {
+                    hasUpper = true;
+                }
+                if (hasUpper && hasLower) {
+                    return col;
+                }
+                if (c == '_') {
+                    builder.append(Character.toUpperCase(col.charAt(++i)));
+                } else {
+                    builder.append(Character.toLowerCase(c));
+                }
+            }
+            return builder.toString();
+
         }
 
         @Override
@@ -316,19 +351,18 @@ public class DefaultQueryHelper implements QueryHelper {
             void applyValue(R result, String[] column, Object sqlValue) {
 
                 if (column.length > 1) {
-                    target.getColumn(column[1])
-                          .ifPresent(metadata -> {
-                              ObjectPropertyOperator operator = GlobalConfig.getPropertyOperator();
+                    RDBColumnMetadata metadata = target.getColumn(column[1]).orElse(null);
 
-                              if (targetProperty == null) {
-                                  operator.setProperty(result, column[1], metadata.decode(sqlValue));
-                              } else {
-                                  Object val = operator.getPropertyOrNew(result, targetProperty);
+                    if (metadata != null) {
+                        ObjectPropertyOperator operator = GlobalConfig.getPropertyOperator();
+                        if (targetProperty == null) {
+                            operator.setProperty(result, column[1], metadata.decode(sqlValue));
+                        } else {
+                            Object val = operator.getPropertyOrNew(result, targetProperty);
+                            operator.setProperty(val, column[1], metadata.decode(sqlValue));
+                        }
+                    }
 
-                                  operator.setProperty(val, column[1], metadata.decode(sqlValue));
-                              }
-
-                          });
                 }
             }
 
@@ -461,7 +495,7 @@ public class DefaultQueryHelper implements QueryHelper {
         public QuerySpec(Class<R> clazz, DefaultQueryHelper parent) {
             this.clazz = clazz;
             this.parent = parent;
-            logContext = Context.of(Context.of(Logger.class, LoggerFactory.getLogger(clazz)));
+            logContext = Context.of(Logger.class, LoggerFactory.getLogger(clazz));
         }
 
         private List<JoinConditionalSpecImpl> joins() {

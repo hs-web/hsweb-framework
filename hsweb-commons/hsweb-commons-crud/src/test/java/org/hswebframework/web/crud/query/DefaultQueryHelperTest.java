@@ -18,6 +18,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import reactor.test.StepVerifier;
 
+import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.*;
@@ -36,14 +37,30 @@ class DefaultQueryHelperTest {
     public void testGroup() {
         DefaultQueryHelper helper = new DefaultQueryHelper(database);
 
-        helper.select("select name,count(1) _total from s_test group by name having count(1) > ? ", 0)
+        database.dml()
+                .insert("s_test")
+                .value("id", "group-test")
+                .value("name", "group")
+                .value("age", 31)
+                .execute()
+                .sync();
+
+        helper.select("select name,count(1) total_result from s_test group by name having count(1) > ? ", GroupResult::new,0)
               .where(dsl -> dsl
-                      .is("age", "31"))
-              .fetchPaged()
+                      .is("age", "31")
+                      .orderByAsc("name"))
+              .fetch()
               .doOnNext(v -> System.out.println(JSON.toJSONString(v, SerializerFeature.PrettyFormat)))
               .as(StepVerifier::create)
               .expectNextCount(1)
               .verifyComplete();
+    }
+
+    @Getter
+    @Setter
+    public static class GroupResult{
+        private String name;
+        private BigDecimal totalResult;
     }
 
     @Test

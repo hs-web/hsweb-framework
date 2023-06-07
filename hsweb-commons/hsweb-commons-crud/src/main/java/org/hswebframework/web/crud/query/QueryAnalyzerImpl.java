@@ -628,10 +628,10 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
 
             appendWhere(sql, param);
 
-            appendOrderBy(sql, param);
-
             sql.addSql(suffix)
                .addParameter(getSuffixParameters(args));
+
+            appendOrderBy(sql, param);
 
             return sql.toRequest();
         }
