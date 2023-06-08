@@ -11,6 +11,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -431,6 +432,10 @@ public interface QueryHelper {
          */
         Mono<PagerResult<R>> fetchPaged();
 
+        default <T> Mono<PagerResult<T>> fetchPaged(Function<List<R>, Mono<List<T>>> transfer) {
+            return transformPageResult(fetchPaged(), transfer);
+        }
+
         /**
          * 指定分页执行查询
          *
@@ -439,6 +444,10 @@ public interface QueryHelper {
          * @return 分页结果
          */
         Mono<PagerResult<R>> fetchPaged(int pageIndex, int pageSize);
+
+        default <T> Mono<PagerResult<T>> fetchPaged(int pageIndex, int pageSize, Function<List<R>, Mono<List<T>>> transfer) {
+            return transformPageResult(fetchPaged(pageIndex, pageSize), transfer);
+        }
     }
 
     interface SelectColumnMapperSpec<R> extends ColumnMapperSpec<R, SelectColumnMapperSpec<R>>, SelectSpec<R> {
@@ -574,4 +583,24 @@ public interface QueryHelper {
     interface Setter<S, V> extends BiConsumer<S, V>, Serializable {
 
     }
+
+
+    @SuppressWarnings("all")
+    static <S, T> Mono<PagerResult<T>> transformPageResult(Mono<PagerResult<S>> source, Function<List<S>, Mono<List<T>>> transfer) {
+        return source.flatMap(result -> {
+            if (result.getTotal() > 0) {
+                return transfer
+                        .apply(result.getData())
+                        .map(newDataList -> {
+                            PagerResult<T> pagerResult = PagerResult.of(result.getTotal(), newDataList);
+                            pagerResult.setPageIndex(result.getPageIndex());
+                            pagerResult.setPageSize(result.getPageSize());
+                            return pagerResult;
+                        });
+            }
+            //empty
+            return Mono.just((PagerResult<T>) result);
+        });
+    }
+
 }

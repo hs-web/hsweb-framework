@@ -164,41 +164,11 @@ public class DefaultQueryHelper implements QueryHelper {
             if (col != null && !analyzer.columnIsExpression(column, context.getColumnIndex())) {
                 doWrap(instance, col.alias, col.metadata.decode(context.getResult()));
             } else {
-                doWrap(instance, col == null ? toHump(column) : col.alias, getCodec().decode(context.getResult()));
+                doWrap(instance, col == null ? QueryHelperUtils.toHump(column) : col.alias, getCodec().decode(context.getResult()));
             }
         }
 
-        static final FastThreadLocal<StringBuilder> HUMP_HOLDER = new FastThreadLocal<StringBuilder>() {
-            @Override
-            protected StringBuilder initialValue() throws Exception {
-                return new StringBuilder();
-            }
-        };
 
-        private String toHump(String col) {
-            StringBuilder builder = HUMP_HOLDER.get();
-            builder.setLength(0);
-            boolean hasUpper = false, hasLower = false;
-            for (int i = 0, len = col.length(); i < len; i++) {
-                char c = col.charAt(i);
-                if (Character.isLowerCase(c)) {
-                    hasLower = true;
-                }
-                if (Character.isUpperCase(c)) {
-                    hasUpper = true;
-                }
-                if (hasUpper && hasLower) {
-                    return col;
-                }
-                if (c == '_') {
-                    builder.append(Character.toUpperCase(col.charAt(++i)));
-                } else {
-                    builder.append(Character.toLowerCase(c));
-                }
-            }
-            return builder.toString();
-
-        }
 
         @Override
         public NativeQuerySpec<R> logger(Logger logger) {

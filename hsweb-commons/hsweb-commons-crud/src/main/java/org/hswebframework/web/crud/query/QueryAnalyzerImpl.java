@@ -104,24 +104,44 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
             synchronized (this) {
                 if (columnMappings == null) {
                     columnMappings = new HashMap<>();
-                    // 主表
-                    for (RDBColumnMetadata column : select.table.metadata.getColumns()) {
-                        Column col = new Column(column.getName(), column.getAlias(), select.table.alias, column);
-                        columnMappings.put(column.getName(), col);
-                        columnMappings.put(column.getAlias(), col);
-                        columnMappings.put(select.table.alias + "." + column.getName(), col);
-                        columnMappings.put(select.table.alias + "." + column.getAlias(), col);
+                    if (select.table instanceof SelectTable) {
+                        for (Column column : select.getColumnList()) {
+                            columnMappings.put(column.getName(), column);
+                            columnMappings.put(column.getAlias(), column);
+                            columnMappings.put(column.getOwner() + "." + column.getName(), column);
+                            columnMappings.put(column.getOwner() + "." + column.getAlias(), column);
+                        }
+                    } else {
+                        // 主表
+                        for (RDBColumnMetadata column : select.table.metadata.getColumns()) {
+                            Column col = new Column(column.getName(), column.getAlias(), select.table.alias, column);
+                            columnMappings.put(column.getName(), col);
+                            columnMappings.put(column.getAlias(), col);
+                            columnMappings.put(select.table.alias + "." + column.getName(), col);
+                            columnMappings.put(select.table.alias + "." + column.getAlias(), col);
+                        }
                     }
+
                     //关联表
                     for (Join join : joins.values()) {
-                        for (RDBColumnMetadata column : join.table.metadata.getColumns()) {
-                            Column col = new Column(column.getName(), column.getAlias(), join.alias, column);
-                            columnMappings.putIfAbsent(column.getName(), col);
-                            columnMappings.putIfAbsent(column.getAlias(), col);
+                        if (join.table instanceof SelectTable) {
+                            for (Column column : select.getColumnList()) {
+                                columnMappings.putIfAbsent(column.getName(), column);
+                                columnMappings.putIfAbsent(column.getAlias(), column);
+                                columnMappings.put(column.getOwner() + "." + column.getName(), column);
+                                columnMappings.put(column.getOwner() + "." + column.getAlias(), column);
+                            }
+                        } else {
+                            for (RDBColumnMetadata column : join.table.metadata.getColumns()) {
+                                Column col = new Column(column.getName(), column.getAlias(), join.alias, column);
+                                columnMappings.putIfAbsent(column.getName(), col);
+                                columnMappings.putIfAbsent(column.getAlias(), col);
 
-                            columnMappings.put(join.alias + "." + column.getName(), col);
-                            columnMappings.put(join.alias + "." + column.getAlias(), col);
+                                columnMappings.put(join.alias + "." + column.getName(), col);
+                                columnMappings.put(join.alias + "." + column.getAlias(), col);
+                            }
                         }
+
                     }
                 }
             }
@@ -129,6 +149,19 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
         return columnMappings;
     }
 
+    private Column getColumnOrSelectColumn(String name) {
+        Column column = select.getColumns().get(name);
+
+        if (column != null) {
+            return column;
+        }
+        column = select.getColumns().get(QueryHelperUtils.toSnake(name));
+        if (column != null) {
+            return column;
+        }
+
+        return getColumnMappings().get(name);
+    }
 
     @SneakyThrows
     private static SelectBody parse(String sql) {
@@ -146,14 +179,17 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
     }
 
     private String parsePlainName(String name) {
-        if (null == name) {
+        if (name == null || name.length() == 0) {
             return null;
         }
+        char firstChar = name.charAt(0);
 
-        if (name.startsWith(database.getMetadata().getDialect().getQuoteStart())
-                && name.endsWith(database.getMetadata().getDialect().getQuoteEnd())) {
-            return name.substring(1, name.length() - 1);
+        if (firstChar == '`' || firstChar == '"' || firstChar == '[' ||
+                name.startsWith(database.getMetadata().getDialect().getQuoteStart())) {
+
+            return new String(name.toCharArray(), 1, name.length() - 2);
         }
+
         return name;
     }
 
@@ -317,13 +353,25 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
         }
     }
 
+    private void refactorAlias(Alias alias) {
+        if (alias != null) {
+            alias.setName(
+                    database
+                            .getMetadata()
+                            .getDialect()
+                            .quote(parsePlainName(alias.getName()), false)
+            );
+        }
+    }
+
     @Override
     public void visit(SelectExpressionItem selectExpressionItem) {
         Expression expr = selectExpressionItem.getExpression();
         Alias alias = selectExpressionItem.getAlias();
 
         if (!(expr instanceof net.sf.jsqlparser.schema.Column)) {
-            String aliasName = alias == null ? expr.toString() : alias.getName();
+            String aliasName = parsePlainName(alias == null ? expr.toString() : alias.getName());
+            refactorAlias(alias);
             select.columnList.add(new ExpressionColumn(aliasName, null, null, selectExpressionItem));
 
             return;
@@ -334,7 +382,7 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
 
         QueryAnalyzer.Table table = getTable(column.getTable());
 
-        String aliasName = alias == null ? columnName : alias.getName();
+        String aliasName = alias == null ? columnName : parsePlainName(alias.getName());
 
         RDBColumnMetadata metadata = table
                 .getMetadata()
@@ -463,7 +511,8 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
             }
             return metadata
                     .findFeature(createFeatureId(term.getTermType()))
-                    .map(feature -> feature.createFragments(table.alias + "." + dialect.quote(col.name), col.metadata, term))
+                    .map(feature -> feature.createFragments(
+                            table.alias + "." + dialect.quote(col.name, col.metadata != null), col.metadata, term))
                     .orElse(EmptySqlFragments.INSTANCE);
         }
     }
@@ -504,7 +553,7 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
                 }
                 boolean sameTable = Objects.equals(column.owner, select.table.alias);
 
-                columns.append(column.owner).append('.').append(dialect.quote(column.name))
+                columns.append(column.owner).append('.').append(dialect.quote(column.name, column.metadata != null))
                        .append(" as ")
                        .append(sameTable
                                        ? dialect.quote(column.alias, false)
@@ -682,13 +731,15 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
                 PrepareSqlFragments orderByColumn = null;
                 for (Sort sort : param.getSorts()) {
                     String name = sort.getName();
-                    Column column = getColumnMappings().get(name);
+                    Column column = getColumnOrSelectColumn(name);
 
                     if (column == null) {
                         continue;
                     }
                     boolean desc = "desc".equalsIgnoreCase(sort.getOrder());
-                    String columnName = org.hswebframework.ezorm.core.utils.StringUtils
+                    String columnName = column.getOwner() == null ?
+                            database.getMetadata().getDialect().quote(column.getName(), false)
+                            : org.hswebframework.ezorm.core.utils.StringUtils
                             .concat(column.getOwner(),
                                     ".",
                                     database.getMetadata().getDialect().quote(column.getName()));
