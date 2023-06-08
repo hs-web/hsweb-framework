@@ -1,8 +1,6 @@
 package org.hswebframework.web.crud.query;
 
-import io.netty.util.concurrent.FastThreadLocal;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -39,7 +37,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -724,7 +721,7 @@ public class DefaultQueryHelper implements QueryHelper {
                             QueryParamEntity param = new QueryParamEntity();
                             param.setTerms(refactorTerms(data));
                             return parent
-                                    .select(join.mainClass)
+                                    .select(join.mainClassSafe())
                                     .all(join.mainClass)
                                     .from(join.mainClass)
                                     .where(param.noPaging())
@@ -776,16 +773,14 @@ public class DefaultQueryHelper implements QueryHelper {
                                 flux,
                                 t -> FastBeanCopier.getProperty(t, mainProperty),
                                 idList -> {
-
                                     term.setColumn(joinProperty);
                                     term.setTermType(TermType.in);
                                     term.setValue(idList);
 
                                     QueryParamEntity param = new QueryParamEntity();
                                     param.setTerms(terms);
-
                                     return parent
-                                            .select(join.mainClass)
+                                            .select(join.mainClassSafe())
                                             .all(join.mainClass)
                                             .from(join.mainClass)
                                             .where(param.noPaging())
@@ -964,6 +959,10 @@ public class DefaultQueryHelper implements QueryHelper {
         private String alias;
         private final Conditional<?> target;
 
+        @SuppressWarnings("all")
+        private Class<Object> mainClassSafe(){
+            return (Class<Object>) mainClass;
+        }
         @Override
         public <T, T2> JoinConditionalSpecImpl applyColumn(StaticMethodReferenceColumn<T> mainColumn,
                                                            String termType,
