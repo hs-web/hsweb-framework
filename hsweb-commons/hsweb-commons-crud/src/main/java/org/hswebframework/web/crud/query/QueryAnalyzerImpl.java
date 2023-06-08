@@ -89,6 +89,16 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
         this.sql = sql;
     }
 
+
+    public boolean columnIsExpression(String name, int index) {
+
+        if (index >= 0 && select.getColumnList().size() > index) {
+            return select.getColumnList().get(index) instanceof ExpressionColumn;
+        }
+
+        return select.getColumns().get(name) instanceof ExpressionColumn;
+    }
+
     private Map<String, Column> getColumnMappings() {
         if (columnMappings == null) {
             synchronized (this) {
@@ -656,7 +666,7 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
                 appendWhere(sql, param);
 
                 sql.addSql(suffix)
-                   .addSql(")");
+                   .addSql(") _t");
             }
 
             return sql

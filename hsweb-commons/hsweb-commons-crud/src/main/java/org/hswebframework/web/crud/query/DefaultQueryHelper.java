@@ -161,10 +161,10 @@ public class DefaultQueryHelper implements QueryHelper {
             String column = context.getColumnLabel();
             QueryAnalyzer.Column col = analyzer.findColumn(column).orElse(null);
 
-            if (col != null) {
-                doWrap(instance, column, col.metadata.decode(context.getResult()));
+            if (col != null && !analyzer.columnIsExpression(column, context.getColumnIndex())) {
+                doWrap(instance, col.alias, col.metadata.decode(context.getResult()));
             } else {
-                doWrap(instance, toHump(column), getCodec().decode(context.getResult()));
+                doWrap(instance, col == null ? toHump(column) : col.alias, getCodec().decode(context.getResult()));
             }
         }
 

@@ -62,6 +62,15 @@ public interface QueryAnalyzer {
     Optional<Column> findColumn(String name);
 
     /**
+     * 判断查询的列是否为表达式,如使用了函数: sum(num) as num
+     *
+     * @param name  列名
+     * @param index 列序号
+     * @return 是否为表达式
+     */
+    boolean columnIsExpression(String name, int index);
+
+    /**
      * @return 关联表信息
      */
     List<Join> joins();
