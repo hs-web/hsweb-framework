@@ -1,21 +1,30 @@
 package org.hswebframework.web.crud.query;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.hswebframework.ezorm.core.Conditional;
+import org.hswebframework.ezorm.core.MethodReferenceConverter;
+import org.hswebframework.ezorm.core.StaticMethodReferenceColumn;
 import org.hswebframework.ezorm.core.dsl.Query;
+import org.hswebframework.ezorm.rdb.mapping.ReactiveQuery;
 import org.hswebframework.ezorm.rdb.mapping.defaults.record.Record;
 import org.hswebframework.ezorm.rdb.operator.dml.query.SortOrder;
+import org.hswebframework.web.api.crud.entity.GenericEntity;
 import org.hswebframework.web.api.crud.entity.PagerResult;
 import org.hswebframework.web.api.crud.entity.QueryParamEntity;
 import org.slf4j.Logger;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * 使用DSL方式链式调用来构建复杂查询
@@ -338,7 +347,7 @@ public interface QueryHelper {
      *
      * @param <R> 查询结果类型
      */
-    interface JoinSpec<R> extends WhereSpec<R> {
+    interface JoinSpec<R> extends WhereSpec<R>, SortSpec<R> {
 
 
         /**
@@ -584,9 +593,97 @@ public interface QueryHelper {
 
     }
 
+    /**
+     * 一对多数据组合,通常用于进行一对多的数据查询.
+     *
+     * <pre>{@code
+     *
+     *  Flux<MyEntity> flux = QueryHelper
+     *          .combineOneToMany(
+     *               myService.createQuery().fetch(),
+     *               MyEntity::getId,
+     *               infoService.createQuery(),
+     *               InfoEntity::getMyId,
+     *               MyEntity::setInfos
+     *           )
+     *
+     * }</pre>
+     *
+     * @param source       源数据
+     * @param idMapper     主数据的ID获取器,如: MyEntity::getId
+     * @param fetcher      关联数据获取器,如: infoService.createQuery()
+     * @param mainIdGetter 关联数据的主数据ID获取器,如: InfoEntity::getMyId
+     * @param setter       主数据的关联数据设置器,如: MyEntity::setInfos
+     * @param <T>          主数据类型
+     * @param <ID>         主数据ID类型
+     * @param <R>          关联数据类型
+     * @return Flux 组合后的数据流
+     */
+    static <T, ID, R> Flux<T> combineOneToMany(Flux<T> source,
+                                               Getter<T,@NotNull ID> idMapper,
+                                               ReactiveQuery<R> fetcher,
+                                               Getter<R,@NotNull ID> mainIdGetter,
+                                               Setter<T, List<R>> setter) {
+        return combineOneToMany(source,
+                                idMapper,
+                                list -> fetcher
+                                        .in(MethodReferenceConverter.convertToColumn(mainIdGetter), list)
+                                        .fetch(),
+                                mainIdGetter,
+                                setter);
+    }
 
+    /**
+     * 一对多数据组合,通常用于进行一对多的数据查询.
+     *
+     * @param source       源数据
+     * @param idMapper     主数据的ID获取器,如: MyEntity::getId
+     * @param fetcher      关联数据获取器,如: ids->infoService.createQuery().in(InfoEntity::getMyId,ids).fetch()
+     * @param mainIdGetter 关联数据的主数据ID获取器,如: InfoEntity::getMyId
+     * @param setter       主数据的关联数据设置器,如: MyEntity::setInfos
+     * @param <T>          主数据类型
+     * @param <ID>         主数据ID类型
+     * @param <R>          关联数据类型
+     * @return Flux 组合后的数据流
+     */
+    static <T, ID, R> Flux<T> combineOneToMany(Flux<T> source,
+                                               Getter<T, @NotNull ID> idMapper,
+                                               Function<Set<ID>, Flux<R>> fetcher,
+                                               Getter<R, @NotNull ID> mainIdGetter,
+                                               Setter<T, List<R>> setter) {
+
+        return source
+                .buffer(200)
+                .concatMap(buffer -> {
+                    Map<ID, T> mapping = buffer
+                            .stream()
+                            .collect(Collectors.toMap(idMapper, Function.identity(), (a, b) -> b));
+                    return fetcher
+                            .apply(mapping.keySet())
+                            .collect(Collectors.groupingBy(mainIdGetter))
+                            .flatMapIterable(Map::entrySet)
+                            .doOnNext(e -> {
+                                T main = mapping.get(e.getKey());
+                                if (main != null) {
+                                    setter.accept(main, e.getValue());
+                                }
+                            })
+                            .thenMany(Flux.fromIterable(buffer));
+                });
+    }
+
+    /**
+     * 转换分页结果中的数据为另外一种数据
+     *
+     * @param source   原始分页数据
+     * @param transfer 转换器
+     * @param <S>
+     * @param <T>
+     * @return 转换后的分页数据
+     */
     @SuppressWarnings("all")
-    static <S, T> Mono<PagerResult<T>> transformPageResult(Mono<PagerResult<S>> source, Function<List<S>, Mono<List<T>>> transfer) {
+    static <S, T> Mono<PagerResult<T>> transformPageResult(Mono<PagerResult<S>> source,
+                                                           Function<List<S>, Mono<List<T>>> transfer) {
         return source.flatMap(result -> {
             if (result.getTotal() > 0) {
                 return transfer

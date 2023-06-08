@@ -2,11 +2,14 @@ package org.hswebframework.web.crud.query;
 
 import io.netty.util.concurrent.FastThreadLocal;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.hswebframework.ezorm.core.*;
 import org.hswebframework.ezorm.core.dsl.Query;
 import org.hswebframework.ezorm.core.param.Term;
+import org.hswebframework.ezorm.core.param.TermType;
 import org.hswebframework.ezorm.rdb.executor.SqlRequest;
 import org.hswebframework.ezorm.rdb.executor.reactive.ReactiveSqlExecutor;
 import org.hswebframework.ezorm.rdb.executor.wrapper.ColumnWrapperContext;
@@ -34,7 +37,9 @@ import org.hswebframework.web.api.crud.entity.QueryParamEntity;
 import org.hswebframework.web.bean.FastBeanCopier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -42,14 +47,12 @@ import reactor.util.context.Context;
 import reactor.util.context.ContextView;
 
 import javax.persistence.Table;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 
 @AllArgsConstructor
@@ -167,7 +170,6 @@ public class DefaultQueryHelper implements QueryHelper {
                 doWrap(instance, col == null ? QueryHelperUtils.toHump(column) : col.alias, getCodec().decode(context.getResult()));
             }
         }
-
 
 
         @Override
@@ -299,6 +301,9 @@ public class DefaultQueryHelper implements QueryHelper {
 
             private final String targetProperty;
 
+            private final ResolvableType propertyType;
+
+            @SneakyThrows
             public All(QuerySpec<R> parent,
                        String table,
                        Class<?> tableType,
@@ -307,9 +312,18 @@ public class DefaultQueryHelper implements QueryHelper {
                 this.table = table;
                 this.tableType = tableType;
                 this.targetProperty = setter == null ? null : MethodReferenceConverter.convertToColumn(setter);
+                if (this.targetProperty != null) {
+                    propertyType = ResolvableType.forField(parent.clazz.getDeclaredField(targetProperty), parent.clazz);
+                } else {
+                    propertyType = null;
+                }
                 String prefix = targetProperty == null ? "all" : targetProperty;
                 int size = parent.mappings.size();
                 this.alias = size == 0 ? prefix : prefix + "_" + size;
+            }
+
+            boolean propertyTypeIsCollection() {
+                return propertyType != null && Collection.class.isAssignableFrom(propertyType.toClass());
             }
 
             @Override
@@ -461,6 +475,7 @@ public class DefaultQueryHelper implements QueryHelper {
         private QueryParamEntity param;
         final ContextView logContext;
 
+        private Function<Flux<R>, Flux<R>> resultHandler = Function.identity();
 
         public QuerySpec(Class<R> clazz, DefaultQueryHelper parent) {
             this.clazz = clazz;
@@ -535,7 +550,8 @@ public class DefaultQueryHelper implements QueryHelper {
             return createQuery()
                     .fetch(this)
                     .reactive()
-                    .contextWrite(logContext);
+                    .contextWrite(logContext)
+                    .as(resultHandler);
         }
 
         @Override
@@ -554,6 +570,7 @@ public class DefaultQueryHelper implements QueryHelper {
                         .paging(pageIndex, pageSize)
                         .fetch(this)
                         .reactive()
+                        .as(resultHandler)
                         .collectList()
                         .map(list -> PagerResult.of(param.getTotal(), list, param))
                         .contextWrite(logContext);
@@ -565,6 +582,7 @@ public class DefaultQueryHelper implements QueryHelper {
                                         .paging(pageIndex, pageSize)
                                         .fetch(this)
                                         .reactive()
+                                        .as(resultHandler)
                                         .collectList(),
                                 (total, list) -> PagerResult.of(total, list, param))
                            .contextWrite(logContext);
@@ -583,6 +601,7 @@ public class DefaultQueryHelper implements QueryHelper {
                                 .paging(copy.getPageIndex(), copy.getPageSize())
                                 .fetch(this)
                                 .reactive()
+                                .as(resultHandler)
                                 .collectList()
                                 .map(list -> PagerResult.of(i, list, copy))
                                 .contextWrite(logContext);
@@ -643,6 +662,24 @@ public class DefaultQueryHelper implements QueryHelper {
 
             QueryParamEntity param = condition.getParam();
 
+            for (ColumnMapping<R> mapping : mappings) {
+                if (mapping instanceof ColumnMapping.All) {
+                    // 1对多
+                    ColumnMapping.All<R, ?> all = (ColumnMapping.All<R, ?>) mapping;
+                    if (all.propertyTypeIsCollection()) {
+                        if (all.tableType == null) {
+                            if (Objects.equals(all.table, spec.alias)) {
+                                buildOnToMany(param, spec, all);
+                                return this;
+                            }
+                        } else if (all.tableType == type) {
+                            buildOnToMany(param, spec, all);
+                            return this;
+                        }
+                    }
+                }
+            }
+
             Join join = new Join();
             join.setAlias(spec.alias);
             join.setTerms(param.getTerms());
@@ -652,6 +689,118 @@ public class DefaultQueryHelper implements QueryHelper {
             query.join(join);
             return this;
 
+        }
+
+        class Joiner {
+            private final List<Term> terms;
+
+            private final List<Term> joinTerms = new ArrayList<>();
+
+            public Joiner(List<Term> terms) {
+                this.terms = terms;
+                prepare(terms);
+            }
+
+            public void prepare(List<Term> terms) {
+                for (Term term : terms) {
+                    if (Objects.equals(TermType.eq, term.getTermType())
+                            && term.getValue() instanceof JoinConditionalSpecImpl.ColumnRef) {
+                        joinTerms.add(term);
+                    }
+                    if (term.getTerms() != null) {
+                        prepare(term.getTerms());
+                    }
+                }
+            }
+
+
+            private Function<Flux<R>, Flux<R>> buildHandler(JoinConditionalSpecImpl join,
+                                                            ColumnMapping.All<R, ?> mapping) {
+                if (joinTerms.size() == 1) {
+                    return buildBatchHandler(join, mapping);
+                }
+                return flux -> flux
+                        .flatMap(data -> {
+                            QueryParamEntity param = new QueryParamEntity();
+                            param.setTerms(refactorTerms(data));
+                            return parent
+                                    .select(join.mainClass)
+                                    .all(join.mainClass)
+                                    .from(join.mainClass)
+                                    .where(param.noPaging())
+                                    .fetch()
+                                    .collectList()
+                                    .map(list -> FastBeanCopier.copy(Collections.singletonMap(mapping.targetProperty, list), data));
+                        }, 16);
+            }
+
+            private List<Term> refactorTerms(R main) {
+                return refactorTerms(terms.stream().map(Term::clone).collect(Collectors.toList()), main);
+            }
+
+            private List<Term> refactorTerms(List<Term> terms, R main) {
+                for (Term term : terms) {
+                    refactorTerms(main, term);
+                    if (CollectionUtils.isNotEmpty(term.getTerms())) {
+                        refactorTerms(term.getTerms(), main);
+                    }
+                }
+                return terms;
+            }
+
+            private void refactorTerms(R main, Term term) {
+                if (term.getValue() instanceof JoinConditionalSpecImpl.ColumnRef) {
+                    JoinConditionalSpecImpl.ColumnRef ref = (JoinConditionalSpecImpl.ColumnRef) term.getValue();
+                    String mainProperty =  ref.getColumn().getAlias();
+
+                    Object value = FastBeanCopier.getProperty(main, mainProperty);
+                    if (value == null) {
+                        term.setTermType(TermType.isnull);
+                        term.setValue(1);
+                    } else {
+                        term.setValue(value);
+                    }
+                }
+            }
+
+            private Function<Flux<R>, Flux<R>> buildBatchHandler(JoinConditionalSpecImpl join,
+                                                                 ColumnMapping.All<R, ?> mapping) {
+                Term term = joinTerms.get(0);
+                JoinConditionalSpecImpl.ColumnRef ref = (JoinConditionalSpecImpl.ColumnRef) term.getValue();
+
+                String joinProperty = term.getColumn();
+                String mainProperty = ref.getColumn().getAlias();
+
+                return flux -> QueryHelper
+                        .combineOneToMany(
+                                flux,
+                                t -> FastBeanCopier.getProperty(t, mainProperty),
+                                idList -> {
+
+                                    term.setColumn(joinProperty);
+                                    term.setTermType(TermType.in);
+                                    term.setValue(idList);
+
+                                    QueryParamEntity param = new QueryParamEntity();
+                                    param.setTerms(terms);
+
+                                    return parent
+                                            .select(join.mainClass)
+                                            .all(join.mainClass)
+                                            .from(join.mainClass)
+                                            .where(param.noPaging())
+                                            .fetch();
+                                },
+                                r -> FastBeanCopier.getProperty(r, joinProperty),
+                                (t, list) -> FastBeanCopier.copy(Collections.singletonMap(mapping.targetProperty, list), t)
+                        );
+            }
+
+        }
+
+        private void buildOnToMany(QueryParamEntity param, JoinConditionalSpecImpl join, ColumnMapping.All<R, ?> mapping) {
+
+            this.resultHandler = this.resultHandler.andThen(new Joiner(param.getTerms()).buildHandler(join, mapping));
         }
 
         @Override
@@ -854,9 +1003,21 @@ public class DefaultQueryHelper implements QueryHelper {
                     .getColumn(column)
                     .orElseThrow(() -> new IllegalArgumentException("column [" + column + "] not found"));
 
-            getAccepter().accept(mainColumn, termType, NativeSql.of(columnMetadata.getFullName(alias)));
+            getAccepter().accept(mainColumn, termType, new ColumnRef(columnMetadata, alias));
 
             return this;
+        }
+
+        @AllArgsConstructor
+        @lombok.Getter
+        public static class ColumnRef implements NativeSql {
+            private final RDBColumnMetadata column;
+            private final String alias;
+
+            @Override
+            public String getSql() {
+                return column.getFullName(alias);
+            }
         }
 
         @Override

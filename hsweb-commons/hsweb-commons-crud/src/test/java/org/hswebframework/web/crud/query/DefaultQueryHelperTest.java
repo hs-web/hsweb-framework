@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.*;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -133,7 +134,8 @@ class DefaultQueryHelperTest {
         database.dml()
                 .insert("s_test_event")
                 .value("id", "helper_test")
-                .value("name", "Ename")
+                .value("name", "main")
+                .value("age", 10)
                 .execute()
                 .sync();
 
@@ -149,27 +151,28 @@ class DefaultQueryHelperTest {
         DefaultQueryHelper helper = new DefaultQueryHelper(database);
 
         helper.select(TestInfo.class)
-              .all(EventTestEntity.class, TestInfo::setEvent)
+              .all("e1", TestInfo::setEventList)
+              .all("e2", TestInfo::setEvent)
               .all(TestEntity.class)
               .from(TestEntity.class)
               .leftJoin(EventTestEntity.class,
                         join -> join
                                 .alias("e1")
-                                .is(EventTestEntity::getId, TestEntity::getId))
+                                .is(EventTestEntity::getId, TestEntity::getId)
+//                                .is(EventTestEntity::getName, TestEntity::getId)
+                                .notNull(EventTestEntity::getAge))
               .leftJoin(EventTestEntity.class,
                         join -> join
                                 .alias("e2")
-                                .is(EventTestEntity::getId, "e1", EventTestEntity::getId)
-                                .nest()
-                                .is(TestEntity::getId, EventTestEntity::getId))
+                                .is(EventTestEntity::getId, TestEntity::getId))
 
-              .where(dsl -> dsl.is(EventTestEntity::getName, "Ename")
-                               .is("event.name", "Ename")
-                               .orNest()
-                               .is(TestEntity::getName, "main")
-                               .is("e2.name", "Ename")
-                               .end()
-              )
+//              .where(dsl -> dsl.is(EventTestEntity::getName, "Ename")
+//                               .is("e1.name", "Ename")
+//                               .orNest()
+//                               .is(TestEntity::getName, "main")
+//                               .is("e1.name", "Ename")
+//                               .end()
+//              )
               .orderByAsc(TestEntity::getAge)
               .orderByDesc(EventTestEntity::getAge)
               .fetchPaged()
@@ -194,5 +197,7 @@ class DefaultQueryHelperTest {
         private String testName;
 
         private EventTestEntity event;
+
+        private List<EventTestEntity> eventList;
     }
 }
