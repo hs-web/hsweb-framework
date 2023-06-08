@@ -485,9 +485,13 @@ public interface QueryHelper {
          * <pre>{@code
          *   all(DetailEntity.class,MyEntity::setDetail)
          * }</pre>
+         * <p>
+         * 如果setter对应的属性类型为List,则自动进行一对多查询.
+         * 此时不支持按关联表进行条件查询主表的数据.
          *
          * @param tableType 类型,只能是from或者join的类型.
          * @return Self
+         * @see QueryHelper#combineOneToMany(Flux, Getter, ReactiveQuery, Getter, Setter)
          */
         <V> Self all(Class<?> tableType, Setter<R, V> setter);
 
@@ -620,9 +624,9 @@ public interface QueryHelper {
      * @return Flux 组合后的数据流
      */
     static <T, ID, R> Flux<T> combineOneToMany(Flux<T> source,
-                                               Getter<T,@NotNull ID> idMapper,
+                                               Getter<T, @NotNull ID> idMapper,
                                                ReactiveQuery<R> fetcher,
-                                               Getter<R,@NotNull ID> mainIdGetter,
+                                               Getter<R, @NotNull ID> mainIdGetter,
                                                Setter<T, List<R>> setter) {
         return combineOneToMany(source,
                                 idMapper,
