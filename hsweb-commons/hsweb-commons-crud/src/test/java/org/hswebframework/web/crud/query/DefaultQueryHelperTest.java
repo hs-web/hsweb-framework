@@ -151,8 +151,8 @@ class DefaultQueryHelperTest {
         DefaultQueryHelper helper = new DefaultQueryHelper(database);
 
         helper.select(TestInfo.class)
-              .all("e1", TestInfo::setEventList)
-              .all("e2", TestInfo::setEvent)
+              .all(EventTestEntity.class, TestInfo::setEventList)
+//              .all("e2", TestInfo::setEvent)
               .all(TestEntity.class)
               .from(TestEntity.class)
               .leftJoin(EventTestEntity.class,
@@ -161,10 +161,10 @@ class DefaultQueryHelperTest {
                                 .is(EventTestEntity::getId, TestEntity::getId)
 //                                .is(EventTestEntity::getName, TestEntity::getId)
                                 .notNull(EventTestEntity::getAge))
-              .leftJoin(EventTestEntity.class,
-                        join -> join
-                                .alias("e2")
-                                .is(EventTestEntity::getId, TestEntity::getId))
+//              .leftJoin(EventTestEntity.class,
+//                        join -> join
+//                                .alias("e2")
+//                                .is(EventTestEntity::getId, TestEntity::getId))
 
 //              .where(dsl -> dsl.is(EventTestEntity::getName, "Ename")
 //                               .is("e1.name", "Ename")

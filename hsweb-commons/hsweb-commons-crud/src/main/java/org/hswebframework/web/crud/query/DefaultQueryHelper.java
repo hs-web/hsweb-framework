@@ -369,6 +369,9 @@ public class DefaultQueryHelper implements QueryHelper {
 
             @Override
             SelectColumnSupplier[] forSelect() {
+                if(propertyTypeIsCollection()){
+                    return new SelectColumnSupplier[0];
+                }
                 //查询主表
                 if (tableType == parent.from) {
                     return toColumns(this.target = parent.table, null);
