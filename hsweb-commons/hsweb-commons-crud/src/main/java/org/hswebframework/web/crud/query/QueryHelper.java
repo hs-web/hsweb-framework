@@ -1,14 +1,11 @@
 package org.hswebframework.web.crud.query;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.hswebframework.ezorm.core.Conditional;
 import org.hswebframework.ezorm.core.MethodReferenceConverter;
-import org.hswebframework.ezorm.core.StaticMethodReferenceColumn;
 import org.hswebframework.ezorm.core.dsl.Query;
 import org.hswebframework.ezorm.rdb.mapping.ReactiveQuery;
 import org.hswebframework.ezorm.rdb.mapping.defaults.record.Record;
 import org.hswebframework.ezorm.rdb.operator.dml.query.SortOrder;
-import org.hswebframework.web.api.crud.entity.GenericEntity;
 import org.hswebframework.web.api.crud.entity.PagerResult;
 import org.hswebframework.web.api.crud.entity.QueryParamEntity;
 import org.slf4j.Logger;
@@ -55,6 +52,11 @@ import java.util.stream.Collectors;
  *  }</pre>
  *
  * @author zhouhao
+ * @see QueryHelper#select(String, Object...)
+ * @see QueryHelper#select(Class)
+ * @see QueryHelper#transformPageResult(Mono, Function)
+ * @see QueryHelper#combineOneToMany(Flux, Getter, ReactiveQuery, Getter, Setter)
+ * @see QueryHelper#combineOneToMany(Flux, Getter, Function, Getter, Setter)
  * @since 4.0.16
  */
 public interface QueryHelper {
@@ -83,7 +85,7 @@ public interface QueryHelper {
     /**
      * 创建原生SQL查询器
      * <p>
-     * 预编译参数仅支持<code>?</code>,如果要使用模版,请使用{@link org.hswebframework.ezorm.rdb.executor.SqlRequests#template(String, Object)}
+     * 预编译参数仅支持<code>?</code>占位符,如果要使用模版,请使用{@link org.hswebframework.ezorm.rdb.executor.SqlRequests#template(String, Object)}
      * 构造sql以及参数
      * <pre>{@code
      *
@@ -441,6 +443,13 @@ public interface QueryHelper {
          */
         Mono<PagerResult<R>> fetchPaged();
 
+        /**
+         * 执行分页查询,并对结果进行转换
+         *
+         * @param transfer 转换器
+         * @param <T>      转换后的数据类型
+         * @return 转换后的分页结果
+         */
         default <T> Mono<PagerResult<T>> fetchPaged(Function<List<R>, Mono<List<T>>> transfer) {
             return transformPageResult(fetchPaged(), transfer);
         }
@@ -454,6 +463,15 @@ public interface QueryHelper {
          */
         Mono<PagerResult<R>> fetchPaged(int pageIndex, int pageSize);
 
+        /**
+         * 指定分页执行查询,并对结果进行转换
+         *
+         * @param pageIndex 分页序号,从0开始
+         * @param pageSize  每页数量
+         * @param transfer  转换器
+         * @param <T>       转换后的数据类型
+         * @return 转换后的分页结果
+         */
         default <T> Mono<PagerResult<T>> fetchPaged(int pageIndex, int pageSize, Function<List<R>, Mono<List<T>>> transfer) {
             return transformPageResult(fetchPaged(pageIndex, pageSize), transfer);
         }
