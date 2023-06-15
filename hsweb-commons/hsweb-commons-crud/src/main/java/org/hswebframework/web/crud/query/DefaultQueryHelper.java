@@ -162,7 +162,7 @@ public class DefaultQueryHelper implements QueryHelper {
             QueryAnalyzer.Column col = analyzer.findColumn(column).orElse(null);
 
             if (col != null && !analyzer.columnIsExpression(column, context.getColumnIndex())) {
-                doWrap(instance, col.alias, col.metadata.decode(context.getResult()));
+                doWrap(instance, column, col.metadata.decode(context.getResult()));
             } else {
                 doWrap(instance, col == null ? QueryHelperUtils.toHump(column) : col.alias, getCodec().decode(context.getResult()));
             }
@@ -1153,7 +1153,7 @@ public class DefaultQueryHelper implements QueryHelper {
                     .getColumn(column)
                     .orElseThrow(() -> new IllegalArgumentException("column [" + column + "] not found"));
 
-            getAccepter().accept(mainColumn, termType, NativeSql.of(columnMetadata.getFullName(alias)));
+            getAccepter().accept(mainColumn, termType, new JoinConditionalSpecImpl.ColumnRef(columnMetadata,alias));
 
             return (T) this;
         }

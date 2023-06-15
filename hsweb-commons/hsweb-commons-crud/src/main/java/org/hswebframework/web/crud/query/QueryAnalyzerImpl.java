@@ -285,18 +285,21 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
             QueryAnalyzer.SelectTable selectTable = ((QueryAnalyzer.SelectTable) table);
 
             for (QueryAnalyzer.Column column : selectTable.columns.values()) {
+                String alias = table == select.table ? column.getAlias() : table.alias + "." + column.getAlias();
                 container.add(new QueryAnalyzer.Column(
                         column.name,
-                        column.getAlias(),
+                        alias,
                         table.alias,
                         column.metadata
                 ));
             }
         } else {
             for (RDBColumnMetadata column : table.metadata.getColumns()) {
+                String alias = table == select.table ? column.getAlias() : table.alias + "." + column.getAlias();
+
                 container.add(new QueryAnalyzer.Column(
                         column.getName(),
-                        column.getAlias(),
+                        alias,
                         table.alias,
                         column
                 ));
@@ -551,13 +554,10 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
                     fastCount = false;
                     continue;
                 }
-                boolean sameTable = Objects.equals(column.owner, select.table.alias);
 
                 columns.append(column.owner).append('.').append(dialect.quote(column.name, column.metadata != null))
                        .append(" as ")
-                       .append(sameTable
-                                       ? dialect.quote(column.alias, false)
-                                       : dialect.quote(column.owner + "." + column.alias, false));
+                       .append(dialect.quote(column.alias, false));
             }
         }
 
