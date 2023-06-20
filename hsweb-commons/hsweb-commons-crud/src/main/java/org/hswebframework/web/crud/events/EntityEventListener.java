@@ -2,20 +2,19 @@ package org.hswebframework.web.crud.events;
 
 
 import lombok.AllArgsConstructor;
-import org.apache.commons.beanutils.BeanUtilsBean;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
 import org.hswebframework.ezorm.core.GlobalConfig;
 import org.hswebframework.ezorm.core.param.QueryParam;
-import org.hswebframework.ezorm.rdb.events.*;
 import org.hswebframework.ezorm.rdb.events.EventListener;
-import org.hswebframework.ezorm.rdb.events.EventType;
+import org.hswebframework.ezorm.rdb.events.*;
 import org.hswebframework.ezorm.rdb.executor.NullValue;
 import org.hswebframework.ezorm.rdb.mapping.*;
 import org.hswebframework.ezorm.rdb.mapping.events.MappingContextKeys;
 import org.hswebframework.ezorm.rdb.mapping.events.MappingEventTypes;
 import org.hswebframework.ezorm.rdb.mapping.events.ReactiveResultHolder;
 import org.hswebframework.ezorm.rdb.metadata.RDBColumnMetadata;
-import org.hswebframework.ezorm.rdb.metadata.TableOrViewMetadata;
 import org.hswebframework.ezorm.rdb.operator.builder.fragments.NativeSql;
 import org.hswebframework.web.api.crud.entity.Entity;
 import org.hswebframework.web.bean.FastBeanCopier;
@@ -33,10 +32,11 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
-import static org.hswebframework.web.crud.events.EntityEventHelper.*;
+import static org.hswebframework.web.crud.events.EntityEventHelper.isDoFireEvent;
+import static org.hswebframework.web.crud.events.EntityEventHelper.publishEvent;
 
 @SuppressWarnings("all")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class EntityEventListener implements EventListener, Ordered {
 
     public static final ContextKey<List<Object>> readyToDeleteContextKey = ContextKey.of("readyToDelete");
@@ -45,6 +45,9 @@ public class EntityEventListener implements EventListener, Ordered {
     private final ApplicationEventPublisher eventPublisher;
 
     private final EntityEventListenerConfigure listenerConfigure;
+
+    @Setter
+    private SqlExpressionInvoker expressionInvoker;
 
     @Override
     public String getId() {
@@ -147,6 +150,7 @@ public class EntityEventListener implements EventListener, Ordered {
                 .orElse(Collections.emptyMap());
 
         for (Object old : olds) {
+            Map<String, Object> oldMap = null;
             Object data = FastBeanCopier.copy(old, mapping.newInstance());
             for (Map.Entry<String, Object> entry : columns.entrySet()) {
 
@@ -161,6 +165,16 @@ public class EntityEventListener implements EventListener, Ordered {
                 if (value instanceof NullValue) {
                     value = null;
                 }
+                //原生sql
+                if (value instanceof NativeSql) {
+                    value = expressionInvoker == null ? null : expressionInvoker.invoke(
+                            ((NativeSql) value),
+                            mapping,
+                            oldMap == null ? oldMap = createFullMapping(old, mapping) : oldMap);
+                    if (value == null) {
+                        continue;
+                    }
+                }
 
                 GlobalConfig
                         .getPropertyOperator()
@@ -170,6 +184,18 @@ public class EntityEventListener implements EventListener, Ordered {
             newValues.add(data);
         }
         return newValues;
+    }
+
+    protected Map<String, Object> createFullMapping(Object old, EntityColumnMapping mapping) {
+        Map<String, Object> map = FastBeanCopier.copy(old, new HashMap<>());
+
+        for (RDBColumnMetadata column : mapping.getTable().getColumns()) {
+            if (map.containsKey(column.getAlias())) {
+                map.put(column.getName(), map.get(column.getAlias()));
+            }
+        }
+
+        return map;
     }
 
     protected Mono<Void> sendUpdateEvent(List<Object> before,
@@ -300,7 +326,7 @@ public class EntityEventListener implements EventListener, Ordered {
                                                       .setParam(dslUpdate.toQueryParam())
                                                       .fetch()
                                                       .collectList()
-                                                      .doOnNext(list->{
+                                                      .doOnNext(list -> {
                                                           context.set(readyToDeleteContextKey, list);
                                                       })
                                                       .filter(CollectionUtils::isNotEmpty)

@@ -24,6 +24,7 @@ import org.hswebframework.web.crud.annotation.EnableEasyormRepository;
 import org.hswebframework.web.crud.entity.factory.EntityMappingCustomizer;
 import org.hswebframework.web.crud.entity.factory.MapperEntityFactory;
 import org.hswebframework.web.crud.events.*;
+import org.hswebframework.web.crud.events.expr.SpelSqlExpressionInvoker;
 import org.hswebframework.web.crud.generator.CurrentTimeGenerator;
 import org.hswebframework.web.crud.generator.DefaultIdGenerator;
 import org.hswebframework.web.crud.generator.MD5Generator;
@@ -136,10 +137,14 @@ public class EasyormConfiguration {
 
     @Bean
     public EntityEventListener entityEventListener(ApplicationEventPublisher eventPublisher,
+                                                   ObjectProvider<SqlExpressionInvoker> invokers,
                                                    ObjectProvider<EntityEventListenerCustomizer> customizers) {
         DefaultEntityEventListenerConfigure configure = new DefaultEntityEventListenerConfigure();
         customizers.forEach(customizer -> customizer.customize(configure));
-        return new EntityEventListener(eventPublisher, configure);
+        EntityEventListener entityEventListener = new EntityEventListener(eventPublisher, configure);
+        entityEventListener.setExpressionInvoker(invokers.getIfAvailable(SpelSqlExpressionInvoker::new));
+
+        return entityEventListener;
     }
 
     @Bean
