@@ -18,6 +18,9 @@
 
 package org.hswebframework.web.authorization.events;
 
+import lombok.Getter;
+import org.hswebframework.web.authorization.Authentication;
+
 import java.util.function.Function;
 
 /**
@@ -26,11 +29,29 @@ import java.util.function.Function;
  * @author zhouhao
  * @since 3.0
  */
+@Getter
 public class AuthorizationBeforeEvent extends AbstractAuthorizationEvent {
 
     private static final long serialVersionUID = 5948747533500518524L;
 
+    private String userId;
+
+    private Authentication authentication;
+
     public AuthorizationBeforeEvent(String username, String password, Function<String, Object> parameterGetter) {
         super(username, password, parameterGetter);
     }
+
+    public void setAuthorized(String userId) {
+        this.userId = userId;
+    }
+
+    public void setAuthorized(Authentication authentication) {
+        this.authentication = authentication;
+    }
+
+    public boolean isAuthorized() {
+        return userId != null || authentication != null;
+    }
+
 }
