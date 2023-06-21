@@ -22,7 +22,7 @@ public final class EntityFactoryHolder {
     public static <T> T newInstance(Class<T> type,
                                     Supplier<T> mapper) {
         if (FACTORY != null) {
-            return FACTORY.newInstance(type);
+            return FACTORY.newInstance(type,mapper);
         }
         return mapper.get();
     }

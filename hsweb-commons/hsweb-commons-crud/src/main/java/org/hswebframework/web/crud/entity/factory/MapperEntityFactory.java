@@ -73,12 +73,12 @@ public class MapperEntityFactory implements EntityFactory, BeanFactory {
     }
 
     public <T> MapperEntityFactory addMapping(Class<T> target, Supplier<? extends T> mapper) {
-        realTypeMapper.put(target, new Mapper(target, mapper));
+        realTypeMapper.put(target, new Mapper(mapper.get().getClass(), mapper));
         return this;
     }
 
     public <T> MapperEntityFactory addMappingIfAbsent(Class<T> target, Supplier<? extends T> mapper) {
-        realTypeMapper.putIfAbsent(target, new Mapper(target, mapper));
+        realTypeMapper.putIfAbsent(target, new Mapper(mapper.get().getClass(), mapper));
         return this;
     }
 
@@ -125,13 +125,15 @@ public class MapperEntityFactory implements EntityFactory, BeanFactory {
             }
 
             return (T) defaultPropertyCopier.copyProperties(source, target);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             logger.warn("copy properties error", e);
         }
         return target;
     }
 
-    protected <T> Mapper<T> initCache(Class<T> beanClass) {
+    static final Mapper NON_MAPPER = new Mapper(null, null);
+
+    protected <T> Mapper<T> createMapper(Class<T> beanClass) {
         Mapper<T> mapper = null;
         Class<T> realType = null;
         ServiceLoader<T> serviceLoader = ServiceLoader.load(beanClass, this.getClass().getClassLoader());
@@ -152,17 +154,27 @@ public class MapperEntityFactory implements EntityFactory, BeanFactory {
             if (logger.isDebugEnabled() && realType != beanClass) {
                 logger.debug("use instance {} for {}", realType, beanClass);
             }
-            mapper = new Mapper<>(realType, new DefaultInstanceGetter(realType));
+            mapper = new Mapper<>(realType, new DefaultInstanceGetter<>(realType));
         }
-        if (mapper != null) {
-            realTypeMapper.put(beanClass, mapper);
-        }
-        return mapper;
+
+        return mapper == null ? NON_MAPPER : mapper;
     }
 
     @Override
     public <T> T newInstance(Class<T> beanClass) {
-        return newInstance(beanClass, null);
+        return newInstance(beanClass, (Class<? extends T>) null);
+    }
+
+    @Override
+    public <T> T newInstance(Class<T> entityClass, Supplier<? extends T> defaultFactory) {
+        if (entityClass == null) {
+            return null;
+        }
+        Mapper<T> mapper = realTypeMapper.computeIfAbsent(entityClass, this::createMapper);
+        if (mapper != null && mapper != NON_MAPPER) {
+            return mapper.getInstanceGetter().get();
+        }
+        return defaultFactory.get();
     }
 
     @Override
@@ -170,12 +182,8 @@ public class MapperEntityFactory implements EntityFactory, BeanFactory {
         if (beanClass == null) {
             return null;
         }
-        Mapper<T> mapper = realTypeMapper.get(beanClass);
-        if (mapper != null) {
-            return mapper.getInstanceGetter().get();
-        }
-        mapper = initCache(beanClass);
-        if (mapper != null) {
+        Mapper<T> mapper = realTypeMapper.computeIfAbsent(beanClass, this::createMapper);
+        if (mapper != null && mapper != NON_MAPPER) {
             return mapper.getInstanceGetter().get();
         }
         if (defaultClass != null) {
@@ -203,21 +211,16 @@ public class MapperEntityFactory implements EntityFactory, BeanFactory {
                 || beanClass.isEnum()) {
             return null;
         }
-        Mapper<T> mapper = realTypeMapper.get(beanClass);
-        if (null != mapper) {
+        Mapper<T> mapper = realTypeMapper.computeIfAbsent(
+                beanClass,
+                clazz -> autoRegister ? createMapper(clazz) : null);
+
+        if (null != mapper && mapper != NON_MAPPER) {
             return mapper.getTarget();
         }
-        if (autoRegister) {
-            mapper = initCache(beanClass);
-            if (mapper != null) {
-                return mapper.getTarget();
-            }
-
-            return Modifier.isAbstract(beanClass.getModifiers())
-                    || Modifier.isInterface(beanClass.getModifiers())
-                    ? null : beanClass;
-        }
-        return null;
+        return Modifier.isAbstract(beanClass.getModifiers())
+                || Modifier.isInterface(beanClass.getModifiers())
+                ? null : beanClass;
     }
 
     public void setDefaultMapperFactory(DefaultMapperFactory defaultMapperFactory) {

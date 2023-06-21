@@ -19,7 +19,7 @@
 package org.hswebframework.web.api.crud.entity;
 
 
-import javax.annotation.Nullable;
+import java.util.function.Supplier;
 
 /**
  * 实体工厂接口,系统各个地方使用此接口来创建实体,在实际编码中也应该使用此接口来创建实体,而不是使用new方式来创建
@@ -59,6 +59,21 @@ public interface EntityFactory {
     <T> T newInstance(Class<T> entityClass, Class<? extends T> defaultClass);
 
     /**
+     * 根据类型创建实例,如果类型无法创建,则使用默认类型进行创建
+     * <p>
+     * e.g.
+     * <pre>
+     *  entityFactory.newInstance(UserEntity.class,SimpleUserEntity::new);
+     * </pre>
+     *
+     * @param entityClass    要创建的class
+     * @param defaultFactory 默认实体创建工厂
+     * @param <T>            类型
+     * @return 实例
+     */
+    <T> T newInstance(Class<T> entityClass, Supplier<? extends T> defaultFactory);
+
+    /**
      * 创建实体并设置默认的属性
      *
      * @param entityClass       实体类型
@@ -68,6 +83,7 @@ public interface EntityFactory {
      * @return 创建结果
      * @see EntityFactory#copyProperties(Object, Object)
      */
+    @Deprecated
     default <S, T> T newInstance(Class<T> entityClass, S defaultProperties) {
         return copyProperties(defaultProperties, newInstance(entityClass));
     }
@@ -83,6 +99,7 @@ public interface EntityFactory {
      * @return 创建结果
      * @see EntityFactory#copyProperties(Object, Object)
      */
+    @Deprecated
     default <S, T> T newInstance(Class<T> entityClass, Class<? extends T> defaultClass, S defaultProperties) {
         return copyProperties(defaultProperties, newInstance(entityClass, defaultClass));
     }
@@ -114,5 +131,6 @@ public interface EntityFactory {
      * @param <T>    被拷贝对象的类型
      * @return 被拷贝的对象
      */
+    @Deprecated
     <S, T> T copyProperties(S source, T target);
 }

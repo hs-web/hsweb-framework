@@ -57,7 +57,7 @@ public class CustomTypeFactory extends TypeFactory {
     protected JavaType _fromWellKnownInterface(ClassStack context, Class<?> rawType, TypeBindings bindings, JavaType superClass, JavaType[] superInterfaces) {
         JavaType javaType = super._fromWellKnownInterface(context, rawType, bindings, superClass, superInterfaces);
         if (javaType == null) {
-            rawType = entityFactory.getInstanceType(rawType);
+            rawType = entityFactory.getInstanceType(rawType, false);
             if (rawType != null) {
                 javaType = SimpleType.constructUnsafe(rawType);
             }
@@ -70,7 +70,7 @@ public class CustomTypeFactory extends TypeFactory {
 
         JavaType javaType = super._fromWellKnownClass(context, rawType, bindings, superClass, superInterfaces);
         if (javaType == null) {
-            rawType = entityFactory.getInstanceType(rawType);
+            rawType = entityFactory.getInstanceType(rawType, false);
             if (rawType != null) {
                 javaType = SimpleType.constructUnsafe(rawType);
             }
