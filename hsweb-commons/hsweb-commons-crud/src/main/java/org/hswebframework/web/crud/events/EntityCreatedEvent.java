@@ -18,4 +18,9 @@ public class EntityCreatedEvent<E> extends DefaultAsyncEvent implements Serializ
     private final List<E> entity;
 
     private final Class<E> entityType;
+
+    @Override
+    public String toString() {
+        return "EntityCreatedEvent<" + entityType.getSimpleName() + ">"+entity;
+    }
 }

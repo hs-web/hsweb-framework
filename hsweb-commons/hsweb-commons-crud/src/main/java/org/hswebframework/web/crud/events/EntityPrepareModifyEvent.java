@@ -23,4 +23,8 @@ public class EntityPrepareModifyEvent<E> extends DefaultAsyncEvent implements Se
 
     private final Class<E> entityType;
 
+    @Override
+    public String toString() {
+        return "EntityPrepareModifyEvent<" + entityType.getSimpleName() + ">\n{\nbefore:" + before + "\nafter: " + after + "\n}";
+    }
 }

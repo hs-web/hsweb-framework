@@ -23,4 +23,8 @@ public class EntityModifyEvent<E> extends DefaultAsyncEvent implements Serializa
 
     private final Class<E> entityType;
 
+    @Override
+    public String toString() {
+        return "EntityModifyEvent<" + entityType.getSimpleName() + ">\n{\nbefore:" + before + "\nafter: " + after + "\n}";
+    }
 }

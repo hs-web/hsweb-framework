@@ -18,4 +18,9 @@ public class EntityBeforeSaveEvent<E> extends DefaultAsyncEvent implements Seria
     private final List<E> entity;
 
     private final Class<E> entityType;
+
+    @Override
+    public String toString() {
+        return "EntityBeforeSaveEvent<" + entityType.getSimpleName() + ">"+entity;
+    }
 }

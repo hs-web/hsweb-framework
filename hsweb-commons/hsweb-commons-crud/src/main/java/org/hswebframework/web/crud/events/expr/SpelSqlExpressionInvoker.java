@@ -20,7 +20,7 @@ import java.util.function.BiFunction;
 @Slf4j
 public class SpelSqlExpressionInvoker extends AbstractSqlExpressionInvoker {
 
-    static class SqlFunctions extends HashMap<String, Object> {
+    protected static class SqlFunctions extends HashMap<String, Object> {
 
         public SqlFunctions(Map<String, Object> map) {
             super(map);
@@ -74,6 +74,20 @@ public class SpelSqlExpressionInvoker extends AbstractSqlExpressionInvoker {
                     return super.resolve(context, targetObject, name.toLowerCase(), argumentTypes);
                 }
             });
+            context.setOperatorOverloader(new OperatorOverloader() {
+                @Override
+                public boolean overridesOperation(@Nonnull Operation operation, Object leftOperand, Object rightOperand) throws EvaluationException {
+                    if (leftOperand instanceof Number || rightOperand instanceof Number) {
+                        return leftOperand == null || rightOperand == null;
+                    }
+                    return leftOperand == null && rightOperand == null;
+                }
+
+                @Override
+                public Object operate(@Nonnull Operation operation, Object leftOperand, Object rightOperand) throws EvaluationException {
+                    return null;
+                }
+            });
             return context;
         }
     };
@@ -101,7 +115,7 @@ public class SpelSqlExpressionInvoker extends AbstractSqlExpressionInvoker {
                 if (errorCount.get() > 1024) {
                     return null;
                 }
-                object = new SqlFunctions(object);
+                object = createArguments(object);
 
                 if (args != null && args.length != 0) {
                     int index = 0;
@@ -126,17 +140,24 @@ public class SpelSqlExpressionInvoker extends AbstractSqlExpressionInvoker {
                 return null;
             };
         } catch (Throwable error) {
-            log.warn("create sql expression [{}] parser error", sql, error);
-            return (args, data) -> null;
+            return spelError(sql, error);
         }
     }
 
+    protected SqlFunctions createArguments(Map<String, Object> args) {
+        return new SqlFunctions(args);
+    }
+
+    protected BiFunction<Object[], Map<String, Object>, Object> spelError(String sql, Throwable error) {
+        log.warn("create sql expression [{}] parser error", sql, error);
+        return (args, data) -> null;
+    }
 
     static ExtMapAccessor accessor = new ExtMapAccessor();
 
     static class ExtMapAccessor extends MapAccessor {
         @Override
-        public boolean canRead(@Nonnull EvaluationContext context, Object target,@Nonnull String name) throws AccessException {
+        public boolean canRead(@Nonnull EvaluationContext context, Object target, @Nonnull String name) throws AccessException {
             return target instanceof Map;
         }
 

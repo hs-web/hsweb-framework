@@ -22,4 +22,9 @@ public class EntityDeletedEvent<E> extends DefaultAsyncEvent implements Serializ
 
     private final Class<E> entityType;
 
+    @Override
+    public String toString() {
+        return "EntityDeletedEvent<" + entityType.getSimpleName() + ">"+entity;
+    }
+
 }

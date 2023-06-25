@@ -21,4 +21,8 @@ public class EntityBeforeQueryEvent<E> extends DefaultAsyncEvent implements Seri
 
     private final Class<E> entityType;
 
+    @Override
+    public String toString() {
+        return "EntityBeforeQueryEvent<" + entityType.getSimpleName() + ">"+param;
+    }
 }

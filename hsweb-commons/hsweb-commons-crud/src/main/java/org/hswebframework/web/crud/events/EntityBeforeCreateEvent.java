@@ -18,4 +18,9 @@ public class EntityBeforeCreateEvent<E> extends DefaultAsyncEvent implements Ser
     private final List<E> entity;
 
     private final Class<E> entityType;
+
+    @Override
+    public String toString() {
+        return "EntityBeforeCreateEvent<" + entityType.getSimpleName() + ">"+entity;
+    }
 }

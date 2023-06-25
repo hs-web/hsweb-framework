@@ -18,4 +18,9 @@ public class EntityPrepareCreateEvent<E> extends DefaultAsyncEvent implements Se
     private final List<E> entity;
 
     private final Class<E> entityType;
+
+    @Override
+    public String toString() {
+        return "EntityPrepareCreateEvent<" + entityType.getSimpleName() + ">"+entity;
+    }
 }

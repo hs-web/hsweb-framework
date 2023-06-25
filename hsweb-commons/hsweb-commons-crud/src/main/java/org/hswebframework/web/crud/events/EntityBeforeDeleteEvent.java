@@ -21,4 +21,8 @@ public class EntityBeforeDeleteEvent<E> extends DefaultAsyncEvent implements Ser
 
     private final Class<E> entityType;
 
+    @Override
+    public String toString() {
+        return "EntityBeforeDeleteEvent<" + entityType.getSimpleName() + ">"+entity;
+    }
 }
