@@ -1,6 +1,7 @@
 package org.hswebframework.web.crud.events;
 
 import org.hswebframework.ezorm.rdb.mapping.ReactiveRepository;
+import org.hswebframework.ezorm.rdb.operator.builder.fragments.NativeSql;
 import org.hswebframework.web.crud.TestApplication;
 import org.hswebframework.web.crud.entity.EventTestEntity;
 import org.junit.Assert;
@@ -45,6 +46,30 @@ public class EntityEventListenerTest {
             .verifyComplete();
         Assert.assertEquals(listener.created.getAndSet(0), 1);
 
+
+    }
+
+    @Test
+    public void testUpdateNative() {
+        EventTestEntity entity =EventTestEntity.of("test-update-native", null);
+        reactiveRepository
+                .insert(entity)
+                .as(StepVerifier::create)
+                .expectNext(1)
+                .verifyComplete();
+        Assert.assertEquals(listener.created.getAndSet(0), 1);
+
+        reactiveRepository
+                .createUpdate()
+                .set(EventTestEntity::getAge, NativeSql.of("coalesce(age+1,?)",10))
+                .where()
+                .is(entity::getName)
+                .execute()
+                .as(StepVerifier::create)
+                .expectNext(1)
+                .verifyComplete();
+
+        Assert.assertEquals(1, listener.modified.getAndSet(0));
 
     }
 
