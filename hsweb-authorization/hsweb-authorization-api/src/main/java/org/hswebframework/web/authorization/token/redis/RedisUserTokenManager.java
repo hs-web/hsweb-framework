@@ -87,6 +87,10 @@ public class RedisUserTokenManager implements UserTokenManager {
     //异地登录模式，默认允许异地登录
     private AllopatricLoginMode allopatricLoginMode = AllopatricLoginMode.allow;
 
+    @Getter
+    @Setter
+    private Duration maxTokenExpires = Duration.ofSeconds(1).negated();
+
     @Setter
     private ApplicationEventPublisher eventPublisher;
 
@@ -220,6 +224,8 @@ public class RedisUserTokenManager implements UserTokenManager {
                                    String userId,
                                    long maxInactiveInterval,
                                    Consumer<Map<String, Object>> cacheBuilder) {
+        long expires = maxTokenExpires.isNegative() ? maxInactiveInterval : Math.min(maxInactiveInterval, maxTokenExpires.toMillis());
+
         return Mono
                 .defer(() -> {
                     Mono<SimpleUserToken> doSign = Mono.defer(() -> {
@@ -227,7 +233,7 @@ public class RedisUserTokenManager implements UserTokenManager {
                         map.put("token", token);
                         map.put("type", type);
                         map.put("userId", userId);
-                        map.put("maxInactiveInterval", maxInactiveInterval);
+                        map.put("maxInactiveInterval", expires);
                         map.put("state", TokenState.normal.getValue());
                         map.put("signInTime", System.currentTimeMillis());
                         map.put("lastRequestTime", System.currentTimeMillis());
@@ -236,8 +242,8 @@ public class RedisUserTokenManager implements UserTokenManager {
                         return userTokenStore
                                 .putAll(key, map)
                                 .then(Mono.defer(() -> {
-                                    if (maxInactiveInterval > 0) {
-                                        return operations.expire(key, Duration.ofMillis(maxInactiveInterval));
+                                    if (expires > 0) {
+                                        return operations.expire(key, Duration.ofMillis(expires));
                                     }
                                     return Mono.empty();
                                 }))
