@@ -95,7 +95,7 @@ public final class LocaleUtils {
      * <p>
      * <pre>
      * monoOrFlux
-     * .subscriberContext(LocaleUtils.useLocale(locale))
+     * .contextWrite(LocaleUtils.useLocale(locale))
      * </pre>
      *
      * @param locale 区域
@@ -391,7 +391,7 @@ public final class LocaleUtils {
             if (signal.getType() != type) {
                 return;
             }
-            Locale locale = signal.getContext().getOrDefault(Locale.class, DEFAULT_LOCALE);
+            Locale locale = signal.getContextView().getOrDefault(Locale.class, DEFAULT_LOCALE);
 
             doWith(locale, l -> operation.accept(signal, l));
         };

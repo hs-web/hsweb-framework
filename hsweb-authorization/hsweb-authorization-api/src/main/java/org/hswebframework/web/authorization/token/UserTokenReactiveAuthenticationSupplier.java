@@ -69,7 +69,7 @@ public class UserTokenReactiveAuthenticationSupplier implements ReactiveAuthenti
     @Override
     public Mono<Authentication> get() {
         return Mono
-                .deferWithContext(context -> context
+                .deferContextual(context -> context
                         .<ParsedToken>getOrEmpty(ParsedToken.class)
                         .map(t -> userTokenManager
                                 .getByToken(t.getToken())

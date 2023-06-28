@@ -21,7 +21,7 @@ public class ReactiveTokenAuthenticationSupplier implements ReactiveAuthenticati
     @Override
     public Mono<Authentication> get() {
         return Mono
-                .deferWithContext(context -> context
+                .deferContextual(context -> context
                         .<ParsedToken>getOrEmpty(ParsedToken.class)
                         .map(t -> tokenManager.getByToken(t.getToken()))
                         .orElse(Mono.empty()));

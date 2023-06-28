@@ -4,6 +4,7 @@ import org.hswebframework.web.i18n.LocaleUtils;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Mono;
 import reactor.util.context.Context;
+import reactor.util.context.ContextView;
 
 import javax.annotation.Nullable;
 import java.util.Locale;
@@ -71,8 +72,8 @@ public class TraceSourceException extends RuntimeException {
      * 深度溯源上下文,用来标识是否是深度溯源的异常.开启深度追踪后,会创建新的{@link  TraceSourceException}对象.
      *
      * @return 上下文
-     * @see reactor.core.publisher.Flux#subscriberContext(Context)
-     * @see Mono#subscriberContext(Context)
+     * @see reactor.core.publisher.Flux#contextWrite(ContextView)
+     * @see Mono#contextWrite(ContextView)
      */
     public static Context deepTraceContext() {
         return deepTraceContext;
@@ -115,7 +116,7 @@ public class TraceSourceException extends RuntimeException {
         return err -> {
             if (err instanceof TraceSourceException) {
                 return Mono
-                        .deferWithContext(ctx -> {
+                        .deferContextual(ctx -> {
                             if (ctx.hasKey(deepTraceKey)) {
                                 return Mono.error(new TraceSourceException(err).withSource(operation,source));
                             } else {

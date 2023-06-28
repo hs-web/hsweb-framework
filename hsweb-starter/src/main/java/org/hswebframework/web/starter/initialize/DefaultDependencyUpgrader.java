@@ -58,7 +58,7 @@ public class DefaultDependencyUpgrader implements DependencyUpgrader {
     public void upgrade(CallBack callBack) {
         shouldUpdateVersionList.forEach(context -> {
             if (this.context != null) {
-                context.putAll(context);
+                context.putAll(this.context);
             }
             if (logger.isInfoEnabled()) {
                 logger.info("upgrade [{}/{}] to version:{} {}", dependency.getGroupId(), dependency.getArtifactId(), context.get("version"), dependency.getWebsite());

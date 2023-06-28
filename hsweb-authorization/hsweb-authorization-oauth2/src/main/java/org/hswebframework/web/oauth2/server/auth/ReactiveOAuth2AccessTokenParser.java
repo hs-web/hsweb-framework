@@ -48,7 +48,7 @@ public class ReactiveOAuth2AccessTokenParser implements ReactiveUserTokenParser,
     @Override
     public Mono<Authentication> get() {
         return Mono
-                .deferWithContext(context -> context
+                .deferContextual(context -> context
                         .<ParsedToken>getOrEmpty(ParsedToken.class)
                         .filter(token -> "oauth2".equals(token.getType()))
                         .map(t -> accessTokenManager.getAuthenticationByToken(t.getToken()))

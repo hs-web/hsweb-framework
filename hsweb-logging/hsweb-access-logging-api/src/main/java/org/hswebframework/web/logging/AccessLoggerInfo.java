@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.StringJoiner;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 /**
@@ -160,14 +161,14 @@ public class AccessLoggerInfo {
 
     public void putContext(Map<String,String> context) {
         if (this.context == null) {
-            this.context = new HashMap<>();
+            this.context = new ConcurrentHashMap<>();
         }
         this.context.putAll(context);
     }
 
     public void putContext(String key, Object value) {
         if (this.context == null) {
-            this.context = new HashMap<>();
+            this.context = new ConcurrentHashMap<>();
         }
         this.context.put(key, String.valueOf(value));
     }

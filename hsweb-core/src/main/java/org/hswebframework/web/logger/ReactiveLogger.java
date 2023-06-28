@@ -95,7 +95,7 @@ public class ReactiveLogger {
                         consumer.accept(maybeContextMap.get());
                     } else {
                         consumer.accept(Collections.emptyMap());
-                        log.warn("logger context is empty,please call publisher.subscriberContext(ReactiveLogger.mdc()) first!");
+                        log.warn("logger context is empty,please call publisher.contextWrite(ReactiveLogger.mdc()) first!");
                     }
                     return Mono.empty();
                 });

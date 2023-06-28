@@ -48,7 +48,7 @@ public class ReactiveUserTokenController {
     @Operation(summary = "重置当前用户的令牌")
     public Mono<Boolean> resetToken() {
         return Mono
-                .<ParsedToken>deferWithContext(ctx -> Mono.justOrEmpty(ctx.getOrEmpty(ParsedToken.class)))
+                .<ParsedToken>deferContextual(ctx -> Mono.justOrEmpty(ctx.getOrEmpty(ParsedToken.class)))
                 .flatMap(token -> userTokenManager.signOutByToken(token.getToken()))
                 .thenReturn(true);
     }
