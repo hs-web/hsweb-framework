@@ -67,27 +67,23 @@ public class ReactiveAopAccessLoggerSupport extends StaticMethodMatcherPointcutA
         });
     }
 
-    private Mono<RequestInfo> currentRequestInfo() {
-        return Mono
-                .deferContextual(context -> {
-                    if (context.hasKey(RequestInfo.class)) {
-                        RequestInfo info = context.get(RequestInfo.class);
-                        ReactiveLogger.log(context, ctx -> info.setContext(new HashMap<>(ctx)));
-                        return Mono.just(info);
-                    }
-                    return Mono.empty();
-                });
+    private Mono<RequestInfo> currentRequestInfo(ContextView context) {
+        if (context.hasKey(RequestInfo.class)) {
+            RequestInfo info = context.get(RequestInfo.class);
+            ReactiveLogger.log(context, ctx -> info.setContext(new HashMap<>(ctx)));
+            return Mono.just(info);
+        }
+        return Mono.empty();
     }
 
     protected Flux<?> wrapFluxResponse(Flux<?> flux, AccessLoggerInfo loggerInfo) {
         return Flux.deferContextual(ctx -> this
-                           .currentRequestInfo()
+                           .currentRequestInfo(ctx)
                            .doOnNext(loggerInfo::putAccessInfo)
                            .then(beforeRequest(loggerInfo))
                            .thenMany(flux)
                            .doOnError(loggerInfo::setException)
-                           .doFinally(signal -> completeRequest(loggerInfo, ctx)))
-                   .contextWrite(ReactiveLogger.start("accessLogId", loggerInfo.getId()));
+                           .doFinally(signal -> completeRequest(loggerInfo, ctx)));
     }
 
     private Mono<Void> beforeRequest(AccessLoggerInfo loggerInfo) {
