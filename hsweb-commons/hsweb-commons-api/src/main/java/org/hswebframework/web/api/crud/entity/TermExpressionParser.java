@@ -1,19 +1,15 @@
 package org.hswebframework.web.api.crud.entity;
 
 import lombok.SneakyThrows;
-import org.apache.commons.codec.net.URLCodec;
+import org.apache.commons.collections4.MapUtils;
 import org.hswebframework.ezorm.core.NestConditional;
 import org.hswebframework.ezorm.core.dsl.Query;
 import org.hswebframework.ezorm.core.param.Sort;
 import org.hswebframework.ezorm.core.param.Term;
 import org.hswebframework.ezorm.core.param.TermType;
-import org.hswebframework.web.api.crud.entity.QueryParamEntity;
 
 import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -26,11 +22,68 @@ import java.util.stream.Stream;
  */
 public class TermExpressionParser {
 
+    /**
+     * 解析Map为动态条件,map中的key为条件列,value为条件值,如果列以$or$开头则表示or查询.
+     *
+     * <pre>{@code
+     *   {
+     *       "name$like":"测试",
+     *       //OR
+     *       "$or$status$in":[1,2,3],
+     *       //嵌套
+     *       "$nest":{
+     *           "age$gt":10,
+     *       }
+     *   }
+     * }</pre>
+     *
+     * @param map map
+     * @return 条件
+     */
+    public static List<Term> parse(Map<String, Object> map) {
+        if (MapUtils.isEmpty(map)) {
+            return Collections.emptyList();
+        }
+
+        List<Term> terms = new ArrayList<>(map.size());
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+            boolean isOr = false;
+            Term term = new Term();
+
+            //嵌套
+            if (key.startsWith("$nest") ||
+                    (isOr = key.startsWith("$orNest"))) {
+                @SuppressWarnings("all")
+                List<Term> nest = value instanceof Map ? parse(((Map<String, Object>) value)) : parse(String.valueOf(value));
+                term.setTerms(nest);
+            }
+            //普通
+            else {
+                if (key.startsWith("$or$")) {
+                    isOr = true;
+                    key = key.substring(4);
+                }
+                term.setColumn(key);
+                term.setValue(value);
+            }
+
+            if (isOr) {
+                term.setType(Term.Type.or);
+            }
+            terms.add(term);
+        }
+
+        return terms;
+
+    }
+
     @SneakyThrows
     public static List<Term> parse(String expression) {
         try {
             expression = URLDecoder.decode(expression, "utf-8");
-        }catch (Throwable ignore){
+        } catch (Throwable ignore) {
 
         }
         Query<?, QueryParamEntity> conditional = QueryParamEntity.newQuery();

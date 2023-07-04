@@ -4,7 +4,9 @@ import org.hswebframework.ezorm.core.param.Term;
 import org.hswebframework.ezorm.core.param.TermType;
 import org.junit.Test;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 
@@ -42,6 +44,34 @@ public class TermExpressionParserTest {
 
         }
     }
+    @Test
+    public void testMap(){
+        Map<String,Object> map = new LinkedHashMap<>();
+        map.put("name$like","我");
+
+        map.put("$or$name","你");
+
+        map.put("$nest","age = 10");
+
+
+        List<Term> terms = TermExpressionParser.parse(map);
+
+        assertEquals(3,terms.size());
+        assertEquals("like",terms.get(0).getTermType());
+        assertEquals("name",terms.get(0).getColumn());
+        assertEquals("我",terms.get(0).getValue());
+
+        assertEquals(Term.Type.or,terms.get(1).getType());
+        assertEquals("name",terms.get(1).getColumn());
+        assertEquals("你",terms.get(1).getValue());
+
+        assertEquals(1,terms.get(2).getTerms().size());
+
+        assertEquals("age",terms.get(2).getTerms().get(0).getColumn());
+
+    }
+
+
     @Test
     public void test() {
         {
