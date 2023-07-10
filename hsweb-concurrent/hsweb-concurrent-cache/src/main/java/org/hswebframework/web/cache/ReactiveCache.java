@@ -8,12 +8,17 @@ import reactor.core.publisher.Mono;
 
 import java.util.Collection;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public interface ReactiveCache<E> {
 
     Flux<E> getFlux(Object key);
 
+    Flux<E> getFlux(Object key, Supplier<Flux<E>> loader);
+
     Mono<E> getMono(Object key);
+
+    Mono<E> getMono(Object key, Supplier<Mono<E>> loader);
 
     Mono<Void> put(Object key, Publisher<E> data);
 
@@ -25,6 +30,10 @@ public interface ReactiveCache<E> {
 
     Mono<Void> clear();
 
+    /**
+     * @deprecated <a href="https://github.com/reactor/reactor-addons/issues/237">https://github.com/reactor/reactor-addons/issues/237</a>
+     */
+    @Deprecated
     default CacheFlux.FluxCacheBuilderMapMiss<E> flux(Object key) {
         return otherSupplier -> Flux
                 .defer(() -> this
@@ -35,6 +44,10 @@ public interface ReactiveCache<E> {
                                                             .thenMany(Flux.fromIterable(values)))));
     }
 
+    /**
+     * @deprecated <a href="https://github.com/reactor/reactor-addons/issues/237">https://github.com/reactor/reactor-addons/issues/237</a>
+     */
+    @Deprecated
     default CacheMono.MonoCacheBuilderMapMiss<E> mono(Object key) {
         return otherSupplier -> Mono
                 .defer(() -> this

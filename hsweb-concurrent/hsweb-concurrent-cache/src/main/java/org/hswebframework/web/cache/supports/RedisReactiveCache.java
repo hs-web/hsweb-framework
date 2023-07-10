@@ -16,7 +16,7 @@ import java.util.stream.StreamSupport;
 
 @SuppressWarnings("all")
 @Slf4j
-public class RedisReactiveCache<E> implements ReactiveCache<E> {
+public class RedisReactiveCache<E> extends AbstractReactiveCache<E> {
 
     private ReactiveRedisOperations<Object, Object> operations;
 
@@ -30,7 +30,8 @@ public class RedisReactiveCache<E> implements ReactiveCache<E> {
         this.operations = operations;
         this.localCache = localCache;
         this.redisKey = redisKey;
-        operations.listenToChannel(topicName = ("_cache_changed:" + redisKey))
+        operations
+                .listenToChannel(topicName = ("_cache_changed:" + redisKey))
                 .map(ReactiveSubscription.Message::getMessage)
                 .cast(String.class)
                 .subscribe(s -> {
@@ -44,24 +45,20 @@ public class RedisReactiveCache<E> implements ReactiveCache<E> {
     }
 
     @Override
-    public Flux<E> getFlux(Object key) {
-        return localCache
-                .getFlux(key)
-                .switchIfEmpty(Flux.<E>defer(() -> {
-                    return operations
-                            .opsForHash()
-                            .get(redisKey, key)
-                            .flatMapIterable(r -> {
-                                if (r instanceof Iterable) {
-                                    return ((Iterable) r);
-                                }
-                                return Collections.singletonList(r);
-                            })
-                            .map(r -> (E) r);
-                }))
-                .onErrorResume(err -> this.<E>handleError((Throwable) err));
-
+    protected Mono<Object> getNow(Object key) {
+        return (Mono) localCache.getMono(key, () -> (Mono) operations.opsForHash().get(redisKey, key));
     }
+
+    @Override
+    public Mono<Void> putNow(Object key, Object value) {
+        return operations
+                .opsForHash()
+                .put(redisKey, key, value)
+                .then(localCache.evict(key))
+                .then(operations.convertAndSend(topicName, key))
+                .then();
+    }
+
 
     protected <T> Mono<T> handleError(Throwable error) {
         log.error(error.getMessage(), error);
@@ -69,58 +66,15 @@ public class RedisReactiveCache<E> implements ReactiveCache<E> {
     }
 
     @Override
-    public Mono<E> getMono(Object key) {
-        return localCache.getMono(key)
-                .switchIfEmpty(operations.opsForHash()
-                        .get(redisKey, key)
-                        .map(v -> (E) v)
-                        .flatMap(r -> localCache.put(key, Mono.just(r))
-                                .thenReturn(r)))
-                .onErrorResume(err -> this.handleError(err));
-    }
-
-    @Override
-    public Mono<Void> put(Object key, Publisher<E> data) {
-        if (data instanceof Mono) {
-            return ((Mono<?>) data)
-                    .flatMap(r -> {
-                        return operations.opsForHash()
-                                .put(redisKey, key, r)
-                                .then(localCache.put(key, data))
-                                .then(operations.convertAndSend(topicName, key));
-
-                    })
-                    .then()
-                    .onErrorResume(err -> this.handleError(err))
-                    ;
-        }
-        if (data instanceof Flux) {
-            return ((Flux<?>) data)
-                    .collectList()
-                    .flatMap(r -> {
-                        return operations.opsForHash()
-                                .put(redisKey, key, r)
-                                .then(localCache.put(key, data))
-                                .then(operations.convertAndSend(topicName, key));
-
-                    })
-                    .then()
-                    .onErrorResume(err -> this.handleError(err))
-                    ;
-        }
-        return Mono.error(new UnsupportedOperationException("unsupport publisher:" + data));
-    }
-
-
-    @Override
     public Mono<Void> evictAll(Iterable<?> key) {
-        return operations.opsForHash()
+        return operations
+                .opsForHash()
                 .remove(redisKey, StreamSupport.stream(key.spliterator(), false).toArray())
                 .then(localCache.evictAll(key))
-                .flatMap(nil -> Flux.fromIterable(key)
+                .flatMap(nil -> Flux
+                        .fromIterable(key)
                         .flatMap(k -> operations.convertAndSend(topicName, key))
-                        .then()
-                )
+                        .then())
                 .onErrorResume(err -> this.handleError(err));
     }
 
@@ -132,7 +86,8 @@ public class RedisReactiveCache<E> implements ReactiveCache<E> {
                     .values(redisKey)
                     .map(r -> (E) r);
         }
-        return operations.opsForHash()
+        return operations
+                .opsForHash()
                 .multiGet(redisKey, Arrays.asList(keys))
                 .flatMapIterable(Function.identity())
                 .map(r -> (E) r)

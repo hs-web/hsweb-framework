@@ -35,39 +35,37 @@ public class RedisReactiveCacheManagerTest {
 
         ReactiveCache<String> cache = cacheManager.getCache("test");
         cache.clear()
-                .as(StepVerifier::create)
-                .verifyComplete();
+             .as(StepVerifier::create)
+             .verifyComplete();
 
-        cache.flux("test-flux")
-                .onCacheMissResume(Flux.just("1", "2", "3"))
-                .as(StepVerifier::create)
-                .expectNext("1", "2", "3")
-                .verifyComplete();
+        cache.getFlux("test-flux", () -> Flux.just("1", "2", "3"))
+             .as(StepVerifier::create)
+             .expectNext("1", "2", "3")
+             .verifyComplete();
 
         cache.put("test-flux", Flux.just("3", "2", "1"))
-                .as(StepVerifier::create)
-                .verifyComplete();
+             .as(StepVerifier::create)
+             .verifyComplete();
 
         cache.getFlux("test-flux")
-                .as(StepVerifier::create)
-                .expectNext("3", "2", "1")
-                .verifyComplete();
+             .as(StepVerifier::create)
+             .expectNext("3", "2", "1")
+             .verifyComplete();
 
 
-        cache.mono("test-mono")
-                .onCacheMissResume(Mono.just("1"))
-                .as(StepVerifier::create)
-                .expectNext("1")
-                .verifyComplete();
+        cache.getMono("test-mono", () -> Mono.just("1"))
+             .as(StepVerifier::create)
+             .expectNext("1")
+             .verifyComplete();
 
         cache.put("test-mono", Mono.just("2"))
-                .as(StepVerifier::create)
-                .verifyComplete();
+             .as(StepVerifier::create)
+             .verifyComplete();
 
         cache.getMono("test-mono")
-                .as(StepVerifier::create)
-                .expectNext("2")
-                .verifyComplete();
+             .as(StepVerifier::create)
+             .expectNext("2")
+             .verifyComplete();
 
 
     }

@@ -19,7 +19,17 @@ public class UnSupportedReactiveCache<E> implements ReactiveCache<E> {
 
     @SuppressWarnings("all")
     public static <E> ReactiveCache<E> getInstance() {
-        return (UnSupportedReactiveCache)INSTANCE;
+        return (UnSupportedReactiveCache) INSTANCE;
+    }
+
+    @Override
+    public Flux<E> getFlux(Object key, Supplier<Flux<E>> loader) {
+        return loader.get();
+    }
+
+    @Override
+    public Mono<E> getMono(Object key, Supplier<Mono<E>> loader) {
+        return loader.get();
     }
 
     @Override
