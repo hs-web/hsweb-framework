@@ -26,10 +26,9 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.function.Function3;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -103,6 +102,9 @@ public class DefaultDimensionUserService extends GenericReactiveCrudService<Dime
     private Flux<DimensionUserEntity> publishEvent(Publisher<DimensionUserEntity> stream,
                                                    Function3<String, String, List<String>, AsyncEvent> event) {
         Flux<DimensionUserEntity> cache = Flux.from(stream).doOnNext(DimensionUserEntity::generateId).cache();
+
+        Set<Mono<Void>> jobs = ConcurrentHashMap.newKeySet();
+
         return cache
                 .groupBy(DimensionUserEntity::getDimensionTypeId)
                 .flatMap(typeGroup -> {
@@ -114,13 +116,13 @@ public class DefaultDimensionUserService extends GenericReactiveCrudService<Dime
                                 return dimensionIdGroup
                                         .map(DimensionUserEntity::getUserId)
                                         .collectList()
-                                        .flatMap(userIdList -> ClearUserAuthorizationCacheEvent
-                                                .of(userIdList)
-                                                .publish(eventPublisher)
-                                                .then(event.apply(type, dimensionId, userIdList)
-                                                           .publish(eventPublisher)));
+                                        .doOnNext(userIdList -> jobs.add(event.apply(type, dimensionId, userIdList).publish(eventPublisher)))
+                                        .flatMapIterable(Function.identity());
                             });
                 })
+                .<Collection<String>>collect(HashSet::new, Collection::add)
+                .flatMap(userList -> ClearUserAuthorizationCacheEvent.of(userList).publish(eventPublisher))
+                .then(Mono.defer(() -> Flux.concat(jobs).then()))
                 .thenMany(cache);
     }
 
