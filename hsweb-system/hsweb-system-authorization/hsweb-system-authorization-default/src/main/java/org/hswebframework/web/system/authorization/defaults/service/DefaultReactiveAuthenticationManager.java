@@ -77,7 +77,6 @@ public class DefaultReactiveAuthenticationManager implements ReactiveAuthenticat
 
         return cacheManager
                 .<Authentication>getCache("user-auth")
-                .mono(userId)
-                .onCacheMissResume(() -> initializeService.initUserAuthorization(userId));
+                .getMono(userId, () -> initializeService.initUserAuthorization(userId));
     }
 }

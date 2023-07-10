@@ -24,16 +24,16 @@ public class CompositeDictDefineRepository extends DefaultDictDefineRepository {
 
     @EventListener
     public void handleClearCacheEvent(ClearDictionaryCacheEvent event) {
-        if(StringUtils.isEmpty(event.getDictionaryId())){
+        if (StringUtils.isEmpty(event.getDictionaryId())) {
             cacheManager.<DictDefine>getCache("dic-define")
-                    .clear()
-                    .doOnSuccess(r -> log.info("clear all dic cache success"))
-                    .subscribe();
-        }else{
+                        .clear()
+                        .doOnSuccess(r -> log.info("clear all dic cache success"))
+                        .subscribe();
+        } else {
             cacheManager.<DictDefine>getCache("dic-define")
-                    .evict(event.getDictionaryId())
-                    .doOnSuccess(r -> log.info("clear dict [{}] cache success", event.getDictionaryId()))
-                    .subscribe();
+                        .evict(event.getDictionaryId())
+                        .doOnSuccess(r -> log.info("clear dict [{}] cache success", event.getDictionaryId()))
+                        .subscribe();
         }
 
     }
@@ -41,9 +41,9 @@ public class CompositeDictDefineRepository extends DefaultDictDefineRepository {
     @Override
     public Mono<DictDefine> getDefine(String id) {
         return super.getDefine(id)
-                .switchIfEmpty(Mono.defer(() -> cacheManager.<DictDefine>getCache("dic-define")
-                        .mono(id)
-                        .onCacheMissResume(getFromDb(id))));
+                    .switchIfEmpty(Mono.defer(() -> cacheManager
+                            .<DictDefine>getCache("dic-define")
+                            .getMono(id, () -> getFromDb(id))));
     }
 
     @Override

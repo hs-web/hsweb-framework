@@ -16,9 +16,9 @@ public interface EnableCacheReactiveCrudService<E, K> extends ReactiveCrudServic
     ReactiveCache<E> getCache();
 
     default Mono<E> findById(K id) {
-        return this.getCache()
-                   .mono("id:" + id)
-                   .onCacheMissResume(ReactiveCrudService.super.findById(Mono.just(id)));
+        return this
+                .getCache()
+                .getMono("id:" + id, () -> ReactiveCrudService.super.findById(id));
     }
 
     @Override
@@ -80,13 +80,13 @@ public interface EnableCacheReactiveCrudService<E, K> extends ReactiveCrudServic
     default ReactiveUpdate<E> createUpdate() {
         return ReactiveCrudService.super
                 .createUpdate()
-                .onExecute((update, s) -> s.doFinally((__) -> getCache().clear().subscribe()));
+                .onExecute((update, s) -> getCache().clear().then(s));
     }
 
     @Override
     default ReactiveDelete createDelete() {
         return ReactiveCrudService.super
                 .createDelete()
-                .onExecute((update, s) -> s.doFinally((__) -> getCache().clear().subscribe()));
+                .onExecute((update, s) -> getCache().clear().then(s));
     }
 }
