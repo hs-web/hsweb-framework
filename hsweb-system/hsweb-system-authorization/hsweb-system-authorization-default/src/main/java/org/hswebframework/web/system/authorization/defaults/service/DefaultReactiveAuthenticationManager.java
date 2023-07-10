@@ -46,7 +46,7 @@ public class DefaultReactiveAuthenticationManager implements ReactiveAuthenticat
                         .doOnSuccess(__ -> log.info("clear user {} authentication cache success", event.getUserId()));
             }
             if (event.isAsync()) {
-                event.async(operator);
+                event.first(operator);
             } else {
                 log.warn("please use async for ClearUserAuthorizationCacheEvent");
                 operator.subscribe();
