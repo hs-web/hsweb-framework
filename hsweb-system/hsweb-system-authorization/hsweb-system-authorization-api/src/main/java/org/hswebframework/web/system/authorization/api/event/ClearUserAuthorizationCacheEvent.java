@@ -4,6 +4,7 @@ import lombok.Getter;
 import org.hswebframework.web.event.DefaultAsyncEvent;
 import org.reactivestreams.Publisher;
 import org.springframework.context.ApplicationEventPublisher;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.context.Context;
 
@@ -27,7 +28,11 @@ public class ClearUserAuthorizationCacheEvent extends DefaultAsyncEvent {
 
     private static final String DISABLE_KEY = ClearUserAuthorizationCacheEvent.class + "_Disabled";
 
-    public static Mono<Void> disable(Mono<Void> task) {
+    public static <T> Flux<T> disable(Flux<T> task) {
+        return task.contextWrite(Context.of(DISABLE_KEY, true));
+    }
+
+    public static <T> Mono<T> disable(Mono<T> task) {
         return task.contextWrite(Context.of(DISABLE_KEY, true));
     }
 
