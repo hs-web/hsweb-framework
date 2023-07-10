@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.hswebframework.ezorm.rdb.executor.SqlRequest;
 import org.hswebframework.ezorm.rdb.metadata.RDBColumnMetadata;
 import org.hswebframework.ezorm.rdb.metadata.TableOrViewMetadata;
+import org.hswebframework.ezorm.rdb.operator.DatabaseOperator;
 import org.hswebframework.web.api.crud.entity.QueryParamEntity;
 
 import java.util.List;
@@ -18,7 +19,7 @@ import java.util.stream.Collectors;
  * 查询分析器,用于分析SQL查询语句以及对SQL进行重构,追加查询条件等操作
  *
  * @author zhouhao
- * @see 4.0.16
+ * @since 4.0.16
  */
 public interface QueryAnalyzer {
 
