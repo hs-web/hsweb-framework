@@ -15,13 +15,13 @@ public class DefaultAsyncEvent implements AsyncEvent {
 
     public synchronized void async(Publisher<?> publisher) {
         hasListener = true;
-        this.async = async.then(Mono.fromDirect(publisher).then());
+        this.async = async.then(AsyncEventHooks.hookAsync(this, Mono.fromDirect(publisher)));
     }
 
     @Override
     public synchronized void first(Publisher<?> publisher) {
         hasListener = true;
-        this.first = Mono.fromDirect(publisher).then(first);
+        this.first = AsyncEventHooks.hookFirst(this, Mono.fromDirect(publisher)).then(first);
     }
 
     @Override
