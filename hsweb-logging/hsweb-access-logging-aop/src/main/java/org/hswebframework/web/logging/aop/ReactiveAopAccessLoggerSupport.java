@@ -11,6 +11,7 @@ import org.hswebframework.web.logging.*;
 import org.hswebframework.web.logging.events.AccessLoggerAfterEvent;
 import org.hswebframework.web.logging.events.AccessLoggerBeforeEvent;
 import org.hswebframework.web.utils.ReactiveWebUtils;
+import org.reactivestreams.Publisher;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -78,12 +79,12 @@ public class ReactiveAopAccessLoggerSupport extends StaticMethodMatcherPointcutA
 
     protected Flux<?> wrapFluxResponse(Flux<?> flux, AccessLoggerInfo loggerInfo) {
         return Flux.deferContextual(ctx -> this
-                           .currentRequestInfo(ctx)
-                           .doOnNext(loggerInfo::putAccessInfo)
-                           .then(beforeRequest(loggerInfo))
-                           .thenMany(flux)
-                           .doOnError(loggerInfo::setException)
-                           .doFinally(signal -> completeRequest(loggerInfo, ctx)));
+                .currentRequestInfo(ctx)
+                .doOnNext(loggerInfo::putAccessInfo)
+                .then(beforeRequest(loggerInfo))
+                .thenMany(flux)
+                .doOnError(loggerInfo::setException)
+                .doFinally(signal -> completeRequest(loggerInfo, ctx)));
     }
 
     private Mono<Void> beforeRequest(AccessLoggerInfo loggerInfo) {
@@ -183,7 +184,12 @@ public class ReactiveAopAccessLoggerSupport extends StaticMethodMatcherPointcutA
     }
 
     @Override
-    public boolean matches(@Nonnull Method method,@Nonnull Class<?> aClass) {
+    public boolean matches(@Nonnull Method method, @Nonnull Class<?> aClass) {
+        //仅支持响应式
+        if (!Publisher.class.isAssignableFrom(method.getReturnType())) {
+            return false;
+        }
+
         AccessLogger ann = AnnotationUtils.findAnnotation(method, AccessLogger.class);
         if (ann != null && ann.ignore()) {
             return false;
@@ -195,7 +201,7 @@ public class ReactiveAopAccessLoggerSupport extends StaticMethodMatcherPointcutA
 
     @Override
     @Nonnull
-    public Mono<Void> filter(@Nonnull ServerWebExchange exchange,@Nonnull WebFilterChain chain) {
+    public Mono<Void> filter(@Nonnull ServerWebExchange exchange, @Nonnull WebFilterChain chain) {
         return chain
                 .filter(exchange)
                 .contextWrite(Context.of(RequestInfo.class, createAccessInfo(exchange)));
