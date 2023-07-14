@@ -15,6 +15,7 @@ import org.jctools.maps.NonBlockingHashMap;
 import org.springframework.core.ResolvableType;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.NumberUtils;
 import org.springframework.util.ReflectionUtils;
 
 import java.beans.PropertyDescriptor;
@@ -185,8 +186,8 @@ public final class FastBeanCopier {
                 sourceName + " $$__source=(" + sourceName + ")s;\n\t" +
                 tartName + " $$__target=(" + tartName + ")t;\n\t" +
                 createCopierCode(source, target) +
-                "}catch(Exception e){\n" +
-                "\tthrow new RuntimeException(e.getMessage(),e);" +
+                "}catch(Throwable e){\n" +
+                "\tthrow e;" +
                 "\n}\n" +
                 "\n}";
         try {
@@ -531,6 +532,7 @@ public final class FastBeanCopier {
 
         @Override
         @SuppressWarnings("all")
+        @SneakyThrows
         public <T> T convert(Object source, Class<T> targetClass, Class[] genericType) {
             if (source == null) {
                 return null;
@@ -598,7 +600,6 @@ public final class FastBeanCopier {
                 }
                 return (T) collection;
             }
-
             if (target.isEnumType()) {
                 if (target.isEnumDict()) {
                     String strVal = String.valueOf(source);
@@ -637,7 +638,14 @@ public final class FastBeanCopier {
                 List<?> val = convert(source, List.class, new Class[]{componentType});
                 return (T) val.toArray((Object[]) Array.newInstance(componentType, val.size()));
             }
-
+            if (target.isNumber()) {
+                if (source instanceof String) {
+                    return (T) NumberUtils.parseNumber(String.valueOf(source), (Class) targetClass);
+                }
+                if (source instanceof Date) {
+                    source = ((Date) source).getTime();
+                }
+            }
             try {
                 org.apache.commons.beanutils.Converter converter = convertUtils.lookup(targetClass);
                 if (null != converter) {
@@ -669,7 +677,7 @@ public final class FastBeanCopier {
                 return copy(source, beanFactory.newInstance(targetClass), this);
             } catch (Exception e) {
                 log.warn("复制类型{}->{}失败", source, targetClass, e);
-                throw new UnsupportedOperationException(e.getMessage(), e);
+                throw e;
             }
 //            return null;
         }

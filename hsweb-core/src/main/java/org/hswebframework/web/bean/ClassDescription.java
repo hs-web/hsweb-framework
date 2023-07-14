@@ -14,6 +14,7 @@ public class ClassDescription {
     private final boolean enumType;
     private final boolean enumDict;
     private final int fieldSize;
+    private final boolean number;
 
     private final Object[] enums;
 
@@ -24,6 +25,7 @@ public class ClassDescription {
         arrayType = type.isArray();
         enumType = type.isEnum();
         fieldSize = type.getDeclaredFields().length;
+        number = Number.class.isAssignableFrom(type);
         if (enumType) {
             enums = type.getEnumConstants();
         } else {
