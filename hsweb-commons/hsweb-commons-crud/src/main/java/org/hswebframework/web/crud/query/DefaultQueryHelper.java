@@ -201,7 +201,7 @@ public class DefaultQueryHelper implements QueryHelper {
                     .database
                     .sql()
                     .reactive()
-                    .select(analyzer.refactor(param, args), this)
+                    .select(analyzer.refactor(param == null ? QueryParamEntity.of().noPaging() : param, args), this)
                     .map(mapper)
                     .contextWrite(logContext);
         }
@@ -369,7 +369,7 @@ public class DefaultQueryHelper implements QueryHelper {
 
             @Override
             SelectColumnSupplier[] forSelect() {
-                if(propertyTypeIsCollection()){
+                if (propertyTypeIsCollection()) {
                     return new SelectColumnSupplier[0];
                 }
                 //查询主表
@@ -751,7 +751,7 @@ public class DefaultQueryHelper implements QueryHelper {
             private void refactorTerms(R main, Term term) {
                 if (term.getValue() instanceof JoinConditionalSpecImpl.ColumnRef) {
                     JoinConditionalSpecImpl.ColumnRef ref = (JoinConditionalSpecImpl.ColumnRef) term.getValue();
-                    String mainProperty =  ref.getColumn().getAlias();
+                    String mainProperty = ref.getColumn().getAlias();
 
                     Object value = FastBeanCopier.getProperty(main, mainProperty);
                     if (value == null) {
@@ -963,9 +963,10 @@ public class DefaultQueryHelper implements QueryHelper {
         private final Conditional<?> target;
 
         @SuppressWarnings("all")
-        private Class<Object> mainClassSafe(){
+        private Class<Object> mainClassSafe() {
             return (Class<Object>) mainClass;
         }
+
         @Override
         public <T, T2> JoinConditionalSpecImpl applyColumn(StaticMethodReferenceColumn<T> mainColumn,
                                                            String termType,
@@ -1153,7 +1154,7 @@ public class DefaultQueryHelper implements QueryHelper {
                     .getColumn(column)
                     .orElseThrow(() -> new IllegalArgumentException("column [" + column + "] not found"));
 
-            getAccepter().accept(mainColumn, termType, new JoinConditionalSpecImpl.ColumnRef(columnMetadata,alias));
+            getAccepter().accept(mainColumn, termType, new JoinConditionalSpecImpl.ColumnRef(columnMetadata, alias));
 
             return (T) this;
         }
