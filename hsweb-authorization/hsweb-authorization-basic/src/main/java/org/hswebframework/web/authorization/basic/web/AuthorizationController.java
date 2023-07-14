@@ -82,8 +82,8 @@ public class AuthorizationController {
     private Mono<Map<String, Object>> doLogin(Mono<Map<String, Object>> parameter) {
 
         return parameter.flatMap(parameters -> {
-            String username_ = (String) parameters.get("username");
-            String password_ = (String) parameters.get("password");
+            String username_ = String.valueOf(parameters.getOrDefault("username", ""));
+            String password_ = String.valueOf(parameters.getOrDefault("password", ""));
 
             Assert.hasLength(username_, "validation.username_must_not_be_empty");
             Assert.hasLength(password_, "validation.password_must_not_be_empty");
