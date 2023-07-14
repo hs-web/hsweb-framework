@@ -4,8 +4,7 @@ import io.netty.util.concurrent.FastThreadLocal;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 
-import java.nio.ByteBuffer;
-import java.util.Arrays;
+import java.time.Duration;
 import java.util.Base64;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -47,6 +46,26 @@ public class RandomIdGenerator implements IDGenerator<String> {
         nextBytes(value, 8, 16);
         nextBytes(value, 16, 24);
         return encoder.encodeToString(value);
+    }
+
+    public static boolean isRandomId(String id) {
+        if (id.length() < 16 || id.length() > 48) {
+            return false;
+        }
+        return org.apache.commons.codec.binary.Base64.isBase64(id);
+    }
+
+    public static boolean timestampRangeOf(String id, Duration duration) {
+        try {
+            if (!isRandomId(id)) {
+                return false;
+            }
+            long now = System.currentTimeMillis();
+            long ts = getTimestampInId(id);
+            return Math.abs(now - ts) <= duration.toMillis();
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
     }
 
     public static long getTimestampInId(String id) {
