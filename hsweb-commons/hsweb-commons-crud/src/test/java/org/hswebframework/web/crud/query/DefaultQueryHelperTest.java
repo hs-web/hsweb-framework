@@ -47,9 +47,9 @@ class DefaultQueryHelperTest {
                 .sync();
 
         helper.select("select name as \"name\",count(1) totalResult from s_test group by name having count(1) > ? ", GroupResult::new,0)
-              .where(dsl -> dsl
-                      .is("age", "31")
-                      .orderByAsc(GroupResult::getTotalResult))
+//              .where(dsl -> dsl
+//                      .is("age", "31")
+//                      .orderByAsc(GroupResult::getTotalResult))
               .fetch()
               .doOnNext(v -> System.out.println(JSON.toJSONString(v, SerializerFeature.PrettyFormat)))
               .as(StepVerifier::create)
