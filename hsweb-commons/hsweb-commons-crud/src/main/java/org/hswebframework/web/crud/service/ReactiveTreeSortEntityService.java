@@ -7,6 +7,7 @@ import org.hswebframework.web.api.crud.entity.QueryParamEntity;
 import org.hswebframework.web.api.crud.entity.TransactionManagers;
 import org.hswebframework.web.api.crud.entity.TreeSortSupportEntity;
 import org.hswebframework.web.api.crud.entity.TreeSupportEntity;
+import org.hswebframework.web.exception.ValidationException;
 import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.validator.CreateGroup;
 import org.reactivestreams.Publisher;
@@ -148,6 +149,7 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
     default Mono<Integer> insertBatch(Publisher<? extends Collection<E>> entityPublisher) {
         return this.getRepository()
                    .insertBatch(Flux.from(entityPublisher)
+                                    .flatMap(this::checkParentId)
                                     .flatMap(Flux::fromIterable)
                                     .flatMap(this::applyTreeProperty)
                                     .flatMap(e -> Flux.fromIterable(TreeSupportEntity.expandTree2List(e, getIDGenerator())))
@@ -175,10 +177,45 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
                 .queryIncludeChildren(Collections.singletonList(id))
                 .doOnNext(e -> {
                     if (Objects.equals(ele.getParentId(), e.getId())) {
-                        throw new IllegalArgumentException("不能修改父节点为自己或者自己的子节点");
+                        throw new ValidationException("parentId", "error.tree_entity_cyclic_dependency");
                     }
                 })
                 .then(Mono.just(ele));
+    }
+
+    default Mono<Collection<E>> checkParentId(Collection<E> source) {
+        
+        Set<K> idSet = source
+                .stream()
+                .map(TreeSupportEntity::getId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        if (idSet.isEmpty()) {
+            return Mono.just(source);
+        }
+
+        Set<K> readyToCheck = source
+                .stream()
+                .map(TreeSupportEntity::getParentId)
+                .filter(e -> Objects.nonNull(e) && !idSet.contains(e))
+                .collect(Collectors.toSet());
+
+        if (readyToCheck.isEmpty()) {
+            return Mono.just(source);
+        }
+
+        return this
+                .createQuery()
+                .in("id", readyToCheck)
+                .count()
+                .doOnNext(count -> {
+                    if (count != readyToCheck.size()) {
+                        throw new ValidationException("parentId", "error.tree_entity_parent_id_not_exist");
+                    }
+                })
+                .thenReturn(source);
+
     }
 
     //重构子节点的path
@@ -212,6 +249,7 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
                 //1.先平铺
                 .flatMapIterable(e -> TreeSupportEntity.expandTree2List(e, getIDGenerator()))
                 .collectList()
+                .flatMap(this::checkParentId)
                 .flatMapIterable(list -> {
                     Map<K, E> map = list
                             .stream()

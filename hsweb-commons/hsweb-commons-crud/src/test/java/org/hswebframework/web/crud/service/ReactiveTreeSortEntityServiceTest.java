@@ -4,11 +4,13 @@ import org.hswebframework.ezorm.core.param.QueryParam;
 import org.hswebframework.ezorm.rdb.mapping.defaults.SaveResult;
 import org.hswebframework.web.api.crud.entity.QueryParamEntity;
 import org.hswebframework.web.crud.entity.TestTreeSortEntity;
+import org.hswebframework.web.exception.ValidationException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -138,5 +140,31 @@ public class ReactiveTreeSortEntityServiceTest {
                 .as(StepVerifier::create)
                 .expectNext(firstPath)
                 .verifyComplete();
+    }
+
+    @Test
+    public void testNotExistParentId(){
+        TestTreeSortEntity entity = new TestTreeSortEntity();
+        entity.setId("NotExistParentIdTest");
+        entity.setName("NotExistParentIdTest");
+        entity.setParentId("NotExistParentId");
+
+        sortEntityService
+                .save(entity)
+                .then()
+                .as(StepVerifier::create)
+                .expectError(ValidationException.class)
+                .verify();
+
+        TestTreeSortEntity entity2 = new TestTreeSortEntity();
+        entity2.setId("NotExistParentId");
+        entity2.setName("NotExistParentId");
+
+        sortEntityService
+                .save(Flux.just(entity,entity2))
+                .then()
+                .as(StepVerifier::create)
+                .expectComplete()
+                .verify();
     }
 }
