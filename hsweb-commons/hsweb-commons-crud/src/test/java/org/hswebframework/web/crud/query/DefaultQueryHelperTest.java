@@ -46,7 +46,7 @@ class DefaultQueryHelperTest {
                 .execute()
                 .sync();
 
-        helper.select("select name as \"name\",count(1) totalResult from s_test group by name having count(1) > ? ", GroupResult::new,0)
+        helper.select("select name as \"name\",count(1) totalResult from s_test group by name having count(1) > ? ", GroupResult::new, 0)
 //              .where(dsl -> dsl
 //                      .is("age", "31")
 //                      .orderByAsc(GroupResult::getTotalResult))
@@ -57,9 +57,33 @@ class DefaultQueryHelperTest {
               .verifyComplete();
     }
 
+    @Test
+    public void testInner() {
+        DefaultQueryHelper helper = new DefaultQueryHelper(database);
+
+        database.dml()
+                .insert("s_test")
+                .value("id", "inner-test")
+                .value("name", "inner")
+                .value("age", 31)
+                .execute()
+                .sync();
+
+
+        helper.select("select age,count(1) c from ( select name,age from s_test ) a group by age ", 0)
+              .where(dsl -> dsl
+                      .is("a.name", "inner")
+                      .is("age", 31))
+              .fetch()
+              .doOnNext(v -> System.out.println(JSON.toJSONString(v, SerializerFeature.PrettyFormat)))
+              .as(StepVerifier::create)
+              .expectNextCount(1)
+              .verifyComplete();
+    }
+
     @Getter
     @Setter
-    public static class GroupResult{
+    public static class GroupResult {
         private String name;
         private BigDecimal totalResult;
     }

@@ -104,12 +104,24 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
             synchronized (this) {
                 if (columnMappings == null) {
                     columnMappings = new HashMap<>();
+
                     if (select.table instanceof SelectTable) {
+
+                        for (Map.Entry<String, Column> entry :
+                                ((SelectTable) select.getTable()).getColumns().entrySet()) {
+                            Column column = entry.getValue();
+                            Column col = new Column(column.getName(), column.getAlias(), select.table.alias, column.metadata);
+                            columnMappings.put(entry.getKey(), col);
+                            columnMappings.put(select.table.alias + "." + entry.getKey(), col);
+                        }
+
                         for (Column column : select.getColumnList()) {
                             columnMappings.put(column.getName(), column);
                             columnMappings.put(column.getAlias(), column);
-                            columnMappings.put(column.getOwner() + "." + column.getName(), column);
-                            columnMappings.put(column.getOwner() + "." + column.getAlias(), column);
+                            if (null != column.getOwner()) {
+                                columnMappings.put(column.getOwner() + "." + column.getName(), column);
+                                columnMappings.put(column.getOwner() + "." + column.getAlias(), column);
+                            }
                         }
                     } else {
                         // 主表

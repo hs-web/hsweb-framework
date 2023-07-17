@@ -9,6 +9,7 @@ import org.hswebframework.ezorm.rdb.metadata.TableOrViewMetadata;
 import org.hswebframework.ezorm.rdb.operator.DatabaseOperator;
 import org.hswebframework.web.api.crud.entity.QueryParamEntity;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -138,6 +139,10 @@ public interface QueryAnalyzer {
                            TableOrViewMetadata metadata) {
             super(alias, metadata);
             this.columns = columns;
+        }
+
+        public Map<String, Column> getColumns() {
+            return Collections.unmodifiableMap(columns);
         }
     }
 
