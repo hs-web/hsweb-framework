@@ -74,7 +74,7 @@ class DefaultQueryHelperTest {
               .where(dsl -> dsl
                       .is("a.name", "inner")
                       .is("age", 31))
-              .fetch()
+              .fetchPaged(0,10)
               .doOnNext(v -> System.out.println(JSON.toJSONString(v, SerializerFeature.PrettyFormat)))
               .as(StepVerifier::create)
               .expectNextCount(1)
@@ -199,7 +199,7 @@ class DefaultQueryHelperTest {
 //              )
               .orderByAsc(TestEntity::getAge)
               .orderByDesc(EventTestEntity::getAge)
-              .fetchPaged()
+              .fetchPaged(0,10)
               .doOnNext(info -> System.out.println(JSON.toJSONString(info, SerializerFeature.PrettyFormat)))
               .as(StepVerifier::create)
               .expectNextCount(1)

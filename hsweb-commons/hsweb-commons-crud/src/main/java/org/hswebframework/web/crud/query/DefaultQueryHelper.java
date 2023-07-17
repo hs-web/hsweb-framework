@@ -228,7 +228,9 @@ public class DefaultQueryHelper implements QueryHelper {
 
         @Override
         public Mono<PagerResult<R>> fetchPaged(int pageIndex, int pageSize) {
-            QueryParamEntity param = this.param == null ? new QueryParamEntity().doPaging(pageIndex, pageSize) : this.param.clone();
+            QueryParamEntity param = this.param == null
+                    ? new QueryParamEntity().doPaging(pageIndex, pageSize)
+                    : this.param.clone().doPaging(pageIndex,pageSize);
 
             SqlRequest listSql = analyzer.refactor(param, args);
 
@@ -584,11 +586,13 @@ public class DefaultQueryHelper implements QueryHelper {
                                         .reactive()
                                         .as(resultHandler)
                                         .collectList(),
-                                (total, list) -> PagerResult.of(total, list, param))
+                                (total, list) -> PagerResult.of(total, list, param.clone().doPaging(pageIndex, pageSize)))
                            .contextWrite(logContext);
             }
 
-            QueryParamEntity copy = param != null ? param.clone() : new QueryParamEntity().doPaging(pageIndex, pageSize);
+            QueryParamEntity copy = param != null
+                    ? param.clone().doPaging(pageIndex, pageSize)
+                    : new QueryParamEntity().doPaging(pageIndex, pageSize);
 
             return this
                     .count()
