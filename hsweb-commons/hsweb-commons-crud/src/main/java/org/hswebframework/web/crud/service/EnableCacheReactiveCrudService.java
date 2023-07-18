@@ -4,10 +4,13 @@ import org.hswebframework.ezorm.rdb.mapping.ReactiveDelete;
 import org.hswebframework.ezorm.rdb.mapping.ReactiveUpdate;
 import org.hswebframework.ezorm.rdb.mapping.defaults.SaveResult;
 import org.hswebframework.web.cache.ReactiveCache;
+import org.hswebframework.web.crud.utils.TransactionUtils;
 import org.reactivestreams.Publisher;
+import org.springframework.transaction.reactive.TransactionSynchronization;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.function.Function;
 
@@ -28,65 +31,98 @@ public interface EnableCacheReactiveCrudService<E, K> extends ReactiveCrudServic
 
     @Override
     default Mono<Integer> updateById(K id, Mono<E> entityPublisher) {
-        return ReactiveCrudService.super
-                .updateById(id, entityPublisher)
-                .doFinally(i -> getCache().evict("id:" + id).subscribe());
+        return registerClearCache("id:" + id)
+                .then(ReactiveCrudService.super.updateById(id, entityPublisher));
     }
 
     @Override
     default Mono<SaveResult> save(E data) {
-        return ReactiveCrudService.super
-                .save(data)
-                .doFinally(i -> getCache().clear().subscribe());
+        return registerClearCache()
+                .then(ReactiveCrudService.super.save(data));
     }
 
     @Override
     default Mono<SaveResult> save(Publisher<E> entityPublisher) {
-        return ReactiveCrudService.super
-                .save(entityPublisher)
-                .doFinally(i -> getCache().clear().subscribe());
+        return registerClearCache()
+                .then(ReactiveCrudService.super.save(entityPublisher));
     }
 
     @Override
     default Mono<Integer> insert(E data) {
-        return ReactiveCrudService.super
-                .insert(data)
-                .doFinally(i -> getCache().clear().subscribe());
+        return registerClearCache()
+                .then(ReactiveCrudService.super.insert(data));
     }
 
     @Override
     default Mono<Integer> insert(Publisher<E> entityPublisher) {
-        return ReactiveCrudService.super
-                .insert(entityPublisher)
-                .doFinally(i -> getCache().clear().subscribe());
+        return registerClearCache()
+                .then(ReactiveCrudService.super.insert(entityPublisher));
     }
 
     @Override
     default Mono<Integer> insertBatch(Publisher<? extends Collection<E>> entityPublisher) {
-        return ReactiveCrudService.super
-                .insertBatch(entityPublisher)
-                .doFinally(i -> getCache().clear().subscribe());
+        return registerClearCache()
+                .then(ReactiveCrudService.super.insertBatch(entityPublisher));
     }
+
+    default Mono<Void> registerClearCache() {
+        return TransactionUtils.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            @Nonnull
+            public Mono<Void> afterCommit() {
+                return getCache().clear();
+            }
+        }, TransactionSynchronization::afterCommit);
+    }
+
+    default Mono<Void> registerClearCache(String key) {
+        return TransactionUtils.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            @Nonnull
+            public Mono<Void> afterCommit() {
+                return getCache().evict(key);
+            }
+        }, TransactionSynchronization::afterCommit);
+    }
+
 
     @Override
     default Mono<Integer> deleteById(Publisher<K> idPublisher) {
-        return Flux
-                .from(idPublisher)
-                .flatMap(id -> this.getCache().evict("id:" + id).thenReturn(id))
-                .as(ReactiveCrudService.super::deleteById);
+        Flux<K> cache = Flux.from(idPublisher).cache();
+        return TransactionUtils
+                .registerSynchronization(new TransactionSynchronization() {
+                    @Override
+                    @Nonnull
+                    public Mono<Void> afterCommit() {
+                        return cache
+                                .flatMap(id -> getCache().evict("id:" + id))
+                                .then();
+                    }
+                }, TransactionSynchronization::afterCommit)
+                .then(ReactiveCrudService.super.deleteById(cache));
     }
 
     @Override
     default ReactiveUpdate<E> createUpdate() {
         return ReactiveCrudService.super
                 .createUpdate()
-                .onExecute((update, s) -> getCache().clear().then(s));
+                .onExecute((update, s) -> s.flatMap(i -> {
+                    if (i > 0) {
+                        return getCache().clear().thenReturn(i);
+                    }
+                    return Mono.just(i);
+                }));
     }
 
     @Override
     default ReactiveDelete createDelete() {
         return ReactiveCrudService.super
                 .createDelete()
-                .onExecute((update, s) -> getCache().clear().then(s));
+                .onExecute((update, s) -> s.flatMap(i -> {
+                    if (i > 0) {
+                        return getCache().clear().thenReturn(i);
+                    }
+                    return Mono.just(i);
+                }));
     }
 }
