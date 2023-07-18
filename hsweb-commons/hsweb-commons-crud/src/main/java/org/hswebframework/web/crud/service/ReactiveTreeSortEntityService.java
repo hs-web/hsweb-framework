@@ -184,11 +184,11 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
     }
 
     default Mono<Collection<E>> checkParentId(Collection<E> source) {
-        
+
         Set<K> idSet = source
                 .stream()
                 .map(TreeSupportEntity::getId)
-                .filter(Objects::nonNull)
+                .filter(e -> !ObjectUtils.isEmpty(e))
                 .collect(Collectors.toSet());
 
         if (idSet.isEmpty()) {
@@ -198,7 +198,7 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
         Set<K> readyToCheck = source
                 .stream()
                 .map(TreeSupportEntity::getParentId)
-                .filter(e -> Objects.nonNull(e) && !idSet.contains(e))
+                .filter(e -> !ObjectUtils.isEmpty(e) && !idSet.contains(e))
                 .collect(Collectors.toSet());
 
         if (readyToCheck.isEmpty()) {
