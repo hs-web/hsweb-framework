@@ -24,12 +24,14 @@ public class LocalFileStorageService implements FileStorageService {
     @Override
     public Mono<String> saveFile(FilePart filePart) {
         FileUploadProperties.StaticFileInfo info = properties.createStaticSavePath(filePart.filename());
-        File file = new File(info.getSavePath());
-
-        return (filePart)
-                .transferTo(file)
-                .then(Mono.fromRunnable(()->properties.applyFilePermission(file)))
-                .thenReturn(info.getLocation());
+        return createStaticFileInfo(filePart.filename())
+                .flatMap(into -> {
+                    File file = new File(info.getSavePath());
+                    return (filePart)
+                            .transferTo(file)
+                            .then(Mono.fromRunnable(() -> properties.applyFilePermission(file)))
+                            .thenReturn(info.getLocation());
+                });
     }
 
     private static final OpenOption[] FILE_CHANNEL_OPTIONS = {
@@ -37,30 +39,33 @@ public class LocalFileStorageService implements FileStorageService {
             StandardOpenOption.TRUNCATE_EXISTING,
             StandardOpenOption.WRITE};
 
+    protected Mono<FileUploadProperties.StaticFileInfo> createStaticFileInfo(String fileName) {
+        return Mono.just(properties.createStaticSavePath(fileName));
+    }
+
     @Override
     @SneakyThrows
     public Mono<String> saveFile(InputStream inputStream, String fileType) {
         String fileName = "_temp" + (fileType.startsWith(".") ? fileType : "." + fileType);
 
-        FileUploadProperties.StaticFileInfo info = properties.createStaticSavePath(fileName);
-
-        return Mono
-                .fromCallable(() -> {
-                    try (ReadableByteChannel input = Channels.newChannel(inputStream);
-                         FileChannel output = FileChannel.open(Paths.get(info.getSavePath()), FILE_CHANNEL_OPTIONS)) {
-                        long size = (input instanceof FileChannel ? ((FileChannel) input).size() : Long.MAX_VALUE);
-                        long totalWritten = 0;
-                        while (totalWritten < size) {
-                            long written = output.transferFrom(input, totalWritten, size - totalWritten);
-                            if (written <= 0) {
-                                break;
+        return createStaticFileInfo(fileName)
+                .flatMap(info -> Mono
+                        .fromCallable(() -> {
+                            try (ReadableByteChannel input = Channels.newChannel(inputStream);
+                                 FileChannel output = FileChannel.open(Paths.get(info.getSavePath()), FILE_CHANNEL_OPTIONS)) {
+                                long size = (input instanceof FileChannel ? ((FileChannel) input).size() : Long.MAX_VALUE);
+                                long totalWritten = 0;
+                                while (totalWritten < size) {
+                                    long written = output.transferFrom(input, totalWritten, size - totalWritten);
+                                    if (written <= 0) {
+                                        break;
+                                    }
+                                    totalWritten += written;
+                                }
+                                return info.getLocation();
                             }
-                            totalWritten += written;
-                        }
-                        return info.getLocation();
-                    }
-                })
-                .doOnSuccess((ignore)-> properties.applyFilePermission(new File(info.getSavePath())))
-                .subscribeOn(Schedulers.boundedElastic());
+                        })
+                        .doOnSuccess((ignore) -> properties.applyFilePermission(new File(info.getSavePath())))
+                        .subscribeOn(Schedulers.boundedElastic()));
     }
 }

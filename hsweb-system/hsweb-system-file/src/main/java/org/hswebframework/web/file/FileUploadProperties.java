@@ -113,15 +113,17 @@ public class FileUploadProperties {
 
         info.location = staticLocation + "/" + filePath + "/" + fileName;
         info.savePath = absPath + "/" + fileName;
-
+        info.relativeLocation = filePath + "/" + fileName;
         return info;
     }
 
     @Getter
     @Setter
     public static class StaticFileInfo {
+
         private String savePath;
 
+        private String relativeLocation;
         private String location;
     }
 }
