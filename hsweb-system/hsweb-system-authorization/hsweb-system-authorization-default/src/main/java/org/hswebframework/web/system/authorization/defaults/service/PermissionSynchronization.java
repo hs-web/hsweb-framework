@@ -75,7 +75,7 @@ public class PermissionSynchronization implements CommandLineRunner {
         }
     }
 
-    protected PermissionEntity convert(Map<String, PermissionEntity> old, ResourceDefinition definition) {
+    public static PermissionEntity convert(Map<String, PermissionEntity> old, ResourceDefinition definition,Map<String, List<OptionalField>>  entityFieldsMapping) {
         PermissionEntity entity = old.getOrDefault(definition.getId(), PermissionEntity.builder()
                 .name(definition.getName())
                 .describe(definition.getDescription())
@@ -129,7 +129,7 @@ public class PermissionSynchronization implements CommandLineRunner {
                 .fetch()
                 .collect(Collectors.toMap(PermissionEntity::getId, Function.identity()))
                 .flatMap(group -> Flux.fromIterable(definition.getResources())
-                        .map(d -> this.convert(group, d))
+                        .map(d -> PermissionSynchronization.convert(group, d,entityFieldsMapping))
                         .as(permissionRepository::save))
                 .doOnError(err -> log.warn("sync permission error", err))
                 .subscribe(l -> {
