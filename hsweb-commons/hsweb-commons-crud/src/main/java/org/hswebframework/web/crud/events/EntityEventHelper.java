@@ -35,6 +35,16 @@ public class EntityEventHelper {
                 .defaultIfEmpty(defaultIfEmpty);
     }
 
+    public static Mono<Void> tryFireEvent(Supplier<Mono<Void>> task) {
+        return Mono
+                .deferContextual(ctx -> {
+                    if (Boolean.TRUE.equals(ctx.getOrDefault(doEventContextKey, true))) {
+                        return task.get();
+                    }
+                    return Mono.empty();
+                });
+    }
+
     /**
      * 设置Mono不触发实体类事件
      *
@@ -95,6 +105,10 @@ public class EntityEventHelper {
                                                     List<T> before,
                                                     List<T> after,
                                                     Consumer<GenericsPayloadApplicationEvent<EntityModifyEvent<T>>> publisher) {
+        //没有数据被更新则不触发事件
+        if (before.isEmpty()) {
+            return Mono.empty();
+        }
         return publishEvent(source, entityType, () -> new EntityModifyEvent<>(before, after, entityType), publisher);
     }
 
