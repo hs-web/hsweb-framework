@@ -57,6 +57,11 @@ public class EnumDictTest {
                            .readValue("{\"testEnum\":\"e1\"}");
         Assert.assertEquals(testEntity.testEnum, TestEnum.E1);
 
+        testEntity = mapper.readerFor(TestEntity.class)
+                           .readValue("{\"testEnum\":0}");
+        Assert.assertEquals(testEntity.testEnum, TestEnum.E1);
+
+
         System.out.println((Object) mapper.readerFor(TestEnum.class).readValue("\"E1\""));
 
         testEntity = mapper.readerFor(TestEntity.class)
@@ -68,7 +73,7 @@ public class EnumDictTest {
 
     @Test
     public void testEq() {
-        assertFalse(EnumDict.find(TestEnum.class, 1)
+        assertTrue(EnumDict.find(TestEnum.class, 1)
                             .isPresent());
 
         assertTrue(EnumDict.find(TestEnum.class, "e1")

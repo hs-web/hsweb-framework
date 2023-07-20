@@ -101,12 +101,14 @@ public interface EnumDict<V> extends JSONSerializable {
         if (v instanceof Map) {
             v = ((Map) v).getOrDefault("value", ((Map) v).get("text"));
         }
+        if (v instanceof Number) {
+            v = ((Number) v).intValue();
+        }
         return this == v
                 || getValue() == v
-                || getValue().equals(v)
-//                || (v instanceof Number ? in(((Number) v).longValue()) : false)
+                || Objects.equals(getValue(), v)
+                || Objects.equals(ordinal(), v)
                 || String.valueOf(getValue()).equalsIgnoreCase(String.valueOf(v))
-//                || v.equals(getMask())
                 || getText().equalsIgnoreCase(String.valueOf(v)
         );
     }
@@ -138,7 +140,7 @@ public interface EnumDict<V> extends JSONSerializable {
      * @return 查找到的结果
      */
     @SuppressWarnings("all")
-    static <T extends Enum & EnumDict> Optional<T> find(Class<T> type, Predicate<T> predicate) {
+    static <T extends Enum<?> & EnumDict<?>> Optional<T> find(Class<T> type, Predicate<T> predicate) {
         ClassDescription description = ClassDescriptions.getDescription(type);
         if (description.isEnumType()) {
             for (Object enumDict : description.getEnums()) {
@@ -151,7 +153,7 @@ public interface EnumDict<V> extends JSONSerializable {
     }
 
     @SuppressWarnings("all")
-    static <T extends Enum & EnumDict> List<T> findList(Class<T> type, Predicate<T> predicate) {
+    static <T extends Enum<?> & EnumDict<?>> List<T> findList(Class<T> type, Predicate<T> predicate) {
         ClassDescription description = ClassDescriptions.getDescription(type);
         if (description.isEnumType()) {
             return Arrays.stream(description.getEnums())
@@ -167,7 +169,7 @@ public interface EnumDict<V> extends JSONSerializable {
      *
      * @see EnumDict#find(Class, Predicate)
      */
-    static <T extends Enum & EnumDict<?>> Optional<T> findByValue(Class<T> type, Object value) {
+    static <T extends Enum<?> & EnumDict<?>> Optional<T> findByValue(Class<T> type, Object value) {
         return find(type, e -> e.getValue() == value || e.getValue().equals(value) || String
                 .valueOf(e.getValue())
                 .equalsIgnoreCase(String.valueOf(value)));
@@ -178,7 +180,7 @@ public interface EnumDict<V> extends JSONSerializable {
      *
      * @see EnumDict#find(Class, Predicate)
      */
-    static <T extends Enum & EnumDict> Optional<T> findByText(Class<T> type, String text) {
+    static <T extends Enum<?> & EnumDict<?>> Optional<T> findByText(Class<T> type, String text) {
         return find(type, e -> e.getText().equalsIgnoreCase(text));
     }
 
@@ -187,12 +189,12 @@ public interface EnumDict<V> extends JSONSerializable {
      *
      * @see EnumDict#find(Class, Predicate)
      */
-    static <T extends Enum & EnumDict> Optional<T> find(Class<T> type, Object target) {
+    static <T extends Enum<?> & EnumDict<?>> Optional<T> find(Class<T> type, Object target) {
         return find(type, v -> v.eq(target));
     }
 
     @SafeVarargs
-    static <T extends EnumDict> long toMask(T... t) {
+    static <T extends EnumDict<?>> long toMask(T... t) {
         if (t == null) {
             return 0L;
         }
@@ -205,38 +207,40 @@ public interface EnumDict<V> extends JSONSerializable {
 
 
     @SafeVarargs
-    static <T extends Enum & EnumDict> boolean in(T target, T... t) {
-        ClassDescription description= ClassDescriptions.getDescription(target.getClass());
+    static <T extends Enum<?> & EnumDict<?>> boolean in(T target, T... t) {
+        ClassDescription description = ClassDescriptions.getDescription(target.getClass());
         Object[] all = description.getEnums();
 
         if (all.length >= 64) {
-            List<T> list = Arrays.asList(t);
-            return Arrays.stream(all)
-                         .map(EnumDict.class::cast)
-                         .anyMatch(list::contains);
+            Set<Object> allSet = new HashSet<>(Arrays.asList(all));
+            for (T t1 : t) {
+                if (allSet.contains(t1)) {
+                    return true;
+                }
+            }
+            return false;
         }
         return maskIn(toMask(t), target);
     }
 
     @SafeVarargs
-    static <T extends EnumDict> boolean maskIn(long mask, T... t) {
+    static <T extends EnumDict<?>> boolean maskIn(long mask, T... t) {
         long value = toMask(t);
         return (mask & value) == value;
     }
 
     @SafeVarargs
-    static <T extends EnumDict> boolean maskInAny(long mask, T... t) {
+    static <T extends EnumDict<?>> boolean maskInAny(long mask, T... t) {
         long value = toMask(t);
         return (mask & value) != 0;
     }
 
-    static <T extends EnumDict> List<T> getByMask(List<T> allOptions, long mask) {
+    static <T extends EnumDict<?>> List<T> getByMask(List<T> allOptions, long mask) {
         if (allOptions.size() >= 64) {
             throw new UnsupportedOperationException("不支持选项超过64个数据字典!");
         }
         List<T> arr = new ArrayList<>();
-        List<T> all = allOptions;
-        for (T t : all) {
+        for (T t : allOptions) {
             if (t.in(mask)) {
                 arr.add(t);
             }
@@ -244,12 +248,12 @@ public interface EnumDict<V> extends JSONSerializable {
         return arr;
     }
 
-    static <T extends EnumDict> List<T> getByMask(Supplier<List<T>> allOptionsSupplier, long mask) {
+    static <T extends EnumDict<?>> List<T> getByMask(Supplier<List<T>> allOptionsSupplier, long mask) {
         return getByMask(allOptionsSupplier.get(), mask);
     }
 
 
-    static <T extends Enum & EnumDict> List<T> getByMask(Class<T> tClass, long mask) {
+    static <T extends Enum<?> & EnumDict<?>> List<T> getByMask(Class<T> tClass, long mask) {
 
         return getByMask(Arrays.asList(tClass.getEnumConstants()), mask);
     }
@@ -311,7 +315,7 @@ public interface EnumDict<V> extends JSONSerializable {
     @Slf4j
     @AllArgsConstructor
     @NoArgsConstructor
-    class EnumDictJSONDeserializer extends JsonDeserializer implements ObjectDeserializer {
+    class EnumDictJSONDeserializer extends JsonDeserializer<Object> implements ObjectDeserializer {
         private Function<Object, Object> mapper;
 
         @Override
@@ -325,7 +329,7 @@ public interface EnumDict<V> extends JSONSerializable {
                     int intValue = lexer.intValue();
                     lexer.nextToken(JSONToken.COMMA);
 
-                    return (T) EnumDict.find((Class) type, intValue);
+                    return (T) EnumDict.find((Class) type, intValue).orElse(null);
                 } else if (token == JSONToken.LITERAL_STRING) {
                     String name = lexer.stringVal();
                     lexer.nextToken(JSONToken.COMMA);
