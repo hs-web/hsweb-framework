@@ -156,6 +156,7 @@ class DefaultQueryHelperTest {
     public void testCustomFirstPageIndex() {
         DefaultQueryHelper helper = new DefaultQueryHelper(database);
         QueryParamEntity e = new QueryParamEntity();
+        e.and("id","eq","testCustomFirstPageIndex");
         e.setFirstPageIndex(1);
         e.setPageIndex(2);
 
