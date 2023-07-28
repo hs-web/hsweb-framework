@@ -150,7 +150,7 @@ public class ReactiveTreeSortEntityServiceTest {
         entity.setParentId("NotExistParentId");
 
         sortEntityService
-                .save(entity)
+                .insert(entity)
                 .then()
                 .as(StepVerifier::create)
                 .expectError(ValidationException.class)

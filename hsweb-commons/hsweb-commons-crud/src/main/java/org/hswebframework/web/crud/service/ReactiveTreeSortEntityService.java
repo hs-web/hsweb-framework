@@ -140,20 +140,34 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
     }
 
     @Override
-    @Transactional(readOnly = true, transactionManager = TransactionManagers.reactiveTransactionManager)
+    @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager)
     default Mono<Integer> insert(Publisher<E> entityPublisher) {
         return insertBatch(Flux.from(entityPublisher).collectList());
     }
 
     @Override
+    @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager)
+    default Mono<Integer> insert(E data) {
+        return this.insertBatch(Flux.just(Collections.singletonList(data)));
+    }
+
+    @Override
+    @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager)
     default Mono<Integer> insertBatch(Publisher<? extends Collection<E>> entityPublisher) {
-        return this.getRepository()
-                   .insertBatch(Flux.from(entityPublisher)
-                                    .flatMap(this::checkParentId)
-                                    .flatMap(Flux::fromIterable)
-                                    .flatMap(this::applyTreeProperty)
-                                    .flatMap(e -> Flux.fromIterable(TreeSupportEntity.expandTree2List(e, getIDGenerator())))
-                                    .collectList());
+        return this
+                .getRepository()
+                .insertBatch(Flux.from(entityPublisher)
+                                 .flatMap(Flux::fromIterable)
+                                 .collectList()
+                                 .flatMap(this::checkParentId)
+                                 .flatMapIterable(Function.identity())
+                                 .flatMap(this::applyTreeProperty)
+                                 .flatMap(e -> Flux.fromIterable(TreeSupportEntity.expandTree2List(e, getIDGenerator())))
+                                 .buffer(getBufferSize()));
+    }
+
+    default int getBufferSize() {
+        return 200;
     }
 
     default Mono<E> applyTreeProperty(E ele) {
@@ -267,7 +281,9 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
                 .flatMapIterable(e -> TreeSupportEntity.expandTree2List(e, getIDGenerator()))
                 //重构path
                 .as(this::tryRefactorPath)
-                .as(this.getRepository()::save);
+                .buffer(getBufferSize())
+                .flatMap(this.getRepository()::save)
+                .reduce(SaveResult::merge);
 
     }
 
