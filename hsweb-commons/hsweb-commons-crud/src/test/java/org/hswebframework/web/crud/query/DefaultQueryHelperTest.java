@@ -74,7 +74,7 @@ class DefaultQueryHelperTest {
               .where(dsl -> dsl
                       .is("a.name", "inner")
                       .is("age", 31))
-              .fetchPaged(0,10)
+              .fetchPaged(0, 10)
               .doOnNext(v -> System.out.println(JSON.toJSONString(v, SerializerFeature.PrettyFormat)))
               .as(StepVerifier::create)
               .expectNextCount(1)
@@ -153,6 +153,35 @@ class DefaultQueryHelperTest {
     }
 
     @Test
+    public void testCustomFirstPageIndex() {
+        DefaultQueryHelper helper = new DefaultQueryHelper(database);
+        QueryParamEntity e = new QueryParamEntity();
+        e.setFirstPageIndex(1);
+        e.setPageIndex(2);
+
+        {
+            helper.select(TestInfo.class)
+                  .from(TestEntity.class)
+                  .where(e)
+                  .fetchPaged()
+                  .doOnNext(info -> System.out.println(JSON.toJSONString(info, SerializerFeature.PrettyFormat)))
+                  .as(StepVerifier::create)
+                  .expectNextMatches(p -> p.getPageIndex() == 1)
+                  .verifyComplete();
+        }
+
+        {
+            helper.select("select * from s_test")
+                  .where(e)
+                  .fetchPaged()
+                  .doOnNext(info -> System.out.println(JSON.toJSONString(info, SerializerFeature.PrettyFormat)))
+                  .as(StepVerifier::create)
+                  .expectNextMatches(p -> p.getPageIndex() == 1)
+                  .verifyComplete();
+        }
+    }
+
+    @Test
     public void test() {
 
         database.dml()
@@ -199,7 +228,7 @@ class DefaultQueryHelperTest {
 //              )
               .orderByAsc(TestEntity::getAge)
               .orderByDesc(EventTestEntity::getAge)
-              .fetchPaged(0,10)
+              .fetchPaged(0, 10)
               .doOnNext(info -> System.out.println(JSON.toJSONString(info, SerializerFeature.PrettyFormat)))
               .as(StepVerifier::create)
               .expectNextCount(1)

@@ -211,7 +211,7 @@ public class DefaultQueryHelper implements QueryHelper {
             if (param == null) {
                 return fetchPaged(0, 25);
             }
-            return fetchPaged(param.getPageIndex(), param.getPageSize());
+            return fetchPaged(param);
         }
 
         private SqlRequest createPagingSql(SqlRequest request, int pageIndex, int pageSize) {
@@ -228,9 +228,12 @@ public class DefaultQueryHelper implements QueryHelper {
 
         @Override
         public Mono<PagerResult<R>> fetchPaged(int pageIndex, int pageSize) {
-            QueryParamEntity param = this.param == null
-                    ? new QueryParamEntity().doPaging(pageIndex, pageSize)
-                    : this.param.clone().doPaging(pageIndex,pageSize);
+            return fetchPaged(this.param == null
+                                      ? new QueryParamEntity().doPaging(pageIndex, pageSize)
+                                      : this.param.clone().<QueryParamEntity>doPaging(pageIndex, pageSize));
+        }
+
+        public Mono<PagerResult<R>> fetchPaged(QueryParamEntity param) {
 
             SqlRequest listSql = analyzer.refactor(param, args);
 
@@ -238,7 +241,7 @@ public class DefaultQueryHelper implements QueryHelper {
 
             if (param.getTotal() != null) {
                 return sqlExecutor
-                        .select(createPagingSql(listSql, pageIndex, pageSize), this).map(mapper)
+                        .select(createPagingSql(listSql, param.getPageIndex(), param.getPageSize()), this).map(mapper)
                         .collectList()
                         .map(list -> PagerResult.of(param.getTotal(), list, param))
                         .contextWrite(logContext);
@@ -262,11 +265,11 @@ public class DefaultQueryHelper implements QueryHelper {
                     .select(countSql, countWrapper)
                     .single(0)
                     .<PagerResult<R>>flatMap(total -> {
-                        if (total == 0) {
-                            return Mono.just(PagerResult.of(0, new ArrayList<>(), param.clone()));
-                        }
                         QueryParamEntity copy = param.clone();
                         copy.rePaging(total);
+                        if (total == 0) {
+                            return Mono.just(PagerResult.of(0, new ArrayList<>(), copy));
+                        }
                         return sqlExecutor
                                 .select(createPagingSql(listSql, copy.getPageIndex(), copy.getPageSize()), this)
                                 .map(mapper)
@@ -559,17 +562,23 @@ public class DefaultQueryHelper implements QueryHelper {
         @Override
         public Mono<PagerResult<R>> fetchPaged() {
             if (param != null) {
-                return fetchPaged(param.getPageIndex(), param.getPageSize());
+                return fetchPaged(param);
             }
             return fetchPaged(0, 25);
         }
 
         @Override
         public Mono<PagerResult<R>> fetchPaged(int pageIndex, int pageSize) {
+            return fetchPaged(param != null
+                                      ? param.clone().doPaging(pageIndex, pageSize)
+                                      : new QueryParamEntity().<QueryParamEntity>doPaging(pageIndex, pageSize));
+        }
 
-            if (param != null && param.getTotal() != null) {
+        private Mono<PagerResult<R>> fetchPaged(QueryParamEntity param) {
+
+            if (param.getTotal() != null) {
                 return createQuery()
-                        .paging(pageIndex, pageSize)
+                        .paging(param.getPageIndex(), param.getPageSize())
                         .fetch(this)
                         .reactive()
                         .as(resultHandler)
@@ -578,29 +587,27 @@ public class DefaultQueryHelper implements QueryHelper {
                         .contextWrite(logContext);
             }
 
-            if (param != null && param.isParallelPager()) {
+            if (param.isParallelPager()) {
                 return Mono.zip(count(),
                                 createQuery()
-                                        .paging(pageIndex, pageSize)
+                                        .paging(param.getPageIndex(), param.getPageSize())
                                         .fetch(this)
                                         .reactive()
                                         .as(resultHandler)
                                         .collectList(),
-                                (total, list) -> PagerResult.of(total, list, param.clone().doPaging(pageIndex, pageSize)))
+                                (total, list) -> PagerResult.of(total, list, param))
                            .contextWrite(logContext);
             }
 
-            QueryParamEntity copy = param != null
-                    ? param.clone().doPaging(pageIndex, pageSize)
-                    : new QueryParamEntity().doPaging(pageIndex, pageSize);
 
             return this
                     .count()
                     .flatMap(i -> {
+                        QueryParamEntity copy = param.clone();
+                        copy.rePaging(i);
                         if (i == 0) {
                             return Mono.just(PagerResult.of(0, new ArrayList<>(), copy));
                         }
-                        copy.rePaging(i);
                         return createQuery()
                                 .paging(copy.getPageIndex(), copy.getPageSize())
                                 .fetch(this)
