@@ -96,20 +96,22 @@ public class RedisAccessTokenManager implements AccessTokenManager {
     }
 
     private Mono<Void> storeAuthToken(RedisAccessToken token) {
-        if (token.isSingleton()) {
-            return userTokenManager
-                    .signIn(token.getAccessToken(),
-                            createTokenType(token.getClientId()),
-                            token.getAuthentication().getUser().getId(),
-                            tokenExpireIn * 1000L)
-                    .then();
-        } else {
+        //保存独立的权限信息,通常是用户指定了特定的授权范围时生效.
+        if (token.storeAuth()) {
             return userTokenManager
                     .signIn(token.getAccessToken(),
                             createTokenType(token.getClientId()),
                             token.getAuthentication().getUser().getId(),
                             tokenExpireIn * 1000L,
                             token.getAuthentication())
+                    .then();
+
+        } else {
+            return userTokenManager
+                    .signIn(token.getAccessToken(),
+                            createTokenType(token.getClientId()),
+                            token.getAuthentication().getUser().getId(),
+                            tokenExpireIn * 1000L)
                     .then();
         }
     }

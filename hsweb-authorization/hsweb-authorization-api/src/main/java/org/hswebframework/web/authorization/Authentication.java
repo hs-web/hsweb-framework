@@ -202,6 +202,15 @@ public interface Authentication extends Serializable {
     Map<String, Serializable> getAttributes();
 
     /**
+     * 设置属性,注意: 此属性可能并不会被持久化,仅用于临时传递信息.
+     * @param key key
+     * @param value value
+     */
+    default void setAttribute(String key,Serializable value){
+        getAttributes().put(key,value);
+    }
+
+    /**
      * 合并权限
      *
      * @param source 源权限信息

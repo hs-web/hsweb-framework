@@ -27,8 +27,18 @@ public class RedisAccessToken implements Serializable {
 
     private boolean singleton;
 
-    public AccessToken toAccessToken(int expiresIn){
-        AccessToken token=new AccessToken();
+    public boolean storeAuth() {
+        boolean allowAllScope = authentication
+                .getAttribute("scope")
+                .map("*"::equals)
+                .orElse(false);
+
+        //不是单例,并且没有授予全部权限
+        return !singleton && !allowAllScope;
+    }
+
+    public AccessToken toAccessToken(int expiresIn) {
+        AccessToken token = new AccessToken();
         token.setAccessToken(accessToken);
         token.setRefreshToken(refreshToken);
         token.setExpiresIn(expiresIn);

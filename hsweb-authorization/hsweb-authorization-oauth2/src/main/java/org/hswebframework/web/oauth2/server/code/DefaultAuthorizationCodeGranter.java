@@ -58,9 +58,13 @@ public class DefaultAuthorizationCodeGranter implements AuthorizationCodeGranter
 
         ScopePredicate permissionPredicate = OAuth2ScopeUtils.createScopePredicate(codeCache.getScope());
 
-        codeCache.setAuthentication(authentication.copy(
+        Authentication copy = authentication.copy(
                 (permission, action) -> permissionPredicate.test(permission.getId(), action),
-                dimension -> permissionPredicate.test(dimension.getType().getId(), dimension.getId())));
+                dimension -> permissionPredicate.test(dimension.getType().getId(), dimension.getId()));
+
+        copy.setAttribute("scope", codeCache.getScope());
+
+        codeCache.setAuthentication(copy);
 
 
         return redis

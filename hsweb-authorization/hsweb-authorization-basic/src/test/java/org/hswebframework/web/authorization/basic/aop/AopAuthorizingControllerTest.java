@@ -1,5 +1,6 @@
 package org.hswebframework.web.authorization.basic.aop;
 
+import org.hswebframework.ezorm.core.CastUtil;
 import org.hswebframework.ezorm.core.param.Param;
 import org.hswebframework.ezorm.core.param.QueryParam;
 import org.hswebframework.ezorm.core.param.Term;
@@ -134,7 +135,7 @@ public class AopAuthorizingControllerTest {
                 .flatMapIterable(Function.identity())
                 .next()
                 .map(Term::getValue)
-                .<Collection<Object>>map(Collection.class::cast)
+                .map(CastUtil::<Collection<Object>>cast)
                 .flatMapIterable(Function.identity())
                 .next()
                 .as(StepVerifier::create)

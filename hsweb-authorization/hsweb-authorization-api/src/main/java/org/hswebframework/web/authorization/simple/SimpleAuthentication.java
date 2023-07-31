@@ -98,6 +98,7 @@ public class SimpleAuthentication implements Authentication {
                                               .collect(Collectors.toList())
         );
         authentication.setUser(user);
+        authentication.setAttributes(new HashMap<>(attributes));
         return authentication;
     }
 

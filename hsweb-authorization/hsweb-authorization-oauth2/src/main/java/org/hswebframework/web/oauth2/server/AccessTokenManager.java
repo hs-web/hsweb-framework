@@ -25,7 +25,7 @@ public interface AccessTokenManager {
      * @param clientId       clientId {@link OAuth2Client#getClientId()}
      * @param authentication 权限信息
      * @param singleton      是否单例,如果为true,重复创建token将返回首次创建的token
-     * @return
+     * @return AccessToken
      */
     Mono<AccessToken> createAccessToken(String clientId,
                                         Authentication authentication,
