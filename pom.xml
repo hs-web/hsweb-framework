@@ -470,12 +470,18 @@
             <id>aliyun-nexus</id>
             <name>aliyun</name>
             <url>https://maven.aliyun.com/nexus/content/groups/public/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
         </repository>
 
         <repository>
             <id>hsweb-nexus</id>
             <name>Nexus Release Repository</name>
-            <url>https://nexus.hsweb.me/content/groups/public/</url>
+            <url>https://nexus.jetlinks.cn/content/groups/public/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
             <snapshots>
                 <enabled>true</enabled>
                 <updatePolicy>
@@ -490,12 +496,12 @@
         <repository>
             <id>releases</id>
             <name>Nexus Release Repository</name>
-            <url>https://nexus.hsweb.me/content/repositories/releases/</url>
+            <url>https://nexus.jetlinks.cn/content/repositories/releases/</url>
         </repository>
         <snapshotRepository>
             <id>snapshots</id>
             <name>Nexus Snapshot Repository</name>
-            <url>https://nexus.hsweb.me/content/repositories/snapshots/</url>
+            <url>https://nexus.jetlinks.cn/content/repositories/snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
 
