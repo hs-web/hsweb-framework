@@ -17,6 +17,7 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.context.index.CandidateComponentsIndex;
 import org.springframework.context.index.CandidateComponentsIndexLoader;
+import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.io.Resource;
@@ -27,6 +28,7 @@ import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
+import org.springframework.util.ReflectionUtils;
 
 import javax.persistence.Table;
 import java.io.IOException;
@@ -79,6 +81,34 @@ public class EasyormRepositoryRegistrar implements ImportBeanDefinitionRegistrar
                 .collect(Collectors.toSet());
     }
 
+    private Class<?> findIdType(Class<?> entityType) {
+        Class<?> idType;
+        try {
+            if (GenericEntity.class.isAssignableFrom(entityType)) {
+                return GenericTypeResolver.resolveTypeArgument(entityType, GenericEntity.class);
+            }
+
+            Class<?>[] ref = new Class[1];
+            ReflectionUtils.doWithFields(entityType, field -> {
+                if (field.isAnnotationPresent(javax.persistence.Id.class)) {
+                    ref[0] = field.getType();
+                }
+            });
+            idType = ref[0];
+
+            if (idType == null) {
+                Method getId = org.springframework.util.ClassUtils.getMethod(entityType, "getId");
+                idType = getId.getReturnType();
+            }
+        } catch (Throwable e) {
+            log.warn("unknown id type of entity:{}", entityType);
+            idType = String.class;
+        }
+
+        return idType;
+
+    }
+
     @Override
     @SneakyThrows
     @SuppressWarnings("all")
@@ -106,18 +136,7 @@ public class EasyormRepositoryRegistrar implements ImportBeanDefinitionRegistrar
 
             Reactive reactive = AnnotationUtils.findAnnotation(entityType, Reactive.class);
 
-            Class idType = null;
-            try {
-                if (GenericEntity.class.isAssignableFrom(entityType)) {
-                    idType = ClassUtils.getGenericType(entityType);
-                }
-                if (idType == null) {
-                    Method getId = org.springframework.util.ClassUtils.getMethod(entityType, "getId");
-                    idType = getId.getReturnType();
-                }
-            } catch (Exception e) {
-                idType = String.class;
-            }
+            Class idType = findIdType(entityType);
 
             EntityInfo entityInfo = new EntityInfo(entityType,
                                                    entityType,
