@@ -117,6 +117,8 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
                             if (!(column instanceof ExpressionColumn) && column.metadata != null) {
                                 columnMappings.put(column.metadata.getName(), col);
                                 columnMappings.put(select.table.alias + "." + column.metadata.getName(), col);
+                                columnMappings.put(column.metadata.getAlias(), col);
+                                columnMappings.put(select.table.alias + "." + column.metadata.getAlias(), col);
                             }
                         }
 
