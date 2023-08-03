@@ -113,6 +113,11 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
                             Column col = new Column(column.getName(), column.getAlias(), select.table.alias, column.metadata);
                             columnMappings.put(entry.getKey(), col);
                             columnMappings.put(select.table.alias + "." + entry.getKey(), col);
+
+                            if (!(column instanceof ExpressionColumn) && column.metadata != null) {
+                                columnMappings.put(column.metadata.getName(), col);
+                                columnMappings.put(select.table.alias + "." + column.metadata.getName(), col);
+                            }
                         }
 
                         for (Column column : select.getColumnList()) {
@@ -191,7 +196,7 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
     }
 
     private String parsePlainName(String name) {
-        if (name == null || name.length() == 0) {
+        if (name == null || name.isEmpty()) {
             return null;
         }
         char firstChar = name.charAt(0);
@@ -524,10 +529,11 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
             if (col.metadata == null) {
                 metadata = table.metadata;
             }
+            String colName = col.metadata != null ? col.metadata.getName() : col.name;
             return metadata
                     .findFeature(createFeatureId(term.getTermType()))
                     .map(feature -> feature.createFragments(
-                            table.alias + "." + dialect.quote(col.name, col.metadata != null), col.metadata, term))
+                            table.alias + "." + dialect.quote(colName, col.metadata != null), col.metadata, term))
                     .orElse(EmptySqlFragments.INSTANCE);
         }
     }

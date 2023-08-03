@@ -65,14 +65,17 @@ class DefaultQueryHelperTest {
                 .insert("s_test")
                 .value("id", "inner-test")
                 .value("name", "inner")
+                .value("testName","inner")
                 .value("age", 31)
                 .execute()
                 .sync();
 
 
-        helper.select("select age,count(1) c from ( select name,age from s_test ) a group by age ", 0)
+        helper.select("select age,count(1) c from ( select *,'1' as x from s_test ) a group by age ", 0)
               .where(dsl -> dsl
-                      .is("a.name", "inner")
+                      .is("x", "1")
+                      .is("name", "inner")
+                      .is("a.testName", "inner")
                       .is("age", 31))
               .fetchPaged(0, 10)
               .doOnNext(v -> System.out.println(JSON.toJSONString(v, SerializerFeature.PrettyFormat)))
