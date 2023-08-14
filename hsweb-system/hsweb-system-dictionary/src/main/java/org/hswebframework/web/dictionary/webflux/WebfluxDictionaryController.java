@@ -4,7 +4,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Parameter;
 import org.hswebframework.web.api.crud.entity.QueryParamEntity;
+import org.hswebframework.web.api.crud.entity.QueryNoPagingOperation;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.annotation.Resource;
 import org.hswebframework.web.crud.service.ReactiveCrudService;
@@ -38,8 +40,8 @@ public class WebfluxDictionaryController implements ReactiveServiceCrudControlle
     }
 
     @GetMapping("/detail/_query")
-    @Operation(summary = "使用GET方式获取数据字典详情")
-    public Flux<DictionaryEntity> getItemDefineById(QueryParamEntity query) {
+    @QueryNoPagingOperation(summary = "使用GET方式获取数据字典详情")
+    public Flux<DictionaryEntity> getItemDefineById(@Parameter(hidden = true) QueryParamEntity query) {
         return dictionaryService
                 .findAllDetail(query, true);
     }
