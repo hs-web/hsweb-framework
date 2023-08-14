@@ -1,10 +1,11 @@
 package org.hswebframework.web.dictionary.service;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.hswebframework.ezorm.rdb.mapping.ReactiveDelete;
 import org.hswebframework.ezorm.rdb.mapping.ReactiveUpdate;
 import org.hswebframework.ezorm.rdb.mapping.defaults.SaveResult;
 import org.hswebframework.web.api.crud.entity.QueryParamEntity;
-import org.hswebframework.web.api.crud.entity.SortSupportEntity;
+import org.hswebframework.web.crud.query.QueryHelper;
 import org.hswebframework.web.crud.service.GenericReactiveCrudService;
 import org.hswebframework.web.dictionary.entity.DictionaryEntity;
 import org.hswebframework.web.dictionary.entity.DictionaryItemEntity;
@@ -16,8 +17,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Collection;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public class DefaultDictionaryService extends GenericReactiveCrudService<DictionaryEntity, String> {
 
@@ -83,29 +82,31 @@ public class DefaultDictionaryService extends GenericReactiveCrudService<Diction
                         });
     }
 
-    public Flux<DictionaryEntity> findAllDetail(QueryParamEntity paramEntity) {
-        /*
-            1. 查询出所有字典并以ID为key转为map
-            2. 查询出所有字段选项并按dicId分组
-            3. 根据分组后的key(dictId)获取字段
-            4. 将2的分组结果放到字典里
-         */
+    public Flux<DictionaryEntity> findAllDetail(QueryParamEntity paramEntity, boolean allowEmptyItem) {
         return createQuery()
                 .setParam(paramEntity)
                 .fetch()
-                .collect(Collectors.toMap(DictionaryEntity::getId, Function.identity())) //.1
-                .flatMapMany(dicMap ->
-                        itemService.createQuery()
-                                .fetch()
-                                .groupBy(DictionaryItemEntity::getDictId)//.2
-                                .flatMap(group -> Mono
-                                        .justOrEmpty(dicMap.get(group.key())) //.3
-                                        .zipWhen(dict -> group.collectList(),
-                                                (dict, items) -> {
-                                                    items.sort(SortSupportEntity::compareTo);
-                                                    dict.setItems(items);  //.4
-                                                    return dict;
-                                                })));
+                .as(flux -> fillDetail(flux, allowEmptyItem));
     }
+
+    /**
+     * 查询字典详情
+     *
+     * @param dictionary     源数据
+     * @param allowEmptyItem 是否允许item为空
+     */
+    public Flux<DictionaryEntity> fillDetail(Flux<DictionaryEntity> dictionary, boolean allowEmptyItem) {
+        return QueryHelper
+                .combineOneToMany(
+                        dictionary,
+                        DictionaryEntity::getId,
+                        itemService.createQuery(),
+                        DictionaryItemEntity::getDictId,
+                        DictionaryEntity::setItems
+                )
+                //根据条件过滤是否允许返回item为空的
+                .filter(dict -> allowEmptyItem || CollectionUtils.isNotEmpty(dict.getItems()));
+    }
+
 
 }

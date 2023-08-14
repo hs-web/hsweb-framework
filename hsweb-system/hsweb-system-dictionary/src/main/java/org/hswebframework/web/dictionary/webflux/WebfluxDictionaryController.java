@@ -2,7 +2,11 @@ package org.hswebframework.web.dictionary.webflux;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Parameter;
+import org.hswebframework.web.api.crud.entity.QueryParamEntity;
+import org.hswebframework.web.api.crud.entity.QueryNoPagingOperation;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.annotation.Resource;
 import org.hswebframework.web.crud.service.ReactiveCrudService;
@@ -13,11 +17,9 @@ import org.hswebframework.web.dict.EnumDict;
 import org.hswebframework.web.dictionary.entity.DictionaryEntity;
 import org.hswebframework.web.dictionary.service.DefaultDictionaryService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 
 @RestController
@@ -37,11 +39,27 @@ public class WebfluxDictionaryController implements ReactiveServiceCrudControlle
         return dictionaryService;
     }
 
+    @GetMapping("/detail/_query")
+    @QueryNoPagingOperation(summary = "使用GET方式获取数据字典详情")
+    public Flux<DictionaryEntity> getItemDefineById(@Parameter(hidden = true) QueryParamEntity query) {
+        return dictionaryService
+                .findAllDetail(query, true);
+    }
+
+    @PostMapping("/detail/_query")
+    @Operation(summary = "使用POST方式获取数据字典详情")
+    public Flux<DictionaryEntity> getItemDefineById(@RequestBody Mono<QueryParamEntity> query) {
+        return query
+                .flatMapMany(param -> dictionaryService
+                        .findAllDetail(param, true));
+    }
+
     @GetMapping("/{id:.+}/items")
     @Authorize(merge = false)
     @Operation(summary = "获取数据字段的所有选项")
     public Flux<EnumDict<?>> getItemDefineById(@PathVariable String id) {
-        return repository.getDefine(id)
+        return repository
+                .getDefine(id)
                 .flatMapIterable(DictDefine::getItems);
     }
 

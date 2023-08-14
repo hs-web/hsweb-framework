@@ -51,7 +51,7 @@ public class CompositeDictDefineRepository extends DefaultDictDefineRepository {
         return Flux.concat(super.getAllDefine(), QueryParamEntity
                 .newQuery()
                 .noPaging()
-                .execute(dictionaryService::findAllDetail)
+                .execute(paramEntity -> dictionaryService.findAllDetail(paramEntity,false))
                 .map(DictionaryEntity::toDictDefine));
     }
 
