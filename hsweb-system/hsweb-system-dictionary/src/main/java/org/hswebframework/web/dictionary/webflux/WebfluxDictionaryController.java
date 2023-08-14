@@ -2,6 +2,7 @@ package org.hswebframework.web.dictionary.webflux;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.hswebframework.web.api.crud.entity.QueryParamEntity;
 import org.hswebframework.web.authorization.annotation.Authorize;
@@ -36,8 +37,15 @@ public class WebfluxDictionaryController implements ReactiveServiceCrudControlle
         return dictionaryService;
     }
 
-    @GetMapping("/_detail")
-    @Operation(summary = "获取数据字典详情")
+    @GetMapping("/detail/_query")
+    @Operation(summary = "使用GET方式获取数据字典详情")
+    public Flux<DictionaryEntity> getItemDefineById(QueryParamEntity query) {
+        return dictionaryService
+                .findAllDetail(query, true);
+    }
+
+    @PostMapping("/detail/_query")
+    @Operation(summary = "使用POST方式获取数据字典详情")
     public Flux<DictionaryEntity> getItemDefineById(@RequestBody Mono<QueryParamEntity> query) {
         return query
                 .flatMapMany(param -> dictionaryService
