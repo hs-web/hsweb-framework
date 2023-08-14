@@ -1,5 +1,6 @@
 package org.hswebframework.web.dictionary.service;
 
+import org.apache.commons.collections4.MapUtils;
 import org.hswebframework.ezorm.rdb.mapping.ReactiveDelete;
 import org.hswebframework.ezorm.rdb.mapping.ReactiveUpdate;
 import org.hswebframework.ezorm.rdb.mapping.defaults.SaveResult;
@@ -83,29 +84,48 @@ public class DefaultDictionaryService extends GenericReactiveCrudService<Diction
                         });
     }
 
-    public Flux<DictionaryEntity> findAllDetail(QueryParamEntity paramEntity) {
-        /*
-            1. 查询出所有字典并以ID为key转为map
-            2. 查询出所有字段选项并按dicId分组
-            3. 根据分组后的key(dictId)获取字段
-            4. 将2的分组结果放到字典里
-         */
+    public Flux<DictionaryEntity> findAllDetail(QueryParamEntity paramEntity, boolean allowEmptyItem) {
         return createQuery()
                 .setParam(paramEntity)
                 .fetch()
-                .collect(Collectors.toMap(DictionaryEntity::getId, Function.identity())) //.1
-                .flatMapMany(dicMap ->
-                        itemService.createQuery()
-                                .fetch()
-                                .groupBy(DictionaryItemEntity::getDictId)//.2
-                                .flatMap(group -> Mono
-                                        .justOrEmpty(dicMap.get(group.key())) //.3
-                                        .zipWhen(dict -> group.collectList(),
-                                                (dict, items) -> {
-                                                    items.sort(SortSupportEntity::compareTo);
-                                                    dict.setItems(items);  //.4
-                                                    return dict;
-                                                })));
+                .as(flux -> fillDetail(flux, allowEmptyItem));
     }
+
+    /**
+     * 查询字典详情
+     *
+     * @param dictionary     源数据
+     * @param allowEmptyItem 是否允许item为空
+     */
+    public Flux<DictionaryEntity> fillDetail(Flux<DictionaryEntity> dictionary, boolean allowEmptyItem) {
+        return dictionary
+                .collect(Collectors.toMap(DictionaryEntity::getId, Function.identity()))
+                .flatMapMany(dicMap -> {
+                    if (MapUtils.isEmpty(dicMap)) {
+                        return Mono.empty();
+                    }
+                    return itemService
+                            .createQuery()
+                            .in(DictionaryItemEntity::getDictId, dicMap.keySet())
+                            .fetch()
+                            .groupBy(DictionaryItemEntity::getDictId)
+                            .flatMap(group -> Mono
+                                    .justOrEmpty(dicMap.remove(group.key()))
+                                    .zipWhen(dict -> group.collectList(),
+                                             (dict, items) -> {
+                                                 items.sort(SortSupportEntity::compareTo);
+                                                 dict.setItems(items);
+                                                 return dict;
+                                             }))
+                            .concatWith(Flux.defer(() -> {
+                                if (allowEmptyItem) {
+                                    //允许返回item为空的数据字典
+                                    return Flux.fromIterable(dicMap.values());
+                                }
+                                return Mono.empty();
+                            }));
+                });
+    }
+
 
 }
