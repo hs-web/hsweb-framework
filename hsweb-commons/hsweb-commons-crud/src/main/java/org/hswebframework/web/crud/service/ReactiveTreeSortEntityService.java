@@ -1,12 +1,10 @@
 package org.hswebframework.web.crud.service;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.hswebframework.ezorm.rdb.mapping.defaults.SaveResult;
 import org.hswebframework.ezorm.rdb.operator.dml.Terms;
 import org.hswebframework.utils.RandomUtil;
-import org.hswebframework.web.api.crud.entity.QueryParamEntity;
-import org.hswebframework.web.api.crud.entity.TransactionManagers;
-import org.hswebframework.web.api.crud.entity.TreeSortSupportEntity;
-import org.hswebframework.web.api.crud.entity.TreeSupportEntity;
+import org.hswebframework.web.api.crud.entity.*;
 import org.hswebframework.web.exception.ValidationException;
 import org.hswebframework.web.id.IDGenerator;
 import org.hswebframework.web.validator.CreateGroup;
@@ -86,12 +84,13 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
 
         return findById(idList)
                 .concatMap(e -> !StringUtils.hasText(e.getPath()) || !duplicateCheck.add(e.getPath())
-                        ? Mono.just(e)
-                        : createQuery()
-                        .where()
-                        //使用path快速查询
-                        .like$("path", e.getPath())
-                        .fetch())
+                                   ? Mono.just(e)
+                                   : createQuery()
+                                   .where()
+                                   //使用path快速查询
+                                   .like$("path", e.getPath())
+                                   .fetch(),
+                           Integer.MAX_VALUE)
                 .distinct(TreeSupportEntity::getId);
     }
 
@@ -114,7 +113,7 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
                         .accept(Terms.Like.reversal("path", e.getPath(), false, true))
                         .notEmpty("path")
                         .notNull("path")
-                        .fetch())
+                        .fetch(), Integer.MAX_VALUE)
                 .distinct(TreeSupportEntity::getId);
     }
 
@@ -156,20 +155,18 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
     default Mono<Integer> insertBatch(Publisher<? extends Collection<E>> entityPublisher) {
         return this
                 .getRepository()
-                .insertBatch(Flux.from(entityPublisher)
-                                 .flatMap(Flux::fromIterable)
-                                 .collectList()
-                                 .flatMap(this::checkParentId)
-                                 .flatMapIterable(Function.identity())
-                                 .flatMap(this::applyTreeProperty)
-                                 .flatMap(e -> Flux.fromIterable(TreeSupportEntity.expandTree2List(e, getIDGenerator())))
-                                 .buffer(getBufferSize()));
+                .insertBatch(new TreeSortServiceHelper<>(this)
+                                     .prepare(Flux.from(entityPublisher)
+                                                  .flatMapIterable(Function.identity()))
+                                     .doOnNext(e -> e.tryValidate(CreateGroup.class))
+                                     .buffer(getBufferSize()));
     }
 
     default int getBufferSize() {
         return 200;
     }
 
+    @Deprecated
     default Mono<E> applyTreeProperty(E ele) {
         if (StringUtils.hasText(ele.getPath()) ||
                 ObjectUtils.isEmpty(ele.getParentId())) {
@@ -182,6 +179,7 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
                    .thenReturn(ele);
     }
 
+    @Deprecated
     //校验是否有循环依赖,修改父节点为自己的子节点?
     default Mono<E> checkCyclicDependency(K id, E ele) {
         if (ObjectUtils.isEmpty(id)) {
@@ -197,6 +195,7 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
                 .then(Mono.just(ele));
     }
 
+    @Deprecated
     default Mono<Collection<E>> checkParentId(Collection<E> source) {
 
         Set<K> idSet = source
@@ -221,72 +220,60 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
 
         return this
                 .createQuery()
+                .select("id")
                 .in("id", readyToCheck)
-                .count()
-                .doOnNext(count -> {
-                    if (count != readyToCheck.size()) {
-                        throw new ValidationException("parentId", "error.tree_entity_parent_id_not_exist");
+                .fetch()
+                .doOnNext(e -> readyToCheck.remove(e.getId()))
+                .then(Mono.fromSupplier(() -> {
+                    if (!readyToCheck.isEmpty()) {
+                        throw new ValidationException(
+                                "error.tree_entity_parent_id_not_exist",
+                                Collections.singletonList(
+                                        new ValidationException.Detail(
+                                                "parentId",
+                                                "error.tree_entity_parent_id_not_exist",
+                                                readyToCheck))
+                        );
                     }
-                })
-                .thenReturn(source);
+                    return source;
+                }));
 
     }
 
+    @Deprecated
     //重构子节点的path
-    default Mono<Void> refactorChildPath(K id, String path, Consumer<E> pathAccepter) {
-        return this
-                .createQuery()
-                .where("parentId", id)
-                .fetch()
-                .flatMap(e -> {
-                    if (ObjectUtils.isEmpty(path)) {
-                        e.setPath(RandomUtil.randomChar(4));
-                    } else {
-                        e.setPath(path + "-" + RandomUtil.randomChar(4));
-                    }
-                    pathAccepter.accept(e);
-                    if (e.getParentId() != null) {
-                        return this
-                                .refactorChildPath(e.getId(), e.getPath(), pathAccepter)
-                                .thenReturn(e);
-                    }
-                    return Mono.just(e);
-                })
-                .as(getRepository()::save)
-                .then();
+    default void refactorChildPath(K id, Function<K, Collection<E>> childGetter, String path, Consumer<E> pathAccepter) {
+
+        Collection<E> children = childGetter.apply(id);
+        if (CollectionUtils.isEmpty(children)) {
+            return;
+        }
+        for (E child : children) {
+            if (ObjectUtils.isEmpty(path)) {
+                child.setPath(RandomUtil.randomChar(4));
+            } else {
+                child.setPath(path + "-" + RandomUtil.randomChar(4));
+            }
+            pathAccepter.accept(child);
+            this.refactorChildPath(child.getId(), childGetter, child.getPath(), pathAccepter);
+        }
+
     }
 
     @Override
+    @Transactional(rollbackFor = Throwable.class,
+            transactionManager = TransactionManagers.reactiveTransactionManager)
     default Mono<SaveResult> save(Publisher<E> entityPublisher) {
-        return Flux
-                .from(entityPublisher)
-                //1.先平铺
-                .flatMapIterable(e -> TreeSupportEntity.expandTree2List(e, getIDGenerator()))
-                .collectList()
-                .flatMap(this::checkParentId)
-                .flatMapIterable(list -> {
-                    Map<K, E> map = list
-                            .stream()
-                            .filter(e -> e.getId() != null)
-                            .collect(Collectors.toMap(TreeSupportEntity::getId, Function.identity()));
-                    //2. 重新组装树结构
-                    return TreeSupportEntity.list2tree(list,
-                                                       this::setChildren,
-                                                       (Predicate<E>) e -> this.isRootNode(e) || map.get(e.getParentId()) == null);
-
-                })
-                //执行验证
+        return new TreeSortServiceHelper<>(this)
+                .prepare(Flux.from(entityPublisher))
                 .doOnNext(e -> e.tryValidate(CreateGroup.class))
-                //再次平铺为
-                .flatMapIterable(e -> TreeSupportEntity.expandTree2List(e, getIDGenerator()))
-                //重构path
-                .as(this::tryRefactorPath)
                 .buffer(getBufferSize())
                 .flatMap(this.getRepository()::save)
                 .reduce(SaveResult::merge);
 
     }
 
+    @Deprecated
     default Flux<E> tryRefactorPath(Flux<E> stream) {
         Flux<E> cache = stream.cache();
         Mono<Map<K, E>> mapping = cache
@@ -294,34 +281,65 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
                 .collectMap(TreeSupportEntity::getId, Function.identity())
                 .defaultIfEmpty(Collections.emptyMap());
 
-        //查询出旧数据
-        Mono<Map<K, E>> olds = cache
-                .filter(e -> null != e.getId())
-                .map(TreeSupportEntity::getId)
-                .as(this::findById)
-                .collectMap(TreeSupportEntity::getId, Function.identity())
-                .defaultIfEmpty(Collections.emptyMap());
-
+        Mono<Map<K, E>> allDataFetcher =
+                cache
+                        .filter(e -> null != e.getId())
+                        .flatMapIterable(e -> e.getParentId() != null ?
+                                Arrays.asList(e.getId(), e.getParentId()) :
+                                Collections.singleton(e.getId()))
+                        .collect(Collectors.toSet())
+                        .flatMap(list -> this
+                                .queryIncludeChildren(list)
+                                .collect(
+                                        Collectors.toMap(
+                                                TreeSupportEntity::getId,
+                                                Function.identity()
+                                        )
+                                ));
 
         return Mono
-                .zip(mapping, olds)
+                .zip(mapping, allDataFetcher)
                 .flatMapMany(tp2 -> {
-                    Map<K, E> map = tp2.getT1();
+                    //本次提交的数据
+                    Map<K, E> thisTime = tp2.getT1();
+                    //旧的数据
                     Map<K, E> oldMap = tp2.getT2();
 
+                    Map<K, E> allMap = new LinkedHashMap<>(oldMap);
+                    allMap.putAll(thisTime);
+
+                    //子节点映射
+                    Map<K, Map<K, E>> childMapping = new LinkedHashMap<>();
+
+                    List<E> all = new ArrayList<>(oldMap.values());
+                    all.addAll(thisTime.values());
+
+                    for (E value : all) {
+                        if (isRootNode(value) || value.getId() == null) {
+                            continue;
+                        }
+                        childMapping
+                                .computeIfAbsent(value.getParentId(), ignore -> new LinkedHashMap<>())
+                                .put(value.getId(), value);
+                    }
+
+                    Function<K, Collection<E>> childGetter
+                            = id -> childMapping
+                            .getOrDefault(id, Collections.emptyMap())
+                            .values();
                     return cache
-                            .flatMap(data -> {
+                            .concatMap(data -> {
                                 E old = data.getId() == null ? null : oldMap.get(data.getId());
                                 K parentId = old != null ? old.getParentId() : data.getParentId();
-                                E oldParent = parentId == null ? null : oldMap.get(parentId);
+                                E oldParent = parentId == null ? null : allMap.get(parentId);
+
                                 if (old != null) {
                                     K newParentId = data.getParentId();
                                     //父节点发生变化，更新所有子节点path
                                     if (!Objects.equals(parentId, newParentId)) {
-                                        List<Mono<Void>> jobs = new ArrayList<>();
                                         Consumer<E> childConsumer = child -> {
                                             //更新了父节点,但是同时也传入的对应的子节点
-                                            E readyToUpdate = map.get(child.getId());
+                                            E readyToUpdate = thisTime.get(child.getId());
                                             if (null != readyToUpdate) {
                                                 readyToUpdate.setPath(child.getPath());
                                             }
@@ -330,51 +348,39 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
                                         //变更到了顶级节点
                                         if (isRootNode(data)) {
                                             data.setPath(RandomUtil.randomChar(4));
-                                            jobs.add(this.refactorChildPath(old.getId(), data.getPath(), childConsumer));
+                                            this.refactorChildPath(old.getId(), childGetter, data.getPath(), childConsumer);
+                                            //重新保存所有子节点
+                                            return Flux
+                                                    .fromIterable(childGetter.apply(old.getId()))
+                                                    .concatWithValues(data);
                                         } else {
-                                            if (null != oldParent) {
-                                                data.setPath(oldParent.getPath() + "-" + RandomUtil.randomChar(4));
-                                                jobs.add(this.refactorChildPath(old.getId(), data.getPath(), childConsumer));
-                                            } else {
-                                                jobs.add(this.findById(newParentId)
-                                                             .flatMap(parent -> {
-                                                                 data.setPath(parent.getPath() + "-" + RandomUtil.randomChar(4));
-                                                                 return this.refactorChildPath(data.getId(), data.getPath(), childConsumer);
-                                                             })
-                                                );
+                                            E newParent = allMap.get(newParentId);
+                                            if (null != newParent) {
+                                                data.setPath(newParent.getPath() + "-" + RandomUtil.randomChar(4));
+                                                this.refactorChildPath(data.getId(), childGetter, data.getPath(), childConsumer);
+                                                //重新保存所有子节点
+                                                return Flux.fromIterable(childGetter.apply(data.getId()))
+                                                           .concatWithValues(data);
                                             }
                                         }
-                                        return Flux.merge(jobs)
-                                                   .then(Mono.just(data));
+                                        return Mono.just(data);
                                     } else {
-                                        //父节点未变化则使用原始的path
-                                        Consumer<E> pathRefactor = (parent) -> {
-                                            if (old.getPath().startsWith(parent.getPath())) {
+
+                                        if (oldParent != null) {
+                                            if (old.getPath().startsWith(oldParent.getPath())) {
                                                 data.setPath(old.getPath());
                                             } else {
-                                                data.setPath(parent.getPath() + "-" + RandomUtil.randomChar(4));
+                                                data.setPath(oldParent.getPath() + "-" + RandomUtil.randomChar(4));
                                             }
-                                        };
-                                        if (oldParent != null) {
-                                            pathRefactor.accept(oldParent);
-                                        } else if (parentId != null) {
-                                            return findById(parentId)
-                                                    .switchIfEmpty(Mono.fromRunnable(() -> {
-                                                        data.setParentId(null);
-                                                        data.setLevel(1);
-                                                        data.setPath(old.getPath());
-                                                    }))
-                                                    .doOnNext(pathRefactor)
-                                                    .thenReturn(data);
                                         } else {
                                             data.setPath(old.getPath());
                                         }
-
                                     }
                                 }
                                 return Mono.just(data);
                             });
-                });
+                })
+                .distinct(TreeSupportEntity::getId);
     }
 
     @Override

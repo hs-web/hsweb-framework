@@ -22,4 +22,8 @@ public class TestTreeSortEntity  extends GenericTreeSortSupportEntity<String> {
     private List<TestTreeSortEntity> children;
 
 
+    @Override
+    public String toString() {
+        return "TestTreeSortEntity{}";
+    }
 }
