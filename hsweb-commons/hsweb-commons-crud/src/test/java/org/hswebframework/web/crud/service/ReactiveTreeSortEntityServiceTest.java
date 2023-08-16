@@ -30,11 +30,11 @@ public class ReactiveTreeSortEntityServiceTest {
     @Test
     public void testCrud() {
         TestTreeSortEntity entity = new TestTreeSortEntity();
-        entity.setId("test");
-        entity.setName("test");
+        entity.setId("Crud-test");
+        entity.setName("Crud-test");
 
         TestTreeSortEntity entity2 = new TestTreeSortEntity();
-        entity2.setName("test2");
+        entity2.setName("Crud-test2");
 
         entity.setChildren(Arrays.asList(entity2));
 
@@ -49,7 +49,7 @@ public class ReactiveTreeSortEntityServiceTest {
                          .expectNext(2)
                          .verifyComplete();
 
-        sortEntityService.queryResultToTree(QueryParamEntity.of())
+        sortEntityService.queryResultToTree(QueryParamEntity.of().and("id","like","Crud-%"))
                          .map(List::size)
                          .as(StepVerifier::create)
                          .expectNext(1)
@@ -61,7 +61,7 @@ public class ReactiveTreeSortEntityServiceTest {
                          .verifyComplete();
 
 
-        sortEntityService.deleteById(Mono.just("test"))
+        sortEntityService.deleteById(Mono.just(entity.getId()))
                          .as(StepVerifier::create)
                          .expectNext(2)
                          .verifyComplete();
@@ -143,7 +143,7 @@ public class ReactiveTreeSortEntityServiceTest {
     }
 
     @Test
-    public void testNotExistParentId(){
+    public void testNotExistParentId() {
         TestTreeSortEntity entity = new TestTreeSortEntity();
         entity.setId("NotExistParentIdTest");
         entity.setName("NotExistParentIdTest");
@@ -161,10 +161,52 @@ public class ReactiveTreeSortEntityServiceTest {
         entity2.setName("NotExistParentId");
 
         sortEntityService
-                .save(Flux.just(entity,entity2))
+                .save(Flux.just(entity, entity2))
                 .then()
                 .as(StepVerifier::create)
                 .expectComplete()
+                .verify();
+    }
+
+
+    @Test
+    public void testCyclicDependency() {
+
+        TestTreeSortEntity root = new TestTreeSortEntity();
+        root.setId("testCyclicDependency-root");
+        root.setName("testCyclicDependency");
+
+
+        TestTreeSortEntity node1 = new TestTreeSortEntity();
+        node1.setId("testCyclicDependency-node1");
+        node1.setName("testCyclicDependency-node1");
+        node1.setParentId(root.getId());
+
+        root.setParentId(node1.getId());
+        sortEntityService
+                .insert(Flux.just(root,node1))
+                .as(StepVerifier::create)
+                .expectErrorMatches(err->err.getMessage().contains("tree_entity_cyclic_dependency"))
+                .verify();
+
+        root.setParentId(null);
+        root.setChildren(null);
+        node1.setChildren(null);
+
+        sortEntityService
+                .insert(Flux.just(root,node1))
+                .as(StepVerifier::create)
+                .expectNext(2)
+                .verifyComplete();
+
+        root.setParentId(node1.getId());
+        root.setChildren(null);
+        node1.setChildren(null);
+
+        sortEntityService
+                .save(Flux.just(root))
+                .as(StepVerifier::create)
+                .expectErrorMatches(err->err.getMessage().contains("tree_entity_cyclic_dependency"))
                 .verify();
     }
 }
