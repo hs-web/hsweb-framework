@@ -184,16 +184,16 @@ public interface TreeSupportEntity<PK> extends Entity {
             }
         }
 
-        if (CollectionUtils.isEmpty(root.getChildren())) {
-            target.add(root);
-            return;
-        }
-
         //尝试设置id
         PK parentId = root.getId();
         if (parentId == null) {
             parentId = idGenerator.generate();
             root.setId(parentId);
+        }
+
+        if (CollectionUtils.isEmpty(root.getChildren())) {
+            target.add(root);
+            return;
         }
 
         //所有节点处理队列
