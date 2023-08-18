@@ -79,9 +79,9 @@ class QueryAnalyzerImplTest {
 
         SqlRequest request = analyzer
                 .refactor(QueryParamEntity
-                                .newQuery()
-                                .where("n", "123")
-                                .getParam());
+                                  .newQuery()
+                                  .where("n", "123")
+                                  .getParam());
 
         System.out.println(request);
 
@@ -91,5 +91,21 @@ class QueryAnalyzerImplTest {
                 .as(StepVerifier::create)
                 .expectComplete()
                 .verify();
+    }
+
+    @Test
+    void testJoin() {
+        QueryAnalyzerImpl analyzer = new QueryAnalyzerImpl(
+                database,
+                "select *,t2.c from s_test t " +
+                        "left join (select z.id id, count(1) c from s_test z) t2 on t2.id = t.id");
+
+        SqlRequest request = analyzer
+                .refactor(QueryParamEntity
+                                  .of()
+                                  .and("t2.c", "is", "xyz"));
+
+        System.out.println(request);
+
     }
 }

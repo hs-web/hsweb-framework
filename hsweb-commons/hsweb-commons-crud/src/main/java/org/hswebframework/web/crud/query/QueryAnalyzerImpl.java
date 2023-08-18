@@ -415,6 +415,10 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
             if (table instanceof QueryAnalyzer.SelectTable) {
                 Column c = ((SelectTable) table).columns.get(columnName);
                 if (null != c) {
+                    if (c.metadata == null) {
+                        select.columnList.add(new QueryAnalyzer.Column(c.getName(), aliasName, table.alias, null));
+                        return;
+                    }
                     metadata = c.metadata;
                 }
             }

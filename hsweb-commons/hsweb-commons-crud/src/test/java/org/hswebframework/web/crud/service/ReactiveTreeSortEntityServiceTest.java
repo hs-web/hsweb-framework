@@ -28,6 +28,18 @@ public class ReactiveTreeSortEntityServiceTest {
 
 
     @Test
+    public void testCreateDefaultId() {
+        TestTreeSortEntity entity = new TestTreeSortEntity();
+        entity.setName("Simple-test");
+
+        sortEntityService
+                .insert(Mono.just(entity))
+                .as(StepVerifier::create)
+                .expectNext(1)
+                .verifyComplete();
+    }
+
+    @Test
     public void testCrud() {
         TestTreeSortEntity entity = new TestTreeSortEntity();
         entity.setId("Crud-test");
@@ -49,7 +61,7 @@ public class ReactiveTreeSortEntityServiceTest {
                          .expectNext(2)
                          .verifyComplete();
 
-        sortEntityService.queryResultToTree(QueryParamEntity.of().and("id","like","Crud-%"))
+        sortEntityService.queryResultToTree(QueryParamEntity.of().and("id", "like", "Crud-%"))
                          .map(List::size)
                          .as(StepVerifier::create)
                          .expectNext(1)
@@ -184,9 +196,9 @@ public class ReactiveTreeSortEntityServiceTest {
 
         root.setParentId(node1.getId());
         sortEntityService
-                .insert(Flux.just(root,node1))
+                .insert(Flux.just(root, node1))
                 .as(StepVerifier::create)
-                .expectErrorMatches(err->err.getMessage().contains("tree_entity_cyclic_dependency"))
+                .expectErrorMatches(err -> err.getMessage().contains("tree_entity_cyclic_dependency"))
                 .verify();
 
         root.setParentId(null);
@@ -194,7 +206,7 @@ public class ReactiveTreeSortEntityServiceTest {
         node1.setChildren(null);
 
         sortEntityService
-                .insert(Flux.just(root,node1))
+                .insert(Flux.just(root, node1))
                 .as(StepVerifier::create)
                 .expectNext(2)
                 .verifyComplete();
@@ -206,7 +218,7 @@ public class ReactiveTreeSortEntityServiceTest {
         sortEntityService
                 .save(Flux.just(root))
                 .as(StepVerifier::create)
-                .expectErrorMatches(err->err.getMessage().contains("tree_entity_cyclic_dependency"))
+                .expectErrorMatches(err -> err.getMessage().contains("tree_entity_cyclic_dependency"))
                 .verify();
     }
 }
