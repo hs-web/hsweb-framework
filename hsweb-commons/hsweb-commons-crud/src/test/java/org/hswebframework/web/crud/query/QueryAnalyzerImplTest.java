@@ -108,4 +108,16 @@ class QueryAnalyzerImplTest {
         System.out.println(request);
 
     }
+
+    @Test
+    void testPrepare(){
+        QueryAnalyzerImpl analyzer = new QueryAnalyzerImpl(
+                database,
+                "select * from (select substring(id,9) id from s_test where left(id,1) = ?) t");
+
+        SqlRequest request = analyzer
+                .refactor(QueryParamEntity.of(),33);
+
+        System.out.println(request);
+    }
 }
