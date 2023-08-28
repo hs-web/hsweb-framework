@@ -116,7 +116,7 @@ public class AuthorizationController {
                         failedEvent.setException(err);
                         return failedEvent
                                 .publish(eventPublisher)
-                                .then(Mono.error(failedEvent.getException()));
+                                .then(Mono.error(failedEvent::getException));
                     });
         });
     }
