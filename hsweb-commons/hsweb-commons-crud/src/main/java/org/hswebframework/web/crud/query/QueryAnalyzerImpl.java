@@ -2,11 +2,10 @@ package org.hswebframework.web.crud.query;
 
 import lombok.Getter;
 import lombok.SneakyThrows;
-import net.sf.jsqlparser.expression.Alias;
-import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.expression.ExpressionVisitorAdapter;
-import net.sf.jsqlparser.expression.JdbcParameter;
+import net.sf.jsqlparser.expression.*;
+import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
 import net.sf.jsqlparser.statement.values.ValuesStatement;
 import org.apache.commons.collections4.CollectionUtils;
@@ -604,6 +603,9 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
                 from.append("FROM ");
 
                 from.append(plainSelect.getFromItem());
+                PrepareStatementVisitor visitor = new PrepareStatementVisitor();
+                plainSelect.getFromItem().accept(visitor);
+                prefixParameters += visitor.parameterSize;
             }
 
             if (plainSelect.getJoins() != null) {
@@ -847,13 +849,131 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
 
 
     @Getter
-    static class PrepareStatementVisitor extends ExpressionVisitorAdapter {
+    static class PrepareStatementVisitor extends ExpressionVisitorAdapter implements FromItemVisitor, SelectVisitor {
         private int parameterSize;
+
+        public PrepareStatementVisitor() {
+            setSelectVisitor(this);
+        }
 
         @Override
         public void visit(JdbcParameter parameter) {
             parameterSize++;
             super.visit(parameter);
+        }
+
+        @Override
+        public void visit(net.sf.jsqlparser.schema.Table tableName) {
+
+        }
+
+        @Override
+        public void visit(SubJoin subjoin) {
+            if (subjoin.getLeft() != null) {
+                subjoin.getLeft().accept(this);
+            }
+            if (CollectionUtils.isNotEmpty(subjoin.getJoinList())) {
+                for (net.sf.jsqlparser.statement.select.Join join : subjoin.getJoinList()) {
+                    if (join.getRightItem() != null) {
+                        join.getRightItem().accept(this);
+                    }
+                    if (join.getOnExpressions() != null) {
+                        join.getOnExpressions().forEach(expr -> expr.accept(this));
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void visit(LateralSubSelect lateralSubSelect) {
+            if (lateralSubSelect.getSubSelect() != null) {
+                lateralSubSelect.getSubSelect().accept((ExpressionVisitor) this);
+            }
+        }
+
+        @Override
+        public void visit(ValuesList valuesList) {
+            if (valuesList.getMultiExpressionList() != null) {
+                for (ExpressionList expressionList : valuesList.getMultiExpressionList().getExpressionLists()) {
+                    expressionList.getExpressions().forEach(expr -> expr.accept(this));
+                }
+            }
+        }
+
+        @Override
+        public void visit(TableFunction tableFunction) {
+            tableFunction.getFunction().accept(this);
+        }
+
+        @Override
+        public void visit(ParenthesisFromItem aThis) {
+            aThis.getFromItem().accept(this);
+        }
+
+        @Override
+        public void visit(PlainSelect plainSelect) {
+            plainSelect.getFromItem().accept(this);
+            if (plainSelect.getJoins() != null) {
+                for (net.sf.jsqlparser.statement.select.Join join : plainSelect.getJoins()) {
+                    join.getRightItem().accept(this);
+                }
+            }
+            if (plainSelect.getSelectItems() != null) {
+                for (SelectItem selectItem : plainSelect.getSelectItems()) {
+                    selectItem.accept(this);
+                }
+            }
+            if (plainSelect.getWhere() != null) {
+                plainSelect.getWhere().accept(this);
+            }
+            if (plainSelect.getHaving() != null) {
+                plainSelect.getHaving().accept(this);
+            }
+
+            if (plainSelect.getGroupBy() != null) {
+                for (Expression expression : plainSelect.getGroupBy().getGroupByExpressionList().getExpressions()) {
+                    expression.accept(this);
+                }
+            }
+        }
+
+        @Override
+        public void visit(SetOperationList setOpList) {
+            if (CollectionUtils.isNotEmpty(setOpList.getSelects())) {
+                for (SelectBody select : setOpList.getSelects()) {
+                    select.accept(this);
+                }
+            }
+            if (setOpList.getOffset() != null) {
+                setOpList.getOffset().getOffset().accept(this);
+            }
+            if (setOpList.getLimit() != null) {
+                if (setOpList.getLimit().getRowCount() != null) {
+                    setOpList.getLimit().getRowCount().accept(this);
+                }
+                if (setOpList.getLimit().getOffset() != null) {
+                    setOpList.getLimit().getOffset().accept(this);
+                }
+            }
+        }
+
+        @Override
+        public void visit(WithItem withItem) {
+            if (CollectionUtils.isNotEmpty(withItem.getWithItemList())) {
+                for (SelectItem selectItem : withItem.getWithItemList()) {
+                    selectItem.accept(this);
+                }
+            }
+            if (withItem.getSubSelect() != null) {
+                withItem.getSubSelect().accept((ExpressionVisitor) this);
+            }
+        }
+
+        @Override
+        public void visit(ValuesStatement aThis) {
+            if (aThis.getExpressions() != null) {
+                aThis.getExpressions().accept(this);
+            }
         }
     }
 
