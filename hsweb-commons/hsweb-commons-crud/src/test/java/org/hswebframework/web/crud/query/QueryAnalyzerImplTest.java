@@ -120,4 +120,30 @@ class QueryAnalyzerImplTest {
 
         System.out.println(request);
     }
+
+    @Test
+    void testWith(){
+
+        QueryAnalyzerImpl analyzer = new QueryAnalyzerImpl(
+                database,
+        "WITH RECURSIVE Tree AS (\n" +
+                "\n" +
+                "  SELECT id\n" +
+                "  FROM s_test\n" +
+                "  WHERE id = ? \n" +
+                "\t\n" +
+                "  UNION ALL\n" +
+                "\t\n" +
+                "  SELECT ai.id\n" +
+                "  FROM s_test AS ai\n" +
+                "  INNER JOIN Tree AS tr ON ai.id = tr.id\n" +
+                ")\n" +
+                "SELECT t1.id\n" +
+                "FROM Tree AS t1;");
+
+        SqlRequest request = analyzer
+                .refactor(QueryParamEntity.of(),1);
+
+        System.out.println(request);
+    }
 }

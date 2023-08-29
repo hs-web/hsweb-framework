@@ -2,6 +2,7 @@ package org.hswebframework.web.crud.query;
 
 import lombok.Getter;
 import lombok.SneakyThrows;
+import net.sf.jsqlparser.Model;
 import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
@@ -13,8 +14,7 @@ import org.hswebframework.ezorm.core.meta.FeatureSupportedMetadata;
 import org.hswebframework.ezorm.core.param.Sort;
 import org.hswebframework.ezorm.core.param.Term;
 import org.hswebframework.ezorm.rdb.executor.SqlRequest;
-import org.hswebframework.ezorm.rdb.metadata.RDBColumnMetadata;
-import org.hswebframework.ezorm.rdb.metadata.RDBSchemaMetadata;
+import org.hswebframework.ezorm.rdb.metadata.*;
 import org.hswebframework.ezorm.rdb.metadata.dialect.Dialect;
 import org.hswebframework.ezorm.rdb.operator.DatabaseOperator;
 import org.hswebframework.ezorm.rdb.operator.builder.fragments.AbstractTermsFragmentBuilder;
@@ -43,9 +43,12 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
 
     private final Map<String, QueryAnalyzer.Join> joins = new LinkedHashMap<>();
 
+    private final List<WithItem> withItems = new ArrayList<>();
     private QueryRefactor injector;
 
     private volatile Map<String, Column> columnMappings;
+
+    private final Map<String, TableOrViewMetadata> virtualTable = new HashMap<>();
 
     @Override
     public String originalSql() {
@@ -182,8 +185,8 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
     }
 
     @SneakyThrows
-    private static SelectBody parse(String sql) {
-        return ((net.sf.jsqlparser.statement.select.Select) CCJSqlParserUtil.parse(sql)).getSelectBody();
+    private static net.sf.jsqlparser.statement.select.Select parse(String sql) {
+        return ((net.sf.jsqlparser.statement.select.Select) CCJSqlParserUtil.parse(sql));
     }
 
     QueryAnalyzerImpl(DatabaseOperator database, SelectBody selectBody) {
@@ -193,6 +196,35 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
             selectBody.accept(this);
         } else {
             this.parsed = null;
+        }
+    }
+
+    QueryAnalyzerImpl(DatabaseOperator database, SubSelect select) {
+        this.parsed = select.getSelectBody();
+        this.database = database;
+        //with ...
+        if (CollectionUtils.isNotEmpty(select.getWithItemsList())) {
+            for (WithItem withItem : select.getWithItemsList()) {
+                withItem.accept(this);
+            }
+        }
+        if (this.parsed != null) {
+            this.parsed.accept(this);
+        }
+    }
+
+    QueryAnalyzerImpl(DatabaseOperator database, net.sf.jsqlparser.statement.select.Select select) {
+        this.parsed = select.getSelectBody();
+        this.database = database;
+        //with ...
+        if (CollectionUtils.isNotEmpty(select.getWithItemsList())) {
+            for (WithItem withItem : select.getWithItemsList()) {
+                withItem.accept(this);
+            }
+        }
+
+        if (this.parsed != null) {
+            this.parsed.accept(this);
         }
     }
 
@@ -226,11 +258,19 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
 
         String alias = tableName.getAlias() == null ? tableName.getName() : tableName.getAlias().getName();
 
+        String name = parsePlainName(tableName.getName());
+
+        TableOrViewMetadata tableMetadata = schemaMetadata
+                .getTableOrView(name, false)
+                .orElseGet(() -> virtualTable.get(name));
+
+        if (tableMetadata == null) {
+            throw new IllegalStateException("table or view " + tableName.getName() + " not found in " + schemaMetadata.getName());
+        }
+
         QueryAnalyzer.Table table = new QueryAnalyzer.Table(
                 parsePlainName(alias),
-                schemaMetadata
-                        .getTableOrView(parsePlainName(tableName.getName()), false)
-                        .orElseThrow(() -> new IllegalStateException("table or view " + tableName.getName() + " not found in " + schemaMetadata.getName()))
+                tableMetadata
         );
 
         select = new QueryAnalyzer.Select(new ArrayList<>(), table);
@@ -484,7 +524,27 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
 
     @Override
     public void visit(WithItem withItem) {
+        withItems.add(withItem);
 
+        String name = withItem.getName();
+        RDBViewMetadata view = new RDBViewMetadata();
+        view.setName(name);
+        view.setSchema(database.getMetadata().getCurrentSchema());
+        virtualTable.put(name, view);
+        if (withItem.getSubSelect() != null) {
+            QueryAnalyzerImpl analyzer = new QueryAnalyzerImpl(database, withItem.getSubSelect());
+            for (Column column : analyzer.select.getColumnList()) {
+                RDBColumnMetadata metadata;
+                if (column.getMetadata() == null) {
+                    metadata = new RDBColumnMetadata();
+                } else {
+                    metadata = column.metadata.clone();
+                }
+                metadata.setName(column.getName());
+                metadata.setAlias(column.getAlias());
+                view.addColumn(metadata);
+            }
+        }
     }
 
     @Override
@@ -495,7 +555,9 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
     private void initInjector() {
         SimpleQueryRefactor injector = new SimpleQueryRefactor();
         parsed.accept(injector);
-
+        for (WithItem withItem : withItems) {
+            withItem.accept(injector);
+        }
         this.injector = injector;
     }
 
@@ -546,6 +608,7 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
     static QueryAnalyzerTermsFragmentBuilder TERMS_BUILDER = new QueryAnalyzerTermsFragmentBuilder();
 
     class SimpleQueryRefactor implements QueryRefactor, SelectVisitor {
+        private String prefix = "";
         private String from;
 
         private String columns;
@@ -675,7 +738,13 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
 
         @Override
         public void visit(WithItem withItem) {
-
+            if(!StringUtils.hasText(prefix)){
+                prefix+="WITH ";
+            }
+            prefix += withItem;
+            PrepareStatementVisitor visitor = new PrepareStatementVisitor();
+            withItem.accept(visitor);
+            prefixParameters += visitor.parameterSize;
         }
 
         @Override
@@ -706,7 +775,8 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
         @Override
         public SqlRequest refactor(QueryParamEntity param, Object... args) {
             PrepareSqlFragments sql = PrepareSqlFragments
-                    .of("SELECT")
+                    .of(prefix)
+                    .addSql("SELECT")
                     .addSql(columns)
                     .addSql(from)
                     .addParameter(getPrefixParameters(args));
@@ -724,7 +794,9 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
         @Override
         public SqlRequest refactorCount(QueryParamEntity param, Object... args) {
             PrepareSqlFragments sql = PrepareSqlFragments
-                    .of("SELECT", getPrefixParameters(args));
+                    .of(prefix)
+                    .addSql("SELECT")
+                    .addParameter(getPrefixParameters(args));
 
             if (fastCount) {
                 sql.addSql("count(1) as _total");
