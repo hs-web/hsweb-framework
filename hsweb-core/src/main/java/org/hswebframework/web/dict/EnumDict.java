@@ -402,7 +402,7 @@ public interface EnumDict<V> extends JSONSerializable {
             if (EnumDict.class.isAssignableFrom(findPropertyType) && findPropertyType.isEnum()) {
                 if (node.isObject()) {
                     return (EnumDict) EnumDict
-                            .findByValue(findPropertyType, node.get("value").textValue())
+                            .findByValue(findPropertyType, node.has("value") ? node.get("value").textValue() : null)
                             .orElseThrow(exceptionSupplier);
                 }
                 if (node.isNumber()) {
