@@ -170,6 +170,9 @@ public interface EnumDict<V> extends JSONSerializable {
      * @see EnumDict#find(Class, Predicate)
      */
     static <T extends Enum<?> & EnumDict<?>> Optional<T> findByValue(Class<T> type, Object value) {
+        if (value == null) {
+            return Optional.empty();
+        }
         return find(type, e -> e.getValue() == value || e.getValue().equals(value) || String
                 .valueOf(e.getValue())
                 .equalsIgnoreCase(String.valueOf(value)));
@@ -402,7 +405,7 @@ public interface EnumDict<V> extends JSONSerializable {
             if (EnumDict.class.isAssignableFrom(findPropertyType) && findPropertyType.isEnum()) {
                 if (node.isObject()) {
                     return (EnumDict) EnumDict
-                            .findByValue(findPropertyType, node.get("value").textValue())
+                            .findByValue(findPropertyType, node.has("value") ? node.get("value").textValue() : null)
                             .orElseThrow(exceptionSupplier);
                 }
                 if (node.isNumber()) {
