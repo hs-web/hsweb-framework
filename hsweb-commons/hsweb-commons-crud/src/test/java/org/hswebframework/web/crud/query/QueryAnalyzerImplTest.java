@@ -79,9 +79,9 @@ class QueryAnalyzerImplTest {
 
         SqlRequest request = analyzer
                 .refactor(QueryParamEntity
-                                .newQuery()
-                                .where("n", "123")
-                                .getParam());
+                                  .newQuery()
+                                  .where("n", "123")
+                                  .getParam());
 
         System.out.println(request);
 
@@ -91,5 +91,59 @@ class QueryAnalyzerImplTest {
                 .as(StepVerifier::create)
                 .expectComplete()
                 .verify();
+    }
+
+    @Test
+    void testJoin() {
+        QueryAnalyzerImpl analyzer = new QueryAnalyzerImpl(
+                database,
+                "select *,t2.c from s_test t " +
+                        "left join (select z.id id, count(1) c from s_test z) t2 on t2.id = t.id");
+
+        SqlRequest request = analyzer
+                .refactor(QueryParamEntity
+                                  .of()
+                                  .and("t2.c", "is", "xyz"));
+
+        System.out.println(request);
+
+    }
+
+    @Test
+    void testPrepare(){
+        QueryAnalyzerImpl analyzer = new QueryAnalyzerImpl(
+                database,
+                "select * from (select substring(id,9) id from s_test where left(id,1) = ?) t");
+
+        SqlRequest request = analyzer
+                .refactor(QueryParamEntity.of(),33);
+
+        System.out.println(request);
+    }
+
+    @Test
+    void testWith(){
+
+        QueryAnalyzerImpl analyzer = new QueryAnalyzerImpl(
+                database,
+        "WITH RECURSIVE Tree AS (\n" +
+                "\n" +
+                "  SELECT id\n" +
+                "  FROM s_test\n" +
+                "  WHERE id = ? \n" +
+                "\t\n" +
+                "  UNION ALL\n" +
+                "\t\n" +
+                "  SELECT ai.id\n" +
+                "  FROM s_test AS ai\n" +
+                "  INNER JOIN Tree AS tr ON ai.id = tr.id\n" +
+                ")\n" +
+                "SELECT t1.id\n" +
+                "FROM Tree AS t1;");
+
+        SqlRequest request = analyzer
+                .refactor(QueryParamEntity.of(),1);
+
+        System.out.println(request);
     }
 }

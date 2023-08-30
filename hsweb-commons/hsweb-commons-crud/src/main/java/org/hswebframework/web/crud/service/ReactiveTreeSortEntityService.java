@@ -158,7 +158,7 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
                 .insertBatch(new TreeSortServiceHelper<>(this)
                                      .prepare(Flux.from(entityPublisher)
                                                   .flatMapIterable(Function.identity()))
-                                     .doOnNext(e -> e.tryValidate(CreateGroup.class))
+                                   //  .doOnNext(e -> e.tryValidate(CreateGroup.class))
                                      .buffer(getBufferSize()));
     }
 
@@ -266,7 +266,7 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
     default Mono<SaveResult> save(Publisher<E> entityPublisher) {
         return new TreeSortServiceHelper<>(this)
                 .prepare(Flux.from(entityPublisher))
-                .doOnNext(e -> e.tryValidate(CreateGroup.class))
+//                .doOnNext(e -> e.tryValidate(CreateGroup.class))
                 .buffer(getBufferSize())
                 .flatMap(this.getRepository()::save)
                 .reduce(SaveResult::merge);
