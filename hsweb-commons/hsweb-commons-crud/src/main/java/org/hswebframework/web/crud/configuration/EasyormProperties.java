@@ -7,6 +7,7 @@ import lombok.SneakyThrows;
 import org.hswebframework.ezorm.rdb.metadata.RDBDatabaseMetadata;
 import org.hswebframework.ezorm.rdb.metadata.RDBSchemaMetadata;
 import org.hswebframework.ezorm.rdb.metadata.dialect.Dialect;
+import org.hswebframework.ezorm.rdb.supports.clickhouse.ClickhouseSchemaMetadata;
 import org.hswebframework.ezorm.rdb.supports.h2.H2SchemaMetadata;
 import org.hswebframework.ezorm.rdb.supports.mssql.SqlServerSchemaMetadata;
 import org.hswebframework.ezorm.rdb.supports.mysql.MysqlSchemaMetadata;
@@ -105,6 +106,12 @@ public class EasyormProperties {
                 return new H2SchemaMetadata(name);
             }
         },
+        clickhouse(Dialect.clickhouse,"?"){
+            @Override
+            public RDBSchemaMetadata createSchema(String name) {
+                return new ClickhouseSchemaMetadata(name);
+            }
+        }
         ;
 
         private Dialect dialect;
