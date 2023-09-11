@@ -1,6 +1,7 @@
 package org.hswebframework.web.api.crud.entity;
 
 import com.google.common.collect.Maps;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 import java.util.*;
@@ -9,6 +10,51 @@ import java.util.stream.Collectors;
 
 public class TreeUtils {
 
+    /**
+     * 树结构转为List
+     *
+     * @param nodeList List
+     * @param children 子节点获取函数
+     * @param <N>      节点类型
+     * @return List
+     */
+    public static <N> List<N> treeToList(Collection<N> nodeList,
+                                         Function<N, Collection<N>> children) {
+        List<N> list = new ArrayList<>(nodeList.size());
+        flatTree(nodeList, children, list::add);
+        return list;
+    }
+
+    /**
+     * 平铺树结构
+     *
+     * @param nodeList 树结构list
+     * @param children 子节点获取函数
+     * @param handler  平铺节点接收函数
+     * @param <N>      节点类型
+     */
+    public static <N> void flatTree(Collection<N> nodeList,
+                                    Function<N, Collection<N>> children,
+                                    Consumer<N> handler) {
+        Queue<N> queue = new LinkedList<>(nodeList);
+        Set<N> distinct = new HashSet<>();
+
+        while (!queue.isEmpty()) {
+            N node = queue.poll();
+
+            if (!distinct.add(node)) {
+                continue;
+            }
+
+            Collection<N> childrenList = children.apply(node);
+            if (CollectionUtils.isNotEmpty(childrenList)) {
+                queue.addAll(childrenList);
+            }
+
+            handler.accept(node);
+        }
+
+    }
 
     /**
      * 列表结构转为树结构,并返回根节点集合.
