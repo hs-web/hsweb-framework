@@ -200,14 +200,12 @@ public interface TreeSupportEntity<PK> extends Entity {
         Queue<T> queue = new LinkedList<>();
         queue.add(root);
         //已经处理过的节点过滤器
-        Set<Long> filter = new HashSet<>();
+        Set<T> filter = new HashSet<>();
 
         for (T parent = queue.poll(); parent != null; parent = queue.poll()) {
-            long hash = System.identityHashCode(parent);
-            if (filter.contains(hash)) {
+            if (!filter.add(parent)) {
                 continue;
             }
-            filter.add(hash);
 
             //处理子节点
             if (!CollectionUtils.isEmpty(parent.getChildren())) {
