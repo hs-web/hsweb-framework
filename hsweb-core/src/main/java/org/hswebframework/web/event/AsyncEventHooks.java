@@ -26,12 +26,10 @@ public class AsyncEventHooks {
         if (hooksList == null) {
             return publisher;
         }
-        if (hooksList.size() == 1) {
-            return hooksList.getFirst().hookFirst(event, publisher);
+        for (AsyncEventHook asyncEventHook : hooksList) {
+            publisher = asyncEventHook.hookFirst(event, publisher);
         }
-        return Flux.fromIterable(hooksList)
-                   .flatMap(hook -> hook.hookFirst(event, publisher))
-                   .then();
+        return publisher;
     }
 
     static Mono<?> hookAsync(AsyncEvent event, Mono<?> publisher) {
@@ -39,12 +37,10 @@ public class AsyncEventHooks {
         if (hooksList == null) {
             return publisher;
         }
-        if (hooksList.size() == 1) {
-            return hooksList.getFirst().hookAsync(event, publisher);
+        for (AsyncEventHook asyncEventHook : hooksList) {
+            publisher = asyncEventHook.hookAsync(event, publisher);
         }
-        return Flux.fromIterable(hooksList)
-                   .flatMap(hook -> hook.hookAsync(event, publisher))
-                   .then();
+        return publisher;
     }
 
 
