@@ -24,6 +24,7 @@ import org.hswebframework.ezorm.rdb.mapping.annotation.Comment;
 import org.hswebframework.ezorm.rdb.mapping.annotation.DefaultValue;
 import org.hswebframework.web.api.crud.entity.GenericEntity;
 import org.hswebframework.web.api.crud.entity.RecordCreationEntity;
+import org.hswebframework.web.crud.generator.Generators;
 import org.hswebframework.web.dict.DictDefine;
 import org.hswebframework.web.dict.defaults.DefaultDictDefine;
 
@@ -56,11 +57,12 @@ public class DictionaryEntity extends GenericEntity<String> implements RecordCre
     @Schema(description = "说明")
     private String describe;
     //创建时间
-    @Column(name = "create_time")
+    @Column(name = "create_time", updatable = false)
     @Schema(description = "创建时间")
+    @DefaultValue(generator = Generators.CURRENT_TIME)
     private Long createTime;
     //创建人id
-    @Column(name = "creator_id")
+    @Column(name = "creator_id", updatable = false)
     @Schema(description = "创建人ID")
     private String creatorId;
     //状态
