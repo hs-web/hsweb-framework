@@ -27,6 +27,7 @@ import org.hswebframework.web.api.crud.entity.RecordCreationEntity;
 import org.hswebframework.web.crud.generator.Generators;
 import org.hswebframework.web.dict.DictDefine;
 import org.hswebframework.web.dict.defaults.DefaultDictDefine;
+import org.hswebframework.web.validator.CreateGroup;
 
 import javax.persistence.Column;
 import javax.persistence.Table;
@@ -45,7 +46,7 @@ import java.util.List;
 public class DictionaryEntity extends GenericEntity<String> implements RecordCreationEntity {
     //字典名称
     @Column(nullable = false)
-    @NotBlank(message = "名称不能为空")
+    @NotBlank(message = "名称不能为空",groups = CreateGroup.class)
     @Schema(description = "字典名称")
     private String name;
     //分类
