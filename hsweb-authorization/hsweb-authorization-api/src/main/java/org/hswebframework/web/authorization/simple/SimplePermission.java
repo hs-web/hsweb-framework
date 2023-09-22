@@ -1,6 +1,7 @@
 package org.hswebframework.web.authorization.simple;
 
 import lombok.*;
+import org.apache.commons.collections.CollectionUtils;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.access.DataAccessConfig;
 
@@ -61,5 +62,10 @@ public class SimplePermission implements Permission {
 
     public Permission copy() {
         return copy(action -> true, conf -> true);
+    }
+
+    @Override
+    public String toString() {
+        return id + (CollectionUtils.isNotEmpty(actions) ? ":" + String.join(",", actions) : "");
     }
 }

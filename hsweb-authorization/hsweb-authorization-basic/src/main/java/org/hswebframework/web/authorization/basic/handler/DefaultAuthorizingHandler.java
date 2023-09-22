@@ -1,5 +1,6 @@
 package org.hswebframework.web.authorization.basic.handler;
 
+import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.access.DataAccessController;
@@ -17,11 +18,10 @@ import org.springframework.context.ApplicationEventPublisher;
 /**
  * @author zhouhao
  */
+@Slf4j
 public class DefaultAuthorizingHandler implements AuthorizingHandler {
 
     private DataAccessController dataAccessController;
-
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private ApplicationEventPublisher eventPublisher;
 
@@ -69,7 +69,7 @@ public class DefaultAuthorizingHandler implements AuthorizingHandler {
     public void handleDataAccess(AuthorizingContext context) {
 
         if (dataAccessController == null) {
-            logger.warn("dataAccessController is null,skip result access control!");
+            log.warn("dataAccessController is null,skip result access control!");
             return;
         }
         if (context.getDefinition().getResources() == null) {
@@ -105,7 +105,7 @@ public class DefaultAuthorizingHandler implements AuthorizingHandler {
 
         ResourcesDefinition resources = definition.getResources();
 
-        if (!resources.hasPermission(authentication.getPermissions())) {
+        if (!resources.hasPermission(authentication)) {
             throw new AccessDenyException(definition.getMessage(),definition.getDescription());
         }
     }
