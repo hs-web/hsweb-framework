@@ -221,4 +221,34 @@ public class ReactiveTreeSortEntityServiceTest {
                 .expectErrorMatches(err -> err.getMessage().contains("tree_entity_cyclic_dependency"))
                 .verify();
     }
+
+
+    @Test
+    public void testDelete() {
+        TestTreeSortEntity root = new TestTreeSortEntity();
+        root.setId("delete-root");
+        root.setName("deleteRoot");
+
+
+        TestTreeSortEntity node1 = new TestTreeSortEntity();
+        node1.setId("delete-node1");
+        node1.setName("delete-node1");
+        node1.setParentId(root.getId());
+
+        sortEntityService
+                .save(Flux.just(root, node1))
+                .map(SaveResult::getTotal)
+                .as(StepVerifier::create)
+                .expectNext(2)
+                .verifyComplete();
+
+        sortEntityService
+                .createDelete()
+                .where(TestTreeSortEntity::getId,"delete-root")
+                .execute()
+                .as(StepVerifier::create)
+                .expectNext(2)
+                .verifyComplete();
+
+    }
 }

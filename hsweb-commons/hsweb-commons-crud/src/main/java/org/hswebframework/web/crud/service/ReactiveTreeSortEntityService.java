@@ -1,6 +1,7 @@
 package org.hswebframework.web.crud.service;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.hswebframework.ezorm.rdb.mapping.ReactiveDelete;
 import org.hswebframework.ezorm.rdb.mapping.defaults.SaveResult;
 import org.hswebframework.ezorm.rdb.operator.dml.Terms;
 import org.hswebframework.utils.RandomUtil;
@@ -158,7 +159,7 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
                 .insertBatch(new TreeSortServiceHelper<>(this)
                                      .prepare(Flux.from(entityPublisher)
                                                   .flatMapIterable(Function.identity()))
-                                   //  .doOnNext(e -> e.tryValidate(CreateGroup.class))
+                                     //  .doOnNext(e -> e.tryValidate(CreateGroup.class))
                                      .buffer(getBufferSize()));
     }
 
@@ -413,7 +414,7 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
         return this
                 .findById(Flux.from(idPublisher))
                 .concatMap(e -> StringUtils.hasText(e.getPath())
-                        ? createDelete().where().like$(e::getPath).execute()
+                        ? getRepository().createDelete().where().like$(e::getPath).execute()
                         : getRepository().deleteById(e.getId()))
                 .as(MathFlux::sumInt);
     }
@@ -441,5 +442,25 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
 
     default boolean isRootNode(E entity) {
         return ObjectUtils.isEmpty(entity.getParentId()) || "-1".equals(String.valueOf(entity.getParentId()));
+    }
+
+    @Override
+    default ReactiveDelete createDelete() {
+        return ReactiveCrudService.super
+                .createDelete()
+                .onExecute((delete,executor) -> this
+                        .getRepository()
+                        .createQuery()
+                        .setParam(delete.toQueryParam())
+                        .fetch()
+                        .filter(e -> StringUtils.hasText(e.getPath()))
+                        //删除所有子节点
+                        .concatMap(e -> getRepository()
+                                .createDelete()
+                                .where()
+                                .like$(e::getPath)
+                                .execute())
+                        .concatWith(executor)
+                        .reduce(0, Math::addExact));
     }
 }
