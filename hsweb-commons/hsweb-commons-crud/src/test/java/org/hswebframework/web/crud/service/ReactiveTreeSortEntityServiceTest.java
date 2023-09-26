@@ -116,10 +116,11 @@ public class ReactiveTreeSortEntityServiceTest {
                 .expectComplete()
                 .verify();
 
-        sortEntityService.queryIncludeChildren(Arrays.asList(entity_0.getId()))
-                         .as(StepVerifier::create)
-                         .expectNextCount(3)
-                         .verifyComplete();
+        sortEntityService
+                .queryIncludeChildren(Arrays.asList(entity_0.getId()))
+                .as(StepVerifier::create)
+                .expectNextCount(3)
+                .verifyComplete();
 
     }
 
@@ -244,7 +245,7 @@ public class ReactiveTreeSortEntityServiceTest {
 
         sortEntityService
                 .createDelete()
-                .where(TestTreeSortEntity::getId,"delete-root")
+                .where(TestTreeSortEntity::getId, "delete-root")
                 .execute()
                 .as(StepVerifier::create)
                 .expectNext(2)

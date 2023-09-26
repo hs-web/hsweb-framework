@@ -62,7 +62,8 @@ public class TreeSortServiceHelper<E extends TreeSortSupportEntity<PK>, PK> {
                 .then(Mono.defer(this::checkParentId))
                 .then(Mono.fromRunnable(this::checkCyclicDependency))
                 .then(Mono.fromRunnable(this::refactorPath))
-                .thenMany(Flux.defer(() -> Flux.fromIterable(readyToSave.values())));
+                .thenMany(Flux.defer(() -> Flux.fromIterable(readyToSave.values())))
+                .doOnNext(this::refactor);
     }
 
     private Mono<Void> init(Flux<E> source) {
@@ -239,6 +240,12 @@ public class TreeSortServiceHelper<E extends TreeSortSupportEntity<PK>, PK> {
             }
         }
 
+    }
+
+    private void refactor(E e) {
+        if (e.getPath() != null) {
+            e.setLevel(e.getPath().split("-").length);
+        }
     }
 
     //重构子节点的path
