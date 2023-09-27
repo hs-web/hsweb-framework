@@ -41,10 +41,10 @@ public class DefaultReactiveUserServiceTest {
                 .zip(
                         userService
                                 .saveUser(Mono.just(userBuilder.get()))
-                                .subscribeOn(Schedulers.newSingle("newSingle")),
+                                .subscribeOn(Schedulers.boundedElastic()),
                         userService
                                 .saveUser(Mono.just(userBuilder.get()))
-                                .subscribeOn(Schedulers.newSingle("newSingle"))
+                                .subscribeOn(Schedulers.boundedElastic())
                 )
                 .as(StepVerifier::create)
                 .expectError(ValidationException.class)

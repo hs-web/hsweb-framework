@@ -5,6 +5,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.hswebframework.ezorm.core.param.QueryParam;
 import org.hswebframework.ezorm.rdb.exception.DuplicateKeyException;
 import org.hswebframework.ezorm.rdb.mapping.ReactiveRepository;
+import org.hswebframework.web.api.crud.entity.PagerResult;
+import org.hswebframework.web.api.crud.entity.QueryParamEntity;
 import org.hswebframework.web.api.crud.entity.TransactionManagers;
 import org.hswebframework.web.crud.service.GenericReactiveCrudService;
 import org.hswebframework.web.exception.NotFoundException;
@@ -25,6 +27,7 @@ import reactor.core.publisher.Mono;
 
 import javax.validation.ValidationException;
 import java.util.Objects;
+import java.util.function.Function;
 
 
 public class DefaultReactiveUserService extends GenericReactiveCrudService<UserEntity, String> implements ReactiveUserService {
@@ -238,5 +241,10 @@ public class DefaultReactiveUserService extends GenericReactiveCrudService<UserE
                         .deleteById(Mono.just(userId))
                         .flatMap(i -> new UserDeletedEvent(user).publish(eventPublisher))
                         .thenReturn(true));
+    }
+
+    @Override
+    public Mono<PagerResult<UserEntity>> queryPager(QueryParamEntity queryParamMono) {
+        return super.queryPager(queryParamMono);
     }
 }
