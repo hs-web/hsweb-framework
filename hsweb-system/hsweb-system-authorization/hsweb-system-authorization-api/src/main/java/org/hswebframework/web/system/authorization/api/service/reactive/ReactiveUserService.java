@@ -1,6 +1,8 @@
 package org.hswebframework.web.system.authorization.api.service.reactive;
 
 import org.hswebframework.ezorm.core.param.QueryParam;
+import org.hswebframework.web.api.crud.entity.PagerResult;
+import org.hswebframework.web.api.crud.entity.QueryParamEntity;
 import org.hswebframework.web.system.authorization.api.entity.UserEntity;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -29,6 +31,12 @@ public interface ReactiveUserService {
      */
     Mono<Boolean> saveUser(Mono<UserEntity> userEntity);
 
+    /**
+     * 新增用户
+     *
+     * @param userEntity 用户实体
+     * @return 新增的用户实体
+     */
     Mono<UserEntity> addUser(UserEntity userEntity);
 
     /**
@@ -77,6 +85,7 @@ public interface ReactiveUserService {
 
     /**
      * 根据查询条件查询用户
+     *
      * @param queryParam 动态查询条件
      * @return 用户列表
      */
@@ -84,6 +93,7 @@ public interface ReactiveUserService {
 
     /**
      * 根据查询条件查询用户数量
+     *
      * @param queryParam 查询条件
      * @return 用户数量
      */
@@ -91,10 +101,19 @@ public interface ReactiveUserService {
 
     /**
      * 删除用户
+     *
      * @param userId 用户ID
      * @return 是否成功
      * @see org.hswebframework.web.system.authorization.api.event.UserDeletedEvent
      */
     Mono<Boolean> deleteUser(String userId);
 
+    /**
+     * 分页查询用户
+     *
+     * @param param 动态查询条件
+     * @return 查询结果
+     * @since 4.0.17
+     */
+    Mono<PagerResult<UserEntity>> queryPager(QueryParamEntity param);
 }
