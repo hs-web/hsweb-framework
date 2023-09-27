@@ -24,18 +24,19 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hswebframework.ezorm.core.param.QueryParam;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 分页查询结果,用于在分页查询时,定义查询结果.如果需要拓展此类,例如自定义json序列化,请使用spi方式定义拓展实现类型:
- * <pre>
+ * <pre>{@code
  * ---resources
  * -----|--META-INF
  * -----|----services
  * -----|------org.hswebframework.web.api.crud.entity.PagerResult
- * </pre>
+ * }</pre>
+ * <p>
  *
  * @param <E> 结果类型
  * @author zhouhao
@@ -43,7 +44,7 @@ import java.util.Map;
  */
 @Getter
 @Setter
-public class PagerResult<E> {
+public class PagerResult<E> implements Serializable {
     private static final long serialVersionUID = -6171751136953308027L;
 
     /**
@@ -108,5 +109,4 @@ public class PagerResult<E> {
         this.total = total;
         this.data = data;
     }
-
 }

@@ -101,10 +101,11 @@ public class PermissionSynchronization implements CommandLineRunner {
                     .describe(definitionAction.getName())
                     .build());
             Map<String, Object> properties = Optional.ofNullable(action.getProperties()).orElse(new HashMap<>());
-            Set<Object> types = Optional.of(properties.computeIfAbsent("supportDataAccessTypes", t -> new HashSet<>()))
+            @SuppressWarnings("all")
+            Set<Object> types = (Set)Optional.of(properties.computeIfAbsent("supportDataAccessTypes", t -> new HashSet<>()))
                     .filter(Collection.class::isInstance)
-                    .<Collection<Object>>map(Collection.class::cast)
-                    .<Set<Object>>map(HashSet::new)
+                    .map(Collection.class::cast)
+                    .map(HashSet::new)
                     .orElseGet(HashSet::new);
 
             types.addAll(definitionAction.getDataAccess().getDataAccessTypes().stream().map(DataAccessTypeDefinition::getId).collect(Collectors.toSet()));

@@ -1,8 +1,6 @@
 package org.hswebframework.web.api.crud.entity;
 
 import io.swagger.v3.oas.annotations.Hidden;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,7 +15,7 @@ import org.hswebframework.ezorm.core.param.TermType;
 import org.hswebframework.web.bean.FastBeanCopier;
 import org.springframework.util.StringUtils;
 
-
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -45,26 +43,23 @@ import java.util.function.Consumer;
  * @see QueryParam
  * @since 3.0
  */
+@Getter
 @Slf4j
 public class QueryParamEntity extends QueryParam {
 
     private static final long serialVersionUID = 8097500947924037523L;
 
-    @Getter
     @Schema(description = "where条件表达式,与terms参数不能共存.语法: name = 张三 and age > 16")
     private String where;
 
-    @Getter
     @Schema(description = "orderBy条件表达式,与sorts参数不能共存.语法: age asc,createTime desc")
     private String orderBy;
 
     //总数,设置了此值时,在分页查询的时候将不执行count.
-    @Getter
     @Setter
     @Schema(description = "设置了此值后将不重复执行count查询总数")
     private Integer total;
 
-    @Getter
     @Setter
     @Schema(description = "是否进行并行分页")
     private boolean parallelPager = false;
@@ -89,12 +84,14 @@ public class QueryParamEntity extends QueryParam {
 
     @Override
     @Schema(description = "指定要查询的列")
+    @Nonnull
     public Set<String> getIncludes() {
         return super.getIncludes();
     }
 
     @Override
     @Schema(description = "指定不查询的列")
+    @Nonnull
     public Set<String> getExcludes() {
         return super.getExcludes();
     }
@@ -199,7 +196,7 @@ public class QueryParamEntity extends QueryParam {
      */
     public void setOrderBy(String orderBy) {
         this.orderBy = orderBy;
-        if (StringUtils.isEmpty(orderBy)) {
+        if (!StringUtils.hasText(orderBy)) {
             return;
         }
         setSorts(TermExpressionParser.parseOrder(orderBy));
@@ -213,13 +210,14 @@ public class QueryParamEntity extends QueryParam {
      */
     public void setWhere(String where) {
         this.where = where;
-        if (StringUtils.isEmpty(where)) {
+        if (!StringUtils.hasText(where)) {
             return;
         }
         setTerms(TermExpressionParser.parse(where));
     }
 
     @Override
+    @Nonnull
     public List<Term> getTerms() {
         List<Term> terms = super.getTerms();
         if (CollectionUtils.isEmpty(terms) && StringUtils.hasText(where)) {
@@ -228,6 +226,7 @@ public class QueryParamEntity extends QueryParam {
         return terms;
     }
 
+    @SuppressWarnings("unchecked")
     public QueryParamEntity noPaging() {
         setPaging(false);
         return this;
