@@ -4,10 +4,13 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Parameter;
+import org.hswebframework.ezorm.rdb.mapping.defaults.SaveResult;
 import org.hswebframework.web.api.crud.entity.QueryParamEntity;
 import org.hswebframework.web.api.crud.entity.QueryNoPagingOperation;
+import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.annotation.Resource;
+import org.hswebframework.web.authorization.annotation.SaveAction;
 import org.hswebframework.web.crud.service.ReactiveCrudService;
 import org.hswebframework.web.crud.web.reactive.ReactiveServiceCrudController;
 import org.hswebframework.web.dict.DictDefine;
@@ -67,5 +70,15 @@ public class WebfluxDictionaryController implements ReactiveServiceCrudControlle
     @Schema(description = "获取全部数据字典")
     public Flux<DictDefine> getAllDict() {
         return repository.getAllDefine();
+    }
+
+    @PostMapping("/_distinct")
+    @SaveAction
+    @Operation(summary = "导入字典", description = "如果传入了id,且对应数据存在,尝试覆盖,不存在则新增.如果存在多个相同id,则以最后一条为准")
+    public Mono<SaveResult> distinctSave(@RequestBody Flux<DictionaryEntity> payload) {
+        return payload
+                .groupBy(DictionaryEntity::getId)
+                .flatMap(Flux::last)
+                .as(dictionaryService::save);
     }
 }
