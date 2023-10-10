@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Comparator;
+
 
 @RestController
 @RequestMapping("/dictionary")
@@ -56,10 +58,11 @@ public class WebfluxDictionaryController implements ReactiveServiceCrudControlle
     @GetMapping("/{id:.+}/items")
     @Authorize(merge = false)
     @Operation(summary = "获取数据字段的所有选项")
-    public Flux<EnumDict<?>> getItemDefineById(@PathVariable String id) {
+    public Flux<? extends EnumDict<?>> getItemDefineById(@PathVariable String id) {
         return repository
                 .getDefine(id)
-                .flatMapIterable(DictDefine::getItems);
+                .flatMapIterable(DictDefine::getItems)
+                .sort(Comparator.comparingLong(EnumDict::index));
     }
 
     @GetMapping("/_all")
