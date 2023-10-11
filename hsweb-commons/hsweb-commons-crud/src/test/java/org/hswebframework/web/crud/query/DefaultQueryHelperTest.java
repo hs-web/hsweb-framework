@@ -65,7 +65,7 @@ class DefaultQueryHelperTest {
                 .insert("s_test")
                 .value("id", "inner-test")
                 .value("name", "inner")
-                .value("testName","inner")
+                .value("testName", "inner")
                 .value("age", 31)
                 .execute()
                 .sync();
@@ -159,7 +159,7 @@ class DefaultQueryHelperTest {
     public void testCustomFirstPageIndex() {
         DefaultQueryHelper helper = new DefaultQueryHelper(database);
         QueryParamEntity e = new QueryParamEntity();
-        e.and("id","eq","testCustomFirstPageIndex");
+        e.and("id", "eq", "testCustomFirstPageIndex");
         e.setFirstPageIndex(1);
         e.setPageIndex(2);
 
@@ -243,7 +243,7 @@ class DefaultQueryHelperTest {
     @Getter
     @Setter
     @ToString
-    public static class TestInfo {
+    public static class TestInfo extends TestInfoSuper {
 
         private String id;
 
@@ -255,6 +255,11 @@ class DefaultQueryHelperTest {
 
         private EventTestEntity event;
 
+    }
+
+    @Getter
+    @Setter
+    public static class TestInfoSuper {
         private List<EventTestEntity> eventList;
     }
 }

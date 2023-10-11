@@ -37,6 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -44,6 +45,7 @@ import reactor.util.context.Context;
 import reactor.util.context.ContextView;
 
 import javax.persistence.Table;
+import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
@@ -318,7 +320,11 @@ public class DefaultQueryHelper implements QueryHelper {
                 this.tableType = tableType;
                 this.targetProperty = setter == null ? null : MethodReferenceConverter.convertToColumn(setter);
                 if (this.targetProperty != null) {
-                    propertyType = ResolvableType.forField(parent.clazz.getDeclaredField(targetProperty), parent.clazz);
+                    Field field = ReflectionUtils.findField(parent.clazz, targetProperty);
+                    if (field == null) {
+                        throw new NoSuchFieldException(parent.clazz.getName() + "." + targetProperty);
+                    }
+                    propertyType = ResolvableType.forField(field, parent.clazz);
                 } else {
                     propertyType = null;
                 }
