@@ -204,9 +204,7 @@ public class TreeSortServiceHelper<E extends TreeSortSupportEntity<PK>, PK> {
                         data.setPath(RandomUtil.randomChar(4));
                         this.refactorChildPath(old.getId(), data.getPath(), childConsumer);
                         //重新保存所有子节点
-                        childGetter
-                                .apply(old.getId())
-                                .forEach(e -> readyToSave.put(e.getId(), e));
+                        putChildToReadyToSave(childGetter, old);
 
                     } else {
                         E newParent = allData.get(newParentId);
@@ -214,9 +212,7 @@ public class TreeSortServiceHelper<E extends TreeSortSupportEntity<PK>, PK> {
                             data.setPath(newParent.getPath() + "-" + RandomUtil.randomChar(4));
                             this.refactorChildPath(data.getId(), data.getPath(), childConsumer);
                             //重新保存所有子节点
-                            childGetter
-                                    .apply(data.getId())
-                                    .forEach(e -> readyToSave.put(e.getId(), e));
+                            putChildToReadyToSave(childGetter, data);
                         }
                     }
                 } else {
@@ -240,6 +236,15 @@ public class TreeSortServiceHelper<E extends TreeSortSupportEntity<PK>, PK> {
             }
         }
 
+    }
+
+    private void putChildToReadyToSave(Function<PK, Collection<E>> childGetter, E data) {
+        childGetter
+                .apply(data.getId())
+                .forEach(e -> {
+                    readyToSave.put(e.getId(), e);
+                    putChildToReadyToSave(childGetter, e);
+                });
     }
 
     private void refactor(E e) {
