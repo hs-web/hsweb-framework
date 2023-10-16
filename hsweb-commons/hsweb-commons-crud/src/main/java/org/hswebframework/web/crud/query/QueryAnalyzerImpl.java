@@ -254,6 +254,7 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
                     .orElseThrow(() -> new IllegalStateException("schema " + schema + " not initialized"));
         } else {
             schemaMetadata = database.getMetadata().getCurrentSchema();
+            tableName.setSchemaName(schemaMetadata.getName());
         }
 
         String alias = tableName.getAlias() == null ? tableName.getName() : tableName.getAlias().getName();
