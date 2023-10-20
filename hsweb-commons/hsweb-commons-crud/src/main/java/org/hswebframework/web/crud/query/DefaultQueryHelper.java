@@ -202,11 +202,16 @@ public class DefaultQueryHelper implements QueryHelper {
 
         @Override
         public Flux<R> fetch() {
+            QueryParamEntity _param = param == null ? QueryParamEntity.of().noPaging() : param;
+            SqlRequest request = analyzer.refactor(_param, args);
+            if (_param.isPaging()) {
+                request = createPagingSql(request, param.getPageIndex(), param.getPageSize());
+            }
             return parent
                     .database
                     .sql()
                     .reactive()
-                    .select(analyzer.refactor(param == null ? QueryParamEntity.of().noPaging() : param, args), this)
+                    .select(request, this)
                     .map(mapper)
                     .contextWrite(logContext);
         }

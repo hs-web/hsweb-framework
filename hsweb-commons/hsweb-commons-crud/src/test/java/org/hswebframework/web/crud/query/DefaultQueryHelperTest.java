@@ -35,6 +35,36 @@ class DefaultQueryHelperTest {
 
 
     @Test
+    public void testPage(){
+        DefaultQueryHelper helper = new DefaultQueryHelper(database);
+
+        database.dml()
+                .insert("s_test")
+                .value("id", "page-test")
+                .value("name", "page")
+                .value("age", 22)
+                .execute()
+                .sync();
+
+        database.dml()
+                .insert("s_test")
+                .value("id", "page-test2")
+                .value("name", "page")
+                .value("age", 22)
+                .execute()
+                .sync();
+
+        helper.select("select * from s_test")
+                .where(dsl->{
+                    dsl.doPaging(0,1);
+                })
+                .fetch()
+                .as(StepVerifier::create)
+                .expectNextCount(1)
+                .verifyComplete();
+    }
+
+    @Test
     public void testGroup() {
         DefaultQueryHelper helper = new DefaultQueryHelper(database);
 
