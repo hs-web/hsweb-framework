@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.hswebframework.ezorm.core.NestConditional;
 import org.hswebframework.ezorm.core.dsl.Query;
 import org.hswebframework.ezorm.core.param.Param;
@@ -18,6 +19,7 @@ import org.springframework.util.StringUtils;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -59,6 +61,14 @@ public class QueryParamEntity extends QueryParam {
     @Setter
     @Schema(description = "设置了此值后将不重复执行count查询总数")
     private Integer total;
+
+    /**
+     * @see TermExpressionParser#parse(Map)
+     * @since 4.0.17
+     */
+    @Getter
+    @Schema(description = "使用map方式传递查询条件.与terms参数不能共存.格式: {\"name$like\":\"张三\"}")
+    private Map<String, Object> filter;
 
     @Setter
     @Schema(description = "是否进行并行分页")
@@ -216,12 +226,29 @@ public class QueryParamEntity extends QueryParam {
         setTerms(TermExpressionParser.parse(where));
     }
 
+    /**
+     * 设置map格式的过滤条件
+     *
+     * @param filter 过滤条件
+     * @see TermExpressionParser#parse(Map)
+     * @since 4.0.17
+     */
+    public void setFilter(Map<String, Object> filter) {
+        this.filter = filter;
+        if (MapUtils.isNotEmpty(filter)) {
+            setTerms(TermExpressionParser.parse(filter));
+        }
+    }
+
     @Override
     @Nonnull
     public List<Term> getTerms() {
         List<Term> terms = super.getTerms();
         if (CollectionUtils.isEmpty(terms) && StringUtils.hasText(where)) {
             setTerms(terms = TermExpressionParser.parse(where));
+        }
+        if (CollectionUtils.isEmpty(terms) && MapUtils.isNotEmpty(filter)) {
+            setTerms(terms = TermExpressionParser.parse(filter));
         }
         return terms;
     }
