@@ -169,7 +169,7 @@ public interface QueryHelper {
          * @return this
          */
         default ExecuteSpec<T> where(Consumer<Query<?, QueryParamEntity>> dsl) {
-            Query<?, QueryParamEntity> query = QueryParamEntity.newQuery();
+            Query<?, QueryParamEntity> query = QueryParamEntity.newQuery().noPaging();
             dsl.accept(query);
             return where(query.getParam());
         }

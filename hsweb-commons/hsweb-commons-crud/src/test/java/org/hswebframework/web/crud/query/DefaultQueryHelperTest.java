@@ -35,7 +35,7 @@ class DefaultQueryHelperTest {
 
 
     @Test
-    public void testPage(){
+    public void testPage() {
         DefaultQueryHelper helper = new DefaultQueryHelper(database);
 
         database.dml()
@@ -55,13 +55,34 @@ class DefaultQueryHelperTest {
                 .sync();
 
         helper.select("select * from s_test")
-                .where(dsl->{
-                    dsl.doPaging(0,1);
-                })
-                .fetch()
-                .as(StepVerifier::create)
-                .expectNextCount(1)
-                .verifyComplete();
+              .where(dsl -> {
+                  dsl.doPaging(0, 1);
+              })
+              .fetch()
+              .as(StepVerifier::create)
+              .expectNextCount(1)
+              .verifyComplete();
+    }
+
+    @Test
+    public void testAgg() {
+        DefaultQueryHelper helper = new DefaultQueryHelper(database);
+
+        database.dml()
+                .insert("s_test")
+                .value("id", "agg-test")
+                .value("name", "agg")
+                .value("age", 111)
+                .execute()
+                .sync();
+
+        helper.select("select sum(age) num from s_test t")
+              .where(dsl -> dsl.is("name", "agg"))
+              .fetch()
+              .doOnNext(v -> System.out.println(JSON.toJSONString(v, SerializerFeature.PrettyFormat)))
+              .as(StepVerifier::create)
+              .expectNextCount(1)
+              .verifyComplete();
     }
 
     @Test
