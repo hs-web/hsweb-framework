@@ -235,7 +235,9 @@ public class QueryParamEntity extends QueryParam {
      */
     public void setFilter(Map<String, Object> filter) {
         this.filter = filter;
-        setTerms(TermExpressionParser.parse(filter));
+        if (MapUtils.isNotEmpty(filter)) {
+            setTerms(TermExpressionParser.parse(filter));
+        }
     }
 
     @Override
