@@ -294,7 +294,7 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
         for (Column column : sub.select.getColumnList()) {
 
             columnMap.put(column.getAlias(),
-                          new Column(column.alias, column.getAlias(), column.owner, column.metadata));
+                          new Column(column.name, column.getAlias(), column.owner, column.metadata));
         }
 
         select = new QueryAnalyzer.Select(
@@ -684,6 +684,9 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
                         from.append(", ").append(join);
                     } else {
                         from.append(" ").append(join);
+                    }
+                    if (null != join.getRightItem()) {
+                        join.getRightItem().accept(visitor);
                     }
                     if (null != join.getOnExpressions()) {
                         for (Expression onExpression : join.getOnExpressions()) {

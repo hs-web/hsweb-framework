@@ -98,9 +98,9 @@ class DefaultQueryHelperTest {
                 .sync();
 
         helper.select("select name as \"name\",count(1) totalResult from s_test group by name having count(1) > ? ", GroupResult::new, 0)
-//              .where(dsl -> dsl
-//                      .is("age", "31")
-//                      .orderByAsc(GroupResult::getTotalResult))
+              .where(dsl -> dsl
+                      .is("age", "31")
+                      .orderByAsc(GroupResult::getTotalResult))
               .fetch()
               .doOnNext(v -> System.out.println(JSON.toJSONString(v, SerializerFeature.PrettyFormat)))
               .as(StepVerifier::create)
@@ -129,6 +129,27 @@ class DefaultQueryHelperTest {
                       .is("a.testName", "inner")
                       .is("age", 31))
               .fetchPaged(0, 10)
+              .doOnNext(v -> System.out.println(JSON.toJSONString(v, SerializerFeature.PrettyFormat)))
+              .as(StepVerifier::create)
+              .expectNextCount(1)
+              .verifyComplete();
+    }
+
+    @Test
+    public void testJoinSubQuery() {
+        DefaultQueryHelper helper = new DefaultQueryHelper(database);
+
+        database.dml()
+                .insert("s_test")
+                .value("id", "join_sub")
+                .value("name", "join_sub")
+                .value("testName", "join_sub")
+                .value("age", 31)
+                .execute()
+                .sync();
+
+        helper.select("select * from s_test t1 join (select * from s_test s where name = ? ) t2 on t2.id = t1.id ", "join_sub")
+              .fetch()
               .doOnNext(v -> System.out.println(JSON.toJSONString(v, SerializerFeature.PrettyFormat)))
               .as(StepVerifier::create)
               .expectNextCount(1)
