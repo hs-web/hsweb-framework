@@ -4,6 +4,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.hswebframework.ezorm.rdb.mapping.ReactiveDelete;
 import org.hswebframework.ezorm.rdb.mapping.ReactiveUpdate;
 import org.hswebframework.ezorm.rdb.mapping.defaults.SaveResult;
+import org.hswebframework.ezorm.rdb.operator.dml.query.SortOrder;
 import org.hswebframework.web.api.crud.entity.QueryParamEntity;
 import org.hswebframework.web.crud.query.QueryHelper;
 import org.hswebframework.web.crud.service.GenericReactiveCrudService;
@@ -74,6 +75,7 @@ public class DefaultDictionaryService extends GenericReactiveCrudService<Diction
                 .zipWith(itemService
                                 .createQuery()
                                 .where(DictionaryItemEntity::getDictId, id)
+                                .orderBy(SortOrder.asc(DictionaryItemEntity::getOrdinal))
                                 .fetch()
                                 .collectList(),
                         (dic, items) -> {

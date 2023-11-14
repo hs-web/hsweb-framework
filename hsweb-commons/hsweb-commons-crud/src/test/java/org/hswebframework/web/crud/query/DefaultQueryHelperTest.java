@@ -35,6 +35,57 @@ class DefaultQueryHelperTest {
 
 
     @Test
+    public void testPage() {
+        DefaultQueryHelper helper = new DefaultQueryHelper(database);
+
+        database.dml()
+                .insert("s_test")
+                .value("id", "page-test")
+                .value("name", "page")
+                .value("age", 22)
+                .execute()
+                .sync();
+
+        database.dml()
+                .insert("s_test")
+                .value("id", "page-test2")
+                .value("name", "page")
+                .value("age", 22)
+                .execute()
+                .sync();
+
+        helper.select("select * from s_test")
+              .where(dsl -> {
+                  dsl.doPaging(0, 1);
+              })
+              .fetch()
+              .as(StepVerifier::create)
+              .expectNextCount(1)
+              .verifyComplete();
+    }
+
+    @Test
+    public void testAgg() {
+        DefaultQueryHelper helper = new DefaultQueryHelper(database);
+
+        database.dml()
+                .insert("s_test")
+                .value("id", "agg-test")
+                .value("name", "agg")
+                .value("age", 111)
+                .execute()
+                .sync();
+
+        helper.select("select sum(age) num from s_test t")
+              .where(dsl -> dsl.is("name", "agg"))
+              .fetch()
+              .doOnNext(v -> System.out.println(JSON.toJSONString(v, SerializerFeature.PrettyFormat)))
+              .as(StepVerifier::create)
+              .expectNextCount(1)
+              .verifyComplete();
+    }
+
+    @Test
     public void testGroup() {
         DefaultQueryHelper helper = new DefaultQueryHelper(database);
 
@@ -47,9 +98,9 @@ class DefaultQueryHelperTest {
                 .sync();
 
         helper.select("select name as \"name\",count(1) totalResult from s_test group by name having count(1) > ? ", GroupResult::new, 0)
-//              .where(dsl -> dsl
-//                      .is("age", "31")
-//                      .orderByAsc(GroupResult::getTotalResult))
+              .where(dsl -> dsl
+                      .is("age", "31")
+                      .orderByAsc(GroupResult::getTotalResult))
               .fetch()
               .doOnNext(v -> System.out.println(JSON.toJSONString(v, SerializerFeature.PrettyFormat)))
               .as(StepVerifier::create)
@@ -65,7 +116,7 @@ class DefaultQueryHelperTest {
                 .insert("s_test")
                 .value("id", "inner-test")
                 .value("name", "inner")
-                .value("testName","inner")
+                .value("testName", "inner")
                 .value("age", 31)
                 .execute()
                 .sync();
@@ -78,6 +129,27 @@ class DefaultQueryHelperTest {
                       .is("a.testName", "inner")
                       .is("age", 31))
               .fetchPaged(0, 10)
+              .doOnNext(v -> System.out.println(JSON.toJSONString(v, SerializerFeature.PrettyFormat)))
+              .as(StepVerifier::create)
+              .expectNextCount(1)
+              .verifyComplete();
+    }
+
+    @Test
+    public void testJoinSubQuery() {
+        DefaultQueryHelper helper = new DefaultQueryHelper(database);
+
+        database.dml()
+                .insert("s_test")
+                .value("id", "join_sub")
+                .value("name", "join_sub")
+                .value("testName", "join_sub")
+                .value("age", 31)
+                .execute()
+                .sync();
+
+        helper.select("select * from s_test t1 join (select * from s_test s where name = ? ) t2 on t2.id = t1.id ", "join_sub")
+              .fetch()
               .doOnNext(v -> System.out.println(JSON.toJSONString(v, SerializerFeature.PrettyFormat)))
               .as(StepVerifier::create)
               .expectNextCount(1)
@@ -159,7 +231,7 @@ class DefaultQueryHelperTest {
     public void testCustomFirstPageIndex() {
         DefaultQueryHelper helper = new DefaultQueryHelper(database);
         QueryParamEntity e = new QueryParamEntity();
-        e.and("id","eq","testCustomFirstPageIndex");
+        e.and("id", "eq", "testCustomFirstPageIndex");
         e.setFirstPageIndex(1);
         e.setPageIndex(2);
 
@@ -243,7 +315,7 @@ class DefaultQueryHelperTest {
     @Getter
     @Setter
     @ToString
-    public static class TestInfo {
+    public static class TestInfo extends TestInfoSuper {
 
         private String id;
 
@@ -255,6 +327,11 @@ class DefaultQueryHelperTest {
 
         private EventTestEntity event;
 
+    }
+
+    @Getter
+    @Setter
+    public static class TestInfoSuper {
         private List<EventTestEntity> eventList;
     }
 }

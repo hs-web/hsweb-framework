@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
+import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.annotation.Logical;
 
@@ -62,34 +63,24 @@ public class ResourcesDefinition {
                 .isPresent();
     }
 
-    public boolean isEmpty(){
+    public boolean isEmpty() {
         return resources.isEmpty();
     }
 
-    public boolean hasPermission(Collection<Permission> permissions) {
+    public boolean hasPermission(Authentication authentication) {
 
         if (CollectionUtils.isEmpty(resources)) {
             return true;
         }
-        if (CollectionUtils.isEmpty(permissions)) {
-            return false;
-        }
-        if (permissions.size() == 1) {
-            return hasPermission(permissions.iterator().next());
-        }
-
-        Map<String, Permission> mappings = permissions.stream().collect(Collectors.toMap(Permission::getId, Function.identity()));
 
         if (logical == Logical.AND) {
-            return resources.stream()
-                    .allMatch(resource -> Optional.ofNullable(mappings.get(resource.getId()))
-                            .map(per -> resource.hasAction(per.getActions()))
-                            .orElse(false));
+            return resources
+                    .stream()
+                    .allMatch(resource -> authentication.hasPermission(resource.getId(), resource.getActionIds()));
         }
 
-        return resources.stream()
-                .anyMatch(resource -> Optional.ofNullable(mappings.get(resource.getId()))
-                        .map(per -> resource.hasAction(per.getActions()))
-                        .orElse(false));
+        return resources
+                .stream()
+                .anyMatch(resource -> authentication.hasPermission(resource.getId(), resource.getActionIds()));
     }
 }

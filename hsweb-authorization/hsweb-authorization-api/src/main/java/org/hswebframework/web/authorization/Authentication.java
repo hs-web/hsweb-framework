@@ -93,8 +93,7 @@ public interface Authentication extends Serializable {
      * @return 用户持有的权限集合
      */
     List<Permission> getPermissions();
-
-
+    
     default boolean hasDimension(String type, String... id) {
         return hasDimension(type, Arrays.asList(id));
     }
@@ -113,7 +112,7 @@ public interface Authentication extends Serializable {
     }
 
     default Optional<Dimension> getDimension(String type, String id) {
-        if (StringUtils.isEmpty(type)) {
+        if (!StringUtils.hasText(type)) {
             return Optional.empty();
         }
         return getDimensions()
@@ -134,7 +133,7 @@ public interface Authentication extends Serializable {
 
 
     default List<Dimension> getDimensions(String type) {
-        if (StringUtils.isEmpty(type)) {
+        if (!StringUtils.hasText(type)) {
             return Collections.emptyList();
         }
         return getDimensions()
@@ -164,7 +163,8 @@ public interface Authentication extends Serializable {
         if (null == id) {
             return Optional.empty();
         }
-        return getPermissions().stream()
+        return getPermissions()
+                .stream()
                 .filter(permission -> permission.getId().equals(id))
                 .findAny();
     }
@@ -173,17 +173,28 @@ public interface Authentication extends Serializable {
      * 判断是否持有某权限以及对权限的可操作事件
      *
      * @param permissionId 权限id {@link Permission#getId()}
-     * @param actions      可操作事件 {@link Permission#getActions()} 如果为空,则不判断action,只判断permissionId
+     * @param actions      可操作动作 {@link Permission#getActions()} 如果为空,则不判断action,只判断permissionId
      * @return 是否持有权限
      */
     default boolean hasPermission(String permissionId, String... actions) {
-        return hasPermission(permissionId, Arrays.asList(actions));
+        return hasPermission(permissionId,
+                             actions.length == 0
+                                     ? Collections.emptyList()
+                                     : Arrays.asList(actions));
     }
 
     default boolean hasPermission(String permissionId, Collection<String> actions) {
-        return getPermission(permissionId)
-                .filter(permission -> actions.isEmpty() || permission.getActions().containsAll(actions))
-                .isPresent();
+        for (Permission permission : getPermissions()) {
+            if (Objects.equals(permission.getId(), "*")) {
+                return true;
+            }
+            if (Objects.equals(permissionId, permission.getId())) {
+                return actions.isEmpty()
+                        || permission.getActions().containsAll(actions)
+                        || permission.getActions().contains("*");
+            }
+        }
+        return false;
     }
 
     /**
@@ -203,11 +214,12 @@ public interface Authentication extends Serializable {
 
     /**
      * 设置属性,注意: 此属性可能并不会被持久化,仅用于临时传递信息.
-     * @param key key
+     *
+     * @param key   key
      * @param value value
      */
-    default void setAttribute(String key,Serializable value){
-        getAttributes().put(key,value);
+    default void setAttribute(String key, Serializable value) {
+        getAttributes().put(key, value);
     }
 
     /**

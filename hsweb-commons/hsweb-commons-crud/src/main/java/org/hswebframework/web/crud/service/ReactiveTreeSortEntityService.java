@@ -1,6 +1,7 @@
 package org.hswebframework.web.crud.service;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.hswebframework.ezorm.rdb.mapping.ReactiveDelete;
 import org.hswebframework.ezorm.rdb.mapping.defaults.SaveResult;
 import org.hswebframework.ezorm.rdb.operator.dml.Terms;
 import org.hswebframework.utils.RandomUtil;
@@ -131,10 +132,19 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
                 .concatMap(e -> !StringUtils.hasText(e.getPath()) || !duplicateCheck.add(e.getPath())
                         ? Mono.just(e)
                         : createQuery()
+                        .as(q -> {
+                            if (CollectionUtils.isNotEmpty(queryParam.getIncludes())) {
+                                q.select(queryParam.getIncludes().toArray(new String[0]));
+                            }
+                            if (CollectionUtils.isNotEmpty(queryParam.getExcludes())) {
+                                q.selectExcludes(queryParam.getExcludes().toArray(new String[0]));
+                            }
+                            return q;
+                        })
                         .where()
                         .like$("path", e.getPath())
                         .fetch()
-                )
+                ,Integer.MAX_VALUE)
                 .distinct(TreeSupportEntity::getId);
     }
 
@@ -158,7 +168,7 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
                 .insertBatch(new TreeSortServiceHelper<>(this)
                                      .prepare(Flux.from(entityPublisher)
                                                   .flatMapIterable(Function.identity()))
-                                   //  .doOnNext(e -> e.tryValidate(CreateGroup.class))
+                                     //  .doOnNext(e -> e.tryValidate(CreateGroup.class))
                                      .buffer(getBufferSize()));
     }
 
@@ -275,112 +285,7 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
 
     @Deprecated
     default Flux<E> tryRefactorPath(Flux<E> stream) {
-        Flux<E> cache = stream.cache();
-        Mono<Map<K, E>> mapping = cache
-                .filter(e -> null != e.getId())
-                .collectMap(TreeSupportEntity::getId, Function.identity())
-                .defaultIfEmpty(Collections.emptyMap());
-
-        Mono<Map<K, E>> allDataFetcher =
-                cache
-                        .filter(e -> null != e.getId())
-                        .flatMapIterable(e -> e.getParentId() != null ?
-                                Arrays.asList(e.getId(), e.getParentId()) :
-                                Collections.singleton(e.getId()))
-                        .collect(Collectors.toSet())
-                        .flatMap(list -> this
-                                .queryIncludeChildren(list)
-                                .collect(
-                                        Collectors.toMap(
-                                                TreeSupportEntity::getId,
-                                                Function.identity()
-                                        )
-                                ));
-
-        return Mono
-                .zip(mapping, allDataFetcher)
-                .flatMapMany(tp2 -> {
-                    //本次提交的数据
-                    Map<K, E> thisTime = tp2.getT1();
-                    //旧的数据
-                    Map<K, E> oldMap = tp2.getT2();
-
-                    Map<K, E> allMap = new LinkedHashMap<>(oldMap);
-                    allMap.putAll(thisTime);
-
-                    //子节点映射
-                    Map<K, Map<K, E>> childMapping = new LinkedHashMap<>();
-
-                    List<E> all = new ArrayList<>(oldMap.values());
-                    all.addAll(thisTime.values());
-
-                    for (E value : all) {
-                        if (isRootNode(value) || value.getId() == null) {
-                            continue;
-                        }
-                        childMapping
-                                .computeIfAbsent(value.getParentId(), ignore -> new LinkedHashMap<>())
-                                .put(value.getId(), value);
-                    }
-
-                    Function<K, Collection<E>> childGetter
-                            = id -> childMapping
-                            .getOrDefault(id, Collections.emptyMap())
-                            .values();
-                    return cache
-                            .concatMap(data -> {
-                                E old = data.getId() == null ? null : oldMap.get(data.getId());
-                                K parentId = old != null ? old.getParentId() : data.getParentId();
-                                E oldParent = parentId == null ? null : allMap.get(parentId);
-
-                                if (old != null) {
-                                    K newParentId = data.getParentId();
-                                    //父节点发生变化，更新所有子节点path
-                                    if (!Objects.equals(parentId, newParentId)) {
-                                        Consumer<E> childConsumer = child -> {
-                                            //更新了父节点,但是同时也传入的对应的子节点
-                                            E readyToUpdate = thisTime.get(child.getId());
-                                            if (null != readyToUpdate) {
-                                                readyToUpdate.setPath(child.getPath());
-                                            }
-                                        };
-
-                                        //变更到了顶级节点
-                                        if (isRootNode(data)) {
-                                            data.setPath(RandomUtil.randomChar(4));
-                                            this.refactorChildPath(old.getId(), childGetter, data.getPath(), childConsumer);
-                                            //重新保存所有子节点
-                                            return Flux
-                                                    .fromIterable(childGetter.apply(old.getId()))
-                                                    .concatWithValues(data);
-                                        } else {
-                                            E newParent = allMap.get(newParentId);
-                                            if (null != newParent) {
-                                                data.setPath(newParent.getPath() + "-" + RandomUtil.randomChar(4));
-                                                this.refactorChildPath(data.getId(), childGetter, data.getPath(), childConsumer);
-                                                //重新保存所有子节点
-                                                return Flux.fromIterable(childGetter.apply(data.getId()))
-                                                           .concatWithValues(data);
-                                            }
-                                        }
-                                        return Mono.just(data);
-                                    } else {
-
-                                        if (oldParent != null) {
-                                            if (old.getPath().startsWith(oldParent.getPath())) {
-                                                data.setPath(old.getPath());
-                                            } else {
-                                                data.setPath(oldParent.getPath() + "-" + RandomUtil.randomChar(4));
-                                            }
-                                        } else {
-                                            data.setPath(old.getPath());
-                                        }
-                                    }
-                                }
-                                return Mono.just(data);
-                            });
-                })
-                .distinct(TreeSupportEntity::getId);
+        return new TreeSortServiceHelper<>(this).prepare(stream);
     }
 
     @Override
@@ -413,8 +318,8 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
         return this
                 .findById(Flux.from(idPublisher))
                 .concatMap(e -> StringUtils.hasText(e.getPath())
-                        ? createDelete().where().like$(e::getPath).execute()
-                        : getRepository().deleteById(e.getId()))
+                        ? getRepository().createDelete().where().like$(e::getPath).execute()
+                        : getRepository().deleteById(e.getId()),Integer.MAX_VALUE)
                 .as(MathFlux::sumInt);
     }
 
@@ -441,5 +346,24 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
 
     default boolean isRootNode(E entity) {
         return ObjectUtils.isEmpty(entity.getParentId()) || "-1".equals(String.valueOf(entity.getParentId()));
+    }
+
+    @Override
+    @SuppressWarnings("all")
+    default ReactiveDelete createDelete() {
+        return ReactiveCrudService.super
+                .createDelete()
+                .onExecute((delete, executor) -> this
+                        .queryIncludeChildren(delete.toQueryParam(QueryParamEntity::new)
+                                                    .<QueryParamEntity>includes("id", "path", "parentId"))
+                        .map(TreeSupportEntity::getId)
+                        .buffer(200)
+                        .concatMap(list -> getRepository()
+                                .createDelete()
+                                .where()
+                                .in("id", list)
+                                .execute(), Integer.MAX_VALUE)
+                        //.concatWith(executor)
+                        .reduce(0, Math::addExact));
     }
 }

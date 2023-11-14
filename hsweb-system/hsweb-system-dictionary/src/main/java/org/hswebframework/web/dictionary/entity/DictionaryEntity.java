@@ -24,8 +24,10 @@ import org.hswebframework.ezorm.rdb.mapping.annotation.Comment;
 import org.hswebframework.ezorm.rdb.mapping.annotation.DefaultValue;
 import org.hswebframework.web.api.crud.entity.GenericEntity;
 import org.hswebframework.web.api.crud.entity.RecordCreationEntity;
+import org.hswebframework.web.crud.generator.Generators;
 import org.hswebframework.web.dict.DictDefine;
 import org.hswebframework.web.dict.defaults.DefaultDictDefine;
+import org.hswebframework.web.validator.CreateGroup;
 
 import javax.persistence.Column;
 import javax.persistence.Table;
@@ -44,7 +46,7 @@ import java.util.List;
 public class DictionaryEntity extends GenericEntity<String> implements RecordCreationEntity {
     //字典名称
     @Column(nullable = false)
-    @NotBlank(message = "名称不能为空")
+    @NotBlank(message = "名称不能为空",groups = CreateGroup.class)
     @Schema(description = "字典名称")
     private String name;
     //分类
@@ -56,11 +58,12 @@ public class DictionaryEntity extends GenericEntity<String> implements RecordCre
     @Schema(description = "说明")
     private String describe;
     //创建时间
-    @Column(name = "create_time")
+    @Column(name = "create_time", updatable = false)
     @Schema(description = "创建时间")
+    @DefaultValue(generator = Generators.CURRENT_TIME)
     private Long createTime;
     //创建人id
-    @Column(name = "creator_id")
+    @Column(name = "creator_id", updatable = false)
     @Schema(description = "创建人ID")
     private String creatorId;
     //状态

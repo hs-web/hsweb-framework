@@ -2,6 +2,8 @@ package org.hswebframework.web.crud.events.expr;
 
 import io.netty.util.concurrent.FastThreadLocal;
 import lombok.extern.slf4j.Slf4j;
+import org.hswebframework.ezorm.rdb.mapping.EntityColumnMapping;
+import org.hswebframework.web.crud.query.QueryHelperUtils;
 import org.springframework.context.expression.MapAccessor;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.*;
@@ -9,21 +11,37 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.ReflectiveMethodResolver;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.util.Assert;
+import reactor.function.Function3;
 
 import javax.annotation.Nonnull;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.BiFunction;
 
 @Slf4j
 public class SpelSqlExpressionInvoker extends AbstractSqlExpressionInvoker {
 
     protected static class SqlFunctions extends HashMap<String, Object> {
 
-        public SqlFunctions(Map<String, Object> map) {
+        private final EntityColumnMapping mapping;
+
+        public SqlFunctions(EntityColumnMapping mapping, Map<String, Object> map) {
             super(map);
+            this.mapping = mapping;
+        }
+
+        @Override
+        public Object get(Object key) {
+            Object val = super.get(key);
+            if (val == null) {
+                val = super.get(QueryHelperUtils.toHump(String.valueOf(key)));
+            }
+            if (val == null) {
+                val = mapping
+                        .getPropertyByColumnName(String.valueOf(key))
+                        .map(super::get)
+                        .orElse(null);
+            }
+            return val;
         }
 
         public String lower(Object str) {
@@ -32,6 +50,10 @@ public class SpelSqlExpressionInvoker extends AbstractSqlExpressionInvoker {
 
         public String upper(Object str) {
             return String.valueOf(str).toUpperCase();
+        }
+
+        public Object ifnull(Object nullable, Object val) {
+            return nullable == null ? val : nullable;
         }
 
         public String substring(Object str, int start, int length) {
@@ -93,7 +115,7 @@ public class SpelSqlExpressionInvoker extends AbstractSqlExpressionInvoker {
     };
 
     @Override
-    protected BiFunction<Object[], Map<String, Object>, Object> compile(String sql) {
+    protected Function3<EntityColumnMapping, Object[], Map<String, Object>, Object> compile(String sql) {
 
         StringBuilder builder = new StringBuilder(sql.length());
         int argIndex = 0;
@@ -111,11 +133,11 @@ public class SpelSqlExpressionInvoker extends AbstractSqlExpressionInvoker {
             Expression expression = parser.parseExpression(builder.toString());
             AtomicLong errorCount = new AtomicLong();
 
-            return (args, object) -> {
+            return (mapping, args, object) -> {
                 if (errorCount.get() > 1024) {
                     return null;
                 }
-                object = createArguments(object);
+                object = createArguments(mapping, object);
 
                 if (args != null && args.length != 0) {
                     int index = 0;
@@ -144,13 +166,13 @@ public class SpelSqlExpressionInvoker extends AbstractSqlExpressionInvoker {
         }
     }
 
-    protected SqlFunctions createArguments(Map<String, Object> args) {
-        return new SqlFunctions(args);
+    protected SqlFunctions createArguments(EntityColumnMapping mapping, Map<String, Object> args) {
+        return new SqlFunctions(mapping, args);
     }
 
-    protected BiFunction<Object[], Map<String, Object>, Object> spelError(String sql, Throwable error) {
+    protected Function3<EntityColumnMapping, Object[], Map<String, Object>, Object> spelError(String sql, Throwable error) {
         log.warn("create sql expression [{}] parser error", sql, error);
-        return (args, data) -> null;
+        return (mapping, args, data) -> null;
     }
 
     static ExtMapAccessor accessor = new ExtMapAccessor();

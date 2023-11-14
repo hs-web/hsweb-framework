@@ -14,6 +14,7 @@ import org.hswebframework.web.i18n.LocaleUtils;
 import org.hswebframework.web.logger.ReactiveLogger;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.TransactionException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
@@ -53,11 +54,16 @@ public class CommonErrorControllerAdvice {
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Mono<ResponseMessage<Object>> handleException(BusinessException e) {
+    public Mono<ResponseEntity<ResponseMessage<Object>>> handleException(BusinessException e) {
         return LocaleUtils
                 .resolveThrowable(e,
-                                  (err, msg) -> ResponseMessage.error(err.getStatus(), err.getCode(), msg));
+                                  (err, msg) -> ResponseMessage.error(err.getStatus(), err.getCode(), msg))
+                .map(msg -> {
+                    HttpStatus status = HttpStatus.resolve(msg.getStatus());
+                    return ResponseEntity
+                            .status(status == null ? HttpStatus.INTERNAL_SERVER_ERROR : status)
+                            .body(msg);
+                });
     }
 
     @ExceptionHandler

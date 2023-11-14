@@ -88,9 +88,9 @@ public class EntityEventListener implements EventListener, Ordered {
                                       EntityCreatedEvent::new);
             } else {
                 handleBatchOperation(mapping.getEntityType(),
-                                     EntityEventType.save,
+                                     EntityEventType.create,
                                      context,
-                                     EntityPrepareSaveEvent::new,
+                                     EntityPrepareCreateEvent::new,
                                      EntityBeforeCreateEvent::new,
                                      EntityCreatedEvent::new);
             }

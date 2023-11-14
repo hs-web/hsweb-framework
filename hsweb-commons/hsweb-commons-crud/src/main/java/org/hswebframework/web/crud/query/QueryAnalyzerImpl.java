@@ -189,8 +189,9 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
         return ((net.sf.jsqlparser.statement.select.Select) CCJSqlParserUtil.parse(sql));
     }
 
-    QueryAnalyzerImpl(DatabaseOperator database, SelectBody selectBody) {
+    QueryAnalyzerImpl(DatabaseOperator database, SelectBody selectBody, QueryAnalyzerImpl parent) {
         this.database = database;
+        this.virtualTable.putAll(parent.virtualTable);
         if (null != selectBody) {
             this.parsed = selectBody;
             selectBody.accept(this);
@@ -199,9 +200,10 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
         }
     }
 
-    QueryAnalyzerImpl(DatabaseOperator database, SubSelect select) {
+    QueryAnalyzerImpl(DatabaseOperator database, SubSelect select, QueryAnalyzerImpl parent) {
         this.parsed = select.getSelectBody();
         this.database = database;
+        this.virtualTable.putAll(parent.virtualTable);
         //with ...
         if (CollectionUtils.isNotEmpty(select.getWithItemsList())) {
             for (WithItem withItem : select.getWithItemsList()) {
@@ -246,6 +248,9 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
     @Override
     public void visit(net.sf.jsqlparser.schema.Table tableName) {
         String schema = parsePlainName(tableName.getSchemaName());
+
+        String name = parsePlainName(tableName.getName());
+
         RDBSchemaMetadata schemaMetadata;
         if (schema != null) {
             schemaMetadata = database
@@ -254,11 +259,12 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
                     .orElseThrow(() -> new IllegalStateException("schema " + schema + " not initialized"));
         } else {
             schemaMetadata = database.getMetadata().getCurrentSchema();
+            if (!virtualTable.containsKey(name)) {
+                tableName.setSchemaName(schemaMetadata.getName());
+            }
         }
 
         String alias = tableName.getAlias() == null ? tableName.getName() : tableName.getAlias().getName();
-
-        String name = parsePlainName(tableName.getName());
 
         TableOrViewMetadata tableMetadata = schemaMetadata
                 .getTableOrView(name, false)
@@ -281,14 +287,14 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
     @Override
     public void visit(SubSelect subSelect) {
         SelectBody body = subSelect.getSelectBody();
-        QueryAnalyzerImpl sub = new QueryAnalyzerImpl(database, body);
+        QueryAnalyzerImpl sub = new QueryAnalyzerImpl(database, body, this);
         String alias = subSelect.getAlias() == null ? null : subSelect.getAlias().getName();
 
         Map<String, Column> columnMap = new LinkedHashMap<>();
         for (Column column : sub.select.getColumnList()) {
 
             columnMap.put(column.getAlias(),
-                          new Column(column.alias, column.getAlias(), column.owner, column.metadata));
+                          new Column(column.name, column.getAlias(), column.owner, column.metadata));
         }
 
         select = new QueryAnalyzer.Select(
@@ -488,7 +494,7 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
         if (joinList != null) {
             for (net.sf.jsqlparser.statement.select.Join join : joinList) {
                 FromItem fromItem = join.getRightItem();
-                QueryAnalyzerImpl joinAn = new QueryAnalyzerImpl(database, (SelectBody) null);
+                QueryAnalyzerImpl joinAn = new QueryAnalyzerImpl(database, (SelectBody) null, this);
                 fromItem.accept(joinAn);
 
                 Join.Type type;
@@ -516,7 +522,7 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
 
         for (SelectBody body : setOpList.getSelects()) {
             body.accept(this);
-            break;
+            // break;
         }
 
 
@@ -532,7 +538,7 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
         view.setSchema(database.getMetadata().getCurrentSchema());
         virtualTable.put(name, view);
         if (withItem.getSubSelect() != null) {
-            QueryAnalyzerImpl analyzer = new QueryAnalyzerImpl(database, withItem.getSubSelect());
+            QueryAnalyzerImpl analyzer = new QueryAnalyzerImpl(database, withItem.getSubSelect(), this);
             for (Column column : analyzer.select.getColumnList()) {
                 RDBColumnMetadata metadata;
                 if (column.getMetadata() == null) {
@@ -679,6 +685,9 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
                     } else {
                         from.append(" ").append(join);
                     }
+                    if (null != join.getRightItem()) {
+                        join.getRightItem().accept(visitor);
+                    }
                     if (null != join.getOnExpressions()) {
                         for (Expression onExpression : join.getOnExpressions()) {
                             onExpression.accept(visitor);
@@ -738,8 +747,8 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
 
         @Override
         public void visit(WithItem withItem) {
-            if(!StringUtils.hasText(prefix)){
-                prefix+="WITH ";
+            if (!StringUtils.hasText(prefix)) {
+                prefix += "WITH ";
             }
             prefix += withItem;
             PrepareStatementVisitor visitor = new PrepareStatementVisitor();
