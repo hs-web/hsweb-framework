@@ -1,7 +1,6 @@
 package org.hswebframework.web.crud.events;
 
 
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
@@ -32,7 +31,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
-import static org.hswebframework.web.crud.events.EntityEventHelper.isDoFireEvent;
 import static org.hswebframework.web.crud.events.EntityEventHelper.publishEvent;
 
 @SuppressWarnings("all")
@@ -40,7 +38,10 @@ import static org.hswebframework.web.crud.events.EntityEventHelper.publishEvent;
 public class EntityEventListener implements EventListener, Ordered {
 
     public static final ContextKey<List<Object>> readyToDeleteContextKey = ContextKey.of("readyToDelete");
-    public static final ContextKey<List<Object>> readyToUpdateContextKey = ContextKey.of("readyToUpdate");
+    //更新前的数据
+    public static final ContextKey<List<Object>> readyToUpdateBeforeContextKey = ContextKey.of("readyToUpdateBefore");
+    //更新后的数据
+    public static final ContextKey<List<Object>> readyToUpdateAfterContextKey = ContextKey.of("readyToUpdateAfter");
 
     private final ApplicationEventPublisher eventPublisher;
 
@@ -247,6 +248,8 @@ public class EntityEventListener implements EventListener, Ordered {
                                         }
                                         List<Object> after = createAfterData(list, context);
                                         updated.set(Tuples.of(list, after));
+                                        context.set(readyToUpdateBeforeContextKey, list);
+                                        context.set(readyToUpdateAfterContextKey, after);
                                         return sendUpdateEvent(list,
                                                                after,
                                                                entityType,
