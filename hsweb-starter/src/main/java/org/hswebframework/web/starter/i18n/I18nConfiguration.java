@@ -4,6 +4,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.web.i18n.MessageSourceInitializer;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
@@ -18,7 +19,7 @@ import org.springframework.util.StringUtils;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-@Configuration(proxyBeanMethods = false)
+@AutoConfiguration
 @AutoConfigureOrder(Ordered.HIGHEST_PRECEDENCE)
 @Slf4j
 public class I18nConfiguration {

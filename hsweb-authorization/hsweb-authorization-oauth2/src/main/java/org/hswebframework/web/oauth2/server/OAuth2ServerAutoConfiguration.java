@@ -1,11 +1,8 @@
 package org.hswebframework.web.oauth2.server;
 
-import org.hswebframework.web.authorization.ReactiveAuthenticationHolder;
 import org.hswebframework.web.authorization.ReactiveAuthenticationManager;
 import org.hswebframework.web.authorization.basic.web.ReactiveUserTokenParser;
-import org.hswebframework.web.authorization.token.UserToken;
 import org.hswebframework.web.authorization.token.UserTokenManager;
-import org.hswebframework.web.oauth2.server.auth.ReactiveOAuth2AccessTokenParser;
 import org.hswebframework.web.oauth2.server.code.AuthorizationCodeGranter;
 import org.hswebframework.web.oauth2.server.code.DefaultAuthorizationCodeGranter;
 import org.hswebframework.web.oauth2.server.credential.ClientCredentialGranter;
@@ -16,6 +13,7 @@ import org.hswebframework.web.oauth2.server.refresh.DefaultRefreshTokenGranter;
 import org.hswebframework.web.oauth2.server.refresh.RefreshTokenGranter;
 import org.hswebframework.web.oauth2.server.web.OAuth2AuthorizeController;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -27,7 +25,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory;
 import org.springframework.data.redis.core.ReactiveRedisOperations;
 
-@Configuration(proxyBeanMethods = false)
+@AutoConfiguration
 @EnableConfigurationProperties(OAuth2Properties.class)
 public class OAuth2ServerAutoConfiguration {
 

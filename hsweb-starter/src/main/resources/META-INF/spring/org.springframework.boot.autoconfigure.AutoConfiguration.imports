@@ -1,0 +1,4 @@
+org.hswebframework.web.starter.jackson.CustomCodecsAutoConfiguration
+org.hswebframework.web.starter.HswebAutoConfiguration
+org.hswebframework.web.starter.CorsAutoConfiguration
+org.hswebframework.web.starter.i18n.I18nConfiguration

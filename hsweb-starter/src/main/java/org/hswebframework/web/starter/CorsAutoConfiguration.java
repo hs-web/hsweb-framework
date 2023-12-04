@@ -1,5 +1,6 @@
 package org.hswebframework.web.starter;
 
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -61,7 +62,7 @@ import java.util.Optional;
  * @author Jia
  * @since 1.0
  */
-@Configuration
+@AutoConfiguration
 @ConditionalOnProperty(prefix = "hsweb.cors", name = "enable", havingValue = "true")
 @EnableConfigurationProperties(CorsProperties.class)
 public class CorsAutoConfiguration {

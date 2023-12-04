@@ -35,6 +35,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -53,7 +54,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-@Configuration
+@AutoConfiguration
 @EnableConfigurationProperties(EasyormProperties.class)
 @EnableEasyormRepository("org.hswebframework.web.**.entity")
 public class EasyormConfiguration {

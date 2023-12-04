@@ -14,6 +14,7 @@ import org.hswebframework.web.system.authorization.defaults.service.*;
 import org.hswebframework.web.system.authorization.defaults.service.terms.DimensionTerm;
 import org.hswebframework.web.system.authorization.defaults.service.terms.UserDimensionTerm;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -21,10 +22,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 
-@Configuration
+@AutoConfiguration
 public class AuthorizationServiceAutoConfiguration {
 
-    @Configuration(proxyBeanMethods = false)
+    @AutoConfiguration
     @AutoConfigureBefore(DefaultAuthorizationAutoConfiguration.class)
     static class ReactiveAuthorizationServiceAutoConfiguration {
         @ConditionalOnBean(ReactiveRepository.class)

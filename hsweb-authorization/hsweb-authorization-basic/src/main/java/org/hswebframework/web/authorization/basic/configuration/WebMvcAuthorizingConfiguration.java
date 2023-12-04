@@ -5,6 +5,7 @@ import org.hswebframework.web.authorization.basic.twofactor.TwoFactorHandlerInte
 import org.hswebframework.web.authorization.basic.web.*;
 import org.hswebframework.web.authorization.token.UserTokenManager;
 import org.hswebframework.web.authorization.twofactor.TwoFactorValidatorManager;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.*;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -17,7 +18,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import javax.annotation.Nonnull;
 import java.util.List;
 
-@Configuration
+@AutoConfiguration
 @ConditionalOnClass(name = "org.springframework.web.servlet.config.annotation.WebMvcConfigurer")
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 public class WebMvcAuthorizingConfiguration {
