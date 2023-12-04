@@ -1,0 +1,2 @@
+org.hswebframework.web.authorization.basic.configuration.AuthorizingHandlerAutoConfiguration
+org.hswebframework.web.authorization.basic.configuration.WebMvcAuthorizingConfiguration

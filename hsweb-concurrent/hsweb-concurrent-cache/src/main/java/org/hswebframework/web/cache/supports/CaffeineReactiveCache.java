@@ -24,6 +24,10 @@ public class CaffeineReactiveCache<E> extends AbstractReactiveCache<E> {
     @Override
     public Flux<E> getAll(Object... keys) {
         return Flux.<E>defer(() -> {
+            if (keys == null || keys.length == 0) {
+                return Flux.fromIterable(cache.asMap().values())
+                           .map(e -> (E) e);
+            }
             return Flux.fromIterable(cache.getAllPresent(Arrays.asList(keys)).values())
                        .map(e -> (E) e);
         });

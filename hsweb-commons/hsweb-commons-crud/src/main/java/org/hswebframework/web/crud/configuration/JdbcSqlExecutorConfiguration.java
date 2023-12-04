@@ -4,6 +4,7 @@ import org.hswebframework.ezorm.rdb.executor.SyncSqlExecutor;
 import org.hswebframework.ezorm.rdb.executor.reactive.ReactiveSqlExecutor;
 import org.hswebframework.web.crud.sql.DefaultJdbcExecutor;
 import org.hswebframework.web.crud.sql.DefaultJdbcReactiveExecutor;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -13,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
 
 import javax.sql.DataSource;
 
-@Configuration
+@AutoConfiguration
 @AutoConfigureAfter(DataSourceAutoConfiguration.class)
 @ConditionalOnBean(DataSource.class)
 public class JdbcSqlExecutorConfiguration {

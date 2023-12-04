@@ -3,6 +3,7 @@ package org.hswebframework.web.datasource;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -11,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
 /**
  * @author zhouhao
  */
-@Configuration
+@AutoConfiguration
 @ImportAutoConfiguration(AopDataSourceSwitcherAutoConfiguration.class)
 public class DynamicDataSourceAutoConfiguration {
 

@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.type.ClassKey;
 import com.fasterxml.jackson.databind.type.ReferenceType;
 import org.hswebframework.web.api.crud.entity.EntityFactory;
 import org.hswebframework.web.dict.EnumDict;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -23,8 +24,7 @@ import org.springframework.http.codec.CodecConfigurer;
 
 import java.io.IOException;
 
-@Configuration(proxyBeanMethods = false)
-@AutoConfigureAfter(JacksonAutoConfiguration.class)
+@AutoConfiguration(after = JacksonAutoConfiguration.class)
 public class CustomCodecsAutoConfiguration {
 
     @Configuration(proxyBeanMethods = false)

@@ -12,6 +12,7 @@ import org.hswebframework.web.starter.initialize.SystemVersion;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -24,7 +25,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@Configuration
+@AutoConfiguration
 @EnableConfigurationProperties(AppProperties.class)
 public class HswebAutoConfiguration {
 
