@@ -21,6 +21,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.web.bean.ClassDescription;
 import org.hswebframework.web.bean.ClassDescriptions;
+import org.hswebframework.web.dict.defaults.DefaultItemDefine;
 import org.hswebframework.web.exception.ValidationException;
 import org.hswebframework.web.i18n.LocaleUtils;
 import org.springframework.beans.BeanUtils;
@@ -103,6 +104,13 @@ public interface EnumDict<V> extends JSONSerializable {
         }
         if (v instanceof Number) {
             v = ((Number) v).intValue();
+        }
+        if (v instanceof EnumDict) {
+            EnumDict dict = ((EnumDict<?>) v);
+            v = dict.getValue();
+            if (v == null) {
+                v = dict.getText();
+            }
         }
         return this == v
                 || getValue() == v
@@ -441,4 +449,28 @@ public interface EnumDict<V> extends JSONSerializable {
         }
     }
 
+    /**
+     * 创建动态的字典选项
+     *
+     * @param value 值
+     * @return 字典选项
+     */
+    static EnumDict<String> create(String value) {
+        return create(value, null);
+    }
+
+    /**
+     * 创建动态的字典选项
+     *
+     * @param value 值
+     * @param text  说明
+     * @return 字典选项
+     */
+    static EnumDict<String> create(String value, String text) {
+        return DefaultItemDefine
+                .builder()
+                .value(value)
+                .text(text)
+                .build();
+    }
 }
