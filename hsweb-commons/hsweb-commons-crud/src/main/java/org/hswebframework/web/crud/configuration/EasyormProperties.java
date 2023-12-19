@@ -1,9 +1,6 @@
 package org.hswebframework.web.crud.configuration;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.Getter;
-import lombok.SneakyThrows;
+import lombok.*;
 import org.hswebframework.ezorm.rdb.metadata.RDBDatabaseMetadata;
 import org.hswebframework.ezorm.rdb.metadata.RDBSchemaMetadata;
 import org.hswebframework.ezorm.rdb.metadata.dialect.Dialect;
@@ -14,15 +11,13 @@ import org.hswebframework.ezorm.rdb.supports.oracle.OracleSchemaMetadata;
 import org.hswebframework.ezorm.rdb.supports.postgres.PostgresqlSchemaMetadata;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @ConfigurationProperties(prefix = "easyorm")
 @Data
 public class EasyormProperties {
 
-    private String defaultSchema="PUBLIC";
+    private String defaultSchema = "PUBLIC";
 
     private String[] schemas = {};
 
@@ -32,11 +27,21 @@ public class EasyormProperties {
 
     private boolean allowTypeAlter = true;
 
-    private DialectEnum dialect = DialectEnum.h2;
+    /**
+     * @see DialectProvider
+     */
+    private DialectProvider dialect = DialectEnum.h2;
 
+    @Deprecated
     private Class<? extends Dialect> dialectType;
 
+    @Deprecated
     private Class<? extends RDBSchemaMetadata> schemaType;
+
+    @SneakyThrows
+    public void setDialect(String dialect) {
+        this.dialect = DialectProviders.lookup(dialect);
+    }
 
     public RDBDatabaseMetadata createDatabaseMetadata() {
         RDBDatabaseMetadata metadata = new RDBDatabaseMetadata(createDialect());
@@ -46,8 +51,8 @@ public class EasyormProperties {
             schemaSet.add(defaultSchema);
         }
         schemaSet.stream()
-                .map(this::createSchema)
-                .forEach(metadata::addSchema);
+                 .map(this::createSchema)
+                 .forEach(metadata::addSchema);
 
         metadata.getSchema(defaultSchema)
                 .ifPresent(metadata::setCurrentSchema);
@@ -57,24 +62,17 @@ public class EasyormProperties {
 
     @SneakyThrows
     public RDBSchemaMetadata createSchema(String name) {
-        if (schemaType == null) {
-            return dialect.createSchema(name);
-        }
-        return schemaType.getConstructor(String.class).newInstance(name);
+        return dialect.createSchema(name);
     }
 
     @SneakyThrows
     public Dialect createDialect() {
-        if (dialectType == null) {
-            return dialect.getDialect();
-        }
-
-        return dialectType.newInstance();
+        return dialect.getDialect();
     }
 
     @Getter
     @AllArgsConstructor
-    public enum DialectEnum {
+    public enum DialectEnum implements DialectProvider {
         mysql(Dialect.MYSQL, "?") {
             @Override
             public RDBSchemaMetadata createSchema(String name) {
@@ -92,6 +90,11 @@ public class EasyormProperties {
             public RDBSchemaMetadata createSchema(String name) {
                 return new OracleSchemaMetadata(name);
             }
+
+            @Override
+            public String getValidationSql() {
+                return "select 1 from dual";
+            }
         },
         postgres(Dialect.POSTGRES, "$") {
             @Override
@@ -107,8 +110,8 @@ public class EasyormProperties {
         },
         ;
 
-        private Dialect dialect;
-        private String bindSymbol;
+        private final Dialect dialect;
+        private final String bindSymbol;
 
         public abstract RDBSchemaMetadata createSchema(String name);
     }

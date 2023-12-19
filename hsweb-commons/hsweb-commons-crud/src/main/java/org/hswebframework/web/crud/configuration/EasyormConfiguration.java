@@ -59,9 +59,6 @@ import java.util.Set;
 @EnableEasyormRepository("org.hswebframework.web.**.entity")
 public class EasyormConfiguration {
 
-    @Autowired
-    private EasyormProperties properties;
-
     static {
 
     }
@@ -80,7 +77,8 @@ public class EasyormConfiguration {
     @ConditionalOnMissingBean
     @SuppressWarnings("all")
     public RDBDatabaseMetadata databaseMetadata(Optional<SyncSqlExecutor> syncSqlExecutor,
-                                                Optional<ReactiveSqlExecutor> reactiveSqlExecutor) {
+                                                Optional<ReactiveSqlExecutor> reactiveSqlExecutor,
+                                                EasyormProperties properties) {
         RDBDatabaseMetadata metadata = properties.createDatabaseMetadata();
         syncSqlExecutor.ifPresent(metadata::addFeature);
         reactiveSqlExecutor.ifPresent(metadata::addFeature);
