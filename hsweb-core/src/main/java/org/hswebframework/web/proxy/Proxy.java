@@ -4,16 +4,16 @@ import javassist.*;
 import javassist.bytecode.AnnotationsAttribute;
 import javassist.bytecode.ConstPool;
 import javassist.bytecode.annotation.*;
-import javassist.scopedpool.*;
 import lombok.Getter;
 import lombok.SneakyThrows;
-import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.core.type.StandardAnnotationMetadata;
 import org.springframework.util.ClassUtils;
+import sun.misc.CompoundEnumeration;
 
-import java.util.Arrays;
-import java.util.Map;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
@@ -21,7 +21,7 @@ import java.util.function.Consumer;
  * @author zhouhao
  * @since 3.0
  */
-public class Proxy<I> {
+public class Proxy<I> extends URLClassLoader {
     private static final AtomicLong counter = new AtomicLong(1);
 
     private final CtClass ctClass;
@@ -32,30 +32,92 @@ public class Proxy<I> {
     @Getter
     private final String classFullName;
 
+    private final List<ClassLoader> loaders = new ArrayList<>();
     private Class<I> targetClass;
 
     @SneakyThrows
-    public static <I> Proxy<I> create(Class<I> superClass, String... classPathString) {
-        return new Proxy<>(superClass, classPathString);
+    public static <I> Proxy<I> create(Class<I> superClass, Class<?>[] classPaths, String... classPathString) {
+        return new Proxy<>(superClass, classPaths, classPathString);
     }
 
     @SneakyThrows
+    public static <I> Proxy<I> create(Class<I> superClass, String... classPathString) {
+        return new Proxy<>(superClass, null, classPathString);
+    }
+
     public Proxy(Class<I> superClass, String... classPathString) {
+        this(superClass, null, classPathString);
+    }
+
+    @Override
+    public Class<?> loadClass(String name) throws ClassNotFoundException {
+        for (ClassLoader loader : loaders) {
+            try {
+                return loader.loadClass(name);
+            } catch (ClassNotFoundException ignore) {
+            }
+        }
+        return super.loadClass(name);
+    }
+
+    @Override
+    public URL getResource(String name) {
+        for (ClassLoader loader : loaders) {
+            URL resource = loader.getResource(name);
+            if (resource != null) {
+                return resource;
+            }
+        }
+        return super.getResource(name);
+    }
+
+    @Override
+    public Enumeration<URL> getResources(String name) throws IOException {
+        @SuppressWarnings("all")
+        Enumeration<URL>[] tmp = (Enumeration<URL>[]) new Enumeration<?>[loaders.size()];
+
+        for (int i = 0; i < loaders.size(); i++) {
+            tmp[i] = loaders.get(i).getResources(name);
+        }
+
+        return new CompoundEnumeration<>(tmp);
+    }
+
+    @SneakyThrows
+    private static URL[] toUrl(String[] str) {
+        if (str == null || str.length == 0) {
+            return new URL[0];
+        }
+        URL[] arr = new URL[str.length];
+        for (int i = 0; i < str.length; i++) {
+            arr[i] = URI.create(str[i]).toURL();
+        }
+        return arr;
+    }
+
+    @SneakyThrows
+    public Proxy(Class<I> superClass, Class<?>[] classPaths, String... classPathString) {
+        super(toUrl(classPathString));
         if (superClass == null) {
             throw new NullPointerException("superClass can not be null");
         }
         this.superClass = superClass;
         ClassPool classPool = ClassPool.getDefault();
 
-        classPool.insertClassPath(new ClassClassPath(this.getClass()));
-        classPool.insertClassPath(new LoaderClassPath(ClassUtils.getDefaultClassLoader()));
-
-        if (classPathString != null) {
-            for (String path : classPathString) {
-                classPool.insertClassPath(path);
+        if (classPaths != null) {
+            for (Class<?> classPath : classPaths) {
+                if (classPath.getClassLoader() != null &&
+                        classPath.getClassLoader() != this.getClass().getClassLoader()) {
+                    loaders.add(classPath.getClassLoader());
+                }
             }
         }
-        className = superClass.getSimpleName() + "FastBeanCopier" + counter.getAndAdd(1);
+
+        loaders.add(ClassUtils.getDefaultClassLoader());
+
+        classPool.insertClassPath(new LoaderClassPath(this));
+
+        className = superClass.getSimpleName() + "$Proxy" + counter.getAndIncrement();
         classFullName = superClass.getPackage() + "." + className;
 
         ctClass = classPool.makeClass(classFullName);
@@ -100,10 +162,13 @@ public class Proxy<I> {
             memberValue = new ClassMemberValue(((Class) value).getName(), constPool);
         } else if (value instanceof Object[]) {
             Object[] arr = ((Object[]) value);
-            ArrayMemberValue arrayMemberValue = new ArrayMemberValue(new ClassMemberValue(arr[0].getClass().getName(), constPool), constPool);
-            arrayMemberValue.setValue(Arrays.stream(arr)
-                    .map(o -> createMemberValue(o, constPool))
-                    .toArray(MemberValue[]::new));
+            ArrayMemberValue arrayMemberValue = new ArrayMemberValue(
+                    new ClassMemberValue(arr[0].getClass().getName(), constPool), constPool);
+            arrayMemberValue.setValue(
+                    Arrays
+                            .stream(arr)
+                            .map(o -> createMemberValue(o, constPool))
+                            .toArray(MemberValue[]::new));
             memberValue = arrayMemberValue;
 
         }
@@ -153,7 +218,7 @@ public class Proxy<I> {
     @SneakyThrows
     public Class<I> getTargetClass() {
         if (targetClass == null) {
-            targetClass = (Class)ctClass.toClass(ClassUtils.getDefaultClassLoader(), null);
+            targetClass = (Class) ctClass.toClass(this, null);
         }
         return targetClass;
     }

@@ -3,11 +3,16 @@ package org.hswebframework.web.bean;
 import com.google.common.collect.ImmutableMap;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.SneakyThrows;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Proxy;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -117,6 +122,66 @@ public class FastBeanCopierTest {
 
         System.out.println(target);
         System.out.println(FastBeanCopier.copy(target, new Target()));
+    }
+
+    @Test
+    @SneakyThrows
+    public void testCrossClassLoader() {
+        URL clazz = Source.class.getResource("/");
+
+        URLClassLoader loader = new URLClassLoader(new URL[]{
+                clazz
+        }, ClassLoader.getSystemClassLoader()){
+            @Override
+            protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+                try {
+                    Class<?> clazz = loadSelfClass(name);
+                    if (null != clazz) {
+                        if (resolve) {
+                            resolveClass(clazz);
+                        }
+                        return clazz;
+                    }
+                } catch (Throwable ignore) {
+
+                }
+                return super.loadClass(name, resolve);
+            }
+
+            @SneakyThrows
+            public synchronized Class<?> loadSelfClass(String name) {
+                Class<?> clazz = super.findLoadedClass(name);
+                if (clazz == null) {
+                    clazz = super.findClass(name);
+                    resolveClass(clazz);
+                }
+                return clazz;
+            }
+
+            @Override
+            public Enumeration<URL> getResources(String name) throws IOException {
+                return findResources(name);
+            }
+
+            @Override
+            public URL getResource(String name) {
+                return findResource(name);
+            }
+        };
+        Class<?> sourceClass = loader.loadClass(Source.class.getName());
+        Assert.assertNotSame(sourceClass, Source.class);
+
+        Object source = sourceClass.newInstance();
+        FastBeanCopier.copy(Collections.singletonMap("name","测试"),source);
+
+        Map<String,Object> map = FastBeanCopier.copy(source,new HashMap<>());
+        System.out.println(map);
+
+        loader.close();
+        map = FastBeanCopier.copy(source,new HashMap<>());
+
+        System.out.println(map);
+
     }
 
 
