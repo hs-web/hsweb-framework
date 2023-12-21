@@ -1,0 +1,2 @@
+org.hswebframework.web.oauth2.configuration.OAuth2ClientManagerAutoConfiguration
+org.hswebframework.web.oauth2.configuration.OAuth2ClientManagerAutoConfiguration.ReactiveOAuth2ClientManagerAutoConfiguration

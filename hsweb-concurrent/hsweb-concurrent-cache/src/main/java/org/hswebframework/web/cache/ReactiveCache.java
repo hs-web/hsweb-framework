@@ -10,6 +10,11 @@ import java.util.Collection;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+/**
+ * 响应式缓存
+ *
+ * @param <E> 缓存元素类型
+ */
 public interface ReactiveCache<E> {
 
     Flux<E> getFlux(Object key);

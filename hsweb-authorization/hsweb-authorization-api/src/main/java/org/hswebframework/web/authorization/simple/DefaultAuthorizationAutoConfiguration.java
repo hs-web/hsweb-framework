@@ -14,6 +14,7 @@ import org.hswebframework.web.authorization.twofactor.defaults.DefaultTwoFactorV
 import org.hswebframework.web.convert.CustomMessageConverter;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -25,11 +26,8 @@ import java.util.List;
 /**
  * @author zhouhao
  */
-@Configuration
+@AutoConfiguration
 public class DefaultAuthorizationAutoConfiguration {
-
-    @Autowired(required = false)
-    private List<DataAccessConfigConverter> dataAccessConfigConverters;
 
     @Bean
     @ConditionalOnMissingBean(UserTokenManager.class)
@@ -67,11 +65,7 @@ public class DefaultAuthorizationAutoConfiguration {
     @ConditionalOnMissingBean(DataAccessConfigBuilderFactory.class)
     @ConfigurationProperties(prefix = "hsweb.authorization.data-access", ignoreInvalidFields = true)
     public SimpleDataAccessConfigBuilderFactory dataAccessConfigBuilderFactory() {
-        SimpleDataAccessConfigBuilderFactory factory = new SimpleDataAccessConfigBuilderFactory();
-        if (null != dataAccessConfigConverters) {
-            dataAccessConfigConverters.forEach(factory::addConvert);
-        }
-        return factory;
+        return new SimpleDataAccessConfigBuilderFactory();
     }
 
     @Bean

@@ -16,6 +16,7 @@ import org.hswebframework.web.authorization.token.UserTokenManager;
 import org.hswebframework.web.authorization.twofactor.TwoFactorValidatorManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.*;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -36,7 +37,7 @@ import java.util.List;
  * @author zhouhao
  * @since 3.0
  */
-@Configuration
+@AutoConfiguration
 @EnableConfigurationProperties(EmbedAuthenticationProperties.class)
 public class AuthorizingHandlerAutoConfiguration {
 

@@ -35,7 +35,7 @@ import java.util.stream.Stream;
  */
 @Slf4j
 public final class FastBeanCopier {
-    private static final Map<CacheKey, Copier> CACHE = new NonBlockingHashMap<>();
+    private static final Map<CacheKey, Copier> CACHE = new ConcurrentHashMap<>();
 
     private static final PropertyUtilsBean propertyUtils = BeanUtilsBean.getInstance().getPropertyUtils();
 
@@ -160,7 +160,7 @@ public final class FastBeanCopier {
         Class<?> targetType = getUserClass(target);
         CacheKey key = createCacheKey(sourceType, targetType);
         if (autoCreate) {
-            return CACHE.computeIfAbsent(key, k -> createCopier(sourceType, targetType));
+            return CACHE.computeIfAbsent(key, k -> createCopier(k.sourceType, k.targetType));
         } else {
             return CACHE.get(key);
         }
@@ -191,9 +191,11 @@ public final class FastBeanCopier {
                 "\n}\n" +
                 "\n}";
         try {
-            return Proxy.create(Copier.class)
-                        .addMethod(method)
-                        .newInstance();
+            @SuppressWarnings("all")
+            Proxy<Copier> proxy = Proxy
+                    .create(Copier.class, new Class[]{source, target})
+                    .addMethod(method);
+            return proxy.newInstance();
         } catch (Exception e) {
             log.error("创建bean copy 代理对象失败:\n{}", method, e);
             throw new UnsupportedOperationException(e.getMessage(), e);
@@ -676,7 +678,7 @@ public final class FastBeanCopier {
 
                 return copy(source, beanFactory.newInstance(targetClass), this);
             } catch (Exception e) {
-                log.warn("复制类型{}->{}失败", source, targetClass, e);
+                log.warn("复制类型{}->{}失败", targetClass, e);
                 throw e;
             }
 //            return null;
@@ -710,9 +712,9 @@ public final class FastBeanCopier {
     @AllArgsConstructor
     public static class CacheKey {
 
-        private final Class<?> targetType;
-
         private final Class<?> sourceType;
+
+        private final Class<?> targetType;
 
         @Override
         public boolean equals(Object obj) {

@@ -80,7 +80,7 @@ public class RedisReactiveCache<E> extends AbstractReactiveCache<E> {
 
     @Override
     public Flux<E> getAll(Object... keys) {
-        if (keys.length == 0) {
+        if (keys == null || keys.length == 0) {
             return operations
                     .opsForHash()
                     .values(redisKey)

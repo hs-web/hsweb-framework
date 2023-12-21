@@ -35,6 +35,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -53,13 +54,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-@Configuration
+@AutoConfiguration
 @EnableConfigurationProperties(EasyormProperties.class)
 @EnableEasyormRepository("org.hswebframework.web.**.entity")
 public class EasyormConfiguration {
-
-    @Autowired
-    private EasyormProperties properties;
 
     static {
 
@@ -79,7 +77,8 @@ public class EasyormConfiguration {
     @ConditionalOnMissingBean
     @SuppressWarnings("all")
     public RDBDatabaseMetadata databaseMetadata(Optional<SyncSqlExecutor> syncSqlExecutor,
-                                                Optional<ReactiveSqlExecutor> reactiveSqlExecutor) {
+                                                Optional<ReactiveSqlExecutor> reactiveSqlExecutor,
+                                                EasyormProperties properties) {
         RDBDatabaseMetadata metadata = properties.createDatabaseMetadata();
         syncSqlExecutor.ifPresent(metadata::addFeature);
         reactiveSqlExecutor.ifPresent(metadata::addFeature);

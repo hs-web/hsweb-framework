@@ -9,7 +9,7 @@ import java.util.Arrays;
 
 @SuppressWarnings("all")
 @AllArgsConstructor
-public class GuavaReactiveCache<E> extends AbstractReactiveCache<E>{
+public class GuavaReactiveCache<E> extends AbstractReactiveCache<E> {
 
     private Cache<Object, Object> cache;
 
@@ -34,11 +34,17 @@ public class GuavaReactiveCache<E> extends AbstractReactiveCache<E>{
     public Mono<Void> evict(Object key) {
         return Mono.fromRunnable(() -> cache.invalidate(key));
     }
+
     @Override
     public Flux<E> getAll(Object... keys) {
         return Flux.<E>defer(() -> {
+            if (keys == null || keys.length == 0) {
+                return Flux
+                        .fromIterable(cache.asMap().values())
+                        .map(e -> (E) e);
+            }
             return Flux.fromIterable(cache.getAllPresent(Arrays.asList(keys)).values())
-                    .map(e -> (E) e);
+                       .map(e -> (E) e);
         });
     }
 

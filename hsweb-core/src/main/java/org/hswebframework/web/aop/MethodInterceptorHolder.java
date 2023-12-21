@@ -21,19 +21,15 @@ package org.hswebframework.web.aop;
 import com.google.common.collect.Maps;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
 import org.aopalliance.intercept.MethodInvocation;
 import org.hswebframework.web.utils.AnnotationUtils;
 import org.hswebframework.web.utils.DigestUtils;
 import org.reactivestreams.Publisher;
-import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
+import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -47,7 +43,7 @@ public class MethodInterceptorHolder {
     /**
      * 参数名称获取器,用于获取方法参数的名称
      */
-    public static final ParameterNameDiscoverer nameDiscoverer = new LocalVariableTableParameterNameDiscoverer();
+    public static final ParameterNameDiscoverer nameDiscoverer = new DefaultParameterNameDiscoverer();
 
     public static MethodInterceptorHolder create(MethodInvocation invocation) {
         String[] argNames = nameDiscoverer.getParameterNames(invocation.getMethod());

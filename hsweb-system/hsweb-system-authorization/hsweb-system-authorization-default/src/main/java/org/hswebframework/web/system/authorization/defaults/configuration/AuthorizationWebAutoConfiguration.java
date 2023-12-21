@@ -1,17 +1,18 @@
 package org.hswebframework.web.system.authorization.defaults.configuration;
 
 import org.hswebframework.web.system.authorization.defaults.webflux.*;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-@Configuration
+@AutoConfiguration
 public class AuthorizationWebAutoConfiguration {
 
 
-    @Configuration(proxyBeanMethods = false)
+    @AutoConfiguration
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
     public static class WebFluxAuthorizationConfiguration {
 
