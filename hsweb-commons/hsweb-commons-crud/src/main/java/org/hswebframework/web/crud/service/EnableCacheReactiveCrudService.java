@@ -10,7 +10,7 @@ import org.springframework.transaction.reactive.TransactionSynchronization;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import java.util.Collection;
 import java.util.function.Function;
 

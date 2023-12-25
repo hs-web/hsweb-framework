@@ -27,7 +27,7 @@ import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 import reactor.core.publisher.Mono;
 
-import javax.validation.ConstraintViolationException;
+import jakarta.validation.ConstraintViolationException;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
@@ -135,7 +135,7 @@ public class CommonWebMvcErrorControllerAdvice {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseMessage<?> handleException(javax.validation.ValidationException e) {
+    public ResponseMessage<?> handleException(jakarta.validation.ValidationException e) {
         return ResponseMessage.error(400, CodeConstants.Error.illegal_argument, e.getMessage());
     }
 

@@ -3,33 +3,20 @@ package org.hswebframework.web.authorization.basic.configuration;
 import org.hswebframework.web.authorization.AuthenticationManager;
 import org.hswebframework.web.authorization.ReactiveAuthenticationManagerProvider;
 import org.hswebframework.web.authorization.access.DataAccessController;
-import org.hswebframework.web.authorization.access.DataAccessHandler;
-import org.hswebframework.web.authorization.basic.aop.AopMethodAuthorizeDefinitionParser;
 import org.hswebframework.web.authorization.basic.embed.EmbedAuthenticationProperties;
 import org.hswebframework.web.authorization.basic.embed.EmbedReactiveAuthenticationManager;
 import org.hswebframework.web.authorization.basic.handler.DefaultAuthorizingHandler;
 import org.hswebframework.web.authorization.basic.handler.UserAllowPermissionHandler;
-import org.hswebframework.web.authorization.basic.handler.access.DefaultDataAccessController;
-import org.hswebframework.web.authorization.basic.twofactor.TwoFactorHandlerInterceptorAdapter;
 import org.hswebframework.web.authorization.basic.web.*;
 import org.hswebframework.web.authorization.token.UserTokenManager;
-import org.hswebframework.web.authorization.twofactor.TwoFactorValidatorManager;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.*;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
-
-import javax.annotation.Nonnull;
-import java.util.List;
 
 /**
  * 权限控制自动配置类
@@ -41,14 +28,10 @@ import java.util.List;
 @EnableConfigurationProperties(EmbedAuthenticationProperties.class)
 public class AuthorizingHandlerAutoConfiguration {
 
-    @Bean
-    public DefaultDataAccessController dataAccessController() {
-        return new DefaultDataAccessController();
-    }
 
     @Bean
-    public DefaultAuthorizingHandler authorizingHandler(DataAccessController dataAccessController) {
-        return new DefaultAuthorizingHandler(dataAccessController);
+    public DefaultAuthorizingHandler authorizingHandler() {
+        return new DefaultAuthorizingHandler(null);
     }
 
 
@@ -92,27 +75,6 @@ public class AuthorizingHandlerAutoConfiguration {
     public BearerTokenParser bearerTokenParser() {
         return new BearerTokenParser();
     }
-
-    @Configuration
-    public static class DataAccessHandlerProcessor implements BeanPostProcessor {
-
-        @Autowired
-        private DefaultDataAccessController defaultDataAccessController;
-
-        @Override
-        public Object postProcessBeforeInitialization(Object bean, String beanName) {
-            return bean;
-        }
-
-        @Override
-        public Object postProcessAfterInitialization(Object bean, String beanName) {
-            if (bean instanceof DataAccessHandler) {
-                defaultDataAccessController.addHandler(((DataAccessHandler) bean));
-            }
-            return bean;
-        }
-    }
-
 
     @Configuration
     @ConditionalOnProperty(prefix = "hsweb.authorize", name = "basic-authorization", havingValue = "true")

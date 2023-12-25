@@ -3,6 +3,7 @@ package org.hswebframework.web.system.authorization.defaults.service.reactive;
 import org.hswebframework.web.exception.ValidationException;
 import org.hswebframework.web.system.authorization.api.entity.UserEntity;
 import org.hswebframework.web.system.authorization.api.service.reactive.ReactiveUserService;
+import org.hswebframework.web.system.authorization.defaults.service.DefaultReactiveUserService;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,7 +18,7 @@ import reactor.test.StepVerifier;
 import java.util.function.Supplier;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = ReactiveTestApplication.class)
+@SpringBootTest(classes = {ReactiveTestApplication.class, DefaultReactiveUserService.class})
 public class DefaultReactiveUserServiceTest {
 
     @Autowired

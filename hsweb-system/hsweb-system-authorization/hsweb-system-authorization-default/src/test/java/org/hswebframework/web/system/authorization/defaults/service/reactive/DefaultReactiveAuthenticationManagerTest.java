@@ -10,6 +10,7 @@ import org.hswebframework.web.system.authorization.api.entity.AuthorizationSetti
 import org.hswebframework.web.system.authorization.api.entity.PermissionEntity;
 import org.hswebframework.web.system.authorization.api.entity.UserEntity;
 import org.hswebframework.web.system.authorization.api.service.reactive.ReactiveUserService;
+import org.hswebframework.web.system.authorization.defaults.service.DefaultReactiveUserService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,7 @@ import java.util.Arrays;
 import java.util.Collections;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = ReactiveTestApplication.class)
+@SpringBootTest(classes = {ReactiveTestApplication.class, DefaultReactiveUserService.class})
 public class DefaultReactiveAuthenticationManagerTest {
 
     @Autowired

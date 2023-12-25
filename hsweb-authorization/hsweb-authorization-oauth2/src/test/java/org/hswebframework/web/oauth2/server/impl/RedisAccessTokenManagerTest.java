@@ -1,6 +1,7 @@
 package org.hswebframework.web.oauth2.server.impl;
 
 import org.hswebframework.web.authorization.simple.SimpleAuthentication;
+import org.hswebframework.web.authorization.simple.SimpleUser;
 import org.hswebframework.web.oauth2.server.RedisHelper;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
@@ -16,7 +17,7 @@ public class RedisAccessTokenManagerTest {
         RedisAccessTokenManager tokenManager = new RedisAccessTokenManager(RedisHelper.factory);
 
         SimpleAuthentication authentication = new SimpleAuthentication();
-
+        authentication.setUser(SimpleUser.builder().id("test").build());
         tokenManager.createAccessToken("test", authentication, false)
                 .doOnNext(System.out::println)
                 .as(StepVerifier::create)
@@ -30,7 +31,7 @@ public class RedisAccessTokenManagerTest {
         RedisAccessTokenManager tokenManager = new RedisAccessTokenManager(RedisHelper.factory);
 
         SimpleAuthentication authentication = new SimpleAuthentication();
-
+        authentication.setUser(SimpleUser.builder().id("test").build());
         tokenManager
                 .createAccessToken("test", authentication, false)
                 .zipWhen(token -> tokenManager.refreshAccessToken("test", token.getRefreshToken()))
@@ -47,7 +48,7 @@ public class RedisAccessTokenManagerTest {
         RedisAccessTokenManager tokenManager = new RedisAccessTokenManager(RedisHelper.factory);
 
         SimpleAuthentication authentication = new SimpleAuthentication();
-
+        authentication.setUser(SimpleUser.builder().id("test").build());
         Flux
                 .concat(tokenManager
                                 .createAccessToken("test", authentication, true),

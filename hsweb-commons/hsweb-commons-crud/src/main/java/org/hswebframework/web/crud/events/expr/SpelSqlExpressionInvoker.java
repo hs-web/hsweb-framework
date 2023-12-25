@@ -1,6 +1,7 @@
 package org.hswebframework.web.crud.events.expr;
 
 import io.netty.util.concurrent.FastThreadLocal;
+import jakarta.annotation.Nonnull;
 import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.ezorm.rdb.mapping.EntityColumnMapping;
 import org.hswebframework.web.crud.query.QueryHelperUtils;
@@ -13,7 +14,6 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.util.Assert;
 import reactor.function.Function3;
 
-import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 

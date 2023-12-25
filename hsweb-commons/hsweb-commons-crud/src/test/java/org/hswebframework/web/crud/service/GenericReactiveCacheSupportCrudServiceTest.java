@@ -14,7 +14,7 @@ import reactor.test.StepVerifier;
 
 import static org.junit.Assert.*;
 
-@SpringBootTest(classes = TestApplication.class, args = "--hsweb.cache.type=guava")
+@SpringBootTest(classes ={ TestApplication.class,TestCacheEntityService.class}, args = "--hsweb.cache.type=guava")
 @RunWith(SpringRunner.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 public class GenericReactiveCacheSupportCrudServiceTest {

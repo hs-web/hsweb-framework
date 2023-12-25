@@ -15,7 +15,7 @@ import org.hswebframework.web.oauth2.server.OAuth2Client;
 
 import javax.persistence.Column;
 import javax.persistence.Table;
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 
 @Table(name = "s_oauth2_client")
 @Comment("OAuth2客户端")

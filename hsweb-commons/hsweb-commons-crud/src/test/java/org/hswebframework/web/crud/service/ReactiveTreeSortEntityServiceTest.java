@@ -3,6 +3,7 @@ package org.hswebframework.web.crud.service;
 import org.hswebframework.ezorm.core.param.QueryParam;
 import org.hswebframework.ezorm.rdb.mapping.defaults.SaveResult;
 import org.hswebframework.web.api.crud.entity.QueryParamEntity;
+import org.hswebframework.web.crud.TestApplication;
 import org.hswebframework.web.crud.entity.TestTreeSortEntity;
 import org.hswebframework.web.exception.ValidationException;
 import org.junit.Test;
@@ -19,7 +20,7 @@ import java.util.List;
 
 import static org.junit.Assert.*;
 
-@SpringBootTest
+@SpringBootTest(classes = {TestApplication.class,TestTreeSortEntityService.class})
 @RunWith(SpringJUnit4ClassRunner.class)
 public class ReactiveTreeSortEntityServiceTest {
 

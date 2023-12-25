@@ -2,6 +2,7 @@ package org.hswebframework.web.crud;
 
 import org.hswebframework.web.crud.entity.CustomTestEntity;
 import org.hswebframework.web.crud.entity.TestEntity;
+import org.hswebframework.web.crud.service.CustomTestCustom;
 import org.hswebframework.web.crud.service.TestEntityService;
 import org.junit.Assert;
 import org.junit.Test;
@@ -12,7 +13,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-@SpringBootTest
+@SpringBootTest(classes = {TestApplication.class,TestEntityService.class, CustomTestCustom.class})
 @RunWith(SpringJUnit4ClassRunner.class)
 public class CrudTests {
 

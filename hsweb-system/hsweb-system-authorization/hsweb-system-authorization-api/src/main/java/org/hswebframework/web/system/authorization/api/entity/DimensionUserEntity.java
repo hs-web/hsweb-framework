@@ -16,7 +16,7 @@ import org.springframework.util.StringUtils;
 import javax.persistence.Column;
 import javax.persistence.Index;
 import javax.persistence.Table;
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 import java.sql.JDBCType;
 
 @Getter

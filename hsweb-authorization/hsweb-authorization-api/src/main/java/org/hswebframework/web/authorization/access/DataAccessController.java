@@ -9,6 +9,7 @@ import org.hswebframework.web.authorization.define.AuthorizingContext;
  * @author zhouhao
  * @since  3.0
  */
+@Deprecated
 public interface DataAccessController {
     /**
      * 执行权限控制

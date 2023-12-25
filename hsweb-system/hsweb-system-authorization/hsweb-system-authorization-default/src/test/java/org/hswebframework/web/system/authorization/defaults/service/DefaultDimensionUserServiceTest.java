@@ -17,7 +17,10 @@ import reactor.test.StepVerifier;
 import static org.junit.Assert.*;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = ReactiveTestApplication.class)
+@SpringBootTest(classes = {
+        ReactiveTestApplication.class,
+        DefaultReactiveUserService.class
+})
 public class DefaultDimensionUserServiceTest {
 
     @Autowired

@@ -28,7 +28,7 @@ import org.springframework.web.bind.support.WebExchangeBindException;
 import org.springframework.web.server.*;
 import reactor.core.publisher.Mono;
 
-import javax.validation.ConstraintViolationException;
+import jakarta.validation.ConstraintViolationException;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
@@ -161,7 +161,7 @@ public class CommonErrorControllerAdvice {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Mono<ResponseMessage<?>> handleException(javax.validation.ValidationException e) {
+    public Mono<ResponseMessage<?>> handleException(jakarta.validation.ValidationException e) {
         return Mono.just(ResponseMessage.error(400, CodeConstants.Error.illegal_argument, e.getMessage()));
     }
 

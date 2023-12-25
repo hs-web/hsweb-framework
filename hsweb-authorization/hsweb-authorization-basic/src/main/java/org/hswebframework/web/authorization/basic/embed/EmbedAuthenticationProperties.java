@@ -11,10 +11,8 @@ import org.hswebframework.web.authorization.simple.builder.SimpleDataAccessConfi
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.util.StringUtils;
-import reactor.core.publisher.Mono;
+import org.springframework.util.ObjectUtils;
 
-import javax.validation.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -36,10 +34,6 @@ import java.util.Optional;
  *            permissions:
  *              - id: user-manager
  *                actions: *
- *                dataAccesses:
- *                  - action: query
- *                    type: DENY_FIELDS
- *                    fields: password,salt
  * </pre>
  *
  * @author zhouhao
@@ -62,24 +56,8 @@ public class EmbedAuthenticationProperties implements InitializingBean {
     @Override
     public void afterPropertiesSet() {
         users.forEach((id, properties) -> {
-            if (StringUtils.isEmpty(properties.getId())) {
+            if (ObjectUtils.isEmpty(properties.getId())) {
                 properties.setId(id);
-            }
-            for (EmbedAuthenticationInfo.PermissionInfo permissionInfo : properties.getPermissions()) {
-                for (Map<String, Object> objectMap : permissionInfo.getDataAccesses()) {
-                    for (Map.Entry<String, Object> stringObjectEntry : objectMap.entrySet()) {
-                        if (stringObjectEntry.getValue() instanceof Map) {
-                            Map<?, ?> mapVal = ((Map) stringObjectEntry.getValue());
-                            boolean maybeIsList = mapVal
-                                    .keySet()
-                                    .stream()
-                                    .allMatch(org.hswebframework.utils.StringUtils::isInt);
-                            if (maybeIsList) {
-                                stringObjectEntry.setValue(mapVal.values());
-                            }
-                        }
-                    }
-                }
             }
             authentications.put(id, properties.toAuthentication(dataAccessConfigBuilderFactory));
         });

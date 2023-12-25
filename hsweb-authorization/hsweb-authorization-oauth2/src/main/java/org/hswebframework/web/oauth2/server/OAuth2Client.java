@@ -6,7 +6,7 @@ import org.hswebframework.web.oauth2.ErrorType;
 import org.hswebframework.web.oauth2.OAuth2Exception;
 import org.springframework.util.StringUtils;
 
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 
 @Getter
 @Setter

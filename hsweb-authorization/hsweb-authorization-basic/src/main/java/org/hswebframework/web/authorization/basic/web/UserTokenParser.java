@@ -2,7 +2,7 @@ package org.hswebframework.web.authorization.basic.web;
 
 import org.hswebframework.web.authorization.token.ParsedToken;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * 令牌解析器，用于在接受到请求到时候，从请求中获取令牌

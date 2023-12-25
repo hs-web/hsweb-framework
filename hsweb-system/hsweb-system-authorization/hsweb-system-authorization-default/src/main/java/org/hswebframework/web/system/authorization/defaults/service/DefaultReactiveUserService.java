@@ -25,7 +25,7 @@ import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import javax.validation.ValidationException;
+import jakarta.validation.ValidationException;
 import java.util.Objects;
 import java.util.function.Function;
 

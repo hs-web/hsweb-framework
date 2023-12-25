@@ -8,9 +8,10 @@ import lombok.ToString;
 import org.hswebframework.ezorm.core.param.Sort;
 import org.hswebframework.ezorm.rdb.operator.DatabaseOperator;
 import org.hswebframework.web.api.crud.entity.QueryParamEntity;
+import org.hswebframework.web.crud.TestApplication;
 import org.hswebframework.web.crud.entity.EventTestEntity;
 import org.hswebframework.web.crud.entity.TestEntity;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,16 +20,13 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import reactor.test.StepVerifier;
 
 import java.math.BigDecimal;
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
 import java.nio.charset.*;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
+@SpringBootTest(classes = TestApplication.class)
 @RunWith(SpringJUnit4ClassRunner.class)
-class DefaultQueryHelperTest {
+public class DefaultQueryHelperTest {
 
     @Autowired
     private DatabaseOperator database;

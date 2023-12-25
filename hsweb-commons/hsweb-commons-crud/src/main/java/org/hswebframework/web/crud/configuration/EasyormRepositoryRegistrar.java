@@ -66,18 +66,11 @@ public class EasyormRepositoryRegistrar implements ImportBeanDefinitionRegistrar
     }
 
     protected Set<String> scanEntities(String[] packageStr) {
-        CandidateComponentsIndex index = CandidateComponentsIndexLoader.loadIndex(org.springframework.util.ClassUtils.getDefaultClassLoader());
-        if (null == index) {
-            return Stream
-                    .of(packageStr)
-                    .flatMap(this::doGetResources)
-                    .map(this::getResourceClassName)
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toSet());
-        }
         return Stream
                 .of(packageStr)
-                .flatMap(pkg -> index.getCandidateTypes(pkg, Table.class.getName()).stream())
+                .flatMap(this::doGetResources)
+                .map(this::getResourceClassName)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
     }
 

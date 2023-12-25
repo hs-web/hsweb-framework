@@ -16,7 +16,7 @@ import org.hswebframework.ezorm.core.param.TermType;
 import org.hswebframework.web.bean.FastBeanCopier;
 import org.springframework.util.StringUtils;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

@@ -10,7 +10,7 @@ import reactor.core.CoreSubscriber;
 import reactor.core.publisher.*;
 import reactor.util.context.Context;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import java.util.Locale;
 import java.util.concurrent.Callable;
 import java.util.function.BiConsumer;

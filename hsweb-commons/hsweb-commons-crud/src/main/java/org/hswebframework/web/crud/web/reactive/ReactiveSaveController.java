@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 /**
  * 响应式保存接口,基于{@link  ReactiveRepository}提供默认的新增,保存,修改接口.

@@ -7,7 +7,7 @@ import org.hswebframework.web.authorization.token.ParsedToken;
 import org.hswebframework.web.id.IDGenerator;
 import org.springframework.util.StringUtils;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;

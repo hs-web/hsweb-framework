@@ -4,7 +4,8 @@ import org.hswebframework.ezorm.rdb.executor.SqlRequest;
 import org.hswebframework.ezorm.rdb.executor.wrapper.ResultWrappers;
 import org.hswebframework.ezorm.rdb.operator.DatabaseOperator;
 import org.hswebframework.web.api.crud.entity.QueryParamEntity;
-import org.junit.jupiter.api.Test;
+import org.hswebframework.web.crud.TestApplication;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,15 +14,15 @@ import reactor.test.StepVerifier;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
+@SpringBootTest(classes = TestApplication.class)
 @RunWith(SpringJUnit4ClassRunner.class)
-class QueryAnalyzerImplTest {
+public class QueryAnalyzerImplTest {
     @Autowired
     private DatabaseOperator database;
 
 
     @Test
-    void testInject() {
+    public void testInject() {
         QueryAnalyzerImpl analyzer = new QueryAnalyzerImpl(database,
                                                            "select count(distinct time) t2, \"name\" n from \"s_test\" t");
         SqlRequest request = analyzer.refactor(
@@ -43,7 +44,7 @@ class QueryAnalyzerImplTest {
 
 
     @Test
-    void testUnion() {
+    public void testUnion() {
         QueryAnalyzerImpl analyzer = new QueryAnalyzerImpl(database,
                                                            "select name n from s_test t " +
                                                                    "union select name n from s_test t");
@@ -56,7 +57,7 @@ class QueryAnalyzerImplTest {
     }
 
     @Test
-    void test() {
+    public  void test() {
         QueryAnalyzerImpl analyzer = new QueryAnalyzerImpl(database,
                                                            "select name n from s_test t");
 
@@ -69,7 +70,7 @@ class QueryAnalyzerImplTest {
     }
 
     @Test
-    void testSub() {
+    public void testSub() {
         QueryAnalyzerImpl analyzer = new QueryAnalyzerImpl(database,
                                                            "select * from ( select distinct(name) as n from s_test ) t");
 
@@ -94,7 +95,7 @@ class QueryAnalyzerImplTest {
     }
 
     @Test
-    void testJoin() {
+    public void testJoin() {
         QueryAnalyzerImpl analyzer = new QueryAnalyzerImpl(
                 database,
                 "select *,t2.c from s_test t " +
@@ -110,7 +111,7 @@ class QueryAnalyzerImplTest {
     }
 
     @Test
-    void testPrepare(){
+    public void testPrepare(){
         QueryAnalyzerImpl analyzer = new QueryAnalyzerImpl(
                 database,
                 "select * from (select substring(id,9) id from s_test where left(id,1) = ?) t");
@@ -122,7 +123,7 @@ class QueryAnalyzerImplTest {
     }
 
     @Test
-    void testWith(){
+    public void testWith(){
 
         QueryAnalyzerImpl analyzer = new QueryAnalyzerImpl(
                 database,

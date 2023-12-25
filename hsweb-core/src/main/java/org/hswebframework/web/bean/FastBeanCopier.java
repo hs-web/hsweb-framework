@@ -11,7 +11,6 @@ import org.apache.commons.beanutils.PropertyUtilsBean;
 import org.hswebframework.utils.time.DateFormatter;
 import org.hswebframework.web.dict.EnumDict;
 import org.hswebframework.web.proxy.Proxy;
-import org.jctools.maps.NonBlockingHashMap;
 import org.springframework.core.ResolvableType;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;

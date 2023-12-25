@@ -76,16 +76,16 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.build.locales>zh_CN</project.build.locales>
 
-        <java.version>1.8</java.version>
+        <java.version>17</java.version>
+        <java.module.version>17</java.module.version>
         <project.build.jdk>${java.version}</project.build.jdk>
 
-        <spring.boot.version>2.7.11</spring.boot.version>
+        <spring.boot.version>3.2.0</spring.boot.version>
 
-        <javassist.version>3.20.0-GA</javassist.version>
-        <activiti.version>5.19.0.2</activiti.version>
+        <javassist.version>3.30.1-GA</javassist.version>
 
         <fastjson.version>1.2.83</fastjson.version>
-        <h2.version>2.1.212</h2.version>
+        <h2.version>2.2.224</h2.version>
         <mysql.version>5.1.39</mysql.version>
         <cglib.version>3.2.2</cglib.version>
         <aspectj.version>1.6.12</aspectj.version>
@@ -172,17 +172,45 @@
         </profile>
     </profiles>
     <build>
-
         <plugins>
+<!--            <plugin>-->
+<!--                <groupId>org.moditect</groupId>-->
+<!--                <artifactId>moditect-maven-plugin</artifactId>-->
+<!--                <version>1.1.0</version>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <id>add-module-infos</id>-->
+<!--                        <phase>package</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>add-module-info</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <jvmVersion>${java.module.version}</jvmVersion>-->
+<!--                            <jdepsExtraArgs>-->
+<!--                                <arg>&#45;&#45;multi-release=${java.module.version}</arg>-->
+<!--                            </jdepsExtraArgs>-->
+<!--                            <failOnWarning>false</failOnWarning>-->
+<!--                            <outputTimestamp>${maven.build.timestamp}</outputTimestamp>-->
+<!--                            <module>-->
+<!--                                <moduleInfoFile>${project.basedir}/src/main/java9/module-info.java</moduleInfoFile>-->
+<!--                            </module>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
+
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.8</version>
+                <version>0.8.11</version>
                 <executions>
                     <execution>
                         <goals>
                             <goal>prepare-agent</goal>
                         </goals>
+                        <configuration>
+                            <propertyName>jacocoArgLine</propertyName>
+                        </configuration>
                     </execution>
                     <execution>
                         <id>report</id>
@@ -192,6 +220,19 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.3.0</version>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <Multi-Release>true</Multi-Release>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
             </plugin>
 
             <plugin>
@@ -220,7 +261,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.11.0</version>
+                <version>3.12.0</version>
                 <configuration>
                     <source>${project.build.jdk}</source>
                     <target>${project.build.jdk}</target>
@@ -228,7 +269,40 @@
                     <compilerArgs>
                         <arg>-parameters</arg>
                     </compilerArgs>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>1.18.30</version>
+                        </path>
+                    </annotationProcessorPaths>
                 </configuration>
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <id>compile-java-8</id>-->
+<!--                        <goals>-->
+<!--                            <goal>compile</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <source>1.8</source>-->
+<!--                            <target>1.8</target>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
+<!--                    <execution>-->
+<!--                        <id>compile-java-9</id>-->
+<!--                        <phase>compile</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>compile</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <release>9</release>-->
+<!--                            <compileSourceRoots>-->
+<!--                                <compileSourceRoot>${project.basedir}/src/main/java9</compileSourceRoot>-->
+<!--                            </compileSourceRoots>-->
+<!--                            <outputDirectory>${project.build.outputDirectory}/META-INF/versions/9</outputDirectory>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
+<!--                </executions>-->
             </plugin>
 
             <plugin>
@@ -252,6 +326,7 @@
                     </dependency>
                 </dependencies>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -259,13 +334,25 @@
                 <configuration>
                     <includes>
                         <include>**/*Test.java</include>
-                        <include>**/*Test.groovy</include>
                         <include>**/*Tests.java</include>
-                        <include>**/*Test.groovy</include>
-                        <include>**/*Spec.java</include>
+                        <include>**/*TestCase.java</include>
                     </includes>
                 </configuration>
             </plugin>
+
+<!--            <plugin>-->
+<!--                <groupId>org.projectlombok</groupId>-->
+<!--                <artifactId>lombok-maven-plugin</artifactId>-->
+<!--                <version>1.18.20.0</version>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <phase>generate-sources</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>delombok</goal>-->
+<!--                        </goals>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
         </plugins>
     </build>
 
@@ -283,13 +370,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.codehaus.groovy</groupId>
-            <artifactId>groovy-all</artifactId>
-            <version>2.4.15</version>
-            <type>pom</type>
-        </dependency>
-
-        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <scope>provided</scope>
@@ -300,6 +380,13 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+
 
         <dependency>
             <groupId>ch.qos.logback</groupId>
@@ -316,17 +403,17 @@
 
     <dependencyManagement>
         <dependencies>
-<!--            <dependency>-->
-<!--                <groupId>org.springframework.data</groupId>-->
-<!--                <artifactId>spring-data-r2dbc</artifactId>-->
-<!--                <version>1.1.3.RELEASE</version>-->
-<!--                <scope>compile</scope>-->
-<!--            </dependency>-->
-<!--            <dependency>-->
-<!--                <groupId>org.springframework.boot</groupId>-->
-<!--                <artifactId>spring-boot-starter-data-r2dbc</artifactId>-->
-<!--                <version>2.3.3.RELEASE</version>-->
-<!--            </dependency>-->
+            <!--            <dependency>-->
+            <!--                <groupId>org.springframework.data</groupId>-->
+            <!--                <artifactId>spring-data-r2dbc</artifactId>-->
+            <!--                <version>1.1.3.RELEASE</version>-->
+            <!--                <scope>compile</scope>-->
+            <!--            </dependency>-->
+            <!--            <dependency>-->
+            <!--                <groupId>org.springframework.boot</groupId>-->
+            <!--                <artifactId>spring-boot-starter-data-r2dbc</artifactId>-->
+            <!--                <version>2.3.3.RELEASE</version>-->
+            <!--            </dependency>-->
 
             <dependency>
                 <groupId>com.google.code.findbugs</groupId>
@@ -363,7 +450,8 @@
             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
-                <version>1.16.22</version>
+                <version>1.18.30</version>
+                <scope>provided</scope>
             </dependency>
 
             <dependency>

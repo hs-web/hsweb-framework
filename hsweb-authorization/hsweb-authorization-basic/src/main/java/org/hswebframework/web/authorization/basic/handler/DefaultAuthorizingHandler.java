@@ -69,7 +69,6 @@ public class DefaultAuthorizingHandler implements AuthorizingHandler {
     public void handleDataAccess(AuthorizingContext context) {
 
         if (dataAccessController == null) {
-            log.warn("dataAccessController is null,skip result access control!");
             return;
         }
         if (context.getDefinition().getResources() == null) {

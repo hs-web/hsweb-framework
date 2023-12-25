@@ -5,10 +5,9 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import java.util.concurrent.atomic.AtomicInteger;
 
-@Component
 public class TestEntityListener {
 
     AtomicInteger beforeCreate = new AtomicInteger();

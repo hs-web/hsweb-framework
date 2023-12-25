@@ -4,7 +4,7 @@ import org.hibernate.validator.BaseHibernateValidatorConfiguration;
 import org.hswebframework.web.exception.ValidationException;
 import org.hswebframework.web.i18n.ContextLocaleResolver;
 
-import javax.validation.*;
+import jakarta.validation.*;
 import java.util.Set;
 
 public final class ValidatorUtils {
@@ -28,7 +28,6 @@ public final class ValidatorUtils {
                 configuration.messageInterpolator(configuration.getDefaultMessageInterpolator());
 
                 ValidatorFactory factory = configuration.buildValidatorFactory();
-
                 return validator = factory.getValidator();
             }
         }

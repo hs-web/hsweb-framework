@@ -3,7 +3,7 @@ package org.hswebframework.web.authorization.basic.web;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.utils.WebUtils;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.Map;

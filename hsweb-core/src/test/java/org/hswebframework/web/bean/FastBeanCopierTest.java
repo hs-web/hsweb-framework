@@ -6,6 +6,7 @@ import lombok.Setter;
 import lombok.SneakyThrows;
 import org.junit.Assert;
 import org.junit.Test;
+import org.springframework.util.ClassUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -127,11 +128,12 @@ public class FastBeanCopierTest {
     @Test
     @SneakyThrows
     public void testCrossClassLoader() {
-        URL clazz = Source.class.getResource("/");
+        URL clazz = new File("target/test-classes").getAbsoluteFile().toURI().toURL();
 
+        System.out.println(clazz);
         URLClassLoader loader = new URLClassLoader(new URL[]{
                 clazz
-        }, ClassLoader.getSystemClassLoader()){
+        }, ClassUtils.getDefaultClassLoader()){
             @Override
             protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
                 try {
@@ -143,7 +145,7 @@ public class FastBeanCopierTest {
                         return clazz;
                     }
                 } catch (Throwable ignore) {
-
+                  //  ignore.printStackTrace();
                 }
                 return super.loadClass(name, resolve);
             }
@@ -189,7 +191,7 @@ public class FastBeanCopierTest {
     public void testProxy() {
         AtomicReference<Object> reference = new AtomicReference<>();
 
-        ProxyTest test = (ProxyTest) Proxy.newProxyInstance(ClassLoader.getSystemClassLoader(),
+        ProxyTest test = (ProxyTest) Proxy.newProxyInstance(ClassUtils.getDefaultClassLoader(),
                                                             new Class[]{ProxyTest.class}, (proxy, method, args) -> {
                     if (method.getName().equals("getName")) {
                         return "test";

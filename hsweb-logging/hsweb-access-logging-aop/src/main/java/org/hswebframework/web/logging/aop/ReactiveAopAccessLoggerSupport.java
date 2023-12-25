@@ -28,7 +28,7 @@ import reactor.core.publisher.Mono;
 import reactor.util.context.Context;
 import reactor.util.context.ContextView;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -212,7 +212,7 @@ public class ReactiveAopAccessLoggerSupport extends StaticMethodMatcherPointcutA
         ServerHttpRequest request = exchange.getRequest();
         info.setRequestId(request.getId());
         info.setPath(request.getPath().value());
-        info.setRequestMethod(request.getMethodValue());
+        info.setRequestMethod(request.getMethod().name());
         info.setHeaders(request.getHeaders().toSingleValueMap());
 
         Optional.ofNullable(ReactiveWebUtils.getIpAddr(request))

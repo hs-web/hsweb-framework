@@ -67,7 +67,7 @@ import java.util.Optional;
 @EnableConfigurationProperties(CorsProperties.class)
 public class CorsAutoConfiguration {
 
-    @ConditionalOnClass(name = "javax.servlet.Filter")
+    @ConditionalOnClass(name = "jakarta.servlet.Filter")
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
     @Configuration
     static class WebMvcCorsConfiguration {

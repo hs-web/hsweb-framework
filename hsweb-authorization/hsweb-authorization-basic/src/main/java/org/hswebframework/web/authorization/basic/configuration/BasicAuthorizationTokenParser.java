@@ -11,7 +11,7 @@ import org.hswebframework.web.authorization.token.UserToken;
 import org.hswebframework.web.authorization.token.UserTokenManager;
 import reactor.core.publisher.Mono;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 public class BasicAuthorizationTokenParser implements UserTokenForTypeParser {
 

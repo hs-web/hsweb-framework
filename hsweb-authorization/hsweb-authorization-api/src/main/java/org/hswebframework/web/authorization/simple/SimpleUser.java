@@ -3,6 +3,7 @@ package org.hswebframework.web.authorization.simple;
 import lombok.*;
 import org.hswebframework.web.authorization.User;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Map;
 
@@ -16,6 +17,7 @@ import java.util.Map;
 @Builder
 public class SimpleUser implements User {
 
+    @Serial
     private static final long serialVersionUID = 2194541828191869091L;
 
     private String id;

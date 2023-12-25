@@ -20,7 +20,7 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 public class CustomMappingJackson2HttpMessageConverter extends MappingJackson2HttpMessageConverter {
 

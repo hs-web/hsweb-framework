@@ -18,7 +18,7 @@
 
 package org.hswebframework.web.api.crud.entity;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 /**
  * 支持排序的实体

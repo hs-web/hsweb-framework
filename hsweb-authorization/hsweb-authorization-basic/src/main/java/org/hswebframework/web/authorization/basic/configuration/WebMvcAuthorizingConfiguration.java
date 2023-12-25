@@ -1,7 +1,6 @@
 package org.hswebframework.web.authorization.basic.configuration;
 
 import org.hswebframework.web.authorization.basic.aop.AopMethodAuthorizeDefinitionParser;
-import org.hswebframework.web.authorization.basic.twofactor.TwoFactorHandlerInterceptorAdapter;
 import org.hswebframework.web.authorization.basic.web.*;
 import org.hswebframework.web.authorization.token.UserTokenManager;
 import org.hswebframework.web.authorization.twofactor.TwoFactorValidatorManager;
@@ -15,7 +14,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import java.util.List;
 
 @AutoConfiguration
@@ -62,18 +61,6 @@ public class WebMvcAuthorizingConfiguration {
     @Bean
     public SessionIdUserTokenGenerator sessionIdUserTokenGenerator() {
         return new SessionIdUserTokenGenerator();
-    }
-
-    @Bean
-    @ConditionalOnProperty(prefix = "hsweb.authorize.two-factor", name = "enable", havingValue = "true")
-    @Order(100)
-    public WebMvcConfigurer twoFactorHandlerConfigurer(TwoFactorValidatorManager manager) {
-        return new WebMvcConfigurer() {
-            @Override
-            public void addInterceptors(@Nonnull InterceptorRegistry registry) {
-                registry.addInterceptor(new TwoFactorHandlerInterceptorAdapter(manager));
-            }
-        };
     }
 
 }

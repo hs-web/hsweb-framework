@@ -8,7 +8,7 @@ import org.hswebframework.web.i18n.MessageSourceInitializer;
 import org.junit.Test;
 import org.springframework.context.support.StaticMessageSource;
 
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 
 import java.util.Locale;
 
