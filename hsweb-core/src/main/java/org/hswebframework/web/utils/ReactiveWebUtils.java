@@ -1,6 +1,7 @@
 package org.hswebframework.web.utils;
 
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.net.InetSocketAddress;
@@ -25,7 +26,7 @@ public class ReactiveWebUtils {
     public static String getIpAddr(ServerHttpRequest request) {
         for (String ipHeader : ipHeaders) {
             String ip = request.getHeaders().getFirst(ipHeader);
-            if (!StringUtils.isEmpty(ip) && !ip.contains("unknown")) {
+            if (!ObjectUtils.isEmpty(ip) && !ip.contains("unknown")) {
                 return ip;
             }
         }

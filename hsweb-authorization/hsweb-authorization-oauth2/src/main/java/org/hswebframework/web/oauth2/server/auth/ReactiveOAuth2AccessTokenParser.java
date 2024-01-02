@@ -10,6 +10,7 @@ import org.hswebframework.web.context.ContextUtils;
 import org.hswebframework.web.logger.ReactiveLogger;
 import org.hswebframework.web.oauth2.server.AccessTokenManager;
 import org.springframework.http.HttpHeaders;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
@@ -23,7 +24,7 @@ public class ReactiveOAuth2AccessTokenParser implements ReactiveUserTokenParser,
     public Mono<ParsedToken> parseToken(ServerWebExchange exchange) {
 
         String token = exchange.getRequest().getQueryParams().getFirst("access_token");
-        if (StringUtils.isEmpty(token)) {
+        if (ObjectUtils.isEmpty(token)) {
             token = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
             if (StringUtils.hasText(token)) {
                 String[] typeAndToken = token.split("[ ]");

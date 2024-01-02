@@ -25,6 +25,7 @@ import org.hswebframework.web.dict.defaults.DefaultItemDefine;
 import org.hswebframework.web.exception.ValidationException;
 import org.hswebframework.web.i18n.LocaleUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
@@ -392,7 +393,7 @@ public interface EnumDict<V> extends JSONSerializable {
             String currentName = jp.currentName();
             Object currentValue = jp.getCurrentValue();
             Class findPropertyType;
-            if (StringUtils.isEmpty(currentName) || StringUtils.isEmpty(currentValue)) {
+            if (ObjectUtils.isEmpty(currentName) || ObjectUtils.isEmpty(currentValue)) {
                 return null;
             } else {
                 findPropertyType = BeanUtils.findPropertyType(currentName, currentValue.getClass());

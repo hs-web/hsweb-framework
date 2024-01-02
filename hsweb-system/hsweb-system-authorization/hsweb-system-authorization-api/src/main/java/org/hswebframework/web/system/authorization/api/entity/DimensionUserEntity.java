@@ -11,6 +11,7 @@ import org.hswebframework.web.crud.annotation.EnableEntityEvent;
 import org.hswebframework.web.dict.EnumDict;
 import org.hswebframework.web.system.authorization.api.enums.DimensionUserFeature;
 import org.springframework.util.DigestUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import javax.persistence.Column;
@@ -75,7 +76,7 @@ public class DimensionUserEntity extends GenericEntity<String> {
     private DimensionUserFeature[] features;
 
     public void generateId() {
-        if (StringUtils.isEmpty(getId())) {
+        if (ObjectUtils.isEmpty(getId())) {
             String id = DigestUtils
                     .md5DigestAsHex(String.format("%s-%s-%s",
                                                   dimensionTypeId,

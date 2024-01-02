@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hswebframework.web.oauth2.ErrorType;
 import org.hswebframework.web.oauth2.OAuth2Exception;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import jakarta.validation.constraints.NotBlank;
@@ -30,13 +31,13 @@ public class OAuth2Client {
     private String userId;
 
     public void validateRedirectUri(String redirectUri) {
-        if (StringUtils.isEmpty(redirectUri) || (!redirectUri.startsWith(this.redirectUrl))) {
+        if (ObjectUtils.isEmpty(redirectUri) || (!redirectUri.startsWith(this.redirectUrl))) {
             throw new OAuth2Exception(ErrorType.ILLEGAL_REDIRECT_URI);
         }
     }
 
     public void validateSecret(String secret) {
-        if (StringUtils.isEmpty(secret) || (!secret.equals(this.clientSecret))) {
+        if (ObjectUtils.isEmpty(secret) || (!secret.equals(this.clientSecret))) {
             throw new OAuth2Exception(ErrorType.ILLEGAL_CLIENT_SECRET);
         }
     }

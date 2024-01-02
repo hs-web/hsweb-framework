@@ -23,6 +23,7 @@ import org.hswebframework.web.system.authorization.api.entity.UserEntity;
 import org.hswebframework.web.system.authorization.api.service.reactive.ReactiveUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -172,7 +173,7 @@ public class DefaultReactiveAuthenticationInitializeService
                     continue;
                 }
                 for (ParentPermission parent : permissionEntity.getParents()) {
-                    if (StringUtils.isEmpty(parent.getPermission())) {
+                    if (ObjectUtils.isEmpty(parent.getPermission())) {
                         continue;
                     }
                     Set<String> pre = parent.getPreActions();

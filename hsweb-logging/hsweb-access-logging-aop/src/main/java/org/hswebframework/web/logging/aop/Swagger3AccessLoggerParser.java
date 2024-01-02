@@ -6,6 +6,7 @@ import org.hswebframework.web.aop.MethodInterceptorHolder;
 import org.hswebframework.web.logging.LoggerDefine;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Method;
@@ -29,7 +30,7 @@ public class Swagger3AccessLoggerParser implements AccessLoggerParser {
             action = action.concat(api.name());
         }
         if (null != operation) {
-            action = StringUtils.isEmpty(action) ? operation.summary() : action + "-" + operation.summary();
+            action = ObjectUtils.isEmpty(action) ? operation.summary() : action + "-" + operation.summary();
         }
         return new LoggerDefine(action, "");
     }

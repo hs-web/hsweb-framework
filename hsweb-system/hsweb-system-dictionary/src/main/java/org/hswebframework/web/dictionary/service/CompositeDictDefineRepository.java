@@ -9,6 +9,7 @@ import org.hswebframework.web.dictionary.entity.DictionaryEntity;
 import org.hswebframework.web.dictionary.event.ClearDictionaryCacheEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -24,7 +25,7 @@ public class CompositeDictDefineRepository extends DefaultDictDefineRepository {
 
     @EventListener
     public void handleClearCacheEvent(ClearDictionaryCacheEvent event) {
-        if (StringUtils.isEmpty(event.getDictionaryId())) {
+        if (ObjectUtils.isEmpty(event.getDictionaryId())) {
             cacheManager.<DictDefine>getCache("dic-define")
                         .clear()
                         .doOnSuccess(r -> log.info("clear all dic cache success"))

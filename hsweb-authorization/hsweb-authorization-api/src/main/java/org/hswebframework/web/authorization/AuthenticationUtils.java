@@ -1,5 +1,6 @@
 package org.hswebframework.web.authorization;
 
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -9,7 +10,7 @@ import org.springframework.util.StringUtils;
 public class AuthenticationUtils {
 
     public static AuthenticationPredicate createPredicate(String expression) {
-        if (StringUtils.isEmpty(expression)) {
+        if (ObjectUtils.isEmpty(expression)) {
             return (authentication -> false);
         }
         AuthenticationPredicate main = null;

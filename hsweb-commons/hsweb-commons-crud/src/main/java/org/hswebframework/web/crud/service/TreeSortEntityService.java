@@ -9,6 +9,7 @@ import org.hswebframework.web.api.crud.entity.TreeSupportEntity;
 import org.hswebframework.web.id.IDGenerator;
 import org.reactivestreams.Publisher;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -88,7 +89,7 @@ public interface TreeSortEntityService<E extends TreeSortSupportEntity<K>, K>
 
     default Stream<E> applyTreeProperty(E ele) {
         if (StringUtils.hasText(ele.getPath()) ||
-                StringUtils.isEmpty(ele.getParentId())) {
+                ObjectUtils.isEmpty(ele.getParentId())) {
             return Stream.of(ele);
         }
 
@@ -100,7 +101,7 @@ public interface TreeSortEntityService<E extends TreeSortSupportEntity<K>, K>
 
     //校验是否有循环依赖,修改父节点为自己的子节点?
     default void checkCyclicDependency(K id, E ele) {
-        if (StringUtils.isEmpty(id)) {
+        if (ObjectUtils.isEmpty(id)) {
             return;
         }
         for (E e : this.queryIncludeChildren(Collections.singletonList(id))) {
@@ -158,7 +159,7 @@ public interface TreeSortEntityService<E extends TreeSortSupportEntity<K>, K>
                 return true;
             }
             //有父节点,但是父节点不存在
-            if (!StringUtils.isEmpty(node.getParentId())) {
+            if (!ObjectUtils.isEmpty(node.getParentId())) {
                 return helper.getNode(node.getParentId()) == null;
             }
             return false;
@@ -166,6 +167,6 @@ public interface TreeSortEntityService<E extends TreeSortSupportEntity<K>, K>
     }
 
     default boolean isRootNode(E entity) {
-        return StringUtils.isEmpty(entity.getParentId()) || "-1".equals(String.valueOf(entity.getParentId()));
+        return ObjectUtils.isEmpty(entity.getParentId()) || "-1".equals(String.valueOf(entity.getParentId()));
     }
 }

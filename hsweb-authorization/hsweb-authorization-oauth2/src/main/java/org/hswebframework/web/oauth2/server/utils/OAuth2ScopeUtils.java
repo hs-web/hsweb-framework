@@ -1,6 +1,7 @@
 package org.hswebframework.web.oauth2.server.utils;
 
 import org.hswebframework.web.oauth2.server.ScopePredicate;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
@@ -16,7 +17,7 @@ import java.util.*;
 public class OAuth2ScopeUtils {
 
     public static ScopePredicate createScopePredicate(String scopeStr) {
-        if (StringUtils.isEmpty(scopeStr)) {
+        if (ObjectUtils.isEmpty(scopeStr)) {
             return ((permission, action) -> false);
         }
         String[] scopes = scopeStr.split("[ ,\n]");

@@ -5,6 +5,7 @@ import lombok.*;
 import org.hswebframework.web.authorization.annotation.*;
 import org.hswebframework.web.authorization.define.*;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.lang.annotation.Annotation;
@@ -131,7 +132,7 @@ public class DefaultBasicAuthorizeDefinition implements AopAuthorizeDefinition {
             typeDefinition.setConfiguration(dataAccessType.configuration());
             typeDefinition.setDescription(String.join("\n", dataAccessType.description()));
         }
-        if (StringUtils.isEmpty(typeDefinition.getId())) {
+        if (ObjectUtils.isEmpty(typeDefinition.getId())) {
             return;
         }
         definition.getDataAccess()

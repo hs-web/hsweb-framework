@@ -2,6 +2,7 @@ package org.hswebframework.web.utils;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.HashMap;
@@ -80,7 +81,7 @@ public class ExpressionUtils {
 
 
         return TemplateParser.parse(expression, var -> {
-            if (StringUtils.isEmpty(var)) {
+            if (ObjectUtils.isEmpty(var)) {
                 return "";
             }
             Object val = vars.get(var);

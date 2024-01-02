@@ -19,6 +19,7 @@ import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -37,7 +38,7 @@ public class DefaultAuthorizationSettingService extends GenericReactiveCrudServi
     private List<DimensionProvider> providers;
 
     protected AuthorizationSettingEntity generateId(AuthorizationSettingEntity entity) {
-        if (StringUtils.isEmpty(entity.getId())) {
+        if (ObjectUtils.isEmpty(entity.getId())) {
             entity.setId(DigestUtils.md5Hex(entity.getPermission() + entity.getDimensionType() + entity.getDimensionTarget()));
         }
         return entity;

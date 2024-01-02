@@ -21,6 +21,7 @@ import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -60,7 +61,7 @@ public class DefaultReactiveUserService extends GenericReactiveCrudService<UserE
     public Mono<Boolean> saveUser(Mono<UserEntity> request) {
         return request
                 .flatMap(userEntity -> {
-                    if (StringUtils.isEmpty(userEntity.getId())) {
+                    if (ObjectUtils.isEmpty(userEntity.getId())) {
                         return doAdd(userEntity);
                     }
                     return findById(userEntity.getId())

@@ -19,6 +19,7 @@
 package org.hswebframework.web.utils;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -114,7 +115,7 @@ public class WebUtils {
     public static String getIpAddr(HttpServletRequest request) {
         for (String ipHeader : ipHeaders) {
             String ip = request.getHeader(ipHeader);
-            if (!StringUtils.isEmpty(ip) && !ip.contains("unknown")) {
+            if (!ObjectUtils.isEmpty(ip) && !ip.contains("unknown")) {
                 return ip;
             }
         }

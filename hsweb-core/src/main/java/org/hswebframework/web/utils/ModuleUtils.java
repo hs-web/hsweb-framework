@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.security.CodeSource;
@@ -144,14 +145,14 @@ public abstract class ModuleUtils {
         }
 
         public String getId() {
-            if (StringUtils.isEmpty(id)) {
+            if (ObjectUtils.isEmpty(id)) {
                 id = groupId + "/" + artifactId;
             }
             return id;
         }
 
         public boolean isNone() {
-            return StringUtils.isEmpty(classPath);
+            return ObjectUtils.isEmpty(classPath);
         }
     }
 }
