@@ -5,7 +5,7 @@
     <parent>
         <artifactId>hsweb-concurrent</artifactId>
         <groupId>org.hswebframework.web</groupId>
-        <version>4.0.17-SNAPSHOT</version>
+        <version>5.0.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 

@@ -5,7 +5,7 @@
     <parent>
         <artifactId>hsweb-commons</artifactId>
         <groupId>org.hswebframework.web</groupId>
-        <version>4.0.17-SNAPSHOT</version>
+        <version>5.0.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -148,18 +148,6 @@
             <groupId>com.github.jsqlparser</groupId>
             <artifactId>jsqlparser</artifactId>
             <version>4.6</version>
-        </dependency>
-
-        <dependency>
-            <groupId>jakarta.websocket</groupId>
-            <artifactId>jakarta.websocket-api</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>jakarta.websocket</groupId>
-            <artifactId>jakarta.websocket-client-api</artifactId>
-            <scope>test</scope>
         </dependency>
 
         <dependency>

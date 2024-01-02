@@ -5,7 +5,7 @@
     <parent>
         <artifactId>hsweb-authorization</artifactId>
         <groupId>org.hswebframework.web</groupId>
-        <version>4.0.17-SNAPSHOT</version>
+        <version>5.0.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -98,17 +98,7 @@
             <scope>test</scope>
         </dependency>
 
-        <dependency>
-            <groupId>jakarta.websocket</groupId>
-            <artifactId>jakarta.websocket-api</artifactId>
-            <scope>test</scope>
-        </dependency>
 
-        <dependency>
-            <groupId>jakarta.websocket</groupId>
-            <artifactId>jakarta.websocket-client-api</artifactId>
-            <scope>test</scope>
-        </dependency>
 
         <dependency>
             <groupId>org.glassfish.expressly</groupId>
