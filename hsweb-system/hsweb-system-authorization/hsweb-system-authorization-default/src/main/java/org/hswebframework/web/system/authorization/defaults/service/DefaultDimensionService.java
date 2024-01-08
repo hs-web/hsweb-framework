@@ -124,12 +124,16 @@ public class DefaultDimensionService
 
     @EventListener
     public void handleDimensionChanged(EntitySavedEvent<DimensionEntity> event) {
-        eventPublisher.publishEvent(ClearUserAuthorizationCacheEvent.all());
+        event.async(
+                ClearUserAuthorizationCacheEvent.all().publish(eventPublisher)
+        );
     }
 
     @EventListener
     public void handleDimensionChanged(EntityModifyEvent<DimensionEntity> event) {
-        eventPublisher.publishEvent(ClearUserAuthorizationCacheEvent.all());
+        event.async(
+                ClearUserAuthorizationCacheEvent.all().publish(eventPublisher)
+        );
     }
 
     @EventListener

@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hswebframework.web.authorization.Dimension;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,7 +14,10 @@ import java.util.List;
 @Setter
 @AllArgsConstructor(staticName = "of")
 @NoArgsConstructor
-public class DimensionUserDetail {
+public class DimensionUserDetail implements Serializable {
+    private static final long serialVersionUID = -6849794470754667710L;
+
+
     private String userId;
 
     private List<Dimension> dimensions;

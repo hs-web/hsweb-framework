@@ -39,7 +39,7 @@ public class UserDimensionTerm extends AbstractTermFragmentBuilder {
 
         fragments.addSql("exists(select 1 from ",getTableName("s_dimension_user",column)," d where d.user_id =", columnFullName);
 
-        if (options.size() > 0) {
+        if (!options.isEmpty()) {
             String typeId = options.get(0);
             if (!"not".equals(typeId) && !"any".equals(typeId)) {
                 fragments.addSql("and d.dimension_type_id = ?").addParameter(typeId);

@@ -54,7 +54,7 @@ public class DefaultDimensionManager implements DimensionManager {
                         .flatMap(provider -> provider.getDimensionBindInfo(userId))
                         .groupBy(DimensionUserBind::getDimensionType)
                         .flatMap(group -> {
-                            String type = String.valueOf(group.key());
+                            String type = group.key();
                             Flux<DimensionUserBind> binds = group.cache();
                             DimensionProvider provider = providerMapping.get(type);
                             if (null == provider) {
@@ -70,7 +70,7 @@ public class DefaultDimensionManager implements DimensionManager {
                                             .groupBy(DimensionUserBind::getUserId)
                                             .flatMap(userGroup -> Mono
                                                     .zip(
-                                                            Mono.just(String.valueOf(userGroup.key())),
+                                                            Mono.just(userGroup.key()),
                                                             userGroup
                                                                     .<Dimension>handle((bind, sink) -> {
                                                                         Dimension dimension = mapping.get(bind.getDimensionId());
