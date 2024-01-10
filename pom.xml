@@ -89,7 +89,7 @@
         <cglib.version>3.2.2</cglib.version>
         <aspectj.version>1.6.12</aspectj.version>
 
-        <hsweb.ezorm.version>4.1.1</hsweb.ezorm.version>
+        <hsweb.ezorm.version>4.1.2-SNAPSHOT</hsweb.ezorm.version>
         <hsweb.utils.version>3.0.2</hsweb.utils.version>
         <hsweb.expands.version>3.0.2</hsweb.expands.version>
         <swagger.version>2.7.0</swagger.version>
@@ -362,7 +362,7 @@
             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
-                <version>1.16.22</version>
+                <version>1.18.30</version>
             </dependency>
 
             <dependency>

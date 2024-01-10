@@ -55,6 +55,11 @@ class DetectEntityColumnMapping implements EntityColumnMapping {
     }
 
     @Override
+    public void reload() {
+        mapping.reload();
+    }
+
+    @Override
     public Object newInstance() {
         return entityFactory.newInstance(getEntityType());
     }
