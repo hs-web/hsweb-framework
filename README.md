@@ -131,3 +131,6 @@ public Mono<String> addAccount(@RequestBody Mono<Account> account){
 ## License
 
 [Apache 2.0](https://github.com/spring-projects/spring-boot/blob/main/LICENSE.txt)
+
+
+[![Stargazers over time](https://starchart.cc/hs-web/hsweb-framework.svg?variant=adaptive)](https://starchart.cc/hs-web/hsweb-framework)
