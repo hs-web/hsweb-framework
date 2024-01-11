@@ -212,7 +212,7 @@ public class ReactiveAopAccessLoggerSupport extends StaticMethodMatcherPointcutA
         ServerHttpRequest request = exchange.getRequest();
         info.setRequestId(request.getId());
         info.setPath(request.getPath().value());
-        info.setRequestMethod(request.getMethodValue());
+        info.setRequestMethod(request.getMethod() == null ? "UNKNOWN" : request.getMethod().name());
         info.setHeaders(request.getHeaders().toSingleValueMap());
 
         Optional.ofNullable(ReactiveWebUtils.getIpAddr(request))

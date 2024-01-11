@@ -7,7 +7,6 @@ import javassist.bytecode.annotation.*;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.springframework.util.ClassUtils;
-import sun.misc.CompoundEnumeration;
 
 import java.io.IOException;
 import java.net.URI;
@@ -76,11 +75,28 @@ public class Proxy<I> extends URLClassLoader {
         @SuppressWarnings("all")
         Enumeration<URL>[] tmp = (Enumeration<URL>[]) new Enumeration<?>[loaders.size()];
 
-        for (int i = 0; i < loaders.size(); i++) {
-            tmp[i] = loaders.get(i).getResources(name);
-        }
+        return new Enumeration<URL>() {
 
-        return new CompoundEnumeration<>(tmp);
+            @Override
+            public boolean hasMoreElements() {
+                for (Enumeration<URL> urlEnumeration : tmp) {
+                    if (urlEnumeration.hasMoreElements()) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            @Override
+            public URL nextElement() {
+                for (Enumeration<URL> urlEnumeration : tmp) {
+                    if (urlEnumeration.hasMoreElements()) {
+                        return urlEnumeration.nextElement();
+                    }
+                }
+                return null;
+            }
+        };
     }
 
     @SneakyThrows
@@ -212,13 +228,15 @@ public class Proxy<I> extends URLClassLoader {
 
     @SneakyThrows
     public I newInstance() {
-        return getTargetClass().newInstance();
+        return getTargetClass().getConstructor().newInstance();
     }
 
     @SneakyThrows
+    @SuppressWarnings("all")
     public Class<I> getTargetClass() {
         if (targetClass == null) {
-            targetClass = (Class) ctClass.toClass(this, null);
+            byte[] code = ctClass.toBytecode();
+            targetClass = (Class) defineClass(null, code, 0, code.length);
         }
         return targetClass;
     }
