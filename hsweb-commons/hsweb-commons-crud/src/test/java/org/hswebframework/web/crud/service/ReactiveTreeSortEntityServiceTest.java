@@ -251,6 +251,19 @@ public class ReactiveTreeSortEntityServiceTest {
             .expectNext(2)
             .verifyComplete();
 
+        sortEntityService
+            .save(Flux.just(root, node1))
+            .map(SaveResult::getTotal)
+            .as(StepVerifier::create)
+            .expectNext(2)
+            .verifyComplete();
+
+        sortEntityService
+            .deleteById(root.getId())
+            .as(StepVerifier::create)
+            .expectNext(2)
+            .verifyComplete();
+
     }
 
     @Test
@@ -270,7 +283,7 @@ public class ReactiveTreeSortEntityServiceTest {
 
 
         sortEntityService
-            .save(Flux.just(entity, entity2,entity3))
+            .save(Flux.just(entity, entity2, entity3))
             .then()
             .as(StepVerifier::create)
             .expectComplete()

@@ -1,6 +1,8 @@
 package org.hswebframework.web.crud.service;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.hswebframework.ezorm.core.MethodReferenceColumn;
+import org.hswebframework.ezorm.core.StaticMethodReferenceColumn;
 import org.hswebframework.ezorm.rdb.mapping.ReactiveDelete;
 import org.hswebframework.ezorm.rdb.mapping.defaults.SaveResult;
 import org.hswebframework.ezorm.rdb.operator.dml.Terms;
@@ -310,6 +312,12 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
                         .map(SaveResult::getTotal))
                 .defaultIfEmpty(Mono.just(0))
                 .flatMap(Function.identity());
+    }
+
+    @Override
+    @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager)
+    default Mono<Integer> deleteById(K id) {
+        return this.deleteById(Flux.just(id));
     }
 
     @Override
