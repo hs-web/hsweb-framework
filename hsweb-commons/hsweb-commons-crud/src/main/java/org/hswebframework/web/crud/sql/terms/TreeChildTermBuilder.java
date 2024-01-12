@@ -49,7 +49,7 @@ public abstract class TreeChildTermBuilder extends AbstractTermFragmentBuilder {
         return PrepareSqlFragments
             .of().addSql(
                 "exists(select 1 from", tableName, "_p join", tableName,
-                "_c on", idColumn.getFullName("_c"), "in(", String.join("?", args), ")",
+                "_c on", idColumn.getFullName("_c"), "in(", String.join(",", args), ")",
                 "and", pathColumn.getFullName("_p"), "like concat(" + pathColumn.getFullName("_c") + ",'%')",
                 "where", columnFullName, "=", idColumn.getFullName("_p"), ")"
             )
