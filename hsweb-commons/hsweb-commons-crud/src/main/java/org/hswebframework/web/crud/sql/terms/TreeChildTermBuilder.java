@@ -33,14 +33,18 @@ public abstract class TreeChildTermBuilder extends AbstractTermFragmentBuilder {
         Arrays.fill(args, "?");
 
         RDBColumnMetadata pathColumn = column
-            .getOwner()
-            .getColumn("path")
-            .orElseThrow(() -> new IllegalArgumentException("not found 'path' column"));
+                .getOwner()
+                .getSchema()
+                .getTable(tableName)
+                .flatMap(t -> t.getColumn("path"))
+                .orElseThrow(() -> new IllegalArgumentException("not found 'path' column"));
 
         RDBColumnMetadata idColumn = column
-            .getOwner()
-            .getColumn("id")
-            .orElseThrow(() -> new IllegalArgumentException("not found 'id' column"));
+                .getOwner()
+                .getSchema()
+                .getTable(tableName)
+                .flatMap(t -> t.getColumn("id"))
+                .orElseThrow(() -> new IllegalArgumentException("not found 'id' column"));
 
         return PrepareSqlFragments
             .of().addSql(
