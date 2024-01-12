@@ -28,6 +28,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.Function;
@@ -49,7 +50,7 @@ import java.util.stream.Stream;
  */
 @JSONType(deserializer = EnumDict.EnumDictJSONDeserializer.class)
 @JsonDeserialize(contentUsing = EnumDict.EnumDictJSONDeserializer.class)
-public interface EnumDict<V> extends JSONSerializable {
+public interface EnumDict<V> extends JSONSerializable, Serializable {
 
     /**
      * 枚举选项的值,通常由字母或者数字组成,并且在同一个枚举中值唯一;对应数据库中的值通常也为此值
