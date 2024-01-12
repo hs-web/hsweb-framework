@@ -6,7 +6,6 @@ import org.hswebframework.web.api.crud.entity.EntityFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.boot.web.codec.CodecCustomizer;
 import org.springframework.context.annotation.Bean;
@@ -22,12 +21,10 @@ public class CustomCodecsAutoConfiguration {
 
 
         @Bean
-        Jackson2ObjectMapperBuilderCustomizer entityJackson2ObjectMapperBuilderCustomizer() {
-            return builder -> {
-                SimpleModule module = new SimpleModule();
-                module.setDeserializers(new CustomDeserializers());
-                builder.modules(module);
-            };
+        SimpleModule entityAndEnumDictModule() {
+            SimpleModule module = new SimpleModule();
+            module.setDeserializers(new CustomDeserializers());
+            return module;
         }
 
         @Bean
