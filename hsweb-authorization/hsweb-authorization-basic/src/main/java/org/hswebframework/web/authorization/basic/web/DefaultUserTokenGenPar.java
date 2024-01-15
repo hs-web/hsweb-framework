@@ -19,7 +19,10 @@ public class DefaultUserTokenGenPar implements ReactiveUserTokenGenerator, React
 
     private long timeout = TimeUnit.MINUTES.toMillis(30);
 
+    @SuppressWarnings("all")
     private String headerName = "X-Access-Token";
+
+    private String parameterName = ":X_Access_Token";
 
     @Override
     public String getTokenType() {
@@ -58,10 +61,10 @@ public class DefaultUserTokenGenPar implements ReactiveUserTokenGenerator, React
         String token = Optional.ofNullable(exchange.getRequest()
                 .getHeaders()
                 .getFirst(headerName))
-                .orElseGet(() -> exchange.getRequest().getQueryParams().getFirst(":X_Access_Token"));
+                .orElseGet(() -> exchange.getRequest().getQueryParams().getFirst(parameterName));
         if (token == null) {
             return Mono.empty();
         }
-        return Mono.just(ParsedToken.of(getTokenType(),token));
+        return Mono.just(ParsedToken.of(getTokenType(),token,(_header,_token)->_header.set(headerName,_token)));
     }
 }
