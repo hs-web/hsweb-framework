@@ -21,9 +21,9 @@ public class CustomCodecsAutoConfiguration {
 
 
         @Bean
-        SimpleModule entityAndEnumDictModule() {
+        SimpleModule entityAndEnumDictModule(EntityFactory entityFactory) {
             SimpleModule module = new SimpleModule();
-            module.setDeserializers(new CustomDeserializers());
+            module.setDeserializers(new CustomDeserializers(entityFactory));
             return module;
         }
 
