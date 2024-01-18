@@ -38,49 +38,49 @@ public class DefaultDictionaryItemService extends GenericReactiveCrudService<Dic
     @Override
     public Mono<Integer> insert(Publisher<DictionaryItemEntity> entityPublisher) {
         return super.insert(this.fillOrdinal(entityPublisher))
-                .doOnSuccess(r -> eventPublisher.publishEvent(ClearDictionaryCacheEvent.of()));
+                    .doOnSuccess(r -> eventPublisher.publishEvent(ClearDictionaryCacheEvent.of()));
     }
 
     @Override
     public Mono<Integer> insertBatch(Publisher<? extends Collection<DictionaryItemEntity>> entityPublisher) {
-        return super.insertBatch(fillCollectionOrdinal(entityPublisher))
-                .doOnSuccess(r -> eventPublisher.publishEvent(ClearDictionaryCacheEvent.of()));
+        return super.insertBatch(this.fillCollectionOrdinal(entityPublisher))
+                    .doOnSuccess(r -> eventPublisher.publishEvent(ClearDictionaryCacheEvent.of()));
     }
 
     @Override
     public Mono<Integer> updateById(String id, Mono<DictionaryItemEntity> entityPublisher) {
         return super.updateById(id, entityPublisher)
-                .doOnSuccess(r -> eventPublisher.publishEvent(ClearDictionaryCacheEvent.of()));
+                    .doOnSuccess(r -> eventPublisher.publishEvent(ClearDictionaryCacheEvent.of()));
     }
 
     @Override
     public Mono<Integer> deleteById(Publisher<String> idPublisher) {
         return super.deleteById(idPublisher)
-                .doOnSuccess(r -> eventPublisher.publishEvent(ClearDictionaryCacheEvent.of()));
+                    .doOnSuccess(r -> eventPublisher.publishEvent(ClearDictionaryCacheEvent.of()));
     }
 
     @Override
     public Mono<SaveResult> save(Publisher<DictionaryItemEntity> entityPublisher) {
         return super.save(this.fillOrdinal(entityPublisher))
-                .doOnSuccess(r -> eventPublisher.publishEvent(ClearDictionaryCacheEvent.of()));
+                    .doOnSuccess(r -> eventPublisher.publishEvent(ClearDictionaryCacheEvent.of()));
     }
 
     @Override
     public ReactiveUpdate<DictionaryItemEntity> createUpdate() {
         return super.createUpdate()
-                .onExecute((ignore, r) -> r.doOnSuccess(l -> eventPublisher.publishEvent(ClearDictionaryCacheEvent.of())));
+                    .onExecute((ignore, r) -> r.doOnSuccess(l -> eventPublisher.publishEvent(ClearDictionaryCacheEvent.of())));
     }
 
     @Override
     public ReactiveDelete createDelete() {
         return super.createDelete()
-                .onExecute((ignore, r) -> r.doOnSuccess(l -> eventPublisher.publishEvent(ClearDictionaryCacheEvent.of())));
+                    .onExecute((ignore, r) -> r.doOnSuccess(l -> eventPublisher.publishEvent(ClearDictionaryCacheEvent.of())));
     }
 
-    public Publisher<? extends Collection<DictionaryItemEntity>> fillCollectionOrdinal(Publisher<? extends Collection<DictionaryItemEntity>> entityPublisher){
+    public Publisher<? extends Collection<DictionaryItemEntity>> fillCollectionOrdinal(Publisher<? extends Collection<DictionaryItemEntity>> entityPublisher) {
         return Flux
                 .from(entityPublisher)
-                .flatMap(collection-> fillOrdinal(Flux.fromIterable(collection)).collectList());
+                .flatMap(collection -> fillOrdinal(Flux.fromIterable(collection)).collectList());
     }
 
 
@@ -91,32 +91,36 @@ public class DefaultDictionaryItemService extends GenericReactiveCrudService<Dic
                 .flatMap(group -> group
                         .collectList()
                         .flatMapMany(list -> {
-                            boolean isNull = list.stream().allMatch(item -> item.getOrdinal() == null);
+                            boolean isAllNull = list.stream().allMatch(item -> item.getOrdinal() == null);
                             boolean notNull = list.stream().allMatch(item -> item.getOrdinal() != null);
                             if (notNull) {
                                 return Flux.fromIterable(list);
                             }
-                            if (isNull) {
-                                return this
-                                        .createQuery()
-                                        .select(DictionaryItemEntity::getOrdinal)
-                                        .where(DictionaryItemEntity::getDictId, group.key())
-                                        .orderBy(SortOrder.desc(DictionaryItemEntity::getOrdinal))
-                                        .fetchOne()
-                                        .map(DictionaryItemEntity::getOrdinal)
-                                        .defaultIfEmpty(-1)
-                                        .flatMapMany(maxOrdinal -> Flux
-                                                .fromIterable(list)
-                                                .index()
-                                                .map(tp2 -> {
-                                                    DictionaryItemEntity t2 = tp2.getT2();
-                                                    int ordinal = tp2.getT1().intValue() + maxOrdinal + 1;
-                                                    t2.setOrdinal(ordinal);
-                                                    return t2;
-                                                }));
+                            if (isAllNull) {
+                                return fillOrdinal(group.key(), list);
                             }
                             return Mono.error(() -> new BusinessException("error.ordinal_can_not_null"));
 
+                        }));
+    }
+
+    private Flux<DictionaryItemEntity> fillOrdinal(String dictId, List<DictionaryItemEntity> list) {
+        return this
+                .createQuery()
+                .select(DictionaryItemEntity::getOrdinal)
+                .where(DictionaryItemEntity::getDictId, dictId)
+                .orderBy(SortOrder.desc(DictionaryItemEntity::getOrdinal))
+                .fetchOne()
+                .map(DictionaryItemEntity::getOrdinal)
+                .defaultIfEmpty(-1)
+                .flatMapMany(maxOrdinal -> Flux
+                        .fromIterable(list)
+                        .index()
+                        .map(tp2 -> {
+                            DictionaryItemEntity t2 = tp2.getT2();
+                            int ordinal = tp2.getT1().intValue() + maxOrdinal + 1;
+                            t2.setOrdinal(ordinal);
+                            return t2;
                         }));
     }
 
