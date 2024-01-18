@@ -1,7 +1,5 @@
 package org.hswebframework.web.system.authorization.api.entity;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -11,18 +9,15 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.hswebframework.ezorm.rdb.mapping.annotation.Comment;
 import org.hswebframework.ezorm.rdb.mapping.annotation.DefaultValue;
 import org.hswebframework.web.api.crud.entity.GenericEntity;
-import org.hswebframework.web.api.crud.entity.QueryParamEntity;
 import org.hswebframework.web.api.crud.entity.RecordCreationEntity;
 import org.hswebframework.web.bean.ToString;
 import org.hswebframework.web.validator.CreateGroup;
 import org.springframework.util.StringUtils;
 
 import javax.persistence.Column;
-import javax.persistence.GeneratedValue;
 import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
-import java.util.Objects;
 
 /**
  * 系统用户实体
@@ -94,6 +89,10 @@ public class UserEntity extends GenericEntity<String> implements RecordCreationE
         if (StringUtils.hasText(getId())) {
             return;
         }
-        setId(DigestUtils.md5Hex(username));
+        setId(generateId(username));
+    }
+
+    public static String generateId(String username) {
+        return DigestUtils.md5Hex(username);
     }
 }
