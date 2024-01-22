@@ -60,8 +60,17 @@ public class DefaultDictionaryItemServiceTest {
                 .save(Flux.just(itemEntity, itemEntity2))
                 .then()
                 .as(StepVerifier::create)
-                .expectError(DuplicateKeyException.class)
+                .expectComplete()
                 .verify();
+
+
+        defaultDictionaryItemService
+                .query(new QueryParamEntity().noPaging())
+                .doOnNext(System.out::println)
+                .count()
+                .as(StepVerifier::create)
+                .expectNext(1L)
+                .verifyComplete();
 
         itemEntity2.setOrdinal(null);
 
@@ -100,7 +109,7 @@ public class DefaultDictionaryItemServiceTest {
                 .doOnNext(System.out::println)
                 .count()
                 .as(StepVerifier::create)
-                .expectNext(4L)
+                .expectNext(3L)
                 .verifyComplete();
 
 

@@ -10,9 +10,11 @@ import org.hswebframework.web.dictionary.entity.DictionaryItemEntity;
 import org.hswebframework.web.dictionary.event.ClearDictionaryCacheEvent;
 import org.hswebframework.web.exception.BusinessException;
 import org.hswebframework.web.id.IDGenerator;
+import org.hswebframework.web.utils.DigestUtils;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -94,7 +96,9 @@ public class DefaultDictionaryItemService extends GenericReactiveCrudService<Dic
                             boolean isAllNull = list.stream().allMatch(item -> item.getOrdinal() == null);
                             boolean notNull = list.stream().allMatch(item -> item.getOrdinal() != null);
                             if (notNull) {
-                                return Flux.fromIterable(list);
+                                return Flux
+                                        .fromIterable(list)
+                                        .doOnNext(this::generateId);
                             }
                             if (isAllNull) {
                                 return fillOrdinal(group.key(), list);
@@ -117,12 +121,23 @@ public class DefaultDictionaryItemService extends GenericReactiveCrudService<Dic
                         .fromIterable(list)
                         .index()
                         .map(tp2 -> {
-                            DictionaryItemEntity t2 = tp2.getT2();
+                            DictionaryItemEntity item = tp2.getT2();
                             int ordinal = tp2.getT1().intValue() + maxOrdinal + 1;
-                            t2.setOrdinal(ordinal);
-                            return t2;
+                            item.setOrdinal(ordinal);
+                            generateId(item);
+                            return item;
                         }));
     }
 
+    private void generateId(DictionaryItemEntity item) {
+        if (StringUtils.hasText(item.getId())) {
+            return;
+        }
+        item.setId(generateId(item.getDictId(), item.getOrdinal()));
+    }
+
+    private String generateId(String dictId, Integer ordinal) {
+        return DigestUtils.md5Hex(String.join("|", dictId, ordinal.toString()));
+    }
 
 }

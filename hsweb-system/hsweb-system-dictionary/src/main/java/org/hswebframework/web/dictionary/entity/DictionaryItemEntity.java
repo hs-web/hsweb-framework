@@ -38,8 +38,7 @@ import java.util.List;
 @Table(name = "s_dictionary_item",indexes = {
         @Index(name = "idx_dic_item_dic_id",columnList = "dict_id"),
         @Index(name = "idx_dic_item_ordinal",columnList = "ordinal"),
-        @Index(name = "idx_dic_item_path",columnList = "path"),
-        @Index(name = "idx_dic_item_ordinal_unique", columnList = "dict_id,ordinal",unique = true)
+        @Index(name = "idx_dic_item_path",columnList = "path")
 })
 @Comment("数据字典选项")
 public class DictionaryItemEntity extends GenericTreeSortSupportEntity<String> implements EnumDict<String> {
