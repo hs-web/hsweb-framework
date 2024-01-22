@@ -1,12 +1,12 @@
 package org.hswebframework.web.dictionary.service;
 
+import io.r2dbc.spi.R2dbcDataIntegrityViolationException;
 import org.hswebframework.ezorm.rdb.exception.DuplicateKeyException;
 import org.hswebframework.web.api.crud.entity.QueryParamEntity;
 import org.hswebframework.web.dictionary.entity.DictionaryEntity;
 import org.hswebframework.web.dictionary.entity.DictionaryItemEntity;
 import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -38,55 +38,22 @@ public class DefaultDictionaryItemServiceTest {
                 .verify();
     }
 
-    @Test
-    public void save() {
+    public DictionaryItemEntity createItem(String value) {
         DictionaryItemEntity itemEntity = new DictionaryItemEntity();
         itemEntity.setDictId("demo");
-        itemEntity.setName("item1");
-        itemEntity.setValue("item1");
-        itemEntity.setText("item1");
-        itemEntity.setOrdinal(0);
+        itemEntity.setName(value);
+        itemEntity.setValue(value);
+        itemEntity.setText(value);
         itemEntity.setStatus((byte) 1);
+        return itemEntity;
+    }
 
-        DictionaryItemEntity itemEntity2 = new DictionaryItemEntity();
-        itemEntity2.setDictId("demo");
-        itemEntity2.setName("item2");
-        itemEntity2.setValue("item2");
-        itemEntity2.setText("item2");
+    @Test
+    public void save() {
+        DictionaryItemEntity itemEntity = createItem("test1");
+        itemEntity.setOrdinal(0);
+        DictionaryItemEntity itemEntity2 = createItem("test2");
         itemEntity2.setOrdinal(0);
-        itemEntity2.setStatus((byte) 1);
-
-        defaultDictionaryItemService
-                .save(Flux.just(itemEntity, itemEntity2))
-                .then()
-                .as(StepVerifier::create)
-                .expectError(DuplicateKeyException.class)
-                .verify();
-
-        itemEntity2.setOrdinal(null);
-
-        defaultDictionaryItemService
-                .save(Flux.just(itemEntity, itemEntity2))
-                .then()
-                .as(StepVerifier::create)
-                .expectErrorMessage("error.ordinal_can_not_null")
-                .verify();
-
-        itemEntity2.setOrdinal(1);
-
-        defaultDictionaryItemService
-                .save(Flux.just(itemEntity, itemEntity2))
-                .then()
-                .as(StepVerifier::create)
-                .expectComplete()
-                .verify();
-
-
-        //自动填充ordinal
-        itemEntity.setId(null);
-        itemEntity.setOrdinal(null);
-        itemEntity2.setId(null);
-        itemEntity2.setOrdinal(null);
 
         defaultDictionaryItemService
                 .save(Flux.just(itemEntity, itemEntity2))
@@ -100,10 +67,67 @@ public class DefaultDictionaryItemServiceTest {
                 .doOnNext(System.out::println)
                 .count()
                 .as(StepVerifier::create)
-                .expectNext(4L)
+                .expectNext(1L)
                 .verifyComplete();
 
+        itemEntity2.setOrdinal(null);
 
+        defaultDictionaryItemService
+                .save(Flux.just(itemEntity, itemEntity2))
+                .then()
+                .as(StepVerifier::create)
+                .expectErrorMessage("error.ordinal_can_not_null")
+                .verify();
+
+    }
+
+    @Test
+    public void testErrorOrdinal() {
+        DictionaryItemEntity itemEntity = createItem("test-error");
+        itemEntity.setOrdinal(0);
+
+        defaultDictionaryItemService
+                .save(itemEntity)
+                .then()
+                .as(StepVerifier::create)
+                .expectComplete()
+                .verify();
+
+        DictionaryItemEntity itemEntity2 = createItem("test-error");
+        itemEntity2.setOrdinal(0);
+
+        defaultDictionaryItemService
+                .insert(itemEntity2)
+                .then()
+                .as(StepVerifier::create)
+                .expectError(DuplicateKeyException.class)
+                .verify();
+
+    }
+
+    @Test
+    public void testAutoOrdinal() {
+        //自动填充ordinal
+        DictionaryItemEntity itemEntity = createItem("test-auto");
+        itemEntity.setOrdinal(null);
+        DictionaryItemEntity itemEntity2 = createItem("test-auto");
+        itemEntity2.setOrdinal(null);
+
+
+        defaultDictionaryItemService
+                .save(Flux.just(itemEntity, itemEntity2))
+                .then()
+                .as(StepVerifier::create)
+                .expectComplete()
+                .verify();
+
+        defaultDictionaryItemService
+                .query(QueryParamEntity.of("value","test-auto").noPaging())
+                .doOnNext(System.out::println)
+                .count()
+                .as(StepVerifier::create)
+                .expectNext(2L)
+                .verifyComplete();
     }
 
 }

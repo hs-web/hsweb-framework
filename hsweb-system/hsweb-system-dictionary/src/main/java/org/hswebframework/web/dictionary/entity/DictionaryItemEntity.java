@@ -24,6 +24,8 @@ import org.hswebframework.ezorm.rdb.mapping.annotation.Comment;
 import org.hswebframework.ezorm.rdb.mapping.annotation.DefaultValue;
 import org.hswebframework.web.api.crud.entity.GenericTreeSortSupportEntity;
 import org.hswebframework.web.dict.EnumDict;
+import org.hswebframework.web.utils.DigestUtils;
+import org.springframework.util.StringUtils;
 
 import javax.persistence.Column;
 import javax.persistence.Index;
@@ -38,8 +40,7 @@ import java.util.List;
 @Table(name = "s_dictionary_item",indexes = {
         @Index(name = "idx_dic_item_dic_id",columnList = "dict_id"),
         @Index(name = "idx_dic_item_ordinal",columnList = "ordinal"),
-        @Index(name = "idx_dic_item_path",columnList = "path"),
-        @Index(name = "idx_dic_item_ordinal_unique", columnList = "dict_id,ordinal",unique = true)
+        @Index(name = "idx_dic_item_path",columnList = "path")
 })
 @Comment("数据字典选项")
 public class DictionaryItemEntity extends GenericTreeSortSupportEntity<String> implements EnumDict<String> {
@@ -89,6 +90,17 @@ public class DictionaryItemEntity extends GenericTreeSortSupportEntity<String> i
 
     @Schema(description = "子节点")
     private List<DictionaryItemEntity> children;
+
+    public void generateId() {
+        if (StringUtils.hasText(this.getId())) {
+            return;
+        }
+        this.setId(generateId(this.getDictId(), this.getOrdinal()));
+    }
+
+    public static String generateId(String dictId, Integer ordinal) {
+        return DigestUtils.md5Hex(String.join("|", dictId, ordinal.toString()));
+    }
 
     @Override
     public Object getWriteJSONObject() {
