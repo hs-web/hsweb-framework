@@ -98,7 +98,7 @@ public class DefaultDictionaryItemService extends GenericReactiveCrudService<Dic
                             if (notNull) {
                                 return Flux
                                         .fromIterable(list)
-                                        .doOnNext(this::generateId);
+                                        .doOnNext(DictionaryItemEntity::generateId);
                             }
                             if (isAllNull) {
                                 return fillOrdinal(group.key(), list);
@@ -124,20 +124,11 @@ public class DefaultDictionaryItemService extends GenericReactiveCrudService<Dic
                             DictionaryItemEntity item = tp2.getT2();
                             int ordinal = tp2.getT1().intValue() + maxOrdinal + 1;
                             item.setOrdinal(ordinal);
-                            generateId(item);
+                            item.generateId();
                             return item;
                         }));
     }
 
-    private void generateId(DictionaryItemEntity item) {
-        if (StringUtils.hasText(item.getId())) {
-            return;
-        }
-        item.setId(generateId(item.getDictId(), item.getOrdinal()));
-    }
 
-    private String generateId(String dictId, Integer ordinal) {
-        return DigestUtils.md5Hex(String.join("|", dictId, ordinal.toString()));
-    }
 
 }
