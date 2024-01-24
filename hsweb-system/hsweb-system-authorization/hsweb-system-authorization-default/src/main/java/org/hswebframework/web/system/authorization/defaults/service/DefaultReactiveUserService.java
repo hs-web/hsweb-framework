@@ -64,11 +64,10 @@ public class DefaultReactiveUserService extends GenericReactiveCrudService<UserE
                     }
                     return findById(userEntity.getId())
                             .flatMap(old -> doUpdate(old, userEntity))
-                            .switchIfEmpty(
-                                    Objects.equals(userEntity.getId(), UserEntity.generateId(userEntity.getUsername())) ?
-                                            doAdd(userEntity) :
-                                            Mono.error(() -> new NotFoundException("error.user_not_found",userEntity.getId()))
-                            );
+                            .switchIfEmpty(Mono.defer(() -> Objects.equals(userEntity.getId(), UserEntity.generateId(userEntity.getUsername())) ?
+                                    doAdd(userEntity) :
+                                    Mono.error(() -> new NotFoundException("error.user_not_found", userEntity.getId()))
+                            ));
                 }).thenReturn(true);
     }
 
