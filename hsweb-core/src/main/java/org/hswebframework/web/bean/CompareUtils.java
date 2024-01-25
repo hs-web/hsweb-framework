@@ -63,11 +63,11 @@ public abstract class CompareUtils {
             return compare(((Map) target), source);
         }
 
-        if (source.getClass().isEnum()) {
+        if (source.getClass().isEnum() || source instanceof Enum) {
             return compare(((Enum) source), target);
         }
 
-        if (target.getClass().isEnum()) {
+        if (target.getClass().isEnum() || source instanceof Enum) {
             return compare(((Enum) target), source);
         }
 
