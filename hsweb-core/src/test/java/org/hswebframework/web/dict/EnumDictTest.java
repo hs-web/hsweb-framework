@@ -90,6 +90,8 @@ public class EnumDictTest {
     public static class TestEntity {
         private TestEnum testEnum = TestEnum.E1;
 
+        private TestEnumInteger testEnumInteger = TestEnumInteger.E1;
+
         private SimpleEnum simpleEnum = SimpleEnum.A;
 
         private TestEnum[] testEnums;

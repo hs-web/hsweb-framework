@@ -413,8 +413,17 @@ public interface EnumDict<V> extends JSONSerializable, Serializable {
             };
             if (EnumDict.class.isAssignableFrom(findPropertyType) && findPropertyType.isEnum()) {
                 if (node.isObject()) {
+                    JsonNode valueNode = node.get("value");
+                    Object value = null;
+                    if (valueNode != null) {
+                        if (valueNode.isTextual()) {
+                            value = valueNode.textValue();
+                        } else if (valueNode.isNumber()) {
+                            value = valueNode.numberValue();
+                        }
+                    }
                     return (EnumDict) EnumDict
-                            .findByValue(findPropertyType, node.has("value") ? node.get("value").textValue() : null)
+                            .findByValue(findPropertyType, value)
                             .orElseThrow(exceptionSupplier);
                 }
                 if (node.isNumber()) {
