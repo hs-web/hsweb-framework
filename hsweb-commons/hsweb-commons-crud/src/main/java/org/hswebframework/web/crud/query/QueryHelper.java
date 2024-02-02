@@ -650,8 +650,8 @@ public interface QueryHelper {
         return combineOneToMany(source,
                                 idMapper,
                                 list -> fetcher
-                                        .in(MethodReferenceConverter.convertToColumn(mainIdGetter), list)
-                                        .fetch(),
+                                    .in(MethodReferenceConverter.convertToColumn(mainIdGetter), list)
+                                    .fetch(),
                                 mainIdGetter,
                                 setter);
     }
@@ -676,23 +676,23 @@ public interface QueryHelper {
                                                Setter<T, List<R>> setter) {
 
         return source
-                .buffer(200)
-                .concatMap(buffer -> {
-                    Map<ID, T> mapping = buffer
-                            .stream()
-                            .collect(Collectors.toMap(idMapper, Function.identity(), (a, b) -> b));
-                    return fetcher
-                            .apply(mapping.keySet())
-                            .collect(Collectors.groupingBy(mainIdGetter))
-                            .flatMapIterable(Map::entrySet)
-                            .doOnNext(e -> {
-                                T main = mapping.get(e.getKey());
-                                if (main != null) {
-                                    setter.accept(main, e.getValue());
-                                }
-                            })
-                            .thenMany(Flux.fromIterable(buffer));
-                });
+            .buffer(200)
+            .concatMap(buffer -> {
+                Map<ID, T> mapping = buffer
+                    .stream()
+                    .collect(Collectors.toMap(idMapper, Function.identity(), (a, b) -> b));
+                return fetcher
+                    .apply(mapping.keySet())
+                    .collect(Collectors.groupingBy(mainIdGetter))
+                    .flatMapIterable(Map::entrySet)
+                    .doOnNext(e -> {
+                        T main = mapping.get(e.getKey());
+                        if (main != null) {
+                            setter.accept(main, e.getValue());
+                        }
+                    })
+                    .thenMany(Flux.fromIterable(buffer));
+            });
     }
 
     /**
@@ -710,13 +710,13 @@ public interface QueryHelper {
         return source.flatMap(result -> {
             if (result.getTotal() > 0) {
                 return transfer
-                        .apply(result.getData())
-                        .map(newDataList -> {
-                            PagerResult<T> pagerResult = PagerResult.of(result.getTotal(), newDataList);
-                            pagerResult.setPageIndex(result.getPageIndex());
-                            pagerResult.setPageSize(result.getPageSize());
-                            return pagerResult;
-                        });
+                    .apply(result.getData())
+                    .map(newDataList -> {
+                        PagerResult<T> pagerResult = PagerResult.of(result.getTotal(), newDataList);
+                        pagerResult.setPageIndex(result.getPageIndex());
+                        pagerResult.setPageSize(result.getPageSize());
+                        return pagerResult;
+                    });
             }
             //empty
             return Mono.just((PagerResult<T>) result);
@@ -733,42 +733,60 @@ public interface QueryHelper {
      */
     static <T> Mono<PagerResult<T>> queryPager(QueryParamEntity param,
                                                Supplier<ReactiveQuery<T>> query) {
+
+        return queryPager(param, query, Function.identity());
+    }
+
+    /**
+     * 指定ReactiveQuery和QueryParamEntity,执行查询并封装为分页查询结果.
+     *
+     * @param param  QueryParamEntity
+     * @param query  ReactiveQuery
+     * @param mapper 转换结果类型
+     * @param <T>    T
+     * @return PagerResult
+     */
+    static <T, R> Mono<PagerResult<R>> queryPager(QueryParamEntity param,
+                                                  Supplier<ReactiveQuery<T>> query,
+                                                  Function<T, R> mapper) {
         //如果查询参数指定了总数,表示不需要再进行count操作.
         //建议前端在使用分页查询时,切换下一页时,将第一次查询到total结果传入查询参数,可以提升查询性能.
         if (param.getTotal() != null) {
             return query
-                    .get()
-                    .setParam(param.rePaging(param.getTotal()))
-                    .fetch()
-                    .collectList()
-                    .map(list -> PagerResult.of(param.getTotal(), list, param));
+                .get()
+                .setParam(param.rePaging(param.getTotal()))
+                .fetch()
+                .map(mapper)
+                .collectList()
+                .map(list -> PagerResult.of(param.getTotal(), list, param));
         }
         //并行分页,更快,所在页码无数据时,会返回空list.
         if (param.isParallelPager()) {
             return Mono
-                    .zip(
-                            query.get().setParam(param.clone()).count(),
-                            query.get().setParam(param.clone()).fetch().collectList(),
-                            (total, data) -> PagerResult.of(total, data, param)
-                    );
+                .zip(
+                    query.get().setParam(param.clone()).count(),
+                    query.get().setParam(param.clone()).fetch().map(mapper).collectList(),
+                    (total, data) -> PagerResult.of(total, data, param)
+                );
         }
         return query
-                .get()
-                .setParam(param.clone())
-                .count()
-                .flatMap(total -> {
-                    if (total == 0) {
-                        return Mono.just(PagerResult.of(0, new ArrayList<>(), param));
-                    }
-                    //查询前根据数据总数进行重新分页:要跳转的页码没有数据则跳转到最后一页
-                    QueryParamEntity rePagingQuery = param.clone().rePaging(total);
-                    return query
-                            .get()
-                            .setParam(rePagingQuery)
-                            .fetch()
-                            .collectList()
-                            .map(list -> PagerResult.of(total, list, rePagingQuery));
-                });
+            .get()
+            .setParam(param.clone())
+            .count()
+            .flatMap(total -> {
+                if (total == 0) {
+                    return Mono.just(PagerResult.of(0, new ArrayList<>(), param));
+                }
+                //查询前根据数据总数进行重新分页:要跳转的页码没有数据则跳转到最后一页
+                QueryParamEntity rePagingQuery = param.clone().rePaging(total);
+                return query
+                    .get()
+                    .setParam(rePagingQuery)
+                    .fetch()
+                    .map(mapper)
+                    .collectList()
+                    .map(list -> PagerResult.of(total, list, rePagingQuery));
+            });
     }
 
 }
