@@ -46,8 +46,12 @@ public abstract class TreeChildTermBuilder extends AbstractTermFragmentBuilder {
                 .flatMap(t -> t.getColumn("id"))
                 .orElseThrow(() -> new IllegalArgumentException("not found 'id' column"));
 
-        return PrepareSqlFragments
-            .of().addSql(
+        PrepareSqlFragments fragments = PrepareSqlFragments.of();
+        if (term.getOptions().contains("not")) {
+            fragments.addSql("not");
+        }
+
+        return fragments.addSql(
                 "exists(select 1 from", tableName, "_p join", tableName,
                 "_c on", idColumn.getFullName("_c"), "in(", String.join(",", args), ")",
                 "and", pathColumn.getFullName("_p"), "like concat(" + pathColumn.getFullName("_c") + ",'%')",
