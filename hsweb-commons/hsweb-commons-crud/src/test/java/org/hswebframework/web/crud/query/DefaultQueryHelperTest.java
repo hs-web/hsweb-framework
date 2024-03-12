@@ -109,6 +109,28 @@ class DefaultQueryHelperTest {
     }
 
     @Test
+    public void testDistinct() {
+        DefaultQueryHelper helper = new DefaultQueryHelper(database);
+
+        database.dml()
+                .insert("s_test")
+                .value("id", "distinct-test")
+                .value("name", "testDistinct")
+                .value("testName", "distinct")
+                .value("age", 33)
+                .execute()
+                .sync();
+
+
+        helper.select("select distinct name from s_test ", 0)
+              .fetchPaged(0, 10)
+              .doOnNext(v -> System.out.println(JSON.toJSONString(v, SerializerFeature.PrettyFormat)))
+              .as(StepVerifier::create)
+              .expectNextCount(1)
+              .verifyComplete();
+    }
+
+    @Test
     public void testInner() {
         DefaultQueryHelper helper = new DefaultQueryHelper(database);
 
