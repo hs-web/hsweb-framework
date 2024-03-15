@@ -150,7 +150,7 @@ public interface QueryHelper {
     interface NativeQuerySpec<T> extends ExecuteSpec<T> {
 
         /**
-         * 设置日志,在执行sql等操作时使用次日志进行日志打印.
+         * 设置日志,在执行sql等操作时使用此日志进行日志打印.
          *
          * @param logger Logger
          * @return this

@@ -79,7 +79,10 @@ public class DefaultQueryHelper implements QueryHelper {
     public <T> NativeQuerySpec<T> select(String sql,
                                          Supplier<T> newInstance,
                                          Object... args) {
-        return new NativeQuerySpecImpl<>(this, sql, args, map -> FastBeanCopier.copy(map, newInstance), true);
+        NativeQuerySpecImpl<T> impl = new NativeQuerySpecImpl<>(
+            this, sql, args, map -> FastBeanCopier.copy(map, newInstance), true);
+        impl.setMapBuilder(ToHumpMap::new);
+        return impl;
     }
 
     @Override
@@ -100,22 +103,22 @@ public class DefaultQueryHelper implements QueryHelper {
         Table table = nameMapping.computeIfAbsent(type, this::parseTableName);
         if (StringUtils.hasText(table.schema())) {
             return database
-                    .getMetadata()
-                    .getSchema(table.schema())
-                    .flatMap(schema -> schema.getTableOrView(table.name(), false))
-                    .orElseThrow(() -> new UnsupportedOperationException("table [" + table.schema() + "." + table.name() + "] not found"));
+                .getMetadata()
+                .getSchema(table.schema())
+                .flatMap(schema -> schema.getTableOrView(table.name(), false))
+                .orElseThrow(() -> new UnsupportedOperationException("table [" + table.schema() + "." + table.name() + "] not found"));
         }
         return database
-                .getMetadata()
-                .getCurrentSchema()
-                .getTableOrView(table.name(), false)
-                .orElseThrow(() -> new UnsupportedOperationException("table [" + table.name() + "] not found"));
+            .getMetadata()
+            .getCurrentSchema()
+            .getTableOrView(table.name(), false)
+            .orElseThrow(() -> new UnsupportedOperationException("table [" + table.name() + "] not found"));
     }
 
     static RDBColumnMetadata getColumn(TableOrViewMetadata table, String column) {
         return table
-                .getColumn(column)
-                .orElseThrow(() -> new UnsupportedOperationException("column [" + column + "] not found in [" + table.getName() + "]"));
+            .getColumn(column)
+            .orElseThrow(() -> new UnsupportedOperationException("column [" + column + "] not found in [" + table.getName() + "]"));
     }
 
     Table parseTableName(Class<?> type) {
@@ -165,8 +168,8 @@ public class DefaultQueryHelper implements QueryHelper {
 
             if (col != null && !analyzer.columnIsExpression(column, context.getColumnIndex())) {
                 Object val = col.metadata == null
-                        ? getCodec().decode(context.getResult())
-                        : col.metadata.decode(context.getResult());
+                    ? getCodec().decode(context.getResult())
+                    : col.metadata.decode(context.getResult());
                 doWrap(instance, column, val);
             } else {
                 doWrap(instance, col == null ? QueryHelperUtils.toHump(column) : col.alias, getCodec().decode(context.getResult()));
@@ -186,12 +189,12 @@ public class DefaultQueryHelper implements QueryHelper {
             SqlRequest countSql = analyzer.refactorCount(param == null ? new QueryParamEntity() : param, args);
 
             return parent
-                    .database
-                    .sql()
-                    .reactive()
-                    .select(countSql, countWrapper)
-                    .single(0)
-                    .contextWrite(logContext);
+                .database
+                .sql()
+                .reactive()
+                .select(countSql, countWrapper)
+                .single(0)
+                .contextWrite(logContext);
         }
 
         @Override
@@ -208,12 +211,12 @@ public class DefaultQueryHelper implements QueryHelper {
                 request = createPagingSql(request, param.getPageIndex(), param.getPageSize());
             }
             return parent
-                    .database
-                    .sql()
-                    .reactive()
-                    .select(request, this)
-                    .map(mapper)
-                    .contextWrite(logContext);
+                .database
+                .sql()
+                .reactive()
+                .select(request, this)
+                .map(mapper)
+                .contextWrite(logContext);
         }
 
         @Override
@@ -228,10 +231,10 @@ public class DefaultQueryHelper implements QueryHelper {
             PrepareSqlFragments sql = PrepareSqlFragments.of(request.getSql(), request.getParameters());
 
             Paginator paginator = parent
-                    .database
-                    .getMetadata()
-                    .getCurrentSchema()
-                    .findFeatureNow(RDBFeatureType.paginator.getId());
+                .database
+                .getMetadata()
+                .getCurrentSchema()
+                .findFeatureNow(RDBFeatureType.paginator.getId());
 
             return paginator.doPaging(sql, pageIndex, pageSize).toRequest();
         }
@@ -239,8 +242,8 @@ public class DefaultQueryHelper implements QueryHelper {
         @Override
         public Mono<PagerResult<R>> fetchPaged(int pageIndex, int pageSize) {
             return fetchPaged(this.param == null
-                                      ? new QueryParamEntity().doPaging(pageIndex, pageSize)
-                                      : this.param.clone().<QueryParamEntity>doPaging(pageIndex, pageSize));
+                                  ? new QueryParamEntity().doPaging(pageIndex, pageSize)
+                                  : this.param.clone().<QueryParamEntity>doPaging(pageIndex, pageSize));
         }
 
         public Mono<PagerResult<R>> fetchPaged(QueryParamEntity param) {
@@ -251,43 +254,43 @@ public class DefaultQueryHelper implements QueryHelper {
 
             if (param.getTotal() != null) {
                 return sqlExecutor
-                        .select(createPagingSql(listSql, param.getPageIndex(), param.getPageSize()), this).map(mapper)
-                        .collectList()
-                        .map(list -> PagerResult.of(param.getTotal(), list, param))
-                        .contextWrite(logContext);
+                    .select(createPagingSql(listSql, param.getPageIndex(), param.getPageSize()), this).map(mapper)
+                    .collectList()
+                    .map(list -> PagerResult.of(param.getTotal(), list, param))
+                    .contextWrite(logContext);
             }
 
             SqlRequest countSql = analyzer.refactorCount(param, args);
 
             if (param.isParallelPager()) {
                 return Mono.zip(sqlExecutor
-                                        .select(countSql, countWrapper)
-                                        .single(0),
+                                    .select(countSql, countWrapper)
+                                    .single(0),
                                 sqlExecutor
-                                        .select(createPagingSql(listSql, param.getPageIndex(), param.getPageSize()), this)
-                                        .map(mapper)
-                                        .collectList(),
+                                    .select(createPagingSql(listSql, param.getPageIndex(), param.getPageSize()), this)
+                                    .map(mapper)
+                                    .collectList(),
                                 (total, list) -> PagerResult.of(total, list, param))
                            .contextWrite(logContext);
             }
 
             return sqlExecutor
-                    .select(countSql, countWrapper)
-                    .single(0)
-                    .<PagerResult<R>>flatMap(total -> {
-                        QueryParamEntity copy = param.clone();
-                        copy.rePaging(total);
-                        if (total == 0) {
-                            return Mono.just(PagerResult.of(0, new ArrayList<>(), copy));
-                        }
-                        return sqlExecutor
-                                .select(createPagingSql(listSql, copy.getPageIndex(), copy.getPageSize()), this)
-                                .map(mapper)
-                                .collectList()
-                                .map(list -> PagerResult.of(total, list, copy));
+                .select(countSql, countWrapper)
+                .single(0)
+                .<PagerResult<R>>flatMap(total -> {
+                    QueryParamEntity copy = param.clone();
+                    copy.rePaging(total);
+                    if (total == 0) {
+                        return Mono.just(PagerResult.of(0, new ArrayList<>(), copy));
+                    }
+                    return sqlExecutor
+                        .select(createPagingSql(listSql, copy.getPageIndex(), copy.getPageSize()), this)
+                        .map(mapper)
+                        .collectList()
+                        .map(list -> PagerResult.of(total, list, copy));
 
-                    })
-                    .contextWrite(logContext);
+                })
+                .contextWrite(logContext);
         }
     }
 
@@ -370,12 +373,12 @@ public class DefaultQueryHelper implements QueryHelper {
                                              String owner) {
 
                 return table
-                        .getColumns()
-                        .stream()
-                        .map(column -> Selects
-                                .column(owner == null ? column.getName() : owner + "." + column.getName())
-                                .as(alias + "." + column.getAlias()))
-                        .toArray(SelectColumnSupplier[]::new);
+                    .getColumns()
+                    .stream()
+                    .map(column -> Selects
+                        .column(owner == null ? column.getName() : owner + "." + column.getName())
+                        .as(alias + "." + column.getAlias()))
+                    .toArray(SelectColumnSupplier[]::new);
             }
 
             JoinConditionalSpecImpl getJoin() {
@@ -441,7 +444,7 @@ public class DefaultQueryHelper implements QueryHelper {
             @Override
             SelectColumnSupplier[] forSelect() {
                 this.alias = this.alias != null ?
-                        this.alias : MethodReferenceConverter.convertToColumn(setter);
+                    this.alias : MethodReferenceConverter.convertToColumn(setter);
 
                 if (column != null) {
                     String[] nestMaybe = column.split("[.]");
@@ -534,9 +537,9 @@ public class DefaultQueryHelper implements QueryHelper {
         @Override
         public <From> FromSpec<R> from(Class<From> clazz) {
             query = parent
-                    .database
-                    .dml()
-                    .query(table = parent.getTable(from = clazz));
+                .database
+                .dml()
+                .query(table = parent.getTable(from = clazz));
             return this;
         }
 
@@ -556,21 +559,21 @@ public class DefaultQueryHelper implements QueryHelper {
             operator.getParameter().setPageSize(null);
             operator.getParameter().setOrderBy(new ArrayList<>());
             return operator
-                    .select(Selects.count1().as("_total"))
-                    .fetch(countWrapper)
-                    .reactive()
-                    .single(0)
-                    .contextWrite(logContext);
+                .select(Selects.count1().as("_total"))
+                .fetch(countWrapper)
+                .reactive()
+                .single(0)
+                .contextWrite(logContext);
         }
 
         @Override
         public Flux<R> fetch() {
 
             return createQuery()
-                    .fetch(this)
-                    .reactive()
-                    .contextWrite(logContext)
-                    .as(resultHandler);
+                .fetch(this)
+                .reactive()
+                .contextWrite(logContext)
+                .as(resultHandler);
         }
 
         @Override
@@ -584,53 +587,53 @@ public class DefaultQueryHelper implements QueryHelper {
         @Override
         public Mono<PagerResult<R>> fetchPaged(int pageIndex, int pageSize) {
             return fetchPaged(param != null
-                                      ? param.clone().doPaging(pageIndex, pageSize)
-                                      : new QueryParamEntity().<QueryParamEntity>doPaging(pageIndex, pageSize));
+                                  ? param.clone().doPaging(pageIndex, pageSize)
+                                  : new QueryParamEntity().<QueryParamEntity>doPaging(pageIndex, pageSize));
         }
 
         private Mono<PagerResult<R>> fetchPaged(QueryParamEntity param) {
 
             if (param.getTotal() != null) {
                 return createQuery()
-                        .paging(param.getPageIndex(), param.getPageSize())
-                        .fetch(this)
-                        .reactive()
-                        .as(resultHandler)
-                        .collectList()
-                        .map(list -> PagerResult.of(param.getTotal(), list, param))
-                        .contextWrite(logContext);
+                    .paging(param.getPageIndex(), param.getPageSize())
+                    .fetch(this)
+                    .reactive()
+                    .as(resultHandler)
+                    .collectList()
+                    .map(list -> PagerResult.of(param.getTotal(), list, param))
+                    .contextWrite(logContext);
             }
 
             if (param.isParallelPager()) {
                 return Mono.zip(count(),
                                 createQuery()
-                                        .paging(param.getPageIndex(), param.getPageSize())
-                                        .fetch(this)
-                                        .reactive()
-                                        .as(resultHandler)
-                                        .collectList(),
+                                    .paging(param.getPageIndex(), param.getPageSize())
+                                    .fetch(this)
+                                    .reactive()
+                                    .as(resultHandler)
+                                    .collectList(),
                                 (total, list) -> PagerResult.of(total, list, param))
                            .contextWrite(logContext);
             }
 
 
             return this
-                    .count()
-                    .flatMap(i -> {
-                        QueryParamEntity copy = param.clone();
-                        copy.rePaging(i);
-                        if (i == 0) {
-                            return Mono.just(PagerResult.of(0, new ArrayList<>(), copy));
-                        }
-                        return createQuery()
-                                .paging(copy.getPageIndex(), copy.getPageSize())
-                                .fetch(this)
-                                .reactive()
-                                .as(resultHandler)
-                                .collectList()
-                                .map(list -> PagerResult.of(i, list, copy))
-                                .contextWrite(logContext);
-                    });
+                .count()
+                .flatMap(i -> {
+                    QueryParamEntity copy = param.clone();
+                    copy.rePaging(i);
+                    if (i == 0) {
+                        return Mono.just(PagerResult.of(0, new ArrayList<>(), copy));
+                    }
+                    return createQuery()
+                        .paging(copy.getPageIndex(), copy.getPageSize())
+                        .fetch(this)
+                        .reactive()
+                        .as(resultHandler)
+                        .collectList()
+                        .map(list -> PagerResult.of(i, list, copy))
+                        .contextWrite(logContext);
+                });
         }
 
         @Override
@@ -674,11 +677,11 @@ public class DefaultQueryHelper implements QueryHelper {
             Query<?, QueryParamEntity> condition = QueryParamEntity.newQuery();
 
             JoinConditionalSpecImpl spec = new JoinConditionalSpecImpl(
-                    this,
-                    type,
-                    joinTable,
-                    alias,
-                    condition
+                this,
+                type,
+                joinTable,
+                alias,
+                condition
             );
 
             joins().add(spec);
@@ -729,7 +732,7 @@ public class DefaultQueryHelper implements QueryHelper {
             public void prepare(List<Term> terms) {
                 for (Term term : terms) {
                     if (Objects.equals(TermType.eq, term.getTermType())
-                            && term.getValue() instanceof JoinConditionalSpecImpl.ColumnRef) {
+                        && term.getValue() instanceof JoinConditionalSpecImpl.ColumnRef) {
                         joinTerms.add(term);
                     }
                     if (term.getTerms() != null) {
@@ -745,18 +748,18 @@ public class DefaultQueryHelper implements QueryHelper {
                     return buildBatchHandler(join, mapping);
                 }
                 return flux -> flux
-                        .flatMap(data -> {
-                            QueryParamEntity param = new QueryParamEntity();
-                            param.setTerms(refactorTerms(data));
-                            return parent
-                                    .select(join.mainClassSafe())
-                                    .all(join.mainClass)
-                                    .from(join.mainClass)
-                                    .where(param.noPaging())
-                                    .fetch()
-                                    .collectList()
-                                    .map(list -> FastBeanCopier.copy(Collections.singletonMap(mapping.targetProperty, list), data));
-                        }, 16);
+                    .flatMap(data -> {
+                        QueryParamEntity param = new QueryParamEntity();
+                        param.setTerms(refactorTerms(data));
+                        return parent
+                            .select(join.mainClassSafe())
+                            .all(join.mainClass)
+                            .from(join.mainClass)
+                            .where(param.noPaging())
+                            .fetch()
+                            .collectList()
+                            .map(list -> FastBeanCopier.copy(Collections.singletonMap(mapping.targetProperty, list), data));
+                    }, 16);
             }
 
             private List<Term> refactorTerms(R main) {
@@ -797,26 +800,26 @@ public class DefaultQueryHelper implements QueryHelper {
                 String mainProperty = ref.getColumn().getAlias();
 
                 return flux -> QueryHelper
-                        .combineOneToMany(
-                                flux,
-                                t -> FastBeanCopier.getProperty(t, mainProperty),
-                                idList -> {
-                                    term.setColumn(joinProperty);
-                                    term.setTermType(TermType.in);
-                                    term.setValue(idList);
+                    .combineOneToMany(
+                        flux,
+                        t -> FastBeanCopier.getProperty(t, mainProperty),
+                        idList -> {
+                            term.setColumn(joinProperty);
+                            term.setTermType(TermType.in);
+                            term.setValue(idList);
 
-                                    QueryParamEntity param = new QueryParamEntity();
-                                    param.setTerms(terms);
-                                    return parent
-                                            .select(join.mainClassSafe())
-                                            .all(join.mainClass)
-                                            .from(join.mainClass)
-                                            .where(param.noPaging())
-                                            .fetch();
-                                },
-                                r -> FastBeanCopier.getProperty(r, joinProperty),
-                                (t, list) -> FastBeanCopier.copy(Collections.singletonMap(mapping.targetProperty, list), t)
-                        );
+                            QueryParamEntity param = new QueryParamEntity();
+                            param.setTerms(terms);
+                            return parent
+                                .select(join.mainClassSafe())
+                                .all(join.mainClass)
+                                .from(join.mainClass)
+                                .where(param.noPaging())
+                                .fetch();
+                        },
+                        r -> FastBeanCopier.getProperty(r, joinProperty),
+                        (t, list) -> FastBeanCopier.copy(Collections.singletonMap(mapping.targetProperty, list), t)
+                    );
             }
 
         }
@@ -1028,8 +1031,8 @@ public class DefaultQueryHelper implements QueryHelper {
                                                    String column) {
 
             RDBColumnMetadata columnMetadata = join
-                    .getColumn(column)
-                    .orElseThrow(() -> new IllegalArgumentException("column [" + column + "] not found"));
+                .getColumn(column)
+                .orElseThrow(() -> new IllegalArgumentException("column [" + column + "] not found"));
 
             getAccepter().accept(mainColumn, termType, new ColumnRef(columnMetadata, alias));
 
@@ -1176,8 +1179,8 @@ public class DefaultQueryHelper implements QueryHelper {
                              String column) {
 
             RDBColumnMetadata columnMetadata = join
-                    .getColumn(column)
-                    .orElseThrow(() -> new IllegalArgumentException("column [" + column + "] not found"));
+                .getColumn(column)
+                .orElseThrow(() -> new IllegalArgumentException("column [" + column + "] not found"));
 
             getAccepter().accept(mainColumn, termType, new JoinConditionalSpecImpl.ColumnRef(columnMetadata, alias));
 

@@ -1,5 +1,6 @@
 package org.hswebframework.web.authorization.basic.web;
 
+import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.token.ParsedToken;
 
 /**
@@ -13,6 +14,16 @@ public interface AuthorizedToken extends ParsedToken {
      * @return 令牌绑定的用户id
      */
     String getUserId();
+
+    /**
+     * 获取认证权限信息
+     *
+     * @return Authentication
+     * @since 4.0.17
+     */
+    default Authentication getAuthentication() {
+        return null;
+    }
 
     /**
      * @return 令牌有效期，单位毫秒，-1为长期有效
