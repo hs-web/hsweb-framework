@@ -41,7 +41,11 @@ public class QueryHelperUtils {
                 return col;
             }
             if (c == '_') {
-                builder.append(Character.toUpperCase(col.charAt(++i)));
+                if (i == len - 1) {
+                    builder.append('_');
+                } else {
+                    builder.append(Character.toUpperCase(col.charAt(++i)));
+                }
             } else {
                 builder.append(Character.toLowerCase(c));
             }
