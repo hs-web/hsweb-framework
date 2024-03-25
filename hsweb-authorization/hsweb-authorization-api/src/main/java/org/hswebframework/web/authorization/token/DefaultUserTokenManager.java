@@ -144,7 +144,7 @@ public class DefaultUserTokenManager implements UserTokenManager {
             return Mono.just(false);
         }
         return getByToken(token)
-                .map(t -> !t.isExpired())
+                .map(UserToken::isNormal)
                 .defaultIfEmpty(false);
     }
 

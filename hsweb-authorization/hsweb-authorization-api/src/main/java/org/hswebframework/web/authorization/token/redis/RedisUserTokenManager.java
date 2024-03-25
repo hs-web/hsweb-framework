@@ -136,7 +136,7 @@ public class RedisUserTokenManager implements UserTokenManager {
     @Override
     public Mono<Boolean> tokenIsLoggedIn(String token) {
         return getByToken(token)
-                .map(t -> !t.isExpired())
+                .map(UserToken::isNormal)
                 .defaultIfEmpty(false);
     }
 
