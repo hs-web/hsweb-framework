@@ -128,11 +128,13 @@ public class AuthorizationController {
         event.async(
                 //填充操作日志用户认证信息
                 Mono.deferContextual(ctx -> {
-                    AccessLoggerInfo loggerInfo = ctx.get(AccessLoggerInfo.class);
-                    Authentication auth = event.getAuthentication();
-                    loggerInfo.putContext("userId", auth.getUser().getId());
-                    loggerInfo.putContext("username", auth.getUser().getUsername());
-                    loggerInfo.putContext("userName", auth.getUser().getName());
+                    ctx.<AccessLoggerInfo>getOrEmpty(AccessLoggerInfo.class)
+                       .ifPresent(loggerInfo -> {
+                           Authentication auth = event.getAuthentication();
+                           loggerInfo.putContext("userId", auth.getUser().getId());
+                           loggerInfo.putContext("username", auth.getUser().getUsername());
+                           loggerInfo.putContext("userName", auth.getUser().getName());
+                       });
                     // FIXME: 2024/3/26 未传递用户维度信息,如有需要也可通过上下文传递
                     return Mono.empty();
                 })
