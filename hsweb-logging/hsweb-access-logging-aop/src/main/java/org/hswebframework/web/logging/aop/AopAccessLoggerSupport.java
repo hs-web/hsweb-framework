@@ -19,6 +19,10 @@ import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * 使用AOP记录访问日志,并触发{@link AccessLoggerListener#onLogger(AccessLoggerInfo)}
@@ -61,7 +65,8 @@ public class AopAccessLoggerSupport extends StaticMethodMatcherPointcutAdvisor {
         info.setId(IDGenerator.MD5.generate());
 
         info.setRequestTime(System.currentTimeMillis());
-        LoggerDefine define = loggerParsers.stream()
+        LoggerDefine define = loggerParsers
+                .stream()
                 .filter(parser -> parser.support(ClassUtils.getUserClass(holder.getTarget()), holder.getMethod()))
                 .findAny()
                 .map(parser -> parser.parse(holder))
@@ -71,7 +76,7 @@ public class AopAccessLoggerSupport extends StaticMethodMatcherPointcutAdvisor {
             info.setAction(define.getAction());
             info.setDescribe(define.getDescribe());
         }
-        info.setParameters(holder.getNamedArguments());
+        info.setParameters(parseParameter(holder));
         info.setTarget(holder.getTarget().getClass());
         info.setMethod(holder.getMethod());
 
@@ -84,6 +89,22 @@ public class AopAccessLoggerSupport extends StaticMethodMatcherPointcutAdvisor {
         }
         return info;
 
+    }
+
+    private Map<String, Object> parseParameter(MethodInterceptorHolder holder) {
+        Predicate<String> ignoreParameter = loggerParsers
+                .stream()
+                .map(parser -> parser.ignoreParameter(holder))
+                .filter(Objects::nonNull)
+                .reduce(Predicate::and)
+                .orElse(p -> false);
+
+        return holder
+                .getNamedArguments()
+                .entrySet()
+                .stream()
+                .filter(entry -> ignoreParameter.test(entry.getKey()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     @Override

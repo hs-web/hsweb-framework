@@ -5,9 +5,14 @@ import org.hswebframework.web.aop.MethodInterceptorHolder;
 import org.hswebframework.web.logging.AccessLogger;
 import org.hswebframework.web.logging.LoggerDefine;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Objects;
+import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 
@@ -24,16 +29,37 @@ public class DefaultAccessLoggerParser implements AccessLoggerParser {
         AccessLogger methodAnn = holder.findMethodAnnotation(AccessLogger.class);
         AccessLogger classAnn = holder.findClassAnnotation(AccessLogger.class);
         String action = Stream.of(classAnn, methodAnn)
-                .filter(Objects::nonNull)
-                .map(AccessLogger::value)
-                .reduce((c, m) -> c.concat("-").concat(m))
-                .orElse("");
+                              .filter(Objects::nonNull)
+                              .map(AccessLogger::value)
+                              .reduce((c, m) -> c.concat("-").concat(m))
+                              .orElse("");
         String describe = Stream.of(classAnn, methodAnn)
+                                .filter(Objects::nonNull)
+                                .map(AccessLogger::describe)
+                                .flatMap(Stream::of)
+                                .reduce((c, s) -> c.concat("\n").concat(s))
+                                .orElse("");
+        Set<String> ignoreParameter = Stream
+                .of(classAnn, methodAnn)
                 .filter(Objects::nonNull)
-                .map(AccessLogger::describe)
-                .flatMap(Stream::of)
-                .reduce((c, s) -> c.concat("\n").concat(s))
-                .orElse("");
-        return new LoggerDefine(action,describe);
+                .map(AccessLogger::ignoreParameter)
+                .filter(StringUtils::hasText)
+                .collect(Collectors.toSet());
+        return new LoggerDefine(action, describe);
+
+    }
+
+    @Override
+    public Predicate<String> ignoreParameter(MethodInterceptorHolder holder) {
+        AccessLogger methodAnn = holder.findMethodAnnotation(AccessLogger.class);
+        AccessLogger classAnn = holder.findClassAnnotation(AccessLogger.class);
+        Set<String> ignoreParameter = Stream
+                .of(classAnn, methodAnn)
+                .filter(Objects::nonNull)
+                .map(AccessLogger::ignoreParameter)
+                .flatMap(s-> Arrays.stream(s.split(",")))
+                .filter(StringUtils::hasText)
+                .collect(Collectors.toSet());
+        return parameter -> ignoreParameter.contains("*") || ignoreParameter.contains(parameter);
     }
 }
