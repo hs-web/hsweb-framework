@@ -68,7 +68,6 @@ public class AuthorizationController {
 
     @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE)
     @Authorize(ignore = true)
-    @AccessLogger(ignore = true)
     @Operation(summary = "登录", description = "必要参数:username,password.根据配置不同,其他参数也不同,如:验证码等.")
     public Mono<Map<String, Object>> authorizeByJson(@Parameter(example = "{\"username\":\"admin\",\"password\":\"admin\"}")
                                                      @RequestBody Mono<Map<String, Object>> parameter) {
