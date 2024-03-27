@@ -20,7 +20,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -92,12 +91,9 @@ public class AopAccessLoggerSupport extends StaticMethodMatcherPointcutAdvisor {
     }
 
     private Map<String, Object> parseParameter(MethodInterceptorHolder holder) {
-        Predicate<String> ignoreParameter = loggerParsers
+        Predicate<String> ignoreParameter = parameter -> loggerParsers
                 .stream()
-                .map(parser -> parser.ignoreParameter(holder))
-                .filter(Objects::nonNull)
-                .reduce(Predicate::and)
-                .orElse(p -> false);
+                .anyMatch(loggerParser -> loggerParser.ignoreParameter(holder).test(parameter));
 
         return holder
                 .getNamedArguments()

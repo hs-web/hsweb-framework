@@ -50,5 +50,5 @@ public @interface AccessLogger {
      * @return 忽略记载方法的请求参数
      * <p>如果不想记录方法全部或某些参数，则可以配置返回*或者对应参数名（多个用逗号分割）</p>
      */
-    String ignoreParameter() default "";
+    String[] ignoreParameter() default "";
 }
