@@ -1,5 +1,6 @@
 package org.hswebframework.web.logging.aop;
 
+import com.google.common.collect.Maps;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.hswebframework.web.aop.MethodInterceptorHolder;
 import org.hswebframework.web.id.IDGenerator;
@@ -19,6 +20,8 @@ import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Predicate;
 
 /**
  * 使用AOP记录访问日志,并触发{@link AccessLoggerListener#onLogger(AccessLoggerInfo)}
@@ -61,7 +64,8 @@ public class AopAccessLoggerSupport extends StaticMethodMatcherPointcutAdvisor {
         info.setId(IDGenerator.MD5.generate());
 
         info.setRequestTime(System.currentTimeMillis());
-        LoggerDefine define = loggerParsers.stream()
+        LoggerDefine define = loggerParsers
+                .stream()
                 .filter(parser -> parser.support(ClassUtils.getUserClass(holder.getTarget()), holder.getMethod()))
                 .findAny()
                 .map(parser -> parser.parse(holder))
@@ -71,7 +75,7 @@ public class AopAccessLoggerSupport extends StaticMethodMatcherPointcutAdvisor {
             info.setAction(define.getAction());
             info.setDescribe(define.getDescribe());
         }
-        info.setParameters(holder.getNamedArguments());
+        info.setParameters(parseParameter(holder));
         info.setTarget(holder.getTarget().getClass());
         info.setMethod(holder.getMethod());
 
@@ -84,6 +88,16 @@ public class AopAccessLoggerSupport extends StaticMethodMatcherPointcutAdvisor {
         }
         return info;
 
+    }
+
+    private Map<String, Object> parseParameter(MethodInterceptorHolder holder) {
+        Predicate<String> ignoreParameter = loggerParsers
+                .stream()
+                .map(l -> l.ignoreParameter(holder))
+                .reduce(Predicate::or)
+                .orElseGet(() -> p -> false);
+
+        return Maps.filterKeys(holder.getNamedArguments(), ignoreParameter::test);
     }
 
     @Override
