@@ -1,5 +1,6 @@
 package org.hswebframework.web.logging.aop;
 
+import com.google.common.collect.Maps;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.hswebframework.web.aop.MethodInterceptorHolder;
 import org.hswebframework.web.id.IDGenerator;
@@ -21,7 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 /**
  * 使用AOP记录访问日志,并触发{@link AccessLoggerListener#onLogger(AccessLoggerInfo)}
@@ -91,16 +91,13 @@ public class AopAccessLoggerSupport extends StaticMethodMatcherPointcutAdvisor {
     }
 
     private Map<String, Object> parseParameter(MethodInterceptorHolder holder) {
-        Predicate<String> ignoreParameter = parameter -> loggerParsers
+        Predicate<String> ignoreParameter = loggerParsers
                 .stream()
-                .anyMatch(loggerParser -> loggerParser.ignoreParameter(holder).test(parameter));
+                .map(l -> l.ignoreParameter(holder))
+                .reduce(Predicate::or)
+                .orElseGet(() -> p -> false);
 
-        return holder
-                .getNamedArguments()
-                .entrySet()
-                .stream()
-                .filter(entry -> ignoreParameter.test(entry.getKey()))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        return Maps.filterKeys(holder.getNamedArguments(), ignoreParameter::test);
     }
 
     @Override

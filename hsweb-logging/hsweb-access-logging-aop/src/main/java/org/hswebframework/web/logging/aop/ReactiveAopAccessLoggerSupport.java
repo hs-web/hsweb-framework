@@ -128,10 +128,12 @@ public class ReactiveAopAccessLoggerSupport extends StaticMethodMatcherPointcutA
                 .orElse(UNSUPPORTED);
     }
 
-    private boolean ignoreParameter(String parameter, MethodInterceptorHolder holder) {
+    private Predicate<String> ignoreParameter(MethodInterceptorHolder holder) {
         return loggerParsers
                 .stream()
-                .anyMatch(loggerParser -> loggerParser.ignoreParameter(holder).test(parameter));
+                .map(l -> l.ignoreParameter(holder))
+                .reduce(Predicate::or)
+                .orElseGet(() -> p -> false);
     }
 
     @SuppressWarnings("all")
@@ -159,7 +161,7 @@ public class ReactiveAopAccessLoggerSupport extends StaticMethodMatcherPointcutA
     private Map<String, Object> parseParameter(MethodInterceptorHolder holder) {
         Predicate<String> ignoreParameter = ignoreParameterCache.computeIfAbsent(new CacheKey(
                 ClassUtils.getUserClass(holder.getTarget()),
-                holder.getMethod()), method -> parameter -> ignoreParameter(parameter, holder));
+                holder.getMethod()), method -> ignoreParameter(holder));
 
         Map<String, Object> value = new ConcurrentHashMap<>();
 
