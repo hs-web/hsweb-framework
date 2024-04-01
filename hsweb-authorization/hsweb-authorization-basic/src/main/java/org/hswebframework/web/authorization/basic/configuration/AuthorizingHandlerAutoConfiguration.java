@@ -130,7 +130,7 @@ public class AuthorizingHandlerAutoConfiguration {
 
 
     @Bean
-    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
+    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
     public AuthorizationLoginLoggerInfoHandler authorizationLoginLoggerInfoHandler() {
         return new AuthorizationLoginLoggerInfoHandler();
     }
