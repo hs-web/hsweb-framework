@@ -13,12 +13,20 @@ public class TransactionUtils {
     public static Mono<Void> registerSynchronization(TransactionSynchronization synchronization,
                                                      Function<TransactionSynchronization, Mono<Void>> whenNoTransaction) {
         return TransactionSynchronizationManager
-                .forCurrentTransaction()
-                .doOnNext(manager -> manager.registerSynchronization(synchronization))
-                .then()
-                .onErrorResume(err -> {
-                    log.warn("register TransactionSynchronization [{}] error", synchronization, err);
+            .forCurrentTransaction()
+            .flatMap(manager -> {
+                if (manager.isSynchronizationActive()) {
+                    try {
+                        manager.registerSynchronization(synchronization);
+                    } catch (Throwable err) {
+                        log.warn("register TransactionSynchronization [{}] error", synchronization, err);
+                        return whenNoTransaction.apply(synchronization);
+                    }
+                    return Mono.empty();
+                } else {
+                    log.warn("transaction is not active,execute TransactionSynchronization [{}] immediately.", synchronization);
                     return whenNoTransaction.apply(synchronization);
-                });
+                }
+            });
     }
 }
