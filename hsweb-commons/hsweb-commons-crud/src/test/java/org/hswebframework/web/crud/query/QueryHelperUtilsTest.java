@@ -16,4 +16,15 @@ class QueryHelperUtilsTest {
         assertEquals("ruownum_",QueryHelperUtils.toHump("RUOWNUM_"));
 
     }
+
+    @Test
+    void testToSnake(){
+
+        assertEquals("test_name",QueryHelperUtils.toSnake("testName"));
+
+        assertEquals("test_name",QueryHelperUtils.toSnake("TestName"));
+
+
+
+    }
 }
