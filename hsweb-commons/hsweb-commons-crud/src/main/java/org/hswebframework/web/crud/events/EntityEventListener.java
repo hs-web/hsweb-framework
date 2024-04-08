@@ -290,7 +290,8 @@ public class EntityEventListener implements EventListener, Ordered {
                                                        after,
                                                        entityType,
                                                        EntityPrepareModifyEvent::new)
-                                    .then(Mono.fromRunnable(() -> prepareUpdateInstance(after, context)));
+                                    .then(Mono.fromRunnable(() -> prepareUpdateInstance(after, context)))
+                                    ;
 
                             }).then())
                     );
