@@ -5,7 +5,7 @@ import org.hswebframework.web.cache.ReactiveCache;
 import org.hswebframework.web.cache.ReactiveCacheManager;
 import org.hswebframework.web.cache.supports.UnSupportedReactiveCache;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
+import reactor.core.publisher.Flux;
 
 public abstract class GenericReactiveCacheSupportCrudService<E, K> implements EnableCacheReactiveCrudService<E, K> {
 
@@ -36,5 +36,10 @@ public abstract class GenericReactiveCacheSupportCrudService<E, K> implements En
 
     public String getCacheName() {
         return this.getClass().getSimpleName();
+    }
+
+
+    public Flux<E> getCacheAll() {
+        return getCache().getFlux(ALL_DATA_KEY, () -> EnableCacheReactiveCrudService.super.createQuery().fetch());
     }
 }
