@@ -1,6 +1,8 @@
 package org.hswebframework.web.crud.utils;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.transaction.NoTransactionException;
+import org.springframework.transaction.reactive.TransactionContextManager;
 import org.springframework.transaction.reactive.TransactionSynchronization;
 import org.springframework.transaction.reactive.TransactionSynchronizationManager;
 import reactor.core.publisher.Mono;
@@ -27,6 +29,7 @@ public class TransactionUtils {
                     log.warn("transaction is not active,execute TransactionSynchronization [{}] immediately.", synchronization);
                     return whenNoTransaction.apply(synchronization);
                 }
-            });
+            })
+            .onErrorResume(NoTransactionException.class, err -> whenNoTransaction.apply(synchronization));
     }
 }
