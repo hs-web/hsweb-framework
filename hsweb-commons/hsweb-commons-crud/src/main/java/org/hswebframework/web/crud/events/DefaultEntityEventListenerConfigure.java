@@ -105,7 +105,7 @@ public class DefaultEntityEventListenerConfigure implements EntityEventListenerC
                     return v;
                 }
                 v = new EnumMap<>(EntityEventType.class);
-                initByEntity(entityType, v, false);
+                initByEntity(k, v, false);
                 return v;
             });
     }
