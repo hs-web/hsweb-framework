@@ -189,7 +189,10 @@ public class DefaultReactiveUserService extends GenericReactiveCrudService<UserE
         passwordValidator.validate(newPassword);
         return findById(userId)
                 .switchIfEmpty(Mono.error(NotFoundException::new))
-                .filter(user -> passwordEncoder.encode(oldPassword, user.getSalt()).equals(user.getPassword()))
+                .filter(user -> !StringUtils.hasText(oldPassword)
+                    || passwordEncoder
+                    .encode(oldPassword, user.getSalt())
+                    .equals(user.getPassword()))
                 .switchIfEmpty(Mono.error(() -> new ValidationException("error.illegal_user_password")))
                 .flatMap(old -> {
                     String encodePwd = passwordEncoder.encode(newPassword, old.getSalt());
