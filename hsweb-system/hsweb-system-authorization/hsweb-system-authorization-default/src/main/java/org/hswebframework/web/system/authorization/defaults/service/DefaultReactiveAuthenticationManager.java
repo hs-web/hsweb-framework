@@ -5,9 +5,9 @@ import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.AuthenticationRequest;
 import org.hswebframework.web.authorization.ReactiveAuthenticationInitializeService;
 import org.hswebframework.web.authorization.ReactiveAuthenticationManagerProvider;
+import org.hswebframework.web.authorization.exception.AuthenticationException;
 import org.hswebframework.web.authorization.simple.PlainTextUsernamePasswordAuthenticationRequest;
 import org.hswebframework.web.cache.ReactiveCacheManager;
-import org.hswebframework.web.system.authorization.api.entity.UserEntity;
 import org.hswebframework.web.system.authorization.api.event.ClearUserAuthorizationCacheEvent;
 import org.hswebframework.web.system.authorization.api.service.reactive.ReactiveUserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,9 +60,15 @@ public class DefaultReactiveAuthenticationManager implements ReactiveAuthenticat
                 .filter(PlainTextUsernamePasswordAuthenticationRequest.class::isInstance)
                 .switchIfEmpty(Mono.error(() -> new UnsupportedOperationException("不支持的请求类型")))
                 .map(PlainTextUsernamePasswordAuthenticationRequest.class::cast)
-                .flatMap(pwdRequest -> reactiveUserService.findByUsernameAndPassword(pwdRequest.getUsername(), pwdRequest.getPassword()))
-                .filter(user -> Byte.valueOf((byte) 1).equals(user.getStatus()))
-                .map(UserEntity::getId)
+                .flatMap(pwdRequest -> reactiveUserService
+                    .findByUsernameAndPassword(pwdRequest.getUsername(), pwdRequest.getPassword())
+                    .flatMap(user -> {
+                        if (Byte.valueOf((byte) 1).equals(user.getStatus())) {
+                            return Mono.just(user.getId());
+                        }
+                        return Mono.error(() -> new AuthenticationException(AuthenticationException.USER_DISABLED));
+                    })
+                )
                 .flatMap(this::getByUserId);
     }
 
