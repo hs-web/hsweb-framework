@@ -16,7 +16,7 @@ import org.springframework.context.annotation.Configuration;
 public class DictionaryAutoConfiguration {
 
 
-    @Configuration(proxyBeanMethods = false)
+    @AutoConfiguration
     static class DictionaryServiceConfiguration {
 
         @Bean
@@ -41,7 +41,7 @@ public class DictionaryAutoConfiguration {
     }
 
 
-    @Configuration
+    @AutoConfiguration
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
     static class DictionaryWebFluxConfiguration {
 

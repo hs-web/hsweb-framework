@@ -4,13 +4,17 @@ import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.module.SimpleDeserializers;
+import lombok.AllArgsConstructor;
+import org.hswebframework.web.api.crud.entity.EntityFactory;
 import org.hswebframework.web.api.crud.entity.EntityFactoryHolder;
 import org.hswebframework.web.dict.EnumDict;
 
 import java.io.IOException;
 
+@AllArgsConstructor
 @SuppressWarnings("all")
 public class CustomDeserializers extends SimpleDeserializers {
+    private final EntityFactory entityFactory;
     @Override
     public JsonDeserializer<?> findBeanDeserializer(JavaType type,
                                                     DeserializationConfig config,
@@ -19,7 +23,7 @@ public class CustomDeserializers extends SimpleDeserializers {
 
         if (deserializer == null) {
 
-            Class<?> clazz = EntityFactoryHolder.get().getInstanceType(type.getRawClass(), false);
+            Class<?> clazz =entityFactory.getInstanceType(type.getRawClass(), false);
 
             if (clazz == null || clazz == type.getRawClass()) {
                 return null;

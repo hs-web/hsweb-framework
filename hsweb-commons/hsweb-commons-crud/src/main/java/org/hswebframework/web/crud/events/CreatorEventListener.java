@@ -93,10 +93,11 @@ public class CreatorEventListener implements EventListener, Ordered {
                     e.setCreateTime(now);
                 }
             } else if (entity instanceof Map) {
-                Map<Object, Object> map = ((Map) entity);
-                map.putIfAbsent("creatorId", auth.getUser().getId());
-                map.putIfAbsent("creatorName", auth.getUser().getName());
-                map.putIfAbsent("createTime", now);
+                @SuppressWarnings("all")
+                Map<Object, Object> map = ((Map<Object, Object>) entity);
+                map.putIfAbsent("creator_id", auth.getUser().getId());
+                map.putIfAbsent("creator_name", auth.getUser().getName());
+                map.putIfAbsent("create_time", now);
             }
 
 
@@ -111,10 +112,11 @@ public class CreatorEventListener implements EventListener, Ordered {
                 e.setModifyTime(now);
             }
         } else if (entity instanceof Map) {
-            Map<Object, Object> map = ((Map) entity);
-            map.putIfAbsent("modifierId", auth.getUser().getId());
-            map.putIfAbsent("modifierName", auth.getUser().getName());
-            map.putIfAbsent("modifyTime", now);
+            @SuppressWarnings("all")
+            Map<Object, Object> map = ((Map<Object, Object>) entity);
+            map.putIfAbsent("modifier_id", auth.getUser().getId());
+            map.putIfAbsent("modifier_name", auth.getUser().getName());
+            map.putIfAbsent("modify_time", now);
 
         }
     }

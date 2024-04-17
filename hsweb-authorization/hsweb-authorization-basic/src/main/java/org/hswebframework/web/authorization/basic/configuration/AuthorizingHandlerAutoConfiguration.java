@@ -7,6 +7,7 @@ import org.hswebframework.web.authorization.access.DataAccessHandler;
 import org.hswebframework.web.authorization.basic.aop.AopMethodAuthorizeDefinitionParser;
 import org.hswebframework.web.authorization.basic.embed.EmbedAuthenticationProperties;
 import org.hswebframework.web.authorization.basic.embed.EmbedReactiveAuthenticationManager;
+import org.hswebframework.web.authorization.basic.handler.AuthorizationLoginLoggerInfoHandler;
 import org.hswebframework.web.authorization.basic.handler.DefaultAuthorizingHandler;
 import org.hswebframework.web.authorization.basic.handler.UserAllowPermissionHandler;
 import org.hswebframework.web.authorization.basic.handler.access.DefaultDataAccessController;
@@ -125,5 +126,12 @@ public class AuthorizingHandlerAutoConfiguration {
             return new BasicAuthorizationTokenParser(authenticationManager, tokenManager);
         }
 
+    }
+
+
+    @Bean
+    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
+    public AuthorizationLoginLoggerInfoHandler authorizationLoginLoggerInfoHandler() {
+        return new AuthorizationLoginLoggerInfoHandler();
     }
 }

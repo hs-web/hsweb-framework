@@ -3,25 +3,29 @@ package org.hswebframework.web.crud.service;
 import org.hswebframework.ezorm.rdb.mapping.ReactiveDelete;
 import org.hswebframework.ezorm.rdb.mapping.ReactiveUpdate;
 import org.hswebframework.ezorm.rdb.mapping.defaults.SaveResult;
+import org.hswebframework.web.api.crud.entity.TransactionManagers;
 import org.hswebframework.web.cache.ReactiveCache;
 import org.hswebframework.web.crud.utils.TransactionUtils;
 import org.reactivestreams.Publisher;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.reactive.TransactionSynchronization;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
-import java.util.function.Function;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 public interface EnableCacheReactiveCrudService<E, K> extends ReactiveCrudService<E, K> {
 
     ReactiveCache<E> getCache();
 
+    String ALL_DATA_KEY = "@all";
+
     default Mono<E> findById(K id) {
-        return this
-                .getCache()
-                .getMono("id:" + id, () -> ReactiveCrudService.super.findById(id));
+        return this.getCache().getMono("id:" + id, () -> ReactiveCrudService.super.findById(id));
     }
 
     @Override
@@ -30,9 +34,21 @@ public interface EnableCacheReactiveCrudService<E, K> extends ReactiveCrudServic
     }
 
     @Override
+    @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager)
+    default Mono<Integer> updateById(K id, E data) {
+        return updateById(id, Mono.just(data));
+    }
+
+    @Override
     default Mono<Integer> updateById(K id, Mono<E> entityPublisher) {
-        return registerClearCache("id:" + id)
+        return registerClearCache(Collections.singleton("id:" + id))
                 .then(ReactiveCrudService.super.updateById(id, entityPublisher));
+    }
+
+    @Override
+    default Mono<SaveResult> save(Collection<E> collection) {
+        return registerClearCache()
+                .then(ReactiveCrudService.super.save(collection));
     }
 
     @Override
@@ -75,30 +91,32 @@ public interface EnableCacheReactiveCrudService<E, K> extends ReactiveCrudServic
         }, TransactionSynchronization::afterCommit);
     }
 
-    default Mono<Void> registerClearCache(String key) {
+    default Mono<Void> registerClearCache(Collection<?> keys) {
         return TransactionUtils.registerSynchronization(new TransactionSynchronization() {
             @Override
             @Nonnull
             public Mono<Void> afterCommit() {
-                return getCache().evict(key);
+                Set<Object> set = new HashSet<>(keys);
+                //同步删除全量数据的缓存
+                set.add(ALL_DATA_KEY);
+                return getCache().evictAll(set);
             }
         }, TransactionSynchronization::afterCommit);
     }
 
 
     @Override
+    @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager)
+    default Mono<Integer> deleteById(K id) {
+        return deleteById(Mono.just(id));
+    }
+
+    @Override
     default Mono<Integer> deleteById(Publisher<K> idPublisher) {
         Flux<K> cache = Flux.from(idPublisher).cache();
-        return TransactionUtils
-                .registerSynchronization(new TransactionSynchronization() {
-                    @Override
-                    @Nonnull
-                    public Mono<Void> afterCommit() {
-                        return cache
-                                .flatMap(id -> getCache().evict("id:" + id))
-                                .then();
-                    }
-                }, TransactionSynchronization::afterCommit)
+        return cache
+                .collectList()
+                .flatMap(this::registerClearCache)
                 .then(ReactiveCrudService.super.deleteById(cache));
     }
 

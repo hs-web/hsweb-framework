@@ -12,7 +12,7 @@ import org.hswebframework.web.datasource.DataSourceHolder;
 import org.hswebframework.web.datasource.R2dbcDataSource;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.r2dbc.connectionfactory.ConnectionFactoryUtils;
+import org.springframework.r2dbc.connection.ConnectionFactoryUtils;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;

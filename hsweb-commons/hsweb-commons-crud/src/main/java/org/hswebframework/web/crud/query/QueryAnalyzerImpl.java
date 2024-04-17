@@ -662,7 +662,8 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
 
 
             if (plainSelect.getDistinct() != null) {
-                columns.append(plainSelect.getDistinct());
+                columns.append(plainSelect.getDistinct())
+                    .append(' ');
                 fastCount = false;
             }
 

@@ -21,11 +21,9 @@ import reactor.core.publisher.Mono;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class RedisUserTokenManager implements UserTokenManager {
@@ -132,12 +130,14 @@ public class RedisUserTokenManager implements UserTokenManager {
     @Override
     public Mono<Boolean> userIsLoggedIn(String userId) {
         return getByUserId(userId)
-                .hasElements();
+                .any(UserToken::isNormal);
     }
 
     @Override
     public Mono<Boolean> tokenIsLoggedIn(String token) {
-        return operations.hasKey(getTokenRedisKey(token));
+        return getByToken(token)
+                .map(UserToken::isNormal)
+                .defaultIfEmpty(false);
     }
 
     @Override

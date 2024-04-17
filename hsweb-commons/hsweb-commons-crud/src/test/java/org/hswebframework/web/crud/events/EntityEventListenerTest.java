@@ -5,6 +5,7 @@ import org.hswebframework.ezorm.rdb.operator.builder.fragments.NativeSql;
 import org.hswebframework.web.crud.TestApplication;
 import org.hswebframework.web.crud.entity.EventTestEntity;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,6 +38,10 @@ public class EntityEventListenerTest {
     @Autowired
     private TestEntityListener listener;
 
+    @Before
+    public void before(){
+        listener.reset();
+    }
     @Test
     public void test() {
         Mono.just(EventTestEntity.of("test", 1))
@@ -50,24 +55,52 @@ public class EntityEventListenerTest {
     }
 
     @Test
-    public void testUpdateNative() {
-        EventTestEntity entity =EventTestEntity.of("test-update-native", null);
+    public void testPrepareModify() {
+        EventTestEntity entity = EventTestEntity.of("prepare", null);
         reactiveRepository
-                .insert(entity)
-                .as(StepVerifier::create)
-                .expectNext(1)
-                .verifyComplete();
+            .insert(entity)
+            .as(StepVerifier::create)
+            .expectNext(1)
+            .verifyComplete();
         Assert.assertEquals(listener.created.getAndSet(0), 1);
 
         reactiveRepository
-                .createUpdate()
-                .set(EventTestEntity::getAge, NativeSql.of("coalesce(age+1,?)",10))
-                .where()
-                .is(entity::getName)
-                .execute()
-                .as(StepVerifier::create)
-                .expectNext(1)
-                .verifyComplete();
+            .createUpdate()
+            .set("name","prepare-xx")
+            .where("id",entity.getId())
+            .execute()
+            .as(StepVerifier::create)
+            .expectNextCount(1)
+            .verifyComplete();
+
+        reactiveRepository
+            .findById(entity.getId())
+            .map(EventTestEntity::getName)
+            .as(StepVerifier::create)
+            .expectNext("prepare-0")
+            .verifyComplete();
+
+    }
+
+    @Test
+    public void testUpdateNative() {
+        EventTestEntity entity = EventTestEntity.of("test-update-native", null);
+        reactiveRepository
+            .insert(entity)
+            .as(StepVerifier::create)
+            .expectNext(1)
+            .verifyComplete();
+        Assert.assertEquals(listener.created.getAndSet(0), 1);
+
+        reactiveRepository
+            .createUpdate()
+            .set(EventTestEntity::getAge, NativeSql.of("coalesce(age+1,?)", 10))
+            .where()
+            .is(entity::getName)
+            .execute()
+            .as(StepVerifier::create)
+            .expectNext(1)
+            .verifyComplete();
 
         Assert.assertEquals(1, listener.modified.getAndSet(0));
 
@@ -94,10 +127,10 @@ public class EntityEventListenerTest {
         Assert.assertEquals(listener.beforeCreate.getAndSet(0), 2);
 
         reactiveRepository
-                .createUpdate().set("age", 3).where().in("name", "test2", "test3").execute()
-                .as(StepVerifier::create)
-                .expectNext(2)
-                .verifyComplete();
+            .createUpdate().set("age", 3).where().in("name", "test2", "test3").execute()
+            .as(StepVerifier::create)
+            .expectNext(2)
+            .verifyComplete();
 
         Assert.assertEquals(listener.modified.getAndSet(0), 2);
         Assert.assertEquals(listener.beforeModify.getAndSet(0), 2);

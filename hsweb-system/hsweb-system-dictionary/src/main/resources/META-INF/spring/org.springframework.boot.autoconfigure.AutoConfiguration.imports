@@ -1,1 +1,3 @@
 org.hswebframework.web.dictionary.configuration.DictionaryAutoConfiguration
+org.hswebframework.web.dictionary.configuration.DictionaryAutoConfiguration.DictionaryServiceConfiguration
+org.hswebframework.web.dictionary.configuration.DictionaryAutoConfiguration.DictionaryWebFluxConfiguration

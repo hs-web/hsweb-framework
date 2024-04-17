@@ -17,7 +17,10 @@ public class QueryHelperUtils {
         for (int i = 0, len = col.length(); i < len; i++) {
             char c = col.charAt(i);
             if (Character.isUpperCase(c)) {
-                builder.append('_').append(Character.toLowerCase(c));
+                if (i != 0) {
+                    builder.append('_');
+                }
+                builder.append(Character.toLowerCase(c));
             } else {
                 builder.append(c);
             }
@@ -41,7 +44,11 @@ public class QueryHelperUtils {
                 return col;
             }
             if (c == '_') {
-                builder.append(Character.toUpperCase(col.charAt(++i)));
+                if (i == len - 1) {
+                    builder.append('_');
+                } else {
+                    builder.append(Character.toUpperCase(col.charAt(++i)));
+                }
             } else {
                 builder.append(Character.toLowerCase(c));
             }
