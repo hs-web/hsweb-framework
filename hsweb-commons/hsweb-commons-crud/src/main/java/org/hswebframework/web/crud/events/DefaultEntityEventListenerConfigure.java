@@ -73,20 +73,15 @@ public class DefaultEntityEventListenerConfigure implements EntityEventListenerC
 
     @Override
     public boolean isEnabled(Class<? extends Entity> entityType) {
-        if (!enabledFeatures.containsKey(entityType)) {
-            initByEntity(entityType, getOrCreateTypeMap(entityType, enabledFeatures), false);
-        }
-        return MapUtils.isNotEmpty(enabledFeatures.get(entityType));
+        Map<EntityEventType, Set<EntityEventPhase>> enabled = initByEntityType(entityType);
+        return MapUtils.isNotEmpty(enabled);
     }
 
     @Override
     public boolean isEnabled(Class<? extends Entity> entityType,
                              EntityEventType type,
                              EntityEventPhase phase) {
-        if (!enabledFeatures.containsKey(entityType)) {
-            initByEntity(entityType, getOrCreateTypeMap(entityType, enabledFeatures), false);
-        }
-        Map<EntityEventType, Set<EntityEventPhase>> enabled = enabledFeatures.get(entityType);
+        Map<EntityEventType, Set<EntityEventPhase>> enabled = initByEntityType(entityType);
         if (MapUtils.isEmpty(enabled)) {
             return false;
         }
@@ -101,5 +96,17 @@ public class DefaultEntityEventListenerConfigure implements EntityEventListenerC
         }
 
         return false;
+    }
+
+    private Map<EntityEventType, Set<EntityEventPhase>> initByEntityType(Class<? extends Entity> entityType) {
+        return enabledFeatures
+            .compute(entityType, (k, v) -> {
+                if (v != null) {
+                    return v;
+                }
+                v = new EnumMap<>(EntityEventType.class);
+                initByEntity(k, v, false);
+                return v;
+            });
     }
 }
