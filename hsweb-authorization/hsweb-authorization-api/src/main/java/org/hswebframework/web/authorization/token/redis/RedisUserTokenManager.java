@@ -345,8 +345,9 @@ public class RedisUserTokenManager implements UserTokenManager {
         if (eventPublisher == null) {
             return notifyTokenRemoved(token.getToken());
         }
-        return Mono.fromRunnable(() -> eventPublisher.publishEvent(new UserTokenRemovedEvent(token)))
-                   .then(notifyTokenRemoved(token.getToken()));
+        return new UserTokenRemovedEvent(token)
+            .publish(eventPublisher)
+            .then(notifyTokenRemoved(token.getToken()));
     }
 
     private Mono<Void> onTokenChanged(UserToken old, SimpleUserToken newToken) {
@@ -354,7 +355,9 @@ public class RedisUserTokenManager implements UserTokenManager {
         if (eventPublisher == null) {
             return notifyTokenRemoved(newToken.getToken());
         }
-        return Mono.fromRunnable(() -> eventPublisher.publishEvent(new UserTokenChangedEvent(old, newToken)));
+        return new UserTokenChangedEvent(old, newToken)
+            .publish(eventPublisher)
+            .then(notifyTokenRemoved(newToken.getToken()));
     }
 
     private Mono<UserToken> onUserTokenCreated(SimpleUserToken token) {
@@ -363,10 +366,10 @@ public class RedisUserTokenManager implements UserTokenManager {
             return notifyTokenRemoved(token.getToken())
                     .thenReturn(token);
         }
-        return Mono
-                .fromRunnable(() -> eventPublisher.publishEvent(new UserTokenCreatedEvent(token)))
-                .then(notifyTokenRemoved(token.getToken()))
-                .thenReturn(token);
+        return new UserTokenCreatedEvent(token)
+            .publish(eventPublisher)
+            .then(notifyTokenRemoved(token.getToken()))
+            .thenReturn(token);
     }
 
 }
