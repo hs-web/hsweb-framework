@@ -26,7 +26,6 @@ import org.hswebframework.web.authorization.token.event.UserTokenChangedEvent;
 import org.hswebframework.web.authorization.token.event.UserTokenCreatedEvent;
 import org.hswebframework.web.authorization.token.event.UserTokenRemovedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -170,42 +169,39 @@ public class DefaultUserTokenManager implements UserTokenManager {
         }
         return Mono.defer(() -> {
             Set<String> tokens = getUserToken(userId);
-            tokens.forEach(token -> signOutByToken(token, false));
-            tokens.clear();
-            userStorage.remove(userId);
-            return Mono.empty();
+            return Flux
+                .fromIterable(tokens)
+                .flatMap(token -> signOutByToken(token, false))
+                .then(Mono.fromRunnable(() -> {
+                    tokens.clear();
+                    userStorage.remove(userId);
+                }));
         });
     }
 
-    private void signOutByToken(String token, boolean removeUserToken) {
-        if (token == null) {
-            return;
-        }
-        LocalUserToken tokenObject = tokenStorage.remove(token);
-        if (tokenObject != null) {
-            String userId = tokenObject.getUserId();
-            if (removeUserToken) {
-                Set<String> tokens = getUserToken(userId);
-                if (!tokens.isEmpty()) {
-                    tokens.remove(token);
+    private Mono<Void> signOutByToken(String token, boolean removeUserToken) {
+        if (token != null) {
+            LocalUserToken tokenObject = tokenStorage.remove(token);
+            if (tokenObject != null) {
+                String userId = tokenObject.getUserId();
+                if (removeUserToken) {
+                    Set<String> tokens = getUserToken(userId);
+                    if (!tokens.isEmpty()) {
+                        tokens.remove(token);
+                    }
+                    if (tokens.isEmpty()) {
+                        userStorage.remove(tokenObject.getUserId());
+                    }
                 }
-                if (tokens.isEmpty()) {
-                    userStorage.remove(tokenObject.getUserId());
-                }
+                return new UserTokenRemovedEvent(tokenObject).publish(eventPublisher);
             }
-            publishEvent(new UserTokenRemovedEvent(tokenObject));
         }
+        return Mono.empty();
     }
 
     @Override
     public Mono<Void> signOutByToken(String token) {
-        return Mono.fromRunnable(() -> signOutByToken(token, true));
-    }
-
-    protected void publishEvent(ApplicationEvent event) {
-        if (null != eventPublisher) {
-            eventPublisher.publishEvent(event);
-        }
+        return signOutByToken(token, true);
     }
 
     public Mono<Void> changeTokenState(UserToken userToken, TokenState state) {
@@ -216,7 +212,7 @@ public class DefaultUserTokenManager implements UserTokenManager {
             token.setState(state);
             syncToken(userToken);
 
-            publishEvent(new UserTokenChangedEvent(copy, userToken));
+            return new UserTokenChangedEvent(copy, userToken).publish(eventPublisher);
         }
         return Mono.empty();
     }
@@ -250,13 +246,13 @@ public class DefaultUserTokenManager implements UserTokenManager {
             detail.setType(type);
             detail.setMaxInactiveInterval(maxInactiveInterval);
             detail.setState(TokenState.normal);
-            Runnable doSign = () -> {
+            Mono<Void> doSign = Mono.defer(() -> {
                 tokenStorage.put(token, detail);
 
                 getUserToken(userId).add(token);
 
-                publishEvent(new UserTokenCreatedEvent(detail));
-            };
+                return new UserTokenCreatedEvent(detail).publish(eventPublisher);
+            });
             AllopatricLoginMode mode = allopatricLoginModes.getOrDefault(type, allopatricLoginMode);
             if (mode == AllopatricLoginMode.deny) {
                 return getByUserId(userId)
@@ -268,17 +264,16 @@ public class DefaultUserTokenManager implements UserTokenManager {
                             }
                             return Mono.empty();
                         })
-                        .then(Mono.just(detail))
-                        .doOnNext(__ -> doSign.run());
+                        .then(doSign)
+                        .thenReturn(detail);
             } else if (mode == AllopatricLoginMode.offlineOther) {
                 return getByUserId(userId)
                         .filter(userToken -> type.equals(userToken.getType()))
                         .flatMap(userToken -> changeTokenState(userToken, TokenState.offline))
-                        .then(Mono.just(detail))
-                        .doOnNext(__ -> doSign.run());
+                        .then(doSign)
+                        .thenReturn(detail);
             }
-            doSign.run();
-            return Mono.just(detail);
+            return doSign.thenReturn(detail);
         });
 
     }
