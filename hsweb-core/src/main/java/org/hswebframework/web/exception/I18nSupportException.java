@@ -54,7 +54,7 @@ public class I18nSupportException extends TraceSourceException {
 
     @Override
     public String getMessage() {
-        return super.getMessage() != null ? super.getMessage() : getLocalizedMessage();
+        return getLocalizedMessage();
     }
 
     @Override
