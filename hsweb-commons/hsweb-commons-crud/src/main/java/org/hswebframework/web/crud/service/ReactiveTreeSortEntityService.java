@@ -201,7 +201,7 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
                 .queryIncludeChildren(Collections.singletonList(id))
                 .doOnNext(e -> {
                     if (Objects.equals(ele.getParentId(), e.getId())) {
-                        throw new ValidationException("parentId", "error.tree_entity_cyclic_dependency");
+                        throw new ValidationException.NoStackTrace("parentId", "error.tree_entity_cyclic_dependency");
                     }
                 })
                 .then(Mono.just(ele));

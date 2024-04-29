@@ -19,7 +19,7 @@ public interface ReactiveServiceDeleteController<E, K> {
     default Mono<E> delete(@PathVariable K id) {
         return getService()
                 .findById(Mono.just(id))
-                .switchIfEmpty(Mono.error(NotFoundException::new))
+                .switchIfEmpty(Mono.error(NotFoundException.NoStackTrace::new))
                 .flatMap(e -> getService()
                         .deleteById(Mono.just(id))
                         .thenReturn(e));

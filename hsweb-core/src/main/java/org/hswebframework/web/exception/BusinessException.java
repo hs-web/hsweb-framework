@@ -26,12 +26,11 @@ import lombok.Getter;
  * @author zhouhao
  * @since 2.0
  */
+@Getter
 public class BusinessException extends I18nSupportException {
     private static final long serialVersionUID = 5441923856899380112L;
 
-    @Getter
     private int status = 500;
-    @Getter
     private String code;
 
     public BusinessException(String message) {
@@ -61,5 +60,41 @@ public class BusinessException extends I18nSupportException {
     public BusinessException(String message, Throwable cause, int status) {
         super(message, cause);
         this.status = status;
+    }
+
+    /**
+     * 不填充线程栈的异常，在一些对线程栈不敏感，且对异常不可控（如: 来自未认证请求产生的异常）的情况下不填充线程栈对性能有利。
+     */
+    public static class NoStackTrace extends BusinessException {
+        public NoStackTrace(String message) {
+            this(message, 500);
+        }
+
+        public NoStackTrace(String message, int status, Object... args) {
+            this(message, null, status, args);
+        }
+
+        public NoStackTrace(String message, String code) {
+            this(message, code, 500);
+        }
+
+        public NoStackTrace(String message, String code, int status, Object... args) {
+            super(message, code, status, args);
+
+        }
+
+        public NoStackTrace(String message, Throwable cause) {
+            super(message, cause);
+        }
+
+        public NoStackTrace(String message, Throwable cause, int status) {
+            super(message, cause, status);
+        }
+
+
+        @Override
+        public final synchronized Throwable fillInStackTrace() {
+            return this;
+        }
     }
 }

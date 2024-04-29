@@ -131,12 +131,12 @@ public class AuthorizationController {
             } else {
                 authenticationMono = ReactiveAuthenticationHolder
                         .get(event.getUserId())
-                        .switchIfEmpty(Mono.error(() -> new AuthenticationException(AuthenticationException.USER_DISABLED)));
+                        .switchIfEmpty(Mono.error(() -> new AuthenticationException.NoStackTrace(AuthenticationException.USER_DISABLED)));
             }
         } else {
             authenticationMono = authenticationManager
                     .authenticate(Mono.just(new PlainTextUsernamePasswordAuthenticationRequest(event.getUsername(), event.getPassword())))
-                    .switchIfEmpty(Mono.error(() -> new AuthenticationException(AuthenticationException.ILLEGAL_PASSWORD)));
+                    .switchIfEmpty(Mono.error(() -> new AuthenticationException.NoStackTrace(AuthenticationException.ILLEGAL_PASSWORD)));
         }
         return authenticationMono;
     }

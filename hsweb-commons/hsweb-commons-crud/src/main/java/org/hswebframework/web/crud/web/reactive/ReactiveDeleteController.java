@@ -19,7 +19,7 @@ public interface ReactiveDeleteController<E, K> {
     default Mono<E> delete(@PathVariable K id) {
         return getRepository()
                 .findById(Mono.just(id))
-                .switchIfEmpty(Mono.error(NotFoundException::new))
+                .switchIfEmpty(Mono.error(NotFoundException.NoStackTrace::new))
                 .flatMap(e -> getRepository()
                         .deleteById(Mono.just(id))
                         .thenReturn(e));
