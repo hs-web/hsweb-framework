@@ -9,7 +9,6 @@ import org.springframework.util.StringUtils;
 import reactor.core.publisher.Mono;
 
 import java.util.Locale;
-import java.util.Objects;
 
 /**
  * 支持国际化消息的异常,code为
@@ -54,7 +53,7 @@ public class I18nSupportException extends TraceSourceException {
 
     @Override
     public String getMessage() {
-        return super.getMessage() != null ? super.getMessage() : getLocalizedMessage();
+        return getLocalizedMessage();
     }
 
     @Override
@@ -68,8 +67,8 @@ public class I18nSupportException extends TraceSourceException {
 
     public final Mono<String> getLocalizedMessageReactive() {
         return LocaleUtils
-                .currentReactive()
-                .map(this::getLocalizedMessage);
+            .currentReactive()
+            .map(this::getLocalizedMessage);
     }
 
     public static String tryGetLocalizedMessage(Throwable error, Locale locale) {
@@ -93,7 +92,25 @@ public class I18nSupportException extends TraceSourceException {
 
     public static Mono<String> tryGetLocalizedMessageReactive(Throwable error) {
         return LocaleUtils
-                .currentReactive()
-                .map(locale -> tryGetLocalizedMessage(error, locale));
+            .currentReactive()
+            .map(locale -> tryGetLocalizedMessage(error, locale));
+    }
+
+    /**
+     * 不填充线程栈的异常，在一些对线程栈不敏感，且对异常不可控（如: 来自未认证请求产生的异常）的情况下不填充线程栈对性能有利。
+     */
+    public static class NoStackTrace extends I18nSupportException {
+        public NoStackTrace(String code, Object... args) {
+            super(code, args);
+        }
+
+        public NoStackTrace(String code, Throwable cause, Object... args) {
+            super(code, cause, args);
+        }
+
+        @Override
+        public final synchronized Throwable fillInStackTrace() {
+            return this;
+        }
     }
 }

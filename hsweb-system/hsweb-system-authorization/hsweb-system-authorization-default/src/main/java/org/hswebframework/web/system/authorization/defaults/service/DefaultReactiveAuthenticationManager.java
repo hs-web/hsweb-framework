@@ -58,7 +58,6 @@ public class DefaultReactiveAuthenticationManager implements ReactiveAuthenticat
     public Mono<Authentication> authenticate(Mono<AuthenticationRequest> request) {
         return request
                 .filter(PlainTextUsernamePasswordAuthenticationRequest.class::isInstance)
-                .switchIfEmpty(Mono.error(() -> new UnsupportedOperationException("不支持的请求类型")))
                 .map(PlainTextUsernamePasswordAuthenticationRequest.class::cast)
                 .flatMap(pwdRequest -> reactiveUserService.findByUsernameAndPassword(pwdRequest.getUsername(), pwdRequest.getPassword()))
                 .filter(user -> Byte.valueOf((byte) 1).equals(user.getStatus()))
