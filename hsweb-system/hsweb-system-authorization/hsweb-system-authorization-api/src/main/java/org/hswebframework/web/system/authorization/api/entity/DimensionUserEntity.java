@@ -5,9 +5,11 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hswebframework.ezorm.rdb.mapping.annotation.ColumnType;
 import org.hswebframework.ezorm.rdb.mapping.annotation.Comment;
+import org.hswebframework.ezorm.rdb.mapping.annotation.DefaultValue;
 import org.hswebframework.ezorm.rdb.mapping.annotation.EnumCodec;
 import org.hswebframework.web.api.crud.entity.GenericEntity;
 import org.hswebframework.web.crud.annotation.EnableEntityEvent;
+import org.hswebframework.web.crud.generator.Generators;
 import org.hswebframework.web.dict.EnumDict;
 import org.hswebframework.web.system.authorization.api.enums.DimensionUserFeature;
 import org.springframework.util.DigestUtils;
@@ -73,6 +75,11 @@ public class DimensionUserEntity extends GenericEntity<String> {
     @EnumCodec(toMask = true)
     @Schema(description = "其他功能")
     private DimensionUserFeature[] features;
+
+    @Column(updatable = false)
+    @DefaultValue(generator = Generators.CURRENT_TIME)
+    @Schema(description = "关联时间", accessMode = Schema.AccessMode.READ_ONLY)
+    private Long relationTime;
 
     public void generateId() {
         if (StringUtils.isEmpty(getId())) {
