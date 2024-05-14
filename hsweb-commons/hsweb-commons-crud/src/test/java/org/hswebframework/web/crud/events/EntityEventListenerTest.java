@@ -56,7 +56,7 @@ public class EntityEventListenerTest {
 
     @Test
     public void testPrepareModify() {
-        EventTestEntity entity = EventTestEntity.of("prepare", null);
+        EventTestEntity entity = EventTestEntity.of("prepare", 10);
         reactiveRepository
             .insert(entity)
             .as(StepVerifier::create)
@@ -67,6 +67,7 @@ public class EntityEventListenerTest {
         reactiveRepository
             .createUpdate()
             .set("name","prepare-xx")
+            .set("age",20)
             .where("id",entity.getId())
             .execute()
             .as(StepVerifier::create)

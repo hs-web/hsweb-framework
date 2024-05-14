@@ -15,6 +15,7 @@ import org.hswebframework.ezorm.rdb.mapping.events.MappingEventTypes;
 import org.hswebframework.ezorm.rdb.mapping.events.ReactiveResultHolder;
 import org.hswebframework.ezorm.rdb.metadata.RDBColumnMetadata;
 import org.hswebframework.ezorm.rdb.operator.builder.fragments.NativeSql;
+import org.hswebframework.ezorm.rdb.operator.dml.update.UpdateOperator;
 import org.hswebframework.web.api.crud.entity.Entity;
 import org.hswebframework.web.bean.FastBeanCopier;
 import org.hswebframework.web.event.AsyncEvent;
@@ -234,25 +235,40 @@ public class EntityEventListener implements EventListener, Ordered {
             .orElseThrow(UnsupportedOperationException::new);
 
         Object afterEntity = after.get(0);
+        Map<String, Object> copy = new HashMap<>(instance);
 
-        for (Map.Entry<String, Object> entry : instance.entrySet()) {
-            RDBColumnMetadata column = mapping.getColumnByName(entry.getKey()).orElse(null);
-            if (column == null) {
+        Map<String, Object> afterMap = FastBeanCopier.copy(afterEntity, new HashMap<>());
+
+        //设置实体类中指定的字段值
+        for (Map.Entry<String, Object> entry : afterMap.entrySet()) {
+            RDBColumnMetadata column = mapping.getColumnByProperty(entry.getKey()).orElse(null);
+            if (column == null || !column.isUpdatable()) {
                 continue;
             }
-            Object value = entry.getValue();
-            if (value instanceof NullValue ||
-                value instanceof NativeSql) {
+
+            Object origin = copy.remove(column.getAlias());
+            if (origin == null) {
+                origin = copy.remove(column.getName());
+            }
+
+            //按sql更新 忽略
+            if (origin instanceof NativeSql) {
                 continue;
             }
-            entry.setValue(
-                GlobalConfig
-                    .getPropertyOperator()
-                    .getProperty(afterEntity, column.getAlias())
-                    .orElse(entry.getValue())
-            );
-
+            //设置新的值
+            instance.put(column.getAlias(), entry.getValue());
         }
+
+        DSLUpdate<?, ?> operator = ctx
+            .get(ContextKeys.<DSLUpdate<?, ?>>source())
+            .orElse(null);
+        if (operator != null) {
+            //不更新设置为null的字段
+            for (String col : copy.keySet()) {
+                operator.excludes(col);
+            }
+        }
+
     }
 
     protected void handleUpdateBefore(DSLUpdate<?, ?> update, EventContext context) {
@@ -286,12 +302,17 @@ public class EntityEventListener implements EventListener, Ordered {
                                 updated.set(Tuples.of(list, after));
                                 context.set(readyToUpdateBeforeContextKey, list);
                                 context.set(readyToUpdateAfterContextKey, after);
+                                EntityPrepareModifyEvent event = new EntityPrepareModifyEvent(list, after, entityType);
+
                                 return sendUpdateEvent(list,
                                                        after,
                                                        entityType,
-                                                       EntityPrepareModifyEvent::new)
-                                    .then(Mono.fromRunnable(() -> prepareUpdateInstance(after, context)))
-                                    ;
+                                                       (_list, _after, _type) -> event)
+                                    .then(Mono.fromRunnable(() -> {
+                                        if (event.hasListener()) {
+                                            prepareUpdateInstance(after, context);
+                                        }
+                                    }));
 
                             }).then())
                     );
