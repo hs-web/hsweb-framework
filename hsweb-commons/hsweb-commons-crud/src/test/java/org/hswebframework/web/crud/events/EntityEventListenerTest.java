@@ -39,9 +39,10 @@ public class EntityEventListenerTest {
     private TestEntityListener listener;
 
     @Before
-    public void before(){
+    public void before() {
         listener.reset();
     }
+
     @Test
     public void test() {
         Mono.just(EventTestEntity.of("test", 1))
@@ -51,6 +52,35 @@ public class EntityEventListenerTest {
             .verifyComplete();
         Assert.assertEquals(listener.created.getAndSet(0), 1);
 
+
+    }
+
+    @Test
+    public void testPrepareModifySetNull() {
+        EventTestEntity entity = EventTestEntity.of("prepare-setNull", 20);
+        reactiveRepository
+            .insert(entity)
+            .as(StepVerifier::create)
+            .expectNext(1)
+            .verifyComplete();
+        Assert.assertEquals(listener.created.getAndSet(0), 1);
+
+        reactiveRepository
+            .createUpdate()
+            .set("name", "prepare-setNull-set")
+            .setNull("age")
+            .where("id", entity.getId())
+            .execute()
+            .as(StepVerifier::create)
+            .expectNextCount(1)
+            .verifyComplete();
+
+        reactiveRepository
+            .findById(entity.getId())
+            .mapNotNull(EventTestEntity::getAge)
+            .as(StepVerifier::create)
+            .expectComplete()
+            .verify();
 
     }
 
@@ -66,9 +96,9 @@ public class EntityEventListenerTest {
 
         reactiveRepository
             .createUpdate()
-            .set("name","prepare-xx")
-            .set("age",20)
-            .where("id",entity.getId())
+            .set("name", "prepare-xx")
+            .set("age", 20)
+            .where("id", entity.getId())
             .execute()
             .as(StepVerifier::create)
             .expectNextCount(1)

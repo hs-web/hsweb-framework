@@ -263,10 +263,16 @@ public class EntityEventListener implements EventListener, Ordered {
             .get(ContextKeys.<DSLUpdate<?, ?>>source())
             .orElse(null);
         if (operator != null) {
-            //不更新设置为null的字段
-            for (String col : copy.keySet()) {
-                operator.excludes(col);
+            for (Map.Entry<String, Object> entry : copy.entrySet()) {
+                Object val = entry.getValue();
+                if (val instanceof NullValue || val instanceof NativeSql) {
+                    continue;
+                }
+                for (String col : copy.keySet()) {
+                    operator.excludes(col);
+                }
             }
+
         }
 
     }
