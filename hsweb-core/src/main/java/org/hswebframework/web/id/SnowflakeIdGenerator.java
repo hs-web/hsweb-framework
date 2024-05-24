@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.security.SecureRandom;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -32,7 +33,7 @@ public class SnowflakeIdGenerator {
     private static final SnowflakeIdGenerator generator;
 
     static {
-        Random random = new Random();
+        Random random = new SecureRandom();
         long workerId = Long.getLong("id-worker", random.nextInt(31));
         long dataCenterId = Long.getLong("id-datacenter", random.nextInt(31));
         generator = new SnowflakeIdGenerator(workerId, dataCenterId);

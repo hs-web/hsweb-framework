@@ -119,6 +119,7 @@ public interface Permission extends Serializable {
      * @see DataAccessConfig
      * @see org.hswebframework.web.authorization.access.DataAccessController
      */
+    @Deprecated
     Set<DataAccessConfig> getDataAccesses();
 
 
