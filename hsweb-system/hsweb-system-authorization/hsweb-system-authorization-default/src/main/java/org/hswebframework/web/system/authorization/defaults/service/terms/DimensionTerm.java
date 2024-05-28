@@ -6,10 +6,12 @@ import org.hswebframework.ezorm.core.dsl.Query;
 import org.hswebframework.ezorm.core.param.QueryParam;
 import org.hswebframework.ezorm.core.param.Term;
 import org.hswebframework.ezorm.rdb.metadata.RDBColumnMetadata;
+import org.hswebframework.ezorm.rdb.operator.builder.fragments.BatchSqlFragments;
 import org.hswebframework.ezorm.rdb.operator.builder.fragments.EmptySqlFragments;
 import org.hswebframework.ezorm.rdb.operator.builder.fragments.PrepareSqlFragments;
 import org.hswebframework.ezorm.rdb.operator.builder.fragments.SqlFragments;
 import org.hswebframework.ezorm.rdb.operator.builder.fragments.term.AbstractTermFragmentBuilder;
+import org.hswebframework.ezorm.rdb.utils.SqlUtils;
 
 import java.util.List;
 import java.util.StringJoiner;
@@ -27,6 +29,8 @@ public class DimensionTerm extends AbstractTermFragmentBuilder {
         super("dimension", "和维度关联的数据");
     }
 
+    private static final SqlFragments USER_ID_IN = SqlFragments.of("and d.user_id in(");
+
     public static <T extends Conditional<?>> T inject(T query,
                                                       String column,
                                                       String dimensionType,
@@ -34,6 +38,7 @@ public class DimensionTerm extends AbstractTermFragmentBuilder {
         return inject(query, column, dimensionType, false, false, userId);
     }
 
+    @SuppressWarnings("all")
     public static <T extends Conditional<?>> T inject(T query,
                                                       String column,
                                                       String dimensionType,
@@ -67,21 +72,26 @@ public class DimensionTerm extends AbstractTermFragmentBuilder {
         if (CollectionUtils.isEmpty(options)) {
             throw new IllegalArgumentException("查询条件错误,正确格式:" + column.getAlias() + "$dimension${type}$[not]");
         }
-        PrepareSqlFragments fragments = PrepareSqlFragments.of();
+        BatchSqlFragments fragments = new BatchSqlFragments(6, 2);
 
         if (options.contains("not")) {
-            fragments.addSql("not ");
+            fragments.add(SqlFragments.NOT);
         }
         fragments
-                .addSql("exists(select 1 from", getTableName("s_dimension_user", column), "d where d.dimension_type_id = ? and d.dimension_id =", columnFullName)
-                .addParameter(options.get(0));
+            .addSql("exists(select 1 from",
+                    getTableName("s_dimension_user", column),
+                    "d where d.dimension_type_id = ? and d.dimension_id =", columnFullName)
+            .addParameter(options.get(0));
 
         if (!options.contains("any")) {
-            fragments.addSql("and d.user_id in(", values.stream().map(r -> "?").collect(Collectors.joining(",")), ")")
-                     .addParameter(values);
+            fragments
+                .add(USER_ID_IN)
+                .add(SqlUtils.createQuestionMarks(values.size()))
+                .add(SqlFragments.RIGHT_BRACKET)
+                .addParameter(values);
         }
-
-        fragments.addSql(")");
+        
+        fragments.add(SqlFragments.COMMA);
         return fragments;
     }
 }
