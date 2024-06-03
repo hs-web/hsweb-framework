@@ -90,8 +90,8 @@ public class DimensionTerm extends AbstractTermFragmentBuilder {
                 .add(SqlFragments.RIGHT_BRACKET)
                 .addParameter(values);
         }
-        
-        fragments.add(SqlFragments.COMMA);
+
+        fragments.add(SqlFragments.RIGHT_BRACKET);
         return fragments;
     }
 }
