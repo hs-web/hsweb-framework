@@ -18,7 +18,7 @@
 
 package org.hswebframework.web.authorization;
 
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.hswebframework.web.authorization.simple.SimpleAuthentication;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;

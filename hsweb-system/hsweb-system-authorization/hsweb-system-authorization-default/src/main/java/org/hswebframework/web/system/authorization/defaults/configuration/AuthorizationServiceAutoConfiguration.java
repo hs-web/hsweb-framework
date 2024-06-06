@@ -26,8 +26,8 @@ import org.springframework.context.annotation.Configuration;
 public class AuthorizationServiceAutoConfiguration {
 
     @AutoConfiguration
-    @AutoConfigureBefore(DefaultAuthorizationAutoConfiguration.class)
-    static class ReactiveAuthorizationServiceAutoConfiguration {
+    public static class ReactiveAuthorizationServiceAutoConfiguration {
+
         @ConditionalOnBean(ReactiveRepository.class)
         @Bean
         public ReactiveUserService reactiveUserService() {
