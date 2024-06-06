@@ -84,7 +84,7 @@
         <javassist.version>3.29.2-GA</javassist.version>
 
         <fastjson.version>1.2.83</fastjson.version>
-        <h2.version>2.1.212</h2.version>
+        <h2.version>2.2.220</h2.version>
         <mysql.version>5.1.39</mysql.version>
         <cglib.version>3.2.2</cglib.version>
         <aspectj.version>1.6.12</aspectj.version>
