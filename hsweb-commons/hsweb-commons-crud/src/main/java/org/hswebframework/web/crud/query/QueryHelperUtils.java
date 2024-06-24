@@ -1,6 +1,7 @@
 package org.hswebframework.web.crud.query;
 
 import io.netty.util.concurrent.FastThreadLocal;
+import org.hswebframework.web.exception.BusinessException;
 
 public class QueryHelperUtils {
 
@@ -55,5 +56,23 @@ public class QueryHelperUtils {
         }
         return builder.toString();
 
+    }
+
+    public static void assertLegalColumn(String col) {
+        if (!isLegalColumn(col)) {
+            throw new BusinessException.NoStackTrace("error.illegal_column_name", col);
+        }
+    }
+
+    public static boolean isLegalColumn(String col) {
+        int len = col.length();
+        for (int i = 0; i < len; i++) {
+            char c = col.charAt(i);
+            if (c == '_'  || c == '$' || Character.isLetterOrDigit(c)) {
+                continue;
+            }
+            return false;
+        }
+        return true;
     }
 }

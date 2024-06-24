@@ -27,4 +27,16 @@ class QueryHelperUtilsTest {
 
 
     }
+
+
+    @Test
+    void testLegal(){
+
+        assertTrue(QueryHelperUtils.isLegalColumn("test_name"));
+        assertFalse(QueryHelperUtils.isLegalColumn("test-name"));
+
+        assertFalse(QueryHelperUtils.isLegalColumn("test\nname"));
+
+
+    }
 }

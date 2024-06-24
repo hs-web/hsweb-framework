@@ -142,8 +142,63 @@ class QueryAnalyzerImplTest {
                 "FROM Tree AS t1;");
 
         SqlRequest request = analyzer
-                .refactor(QueryParamEntity.of(),1);
+                .refactor(QueryParamEntity.of().and("id","eq","test"),1);
 
+        System.out.println(request);
+    }
+
+    @Test
+    void testTableFunction(){
+        QueryAnalyzerImpl analyzer = new QueryAnalyzerImpl(
+            database,
+            "select t.key from json_each_text('{\"name\":\"test\"}') t");
+
+        SqlRequest request = analyzer
+            .refactor(QueryParamEntity.of().and("key","like","test%"),1);
+        System.out.println(request);
+    }
+
+    @Test
+    void testTableFunctionJoin(){
+        QueryAnalyzerImpl analyzer = new QueryAnalyzerImpl(
+            database,
+            "select t1.*,t2.key from s_test t1 left join json_each_text('{\"name\":\"test\"}') t2 on t2.key='test' and t2.value='test1'");
+
+        SqlRequest request = analyzer
+            .refactor(QueryParamEntity.of().and("t2.key","like","test%"),1);
+        System.out.println(request);
+    }
+
+    @Test
+    void testValues(){
+        QueryAnalyzerImpl analyzer = new QueryAnalyzerImpl(
+            database,
+            "select * from (values (1,2),(3,4)) t(a,b)");
+
+        SqlRequest request = analyzer
+            .refactor(QueryParamEntity.of().and("a","eq",1),1);
+        System.out.println(request);
+    }
+
+    @Test
+    void testLateralSubSelect(){
+        QueryAnalyzerImpl analyzer = new QueryAnalyzerImpl(
+            database,
+            "select * from s_test t, lateral(select * from s_test where id = t.id) t2");
+
+        SqlRequest request = analyzer
+            .refactor(QueryParamEntity.of().and("t2.id","eq","test"),1);
+        System.out.println(request);
+    }
+
+    @Test
+    void testParenthesisFrom(){
+        QueryAnalyzerImpl analyzer = new QueryAnalyzerImpl(
+            database,
+            "select * from (s_test) t");
+
+        SqlRequest request = analyzer
+            .refactor(QueryParamEntity.of().and("t.id","eq","test"),1);
         System.out.println(request);
     }
 }
