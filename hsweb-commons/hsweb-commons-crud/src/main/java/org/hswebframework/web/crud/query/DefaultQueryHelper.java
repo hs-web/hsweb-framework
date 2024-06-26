@@ -63,7 +63,9 @@ public class DefaultQueryHelper implements QueryHelper {
 
     private final Map<String, QueryAnalyzer> analyzerCaches = new ConcurrentHashMap<>();
 
-    static final ResultWrapper<Integer, ?> countWrapper = ResultWrappers.column("_total", i -> ((Number) i).intValue());
+    static final ResultWrapper<Integer, ?> countWrapper =
+        ResultWrappers.column("_total", i -> ((Number) i).intValue())
+      ;
 
     @Override
     public QueryAnalyzer analysis(String selectSql) {

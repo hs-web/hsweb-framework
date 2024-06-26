@@ -371,7 +371,7 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
         aThis.getFromItem().accept(this);
         String alias = parsePlainName(aThis.getAlias() == null ? null : aThis.getAlias().getName());
         if (alias != null) {
-           this.select = select.newSelectAlias(alias);
+            this.select = select.newSelectAlias(alias);
         }
     }
 
@@ -893,7 +893,10 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
 
             if (fastCount) {
                 if (FAST_COUNT == null) {
-                    FAST_COUNT = SqlFragments.of(prefix, "SELECT count(1) as _total", from);
+                    FAST_COUNT = SqlFragments.of(
+                        prefix, "SELECT count(1) as",
+                        database.getMetadata().getDialect().quote("_total"),
+                        from);
                 }
                 //SELECT count(1) as _total from
                 sql.add(FAST_COUNT);
@@ -905,7 +908,10 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
             } else {
                 if (SLOW_COUNT == null) {
                     SLOW_COUNT = SqlFragments
-                        .of(prefix, "SELECT count(1) as _total from (SELECT", columns, from);
+                        .of(prefix,
+                            "SELECT count(1) as",
+                            database.getMetadata().getDialect().quote("_total"),
+                            "from (SELECT", columns, from);
                 }
 
                 sql.add(SLOW_COUNT);
