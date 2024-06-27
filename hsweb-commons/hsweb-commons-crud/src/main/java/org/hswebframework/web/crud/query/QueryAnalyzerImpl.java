@@ -256,7 +256,7 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
         } else {
             schemaMetadata = database.getMetadata().getCurrentSchema();
             if (!virtualTable.containsKey(name)) {
-                tableName.setSchemaName(schemaMetadata.getName());
+                tableName.setSchemaName(schemaMetadata.getQuoteName());
             }
         }
 
@@ -269,7 +269,7 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
         if (tableMetadata == null) {
             throw new IllegalStateException("table or view " + tableName.getName() + " not found in " + schemaMetadata.getName());
         }
-
+        tableName.setName(tableMetadata.getRealName());
         QueryAnalyzer.Table table = new QueryAnalyzer.Table(
             parsePlainName(alias),
             tableMetadata
@@ -339,6 +339,7 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
         }
 
         view.setName(name);
+        view.setRealName(name);
         view.setSchema(database.getMetadata().getCurrentSchema());
         view.setAlias(name);
 
@@ -403,7 +404,7 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
                 String alias = table == select.table ? column.getAlias() : table.alias + "." + column.getAlias();
 
                 container.add(new QueryAnalyzer.Column(
-                    column.getName(),
+                    column.getRealName(),
                     alias,
                     table.alias,
                     column
@@ -519,7 +520,7 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
             throw new IllegalStateException("column [" + column.getColumnName() + "] not found in " + table.metadata.getName());
         }
 
-        select.columnList.add(new QueryAnalyzer.Column(metadata.getName(), aliasName, table.alias, metadata));
+        select.columnList.add(new QueryAnalyzer.Column(metadata.getRealName(), aliasName, table.alias, metadata));
 
 
     }
@@ -670,13 +671,15 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
                 metadata = table.metadata;
             }
 
-            String colName = col.metadata != null ? col.metadata.getName() : col.name;
-            Column _col = col;
-            Table _table = table;
+            String colName = col.metadata != null ? col.metadata.getRealName() : col.name;
+            String fullName = col.metadata != null
+                ? col.getMetadata().getFullName(table.alias)
+                : table.alias + "." + dialect.quote(colName, false);
+
             return metadata
                 .findFeature(createFeatureId(term.getTermType()))
                 .map(feature -> feature.createFragments(
-                    _table.alias + "." + dialect.quote(colName, _col.metadata != null), _col.metadata, term))
+                    fullName, col.metadata, term))
                 .orElse(EmptySqlFragments.INSTANCE);
         }
     }
@@ -727,7 +730,9 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
                     continue;
                 }
 
-                columns.append(column.owner).append('.').append(dialect.quote(column.name, column.metadata != null))
+                columns.append(column.owner)
+                       .append('.')
+                       .append(dialect.quote(column.name, column.metadata != null && !column.metadata.realNameDetected()))
                        .append(" as ")
                        .append(dialect.quote(column.alias, false));
             }
@@ -839,7 +844,8 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
 
         @Override
         public void visit(ValuesStatement aThis) {
-
+            PrepareStatementVisitor visitor = new PrepareStatementVisitor();
+            aThis.accept(visitor);
         }
 
         public Object[] getPrefixParameters(Object... args) {

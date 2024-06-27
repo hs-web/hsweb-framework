@@ -114,11 +114,11 @@ public interface EnumDict<V> extends JSONSerializable, Serializable {
             }
         }
         return this == v
-                || getValue() == v
-                || Objects.equals(getValue(), v)
-                || Objects.equals(ordinal(), v)
-                || String.valueOf(getValue()).equalsIgnoreCase(String.valueOf(v))
-                || getText().equalsIgnoreCase(String.valueOf(v)
+            || getValue() == v
+            || Objects.equals(getValue(), v)
+            || Objects.equals(ordinal(), v)
+            || String.valueOf(getValue()).equalsIgnoreCase(String.valueOf(v))
+            || getText().equalsIgnoreCase(String.valueOf(v)
         );
     }
 
@@ -183,8 +183,8 @@ public interface EnumDict<V> extends JSONSerializable, Serializable {
             return Optional.empty();
         }
         return find(type, e -> e.getValue() == value || e.getValue().equals(value) || String
-                .valueOf(e.getValue())
-                .equalsIgnoreCase(String.valueOf(value)));
+            .valueOf(e.getValue())
+            .equalsIgnoreCase(String.valueOf(value)));
     }
 
     /**
@@ -358,9 +358,9 @@ public interface EnumDict<V> extends JSONSerializable, Serializable {
                     if (value instanceof Map) {
                         return (T) EnumDict.find(((Class) type), ((Map) value).get("value"))
                                            .orElseGet(() ->
-                                                              EnumDict
-                                                                      .find(((Class) type), ((Map) value).get("text"))
-                                                                      .orElse(null));
+                                                          EnumDict
+                                                              .find(((Class) type), ((Map) value).get("text"))
+                                                              .orElse(null));
                     }
                 }
 
@@ -400,14 +400,14 @@ public interface EnumDict<V> extends JSONSerializable, Serializable {
             }
             Supplier<ValidationException> exceptionSupplier = () -> {
                 List<Object> values = Stream
-                        .of(findPropertyType.getEnumConstants())
-                        .map(Enum.class::cast)
-                        .map(e -> {
-                            if (e instanceof EnumDict) {
-                                return ((EnumDict) e).getValue();
-                            }
-                            return e.name();
-                        }).collect(Collectors.toList());
+                    .of(findPropertyType.getEnumConstants())
+                    .map(Enum.class::cast)
+                    .map(e -> {
+                        if (e instanceof EnumDict) {
+                            return ((EnumDict) e).getValue();
+                        }
+                        return e.name();
+                    }).collect(Collectors.toList());
 
                 return new ValidationException(currentName, "validation.parameter_does_not_exist_in_enums", currentName);
             };
@@ -423,38 +423,38 @@ public interface EnumDict<V> extends JSONSerializable, Serializable {
                         }
                     }
                     return (EnumDict) EnumDict
-                            .findByValue(findPropertyType, value)
-                            .orElseThrow(exceptionSupplier);
+                        .findByValue(findPropertyType, value)
+                        .orElseThrow(exceptionSupplier);
                 }
                 if (node.isNumber()) {
                     return (EnumDict) EnumDict
-                            .find(findPropertyType, node.numberValue())
-                            .orElseThrow(exceptionSupplier);
+                        .find(findPropertyType, node.numberValue())
+                        .orElseThrow(exceptionSupplier);
                 }
                 if (node.isTextual()) {
                     return (EnumDict) EnumDict
-                            .find(findPropertyType, node.textValue())
-                            .orElseThrow(exceptionSupplier);
+                        .find(findPropertyType, node.textValue())
+                        .orElseThrow(exceptionSupplier);
                 }
                 return exceptionSupplier.get();
             }
             if (findPropertyType.isEnum()) {
                 return Stream
-                        .of(findPropertyType.getEnumConstants())
-                        .filter(o -> {
-                            if (node.isTextual()) {
-                                return node.textValue().equalsIgnoreCase(((Enum) o).name());
-                            }
-                            if (node.isNumber()) {
-                                return node.intValue() == ((Enum) o).ordinal();
-                            }
-                            return false;
-                        })
-                        .findAny()
-                        .orElseThrow(exceptionSupplier);
+                    .of(findPropertyType.getEnumConstants())
+                    .filter(o -> {
+                        if (node.isTextual()) {
+                            return node.textValue().equalsIgnoreCase(((Enum) o).name());
+                        }
+                        if (node.isNumber()) {
+                            return node.intValue() == ((Enum) o).ordinal();
+                        }
+                        return false;
+                    })
+                    .findAny()
+                    .orElseThrow(exceptionSupplier);
             }
 
-            log.warn("unsupported deserialize enum json : {}", node);
+            log.warn("unsupported deserialize enum json : {} for: {}@{}", node, currentName, currentValue);
             return null;
         }
     }
@@ -478,9 +478,9 @@ public interface EnumDict<V> extends JSONSerializable, Serializable {
      */
     static EnumDict<String> create(String value, String text) {
         return DefaultItemDefine
-                .builder()
-                .value(value)
-                .text(text)
-                .build();
+            .builder()
+            .value(value)
+            .text(text)
+            .build();
     }
 }

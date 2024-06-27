@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.hswebframework.ezorm.core.param.Sort;
+import org.hswebframework.ezorm.rdb.executor.SqlRequest;
+import org.hswebframework.ezorm.rdb.executor.SqlRequests;
 import org.hswebframework.ezorm.rdb.operator.DatabaseOperator;
 import org.hswebframework.web.api.crud.entity.QueryParamEntity;
 import org.hswebframework.web.crud.entity.EventTestEntity;
@@ -33,6 +35,39 @@ class DefaultQueryHelperTest {
     @Autowired
     private DatabaseOperator database;
 
+
+    @Test
+    public void testLoadTable() {
+        database
+            .sql()
+            .reactive()
+            .execute(SqlRequests.of("create table \"NATIVE_TEST\"( " +
+                                        "\"id\" varchar(32) primary key" +
+                                        ",name varchar(32)" +
+                                        ",\"testName\" varchar(32)" +
+                                        ")"))
+            .as(StepVerifier::create)
+            .expectComplete()
+            .verify();
+
+        DefaultQueryHelper helper = new DefaultQueryHelper(database);
+
+        database
+            .dml()
+            .insert("native_test")
+            .value("id", "test")
+            .value("NAME", "test")
+            .value("testName", "test")
+            .execute()
+            .sync();
+
+        helper.select("select id,name,testName from native_test")
+              .fetch()
+              .doOnNext(System.out::println)
+              .as(StepVerifier::create)
+              .expectNextCount(1)
+              .verifyComplete();
+    }
 
     @Test
     public void testPage() {
@@ -97,15 +132,16 @@ class DefaultQueryHelperTest {
                 .execute()
                 .sync();
 
-        helper.select("select name as \"name\",count(1) totalResult from s_test group by name having count(1) > ? ", GroupResult::new, 0)
-              .where(dsl -> dsl
-                      .is("age", "31")
-                      .orderByAsc(GroupResult::getTotalResult))
-              .fetch()
-              .doOnNext(v -> System.out.println(JSON.toJSONString(v, SerializerFeature.PrettyFormat)))
-              .as(StepVerifier::create)
-              .expectNextCount(1)
-              .verifyComplete();
+        helper
+            .select("select name as \"name\",count(1) totalResult from s_test group by name having count(1) > ? ", GroupResult::new, 0)
+            .where(dsl -> dsl
+                .is("age", "31")
+                .orderByAsc(GroupResult::getTotalResult))
+            .fetch()
+            .doOnNext(v -> System.out.println(JSON.toJSONString(v, SerializerFeature.PrettyFormat)))
+            .as(StepVerifier::create)
+            .expectNextCount(1)
+            .verifyComplete();
     }
 
     @Test
@@ -146,10 +182,10 @@ class DefaultQueryHelperTest {
 
         helper.select("select age,count(1) c from ( select *,'1' as x from s_test ) a group by age ", 0)
               .where(dsl -> dsl
-                      .is("x", "1")
-                      .is("name", "inner")
-                      .is("a.testName", "inner")
-                      .is("age", 31))
+                  .is("x", "1")
+                  .is("name", "inner")
+                  .is("a.testName", "inner")
+                  .is("age", 31))
               .fetchPaged(0, 10)
               .doOnNext(v -> System.out.println(JSON.toJSONString(v, SerializerFeature.PrettyFormat)))
               .as(StepVerifier::create)
@@ -170,12 +206,13 @@ class DefaultQueryHelperTest {
                 .execute()
                 .sync();
 
-        helper.select("select * from s_test t1 join (select * from s_test s where name = ? ) t2 on t2.id = t1.id ", "join_sub")
-              .fetch()
-              .doOnNext(v -> System.out.println(JSON.toJSONString(v, SerializerFeature.PrettyFormat)))
-              .as(StepVerifier::create)
-              .expectNextCount(1)
-              .verifyComplete();
+        helper
+            .select("select * from s_test t1 join (select * from s_test s where name = ? ) t2 on t2.id = t1.id ", "join_sub")
+            .fetch()
+            .doOnNext(v -> System.out.println(JSON.toJSONString(v, SerializerFeature.PrettyFormat)))
+            .as(StepVerifier::create)
+            .expectNextCount(1)
+            .verifyComplete();
     }
 
     @Getter
@@ -204,11 +241,11 @@ class DefaultQueryHelperTest {
 
         DefaultQueryHelper helper = new DefaultQueryHelper(database);
         QueryParamEntity param = QueryParamEntity
-                .newQuery()
-                .is("e.id", "helper_testNative")
-                .is("t.age", "20")
-                .orderByAsc("t.age")
-                .getParam();
+            .newQuery()
+            .is("e.id", "helper_testNative")
+            .is("t.age", "20")
+            .orderByAsc("t.age")
+            .getParam();
 
         {
             Sort sortByValue = new Sort();
@@ -225,8 +262,8 @@ class DefaultQueryHelperTest {
 
 
         helper.select("select t.*,e.*,e.name ename,e.id `x.id` from s_test t " +
-                              "left join s_test_event e on e.id = t.id " +
-                              "where t.age = ?", 20)
+                          "left join s_test_event e on e.id = t.id " +
+                          "where t.age = ?", 20)
               .logger(LoggerFactory.getLogger("org.hswebframework.test.native"))
               .where(param)
               .fetchPaged()
@@ -236,10 +273,10 @@ class DefaultQueryHelperTest {
               .verifyComplete();
 
         helper.select("select id,name from s_test t " +
-                              "union all select id,name from s_test_event")
+                          "union all select id,name from s_test_event")
               .where(dsl -> dsl
-                      .is("id", "helper_testNative")
-                      .orderByAsc("name"))
+                  .is("id", "helper_testNative")
+                  .orderByAsc("name"))
               .fetchPaged()
               .doOnNext(v -> System.out.println(JSON.toJSONString(v, SerializerFeature.PrettyFormat)))
               .as(StepVerifier::create)
@@ -308,10 +345,10 @@ class DefaultQueryHelperTest {
               .from(TestEntity.class)
               .leftJoin(EventTestEntity.class,
                         join -> join
-                                .alias("e1")
-                                .is(EventTestEntity::getId, TestEntity::getId)
+                            .alias("e1")
+                            .is(EventTestEntity::getId, TestEntity::getId)
 //                                .is(EventTestEntity::getName, TestEntity::getId)
-                                .notNull(EventTestEntity::getAge))
+                            .notNull(EventTestEntity::getAge))
 //              .leftJoin(EventTestEntity.class,
 //                        join -> join
 //                                .alias("e2")

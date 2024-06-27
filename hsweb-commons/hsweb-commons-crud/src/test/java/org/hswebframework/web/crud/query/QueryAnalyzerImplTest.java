@@ -173,7 +173,7 @@ class QueryAnalyzerImplTest {
     void testValues(){
         QueryAnalyzerImpl analyzer = new QueryAnalyzerImpl(
             database,
-            "select * from (values (1,2),(3,4)) t(a,b)");
+            "select * from (values (1,2),(3,4)) t(\"a\",b)");
 
         SqlRequest request = analyzer
             .refactor(QueryParamEntity.of().and("a","eq",1),1);
