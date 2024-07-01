@@ -29,10 +29,9 @@ public class ReactiveRepositoryFactoryBean<E, PK>
     @Override
     public ReactiveRepository<E, PK> getObject() {
         RDBTableMetadata table = resolver.resolve(entityType);
-        String tableName = table.getName();
         return new DefaultReactiveRepository<>(
             operator,
-            tableName,
+            table.getName(),
             entityType,
             wrapperFactory.getWrapper(entityType));
     }
