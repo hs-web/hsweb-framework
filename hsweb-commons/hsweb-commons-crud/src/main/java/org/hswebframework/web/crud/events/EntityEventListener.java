@@ -4,6 +4,7 @@ package org.hswebframework.web.crud.events;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.hswebframework.ezorm.core.GlobalConfig;
 import org.hswebframework.ezorm.core.param.QueryParam;
 import org.hswebframework.ezorm.rdb.events.EventListener;
@@ -222,11 +223,11 @@ public class EntityEventListener implements EventListener, Ordered {
 
     // 回填修改后的字段到准备更新的数据中
     // 用于实现通过事件来修改即将被修改的数据
-    protected void prepareUpdateInstance(List<Object> after, EventContext ctx) {
+    protected void prepareUpdateInstance(List<Object> before, List<Object> after, EventContext ctx) {
         Map<String, Object> instance = ctx
             .get(MappingContextKeys.updateColumnInstance)
             .orElse(null);
-        if (after.size() != 1 || instance == null) {
+        if (before.size() != 1 || after.size() != 1 || instance == null) {
             //不支持一次性更新多条数据时设置.
             return;
         }
@@ -235,9 +236,11 @@ public class EntityEventListener implements EventListener, Ordered {
             .orElseThrow(UnsupportedOperationException::new);
 
         Object afterEntity = after.get(0);
+        Object beforeEntity = before.get(0);
         Map<String, Object> copy = new HashMap<>(instance);
 
         Map<String, Object> afterMap = FastBeanCopier.copy(afterEntity, new HashMap<>());
+        Map<String, Object> beforeMap = FastBeanCopier.copy(beforeEntity, new HashMap<>());
 
         //设置实体类中指定的字段值
         for (Map.Entry<String, Object> entry : afterMap.entrySet()) {
@@ -246,9 +249,18 @@ public class EntityEventListener implements EventListener, Ordered {
                 continue;
             }
 
+            //原始值
             Object origin = copy.remove(column.getAlias());
             if (origin == null) {
                 origin = copy.remove(column.getName());
+            }
+            //没有指定原始值,说明是通过事件指定的.
+            if (origin == null) {
+                //值相同忽略更新,可能是事件并没有修改这个字段.
+                if (Objects.equals(beforeMap.get(column.getAlias()), entry.getValue()) ||
+                    Objects.equals(beforeMap.get(column.getName()), entry.getValue())) {
+                    continue;
+                }
             }
 
             //按sql更新 忽略
@@ -262,15 +274,14 @@ public class EntityEventListener implements EventListener, Ordered {
         DSLUpdate<?, ?> operator = ctx
             .get(ContextKeys.<DSLUpdate<?, ?>>source())
             .orElse(null);
-        if (operator != null) {
+
+        if (operator != null && MapUtils.isNotEmpty(copy)) {
             for (Map.Entry<String, Object> entry : copy.entrySet()) {
                 Object val = entry.getValue();
                 if (val instanceof NullValue || val instanceof NativeSql) {
                     continue;
                 }
-                for (String col : copy.keySet()) {
-                    operator.excludes(col);
-                }
+                operator.excludes(entry.getKey());
             }
 
         }
@@ -316,7 +327,7 @@ public class EntityEventListener implements EventListener, Ordered {
                                                        (_list, _after, _type) -> event)
                                     .then(Mono.fromRunnable(() -> {
                                         if (event.hasListener()) {
-                                            prepareUpdateInstance(after, context);
+                                            prepareUpdateInstance(list, after, context);
                                         }
                                     }));
 
