@@ -80,7 +80,7 @@
         <java.module.version>17</java.module.version>
         <project.build.jdk>${java.version}</project.build.jdk>
 
-        <spring.boot.version>3.2.0</spring.boot.version>
+        <spring.boot.version>3.3.1</spring.boot.version>
 
         <javassist.version>3.30.1-GA</javassist.version>
 
