@@ -1,6 +1,8 @@
 package org.hswebframework.web.crud.service;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.hswebframework.ezorm.core.MethodReferenceColumn;
+import org.hswebframework.ezorm.core.StaticMethodReferenceColumn;
 import org.hswebframework.ezorm.rdb.mapping.ReactiveDelete;
 import org.hswebframework.ezorm.rdb.mapping.defaults.SaveResult;
 import org.hswebframework.ezorm.rdb.operator.dml.Terms;
@@ -199,7 +201,7 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
                 .queryIncludeChildren(Collections.singletonList(id))
                 .doOnNext(e -> {
                     if (Objects.equals(ele.getParentId(), e.getId())) {
-                        throw new ValidationException("parentId", "error.tree_entity_cyclic_dependency");
+                        throw new ValidationException.NoStackTrace("parentId", "error.tree_entity_cyclic_dependency");
                     }
                 })
                 .then(Mono.just(ele));
@@ -310,6 +312,12 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
                         .map(SaveResult::getTotal))
                 .defaultIfEmpty(Mono.just(0))
                 .flatMap(Function.identity());
+    }
+
+    @Override
+    @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager)
+    default Mono<Integer> deleteById(K id) {
+        return this.deleteById(Flux.just(id));
     }
 
     @Override

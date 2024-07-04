@@ -9,10 +9,7 @@ import org.hswebframework.ezorm.rdb.metadata.TableOrViewMetadata;
 import org.hswebframework.ezorm.rdb.operator.DatabaseOperator;
 import org.hswebframework.web.api.crud.entity.QueryParamEntity;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -101,12 +98,20 @@ public interface QueryAnalyzer {
 
         final Table table;
 
+        public Select newSelectAlias(String alias) {
+            return new Select(columnList
+                                  .stream()
+                                  .map(col -> col.moveOwner(alias))
+                                  .collect(Collectors.toList()),
+                              table.newAlias(alias));
+        }
+
         public Map<String, Column> getColumns() {
             return columns == null
-                    ? columns = columnList
-                    .stream()
-                    .collect(Collectors.toMap(Column::getAlias, Function.identity(), (a, b) -> b))
-                    : columns;
+                ? columns = columnList
+                .stream()
+                .collect(Collectors.toMap(Column::getAlias, Function.identity(), (a, b) -> b))
+                : columns;
         }
     }
 
@@ -116,6 +121,10 @@ public interface QueryAnalyzer {
         final String alias;
 
         final TableOrViewMetadata metadata;
+
+        public Table newAlias(String alias) {
+            return new Table(alias, metadata);
+        }
     }
 
     @AllArgsConstructor
@@ -129,6 +138,10 @@ public interface QueryAnalyzer {
         String owner;
         //元数据信息
         RDBColumnMetadata metadata;
+
+        public Column moveOwner(String owner) {
+            return new Column(name, alias, owner, metadata);
+        }
     }
 
     class SelectTable extends Table {
@@ -139,6 +152,22 @@ public interface QueryAnalyzer {
                            TableOrViewMetadata metadata) {
             super(alias, metadata);
             this.columns = columns;
+        }
+
+        @Override
+        public Table newAlias(String alias) {
+            return new SelectTable(
+                alias,
+                columns
+                    .entrySet()
+                    .stream()
+                    .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        e -> e.getValue().moveOwner(alias),
+                        (l, r) -> r,
+                        LinkedHashMap::new
+                    ))
+                , metadata);
         }
 
         public Map<String, Column> getColumns() {

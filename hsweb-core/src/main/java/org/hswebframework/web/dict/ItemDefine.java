@@ -1,6 +1,5 @@
 package org.hswebframework.web.dict;
 
-import java.util.List;
 
 /**
  * @author zhouhao

@@ -6,7 +6,6 @@ import org.hswebframework.ezorm.core.meta.Feature;
 import org.hswebframework.ezorm.rdb.events.EventListener;
 import org.hswebframework.ezorm.rdb.executor.SyncSqlExecutor;
 import org.hswebframework.ezorm.rdb.executor.reactive.ReactiveSqlExecutor;
-import org.hswebframework.ezorm.rdb.mapping.DefaultEntityColumnMapping;
 import org.hswebframework.ezorm.rdb.mapping.EntityColumnMapping;
 import org.hswebframework.ezorm.rdb.mapping.EntityManager;
 import org.hswebframework.ezorm.rdb.mapping.MappingFeatureType;
@@ -33,24 +32,19 @@ import org.hswebframework.web.crud.query.DefaultQueryHelper;
 import org.hswebframework.web.crud.query.QueryHelper;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
 
 import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.time.Duration;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -218,16 +212,17 @@ public class EasyormConfiguration {
                     Class<?> realType = factory.getInstanceType(entityType, true);
                     Optional<RDBTableMetadata> tableOpt = super.parseTableMetadata(realType);
                     tableOpt.ifPresent(table -> {
+                        EntityColumnMapping columnMapping = table.findFeatureNow(
+                            MappingFeatureType.columnPropertyMapping.createFeatureId(realType)
+                        );
                         if (realType != entityType) {
-                            table.addFeature(new DetectEntityColumnMapping(
-                                    entityType,
-                                    table.findFeatureNow(
-                                            MappingFeatureType.columnPropertyMapping.createFeatureId(realType)
-                                    ), factory));
+                            table.addFeature(new DetectEntityColumnMapping(realType, columnMapping, factory));
+                            table.addFeature(columnMapping = new DetectEntityColumnMapping(entityType, columnMapping, factory));
                         }
                         for (TableMetadataCustomizer customizer : customizers) {
                             customizer.customTable(realType, table);
                         }
+                        columnMapping.reload();
                     });
                     return tableOpt;
                 }

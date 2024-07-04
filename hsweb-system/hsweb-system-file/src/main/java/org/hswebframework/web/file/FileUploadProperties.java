@@ -2,7 +2,7 @@ package org.hswebframework.web.file;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.hswebframework.utils.time.DateFormatter;
 import org.hswebframework.web.id.IDGenerator;
 import org.springframework.boot.context.properties.ConfigurationProperties;

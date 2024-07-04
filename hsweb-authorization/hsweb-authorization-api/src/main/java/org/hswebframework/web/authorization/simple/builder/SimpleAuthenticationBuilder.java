@@ -3,6 +3,7 @@ package org.hswebframework.web.authorization.simple.builder;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.Maps;
 import org.hswebframework.web.authorization.*;
 import org.hswebframework.web.authorization.builder.AuthenticationBuilder;
 import org.hswebframework.web.authorization.builder.DataAccessConfigBuilderFactory;
@@ -44,11 +45,11 @@ public class SimpleAuthenticationBuilder implements AuthenticationBuilder {
     public AuthenticationBuilder user(Map<String, String> user) {
         Objects.requireNonNull(user.get("id"));
         user(SimpleUser.builder()
-                .id(user.get("id"))
-                .username(user.get("username"))
-                .name(user.get("name"))
-                .userType(user.get("type"))
-                .build());
+                       .id(user.get("id"))
+                       .username(user.get("username"))
+                       .name(user.get("name"))
+                       .userType(user.get("type"))
+                       .build());
         return this;
     }
 
@@ -87,9 +88,12 @@ public class SimpleAuthenticationBuilder implements AuthenticationBuilder {
             JSONArray dataAccess = jsonObject.getJSONArray("dataAccesses");
             if (null != dataAccess) {
                 permission.setDataAccesses(dataAccess.stream().map(JSONObject.class::cast)
-                        .map(dataJson -> dataBuilderFactory.create().fromJson(dataJson.toJSONString()).build())
-                        .filter(Objects::nonNull)
-                        .collect(Collectors.toSet()));
+                                                     .map(dataJson -> dataBuilderFactory
+                                                         .create()
+                                                         .fromJson(dataJson.toJSONString())
+                                                         .build())
+                                                     .filter(Objects::nonNull)
+                                                     .collect(Collectors.toSet()));
             }
             permissions.add(permission);
         }
@@ -120,11 +124,13 @@ public class SimpleAuthenticationBuilder implements AuthenticationBuilder {
             JSONObject jsonObject = json.getJSONObject(i);
             Object type = jsonObject.get("type");
 
-            dimensions.add( SimpleDimension.of(
-                    jsonObject.getString("id"),
-                    jsonObject.getString("name"),
-                    type instanceof String?SimpleDimensionType.of(String.valueOf(type)):jsonObject.getJSONObject("type").toJavaObject(SimpleDimensionType.class),
-                    jsonObject.getJSONObject("options")
+            dimensions.add(SimpleDimension.of(
+                jsonObject.getString("id"),
+                jsonObject.getString("name"),
+                type instanceof String ? SimpleDimensionType.of(String.valueOf(type)) : jsonObject
+                    .getJSONObject("type")
+                    .toJavaObject(SimpleDimensionType.class),
+                jsonObject.getJSONObject("options")
             ));
         }
         authentication.setDimensions(dimensions);
@@ -145,6 +151,9 @@ public class SimpleAuthenticationBuilder implements AuthenticationBuilder {
         }
         if (jsonObject.containsKey("dimensions")) {
             dimension(jsonObject.getJSONArray("dimensions"));
+        }
+        if (jsonObject.containsKey("attributes")) {
+            attributes(Maps.transformValues(jsonObject.getJSONObject("attributes"), Serializable.class::cast));
         }
         return this;
     }

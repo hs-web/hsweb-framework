@@ -5,10 +5,19 @@ import org.hswebframework.web.authorization.simple.SimpleAuthentication;
 import org.hswebframework.web.authorization.token.*;
 import org.junit.Assert;
 import org.junit.Test;
+import org.springframework.context.support.StaticApplicationContext;
 import reactor.test.StepVerifier;
 
 public class UserTokenManagerTests {
 
+    private DefaultUserTokenManager createUserTokenManager(){
+        DefaultUserTokenManager userTokenManager = new DefaultUserTokenManager();
+        StaticApplicationContext context=new StaticApplicationContext();
+        context.refresh();
+
+        userTokenManager.setEventPublisher(context);
+        return userTokenManager;
+    }
 
     /**
      * 基本功能测试
@@ -17,7 +26,7 @@ public class UserTokenManagerTests {
      */
     @Test
     public void testDefaultSetting() throws InterruptedException {
-        DefaultUserTokenManager userTokenManager = new DefaultUserTokenManager();
+        DefaultUserTokenManager userTokenManager = createUserTokenManager();
         userTokenManager.setAllopatricLoginMode(AllopatricLoginMode.allow); //允许异地登录
 
         UserToken userToken = userTokenManager.signIn("test", "sessionId", "admin", 1000).block();
@@ -83,6 +92,7 @@ public class UserTokenManagerTests {
     public void testDeny() throws InterruptedException {
         DefaultUserTokenManager userTokenManager = new DefaultUserTokenManager();
         userTokenManager.setAllopatricLoginMode(AllopatricLoginMode.deny);//如果在其他地方登录，本地禁止登录
+        userTokenManager.setEventPublisher(new StaticApplicationContext());
 
         userTokenManager.signIn("test", "sessionId", "admin", 10000).subscribe();
 
@@ -102,7 +112,8 @@ public class UserTokenManagerTests {
      */
     @Test
     public void testOffline() {
-        DefaultUserTokenManager userTokenManager = new DefaultUserTokenManager();
+        DefaultUserTokenManager userTokenManager = createUserTokenManager();
+
         userTokenManager.setAllopatricLoginMode(AllopatricLoginMode.offlineOther); //将其他地方登录的用户踢下线
 
         userTokenManager.signIn("test", "sessionId", "admin", 1000).subscribe();
@@ -117,7 +128,7 @@ public class UserTokenManagerTests {
 
     @Test
     public void testAuth() {
-        UserTokenManager userTokenManager = new DefaultUserTokenManager();
+        DefaultUserTokenManager userTokenManager = createUserTokenManager();
         Authentication authentication = new SimpleAuthentication();
 
         userTokenManager.signIn("test", "test", "test", 1000, authentication)

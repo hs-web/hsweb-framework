@@ -11,8 +11,6 @@ import org.junit.Test;
 import java.math.BigDecimal;
 import java.util.*;
 
-import static org.junit.Assert.*;
-
 public class CompareUtilsTest {
 
     @Test
@@ -40,8 +38,8 @@ public class CompareUtilsTest {
         Assert.assertTrue(CompareUtils.compare(1, 1));
         Assert.assertTrue(CompareUtils.compare(1, 1D));
         Assert.assertTrue(CompareUtils.compare(1, 1.0D));
-        Assert.assertTrue(CompareUtils.compare(1e3,"1e3"));
-        Assert.assertTrue(CompareUtils.compare(1e3,"1000"));
+        Assert.assertTrue(CompareUtils.compare(1e3, "1e3"));
+        Assert.assertTrue(CompareUtils.compare(1e3, "1000"));
 
         Assert.assertTrue(CompareUtils.compare(1, "1"));
         Assert.assertTrue(CompareUtils.compare("1.0", 1));
@@ -65,6 +63,10 @@ public class CompareUtilsTest {
 
         Assert.assertFalse(CompareUtils.compare(TestEnumDic.RED, "蓝色"));
 
+        Assert.assertFalse(CompareUtils.compare((Object) TestEnumDic.RED, TestEnumDic.BLUE));
+
+        Assert.assertTrue(CompareUtils.compare((Object) TestEnumDic.RED, TestEnumDic.RED));
+
 
     }
 
@@ -73,7 +75,7 @@ public class CompareUtilsTest {
 
         Assert.assertTrue(CompareUtils.compare("20180101", DateFormatter.fromString("20180101")));
 
-        Assert.assertTrue(CompareUtils.compare(1,"1"));
+        Assert.assertTrue(CompareUtils.compare(1, "1"));
 
         Assert.assertTrue(CompareUtils.compare("1", 1));
 
@@ -169,10 +171,19 @@ public class CompareUtilsTest {
     @Getter
     @AllArgsConstructor
     enum TestEnumDic implements EnumDict<String> {
-        RED("RED", "红色"), BLUE("BLUE", "蓝色");
+        RED("RED", "红色") {
+            public void function() {
 
-        private String value;
-        private String text;
+            }
+        },
+        BLUE("BLUE", "蓝色") {
+            public void function() {
+
+            }
+        };
+
+        private final String value;
+        private final String text;
 
     }
 

@@ -1,6 +1,6 @@
 package org.hswebframework.web.system.authorization.defaults.service;
 
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.hswebframework.ezorm.rdb.mapping.ReactiveRepository;
 import org.hswebframework.web.authorization.Dimension;
 import org.hswebframework.web.authorization.DimensionProvider;
@@ -124,12 +124,16 @@ public class DefaultDimensionService
 
     @EventListener
     public void handleDimensionChanged(EntitySavedEvent<DimensionEntity> event) {
-        eventPublisher.publishEvent(ClearUserAuthorizationCacheEvent.all());
+        event.async(
+                ClearUserAuthorizationCacheEvent.all().publish(eventPublisher)
+        );
     }
 
     @EventListener
     public void handleDimensionChanged(EntityModifyEvent<DimensionEntity> event) {
-        eventPublisher.publishEvent(ClearUserAuthorizationCacheEvent.all());
+        event.async(
+                ClearUserAuthorizationCacheEvent.all().publish(eventPublisher)
+        );
     }
 
     @EventListener

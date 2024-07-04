@@ -24,6 +24,8 @@ import org.hswebframework.ezorm.rdb.mapping.annotation.Comment;
 import org.hswebframework.ezorm.rdb.mapping.annotation.DefaultValue;
 import org.hswebframework.web.api.crud.entity.GenericTreeSortSupportEntity;
 import org.hswebframework.web.dict.EnumDict;
+import org.hswebframework.web.utils.DigestUtils;
+import org.springframework.util.StringUtils;
 
 import javax.persistence.Column;
 import javax.persistence.Index;
@@ -88,6 +90,17 @@ public class DictionaryItemEntity extends GenericTreeSortSupportEntity<String> i
 
     @Schema(description = "子节点")
     private List<DictionaryItemEntity> children;
+
+    public void generateId() {
+        if (StringUtils.hasText(this.getId())) {
+            return;
+        }
+        this.setId(generateId(this.getDictId(), this.getOrdinal()));
+    }
+
+    public static String generateId(String dictId, Integer ordinal) {
+        return DigestUtils.md5Hex(String.join("|", dictId, ordinal.toString()));
+    }
 
     @Override
     public Object getWriteJSONObject() {

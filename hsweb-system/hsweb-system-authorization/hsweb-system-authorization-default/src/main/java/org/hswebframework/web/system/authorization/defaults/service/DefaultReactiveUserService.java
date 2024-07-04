@@ -28,7 +28,6 @@ import reactor.core.publisher.Mono;
 
 import jakarta.validation.ValidationException;
 import java.util.Objects;
-import java.util.function.Function;
 
 
 public class DefaultReactiveUserService extends GenericReactiveCrudService<UserEntity, String> implements ReactiveUserService {
@@ -66,11 +65,7 @@ public class DefaultReactiveUserService extends GenericReactiveCrudService<UserE
                     }
                     return findById(userEntity.getId())
                             .flatMap(old -> doUpdate(old, userEntity))
-                            .switchIfEmpty(
-                                    Objects.equals(userEntity.getId(), userEntity.getUsername()) ?
-                                            doAdd(userEntity) :
-                                            Mono.error(NotFoundException::new)
-                            );
+                            .switchIfEmpty(doAdd(userEntity));
                 }).thenReturn(true);
     }
 
@@ -194,7 +189,7 @@ public class DefaultReactiveUserService extends GenericReactiveCrudService<UserE
     public Mono<Boolean> changePassword(String userId, String oldPassword, String newPassword) {
         passwordValidator.validate(newPassword);
         return findById(userId)
-                .switchIfEmpty(Mono.error(NotFoundException::new))
+                .switchIfEmpty(Mono.error(NotFoundException.NoStackTrace::new))
                 .filter(user -> passwordEncoder.encode(oldPassword, user.getSalt()).equals(user.getPassword()))
                 .switchIfEmpty(Mono.error(() -> new ValidationException("error.illegal_user_password")))
                 .flatMap(old -> {

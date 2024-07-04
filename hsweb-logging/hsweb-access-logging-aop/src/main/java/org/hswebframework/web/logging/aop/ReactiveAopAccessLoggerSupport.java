@@ -32,6 +32,7 @@ import jakarta.annotation.Nonnull;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
 
 /**
  * 使用AOP记录访问日志,并触发{@link AccessLoggerListener#onLogger(AccessLoggerInfo)}
@@ -48,6 +49,7 @@ public class ReactiveAopAccessLoggerSupport extends StaticMethodMatcherPointcutA
     private ApplicationEventPublisher eventPublisher;
 
     private final Map<CacheKey, LoggerDefine> defineCache = new ConcurrentReferenceHashMap<>();
+    private final Map<CacheKey, Predicate<String>> ignoreParameterCache = new ConcurrentReferenceHashMap<>();
 
     private static final LoggerDefine UNSUPPORTED = new LoggerDefine();
 
@@ -126,6 +128,14 @@ public class ReactiveAopAccessLoggerSupport extends StaticMethodMatcherPointcutA
                 .orElse(UNSUPPORTED);
     }
 
+    private Predicate<String> ignoreParameter(MethodInterceptorHolder holder) {
+        return loggerParsers
+                .stream()
+                .map(l -> l.ignoreParameter(holder))
+                .reduce(Predicate::or)
+                .orElseGet(() -> p -> false);
+    }
+
     @SuppressWarnings("all")
     protected AccessLoggerInfo createLogger(MethodInterceptorHolder holder) {
         AccessLoggerInfo info = new AccessLoggerInfo();
@@ -141,6 +151,18 @@ public class ReactiveAopAccessLoggerSupport extends StaticMethodMatcherPointcutA
             info.setDescribe(define.getDescribe());
         }
 
+        info.setParameters(parseParameter(holder));
+        info.setTarget(holder.getTarget().getClass());
+        info.setMethod(holder.getMethod());
+        return info;
+
+    }
+
+    private Map<String, Object> parseParameter(MethodInterceptorHolder holder) {
+        Predicate<String> ignoreParameter = ignoreParameterCache.computeIfAbsent(new CacheKey(
+                ClassUtils.getUserClass(holder.getTarget()),
+                holder.getMethod()), method -> ignoreParameter(holder));
+
         Map<String, Object> value = new ConcurrentHashMap<>();
 
         String[] names = holder.getArgumentsNames();
@@ -149,6 +171,9 @@ public class ReactiveAopAccessLoggerSupport extends StaticMethodMatcherPointcutA
 
         for (int i = 0; i < args.length; i++) {
             String name = names[i];
+            if (ignoreParameter.test(name)) {
+                continue;
+            }
             Object val = args[i];
             if (val == null) {
                 value.put(name, "null");
@@ -170,12 +195,7 @@ public class ReactiveAopAccessLoggerSupport extends StaticMethodMatcherPointcutA
                 value.put(name, val);
             }
         }
-
-        info.setParameters(value);
-        info.setTarget(holder.getTarget().getClass());
-        info.setMethod(holder.getMethod());
-        return info;
-
+        return value;
     }
 
     @Override
@@ -212,7 +232,7 @@ public class ReactiveAopAccessLoggerSupport extends StaticMethodMatcherPointcutA
         ServerHttpRequest request = exchange.getRequest();
         info.setRequestId(request.getId());
         info.setPath(request.getPath().value());
-        info.setRequestMethod(request.getMethod().name());
+        info.setRequestMethod(request.getMethod() == null ? "UNKNOWN" : request.getMethod().name());
         info.setHeaders(request.getHeaders().toSingleValueMap());
 
         Optional.ofNullable(ReactiveWebUtils.getIpAddr(request))

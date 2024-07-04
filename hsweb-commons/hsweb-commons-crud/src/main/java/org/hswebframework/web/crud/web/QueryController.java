@@ -169,7 +169,7 @@ public interface QueryController<E, K> {
     default E getById(@PathVariable K id) {
        return getRepository()
                 .findById(id)
-               .orElseThrow(NotFoundException::new);
+               .orElseThrow(NotFoundException.NoStackTrace::new);
     }
 
 }

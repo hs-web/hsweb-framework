@@ -90,8 +90,8 @@
         <cglib.version>3.2.2</cglib.version>
         <aspectj.version>1.6.12</aspectj.version>
 
-        <hsweb.ezorm.version>4.1.1</hsweb.ezorm.version>
-        <hsweb.utils.version>3.0.2</hsweb.utils.version>
+        <hsweb.ezorm.version>4.1.2-SNAPSHOT</hsweb.ezorm.version>
+        <hsweb.utils.version>3.0.4</hsweb.utils.version>
         <hsweb.expands.version>3.0.2</hsweb.expands.version>
         <swagger.version>2.7.0</swagger.version>
 
@@ -172,6 +172,7 @@
         </profile>
     </profiles>
     <build>
+
         <plugins>
 <!--            <plugin>-->
 <!--                <groupId>org.moditect</groupId>-->
@@ -308,13 +309,13 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.17</version>
+                <version>2.22.0</version>
                 <configuration>
                     <includes>
                         <include>**/*Test.java</include>
                         <include>**/*Tests.java</include>
-                        <include>**/*TestCase.java</include>
                     </includes>
+                    <argLine>-Dfile.encoding=UTF-8 ${jacocoArgLine}</argLine>
                 </configuration>
             </plugin>
 
@@ -473,6 +474,18 @@
                 <groupId>commons-beanutils</groupId>
                 <artifactId>commons-beanutils</artifactId>
                 <version>1.9.4</version>
+<!--                <exclusions>-->
+<!--                    <exclusion>-->
+<!--                        <groupId>commons-collections</groupId>-->
+<!--                        <artifactId>commons-collections</artifactId>-->
+<!--                    </exclusion>-->
+<!--                </exclusions>-->
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-collections4</artifactId>
+                <version>4.4</version>
             </dependency>
 
             <dependency>

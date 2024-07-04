@@ -49,8 +49,8 @@ public class ValidationException extends I18nSupportException {
         //{0} 属性 ，{1} 验证消息
         //property也支持国际化?
         String propertyI18n = propertyI18nEnabled ?
-                first.getRootBeanClass().getName() + "." + property
-                : property;
+            first.getRootBeanClass().getName() + "." + property
+            : property;
 
         setArgs(new Object[]{propertyI18n, first.getMessage()});
 
@@ -64,11 +64,11 @@ public class ValidationException extends I18nSupportException {
 
     public List<Detail> getDetails(Locale locale) {
         return CollectionUtils.isEmpty(details)
-                ? Collections.emptyList()
-                : details
-                .stream()
-                .map(detail -> detail.translateI18n(locale))
-                .collect(Collectors.toList());
+            ? Collections.emptyList()
+            : details
+            .stream()
+            .map(detail -> detail.translateI18n(locale))
+            .collect(Collectors.toList());
     }
 
     @Override
@@ -99,6 +99,33 @@ public class ValidationException extends I18nSupportException {
             if (StringUtils.hasText(message) && message.contains(".")) {
                 return new Detail(property, LocaleUtils.resolveMessage(message, locale, message), detail);
             }
+            return this;
+        }
+    }
+
+    /**
+     * 不填充线程栈的异常，在一些对线程栈不敏感，且对异常不可控（如: 来自未认证请求产生的异常）的情况下不填充线程栈对性能有利。
+     */
+    public static class NoStackTrace extends ValidationException {
+        public NoStackTrace(String message) {
+            super(message);
+        }
+
+        public NoStackTrace(String property, String message, Object... args) {
+            super(property, message, args);
+        }
+
+        public NoStackTrace(String message, List<Detail> details, Object... args) {
+            super(message, details, args);
+
+        }
+
+        public NoStackTrace(Set<? extends ConstraintViolation<?>> violations) {
+            super(violations);
+        }
+
+        @Override
+        public final synchronized Throwable fillInStackTrace() {
             return this;
         }
     }

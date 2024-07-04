@@ -3,7 +3,8 @@ package org.hswebframework.web.crud.events;
 
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.hswebframework.ezorm.core.GlobalConfig;
 import org.hswebframework.ezorm.core.param.QueryParam;
 import org.hswebframework.ezorm.rdb.events.EventListener;
@@ -15,6 +16,7 @@ import org.hswebframework.ezorm.rdb.mapping.events.MappingEventTypes;
 import org.hswebframework.ezorm.rdb.mapping.events.ReactiveResultHolder;
 import org.hswebframework.ezorm.rdb.metadata.RDBColumnMetadata;
 import org.hswebframework.ezorm.rdb.operator.builder.fragments.NativeSql;
+import org.hswebframework.ezorm.rdb.operator.dml.update.UpdateOperator;
 import org.hswebframework.web.api.crud.entity.Entity;
 import org.hswebframework.web.bean.FastBeanCopier;
 import org.hswebframework.web.event.AsyncEvent;
@@ -70,8 +72,8 @@ public class EntityEventListener implements EventListener, Ordered {
         Class<Entity> entityType;
 
         if (mapping == null ||
-                !Entity.class.isAssignableFrom(entityType = (Class) mapping.getEntityType()) ||
-                !listenerConfigure.isEnabled(entityType)) {
+            !Entity.class.isAssignableFrom(entityType = (Class) mapping.getEntityType()) ||
+            !listenerConfigure.isEnabled(entityType)) {
             return;
         }
 
@@ -131,9 +133,9 @@ public class EntityEventListener implements EventListener, Ordered {
                               EntityBeforeQueryEvent event = new EntityBeforeQueryEvent<>(queryParam, mapping.getEntityType());
                               eventPublisher.publishEvent(new GenericsPayloadApplicationEvent<>(this, event, mapping.getEntityType()));
                               holder
-                                      .before(
-                                              event.getAsync()
-                                      );
+                                  .before(
+                                      event.getAsync()
+                                  );
                           });
                });
     }
@@ -143,12 +145,12 @@ public class EntityEventListener implements EventListener, Ordered {
         List<Object> newValues = new ArrayList<>(olds.size());
 
         EntityColumnMapping mapping = context
-                .get(MappingContextKeys.columnMapping)
-                .orElseThrow(UnsupportedOperationException::new);
+            .get(MappingContextKeys.columnMapping)
+            .orElseThrow(UnsupportedOperationException::new);
 
         Map<String, Object> columns = context
-                .get(MappingContextKeys.updateColumnInstance)
-                .orElse(Collections.emptyMap());
+            .get(MappingContextKeys.updateColumnInstance)
+            .orElse(Collections.emptyMap());
 
         for (Object old : olds) {
             Map<String, Object> oldMap = null;
@@ -169,17 +171,17 @@ public class EntityEventListener implements EventListener, Ordered {
                 //原生sql
                 if (value instanceof NativeSql) {
                     value = expressionInvoker == null ? null : expressionInvoker.invoke(
-                            ((NativeSql) value),
-                            mapping,
-                            oldMap == null ? oldMap = createFullMapping(old, mapping) : oldMap);
+                        ((NativeSql) value),
+                        mapping,
+                        oldMap == null ? oldMap = createFullMapping(old, mapping) : oldMap);
                     if (value == null) {
                         continue;
                     }
                 }
 
                 GlobalConfig
-                        .getPropertyOperator()
-                        .setProperty(data, column.getAlias(), value);
+                    .getPropertyOperator()
+                    .setProperty(data, column.getAlias(), value);
 
             }
             newValues.add(data);
@@ -219,11 +221,78 @@ public class EntityEventListener implements EventListener, Ordered {
                             eventPublisher::publishEvent);
     }
 
+    // 回填修改后的字段到准备更新的数据中
+    // 用于实现通过事件来修改即将被修改的数据
+    protected void prepareUpdateInstance(List<Object> before, List<Object> after, EventContext ctx) {
+        Map<String, Object> instance = ctx
+            .get(MappingContextKeys.updateColumnInstance)
+            .orElse(null);
+        if (before.size() != 1 || after.size() != 1 || instance == null) {
+            //不支持一次性更新多条数据时设置.
+            return;
+        }
+        EntityColumnMapping mapping = ctx
+            .get(MappingContextKeys.columnMapping)
+            .orElseThrow(UnsupportedOperationException::new);
+
+        Object afterEntity = after.get(0);
+        Object beforeEntity = before.get(0);
+        Map<String, Object> copy = new HashMap<>(instance);
+
+        Map<String, Object> afterMap = FastBeanCopier.copy(afterEntity, new HashMap<>());
+        Map<String, Object> beforeMap = FastBeanCopier.copy(beforeEntity, new HashMap<>());
+
+        //设置实体类中指定的字段值
+        for (Map.Entry<String, Object> entry : afterMap.entrySet()) {
+            RDBColumnMetadata column = mapping.getColumnByProperty(entry.getKey()).orElse(null);
+            if (column == null || !column.isUpdatable()) {
+                continue;
+            }
+
+            //原始值
+            Object origin = copy.remove(column.getAlias());
+            if (origin == null) {
+                origin = copy.remove(column.getName());
+            }
+            //没有指定原始值,说明是通过事件指定的.
+            if (origin == null) {
+                //值相同忽略更新,可能是事件并没有修改这个字段.
+                if (Objects.equals(beforeMap.get(column.getAlias()), entry.getValue()) ||
+                    Objects.equals(beforeMap.get(column.getName()), entry.getValue())) {
+                    continue;
+                }
+            }
+
+            //按sql更新 忽略
+            if (origin instanceof NativeSql) {
+                continue;
+            }
+            //设置新的值
+            instance.put(column.getAlias(), entry.getValue());
+        }
+
+        DSLUpdate<?, ?> operator = ctx
+            .get(ContextKeys.<DSLUpdate<?, ?>>source())
+            .orElse(null);
+
+        if (operator != null && MapUtils.isNotEmpty(copy)) {
+            for (Map.Entry<String, Object> entry : copy.entrySet()) {
+                Object val = entry.getValue();
+                if (val instanceof NullValue || val instanceof NativeSql) {
+                    continue;
+                }
+                operator.excludes(entry.getKey());
+            }
+
+        }
+
+    }
+
     protected void handleUpdateBefore(DSLUpdate<?, ?> update, EventContext context) {
         Object repo = context.get(MappingContextKeys.repository).orElse(null);
         EntityColumnMapping mapping = context
-                .get(MappingContextKeys.columnMapping)
-                .orElseThrow(UnsupportedOperationException::new);
+            .get(MappingContextKeys.columnMapping)
+            .orElseThrow(UnsupportedOperationException::new);
         Class entityType = (Class) mapping.getEntityType();
         if (repo instanceof ReactiveRepository) {
             ReactiveResultHolder holder = context.get(MappingContextKeys.reactiveResultHolder).orElse(null);
@@ -236,26 +305,33 @@ public class EntityEventListener implements EventListener, Ordered {
                               EntityEventPhase.before,
                               EntityEventPhase.after)) {
                     holder.before(
-                            this.doAsyncEvent(() -> ((ReactiveRepository<Object, ?>) repo)
-                                    .createQuery()
-                                    .setParam(update.toQueryParam())
-                                    .fetch()
-                                    .collectList()
-                                    .flatMap((list) -> {
-                                        //没有数据被修改则不触发事件
-                                        if (list.isEmpty()) {
-                                            return Mono.empty();
-                                        }
-                                        List<Object> after = createAfterData(list, context);
-                                        updated.set(Tuples.of(list, after));
-                                        context.set(readyToUpdateBeforeContextKey, list);
-                                        context.set(readyToUpdateAfterContextKey, after);
-                                        return sendUpdateEvent(list,
-                                                               after,
-                                                               entityType,
-                                                               EntityPrepareModifyEvent::new);
+                        this.doAsyncEvent(() -> ((ReactiveRepository<Object, ?>) repo)
+                            .createQuery()
+                            .setParam(update.toQueryParam())
+                            .fetch()
+                            .collectList()
+                            .flatMap((list) -> {
+                                //没有数据被修改则不触发事件
+                                if (list.isEmpty()) {
+                                    return Mono.empty();
+                                }
+                                List<Object> after = createAfterData(list, context);
+                                updated.set(Tuples.of(list, after));
+                                context.set(readyToUpdateBeforeContextKey, list);
+                                context.set(readyToUpdateAfterContextKey, after);
+                                EntityPrepareModifyEvent event = new EntityPrepareModifyEvent(list, after, entityType);
 
-                                    }).then())
+                                return sendUpdateEvent(list,
+                                                       after,
+                                                       entityType,
+                                                       (_list, _after, _type) -> event)
+                                    .then(Mono.fromRunnable(() -> {
+                                        if (event.hasListener()) {
+                                            prepareUpdateInstance(list, after, context);
+                                        }
+                                    }));
+
+                            }).then())
                     );
                 }
                 //before
@@ -275,16 +351,16 @@ public class EntityEventListener implements EventListener, Ordered {
                 //after
                 if (isEnabled(entityType, EntityEventType.modify, EntityEventPhase.after)) {
                     holder.after(v -> this
-                            .doAsyncEvent(() -> {
-                                Tuple2<List<Object>, List<Object>> _tmp = updated.getAndSet(null);
-                                if (_tmp != null) {
-                                    return sendUpdateEvent(_tmp.getT1(),
-                                                           _tmp.getT2(),
-                                                           entityType,
-                                                           EntityModifyEvent::new);
-                                }
-                                return Mono.empty();
-                            }));
+                        .doAsyncEvent(() -> {
+                            Tuple2<List<Object>, List<Object>> _tmp = updated.getAndSet(null);
+                            if (_tmp != null) {
+                                return sendUpdateEvent(_tmp.getT1(),
+                                                       _tmp.getT2(),
+                                                       entityType,
+                                                       EntityModifyEvent::new);
+                            }
+                            return Mono.empty();
+                        }));
                 }
             }
         } else if (repo instanceof SyncRepository) {
@@ -301,7 +377,7 @@ public class EntityEventListener implements EventListener, Ordered {
                                 createAfterData(list, context),
                                 (Class<Object>) mapping.getEntityType(),
                                 EntityBeforeModifyEvent::new)
-                        .block();
+                    .block();
             }
         }
     }
@@ -316,8 +392,8 @@ public class EntityEventListener implements EventListener, Ordered {
 
     protected void handleDeleteBefore(Class<Entity> entityType, EventContext context) {
         EntityColumnMapping mapping = context
-                .get(MappingContextKeys.columnMapping)
-                .orElseThrow(UnsupportedOperationException::new);
+            .get(MappingContextKeys.columnMapping)
+            .orElseThrow(UnsupportedOperationException::new);
         context.<DSLDelete>get(ContextKeys.source())
                .ifPresent(dslUpdate -> {
                    Object repo = context.get(MappingContextKeys.repository).orElse(null);
@@ -327,32 +403,32 @@ public class EntityEventListener implements EventListener, Ordered {
                                   AtomicReference<List<Object>> deleted = new AtomicReference<>();
                                   if (isEnabled(entityType, EntityEventType.delete, EntityEventPhase.before, EntityEventPhase.after)) {
                                       holder.before(
-                                              this.doAsyncEvent(() -> ((ReactiveRepository<Object, ?>) repo)
-                                                      .createQuery()
-                                                      .setParam(dslUpdate.toQueryParam())
-                                                      .fetch()
-                                                      .collectList()
-                                                      .doOnNext(list -> {
-                                                          context.set(readyToDeleteContextKey, list);
-                                                      })
-                                                      .filter(CollectionUtils::isNotEmpty)
-                                                      .flatMap(list -> {
-                                                          deleted.set(list);
-                                                          return this
-                                                                  .sendDeleteEvent(list, (Class) mapping.getEntityType(), EntityBeforeDeleteEvent::new);
-                                                      })
-                                              )
+                                          this.doAsyncEvent(() -> ((ReactiveRepository<Object, ?>) repo)
+                                              .createQuery()
+                                              .setParam(dslUpdate.toQueryParam())
+                                              .fetch()
+                                              .collectList()
+                                              .doOnNext(list -> {
+                                                  context.set(readyToDeleteContextKey, list);
+                                              })
+                                              .filter(CollectionUtils::isNotEmpty)
+                                              .flatMap(list -> {
+                                                  deleted.set(list);
+                                                  return this
+                                                      .sendDeleteEvent(list, (Class) mapping.getEntityType(), EntityBeforeDeleteEvent::new);
+                                              })
+                                          )
                                       );
                                   }
                                   if (isEnabled(entityType, EntityEventType.delete, EntityEventPhase.after)) {
                                       holder.after(v -> this
-                                              .doAsyncEvent(() -> {
-                                                  List<Object> _tmp = deleted.getAndSet(null);
-                                                  if (CollectionUtils.isNotEmpty(_tmp)) {
-                                                      return sendDeleteEvent(_tmp, (Class) mapping.getEntityType(), EntityDeletedEvent::new);
-                                                  }
-                                                  return Mono.empty();
-                                              }));
+                                          .doAsyncEvent(() -> {
+                                              List<Object> _tmp = deleted.getAndSet(null);
+                                              if (CollectionUtils.isNotEmpty(_tmp)) {
+                                                  return sendDeleteEvent(_tmp, (Class) mapping.getEntityType(), EntityDeletedEvent::new);
+                                              }
+                                              return Mono.empty();
+                                          }));
                                   }
 
                               });
@@ -397,23 +473,23 @@ public class EntityEventListener implements EventListener, Ordered {
                 ReactiveResultHolder holder = resultHolder.get();
                 if (null != prepareEvent && isEnabled(clazz, entityEventType, EntityEventPhase.prepare)) {
                     holder.before(
-                            this.doAsyncEvent(() -> {
-                                return publishEvent(this,
-                                                    clazz,
-                                                    () -> prepareEvent,
-                                                    eventPublisher::publishEvent);
-                            })
+                        this.doAsyncEvent(() -> {
+                            return publishEvent(this,
+                                                clazz,
+                                                () -> prepareEvent,
+                                                eventPublisher::publishEvent);
+                        })
                     );
                 }
 
                 if (null != beforeEvent && isEnabled(clazz, entityEventType, EntityEventPhase.before)) {
                     holder.invoke(
-                            this.doAsyncEvent(() -> {
-                                return publishEvent(this,
-                                                    clazz,
-                                                    () -> beforeEvent,
-                                                    eventPublisher::publishEvent);
-                            })
+                        this.doAsyncEvent(() -> {
+                            return publishEvent(this,
+                                                clazz,
+                                                () -> beforeEvent,
+                                                eventPublisher::publishEvent);
+                        })
                     );
                 }
                 if (null != afterEvent && isEnabled(clazz, entityEventType, EntityEventPhase.after)) {
@@ -464,23 +540,23 @@ public class EntityEventListener implements EventListener, Ordered {
                            ReactiveResultHolder holder = resultHolder.get();
                            if (null != prepareEvent && isEnabled(clazz, entityEventType, EntityEventPhase.prepare)) {
                                holder.before(
-                                       this.doAsyncEvent(() -> {
-                                           return publishEvent(this,
-                                                               clazz,
-                                                               () -> prepareEvent,
-                                                               eventPublisher::publishEvent);
-                                       })
+                                   this.doAsyncEvent(() -> {
+                                       return publishEvent(this,
+                                                           clazz,
+                                                           () -> prepareEvent,
+                                                           eventPublisher::publishEvent);
+                                   })
                                );
                            }
 
                            if (null != beforeEvent && isEnabled(clazz, entityEventType, EntityEventPhase.before)) {
                                holder.invoke(
-                                       this.doAsyncEvent(() -> {
-                                           return publishEvent(this,
-                                                               clazz,
-                                                               () -> beforeEvent,
-                                                               eventPublisher::publishEvent);
-                                       })
+                                   this.doAsyncEvent(() -> {
+                                       return publishEvent(this,
+                                                           clazz,
+                                                           () -> beforeEvent,
+                                                           eventPublisher::publishEvent);
+                                   })
                                );
                            }
                            if (null != afterEvent && isEnabled(clazz, entityEventType, EntityEventPhase.after)) {

@@ -9,6 +9,7 @@ import org.hswebframework.web.logger.ReactiveLogger;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.context.support.StaticApplicationContext;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.SignalType;
 import reactor.test.StepVerifier;
@@ -115,8 +116,12 @@ public class AuthenticationTests {
 
         };
         //绑定用户token
-        UserTokenManager userTokenManager = new DefaultUserTokenManager();
-        UserToken token = userTokenManager.signIn("test", "token-test", "admin", -1,authentication).block();
+        DefaultUserTokenManager userTokenManager = new DefaultUserTokenManager();
+        StaticApplicationContext ctx=  new StaticApplicationContext();
+        ctx.refresh();
+        userTokenManager.setEventPublisher(ctx);
+        UserToken token = userTokenManager.signIn("test", "token-test", "admin", -1,authentication)
+                                          .block();
 
         ReactiveAuthenticationHolder.addSupplier(new UserTokenReactiveAuthenticationSupplier(userTokenManager, authenticationManager));
         ParsedToken parsedToken=new ParsedToken() {
@@ -136,9 +141,6 @@ public class AuthenticationTests {
                 .currentReactive()
                 .map(Authentication::getUser)
                 .map(User::getId)
-                .doOnEach(ReactiveLogger.on(SignalType.ON_NEXT,(ctx,signal)->{
-                    System.out.println(ctx);
-                }))
                 .contextWrite(Context.of(ParsedToken.class, parsedToken))
                 .contextWrite(ReactiveLogger.start("rid","1"))
                 .as(StepVerifier::create)

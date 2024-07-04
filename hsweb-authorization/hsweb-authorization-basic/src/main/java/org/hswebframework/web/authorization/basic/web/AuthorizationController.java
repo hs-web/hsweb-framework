@@ -33,8 +33,10 @@ import org.hswebframework.web.authorization.exception.AuthenticationException;
 import org.hswebframework.web.authorization.exception.UnAuthorizedException;
 import org.hswebframework.web.authorization.simple.PlainTextUsernamePasswordAuthenticationRequest;
 import org.hswebframework.web.logging.AccessLogger;
+import org.hswebframework.web.logging.AccessLoggerInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.event.EventListener;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
@@ -68,7 +70,7 @@ public class AuthorizationController {
 
     @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE)
     @Authorize(ignore = true)
-    @AccessLogger(ignore = true)
+    @AccessLogger(ignoreParameter = {"parameter"})
     @Operation(summary = "登录", description = "必要参数:username,password.根据配置不同,其他参数也不同,如:验证码等.")
     public Mono<Map<String, Object>> authorizeByJson(@Parameter(example = "{\"username\":\"admin\",\"password\":\"admin\"}")
                                                      @RequestBody Mono<Map<String, Object>> parameter) {
@@ -129,12 +131,12 @@ public class AuthorizationController {
             } else {
                 authenticationMono = ReactiveAuthenticationHolder
                         .get(event.getUserId())
-                        .switchIfEmpty(Mono.error(() -> new AuthenticationException(AuthenticationException.USER_DISABLED)));
+                        .switchIfEmpty(Mono.error(() -> new AuthenticationException.NoStackTrace(AuthenticationException.USER_DISABLED)));
             }
         } else {
             authenticationMono = authenticationManager
                     .authenticate(Mono.just(new PlainTextUsernamePasswordAuthenticationRequest(event.getUsername(), event.getPassword())))
-                    .switchIfEmpty(Mono.error(() -> new AuthenticationException(AuthenticationException.ILLEGAL_PASSWORD)));
+                    .switchIfEmpty(Mono.error(() -> new AuthenticationException.NoStackTrace(AuthenticationException.ILLEGAL_PASSWORD)));
         }
         return authenticationMono;
     }

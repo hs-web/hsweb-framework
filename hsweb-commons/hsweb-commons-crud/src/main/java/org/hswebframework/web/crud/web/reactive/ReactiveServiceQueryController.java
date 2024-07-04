@@ -240,7 +240,7 @@ public interface ReactiveServiceQueryController<E, K> {
     default Mono<E> getById(@PathVariable K id) {
         return getService()
                 .findById(id)
-                .switchIfEmpty(Mono.error(NotFoundException::new));
+                .switchIfEmpty(Mono.error(NotFoundException.NoStackTrace::new));
     }
 
 }

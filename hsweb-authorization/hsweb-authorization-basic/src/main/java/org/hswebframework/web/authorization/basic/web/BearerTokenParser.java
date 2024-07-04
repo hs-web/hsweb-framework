@@ -15,7 +15,7 @@ public class BearerTokenParser implements ReactiveUserTokenParser {
                 .getFirst(HttpHeaders.AUTHORIZATION);
 
         if (token != null && token.startsWith("Bearer ")) {
-            return Mono.just(ParsedToken.of("bearer", token.substring(7)));
+            return Mono.just(ParsedToken.ofBearer(token.substring(7)));
         }
         return Mono.empty();
     }

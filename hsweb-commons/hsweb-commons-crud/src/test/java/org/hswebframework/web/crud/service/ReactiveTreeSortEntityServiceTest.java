@@ -34,10 +34,10 @@ public class ReactiveTreeSortEntityServiceTest {
         entity.setName("Simple-test");
 
         sortEntityService
-                .insert(Mono.just(entity))
-                .as(StepVerifier::create)
-                .expectNext(1)
-                .verifyComplete();
+            .insert(Mono.just(entity))
+            .as(StepVerifier::create)
+            .expectNext(1)
+            .verifyComplete();
     }
 
     @Test
@@ -101,27 +101,27 @@ public class ReactiveTreeSortEntityServiceTest {
         entity3.setParentId(entity2.getId());
 
         sortEntityService
-                .save(Arrays.asList(entity, entity_0, entity2, entity3))
-                .then()
-                .as(StepVerifier::create)
-                .expectComplete()
-                .verify();
+            .save(Arrays.asList(entity, entity_0, entity2, entity3))
+            .then()
+            .as(StepVerifier::create)
+            .expectComplete()
+            .verify();
 
         entity2.setChildren(null);
         entity2.setParentId(entity_0.getId());
 
         sortEntityService
-                .save(Arrays.asList(entity2))
-                .then()
-                .as(StepVerifier::create)
-                .expectComplete()
-                .verify();
+            .save(Arrays.asList(entity2))
+            .then()
+            .as(StepVerifier::create)
+            .expectComplete()
+            .verify();
 
         sortEntityService
-                .queryIncludeChildren(Arrays.asList(entity_0.getId()))
-                .as(StepVerifier::create)
-                .expectNextCount(3)
-                .verifyComplete();
+            .queryIncludeChildren(Arrays.asList(entity_0.getId()))
+            .as(StepVerifier::create)
+            .expectNextCount(3)
+            .verifyComplete();
 
     }
 
@@ -132,28 +132,28 @@ public class ReactiveTreeSortEntityServiceTest {
         entity.setName("test-path");
 
         sortEntityService
-                .save(entity)
-                .then()
-                .as(StepVerifier::create)
-                .expectComplete()
-                .verify();
+            .save(entity)
+            .then()
+            .as(StepVerifier::create)
+            .expectComplete()
+            .verify();
         String firstPath = entity.getPath();
         assertNotNull(firstPath);
         entity.setPath(null);
 
         sortEntityService
-                .save(entity)
-                .then()
-                .as(StepVerifier::create)
-                .expectComplete()
-                .verify();
+            .save(entity)
+            .then()
+            .as(StepVerifier::create)
+            .expectComplete()
+            .verify();
 
         sortEntityService
-                .findById(entity.getId())
-                .map(TestTreeSortEntity::getPath)
-                .as(StepVerifier::create)
-                .expectNext(firstPath)
-                .verifyComplete();
+            .findById(entity.getId())
+            .map(TestTreeSortEntity::getPath)
+            .as(StepVerifier::create)
+            .expectNext(firstPath)
+            .verifyComplete();
     }
 
     @Test
@@ -164,22 +164,22 @@ public class ReactiveTreeSortEntityServiceTest {
         entity.setParentId("NotExistParentId");
 
         sortEntityService
-                .insert(entity)
-                .then()
-                .as(StepVerifier::create)
-                .expectError(ValidationException.class)
-                .verify();
+            .insert(entity)
+            .then()
+            .as(StepVerifier::create)
+            .expectError(ValidationException.class)
+            .verify();
 
         TestTreeSortEntity entity2 = new TestTreeSortEntity();
         entity2.setId("NotExistParentId");
         entity2.setName("NotExistParentId");
 
         sortEntityService
-                .save(Flux.just(entity, entity2))
-                .then()
-                .as(StepVerifier::create)
-                .expectComplete()
-                .verify();
+            .save(Flux.just(entity, entity2))
+            .then()
+            .as(StepVerifier::create)
+            .expectComplete()
+            .verify();
     }
 
 
@@ -198,30 +198,30 @@ public class ReactiveTreeSortEntityServiceTest {
 
         root.setParentId(node1.getId());
         sortEntityService
-                .insert(Flux.just(root, node1))
-                .as(StepVerifier::create)
-                .expectErrorMatches(err -> err.getMessage().contains("tree_entity_cyclic_dependency"))
-                .verify();
+            .insert(Flux.just(root, node1))
+            .as(StepVerifier::create)
+            .expectErrorMatches(err -> err.getMessage().contains("tree_entity_cyclic_dependency"))
+            .verify();
 
         root.setParentId(null);
         root.setChildren(null);
         node1.setChildren(null);
 
         sortEntityService
-                .insert(Flux.just(root, node1))
-                .as(StepVerifier::create)
-                .expectNext(2)
-                .verifyComplete();
+            .insert(Flux.just(root, node1))
+            .as(StepVerifier::create)
+            .expectNext(2)
+            .verifyComplete();
 
         root.setParentId(node1.getId());
         root.setChildren(null);
         node1.setChildren(null);
 
         sortEntityService
-                .save(Flux.just(root))
-                .as(StepVerifier::create)
-                .expectErrorMatches(err -> err.getMessage().contains("tree_entity_cyclic_dependency"))
-                .verify();
+            .save(Flux.just(root))
+            .as(StepVerifier::create)
+            .expectErrorMatches(err -> err.getMessage().contains("tree_entity_cyclic_dependency"))
+            .verify();
     }
 
 
@@ -238,19 +238,65 @@ public class ReactiveTreeSortEntityServiceTest {
         node1.setParentId(root.getId());
 
         sortEntityService
-                .save(Flux.just(root, node1))
-                .map(SaveResult::getTotal)
-                .as(StepVerifier::create)
-                .expectNext(2)
-                .verifyComplete();
+            .save(Flux.just(root, node1))
+            .map(SaveResult::getTotal)
+            .as(StepVerifier::create)
+            .expectNext(2)
+            .verifyComplete();
 
         sortEntityService
-                .createDelete()
-                .where(TestTreeSortEntity::getId, "delete-root")
-                .execute()
-                .as(StepVerifier::create)
-                .expectNext(2)
-                .verifyComplete();
+            .createDelete()
+            .where(TestTreeSortEntity::getId, "delete-root")
+            .execute()
+            .as(StepVerifier::create)
+            .expectNext(2)
+            .verifyComplete();
+
+        sortEntityService
+            .save(Flux.just(root, node1))
+            .map(SaveResult::getTotal)
+            .as(StepVerifier::create)
+            .expectNext(2)
+            .verifyComplete();
+
+        sortEntityService
+            .deleteById(root.getId())
+            .as(StepVerifier::create)
+            .expectNext(2)
+            .verifyComplete();
 
     }
+
+    @Test
+    public void testChild() {
+        TestTreeSortEntity entity = new TestTreeSortEntity();
+        entity.setId("ChildQuery");
+        entity.setName("ChildQuery");
+
+        TestTreeSortEntity entity2 = new TestTreeSortEntity();
+        entity2.setId("ChildQuery2");
+        entity2.setName("ChildQuery2");
+        entity2.setParentId(entity.getId());
+
+        TestTreeSortEntity entity3 = new TestTreeSortEntity();
+        entity3.setId("ChildQuery3");
+        entity3.setName("ChildQuery3");
+
+
+        sortEntityService
+            .save(Flux.just(entity, entity2, entity3))
+            .then()
+            .as(StepVerifier::create)
+            .expectComplete()
+            .verify();
+
+        sortEntityService
+            .createQuery()
+            .accept("id", "test-child", entity.getId())
+            .fetch()
+            .as(StepVerifier::create)
+            .expectNextCount(2)
+            .verifyComplete();
+    }
+
 }

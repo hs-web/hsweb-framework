@@ -59,8 +59,8 @@ public class SimpleAuthentication implements Authentication {
 
     public SimpleAuthentication merge(Authentication authentication) {
         Map<String, Permission> mePermissionGroup = permissions
-                .stream()
-                .collect(Collectors.toMap(Permission::getId, Function.identity()));
+            .stream()
+            .collect(Collectors.toMap(Permission::getId, Function.identity()));
 
         if (authentication.getUser() != null) {
             user = authentication.getUser();
@@ -86,16 +86,20 @@ public class SimpleAuthentication implements Authentication {
         return this;
     }
 
+    protected SimpleAuthentication newInstance() {
+        return new SimpleAuthentication();
+    }
+
     @Override
     public Authentication copy(BiPredicate<Permission, String> permissionFilter,
                                Predicate<Dimension> dimension) {
-        SimpleAuthentication authentication = new SimpleAuthentication();
+        SimpleAuthentication authentication = newInstance();
         authentication.setDimensions(dimensions.stream().filter(dimension).collect(Collectors.toList()));
         authentication.setPermissions(permissions
-                                              .stream()
-                                              .map(permission -> permission.copy(action -> permissionFilter.test(permission, action), conf -> true))
-                                              .filter(per -> !per.getActions().isEmpty())
-                                              .collect(Collectors.toList())
+                                          .stream()
+                                          .map(permission -> permission.copy(action -> permissionFilter.test(permission, action), conf -> true))
+                                          .filter(per -> !per.getActions().isEmpty())
+                                          .collect(Collectors.toList())
         );
         authentication.setUser(user);
         authentication.setAttributes(new HashMap<>(attributes));
@@ -105,6 +109,10 @@ public class SimpleAuthentication implements Authentication {
     public void setUser(User user) {
         this.user = user;
         dimensions.add(user);
+    }
+
+    protected void setUser0(User user) {
+        this.user = user;
     }
 
     public void setDimensions(List<Dimension> dimensions) {
