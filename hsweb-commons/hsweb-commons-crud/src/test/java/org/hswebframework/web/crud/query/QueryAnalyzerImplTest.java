@@ -149,7 +149,7 @@ public class QueryAnalyzerImplTest {
     }
 
     @Test
-    void testTableFunction(){
+    public void testTableFunction(){
         QueryAnalyzerImpl analyzer = new QueryAnalyzerImpl(
             database,
             "select t.key from json_each_text('{\"name\":\"test\"}') t");
@@ -160,7 +160,7 @@ public class QueryAnalyzerImplTest {
     }
 
     @Test
-    void testTableFunctionJoin(){
+    public void testTableFunctionJoin(){
         QueryAnalyzerImpl analyzer = new QueryAnalyzerImpl(
             database,
             "select t1.*,t2.key from s_test t1 left join json_each_text('{\"name\":\"test\"}') t2 on t2.key='test' and t2.value='test1'");
@@ -171,7 +171,7 @@ public class QueryAnalyzerImplTest {
     }
 
     @Test
-    void testValues(){
+    public  void testValues(){
         QueryAnalyzerImpl analyzer = new QueryAnalyzerImpl(
             database,
             "select * from (values (1,2),(3,4)) t(\"a\",b)");
@@ -182,7 +182,7 @@ public class QueryAnalyzerImplTest {
     }
 
     @Test
-    void testLateralSubSelect(){
+   public void testLateralSubSelect(){
         QueryAnalyzerImpl analyzer = new QueryAnalyzerImpl(
             database,
             "select * from s_test t, lateral(select * from s_test where id = t.id) t2");
@@ -193,7 +193,7 @@ public class QueryAnalyzerImplTest {
     }
 
     @Test
-    void testParenthesisFrom(){
+    public void testParenthesisFrom(){
         QueryAnalyzerImpl analyzer = new QueryAnalyzerImpl(
             database,
             "select * from (s_test) t");
