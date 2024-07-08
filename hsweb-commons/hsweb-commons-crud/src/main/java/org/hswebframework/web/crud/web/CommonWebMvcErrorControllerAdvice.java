@@ -54,7 +54,7 @@ public class CommonWebMvcErrorControllerAdvice {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ResponseMessage<Object> handleException(UnsupportedOperationException e) {
-        log.error(e.getLocalizedMessage(), e);
+        log.warn(e.getLocalizedMessage(), e);
         String msg = resolveMessage(e);
         return ResponseMessage.error(500, CodeConstants.Error.unsupported, msg);
     }
@@ -149,21 +149,21 @@ public class CommonWebMvcErrorControllerAdvice {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @Order
     public ResponseMessage<Object> handleException(RuntimeException e) {
-        log.error(e.getLocalizedMessage(), e);
+        log.warn(e.getLocalizedMessage(), e);
         return ResponseMessage.error(resolveMessage(e));
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ResponseMessage<Object> handleException(NullPointerException e) {
-        log.error(e.getLocalizedMessage(), e);
+        log.warn(e.getLocalizedMessage(), e);
         return ResponseMessage.error(e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseMessage<Object> handleException(IllegalArgumentException e) {
-        log.error(e.getLocalizedMessage(), e);
+        log.warn(e.getLocalizedMessage(), e);
 
         return ResponseMessage.error(400, CodeConstants.Error.illegal_argument, resolveMessage(e));
     }
@@ -171,7 +171,7 @@ public class CommonWebMvcErrorControllerAdvice {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseMessage<Object> handleException(AuthenticationException e) {
-        log.error(e.getLocalizedMessage(), e);
+        log.warn(e.getLocalizedMessage(), e);
 
         return ResponseMessage.error(400, e.getCode(), resolveMessage(e));
     }
@@ -179,7 +179,7 @@ public class CommonWebMvcErrorControllerAdvice {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
     public ResponseMessage<Object> handleException(UnsupportedMediaTypeStatusException e) {
-        log.error(e.getLocalizedMessage(), e);
+        log.warn(e.getLocalizedMessage(), e);
 
         return ResponseMessage
                 .error(415, "unsupported_media_type", LocaleUtils.resolveMessage("error.unsupported_media_type"))
@@ -189,7 +189,7 @@ public class CommonWebMvcErrorControllerAdvice {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
     public ResponseMessage<Object> handleException(NotAcceptableStatusException e) {
-        log.error(e.getLocalizedMessage(), e);
+        log.warn(e.getLocalizedMessage(), e);
 
         return ResponseMessage
                 .error(406, "not_acceptable_media_type", LocaleUtils
@@ -200,7 +200,7 @@ public class CommonWebMvcErrorControllerAdvice {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
     public ResponseMessage<Object> handleException(MethodNotAllowedException e) {
-        log.error(e.getLocalizedMessage(), e);
+        log.warn(e.getLocalizedMessage(), e);
 
         return ResponseMessage
                 .error(406, "method_not_allowed", LocaleUtils.resolveMessage("error.method_not_allowed"))

@@ -4,8 +4,11 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.hswebframework.ezorm.rdb.executor.SqlRequest;
+import org.hswebframework.ezorm.rdb.metadata.RDBSchemaMetadata;
 import org.hswebframework.ezorm.rdb.metadata.RDBTableMetadata;
 import org.hswebframework.ezorm.rdb.operator.DatabaseOperator;
+import org.hswebframework.ezorm.rdb.operator.builder.fragments.ddl.CreateTableSqlBuilder;
 import org.hswebframework.web.api.crud.entity.EntityFactory;
 import org.hswebframework.web.crud.annotation.DDL;
 import org.hswebframework.web.crud.entity.factory.MapperEntityFactory;
@@ -60,9 +63,9 @@ public class AutoDDLProcessor implements InitializingBean {
             Class<?> type = entityFactory.getInstanceType(entity.getRealType(), true);
             DDL ddl = AnnotatedElementUtils.findMergedAnnotation(type, DDL.class);
             if (properties.isAutoDdl() && (ddl == null || ddl.value())) {
-                readyToDDL.add(type);
+                readyToDDL.add(entity.getEntityType());
             } else {
-                nonDDL.add(type);
+                nonDDL.add(entity.getEntityType());
             }
         }
 
@@ -78,12 +81,12 @@ public class AutoDDLProcessor implements InitializingBean {
                         return metadata;
                     })
                     .flatMap(meta -> operator
-                                     .ddl()
-                                     .createOrAlter(meta)
-                                     .autoLoad(false)
-                                     .commit()
-                                     .reactive()
-                                     .subscribeOn(Schedulers.boundedElastic()),
+                                 .ddl()
+                                 .createOrAlter(meta)
+                                 .autoLoad(false)
+                                 .commit()
+                                 .reactive()
+                                 .subscribeOn(Schedulers.boundedElastic()),
                              8)
                     .doOnError((err) -> log.error(err.getMessage(), err))
                     .then()
@@ -110,10 +113,15 @@ public class AutoDDLProcessor implements InitializingBean {
 
         for (Class<?> entity : nonDDL) {
             RDBTableMetadata metadata = resolver.resolve(entity);
-            operator
-                    .getMetadata()
-                    .getCurrentSchema()
-                    .addTable(metadata);
+            RDBSchemaMetadata schema = metadata.getSchema();
+            RDBTableMetadata table = schema
+                .getTable(metadata.getName())
+                .orElse(null);
+            if (table == null) {
+                SqlRequest request = schema.findFeatureNow(CreateTableSqlBuilder.ID).build(metadata);
+                log.info("DDL SQL for {} \n{}", entity, request.toNativeSql());
+            }
+            schema.addTable(metadata);
         }
     }
 }

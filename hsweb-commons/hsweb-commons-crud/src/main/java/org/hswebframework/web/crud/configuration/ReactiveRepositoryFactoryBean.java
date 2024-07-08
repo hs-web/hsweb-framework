@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hswebframework.ezorm.rdb.mapping.ReactiveRepository;
 import org.hswebframework.ezorm.rdb.mapping.defaults.DefaultReactiveRepository;
+import org.hswebframework.ezorm.rdb.metadata.RDBSchemaMetadata;
+import org.hswebframework.ezorm.rdb.metadata.RDBTableMetadata;
 import org.hswebframework.ezorm.rdb.operator.DatabaseOperator;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Getter
 @Setter
 public class ReactiveRepositoryFactoryBean<E, PK>
-        implements FactoryBean<ReactiveRepository<E, PK>> {
+    implements FactoryBean<ReactiveRepository<E, PK>> {
 
     @Autowired
     private DatabaseOperator operator;
@@ -26,11 +28,12 @@ public class ReactiveRepositoryFactoryBean<E, PK>
 
     @Override
     public ReactiveRepository<E, PK> getObject() {
-
-        return new DefaultReactiveRepository<>(operator,
-                resolver.resolve(entityType),
-                entityType,
-                wrapperFactory.getWrapper(entityType));
+        RDBTableMetadata table = resolver.resolve(entityType);
+        return new DefaultReactiveRepository<>(
+            operator,
+            table.getName(),
+            entityType,
+            wrapperFactory.getWrapper(entityType));
     }
 
     @Override

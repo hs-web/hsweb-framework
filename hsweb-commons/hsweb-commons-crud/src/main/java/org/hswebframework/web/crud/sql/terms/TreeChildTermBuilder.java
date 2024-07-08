@@ -2,6 +2,7 @@ package org.hswebframework.web.crud.sql.terms;
 
 import org.hswebframework.ezorm.core.param.Term;
 import org.hswebframework.ezorm.rdb.metadata.RDBColumnMetadata;
+import org.hswebframework.ezorm.rdb.operator.builder.fragments.BatchSqlFragments;
 import org.hswebframework.ezorm.rdb.operator.builder.fragments.PrepareSqlFragments;
 import org.hswebframework.ezorm.rdb.operator.builder.fragments.SqlFragments;
 import org.hswebframework.ezorm.rdb.operator.builder.fragments.term.AbstractTermFragmentBuilder;
@@ -33,25 +34,26 @@ public abstract class TreeChildTermBuilder extends AbstractTermFragmentBuilder {
         Arrays.fill(args, "?");
 
         RDBColumnMetadata pathColumn = column
-                .getOwner()
-                .getSchema()
-                .getTable(tableName)
-                .flatMap(t -> t.getColumn("path"))
-                .orElseThrow(() -> new IllegalArgumentException("not found 'path' column"));
+            .getOwner()
+            .getSchema()
+            .getTable(tableName)
+            .flatMap(t -> t.getColumn("path"))
+            .orElseThrow(() -> new IllegalArgumentException("not found 'path' column"));
 
         RDBColumnMetadata idColumn = column
-                .getOwner()
-                .getSchema()
-                .getTable(tableName)
-                .flatMap(t -> t.getColumn("id"))
-                .orElseThrow(() -> new IllegalArgumentException("not found 'id' column"));
+            .getOwner()
+            .getSchema()
+            .getTable(tableName)
+            .flatMap(t -> t.getColumn("id"))
+            .orElseThrow(() -> new IllegalArgumentException("not found 'id' column"));
 
-        PrepareSqlFragments fragments = PrepareSqlFragments.of();
+        BatchSqlFragments fragments = new BatchSqlFragments(2, 1);
         if (term.getOptions().contains("not")) {
-            fragments.addSql("not");
+            fragments.add(SqlFragments.NOT);
         }
 
-        return fragments.addSql(
+        return fragments
+            .addSql(
                 "exists(select 1 from", tableName, "_p join", tableName,
                 "_c on", idColumn.getFullName("_c"), "in(", String.join(",", args), ")",
                 "and", pathColumn.getFullName("_p"), "like concat(" + pathColumn.getFullName("_c") + ",'%')",

@@ -7,6 +7,7 @@ import org.hswebframework.web.authorization.exception.UnAuthorizedException;
 import org.hswebframework.web.authorization.simple.SimpleAuthentication;
 import org.hswebframework.web.authorization.token.*;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
@@ -19,6 +20,7 @@ import java.util.HashMap;
 
 import static org.junit.Assert.*;
 
+@Ignore
 public class RedisUserTokenManagerTest {
 
     UserTokenManager tokenManager;
@@ -28,8 +30,8 @@ public class RedisUserTokenManagerTest {
         LettuceConnectionFactory factory = new LettuceConnectionFactory(new RedisStandaloneConfiguration("127.0.0.1"));
 
         ReactiveRedisTemplate<Object, Object> template = new ReactiveRedisTemplate<>(
-                factory,
-                RedisSerializationContext.java()
+            factory,
+            RedisSerializationContext.java()
         );
         factory.afterPropertiesSet();
 

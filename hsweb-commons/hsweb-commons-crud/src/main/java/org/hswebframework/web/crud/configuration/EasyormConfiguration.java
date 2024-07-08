@@ -216,6 +216,7 @@ public class EasyormConfiguration {
                             MappingFeatureType.columnPropertyMapping.createFeatureId(realType)
                         );
                         if (realType != entityType) {
+                            table.addFeature(new DetectEntityColumnMapping(realType, columnMapping, factory));
                             table.addFeature(columnMapping = new DetectEntityColumnMapping(entityType, columnMapping, factory));
                         }
                         for (TableMetadataCustomizer customizer : customizers) {

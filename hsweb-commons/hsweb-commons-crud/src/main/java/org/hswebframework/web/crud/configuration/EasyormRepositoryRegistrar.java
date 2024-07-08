@@ -49,9 +49,9 @@ public class EasyormRepositoryRegistrar implements ImportBeanDefinitionRegistrar
     private String getResourceClassName(Resource resource) {
         try {
             return metadataReaderFactory
-                    .getMetadataReader(resource)
-                    .getClassMetadata()
-                    .getClassName();
+                .getMetadataReader(resource)
+                .getClassMetadata()
+                .getClassName();
         } catch (IOException e) {
             return null;
         }
@@ -60,8 +60,8 @@ public class EasyormRepositoryRegistrar implements ImportBeanDefinitionRegistrar
     @SneakyThrows
     private Stream<Resource> doGetResources(String packageStr) {
         String path = ResourcePatternResolver
-                .CLASSPATH_ALL_URL_PREFIX
-                .concat(packageStr.replace(".", "/")).concat("/**/*.class");
+            .CLASSPATH_ALL_URL_PREFIX
+            .concat(packageStr.replace(".", "/")).concat("/**/*.class");
         return Arrays.stream(resourcePatternResolver.getResources(path));
     }
 
@@ -69,16 +69,16 @@ public class EasyormRepositoryRegistrar implements ImportBeanDefinitionRegistrar
         CandidateComponentsIndex index = CandidateComponentsIndexLoader.loadIndex(org.springframework.util.ClassUtils.getDefaultClassLoader());
         if (null == index) {
             return Stream
-                    .of(packageStr)
-                    .flatMap(this::doGetResources)
-                    .map(this::getResourceClassName)
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toSet());
+                .of(packageStr)
+                .flatMap(this::doGetResources)
+                .map(this::getResourceClassName)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
         }
         return Stream
-                .of(packageStr)
-                .flatMap(pkg -> index.getCandidateTypes(pkg, Table.class.getName()).stream())
-                .collect(Collectors.toSet());
+            .of(packageStr)
+            .flatMap(pkg -> index.getCandidateTypes(pkg, Table.class.getName()).stream())
+            .collect(Collectors.toSet());
     }
 
     private Class<?> findIdType(Class<?> entityType) {
@@ -153,7 +153,8 @@ public class EasyormRepositoryRegistrar implements ImportBeanDefinitionRegistrar
             Class idType = entityInfo.getIdType();
             Class realType = entityInfo.getRealType();
             if (entityInfo.isReactive()) {
-                log.trace("register ReactiveRepository<{},{}>", entityType.getName(), idType.getSimpleName());
+                String beanName = entityType.getSimpleName().concat("ReactiveRepository");
+                log.trace("Register bean ReactiveRepository<{},{}> {}", entityType.getName(), idType.getSimpleName(), beanName);
 
                 ResolvableType repositoryType = ResolvableType.forClassWithGenerics(DefaultReactiveRepository.class, entityType, idType);
 
@@ -161,25 +162,27 @@ public class EasyormRepositoryRegistrar implements ImportBeanDefinitionRegistrar
                 definition.setTargetType(repositoryType);
                 definition.setBeanClass(ReactiveRepositoryFactoryBean.class);
                 definition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
-                definition.getPropertyValues().add("entityType", realType);
-                registry.registerBeanDefinition(realType.getSimpleName().concat("ReactiveRepository"), definition);
+                definition.getPropertyValues().add("entityType", entityType);
+                registry.registerBeanDefinition(beanName, definition);
             }
             if (entityInfo.isNonReactive()) {
-                log.trace("register SyncRepository<{},{}>", entityType.getName(), idType.getSimpleName());
+                String beanName = entityType.getSimpleName().concat("SyncRepository");
+                log.trace("Register bean SyncRepository<{},{}> {}", entityType.getName(), idType.getSimpleName(), beanName);
+
                 ResolvableType repositoryType = ResolvableType.forClassWithGenerics(DefaultSyncRepository.class, entityType, idType);
                 RootBeanDefinition definition = new RootBeanDefinition();
                 definition.setTargetType(repositoryType);
                 definition.setBeanClass(SyncRepositoryFactoryBean.class);
                 definition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
-                definition.getPropertyValues().add("entityType", realType);
-                registry.registerBeanDefinition(realType.getSimpleName().concat("SyncRepository"), definition);
+                definition.getPropertyValues().add("entityType", entityType);
+                registry.registerBeanDefinition(beanName, definition);
             }
 
         }
 
         Map<Boolean, Set<EntityInfo>> group = entityInfos
-                .stream()
-                .collect(Collectors.groupingBy(EntityInfo::isReactive, Collectors.toSet()));
+            .stream()
+            .collect(Collectors.groupingBy(EntityInfo::isReactive, Collectors.toSet()));
 
         for (Map.Entry<Boolean, Set<EntityInfo>> entry : group.entrySet()) {
             RootBeanDefinition definition = new RootBeanDefinition();

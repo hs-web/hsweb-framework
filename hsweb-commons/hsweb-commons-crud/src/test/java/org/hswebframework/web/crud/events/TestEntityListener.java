@@ -99,6 +99,7 @@ public class TestEntityListener {
             for (EventTestEntity eventTestEntity : event.getAfter()) {
                 if(eventTestEntity.getName().equals("prepare-xx")){
                     eventTestEntity.setName("prepare-0");
+                    eventTestEntity.setAge(null);
                 }
             }
         }));

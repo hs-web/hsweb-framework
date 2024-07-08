@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 
 import java.time.Duration;
 import java.util.Base64;
+import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -13,7 +14,7 @@ public class RandomIdGenerator implements IDGenerator<String> {
 
     // java -Dgenerator.random.instance-id=8
     static final RandomIdGenerator GLOBAL = new RandomIdGenerator(
-            Integer.getInteger("generator.random.instance-id", ThreadLocalRandom.current().nextInt(1, 127)).byteValue()
+        Integer.getInteger("generator.random.instance-id", ThreadLocalRandom.current().nextInt(1, 127)).byteValue()
     );
 
     static final Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
@@ -75,17 +76,21 @@ public class RandomIdGenerator implements IDGenerator<String> {
         }
         long now = System.currentTimeMillis();
         return ((now >>> 56) & 0xff) << 56 |
-                ((now >>> 48) & 0xff) << 48 |
-                ((now >>> 40) & 0xff) << 40 |
-                ((long) bytes[1] & 0xff) << 32 |
-                ((long) bytes[2] & 0xff) << 24 |
-                ((long) bytes[3] & 0xff) << 16 |
-                ((long) bytes[4] & 0xff) << 8 |
-                (long) bytes[5] & 0xff;
+            ((now >>> 48) & 0xff) << 48 |
+            ((now >>> 40) & 0xff) << 40 |
+            ((long) bytes[1] & 0xff) << 32 |
+            ((long) bytes[2] & 0xff) << 24 |
+            ((long) bytes[3] & 0xff) << 16 |
+            ((long) bytes[4] & 0xff) << 8 |
+            (long) bytes[5] & 0xff;
     }
 
-    private static void nextBytes(byte[] bytes, int offset, int len) {
-        ThreadLocalRandom random = ThreadLocalRandom.current();
+    protected Random random() {
+        return io.netty.util.internal.ThreadLocalRandom.current();
+    }
+
+    private void nextBytes(byte[] bytes, int offset, int len) {
+        Random random = random();
 
         for (int i = offset; i < len; ) {
             for (int rnd = random.nextInt(),

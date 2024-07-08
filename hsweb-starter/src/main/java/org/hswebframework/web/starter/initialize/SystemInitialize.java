@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 /**
  * @author zhouhao
  */
+@Deprecated
 public class SystemInitialize {
     private final Logger logger = LoggerFactory.getLogger(SystemInitialize.class);
 
