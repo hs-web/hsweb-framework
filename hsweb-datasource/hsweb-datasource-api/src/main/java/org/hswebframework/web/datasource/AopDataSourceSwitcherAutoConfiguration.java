@@ -31,7 +31,7 @@ import static org.hswebframework.web.datasource.strategy.AnnotationDataSourceSwi
  * @author zhouhao
  * @since 3.0
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 public class AopDataSourceSwitcherAutoConfiguration {
 
     @Bean

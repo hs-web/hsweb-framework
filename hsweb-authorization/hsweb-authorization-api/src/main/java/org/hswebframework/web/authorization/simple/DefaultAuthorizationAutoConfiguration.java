@@ -69,13 +69,6 @@ public class DefaultAuthorizationAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(TwoFactorValidatorManager.class)
-    @ConfigurationProperties("hsweb.authorize.two-factor")
-    public DefaultTwoFactorValidatorManager defaultTwoFactorValidatorManager() {
-        return new DefaultTwoFactorValidatorManager();
-    }
-
-    @Bean
     @ConditionalOnMissingBean(AuthenticationBuilderFactory.class)
     public AuthenticationBuilderFactory authenticationBuilderFactory(DataAccessConfigBuilderFactory dataAccessConfigBuilderFactory) {
         return new SimpleAuthenticationBuilderFactory(dataAccessConfigBuilderFactory);

@@ -15,7 +15,7 @@ import java.util.Map;
  * @author zhouhao
  * @since 3.0.4
  */
-public class DefaultTwoFactorValidatorManager implements TwoFactorValidatorManager, BeanPostProcessor {
+public class DefaultTwoFactorValidatorManager implements TwoFactorValidatorManager {
 
     @Getter
     @Setter
@@ -35,20 +35,4 @@ public class DefaultTwoFactorValidatorManager implements TwoFactorValidatorManag
         return validatorProvider.createTwoFactorValidator(userId, operation);
     }
 
-    @Override
-    public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-        return bean;
-    }
-
-    @Override
-    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        if (bean instanceof TwoFactorValidatorProvider) {
-            TwoFactorValidatorProvider provider = ((TwoFactorValidatorProvider) bean);
-            providers.put(provider.getProvider(), provider);
-            if (provider.getProvider().equalsIgnoreCase(defaultProvider)) {
-                providers.put("default", provider);
-            }
-        }
-        return bean;
-    }
 }

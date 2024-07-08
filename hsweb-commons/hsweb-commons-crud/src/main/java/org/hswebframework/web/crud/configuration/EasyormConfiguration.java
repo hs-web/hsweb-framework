@@ -37,9 +37,11 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 
 import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
@@ -68,14 +70,25 @@ public class EasyormConfiguration {
     }
 
     @Bean
+    @Primary
+    public EventListener easyormEventListener(ObjectProvider<EventListener> eventListeners) {
+        CompositeEventListener eventListener = new CompositeEventListener();
+        eventListeners.forEach(eventListener::addListener);
+        return eventListener;
+    }
+
+    @Bean
     @ConditionalOnMissingBean
     @SuppressWarnings("all")
     public RDBDatabaseMetadata databaseMetadata(Optional<SyncSqlExecutor> syncSqlExecutor,
                                                 Optional<ReactiveSqlExecutor> reactiveSqlExecutor,
+                                                ObjectProvider<Feature> features,
                                                 EasyormProperties properties) {
         RDBDatabaseMetadata metadata = properties.createDatabaseMetadata();
         syncSqlExecutor.ifPresent(metadata::addFeature);
         reactiveSqlExecutor.ifPresent(metadata::addFeature);
+        features.forEach(metadata::addFeature);
+
         if (properties.isAutoDdl() && reactiveSqlExecutor.isPresent()) {
             for (RDBSchemaMetadata schema : metadata.getSchemas()) {
                 schema.loadAllTableReactive()
@@ -97,25 +110,25 @@ public class EasyormConfiguration {
         return new DefaultQueryHelper(databaseOperator);
     }
 
-    @Bean
-    public BeanPostProcessor autoRegisterFeature(RDBDatabaseMetadata metadata) {
-        CompositeEventListener eventListener = new CompositeEventListener();
-        metadata.addFeature(eventListener);
-        return new BeanPostProcessor() {
-            @Override
-            public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-
-                if (bean instanceof EventListener) {
-                    eventListener.addListener(((EventListener) bean));
-                } else if (bean instanceof Feature) {
-                    metadata.addFeature(((Feature) bean));
-                }
-
-                return bean;
-            }
-        };
-    }
-
+//    @Bean
+//    public BeanPostProcessor autoRegisterFeature(RDBDatabaseMetadata metadata) {
+//        CompositeEventListener eventListener = new CompositeEventListener();
+//        metadata.addFeature(eventListener);
+//        return new BeanPostProcessor() {
+//            @Override
+//            public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+//
+//                if (bean instanceof EventListener) {
+//                    eventListener.addListener(((EventListener) bean));
+//                } else if (bean instanceof Feature) {
+//                    metadata.addFeature(((Feature) bean));
+//                }
+//
+//                return bean;
+//            }
+//        };
+//    }
+//
 
     @Bean
     public CreatorEventListener creatorEventListener() {
@@ -201,7 +214,7 @@ public class EasyormConfiguration {
 
         @Bean
         @ConditionalOnMissingBean
-        public EntityTableMetadataParser jpaEntityTableMetadataParser(RDBDatabaseMetadata metadata,
+        public EntityTableMetadataParser jpaEntityTableMetadataParser(ApplicationContext context,
                                                                       EntityFactory factory,
                                                                       ObjectProvider<TableMetadataCustomizer> customizers) {
 
@@ -244,7 +257,7 @@ public class EasyormConfiguration {
                     };
                 }
             };
-            parser.setDatabaseMetadata(metadata);
+            parser.setDatabaseMetadata(()->context.getBean(RDBDatabaseMetadata.class));
 
             return parser;
         }

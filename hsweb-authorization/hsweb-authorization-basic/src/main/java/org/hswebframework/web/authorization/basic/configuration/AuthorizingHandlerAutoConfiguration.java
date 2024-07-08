@@ -10,6 +10,7 @@ import org.hswebframework.web.authorization.basic.handler.DefaultAuthorizingHand
 import org.hswebframework.web.authorization.basic.handler.UserAllowPermissionHandler;
 import org.hswebframework.web.authorization.basic.web.*;
 import org.hswebframework.web.authorization.token.UserTokenManager;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -38,8 +39,14 @@ public class AuthorizingHandlerAutoConfiguration {
 
     @Bean
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
-    public UserTokenWebFilter userTokenWebFilter() {
-        return new UserTokenWebFilter();
+    public UserTokenWebFilter userTokenWebFilter(UserTokenManager userTokenManager,
+                                                 ObjectProvider<ReactiveUserTokenParser> tokenParsers,
+                                                 ObjectProvider<ReactiveUserTokenGenerator> tokenGenerators) {
+        UserTokenWebFilter filter = new UserTokenWebFilter(userTokenManager);
+        tokenParsers.forEach(filter::register);
+        tokenGenerators.forEach(filter::register);
+
+        return filter;
     }
 
 

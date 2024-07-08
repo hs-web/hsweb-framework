@@ -4,19 +4,15 @@ import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.ezorm.rdb.mapping.defaults.DefaultReactiveRepository;
 import org.hswebframework.ezorm.rdb.mapping.defaults.DefaultSyncRepository;
-import org.hswebframework.utils.ClassUtils;
 import org.hswebframework.web.crud.annotation.EnableEasyormRepository;
-import org.hswebframework.web.api.crud.entity.ImplementFor;
 import org.hswebframework.web.crud.annotation.Reactive;
 import org.hswebframework.web.api.crud.entity.GenericEntity;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
-import org.springframework.context.index.CandidateComponentsIndex;
-import org.springframework.context.index.CandidateComponentsIndexLoader;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -25,12 +21,9 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
-import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
-import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
 import org.springframework.util.ReflectionUtils;
 
-import javax.persistence.Table;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -62,16 +55,24 @@ public class EasyormRepositoryRegistrar implements ImportBeanDefinitionRegistrar
         String path = ResourcePatternResolver
             .CLASSPATH_ALL_URL_PREFIX
             .concat(packageStr.replace(".", "/")).concat("/**/*.class");
-        return Arrays.stream(resourcePatternResolver.getResources(path));
+
+        String clazz = ResourcePatternResolver
+            .CLASSPATH_ALL_URL_PREFIX
+            .concat(packageStr.replace(".", "/")).concat(".class");
+
+        return Stream.concat(
+            Arrays.stream(resourcePatternResolver.getResources(path)),
+            Arrays.stream(resourcePatternResolver.getResources(clazz))
+        );
     }
 
     protected Set<String> scanEntities(String[] packageStr) {
         return Stream
-                .of(packageStr)
-                .flatMap(this::doGetResources)
-                .map(this::getResourceClassName)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
+            .of(packageStr)
+            .flatMap(this::doGetResources)
+            .map(this::getResourceClassName)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toSet());
     }
 
     private Class<?> findIdType(Class<?> entityType) {
@@ -119,7 +120,6 @@ public class EasyormRepositoryRegistrar implements ImportBeanDefinitionRegistrar
         Class<Annotation>[] anno = (Class[]) attr.get("annotation");
 
         Set<EntityInfo> entityInfos = new HashSet<>();
-        CandidateComponentsIndex index = CandidateComponentsIndexLoader.loadIndex(org.springframework.util.ClassUtils.getDefaultClassLoader());
         for (String className : scanEntities(arr)) {
             Class<?> entityType = org.springframework.util.ClassUtils.forName(className, null);
             if (Arrays.stream(anno)

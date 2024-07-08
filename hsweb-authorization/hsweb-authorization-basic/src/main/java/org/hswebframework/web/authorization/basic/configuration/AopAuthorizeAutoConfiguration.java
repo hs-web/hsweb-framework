@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
 /**
  * @author zhouhao
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @AutoConfigureAfter(AuthorizingHandlerAutoConfiguration.class)
 public class AopAuthorizeAutoConfiguration {
 

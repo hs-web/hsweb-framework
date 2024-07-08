@@ -16,7 +16,7 @@ import org.springframework.core.annotation.Order;
  * @see AopAccessLoggerSupport
  */
 @ConditionalOnClass(AccessLoggerListener.class)
-@Configuration
+@Configuration(proxyBeanMethods = false)
 public class AopAccessLoggerSupportAutoConfiguration {
 
     @Bean

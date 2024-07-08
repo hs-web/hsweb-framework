@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.support.WebExchangeBindException;
+import org.springframework.web.reactive.resource.NoResourceFoundException;
 import org.springframework.web.server.*;
 import reactor.core.publisher.Mono;
 
@@ -43,6 +44,15 @@ import java.util.stream.Collectors;
 @Slf4j
 @Order
 public class CommonErrorControllerAdvice {
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Mono<ResponseMessage<Object>> handleException(NoResourceFoundException e) {
+        return LocaleUtils
+            .resolveMessageReactive("error.resource_not_found")
+            .map(msg -> ResponseMessage.error(404, "error.resource_not_found", msg));
+    }
+
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
