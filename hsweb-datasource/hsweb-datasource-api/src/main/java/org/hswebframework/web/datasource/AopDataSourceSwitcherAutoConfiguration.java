@@ -9,9 +9,11 @@ import org.hswebframework.web.utils.ExpressionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Role;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
@@ -32,20 +34,24 @@ import static org.hswebframework.web.datasource.strategy.AnnotationDataSourceSwi
  * @since 3.0
  */
 @Configuration(proxyBeanMethods = false)
+@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 public class AopDataSourceSwitcherAutoConfiguration {
 
     @Bean
+    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
     @ConfigurationProperties(prefix = "hsweb.datasource")
     public ExpressionDataSourceSwitchStrategyMatcher expressionDataSourceSwitchStrategyMatcher() {
         return new ExpressionDataSourceSwitchStrategyMatcher();
     }
 
     @Bean
+    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
     public AnnotationDataSourceSwitchStrategyMatcher annotationDataSourceSwitchStrategyMatcher() {
         return new AnnotationDataSourceSwitchStrategyMatcher();
     }
 
     @Bean
+    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
     public TableSwitchStrategyMatcher alwaysNoMatchStrategyMatcher() {
         return new TableSwitchStrategyMatcher() {
             @Override
@@ -61,6 +67,7 @@ public class AopDataSourceSwitcherAutoConfiguration {
     }
 
     @Bean
+    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
     public SwitcherMethodMatcherPointcutAdvisor switcherMethodMatcherPointcutAdvisor(
             List<DataSourceSwitchStrategyMatcher> matchers,
             List<TableSwitchStrategyMatcher> tableSwitcher) {

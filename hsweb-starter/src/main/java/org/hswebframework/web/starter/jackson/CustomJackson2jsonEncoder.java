@@ -56,7 +56,7 @@ public class CustomJackson2jsonEncoder extends Jackson2CodecSupport implements H
 
     static {
         STREAM_SEPARATORS = new HashMap<>(4);
-        STREAM_SEPARATORS.put(MediaType.APPLICATION_STREAM_JSON, NEWLINE_SEPARATOR);
+        STREAM_SEPARATORS.put(MediaType.APPLICATION_NDJSON, NEWLINE_SEPARATOR);
         STREAM_SEPARATORS.put(MediaType.parseMediaType("application/stream+x-jackson-smile"), new byte[0]);
 
         ENCODINGS = new HashMap<>(JsonEncoding.values().length + 1);
@@ -75,6 +75,7 @@ public class CustomJackson2jsonEncoder extends Jackson2CodecSupport implements H
      */
     protected CustomJackson2jsonEncoder(ObjectMapper mapper, MimeType... mimeTypes) {
         super(mapper, mimeTypes);
+        setStreamingMediaTypes(Collections.singletonList(MediaType.APPLICATION_NDJSON));
     }
 
 

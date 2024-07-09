@@ -76,8 +76,12 @@
             <version>5.0.0</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+        </dependency>
 
-<!--        <dependency>-->
+        <!--        <dependency>-->
 <!--            <groupId>com.google.code.findbugs</groupId>-->
 <!--            <artifactId>jsr305</artifactId>-->
 <!--            <scope>compile</scope>-->
