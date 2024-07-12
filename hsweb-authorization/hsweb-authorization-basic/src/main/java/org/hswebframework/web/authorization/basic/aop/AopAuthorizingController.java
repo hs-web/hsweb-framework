@@ -19,6 +19,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -65,37 +66,37 @@ public class AopAuthorizingController extends StaticMethodMatcherPointcutAdvisor
                                            Supplier<? extends Publisher<?>> invoker) {
 
         return Authentication
-                .currentReactive()
-                .switchIfEmpty(Mono.error(UnAuthorizedException::new))
-                .flatMapMany(auth -> {
-                    context.setAuthentication(auth);
-                    Function<Runnable, Publisher> afterRuner = runnable -> {
-                        MethodInterceptorContext interceptorContext = holder.createParamContext(invoker.get());
-                        context.setParamContext(interceptorContext);
-                        runnable.run();
-                        return (Publisher<?>) interceptorContext.getInvokeResult();
-                    };
-                    if (context.getDefinition().getPhased() != Phased.after) {
-                        authorizingHandler.handRBAC(context);
-                        if (context.getDefinition().getResources().getPhased() != Phased.after) {
-                            authorizingHandler.handleDataAccess(context);
-                            return invoker.get();
-                        } else {
-                            return afterRuner.apply(() -> authorizingHandler.handleDataAccess(context));
-                        }
-
+            .currentReactive()
+            .switchIfEmpty(Mono.error(UnAuthorizedException::new))
+            .flatMapMany(auth -> {
+                context.setAuthentication(auth);
+                Function<Runnable, Publisher> afterRuner = runnable -> {
+                    MethodInterceptorContext interceptorContext = holder.createParamContext(invoker.get());
+                    context.setParamContext(interceptorContext);
+                    runnable.run();
+                    return (Publisher<?>) interceptorContext.getInvokeResult();
+                };
+                if (context.getDefinition().getPhased() != Phased.after) {
+                    authorizingHandler.handRBAC(context);
+                    if (context.getDefinition().getResources().getPhased() != Phased.after) {
+                        authorizingHandler.handleDataAccess(context);
+                        return invoker.get();
                     } else {
-                        if (context.getDefinition().getResources().getPhased() != Phased.after) {
-                            authorizingHandler.handleDataAccess(context);
-                            return invoker.get();
-                        } else {
-                            return afterRuner.apply(() -> {
-                                authorizingHandler.handRBAC(context);
-                                authorizingHandler.handleDataAccess(context);
-                            });
-                        }
+                        return afterRuner.apply(() -> authorizingHandler.handleDataAccess(context));
                     }
-                });
+
+                } else {
+                    if (context.getDefinition().getResources().getPhased() != Phased.after) {
+                        authorizingHandler.handleDataAccess(context);
+                        return invoker.get();
+                    } else {
+                        return afterRuner.apply(() -> {
+                            authorizingHandler.handRBAC(context);
+                            authorizingHandler.handleDataAccess(context);
+                        });
+                    }
+                }
+            });
     }
 
     @SneakyThrows
@@ -109,7 +110,9 @@ public class AopAuthorizingController extends StaticMethodMatcherPointcutAdvisor
 
         MethodInterceptorContext paramContext = holder.createParamContext();
 
-        AuthorizeDefinition definition = aopMethodAuthorizeDefinitionParser.parse(methodInvocation.getThis().getClass(), methodInvocation.getMethod(), paramContext);
+        AuthorizeDefinition definition = aopMethodAuthorizeDefinitionParser.parse(methodInvocation
+                                                                                      .getThis()
+                                                                                      .getClass(), methodInvocation.getMethod(), paramContext);
         Object result = null;
         boolean isControl = false;
         if (null != definition && !definition.isEmpty()) {
@@ -185,8 +188,9 @@ public class AopAuthorizingController extends StaticMethodMatcherPointcutAdvisor
     public boolean matches(Method method, Class<?> aClass) {
         Authorize authorize;
         boolean support = AnnotationUtils.findAnnotation(aClass, Controller.class) != null
-                || AnnotationUtils.findAnnotation(aClass, RestController.class) != null
-                || ((authorize = AnnotationUtils.findAnnotation(aClass, method, Authorize.class)) != null && !authorize.ignore()
+            || AnnotationUtils.findAnnotation(aClass, RestController.class) != null
+            || AnnotationUtils.findAnnotation(aClass, RequestMapping.class) != null
+            || ((authorize = AnnotationUtils.findAnnotation(aClass, method, Authorize.class)) != null && !authorize.ignore()
         );
 
         if (support && autoParse) {
@@ -198,10 +202,11 @@ public class AopAuthorizingController extends StaticMethodMatcherPointcutAdvisor
     @Override
     public void run(String... args) throws Exception {
         if (autoParse) {
-            List<AuthorizeDefinition> definitions = aopMethodAuthorizeDefinitionParser.getAllParsed()
-                    .stream()
-                    .filter(def -> !def.isEmpty())
-                    .collect(Collectors.toList());
+            List<AuthorizeDefinition> definitions = aopMethodAuthorizeDefinitionParser
+                .getAllParsed()
+                .stream()
+                .filter(def -> !def.isEmpty())
+                .collect(Collectors.toList());
             log.info("publish AuthorizeDefinitionInitializedEvent,definition size:{}", definitions.size());
             eventPublisher.publishEvent(new AuthorizeDefinitionInitializedEvent(definitions));
 
