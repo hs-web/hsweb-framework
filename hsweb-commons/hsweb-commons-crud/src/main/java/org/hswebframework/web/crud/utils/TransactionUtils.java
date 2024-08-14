@@ -1,5 +1,6 @@
 package org.hswebframework.web.crud.utils;
 
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.NoTransactionException;
 import org.springframework.transaction.reactive.TransactionContextManager;
@@ -11,6 +12,19 @@ import java.util.function.Function;
 
 @Slf4j
 public class TransactionUtils {
+
+    public static Mono<Void> afterCommit(Mono<Void> task) {
+        return TransactionUtils.registerSynchronization(
+            new TransactionSynchronization() {
+                @Override
+                @NonNull
+                public Mono<Void> afterCommit() {
+                    return task;
+                }
+            },
+            TransactionSynchronization::afterCommit
+        );
+    }
 
     public static Mono<Void> registerSynchronization(TransactionSynchronization synchronization,
                                                      Function<TransactionSynchronization, Mono<Void>> whenNoTransaction) {
