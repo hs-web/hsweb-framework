@@ -40,7 +40,7 @@ public class TransactionUtils {
                     }
                     return Mono.empty();
                 } else {
-                    log.warn("transaction is not active,execute TransactionSynchronization [{}] immediately.", synchronization);
+                    log.info("transaction is not active,execute TransactionSynchronization [{}] immediately.", synchronization);
                     return whenNoTransaction.apply(synchronization);
                 }
             })
