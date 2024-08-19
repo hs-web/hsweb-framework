@@ -24,7 +24,7 @@
 
     <groupId>org.hswebframework.web</groupId>
     <artifactId>hsweb-framework</artifactId>
-    <version>4.0.17-SNAPSHOT</version>
+    <version>4.0.17</version>
     <modules>
         <module>hsweb-starter</module>
         <module>hsweb-core</module>
@@ -89,11 +89,11 @@
         <cglib.version>3.2.2</cglib.version>
         <aspectj.version>1.6.12</aspectj.version>
 
-        <hsweb.ezorm.version>4.1.2-SNAPSHOT</hsweb.ezorm.version>
+        <hsweb.ezorm.version>4.1.2</hsweb.ezorm.version>
         <hsweb.utils.version>3.0.4</hsweb.utils.version>
         <hsweb.expands.version>3.0.2</hsweb.expands.version>
         <swagger.version>2.7.0</swagger.version>
-
+        <netty.version>4.1.111.Final</netty.version>
         <r2dbc.version>Borca-SR2</r2dbc.version>
     </properties>
 
@@ -327,6 +327,15 @@
 <!--                <artifactId>spring-boot-starter-data-r2dbc</artifactId>-->
 <!--                <version>2.3.3.RELEASE</version>-->
 <!--            </dependency>-->
+
+
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-bom</artifactId>
+                <version>${netty.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
 
             <dependency>
                 <groupId>com.google.code.findbugs</groupId>
