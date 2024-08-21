@@ -202,4 +202,19 @@ public class QueryAnalyzerImplTest {
             .refactor(QueryParamEntity.of().and("t.id","eq","test"),1);
         System.out.println(request);
     }
+
+
+    @Test
+    public void testDistinct() {
+        QueryAnalyzerImpl analyzer = new QueryAnalyzerImpl(
+            database,
+            "select distinct upper(t.id) v from s_test t group by t.name");
+
+        SqlRequest request = analyzer
+            .refactor(QueryParamEntity.of().and("t.id", "eq", "test"), 1);
+
+        System.out.println(request);
+
+        System.out.println(analyzer.refactorCount(QueryParamEntity.of()));
+    }
 }

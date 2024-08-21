@@ -123,7 +123,7 @@ public class Proxy<I> extends URLClassLoader {
         if (classPaths != null) {
             for (Class<?> classPath : classPaths) {
                 if (classPath.getClassLoader() != null &&
-                        classPath.getClassLoader() != this.getClass().getClassLoader()) {
+                    classPath.getClassLoader() != this.getClass().getClassLoader()) {
                     loaders.add(classPath.getClassLoader());
                 }
             }
@@ -134,7 +134,11 @@ public class Proxy<I> extends URLClassLoader {
         classPool.insertClassPath(new LoaderClassPath(this));
 
         className = superClass.getSimpleName() + "$Proxy" + counter.getAndIncrement();
-        classFullName = superClass.getPackage() + "." + className;
+        String packageName = superClass.getPackage().getName();
+        if (packageName.startsWith("java")) {
+            packageName = "proxy." + packageName;
+        }
+        classFullName = packageName + "." + className;
 
         ctClass = classPool.makeClass(classFullName);
         if (superClass != Object.class) {
@@ -179,12 +183,12 @@ public class Proxy<I> extends URLClassLoader {
         } else if (value instanceof Object[]) {
             Object[] arr = ((Object[]) value);
             ArrayMemberValue arrayMemberValue = new ArrayMemberValue(
-                    new ClassMemberValue(arr[0].getClass().getName(), constPool), constPool);
+                new ClassMemberValue(arr[0].getClass().getName(), constPool), constPool);
             arrayMemberValue.setValue(
-                    Arrays
-                            .stream(arr)
-                            .map(o -> createMemberValue(o, constPool))
-                            .toArray(MemberValue[]::new));
+                Arrays
+                    .stream(arr)
+                    .map(o -> createMemberValue(o, constPool))
+                    .toArray(MemberValue[]::new));
             memberValue = arrayMemberValue;
 
         }

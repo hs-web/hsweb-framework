@@ -75,7 +75,7 @@ public class CustomJackson2jsonEncoder extends Jackson2CodecSupport implements H
      */
     protected CustomJackson2jsonEncoder(ObjectMapper mapper, MimeType... mimeTypes) {
         super(mapper, mimeTypes);
-        setStreamingMediaTypes(Collections.singletonList(MediaType.APPLICATION_NDJSON));
+        streamingMediaTypes.add(MediaType.APPLICATION_NDJSON);
     }
 
 
