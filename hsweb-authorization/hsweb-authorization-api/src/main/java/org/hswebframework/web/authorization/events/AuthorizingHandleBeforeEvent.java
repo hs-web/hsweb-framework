@@ -2,6 +2,7 @@ package org.hswebframework.web.authorization.events;
 
 import org.hswebframework.web.authorization.define.AuthorizingContext;
 import org.hswebframework.web.authorization.define.HandleType;
+import org.hswebframework.web.event.DefaultAsyncEvent;
 import org.springframework.context.ApplicationEvent;
 
 /**
@@ -19,10 +20,7 @@ import org.springframework.context.ApplicationEvent;
  * @author zhouhao
  * @since 4.0
  */
-// TODO: 2021/12/21 Reactive支持
-public class AuthorizingHandleBeforeEvent extends ApplicationEvent implements AuthorizationEvent {
-
-    private static final long serialVersionUID = -1095765748533721998L;
+public class AuthorizingHandleBeforeEvent extends DefaultAsyncEvent implements AuthorizationEvent {
 
     private boolean allow = false;
 
@@ -30,15 +28,21 @@ public class AuthorizingHandleBeforeEvent extends ApplicationEvent implements Au
 
     private String message;
 
+    private final AuthorizingContext context;
+
+    /**
+     * @deprecated 数据权限控制已取消,4.1版本后移除
+     */
+    @Deprecated
     private final HandleType handleType;
 
     public AuthorizingHandleBeforeEvent(AuthorizingContext context, HandleType handleType) {
-        super(context);
+        this.context = context;
         this.handleType = handleType;
     }
 
     public AuthorizingContext getContext() {
-        return ((AuthorizingContext) getSource());
+        return context;
     }
 
     public boolean isExecute() {
