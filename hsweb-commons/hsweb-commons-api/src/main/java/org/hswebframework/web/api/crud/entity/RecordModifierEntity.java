@@ -1,6 +1,8 @@
 package org.hswebframework.web.api.crud.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import reactor.util.context.Context;
+import reactor.util.context.ContextView;
 
 /**
  * 记录修改信息的实体类,包括修改人和修改时间。
@@ -62,5 +64,27 @@ public interface RecordModifierEntity extends Entity {
     @JsonIgnore
     default String getModifierIdProperty() {
         return modifierId;
+    }
+
+    /**
+     * 标记不自动更新修改人相关内容
+     *
+     * @param ctx 上下文
+     * @return 上下文
+     */
+    static Context markDoNotUpdate(Context ctx) {
+        return ctx.put(RecordModifierEntity.class, true);
+    }
+
+    /**
+     * 判断上下文是否不更新修改人相关内容
+     *
+     * @param ctx 上下文
+     * @return 上下文
+     */
+    static boolean isDoNotUpdate(ContextView ctx) {
+        return Boolean.TRUE.equals(
+            ctx.getOrDefault(RecordModifierEntity.class, false)
+        );
     }
 }
