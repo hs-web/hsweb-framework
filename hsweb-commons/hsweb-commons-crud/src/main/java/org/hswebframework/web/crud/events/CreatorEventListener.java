@@ -16,12 +16,16 @@ import org.springframework.core.Ordered;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Mono;
+import reactor.util.context.Context;
+import reactor.util.context.ContextView;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
+
+import static org.springframework.data.repository.util.ClassUtils.ifPresent;
 
 /**
  * 自动填充创建人和修改人信息
@@ -42,38 +46,42 @@ public class CreatorEventListener implements EventListener, Ordered {
     public void onEvent(EventType type, EventContext context) {
         Optional<ReactiveResultHolder> resultHolder = context.get(MappingContextKeys.reactiveResultHolder);
         if (type == MappingEventTypes.insert_before
-                || type == MappingEventTypes.save_before
-                || type == MappingEventTypes.update_before) {
+            || type == MappingEventTypes.save_before
+            || type == MappingEventTypes.update_before) {
             if (resultHolder.isPresent()) {
-                resultHolder
-                        .ifPresent(holder -> holder
-                                .before(
-                                        Authentication
-                                                .currentReactive()
-                                                .doOnNext(auth -> doApplyCreator(type, context, auth))
-                                                .then()
-                                ));
+                ReactiveResultHolder holder = resultHolder.get();
+
+                holder
+                    .before(
+                        Mono.deferContextual(ctx -> Authentication
+                            .currentReactive()
+                            .doOnNext(auth -> doApplyCreator(ctx, type, context, auth))
+                            .then())
+                    );
             } else {
                 Authentication
-                        .current()
-                        .ifPresent(auth -> doApplyCreator(type, context, auth));
+                    .current()
+                    .ifPresent(auth -> doApplyCreator(Context.empty(), type, context, auth));
             }
         }
     }
 
-    protected void doApplyCreator(EventType type, EventContext context, Authentication auth) {
+    protected void doApplyCreator(ContextView ctx, EventType type, EventContext context, Authentication auth) {
         Object instance = context.get(MappingContextKeys.instance).orElse(null);
+        boolean applyUpdate = !RecordModifierEntity.isDoNotUpdate(ctx);
         if (instance != null) {
             if (instance instanceof Collection) {
-                applyCreator(auth, context, ((Collection<?>) instance), type != MappingEventTypes.update_before);
+                applyCreator(auth, context, ((Collection<?>) instance),
+                             applyUpdate && type != MappingEventTypes.update_before);
             } else {
-                applyCreator(auth, context, instance, type != MappingEventTypes.update_before);
+                applyCreator(auth, context, instance,
+                             applyUpdate && type != MappingEventTypes.update_before);
             }
         }
 
         context
-                .get(MappingContextKeys.updateColumnInstance)
-                .ifPresent(map -> applyCreator(auth, context, map, type != MappingEventTypes.update_before));
+            .get(MappingContextKeys.updateColumnInstance)
+            .ifPresent(map -> applyCreator(auth, context, map, type != MappingEventTypes.update_before));
 
     }
 
