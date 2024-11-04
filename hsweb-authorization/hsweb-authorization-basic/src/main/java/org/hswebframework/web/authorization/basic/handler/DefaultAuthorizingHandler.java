@@ -1,5 +1,6 @@
 package org.hswebframework.web.authorization.basic.handler;
 
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.Permission;
@@ -14,6 +15,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import reactor.core.publisher.Mono;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author zhouhao
@@ -51,15 +55,54 @@ public class DefaultAuthorizingHandler implements AuthorizingHandler {
 
     }
 
+    @Override
+    public Mono<Void> handRBACAsync(AuthorizingContext context) {
+        return this
+            .handleEventAsync(context, HandleType.RBAC)
+            .doOnNext(handled -> {
+                //没有自定义事件处理
+                if (!handled) {
+                    handleRBAC(context.getAuthentication(), context.getDefinition());
+                }
+            })
+            .then();
+    }
+
+    private Mono<Boolean> handleEventAsync(AuthorizingContext context, HandleType type) {
+        if (null != eventPublisher) {
+            AuthorizingHandleBeforeEvent event = new AuthorizingHandleBeforeEvent(context, type);
+            return event
+                .publish(eventPublisher)
+                .then(Mono.fromCallable(() -> {
+                    if (!event.isExecute()) {
+                        if (event.isAllow()) {
+                            return true;
+                        } else {
+                            throw new AccessDenyException.NoStackTrace(event.getMessage());
+                        }
+                    }
+                    return false;
+                }));
+        }
+        return Mono.just(false);
+    }
+
+    @SneakyThrows
     private boolean handleEvent(AuthorizingContext context, HandleType type) {
         if (null != eventPublisher) {
             AuthorizingHandleBeforeEvent event = new AuthorizingHandleBeforeEvent(context, type);
             eventPublisher.publishEvent(event);
+            if (event.hasListener()) {
+                event
+                    .getAsync()
+                    .toFuture()
+                    .get(10, TimeUnit.SECONDS);
+            }
             if (!event.isExecute()) {
                 if (event.isAllow()) {
                     return true;
                 } else {
-                    throw new AccessDenyException(event.getMessage());
+                    throw new AccessDenyException.NoStackTrace(event.getMessage());
                 }
             }
         }
@@ -82,21 +125,26 @@ public class DefaultAuthorizingHandler implements AuthorizingHandler {
         DataAccessController finalAccessController = dataAccessController;
         Authentication autz = context.getAuthentication();
 
-        boolean isAccess = context.getDefinition()
-                .getResources()
-                .getDataAccessResources()
-                .stream()
-                .allMatch(resource -> {
-                    Permission permission = autz.getPermission(resource.getId()).orElseThrow(AccessDenyException::new);
-                    return resource.getDataAccessAction()
-                            .stream()
-                            .allMatch(act -> permission.getDataAccesses(act.getId())
-                                    .stream()
-                                    .allMatch(dataAccessConfig -> finalAccessController.doAccess(dataAccessConfig, context)));
+        boolean isAccess = context
+            .getDefinition()
+            .getResources()
+            .getDataAccessResources()
+            .stream()
+            .allMatch(resource -> {
+                Permission permission = autz
+                    .getPermission(resource.getId())
+                    .orElseThrow(AccessDenyException.NoStackTrace::new);
+                return resource
+                    .getDataAccessAction()
+                    .stream()
+                    .allMatch(act -> permission
+                        .getDataAccesses(act.getId())
+                        .stream()
+                        .allMatch(dataAccessConfig -> finalAccessController.doAccess(dataAccessConfig, context)));
 
-                });
+            });
         if (!isAccess) {
-            throw new AccessDenyException(context.getDefinition().getMessage());
+            throw new AccessDenyException.NoStackTrace(context.getDefinition().getMessage());
         }
     }
 
@@ -106,7 +154,7 @@ public class DefaultAuthorizingHandler implements AuthorizingHandler {
         ResourcesDefinition resources = definition.getResources();
 
         if (!resources.hasPermission(authentication)) {
-            throw new AccessDenyException(definition.getMessage(),definition.getDescription());
+            throw new AccessDenyException.NoStackTrace(definition.getMessage(), definition.getDescription());
         }
     }
 }

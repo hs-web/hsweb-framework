@@ -64,8 +64,7 @@ public class DefaultQueryHelper implements QueryHelper {
     private final Map<String, QueryAnalyzer> analyzerCaches = new ConcurrentHashMap<>();
 
     static final ResultWrapper<Integer, ?> countWrapper =
-        ResultWrappers.column("_total", i -> ((Number) i).intValue())
-      ;
+        ResultWrappers.column("_total", i -> ((Number) i).intValue());
 
     @Override
     public QueryAnalyzer analysis(String selectSql) {
@@ -219,6 +218,15 @@ public class DefaultQueryHelper implements QueryHelper {
                 .select(request, this)
                 .map(mapper)
                 .contextWrite(logContext);
+        }
+
+        @Override
+        public Flux<R> fetch(int pageIndex, int pageSize) {
+            if (param == null) {
+                param = new QueryParamEntity();
+            }
+            param.doPaging(pageIndex, pageSize);
+            return fetch();
         }
 
         @Override
@@ -572,6 +580,16 @@ public class DefaultQueryHelper implements QueryHelper {
         public Flux<R> fetch() {
 
             return createQuery()
+                .fetch(this)
+                .reactive()
+                .contextWrite(logContext)
+                .as(resultHandler);
+        }
+
+        @Override
+        public Flux<R> fetch(int pageIndex, int pageSize) {
+            return createQuery()
+                .paging(pageIndex, pageSize)
                 .fetch(this)
                 .reactive()
                 .contextWrite(logContext)

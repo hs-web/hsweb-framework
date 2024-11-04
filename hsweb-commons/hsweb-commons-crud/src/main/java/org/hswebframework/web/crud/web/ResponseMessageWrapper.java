@@ -37,7 +37,7 @@ public class ResponseMessageWrapper extends ResponseBodyResultHandler {
     static {
         try {
             param = new MethodParameter(ResponseMessageWrapper.class
-                    .getDeclaredMethod("methodForParams"), -1);
+                                            .getDeclaredMethod("methodForParams"), -1);
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
         }
@@ -69,24 +69,24 @@ public class ResponseMessageWrapper extends ResponseBodyResultHandler {
         boolean isAlreadyResponse = gen == ResponseMessage.class || gen == ResponseEntity.class;
 
         boolean isStream = result.getReturnType().resolve() == Mono.class
-                || result.getReturnType().resolve() == Flux.class;
+            || result.getReturnType().resolve() == Flux.class;
 
         RequestMapping mapping = result.getReturnTypeSource()
-                .getMethodAnnotation(RequestMapping.class);
+                                       .getMethodAnnotation(RequestMapping.class);
         if (mapping == null) {
             return false;
         }
         for (String produce : mapping.produces()) {
             MimeType mimeType = MimeType.valueOf(produce);
             if (MediaType.TEXT_EVENT_STREAM.includes(mimeType) ||
-                    MediaType.APPLICATION_STREAM_JSON.includes(mimeType)) {
+                MediaType.APPLICATION_NDJSON.includes(mimeType)) {
                 return false;
             }
         }
 
         return isStream
-                && super.supports(result)
-                && !isAlreadyResponse;
+            && super.supports(result)
+            && !isAlreadyResponse;
     }
 
     @Override
@@ -94,24 +94,31 @@ public class ResponseMessageWrapper extends ResponseBodyResultHandler {
     public Mono<Void> handleResult(ServerWebExchange exchange, HandlerResult result) {
         Object body = result.getReturnValue();
 
-        if (exchange
-                .getRequest()
-                .getHeaders()
-                .getAccept()
-                .contains(MediaType.TEXT_EVENT_STREAM)) {
-            return writeBody(body, param, exchange);
+        List<MediaType> accept = exchange.getRequest().getHeaders().getAccept();
+
+        if (accept.contains(MediaType.TEXT_EVENT_STREAM)||
+            accept.contains(MediaType.APPLICATION_NDJSON)) {
+            return writeBody(body, result.getReturnTypeSource(), exchange);
+        }
+
+        String ignoreWrapper = exchange
+            .getRequest()
+            .getHeaders()
+            .getFirst("X-Response-Wrapper");
+        if ("Ignore".equals(ignoreWrapper)) {
+            return writeBody(body, result.getReturnTypeSource(), exchange);
         }
 
         if (body instanceof Mono) {
             body = ((Mono) body)
-                    .map(ResponseMessage::ok)
-                    .switchIfEmpty(Mono.just(ResponseMessage.ok()));
+                .map(ResponseMessage::ok)
+                .switchIfEmpty(Mono.just(ResponseMessage.ok()));
         }
         if (body instanceof Flux) {
             body = ((Flux) body)
-                    .collectList()
-                    .map(ResponseMessage::ok)
-                    .switchIfEmpty(Mono.just(ResponseMessage.ok()));
+                .collectList()
+                .map(ResponseMessage::ok)
+                .switchIfEmpty(Mono.just(ResponseMessage.ok()));
 
         }
         if (body == null) {

@@ -19,6 +19,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -63,43 +64,41 @@ public class AopAuthorizingController extends StaticMethodMatcherPointcutAdvisor
                                            MethodInterceptorHolder holder,
                                            AuthorizingContext context,
                                            Supplier<? extends Publisher<?>> invoker) {
+        MethodInterceptorContext interceptorContext = holder.createParamContext(invoker.get());
+        context.setParamContext(interceptorContext);
+        return this
+            .invokeReactive(
+                Authentication
+                    .currentReactive()
+                    .switchIfEmpty(Mono.error(UnAuthorizedException.NoStackTrace::new))
+                    .flatMap(auth -> {
+                        context.setAuthentication(auth);
+                        //响应式不再支持数据权限控制
+                        return authorizingHandler.handRBACAsync(context);
+                    }),
+                (Publisher<?>) interceptorContext.getInvokeResult());
+    }
 
-        return Authentication
-                .currentReactive()
-                .switchIfEmpty(Mono.error(UnAuthorizedException::new))
-                .flatMapMany(auth -> {
-                    context.setAuthentication(auth);
-                    Function<Runnable, Publisher> afterRuner = runnable -> {
-                        MethodInterceptorContext interceptorContext = holder.createParamContext(invoker.get());
-                        context.setParamContext(interceptorContext);
-                        runnable.run();
-                        return (Publisher<?>) interceptorContext.getInvokeResult();
-                    };
-                    if (context.getDefinition().getPhased() != Phased.after) {
-                        authorizingHandler.handRBAC(context);
-                        if (context.getDefinition().getResources().getPhased() != Phased.after) {
-                            authorizingHandler.handleDataAccess(context);
-                            return invoker.get();
-                        } else {
-                            return afterRuner.apply(() -> authorizingHandler.handleDataAccess(context));
-                        }
+    private Publisher<?> invokeReactive(Mono<?> before, Publisher<?> source) {
+        if (source instanceof Mono) {
+            return before.then((Mono<Object>) source);
+        }
+        return before.thenMany(source);
+    }
 
-                    } else {
-                        if (context.getDefinition().getResources().getPhased() != Phased.after) {
-                            authorizingHandler.handleDataAccess(context);
-                            return invoker.get();
-                        } else {
-                            return afterRuner.apply(() -> {
-                                authorizingHandler.handRBAC(context);
-                                authorizingHandler.handleDataAccess(context);
-                            });
-                        }
-                    }
-                });
+    private <T> T invokeReactive(MethodInvocation invocation) {
+        if (Mono.class.isAssignableFrom(invocation.getMethod().getReturnType())) {
+            return (T) Mono.defer(() -> doProceed(invocation));
+        }
+        if (Flux.class.isAssignableFrom(invocation.getMethod().getReturnType())) {
+            return (T) Flux.defer(() -> doProceed(invocation));
+        }
+        return doProceed(invocation);
     }
 
     @SneakyThrows
     private <T> T doProceed(MethodInvocation invocation) {
+
         return (T) invocation.proceed();
     }
 
@@ -109,7 +108,12 @@ public class AopAuthorizingController extends StaticMethodMatcherPointcutAdvisor
 
         MethodInterceptorContext paramContext = holder.createParamContext();
 
-        AuthorizeDefinition definition = aopMethodAuthorizeDefinitionParser.parse(methodInvocation.getThis().getClass(), methodInvocation.getMethod(), paramContext);
+        AuthorizeDefinition definition = aopMethodAuthorizeDefinitionParser
+            .parse(methodInvocation
+                       .getThis()
+                       .getClass(),
+                   methodInvocation.getMethod(),
+                   paramContext);
         Object result = null;
         boolean isControl = false;
         if (null != definition && !definition.isEmpty()) {
@@ -120,16 +124,12 @@ public class AopAuthorizingController extends StaticMethodMatcherPointcutAdvisor
             Class<?> returnType = methodInvocation.getMethod().getReturnType();
             //handle reactive method
             if (Publisher.class.isAssignableFrom(returnType)) {
-                Publisher publisher = handleReactive0(definition, holder, context, () -> doProceed(methodInvocation));
-                if (Mono.class.isAssignableFrom(returnType)) {
-                    return Mono.from(publisher);
-                } else if (Flux.class.isAssignableFrom(returnType)) {
-                    return Flux.from(publisher);
-                }
-                throw new UnsupportedOperationException("unsupported reactive type:" + returnType);
+               return handleReactive0(definition, holder, context, () -> invokeReactive(methodInvocation));
             }
 
-            Authentication authentication = Authentication.current().orElseThrow(UnAuthorizedException::new);
+            Authentication authentication = Authentication
+                .current()
+                .orElseThrow(UnAuthorizedException.NoStackTrace::new);
 
             context.setAuthentication(authentication);
             isControl = true;
@@ -185,8 +185,9 @@ public class AopAuthorizingController extends StaticMethodMatcherPointcutAdvisor
     public boolean matches(Method method, Class<?> aClass) {
         Authorize authorize;
         boolean support = AnnotationUtils.findAnnotation(aClass, Controller.class) != null
-                || AnnotationUtils.findAnnotation(aClass, RestController.class) != null
-                || ((authorize = AnnotationUtils.findAnnotation(aClass, method, Authorize.class)) != null && !authorize.ignore()
+            || AnnotationUtils.findAnnotation(aClass, RestController.class) != null
+            || AnnotationUtils.findAnnotation(aClass, RequestMapping.class) != null
+            || ((authorize = AnnotationUtils.findAnnotation(aClass, method, Authorize.class)) != null && !authorize.ignore()
         );
 
         if (support && autoParse) {
@@ -198,10 +199,11 @@ public class AopAuthorizingController extends StaticMethodMatcherPointcutAdvisor
     @Override
     public void run(String... args) throws Exception {
         if (autoParse) {
-            List<AuthorizeDefinition> definitions = aopMethodAuthorizeDefinitionParser.getAllParsed()
-                    .stream()
-                    .filter(def -> !def.isEmpty())
-                    .collect(Collectors.toList());
+            List<AuthorizeDefinition> definitions = aopMethodAuthorizeDefinitionParser
+                .getAllParsed()
+                .stream()
+                .filter(def -> !def.isEmpty())
+                .collect(Collectors.toList());
             log.info("publish AuthorizeDefinitionInitializedEvent,definition size:{}", definitions.size());
             eventPublisher.publishEvent(new AuthorizeDefinitionInitializedEvent(definitions));
 
