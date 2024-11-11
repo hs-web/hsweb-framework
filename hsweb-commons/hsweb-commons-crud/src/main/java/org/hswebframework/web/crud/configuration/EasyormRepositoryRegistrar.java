@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -125,7 +126,7 @@ public class EasyormRepositoryRegistrar implements ImportBeanDefinitionRegistrar
 
         Class<Annotation>[] anno = (Class[]) attr.get("annotation");
 
-        Set<EntityInfo> entityInfos = new HashSet<>();
+        Set<EntityInfo> entityInfos = ConcurrentHashMap.newKeySet();
         CandidateComponentsIndex index = CandidateComponentsIndexLoader.loadIndex(org.springframework.util.ClassUtils.getDefaultClassLoader());
         for (String className : scanEntities(arr)) {
             Class<?> entityType = org.springframework.util.ClassUtils.forName(className, null);
@@ -163,7 +164,11 @@ public class EasyormRepositoryRegistrar implements ImportBeanDefinitionRegistrar
                 definition.setBeanClass(ReactiveRepositoryFactoryBean.class);
                 definition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
                 definition.getPropertyValues().add("entityType", entityType);
-                registry.registerBeanDefinition(beanName, definition);
+                if (!registry.containsBeanDefinition(beanName)) {
+                    registry.registerBeanDefinition(beanName, definition);
+                } else {
+                    entityInfos.remove(entityInfo);
+                }
             }
             if (entityInfo.isNonReactive()) {
                 String beanName = entityType.getSimpleName().concat("SyncRepository");
@@ -175,7 +180,11 @@ public class EasyormRepositoryRegistrar implements ImportBeanDefinitionRegistrar
                 definition.setBeanClass(SyncRepositoryFactoryBean.class);
                 definition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
                 definition.getPropertyValues().add("entityType", entityType);
-                registry.registerBeanDefinition(beanName, definition);
+                if (!registry.containsBeanDefinition(beanName)) {
+                    registry.registerBeanDefinition(beanName, definition);
+                } else {
+                    entityInfos.remove(entityInfo);
+                }
             }
 
         }
