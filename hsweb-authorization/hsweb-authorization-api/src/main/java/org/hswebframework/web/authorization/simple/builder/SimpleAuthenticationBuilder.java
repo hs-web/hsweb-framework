@@ -71,9 +71,7 @@ public class SimpleAuthenticationBuilder implements AuthenticationBuilder {
         return this;
     }
 
-    @Override
-    public AuthenticationBuilder permission(String permissionJson) {
-        JSONArray jsonArray = JSON.parseArray(permissionJson);
+    public AuthenticationBuilder permission(JSONArray jsonArray) {
         List<Permission> permissions = new ArrayList<>();
         for (int i = 0; i < jsonArray.size(); i++) {
             JSONObject jsonObject = jsonArray.getJSONObject(i);
@@ -102,6 +100,11 @@ public class SimpleAuthenticationBuilder implements AuthenticationBuilder {
     }
 
     @Override
+    public AuthenticationBuilder permission(String permissionJson) {
+        return permission(JSON.parseArray(permissionJson));
+    }
+
+    @Override
     public AuthenticationBuilder attributes(String attributes) {
         authentication.getAttributes().putAll(JSON.<Map<String, Serializable>>parseObject(attributes, Map.class));
         return this;
@@ -123,6 +126,7 @@ public class SimpleAuthenticationBuilder implements AuthenticationBuilder {
         for (int i = 0; i < json.size(); i++) {
             JSONObject jsonObject = json.getJSONObject(i);
             Object type = jsonObject.get("type");
+            Map<String, Object> options = jsonObject.getJSONObject("options");
 
             dimensions.add(SimpleDimension.of(
                 jsonObject.getString("id"),
@@ -130,7 +134,7 @@ public class SimpleAuthenticationBuilder implements AuthenticationBuilder {
                 type instanceof String ? SimpleDimensionType.of(String.valueOf(type)) : jsonObject
                     .getJSONObject("type")
                     .toJavaObject(SimpleDimensionType.class),
-                jsonObject.getJSONObject("options")
+                options
             ));
         }
         authentication.setDimensions(dimensions);
@@ -144,10 +148,10 @@ public class SimpleAuthenticationBuilder implements AuthenticationBuilder {
         JSONObject jsonObject = JSON.parseObject(json);
         user(jsonObject.getObject("user", SimpleUser.class));
         if (jsonObject.containsKey("roles")) {
-            role(jsonObject.getJSONArray("roles").toJSONString());
+            role((List) jsonObject.getJSONArray("roles").toJavaList(SimpleRole.class));
         }
         if (jsonObject.containsKey("permissions")) {
-            permission(jsonObject.getJSONArray("permissions").toJSONString());
+            permission(jsonObject.getJSONArray("permissions"));
         }
         if (jsonObject.containsKey("dimensions")) {
             dimension(jsonObject.getJSONArray("dimensions"));

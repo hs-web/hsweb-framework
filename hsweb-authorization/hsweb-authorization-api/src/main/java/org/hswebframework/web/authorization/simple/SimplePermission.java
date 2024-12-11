@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(exclude = "dataAccesses")
 public class SimplePermission implements Permission {
 
     private static final long serialVersionUID = 7587266693680162184L;
