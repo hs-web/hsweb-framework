@@ -119,6 +119,10 @@ public class SimpleAuthentication implements Authentication {
         this.dimensions.addAll(dimensions);
     }
 
+    public void setDimensions(Collection<Dimension> dimensions) {
+        this.dimensions.addAll(dimensions);
+    }
+
     public void addDimension(Dimension dimension) {
         this.dimensions.add(dimension);
     }
