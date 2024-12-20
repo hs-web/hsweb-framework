@@ -10,6 +10,8 @@ import java.util.Map;
  *
  * @author zhouhao
  * @since 4.0.18
+ * @see SingleI18nSupportEntity
+ * @see MultipleI18nSupportEntity
  */
 public interface I18nSupportEntity {
 
