@@ -23,5 +23,9 @@ public interface Generators {
      */
     String CURRENT_TIME = "current_time";
 
+    /**
+     * @see org.hswebframework.web.id.RandomIdGenerator
+     */
+    String RANDOM = "random";
 
 }

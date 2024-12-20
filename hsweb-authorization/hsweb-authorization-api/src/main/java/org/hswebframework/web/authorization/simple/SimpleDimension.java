@@ -1,9 +1,6 @@
 package org.hswebframework.web.authorization.simple;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hswebframework.web.authorization.Dimension;
 import org.hswebframework.web.authorization.DimensionType;
 
@@ -13,6 +10,7 @@ import java.util.Map;
 @Setter
 @AllArgsConstructor(staticName = "of")
 @NoArgsConstructor
+@EqualsAndHashCode
 public class SimpleDimension implements Dimension {
 
     private String id;

@@ -66,7 +66,7 @@ public @interface Authorize {
     Logical logical() default Logical.DEFAULT;
 
     /**
-     * @return 验证时机，在方法调用前还是调用后s
+     * @return 验证时机，在方法调用前还是调用后
      */
     Phased phased() default Phased.before;
 

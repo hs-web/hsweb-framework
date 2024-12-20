@@ -126,17 +126,17 @@ public final class FastBeanCopier {
                 ((Map) target).putAll(((Map) source));
             } else {
                 ((Map) source)
-                        .forEach((k, v) -> {
-                            if (!ignore.contains(k)) {
-                                ((Map) target).put(k, v);
-                            }
-                        });
+                    .forEach((k, v) -> {
+                        if (!ignore.contains(k)) {
+                            ((Map) target).put(k, v);
+                        }
+                    });
             }
             return target;
         }
 
         getCopier(source, target, true)
-                .copy(source, target, ignore, converter);
+            .copy(source, target, ignore, converter);
         return target;
     }
 
@@ -180,20 +180,20 @@ public final class FastBeanCopier {
             tartName = tartName.substring("package ".length());
         }
         String method = "public void copy(Object s, Object t, java.util.Set ignore, " +
-                "org.hswebframework.web.bean.Converter converter){\n" +
-                "try{\n\t" +
-                sourceName + " $$__source=(" + sourceName + ")s;\n\t" +
-                tartName + " $$__target=(" + tartName + ")t;\n\t" +
-                createCopierCode(source, target) +
-                "}catch(Throwable e){\n" +
-                "\tthrow e;" +
-                "\n}\n" +
-                "\n}";
+            "org.hswebframework.web.bean.Converter converter){\n" +
+            "try{\n\t" +
+            sourceName + " $$__source=(" + sourceName + ")s;\n\t" +
+            tartName + " $$__target=(" + tartName + ")t;\n\t" +
+            createCopierCode(source, target) +
+            "}catch(Throwable e){\n" +
+            "\tthrow e;" +
+            "\n}\n" +
+            "\n}";
         try {
             @SuppressWarnings("all")
             Proxy<Copier> proxy = Proxy
-                    .create(Copier.class, new Class[]{source, target})
-                    .addMethod(method);
+                .create(Copier.class, new Class[]{source, target})
+                .addMethod(method);
             return proxy.newInstance();
         } catch (Exception e) {
             log.error("创建bean copy 代理对象失败:\n{}", method, e);
@@ -208,8 +208,8 @@ public final class FastBeanCopier {
 
         return Stream.of(propertyUtils.getPropertyDescriptors(type))
                      .filter(property -> !property
-                             .getName()
-                             .equals("class") && property.getReadMethod() != null && property.getWriteMethod() != null)
+                         .getName()
+                         .equals("class") && property.getReadMethod() != null && property.getWriteMethod() != null)
                      .map(BeanClassProperty::new)
                      //让字段有序
                      .sorted(Comparator.comparing(property -> fieldNames.indexOf(property.name)))
@@ -266,9 +266,9 @@ public final class FastBeanCopier {
                 code.append("\tif(").append(sourceProperty.getName()).append("!=null){\n");
             }
             code
-                    .append("\t$$__target.")
-                    .append(targetProperty.generateSetter(targetProperty.getType(), sourceProperty.getName()))
-                    .append(";\n");
+                .append("\t$$__target.")
+                .append(targetProperty.generateSetter(targetProperty.getType(), sourceProperty.getName()))
+                .append(";\n");
             if (!targetProperty.isPrimitive()) {
                 code.append("\t}\n");
             }
@@ -376,7 +376,7 @@ public final class FastBeanCopier {
                     }
                 }
                 String convert = "converter.convert((Object)(" + (isPrimitive() ? castWrapper(getterCode) : getterCode) + "),"
-                        + getTypeName(targetType) + ".class," + generic + ")";
+                    + getTypeName(targetType) + ".class," + generic + ")";
                 StringBuilder convertCode = new StringBuilder();
 
                 if (targetType != getType()) {
@@ -389,10 +389,10 @@ public final class FastBeanCopier {
                         // source.getField().intValue();
                         if (sourceIsWrapper) {
                             convertCode
-                                    .append(getterCode)
-                                    .append(".")
-                                    .append(sourcePrimitive.getName())
-                                    .append("Value()");
+                                .append(getterCode)
+                                .append(".")
+                                .append(sourcePrimitive.getName())
+                                .append("Value()");
                         } else {
                             //类型不一致，调用convert转换
                             convertCode.append("((").append(targetWrapperClass.getName())
@@ -427,17 +427,17 @@ public final class FastBeanCopier {
                     if (Cloneable.class.isAssignableFrom(targetType)) {
                         try {
                             convertCode
-                                    .append("(")
-                                    .append(getTypeName())
-                                    .append(")")
-                                    .append(getterCode)
-                                    .append(".clone()");
+                                .append("(")
+                                .append(getTypeName())
+                                .append(")")
+                                .append(getterCode)
+                                .append(".clone()");
                         } catch (Exception e) {
                             convertCode.append(getterCode);
                         }
                     } else {
                         if ((Map.class.isAssignableFrom(targetType)
-                                || Collection.class.isAssignableFrom(type)) && hasGeneric) {
+                            || Collection.class.isAssignableFrom(type)) && hasGeneric) {
                             convertCode.append("(").append(getTypeName()).append(")").append(convert);
                         } else {
                             convertCode.append("(").append(getTypeName()).append(")").append(getterCode);
@@ -625,12 +625,15 @@ public final class FastBeanCopier {
                 for (Object e : target.getEnums()) {
                     Enum t = ((Enum<?>) e);
                     if ((t.name().equalsIgnoreCase(strSource)
-                            || Objects.equals(String.valueOf(t.ordinal()), strSource))) {
+                        || Objects.equals(String.valueOf(t.ordinal()), strSource))) {
                         return (T) e;
                     }
                 }
 
-                log.warn("无法将:{}转为枚举:{}", source, targetClass);
+                log.warn("无法将:{}转为枚举:{}",
+                         source,
+                         targetClass,
+                         new ClassCastException(source + "=>" + targetClass));
                 return null;
             }
             //转换为数组

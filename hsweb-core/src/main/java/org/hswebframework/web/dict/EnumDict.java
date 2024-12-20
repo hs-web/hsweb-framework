@@ -390,6 +390,15 @@ public interface EnumDict<V> extends JSONSerializable, Serializable {
                 if (node.isNumber()) {
                     return mapper.apply(node.asLong());
                 }
+                if (node.isObject()) {
+                    JsonNode value = node.get("value");
+                    if (value == null) {
+                        value = node.get("text");
+                    }
+                    if (value != null) {
+                        return mapper.apply(value.asText());
+                    }
+                }
             }
             String currentName = jp.currentName();
             Object currentValue = jp.getCurrentValue();

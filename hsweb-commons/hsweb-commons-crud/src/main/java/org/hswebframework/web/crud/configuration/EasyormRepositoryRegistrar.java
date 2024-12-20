@@ -119,7 +119,7 @@ public class EasyormRepositoryRegistrar implements ImportBeanDefinitionRegistrar
 
         Class<Annotation>[] anno = (Class[]) attr.get("annotation");
 
-        Set<EntityInfo> entityInfos = new HashSet<>();
+        Set<EntityInfo> entityInfos =  ConcurrentHashMap.newKeySet();
         for (String className : scanEntities(arr)) {
             Class<?> entityType = org.springframework.util.ClassUtils.forName(className, null);
             if (Arrays.stream(anno)
@@ -156,7 +156,11 @@ public class EasyormRepositoryRegistrar implements ImportBeanDefinitionRegistrar
                 definition.setBeanClass(ReactiveRepositoryFactoryBean.class);
                 definition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
                 definition.getPropertyValues().add("entityType", entityType);
-                registry.registerBeanDefinition(beanName, definition);
+                if (!registry.containsBeanDefinition(beanName)) {
+                    registry.registerBeanDefinition(beanName, definition);
+                } else {
+                    entityInfos.remove(entityInfo);
+                }
             }
             if (entityInfo.isNonReactive()) {
                 String beanName = entityType.getSimpleName().concat("SyncRepository");
@@ -168,7 +172,11 @@ public class EasyormRepositoryRegistrar implements ImportBeanDefinitionRegistrar
                 definition.setBeanClass(SyncRepositoryFactoryBean.class);
                 definition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
                 definition.getPropertyValues().add("entityType", entityType);
-                registry.registerBeanDefinition(beanName, definition);
+                if (!registry.containsBeanDefinition(beanName)) {
+                    registry.registerBeanDefinition(beanName, definition);
+                } else {
+                    entityInfos.remove(entityInfo);
+                }
             }
 
         }

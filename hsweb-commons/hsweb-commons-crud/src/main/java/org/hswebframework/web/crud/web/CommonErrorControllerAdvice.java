@@ -71,16 +71,16 @@ public class CommonErrorControllerAdvice {
                 .map(msg -> {
                     HttpStatus status = HttpStatus.resolve(msg.getStatus());
                     return ResponseEntity
-                            .status(status == null ? HttpStatus.INTERNAL_SERVER_ERROR : status)
+                            .status(status == null ? HttpStatus.BAD_REQUEST : status)
                             .body(msg);
                 });
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Mono<ResponseMessage<Object>> handleException(UnsupportedOperationException e) {
         return LocaleUtils
-                .resolveThrowable(e, (err, msg) -> (ResponseMessage.error(500, CodeConstants.Error.unsupported, msg)))
+                .resolveThrowable(e, (err, msg) -> (ResponseMessage.error(400, CodeConstants.Error.unsupported, msg)))
                 .doOnEach(ReactiveLogger.onNext(r -> log.warn(e.getLocalizedMessage(), e)));
     }
 

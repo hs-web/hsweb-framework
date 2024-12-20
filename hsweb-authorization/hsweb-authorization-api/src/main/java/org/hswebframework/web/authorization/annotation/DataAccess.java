@@ -31,10 +31,12 @@ import java.lang.annotation.*;
  * @see DataAccessController
  * @see ResourceAction#dataAccess()
  * @since 3.0
+ * @deprecated 已弃用, 4.1中移除
  */
-@Target({ElementType.ANNOTATION_TYPE,ElementType.METHOD})
+@Target({ElementType.ANNOTATION_TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
+@Deprecated
 public @interface DataAccess {
 
     DataAccessType[] type() default {};

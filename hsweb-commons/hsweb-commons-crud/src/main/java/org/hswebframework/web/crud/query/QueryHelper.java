@@ -438,6 +438,13 @@ public interface QueryHelper {
         Flux<R> fetch();
 
         /**
+         * 执行查询,返回数据流
+         *
+         * @return 数据流
+         */
+        Flux<R> fetch(int pageIndex,int pageSize);
+
+        /**
          * 执行分页查询,默认返回第一页的25条数据.
          *
          * @return 分页结果
@@ -650,6 +657,7 @@ public interface QueryHelper {
         return combineOneToMany(source,
                                 idMapper,
                                 list -> fetcher
+                                    .copy()
                                     .in(MethodReferenceConverter.convertToColumn(mainIdGetter), list)
                                     .fetch(),
                                 mainIdGetter,
