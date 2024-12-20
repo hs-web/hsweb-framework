@@ -65,14 +65,7 @@ public interface I18nSupportEntity {
             return defaultMessage;
         }
 
-        String msg = entries.get(locale.toString());
-
-        if (msg != null) {
-            return msg;
-        }
-
-        return entries
-            .getOrDefault(locale.getCountry(), defaultMessage);
+        return LocaleUtils.getMessage(entries::get, locale, () -> defaultMessage);
     }
 
 }

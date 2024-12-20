@@ -30,15 +30,16 @@ public class CrudTests {
         entity.setAge(1);
         entity.setName("test");
 
-        Mono.just(entity)
-            .cast(TestEntity.class)
-            .as(service::insert)
-            .as(StepVerifier::create)
-            .expectNext(1)
-            .verifyComplete();
+        entity.setExtension("extName", "test");
+
+        service.insert(entity)
+               .as(StepVerifier::create)
+               .expectNext(1)
+               .verifyComplete();
         Assert.assertNotNull(entity.getId());
 
         service.findById(entity.getId())
+               .doOnNext(System.out::println)
                .as(StepVerifier::create)
                .expectNextMatches(e -> e instanceof CustomTestEntity)
                .verifyComplete();

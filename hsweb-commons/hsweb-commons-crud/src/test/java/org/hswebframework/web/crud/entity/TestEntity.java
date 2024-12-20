@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hswebframework.web.api.crud.entity.ExtensibleEntity;
 import org.hswebframework.web.api.crud.entity.GenericEntity;
 import org.hswebframework.web.crud.annotation.EnableEntityEvent;
 import org.hswebframework.web.crud.generator.Generators;
@@ -18,7 +19,7 @@ import javax.persistence.Table;
 @AllArgsConstructor(staticName = "of")
 @NoArgsConstructor
 @EnableEntityEvent
-public class TestEntity extends GenericEntity<String> {
+public class TestEntity extends ExtensibleEntity<String> {
 
     @Column(length = 32)
     private String name;

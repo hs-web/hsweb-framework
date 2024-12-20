@@ -13,10 +13,7 @@ import reactor.util.context.Context;
 import javax.annotation.Nonnull;
 import java.util.Locale;
 import java.util.concurrent.Callable;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
-import java.util.function.Function;
+import java.util.function.*;
 
 /**
  * 用于进行国际化消息转换
@@ -38,6 +35,25 @@ public final class LocaleUtils {
     private static final FastThreadLocal<Locale> CONTEXT_THREAD_LOCAL = new FastThreadLocal<>();
 
     static MessageSource messageSource = UnsupportedMessageSource.instance();
+
+
+    /**
+     * 从指定数据源中获取国际化消息
+     *
+     * @param messageSource  消息源
+     * @param locale         语言地区
+     * @param defaultMessage 默认消息
+     */
+    public static String getMessage(Function<String, String> messageSource,
+                                    Locale locale,
+                                    Supplier<String> defaultMessage) {
+        String str = locale.toString();
+        String msg = messageSource.apply(str);
+        if (msg == null) {
+            msg = messageSource.apply(locale.getLanguage());
+        }
+        return msg == null ? defaultMessage.get() : msg;
+    }
 
     /**
      * 获取当前的语言地区,如果没有设置则返回系统默认语言
@@ -113,24 +129,25 @@ public final class LocaleUtils {
     @SuppressWarnings("all")
     public static Mono<Locale> currentReactive() {
         return Mono
-                .deferContextual(ctx -> Mono.just(ctx.getOrDefault(Locale.class, DEFAULT_LOCALE)));
+            .deferContextual(ctx -> Mono.just(ctx.getOrDefault(Locale.class, DEFAULT_LOCALE)));
     }
+
     public static <T> Mono<T> doInReactive(Callable<T> call) {
         return currentReactive()
-                .handle((locale, sink) -> {
-                    Locale old = CONTEXT_THREAD_LOCAL.get();
-                    try {
-                        CONTEXT_THREAD_LOCAL.set(locale);
-                        T data = call.call();
-                        if (data != null) {
-                            sink.next(data);
-                        }
-                    } catch (Throwable e) {
-                        sink.error(e);
-                    } finally {
-                        CONTEXT_THREAD_LOCAL.set(old);
+            .handle((locale, sink) -> {
+                Locale old = CONTEXT_THREAD_LOCAL.get();
+                try {
+                    CONTEXT_THREAD_LOCAL.set(locale);
+                    T data = call.call();
+                    if (data != null) {
+                        sink.next(data);
                     }
-                });
+                } catch (Throwable e) {
+                    sink.error(e);
+                } finally {
+                    CONTEXT_THREAD_LOCAL.set(old);
+                }
+            });
     }
 
     /**
@@ -271,11 +288,11 @@ public final class LocaleUtils {
                                                 BiFunction<S, String, R> mapper,
                                                 Object... args) {
         return currentReactive()
-                .map(locale -> {
-                    String msg = message.apply(source);
-                    String newMsg = resolveMessage(messageSource, locale, msg, msg, args);
-                    return mapper.apply(source, newMsg);
-                });
+            .map(locale -> {
+                String msg = message.apply(source);
+                String newMsg = resolveMessage(messageSource, locale, msg, msg, args);
+                return mapper.apply(source, newMsg);
+            });
     }
 
     /**
@@ -288,7 +305,7 @@ public final class LocaleUtils {
     public static Mono<String> resolveMessageReactive(String code,
                                                       Object... args) {
         return currentReactive()
-                .map(locale -> resolveMessage(messageSource, locale, code, code, args));
+            .map(locale -> resolveMessage(messageSource, locale, code, code, args));
     }
 
     /**
@@ -303,7 +320,7 @@ public final class LocaleUtils {
                                                       String code,
                                                       Object... args) {
         return currentReactive()
-                .map(locale -> resolveMessage(messageSource, locale, code, code, args));
+            .map(locale -> resolveMessage(messageSource, locale, code, code, args));
     }
 
     /**
@@ -417,12 +434,12 @@ public final class LocaleUtils {
         return publisher -> {
             if (publisher instanceof Mono) {
                 return (T) Mono
-                        .from(publisher)
-                        .doOnEach(on(type, operation));
-            }
-            return (T) Flux
                     .from(publisher)
                     .doOnEach(on(type, operation));
+            }
+            return (T) Flux
+                .from(publisher)
+                .doOnEach(on(type, operation));
         };
     }
 
@@ -488,7 +505,7 @@ public final class LocaleUtils {
                    actual.currentContext().getOrDefault(Locale.class, DEFAULT_LOCALE),
                    (a, l) -> {
                        source.subscribe(
-                               new LocaleSwitchSubscriber<>(a)
+                           new LocaleSwitchSubscriber<>(a)
                        );
                        return null;
                    }
@@ -506,7 +523,7 @@ public final class LocaleUtils {
                    actual.currentContext().getOrDefault(Locale.class, DEFAULT_LOCALE),
                    (a, l) -> {
                        source.subscribe(
-                               new LocaleSwitchSubscriber<>(a)
+                           new LocaleSwitchSubscriber<>(a)
                        );
                        return null;
                    }
@@ -522,7 +539,7 @@ public final class LocaleUtils {
         @Nonnull
         public Context currentContext() {
             return actual
-                    .currentContext();
+                .currentContext();
         }
 
         @Override
@@ -532,7 +549,7 @@ public final class LocaleUtils {
 
         private Locale current() {
             return currentContext()
-                    .getOrDefault(Locale.class, DEFAULT_LOCALE);
+                .getOrDefault(Locale.class, DEFAULT_LOCALE);
         }
 
         @Override
