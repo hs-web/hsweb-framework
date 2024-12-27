@@ -7,16 +7,14 @@ import java.util.Map;
 import java.util.Set;
 
 @AllArgsConstructor
-class ExtensibleToMapCopier implements Copier {
+class ExtensibleToBeanCopier implements Copier {
 
     private final Copier copier;
 
     @Override
     public void copy(Object source, Object target, Set<String> ignore, Converter converter) {
         copier.copy(source, target, ignore, converter);
-        ExtensibleUtils.copyToMap((Extensible) source, ignore, (Map<String, Object>) target);
-        //移除map中的extensions
-        ((Map<?, ?>) target).remove("extensions");
+        FastBeanCopier.copy(((Extensible) source).extensions(), target);
     }
 
 

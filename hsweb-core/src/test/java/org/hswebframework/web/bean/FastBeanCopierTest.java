@@ -27,7 +27,7 @@ public class FastBeanCopierTest {
 
 
     @Test
-    public void testExtensible() {
+    public void testToExtensible() {
         Source source = new Source();
         source.setName("test");
         source.setAge(123);
@@ -50,6 +50,18 @@ public class FastBeanCopierTest {
 
     }
 
+    @Test
+    public void testFromExtensible() {
+        Source source = new Source();
+        ExtensibleEntity e = FastBeanCopier.copy(source, new ExtensibleEntity());
+        e.setName("test");
+        e.setExtension("age",123);
+        FastBeanCopier.copy(e, source);
+        Assert.assertEquals(e.getName(), source.getName());
+        Assert.assertEquals(e.getExtension("age"), source.getAge());
+
+
+    }
     @Test
     public void testMapToExtensible() {
         Source source = new Source();

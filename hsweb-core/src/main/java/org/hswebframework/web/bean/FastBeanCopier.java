@@ -200,12 +200,13 @@ public final class FastBeanCopier {
             Proxy<Copier> proxy = Proxy
                 .create(Copier.class, new Class[]{source, target})
                 .addMethod(method);
-            Copier copier  = proxy.newInstance();
-            if (targetIsExtensible && sourceIsMap) {
+            Copier copier = proxy.newInstance();
+            if (sourceIsExtensible && targetIsMap) {
                 copier = new ExtensibleToMapCopier(copier);
-            }
-            if (sourceIsMap &&  targetIsExtensible) {
+            } else if (sourceIsMap && targetIsExtensible) {
                 copier = new MapToExtensibleCopier(copier);
+            }else if(sourceIsExtensible){
+                copier = new ExtensibleToBeanCopier(copier);
             }
             return copier;
         } catch (Exception e) {
@@ -272,7 +273,7 @@ public final class FastBeanCopier {
             ClassProperty targetProperty = targetProperties.get(sourceProperty.getName());
             if (targetProperty == null) {
                 //复制到拓展对象
-                if (targetIsExtensible && !sourceIsExtensible) {
+                if (targetIsExtensible && !sourceIsExtensible && !sourceIsMap) {
                     code.append("if(!ignore.contains(\"").append(sourceProperty.getName()).append("\")){\n\t");
                     if (!sourceProperty.isPrimitive()) {
                         code.append("if($$__source.").append(sourceProperty.getReadMethod()).append("!=null){\n");
