@@ -3,6 +3,9 @@ package org.hswebframework.web.crud.query;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.hswebframework.ezorm.core.FeatureId;
+import org.hswebframework.ezorm.core.FeatureType;
+import org.hswebframework.ezorm.core.meta.Feature;
 import org.hswebframework.ezorm.rdb.executor.SqlRequest;
 import org.hswebframework.ezorm.rdb.metadata.RDBColumnMetadata;
 import org.hswebframework.ezorm.rdb.metadata.TableOrViewMetadata;
@@ -129,7 +132,9 @@ public interface QueryAnalyzer {
 
     @AllArgsConstructor
     @Getter
-    class Column {
+    class Column implements Feature {
+        static final FeatureId<Column> FEATURE_ID = FeatureId.of("AnalyzedColumn");
+
         //列名
         String name;
         //别名
@@ -141,6 +146,16 @@ public interface QueryAnalyzer {
 
         public Column moveOwner(String owner) {
             return new Column(name, alias, owner, metadata);
+        }
+
+        @Override
+        public String getId() {
+            return FEATURE_ID.getId();
+        }
+
+        @Override
+        public FeatureType getType() {
+            return AnalyzerFeatureType.AnalyzedCol;
         }
     }
 
@@ -175,5 +190,19 @@ public interface QueryAnalyzer {
         }
     }
 
+
+    enum AnalyzerFeatureType implements FeatureType {
+        AnalyzedCol;
+
+        @Override
+        public String getId() {
+            return name();
+        }
+
+        @Override
+        public String getName() {
+            return name();
+        }
+    }
 
 }
