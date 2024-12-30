@@ -370,9 +370,6 @@ public class DefaultQueryHelper implements QueryHelper {
                     RDBColumnMetadata metadata = target.getColumn(column[1]).orElse(null);
 
                     if (metadata != null) {
-                        if(metadata.getFeature(EntityPropertyDescriptor.ID).isPresent()){
-                            return;
-                        }
                         ObjectPropertyOperator operator = GlobalConfig.getPropertyOperator();
                         if (targetProperty == null) {
                             operator.setProperty(result, column[1], metadata.decode(sqlValue));
