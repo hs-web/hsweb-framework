@@ -8,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.beanutils.ConvertUtilsBean;
 import org.apache.commons.beanutils.PropertyUtilsBean;
-import org.hswebframework.ezorm.core.Extensible;
+import org.hswebframework.ezorm.core.Extendable;
 import org.hswebframework.utils.time.DateFormatter;
 import org.hswebframework.web.dict.EnumDict;
 import org.hswebframework.web.proxy.Proxy;
@@ -180,8 +180,8 @@ public final class FastBeanCopier {
         if (tartName.startsWith("package ")) {
             tartName = tartName.substring("package ".length());
         }
-        boolean targetIsExtensible = Extensible.class.isAssignableFrom(target);
-        boolean sourceIsExtensible = Extensible.class.isAssignableFrom(source);
+        boolean targetIsExtendable = Extendable.class.isAssignableFrom(target);
+        boolean sourceIsExtendable = Extendable.class.isAssignableFrom(source);
         boolean targetIsMap = Map.class.isAssignableFrom(target);
         boolean sourceIsMap = Map.class.isAssignableFrom(source);
 
@@ -201,12 +201,12 @@ public final class FastBeanCopier {
                 .create(Copier.class, new Class[]{source, target})
                 .addMethod(method);
             Copier copier = proxy.newInstance();
-            if (sourceIsExtensible && targetIsMap) {
-                copier = new ExtensibleToMapCopier(copier);
-            } else if (sourceIsMap && targetIsExtensible) {
-                copier = new MapToExtensibleCopier(copier);
-            }else if(sourceIsExtensible){
-                copier = new ExtensibleToBeanCopier(copier);
+            if (sourceIsExtendable && targetIsMap) {
+                copier = new ExtendableToMapCopier(copier);
+            } else if (sourceIsMap && targetIsExtendable) {
+                copier = new MapToExtendableCopier(copier);
+            }else if(sourceIsExtendable){
+                copier = new ExtendableToBeanCopier(copier);
             }
             return copier;
         } catch (Exception e) {
@@ -246,8 +246,8 @@ public final class FastBeanCopier {
 
         Map<String, ClassProperty> targetProperties = null;
 
-        boolean targetIsExtensible = Extensible.class.isAssignableFrom(target);
-        boolean sourceIsExtensible = Extensible.class.isAssignableFrom(source);
+        boolean targetIsExtendable = Extendable.class.isAssignableFrom(target);
+        boolean sourceIsExtendable = Extendable.class.isAssignableFrom(source);
         boolean targetIsMap = Map.class.isAssignableFrom(target);
         boolean sourceIsMap = Map.class.isAssignableFrom(source);
         //源类型为Map
@@ -273,12 +273,12 @@ public final class FastBeanCopier {
             ClassProperty targetProperty = targetProperties.get(sourceProperty.getName());
             if (targetProperty == null) {
                 //复制到拓展对象
-                if (targetIsExtensible && !sourceIsExtensible && !sourceIsMap) {
+                if (targetIsExtendable && !sourceIsExtendable && !sourceIsMap) {
                     code.append("if(!ignore.contains(\"").append(sourceProperty.getName()).append("\")){\n\t");
                     if (!sourceProperty.isPrimitive()) {
                         code.append("if($$__source.").append(sourceProperty.getReadMethod()).append("!=null){\n");
                     }
-                    code.append("\t\t((org.hswebframework.ezorm.core.Extensible)$$__target).setExtension(")
+                    code.append("\t\t((org.hswebframework.ezorm.core.Extendable)$$__target).setExtension(")
                         .append("\"").append(sourceProperty.name).append("\",")
                         .append("$$__source.").append(sourceProperty.getReadMethod())
                         .append(");");

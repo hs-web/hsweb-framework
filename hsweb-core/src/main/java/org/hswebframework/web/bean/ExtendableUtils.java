@@ -2,16 +2,16 @@ package org.hswebframework.web.bean;
 
 import com.google.common.collect.Maps;
 import org.apache.commons.collections4.CollectionUtils;
-import org.hswebframework.ezorm.core.Extensible;
+import org.hswebframework.ezorm.core.Extendable;
 
 import java.util.Map;
 import java.util.Set;
 
-public class ExtensibleUtils {
+public class ExtendableUtils {
 
     public static void copyFromMap(Map<String, Object> source,
                                    Set<String> ignore,
-                                   Extensible target) {
+                                   Extendable target) {
         ClassDescription def = ClassDescriptions.getDescription(target.getClass());
 
         for (Map.Entry<String, Object> entry : source.entrySet()) {
@@ -23,7 +23,7 @@ public class ExtensibleUtils {
 
     }
 
-    public static void copyToMap(Extensible target,
+    public static void copyToMap(Extendable target,
                                  Set<String> ignore,
                                  Map<String, Object> source) {
         if (CollectionUtils.isNotEmpty(ignore)) {

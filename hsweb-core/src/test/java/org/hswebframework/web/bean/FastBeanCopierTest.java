@@ -4,8 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
-import org.hswebframework.ezorm.core.DefaultExtensible;
-import org.hswebframework.ezorm.core.Extensible;
+import org.hswebframework.ezorm.core.DefaultExtendable;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.util.ClassUtils;
@@ -27,12 +26,12 @@ public class FastBeanCopierTest {
 
 
     @Test
-    public void testToExtensible() {
+    public void testToExtendable() {
         Source source = new Source();
         source.setName("test");
         source.setAge(123);
         source.setColor(Color.RED);
-        ExtensibleEntity e = FastBeanCopier.copy(source, new ExtensibleEntity());
+        ExtendableEntity e = FastBeanCopier.copy(source, new ExtendableEntity());
 
         Assert.assertEquals(source.getName(), e.getName());
         Assert.assertEquals(source.getAge(), e.getExtension("age"));
@@ -41,7 +40,7 @@ public class FastBeanCopierTest {
         Map<String, Object> map = FastBeanCopier.copy(e, new HashMap<>());
         System.out.println(map);
 
-        ExtensibleEntity t = FastBeanCopier.copy(map, new ExtensibleEntity());
+        ExtendableEntity t = FastBeanCopier.copy(map, new ExtendableEntity());
         Assert.assertEquals(e.getName(), t.getName());
 
         System.out.println(e.extensions());
@@ -51,9 +50,9 @@ public class FastBeanCopierTest {
     }
 
     @Test
-    public void testFromExtensible() {
+    public void testFromExtendable() {
         Source source = new Source();
-        ExtensibleEntity e = FastBeanCopier.copy(source, new ExtensibleEntity());
+        ExtendableEntity e = FastBeanCopier.copy(source, new ExtendableEntity());
         e.setName("test");
         e.setExtension("age",123);
         FastBeanCopier.copy(e, source);
@@ -63,13 +62,13 @@ public class FastBeanCopierTest {
 
     }
     @Test
-    public void testMapToExtensible() {
+    public void testMapToExtendable() {
         Source source = new Source();
         source.setName("test");
         source.setAge(123);
         source.setColor(Color.RED);
         Map<String, Object> map = FastBeanCopier.copy(source, new HashMap<>());
-        ExtensibleEntity e = FastBeanCopier.copy(map, new ExtensibleEntity());
+        ExtendableEntity e = FastBeanCopier.copy(map, new ExtendableEntity());
         Assert.assertEquals(source.getName(), e.getName());
         Assert.assertEquals(source.getAge(), e.getExtension("age"));
         Assert.assertEquals(source.getColor(), e.getExtension("color"));
@@ -78,7 +77,7 @@ public class FastBeanCopierTest {
 
     @Getter
     @Setter
-    public static class ExtensibleEntity extends DefaultExtensible {
+    public static class ExtendableEntity extends DefaultExtendable {
 
         private String name;
 
