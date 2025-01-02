@@ -26,6 +26,20 @@ public class FastBeanCopierTest {
 
 
     @Test
+    public void testExtendableToExtendable() {
+        ExtendableEntity source = new ExtendableEntity();
+        source.setName("test");
+        source.setExtension("age", 123);
+        source.setExtension("color", Color.RED);
+
+        ExtendableEntity e = FastBeanCopier.copy(source, new ExtendableEntity());
+
+        Assert.assertEquals(source.getName(), e.getName());
+        Assert.assertEquals(source.getExtension("age"), e.getExtension("age"));
+        Assert.assertEquals(source.getExtension("color"), e.getExtension("color"));
+
+    }
+    @Test
     public void testToExtendable() {
         Source source = new Source();
         source.setName("test");
