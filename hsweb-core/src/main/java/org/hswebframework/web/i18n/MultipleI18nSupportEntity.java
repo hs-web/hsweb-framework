@@ -12,7 +12,7 @@ public interface MultipleI18nSupportEntity extends I18nSupportEntity {
     @Override
     default Map<String, String> getI18nMessages(String key) {
         Map<String, Map<String, String>> source = getI18nMessages();
-        if (MapUtils.isNotEmpty(source)) {
+        if (MapUtils.isEmpty(source)) {
             return Collections.emptyMap();
         }
         return source.get(key);

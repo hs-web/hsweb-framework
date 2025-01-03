@@ -27,6 +27,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuples;
 
 import java.util.*;
 import java.util.function.Function;
@@ -34,7 +35,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 public class DefaultReactiveAuthenticationInitializeService
-        implements ReactiveAuthenticationInitializeService {
+    implements ReactiveAuthenticationInitializeService {
 
     @Autowired
     private ReactiveUserService userService;
@@ -64,25 +65,25 @@ public class DefaultReactiveAuthenticationInitializeService
         return userEntityMono.flatMap(user -> {
             SimpleAuthentication authentication = new SimpleAuthentication();
             authentication.setUser(SimpleUser
-                                           .builder()
-                                           .id(user.getId())
-                                           .name(user.getName())
-                                           .username(user.getUsername())
-                                           .userType(user.getType())
-                                           .build());
+                                       .builder()
+                                       .id(user.getId())
+                                       .name(user.getName())
+                                       .username(user.getUsername())
+                                       .userType(user.getType())
+                                       .build());
 
             return initPermission(authentication)
-                    .defaultIfEmpty(authentication)
-                    .onErrorResume(err -> {
-                        log.warn(err.getMessage(), err);
-                        return Mono.just(authentication);
-                    })
-                    .flatMap(auth -> {
-                        AuthorizationInitializeEvent event = new AuthorizationInitializeEvent(auth);
-                        return event
-                                .publish(eventPublisher)
-                                .then(Mono.fromSupplier(event::getAuthentication));
-                    });
+                .defaultIfEmpty(authentication)
+                .onErrorResume(err -> {
+                    log.warn(err.getMessage(), err);
+                    return Mono.just(authentication);
+                })
+                .flatMap(auth -> {
+                    AuthorizationInitializeEvent event = new AuthorizationInitializeEvent(auth);
+                    return event
+                        .publish(eventPublisher)
+                        .then(Mono.fromSupplier(event::getAuthentication));
+                });
         });
     }
 
@@ -91,26 +92,28 @@ public class DefaultReactiveAuthenticationInitializeService
                    .filter(dimension -> dimension.getType() != null)
                    .groupBy(d -> d.getType().getId(), (Function<Dimension, Object>) Dimension::getId)
                    .flatMap(group ->
-                                    group.collectList()
-                                         .flatMapMany(list -> settingRepository
-                                                 .createQuery()
-                                                 .where(AuthorizationSettingEntity::getState, 1)
-                                                 .and(AuthorizationSettingEntity::getDimensionType, group.key())
-                                                 .in(AuthorizationSettingEntity::getDimensionTarget, list)
-                                                 .fetch()));
+                                group.collectList()
+                                     .flatMapMany(list -> settingRepository
+                                         .createQuery()
+                                         .where(AuthorizationSettingEntity::getState, 1)
+                                         .and(AuthorizationSettingEntity::getDimensionType, group.key())
+                                         .in(AuthorizationSettingEntity::getDimensionTarget, list)
+                                         .fetch()));
     }
 
     protected Mono<Authentication> initPermission(SimpleAuthentication authentication) {
         return Flux.fromIterable(dimensionProviders)
                    .flatMap(provider -> provider.getDimensionByUserId(authentication.getUser().getId()))
                    .cast(Dimension.class)
+                   //去重?还是合并?
+                   .distinct(dis -> Tuples.of(dis.getType().getId(), dis.getId()))
                    .doOnNext(authentication::addDimension)
                    .collectList()
                    .then(Mono.defer(() -> Mono
-                           .zip(getAllPermission(),
-                                getSettings(authentication.getDimensions()).collect(Collectors.groupingBy(AuthorizationSettingEntity::getPermission)),
-                                (_p, _s) -> handlePermission(authentication, _p, _s)
-                           )));
+                       .zip(getAllPermission(),
+                            getSettings(authentication.getDimensions()).collect(Collectors.groupingBy(AuthorizationSettingEntity::getPermission)),
+                            (_p, _s) -> handlePermission(authentication, _p, _s)
+                       )));
 
     }
 
@@ -146,9 +149,9 @@ public class DefaultReactiveAuthenticationInitializeService
                                          .stream()
                                          .map(conf -> {
                                              DataAccessConfig config = builderFactory
-                                                     .create()
-                                                     .fromMap(conf.toMap())
-                                                     .build();
+                                                 .create()
+                                                 .fromMap(conf.toMap())
+                                                 .build();
                                              if (config == null) {
                                                  log.warn("unsupported data access:{}", conf.toMap());
                                              }
@@ -206,11 +209,11 @@ public class DefaultReactiveAuthenticationInitializeService
     protected Mono<Map<String, PermissionEntity>> getAllPermission() {
 
         return permissionRepository
-                .createQuery()
-                .where(PermissionEntity::getStatus, 1)
-                .fetch()
-                .collect(Collectors.toMap(PermissionEntity::getId, Function.identity()))
-                .switchIfEmpty(Mono.just(Collections.emptyMap()));
+            .createQuery()
+            .where(PermissionEntity::getStatus, 1)
+            .fetch()
+            .collect(Collectors.toMap(PermissionEntity::getId, Function.identity()))
+            .switchIfEmpty(Mono.just(Collections.emptyMap()));
     }
 
 }

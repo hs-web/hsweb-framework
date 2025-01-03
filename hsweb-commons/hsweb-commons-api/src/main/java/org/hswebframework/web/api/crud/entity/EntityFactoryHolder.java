@@ -19,6 +19,14 @@ public final class EntityFactoryHolder {
         return FACTORY;
     }
 
+
+    public static <T> Class<T> getMappedType(Class<T> type) {
+        if (FACTORY != null) {
+            return FACTORY.getInstanceType(type);
+        }
+        return type;
+    }
+
     public static <T> T newInstance(Class<T> type,
                                     Supplier<T> mapper) {
         if (FACTORY != null) {

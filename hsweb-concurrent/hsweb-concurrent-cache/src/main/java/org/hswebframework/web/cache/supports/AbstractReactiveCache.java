@@ -1,5 +1,6 @@
 package org.hswebframework.web.cache.supports;
 
+import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.web.cache.ReactiveCache;
 import org.reactivestreams.Publisher;
 import reactor.core.CoreSubscriber;
@@ -17,8 +18,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
+@Slf4j
 public abstract class AbstractReactiveCache<E> implements ReactiveCache<E> {
-    static Sinks.EmitFailureHandler emitFailureHandler = Sinks.EmitFailureHandler.busyLooping(Duration.ofSeconds(30));
+    static final Sinks.EmitFailureHandler emitFailureHandler = Sinks.EmitFailureHandler.busyLooping(Duration.ofSeconds(30));
+
     private final Map<Object, CacheLoader> cacheLoading = new ConcurrentHashMap<>();
 
     protected static class CacheLoader extends MonoOperator<Object, Object> {
@@ -53,25 +56,25 @@ public abstract class AbstractReactiveCache<E> implements ReactiveCache<E> {
                 Mono<? extends Object> source = this.source;
                 if (defaultValue != null) {
                     source = source
-                            .switchIfEmpty((Mono) defaultValue
-                                    .flatMap(val -> {
-                                        return parent.putNow(key, val).thenReturn(val);
-                                    }));
+                        .switchIfEmpty((Mono) defaultValue
+                            .flatMap(val -> {
+                                return parent.putNow(key, val).thenReturn(val);
+                            }));
                 }
                 loading = source.subscribe(
-                        val -> {
-                            complete();
-                            holder.emitValue(val, emitFailureHandler);
-                        },
-                        err -> {
-                            complete();
-                            holder.emitError(err, emitFailureHandler);
-                        },
-                        () -> {
-                            complete();
-                            holder.emitEmpty(emitFailureHandler);
-                        },
-                        Context.of(context));
+                    val -> {
+                        complete();
+                        holder.emitValue(val, emitFailureHandler);
+                    },
+                    err -> {
+                        complete();
+                        holder.emitError(err, emitFailureHandler);
+                    },
+                    () -> {
+                        complete();
+                        holder.emitEmpty(emitFailureHandler);
+                    },
+                    Context.of(context));
             }
         }
 
@@ -95,42 +98,53 @@ public abstract class AbstractReactiveCache<E> implements ReactiveCache<E> {
     @Override
     @SuppressWarnings("all")
     public final Mono<E> getMono(Object key) {
-        return (Mono<E>) cacheLoading.computeIfAbsent(key, _key -> new CacheLoader(this, _key, getNow(_key)));
+        return (Mono<E>) cacheLoading
+            .computeIfAbsent(key, _key -> new CacheLoader(this, _key, getNow(_key)))
+            .onErrorResume(err -> handleLoaderError(key, err));
     }
 
     @Override
     @SuppressWarnings("all")
     public final Mono<E> getMono(Object key, Supplier<Mono<E>> loader) {
 
-        return Mono.deferContextual(ctx -> {
-            CacheLoader cacheLoader = cacheLoading.compute(key, (_key, old) -> {
-                CacheLoader cl = new CacheLoader(this, _key, getNow(_key));
-                cl.defaultValue(loader.get(), ctx);
-                return cl;
-            });
-            return (Mono<E>) cacheLoader;
-        });
+        return Mono
+            .deferContextual(ctx -> {
+                CacheLoader cacheLoader = cacheLoading.compute(key, (_key, old) -> {
+                    CacheLoader cl = new CacheLoader(this, _key, getNow(_key));
+                    cl.defaultValue(loader.get(), ctx);
+                    return cl;
+                });
+                return (Mono<E>) cacheLoader;
+            })
+            .onErrorResume(err -> handleLoaderError(key, err));
     }
 
 
     @Override
     public final Flux<E> getFlux(Object key) {
         return (cacheLoading.computeIfAbsent(key, _key -> new CacheLoader(this, _key, getNow(_key))))
-                .flatMapIterable(e -> ((List<E>) e));
+            .flatMapIterable(e -> ((List<E>) e))
+            .onErrorResume(err -> handleLoaderError(key, err));
     }
 
     @Override
     public final Flux<E> getFlux(Object key, Supplier<Flux<E>> loader) {
         return Flux.deferContextual(ctx -> {
-            CacheLoader cacheLoader = cacheLoading.compute(key, (_key, old) -> {
-                CacheLoader cl = new CacheLoader(this, _key, getNow(_key));
-                cl.defaultValue(loader.get().collectList(), ctx);
-                return cl;
-            });
-            return cacheLoader.flatMapIterable(e -> ((List<E>) e));
-        });
+                       CacheLoader cacheLoader = cacheLoading.compute(key, (_key, old) -> {
+                           CacheLoader cl = new CacheLoader(this, _key, getNow(_key));
+                           cl.defaultValue(loader.get().collectList(), ctx);
+                           return cl;
+                       });
+                       return cacheLoader.flatMapIterable(e -> ((List<E>) e));
+                   })
+                   .onErrorResume(err -> handleLoaderError(key, err));
     }
 
+    protected Mono<E> handleLoaderError(Object key, Throwable err) {
+        log.warn("load cache error,key:{},evict it.", key, err);
+        return evict(key)
+            .then(Mono.empty());
+    }
 
     @Override
     public final Mono<Void> put(Object key, Publisher<E> data) {

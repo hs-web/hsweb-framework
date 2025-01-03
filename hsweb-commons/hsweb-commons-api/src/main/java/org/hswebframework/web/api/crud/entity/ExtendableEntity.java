@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
-import org.hswebframework.ezorm.core.Extensible;
+import org.hswebframework.ezorm.core.Extendable;
 
 import java.util.Collections;
 import java.util.Map;
@@ -15,7 +15,7 @@ import java.util.Map;
  * <p>
  * <ul>
  *     <li>
- *         实体类继承此类,或者实现{@link Extensible}接口.
+ *         实体类继承此类,或者实现{@link Extendable}接口.
  *     </li>
  *     <li>
  *         使用{@link org.hswebframework.web.crud.configuration.TableMetadataCustomizer}自定义表结构
@@ -32,12 +32,12 @@ import java.util.Map;
  */
 @Getter
 @Setter
-public class ExtensibleEntity<PK> extends GenericEntity<PK> implements Extensible {
+public class ExtendableEntity<PK> extends GenericEntity<PK> implements Extendable {
 
     private Map<String, Object> extensions;
 
     /**
-     * 默认不序列化扩展属性,会由{@link ExtensibleEntity#extensions()},{@link JsonAnyGetter}平铺到json中.
+     * 默认不序列化扩展属性,会由{@link ExtendableEntity#extensions()},{@link JsonAnyGetter}平铺到json中.
      *
      * @return 扩展属性
      */

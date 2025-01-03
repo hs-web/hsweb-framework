@@ -6,22 +6,22 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-public class ExtensibleEntityTest {
+public class ExtendableEntityTest {
 
 
     @Test
     @SneakyThrows
     public void testJson() {
-        ExtensibleEntity<String> entity = new ExtensibleEntity<>();
+        ExtendableEntity<String> entity = new ExtendableEntity<>();
         entity.setId("test");
         entity.setExtension("extName", "test");
 
         ObjectMapper mapper = new ObjectMapper();
 
-        String json = mapper.writerFor(ExtensibleEntity.class).writeValueAsString(entity);
+        String json = mapper.writerFor(ExtendableEntity.class).writeValueAsString(entity);
 
         System.out.println(json);
-        ExtensibleEntity<String> decoded = mapper.readerFor(ExtensibleEntity.class).readValue(json);
+        ExtendableEntity<String> decoded = mapper.readerFor(ExtendableEntity.class).readValue(json);
         assertNotNull(decoded.getId());
 
         assertEquals(entity.getId(), decoded.getId());

@@ -78,37 +78,40 @@ public class TreeUtils {
                          (helper, node) -> {
                              PK parentId = parentIdGetter.apply(node);
                              return ObjectUtils.isEmpty(parentId)
-                                     || helper.getNode(parentId) == null;
+                                 || helper.getNode(parentId) == null;
                          });
     }
 
     /**
      * 列表结构转为树结构,并返回根节点集合
      *
-     * @param dataList          数据集合
-     * @param childConsumer     子节点消费接口,用于设置子节点
-     * @param predicateFunction 根节点判断函数,传入helper,获取一个判断是否为跟节点的函数
-     * @param <N>               元素类型
-     * @param <PK>              主键类型
+     * @param dataList      数据集合
+     * @param childConsumer 子节点消费接口,用于设置子节点
+     * @param rootPredicate 根节点判断函数,传入helper,获取一个判断是否为根节点的函数
+     * @param <N>           元素类型
+     * @param <PK>          主键类型
      * @return 根节点集合
      */
     public static <N, PK> List<N> list2tree(Collection<N> dataList,
                                             Function<N, PK> idGetter,
                                             Function<N, PK> parentIdGetter,
                                             BiConsumer<N, List<N>> childConsumer,
-                                            BiPredicate<TreeSupportEntity.TreeHelper<N, PK>, N> predicateFunction) {
+                                            BiPredicate<TreeSupportEntity.TreeHelper<N, PK>, N> rootPredicate) {
         Objects.requireNonNull(dataList, "source list can not be null");
         Objects.requireNonNull(childConsumer, "child consumer can not be null");
-        Objects.requireNonNull(predicateFunction, "root predicate function can not be null");
-
+        Objects.requireNonNull(rootPredicate, "root predicate function can not be null");
+        int size = dataList.size();
+        if (size == 0) {
+            return new ArrayList<>(0);
+        }
         // id,node
-        Map<PK, N> cache = Maps.newHashMapWithExpectedSize(dataList.size());
+        Map<PK, N> cache = Maps.newHashMapWithExpectedSize(size);
         // parentId,children
         Map<PK, List<N>> treeCache = dataList
-                .stream()
-                .peek(node -> cache.put(idGetter.apply(node), node))
-                .filter(e -> parentIdGetter.apply(e) != null)
-                .collect(Collectors.groupingBy(parentIdGetter));
+            .stream()
+            .peek(node -> cache.put(idGetter.apply(node), node))
+            .filter(e -> parentIdGetter.apply(e) != null)
+            .collect(Collectors.groupingBy(parentIdGetter));
 
         TreeSupportEntity.TreeHelper<N, PK> helper = new TreeSupportEntity.TreeHelper<N, PK>() {
             @Override
@@ -122,13 +125,18 @@ public class TreeUtils {
             }
         };
 
-        return dataList
-                .stream()
-                //设置每个节点的子节点
-                .peek(node -> childConsumer.accept(node, treeCache.get(idGetter.apply(node))))
-                //获取根节点
-                .filter(node -> predicateFunction.test(helper, node))
-                .collect(Collectors.toList());
+        List<N> list = new ArrayList<>(treeCache.size());
+
+        for (N node : dataList) {
+            //设置每个节点的子节点
+            childConsumer.accept(node, treeCache.get(idGetter.apply(node)));
+
+            //获取根节点
+            if (rootPredicate.test(helper, node)) {
+                list.add(node);
+            }
+        }
+        return list;
     }
 
 }

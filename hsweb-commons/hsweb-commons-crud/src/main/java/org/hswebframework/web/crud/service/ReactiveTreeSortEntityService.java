@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
  * @see GenericReactiveTreeSupportCrudService
  */
 public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K>, K>
-        extends ReactiveCrudService<E, K> {
+    extends ReactiveCrudService<E, K> {
 
     /**
      * 动态查询并将查询结构转为树形结构
@@ -54,10 +54,10 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
     @Transactional(readOnly = true, transactionManager = TransactionManagers.reactiveTransactionManager)
     default Mono<List<E>> queryResultToTree(QueryParamEntity paramEntity) {
         return query(paramEntity)
-                .collectList()
-                .map(list -> TreeSupportEntity.list2tree(list,
-                                                         this::setChildren,
-                                                         this::createRootNodePredicate));
+            .collectList()
+            .map(list -> TreeSupportEntity.list2tree(list,
+                                                     this::setChildren,
+                                                     this::createRootNodePredicate));
     }
 
     /**
@@ -69,55 +69,78 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
     @Transactional(readOnly = true, transactionManager = TransactionManagers.reactiveTransactionManager)
     default Mono<List<E>> queryIncludeChildrenTree(QueryParamEntity paramEntity) {
         return queryIncludeChildren(paramEntity)
-                .collectList()
-                .map(list -> TreeSupportEntity.list2tree(list,
-                                                         this::setChildren,
-                                                         this::createRootNodePredicate));
+            .collectList()
+            .map(list -> TreeSupportEntity.list2tree(list,
+                                                     this::setChildren,
+                                                     this::createRootNodePredicate));
     }
 
     /**
      * 查询指定ID的实体以及对应的全部子节点
      *
      * @param idList ID集合
-     * @return 树形结构
+     * @return 包含子节点的所有节点
      */
     @Transactional(readOnly = true, transactionManager = TransactionManagers.reactiveTransactionManager)
     default Flux<E> queryIncludeChildren(Collection<K> idList) {
-        Set<String> duplicateCheck = new HashSet<>();
+        return queryIncludeChildren(findById(idList));
+    }
 
-        return findById(idList)
-                .concatMap(e -> !StringUtils.hasText(e.getPath()) || !duplicateCheck.add(e.getPath())
-                                   ? Mono.just(e)
-                                   : createQuery()
-                                   .where()
-                                   //使用path快速查询
-                                   .like$("path", e.getPath())
-                                   .fetch(),
-                           Integer.MAX_VALUE)
-                .distinct(TreeSupportEntity::getId);
+    /**
+     * 根据实体流查询全部子节点（包含原节点）
+     *
+     * @param entities 实体流
+     * @return 包含子节点的所有节点
+     * @since 4.0.18
+     */
+    @Transactional(readOnly = true, transactionManager = TransactionManagers.reactiveTransactionManager)
+    default Flux<E> queryIncludeChildren(Flux<E> entities) {
+        Set<String> duplicateCheck = new HashSet<>();
+        return entities
+            .concatMap(e -> !StringUtils.hasText(e.getPath()) || !duplicateCheck.add(e.getPath())
+                           ? Mono.just(e)
+                           : createQuery()
+                           .where()
+                           //使用path快速查询
+                           .like$("path", e.getPath())
+                           .fetch(),
+                       Integer.MAX_VALUE)
+            .distinct(TreeSupportEntity::getId);
     }
 
     /**
      * 查询指定ID的实体以及对应的全部父节点
      *
      * @param idList ID集合
-     * @return 树形结构
+     * @return 包含父节点的所有节点
      */
     @Transactional(readOnly = true, transactionManager = TransactionManagers.reactiveTransactionManager)
     default Flux<E> queryIncludeParent(Collection<K> idList) {
+        return queryIncludeParent(findById(idList));
+    }
+
+    /**
+     * 根据实体流查询全部父节点（包含原节点）
+     *
+     * @param entities 实体流
+     * @return 包含父节点的所有节点
+     * @since 4.0.18
+     */
+    @Transactional(readOnly = true, transactionManager = TransactionManagers.reactiveTransactionManager)
+    default Flux<E> queryIncludeParent(Flux<E> entities) {
         Set<String> duplicateCheck = new HashSet<>();
 
-        return findById(idList)
-                .concatMap(e -> !StringUtils.hasText(e.getPath()) || !duplicateCheck.add(e.getPath())
-                        ? Mono.just(e)
-                        : createQuery()
-                        .where()
-                        //where ? like path and path !='' and path not null
-                        .accept(Terms.Like.reversal("path", e.getPath(), false, true))
-                        .notEmpty("path")
-                        .notNull("path")
-                        .fetch(), Integer.MAX_VALUE)
-                .distinct(TreeSupportEntity::getId);
+        return entities
+            .concatMap(e -> !StringUtils.hasText(e.getPath()) || !duplicateCheck.add(e.getPath())
+                ? Mono.just(e)
+                : createQuery()
+                .where()
+                //where ? like path and path !='' and path not null
+                .accept(Terms.Like.reversal("path", e.getPath(), false, true))
+                .notEmpty("path")
+                .notNull("path")
+                .fetch(), Integer.MAX_VALUE)
+            .distinct(TreeSupportEntity::getId);
     }
 
     /**
@@ -131,23 +154,23 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
         Set<String> duplicateCheck = new HashSet<>();
 
         return query(queryParam)
-                .concatMap(e -> !StringUtils.hasText(e.getPath()) || !duplicateCheck.add(e.getPath())
-                        ? Mono.just(e)
-                        : createQuery()
-                        .as(q -> {
-                            if (CollectionUtils.isNotEmpty(queryParam.getIncludes())) {
-                                q.select(queryParam.getIncludes().toArray(new String[0]));
-                            }
-                            if (CollectionUtils.isNotEmpty(queryParam.getExcludes())) {
-                                q.selectExcludes(queryParam.getExcludes().toArray(new String[0]));
-                            }
-                            return q;
-                        })
-                        .where()
-                        .like$("path", e.getPath())
-                        .fetch()
-                ,Integer.MAX_VALUE)
-                .distinct(TreeSupportEntity::getId);
+            .concatMap(e -> !StringUtils.hasText(e.getPath()) || !duplicateCheck.add(e.getPath())
+                           ? Mono.just(e)
+                           : createQuery()
+                           .as(q -> {
+                               if (CollectionUtils.isNotEmpty(queryParam.getIncludes())) {
+                                   q.select(queryParam.getIncludes().toArray(new String[0]));
+                               }
+                               if (CollectionUtils.isNotEmpty(queryParam.getExcludes())) {
+                                   q.selectExcludes(queryParam.getExcludes().toArray(new String[0]));
+                               }
+                               return q;
+                           })
+                           .where()
+                           .like$("path", e.getPath())
+                           .fetch()
+                , Integer.MAX_VALUE)
+            .distinct(TreeSupportEntity::getId);
     }
 
     @Override
@@ -166,12 +189,12 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
     @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager)
     default Mono<Integer> insertBatch(Publisher<? extends Collection<E>> entityPublisher) {
         return this
-                .getRepository()
-                .insertBatch(new TreeSortServiceHelper<>(this)
-                                     .prepare(Flux.from(entityPublisher)
-                                                  .flatMapIterable(Function.identity()))
-                                     //  .doOnNext(e -> e.tryValidate(CreateGroup.class))
-                                     .buffer(getBufferSize()));
+            .getRepository()
+            .insertBatch(new TreeSortServiceHelper<>(this)
+                             .prepare(Flux.from(entityPublisher)
+                                          .flatMapIterable(Function.identity()))
+                             //  .doOnNext(e -> e.tryValidate(CreateGroup.class))
+                             .buffer(getBufferSize()));
     }
 
     default int getBufferSize() {
@@ -181,7 +204,7 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
     @Deprecated
     default Mono<E> applyTreeProperty(E ele) {
         if (StringUtils.hasText(ele.getPath()) ||
-                ObjectUtils.isEmpty(ele.getParentId())) {
+            ObjectUtils.isEmpty(ele.getParentId())) {
             return Mono.just(ele);
         }
 
@@ -198,57 +221,57 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
             return Mono.empty();
         }
         return this
-                .queryIncludeChildren(Collections.singletonList(id))
-                .doOnNext(e -> {
-                    if (Objects.equals(ele.getParentId(), e.getId())) {
-                        throw new ValidationException.NoStackTrace("parentId", "error.tree_entity_cyclic_dependency");
-                    }
-                })
-                .then(Mono.just(ele));
+            .queryIncludeChildren(Collections.singletonList(id))
+            .doOnNext(e -> {
+                if (Objects.equals(ele.getParentId(), e.getId())) {
+                    throw new ValidationException.NoStackTrace("parentId", "error.tree_entity_cyclic_dependency");
+                }
+            })
+            .then(Mono.just(ele));
     }
 
     @Deprecated
     default Mono<Collection<E>> checkParentId(Collection<E> source) {
 
         Set<K> idSet = source
-                .stream()
-                .map(TreeSupportEntity::getId)
-                .filter(e -> !ObjectUtils.isEmpty(e))
-                .collect(Collectors.toSet());
+            .stream()
+            .map(TreeSupportEntity::getId)
+            .filter(e -> !ObjectUtils.isEmpty(e))
+            .collect(Collectors.toSet());
 
         if (idSet.isEmpty()) {
             return Mono.just(source);
         }
 
         Set<K> readyToCheck = source
-                .stream()
-                .map(TreeSupportEntity::getParentId)
-                .filter(e -> !ObjectUtils.isEmpty(e) && !idSet.contains(e))
-                .collect(Collectors.toSet());
+            .stream()
+            .map(TreeSupportEntity::getParentId)
+            .filter(e -> !ObjectUtils.isEmpty(e) && !idSet.contains(e))
+            .collect(Collectors.toSet());
 
         if (readyToCheck.isEmpty()) {
             return Mono.just(source);
         }
 
         return this
-                .createQuery()
-                .select("id")
-                .in("id", readyToCheck)
-                .fetch()
-                .doOnNext(e -> readyToCheck.remove(e.getId()))
-                .then(Mono.fromSupplier(() -> {
-                    if (!readyToCheck.isEmpty()) {
-                        throw new ValidationException(
+            .createQuery()
+            .select("id")
+            .in("id", readyToCheck)
+            .fetch()
+            .doOnNext(e -> readyToCheck.remove(e.getId()))
+            .then(Mono.fromSupplier(() -> {
+                if (!readyToCheck.isEmpty()) {
+                    throw new ValidationException(
+                        "error.tree_entity_parent_id_not_exist",
+                        Collections.singletonList(
+                            new ValidationException.Detail(
+                                "parentId",
                                 "error.tree_entity_parent_id_not_exist",
-                                Collections.singletonList(
-                                        new ValidationException.Detail(
-                                                "parentId",
-                                                "error.tree_entity_parent_id_not_exist",
-                                                readyToCheck))
-                        );
-                    }
-                    return source;
-                }));
+                                readyToCheck))
+                    );
+                }
+                return source;
+            }));
 
     }
 
@@ -274,14 +297,14 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
 
     @Override
     @Transactional(rollbackFor = Throwable.class,
-            transactionManager = TransactionManagers.reactiveTransactionManager)
+        transactionManager = TransactionManagers.reactiveTransactionManager)
     default Mono<SaveResult> save(Publisher<E> entityPublisher) {
         return new TreeSortServiceHelper<>(this)
-                .prepare(Flux.from(entityPublisher))
+            .prepare(Flux.from(entityPublisher))
 //                .doOnNext(e -> e.tryValidate(CreateGroup.class))
-                .buffer(getBufferSize())
-                .flatMap(this.getRepository()::save)
-                .reduce(SaveResult::merge);
+            .buffer(getBufferSize())
+            .flatMap(this.getRepository()::save)
+            .reduce(SaveResult::merge);
 
     }
 
@@ -306,12 +329,12 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
     @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager)
     default Mono<Integer> updateById(K id, Mono<E> entityPublisher) {
         return this
-                .findById(id)
-                .map(e -> this
-                        .save(entityPublisher.doOnNext(data -> data.setId(id)))
-                        .map(SaveResult::getTotal))
-                .defaultIfEmpty(Mono.just(0))
-                .flatMap(Function.identity());
+            .findById(id)
+            .map(e -> this
+                .save(entityPublisher.doOnNext(data -> data.setId(id)))
+                .map(SaveResult::getTotal))
+            .defaultIfEmpty(Mono.just(0))
+            .flatMap(Function.identity());
     }
 
     @Override
@@ -324,11 +347,11 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
     @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager)
     default Mono<Integer> deleteById(Publisher<K> idPublisher) {
         return this
-                .findById(Flux.from(idPublisher))
-                .concatMap(e -> StringUtils.hasText(e.getPath())
-                        ? getRepository().createDelete().where().like$(e::getPath).execute()
-                        : getRepository().deleteById(e.getId()),Integer.MAX_VALUE)
-                .as(MathFlux::sumInt);
+            .findById(Flux.from(idPublisher))
+            .concatMap(e -> StringUtils.hasText(e.getPath())
+                ? getRepository().createDelete().where().like$(e::getPath).execute()
+                : getRepository().deleteById(e.getId()), Integer.MAX_VALUE)
+            .as(MathFlux::sumInt);
     }
 
     IDGenerator<K> getIDGenerator();
@@ -360,18 +383,18 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
     @SuppressWarnings("all")
     default ReactiveDelete createDelete() {
         return ReactiveCrudService.super
-                .createDelete()
-                .onExecute((delete, executor) -> this
-                        .queryIncludeChildren(delete.toQueryParam(QueryParamEntity::new)
-                                                    .<QueryParamEntity>includes("id", "path", "parentId"))
-                        .map(TreeSupportEntity::getId)
-                        .buffer(200)
-                        .concatMap(list -> getRepository()
-                                .createDelete()
-                                .where()
-                                .in("id", list)
-                                .execute(), Integer.MAX_VALUE)
-                        //.concatWith(executor)
-                        .reduce(0, Math::addExact));
+            .createDelete()
+            .onExecute((delete, executor) -> this
+                .queryIncludeChildren(delete.toQueryParam(QueryParamEntity::new)
+                                            .<QueryParamEntity>includes("id", "path", "parentId"))
+                .map(TreeSupportEntity::getId)
+                .buffer(200)
+                .concatMap(list -> getRepository()
+                    .createDelete()
+                    .where()
+                    .in("id", list)
+                    .execute(), Integer.MAX_VALUE)
+                //.concatWith(executor)
+                .reduce(0, Math::addExact));
     }
 }

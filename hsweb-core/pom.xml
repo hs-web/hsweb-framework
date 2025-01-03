@@ -150,5 +150,10 @@
             <artifactId>commons-codec</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.hswebframework</groupId>
+            <artifactId>hsweb-easy-orm-core</artifactId>
+        </dependency>
+
     </dependencies>
 </project>
