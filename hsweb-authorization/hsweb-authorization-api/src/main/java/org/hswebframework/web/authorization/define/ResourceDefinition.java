@@ -8,6 +8,7 @@ import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hswebframework.web.authorization.annotation.Logical;
 import org.hswebframework.web.bean.FastBeanCopier;
+import org.hswebframework.web.i18n.LocaleUtils;
 
 import java.io.Serializable;
 import java.util.*;
@@ -27,6 +28,8 @@ public class ResourceDefinition {
 
     private List<String> group;
 
+    private Map<String, Map<String, String>> i18nMessages = new HashMap<>();
+
     @Setter(value = AccessLevel.PRIVATE)
     @JsonIgnore
     private volatile Set<String> actionIds;
@@ -35,11 +38,36 @@ public class ResourceDefinition {
 
     private Phased phased = Phased.before;
 
+    public final static List<Locale> supportLocale = new ArrayList<>();
+
+    static {
+        supportLocale.add(Locale.CHINESE);
+        supportLocale.add(Locale.ENGLISH);
+    }
+
+
+    private final static String resolvePermissionPrefix = "hswebframework.web.system.permission.";
+
     public static ResourceDefinition of(String id, String name) {
         ResourceDefinition definition = new ResourceDefinition();
         definition.setId(id);
         definition.setName(name);
+        definition.addI18nMessage(id, name);
         return definition;
+    }
+
+
+    private Map<String, Map<String, String>> buildI18nMessage(String id, String name) {
+        Map<String, String> nameMap = new HashMap<>();
+        Map<String, String> describeMap = new HashMap<>();
+        supportLocale.forEach(locale -> {
+            nameMap.put(locale.getLanguage(), LocaleUtils.resolveMessage(resolvePermissionPrefix + id, locale, name));
+            describeMap.put(locale.getLanguage(), LocaleUtils.resolveMessage(resolvePermissionPrefix + id, locale, name));
+
+        });
+        i18nMessages.put("name", nameMap);
+        i18nMessages.put("description", describeMap);
+        return i18nMessages;
     }
 
     public ResourceDefinition copy() {
@@ -52,7 +80,13 @@ public class ResourceDefinition {
         ResourceActionDefinition action = new ResourceActionDefinition();
         action.setId(id);
         action.setName(name);
+        action.addI18nMessage(id, name);
         return addAction(action);
+    }
+
+    public ResourceDefinition addI18nMessage(String id, String name) {
+        this.setI18nMessages(buildI18nMessage(id, name));
+        return this;
     }
 
     public synchronized ResourceDefinition addAction(ResourceActionDefinition action) {
@@ -60,7 +94,7 @@ public class ResourceDefinition {
         ResourceActionDefinition old = getAction(action.getId()).orElse(null);
         if (old != null) {
             old.getDataAccess().getDataAccessTypes()
-                    .addAll(action.getDataAccess().getDataAccessTypes());
+               .addAll(action.getDataAccess().getDataAccessTypes());
         }
         actions.add(action);
         return this;
@@ -68,8 +102,8 @@ public class ResourceDefinition {
 
     public Optional<ResourceActionDefinition> getAction(String action) {
         return actions.stream()
-                .filter(act -> act.getId().equalsIgnoreCase(action))
-                .findAny();
+                      .filter(act -> act.getId().equalsIgnoreCase(action))
+                      .findAny();
     }
 
     public Set<String> getActionIds() {
@@ -85,13 +119,13 @@ public class ResourceDefinition {
     @JsonIgnore
     public List<ResourceActionDefinition> getDataAccessAction() {
         return actions.stream()
-                .filter(act -> CollectionUtils.isNotEmpty(act.getDataAccess().getDataAccessTypes()))
-                .collect(Collectors.toList());
+                      .filter(act -> CollectionUtils.isNotEmpty(act.getDataAccess().getDataAccessTypes()))
+                      .collect(Collectors.toList());
     }
 
     public boolean hasDataAccessAction() {
         return actions.stream()
-                .anyMatch(act -> CollectionUtils.isNotEmpty(act.getDataAccess().getDataAccessTypes()));
+                      .anyMatch(act -> CollectionUtils.isNotEmpty(act.getDataAccess().getDataAccessTypes()));
     }
 
     public boolean hasAction(Collection<String> actions) {

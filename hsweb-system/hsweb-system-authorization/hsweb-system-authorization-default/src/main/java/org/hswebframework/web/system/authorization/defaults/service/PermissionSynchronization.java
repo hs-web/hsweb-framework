@@ -34,16 +34,6 @@ public class PermissionSynchronization implements CommandLineRunner {
 
     private final Map<String, List<OptionalField>> entityFieldsMapping = new HashMap<>();
 
-    private final static String resolvePermissionPrefix = "hswebframework.web.system.permission.";
-    private final static String resolveActionPrefix = "hswebframework.web.system.action.";
-
-    private final static List<Locale> supportLocale = new ArrayList<>();
-
-    static {
-        supportLocale.add(Locale.CHINESE);
-        supportLocale.add(Locale.ENGLISH);
-    }
-
     public PermissionSynchronization(ReactiveRepository<PermissionEntity, String> permissionRepository,
                                      AuthorizeDefinitionCustomizer customizer) {
         this.permissionRepository = permissionRepository;
@@ -89,10 +79,10 @@ public class PermissionSynchronization implements CommandLineRunner {
         PermissionEntity entity = old.getOrDefault(definition.getId(), PermissionEntity.builder()
                                                                                        .name(definition.getName())
                                                                                        .describe(definition.getDescription())
+                                                                                       .i18nMessages(definition.getI18nMessages())
                                                                                        .status((byte) 1)
                                                                                        .build());
         entity.setId(definition.getId());
-        entity.setI18nMessages(buildI18nPermissionMessage(definition));
 
         if (CollectionUtils.isEmpty(entity.getOptionalFields())) {
             entity.setOptionalFields(entityFieldsMapping.get(entity.getId()));
@@ -110,7 +100,7 @@ public class PermissionSynchronization implements CommandLineRunner {
                     .name(definitionAction.getName())
                     .describe(definitionAction.getName())
                     .build());
-            action.setI18nMessages(buildI18nActionMessage(definitionAction));
+            action.setI18nMessages(definitionAction.getI18nMessages());
             Map<String, Object> properties = Optional.ofNullable(action.getProperties()).orElse(new HashMap<>());
             @SuppressWarnings("all")
             Set<Object> types = (Set) Optional
@@ -134,17 +124,6 @@ public class PermissionSynchronization implements CommandLineRunner {
         return entity;
     }
 
-    private static Map<String, String> buildI18nActionMessage(ResourceActionDefinition definition) {
-        Map<String, String> i18nMessages = new HashMap<>();
-        supportLocale.forEach(locale -> i18nMessages.put(locale.getLanguage(), LocaleUtils.resolveMessage(resolveActionPrefix + definition.getId(), locale, definition.getName())));
-        return i18nMessages;
-    }
-
-    private static Map<String, String> buildI18nPermissionMessage(ResourceDefinition definition) {
-        Map<String, String> i18nMessages = new HashMap<>();
-        supportLocale.forEach(locale -> i18nMessages.put(locale.getLanguage(), LocaleUtils.resolveMessage(resolvePermissionPrefix + definition.getId(), locale, definition.getName())));
-        return i18nMessages;
-    }
 
     @Override
     public void run(String... args) throws Exception {
