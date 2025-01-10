@@ -93,7 +93,6 @@ public class DefaultBasicAuthorizeDefinition implements AopAuthorizeDefinition {
         resource.setName(ann.name());
         resource.setLogical(ann.logical());
         resource.setPhased(ann.phased());
-        resource.addI18nMessage(ann.id(),ann.name());
         resource.setDescription(String.join("\n", ann.description()));
         for (ResourceAction action : ann.actions()) {
             putAnnotation(resource, action);
@@ -108,7 +107,6 @@ public class DefaultBasicAuthorizeDefinition implements AopAuthorizeDefinition {
         ResourceActionDefinition actionDefinition = new ResourceActionDefinition();
         actionDefinition.setId(ann.id());
         actionDefinition.setName(ann.name());
-        actionDefinition.addI18nMessage(ann.id(), ann.name());
         actionDefinition.setDescription(String.join("\n", ann.description()));
         for (DataAccess dataAccess : ann.dataAccess()) {
             putAnnotation(actionDefinition, dataAccess);

@@ -52,12 +52,10 @@ public class ResourceDefinition {
         ResourceDefinition definition = new ResourceDefinition();
         definition.setId(id);
         definition.setName(name);
-        definition.addI18nMessage(id, name);
         return definition;
     }
 
-
-    private Map<String, Map<String, String>> buildI18nMessage(String id, String name) {
+    public Map<String, Map<String, String>> getI18nMessages() {
         Map<String, String> nameMap = new HashMap<>();
         Map<String, String> describeMap = new HashMap<>();
         supportLocale.forEach(locale -> {
@@ -80,13 +78,7 @@ public class ResourceDefinition {
         ResourceActionDefinition action = new ResourceActionDefinition();
         action.setId(id);
         action.setName(name);
-        action.addI18nMessage(id, name);
         return addAction(action);
-    }
-
-    public ResourceDefinition addI18nMessage(String id, String name) {
-        this.setI18nMessages(buildI18nMessage(id, name));
-        return this;
     }
 
     public synchronized ResourceDefinition addAction(ResourceActionDefinition action) {

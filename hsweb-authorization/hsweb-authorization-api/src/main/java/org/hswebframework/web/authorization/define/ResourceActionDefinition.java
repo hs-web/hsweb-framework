@@ -32,21 +32,18 @@ public class ResourceActionDefinition {
         return FastBeanCopier.copy(this, ResourceActionDefinition::new);
     }
 
-    private Map<String, Map<String, String>> buildI18nMessage(String id, String name) {
+
+    public Map<String, Map<String, String>> getI18nMessages() {
         Map<String, String> nameMap = new HashMap<>();
         Map<String, String> describeMap = new HashMap<>();
         supportLocale.forEach(locale -> {
             nameMap.put(locale.getLanguage(), LocaleUtils.resolveMessage(resolveActionPrefix + id, locale, name));
             describeMap.put(locale.getLanguage(), LocaleUtils.resolveMessage(resolveActionPrefix + id, locale, name));
+
         });
         i18nMessages.put("name", nameMap);
         i18nMessages.put("description", describeMap);
         return i18nMessages;
-    }
-
-    public ResourceActionDefinition addI18nMessage(String id, String name) {
-        this.setI18nMessages(buildI18nMessage(id, name));
-        return this;
     }
 
 }
