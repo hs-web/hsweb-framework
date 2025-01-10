@@ -8,10 +8,10 @@ import org.hswebframework.web.api.crud.entity.Entity;
 import org.hswebframework.web.authorization.define.*;
 import org.hswebframework.web.crud.web.reactive.ReactiveQueryController;
 import org.hswebframework.web.crud.web.reactive.ReactiveServiceQueryController;
+import org.hswebframework.web.i18n.LocaleUtils;
 import org.hswebframework.web.system.authorization.api.entity.ActionEntity;
 import org.hswebframework.web.system.authorization.api.entity.OptionalField;
 import org.hswebframework.web.system.authorization.api.entity.PermissionEntity;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.event.EventListener;
 import org.springframework.util.CollectionUtils;
@@ -33,6 +33,16 @@ public class PermissionSynchronization implements CommandLineRunner {
     private final MergedAuthorizeDefinition definition = new MergedAuthorizeDefinition();
 
     private final Map<String, List<OptionalField>> entityFieldsMapping = new HashMap<>();
+
+    private final static String resolvePermissionPrefix = "hswebframework.web.system.permission.";
+    private final static String resolveActionPrefix = "hswebframework.web.system.action.";
+
+    private final static List<Locale> supportLocale = new ArrayList<>();
+
+    static {
+        supportLocale.add(Locale.CHINESE);
+        supportLocale.add(Locale.ENGLISH);
+    }
 
     public PermissionSynchronization(ReactiveRepository<PermissionEntity, String> permissionRepository,
                                      AuthorizeDefinitionCustomizer customizer) {
@@ -75,14 +85,14 @@ public class PermissionSynchronization implements CommandLineRunner {
         }
     }
 
-    public static PermissionEntity convert(Map<String, PermissionEntity> old, ResourceDefinition definition,Map<String, List<OptionalField>>  entityFieldsMapping) {
+    public static PermissionEntity convert(Map<String, PermissionEntity> old, ResourceDefinition definition, Map<String, List<OptionalField>> entityFieldsMapping) {
         PermissionEntity entity = old.getOrDefault(definition.getId(), PermissionEntity.builder()
-                .name(definition.getName())
-                .describe(definition.getDescription())
-                .status((byte) 1)
-                .build());
+                                                                                       .name(definition.getName())
+                                                                                       .describe(definition.getDescription())
+                                                                                       .status((byte) 1)
+                                                                                       .build());
         entity.setId(definition.getId());
-
+        entity.setI18nMessages(buildI18nPermissionMessage(definition));
 
         if (CollectionUtils.isEmpty(entity.getOptionalFields())) {
             entity.setOptionalFields(entityFieldsMapping.get(entity.getId()));
@@ -100,22 +110,40 @@ public class PermissionSynchronization implements CommandLineRunner {
                     .name(definitionAction.getName())
                     .describe(definitionAction.getName())
                     .build());
+            action.setI18nMessages(buildI18nActionMessage(definitionAction));
             Map<String, Object> properties = Optional.ofNullable(action.getProperties()).orElse(new HashMap<>());
             @SuppressWarnings("all")
-            Set<Object> types = (Set)Optional.of(properties.computeIfAbsent("supportDataAccessTypes", t -> new HashSet<>()))
+            Set<Object> types = (Set) Optional
+                    .of(properties.computeIfAbsent("supportDataAccessTypes", t -> new HashSet<>()))
                     .filter(Collection.class::isInstance)
                     .map(Collection.class::cast)
                     .map(HashSet::new)
                     .orElseGet(HashSet::new);
 
-            types.addAll(definitionAction.getDataAccess().getDataAccessTypes().stream().map(DataAccessTypeDefinition::getId).collect(Collectors.toSet()));
+            types.addAll(definitionAction
+                                 .getDataAccess()
+                                 .getDataAccessTypes()
+                                 .stream()
+                                 .map(DataAccessTypeDefinition::getId)
+                                 .collect(Collectors.toSet()));
             action.setProperties(properties);
             oldAction.put(action.getAction(), action);
         }
         entity.setActions(new ArrayList<>(oldAction.values()));
 
-
         return entity;
+    }
+
+    private static Map<String, String> buildI18nActionMessage(ResourceActionDefinition definition) {
+        Map<String, String> i18nMessages = new HashMap<>();
+        supportLocale.forEach(locale -> i18nMessages.put(locale.getLanguage(), LocaleUtils.resolveMessage(resolveActionPrefix + definition.getId(), locale, definition.getName())));
+        return i18nMessages;
+    }
+
+    private static Map<String, String> buildI18nPermissionMessage(ResourceDefinition definition) {
+        Map<String, String> i18nMessages = new HashMap<>();
+        supportLocale.forEach(locale -> i18nMessages.put(locale.getLanguage(), LocaleUtils.resolveMessage(resolvePermissionPrefix + definition.getId(), locale, definition.getName())));
+        return i18nMessages;
     }
 
     @Override
@@ -130,8 +158,8 @@ public class PermissionSynchronization implements CommandLineRunner {
                 .fetch()
                 .collect(Collectors.toMap(PermissionEntity::getId, Function.identity()))
                 .flatMap(group -> Flux.fromIterable(definition.getResources())
-                        .map(d -> PermissionSynchronization.convert(group, d,entityFieldsMapping))
-                        .as(permissionRepository::save))
+                                      .map(d -> PermissionSynchronization.convert(group, d, entityFieldsMapping))
+                                      .as(permissionRepository::save))
                 .doOnError(err -> log.warn("sync permission error", err))
                 .subscribe(l -> {
                     log.info("sync permission success:{}", l);
