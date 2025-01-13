@@ -1,5 +1,6 @@
 package org.hswebframework.web.i18n;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.apache.commons.collections4.MapUtils;
 
 import java.util.Collections;
@@ -10,6 +11,7 @@ import java.util.Map;
  *
  * @author zhouhao
  * @since 4.0.18
+ * @see I18nSupportUtils
  */
 public interface MultipleI18nSupportEntity extends I18nSupportEntity {
 
@@ -24,6 +26,7 @@ public interface MultipleI18nSupportEntity extends I18nSupportEntity {
      *
      * @return 国际化信息
      */
+    @Schema(description = "国际化配置", example = "{\"name\":{\"zh\":\"名称\",\"en\":\"Name\"}}")
     Map<String, Map<String, String>> getI18nMessages();
 
     /**
