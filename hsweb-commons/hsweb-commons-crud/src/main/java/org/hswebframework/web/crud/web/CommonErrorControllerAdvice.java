@@ -59,66 +59,67 @@ public class CommonErrorControllerAdvice {
     public Mono<ResponseMessage<Object>> handleException(TransactionException e) {
         log.warn(e.getLocalizedMessage(), e);
         return LocaleUtils
-                .resolveMessageReactive("error.internal_server_error")
-                .map(msg -> ResponseMessage.error(500, "error." + e.getClass().getSimpleName(), msg));
+            .resolveMessageReactive("error.internal_server_error")
+            .map(msg -> ResponseMessage.error(500, "error." + e.getClass().getSimpleName(), msg));
     }
 
     @ExceptionHandler
     public Mono<ResponseEntity<ResponseMessage<Object>>> handleException(BusinessException e) {
         return LocaleUtils
-                .resolveThrowable(e,
-                                  (err, msg) -> ResponseMessage.error(err.getStatus(), err.getCode(), msg))
-                .map(msg -> {
-                    HttpStatus status = HttpStatus.resolve(msg.getStatus());
-                    return ResponseEntity
-                            .status(status == null ? HttpStatus.BAD_REQUEST : status)
-                            .body(msg);
-                });
+            .resolveThrowable(e,
+                              (err, msg) -> ResponseMessage.error(err.getStatus(), err.getCode(), msg))
+            .map(msg -> {
+                HttpStatus status = HttpStatus.resolve(msg.getStatus());
+                return ResponseEntity
+                    .status(status == null ? HttpStatus.BAD_REQUEST : status)
+                    .body(msg);
+            });
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Mono<ResponseMessage<Object>> handleException(UnsupportedOperationException e) {
+        log.warn(e.getLocalizedMessage(), e);
         return LocaleUtils
-                .resolveThrowable(e, (err, msg) -> (ResponseMessage.error(400, CodeConstants.Error.unsupported, msg)))
-                .doOnEach(ReactiveLogger.onNext(r -> log.warn(e.getLocalizedMessage(), e)));
+            .resolveThrowable(e, (err, msg) ->
+                (ResponseMessage.error(400, CodeConstants.Error.unsupported, msg)));
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public Mono<ResponseMessage<TokenState>> handleException(UnAuthorizedException e) {
         return LocaleUtils
-                .resolveThrowable(e, (err, msg) -> (ResponseMessage
-                        .<TokenState>error(401, CodeConstants.Error.unauthorized, msg)
-                        .result(e.getState())));
+            .resolveThrowable(e, (err, msg) -> (ResponseMessage
+                .<TokenState>error(401, CodeConstants.Error.unauthorized, msg)
+                .result(e.getState())));
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public Mono<ResponseMessage<Object>> handleException(AccessDenyException e) {
         return LocaleUtils
-                .resolveThrowable(e, (err, msg) -> ResponseMessage.error(403, e.getCode(), msg))
-                ;
+            .resolveThrowable(e, (err, msg) -> ResponseMessage.error(403, e.getCode(), msg))
+            ;
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public Mono<ResponseMessage<Object>> handleException(NotFoundException e) {
         return LocaleUtils
-                .resolveThrowable(e, (err, msg) -> ResponseMessage.error(404, CodeConstants.Error.not_found, msg))
-                ;
+            .resolveThrowable(e, (err, msg) -> ResponseMessage.error(404, CodeConstants.Error.not_found, msg))
+            ;
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Mono<ResponseMessage<List<ValidationException.Detail>>> handleException(ValidationException e) {
         return LocaleUtils
-                .currentReactive()
-                .map(locale -> ResponseMessage
-                        .<List<ValidationException.Detail>>error(400,
-                                                                 CodeConstants.Error.illegal_argument,
-                                                                 e.getLocalizedMessage(locale))
-                        .result(e.getDetails(locale)));
+            .currentReactive()
+            .map(locale -> ResponseMessage
+                .<List<ValidationException.Detail>>error(400,
+                                                         CodeConstants.Error.illegal_argument,
+                                                         e.getLocalizedMessage(locale))
+                .result(e.getDetails(locale)));
     }
 
     @ExceptionHandler
@@ -162,10 +163,10 @@ public class CommonErrorControllerAdvice {
             message = CodeConstants.Error.illegal_argument;
         }
         List<ValidationException.Detail> details = result
-                .getFieldErrors()
-                .stream()
-                .map(err -> new ValidationException.Detail(err.getField(), err.getDefaultMessage(), null))
-                .collect(Collectors.toList());
+            .getFieldErrors()
+            .stream()
+            .map(err -> new ValidationException.Detail(err.getField(), err.getDefaultMessage(), null))
+            .collect(Collectors.toList());
         return handleException(new ValidationException(message, details));
     }
 
@@ -179,8 +180,8 @@ public class CommonErrorControllerAdvice {
     @ResponseStatus(HttpStatus.GATEWAY_TIMEOUT)
     public Mono<ResponseMessage<Object>> handleException(TimeoutException e) {
         return LocaleUtils
-                .resolveThrowable(e, (err, msg) -> ResponseMessage.error(504, CodeConstants.Error.timeout, msg))
-                .doOnEach(ReactiveLogger.onNext(r -> log.warn(e.getLocalizedMessage(), e)));
+            .resolveThrowable(e, (err, msg) -> ResponseMessage.error(504, CodeConstants.Error.timeout, msg))
+            .doOnEach(ReactiveLogger.onNext(r -> log.warn(e.getLocalizedMessage(), e)));
     }
 
     @ExceptionHandler
@@ -188,16 +189,17 @@ public class CommonErrorControllerAdvice {
     @Order
     public Mono<ResponseMessage<Object>> handleException(RuntimeException e) {
         return LocaleUtils
-                .resolveThrowable(e, (err, msg) -> ResponseMessage.error(msg))
-                .doOnEach(ReactiveLogger.onNext(r -> log.warn(e.getLocalizedMessage(), e)));
+            .resolveThrowable(e, (err, msg) -> {
+                log.warn(msg, e);
+                return ResponseMessage.error(msg);
+            });
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Mono<ResponseMessage<Object>> handleException(NullPointerException e) {
-
-        return Mono.just(ResponseMessage.error(e.getMessage()))
-                   .doOnEach(ReactiveLogger.onNext(r -> log.warn(e.getLocalizedMessage(), e)));
+        log.warn(e.getLocalizedMessage(), e);
+        return Mono.just(ResponseMessage.error(e.getMessage()));
     }
 
     @ExceptionHandler
@@ -205,51 +207,53 @@ public class CommonErrorControllerAdvice {
     public Mono<ResponseMessage<Object>> handleException(IllegalArgumentException e) {
 
         return LocaleUtils
-                .resolveThrowable(e, (err, msg) -> ResponseMessage.error(400, CodeConstants.Error.illegal_argument, msg))
-                .doOnEach(ReactiveLogger.onNext(r -> log.warn(e.getLocalizedMessage(), e)))
-                ;
+            .resolveThrowable(e, (err, msg) -> {
+                log.warn(msg, e);
+                return ResponseMessage.error(400, CodeConstants.Error.illegal_argument, msg);
+            });
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Mono<ResponseMessage<Object>> handleException(AuthenticationException e) {
         return LocaleUtils
-                .resolveThrowable(e, (err, msg) -> ResponseMessage.error(400, err.getCode(), msg))
-                ;
+            .resolveThrowable(e, (err, msg) -> ResponseMessage.error(400, err.getCode(), msg));
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
     public Mono<ResponseMessage<Object>> handleException(UnsupportedMediaTypeStatusException e) {
+        log.warn(e.getLocalizedMessage(), e);
+
         return LocaleUtils
-                .resolveMessageReactive("error.unsupported_media_type")
-                .map(msg -> ResponseMessage
-                        .error(415, "unsupported_media_type", msg)
-                        .result(e.getSupportedMediaTypes()))
-                .doOnEach(ReactiveLogger.onNext(r -> log.warn(e.getLocalizedMessage(), e)));
+            .resolveMessageReactive("error.unsupported_media_type")
+            .map(msg -> ResponseMessage
+                .error(415, "unsupported_media_type", msg)
+                .result(e.getSupportedMediaTypes()));
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
     public Mono<ResponseMessage<Object>> handleException(NotAcceptableStatusException e) {
+        log.warn(e.getLocalizedMessage(), e);
 
         return LocaleUtils
-                .resolveMessageReactive("error.not_acceptable_media_type")
-                .map(msg -> ResponseMessage
-                        .error(406, "not_acceptable_media_type", msg)
-                        .result(e.getSupportedMediaTypes()))
-                .doOnEach(ReactiveLogger.onNext(r -> log.warn(e.getLocalizedMessage(), e)));
+            .resolveMessageReactive("error.not_acceptable_media_type")
+            .map(msg -> ResponseMessage
+                .error(406, "not_acceptable_media_type", msg)
+                .result(e.getSupportedMediaTypes()));
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
     public Mono<ResponseMessage<Object>> handleException(MethodNotAllowedException e) {
+        log.warn(e.getLocalizedMessage(), e);
+
         return LocaleUtils
-                .resolveMessageReactive("error.method_not_allowed")
-                .map(msg -> ResponseMessage
-                        .error(406, "method_not_allowed", msg)
-                        .result(e.getSupportedMethods()))
-                .doOnEach(ReactiveLogger.onNext(r -> log.warn(e.getLocalizedMessage(), e)));
+            .resolveMessageReactive("error.method_not_allowed")
+            .map(msg -> ResponseMessage
+                .error(406, "method_not_allowed", msg)
+                .result(e.getSupportedMethods()));
     }
 
 
@@ -266,12 +270,12 @@ public class CommonErrorControllerAdvice {
         } while (exception != null && exception != e);
         if (exception == null) {
             return Mono.just(
-                    ResponseMessage.error(400, CodeConstants.Error.illegal_argument, e.getMessage())
+                ResponseMessage.error(400, CodeConstants.Error.illegal_argument, e.getMessage())
             );
         }
         return LocaleUtils
-                .resolveThrowable(exception,
-                                  (err, msg) -> ResponseMessage.error(400, CodeConstants.Error.illegal_argument, msg));
+            .resolveThrowable(exception,
+                              (err, msg) -> ResponseMessage.error(400, CodeConstants.Error.illegal_argument, msg));
     }
 
     @ExceptionHandler

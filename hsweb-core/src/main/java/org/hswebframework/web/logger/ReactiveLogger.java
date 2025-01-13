@@ -1,5 +1,6 @@
 package org.hswebframework.web.logger;
 
+import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.web.utils.CollectionUtils;
 import org.slf4j.MDC;
@@ -42,7 +43,7 @@ public class ReactiveLogger {
         return ctx -> {
             Optional<Map<String, String>> maybeContextMap = ctx.getOrEmpty(CONTEXT_KEY);
             if (maybeContextMap.isPresent()) {
-                maybeContextMap.get().putAll(context);
+                maybeContextMap.get().putAll(Maps.filterValues(context,Objects::nonNull));
                 return ctx;
             } else {
                 return ctx.put(CONTEXT_KEY, new ConcurrentHashMap<>(context));
