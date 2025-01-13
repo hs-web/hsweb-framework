@@ -34,15 +34,17 @@ public class ResourceActionDefinition {
 
 
     public Map<String, Map<String, String>> getI18nMessages() {
-        Map<String, String> nameMap = new HashMap<>();
-        Map<String, String> describeMap = new HashMap<>();
-        supportLocale.forEach(locale -> {
-            nameMap.put(locale.getLanguage(), LocaleUtils.resolveMessage(resolveActionPrefix + id, locale, name));
-            describeMap.put(locale.getLanguage(), LocaleUtils.resolveMessage(resolveActionPrefix + id, locale, name));
+        if (org.springframework.util.CollectionUtils.isEmpty(getI18nMessages())) {
+            Map<String, String> nameMap = new HashMap<>();
+            Map<String, String> describeMap = new HashMap<>();
+            supportLocale.forEach(locale -> {
+                nameMap.put(locale.getLanguage(), LocaleUtils.resolveMessage(resolveActionPrefix + id, locale, name));
+                describeMap.put(locale.getLanguage(), LocaleUtils.resolveMessage(resolveActionPrefix + id, locale, name));
 
-        });
-        i18nMessages.put("name", nameMap);
-        i18nMessages.put("description", describeMap);
+            });
+            i18nMessages.put("name", nameMap);
+            i18nMessages.put("description", describeMap);
+        }
         return i18nMessages;
     }
 
