@@ -39,7 +39,7 @@ public class ResourceActionDefinition implements MultipleI18nSupportEntity {
         if (org.springframework.util.CollectionUtils.isEmpty(i18nMessages)) {
             this.i18nMessages = I18nSupportUtils
                     .putI18nMessages(
-                            resolveActionPrefix + this.id, "text", supportLocale, null, this.i18nMessages
+                            resolveActionPrefix + this.id, "name", supportLocale, null, this.i18nMessages
                     );
         }
         return i18nMessages;

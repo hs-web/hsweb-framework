@@ -59,7 +59,7 @@ public class ResourceDefinition implements MultipleI18nSupportEntity {
         if (org.springframework.util.CollectionUtils.isEmpty(i18nMessages)) {
             this.i18nMessages = I18nSupportUtils
                     .putI18nMessages(
-                            resolvePermissionPrefix + this.id, "text", supportLocale, null, this.i18nMessages
+                            resolvePermissionPrefix + this.id, "name", supportLocale, null, this.i18nMessages
                     );
         }
         return i18nMessages;
