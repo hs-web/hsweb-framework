@@ -4,9 +4,12 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.hswebframework.web.bean.FastBeanCopier;
-import org.hswebframework.web.i18n.LocaleUtils;
+import org.hswebframework.web.i18n.I18nSupportUtils;
+import org.hswebframework.web.i18n.MultipleI18nSupportEntity;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import static org.hswebframework.web.authorization.define.ResourceDefinition.supportLocale;
@@ -14,14 +17,14 @@ import static org.hswebframework.web.authorization.define.ResourceDefinition.sup
 @Getter
 @Setter
 @EqualsAndHashCode(of = "id")
-public class ResourceActionDefinition {
+public class ResourceActionDefinition implements MultipleI18nSupportEntity {
     private String id;
 
     private String name;
 
     private String description;
 
-    private Map<String, Map<String, String>> i18nMessages = new HashMap<>();
+    private Map<String, Map<String, String>> i18nMessages;
 
     private DataAccessDefinition dataAccess = new DataAccessDefinition();
 
@@ -32,20 +35,13 @@ public class ResourceActionDefinition {
         return FastBeanCopier.copy(this, ResourceActionDefinition::new);
     }
 
-
     public Map<String, Map<String, String>> getI18nMessages() {
-        if (org.springframework.util.CollectionUtils.isEmpty(getI18nMessages())) {
-            Map<String, String> nameMap = new HashMap<>();
-            Map<String, String> describeMap = new HashMap<>();
-            supportLocale.forEach(locale -> {
-                nameMap.put(locale.getLanguage(), LocaleUtils.resolveMessage(resolveActionPrefix + id, locale, name));
-                describeMap.put(locale.getLanguage(), LocaleUtils.resolveMessage(resolveActionPrefix + id, locale, name));
-
-            });
-            i18nMessages.put("name", nameMap);
-            i18nMessages.put("description", describeMap);
+        if (org.springframework.util.CollectionUtils.isEmpty(i18nMessages)) {
+            this.i18nMessages = I18nSupportUtils
+                    .putI18nMessages(
+                            resolveActionPrefix + this.id, "text", supportLocale, null, this.i18nMessages
+                    );
         }
         return i18nMessages;
     }
-
 }

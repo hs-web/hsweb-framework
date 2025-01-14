@@ -8,16 +8,16 @@ import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hswebframework.web.authorization.annotation.Logical;
 import org.hswebframework.web.bean.FastBeanCopier;
-import org.hswebframework.web.i18n.LocaleUtils;
+import org.hswebframework.web.i18n.I18nSupportUtils;
+import org.hswebframework.web.i18n.MultipleI18nSupportEntity;
 
-import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Getter
 @Setter
 @EqualsAndHashCode(of = "id")
-public class ResourceDefinition {
+public class ResourceDefinition implements MultipleI18nSupportEntity {
     private String id;
 
     private String name;
@@ -28,7 +28,7 @@ public class ResourceDefinition {
 
     private List<String> group;
 
-    private Map<String, Map<String, String>> i18nMessages = new HashMap<>();
+    private Map<String, Map<String, String>> i18nMessages;
 
     @Setter(value = AccessLevel.PRIVATE)
     @JsonIgnore
@@ -56,16 +56,11 @@ public class ResourceDefinition {
     }
 
     public Map<String, Map<String, String>> getI18nMessages() {
-        if (org.springframework.util.CollectionUtils.isEmpty(getI18nMessages())) {
-            Map<String, String> nameMap = new HashMap<>();
-            Map<String, String> describeMap = new HashMap<>();
-            supportLocale.forEach(locale -> {
-                nameMap.put(locale.getLanguage(), LocaleUtils.resolveMessage(resolvePermissionPrefix + id, locale, name));
-                describeMap.put(locale.getLanguage(), LocaleUtils.resolveMessage(resolvePermissionPrefix + id, locale, name));
-
-            });
-            i18nMessages.put("name", nameMap);
-            i18nMessages.put("description", describeMap);
+        if (org.springframework.util.CollectionUtils.isEmpty(i18nMessages)) {
+            this.i18nMessages = I18nSupportUtils
+                    .putI18nMessages(
+                            resolvePermissionPrefix + this.id, "text", supportLocale, null, this.i18nMessages
+                    );
         }
         return i18nMessages;
     }
