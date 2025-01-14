@@ -1,5 +1,6 @@
 package org.hswebframework.web.i18n;
 
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.Collection;
@@ -18,8 +19,13 @@ public class I18nSupportUtils {
             container = new HashMap<>();
         }
 
-        container.compute(property,
-                          (p, c) -> putI18nMessages(i18nKey, locales, defaultMsg, c));
+        container.compute(
+            property,
+            (p, c) -> {
+                Map<String, String> msg = putI18nMessages(i18nKey, locales, defaultMsg, c);
+                //为空不存储
+                return MapUtils.isEmpty(msg) ? null : msg;
+            });
 
         return container;
     }
