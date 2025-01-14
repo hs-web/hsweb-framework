@@ -104,7 +104,7 @@ public class DictionaryItemEntity extends GenericTreeSortSupportEntity<String>
     private Map<String, Map<String, String>> i18nMessages;
 
     public String getI18nText() {
-        return getI18nMessage("text", this.name);
+        return getI18nMessage("text", this.text);
     }
 
     /**
