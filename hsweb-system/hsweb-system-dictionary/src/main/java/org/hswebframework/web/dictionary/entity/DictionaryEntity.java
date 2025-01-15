@@ -30,6 +30,7 @@ import org.hswebframework.web.crud.generator.Generators;
 import org.hswebframework.web.dict.DictDefine;
 import org.hswebframework.web.dict.defaults.DefaultDictDefine;
 import org.hswebframework.web.i18n.I18nSupportUtils;
+import org.hswebframework.web.i18n.LocaleUtils;
 import org.hswebframework.web.i18n.MultipleI18nSupportEntity;
 import org.hswebframework.web.validator.CreateGroup;
 
@@ -94,6 +95,10 @@ public class DictionaryEntity extends GenericEntity<String> implements RecordCre
 
     public String getI18nDescribe() {
         return getI18nMessage("describe", this.describe);
+    }
+
+    public void putI18nName(String i18nKey) {
+        putI18nName(i18nKey, LocaleUtils.getSupportLocales());
     }
 
     public void putI18nName(String i18nKey,
