@@ -18,7 +18,7 @@
 
 package org.hswebframework.web.authorization;
 
-import org.apache.commons.collections4.CollectionUtils;
+import com.google.common.collect.Lists;
 import org.hswebframework.web.authorization.simple.SimpleAuthentication;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -26,7 +26,6 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * 响应式权限保持器,用于响应式方式获取当前登录用户的权限信息.
@@ -47,24 +46,10 @@ public final class ReactiveAuthenticationHolder {
     private static final List<ReactiveAuthenticationSupplier> suppliers = new CopyOnWriteArrayList<>();
 
     private static Mono<Authentication> get(Function<ReactiveAuthenticationSupplier, Mono<Authentication>> function) {
-
         return Flux
-                .merge(suppliers
-                               .stream()
-                               .map(function)
-                               .collect(Collectors.toList()))
-                .collectList()
-                .filter(CollectionUtils::isNotEmpty)
-                .map(all -> {
-                    if (all.size() == 1) {
-                        return all.get(0);
-                    }
-                    SimpleAuthentication authentication = new SimpleAuthentication();
-                    for (Authentication auth : all) {
-                        authentication.merge(auth);
-                    }
-                    return authentication;
-                });
+            .merge(Lists.transform(suppliers, function::apply))
+            .collect(AuthenticationMerging::new, AuthenticationMerging::merge)
+            .mapNotNull(AuthenticationMerging::get);
     }
 
     /**
@@ -97,6 +82,30 @@ public final class ReactiveAuthenticationHolder {
     public static void setSupplier(ReactiveAuthenticationSupplier supplier) {
         suppliers.clear();
         suppliers.add(supplier);
+    }
+
+
+    static class AuthenticationMerging {
+
+        private Authentication auth;
+        private int count;
+
+        public synchronized void merge(Authentication auth) {
+            if (this.auth == null || this.auth == auth) {
+                this.auth = auth;
+            } else {
+                if (count++ == 0) {
+                    SimpleAuthentication newAuth = new SimpleAuthentication();
+                    newAuth.merge(this.auth);
+                    this.auth = newAuth;
+                }
+                this.auth.merge(auth);
+            }
+        }
+
+        private Authentication get() {
+            return auth;
+        }
     }
 
 }
