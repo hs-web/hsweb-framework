@@ -10,6 +10,8 @@ import org.hswebframework.web.authorization.annotation.Authorize;
 import org.hswebframework.web.authorization.annotation.QueryAction;
 import org.hswebframework.web.crud.service.ReactiveCrudService;
 import org.hswebframework.web.exception.NotFoundException;
+import org.hswebframework.web.exception.TraceSourceException;
+import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,12 +39,12 @@ public interface ReactiveServiceQueryController<E, K> {
     @GetMapping("/_query/no-paging")
     @QueryAction
     @QueryNoPagingOperation(summary = "使用GET方式分页动态查询(不返回总数)",
-            description = "此操作不返回分页总数,如果需要获取全部数据,请设置参数paging=false")
+        description = "此操作不返回分页总数,如果需要获取全部数据,请设置参数paging=false")
     default Flux<E> query(@Parameter(hidden = true) QueryParamEntity query) {
         return getService()
-                .createQuery()
-                .setParam(query)
-                .fetch();
+            .createQuery()
+            .setParam(query)
+            .fetch();
     }
 
     /**
@@ -73,7 +75,7 @@ public interface ReactiveServiceQueryController<E, K> {
     @PostMapping("/_query/no-paging")
     @QueryAction
     @Operation(summary = "使用POST方式分页动态查询(不返回总数)",
-            description = "此操作不返回分页总数,如果需要获取全部数据,请设置参数paging=false")
+        description = "此操作不返回分页总数,如果需要获取全部数据,请设置参数paging=false")
     default Flux<E> query(@RequestBody Mono<QueryParamEntity> query) {
         return query.flatMapMany(this::query);
     }
@@ -95,11 +97,11 @@ public interface ReactiveServiceQueryController<E, K> {
     default Mono<PagerResult<E>> queryPager(@Parameter(hidden = true) QueryParamEntity query) {
         if (query.getTotal() != null) {
             return getService()
-                    .createQuery()
-                    .setParam(query.rePaging(query.getTotal()))
-                    .fetch()
-                    .collectList()
-                    .map(list -> PagerResult.of(query.getTotal(), list, query));
+                .createQuery()
+                .setParam(query.rePaging(query.getTotal()))
+                .fetch()
+                .collectList()
+                .map(list -> PagerResult.of(query.getTotal(), list, query));
         }
         return getService().queryPager(query);
 
@@ -195,11 +197,11 @@ public interface ReactiveServiceQueryController<E, K> {
     @Operation(summary = "使用POST方式判断数据是否存在")
     default Mono<Boolean> exists(@RequestBody Mono<QueryParamEntity> query) {
         return query
-                .flatMap(param -> getService()
-                        .createQuery()
-                        .setParam(param)
-                        .fetchOne()
-                        .hasElement());
+            .flatMap(param -> getService()
+                .createQuery()
+                .setParam(param)
+                .fetchOne()
+                .hasElement());
     }
 
     /**
@@ -239,8 +241,11 @@ public interface ReactiveServiceQueryController<E, K> {
     @Operation(summary = "根据ID查询")
     default Mono<E> getById(@PathVariable K id) {
         return getService()
-                .findById(id)
-                .switchIfEmpty(Mono.error(NotFoundException.NoStackTrace::new));
+            .findById(id)
+            .switchIfEmpty(Mono.error(() -> new NotFoundException
+                .NoStackTrace("error.data.find.not_found", id)
+                .withSource(ClassUtils.getUserClass(this).getCanonicalName() + ".getById", id)));
     }
+
 
 }
