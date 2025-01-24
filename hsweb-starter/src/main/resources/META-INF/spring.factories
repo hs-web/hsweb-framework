@@ -1,0 +1,2 @@
+org.springframework.boot.SpringBootExceptionReporter=\
+org.hswebframework.web.starter.reporter.GenericExceptionReport
