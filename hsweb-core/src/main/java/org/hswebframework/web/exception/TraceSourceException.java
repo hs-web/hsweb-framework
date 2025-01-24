@@ -115,12 +115,22 @@ public class TraceSourceException extends RuntimeException {
         if (source == null && operation == null) {
             return Mono::error;
         }
-        return err -> {
-            err.addSuppressed(
-                new StacklessTraceSourceException().withSource(operation, source)
-            );
-            return Mono.error(err);
-        };
+        return err -> Mono.error(transform(err, operation, source));
+    }
+
+    /**
+     * 填充溯源信息到异常中
+     *
+     * @param error     异常
+     * @param operation 操作名称
+     * @param source    源数据
+     * @return 填充后的异常
+     */
+    public static Throwable transform(Throwable error, String operation, Object source) {
+        error.addSuppressed(
+            new StacklessTraceSourceException().withSource(operation, source)
+        );
+        return error;
     }
 
     public static Object tryGetSource(Throwable err) {
@@ -164,9 +174,13 @@ public class TraceSourceException extends RuntimeException {
         return null;
     }
 
+    protected String getExceptionName() {
+        return this.getClass().getCanonicalName();
+    }
+
     @Override
     public String toString() {
-        String className = this.getClass().getCanonicalName();
+        String className = getExceptionName();
         String message = this.getLocalizedMessage();
         String operation = this.operation;
         String source = Optional
