@@ -2,6 +2,7 @@ package org.hswebframework.web.exception;
 
 import org.hswebframework.web.i18n.LocaleUtils;
 import org.springframework.util.StringUtils;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.context.Context;
 import reactor.util.context.ContextView;
@@ -72,9 +73,10 @@ public class TraceSourceException extends RuntimeException {
      * 深度溯源上下文,用来标识是否是深度溯源的异常.开启深度追踪后,会创建新的{@link  TraceSourceException}对象.
      *
      * @return 上下文
-     * @see reactor.core.publisher.Flux#contextWrite(ContextView)
+     * @see Flux#contextWrite(ContextView)
      * @see Mono#contextWrite(ContextView)
      */
+    @Deprecated
     public static Context deepTraceContext() {
         return deepTraceContext;
     }
@@ -106,7 +108,7 @@ public class TraceSourceException extends RuntimeException {
      * @param source    源
      * @param <T>       泛型
      * @return 转换器
-     * @see reactor.core.publisher.Flux#onErrorResume(Function)
+     * @see Flux#onErrorResume(Function)
      * @see Mono#onErrorResume(Function)
      */
     public static <T> Function<Throwable, Mono<T>> transfer(String operation, Object source) {
@@ -114,30 +116,50 @@ public class TraceSourceException extends RuntimeException {
             return Mono::error;
         }
         return err -> {
-            if (err instanceof TraceSourceException) {
-                return Mono
-                    .deferContextual(ctx -> {
-                        if (ctx.hasKey(deepTraceKey)) {
-                            return Mono.error(new TraceSourceException(err).withSource(operation, source));
-                        } else {
-                            return Mono.error(((TraceSourceException) err).withSource(operation, source));
-                        }
-                    });
-            }
-            return Mono.error(new TraceSourceException(err).withSource(operation, source));
+            err.addSuppressed(
+                new StacklessTraceSourceException().withSource(operation, source)
+            );
+            return Mono.error(err);
         };
     }
 
     public static Object tryGetSource(Throwable err) {
+
         if (err instanceof TraceSourceException) {
             return ((TraceSourceException) err).getSource();
         }
+
+        for (Throwable throwable : err.getSuppressed()) {
+            Object source = tryGetSource(throwable);
+            if (source != null) {
+                return source;
+            }
+        }
+
+        Throwable cause = err.getCause();
+
+        if (cause != null) {
+            return tryGetSource(cause);
+        }
+
         return null;
     }
 
     public static String tryGetOperation(Throwable err) {
         if (err instanceof TraceSourceException) {
             return ((TraceSourceException) err).getOperation();
+        }
+
+        for (Throwable throwable : err.getSuppressed()) {
+            String operation = tryGetOperation(throwable);
+            if (operation != null) {
+                return operation;
+            }
+        }
+
+        Throwable cause = err.getCause();
+        if (cause != null) {
+            return tryGetOperation(cause);
         }
         return null;
     }
@@ -186,5 +208,28 @@ public class TraceSourceException extends RuntimeException {
                     sink.next(opt);
                 }
             });
+    }
+
+    public static class StacklessTraceSourceException extends TraceSourceException {
+        public StacklessTraceSourceException() {
+            super();
+        }
+
+        public StacklessTraceSourceException(String message) {
+            super(message);
+        }
+
+        public StacklessTraceSourceException(Throwable e) {
+            super(e.getMessage(), e);
+        }
+
+        public StacklessTraceSourceException(String message, Throwable e) {
+            super(message, e);
+        }
+
+        @Override
+        public synchronized Throwable fillInStackTrace() {
+            return this;
+        }
     }
 }
