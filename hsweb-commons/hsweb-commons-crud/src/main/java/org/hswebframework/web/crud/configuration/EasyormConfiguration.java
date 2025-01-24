@@ -28,6 +28,7 @@ import org.hswebframework.web.crud.generator.*;
 import org.hswebframework.web.crud.query.DefaultQueryHelper;
 import org.hswebframework.web.crud.query.QueryHelper;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;

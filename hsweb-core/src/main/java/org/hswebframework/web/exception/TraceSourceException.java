@@ -36,7 +36,7 @@ public class TraceSourceException extends RuntimeException {
     }
 
     public TraceSourceException(Throwable e) {
-        super(e.getMessage(),e);
+        super(e.getMessage(), e);
     }
 
     public TraceSourceException(String message, Throwable e) {
@@ -116,15 +116,15 @@ public class TraceSourceException extends RuntimeException {
         return err -> {
             if (err instanceof TraceSourceException) {
                 return Mono
-                        .deferContextual(ctx -> {
-                            if (ctx.hasKey(deepTraceKey)) {
-                                return Mono.error(new TraceSourceException(err).withSource(operation,source));
-                            } else {
-                                return Mono.error(((TraceSourceException) err).withSource(operation,source));
-                            }
-                        });
+                    .deferContextual(ctx -> {
+                        if (ctx.hasKey(deepTraceKey)) {
+                            return Mono.error(new TraceSourceException(err).withSource(operation, source));
+                        } else {
+                            return Mono.error(((TraceSourceException) err).withSource(operation, source));
+                        }
+                    });
             }
-            return Mono.error(new TraceSourceException(err).withSource(operation,source));
+            return Mono.error(new TraceSourceException(err).withSource(operation, source));
         };
     }
 
@@ -142,6 +142,36 @@ public class TraceSourceException extends RuntimeException {
         return null;
     }
 
+    @Override
+    public String toString() {
+        String className = this.getClass().getCanonicalName();
+        String message = this.getLocalizedMessage();
+        String operation = this.operation;
+        String source = Optional
+            .ofNullable(this.source)
+            .map(Object::toString)
+            .orElse(null);
+
+        StringBuilder builder = new StringBuilder(
+            className.length()
+                + (message == null ? 0 : message.length())
+                + (operation == null ? 0 : operation.length())
+                + (source == null ? 0 : source.length()));
+
+        builder.append(className);
+        if (message != null) {
+            builder.append(':').append(message);
+        }
+        if (operation != null) {
+            builder.append("\n\t[Operation] ⇢ ").append(operation);
+        }
+        if (source != null) {
+            builder.append("\n\t   [Source] ⇢ ").append(source);
+        }
+
+        return builder.toString();
+    }
+
     public static String tryGetOperationLocalized(Throwable err, Locale locale) {
         String opt = tryGetOperation(err);
         return StringUtils.hasText(opt) ? LocaleUtils.resolveMessage(opt, locale, opt) : opt;
@@ -149,12 +179,12 @@ public class TraceSourceException extends RuntimeException {
 
     public static Mono<String> tryGetOperationLocalizedReactive(Throwable err) {
         return LocaleUtils
-                .currentReactive()
-                .handle((locale, sink) -> {
-                    String opt = tryGetOperationLocalized(err, locale);
-                    if (opt != null) {
-                        sink.next(opt);
-                    }
-                });
+            .currentReactive()
+            .handle((locale, sink) -> {
+                String opt = tryGetOperationLocalized(err, locale);
+                if (opt != null) {
+                    sink.next(opt);
+                }
+            });
     }
 }
