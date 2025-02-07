@@ -55,6 +55,9 @@ public class Source {
 
     private String[] arr6 = {"1", "2"};
 
+    private int[] arr7={1,2};
+    private int[] arr8={1,2};
+
     private Color[] colors ={Color.BLUE,Color.RED};
 
     private String source;
