@@ -3,18 +3,11 @@ package org.hswebframework.web.dict.defaults;
 import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.utils.StringUtils;
 import org.hswebframework.web.dict.*;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.springframework.core.io.support.ResourcePatternResolver;
-import org.springframework.core.type.classreading.MetadataReader;
-import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
-import org.springframework.util.ReflectionUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.lang.reflect.Field;
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author zhouhao
@@ -22,7 +15,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 public class DefaultDictDefineRepository implements DictDefineRepository {
-    protected static final Map<String, DictDefine> parsedDict = new HashMap<>();
+    protected static final Map<String, DictDefine> parsedDict = new ConcurrentHashMap<>();
 
     public static void registerDefine(DictDefine define) {
         if (define == null) {
@@ -38,13 +31,18 @@ public class DefaultDictDefineRepository implements DictDefineRepository {
         if (!type.isEnum()) {
             throw new UnsupportedOperationException("unsupported type " + type);
         }
-        List<EnumDict<?>> items = new ArrayList<>();
-        for (Object enumConstant : type.getEnumConstants()) {
+
+        Object[] constants = type.getEnumConstants();
+        List<EnumDict<?>> items = new ArrayList<>(constants.length);
+
+        for (Object enumConstant : constants) {
             if (enumConstant instanceof EnumDict) {
                 items.add((EnumDict) enumConstant);
             } else {
                 Enum e = ((Enum) enumConstant);
-                items.add(DefaultItemDefine.builder()
+                items.add(
+                    DefaultItemDefine
+                        .builder()
                         .value(e.name())
                         .text(e.name())
                         .ordinal(e.ordinal())
