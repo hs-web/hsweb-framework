@@ -5,9 +5,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hswebframework.web.dict.ItemDefine;
+import org.hswebframework.web.i18n.MultipleI18nSupportEntity;
 
-import java.io.*;
-import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 /**
  * @author zhouhao
@@ -17,12 +18,17 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class DefaultItemDefine implements ItemDefine {
+public class DefaultItemDefine implements ItemDefine, MultipleI18nSupportEntity {
     private static final long serialVersionUID = 1L;
-
+    
     private String text;
     private String value;
     private String comments;
     private int ordinal;
-
+    private Map<String, Map<String, String>> i18nMessages;
+    
+    @Override
+    public String getI18nMessage(Locale locale) {
+        return getI18nMessage("text", locale, text);
+    }
 }
