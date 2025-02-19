@@ -27,6 +27,13 @@ public class DefaultItemDefine implements ItemDefine, MultipleI18nSupportEntity 
     private int ordinal;
     private Map<String, Map<String, String>> i18nMessages;
     
+    public DefaultItemDefine(String text, String value, String comments, int ordinal) {
+        this.text = text;
+        this.value = value;
+        this.comments = comments;
+        this.ordinal = ordinal;
+    }
+    
     @Override
     public String getI18nMessage(Locale locale) {
         return getI18nMessage("text", locale, text);
