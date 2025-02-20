@@ -24,7 +24,6 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class FastBeanCopierTest {
 
-
     @Test
     public void testExtendableToExtendable() {
         ExtendableEntity source = new ExtendableEntity();

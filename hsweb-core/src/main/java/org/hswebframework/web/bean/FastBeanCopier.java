@@ -12,6 +12,7 @@ import org.hswebframework.ezorm.core.Extendable;
 import org.hswebframework.utils.time.DateFormatter;
 import org.hswebframework.web.dict.EnumDict;
 import org.hswebframework.web.proxy.Proxy;
+import org.hswebframework.web.utils.DynamicArrayList;
 import org.springframework.core.ResolvableType;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
@@ -205,7 +206,7 @@ public final class FastBeanCopier {
                 copier = new ExtendableToMapCopier(copier);
             } else if (sourceIsMap && targetIsExtendable) {
                 copier = new MapToExtendableCopier(copier);
-            }else if(sourceIsExtendable){
+            } else if (sourceIsExtendable) {
                 copier = new ExtendableToBeanCopier(copier);
             }
             return copier;
@@ -614,8 +615,8 @@ public final class FastBeanCopier {
                 Collection sourceCollection;
                 if (source instanceof Collection) {
                     sourceCollection = (Collection) source;
-                } else if (source instanceof Object[]) {
-                    sourceCollection = Arrays.asList((Object[]) source);
+                } else if (source.getClass().isArray()) {
+                    sourceCollection = new DynamicArrayList(source);
                 } else if (source instanceof Map) {
                     sourceCollection = ((Map<?, ?>) source).values();
                 } else {
@@ -674,8 +675,15 @@ public final class FastBeanCopier {
             //转换为数组
             if (target.isArrayType()) {
                 Class<?> componentType = targetClass.getComponentType();
+
                 List<?> val = convert(source, List.class, new Class[]{componentType});
-                return (T) val.toArray((Object[]) Array.newInstance(componentType, val.size()));
+                int size = val.size();
+
+                Object array = Array.newInstance(componentType, size);
+                for (int i = 0; i < size; i++) {
+                    Array.set(array, i, val.get(i));
+                }
+                return (T) array;
             }
             if (target.isNumber()) {
                 if (source instanceof String) {

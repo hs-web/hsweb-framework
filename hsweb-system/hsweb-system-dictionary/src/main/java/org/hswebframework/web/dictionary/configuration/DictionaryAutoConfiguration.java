@@ -32,10 +32,12 @@ public class DictionaryAutoConfiguration {
         @Bean
         public CompositeDictDefineRepository compositeDictDefineRepository(DictionaryProperties properties) {
             CompositeDictDefineRepository repository = new CompositeDictDefineRepository();
-            properties.doScanEnum()
-                    .stream()
-                    .map(CompositeDictDefineRepository::parseEnumDict)
-                    .forEach(repository::addDefine);
+
+            properties
+                .doScanEnum()
+                .map(CompositeDictDefineRepository::parseEnumDict)
+                .forEach(repository::addDefine);
+
             return repository;
         }
     }
@@ -46,12 +48,12 @@ public class DictionaryAutoConfiguration {
     static class DictionaryWebFluxConfiguration {
 
         @Bean
-        public WebfluxDictionaryController webfluxDictionaryController(){
+        public WebfluxDictionaryController webfluxDictionaryController() {
             return new WebfluxDictionaryController();
         }
 
         @Bean
-        public WebfluxDictionaryItemController webfluxDictionaryItemController(){
+        public WebfluxDictionaryItemController webfluxDictionaryItemController() {
             return new WebfluxDictionaryItemController();
         }
     }
