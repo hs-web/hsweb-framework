@@ -40,9 +40,15 @@ public class DatabaseExceptionAnalyzerReporter extends ExceptionAnalyzerReporter
             Pattern.compile(".*\\[3D000].*"),
             error -> log
                 .warn(wrapLog("请先手动创建数据库,数据库名不能包含只能由`数字字母下划线`组成."), error));
+
         addSimpleReporter(
             Pattern.compile(".*\\[3F000].*"),
             error -> log
                 .warn(wrapLog("请正确配置`easyorm.default-schema`为pgsql数据库中对应的schema."), error));
+
+        addReporter(
+            err->err.getClass().getCanonicalName().contains("PostgresConnectionException"),
+            error -> log
+                .warn(wrapLog("请检查数据库连接配置是否正确."), error));
     }
 }
