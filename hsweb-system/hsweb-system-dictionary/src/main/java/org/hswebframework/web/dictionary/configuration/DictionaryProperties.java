@@ -52,8 +52,8 @@ public class DictionaryProperties {
                             if (clazz.isEnum() && EnumDict.class.isAssignableFrom(clazz)) {
                                 return clazz;
                             }
-                        } catch (Throwable e) {
-                            log.warn("load enum class error", e);
+                        } catch (Throwable ignore) {
+
                         }
                         return null;
                     })
