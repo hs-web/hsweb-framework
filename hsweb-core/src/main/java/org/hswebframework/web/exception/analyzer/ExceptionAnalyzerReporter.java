@@ -47,7 +47,12 @@ public class ExceptionAnalyzerReporter implements ExceptionAnalyzer {
 
     protected void addSimpleReporter(Pattern pattern, Consumer<Throwable> reporter) {
 
-        addReporter((error) -> pattern.matcher(error.toString()).matches(), reporter);
+        addReporter((error) -> {
+            if (error.getMessage() == null) {
+                return pattern.matcher(error.toString()).matches();
+            }
+            return pattern.matcher(error.getMessage()).matches() || pattern.matcher(error.toString()).matches();
+        }, reporter);
     }
 
     public boolean doReportException(Throwable failure) {
