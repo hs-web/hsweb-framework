@@ -8,6 +8,16 @@ import static org.junit.Assert.*;
 public class DatabaseExceptionAnalyzerReporterTest {
 
     DatabaseExceptionAnalyzerReporter reporter=new DatabaseExceptionAnalyzerReporter();
+
+    @Test
+    void testTimeout(){
+
+        Assertions.assertTrue(reporter.doReportException(
+            new IllegalStateException("Timeout on blocking read for 10000 MILLISECONDS")
+        ));
+
+    }
+
     @Test
     void testBinding(){
         Assertions.assertTrue(reporter.doReportException(

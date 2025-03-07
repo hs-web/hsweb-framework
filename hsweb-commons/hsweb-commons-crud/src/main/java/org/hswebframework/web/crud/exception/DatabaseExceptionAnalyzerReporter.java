@@ -32,6 +32,12 @@ public class DatabaseExceptionAnalyzerReporter extends ExceptionAnalyzerReporter
             error -> log
                 .warn(wrapLog("请先手动创建数据库或者配置`easyorm.default-schema`,数据库名不能包含只能由`数字字母下划线`组成."), error));
 
+        addSimpleReporter(
+            Pattern.compile("^Timeout on blocking.*"),
+            error -> log
+                .warn(wrapLog("操作超时,请检查数据库连接是否正确,数据库是否能正常访问."), error));
+
+
         initForPgsql();
     }
 
