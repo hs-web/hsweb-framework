@@ -39,6 +39,15 @@ public class DatabaseExceptionAnalyzerReporter extends ExceptionAnalyzerReporter
 
 
         initForPgsql();
+
+        initRedis();
+    }
+
+    void initRedis(){
+        addReporter(
+            err->err.getClass().getCanonicalName().contains("RedisConnectionException"),
+            error -> log
+                .warn(wrapLog("请检查redis连接配置."), error));
     }
 
     void initForPgsql() {
