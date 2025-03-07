@@ -13,6 +13,10 @@ public class DatabaseExceptionAnalyzerReporterTest {
         Assertions.assertTrue(reporter.doReportException(
             new IndexOutOfBoundsException("Binding index 0 when only 0 parameters are expected ")
         ));
+
+        Assertions.assertTrue(reporter.doReportException(
+            new IndexOutOfBoundsException("Binding parameters is not supported for simple statement")
+        ));
     }
 
     @Test
