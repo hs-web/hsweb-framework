@@ -116,10 +116,14 @@ public class TreeUtils {
         TreeSupportEntity.TreeHelper<N, PK> helper = new TreeSupportEntity.TreeHelper<N, PK>() {
             @Override
             public List<N> getChildren(PK parentId) {
-                return treeIdCache.get(parentId)
-                                  .stream()
-                                  .map(cache::get)
-                                  .collect(Collectors.toList());
+                List<PK> childId = treeIdCache.get(parentId);
+                if (childId == null) {
+                    return null;
+                }
+                return childId
+                        .stream()
+                        .map(cache::get)
+                        .collect(Collectors.toList());
             }
 
             @Override
@@ -131,11 +135,14 @@ public class TreeUtils {
         List<N> list = new ArrayList<>(treeIdCache.size());
 
         cache.values().forEach(node -> {
-            //设置每个节点的子节点
-            childConsumer.accept(node, treeIdCache.get(idGetter.apply(node))
-                                                  .stream()
-                                                  .map(cache::get)
-                                                  .collect(Collectors.toList()));
+            List<PK> childId = treeIdCache.get(idGetter.apply(node));
+            if (childId != null) {
+                //设置每个节点的子节点
+                childConsumer.accept(node, childId
+                        .stream()
+                        .map(cache::get)
+                        .collect(Collectors.toList()));
+            }
 
 
             //获取根节点
@@ -145,5 +152,6 @@ public class TreeUtils {
         });
         return list;
     }
+
 
 }
