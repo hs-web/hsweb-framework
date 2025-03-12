@@ -107,16 +107,19 @@ public class TreeUtils {
         // id,node
         Map<PK, N> cache = Maps.newHashMapWithExpectedSize(size);
         // parentId,children
-        Map<PK, List<N>> treeCache = dataList
-            .stream()
-            .peek(node -> cache.put(idGetter.apply(node), node))
-            .filter(e -> parentIdGetter.apply(e) != null)
-            .collect(Collectors.groupingBy(parentIdGetter));
+        Map<PK, List<PK>> treeIdCache = dataList
+                .stream()
+                .peek(node -> cache.put(idGetter.apply(node), node))
+                .filter(e -> parentIdGetter.apply(e) != null)
+                .collect(Collectors.groupingBy(parentIdGetter, Collectors.mapping(idGetter, Collectors.toList())));
 
         TreeSupportEntity.TreeHelper<N, PK> helper = new TreeSupportEntity.TreeHelper<N, PK>() {
             @Override
             public List<N> getChildren(PK parentId) {
-                return treeCache.get(parentId);
+                return treeIdCache.get(parentId)
+                                  .stream()
+                                  .map(cache::get)
+                                  .collect(Collectors.toList());
             }
 
             @Override
@@ -125,17 +128,21 @@ public class TreeUtils {
             }
         };
 
-        List<N> list = new ArrayList<>(treeCache.size());
+        List<N> list = new ArrayList<>(treeIdCache.size());
 
-        for (N node : dataList) {
+        cache.values().forEach(node -> {
             //设置每个节点的子节点
-            childConsumer.accept(node, treeCache.get(idGetter.apply(node)));
+            childConsumer.accept(node, treeIdCache.get(idGetter.apply(node))
+                                                  .stream()
+                                                  .map(cache::get)
+                                                  .collect(Collectors.toList()));
+
 
             //获取根节点
             if (rootPredicate.test(helper, node)) {
                 list.add(node);
             }
-        }
+        });
         return list;
     }
 
