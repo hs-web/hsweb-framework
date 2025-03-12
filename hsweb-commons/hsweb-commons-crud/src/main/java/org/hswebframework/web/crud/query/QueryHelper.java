@@ -657,6 +657,7 @@ public interface QueryHelper {
         return combineOneToMany(source,
                                 idMapper,
                                 list -> fetcher
+                                    .copy()
                                     .in(MethodReferenceConverter.convertToColumn(mainIdGetter), list)
                                     .fetch(),
                                 mainIdGetter,

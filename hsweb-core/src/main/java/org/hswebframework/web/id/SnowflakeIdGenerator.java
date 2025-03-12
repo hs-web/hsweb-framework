@@ -51,7 +51,7 @@ public class SnowflakeIdGenerator {
         return create(ThreadLocalRandom.current().nextInt(31), ThreadLocalRandom.current().nextInt(31));
     }
 
-    private SnowflakeIdGenerator(long workerId, long dataCenterId) {
+    public SnowflakeIdGenerator(long workerId, long dataCenterId) {
         // sanity check for workerId
         if (workerId > maxWorkerId || workerId < 0) {
             throw new IllegalArgumentException(String.format("worker Id can't be greater than %d or less than 0", maxWorkerId));
@@ -66,10 +66,11 @@ public class SnowflakeIdGenerator {
 
     public synchronized long nextId() {
         long timestamp = timeGen();
-
+        //时间回退
         if (timestamp < lastTimestamp) {
-            log.error("clock is moving backwards.  Rejecting requests until {}.", lastTimestamp);
-            throw new UnsupportedOperationException(String.format("Clock moved backwards.  Refusing to generate id for %d milliseconds", lastTimestamp - timestamp));
+            //发生回退时不拒绝,有可能出现重复数据?
+            log.warn("clock is moving backwards {}.", lastTimestamp);
+//            throw new UnsupportedOperationException(String.format("Clock moved backwards.  Refusing to generate id for %d milliseconds", lastTimestamp - timestamp));
         }
 
         if (lastTimestamp == timestamp) {

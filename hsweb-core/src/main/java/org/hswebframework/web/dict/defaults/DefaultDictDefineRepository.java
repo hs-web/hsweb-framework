@@ -3,18 +3,11 @@ package org.hswebframework.web.dict.defaults;
 import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.utils.StringUtils;
 import org.hswebframework.web.dict.*;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.springframework.core.io.support.ResourcePatternResolver;
-import org.springframework.core.type.classreading.MetadataReader;
-import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
-import org.springframework.util.ReflectionUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.lang.reflect.Field;
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author zhouhao
@@ -22,10 +15,10 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 public class DefaultDictDefineRepository implements DictDefineRepository {
-    protected static final Map<String, DictDefine> parsedDict = new HashMap<>();
+    protected static final Map<String, DictDefine> parsedDict = new ConcurrentHashMap<>();
 
     public static void registerDefine(DictDefine define) {
-        if (define == null) {
+        if (define == null || define.getId() == null) {
             return;
         }
         parsedDict.put(define.getId(), define);
@@ -34,42 +27,52 @@ public class DefaultDictDefineRepository implements DictDefineRepository {
     @SuppressWarnings("all")
     public static DictDefine parseEnumDict(Class<?> type) {
 
-        Dict dict = type.getAnnotation(Dict.class);
-        if (!type.isEnum()) {
-            throw new UnsupportedOperationException("unsupported type " + type);
-        }
-        List<EnumDict<?>> items = new ArrayList<>();
-        for (Object enumConstant : type.getEnumConstants()) {
-            if (enumConstant instanceof EnumDict) {
-                items.add((EnumDict) enumConstant);
+        try {
+            Dict dict = type.getAnnotation(Dict.class);
+            if (!type.isEnum()) {
+                return null;
+            }
+
+            Object[] constants = type.getEnumConstants();
+            List<EnumDict<?>> items = new ArrayList<>(constants.length);
+
+            for (Object enumConstant : constants) {
+                if (enumConstant instanceof EnumDict) {
+                    items.add((EnumDict) enumConstant);
+                } else {
+                    Enum e = ((Enum) enumConstant);
+                    items.add(
+                        DefaultItemDefine
+                            .builder()
+                            .value(e.name())
+                            .text(e.name())
+                            .ordinal(e.ordinal())
+                            .build());
+                }
+            }
+
+            DefaultDictDefine define = new DefaultDictDefine();
+            if (dict != null) {
+                define.setId(dict.value());
+                define.setComments(dict.comments());
+                define.setAlias(dict.alias());
             } else {
-                Enum e = ((Enum) enumConstant);
-                items.add(DefaultItemDefine.builder()
-                        .value(e.name())
-                        .text(e.name())
-                        .ordinal(e.ordinal())
-                        .build());
-            }
-        }
 
-        DefaultDictDefine define = new DefaultDictDefine();
-        if (dict != null) {
-            define.setId(dict.value());
-            define.setComments(dict.comments());
-            define.setAlias(dict.alias());
-        } else {
-
-            String id = StringUtils.camelCase2UnderScoreCase(type.getSimpleName()).replace("_", "-");
-            if (id.startsWith("-")) {
-                id = id.substring(1);
-            }
-            define.setId(id);
-            define.setAlias(type.getSimpleName());
+                String id = StringUtils.camelCase2UnderScoreCase(type.getSimpleName()).replace("_", "-");
+                if (id.startsWith("-")) {
+                    id = id.substring(1);
+                }
+                define.setId(id);
+                define.setAlias(type.getSimpleName());
 //            define.setComments();
+            }
+            define.setItems(items);
+            log.trace("parse enum dict : {} as : {}", type, define.getId());
+            return define;
+        } catch (Throwable e) {
+            log.warn("parse enum class [{}] error", type, e);
+            return null;
         }
-        define.setItems(items);
-        log.trace("parse enum dict : {} as : {}", type, define.getId());
-        return define;
 
     }
 

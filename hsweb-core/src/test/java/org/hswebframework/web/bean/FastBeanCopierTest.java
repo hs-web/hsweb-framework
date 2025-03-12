@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
+import org.hswebframework.ezorm.core.DefaultExtendable;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.util.ClassUtils;
@@ -22,6 +23,79 @@ import java.util.concurrent.atomic.AtomicReference;
  * @since 3.0
  */
 public class FastBeanCopierTest {
+
+    @Test
+    public void testExtendableToExtendable() {
+        ExtendableEntity source = new ExtendableEntity();
+        source.setName("test");
+        source.setExtension("age", 123);
+        source.setExtension("color", Color.RED);
+
+        ExtendableEntity e = FastBeanCopier.copy(source, new ExtendableEntity());
+
+        Assert.assertEquals(source.getName(), e.getName());
+        Assert.assertEquals(source.getExtension("age"), e.getExtension("age"));
+        Assert.assertEquals(source.getExtension("color"), e.getExtension("color"));
+
+    }
+    @Test
+    public void testToExtendable() {
+        Source source = new Source();
+        source.setName("test");
+        source.setAge(123);
+        source.setColor(Color.RED);
+        ExtendableEntity e = FastBeanCopier.copy(source, new ExtendableEntity());
+
+        Assert.assertEquals(source.getName(), e.getName());
+        Assert.assertEquals(source.getAge(), e.getExtension("age"));
+        Assert.assertEquals(source.getColor(), e.getExtension("color"));
+
+        Map<String, Object> map = FastBeanCopier.copy(e, new HashMap<>());
+        System.out.println(map);
+
+        ExtendableEntity t = FastBeanCopier.copy(map, new ExtendableEntity());
+        Assert.assertEquals(e.getName(), t.getName());
+
+        System.out.println(e.extensions());
+        System.out.println(t.extensions());
+        Assert.assertEquals(e.extensions(), t.extensions());
+
+    }
+
+    @Test
+    public void testFromExtendable() {
+        Source source = new Source();
+        ExtendableEntity e = FastBeanCopier.copy(source, new ExtendableEntity());
+        e.setName("test");
+        e.setExtension("age",123);
+        FastBeanCopier.copy(e, source);
+        Assert.assertEquals(e.getName(), source.getName());
+        Assert.assertEquals(e.getExtension("age"), source.getAge());
+
+
+    }
+    @Test
+    public void testMapToExtendable() {
+        Source source = new Source();
+        source.setName("test");
+        source.setAge(123);
+        source.setColor(Color.RED);
+        Map<String, Object> map = FastBeanCopier.copy(source, new HashMap<>());
+        ExtendableEntity e = FastBeanCopier.copy(map, new ExtendableEntity());
+        Assert.assertEquals(source.getName(), e.getName());
+        Assert.assertEquals(source.getAge(), e.getExtension("age"));
+        Assert.assertEquals(source.getColor(), e.getExtension("color"));
+    }
+
+
+    @Getter
+    @Setter
+    public static class ExtendableEntity extends DefaultExtendable {
+
+        private String name;
+
+        private boolean boy2;
+    }
 
     @Test
     public void test() throws InvocationTargetException, IllegalAccessException {
@@ -68,7 +142,7 @@ public class FastBeanCopierTest {
     @Test
     public void testMapList() {
         Map<String, Object> data = new HashMap<>();
-        data.put("templates",   new HashMap() {
+        data.put("templates", new HashMap() {
             {
                 put("0", Collections.singletonMap("name", "test"));
                 put("1", Collections.singletonMap("name", "test"));
@@ -80,7 +154,7 @@ public class FastBeanCopierTest {
         Assert.assertNotNull(config);
         Assert.assertNotNull(config.templates);
         System.out.println(config.templates);
-        Assert.assertEquals(2,config.templates.size());
+        Assert.assertEquals(2, config.templates.size());
 
 
     }
@@ -98,7 +172,7 @@ public class FastBeanCopierTest {
 
         @Override
         public String toString() {
-            return "name:"+name;
+            return "name:" + name;
         }
     }
 
@@ -132,8 +206,8 @@ public class FastBeanCopierTest {
 
         System.out.println(clazz);
         URLClassLoader loader = new URLClassLoader(new URL[]{
-                clazz
-        }, ClassUtils.getDefaultClassLoader()){
+            clazz
+        }, ClassUtils.getDefaultClassLoader()) {
             @Override
             protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
                 try {
@@ -174,13 +248,13 @@ public class FastBeanCopierTest {
         Assert.assertNotSame(sourceClass, Source.class);
 
         Object source = sourceClass.newInstance();
-        FastBeanCopier.copy(Collections.singletonMap("name","测试"),source);
+        FastBeanCopier.copy(Collections.singletonMap("name", "测试"), source);
 
-        Map<String,Object> map = FastBeanCopier.copy(source,new HashMap<>());
+        Map<String, Object> map = FastBeanCopier.copy(source, new HashMap<>());
         System.out.println(map);
 
         loader.close();
-        map = FastBeanCopier.copy(source,new HashMap<>());
+        map = FastBeanCopier.copy(source, new HashMap<>());
 
         System.out.println(map);
 
@@ -193,17 +267,17 @@ public class FastBeanCopierTest {
 
         ProxyTest test = (ProxyTest) Proxy.newProxyInstance(ClassUtils.getDefaultClassLoader(),
                                                             new Class[]{ProxyTest.class}, (proxy, method, args) -> {
-                    if (method.getName().equals("getName")) {
-                        return "test";
-                    }
+                if (method.getName().equals("getName")) {
+                    return "test";
+                }
 
-                    if (method.getName().equals("setName")) {
-                        reference.set(args[0]);
-                        return null;
-                    }
-
+                if (method.getName().equals("setName")) {
+                    reference.set(args[0]);
                     return null;
-                });
+                }
+
+                return null;
+            });
 
         Target source = new Target();
 

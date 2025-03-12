@@ -2,6 +2,7 @@ package org.hswebframework.web.exception;
 
 import org.hswebframework.web.i18n.LocaleUtils;
 import org.springframework.util.StringUtils;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.context.Context;
 import reactor.util.context.ContextView;
@@ -36,7 +37,7 @@ public class TraceSourceException extends RuntimeException {
     }
 
     public TraceSourceException(Throwable e) {
-        super(e.getMessage(),e);
+        super(e.getMessage(), e);
     }
 
     public TraceSourceException(String message, Throwable e) {
@@ -72,9 +73,10 @@ public class TraceSourceException extends RuntimeException {
      * 深度溯源上下文,用来标识是否是深度溯源的异常.开启深度追踪后,会创建新的{@link  TraceSourceException}对象.
      *
      * @return 上下文
-     * @see reactor.core.publisher.Flux#contextWrite(ContextView)
+     * @see Flux#contextWrite(ContextView)
      * @see Mono#contextWrite(ContextView)
      */
+    @Deprecated
     public static Context deepTraceContext() {
         return deepTraceContext;
     }
@@ -106,32 +108,50 @@ public class TraceSourceException extends RuntimeException {
      * @param source    源
      * @param <T>       泛型
      * @return 转换器
-     * @see reactor.core.publisher.Flux#onErrorResume(Function)
+     * @see Flux#onErrorResume(Function)
      * @see Mono#onErrorResume(Function)
      */
     public static <T> Function<Throwable, Mono<T>> transfer(String operation, Object source) {
         if (source == null && operation == null) {
             return Mono::error;
         }
-        return err -> {
-            if (err instanceof TraceSourceException) {
-                return Mono
-                        .deferContextual(ctx -> {
-                            if (ctx.hasKey(deepTraceKey)) {
-                                return Mono.error(new TraceSourceException(err).withSource(operation,source));
-                            } else {
-                                return Mono.error(((TraceSourceException) err).withSource(operation,source));
-                            }
-                        });
-            }
-            return Mono.error(new TraceSourceException(err).withSource(operation,source));
-        };
+        return err -> Mono.error(transform(err, operation, source));
+    }
+
+    /**
+     * 填充溯源信息到异常中
+     *
+     * @param error     异常
+     * @param operation 操作名称
+     * @param source    源数据
+     * @return 填充后的异常
+     */
+    public static Throwable transform(Throwable error, String operation, Object source) {
+        error.addSuppressed(
+            new StacklessTraceSourceException().withSource(operation, source)
+        );
+        return error;
     }
 
     public static Object tryGetSource(Throwable err) {
+
         if (err instanceof TraceSourceException) {
             return ((TraceSourceException) err).getSource();
         }
+
+        for (Throwable throwable : err.getSuppressed()) {
+            Object source = tryGetSource(throwable);
+            if (source != null) {
+                return source;
+            }
+        }
+
+        Throwable cause = err.getCause();
+
+        if (cause != null) {
+            return tryGetSource(cause);
+        }
+
         return null;
     }
 
@@ -139,7 +159,53 @@ public class TraceSourceException extends RuntimeException {
         if (err instanceof TraceSourceException) {
             return ((TraceSourceException) err).getOperation();
         }
+
+        for (Throwable throwable : err.getSuppressed()) {
+            String operation = tryGetOperation(throwable);
+            if (operation != null) {
+                return operation;
+            }
+        }
+
+        Throwable cause = err.getCause();
+        if (cause != null) {
+            return tryGetOperation(cause);
+        }
         return null;
+    }
+
+    protected String getExceptionName() {
+        return this.getClass().getCanonicalName();
+    }
+
+    @Override
+    public String toString() {
+        String className = getExceptionName();
+        String message = this.getLocalizedMessage();
+        String operation = this.operation;
+        String source = Optional
+            .ofNullable(this.source)
+            .map(Object::toString)
+            .orElse(null);
+
+        StringBuilder builder = new StringBuilder(
+            className.length()
+                + (message == null ? 0 : message.length())
+                + (operation == null ? 0 : operation.length())
+                + (source == null ? 0 : source.length()));
+
+        builder.append(className);
+        if (message != null) {
+            builder.append(':').append(message);
+        }
+        if (operation != null) {
+            builder.append("\n\t[Operation] ⇢ ").append(operation);
+        }
+        if (source != null) {
+            builder.append("\n\t   [Source] ⇢ ").append(source);
+        }
+
+        return builder.toString();
     }
 
     public static String tryGetOperationLocalized(Throwable err, Locale locale) {
@@ -149,12 +215,35 @@ public class TraceSourceException extends RuntimeException {
 
     public static Mono<String> tryGetOperationLocalizedReactive(Throwable err) {
         return LocaleUtils
-                .currentReactive()
-                .handle((locale, sink) -> {
-                    String opt = tryGetOperationLocalized(err, locale);
-                    if (opt != null) {
-                        sink.next(opt);
-                    }
-                });
+            .currentReactive()
+            .handle((locale, sink) -> {
+                String opt = tryGetOperationLocalized(err, locale);
+                if (opt != null) {
+                    sink.next(opt);
+                }
+            });
+    }
+
+    public static class StacklessTraceSourceException extends TraceSourceException {
+        public StacklessTraceSourceException() {
+            super();
+        }
+
+        public StacklessTraceSourceException(String message) {
+            super(message);
+        }
+
+        public StacklessTraceSourceException(Throwable e) {
+            super(e.getMessage(), e);
+        }
+
+        public StacklessTraceSourceException(String message, Throwable e) {
+            super(message, e);
+        }
+
+        @Override
+        public synchronized Throwable fillInStackTrace() {
+            return this;
+        }
     }
 }

@@ -1,9 +1,6 @@
 package org.hswebframework.web.authorization.simple;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hswebframework.web.authorization.DimensionType;
 
 import java.io.Serializable;
@@ -12,6 +9,7 @@ import java.io.Serializable;
 @Setter
 @AllArgsConstructor(staticName = "of")
 @NoArgsConstructor
+@EqualsAndHashCode
 public class SimpleDimensionType implements DimensionType, Serializable {
     private static final long serialVersionUID = -6849794470754667710L;
 

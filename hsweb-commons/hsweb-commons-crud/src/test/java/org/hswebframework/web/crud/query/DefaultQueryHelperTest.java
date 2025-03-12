@@ -339,28 +339,32 @@ class DefaultQueryHelperTest {
         DefaultQueryHelper helper = new DefaultQueryHelper(database);
 
         helper.select(TestInfo.class)
-              .all(EventTestEntity.class, TestInfo::setEventList)
-//              .all("e2", TestInfo::setEvent)
+             // .all(EventTestEntity.class, TestInfo::setEventList)
+              .all("e2", TestInfo::setEvent)
               .all(TestEntity.class)
               .from(TestEntity.class)
-              .leftJoin(EventTestEntity.class,
-                        join -> join
-                            .alias("e1")
-                            .is(EventTestEntity::getId, TestEntity::getId)
-//                                .is(EventTestEntity::getName, TestEntity::getId)
-                            .notNull(EventTestEntity::getAge))
 //              .leftJoin(EventTestEntity.class,
 //                        join -> join
-//                                .alias("e2")
-//                                .is(EventTestEntity::getId, TestEntity::getId))
-
-//              .where(dsl -> dsl.is(EventTestEntity::getName, "Ename")
-//                               .is("e1.name", "Ename")
-//                               .orNest()
-//                               .is(TestEntity::getName, "main")
-//                               .is("e1.name", "Ename")
-//                               .end()
-//              )
+//                            .alias("e1")
+//                            .is(EventTestEntity::getId, TestEntity::getId)
+////                                .is(EventTestEntity::getName, TestEntity::getId)
+//                            .notNull(EventTestEntity::getAge))
+              .leftJoin(EventTestEntity.class,
+                        join -> join
+                            .alias("e2")
+                            .is(EventTestEntity::getId, TestEntity::getId)
+                            .nest()
+                            .is(EventTestEntity::getId,TestEntity::getId)
+                            .is(EventTestEntity::getAge,10)
+                            .end()
+              )
+              .where(dsl -> dsl.is(EventTestEntity::getName, "Ename")
+                               .is("e1.name", "Ename")
+                               .orNest()
+                               .is(TestEntity::getName, "main")
+                               .is("e1.name", "Ename")
+                               .end()
+              )
               .orderByAsc(TestEntity::getAge)
               .orderByDesc(EventTestEntity::getAge)
               .fetchPaged(0, 10)

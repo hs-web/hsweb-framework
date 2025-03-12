@@ -20,30 +20,37 @@ import com.alibaba.fastjson.JSONObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
+import org.hswebframework.ezorm.rdb.mapping.annotation.ColumnType;
 import org.hswebframework.ezorm.rdb.mapping.annotation.Comment;
 import org.hswebframework.ezorm.rdb.mapping.annotation.DefaultValue;
+import org.hswebframework.ezorm.rdb.mapping.annotation.JsonCodec;
 import org.hswebframework.web.api.crud.entity.GenericTreeSortSupportEntity;
 import org.hswebframework.web.dict.EnumDict;
+import org.hswebframework.web.i18n.I18nSupportUtils;
+import org.hswebframework.web.i18n.LocaleUtils;
+import org.hswebframework.web.i18n.MultipleI18nSupportEntity;
 import org.hswebframework.web.utils.DigestUtils;
 import org.springframework.util.StringUtils;
 
 import javax.persistence.Column;
 import javax.persistence.Index;
 import javax.persistence.Table;
-import java.util.List;
+import java.sql.JDBCType;
+import java.util.*;
 
 /**
  * 数据字典选项
  */
 @Getter
 @Setter
-@Table(name = "s_dictionary_item",indexes = {
-        @Index(name = "idx_dic_item_dic_id",columnList = "dict_id"),
-        @Index(name = "idx_dic_item_ordinal",columnList = "ordinal"),
-        @Index(name = "idx_dic_item_path",columnList = "path")
+@Table(name = "s_dictionary_item", indexes = {
+    @Index(name = "idx_dic_item_dic_id", columnList = "dict_id"),
+    @Index(name = "idx_dic_item_ordinal", columnList = "ordinal"),
+    @Index(name = "idx_dic_item_path", columnList = "path")
 })
 @Comment("数据字典选项")
-public class DictionaryItemEntity extends GenericTreeSortSupportEntity<String> implements EnumDict<String> {
+public class DictionaryItemEntity extends GenericTreeSortSupportEntity<String>
+    implements EnumDict<String>, MultipleI18nSupportEntity {
     //字典id
     @Column(name = "dict_id", length = 64, updatable = false, nullable = false)
     @Schema(description = "数据字典ID")
@@ -91,6 +98,47 @@ public class DictionaryItemEntity extends GenericTreeSortSupportEntity<String> i
     @Schema(description = "子节点")
     private List<DictionaryItemEntity> children;
 
+    @Schema(description = "国际化配置")
+    @Column
+    @JsonCodec
+    @ColumnType(javaType = String.class, jdbcType = JDBCType.LONGVARCHAR)
+    private Map<String, Map<String, String>> i18nMessages;
+
+    public String getI18nText() {
+        return getI18nMessage("text", this.text);
+    }
+
+    /**
+     * 根据消息key生成默认的的语言并填充到i18nMessages中
+     *
+     * @param i18nKey key,在国际化文件中定义.
+     */
+    public void putI18nText(String i18nKey) {
+        putI18nText(i18nKey, LocaleUtils.getSupportLocales());
+    }
+
+    /**
+     * 根据消息key生成对应的语言并填充到i18nMessages中
+     *
+     * @param i18nKey key,在国际化文件中定义.
+     * @param locales 要生成的语言.
+     */
+    public void putI18nText(String i18nKey,
+                            Collection<Locale> locales) {
+        this.i18nMessages = I18nSupportUtils
+            .putI18nMessages(
+                i18nKey, "text", locales, null, this.i18nMessages
+            );
+    }
+
+    public String getI18nName() {
+        return getI18nMessage("name", this.name);
+    }
+
+    public String getI18nDescribe() {
+        return getI18nMessage("describe", this.describe);
+    }
+
     public void generateId() {
         if (StringUtils.hasText(this.getId())) {
             return;
@@ -106,10 +154,10 @@ public class DictionaryItemEntity extends GenericTreeSortSupportEntity<String> i
     public Object getWriteJSONObject() {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("id", getId());
-        jsonObject.put("name", getName());
+        jsonObject.put("name", getI18nName());
         jsonObject.put("dictId", getDictId());
         jsonObject.put("value", getValue());
-        jsonObject.put("text", getText());
+        jsonObject.put("text", getI18nText());
         jsonObject.put("ordinal", getOrdinal());
         jsonObject.put("sortIndex", getSortIndex());
         jsonObject.put("parentId", getParentId());
@@ -117,7 +165,7 @@ public class DictionaryItemEntity extends GenericTreeSortSupportEntity<String> i
         jsonObject.put("mask", getMask());
         jsonObject.put("searchCode", getSearchCode());
         jsonObject.put("status", getStatus());
-        jsonObject.put("describe", getDescribe());
+        jsonObject.put("describe", getI18nDescribe());
         return jsonObject;
     }
 }

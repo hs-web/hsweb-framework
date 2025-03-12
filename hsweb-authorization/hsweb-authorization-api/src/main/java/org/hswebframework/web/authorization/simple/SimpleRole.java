@@ -15,6 +15,7 @@ import java.util.Map;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode
 public class SimpleRole implements Role {
 
     private static final long serialVersionUID = 7460859165231311347L;

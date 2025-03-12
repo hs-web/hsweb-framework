@@ -24,13 +24,11 @@ import org.hswebframework.web.crud.entity.factory.EntityMappingCustomizer;
 import org.hswebframework.web.crud.entity.factory.MapperEntityFactory;
 import org.hswebframework.web.crud.events.*;
 import org.hswebframework.web.crud.events.expr.SpelSqlExpressionInvoker;
-import org.hswebframework.web.crud.generator.CurrentTimeGenerator;
-import org.hswebframework.web.crud.generator.DefaultIdGenerator;
-import org.hswebframework.web.crud.generator.MD5Generator;
-import org.hswebframework.web.crud.generator.SnowFlakeStringIdGenerator;
+import org.hswebframework.web.crud.generator.*;
 import org.hswebframework.web.crud.query.DefaultQueryHelper;
 import org.hswebframework.web.crud.query.QueryHelper;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -155,6 +153,11 @@ public class EasyormConfiguration {
     @Bean
     public SnowFlakeStringIdGenerator snowFlakeStringIdGenerator() {
         return new SnowFlakeStringIdGenerator();
+    }
+
+    @Bean
+    public RandomIdGenerator randomIdGenerator() {
+        return new RandomIdGenerator();
     }
 
     @Bean

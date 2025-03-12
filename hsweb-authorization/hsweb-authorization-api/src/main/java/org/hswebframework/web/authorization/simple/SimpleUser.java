@@ -14,6 +14,7 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EqualsAndHashCode
 public class SimpleUser implements User {
 
     private static final long serialVersionUID = 2194541828191869091L;

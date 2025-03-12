@@ -14,6 +14,7 @@ import org.hswebframework.ezorm.rdb.executor.wrapper.ColumnWrapperContext;
 import org.hswebframework.ezorm.rdb.executor.wrapper.MapResultWrapper;
 import org.hswebframework.ezorm.rdb.executor.wrapper.ResultWrapper;
 import org.hswebframework.ezorm.rdb.executor.wrapper.ResultWrappers;
+import org.hswebframework.ezorm.rdb.mapping.EntityPropertyDescriptor;
 import org.hswebframework.ezorm.rdb.mapping.defaults.record.DefaultRecord;
 import org.hswebframework.ezorm.rdb.mapping.defaults.record.Record;
 import org.hswebframework.ezorm.rdb.metadata.RDBColumnMetadata;
@@ -30,6 +31,8 @@ import org.hswebframework.ezorm.rdb.operator.dml.SelectColumnSupplier;
 import org.hswebframework.ezorm.rdb.operator.dml.query.BuildParameterQueryOperator;
 import org.hswebframework.ezorm.rdb.operator.dml.query.Selects;
 import org.hswebframework.ezorm.rdb.operator.dml.query.SortOrder;
+import org.hswebframework.ezorm.rdb.utils.PropertyUtils;
+import org.hswebframework.web.api.crud.entity.EntityFactoryHolder;
 import org.hswebframework.web.api.crud.entity.PagerResult;
 import org.hswebframework.web.api.crud.entity.QueryParamEntity;
 import org.hswebframework.web.bean.FastBeanCopier;
@@ -510,7 +513,7 @@ public class DefaultQueryHelper implements QueryHelper {
         private Function<Flux<R>, Flux<R>> resultHandler = Function.identity();
 
         public QuerySpec(Class<R> clazz, DefaultQueryHelper parent) {
-            this.clazz = clazz;
+            this.clazz = EntityFactoryHolder.getMappedType(clazz);
             this.parent = parent;
             logContext = Context.of(Logger.class, LoggerFactory.getLogger(clazz));
         }
@@ -869,10 +872,15 @@ public class DefaultQueryHelper implements QueryHelper {
             return join(type, createJoinAlias(), JoinType.right, on);
         }
 
+        @SneakyThrows
+        public R newRowInstance0() {
+            return clazz.getConstructor().newInstance();
+        }
+
         @Override
         @SneakyThrows
         public R newRowInstance() {
-            return clazz.newInstance();
+            return EntityFactoryHolder.newInstance(clazz, this::newRowInstance0);
         }
 
         @Override
@@ -1136,7 +1144,8 @@ public class DefaultQueryHelper implements QueryHelper {
 
     }
 
-    static class JoinNestConditionalSpecImpl<T extends TermTypeConditionalSupport> extends SimpleNestConditional<T> implements JoinNestConditionalSpec<T> {
+    static class JoinNestConditionalSpecImpl<T extends TermTypeConditionalSupport>
+        extends SimpleNestConditional<T> implements JoinNestConditionalSpec<T> {
         final QuerySpec<?> parent;
 
         private final Term term;
@@ -1153,17 +1162,19 @@ public class DefaultQueryHelper implements QueryHelper {
         }
 
         @Override
-        public JoinNestConditionalSpec<NestConditional<T>> nest() {
+        @SuppressWarnings("all")
+        public JoinNestConditionalSpecImpl nest() {
             return new JoinNestConditionalSpecImpl<>(parent, this, term.nest());
         }
 
         @Override
-        public JoinNestConditionalSpec<NestConditional<T>> orNest() {
+        @SuppressWarnings("all")
+        public JoinNestConditionalSpecImpl orNest() {
             return new JoinNestConditionalSpecImpl<>(parent, this, term.orNest());
         }
 
         @Override
-        public <T1, T2> T applyColumn(StaticMethodReferenceColumn<T1> joinColumn,
+        public <T1, T2> JoinNestConditionalSpecImpl<T> applyColumn(StaticMethodReferenceColumn<T1> joinColumn,
                                       String termType,
                                       String alias,
                                       StaticMethodReferenceColumn<T2> mainOrJoinColumn) {
@@ -1185,14 +1196,14 @@ public class DefaultQueryHelper implements QueryHelper {
         }
 
         @Override
-        public <T1, T2> T applyColumn(StaticMethodReferenceColumn<T1> mainColumn,
+        public <T1, T2> JoinNestConditionalSpecImpl<T> applyColumn(StaticMethodReferenceColumn<T1> mainColumn,
                                       String termType,
                                       StaticMethodReferenceColumn<T2> joinColumn) {
             return applyColumn(joinColumn, termType, null, joinColumn);
         }
 
 
-        public T applyColumn(String mainColumn,
+        public JoinNestConditionalSpecImpl<T> applyColumn(String mainColumn,
                              String termType,
                              TableOrViewMetadata join,
                              String alias,
@@ -1204,7 +1215,7 @@ public class DefaultQueryHelper implements QueryHelper {
 
             getAccepter().accept(mainColumn, termType, new JoinConditionalSpecImpl.ColumnRef(columnMetadata, alias));
 
-            return (T) this;
+            return  this;
         }
 
         @Override

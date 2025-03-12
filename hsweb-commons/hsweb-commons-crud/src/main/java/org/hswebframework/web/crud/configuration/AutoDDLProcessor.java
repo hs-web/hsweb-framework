@@ -87,7 +87,7 @@ public class AutoDDLProcessor implements InitializingBean {
                                  .commit()
                                  .reactive()
                                  .subscribeOn(Schedulers.boundedElastic()),
-                             8)
+                             8,8)
                     .doOnError((err) -> log.error(err.getMessage(), err))
                     .then()
                     .block(Duration.ofMinutes(5));
