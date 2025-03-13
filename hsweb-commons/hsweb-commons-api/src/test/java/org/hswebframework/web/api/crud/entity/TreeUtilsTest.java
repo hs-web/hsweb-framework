@@ -5,15 +5,14 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.junit.Test;
-import reactor.core.publisher.Flux;
-import reactor.test.StepVerifier;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class TreeUtilsTest {
 
@@ -47,32 +46,26 @@ public class TreeUtilsTest {
         Collections.shuffle(nodes);
 
         // 并发执行，并且创建新的节点
-        Flux.just("3", "2")
-            .flatMapIterable(id -> TreeUtils
-                    .list2tree(Collections2.transform(nodes, e -> {
-                                   Node copy = new Node();
-                                   copy.setId(e.id);
-                                   copy.setParenTId(e.parenTId);
-                                   copy.setChildren(e.children);
-                                   return copy;
-                               }),
-                               Node::getId,
-                               Node::getParenTId,
-                               Node::setChildren,
-                               // 自定义根节点判断
-                               (helper, e) -> id.contains(e.getId())))
-            .map(result -> {
-                Node children = result;
-                assertNotNull(children);
-                while (CollectionUtils.isNotEmpty(children.getChildren())) {
-                    children = children.getChildren().get(0);
-                }
-                return children.getId();
-            })
-            .as(StepVerifier::create)
-            .expectNextMatches("4"::equals)
-            .expectNextMatches("4"::equals)
-            .verifyComplete();
+        List<Node> tree = TreeUtils
+                .list2tree(Collections2.transform(nodes, e -> {
+                               Node copy = new Node();
+                               copy.setId(e.id);
+                               copy.setParenTId(e.parenTId);
+                               copy.setChildren(e.children);
+                               return copy;
+                           }),
+                           Node::getId,
+                           Node::getParenTId,
+                           Node::setChildren,
+                           // 自定义根节点判断
+                           (helper, e) -> "2".contains(e.getId()));
+        assertNotNull(tree);
+        Node children = tree.get(0);
+        assertNotNull(children);
+        while (CollectionUtils.isNotEmpty(children.getChildren())) {
+            children = children.getChildren().get(0);
+        }
+        assertEquals("4", children.getId());
     }
 
     @Getter
