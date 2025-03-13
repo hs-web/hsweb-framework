@@ -134,7 +134,7 @@ public class TreeUtils {
 
         List<N> list = new ArrayList<>(treeIdCache.size());
 
-        cache.values().forEach(node -> {
+        for (N node : cache.values()) {
             List<PK> childId = treeIdCache.get(idGetter.apply(node));
             if (childId != null) {
                 //设置每个节点的子节点
@@ -144,12 +144,11 @@ public class TreeUtils {
                         .collect(Collectors.toList()));
             }
 
-
             //获取根节点
             if (rootPredicate.test(helper, node)) {
                 list.add(node);
             }
-        });
+        }
         return list;
     }
 
