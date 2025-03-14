@@ -105,13 +105,13 @@ public class TreeUtils {
             return new ArrayList<>(0);
         }
         // id,node
-        Map<PK, N> cache = Maps.newHashMapWithExpectedSize(size);
+        Map<PK, N> cache = Maps.newLinkedHashMapWithExpectedSize(size);
         // parentId,children
         Map<PK, List<N>> treeCache = dataList
-            .stream()
-            .peek(node -> cache.put(idGetter.apply(node), node))
-            .filter(e -> parentIdGetter.apply(e) != null)
-            .collect(Collectors.groupingBy(parentIdGetter));
+                .stream()
+                .peek(node -> cache.put(idGetter.apply(node), node))
+                .filter(e -> parentIdGetter.apply(e) != null)
+                .collect(Collectors.groupingBy(parentIdGetter));
 
         TreeSupportEntity.TreeHelper<N, PK> helper = new TreeSupportEntity.TreeHelper<N, PK>() {
             @Override
@@ -127,7 +127,7 @@ public class TreeUtils {
 
         List<N> list = new ArrayList<>(treeCache.size());
 
-        for (N node : dataList) {
+        for (N node : cache.values()) {
             //设置每个节点的子节点
             childConsumer.accept(node, treeCache.get(idGetter.apply(node)));
 
@@ -138,5 +138,6 @@ public class TreeUtils {
         }
         return list;
     }
+
 
 }
