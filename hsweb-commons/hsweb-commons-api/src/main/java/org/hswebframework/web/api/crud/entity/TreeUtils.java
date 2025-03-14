@@ -105,25 +105,18 @@ public class TreeUtils {
             return new ArrayList<>(0);
         }
         // id,node
-        Map<PK, N> cache = Maps.newHashMapWithExpectedSize(size);
+        Map<PK, N> cache = Maps.newLinkedHashMapWithExpectedSize(size);
         // parentId,children
-        Map<PK, List<PK>> treeIdCache = dataList
+        Map<PK, List<N>> treeCache = dataList
                 .stream()
                 .peek(node -> cache.put(idGetter.apply(node), node))
                 .filter(e -> parentIdGetter.apply(e) != null)
-                .collect(Collectors.groupingBy(parentIdGetter, Collectors.mapping(idGetter, Collectors.toList())));
+                .collect(Collectors.groupingBy(parentIdGetter));
 
         TreeSupportEntity.TreeHelper<N, PK> helper = new TreeSupportEntity.TreeHelper<N, PK>() {
             @Override
             public List<N> getChildren(PK parentId) {
-                List<PK> childId = treeIdCache.get(parentId);
-                if (childId == null) {
-                    return null;
-                }
-                return childId
-                        .stream()
-                        .map(cache::get)
-                        .collect(Collectors.toList());
+                return treeCache.get(parentId);
             }
 
             @Override
@@ -132,17 +125,11 @@ public class TreeUtils {
             }
         };
 
-        List<N> list = new ArrayList<>(treeIdCache.size());
+        List<N> list = new ArrayList<>(treeCache.size());
 
         for (N node : cache.values()) {
-            List<PK> childId = treeIdCache.get(idGetter.apply(node));
-            if (childId != null) {
-                //设置每个节点的子节点
-                childConsumer.accept(node, childId
-                        .stream()
-                        .map(cache::get)
-                        .collect(Collectors.toList()));
-            }
+            //设置每个节点的子节点
+            childConsumer.accept(node, treeCache.get(idGetter.apply(node)));
 
             //获取根节点
             if (rootPredicate.test(helper, node)) {
