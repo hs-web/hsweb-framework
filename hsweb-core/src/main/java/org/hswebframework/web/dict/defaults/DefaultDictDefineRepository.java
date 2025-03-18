@@ -15,9 +15,12 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Slf4j
 public class DefaultDictDefineRepository implements DictDefineRepository {
-    protected static final Map<String, DictDefine> parsedDict = new ConcurrentHashMap<>();
+    protected final Map<String, DictDefine> parsedDict = new ConcurrentHashMap<>();
 
-    public static void registerDefine(DictDefine define) {
+    public DefaultDictDefineRepository() {
+    }
+
+    public void registerDefine(DictDefine define) {
         if (define == null || define.getId() == null) {
             return;
         }
