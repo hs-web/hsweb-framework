@@ -18,6 +18,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Collection;
+import java.util.List;
 
 public class DefaultDictionaryService extends GenericReactiveCrudService<DictionaryEntity, String> {
 
@@ -30,43 +31,44 @@ public class DefaultDictionaryService extends GenericReactiveCrudService<Diction
     @Override
     public Mono<Integer> insert(Publisher<DictionaryEntity> entityPublisher) {
         return super.insert(entityPublisher)
-                .doOnSuccess(r->eventPublisher.publishEvent(ClearDictionaryCacheEvent.of()));
+                .doOnSuccess(r -> eventPublisher.publishEvent(ClearDictionaryCacheEvent.of()));
     }
 
     @Override
     public Mono<Integer> insertBatch(Publisher<? extends Collection<DictionaryEntity>> entityPublisher) {
         return super.insertBatch(entityPublisher)
-                .doOnSuccess(r->eventPublisher.publishEvent(ClearDictionaryCacheEvent.of()));
+                .doOnSuccess(r -> eventPublisher.publishEvent(ClearDictionaryCacheEvent.of()));
     }
 
     @Override
     public Mono<Integer> updateById(String id, Mono<DictionaryEntity> entityPublisher) {
-        return super.updateById(id,entityPublisher)
-                .doOnSuccess(r->eventPublisher.publishEvent(ClearDictionaryCacheEvent.of()));
+        return super.updateById(id, entityPublisher)
+                .doOnSuccess(r -> eventPublisher.publishEvent(ClearDictionaryCacheEvent.of()));
     }
 
     @Override
     public Mono<Integer> deleteById(Publisher<String> idPublisher) {
         return super.deleteById(idPublisher)
-                .doOnSuccess(r->eventPublisher.publishEvent(ClearDictionaryCacheEvent.of()));
+                .doOnSuccess(r -> eventPublisher.publishEvent(ClearDictionaryCacheEvent.of()));
     }
 
     @Override
     public Mono<SaveResult> save(Publisher<DictionaryEntity> entityPublisher) {
-        return super.save(entityPublisher)
-                .doOnSuccess(r->eventPublisher.publishEvent(ClearDictionaryCacheEvent.of()));
+        return filterData(entityPublisher)
+                .as(super::save)
+                .doOnSuccess(r -> eventPublisher.publishEvent(ClearDictionaryCacheEvent.of()));
     }
 
     @Override
     public ReactiveUpdate<DictionaryEntity> createUpdate() {
         return super.createUpdate()
-                .onExecute((ignore,r)->r.doOnSuccess(l->eventPublisher.publishEvent(ClearDictionaryCacheEvent.of())));
+                .onExecute((ignore, r) -> r.doOnSuccess(l -> eventPublisher.publishEvent(ClearDictionaryCacheEvent.of())));
     }
 
     @Override
     public ReactiveDelete createDelete() {
         return super.createDelete()
-                .onExecute((ignore,r)->r.doOnSuccess(l->eventPublisher.publishEvent(ClearDictionaryCacheEvent.of())));
+                .onExecute((ignore, r) -> r.doOnSuccess(l -> eventPublisher.publishEvent(ClearDictionaryCacheEvent.of())));
     }
 
 
@@ -110,5 +112,26 @@ public class DefaultDictionaryService extends GenericReactiveCrudService<Diction
                 .filter(dict -> allowEmptyItem || CollectionUtils.isNotEmpty(dict.getItems()));
     }
 
-
+    public Flux<DictionaryEntity> filterData(Publisher<DictionaryEntity> entityPublisher) {
+        Flux<DictionaryEntity> dictCache = Flux.concat(entityPublisher).cache();
+        return Mono.zip(dictCache
+                                .map(DictionaryEntity::getId)
+                                .collectList(),
+                        this.createQuery()
+                                .and(DictionaryEntity::getClassified, "system")
+                                .fetch()
+                                .map(DictionaryEntity::getId)
+                                .collectList()
+                ).
+                flatMapMany(tp2 -> {
+                    //移出是system的数据
+                    List<String> t1 = tp2.getT1();
+                    t1.removeAll(tp2.getT2());
+                    if (t1.isEmpty()) {
+                        return Flux.empty();
+                    }
+                    return dictCache
+                            .filter(entity -> t1.contains(entity.getId()));
+                });
+    }
 }
