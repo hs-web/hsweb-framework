@@ -10,6 +10,7 @@ import org.hswebframework.ezorm.rdb.executor.wrapper.ResultWrapper;
 import org.hswebframework.web.api.crud.entity.TransactionManagers;
 import org.hswebframework.web.datasource.DataSourceHolder;
 import org.hswebframework.web.datasource.R2dbcDataSource;
+import org.hswebframework.web.exception.I18nSupportException;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.r2dbc.connection.ConnectionFactoryUtils;
@@ -48,6 +49,17 @@ public class DefaultR2dbcExecutor extends R2dbcReactiveSqlExecutor {
         return sqlRequest;
     }
 
+    @Override
+    protected Statement prepareStatement(Statement statement, SqlRequest request) {
+        try {
+            return super.prepareStatement(statement, request);
+        } catch (Throwable e) {
+            throw new I18nSupportException
+                .NoStackTrace("error.sql.prepare", e)
+                .withSource("sql.prepare", request);
+        }
+    }
+
     protected void bindNull(Statement statement, int index, Class type) {
         if (type == Date.class) {
             type = LocalDateTime.class;
@@ -60,11 +72,12 @@ public class DefaultR2dbcExecutor extends R2dbcReactiveSqlExecutor {
     }
 
     protected void bind(Statement statement, int index, Object value) {
+
         if (value instanceof Date) {
             value = ((Date) value)
-                    .toInstant()
-                    .atZone(ZoneOffset.systemDefault())
-                    .toLocalDateTime();
+                .toInstant()
+                .atZone(ZoneOffset.systemDefault())
+                .toLocalDateTime();
         }
         if (bindCustomSymbol) {
             statement.bind(getBindSymbol() + (index + getBindFirstIndex()), value);
@@ -77,8 +90,8 @@ public class DefaultR2dbcExecutor extends R2dbcReactiveSqlExecutor {
     protected Mono<Connection> getConnection() {
         if (DataSourceHolder.isDynamicDataSourceReady()) {
             return DataSourceHolder.currentR2dbc()
-                    .flatMap(R2dbcDataSource::getNative)
-                    .flatMap(ConnectionFactoryUtils::getConnection);
+                                   .flatMap(R2dbcDataSource::getNative)
+                                   .flatMap(ConnectionFactoryUtils::getConnection);
         } else {
             return ConnectionFactoryUtils.getConnection(defaultFactory);
         }
@@ -116,7 +129,7 @@ public class DefaultR2dbcExecutor extends R2dbcReactiveSqlExecutor {
     @Override
     @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager)
     public Mono<Integer> update(String sql, Object... args) {
-        return super.update(sql,args);
+        return super.update(sql, args);
     }
 
     @Override
@@ -128,18 +141,18 @@ public class DefaultR2dbcExecutor extends R2dbcReactiveSqlExecutor {
     @Override
     @Transactional(readOnly = true, transactionManager = TransactionManagers.reactiveTransactionManager)
     public Flux<Map<String, Object>> select(String sql, Object... args) {
-        return super.select(sql,args);
+        return super.select(sql, args);
     }
 
     @Override
     @Transactional(readOnly = true, transactionManager = TransactionManagers.reactiveTransactionManager)
     public <E> Flux<E> select(String sql, ResultWrapper<E, ?> wrapper) {
-        return super.select(sql,wrapper);
+        return super.select(sql, wrapper);
     }
 
     @Override
     @Transactional(readOnly = true, transactionManager = TransactionManagers.reactiveTransactionManager)
     public <E> Flux<E> select(SqlRequest sqlRequest, ResultWrapper<E, ?> wrapper) {
-        return super.select(sqlRequest,wrapper);
+        return super.select(sqlRequest, wrapper);
     }
 }

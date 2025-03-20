@@ -2,9 +2,7 @@ package org.hswebframework.web.crud.configuration;
 
 import lombok.SneakyThrows;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.ServiceLoader;
+import java.util.*;
 
 public class DialectProviders {
     private static final Map<String, DialectProvider> allSupportedDialect = new HashMap<>();
@@ -17,6 +15,10 @@ public class DialectProviders {
         for (DialectProvider dialectProvider : ServiceLoader.load(DialectProvider.class)) {
             allSupportedDialect.put(dialectProvider.name(), dialectProvider);
         }
+    }
+
+    public static List<DialectProvider> all(){
+        return new ArrayList<>(allSupportedDialect.values());
     }
 
     @SneakyThrows

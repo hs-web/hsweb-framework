@@ -27,6 +27,7 @@ import org.hswebframework.ezorm.rdb.mapping.annotation.JsonCodec;
 import org.hswebframework.web.api.crud.entity.GenericTreeSortSupportEntity;
 import org.hswebframework.web.dict.EnumDict;
 import org.hswebframework.web.i18n.I18nSupportUtils;
+import org.hswebframework.web.i18n.LocaleUtils;
 import org.hswebframework.web.i18n.MultipleI18nSupportEntity;
 import org.hswebframework.web.utils.DigestUtils;
 import org.springframework.util.StringUtils;
@@ -104,7 +105,16 @@ public class DictionaryItemEntity extends GenericTreeSortSupportEntity<String>
     private Map<String, Map<String, String>> i18nMessages;
 
     public String getI18nText() {
-        return getI18nMessage("text", this.name);
+        return getI18nMessage("text", this.text);
+    }
+
+    /**
+     * 根据消息key生成默认的的语言并填充到i18nMessages中
+     *
+     * @param i18nKey key,在国际化文件中定义.
+     */
+    public void putI18nText(String i18nKey) {
+        putI18nText(i18nKey, LocaleUtils.getSupportLocales());
     }
 
     /**

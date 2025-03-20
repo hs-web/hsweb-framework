@@ -1,5 +1,6 @@
 package org.hswebframework.web.dictionary.configuration;
 
+import org.hswebframework.web.cache.ReactiveCacheManager;
 import org.hswebframework.web.dictionary.service.CompositeDictDefineRepository;
 import org.hswebframework.web.dictionary.service.DefaultDictionaryItemService;
 import org.hswebframework.web.dictionary.service.DefaultDictionaryService;
@@ -30,13 +31,15 @@ public class DictionaryAutoConfiguration {
         }
 
         @Bean
-        public CompositeDictDefineRepository compositeDictDefineRepository(DictionaryProperties properties) {
-            CompositeDictDefineRepository repository = new CompositeDictDefineRepository();
-            properties.doScanEnum()
-                    .stream()
-                    .map(CompositeDictDefineRepository::parseEnumDict)
-                    .forEach(repository::addDefine);
-            return repository;
+        public CompositeDictDefineRepository compositeDictDefineRepository(DictionaryProperties properties,
+                                                                           DefaultDictionaryService service,
+                                                                           ReactiveCacheManager cacheManager) {
+
+            return new CompositeDictDefineRepository(
+                service,
+                cacheManager,
+                properties
+            );
         }
     }
 
@@ -46,12 +49,12 @@ public class DictionaryAutoConfiguration {
     static class DictionaryWebFluxConfiguration {
 
         @Bean
-        public WebfluxDictionaryController webfluxDictionaryController(){
+        public WebfluxDictionaryController webfluxDictionaryController() {
             return new WebfluxDictionaryController();
         }
 
         @Bean
-        public WebfluxDictionaryItemController webfluxDictionaryItemController(){
+        public WebfluxDictionaryItemController webfluxDictionaryItemController() {
             return new WebfluxDictionaryItemController();
         }
     }

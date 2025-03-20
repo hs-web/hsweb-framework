@@ -11,7 +11,7 @@ import reactor.core.publisher.*;
 import reactor.util.context.Context;
 
 import javax.annotation.Nonnull;
-import java.util.Locale;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.function.*;
 
@@ -36,6 +36,35 @@ public final class LocaleUtils {
 
     static MessageSource messageSource = UnsupportedMessageSource.instance();
 
+    static Set<Locale> supportsLocales;
+
+    static {
+        supportsLocales = new HashSet<>();
+        supportsLocales.add(Locale.CHINESE);
+        supportsLocales.add(Locale.ENGLISH);
+        String prop = System.getProperty("hsweb.locale.supports");
+        if (prop != null) {
+            try {
+                for (String locale : prop.split(",")) {
+                    if (locale.isEmpty()) {
+                        continue;
+                    }
+                    supportsLocales.add(Locale.forLanguageTag(locale));
+                }
+            } catch (Throwable e) {
+                System.err.println("error parse hsweb.locale.supports :" + prop);
+            }
+        }
+    }
+
+    /**
+     * 获取支持的语言地区,默认支持中文和英文,可通过jvm参数: -Dhsweb.locale.supports=zh,en 来指定支持的语言地区
+     *
+     * @return 支持的语言地区
+     */
+    public static Set<Locale> getSupportLocales() {
+        return Collections.unmodifiableSet(supportsLocales);
+    }
 
     /**
      * 从指定数据源中获取国际化消息

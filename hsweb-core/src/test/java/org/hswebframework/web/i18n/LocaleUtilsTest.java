@@ -11,6 +11,15 @@ import static org.junit.Assert.*;
 
 public class LocaleUtilsTest {
 
+    @Test
+    public void testSupports(){
+
+        assertNotNull(LocaleUtils.getSupportLocales());
+
+        System.out.println(LocaleUtils.getSupportLocales());
+
+
+    }
 
     @Test
     public void testFlux() {

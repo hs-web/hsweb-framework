@@ -17,13 +17,13 @@ import static org.hswebframework.web.bean.ToString.Feature.nullPropertyToEmpty;
 @Getter
 @Setter
 public class Target {
-    private String   name;
+    private String name;
     private String[] ids;
 
 
     private Boolean boy;
     private boolean boy2;
-    private String  boy3;
+    private String boy3;
 
     private int age;
 
@@ -37,7 +37,7 @@ public class Target {
 
     private Date updateTime;
 
-    @ToString.Features({coverIgnoreProperty,jsonFormat})
+    @ToString.Features({coverIgnoreProperty, jsonFormat})
     @ToString.Ignore(value = "password")
     private NestObject nestObject;
 
@@ -66,6 +66,8 @@ public class Target {
 
     private Color[] colors;
 
+    private long[] arr7;
+    private List<Integer> arr8;
 
     @Override
     public String toString() {
