@@ -87,6 +87,10 @@ public class RedisAccessTokenManager implements AccessTokenManager {
         return "oauth2-" + clientId + "-token";
     }
 
+    private String createUserTokenRedisKey(String key) {
+        return "user-token:".concat(key);
+    }
+
     private Mono<RedisAccessToken> doCreateAccessToken(String clientId, Authentication authentication, boolean singleton) {
         String token = DigestUtils.md5Hex(UUID.randomUUID().toString());
         String refresh = DigestUtils.md5Hex(UUID.randomUUID().toString());
@@ -136,13 +140,17 @@ public class RedisAccessTokenManager implements AccessTokenManager {
 
     private Mono<AccessToken> doCreateSingletonAccessToken(String clientId, Authentication authentication) {
         String redisKey = createSingletonTokenRedisKey(clientId);
-
+        String userRedisKey = createUserTokenRedisKey(clientId);
         return tokenRedis
                 .opsForValue()
                 .get(redisKey)
                 .flatMap(token -> tokenRedis
-                        .getExpire(redisKey)
-                        .map(duration -> token.toAccessToken((int) (duration.toMillis() / 1000))))
+                        .opsForValue()
+                        .get(userRedisKey)
+                        .flatMap(ignore -> tokenRedis
+                                .getExpire(redisKey)
+                                .map(duration -> token.toAccessToken((int) (duration.toMillis() / 1000))))
+                )
                 .switchIfEmpty(Mono.defer(() -> doCreateAccessToken(clientId, authentication, true)
                         .flatMap(redisAccessToken -> tokenRedis
                                 .opsForValue()
