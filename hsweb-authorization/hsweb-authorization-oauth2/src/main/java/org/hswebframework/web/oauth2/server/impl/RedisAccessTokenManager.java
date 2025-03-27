@@ -85,10 +85,6 @@ public class RedisAccessTokenManager implements AccessTokenManager {
         return "oauth2-" + clientId + "-token";
     }
 
-    private String createUserTokenRedisKey(String key) {
-        return "user-token:".concat(key);
-    }
-
     private Mono<RedisAccessToken> doCreateAccessToken(String clientId, Authentication authentication, boolean singleton) {
         String token = DigestUtils.md5Hex(UUID.randomUUID().toString());
         String refresh = DigestUtils.md5Hex(UUID.randomUUID().toString());
