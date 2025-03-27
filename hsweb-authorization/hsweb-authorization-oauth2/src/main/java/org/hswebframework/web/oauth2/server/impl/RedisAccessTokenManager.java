@@ -143,7 +143,7 @@ public class RedisAccessTokenManager implements AccessTokenManager {
                 .get(redisKey)
                 .flatMap(token -> userTokenManager
                         .tokenIsLoggedIn(token.getAccessToken())
-                        .filter(flag -> flag)
+                        .filterWhen(Mono::just)
                         .flatMap(ignore -> tokenRedis
                                 .getExpire(redisKey)
                                 .map(duration -> token.toAccessToken((int) (duration.toMillis() / 1000))))
