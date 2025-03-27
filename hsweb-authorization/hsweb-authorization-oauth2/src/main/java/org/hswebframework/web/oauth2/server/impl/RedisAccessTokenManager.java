@@ -141,13 +141,10 @@ public class RedisAccessTokenManager implements AccessTokenManager {
         return tokenRedis
                 .opsForValue()
                 .get(redisKey)
-                .flatMap(token -> userTokenManager
-                        .tokenIsLoggedIn(token.getAccessToken())
-                        .filterWhen(Mono::just)
-                        .flatMap(ignore -> tokenRedis
-                                .getExpire(redisKey)
-                                .map(duration -> token.toAccessToken((int) (duration.toMillis() / 1000))))
-                )
+                .filterWhen(token -> userTokenManager.tokenIsLoggedIn(token.getAccessToken()))
+                .flatMap(token -> tokenRedis
+                        .getExpire(redisKey)
+                        .map(duration -> token.toAccessToken((int) (duration.toMillis() / 1000))))
                 .switchIfEmpty(Mono.defer(() -> doCreateAccessToken(clientId, authentication, true)
                         .flatMap(redisAccessToken -> tokenRedis
                                 .opsForValue()
