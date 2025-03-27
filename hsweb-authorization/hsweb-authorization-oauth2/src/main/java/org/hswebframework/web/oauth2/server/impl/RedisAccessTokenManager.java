@@ -141,8 +141,15 @@ public class RedisAccessTokenManager implements AccessTokenManager {
         return tokenRedis
                 .opsForValue()
                 .get(redisKey)
-                .flatMap(token -> userTokenManager
-                        .userIsLoggedIn(authentication.getUser().getId())
+                .flatMap(token -> Mono
+                        .zip(
+                                userTokenManager
+                                        .userIsLoggedIn(authentication.getUser().getId()),
+                                userTokenManager
+                                        .tokenIsLoggedIn(token.getAccessToken()),
+                                // 通过userId或token认证用户是否授权，其任意方式认证通过即可
+                                (flag1, flag2) -> flag1 || flag2
+                        )
                         .filter(flag -> flag)
                         .flatMap(ignore -> tokenRedis
                                 .getExpire(redisKey)
