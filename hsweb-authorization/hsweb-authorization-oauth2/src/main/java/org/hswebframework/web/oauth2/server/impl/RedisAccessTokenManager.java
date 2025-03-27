@@ -20,8 +20,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 
 public class RedisAccessTokenManager implements AccessTokenManager {
@@ -140,13 +138,12 @@ public class RedisAccessTokenManager implements AccessTokenManager {
 
     private Mono<AccessToken> doCreateSingletonAccessToken(String clientId, Authentication authentication) {
         String redisKey = createSingletonTokenRedisKey(clientId);
-        String userRedisKey = createUserTokenRedisKey(clientId);
         return tokenRedis
                 .opsForValue()
                 .get(redisKey)
-                .flatMap(token -> tokenRedis
-                        .opsForValue()
-                        .get(userRedisKey)
+                .flatMap(token -> userTokenManager
+                        .userIsLoggedIn(authentication.getUser().getId())
+                        .filter(flag -> flag)
                         .flatMap(ignore -> tokenRedis
                                 .getExpire(redisKey)
                                 .map(duration -> token.toAccessToken((int) (duration.toMillis() / 1000))))
