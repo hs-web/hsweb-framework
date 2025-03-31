@@ -8,10 +8,24 @@ import static org.junit.Assert.*;
 public class DatabaseExceptionAnalyzerReporterTest {
 
     DatabaseExceptionAnalyzerReporter reporter=new DatabaseExceptionAnalyzerReporter();
+
+    @Test
+    void testTimeout(){
+
+        Assertions.assertTrue(reporter.doReportException(
+            new IllegalStateException("Timeout on blocking read for 10000 MILLISECONDS")
+        ));
+
+    }
+
     @Test
     void testBinding(){
         Assertions.assertTrue(reporter.doReportException(
             new IndexOutOfBoundsException("Binding index 0 when only 0 parameters are expected ")
+        ));
+
+        Assertions.assertTrue(reporter.doReportException(
+            new IndexOutOfBoundsException("Binding parameters is not supported for simple statement")
         ));
     }
 

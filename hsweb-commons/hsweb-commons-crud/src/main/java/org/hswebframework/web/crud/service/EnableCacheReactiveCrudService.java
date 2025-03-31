@@ -115,9 +115,10 @@ public interface EnableCacheReactiveCrudService<E, K> extends ReactiveCrudServic
     default Mono<Integer> deleteById(Publisher<K> idPublisher) {
         Flux<K> cache = Flux.from(idPublisher).cache();
         return cache
-                .collectList()
-                .flatMap(this::registerClearCache)
-                .then(ReactiveCrudService.super.deleteById(cache));
+            .map(id -> "id:" + id)
+            .collectList()
+            .flatMap(this::registerClearCache)
+            .then(ReactiveCrudService.super.deleteById(cache));
     }
 
     @Override

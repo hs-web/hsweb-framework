@@ -25,6 +25,9 @@ public class DictionaryProperties {
 
     private Set<String> enumPackages = new HashSet<>();
 
+    public DictionaryProperties() {
+    }
+
     @SneakyThrows
     public Stream<Class<?>> doScanEnum() {
         Set<String> packages = new HashSet<>(enumPackages);
@@ -36,10 +39,12 @@ public class DictionaryProperties {
             .parallelStream()
             .flatMap(enumPackage -> {
                 String path = "classpath*:" + ClassUtils.convertClassNameToResourcePath(enumPackage) + "/**/*.class";
+                log.info("scan enum dict package:{}", path);
                 Resource[] resources;
                 try {
                     resources = resourcePatternResolver.getResources(path);
                 } catch (IOException e) {
+                    log.warn("scan enum dict package:{} error:", path, e);
                     return Stream.empty();
                 }
                 return Stream
@@ -53,6 +58,7 @@ public class DictionaryProperties {
                                 return clazz;
                             }
                         } catch (Throwable ignore) {
+
                         }
                         return null;
                     })

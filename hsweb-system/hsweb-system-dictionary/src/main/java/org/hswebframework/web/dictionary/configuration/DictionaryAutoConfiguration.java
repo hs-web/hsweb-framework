@@ -1,5 +1,6 @@
 package org.hswebframework.web.dictionary.configuration;
 
+import org.hswebframework.web.cache.ReactiveCacheManager;
 import org.hswebframework.web.dictionary.service.CompositeDictDefineRepository;
 import org.hswebframework.web.dictionary.service.DefaultDictionaryItemService;
 import org.hswebframework.web.dictionary.service.DefaultDictionaryService;
@@ -30,15 +31,15 @@ public class DictionaryAutoConfiguration {
         }
 
         @Bean
-        public CompositeDictDefineRepository compositeDictDefineRepository(DictionaryProperties properties) {
-            CompositeDictDefineRepository repository = new CompositeDictDefineRepository();
+        public CompositeDictDefineRepository compositeDictDefineRepository(DictionaryProperties properties,
+                                                                           DefaultDictionaryService service,
+                                                                           ReactiveCacheManager cacheManager) {
 
-            properties
-                .doScanEnum()
-                .map(CompositeDictDefineRepository::parseEnumDict)
-                .forEach(repository::addDefine);
-
-            return repository;
+            return new CompositeDictDefineRepository(
+                service,
+                cacheManager,
+                properties
+            );
         }
     }
 

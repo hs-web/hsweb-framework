@@ -1144,7 +1144,8 @@ public class DefaultQueryHelper implements QueryHelper {
 
     }
 
-    static class JoinNestConditionalSpecImpl<T extends TermTypeConditionalSupport> extends SimpleNestConditional<T> implements JoinNestConditionalSpec<T> {
+    static class JoinNestConditionalSpecImpl<T extends TermTypeConditionalSupport>
+        extends SimpleNestConditional<T> implements JoinNestConditionalSpec<T> {
         final QuerySpec<?> parent;
 
         private final Term term;
@@ -1161,17 +1162,19 @@ public class DefaultQueryHelper implements QueryHelper {
         }
 
         @Override
-        public JoinNestConditionalSpec<NestConditional<T>> nest() {
+        @SuppressWarnings("all")
+        public JoinNestConditionalSpecImpl nest() {
             return new JoinNestConditionalSpecImpl<>(parent, this, term.nest());
         }
 
         @Override
-        public JoinNestConditionalSpec<NestConditional<T>> orNest() {
+        @SuppressWarnings("all")
+        public JoinNestConditionalSpecImpl orNest() {
             return new JoinNestConditionalSpecImpl<>(parent, this, term.orNest());
         }
 
         @Override
-        public <T1, T2> T applyColumn(StaticMethodReferenceColumn<T1> joinColumn,
+        public <T1, T2> JoinNestConditionalSpecImpl<T> applyColumn(StaticMethodReferenceColumn<T1> joinColumn,
                                       String termType,
                                       String alias,
                                       StaticMethodReferenceColumn<T2> mainOrJoinColumn) {
@@ -1193,14 +1196,14 @@ public class DefaultQueryHelper implements QueryHelper {
         }
 
         @Override
-        public <T1, T2> T applyColumn(StaticMethodReferenceColumn<T1> mainColumn,
+        public <T1, T2> JoinNestConditionalSpecImpl<T> applyColumn(StaticMethodReferenceColumn<T1> mainColumn,
                                       String termType,
                                       StaticMethodReferenceColumn<T2> joinColumn) {
             return applyColumn(joinColumn, termType, null, joinColumn);
         }
 
 
-        public T applyColumn(String mainColumn,
+        public JoinNestConditionalSpecImpl<T> applyColumn(String mainColumn,
                              String termType,
                              TableOrViewMetadata join,
                              String alias,
@@ -1212,7 +1215,7 @@ public class DefaultQueryHelper implements QueryHelper {
 
             getAccepter().accept(mainColumn, termType, new JoinConditionalSpecImpl.ColumnRef(columnMetadata, alias));
 
-            return (T) this;
+            return  this;
         }
 
         @Override
