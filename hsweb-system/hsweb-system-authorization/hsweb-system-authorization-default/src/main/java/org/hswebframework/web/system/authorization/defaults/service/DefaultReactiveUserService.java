@@ -113,6 +113,7 @@ public class DefaultReactiveUserService extends GenericReactiveCrudService<UserE
                                     old.getPassword()
                             );
 
+                    String newPassword = passwordChanged ? newer.getPassword() : null;
                     if (updatePassword) {
                         newer.setSalt(IDGenerator.RANDOM.generate());
                         passwordValidator.validate(newer.getPassword());
@@ -123,7 +124,7 @@ public class DefaultReactiveUserService extends GenericReactiveCrudService<UserE
                             .set(newer)
                             .where(newer::getId)
                             .execute()
-                            .flatMap(__ -> new UserModifiedEvent(old, newer, passwordChanged).publish(eventPublisher))
+                            .flatMap(__ -> new UserModifiedEvent(old, newer, passwordChanged, newPassword).publish(eventPublisher))
                             .thenReturn(newer)
                             .flatMap(e -> ClearUserAuthorizationCacheEvent
                                     .of(e.getId())
@@ -202,7 +203,7 @@ public class DefaultReactiveUserService extends GenericReactiveCrudService<UserE
                             .set(newer::getPassword)
                             .where(newer::getId)
                             .execute()
-                            .flatMap(e -> new UserModifiedEvent(old, newer, passwordChanged)
+                            .flatMap(e -> new UserModifiedEvent(old, newer, passwordChanged, newPassword)
                                     .publish(eventPublisher)
                                     .thenReturn(e));
                 })
