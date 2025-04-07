@@ -24,4 +24,7 @@ public class UserModifiedEvent extends DefaultAsyncEvent {
 
     //用户是否修改了密码
     private boolean passwordModified;
+
+    //新密码原始文本, passwordModified 为 true 时有值
+    private String newPassword;
 }
