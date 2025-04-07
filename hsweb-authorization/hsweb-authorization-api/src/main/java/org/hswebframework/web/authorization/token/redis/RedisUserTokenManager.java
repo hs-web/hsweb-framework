@@ -223,6 +223,7 @@ public class RedisUserTokenManager implements UserTokenManager {
                                    String type,
                                    String userId,
                                    long maxInactiveInterval,
+                                   boolean ignoreAllopatricLoginMode,
                                    Consumer<Map<String, Object>> cacheBuilder) {
         long expires = maxTokenExpires.isNegative() ? maxInactiveInterval : Math.min(maxInactiveInterval, maxTokenExpires.toMillis());
 
@@ -250,7 +251,9 @@ public class RedisUserTokenManager implements UserTokenManager {
                                 .then(userTokenMapping.add(getUserRedisKey(userId), token))
                                 .thenReturn(SimpleUserToken.of(map));
                     });
-
+                    if(ignoreAllopatricLoginMode){
+                        return doSign;
+                    }
                     AllopatricLoginMode mode = allopatricLoginModes.getOrDefault(type, allopatricLoginMode);
                     if (mode == AllopatricLoginMode.deny) {
                         return userIsLoggedIn(userId)
@@ -279,7 +282,7 @@ public class RedisUserTokenManager implements UserTokenManager {
 
     @Override
     public Mono<UserToken> signIn(String token, String type, String userId, long maxInactiveInterval) {
-        return signIn(token, type, userId, maxInactiveInterval, ignore -> {
+        return signIn(token, type, userId, maxInactiveInterval,false, ignore -> {
         });
     }
 
@@ -291,6 +294,7 @@ public class RedisUserTokenManager implements UserTokenManager {
                                                 Authentication authentication) {
         return this
                 .signIn(token, type, userId, maxInactiveInterval,
+                        true,
                         cache -> cache.put("authentication", authentication))
                 .cast(AuthenticationUserToken.class);
     }
