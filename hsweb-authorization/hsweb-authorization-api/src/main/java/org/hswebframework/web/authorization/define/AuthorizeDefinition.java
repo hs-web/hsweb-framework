@@ -21,6 +21,10 @@ public interface AuthorizeDefinition {
 
     boolean isEmpty();
 
+    default boolean allowAnonymous() {
+        return false;
+    }
+
     default String getDescription() {
         ResourcesDefinition res = getResources();
         StringJoiner joiner = new StringJoiner(";");

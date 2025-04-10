@@ -70,7 +70,10 @@ public class AopAuthorizingController extends StaticMethodMatcherPointcutAdvisor
             .invokeReactive(
                 Authentication
                     .currentReactive()
-                    .switchIfEmpty(Mono.error(UnAuthorizedException.NoStackTrace::new))
+                    .switchIfEmpty(
+                        context.getDefinition().allowAnonymous()
+                            ? Mono.empty()
+                            : Mono.error(UnAuthorizedException.NoStackTrace::new))
                     .flatMap(auth -> {
                         context.setAuthentication(auth);
                         //响应式不再支持数据权限控制
@@ -124,7 +127,7 @@ public class AopAuthorizingController extends StaticMethodMatcherPointcutAdvisor
             Class<?> returnType = methodInvocation.getMethod().getReturnType();
             //handle reactive method
             if (Publisher.class.isAssignableFrom(returnType)) {
-               return handleReactive0(definition, holder, context, () -> invokeReactive(methodInvocation));
+                return handleReactive0(definition, holder, context, () -> invokeReactive(methodInvocation));
             }
 
             Authentication authentication = Authentication

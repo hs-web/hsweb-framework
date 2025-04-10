@@ -43,18 +43,20 @@ public class DefaultBasicAuthorizeDefinition implements AopAuthorizeDefinition {
 
     private Phased phased = Phased.before;
 
+    private boolean allowAnonymous = false;
+
     @Override
     public boolean isEmpty() {
         return false;
     }
 
     private static final Set<Class<? extends Annotation>> types = new HashSet<>(Arrays.asList(
-            Authorize.class,
-            DataAccess.class,
-            Dimension.class,
-            Resource.class,
-            ResourceAction.class,
-            DataAccessType.class
+        Authorize.class,
+        DataAccess.class,
+        Dimension.class,
+        Resource.class,
+        ResourceAction.class,
+        DataAccessType.class
     ));
 
     public static AopAuthorizeDefinition from(Class<?> targetClass, Method method) {
@@ -75,6 +77,9 @@ public class DefaultBasicAuthorizeDefinition implements AopAuthorizeDefinition {
         }
         for (Dimension dimension : ann.dimension()) {
             putAnnotation(dimension);
+        }
+        if (ann.anonymous()) {
+            allowAnonymous = true;
         }
     }
 
