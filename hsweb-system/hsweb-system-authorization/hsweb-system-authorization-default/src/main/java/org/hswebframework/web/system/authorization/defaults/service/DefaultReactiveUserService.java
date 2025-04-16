@@ -124,12 +124,15 @@ public class DefaultReactiveUserService extends GenericReactiveCrudService<UserE
                             .set(newer)
                             .where(newer::getId)
                             .execute()
-                            .flatMap(__ -> new UserModifiedEvent(old, newer, passwordChanged, newPassword).publish(eventPublisher))
-                            .thenReturn(newer)
-                            .flatMap(e -> ClearUserAuthorizationCacheEvent
-                                    .of(e.getId())
-                                    .publish(eventPublisher)
-                                    .thenReturn(e));
+                            .flatMap(__ -> getRepository()
+                                    .findById(newer.getId())
+                                    .flatMap(newEntity -> new UserModifiedEvent(old, newEntity, passwordChanged, newPassword)
+                                            .publish(eventPublisher)
+                                            .thenReturn(newEntity))
+                                    .flatMap(e -> ClearUserAuthorizationCacheEvent
+                                            .of(e.getId())
+                                            .publish(eventPublisher)
+                                            .thenReturn(e)));
                 });
 
     }
