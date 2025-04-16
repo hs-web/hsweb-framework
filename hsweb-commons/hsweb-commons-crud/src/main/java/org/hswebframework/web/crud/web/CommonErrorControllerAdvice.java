@@ -30,6 +30,7 @@ import org.springframework.web.server.*;
 import reactor.core.publisher.Mono;
 
 import jakarta.validation.ConstraintViolationException;
+
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
@@ -199,7 +200,10 @@ public class CommonErrorControllerAdvice {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Mono<ResponseMessage<Object>> handleException(NullPointerException e) {
         log.warn(e.getLocalizedMessage(), e);
-        return Mono.just(ResponseMessage.error(e.getMessage()));
+
+        return LocaleUtils
+            .resolveMessageReactive("error.internal_server_error")
+            .map(msg -> ResponseMessage.error(500, "internal_server_error", msg));
     }
 
     @ExceptionHandler
