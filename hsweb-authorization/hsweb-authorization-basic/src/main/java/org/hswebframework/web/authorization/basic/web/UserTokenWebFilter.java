@@ -43,41 +43,46 @@ public class UserTokenWebFilter implements WebFilter, BeanPostProcessor {
     public Mono<Void> filter(@NonNull ServerWebExchange exchange, WebFilterChain chain) {
 
         return Flux
-                .fromIterable(parsers)
-                .flatMap(parser -> parser.parseToken(exchange))
-                .next()
-                .map(token -> chain
-                        .filter(exchange)
-                        .contextWrite(Context.of(ParsedToken.class, token)))
-                .defaultIfEmpty(chain.filter(exchange))
-                .flatMap(Function.identity())
-                .contextWrite(ReactiveLogger.start("requestId", exchange.getRequest().getId()));
+            .fromIterable(parsers)
+            .flatMap(parser -> parser.parseToken(exchange))
+            .next()
+            .map(token -> chain
+                .filter(exchange)
+                .contextWrite(Context.of(ParsedToken.class, token)))
+            .defaultIfEmpty(chain.filter(exchange))
+            .flatMap(Function.identity())
+            .contextWrite(ReactiveLogger.start("requestId", exchange.getRequest().getId()));
 
     }
 
     @EventListener
     public void handleUserSign(AuthorizationSuccessEvent event) {
         ReactiveUserTokenGenerator generator = event
-                .<String>getParameter("tokenType")
-                .map(tokenGeneratorMap::get)
-                .orElseGet(() -> tokenGeneratorMap.get("default"));
+            .<String>getParameter("tokenType")
+            .map(tokenGeneratorMap::get)
+            .orElseGet(() -> tokenGeneratorMap.get("default"));
         if (generator != null) {
             GeneratedToken token = generator.generate(event.getAuthentication());
             event.getResult().putAll(token.getResponse());
             if (StringUtils.hasText(token.getToken())) {
                 event.getResult().put("token", token.getToken());
-                long expires = event.getParameter("expires")
-                                    .map(String::valueOf)
-                                    .map(Long::parseLong)
-                                    .orElse(token.getTimeout());
-                event.getResult().put("expires", expires);
-                event.async(userTokenManager
-                                    .signIn(token.getToken(), token.getType(), event
-                                            .getAuthentication()
-                                            .getUser()
-                                            .getId(), expires)
-                                    .doOnNext(t -> log.debug("user [{}] sign in", t.getUserId()))
-                                    .then());
+                long expires = event
+                    .getParameter("expires")
+                    .map(String::valueOf)
+                    .map(Long::parseLong)
+                    .orElse(token.getTimeout());
+
+                event.async(
+                    userTokenManager
+                        .signIn(token.getToken(), token.getType(), event
+                            .getAuthentication()
+                            .getUser()
+                            .getId(), expires)
+                        .doOnNext(t -> {
+                            event.getResult().put("expires", t.getMaxInactiveInterval());
+                            log.debug("user [{}] sign in", t.getUserId());
+                        })
+                        .then());
             }
         }
 

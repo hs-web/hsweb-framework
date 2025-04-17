@@ -246,16 +246,15 @@ public class RedisUserTokenManager implements UserTokenManager {
                 .publishEvent(event)
                 .then(Mono.defer(() -> {
                     map.put("maxInactiveInterval", event.getExpires());
+                    if (event.getExpires() > 0) {
+                        return userTokenStore
+                            .putAll(key, map)
+                            .then(operations.expire(key, Duration.ofMillis(event.getExpires())));
+                    }
                     return userTokenStore.putAll(key, map);
                 }))
-                .then(Mono.defer(() -> {
-                    if (event.getExpires() > 0) {
-                        return operations.expire(key, Duration.ofMillis(event.getExpires()));
-                    }
-                    return Mono.empty();
-                }))
                 .then(userTokenMapping.add(getUserRedisKey(userId), token))
-                .thenReturn(SimpleUserToken.of(map));
+                .thenReturn(userToken);
         });
     }
 
