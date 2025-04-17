@@ -250,7 +250,7 @@ public class RedisUserTokenManager implements UserTokenManager {
                 }))
                 .then(Mono.defer(() -> {
                     if (expires > 0) {
-                        return operations.expire(key, Duration.ofMillis(expires));
+                        return operations.expire(key, Duration.ofMillis(event.getExpires()));
                     }
                     return Mono.empty();
                 }))
