@@ -5,15 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.web.authorization.events.AuthorizationSuccessEvent;
 import org.hswebframework.web.authorization.token.ParsedToken;
 import org.hswebframework.web.authorization.token.UserTokenManager;
-import org.hswebframework.web.context.ContextUtils;
 import org.hswebframework.web.logger.ReactiveLogger;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.event.EventListener;
 import org.springframework.lang.NonNull;
-import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
@@ -66,18 +60,23 @@ public class UserTokenWebFilter implements WebFilter {
             event.getResult().putAll(token.getResponse());
             if (StringUtils.hasText(token.getToken())) {
                 event.getResult().put("token", token.getToken());
-                long expires = event.getParameter("expires")
-                                    .map(String::valueOf)
-                                    .map(Long::parseLong)
-                                    .orElse(token.getTimeout());
-                event.getResult().put("expires", expires);
-                event.async(userTokenManager
-                                .signIn(token.getToken(), token.getType(), event
-                                    .getAuthentication()
-                                    .getUser()
-                                    .getId(), expires)
-                                .doOnNext(t -> log.debug("user [{}] sign in", t.getUserId()))
-                                .then());
+                long expires = event
+                    .getParameter("expires")
+                    .map(String::valueOf)
+                    .map(Long::parseLong)
+                    .orElse(token.getTimeout());
+
+                event.async(
+                    userTokenManager
+                        .signIn(token.getToken(), token.getType(), event
+                            .getAuthentication()
+                            .getUser()
+                            .getId(), expires)
+                        .doOnNext(t -> {
+                            event.getResult().put("expires", t.getMaxInactiveInterval());
+                            log.debug("user [{}] sign in", t.getUserId());
+                        })
+                        .then());
             }
         }
 

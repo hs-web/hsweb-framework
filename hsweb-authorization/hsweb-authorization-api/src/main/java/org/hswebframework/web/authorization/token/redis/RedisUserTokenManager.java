@@ -9,6 +9,7 @@ import org.hswebframework.web.authorization.token.event.UserTokenChangedEvent;
 import org.hswebframework.web.authorization.token.event.UserTokenCreatedEvent;
 import org.hswebframework.web.authorization.token.event.UserTokenRemovedEvent;
 import org.hswebframework.web.bean.FastBeanCopier;
+import org.hswebframework.web.event.AsyncEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory;
 import org.springframework.data.redis.core.*;
@@ -219,6 +220,44 @@ public class RedisUserTokenManager implements UserTokenManager {
             });
     }
 
+    protected Mono<SimpleUserToken> sign0(String token,
+                                          String type,
+                                          String userId,
+                                          long expires,
+                                          boolean ignoreAllopatricLoginMode,
+                                          Consumer<Map<String, Object>> cacheBuilder) {
+        return Mono.defer(() -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("token", token);
+            map.put("type", type);
+            map.put("userId", userId);
+            map.put("maxInactiveInterval", expires);
+            map.put("state", TokenState.normal.getValue());
+            map.put("signInTime", System.currentTimeMillis());
+            map.put("lastRequestTime", System.currentTimeMillis());
+            cacheBuilder.accept(map);
+            String key = getTokenRedisKey(token);
+            SimpleUserToken userToken = SimpleUserToken.of(map);
+
+            // 推送事件,自定义过期时间等场景
+            UserTokenBeforeCreateEvent event = new UserTokenBeforeCreateEvent(userToken, expires);
+
+            return this
+                .publishEvent(event)
+                .then(Mono.defer(() -> {
+                    map.put("maxInactiveInterval", event.getExpires());
+                    if (event.getExpires() > 0) {
+                        return userTokenStore
+                            .putAll(key, map)
+                            .then(operations.expire(key, Duration.ofMillis(event.getExpires())));
+                    }
+                    return userTokenStore.putAll(key, map);
+                }))
+                .then(userTokenMapping.add(getUserRedisKey(userId), token))
+                .thenReturn(userToken);
+        });
+    }
+
     private Mono<UserToken> signIn(String token,
                                    String type,
                                    String userId,
@@ -229,29 +268,16 @@ public class RedisUserTokenManager implements UserTokenManager {
 
         return Mono
             .defer(() -> {
-                Mono<SimpleUserToken> doSign = Mono.defer(() -> {
-                    Map<String, Object> map = new HashMap<>();
-                    map.put("token", token);
-                    map.put("type", type);
-                    map.put("userId", userId);
-                    map.put("maxInactiveInterval", expires);
-                    map.put("state", TokenState.normal.getValue());
-                    map.put("signInTime", System.currentTimeMillis());
-                    map.put("lastRequestTime", System.currentTimeMillis());
-                    cacheBuilder.accept(map);
-                    String key = getTokenRedisKey(token);
-                    return userTokenStore
-                        .putAll(key, map)
-                        .then(Mono.defer(() -> {
-                            if (expires > 0) {
-                                return operations.expire(key, Duration.ofMillis(expires));
-                            }
-                            return Mono.empty();
-                        }))
-                        .then(userTokenMapping.add(getUserRedisKey(userId), token))
-                        .thenReturn(SimpleUserToken.of(map));
-                });
-                if(ignoreAllopatricLoginMode){
+                Mono<SimpleUserToken> doSign = sign0(
+                    token,
+                    type,
+                    userId,
+                    expires,
+                    ignoreAllopatricLoginMode,
+                    cacheBuilder
+                );
+
+                if (ignoreAllopatricLoginMode) {
                     return doSign;
                 }
                 AllopatricLoginMode mode = allopatricLoginModes.getOrDefault(type, allopatricLoginMode);
@@ -282,7 +308,7 @@ public class RedisUserTokenManager implements UserTokenManager {
 
     @Override
     public Mono<UserToken> signIn(String token, String type, String userId, long maxInactiveInterval) {
-        return signIn(token, type, userId, maxInactiveInterval,false, ignore -> {
+        return signIn(token, type, userId, maxInactiveInterval, false, ignore -> {
         });
     }
 
@@ -362,6 +388,13 @@ public class RedisUserTokenManager implements UserTokenManager {
         return new UserTokenChangedEvent(old, newToken)
             .publish(eventPublisher)
             .then(notifyTokenRemoved(newToken.getToken()));
+    }
+
+    private Mono<Void> publishEvent(AsyncEvent event) {
+        if (eventPublisher != null) {
+            return event.publish(eventPublisher);
+        }
+        return Mono.empty();
     }
 
     private Mono<UserToken> onUserTokenCreated(SimpleUserToken token) {

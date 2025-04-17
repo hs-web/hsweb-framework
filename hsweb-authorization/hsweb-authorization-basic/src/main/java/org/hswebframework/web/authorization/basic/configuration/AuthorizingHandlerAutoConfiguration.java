@@ -8,6 +8,7 @@ import org.hswebframework.web.authorization.basic.embed.EmbedReactiveAuthenticat
 import org.hswebframework.web.authorization.basic.handler.AuthorizationLoginLoggerInfoHandler;
 import org.hswebframework.web.authorization.basic.handler.DefaultAuthorizingHandler;
 import org.hswebframework.web.authorization.basic.handler.UserAllowPermissionHandler;
+import org.hswebframework.web.authorization.basic.handler.access.DefaultDataAccessController;
 import org.hswebframework.web.authorization.basic.web.*;
 import org.hswebframework.web.authorization.token.UserTokenManager;
 import org.springframework.beans.factory.ObjectProvider;
@@ -87,6 +88,7 @@ public class AuthorizingHandlerAutoConfiguration {
     public BearerTokenParser bearerTokenParser() {
         return new BearerTokenParser();
     }
+
 
     @Configuration
     @ConditionalOnProperty(prefix = "hsweb.authorize", name = "basic-authorization", havingValue = "true")
