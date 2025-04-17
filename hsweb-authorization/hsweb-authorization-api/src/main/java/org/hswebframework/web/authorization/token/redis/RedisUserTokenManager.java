@@ -249,7 +249,7 @@ public class RedisUserTokenManager implements UserTokenManager {
                     return userTokenStore.putAll(key, map);
                 }))
                 .then(Mono.defer(() -> {
-                    if (expires > 0) {
+                    if (event.getExpires() > 0) {
                         return operations.expire(key, Duration.ofMillis(event.getExpires()));
                     }
                     return Mono.empty();
