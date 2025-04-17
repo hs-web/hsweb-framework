@@ -119,20 +119,19 @@ public class DefaultReactiveUserService extends GenericReactiveCrudService<UserE
                         passwordValidator.validate(newer.getPassword());
                         newer.setPassword(passwordEncoder.encode(newer.getPassword(), newer.getSalt()));
                     }
+                    UserEntity newEntity = newer.copyTo(old);
                     return getRepository()
                             .createUpdate()
                             .set(newer)
                             .where(newer::getId)
                             .execute()
-                            .flatMap(__ -> getRepository()
-                                    .findById(newer.getId())
-                                    .flatMap(newEntity -> new UserModifiedEvent(old, newEntity, passwordChanged, newPassword)
-                                            .publish(eventPublisher)
-                                            .thenReturn(newEntity))
-                                    .flatMap(e -> ClearUserAuthorizationCacheEvent
-                                            .of(e.getId())
-                                            .publish(eventPublisher)
-                                            .thenReturn(e)));
+                            .flatMap(__ -> new UserModifiedEvent(old, newEntity, passwordChanged, newPassword)
+                                    .publish(eventPublisher)
+                                    .thenReturn(newEntity))
+                            .flatMap(e -> ClearUserAuthorizationCacheEvent
+                                    .of(e.getId())
+                                    .publish(eventPublisher)
+                                    .thenReturn(e));
                 });
 
     }
