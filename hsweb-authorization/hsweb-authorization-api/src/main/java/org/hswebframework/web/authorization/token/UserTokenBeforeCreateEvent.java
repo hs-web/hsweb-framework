@@ -2,9 +2,11 @@ package org.hswebframework.web.authorization.token;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 import org.hswebframework.web.event.DefaultAsyncEvent;
 
 @Getter
+@Setter
 @AllArgsConstructor
 public class UserTokenBeforeCreateEvent extends DefaultAsyncEvent {
     private final UserToken token;
