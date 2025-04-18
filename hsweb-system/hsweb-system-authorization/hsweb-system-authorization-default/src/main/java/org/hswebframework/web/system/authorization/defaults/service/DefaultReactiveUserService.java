@@ -119,7 +119,8 @@ public class DefaultReactiveUserService extends GenericReactiveCrudService<UserE
                         passwordValidator.validate(newer.getPassword());
                         newer.setPassword(passwordEncoder.encode(newer.getPassword(), newer.getSalt()));
                     }
-                    UserEntity newEntity = newer.copyTo(old);
+                    UserEntity copyEntity = old.copyTo(new UserEntity());
+                    UserEntity newEntity = newer.copyTo(copyEntity);
                     return getRepository()
                             .createUpdate()
                             .set(newer)
