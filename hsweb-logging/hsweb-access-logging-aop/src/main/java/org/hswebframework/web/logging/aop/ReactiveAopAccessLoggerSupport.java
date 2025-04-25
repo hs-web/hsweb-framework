@@ -16,10 +16,12 @@ import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.Ordered;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
@@ -209,7 +211,10 @@ public class ReactiveAopAccessLoggerSupport extends StaticMethodMatcherPointcutA
         if (!Publisher.class.isAssignableFrom(method.getReturnType())) {
             return false;
         }
-
+        // 只记录API请求
+        if(null == AnnotatedElementUtils.findMergedAnnotation(method, RequestMapping.class)){
+            return false;
+        }
         AccessLogger ann = AnnotationUtils.findAnnotation(method, AccessLogger.class);
         if (ann != null && ann.ignore()) {
             return false;
