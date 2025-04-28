@@ -45,6 +45,14 @@ public @interface Authorize {
     Dimension[] dimension() default {};
 
     /**
+     * 是否运行匿名访问,匿名访问时,直接允许执行,否则将进行权限验证.
+     *
+     * @return 是否允许匿名访问
+     * @since 4.0.19
+     */
+    boolean anonymous() default false;
+
+    /**
      * 验证失败时返回的消息
      *
      * @return 验证失败提示的消息

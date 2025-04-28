@@ -113,18 +113,22 @@ public class DefaultReactiveUserService extends GenericReactiveCrudService<UserE
                                     old.getPassword()
                             );
 
+                    String newPassword = passwordChanged ? newer.getPassword() : null;
                     if (updatePassword) {
                         newer.setSalt(IDGenerator.RANDOM.generate());
                         passwordValidator.validate(newer.getPassword());
                         newer.setPassword(passwordEncoder.encode(newer.getPassword(), newer.getSalt()));
                     }
+                    UserEntity copyEntity = old.copyTo(new UserEntity());
+                    UserEntity newEntity = newer.copyTo(copyEntity);
                     return getRepository()
                             .createUpdate()
                             .set(newer)
                             .where(newer::getId)
                             .execute()
-                            .flatMap(__ -> new UserModifiedEvent(old, newer, passwordChanged).publish(eventPublisher))
-                            .thenReturn(newer)
+                            .flatMap(__ -> new UserModifiedEvent(old, newEntity, passwordChanged, newPassword)
+                                    .publish(eventPublisher)
+                                    .thenReturn(newEntity))
                             .flatMap(e -> ClearUserAuthorizationCacheEvent
                                     .of(e.getId())
                                     .publish(eventPublisher)
@@ -202,7 +206,7 @@ public class DefaultReactiveUserService extends GenericReactiveCrudService<UserE
                             .set(newer::getPassword)
                             .where(newer::getId)
                             .execute()
-                            .flatMap(e -> new UserModifiedEvent(old, newer, passwordChanged)
+                            .flatMap(e -> new UserModifiedEvent(old, newer, passwordChanged, newPassword)
                                     .publish(eventPublisher)
                                     .thenReturn(e));
                 })

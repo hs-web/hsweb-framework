@@ -14,7 +14,9 @@ import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.Ordered;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.util.ClassUtils;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
@@ -107,6 +109,9 @@ public class AopAccessLoggerSupport extends StaticMethodMatcherPointcutAdvisor {
 
     @Override
     public boolean matches(Method method, Class<?> aClass) {
+        if(null == AnnotatedElementUtils.findMergedAnnotation(method, RequestMapping.class)){
+            return false;
+        }
         return loggerParsers.stream().anyMatch(parser -> parser.support(aClass, method));
     }
 }
