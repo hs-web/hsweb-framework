@@ -190,7 +190,7 @@ public class TreeSortServiceHelper<E extends TreeSortSupportEntity<PK>, PK> {
             if (old != null) {
                 PK newParentId = data.getParentId();
                 //父节点发生变化，更新所有子节点path
-                if (!Objects.equals(parentId, newParentId)) {
+                if (newParentId != null && !newParentId.equals(parentId)) {
                     Consumer<E> childConsumer = child -> {
                         //更新了父节点,但是同时也传入的对应的子节点
                         E readyToUpdate = thisTime.get(child.getId());
