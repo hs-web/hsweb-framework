@@ -3,6 +3,7 @@ package org.hswebframework.web.starter.jackson;
 import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,10 +13,8 @@ import org.reactivestreams.Publisher;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpInputMessage;
-import org.springframework.http.HttpOutputMessage;
+import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.http.converter.HttpMessageNotWritableException;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -31,6 +30,13 @@ public class CustomMappingJackson2HttpMessageConverter extends MappingJackson2Ht
                                                      EntityFactory entityFactory) {
         super(objectMapper);
         this.entityFactory = entityFactory;
+        setSupportedMediaTypes(
+            Arrays.asList(
+                MediaType.APPLICATION_JSON,
+                MediaType.APPLICATION_NDJSON,
+                new MediaType("application", "*+json")
+            )
+        );
     }
 
     public Object doRead(Type type, Class<?> contextClass, HttpInputMessage inputMessage) throws IOException, HttpMessageNotReadableException {
@@ -45,7 +51,7 @@ public class CustomMappingJackson2HttpMessageConverter extends MappingJackson2Ht
 
     @Override
     @Nonnull
-    public Object read(@Nonnull Type type, Class<?> contextClass,@Nonnull HttpInputMessage inputMessage) throws IOException, HttpMessageNotReadableException {
+    public Object read(@Nonnull Type type, Class<?> contextClass, @Nonnull HttpInputMessage inputMessage) throws IOException, HttpMessageNotReadableException {
 
         if (type instanceof ParameterizedType) {
             ResolvableType resolvableType = ResolvableType.forType(GenericTypeResolver.resolveType(type, contextClass));
@@ -55,7 +61,9 @@ public class CustomMappingJackson2HttpMessageConverter extends MappingJackson2Ht
                 Type _gen = resolvableType.getGeneric(0).getType();
                 if (Flux.class.isAssignableFrom(clazz)) {
                     //Flux则转为List
-                    Object rel = doRead(ResolvableType.forClassWithGenerics(List.class,resolvableType.getGeneric(0)).getType(), contextClass, inputMessage);
+                    Object rel = doRead(ResolvableType
+                                            .forClassWithGenerics(List.class, resolvableType.getGeneric(0))
+                                            .getType(), contextClass, inputMessage);
                     if (rel instanceof Iterable) {
                         return Flux.fromIterable(((Iterable<?>) rel));
                     } else {

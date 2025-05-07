@@ -1,5 +1,6 @@
 package org.hswebframework.web.crud.web;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -20,13 +21,12 @@ public class CommonWebMvcConfiguration {
         return new CommonWebMvcErrorControllerAdvice();
     }
 
-
     @SuppressWarnings("all")
     @Bean
     @ConditionalOnProperty(prefix = "hsweb.webflux.response-wrapper", name = "enabled", havingValue = "true", matchIfMissing = true)
     @ConfigurationProperties(prefix = "hsweb.webflux.response-wrapper")
-    public ResponseMessageWrapperAdvice responseMessageWrapper() {
-        return new ResponseMessageWrapperAdvice();
+    public ResponseMessageWrapperAdvice responseMessageWrapper(ObjectMapper mapper) {
+        return new ResponseMessageWrapperAdvice(mapper);
     }
 
 
