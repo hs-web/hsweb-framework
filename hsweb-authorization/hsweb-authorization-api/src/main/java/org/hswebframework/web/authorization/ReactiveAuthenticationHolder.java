@@ -103,7 +103,7 @@ public final class ReactiveAuthenticationHolder {
             }
         }
 
-        private Authentication get() {
+        Authentication get() {
             return auth;
         }
     }

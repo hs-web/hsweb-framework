@@ -40,6 +40,19 @@ public class EasyormRepositoryRegistrar implements ImportBeanDefinitionRegistrar
 
     private final MetadataReaderFactory metadataReaderFactory = new CachingMetadataReaderFactory();
 
+    static final boolean mvcEnabled;
+
+    static {
+        boolean mvcImported;
+        try {
+            Class.forName("org.springframework.web.servlet.DispatcherServlet");
+            mvcImported = true;
+        } catch (Throwable e) {
+            mvcImported = false;
+        }
+        mvcEnabled = mvcImported;
+    }
+
     private String getResourceClassName(Resource resource) {
         try {
             return metadataReaderFactory
@@ -114,13 +127,13 @@ public class EasyormRepositoryRegistrar implements ImportBeanDefinitionRegistrar
             return;
         }
         boolean reactiveEnabled = Boolean.TRUE.equals(attr.get("reactive"));
-        boolean nonReactiveEnabled = Boolean.TRUE.equals(attr.get("nonReactive"));
+        boolean nonReactiveEnabled = Boolean.TRUE.equals(attr.get("nonReactive")) || mvcEnabled;
 
         String[] arr = (String[]) attr.get("value");
 
         Class<Annotation>[] anno = (Class[]) attr.get("annotation");
 
-        Set<EntityInfo> entityInfos =  ConcurrentHashMap.newKeySet();
+        Set<EntityInfo> entityInfos = ConcurrentHashMap.newKeySet();
         for (String className : scanEntities(arr)) {
             Class<?> entityType = org.springframework.util.ClassUtils.forName(className, null);
             if (Arrays.stream(anno)
