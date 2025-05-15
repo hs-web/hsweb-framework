@@ -34,10 +34,14 @@ public class DictionaryProperties {
         packages.add("org.hswebframework.web");
         CachingMetadataReaderFactory metadataReaderFactory = new CachingMetadataReaderFactory();
         ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
+        // 获取主线程的类加载器
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
         return packages
             .parallelStream()
             .flatMap(enumPackage -> {
+                // 在每个任务中设置一致的类加载器
+                Thread.currentThread().setContextClassLoader(classLoader);
                 String path = "classpath*:" + ClassUtils.convertClassNameToResourcePath(enumPackage) + "/**/*.class";
                 log.info("scan enum dict package:{}", path);
                 Resource[] resources;
