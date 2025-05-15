@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public abstract class GenericReactiveCrudService<E, K> implements ReactiveCrudService<E, K> {
 
     @Autowired
+    @SuppressWarnings("all")
     private ReactiveRepository<E, K> repository;
 
     @Override
@@ -13,4 +14,10 @@ public abstract class GenericReactiveCrudService<E, K> implements ReactiveCrudSe
         return repository;
     }
 
+    public GenericReactiveCrudService() {
+    }
+
+    public GenericReactiveCrudService(ReactiveRepository<E, K> repository) {
+        this.repository = repository;
+    }
 }

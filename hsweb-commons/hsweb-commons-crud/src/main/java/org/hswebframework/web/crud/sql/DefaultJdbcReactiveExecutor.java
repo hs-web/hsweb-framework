@@ -36,6 +36,7 @@ public class DefaultJdbcReactiveExecutor extends JdbcReactiveSqlExecutor {
         if (log.isDebugEnabled()) {
             log.debug("DataSource ({}) JDBC Connection [{}] will {}be managed by Spring", getDatasourceId(), connection, (isConnectionTransactional ? "" : "not "));
         }
+
         return Tuples.of(dataSource, connection);
     }
 

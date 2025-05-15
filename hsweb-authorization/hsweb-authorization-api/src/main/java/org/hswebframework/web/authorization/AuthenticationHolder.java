@@ -58,14 +58,12 @@ public final class AuthenticationHolder {
         if (size == 1) {
             return function.apply(suppliers.get(0));
         }
-        SimpleAuthentication merge = new SimpleAuthentication();
+        ReactiveAuthenticationHolder.AuthenticationMerging merging
+            = new ReactiveAuthenticationHolder.AuthenticationMerging();
         for (AuthenticationSupplier supplier : suppliers) {
-            function.apply(supplier).ifPresent(merge::merge);
+            function.apply(supplier).ifPresent(merging::merge);
         }
-        if (merge.getUser() == null) {
-            return Optional.empty();
-        }
-        return Optional.of(merge);
+        return Optional.ofNullable(merging.get());
     }
 
     /**

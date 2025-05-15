@@ -141,7 +141,7 @@ public class ReactiveAopAccessLoggerSupport extends StaticMethodMatcherPointcutA
     @SuppressWarnings("all")
     protected AccessLoggerInfo createLogger(MethodInterceptorHolder holder) {
         AccessLoggerInfo info = new AccessLoggerInfo();
-        info.setId(IDGenerator.MD5.generate());
+        info.setId(IDGenerator.RANDOM.generate());
         info.setRequestTime(System.currentTimeMillis());
 
         LoggerDefine define = defineCache.computeIfAbsent(new CacheKey(
@@ -237,7 +237,7 @@ public class ReactiveAopAccessLoggerSupport extends StaticMethodMatcherPointcutA
         ServerHttpRequest request = exchange.getRequest();
         info.setRequestId(request.getId());
         info.setPath(request.getPath().value());
-        info.setRequestMethod(request.getMethod() == null ? "UNKNOWN" : request.getMethod().name());
+        info.setRequestMethod(request.getMethod().name());
         info.setHeaders(request.getHeaders().toSingleValueMap());
 
         Optional.ofNullable(ReactiveWebUtils.getIpAddr(request))
