@@ -40,42 +40,44 @@ public class DictionaryProperties {
         Supplier<ClassLoader> classLoaderSupplier = currentThread::getContextClassLoader;
 
         return packages
-            .parallelStream()
-            .flatMap(enumPackage -> {
-                // 在每个任务中设置一致的类加载器
-                ClassLoader prevClassLoader = Thread.currentThread().getContextClassLoader();
-                Thread.currentThread().setContextClassLoader(classLoaderSupplier.get());
-                String path = "classpath*:" + ClassUtils.convertClassNameToResourcePath(enumPackage) + "/**/*.class";
-                log.info("scan enum dict package:{}", path);
-                Resource[] resources;
-                try {
-                    resources = resourcePatternResolver.getResources(path);
-                } catch (IOException e) {
-                    log.warn("scan enum dict package:{} error:", path, e);
-                    return Stream.empty();
-                }
-                Stream<? extends Class<?>> stream = Stream
-                    .of(resources)
-                    .map(resource -> {
+                .parallelStream()
+                .flatMap(enumPackage -> {
+                    ClassLoader prevClassLoader = Thread.currentThread().getContextClassLoader();
+                    try {
+                        // 在每个任务中设置一致的类加载器
+                        Thread.currentThread().setContextClassLoader(classLoaderSupplier.get());
+                        String path = "classpath*:" + ClassUtils.convertClassNameToResourcePath(enumPackage) + "/**/*.class";
+                        log.info("scan enum dict package:{}", path);
+                        Resource[] resources;
                         try {
-                            // 在每个任务中设置一致的类加载器
-                            Thread.currentThread().setContextClassLoader(classLoaderSupplier.get());
-                            MetadataReader reader = metadataReaderFactory.getMetadataReader(resource);
-                            String name = reader.getClassMetadata().getClassName();
-                            Class<?> clazz = ClassUtils.forName(name, classLoaderSupplier.get());
-                            if (clazz.isEnum() && EnumDict.class.isAssignableFrom(clazz)) {
-                                return clazz;
-                            }
-                        } catch (Throwable ignore) {
-
+                            resources = resourcePatternResolver.getResources(path);
+                        } catch (IOException e) {
+                            log.warn("scan enum dict package:{} error:", path, e);
+                            return Stream.empty();
                         }
-                        return null;
-                    })
-                    .filter(Objects::nonNull);
-                // 还原类加载器
-                Thread.currentThread().setContextClassLoader(prevClassLoader);
-                return stream;
-            });
+                        return Stream
+                                .of(resources)
+                                .map(resource -> {
+                                    try {
+                                        // 在每个任务中设置一致的类加载器
+                                        Thread.currentThread().setContextClassLoader(classLoaderSupplier.get());
+                                        MetadataReader reader = metadataReaderFactory.getMetadataReader(resource);
+                                        String name = reader.getClassMetadata().getClassName();
+                                        Class<?> clazz = ClassUtils.forName(name, classLoaderSupplier.get());
+                                        if (clazz.isEnum() && EnumDict.class.isAssignableFrom(clazz)) {
+                                            return clazz;
+                                        }
+                                    } catch (Throwable ignore) {
+
+                                    }
+                                    return null;
+                                })
+                                .filter(Objects::nonNull);
+                    } finally {
+                        // 还原类加载器
+                        Thread.currentThread().setContextClassLoader(prevClassLoader);
+                    }
+                });
 
     }
 }
