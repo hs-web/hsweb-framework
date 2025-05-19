@@ -96,7 +96,8 @@ public interface UserToken extends Serializable, Comparable<UserToken> {
 
     default boolean validate() {
         if (!isNormal()) {
-            throw new UnAuthorizedException(getState());
+            throw new UnAuthorizedException
+                .NoStackTrace(getState());
         }
         return true;
     }
