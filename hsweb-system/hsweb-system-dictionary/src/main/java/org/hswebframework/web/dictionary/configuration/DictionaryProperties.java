@@ -35,35 +35,30 @@ public class DictionaryProperties {
         CachingMetadataReaderFactory metadataReaderFactory = new CachingMetadataReaderFactory();
         ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
 
-        return packages
-            .parallelStream()
-            .flatMap(enumPackage -> {
-                String path = "classpath*:" + ClassUtils.convertClassNameToResourcePath(enumPackage) + "/**/*.class";
-                log.info("scan enum dict package:{}", path);
-                Resource[] resources;
+        List<Class<?>> classes = new ArrayList<>();
+        for (String enumPackage : packages) {
+            String path = "classpath*:" + ClassUtils.convertClassNameToResourcePath(enumPackage) + "/**/*.class";
+            log.info("scan enum dict package:{}", path);
+            Resource[] resources;
+            try {
+                resources = resourcePatternResolver.getResources(path);
+            } catch (IOException e) {
+                log.warn("scan enum dict package:{} error:", path, e);
+                return Stream.empty();
+            }
+            for (Resource resource : resources) {
                 try {
-                    resources = resourcePatternResolver.getResources(path);
-                } catch (IOException e) {
-                    log.warn("scan enum dict package:{} error:", path, e);
-                    return Stream.empty();
+                    MetadataReader reader = metadataReaderFactory.getMetadataReader(resource);
+                    String name = reader.getClassMetadata().getClassName();
+                    Class<?> clazz = ClassUtils.forName(name, null);
+                    if (clazz.isEnum() && EnumDict.class.isAssignableFrom(clazz)) {
+                        classes.add(clazz);
+                    }
+                } catch (Throwable ignore) {
+
                 }
-                return Stream
-                    .of(resources)
-                    .map(resource -> {
-                        try {
-                            MetadataReader reader = metadataReaderFactory.getMetadataReader(resource);
-                            String name = reader.getClassMetadata().getClassName();
-                            Class<?> clazz = ClassUtils.forName(name, null);
-                            if (clazz.isEnum() && EnumDict.class.isAssignableFrom(clazz)) {
-                                return clazz;
-                            }
-                        } catch (Throwable ignore) {
-
-                        }
-                        return null;
-                    })
-                    .filter(Objects::nonNull);
-            });
-
+            }
+        }
+        return classes.stream();
     }
 }
