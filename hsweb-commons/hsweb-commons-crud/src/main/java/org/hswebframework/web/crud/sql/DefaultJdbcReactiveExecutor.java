@@ -17,6 +17,7 @@ import reactor.util.function.Tuples;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
+import java.util.function.Function;
 
 @Slf4j
 public class DefaultJdbcReactiveExecutor extends JdbcReactiveSqlExecutor {
@@ -50,6 +51,15 @@ public class DefaultJdbcReactiveExecutor extends JdbcReactiveSqlExecutor {
                         tp2 -> DataSourceUtils.releaseConnection(tp2.getT2(), tp2.getT1()),
                         false
                 );
+    }
+
+    @Override
+    protected <T> Flux<T> doInConnection(Function<Connection, Publisher<T>> handler) {
+        return Flux
+            .using(this::getDataSourceAndConnection,
+                tp2 -> handler.apply(tp2.getT2()),
+                tp2 -> DataSourceUtils.releaseConnection(tp2.getT2(), tp2.getT1())
+            );
     }
 
     @Override

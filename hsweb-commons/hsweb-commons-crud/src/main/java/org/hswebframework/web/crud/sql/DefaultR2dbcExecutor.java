@@ -14,6 +14,7 @@ import org.hswebframework.web.exception.I18nSupportException;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.r2dbc.connection.ConnectionFactoryUtils;
+import org.springframework.r2dbc.core.ConnectionAccessor;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
@@ -24,6 +25,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.Map;
+import java.util.function.Function;
 
 public class DefaultR2dbcExecutor extends R2dbcReactiveSqlExecutor {
 
@@ -88,13 +90,22 @@ public class DefaultR2dbcExecutor extends R2dbcReactiveSqlExecutor {
 
     @Override
     protected Mono<Connection> getConnection() {
-        if (DataSourceHolder.isDynamicDataSourceReady()) {
-            return DataSourceHolder.currentR2dbc()
-                                   .flatMap(R2dbcDataSource::getNative)
-                                   .flatMap(ConnectionFactoryUtils::getConnection);
-        } else {
-            return ConnectionFactoryUtils.getConnection(defaultFactory);
-        }
+        return ConnectionFactoryUtils
+            .getConnection(defaultFactory);
+    }
+
+    @Override
+    protected <T> Flux<T> doInConnection(Function<Connection, Publisher<T>> handler) {
+        return Flux.usingWhen(
+            ConnectionFactoryUtils.getConnection(defaultFactory),
+            handler,
+            source -> ConnectionFactoryUtils
+                .currentConnectionFactory(defaultFactory)
+                .then()
+                .onErrorResume(Exception.class, ex -> Mono.from(source.close()))
+        );
+
+        // return super.doWith(handler);
     }
 
     @Override
