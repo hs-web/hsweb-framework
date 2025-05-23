@@ -57,15 +57,6 @@ public class EasyormConfiguration {
 
     }
 
-    @Bean
-    @ConditionalOnMissingBean
-    public EntityFactory entityFactory(ObjectProvider<EntityMappingCustomizer> customizers) {
-        MapperEntityFactory factory = new MapperEntityFactory();
-        for (EntityMappingCustomizer customizer : customizers) {
-            customizer.custom(factory);
-        }
-        return factory;
-    }
 
     @Bean
     @Primary
