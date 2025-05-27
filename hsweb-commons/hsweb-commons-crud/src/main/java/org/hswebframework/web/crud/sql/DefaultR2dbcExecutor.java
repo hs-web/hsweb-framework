@@ -30,6 +30,7 @@ import java.util.function.Function;
 public class DefaultR2dbcExecutor extends R2dbcReactiveSqlExecutor {
 
     @Autowired
+    @Setter
     private ConnectionFactory defaultFactory;
 
     @Setter
