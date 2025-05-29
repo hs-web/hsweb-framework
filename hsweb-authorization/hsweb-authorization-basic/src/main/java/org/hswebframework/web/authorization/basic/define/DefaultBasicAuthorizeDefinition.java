@@ -50,6 +50,11 @@ public class DefaultBasicAuthorizeDefinition implements AopAuthorizeDefinition {
         return false;
     }
 
+    @Override
+    public boolean allowAnonymous() {
+        return allowAnonymous;
+    }
+
     private static final Set<Class<? extends Annotation>> types = new HashSet<>(Arrays.asList(
         Authorize.class,
         DataAccess.class,
