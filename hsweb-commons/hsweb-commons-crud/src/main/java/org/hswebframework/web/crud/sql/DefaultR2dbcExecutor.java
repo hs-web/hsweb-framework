@@ -28,6 +28,7 @@ import java.util.Map;
 public class DefaultR2dbcExecutor extends R2dbcReactiveSqlExecutor {
 
     @Autowired
+    @Setter
     private ConnectionFactory defaultFactory;
 
     @Setter
