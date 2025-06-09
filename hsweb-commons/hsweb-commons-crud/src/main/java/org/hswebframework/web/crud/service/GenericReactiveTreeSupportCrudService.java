@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 public abstract class GenericReactiveTreeSupportCrudService<E extends TreeSortSupportEntity<K>, K> implements ReactiveTreeSortEntityService<E, K> {
 
+    private static final int SAVE_BUFFER_SIZE = Integer.getInteger("tree.save.buffer.size", 200);
+
     @Autowired
     private ReactiveRepository<E, K> repository;
 
@@ -14,4 +16,8 @@ public abstract class GenericReactiveTreeSupportCrudService<E extends TreeSortSu
         return repository;
     }
 
+    @Override
+    public int getBufferSize() {
+        return SAVE_BUFFER_SIZE;
+    }
 }

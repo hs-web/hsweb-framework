@@ -303,7 +303,7 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
             .prepare(Flux.from(entityPublisher))
 //                .doOnNext(e -> e.tryValidate(CreateGroup.class))
             .buffer(getBufferSize())
-            .flatMap(this.getRepository()::save)
+            .concatMap(this.getRepository()::save)
             .reduce(SaveResult::merge);
 
     }
