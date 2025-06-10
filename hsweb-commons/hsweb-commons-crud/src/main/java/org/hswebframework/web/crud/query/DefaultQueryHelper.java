@@ -565,9 +565,14 @@ public class DefaultQueryHelper implements QueryHelper {
 
         }
 
-        @Override
-        public Mono<Integer> count() {
+        public Mono<Integer> count(QueryOperator query) {
             BuildParameterQueryOperator operator = (BuildParameterQueryOperator) query.clone();
+            operator.getParameter().setAlias(operator.getParameter().getSelect());
+            operator.getParameter().setSelect(new ArrayList<>());
+            return count0(operator);
+        }
+
+        public Mono<Integer> count0(BuildParameterQueryOperator operator) {
             operator.getParameter().setPageIndex(null);
             operator.getParameter().setPageSize(null);
             operator.getParameter().setOrderBy(new ArrayList<>());
@@ -577,6 +582,11 @@ public class DefaultQueryHelper implements QueryHelper {
                 .reactive()
                 .single(0)
                 .contextWrite(logContext);
+        }
+
+        @Override
+        public Mono<Integer> count() {
+            return count0((BuildParameterQueryOperator) query.clone());
         }
 
         @Override
@@ -627,9 +637,10 @@ public class DefaultQueryHelper implements QueryHelper {
                     .contextWrite(logContext);
             }
 
+            QueryOperator query = createQuery();
             if (param.isParallelPager()) {
-                return Mono.zip(count(),
-                                createQuery()
+                return Mono.zip(count(query),
+                                query
                                     .paging(param.getPageIndex(), param.getPageSize())
                                     .fetch(this)
                                     .reactive()
@@ -641,14 +652,14 @@ public class DefaultQueryHelper implements QueryHelper {
 
 
             return this
-                .count()
+                .count(query)
                 .flatMap(i -> {
                     QueryParamEntity copy = param.clone();
                     copy.rePaging(i);
                     if (i == 0) {
                         return Mono.just(PagerResult.of(0, new ArrayList<>(), copy));
                     }
-                    return createQuery()
+                    return query
                         .paging(copy.getPageIndex(), copy.getPageSize())
                         .fetch(this)
                         .reactive()
@@ -1175,9 +1186,9 @@ public class DefaultQueryHelper implements QueryHelper {
 
         @Override
         public <T1, T2> JoinNestConditionalSpecImpl<T> applyColumn(StaticMethodReferenceColumn<T1> joinColumn,
-                                      String termType,
-                                      String alias,
-                                      StaticMethodReferenceColumn<T2> mainOrJoinColumn) {
+                                                                   String termType,
+                                                                   String alias,
+                                                                   StaticMethodReferenceColumn<T2> mainOrJoinColumn) {
             MethodReferenceInfo main = MethodReferenceConverter.parse(joinColumn);
             MethodReferenceInfo join = MethodReferenceConverter.parse(joinColumn);
 
@@ -1197,17 +1208,17 @@ public class DefaultQueryHelper implements QueryHelper {
 
         @Override
         public <T1, T2> JoinNestConditionalSpecImpl<T> applyColumn(StaticMethodReferenceColumn<T1> mainColumn,
-                                      String termType,
-                                      StaticMethodReferenceColumn<T2> joinColumn) {
+                                                                   String termType,
+                                                                   StaticMethodReferenceColumn<T2> joinColumn) {
             return applyColumn(joinColumn, termType, null, joinColumn);
         }
 
 
         public JoinNestConditionalSpecImpl<T> applyColumn(String mainColumn,
-                             String termType,
-                             TableOrViewMetadata join,
-                             String alias,
-                             String column) {
+                                                          String termType,
+                                                          TableOrViewMetadata join,
+                                                          String alias,
+                                                          String column) {
 
             RDBColumnMetadata columnMetadata = join
                 .getColumn(column)
@@ -1215,7 +1226,7 @@ public class DefaultQueryHelper implements QueryHelper {
 
             getAccepter().accept(mainColumn, termType, new JoinConditionalSpecImpl.ColumnRef(columnMetadata, alias));
 
-            return  this;
+            return this;
         }
 
         @Override

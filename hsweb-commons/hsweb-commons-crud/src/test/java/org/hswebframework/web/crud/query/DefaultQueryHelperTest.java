@@ -339,6 +339,7 @@ public class DefaultQueryHelperTest {
         helper.select(TestInfo.class)
              // .all(EventTestEntity.class, TestInfo::setEventList)
               .all("e2", TestInfo::setEvent)
+              .as("e2.name",TestInfo::setE2Name)
               .all(TestEntity.class)
               .from(TestEntity.class)
 //              .leftJoin(EventTestEntity.class,
@@ -361,6 +362,7 @@ public class DefaultQueryHelperTest {
                                .orNest()
                                .is(TestEntity::getName, "main")
                                .is("e1.name", "Ename")
+                               .is("e2Name", "main")
                                .end()
               )
               .orderByAsc(TestEntity::getAge)
@@ -388,6 +390,7 @@ public class DefaultQueryHelperTest {
 
         private EventTestEntity event;
 
+        private String e2Name;
     }
 
     @Getter
