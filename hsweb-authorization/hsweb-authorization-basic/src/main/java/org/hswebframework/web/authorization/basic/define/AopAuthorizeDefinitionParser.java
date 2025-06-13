@@ -17,12 +17,10 @@ import java.util.stream.Stream;
 public class AopAuthorizeDefinitionParser {
 
     private static final Set<Class<? extends Annotation>> types = new HashSet<>(Arrays.asList(
-            Authorize.class,
-            DataAccess.class,
-            Dimension.class,
-            Resource.class,
-            ResourceAction.class,
-            DataAccessType.class
+        Authorize.class,
+        Dimension.class,
+        Resource.class,
+        ResourceAction.class
     ));
 
     private final Set<Annotation> methodAnnotation;
@@ -45,12 +43,12 @@ public class AopAuthorizeDefinitionParser {
         classAnnotation = AnnotatedElementUtils.findAllMergedAnnotations(targetClass, types);
 
         classAnnotationGroup = classAnnotation
-                .stream()
-                .collect(Collectors.groupingBy(Annotation::annotationType));
+            .stream()
+            .collect(Collectors.groupingBy(Annotation::annotationType));
 
         methodAnnotationGroup = methodAnnotation
-                .stream()
-                .collect(Collectors.groupingBy(Annotation::annotationType));
+            .stream()
+            .collect(Collectors.groupingBy(Annotation::annotationType));
     }
 
     private void initClassAnnotation() {
@@ -78,73 +76,13 @@ public class AopAuthorizeDefinitionParser {
         }
     }
 
-    private void initClassDataAccessAnnotation() {
-        for (Annotation annotation : classAnnotation) {
-            if (annotation instanceof DataAccessType ||
-                    annotation instanceof DataAccess) {
-                for (ResourceDefinition resource : definition.getResources().getResources()) {
-                    for (ResourceActionDefinition action : resource.getActions()) {
-                        if (annotation instanceof DataAccessType) {
-                            definition.putAnnotation(action, (DataAccessType) annotation);
-                        } else {
-                            definition.putAnnotation(action, (DataAccess) annotation);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private void initMethodDataAccessAnnotation() {
-        for (Annotation annotation : methodAnnotation) {
-
-            if (annotation instanceof ResourceAction) {
-                getAnnotationByType(Resource.class)
-                        .map(res -> definition.getResources().getResource(res.id()).orElse(null))
-                        .filter(Objects::nonNull)
-                        .forEach(res -> {
-                            ResourceAction ra = (ResourceAction) annotation;
-                            ResourceActionDefinition action = definition.putAnnotation(res, ra);
-                            getAnnotationByType(DataAccessType.class)
-                                    .findFirst()
-                                    .ifPresent(dat -> definition.putAnnotation(action, dat));
-                        });
-            }
-            Optional<ResourceActionDefinition> actionDefinition = getAnnotationByType(Resource.class)
-                    .map(res -> definition.getResources().getResource(res.id()).orElse(null))
-                    .filter(Objects::nonNull)
-                    .flatMap(res -> getAnnotationByType(ResourceAction.class)
-                            .map(ra -> res.getAction(ra.id())
-                                    .orElse(null))
-                    )
-                    .filter(Objects::nonNull)
-                    .findFirst();
-
-            if (annotation instanceof DataAccessType) {
-                actionDefinition.ifPresent(ra -> definition.putAnnotation(ra, (DataAccessType) annotation));
-            }
-
-            if (annotation instanceof DataAccess) {
-                actionDefinition.ifPresent(ra -> {
-                    definition.putAnnotation(ra, (DataAccess) annotation);
-                    getAnnotationByType(DataAccessType.class)
-                            .findFirst()
-                            .ifPresent(dat -> definition.putAnnotation(ra, dat));
-                });
-            }
-
-        }
-    }
-
     AopAuthorizeDefinition parse() {
         //没有任何注解
         if (CollectionUtils.isEmpty(classAnnotation) && CollectionUtils.isEmpty(methodAnnotation)) {
             return EmptyAuthorizeDefinition.instance;
         }
         initClassAnnotation();
-        initClassDataAccessAnnotation();
         initMethodAnnotation();
-        initMethodDataAccessAnnotation();
 
         return definition;
     }
@@ -152,9 +90,9 @@ public class AopAuthorizeDefinitionParser {
 
     private <T extends Annotation> Stream<T> getAnnotationByType(Class<T> type) {
         return Optional.ofNullable(methodAnnotationGroup.getOrDefault(type, classAnnotationGroup.get(type)))
-                .map(Collection::stream)
-                .orElseGet(Stream::empty)
-                .map(type::cast);
+                       .map(Collection::stream)
+                       .orElseGet(Stream::empty)
+                       .map(type::cast);
     }
 
 }

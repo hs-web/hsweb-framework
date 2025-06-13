@@ -5,6 +5,9 @@ import org.hswebframework.web.authorization.Permission;
 
 import java.lang.annotation.*;
 
+import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
 /**
  * 对资源操作的描述,通常用来进行权限控制.
  * <p>
@@ -29,10 +32,11 @@ import java.lang.annotation.*;
  * @see org.hswebframework.web.authorization.Authentication
  * @see Permission#getActions()
  */
-@Target({ElementType.ANNOTATION_TYPE, ElementType.METHOD})
+@Target({ANNOTATION_TYPE, FIELD, METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
+@Repeatable(ResourceAction.List.class)
 public @interface ResourceAction {
     /**
      * 操作标识
@@ -57,9 +61,12 @@ public @interface ResourceAction {
      */
     Logical logical() default Logical.DEFAULT;
 
-    /**
-     * @deprecated 已弃用, 4.1中移除
-     */
-    @Deprecated
-    DataAccess[] dataAccess() default @DataAccess(ignore = true);
+    @Target({ANNOTATION_TYPE, FIELD, METHOD})
+    @Retention(RUNTIME)
+    @Documented
+    @Inherited
+    @interface List {
+        ResourceAction[] value();
+    }
+
 }

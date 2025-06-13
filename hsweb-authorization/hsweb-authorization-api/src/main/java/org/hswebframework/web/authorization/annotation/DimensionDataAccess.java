@@ -10,6 +10,7 @@ import java.lang.annotation.*;
 @Documented
 @Target({ElementType.ANNOTATION_TYPE, ElementType.METHOD})
 @Authorize
+@Deprecated
 public @interface DimensionDataAccess {
 
     Mapping[] mapping() default {};

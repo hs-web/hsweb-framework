@@ -12,6 +12,4 @@ import java.lang.annotation.*;
 @ResourceAction(id = Permission.ACTION_ADD, name = "新增")
 public @interface CreateAction {
 
-    @AliasFor(annotation = ResourceAction.class,attribute = "dataAccess")
-    DataAccess dataAccess() default @DataAccess(ignore = true);
 }

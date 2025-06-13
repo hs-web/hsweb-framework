@@ -5,14 +5,11 @@ import org.springframework.core.annotation.AliasFor;
 
 import java.lang.annotation.*;
 
-@Target(ElementType.METHOD)
+@Target({ElementType.METHOD,ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
 @ResourceAction(id = Permission.ACTION_QUERY, name = "查询")
 public @interface QueryAction {
-
-    @AliasFor(annotation = ResourceAction.class,attribute = "dataAccess")
-    DataAccess dataAccess() default @DataAccess(ignore = true);
 
 }

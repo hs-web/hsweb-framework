@@ -55,15 +55,6 @@ public class DefaultBasicAuthorizeDefinition implements AopAuthorizeDefinition {
         return allowAnonymous;
     }
 
-    private static final Set<Class<? extends Annotation>> types = new HashSet<>(Arrays.asList(
-        Authorize.class,
-        DataAccess.class,
-        Dimension.class,
-        Resource.class,
-        ResourceAction.class,
-        DataAccessType.class
-    ));
-
     public static AopAuthorizeDefinition from(Class<?> targetClass, Method method) {
         AopAuthorizeDefinitionParser parser = new AopAuthorizeDefinitionParser(targetClass, method);
 
@@ -121,36 +112,11 @@ public class DefaultBasicAuthorizeDefinition implements AopAuthorizeDefinition {
         actionDefinition.setId(ann.id());
         actionDefinition.setName(ann.name());
         actionDefinition.setDescription(String.join("\n", ann.description()));
-        for (DataAccess dataAccess : ann.dataAccess()) {
-            putAnnotation(actionDefinition, dataAccess);
-        }
+
         definition.addAction(actionDefinition);
         return actionDefinition;
     }
 
-
-    public void putAnnotation(ResourceActionDefinition definition, DataAccess ann) {
-        if (ann.ignore()) {
-            return;
-        }
-        DataAccessTypeDefinition typeDefinition = new DataAccessTypeDefinition();
-        for (DataAccessType dataAccessType : ann.type()) {
-            if (dataAccessType.ignore()) {
-                continue;
-            }
-            typeDefinition.setId(dataAccessType.id());
-            typeDefinition.setName(dataAccessType.name());
-            typeDefinition.setController(dataAccessType.controller());
-            typeDefinition.setConfiguration(dataAccessType.configuration());
-            typeDefinition.setDescription(String.join("\n", dataAccessType.description()));
-        }
-        if (ObjectUtils.isEmpty(typeDefinition.getId())) {
-            return;
-        }
-        definition.getDataAccess()
-                  .getDataAccessTypes()
-                  .add(typeDefinition);
-    }
 
     public void putAnnotation(ResourceActionDefinition definition, DataAccessType dataAccessType) {
         if (dataAccessType.ignore()) {
