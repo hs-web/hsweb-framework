@@ -22,15 +22,18 @@ import org.springframework.web.reactive.function.BodyInserters;
 
 import static org.junit.Assert.*;
 
-@WebFluxTest(ReactiveFileController.class)
+@WebFluxTest(S3FileController.class)
 @RunWith(SpringRunner.class)
 @ImportAutoConfiguration(FileServiceConfiguration.class)
-public class ReactiveFileControllerTest {
+public class S3FileControllerTest {
 
     static {
-        System.setProperty("hsweb.file.upload.static-file-path","./target/upload");
-        System.setProperty("file.storage", "local");
-//        System.setProperty("hsweb.file.upload.use-original-file-name","true");
+        System.setProperty("oss.s3.endpoint", "https://oss-cn-beijing.aliyuncs.com");
+        System.setProperty("oss.s3.region", "us-east-1");
+        System.setProperty("oss.s3.accessKey", "");
+        System.setProperty("oss.s3.secretKey", "");
+        System.setProperty("oss.s3.bucket", "maydaysansan");
+        System.setProperty("file.storage", "s3");
     }
 
     @Autowired
@@ -38,13 +41,13 @@ public class ReactiveFileControllerTest {
 
     @Test
     public void test(){
-       client.post()
-                .uri("/file/static")
-               .contentType(MediaType.MULTIPART_FORM_DATA)
-               .body(BodyInserters.fromMultipartData("file",new HttpEntity<>(new ClassPathResource("test.json"))))
-               .exchange()
+        client.post()
+                .uri("/oss/file/static")
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .body(BodyInserters.fromMultipartData("file",new HttpEntity<>(new ClassPathResource("test.json"))))
+                .exchange()
                 .expectStatus()
-               .isOk();
+                .isOk();
 
     }
 }

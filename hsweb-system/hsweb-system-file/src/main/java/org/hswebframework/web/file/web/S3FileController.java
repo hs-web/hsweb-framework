@@ -12,8 +12,6 @@ import org.hswebframework.web.authorization.exception.AccessDenyException;
 import org.hswebframework.web.file.FileUploadProperties;
 import org.hswebframework.web.file.S3StorageProperties;
 import org.hswebframework.web.file.service.FileStorageService;
-import org.hswebframework.web.file.service.S3FileStorageService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.http.codec.multipart.Part;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,22 +20,20 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
-import java.io.File;
 import java.io.IOException;
 
 @RestController
-@Resource(id = "file", name = "文件上传")
+@Resource(id = "ossFile", name = "文件上传")
 @Slf4j
-@RequestMapping("/file")
+@RequestMapping("/oss/file")
 @Tag(name = "文件上传")
-public class ReactiveFileController {
-
-    private final FileUploadProperties properties;
+public class S3FileController {
+    private final S3StorageProperties properties;
 
     private final FileStorageService fileStorageService;
 
 
-    public ReactiveFileController(FileUploadProperties properties, FileStorageService fileStorageService) {
+    public S3FileController(S3StorageProperties properties, FileStorageService fileStorageService) {
         this.properties = properties;
         this.fileStorageService = fileStorageService;
     }
@@ -54,7 +50,7 @@ public class ReactiveFileController {
                     if (part instanceof FilePart) {
                         FilePart filePart = ((FilePart) part);
                         if (properties.denied(filePart.filename(), filePart.headers().getContentType())) {
-                           return Mono.error( new AccessDenyException());
+                            return Mono.error( new AccessDenyException());
                         }
                         try {
                             return fileStorageService.saveFile(filePart);
@@ -67,5 +63,4 @@ public class ReactiveFileController {
                 });
 
     }
-
 }
