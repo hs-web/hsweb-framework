@@ -3,6 +3,7 @@ package org.hswebframework.web.file.service;
 import org.springframework.http.codec.multipart.FilePart;
 import reactor.core.publisher.Mono;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -19,7 +20,7 @@ public interface FileStorageService {
      * @param filePart FilePart
      * @return 文件访问地址
      */
-    Mono<String> saveFile(FilePart filePart);
+    Mono<String> saveFile(FilePart filePart) throws IOException;
 
     /**
      * 使用文件流保存文件,并返回文件地址
