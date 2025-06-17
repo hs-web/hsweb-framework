@@ -7,6 +7,7 @@ import org.hswebframework.web.authorization.token.ParsedToken;
 import org.hswebframework.web.authorization.token.UserTokenManager;
 import org.hswebframework.web.logger.ReactiveLogger;
 import org.springframework.context.event.EventListener;
+import org.springframework.core.annotation.Order;
 import org.springframework.lang.NonNull;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
@@ -24,6 +25,7 @@ import java.util.function.Function;
 
 @Slf4j
 @AllArgsConstructor
+@Order(1)
 public class UserTokenWebFilter implements WebFilter {
 
     private final List<ReactiveUserTokenParser> parsers = new ArrayList<>();
