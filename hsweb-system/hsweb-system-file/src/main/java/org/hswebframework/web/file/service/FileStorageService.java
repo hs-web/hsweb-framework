@@ -20,7 +20,7 @@ public interface FileStorageService {
      * @param filePart FilePart
      * @return 文件访问地址
      */
-    Mono<String> saveFile(FilePart filePart) throws IOException;
+    Mono<String> saveFile(FilePart filePart);
 
     /**
      * 使用文件流保存文件,并返回文件地址

@@ -3,6 +3,7 @@ package org.hswebframework.web.file.service;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import org.hswebframework.web.file.FileUploadProperties;
+import org.hswebframework.web.file.S3FileProperties;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.codec.multipart.FilePart;
 import reactor.core.publisher.Mono;
@@ -19,9 +20,10 @@ import java.util.UUID;
 @AllArgsConstructor
 public class S3FileStorageService implements FileStorageService {
 
-    private final FileUploadProperties properties;
-
+    private final FileUploadProperties fileProperties;
+    private final S3FileProperties s3Properties;
     private final S3Client s3Client;
+    
 
     @Override
     public Mono<String> saveFile(FilePart filePart) {
@@ -36,7 +38,7 @@ public class S3FileStorageService implements FileStorageService {
                 })
                 .map(inputStream -> {
                     PutObjectRequest request = PutObjectRequest.builder()
-                            .bucket(properties.getS3().getBucket())
+                            .bucket(s3Properties.getBucket())
                             .key(filename)
                             .build();
 
@@ -53,7 +55,7 @@ public class S3FileStorageService implements FileStorageService {
                     String key = UUID.randomUUID().toString() + (fileType.startsWith(".") ? fileType : "." + fileType);
 
                     PutObjectRequest request = PutObjectRequest.builder()
-                            .bucket(properties.getS3().getBucket())
+                            .bucket(s3Properties.getBucket())
                             .key(key)
                             .build();
 
@@ -72,9 +74,9 @@ public class S3FileStorageService implements FileStorageService {
     }
 
     private String buildFileUrl(String key) {
-        if (properties.getS3().getBaseUrl() != null && !properties.getS3().getBaseUrl().isEmpty()) {
-            return properties.getS3().getBaseUrl() + "/" + key;
+        if (s3Properties.getBaseUrl() != null && !s3Properties.getBaseUrl().isEmpty()) {
+            return s3Properties.getBaseUrl() + "/" + key;
         }
-        return "https://" + properties.getS3().getBucket() + "." + properties.getS3().getEndpoint().replace("https://", "").replace("http://", "") + "/" + key;
+        return "https://" + s3Properties.getBucket() + "." + s3Properties.getEndpoint().replace("https://", "").replace("http://", "") + "/" + key;
     }
 }

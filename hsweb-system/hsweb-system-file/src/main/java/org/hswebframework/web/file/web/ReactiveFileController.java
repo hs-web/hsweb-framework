@@ -53,11 +53,7 @@ public class ReactiveFileController {
                         if (properties.denied(filePart.filename(), filePart.headers().getContentType())) {
                            return Mono.error( new AccessDenyException());
                         }
-                        try {
-                            return fileStorageService.saveFile(filePart);
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
+                        return fileStorageService.saveFile(filePart);
                     } else {
                         return Mono.error(() -> new IllegalArgumentException("[file] part is not a file"));
                     }
@@ -66,7 +62,6 @@ public class ReactiveFileController {
     }
 
     @PostMapping("/oss/static")
-    @SneakyThrows
     @ResourceAction(id = "upload-static", name = "静态文件")
     @Operation(summary = "上传静态文件")
     public Mono<String> uploadOssStatic(@RequestPart("file")
@@ -78,11 +73,7 @@ public class ReactiveFileController {
                         if (properties.denied(filePart.filename(), filePart.headers().getContentType())) {
                             return Mono.error( new AccessDenyException());
                         }
-                        try {
-                            return fileStorageService.saveFile(filePart);
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
+                        return fileStorageService.saveFile(filePart);
                     } else {
                         return Mono.error(() -> new IllegalArgumentException("[file] part is not a file"));
                     }

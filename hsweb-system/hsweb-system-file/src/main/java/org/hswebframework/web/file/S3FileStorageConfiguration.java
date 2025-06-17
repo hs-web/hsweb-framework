@@ -19,25 +19,27 @@ import java.net.URI;
 @Configuration
 @ConditionalOnClass(S3Client.class)
 @ConditionalOnProperty(name = "hsweb.file.storage", havingValue = "s3", matchIfMissing = false)
-@EnableConfigurationProperties(FileUploadProperties.class)
+@EnableConfigurationProperties({S3FileProperties.class, FileUploadProperties.class})
 public class S3FileStorageConfiguration {
 
 
     @Bean
     @ConditionalOnMissingBean
-    public S3Client s3Client(FileUploadProperties properties) {
+    public S3Client s3Client(S3FileProperties properties) {
         return S3Client.builder()
-                .endpointOverride(URI.create(properties.getS3().getEndpoint()))
+                .endpointOverride(URI.create(properties.getEndpoint()))
                 .credentialsProvider(StaticCredentialsProvider.create(
-                        AwsBasicCredentials.create(properties.getS3().getAccessKey(), properties.getS3().getSecretKey())))
-                .region(Region.of(properties.getS3().getRegion()))
+                        AwsBasicCredentials.create(properties.getAccessKey(), properties.getSecretKey())))
+                .region(Region.of(properties.getRegion()))
                 .build();
     }
 
     @Bean
     @ConditionalOnMissingBean(FileStorageService.class)
-    public FileStorageService s3FileStorageService(FileUploadProperties properties, S3Client s3Client) {
-        return new S3FileStorageService(properties, s3Client);
+    public FileStorageService s3FileStorageService(FileUploadProperties uploadProperties,
+                                                   S3FileProperties s3Properties,
+                                                   S3Client s3Client) {
+        return new S3FileStorageService(uploadProperties, s3Properties, s3Client);
     }
 
     @Bean
