@@ -1,5 +1,6 @@
 package org.hswebframework.web.file;
 
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
@@ -28,6 +29,8 @@ public class FileUploadProperties {
     private String staticFilePath = "./static";
 
     private String staticLocation = "/static";
+
+    private S3 s3;
 
     //是否使用原始文件名进行存储
     private boolean useOriginalFileName = false;
@@ -125,5 +128,15 @@ public class FileUploadProperties {
 
         private String relativeLocation;
         private String location;
+    }
+
+    @Data
+    public static class S3 {
+        private String endpoint;
+        private String accessKey;
+        private String secretKey;
+        private String region;
+        private String bucket;
+        private String baseUrl;
     }
 }

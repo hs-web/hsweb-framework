@@ -10,19 +10,16 @@ import org.hswebframework.web.authorization.annotation.Resource;
 import org.hswebframework.web.authorization.annotation.ResourceAction;
 import org.hswebframework.web.authorization.exception.AccessDenyException;
 import org.hswebframework.web.file.FileUploadProperties;
-import org.hswebframework.web.file.S3StorageProperties;
 import org.hswebframework.web.file.service.FileStorageService;
-import org.hswebframework.web.file.service.S3FileStorageService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.http.MediaType;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.http.codec.multipart.Part;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
-import java.io.File;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 @RestController
@@ -66,6 +63,50 @@ public class ReactiveFileController {
                     }
                 });
 
+    }
+
+    @PostMapping("/oss/static")
+    @SneakyThrows
+    @ResourceAction(id = "upload-static", name = "静态文件")
+    @Operation(summary = "上传静态文件")
+    public Mono<String> uploadOssStatic(@RequestPart("file")
+                                     @Parameter(name = "file", description = "文件", style = ParameterStyle.FORM) Mono<Part> partMono) {
+        return partMono
+                .flatMap(part -> {
+                    if (part instanceof FilePart) {
+                        FilePart filePart = ((FilePart) part);
+                        if (properties.denied(filePart.filename(), filePart.headers().getContentType())) {
+                            return Mono.error( new AccessDenyException());
+                        }
+                        try {
+                            return fileStorageService.saveFile(filePart);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    } else {
+                        return Mono.error(() -> new IllegalArgumentException("[file] part is not a file"));
+                    }
+                });
+
+    }
+
+    @PostMapping(value = "/oss/stream", consumes = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    @Operation(summary = "上传文件流")
+    public Mono<String> uploadOssStream(ServerHttpRequest request,
+                                     @RequestParam("fileType") String fileType) {
+
+        if (properties.denied("upload." + fileType, MediaType.APPLICATION_OCTET_STREAM)) {
+            return Mono.error(new AccessDenyException());
+        }
+
+        return DataBufferUtils.join(request.getBody())
+                .map(dataBuffer -> {
+                    byte[] bytes = new byte[dataBuffer.readableByteCount()];
+                    dataBuffer.read(bytes);
+                    DataBufferUtils.release(dataBuffer);
+                    return new ByteArrayInputStream(bytes);
+                })
+                .flatMap(inputStream -> fileStorageService.saveFile(inputStream, fileType));
     }
 
 }

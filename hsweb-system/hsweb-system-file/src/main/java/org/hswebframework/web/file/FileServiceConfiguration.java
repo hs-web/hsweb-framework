@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Bean;
 
 @AutoConfiguration
 @EnableConfigurationProperties(FileUploadProperties.class)
-@ConditionalOnProperty(name = "file.storage", havingValue = "local", matchIfMissing = true)
+@ConditionalOnProperty(name = "hsweb.file.storage", havingValue = "local", matchIfMissing = true)
 public class FileServiceConfiguration {
 
 

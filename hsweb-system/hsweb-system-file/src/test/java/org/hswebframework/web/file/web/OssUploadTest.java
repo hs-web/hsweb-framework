@@ -14,18 +14,18 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.reactive.function.BodyInserters;
 
-@WebFluxTest(S3FileController.class)
+@WebFluxTest(ReactiveFileController.class)
 @RunWith(SpringRunner.class)
 @ImportAutoConfiguration(S3FileStorageConfiguration.class)
-public class S3FileControllerTest {
+public class OssUploadTest {
 
     static {
-        System.setProperty("oss.s3.endpoint", "https://oss-cn-beijing.aliyuncs.com");
-        System.setProperty("oss.s3.region", "us-east-1");
-        System.setProperty("oss.s3.accessKey", "");
-        System.setProperty("oss.s3.secretKey", "");
-        System.setProperty("oss.s3.bucket", "maydaysansan");
-        System.setProperty("file.storage", "s3");
+        System.setProperty("hsweb.file.upload.s3.endpoint", "https://oss-cn-beijing.aliyuncs.com");
+        System.setProperty("hsweb.file.upload.s3.region", "us-east-1");
+        System.setProperty("hsweb.file.upload.s3.accessKey", "");
+        System.setProperty("hsweb.file.upload.s3.secretKey", "");
+        System.setProperty("hsweb.file.upload.s3.bucket", "maydaysansan");
+        System.setProperty("hsweb.file.storage", "s3");
     }
 
     @Autowired
@@ -34,7 +34,7 @@ public class S3FileControllerTest {
     @Test
     public void testStatic(){
         client.post()
-                .uri("/ossFile/static")
+                .uri("/file/oss/static")
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .body(BodyInserters.fromMultipartData("file",new HttpEntity<>(new ClassPathResource("test.json"))))
                 .exchange()
@@ -49,7 +49,7 @@ public class S3FileControllerTest {
 
         client.post()
                 .uri(uriBuilder ->
-                        uriBuilder.path("/oss/file/stream")
+                        uriBuilder.path("/file/oss/stream")
                                 .queryParam("fileType", "json")
                                 .build())
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)

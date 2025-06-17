@@ -29,7 +29,7 @@ public class ReactiveFileControllerTest {
 
     static {
         System.setProperty("hsweb.file.upload.static-file-path","./target/upload");
-        System.setProperty("file.storage", "local");
+        System.setProperty("hsweb.file.storage","local");
 //        System.setProperty("hsweb.file.upload.use-original-file-name","true");
     }
 

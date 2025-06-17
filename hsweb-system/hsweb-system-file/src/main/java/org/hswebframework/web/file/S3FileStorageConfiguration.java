@@ -2,8 +2,7 @@ package org.hswebframework.web.file;
 
 import org.hswebframework.web.file.service.FileStorageService;
 import org.hswebframework.web.file.service.S3FileStorageService;
-import org.hswebframework.web.file.web.S3FileController;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.hswebframework.web.file.web.ReactiveFileController;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -19,32 +18,32 @@ import java.net.URI;
 
 @Configuration
 @ConditionalOnClass(S3Client.class)
-@ConditionalOnProperty(name = "file.storage", havingValue = "s3", matchIfMissing = false)
-@EnableConfigurationProperties(S3StorageProperties.class)
+@ConditionalOnProperty(name = "hsweb.file.storage", havingValue = "s3", matchIfMissing = false)
+@EnableConfigurationProperties(FileUploadProperties.class)
 public class S3FileStorageConfiguration {
 
-    @Bean
-    @ConditionalOnBean(S3StorageProperties.class)
-    @ConditionalOnMissingBean(name = "s3FileController")
-    public S3FileController s3FileController(S3StorageProperties properties,
-                                                         FileStorageService storageService) {
-        return new S3FileController(properties, storageService);
-    }
 
     @Bean
     @ConditionalOnMissingBean
-    public S3Client s3Client(S3StorageProperties properties) {
+    public S3Client s3Client(FileUploadProperties properties) {
         return S3Client.builder()
-                .endpointOverride(URI.create(properties.getEndpoint()))
+                .endpointOverride(URI.create(properties.getS3().getEndpoint()))
                 .credentialsProvider(StaticCredentialsProvider.create(
-                        AwsBasicCredentials.create(properties.getAccessKey(), properties.getSecretKey())))
-                .region(Region.of(properties.getRegion()))
+                        AwsBasicCredentials.create(properties.getS3().getAccessKey(), properties.getS3().getSecretKey())))
+                .region(Region.of(properties.getS3().getRegion()))
                 .build();
     }
 
     @Bean
     @ConditionalOnMissingBean(FileStorageService.class)
-    public FileStorageService s3FileStorageService(S3StorageProperties properties, S3Client s3Client) {
+    public FileStorageService s3FileStorageService(FileUploadProperties properties, S3Client s3Client) {
         return new S3FileStorageService(properties, s3Client);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(name = "reactiveFileController")
+    public ReactiveFileController reactiveFileController(FileUploadProperties properties,
+                                                         FileStorageService storageService) {
+        return new ReactiveFileController(properties, storageService);
     }
 }
