@@ -34,7 +34,7 @@ public class OssUploadTest {
     @Test
     public void testStatic(){
         client.post()
-                .uri("/file/oss/static")
+                .uri("/file/static")
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .body(BodyInserters.fromMultipartData("file",new HttpEntity<>(new ClassPathResource("test.json"))))
                 .exchange()
@@ -49,7 +49,7 @@ public class OssUploadTest {
 
         client.post()
                 .uri(uriBuilder ->
-                        uriBuilder.path("/file/oss/stream")
+                        uriBuilder.path("/file/static/stream")
                                 .queryParam("fileType", "json")
                                 .build())
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)

@@ -21,6 +21,7 @@ import reactor.core.publisher.Mono;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 @RestController
 @Resource(id = "file", name = "文件上传")
@@ -61,27 +62,7 @@ public class ReactiveFileController {
 
     }
 
-    @PostMapping("/oss/static")
-    @ResourceAction(id = "upload-static", name = "静态文件")
-    @Operation(summary = "上传静态文件")
-    public Mono<String> uploadOssStatic(@RequestPart("file")
-                                     @Parameter(name = "file", description = "文件", style = ParameterStyle.FORM) Mono<Part> partMono) {
-        return partMono
-                .flatMap(part -> {
-                    if (part instanceof FilePart) {
-                        FilePart filePart = ((FilePart) part);
-                        if (properties.denied(filePart.filename(), filePart.headers().getContentType())) {
-                            return Mono.error( new AccessDenyException());
-                        }
-                        return fileStorageService.saveFile(filePart);
-                    } else {
-                        return Mono.error(() -> new IllegalArgumentException("[file] part is not a file"));
-                    }
-                });
-
-    }
-
-    @PostMapping(value = "/oss/stream", consumes = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    @PostMapping(value = "/static/stream", consumes = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     @Operation(summary = "上传文件流")
     public Mono<String> uploadOssStream(ServerHttpRequest request,
                                      @RequestParam("fileType") String fileType) {
@@ -91,13 +72,10 @@ public class ReactiveFileController {
         }
 
         return DataBufferUtils.join(request.getBody())
-                .map(dataBuffer -> {
-                    byte[] bytes = new byte[dataBuffer.readableByteCount()];
-                    dataBuffer.read(bytes);
-                    DataBufferUtils.release(dataBuffer);
-                    return new ByteArrayInputStream(bytes);
-                })
-                .flatMap(inputStream -> fileStorageService.saveFile(inputStream, fileType));
+                .flatMap(dataBuffer -> {
+                    InputStream inputStream = dataBuffer.asInputStream(true);
+                    return fileStorageService.saveFile(inputStream, fileType);
+                });
     }
 
 }

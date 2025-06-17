@@ -35,17 +35,9 @@ public class S3FileStorageConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(FileStorageService.class)
-    public FileStorageService s3FileStorageService(FileUploadProperties uploadProperties,
+    public FileStorageService s3FileStorageService(
                                                    S3FileProperties s3Properties,
                                                    S3Client s3Client) {
-        return new S3FileStorageService(uploadProperties, s3Properties, s3Client);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean(name = "reactiveFileController")
-    public ReactiveFileController reactiveFileController(FileUploadProperties properties,
-                                                         FileStorageService storageService) {
-        return new ReactiveFileController(properties, storageService);
+        return new S3FileStorageService(s3Properties, s3Client);
     }
 }
