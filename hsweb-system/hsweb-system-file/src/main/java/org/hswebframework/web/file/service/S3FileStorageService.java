@@ -58,7 +58,7 @@ public class S3FileStorageService implements FileStorageService {
                             .build();
 
                     s3Client.putObject(request, RequestBody.fromInputStream(inputStream, inputStream.available()));
-                    return properties.getBaseUrl() + "/" + key;
+                    return buildFileUrl(key);
                 })
                 .subscribeOn(Schedulers.boundedElastic());
     }
