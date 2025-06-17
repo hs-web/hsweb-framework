@@ -23,10 +23,10 @@ import reactor.core.publisher.Mono;
 import java.io.IOException;
 
 @RestController
-@Resource(id = "ossFile", name = "文件上传")
+@Resource(id = "ossFile", name = "oss文件上传")
 @Slf4j
-@RequestMapping("/oss/file")
-@Tag(name = "文件上传")
+@RequestMapping("/ossFile")
+@Tag(name = "oss文件上传")
 public class S3FileController {
     private final S3StorageProperties properties;
 

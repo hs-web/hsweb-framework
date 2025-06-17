@@ -59,6 +59,7 @@
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>s3</artifactId>
             <version>${aws.sdk.version}</version>
+            <optional>true</optional>
         </dependency>
 
     </dependencies>
