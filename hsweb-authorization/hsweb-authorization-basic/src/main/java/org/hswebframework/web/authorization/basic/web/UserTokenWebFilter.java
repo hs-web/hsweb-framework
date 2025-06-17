@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.event.EventListener;
+import org.springframework.core.annotation.Order;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -29,6 +30,7 @@ import java.util.function.Function;
 
 @Component
 @Slf4j
+@Order(1)
 public class UserTokenWebFilter implements WebFilter, BeanPostProcessor {
 
     private final List<ReactiveUserTokenParser> parsers = new ArrayList<>();
