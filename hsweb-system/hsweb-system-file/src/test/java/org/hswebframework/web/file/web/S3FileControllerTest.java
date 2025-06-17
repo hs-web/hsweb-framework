@@ -11,6 +11,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.reactive.function.BodyInserters;
 
 @WebFluxTest(S3FileController.class)
@@ -31,7 +32,7 @@ public class S3FileControllerTest {
     WebTestClient client;
 
     @Test
-    public void test(){
+    public void testStatic(){
         client.post()
                 .uri("/ossFile/static")
                 .contentType(MediaType.MULTIPART_FORM_DATA)
@@ -41,4 +42,20 @@ public class S3FileControllerTest {
                 .isOk();
 
     }
+
+    @Test
+    public void testStream() throws Exception {
+        byte[] fileBytes = StreamUtils.copyToByteArray(new ClassPathResource("test.json").getInputStream());
+
+        client.post()
+                .uri(uriBuilder ->
+                        uriBuilder.path("/oss/file/stream")
+                                .queryParam("fileType", "json")
+                                .build())
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .bodyValue(fileBytes)
+                .exchange()
+                .expectStatus().isOk();
+    }
+
 }

@@ -12,14 +12,15 @@ import org.hswebframework.web.authorization.exception.AccessDenyException;
 import org.hswebframework.web.file.FileUploadProperties;
 import org.hswebframework.web.file.S3StorageProperties;
 import org.hswebframework.web.file.service.FileStorageService;
+import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.http.MediaType;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.http.codec.multipart.Part;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 @RestController
@@ -28,6 +29,7 @@ import java.io.IOException;
 @RequestMapping("/ossFile")
 @Tag(name = "oss文件上传")
 public class S3FileController {
+
     private final S3StorageProperties properties;
 
     private final FileStorageService fileStorageService;
@@ -63,4 +65,24 @@ public class S3FileController {
                 });
 
     }
+
+    @PostMapping(value = "/stream", consumes = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    @Operation(summary = "上传文件流")
+    public Mono<String> uploadStream(ServerHttpRequest request,
+                                     @RequestParam("fileType") String fileType) {
+
+        if (properties.denied("upload." + fileType, MediaType.APPLICATION_OCTET_STREAM)) {
+            return Mono.error(new AccessDenyException());
+        }
+
+        return DataBufferUtils.join(request.getBody())
+                .map(dataBuffer -> {
+                    byte[] bytes = new byte[dataBuffer.readableByteCount()];
+                    dataBuffer.read(bytes);
+                    DataBufferUtils.release(dataBuffer);
+                    return new ByteArrayInputStream(bytes);
+                })
+                .flatMap(inputStream -> fileStorageService.saveFile(inputStream, fileType));
+    }
+
 }
