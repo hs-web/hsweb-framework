@@ -5,6 +5,7 @@ import lombok.SneakyThrows;
 import org.hswebframework.web.file.S3FileProperties;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.codec.multipart.FilePart;
+import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -12,6 +13,7 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Locale;
 import java.util.UUID;
@@ -26,23 +28,22 @@ public class S3FileStorageService implements FileStorageService {
     @Override
     public Mono<String> saveFile(FilePart filePart) {
         String filename = buildFileName(filePart.filename());
-        return DataBufferUtils.join(filePart.content())
-                .publishOn(Schedulers.boundedElastic())
-                .map(dataBuffer -> {
-                    byte[] bytes = new byte[dataBuffer.readableByteCount()];
-                    dataBuffer.read(bytes);
-                    DataBufferUtils.release(dataBuffer);
-                    return new ByteArrayInputStream(bytes);
-                })
-                .map(inputStream -> {
-                    PutObjectRequest request = PutObjectRequest.builder()
-                            .bucket(properties.getBucket())
-                            .key(filename)
-                            .build();
 
-                    s3Client.putObject(request, RequestBody.fromInputStream(inputStream, inputStream.available()));
-                    return buildFileUrl(filename);
-                });
+        return DataBufferUtils.join(filePart.content())
+                .flatMap(dataBuffer -> {
+                    try (InputStream inputStream = dataBuffer.asInputStream(true)) {
+                        PutObjectRequest request = PutObjectRequest.builder()
+                                .bucket(properties.getBucket())
+                                .key(filename)
+                                .build();
+
+                        s3Client.putObject(request, RequestBody.fromInputStream(inputStream, dataBuffer.readableByteCount()));
+                        return Mono.just(buildFileUrl(filename));
+                    } catch (IOException e) {
+                        return Mono.error(e);
+                    }
+                })
+                .subscribeOn(Schedulers.boundedElastic());
     }
 
 
@@ -73,8 +74,19 @@ public class S3FileStorageService implements FileStorageService {
 
     private String buildFileUrl(String key) {
         if (properties.getBaseUrl() != null && !properties.getBaseUrl().isEmpty()) {
-            return properties.getBaseUrl() + "/" + key;
+            return UriComponentsBuilder
+                    .fromUriString(properties.getBaseUrl())
+                    .pathSegment(key)
+                    .build()
+                    .toUriString();
         }
-        return "https://" + properties.getBucket() + "." + properties.getEndpoint().replace("https://", "").replace("http://", "") + "/" + key;
+        String host = properties.getBucket() + "." + properties.getEndpoint().replaceFirst("^https?://", "");
+        return UriComponentsBuilder
+                .newInstance()
+                .scheme("https")
+                .host(host)
+                .pathSegment(key)
+                .build()
+                .toUriString();
     }
 }
