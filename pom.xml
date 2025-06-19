@@ -95,6 +95,8 @@
         <swagger.version>2.7.0</swagger.version>
         <netty.version>4.1.111.Final</netty.version>
         <r2dbc.version>Borca-SR2</r2dbc.version>
+        <r2dbc.version>Borca-SR2</r2dbc.version>
+        <aws.sdk.version>2.25.5</aws.sdk.version>
     </properties>
 
     <profiles>
