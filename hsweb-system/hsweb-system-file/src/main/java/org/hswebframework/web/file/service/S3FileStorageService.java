@@ -1,5 +1,6 @@
 package org.hswebframework.web.file.service;
 
+import com.google.common.io.Files;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import org.hswebframework.web.file.S3FileProperties;
@@ -28,22 +29,12 @@ public class S3FileStorageService implements FileStorageService {
     @Override
     public Mono<String> saveFile(FilePart filePart) {
         String filename = buildFileName(filePart.filename());
-
+        
         return DataBufferUtils.join(filePart.content())
                 .flatMap(dataBuffer -> {
-                    try (InputStream inputStream = dataBuffer.asInputStream(true)) {
-                        PutObjectRequest request = PutObjectRequest.builder()
-                                .bucket(properties.getBucket())
-                                .key(filename)
-                                .build();
-
-                        s3Client.putObject(request, RequestBody.fromInputStream(inputStream, dataBuffer.readableByteCount()));
-                        return Mono.just(buildFileUrl(filename));
-                    } catch (IOException e) {
-                        return Mono.error(e);
-                    }
-                })
-                .subscribeOn(Schedulers.boundedElastic());
+                    InputStream inputStream = dataBuffer.asInputStream(true);
+                    return saveFile(inputStream, Files.getFileExtension(filename));
+                });
     }
 
 
