@@ -157,7 +157,7 @@ public class ReactiveUserTokenController {
 
     @GetMapping("/user-auth/{userId}")
     @Operation(summary = "根据用户id获取权限信息")
-    @SaveAction
+    @QueryAction
     public Mono<Authentication> userAuthInfo(@PathVariable String userId) {
         return authenticationManager.getByUserId(userId);
     }
