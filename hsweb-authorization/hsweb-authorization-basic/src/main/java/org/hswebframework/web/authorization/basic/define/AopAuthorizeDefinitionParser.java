@@ -73,6 +73,14 @@ public class AopAuthorizeDefinitionParser {
             if (annotation instanceof Dimension) {
                 definition.putAnnotation(((Dimension) annotation));
             }
+            if (annotation instanceof ResourceAction) {
+                getAnnotationByType(Resource.class)
+                    .map(res -> definition.getResources().getResource(res.id()).orElse(null))
+                    .filter(Objects::nonNull)
+                    .forEach(res -> {
+                        definition.putAnnotation(res,  (ResourceAction) annotation);
+                    });
+            }
         }
     }
 
@@ -89,10 +97,11 @@ public class AopAuthorizeDefinitionParser {
 
 
     private <T extends Annotation> Stream<T> getAnnotationByType(Class<T> type) {
-        return Optional.ofNullable(methodAnnotationGroup.getOrDefault(type, classAnnotationGroup.get(type)))
-                       .map(Collection::stream)
-                       .orElseGet(Stream::empty)
-                       .map(type::cast);
+        return Optional
+            .ofNullable(methodAnnotationGroup.getOrDefault(type, classAnnotationGroup.get(type)))
+            .stream()
+            .flatMap(Collection::stream)
+            .map(type::cast);
     }
 
 }

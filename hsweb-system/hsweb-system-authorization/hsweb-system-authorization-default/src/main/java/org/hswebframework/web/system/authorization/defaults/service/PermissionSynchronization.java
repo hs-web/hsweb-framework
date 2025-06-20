@@ -43,82 +43,42 @@ public class PermissionSynchronization implements CommandLineRunner {
     @EventListener
     public void handleResourceParseEvent(AuthorizeDefinitionInitializedEvent event) {
         definition.merge(event.getAllDefinition());
-        for (AuthorizeDefinition authorizeDefinition : event.getAllDefinition()) {
-            if (authorizeDefinition.getResources().getResources().isEmpty()) {
-                continue;
-            }
-            String id = authorizeDefinition.getResources().getResources().iterator().next().getId();
-            if (entityFieldsMapping.containsKey(id)) {
-                return;
-            }
-            if (authorizeDefinition instanceof AopAuthorizeDefinition) {
-                Class<?> target = ((AopAuthorizeDefinition) authorizeDefinition).getTargetClass();
-                if (ReactiveQueryController.class.isAssignableFrom(target)
-                        || ReactiveServiceQueryController.class.isAssignableFrom(target)) {
-                    Class<?> entity = ClassUtils.getGenericType(target);
-                    if (Entity.class.isAssignableFrom(entity)) {
-                        Set<OptionalField> fields = new HashSet<>();
-                        ReflectionUtils.doWithFields(entity, field -> {
-                            if (null != field.getAnnotation(Column.class) && !"id".equals(field.getName())) {
-                                OptionalField optionalField = new OptionalField();
-                                optionalField.setName(field.getName());
-                                Optional.ofNullable(field.getAnnotation(Schema.class))
-                                        .map(Schema::description)
-                                        .ifPresent(optionalField::setDescribe);
-                                fields.add(optionalField);
-                            }
-                        });
-                        entityFieldsMapping.put(id, new ArrayList<>(fields));
-                    }
-                }
-            }
-        }
     }
 
-    public static PermissionEntity convert(Map<String, PermissionEntity> old, ResourceDefinition definition, Map<String, List<OptionalField>> entityFieldsMapping) {
-        PermissionEntity entity = old.getOrDefault(definition.getId(), PermissionEntity.builder()
-                                                                                       .name(definition.getName())
-                                                                                       .describe(definition.getDescription())
-                                                                                       .i18nMessages(definition.getI18nMessages())
-                                                                                       .status((byte) 1)
-                                                                                       .build());
+    public static PermissionEntity convert(Map<String, PermissionEntity> old,
+                                           ResourceDefinition definition,
+                                           Map<String, List<OptionalField>> entityFieldsMapping) {
+        PermissionEntity entity = old.computeIfAbsent(
+            definition.getId(),
+            _id -> PermissionEntity
+                .builder()
+                .name(definition.getName())
+                .describe(definition.getDescription())
+                .i18nMessages(definition.getI18nMessages())
+                .status((byte) 1)
+                .build());
         entity.setId(definition.getId());
 
-        if (CollectionUtils.isEmpty(entity.getOptionalFields())) {
-            entity.setOptionalFields(entityFieldsMapping.get(entity.getId()));
-        }
+        Map<String, ActionEntity> oldAction = new LinkedHashMap<>();
 
-        Map<String, ActionEntity> oldAction = new HashMap<>();
         if (entity.getActions() != null) {
-            entity.getActions().forEach(a -> oldAction.put(a.getAction(), a));
+            for (ActionEntity action : entity.getActions()) {
+                oldAction.put(action.getAction(), action);
+            }
         }
 
         for (ResourceActionDefinition definitionAction : definition.getActions()) {
             ActionEntity action = oldAction.getOrDefault(definitionAction.getId(), ActionEntity
-                    .builder()
-                    .action(definitionAction.getId())
-                    .name(definitionAction.getName())
-                    .describe(definitionAction.getName())
-                    .build());
+                .builder()
+                .action(definitionAction.getId())
+                .name(definitionAction.getName())
+                .describe(definitionAction.getName())
+                .build());
             action.setI18nMessages(definitionAction.getI18nMessages());
-            Map<String, Object> properties = Optional.ofNullable(action.getProperties()).orElse(new HashMap<>());
-            @SuppressWarnings("all")
-            Set<Object> types = (Set) Optional
-                    .of(properties.computeIfAbsent("supportDataAccessTypes", t -> new HashSet<>()))
-                    .filter(Collection.class::isInstance)
-                    .map(Collection.class::cast)
-                    .map(HashSet::new)
-                    .orElseGet(HashSet::new);
 
-            types.addAll(definitionAction
-                                 .getDataAccess()
-                                 .getDataAccessTypes()
-                                 .stream()
-                                 .map(DataAccessTypeDefinition::getId)
-                                 .collect(Collectors.toSet()));
-            action.setProperties(properties);
             oldAction.put(action.getAction(), action);
         }
+
         entity.setActions(new ArrayList<>(oldAction.values()));
 
         return entity;
@@ -133,16 +93,16 @@ public class PermissionSynchronization implements CommandLineRunner {
         customizer.custom(definition);
 
         permissionRepository
-                .createQuery()
-                .fetch()
-                .collect(Collectors.toMap(PermissionEntity::getId, Function.identity()))
-                .flatMap(group -> Flux.fromIterable(definition.getResources())
-                                      .map(d -> PermissionSynchronization.convert(group, d, entityFieldsMapping))
-                                      .as(permissionRepository::save))
-                .doOnError(err -> log.warn("sync permission error", err))
-                .subscribe(l -> {
-                    log.info("sync permission success:{}", l);
-                });
+            .createQuery()
+            .fetch()
+            .collect(Collectors.toMap(PermissionEntity::getId, Function.identity()))
+            .flatMap(group -> Flux.fromIterable(definition.getResources())
+                                  .map(d -> PermissionSynchronization.convert(group, d, entityFieldsMapping))
+                                  .as(permissionRepository::save))
+            .doOnError(err -> log.warn("sync permission error", err))
+            .subscribe(l -> {
+                log.info("sync permission success:{}", l);
+            });
 
     }
 }

@@ -26,6 +26,7 @@ public class ResourceActionDefinition implements MultipleI18nSupportEntity {
 
     private Map<String, Map<String, String>> i18nMessages;
 
+    @Deprecated
     private DataAccessDefinition dataAccess = new DataAccessDefinition();
 
 
