@@ -27,6 +27,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import jakarta.validation.ValidationException;
+
+import java.util.List;
 import java.util.Objects;
 
 
@@ -100,6 +102,47 @@ public class DefaultReactiveUserService extends GenericReactiveCrudService<UserE
                             .thenReturn(userEntity);
                 });
 
+    }
+
+    @Override
+    public Mono<Integer> addUsers(List<UserEntity> userList) {
+        return doAdd(userList);
+    }
+
+    protected Mono<Integer> doAdd(List<UserEntity> userList) {
+
+        return Flux.fromIterable(userList)
+                   .map(userEntity -> {
+                       usernameValidator.validate(userEntity.getUsername());
+                       passwordValidator.validate(userEntity.getPassword());
+                       userEntity.generateId();
+                       userEntity.setSalt(IDGenerator.RANDOM.generate());
+                       userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword(), userEntity.getSalt()));
+                       return userEntity;
+                   })
+                   .cache()
+                   .as(userCache -> userCache
+                           .map(UserEntity::getUsername)
+                           .collectList()
+                           .flatMap(usernameList -> createQuery()
+                                   .where()
+                                   .in(UserEntity::getUsername, usernameList)
+                                   .count()
+                                   .flatMap(count -> {
+                                       if (count > 0) {
+                                           return Mono.error(() -> new org.hswebframework.web.exception.ValidationException("error.user_already_exists"));
+                                       }
+                                       return Mono.empty();
+                                   })
+                           )
+                           .then(userCache.as(getRepository()::insert)
+                                          .flatMap(res -> userCache
+                                                  .flatMap(user -> new UserCreatedEvent(user).publish(eventPublisher))
+                                                  .then()
+                                                  .thenReturn(res)
+                                          )
+                           )
+                   );
     }
 
 
