@@ -11,6 +11,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>hsweb-core</artifactId>
+    <name>${artifactId}</name>
 
     <description>核心包</description>
 

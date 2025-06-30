@@ -1,5 +1,9 @@
 package org.hswebframework.web.starter.jackson;
 
+import lombok.AllArgsConstructor;
+import org.hswebframework.web.authorization.Authentication;
+import org.hswebframework.web.authorization.AuthenticationHolder;
+import org.hswebframework.web.authorization.simple.SimpleAuthentication;
 import org.hswebframework.web.i18n.LocaleUtils;
 import org.springframework.http.codec.json.Jackson2CodecSupport;
 
@@ -7,6 +11,8 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.nio.charset.Charset;
 import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.function.Function;
 
 import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -36,6 +42,8 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
+
+import javax.annotation.Nonnull;
 
 /**
  * Base class providing support methods for Jackson 2.9 encoding. For non-streaming use
@@ -106,71 +114,80 @@ public class CustomJackson2jsonEncoder extends Jackson2CodecSupport implements H
             }
         }
         return (Object.class == clazz ||
-                (!String.class.isAssignableFrom(elementType.resolve(clazz)) && getObjectMapper().canSerialize(clazz)));
+            (!String.class.isAssignableFrom(elementType.resolve(clazz)) && getObjectMapper().canSerialize(clazz)));
     }
 
+
     @Override
-    public Flux<DataBuffer> encode(Publisher<?> inputStream, DataBufferFactory bufferFactory,
-                                   ResolvableType elementType, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+    @Nonnull
+    public Flux<DataBuffer> encode(@Nonnull Publisher<?> inputStream, @Nonnull DataBufferFactory bufferFactory,
+                                   @Nonnull ResolvableType elementType, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
         Assert.notNull(inputStream, "'inputStream' must not be null");
         Assert.notNull(bufferFactory, "'bufferFactory' must not be null");
         Assert.notNull(elementType, "'elementType' must not be null");
 
+
         if (inputStream instanceof Mono) {
-            return Mono.from(inputStream)
-                       .as(LocaleUtils::transform)
-                       .map(value -> encodeValue(value, bufferFactory, elementType, mimeType, hints))
-                       .flux();
+            return Mono
+                .zip(
+                    currentContext(hints),
+                    Mono.from(inputStream),
+                    (ctx, value) -> ctx
+                        .execute(() -> encodeValue(value, bufferFactory, elementType, mimeType, hints))
+                )
+                .flux();
         } else {
             byte[] separator = streamSeparator(mimeType);
             if (separator != null) { // streaming
                 try {
                     ObjectWriter writer = createObjectWriter(elementType, mimeType, hints);
                     ByteArrayBuilder byteBuilder = new ByteArrayBuilder(writer
-                                                                                .getFactory()
-                                                                                ._getBufferRecycler());
+                                                                            .getFactory()
+                                                                            ._getBufferRecycler());
                     JsonEncoding encoding = getJsonEncoding(mimeType);
                     JsonGenerator generator = getObjectMapper()
-                            .getFactory()
-                            .createGenerator(byteBuilder, encoding);
+                        .getFactory()
+                        .createGenerator(byteBuilder, encoding);
                     SequenceWriter sequenceWriter = writer.writeValues(generator);
 
-                    return Flux
-                            .from(inputStream)
-                            .as(LocaleUtils::transform)
-                            .map(value -> this.encodeStreamingValue(value,
-                                                                    bufferFactory,
-                                                                    hints,
-                                                                    sequenceWriter,
-                                                                    byteBuilder,
-                                                                    separator))
-                            .doAfterTerminate(() -> {
-                                try {
-                                    byteBuilder.release();
-                                    generator.close();
-                                } catch (IOException ex) {
-                                    logger.error("Could not close Encoder resources", ex);
-                                }
-                            });
+                    return currentContext(hints)
+                        .flatMapMany(ctx -> ctx
+                            .transform(inputStream,
+                                       value -> this
+                                           .encodeStreamingValue(value,
+                                                                 bufferFactory,
+                                                                 hints,
+                                                                 sequenceWriter,
+                                                                 byteBuilder,
+                                                                 separator)))
+
+                        .doAfterTerminate(() -> {
+                            try {
+                                byteBuilder.release();
+                                generator.close();
+                            } catch (IOException ex) {
+                                logger.error("Could not close Encoder resources", ex);
+                            }
+                        });
                 } catch (IOException ex) {
                     return Flux.error(ex);
                 }
             } else { // non-streaming
                 ResolvableType listType = ResolvableType.forClassWithGenerics(List.class, elementType);
-                return Flux.from(inputStream)
-                           .collectList()
-                           .as(LocaleUtils::transform)
-                           .map(value -> encodeValue(value, bufferFactory, listType, mimeType, hints))
-                           .flux();
+                return currentContext(hints)
+                    .flatMapMany(ctx -> ctx
+                        .transform(Flux.from(inputStream).collectList(),
+                                   value -> encodeValue(value, bufferFactory, listType, mimeType, hints)));
             }
 
         }
     }
 
     @Override
-    public DataBuffer encodeValue(Object value, DataBufferFactory bufferFactory,
-                                  ResolvableType valueType, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+    @Nonnull
+    public DataBuffer encodeValue(@Nonnull Object value,@Nonnull DataBufferFactory bufferFactory,
+                                  @Nonnull ResolvableType valueType, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
         ObjectWriter writer = createObjectWriter(valueType, mimeType, hints);
         ByteArrayBuilder byteBuilder = new ByteArrayBuilder(writer.getFactory()._getBufferRecycler());
@@ -251,7 +268,7 @@ public class CustomJackson2jsonEncoder extends Jackson2CodecSupport implements H
         JavaType javaType = getJavaType(valueType.getType(), null);
         Class<?> jsonView = (hints != null ? (Class<?>) hints.get(Jackson2CodecSupport.JSON_VIEW_HINT) : null);
         ObjectWriter writer = (jsonView != null ?
-                getObjectMapper().writerWithView(jsonView) : getObjectMapper().writer());
+            getObjectMapper().writerWithView(jsonView) : getObjectMapper().writer());
 
         if (javaType.isContainerType()) {
             writer = writer.forType(javaType);
@@ -320,5 +337,33 @@ public class CustomJackson2jsonEncoder extends Jackson2CodecSupport implements H
     @Override
     protected <A extends Annotation> A getAnnotation(MethodParameter parameter, Class<A> annotType) {
         return parameter.getMethodAnnotation(annotType);
+    }
+
+    static final SimpleAuthentication ANONYMOUS = new SimpleAuthentication();
+
+    static Mono<EncodingContext> currentContext(Map<String, Object> hints) {
+        return Mono
+            .zip(Authentication.currentReactive().defaultIfEmpty(ANONYMOUS),
+                 LocaleUtils.currentReactive(), EncodingContext::new);
+    }
+
+    @AllArgsConstructor
+    static class EncodingContext {
+        private final Authentication authentication;
+        private final Locale locale;
+
+        private <T, R> Flux<T> transform(Publisher<R> source, Function<R, T> transformer) {
+            return Flux
+                .from(source)
+                .map((val) -> execute(() -> transformer.apply(val)));
+        }
+
+        private <T> T execute(Callable<T> callable) {
+            if (authentication == null || authentication == ANONYMOUS) {
+                return LocaleUtils.doWith(locale, callable);
+            }
+            return AuthenticationHolder
+                .executeWith(authentication, () -> LocaleUtils.doWith(locale, callable));
+        }
     }
 }

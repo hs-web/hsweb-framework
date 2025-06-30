@@ -9,6 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <name>${artifactId}</name>
     <artifactId>hsweb-authorization</artifactId>
     <packaging>pom</packaging>
     <modules>

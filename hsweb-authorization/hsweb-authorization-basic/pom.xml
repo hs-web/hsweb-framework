@@ -9,6 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <name>${artifactId}</name>
     <artifactId>hsweb-authorization-basic</artifactId>
 
     <description>实现hsweb-authorization-api的相关接口以及使用aop实现RBAC和数据权限的控制</description>

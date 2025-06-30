@@ -14,6 +14,7 @@
     <description>数据源,多数据源,动态数据源</description>
 
     <artifactId>hsweb-datasource</artifactId>
+    <name>${artifactId}</name>
     <packaging>pom</packaging>
     <modules>
         <module>hsweb-datasource-api</module>

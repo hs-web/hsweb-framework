@@ -17,6 +17,7 @@
         <module>hsweb-system-authorization-oauth2</module>
     </modules>
     <artifactId>hsweb-system-authorization</artifactId>
+    <name>${artifactId}</name>
 
 
 </project>

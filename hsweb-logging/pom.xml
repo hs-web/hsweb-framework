@@ -31,6 +31,7 @@
     <description>日志模块</description>
 
     <artifactId>hsweb-logging</artifactId>
+    <name>${artifactId}</name>
     <packaging>pom</packaging>
     <modules>
         <module>hsweb-access-logging-api</module>

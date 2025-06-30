@@ -112,7 +112,7 @@
                             <publishingServerId>central</publishingServerId>
                             <autoPublish>true</autoPublish>
                             <waitUntil>validated</waitUntil>
-                            <deploymentName>${project.name}-${project.version}</deploymentName>
+                            <deploymentName>hsweb-framework:${project.version}</deploymentName>
                         </configuration>
                     </plugin>
 
