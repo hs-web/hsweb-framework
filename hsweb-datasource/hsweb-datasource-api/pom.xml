@@ -5,13 +5,14 @@
     <parent>
         <artifactId>hsweb-datasource</artifactId>
         <groupId>org.hswebframework.web</groupId>
-        <version>4.0.19-SNAPSHOT</version>
+        <version>4.0.19</version>
 
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>hsweb-datasource-api</artifactId>
+    <name>${artifactId}</name>
 
      <description>数据源管理API,以及简单的多数据源实现,支持aop,表达式等多种方式切换数据源</description>
 

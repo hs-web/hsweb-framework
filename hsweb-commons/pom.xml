@@ -23,9 +23,10 @@
     <parent>
         <artifactId>hsweb-framework</artifactId>
         <groupId>org.hswebframework.web</groupId>
-        <version>4.0.19-SNAPSHOT</version>
+        <version>4.0.19</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
+    <name>${artifactId}</name>
     <modelVersion>4.0.0</modelVersion>
     <description>通用模块</description>
 

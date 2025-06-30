@@ -5,10 +5,11 @@
     <parent>
         <artifactId>hsweb-authorization</artifactId>
         <groupId>org.hswebframework.web</groupId>
-        <version>4.0.19-SNAPSHOT</version>
+        <version>4.0.19</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <name>${artifactId}</name>
     <artifactId>hsweb-authorization-oauth2</artifactId>
 
     <dependencies>

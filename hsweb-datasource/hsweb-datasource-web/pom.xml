@@ -5,13 +5,14 @@
     <parent>
         <artifactId>hsweb-datasource</artifactId>
         <groupId>org.hswebframework.web</groupId>
-        <version>4.0.19-SNAPSHOT</version>
+        <version>4.0.19</version>
 
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>hsweb-datasource-web</artifactId>
+    <name>${artifactId}</name>
 
     <description>暴露多数据源的web接口</description>
 

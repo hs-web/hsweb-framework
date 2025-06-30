@@ -24,7 +24,7 @@
 
     <groupId>org.hswebframework.web</groupId>
     <artifactId>hsweb-framework</artifactId>
-    <version>4.0.19-SNAPSHOT</version>
+    <version>4.0.19</version>
     <modules>
         <module>hsweb-starter</module>
         <module>hsweb-core</module>
@@ -89,7 +89,7 @@
         <cglib.version>3.2.2</cglib.version>
         <aspectj.version>1.6.12</aspectj.version>
 
-        <hsweb.ezorm.version>4.1.4-SNAPSHOT</hsweb.ezorm.version>
+        <hsweb.ezorm.version>4.1.4</hsweb.ezorm.version>
         <hsweb.utils.version>3.0.4</hsweb.utils.version>
         <hsweb.expands.version>3.0.2</hsweb.expands.version>
         <swagger.version>2.7.0</swagger.version>
@@ -103,27 +103,18 @@
             <build>
                 <plugins>
                     <plugin>
-                        <groupId>org.sonatype.plugins</groupId>
-                        <artifactId>nexus-staging-maven-plugin</artifactId>
-                        <version>1.6.3</version>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>0.8.0</version>
                         <extensions>true</extensions>
                         <configuration>
-                            <serverId>sonatype-releases</serverId>
-                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                            <autoReleaseAfterClose>true</autoReleaseAfterClose>
-                            <stagingProgressTimeoutMinutes>120</stagingProgressTimeoutMinutes>
+                            <publishingServerId>central</publishingServerId>
+                            <autoPublish>true</autoPublish>
+                            <waitUntil>validated</waitUntil>
+                            <deploymentName>${project.name}-${project.version}</deploymentName>
                         </configuration>
                     </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-release-plugin</artifactId>
-                        <configuration>
-                            <autoVersionSubmodules>true</autoVersionSubmodules>
-                            <useReleaseProfile>false</useReleaseProfile>
-                            <releaseProfiles>release</releaseProfiles>
-                            <goals>deploy</goals>
-                        </configuration>
-                    </plugin>
+
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
@@ -138,6 +129,7 @@
                             </execution>
                         </executions>
                     </plugin>
+
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
@@ -157,15 +149,10 @@
                 </plugins>
             </build>
             <distributionManagement>
-                <repository>
-                    <id>sonatype-releases</id>
-                    <name>sonatype repository</name>
-                    <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
-                </repository>
                 <snapshotRepository>
-                    <id>sonatype-snapshots</id>
-                    <name>Nexus Snapshot Repository</name>
-                    <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+                    <id>central</id>
+                    <name>Central Snapshot Repository</name>
+                    <url>https://central.sonatype.com/repository/maven-snapshots</url>
                 </snapshotRepository>
             </distributionManagement>
         </profile>
@@ -517,11 +504,6 @@
     </repositories>
 
     <distributionManagement>
-        <repository>
-            <id>releases</id>
-            <name>Nexus Release Repository</name>
-            <url>https://nexus.jetlinks.cn/content/repositories/releases/</url>
-        </repository>
         <snapshotRepository>
             <id>snapshots</id>
             <name>Nexus Snapshot Repository</name>
