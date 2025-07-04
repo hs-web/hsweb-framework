@@ -128,17 +128,17 @@ public final class FastBeanCopier {
                 ((Map) target).putAll(((Map) source));
             } else {
                 ((Map) source)
-                    .forEach((k, v) -> {
-                        if (!ignore.contains(k)) {
-                            ((Map) target).put(k, v);
-                        }
-                    });
+                        .forEach((k, v) -> {
+                            if (!ignore.contains(k)) {
+                                ((Map) target).put(k, v);
+                            }
+                        });
             }
             return target;
         }
 
         getCopier(source, target, true)
-            .copy(source, target, ignore, converter);
+                .copy(source, target, ignore, converter);
         return target;
     }
 
@@ -187,20 +187,20 @@ public final class FastBeanCopier {
         boolean sourceIsMap = Map.class.isAssignableFrom(source);
 
         String method = "public void copy(Object s, Object t, java.util.Set ignore, " +
-            "org.hswebframework.web.bean.Converter converter){\n" +
-            "try{\n\t" +
-            sourceName + " $$__source=(" + sourceName + ")s;\n\t" +
-            tartName + " $$__target=(" + tartName + ")t;\n\t" +
-            createCopierCode(source, target) +
-            "}catch(Throwable e){\n" +
-            "\tthrow e;" +
-            "\n}\n" +
-            "\n}";
+                "org.hswebframework.web.bean.Converter converter){\n" +
+                "try{\n\t" +
+                sourceName + " $$__source=(" + sourceName + ")s;\n\t" +
+                tartName + " $$__target=(" + tartName + ")t;\n\t" +
+                createCopierCode(source, target) +
+                "}catch(Throwable e){\n" +
+                "\tthrow e;" +
+                "\n}\n" +
+                "\n}";
         try {
             @SuppressWarnings("all")
             Proxy<Copier> proxy = Proxy
-                .create(Copier.class, new Class[]{source, target})
-                .addMethod(method);
+                    .create(Copier.class, new Class[]{source, target})
+                    .addMethod(method);
             Copier copier = proxy.newInstance();
             if (sourceIsExtendable && targetIsMap) {
                 copier = new ExtendableToMapCopier(copier);
@@ -210,8 +210,8 @@ public final class FastBeanCopier {
                 copier = new ExtendableToBeanCopier(copier);
             }
             return copier;
-        } catch (Exception e) {
-            log.error("创建bean copy 代理对象失败:\n{}", method, e);
+        } catch (Throwable e) {
+            log.error("create bean copy {} =>{} failed :\n{}", source, target, method, e);
             throw new UnsupportedOperationException(e.getMessage(), e);
         }
     }
@@ -219,27 +219,27 @@ public final class FastBeanCopier {
     private static Map<String, ClassProperty> createProperty(Class<?> type) {
 
         List<String> fieldNames = Arrays
-            .stream(type.getDeclaredFields())
-            .map(Field::getName)
-            .collect(Collectors.toList());
+                .stream(type.getDeclaredFields())
+                .map(Field::getName)
+                .collect(Collectors.toList());
 
         return Stream.of(propertyUtils.getPropertyDescriptors(type))
-                     .filter(property -> !property
-                         .getName()
-                         .equals("class") && property.getReadMethod() != null && property.getWriteMethod() != null)
-                     .map(BeanClassProperty::new)
-                     //让字段有序
-                     .sorted(Comparator.comparing(property -> fieldNames.indexOf(property.name)))
-                     .collect(Collectors.toMap(ClassProperty::getName, Function.identity(), (k, k2) -> k, LinkedHashMap::new));
+                .filter(property -> !property
+                        .getName()
+                        .equals("class") && property.getReadMethod() != null && property.getWriteMethod() != null)
+                .map(BeanClassProperty::new)
+                //让字段有序
+                .sorted(Comparator.comparing(property -> fieldNames.indexOf(property.name)))
+                .collect(Collectors.toMap(ClassProperty::getName, Function.identity(), (k, k2) -> k, LinkedHashMap::new));
 
     }
 
     private static Map<String, ClassProperty> createMapProperty(Map<String, ClassProperty> template) {
         return template
-            .values()
-            .stream()
-            .map(classProperty -> new MapClassProperty(classProperty.name))
-            .collect(Collectors.toMap(ClassProperty::getName, Function.identity(), (k, k2) -> k, LinkedHashMap::new));
+                .values()
+                .stream()
+                .map(classProperty -> new MapClassProperty(classProperty.name))
+                .collect(Collectors.toMap(ClassProperty::getName, Function.identity(), (k, k2) -> k, LinkedHashMap::new));
     }
 
     private static String createCopierCode(Class<?> source, Class<?> target) {
@@ -280,9 +280,9 @@ public final class FastBeanCopier {
                         code.append("if($$__source.").append(sourceProperty.getReadMethod()).append("!=null){\n");
                     }
                     code.append("\t\t((org.hswebframework.ezorm.core.Extendable)$$__target).setExtension(")
-                        .append("\"").append(sourceProperty.name).append("\",")
-                        .append("$$__source.").append(sourceProperty.getReadMethod())
-                        .append(");");
+                            .append("\"").append(sourceProperty.name).append("\",")
+                            .append("$$__source.").append(sourceProperty.getReadMethod())
+                            .append(");");
                     if (!sourceProperty.isPrimitive()) {
                         code.append("\n\t}");
                     }
@@ -295,16 +295,16 @@ public final class FastBeanCopier {
                 code.append("if($$__source.").append(sourceProperty.getReadMethod()).append("!=null){\n");
             }
             code.append(targetProperty.generateVar(targetProperty.getName())).append("=")
-                .append(sourceProperty.generateGetter(target, targetProperty.getType()))
-                .append(";\n");
+                    .append(sourceProperty.generateGetter(target, targetProperty.getType()))
+                    .append(";\n");
 
             if (!targetProperty.isPrimitive()) {
                 code.append("\tif(").append(sourceProperty.getName()).append("!=null){\n");
             }
             code
-                .append("\t$$__target.")
-                .append(targetProperty.generateSetter(targetProperty.getType(), sourceProperty.getName()))
-                .append(";\n");
+                    .append("\t$$__target.")
+                    .append(targetProperty.generateSetter(targetProperty.getType(), sourceProperty.getName()))
+                    .append(";\n");
             if (!targetProperty.isPrimitive()) {
                 code.append("\t}\n");
             }
@@ -377,10 +377,10 @@ public final class FastBeanCopier {
 
         protected Class<?> getPrimitiveType(Class<?> type) {
             return wrapperClassMapping.entrySet().stream()
-                                      .filter(entry -> entry.getValue() == type)
-                                      .map(Map.Entry::getKey)
-                                      .findFirst()
-                                      .orElse(null);
+                    .filter(entry -> entry.getValue() == type)
+                    .map(Map.Entry::getKey)
+                    .findFirst()
+                    .orElse(null);
         }
 
         protected Class<?> getWrapperType() {
@@ -401,18 +401,18 @@ public final class FastBeanCopier {
                 boolean hasGeneric = false;
                 if (field != null) {
                     String[] arr = Arrays.stream(ResolvableType.forField(field)
-                                                               .getGenerics())
-                                         .map(ResolvableType::getRawClass)
-                                         .filter(Objects::nonNull)
-                                         .map(t -> t.getName().concat(".class"))
-                                         .toArray(String[]::new);
+                                    .getGenerics())
+                            .map(ResolvableType::getRawClass)
+                            .filter(Objects::nonNull)
+                            .map(t -> t.getName().concat(".class"))
+                            .toArray(String[]::new);
                     if (arr.length > 0) {
                         generic = "new Class[]{" + String.join(",", arr) + "}";
                         hasGeneric = true;
                     }
                 }
                 String convert = "converter.convert((Object)(" + (isPrimitive() ? castWrapper(getterCode) : getterCode) + "),"
-                    + getTypeName(targetType) + ".class," + generic + ")";
+                        + getTypeName(targetType) + ".class," + generic + ")";
                 StringBuilder convertCode = new StringBuilder();
 
                 if (targetType != getType()) {
@@ -425,18 +425,18 @@ public final class FastBeanCopier {
                         // source.getField().intValue();
                         if (sourceIsWrapper) {
                             convertCode
-                                .append(getterCode)
-                                .append(".")
-                                .append(sourcePrimitive.getName())
-                                .append("Value()");
+                                    .append(getterCode)
+                                    .append(".")
+                                    .append(sourcePrimitive.getName())
+                                    .append("Value()");
                         } else {
                             //类型不一致，调用convert转换
                             convertCode.append("((").append(targetWrapperClass.getName())
-                                       .append(")")
-                                       .append(convert)
-                                       .append(").")
-                                       .append(targetType.getName())
-                                       .append("Value()");
+                                    .append(")")
+                                    .append(convert)
+                                    .append(").")
+                                    .append(targetType.getName())
+                                    .append("Value()");
                         }
 
                     } else if (isPrimitive()) {
@@ -444,36 +444,36 @@ public final class FastBeanCopier {
                         //源字段类型为基本数据类型，目标字段为包装器类型
                         if (targetIsWrapper) {
                             convertCode.append(targetType.getName())
-                                       .append(".valueOf(")
-                                       .append(getterCode)
-                                       .append(")");
+                                    .append(".valueOf(")
+                                    .append(getterCode)
+                                    .append(")");
                         } else {
                             convertCode.append("(").append(targetType.getName())
-                                       .append(")(")
-                                       .append(convert)
-                                       .append(")");
+                                    .append(")(")
+                                    .append(convert)
+                                    .append(")");
                         }
                     } else {
                         convertCode.append("(").append(getTypeName(targetType))
-                                   .append(")(")
-                                   .append(convert)
-                                   .append(")");
+                                .append(")(")
+                                .append(convert)
+                                .append(")");
                     }
                 } else {
                     if (Cloneable.class.isAssignableFrom(targetType)) {
                         try {
                             convertCode
-                                .append("(")
-                                .append(getTypeName())
-                                .append(")")
-                                .append(getterCode)
-                                .append(".clone()");
+                                    .append("(")
+                                    .append(getTypeName())
+                                    .append(")")
+                                    .append(getterCode)
+                                    .append(".clone()");
                         } catch (Exception e) {
                             convertCode.append(getterCode);
                         }
                     } else {
                         if ((Map.class.isAssignableFrom(targetType)
-                            || Collection.class.isAssignableFrom(type)) && hasGeneric) {
+                                || Collection.class.isAssignableFrom(type)) && hasGeneric) {
                             convertCode.append("(").append(getTypeName()).append(")").append(convert);
                         } else {
                             convertCode.append("(").append(getTypeName()).append(")").append(getterCode);
@@ -560,9 +560,9 @@ public final class FastBeanCopier {
                 return new LinkedList<>();
             } else {
                 try {
-                    return (Collection<?>) targetClass.newInstance();
-                } catch (Exception e) {
-                    throw new UnsupportedOperationException("不支持的类型:" + targetClass, e);
+                    return (Collection<?>) targetClass.getDeclaredConstructor().newInstance();
+                } catch (Throwable e) {
+                    throw new UnsupportedOperationException("Unsupported Collection Type:" + targetClass, e);
                 }
             }
         }
@@ -661,15 +661,15 @@ public final class FastBeanCopier {
                 for (Object e : target.getEnums()) {
                     Enum t = ((Enum<?>) e);
                     if ((t.name().equalsIgnoreCase(strSource)
-                        || Objects.equals(String.valueOf(t.ordinal()), strSource))) {
+                            || Objects.equals(String.valueOf(t.ordinal()), strSource))) {
                         return (T) e;
                     }
                 }
 
                 log.warn("无法将:{}转为枚举:{}",
-                         source,
-                         targetClass,
-                         new ClassCastException(source + "=>" + targetClass));
+                        source,
+                        targetClass,
+                        new ClassCastException(source + "=>" + targetClass));
                 return null;
             }
             //转换为数组
@@ -722,8 +722,8 @@ public final class FastBeanCopier {
                 }
 
                 return copy(source, beanFactory.newInstance(targetClass), this);
-            } catch (Exception e) {
-                log.warn("复制类型{}->{}失败", targetClass, e);
+            } catch (Throwable e) {
+                log.warn("Copy {} to {} failed", source, targetClass, e);
                 throw e;
             }
 //            return null;
