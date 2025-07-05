@@ -31,7 +31,7 @@ public class Proxy<I> extends URLClassLoader {
     @Getter
     private final String classFullName;
 
-    private final List<ClassLoader> loaders = new ArrayList<>();
+    private final Set<ClassLoader> loaders = new HashSet<>();
     private Class<I> targetClass;
 
     @SneakyThrows
@@ -130,7 +130,7 @@ public class Proxy<I> extends URLClassLoader {
         }
 
         loaders.add(ClassUtils.getDefaultClassLoader());
-
+        loaders.add(Proxy.class.getClassLoader());
         classPool.insertClassPath(new LoaderClassPath(this));
 
         className = superClass.getSimpleName() + "$Proxy" + counter.getAndIncrement();
