@@ -23,7 +23,7 @@
     <parent>
         <artifactId>hsweb-framework</artifactId>
         <groupId>org.hswebframework.web</groupId>
-        <version>4.0.19</version>
+        <version>4.0.20-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <name>${artifactId}</name>
