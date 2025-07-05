@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <logger name="reactor" level="warn"/>
+    <logger name="io.netty" level="warn"/>
+    　
+    <logger name="com.github" level="warn"/>
+    <logger name="org.eclipse" level="warn"/>
+    　
+    <logger name="org.springframework" level="warn"/>
+    　
+    <logger name="org.testcontainers" level="info"/>
+    　 <logger name="org.apache" level="warn"/>
+    　
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%-4relative [%thread] %-5level %logger{35} - %msg %n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="debug">
+        <appender-ref ref="STDOUT"/>
+    </root>
+</configuration>

@@ -10,6 +10,10 @@ import org.springframework.core.ResolvableType;
  */
 public interface TypeConverter {
 
+    static TypeConverter instance() {
+        return SmartTypeConverter.INSTANCE;
+    }
+
     Object convert(Object source, ResolvableType type);
 
 }
