@@ -25,6 +25,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.support.WebExchangeBindException;
+import org.springframework.web.reactive.function.client.WebClientException;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.web.reactive.resource.NoResourceFoundException;
 import org.springframework.web.server.*;
 import reactor.core.publisher.Mono;
@@ -181,19 +183,20 @@ public class CommonErrorControllerAdvice {
     @ResponseStatus(HttpStatus.GATEWAY_TIMEOUT)
     public Mono<ResponseMessage<Object>> handleException(TimeoutException e) {
         return LocaleUtils
-            .resolveThrowable(e, (err, msg) -> ResponseMessage.error(504, CodeConstants.Error.timeout, msg))
-            .doOnEach(ReactiveLogger.onNext(r -> log.warn(e.getLocalizedMessage(), e)));
+            .resolveThrowable(e, (err, msg) -> {
+                log.warn(msg, err);
+                return ResponseMessage.error(504, CodeConstants.Error.timeout, msg);
+            });
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @Order
     public Mono<ResponseMessage<Object>> handleException(RuntimeException e) {
+        log.warn(e.getLocalizedMessage(), e);
         return LocaleUtils
-            .resolveThrowable(e, (err, msg) -> {
-                log.warn(msg, e);
-                return ResponseMessage.error(msg);
-            });
+            .resolveMessageReactive("error.internal_server_error")
+            .map(msg -> ResponseMessage.error(500, "internal_server_error", msg));
     }
 
     @ExceptionHandler
