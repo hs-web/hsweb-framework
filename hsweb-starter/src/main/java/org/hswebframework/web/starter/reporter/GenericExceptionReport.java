@@ -5,9 +5,10 @@ import org.hswebframework.web.exception.analyzer.ExceptionAnalyzers;
 import org.springframework.beans.BeansException;
 import org.springframework.boot.SpringBootExceptionReporter;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.Ordered;
 
 @Slf4j
-public class GenericExceptionReport implements SpringBootExceptionReporter {
+public class GenericExceptionReport implements SpringBootExceptionReporter , Ordered {
 
 
     public GenericExceptionReport(ConfigurableApplicationContext context) {
@@ -19,4 +20,8 @@ public class GenericExceptionReport implements SpringBootExceptionReporter {
         return ExceptionAnalyzers.analyze(failure);
     }
 
+    @Override
+    public int getOrder() {
+        return Ordered.HIGHEST_PRECEDENCE;
+    }
 }
