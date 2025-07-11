@@ -1,0 +1,46 @@
+name: Auto Deploy 5.x to the Maven Repository
+on:
+  push:
+    branches: ["5.0.x"]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node_version: [ 18.x ]
+        #        os: [ubuntu-latest, windows-latest, macOS-latest]
+        os: [ ubuntu-latest ]
+    steps:
+      - uses: actions/checkout@v1
+      - run: echo ${{github.ref}}
+      - name: Set up Repository info
+        uses: actions/setup-java@v2
+        with:
+          java-version: '8'
+          distribution: 'adopt'
+      - name: Cache Maven Repository
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
+      - name: Create Maven settings.xml
+        #uses: actions/cache@v3
+        env:
+          MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
+        run: |
+          mkdir -p ~/.m2
+          echo "<settings>
+                  <servers>
+                    <server>
+                      <id>snapshots</id>
+                      <username>${MAVEN_USERNAME}</username>
+                      <password>${MAVEN_PASSWORD}</password>
+                    </server>
+                  </servers>
+                </settings>" > ~/.m2/settings.xml
+
+          # Step 4: 构建并发布到 Maven 私有仓库
+      - name: Build and Deploy to Maven
+        run: mvn clean deploy -DskipTests -pl $(changes.sh)
