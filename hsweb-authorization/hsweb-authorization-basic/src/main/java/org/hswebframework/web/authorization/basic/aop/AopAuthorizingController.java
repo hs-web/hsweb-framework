@@ -14,6 +14,7 @@ import org.hswebframework.web.authorization.exception.UnAuthorizedException;
 import org.hswebframework.web.utils.AnnotationUtils;
 import org.reactivestreams.Publisher;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
+import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.ApplicationEventPublisher;
@@ -35,7 +36,8 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @SuppressWarnings("all")
-public class AopAuthorizingController extends StaticMethodMatcherPointcutAdvisor implements CommandLineRunner, MethodInterceptor, Ordered {
+public class AopAuthorizingController extends StaticMethodMatcherPointcutAdvisor
+    implements CommandLineRunner, MethodInterceptor, Ordered, SmartInitializingSingleton {
 
     private static final long serialVersionUID = 1154190623020670672L;
 
@@ -198,6 +200,26 @@ public class AopAuthorizingController extends StaticMethodMatcherPointcutAdvisor
 
     @Override
     public void run(String... args) throws Exception {
+//        if (autoParse) {
+//            List<AuthorizeDefinition> definitions = aopMethodAuthorizeDefinitionParser
+//                .getAllParsed()
+//                .stream()
+//                .filter(def -> !def.isEmpty())
+//                .collect(Collectors.toList());
+//            log.info("publish AuthorizeDefinitionInitializedEvent,definition size:{}", definitions.size());
+//            eventPublisher.publishEvent(new AuthorizeDefinitionInitializedEvent(definitions));
+//
+//            //  defaultParser.destroy();
+//        }
+    }
+
+    @Override
+    public int getOrder() {
+        return Ordered.HIGHEST_PRECEDENCE;
+    }
+
+    @Override
+    public void afterSingletonsInstantiated() {
         if (autoParse) {
             List<AuthorizeDefinition> definitions = aopMethodAuthorizeDefinitionParser
                 .getAllParsed()
@@ -209,10 +231,5 @@ public class AopAuthorizingController extends StaticMethodMatcherPointcutAdvisor
 
             //  defaultParser.destroy();
         }
-    }
-
-    @Override
-    public int getOrder() {
-        return Ordered.HIGHEST_PRECEDENCE;
     }
 }
