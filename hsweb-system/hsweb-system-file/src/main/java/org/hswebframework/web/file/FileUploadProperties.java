@@ -1,5 +1,6 @@
 package org.hswebframework.web.file;
 
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
