@@ -20,6 +20,7 @@ import reactor.core.publisher.Flux;
 
 import javax.persistence.Column;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -95,14 +96,14 @@ public class PermissionSynchronization implements CommandLineRunner {
         permissionRepository
             .createQuery()
             .fetch()
-            .collect(Collectors.toMap(PermissionEntity::getId, Function.identity()))
-            .flatMap(group -> Flux.fromIterable(definition.getResources())
-                                  .map(d -> PermissionSynchronization.convert(group, d, entityFieldsMapping))
-                                  .as(permissionRepository::save))
-            .doOnError(err -> log.warn("sync permission error", err))
-            .subscribe(l -> {
-                log.info("sync permission success:{}", l);
-            });
+            .collectMap(PermissionEntity::getId, Function.identity(), ConcurrentHashMap::new)
+            .flatMap(group -> Flux
+                .fromIterable(definition.getResources())
+                .map(d -> PermissionSynchronization.convert(group, d, entityFieldsMapping))
+                .as(permissionRepository::save))
+            .subscribe(
+                l -> log.info("sync permission success:{}", l),
+                err -> log.warn("sync permission error", err));
 
     }
 }

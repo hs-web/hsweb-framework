@@ -17,7 +17,7 @@ import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.core.ReactiveAdapterRegistry;
+import org.springframework.core.Ordered;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,9 +26,6 @@ import reactor.core.publisher.Mono;
 
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -38,7 +35,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @SuppressWarnings("all")
-public class AopAuthorizingController extends StaticMethodMatcherPointcutAdvisor implements CommandLineRunner, MethodInterceptor {
+public class AopAuthorizingController extends StaticMethodMatcherPointcutAdvisor implements CommandLineRunner, MethodInterceptor, Ordered {
 
     private static final long serialVersionUID = 1154190623020670672L;
 
@@ -214,5 +211,8 @@ public class AopAuthorizingController extends StaticMethodMatcherPointcutAdvisor
         }
     }
 
-
+    @Override
+    public int getOrder() {
+        return Ordered.HIGHEST_PRECEDENCE;
+    }
 }

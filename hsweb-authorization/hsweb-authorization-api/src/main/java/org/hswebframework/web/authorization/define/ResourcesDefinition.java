@@ -9,14 +9,14 @@ import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.annotation.Logical;
 
 import java.util.*;
-import java.util.function.Function;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Getter
 @Setter
 public class ResourcesDefinition {
 
-    private Set<ResourceDefinition> resources = new HashSet<>();
+    private final Set<ResourceDefinition> resources = ConcurrentHashMap.newKeySet();
 
     private Logical logical = Logical.DEFAULT;
 
