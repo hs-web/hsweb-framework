@@ -8,6 +8,8 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 /**
  * 响应式用户服务
  *
@@ -38,6 +40,14 @@ public interface ReactiveUserService {
      * @return 新增的用户实体
      */
     Mono<UserEntity> addUser(UserEntity userEntity);
+
+    /**
+     * 批量新增用户
+     *
+     * @param userList 用户实体集合
+     * @return 新增的用户实体数量
+     */
+    Mono<Integer> addUsers(List<UserEntity> userList);
 
     /**
      * 根据用户名查询用户实体，如果用户不存在则返回{@link Mono#empty()}
