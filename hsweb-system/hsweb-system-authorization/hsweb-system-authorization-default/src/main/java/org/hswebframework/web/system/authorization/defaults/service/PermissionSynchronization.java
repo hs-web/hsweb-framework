@@ -14,6 +14,7 @@ import org.hswebframework.web.system.authorization.api.entity.OptionalField;
 import org.hswebframework.web.system.authorization.api.entity.PermissionEntity;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.event.EventListener;
+import org.springframework.core.Ordered;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils;
 import reactor.core.publisher.Flux;
@@ -25,7 +26,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class PermissionSynchronization implements CommandLineRunner {
+public class PermissionSynchronization implements CommandLineRunner, Ordered {
 
     private final ReactiveRepository<PermissionEntity, String> permissionRepository;
 
@@ -105,5 +106,10 @@ public class PermissionSynchronization implements CommandLineRunner {
                 l -> log.info("sync permission success:{}", l),
                 err -> log.warn("sync permission error", err));
 
+    }
+
+    @Override
+    public int getOrder() {
+        return Ordered.LOWEST_PRECEDENCE;
     }
 }
