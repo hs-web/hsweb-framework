@@ -17,7 +17,7 @@ jobs:
       - name: Set up Repository info
         uses: actions/setup-java@v2
         with:
-          java-version: '8'
+          java-version: '17'
           distribution: 'adopt'
       - name: Cache Maven Repository
         uses: actions/cache@v3
