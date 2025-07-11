@@ -8,23 +8,22 @@ import org.hswebframework.ezorm.rdb.executor.SqlRequest;
 import org.hswebframework.ezorm.rdb.executor.reactive.r2dbc.R2dbcReactiveSqlExecutor;
 import org.hswebframework.ezorm.rdb.executor.wrapper.ResultWrapper;
 import org.hswebframework.web.api.crud.entity.TransactionManagers;
-import org.hswebframework.web.datasource.DataSourceHolder;
-import org.hswebframework.web.datasource.R2dbcDataSource;
 import org.hswebframework.web.exception.I18nSupportException;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.r2dbc.connection.ConnectionFactoryUtils;
-import org.springframework.r2dbc.core.ConnectionAccessor;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.SignalType;
 
+import java.io.Serial;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
 public class DefaultR2dbcExecutor extends R2dbcReactiveSqlExecutor {
@@ -97,16 +96,48 @@ public class DefaultR2dbcExecutor extends R2dbcReactiveSqlExecutor {
 
     @Override
     protected <T> Flux<T> doInConnection(Function<Connection, Publisher<T>> handler) {
+        Mono<ConnectionCloseHolder> connectionMono = getConnection().map(
+            connection -> new ConnectionCloseHolder(connection, this::closeConnection));
+
         return Flux.usingWhen(
-            ConnectionFactoryUtils.getConnection(defaultFactory),
-            handler,
-            source -> ConnectionFactoryUtils
-                .currentConnectionFactory(defaultFactory)
-                .then()
-                .onErrorResume(Exception.class, ex -> Mono.from(source.close()))
+            connectionMono,
+            holder -> handler.apply(holder.connection),
+            ConnectionCloseHolder::close,
+            (it, err) -> it.close(),
+            ConnectionCloseHolder::close
         );
 
         // return super.doWith(handler);
+    }
+
+    static class ConnectionCloseHolder extends AtomicBoolean {
+
+        @Serial
+        private static final long serialVersionUID = -8994138383301201380L;
+
+        final transient Connection connection;
+
+        final transient Function<Connection, Publisher<Void>> closeFunction;
+
+        ConnectionCloseHolder(Connection connection, Function<Connection, Publisher<Void>> closeFunction) {
+            this.connection = connection;
+            this.closeFunction = closeFunction;
+        }
+
+        Mono<Void> close() {
+            return Mono.defer(() -> {
+                if (compareAndSet(false, true)) {
+                    return Mono.from(this.closeFunction.apply(this.connection));
+                }
+                return Mono.empty();
+            });
+        }
+    }
+
+    private Publisher<Void> closeConnection(Connection connection) {
+        return ConnectionFactoryUtils
+            .currentConnectionFactory(defaultFactory).then()
+            .onErrorResume(Exception.class, ex -> Mono.from(connection.close()));
     }
 
     @Override
