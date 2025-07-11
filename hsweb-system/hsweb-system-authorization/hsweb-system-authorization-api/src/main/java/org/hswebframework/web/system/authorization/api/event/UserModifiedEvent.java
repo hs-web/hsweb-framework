@@ -27,4 +27,9 @@ public class UserModifiedEvent extends DefaultAsyncEvent {
 
     //新密码原始文本, passwordModified 为 true 时有值
     private String newPassword;
+
+    @Deprecated
+    public UserModifiedEvent(UserEntity before, UserEntity after, boolean passwordModified) {
+        this(before, after, passwordModified, null);
+    }
 }

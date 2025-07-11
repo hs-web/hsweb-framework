@@ -233,7 +233,7 @@ public class DefaultReactiveUserService extends GenericReactiveCrudService<UserE
     }
 
     @Override
-    @Transactional(readOnly = true, transactionManager = TransactionManagers.reactiveTransactionManager)
+    @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager)
     public Mono<Boolean> deleteUser(String userId) {
         return this
                 .findById(userId)
