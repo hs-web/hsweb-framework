@@ -21,4 +21,4 @@ jobs:
         path: ~/.m2
         key: ${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
     - name: Build with Maven
-      run: ./mvnw test
+      run: ./mvnw test -q

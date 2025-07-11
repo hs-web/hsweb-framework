@@ -11,7 +11,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>hsweb-access-logging-aop</artifactId>
-    <name>${artifactId}</name>
+    <name>${project.artifactId}</name>
 
     <description>基于AOP实现访问日志解析,使用spring event发布日志事件.</description>
 

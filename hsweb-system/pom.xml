@@ -17,6 +17,6 @@
         <module>hsweb-system-dictionary</module>
     </modules>
     <artifactId>hsweb-system</artifactId>
-    <name>${artifactId}</name>
+    <name>${project.artifactId}</name>
 
 </project>
