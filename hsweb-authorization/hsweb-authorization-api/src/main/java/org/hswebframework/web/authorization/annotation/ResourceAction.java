@@ -29,7 +29,7 @@ import java.lang.annotation.*;
  * @see org.hswebframework.web.authorization.Authentication
  * @see Permission#getActions()
  */
-@Target({ElementType.ANNOTATION_TYPE, ElementType.METHOD})
+@Target({ElementType.ANNOTATION_TYPE, ElementType.METHOD,ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
