@@ -11,16 +11,17 @@ import org.hswebframework.web.authorization.annotation.ResourceAction;
 import org.hswebframework.web.authorization.exception.AccessDenyException;
 import org.hswebframework.web.file.FileUploadProperties;
 import org.hswebframework.web.file.service.FileStorageService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.http.MediaType;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.http.codec.multipart.Part;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
-import java.io.File;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 @RestController
 @Resource(id = "file", name = "文件上传")
@@ -33,10 +34,12 @@ public class ReactiveFileController {
 
     private final FileStorageService fileStorageService;
 
+
     public ReactiveFileController(FileUploadProperties properties, FileStorageService fileStorageService) {
         this.properties = properties;
         this.fileStorageService = fileStorageService;
     }
+
 
     @PostMapping("/static")
     @SneakyThrows
@@ -57,6 +60,22 @@ public class ReactiveFileController {
                     }
                 });
 
+    }
+
+    @PostMapping(value = "/static/stream", consumes = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    @Operation(summary = "上传文件流")
+    public Mono<String> uploadOssStream(ServerHttpRequest request,
+                                     @RequestParam("fileType") String fileType) {
+
+        if (properties.denied("upload." + fileType, MediaType.APPLICATION_OCTET_STREAM)) {
+            return Mono.error(new AccessDenyException());
+        }
+
+        return DataBufferUtils.join(request.getBody())
+                .flatMap(dataBuffer -> {
+                    InputStream inputStream = dataBuffer.asInputStream(true);
+                    return fileStorageService.saveFile(inputStream, fileType);
+                });
     }
 
 }
