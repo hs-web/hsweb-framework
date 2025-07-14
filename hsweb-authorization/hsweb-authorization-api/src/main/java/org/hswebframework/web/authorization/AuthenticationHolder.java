@@ -18,13 +18,17 @@
 
 package org.hswebframework.web.authorization;
 
+import io.netty.util.concurrent.FastThreadLocal;
+import lombok.SneakyThrows;
 import org.hswebframework.web.authorization.simple.SimpleAuthentication;
+import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Callable;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Function;
@@ -50,6 +54,9 @@ public final class AuthenticationHolder {
 
     private static final ReadWriteLock lock = new ReentrantReadWriteLock();
 
+    private static final FastThreadLocal<Authentication> CURRENT = new FastThreadLocal<>();
+
+
     private static Optional<Authentication> get(Function<AuthenticationSupplier, Optional<Authentication>> function) {
         int size = suppliers.size();
         if (size == 0) {
@@ -58,21 +65,23 @@ public final class AuthenticationHolder {
         if (size == 1) {
             return function.apply(suppliers.get(0));
         }
-        SimpleAuthentication merge = new SimpleAuthentication();
+        ReactiveAuthenticationHolder.AuthenticationMerging merging
+            = new ReactiveAuthenticationHolder.AuthenticationMerging();
         for (AuthenticationSupplier supplier : suppliers) {
-            function.apply(supplier).ifPresent(merge::merge);
+            function.apply(supplier).ifPresent(merging::merge);
         }
-        if (merge.getUser() == null) {
-            return Optional.empty();
-        }
-        return Optional.of(merge);
+        return Optional.ofNullable(merging.get());
     }
+
 
     /**
      * @return 当前登录的用户权限信息
      */
     public static Optional<Authentication> get() {
-
+        Authentication current = CURRENT.get();
+        if (current != null) {
+            return Optional.of(current);
+        }
         return get(AuthenticationSupplier::get);
     }
 
@@ -89,7 +98,7 @@ public final class AuthenticationHolder {
     /**
      * 初始化 {@link AuthenticationSupplier}
      *
-     * @param supplier
+     * @param supplier 认证信息提供者
      */
     public static void addSupplier(AuthenticationSupplier supplier) {
         lock.writeLock().lock();
@@ -97,6 +106,25 @@ public final class AuthenticationHolder {
             suppliers.add(supplier);
         } finally {
             lock.writeLock().unlock();
+        }
+    }
+
+    /**
+     * 指定用户权限，执行一个任务。任务执行过程中可通过 {@link Authentication#current()}获取到当前权限.
+     *
+     * @param current  当前用户权限信息
+     * @param callable 任务执行器
+     * @param <T>      任务执行结果类型
+     * @return 任务执行结果
+     */
+    @SneakyThrows
+    public static <T> T executeWith(Authentication current, Callable<T> callable) {
+        Authentication previous = CURRENT.get();
+        try {
+            CURRENT.set(current);
+            return callable.call();
+        } finally {
+            CURRENT.set(previous);
         }
     }
 

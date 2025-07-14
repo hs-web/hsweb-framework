@@ -2,6 +2,7 @@ package org.hswebframework.web.i18n;
 
 import io.netty.util.concurrent.FastThreadLocal;
 import lombok.AllArgsConstructor;
+import lombok.SneakyThrows;
 import org.hswebframework.web.exception.I18nSupportException;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscription;
@@ -130,6 +131,23 @@ public final class LocaleUtils {
         try {
             CONTEXT_THREAD_LOCAL.set(locale);
             consumer.accept(locale);
+        } finally {
+            CONTEXT_THREAD_LOCAL.set(old);
+        }
+    }
+
+    /**
+     * 使用指定的区域来执行某些操作
+     *
+     * @param locale   区域
+     * @param callable 任务
+     */
+    @SneakyThrows
+    public static <T> T doWith(Locale locale, Callable<T> callable) {
+        Locale old = CONTEXT_THREAD_LOCAL.get();
+        try {
+            CONTEXT_THREAD_LOCAL.set(locale);
+            return callable.call();
         } finally {
             CONTEXT_THREAD_LOCAL.set(old);
         }
