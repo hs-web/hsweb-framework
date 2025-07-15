@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-class RecyclerImpl<T> extends FastThreadLocal<RecyclerImpl<T>.ThreadLocalRecyclable> implements Recycler<T> {
+class RecyclerImpl<T> extends FastThreadLocal<RecyclerImpl.ThreadLocalRecyclable<T>> implements Recycler<T> {
 
     private final Supplier<T> factory;
     private final Consumer<T> rest;
@@ -37,12 +37,12 @@ class RecyclerImpl<T> extends FastThreadLocal<RecyclerImpl<T>.ThreadLocalRecycla
     }
 
     @Override
-    protected ThreadLocalRecyclable initialValue() throws Exception {
-        return new ThreadLocalRecyclable(factory.get(), false);
+    protected ThreadLocalRecyclable<T> initialValue() throws Exception {
+        return new ThreadLocalRecyclable<T>(factory.get(), false);
     }
 
     @Override
-    protected void onRemoval(ThreadLocalRecyclable value) {
+    protected void onRemoval(ThreadLocalRecyclable<T> value) {
         rest.accept(value.value);
     }
 
@@ -50,7 +50,7 @@ class RecyclerImpl<T> extends FastThreadLocal<RecyclerImpl<T>.ThreadLocalRecycla
     public <A, A1, A2, A3, A4, R> R doWith(A arg0, A1 arg1, A2 arg2, A3 arg3, A4 arg4, Function6<T, A, A1, A2, A3, A4, R> call) {
         // 非阻塞线程里 优先使用ThreadLocal池
         if (Schedulers.isInNonBlockingThread()) {
-            ThreadLocalRecyclable ref = this.get();
+            ThreadLocalRecyclable<T> ref = this.get();
             // 使用中,回调里又执行了?
             if (!ref.using) {
                 try {
@@ -87,7 +87,7 @@ class RecyclerImpl<T> extends FastThreadLocal<RecyclerImpl<T>.ThreadLocalRecycla
     public Recyclable<T> take(boolean synchronous) {
         // 同步的,尝试使用ThreadLocal
         if (synchronous && Schedulers.isInNonBlockingThread()) {
-            ThreadLocalRecyclable ref = this.get();
+            ThreadLocalRecyclable<T> ref = this.get();
             if (!ref.using) {
                 ref.using = true;
                 return ref;
@@ -139,7 +139,7 @@ class RecyclerImpl<T> extends FastThreadLocal<RecyclerImpl<T>.ThreadLocalRecycla
     }
 
     @AllArgsConstructor
-    class ThreadLocalRecyclable implements Recyclable<T> {
+   static class ThreadLocalRecyclable<T> implements Recyclable<T> {
         private T value;
         private boolean using;
 
