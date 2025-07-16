@@ -12,6 +12,8 @@ public interface CodeConstants {
         String unauthorized = "unauthorized";
 
         String not_found="not_found";
+
+        String internal_server_error="internal_server_error";
     }
 
 }

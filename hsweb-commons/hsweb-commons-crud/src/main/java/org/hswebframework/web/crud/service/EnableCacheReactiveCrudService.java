@@ -34,48 +34,55 @@ public interface EnableCacheReactiveCrudService<E, K> extends ReactiveCrudServic
     }
 
     @Override
-    @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager)
+    @Transactional(rollbackFor = Throwable.class,  transactionManager = TransactionManagers.reactiveTransactionManager)
     default Mono<Integer> updateById(K id, E data) {
         return updateById(id, Mono.just(data));
     }
 
     @Override
+    @Transactional(rollbackFor = Throwable.class,  transactionManager = TransactionManagers.reactiveTransactionManager)
     default Mono<Integer> updateById(K id, Mono<E> entityPublisher) {
         return registerClearCache(Collections.singleton("id:" + id))
                 .then(ReactiveCrudService.super.updateById(id, entityPublisher));
     }
 
     @Override
+    @Transactional(rollbackFor = Throwable.class,  transactionManager = TransactionManagers.reactiveTransactionManager)
     default Mono<SaveResult> save(Collection<E> collection) {
         return registerClearCache()
                 .then(ReactiveCrudService.super.save(collection));
     }
 
     @Override
+    @Transactional(rollbackFor = Throwable.class,  transactionManager = TransactionManagers.reactiveTransactionManager)
     default Mono<SaveResult> save(E data) {
         return registerClearCache()
                 .then(ReactiveCrudService.super.save(data));
     }
 
     @Override
+    @Transactional(rollbackFor = Throwable.class,  transactionManager = TransactionManagers.reactiveTransactionManager)
     default Mono<SaveResult> save(Publisher<E> entityPublisher) {
         return registerClearCache()
                 .then(ReactiveCrudService.super.save(entityPublisher));
     }
 
     @Override
+    @Transactional(rollbackFor = Throwable.class,  transactionManager = TransactionManagers.reactiveTransactionManager)
     default Mono<Integer> insert(E data) {
         return registerClearCache()
                 .then(ReactiveCrudService.super.insert(data));
     }
 
     @Override
+    @Transactional(rollbackFor = Throwable.class,  transactionManager = TransactionManagers.reactiveTransactionManager)
     default Mono<Integer> insert(Publisher<E> entityPublisher) {
         return registerClearCache()
                 .then(ReactiveCrudService.super.insert(entityPublisher));
     }
 
     @Override
+    @Transactional(rollbackFor = Throwable.class,  transactionManager = TransactionManagers.reactiveTransactionManager)
     default Mono<Integer> insertBatch(Publisher<? extends Collection<E>> entityPublisher) {
         return registerClearCache()
                 .then(ReactiveCrudService.super.insertBatch(entityPublisher));
@@ -106,12 +113,13 @@ public interface EnableCacheReactiveCrudService<E, K> extends ReactiveCrudServic
 
 
     @Override
-    @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager)
+    @Transactional(rollbackFor = Throwable.class, transactionManager = TransactionManagers.reactiveTransactionManager)
     default Mono<Integer> deleteById(K id) {
         return deleteById(Mono.just(id));
     }
 
     @Override
+    @Transactional(rollbackFor = Throwable.class,  transactionManager = TransactionManagers.reactiveTransactionManager)
     default Mono<Integer> deleteById(Publisher<K> idPublisher) {
         Flux<K> cache = Flux.from(idPublisher).cache();
         return cache

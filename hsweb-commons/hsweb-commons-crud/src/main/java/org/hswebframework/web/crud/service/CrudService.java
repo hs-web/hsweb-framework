@@ -32,7 +32,7 @@ public interface CrudService<E, K> {
         return getRepository().createDelete();
     }
 
-    @Transactional(readOnly = true, transactionManager = TransactionManagers.jdbcTransactionManager)
+    @Transactional( readOnly = true, transactionManager = TransactionManagers.jdbcTransactionManager)
     default Optional<E> findById(K id) {
         return getRepository()
                 .findById(id);
@@ -48,48 +48,48 @@ public interface CrudService<E, K> {
                 .findById(id);
     }
 
-    @Transactional(transactionManager = TransactionManagers.jdbcTransactionManager)
+    @Transactional(rollbackFor = Throwable.class,transactionManager = TransactionManagers.jdbcTransactionManager)
     default SaveResult save(Collection<E> entityArr) {
         return getRepository()
                 .save(entityArr);
     }
 
-    @Transactional(transactionManager = TransactionManagers.jdbcTransactionManager)
+    @Transactional(rollbackFor = Throwable.class,transactionManager = TransactionManagers.jdbcTransactionManager)
     default int insert(Collection<E> entityArr) {
         return getRepository()
                 .insertBatch(entityArr);
     }
 
-    @Transactional(transactionManager = TransactionManagers.jdbcTransactionManager)
+    @Transactional(rollbackFor = Throwable.class, transactionManager = TransactionManagers.jdbcTransactionManager)
     default void insert(E entityArr) {
         getRepository()
                 .insert(entityArr);
     }
 
-    @Transactional(transactionManager = TransactionManagers.jdbcTransactionManager)
+    @Transactional(rollbackFor = Throwable.class,transactionManager = TransactionManagers.jdbcTransactionManager)
     default int updateById(K id, E entityArr) {
         return getRepository()
                 .updateById(id, entityArr);
     }
 
-    @Transactional(transactionManager = TransactionManagers.jdbcTransactionManager)
+    @Transactional(rollbackFor = Throwable.class,transactionManager = TransactionManagers.jdbcTransactionManager)
     default SaveResult save(E entity) {
         return getRepository()
                 .save(Collections.singletonList(entity));
     }
 
-    @Transactional(transactionManager = TransactionManagers.jdbcTransactionManager)
+    @Transactional(rollbackFor = Throwable.class,transactionManager = TransactionManagers.jdbcTransactionManager)
     default SaveResult save(List<E> entities) {
         return getRepository()
                 .save(entities);
     }
 
-    @Transactional(transactionManager = TransactionManagers.jdbcTransactionManager)
+    @Transactional(rollbackFor = Throwable.class,transactionManager = TransactionManagers.jdbcTransactionManager)
     default int deleteById(Collection<K> idArr) {
         return getRepository().deleteById(idArr);
     }
 
-    @Transactional(transactionManager = TransactionManagers.jdbcTransactionManager)
+    @Transactional(rollbackFor = Throwable.class,transactionManager = TransactionManagers.jdbcTransactionManager)
     default int deleteById(K idArr) {
         return deleteById(Collections.singletonList(idArr));
     }

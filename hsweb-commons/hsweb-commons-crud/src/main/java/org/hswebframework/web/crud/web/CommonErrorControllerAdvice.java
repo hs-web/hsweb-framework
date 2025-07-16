@@ -176,7 +176,7 @@ public class CommonErrorControllerAdvice {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Mono<ResponseMessage<?>> handleException(jakarta.validation.ValidationException e) {
-        return Mono.just(ResponseMessage.error(400, CodeConstants.Error.illegal_argument, e.getMessage()));
+        return Mono.just(ResponseMessage.error(400, CodeConstants.Error.illegal_argument, e.getLocalizedMessage()));
     }
 
     @ExceptionHandler
@@ -196,7 +196,7 @@ public class CommonErrorControllerAdvice {
         log.warn(e.getLocalizedMessage(), e);
         return LocaleUtils
             .resolveMessageReactive("error.internal_server_error")
-            .map(msg -> ResponseMessage.error(500, "internal_server_error", msg));
+            .map(msg -> ResponseMessage.error(500, CodeConstants.Error.internal_server_error, msg));
     }
 
     @ExceptionHandler
@@ -206,7 +206,7 @@ public class CommonErrorControllerAdvice {
 
         return LocaleUtils
             .resolveMessageReactive("error.internal_server_error")
-            .map(msg -> ResponseMessage.error(500, "internal_server_error", msg));
+            .map(msg -> ResponseMessage.error(500, CodeConstants.Error.internal_server_error, msg));
     }
 
     @ExceptionHandler

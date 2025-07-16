@@ -90,13 +90,13 @@ public interface ReactiveCrudService<E, K> {
     }
 
 
-    @Transactional(readOnly = true, transactionManager = TransactionManagers.reactiveTransactionManager)
+    @Transactional(rollbackFor = Throwable.class,  transactionManager = TransactionManagers.reactiveTransactionManager)
     default Mono<E> findById(K id) {
         return getRepository()
                 .findById(id);
     }
 
-    @Transactional(readOnly = true, transactionManager = TransactionManagers.reactiveTransactionManager)
+    @Transactional(rollbackFor = Throwable.class,  transactionManager = TransactionManagers.reactiveTransactionManager)
     default Flux<E> findById(Collection<K> publisher) {
         return getRepository()
                 .findById(publisher);
@@ -114,61 +114,61 @@ public interface ReactiveCrudService<E, K> {
                 .findById(publisher);
     }
 
-    @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager)
+    @Transactional(rollbackFor = Throwable.class,  transactionManager = TransactionManagers.reactiveTransactionManager)
     default Mono<SaveResult> save(Publisher<E> entityPublisher) {
         return getRepository()
                 .save(entityPublisher);
     }
 
-    @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager)
+    @Transactional(rollbackFor = Throwable.class,  transactionManager = TransactionManagers.reactiveTransactionManager)
     default Mono<SaveResult> save(E data) {
         return getRepository()
                 .save(data);
     }
 
-    @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager)
+    @Transactional(rollbackFor = Throwable.class,  transactionManager = TransactionManagers.reactiveTransactionManager)
     default Mono<SaveResult> save(Collection<E> collection) {
         return getRepository()
                 .save(collection);
     }
 
-    @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager)
+    @Transactional(rollbackFor = Throwable.class,  transactionManager = TransactionManagers.reactiveTransactionManager)
     default Mono<Integer> updateById(K id, Mono<E> entityPublisher) {
         return getRepository()
                 .updateById(id, entityPublisher);
     }
 
-    @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager)
+    @Transactional(rollbackFor = Throwable.class,  transactionManager = TransactionManagers.reactiveTransactionManager)
     default Mono<Integer> updateById(K id, E data) {
         return getRepository()
                 .updateById(id, Mono.just(data));
     }
 
-    @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager)
+    @Transactional(rollbackFor = Throwable.class,  transactionManager = TransactionManagers.reactiveTransactionManager)
     default Mono<Integer> insertBatch(Publisher<? extends Collection<E>> entityPublisher) {
         return getRepository()
                 .insertBatch(entityPublisher);
     }
 
-    @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager)
+    @Transactional(rollbackFor = Throwable.class,  transactionManager = TransactionManagers.reactiveTransactionManager)
     default Mono<Integer> insert(Publisher<E> entityPublisher) {
         return getRepository()
                 .insert(entityPublisher);
     }
 
-    @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager)
+    @Transactional(rollbackFor = Throwable.class,  transactionManager = TransactionManagers.reactiveTransactionManager)
     default Mono<Integer> insert(E data) {
         return getRepository()
                 .insert(Mono.just(data));
     }
 
-    @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager)
+    @Transactional(rollbackFor = Throwable.class,  transactionManager = TransactionManagers.reactiveTransactionManager)
     default Mono<Integer> deleteById(Publisher<K> idPublisher) {
         return getRepository()
                 .deleteById(idPublisher);
     }
 
-    @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager)
+    @Transactional(rollbackFor = Throwable.class,  transactionManager = TransactionManagers.reactiveTransactionManager)
     default Mono<Integer> deleteById(K id) {
         return getRepository()
                 .deleteById(Mono.just(id));

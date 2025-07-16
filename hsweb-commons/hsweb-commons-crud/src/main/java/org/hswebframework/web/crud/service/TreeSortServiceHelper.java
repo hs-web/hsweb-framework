@@ -6,6 +6,7 @@ import org.hswebframework.utils.RandomUtil;
 import org.hswebframework.web.api.crud.entity.TreeSortSupportEntity;
 import org.hswebframework.web.api.crud.entity.TreeSupportEntity;
 import org.hswebframework.web.exception.ValidationException;
+import org.hswebframework.web.id.IDGenerator;
 import org.springframework.util.ObjectUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -16,54 +17,59 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class TreeSortServiceHelper<E extends TreeSortSupportEntity<PK>, PK> {
+public abstract class TreeSortServiceHelper<E extends TreeSortSupportEntity<PK>, PK> {
 
     //包含子节点的数据
-    private Map<PK, E> allData;
+    protected Map<PK, E> allData;
 
-    private Map<PK, E> oldData;
+    protected Map<PK, E> oldData;
 
-    private Map<PK, E> thisTime;
+    protected Map<PK, E> thisTime;
 
-    private Map<PK, E> readyToSave;
+    protected Map<PK, E> readyToSave;
 
-    private final Map<PK, Map<PK, E>> childrenMapping = new LinkedHashMap<>();
+    protected final Map<PK, Map<PK, E>> childrenMapping = new LinkedHashMap<>();
 
-    private final ReactiveTreeSortEntityService<E, PK> service;
+    protected abstract IDGenerator<PK> getIdGenerator();
 
-    TreeSortServiceHelper(ReactiveTreeSortEntityService<E, PK> service) {
-        this.service = service;
-    }
+    protected abstract void applyChildren(E parent, List<E> children);
 
-    Flux<E> prepare(Flux<E> source) {
+    protected abstract boolean isRootNode(E node);
+
+    protected abstract Flux<E> queryIncludeChildren(Collection<PK> idList);
+
+    protected abstract Flux<E> queryById(Collection<PK> idList);
+
+
+    public Flux<E> prepare(Flux<E> source) {
         Flux<E> cache = source
-                .flatMapIterable(e -> TreeSupportEntity.expandTree2List(e, service.getIDGenerator()))
-                .collectList()
-                .flatMapIterable(list -> {
+            .flatMapIterable(e -> TreeSupportEntity.expandTree2List(e, getIdGenerator()))
+            .collectList()
+            .flatMapIterable(list -> {
 
-                    Map<PK, E> map = list
-                            .stream()
-                            .filter(e -> e.getId() != null)
-                            .collect(Collectors.toMap(
-                                    TreeSupportEntity::getId,
-                                    Function.identity(),
-                                    (a, b) -> a
-                            ));
-                    //重新组装树结构
-                    TreeSupportEntity.list2tree(list,
-                                                service::setChildren,
-                                                (Predicate<E>) e -> service.isRootNode(e) || map.get(e.getParentId()) == null);
+                Map<PK, E> map = list
+                    .stream()
+                    .filter(e -> e.getId() != null)
+                    .collect(Collectors.toMap(
+                        TreeSupportEntity::getId,
+                        Function.identity(),
+                        (a, b) -> a
+                    ));
+                //重新组装树结构
+                TreeSupportEntity.list2tree(list,
+                                            this::applyChildren,
+                                            (Predicate<E>) e -> isRootNode(e) || map.get(e.getParentId()) == null);
 
-                    return list;
-                })
-                .cache();
+                return list;
+            })
+            .cache();
 
         return init(cache)
-                .then(Mono.defer(this::checkParentId))
-                .then(Mono.fromRunnable(this::checkCyclicDependency))
-                .then(Mono.fromRunnable(this::refactorPath))
-                .thenMany(Flux.defer(() -> Flux.fromIterable(readyToSave.values())))
-                .doOnNext(this::refactor);
+            .then(Mono.defer(this::checkParentId))
+            .then(Mono.fromRunnable(this::checkCyclicDependency))
+            .then(Mono.fromRunnable(this::refactorPath))
+            .thenMany(Flux.defer(() -> Flux.fromIterable(readyToSave.values())))
+            .doOnNext(this::refactor);
     }
 
     private Mono<Void> init(Flux<E> source) {
@@ -73,49 +79,49 @@ public class TreeSortServiceHelper<E extends TreeSortSupportEntity<PK>, PK> {
         readyToSave = new LinkedHashMap<>();
 
         Mono<Map<PK, E>> allDataFetcher =
-                source
-                        .mapNotNull(e -> {
+            source
+                .mapNotNull(e -> {
 
-                            if (e.getId() != null) {
-                                thisTime.put(e.getId(), e);
-                            }
-
-                            return e.getId();
-                        })
-                        .collect(Collectors.toSet())
-                        .flatMap(list -> service
-                                .queryIncludeChildren(list)
-                                .collectMap(TreeSupportEntity::getId, Function.identity()));
-        return allDataFetcher
-                .doOnNext(includeChildren -> {
-                    //旧的数据
-                    for (E value : thisTime.values()) {
-                        E old = includeChildren.get(value.getId());
-                        if (null != old) {
-                            this.oldData.put(value.getId(), old);
-                        }
+                    if (e.getId() != null) {
+                        thisTime.put(e.getId(), e);
                     }
 
-                    readyToSave.putAll(thisTime);
-
-                    allData.putAll(includeChildren);
-                    allData.putAll(this.thisTime);
-                    initChildren();
-
+                    return e.getId();
                 })
-                .then();
+                .collect(Collectors.toSet())
+                .flatMap(list ->
+                             queryIncludeChildren(list)
+                                 .collectMap(TreeSupportEntity::getId, Function.identity()));
+        return allDataFetcher
+            .doOnNext(includeChildren -> {
+                //旧的数据
+                for (E value : thisTime.values()) {
+                    E old = includeChildren.get(value.getId());
+                    if (null != old) {
+                        this.oldData.put(value.getId(), old);
+                    }
+                }
+
+                readyToSave.putAll(thisTime);
+
+                allData.putAll(includeChildren);
+                allData.putAll(this.thisTime);
+                initChildren();
+
+            })
+            .then();
     }
 
     private void initChildren() {
         childrenMapping.clear();
 
         for (E value : allData.values()) {
-            if (service.isRootNode(value) || value.getId() == null) {
+            if (isRootNode(value) || value.getId() == null) {
                 continue;
             }
             childrenMapping
-                    .computeIfAbsent(value.getParentId(), ignore -> new LinkedHashMap<>())
-                    .put(value.getId(), value);
+                .computeIfAbsent(value.getParentId(), ignore -> new LinkedHashMap<>())
+                .put(value.getId(), value);
         }
     }
 
@@ -144,43 +150,40 @@ public class TreeSortServiceHelper<E extends TreeSortSupportEntity<PK>, PK> {
         }
 
         Set<PK> readyToCheck = thisTime
-                .values()
-                .stream()
-                .map(TreeSupportEntity::getParentId)
-                .filter(e -> !ObjectUtils.isEmpty(e) && !allData.containsKey(e))
-                .collect(Collectors.toSet());
+            .values()
+            .stream()
+            .map(TreeSupportEntity::getParentId)
+            .filter(e -> !ObjectUtils.isEmpty(e) && !allData.containsKey(e))
+            .collect(Collectors.toSet());
 
         if (readyToCheck.isEmpty()) {
             return Mono.empty();
         }
-        return service
-                .createQuery()
-                .in("id", readyToCheck)
-                .fetch()
-                .doOnNext(e -> {
-                    allData.put(e.getId(), e);
-                    readyToCheck.remove(e.getId());
-                })
-                .then(Mono.fromRunnable(() -> {
-                    if (!readyToCheck.isEmpty()) {
-                        throw new ValidationException(
+        return queryById(readyToCheck)
+            .doOnNext(e -> {
+                allData.put(e.getId(), e);
+                readyToCheck.remove(e.getId());
+            })
+            .then(Mono.fromRunnable(() -> {
+                if (!readyToCheck.isEmpty()) {
+                    throw new ValidationException(
+                        "error.tree_entity_parent_id_not_exist",
+                        Collections.singletonList(
+                            new ValidationException.Detail(
+                                "parentId",
                                 "error.tree_entity_parent_id_not_exist",
-                                Collections.singletonList(
-                                        new ValidationException.Detail(
-                                                "parentId",
-                                                "error.tree_entity_parent_id_not_exist",
-                                                readyToCheck))
-                        );
-                    }
-                    initChildren();
-                }));
+                                readyToCheck))
+                    );
+                }
+                initChildren();
+            }));
     }
 
     private void refactorPath() {
         Function<PK, Collection<E>> childGetter
-                = id -> childrenMapping
-                .getOrDefault(id, Collections.emptyMap())
-                .values();
+            = id -> childrenMapping
+            .getOrDefault(id, Collections.emptyMap())
+            .values();
 
         for (E data : thisTime.values()) {
             E old = data.getId() == null ? null : oldData.get(data.getId());
@@ -200,7 +203,7 @@ public class TreeSortServiceHelper<E extends TreeSortSupportEntity<PK>, PK> {
                     };
 
                     //变更到了顶级节点
-                    if (service.isRootNode(data)) {
+                    if (isRootNode(data)) {
                         data.setPath(RandomUtil.randomChar(4));
                         this.refactorChildPath(old.getId(), data.getPath(), childConsumer);
                         //重新保存所有子节点
@@ -240,11 +243,11 @@ public class TreeSortServiceHelper<E extends TreeSortSupportEntity<PK>, PK> {
 
     private void putChildToReadyToSave(Function<PK, Collection<E>> childGetter, E data) {
         childGetter
-                .apply(data.getId())
-                .forEach(e -> {
-                    readyToSave.put(e.getId(), e);
-                    putChildToReadyToSave(childGetter, e);
-                });
+            .apply(data.getId())
+            .forEach(e -> {
+                readyToSave.put(e.getId(), e);
+                putChildToReadyToSave(childGetter, e);
+            });
     }
 
     private void refactor(E e) {

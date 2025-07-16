@@ -146,31 +146,31 @@ public class DefaultR2dbcExecutor extends R2dbcReactiveSqlExecutor {
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, transactionManager = TransactionManagers.reactiveTransactionManager)
+    @Transactional(rollbackFor = Throwable.class, propagation = Propagation.REQUIRES_NEW, transactionManager = TransactionManagers.reactiveTransactionManager)
     public Mono<Void> execute(SqlRequest request) {
         return super.execute(request);
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, transactionManager = TransactionManagers.reactiveTransactionManager)
+    @Transactional(rollbackFor = Throwable.class, propagation = Propagation.REQUIRES_NEW, transactionManager = TransactionManagers.reactiveTransactionManager)
     public Mono<Void> execute(Publisher<SqlRequest> request) {
         return super.execute(request);
     }
 
     @Override
-    @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager)
+    @Transactional(rollbackFor = Throwable.class, transactionManager = TransactionManagers.reactiveTransactionManager)
     public Mono<Integer> update(Publisher<SqlRequest> request) {
         return super.update(request);
     }
 
     @Override
-    @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager)
+    @Transactional(rollbackFor = Throwable.class, transactionManager = TransactionManagers.reactiveTransactionManager)
     public Mono<Integer> update(SqlRequest request) {
         return super.update(request);
     }
 
     @Override
-    @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager)
+    @Transactional(rollbackFor = Throwable.class, transactionManager = TransactionManagers.reactiveTransactionManager)
     public Mono<Integer> update(String sql, Object... args) {
         return super.update(sql, args);
     }
