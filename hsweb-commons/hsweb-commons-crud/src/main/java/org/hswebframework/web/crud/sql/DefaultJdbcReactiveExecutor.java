@@ -63,37 +63,37 @@ public class DefaultJdbcReactiveExecutor extends JdbcReactiveSqlExecutor {
     }
 
     @Override
-    @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager,readOnly = true)
+    @Transactional(transactionManager = TransactionManagers.jdbcTransactionManager,readOnly = true)
     public <E> Flux<E> select(String sql, ResultWrapper<E, ?> wrapper) {
         return super.select(sql,wrapper);
     }
 
     @Override
-    @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager,rollbackFor = Throwable.class)
+    @Transactional(transactionManager = TransactionManagers.jdbcTransactionManager,rollbackFor = Throwable.class)
     public Mono<Integer> update(Publisher<SqlRequest> request) {
         return super.update(request);
     }
 
     @Override
-    @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager,rollbackFor = Throwable.class)
+    @Transactional(transactionManager = TransactionManagers.jdbcTransactionManager,rollbackFor = Throwable.class)
     public Mono<Integer> update(String sql, Object... args) {
         return super.update(sql,args);
     }
 
     @Override
-    @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager,rollbackFor = Throwable.class)
+    @Transactional(transactionManager = TransactionManagers.jdbcTransactionManager,rollbackFor = Throwable.class)
     public Mono<Integer> update(SqlRequest request) {
         return super.update(request);
     }
 
     @Override
-    @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager,rollbackFor = Throwable.class)
+    @Transactional(transactionManager = TransactionManagers.jdbcTransactionManager,rollbackFor = Throwable.class)
     public Mono<Void> execute(Publisher<SqlRequest> request) {
         return super.execute(request);
     }
 
     @Override
-    @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager,rollbackFor = Throwable.class)
+    @Transactional(transactionManager = TransactionManagers.jdbcTransactionManager,rollbackFor = Throwable.class)
     public Mono<Void> execute(SqlRequest request) {
         return super.execute(request);
     }
