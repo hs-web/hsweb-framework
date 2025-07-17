@@ -1,5 +1,6 @@
 package org.hswebframework.web.crud.sql;
 
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.ezorm.rdb.executor.SqlRequest;
 import org.hswebframework.ezorm.rdb.executor.jdbc.JdbcSyncSqlExecutor;
@@ -7,7 +8,10 @@ import org.hswebframework.ezorm.rdb.executor.wrapper.ResultWrapper;
 import org.hswebframework.web.api.crud.entity.TransactionManagers;
 import org.hswebframework.web.datasource.DataSourceHolder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
+import org.springframework.jdbc.support.SQLExceptionTranslator;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +29,13 @@ public class DefaultJdbcExecutor extends JdbcSyncSqlExecutor {
     @Autowired
     private DataSource dataSource;
 
+    public DefaultJdbcExecutor() {
+    }
+
+    public DefaultJdbcExecutor(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
+
     protected String getDatasourceId() {
         return DataSourceHolder.switcher().datasource().current().orElse("default");
     }
@@ -33,8 +44,8 @@ public class DefaultJdbcExecutor extends JdbcSyncSqlExecutor {
     public Connection getConnection(SqlRequest sqlRequest) {
 
         DataSource dataSource = DataSourceHolder.isDynamicDataSourceReady() ?
-                DataSourceHolder.currentDataSource().getNative() :
-                this.dataSource;
+            DataSourceHolder.currentDataSource().getNative() :
+            this.dataSource;
         Connection connection = DataSourceUtils.getConnection(dataSource);
         boolean isConnectionTransactional = DataSourceUtils.isConnectionTransactional(connection, dataSource);
         if (log.isDebugEnabled()) {
@@ -50,8 +61,8 @@ public class DefaultJdbcExecutor extends JdbcSyncSqlExecutor {
         }
         try {
             DataSource dataSource = DataSourceHolder.isDynamicDataSourceReady() ?
-                    DataSourceHolder.currentDataSource().getNative() :
-                    this.dataSource;
+                DataSourceHolder.currentDataSource().getNative() :
+                this.dataSource;
             DataSourceUtils.doReleaseConnection(connection, dataSource);
         } catch (SQLException e) {
             log.error(e.getMessage(), e);

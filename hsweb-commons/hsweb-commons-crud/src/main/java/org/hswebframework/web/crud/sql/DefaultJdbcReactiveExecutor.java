@@ -24,14 +24,23 @@ public class DefaultJdbcReactiveExecutor extends JdbcReactiveSqlExecutor {
     @Autowired
     private DataSource dataSource;
 
+    @Deprecated
+    public DefaultJdbcReactiveExecutor() {
+
+    }
+
+    public DefaultJdbcReactiveExecutor(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
+
     protected String getDatasourceId() {
         return DataSourceHolder.switcher().datasource().current().orElse("default");
     }
 
     private Tuple2<DataSource, Connection> getDataSourceAndConnection() {
         DataSource dataSource = DataSourceHolder.isDynamicDataSourceReady() ?
-                DataSourceHolder.currentDataSource().getNative() :
-                this.dataSource;
+            DataSourceHolder.currentDataSource().getNative() :
+            this.dataSource;
         Connection connection = DataSourceUtils.getConnection(dataSource);
         boolean isConnectionTransactional = DataSourceUtils.isConnectionTransactional(connection, dataSource);
         if (log.isDebugEnabled()) {
@@ -44,56 +53,56 @@ public class DefaultJdbcReactiveExecutor extends JdbcReactiveSqlExecutor {
     @Override
     public Mono<Connection> getConnection() {
         return Mono
-                .using(
-                        this::getDataSourceAndConnection
-                        ,
-                        tp2 -> Mono.just(tp2.getT2()),
-                        tp2 -> DataSourceUtils.releaseConnection(tp2.getT2(), tp2.getT1()),
-                        false
-                );
+            .using(
+                this::getDataSourceAndConnection
+                ,
+                tp2 -> Mono.just(tp2.getT2()),
+                tp2 -> DataSourceUtils.releaseConnection(tp2.getT2(), tp2.getT1()),
+                false
+            );
     }
 
     @Override
     protected <T> Flux<T> doInConnection(Function<Connection, Publisher<T>> handler) {
         return Flux
             .using(this::getDataSourceAndConnection,
-                tp2 -> handler.apply(tp2.getT2()),
-                tp2 -> DataSourceUtils.releaseConnection(tp2.getT2(), tp2.getT1())
+                   tp2 -> handler.apply(tp2.getT2()),
+                   tp2 -> DataSourceUtils.releaseConnection(tp2.getT2(), tp2.getT1())
             );
     }
 
     @Override
-    @Transactional(transactionManager = TransactionManagers.jdbcTransactionManager,readOnly = true)
+    @Transactional(transactionManager = TransactionManagers.jdbcTransactionManager, readOnly = true)
     public <E> Flux<E> select(String sql, ResultWrapper<E, ?> wrapper) {
-        return super.select(sql,wrapper);
+        return super.select(sql, wrapper);
     }
 
     @Override
-    @Transactional(transactionManager = TransactionManagers.jdbcTransactionManager,rollbackFor = Throwable.class)
+    @Transactional(transactionManager = TransactionManagers.jdbcTransactionManager, rollbackFor = Throwable.class)
     public Mono<Integer> update(Publisher<SqlRequest> request) {
         return super.update(request);
     }
 
     @Override
-    @Transactional(transactionManager = TransactionManagers.jdbcTransactionManager,rollbackFor = Throwable.class)
+    @Transactional(transactionManager = TransactionManagers.jdbcTransactionManager, rollbackFor = Throwable.class)
     public Mono<Integer> update(String sql, Object... args) {
-        return super.update(sql,args);
+        return super.update(sql, args);
     }
 
     @Override
-    @Transactional(transactionManager = TransactionManagers.jdbcTransactionManager,rollbackFor = Throwable.class)
+    @Transactional(transactionManager = TransactionManagers.jdbcTransactionManager, rollbackFor = Throwable.class)
     public Mono<Integer> update(SqlRequest request) {
         return super.update(request);
     }
 
     @Override
-    @Transactional(transactionManager = TransactionManagers.jdbcTransactionManager,rollbackFor = Throwable.class)
+    @Transactional(transactionManager = TransactionManagers.jdbcTransactionManager, rollbackFor = Throwable.class)
     public Mono<Void> execute(Publisher<SqlRequest> request) {
         return super.execute(request);
     }
 
     @Override
-    @Transactional(transactionManager = TransactionManagers.jdbcTransactionManager,rollbackFor = Throwable.class)
+    @Transactional(transactionManager = TransactionManagers.jdbcTransactionManager, rollbackFor = Throwable.class)
     public Mono<Void> execute(SqlRequest request) {
         return super.execute(request);
     }

@@ -13,6 +13,8 @@ import org.hswebframework.web.exception.ValidationException;
 import org.hswebframework.web.i18n.LocaleUtils;
 import org.hswebframework.web.logger.ReactiveLogger;
 import org.springframework.core.annotation.Order;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindException;
@@ -241,6 +243,22 @@ public class CommonWebMvcErrorControllerAdvice {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseMessage<Object> handleException(I18nSupportException e) {
         return ResponseMessage.error(400, e.getI18nCode(), resolveMessage(e));
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseMessage<Object> handleException(DataAccessException e){
+        return ResponseMessage.error(400,
+                                     "data_access_failed",
+                                     LocaleUtils.resolveMessage("error.data_access_failed"));
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseMessage<Object> handleException(DuplicateKeyException e){
+        return ResponseMessage.error(400,
+                                     "duplicate_key",
+                                     LocaleUtils.resolveMessage("error.duplicate_key"));
     }
 
 }
