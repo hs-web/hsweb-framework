@@ -1,10 +1,10 @@
 package org.hswebframework.web.crud.events.expr;
 
-import io.netty.util.concurrent.FastThreadLocal;
 import jakarta.annotation.Nonnull;
 import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.ezorm.rdb.mapping.EntityColumnMapping;
 import org.hswebframework.web.crud.query.QueryHelperUtils;
+import org.hswebframework.web.recycler.Recycler;
 import org.springframework.context.expression.MapAccessor;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.*;
@@ -19,6 +19,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
 @Slf4j
 public class SpelSqlExpressionInvoker extends AbstractSqlExpressionInvoker {
+
+    static ExtMapAccessor accessor = new ExtMapAccessor();
 
     protected static class SqlFunctions extends HashMap<String, Object> {
 
@@ -37,9 +39,9 @@ public class SpelSqlExpressionInvoker extends AbstractSqlExpressionInvoker {
             }
             if (val == null) {
                 val = mapping
-                        .getPropertyByColumnName(String.valueOf(key))
-                        .map(super::get)
-                        .orElse(null);
+                    .getPropertyByColumnName(String.valueOf(key))
+                    .map(super::get)
+                    .orElse(null);
             }
             return val;
         }
@@ -82,37 +84,35 @@ public class SpelSqlExpressionInvoker extends AbstractSqlExpressionInvoker {
         }
     }
 
-    static final FastThreadLocal<StandardEvaluationContext> SHARED_CONTEXT = new FastThreadLocal<StandardEvaluationContext>() {
-        @Override
-        protected StandardEvaluationContext initialValue() {
-            StandardEvaluationContext context = new StandardEvaluationContext();
-            context.addPropertyAccessor(accessor);
-            context.addMethodResolver(new ReflectiveMethodResolver() {
-                @Override
-                public MethodExecutor resolve(@Nonnull EvaluationContext context,
-                                              @Nonnull Object targetObject,
-                                              @Nonnull String name,
-                                              @Nonnull List<TypeDescriptor> argumentTypes) throws AccessException {
-                    return super.resolve(context, targetObject, name.toLowerCase(), argumentTypes);
+    static final Recycler<StandardEvaluationContext> SHARED_CONTEXT = Recycler.create(() -> {
+        StandardEvaluationContext context = new StandardEvaluationContext();
+        context.addPropertyAccessor(accessor);
+        context.addMethodResolver(new ReflectiveMethodResolver() {
+            @Override
+            public MethodExecutor resolve(@Nonnull EvaluationContext context,
+                                          @Nonnull Object targetObject,
+                                          @Nonnull String name,
+                                          @Nonnull List<TypeDescriptor> argumentTypes) throws AccessException {
+                return super.resolve(context, targetObject, name.toLowerCase(), argumentTypes);
+            }
+        });
+        context.setOperatorOverloader(new OperatorOverloader() {
+            @Override
+            public boolean overridesOperation(@Nonnull Operation operation, Object leftOperand, Object rightOperand) throws EvaluationException {
+                if (leftOperand instanceof Number || rightOperand instanceof Number) {
+                    return leftOperand == null || rightOperand == null;
                 }
-            });
-            context.setOperatorOverloader(new OperatorOverloader() {
-                @Override
-                public boolean overridesOperation(@Nonnull Operation operation, Object leftOperand, Object rightOperand) throws EvaluationException {
-                    if (leftOperand instanceof Number || rightOperand instanceof Number) {
-                        return leftOperand == null || rightOperand == null;
-                    }
-                    return leftOperand == null && rightOperand == null;
-                }
+                return leftOperand == null && rightOperand == null;
+            }
 
-                @Override
-                public Object operate(@Nonnull Operation operation, Object leftOperand, Object rightOperand) throws EvaluationException {
-                    return null;
-                }
-            });
-            return context;
-        }
-    };
+            @Override
+            public Object operate(@Nonnull Operation operation, Object leftOperand, Object rightOperand) throws EvaluationException {
+                return null;
+            }
+        });
+        return context;
+    }, ctx -> {
+    }, 512);
 
     @Override
     protected Function3<EntityColumnMapping, Object[], Map<String, Object>, Object> compile(String sql) {
@@ -145,21 +145,24 @@ public class SpelSqlExpressionInvoker extends AbstractSqlExpressionInvoker {
                         object.put("_arg" + index, parameter);
                     }
                 }
-                StandardEvaluationContext context = SHARED_CONTEXT.get();
-                try {
-                    context.setRootObject(object);
-                    Object val = expression.getValue(context);
-                    errorCount.set(0);
-                    return val;
-                } catch (Throwable err) {
-                    log.warn("invoke native sql [{}] value error",
-                             sql,
-                             err);
-                    errorCount.incrementAndGet();
-                } finally {
-                    context.setRootObject(null);
-                }
-                return null;
+                return SHARED_CONTEXT.doWith(
+                    expression, object, errorCount, sql,
+                    (context, expr, obj, cnt, _sql) -> {
+                        try {
+                            context.setRootObject(obj);
+                            Object val = expr.getValue(context);
+                            cnt.set(0);
+                            return val;
+                        } catch (Throwable err) {
+                            log.warn("invoke native sql [{}] value error",
+                                     _sql,
+                                     err);
+                            cnt.incrementAndGet();
+                        } finally {
+                            context.setRootObject(null);
+                        }
+                        return null;
+                    });
             };
         } catch (Throwable error) {
             return spelError(sql, error);
@@ -174,8 +177,6 @@ public class SpelSqlExpressionInvoker extends AbstractSqlExpressionInvoker {
         log.warn("create sql expression [{}] parser error", sql, error);
         return (mapping, args, data) -> null;
     }
-
-    static ExtMapAccessor accessor = new ExtMapAccessor();
 
     static class ExtMapAccessor extends MapAccessor {
         @Override

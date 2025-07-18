@@ -1,8 +1,8 @@
 package org.hswebframework.web.id;
 
-import io.netty.util.concurrent.FastThreadLocal;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import org.hswebframework.web.recycler.Recycler;
 
 import java.time.Duration;
 import java.util.Base64;
@@ -19,12 +19,11 @@ public class RandomIdGenerator implements IDGenerator<String> {
 
     static final Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
 
-    private final static FastThreadLocal<byte[]> HOLDER = new FastThreadLocal<byte[]>() {
-        @Override
-        protected byte[] initialValue() {
-            return new byte[24];
-        }
-    };
+    private final static Recycler<byte[]> HOLDER = Recycler.create(
+        () -> new byte[24],
+        ignore -> {
+        },
+        1024);
 
     private final byte instanceId;
 
@@ -33,20 +32,21 @@ public class RandomIdGenerator implements IDGenerator<String> {
     }
 
     public String generate() {
-        long now = System.currentTimeMillis();
-        byte[] value = HOLDER.get();
-        value[0] = instanceId;
+       return HOLDER.doWith((value -> {
+            long now = System.currentTimeMillis();
+            value[0] = instanceId;
 
-        value[1] = (byte) (now >>> 32);
-        value[2] = (byte) (now >>> 24);
-        value[3] = (byte) (now >>> 16);
-        value[4] = (byte) (now >>> 8);
-        value[5] = (byte) (now);
+            value[1] = (byte) (now >>> 32);
+            value[2] = (byte) (now >>> 24);
+            value[3] = (byte) (now >>> 16);
+            value[4] = (byte) (now >>> 8);
+            value[5] = (byte) (now);
 
-        nextBytes(value, 6, 8);
-        nextBytes(value, 8, 16);
-        nextBytes(value, 16, 24);
-        return encoder.encodeToString(value);
+            nextBytes(value, 6, 8);
+            nextBytes(value, 8, 16);
+            nextBytes(value, 16, 24);
+            return encoder.encodeToString(value);
+        }));
     }
 
     public static boolean isRandomId(String id) {
