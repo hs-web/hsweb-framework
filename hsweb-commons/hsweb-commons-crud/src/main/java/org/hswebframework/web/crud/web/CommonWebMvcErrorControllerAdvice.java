@@ -13,7 +13,10 @@ import org.hswebframework.web.exception.ValidationException;
 import org.hswebframework.web.i18n.LocaleUtils;
 import org.hswebframework.web.logger.ReactiveLogger;
 import org.springframework.core.annotation.Order;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -28,6 +31,7 @@ import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 import reactor.core.publisher.Mono;
 
 import jakarta.validation.ConstraintViolationException;
+
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
@@ -39,7 +43,7 @@ public class CommonWebMvcErrorControllerAdvice {
 
     private String resolveMessage(Throwable e) {
         if (e instanceof I18nSupportException) {
-            return LocaleUtils.resolveMessage(((I18nSupportException) e).getI18nCode());
+            return LocaleUtils.resolveMessage(((I18nSupportException) e).getI18nCode(),((I18nSupportException) e).getArgs());
         }
         return e.getMessage() == null ? null : LocaleUtils.resolveMessage(e.getMessage());
     }
@@ -63,8 +67,8 @@ public class CommonWebMvcErrorControllerAdvice {
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ResponseMessage<TokenState> handleException(UnAuthorizedException e) {
         return ResponseMessage
-                .<TokenState>error(401, CodeConstants.Error.unauthorized, resolveMessage(e))
-                .result(e.getState());
+            .<TokenState>error(401, CodeConstants.Error.unauthorized, resolveMessage(e))
+            .result(e.getState());
 
     }
 
@@ -85,9 +89,8 @@ public class CommonWebMvcErrorControllerAdvice {
     public ResponseMessage<List<ValidationException.Detail>> handleException(ValidationException e) {
 
         return ResponseMessage
-                .<List<ValidationException.Detail>>error(400, CodeConstants.Error.illegal_argument, resolveMessage(e))
-                .result(e.getDetails())
-                ;
+            .<List<ValidationException.Detail>>error(400, CodeConstants.Error.illegal_argument, resolveMessage(e))
+            .result(e.getDetails());
     }
 
     @ExceptionHandler
@@ -100,24 +103,24 @@ public class CommonWebMvcErrorControllerAdvice {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseMessage<List<ValidationException.Detail>> handleException(BindException e) {
         return handleException(new ValidationException(e.getMessage(), e
-                .getBindingResult().getAllErrors()
-                .stream()
-                .filter(FieldError.class::isInstance)
-                .map(FieldError.class::cast)
-                .map(err -> new ValidationException.Detail(err.getField(), err.getDefaultMessage(), null))
-                .collect(Collectors.toList())));
+            .getBindingResult().getAllErrors()
+            .stream()
+            .filter(FieldError.class::isInstance)
+            .map(FieldError.class::cast)
+            .map(err -> new ValidationException.Detail(err.getField(), err.getDefaultMessage(), null))
+            .collect(Collectors.toList())));
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseMessage<List<ValidationException.Detail>> handleException(WebExchangeBindException e) {
         return handleException(new ValidationException(e.getMessage(), e
-                .getBindingResult().getAllErrors()
-                .stream()
-                .filter(FieldError.class::isInstance)
-                .map(FieldError.class::cast)
-                .map(err -> new ValidationException.Detail(err.getField(), err.getDefaultMessage(), null))
-                .collect(Collectors.toList())));
+            .getBindingResult().getAllErrors()
+            .stream()
+            .filter(FieldError.class::isInstance)
+            .map(FieldError.class::cast)
+            .map(err -> new ValidationException.Detail(err.getField(), err.getDefaultMessage(), null))
+            .collect(Collectors.toList())));
     }
 
 
@@ -125,18 +128,18 @@ public class CommonWebMvcErrorControllerAdvice {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseMessage<List<ValidationException.Detail>> handleException(MethodArgumentNotValidException e) {
         return handleException(new ValidationException(e.getMessage(), e
-                .getBindingResult().getAllErrors()
-                .stream()
-                .filter(FieldError.class::isInstance)
-                .map(FieldError.class::cast)
-                .map(err -> new ValidationException.Detail(err.getField(), err.getDefaultMessage(), null))
-                .collect(Collectors.toList())));
+            .getBindingResult().getAllErrors()
+            .stream()
+            .filter(FieldError.class::isInstance)
+            .map(FieldError.class::cast)
+            .map(err -> new ValidationException.Detail(err.getField(), err.getDefaultMessage(), null))
+            .collect(Collectors.toList())));
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseMessage<?> handleException(jakarta.validation.ValidationException e) {
-        return ResponseMessage.error(400, CodeConstants.Error.illegal_argument, e.getMessage());
+        return ResponseMessage.error(400, CodeConstants.Error.illegal_argument, e.getLocalizedMessage());
     }
 
     @ExceptionHandler
@@ -150,7 +153,18 @@ public class CommonWebMvcErrorControllerAdvice {
     @Order
     public ResponseMessage<Object> handleException(RuntimeException e) {
         log.warn(e.getLocalizedMessage(), e);
-        return ResponseMessage.error(resolveMessage(e));
+        return ResponseMessage.error(CodeConstants.Error.internal_server_error,
+                                     LocaleUtils.resolveMessage("error.internal_server_error"));
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @Order
+    public ResponseMessage<Object> handleException(HttpMessageNotReadableException e) {
+        return ResponseMessage
+            .error(400,
+                   "missing_request_body",
+                   LocaleUtils.resolveMessage("error.missing_request_body"));
     }
 
     @ExceptionHandler
@@ -182,8 +196,8 @@ public class CommonWebMvcErrorControllerAdvice {
         log.warn(e.getLocalizedMessage(), e);
 
         return ResponseMessage
-                .error(415, "unsupported_media_type", LocaleUtils.resolveMessage("error.unsupported_media_type"))
-                .result(e.getSupportedMediaTypes());
+            .error(415, "unsupported_media_type", LocaleUtils.resolveMessage("error.unsupported_media_type"))
+            .result(e.getSupportedMediaTypes());
     }
 
     @ExceptionHandler
@@ -192,9 +206,9 @@ public class CommonWebMvcErrorControllerAdvice {
         log.warn(e.getLocalizedMessage(), e);
 
         return ResponseMessage
-                .error(406, "not_acceptable_media_type", LocaleUtils
-                        .resolveMessage("error.not_acceptable_media_type"))
-                .result(e.getSupportedMediaTypes());
+            .error(406, "not_acceptable_media_type", LocaleUtils
+                .resolveMessage("error.not_acceptable_media_type"))
+            .result(e.getSupportedMediaTypes());
     }
 
     @ExceptionHandler
@@ -203,8 +217,8 @@ public class CommonWebMvcErrorControllerAdvice {
         log.warn(e.getLocalizedMessage(), e);
 
         return ResponseMessage
-                .error(406, "method_not_allowed", LocaleUtils.resolveMessage("error.method_not_allowed"))
-                .result(e.getSupportedMethods());
+            .error(406, "method_not_allowed", LocaleUtils.resolveMessage("error.method_not_allowed"))
+            .result(e.getSupportedMethods());
     }
 
 
@@ -220,7 +234,7 @@ public class CommonWebMvcErrorControllerAdvice {
 
         } while (exception != null && exception != e);
         if (exception == null) {
-            return  ResponseMessage.error(400, CodeConstants.Error.illegal_argument, e.getMessage());
+            return ResponseMessage.error(400, CodeConstants.Error.illegal_argument, e.getMessage());
         }
         return ResponseMessage.error(400, CodeConstants.Error.illegal_argument, resolveMessage(exception));
     }
@@ -229,6 +243,22 @@ public class CommonWebMvcErrorControllerAdvice {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseMessage<Object> handleException(I18nSupportException e) {
         return ResponseMessage.error(400, e.getI18nCode(), resolveMessage(e));
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseMessage<Object> handleException(DataAccessException e){
+        return ResponseMessage.error(400,
+                                     "data_access_failed",
+                                     LocaleUtils.resolveMessage("error.data_access_failed"));
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseMessage<Object> handleException(DuplicateKeyException e){
+        return ResponseMessage.error(400,
+                                     "duplicate_key",
+                                     LocaleUtils.resolveMessage("error.duplicate_key"));
     }
 
 }

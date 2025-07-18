@@ -34,13 +34,13 @@ public class ValidateEventListener implements EventListener, Ordered {
 
         if (resultHolder.isPresent()) {
             resultHolder
-                    .ifPresent(holder -> holder
-                            .invoke(LocaleUtils
-                                            .doInReactive(() -> {
-                                                tryValidate(type, context);
-                                                return null;
-                                            })
-                            ));
+                .ifPresent(holder -> holder
+                    .invoke(LocaleUtils
+                                .doInReactive(() -> {
+                                    tryValidate(type, context);
+                                    return null;
+                                })
+                    ));
         } else {
             tryValidate(type, context);
         }
@@ -48,7 +48,8 @@ public class ValidateEventListener implements EventListener, Ordered {
 
     @SuppressWarnings("all")
     public void tryValidate(EventType type, EventContext context) {
-        if (type == MappingEventTypes.insert_before || type == MappingEventTypes.save_before) {
+        if (type == MappingEventTypes.insert_before
+            || type == MappingEventTypes.save_before) {
 
             boolean single = context.get(MappingContextKeys.type).map("single"::equals).orElse(false);
             if (single) {
@@ -60,10 +61,11 @@ public class ValidateEventListener implements EventListener, Ordered {
                 context.get(MappingContextKeys.instance)
                        .filter(List.class::isInstance)
                        .map(List.class::cast)
-                       .ifPresent(lst -> lst.stream()
-                                            .filter(Entity.class::isInstance)
-                                            .map(Entity.class::cast)
-                                            .forEach(e -> ((Entity) e).tryValidate(CreateGroup.class))
+                       .ifPresent(lst -> lst
+                           .stream()
+                           .filter(Entity.class::isInstance)
+                           .map(Entity.class::cast)
+                           .forEach(e -> ((Entity) e).tryValidate(CreateGroup.class))
                        );
             }
 
