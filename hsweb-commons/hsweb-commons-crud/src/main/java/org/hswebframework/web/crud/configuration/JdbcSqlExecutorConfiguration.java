@@ -20,14 +20,14 @@ import javax.sql.DataSource;
 public class JdbcSqlExecutorConfiguration {
     @Bean
     @ConditionalOnMissingBean
-    public SyncSqlExecutor syncSqlExecutor() {
-        return new DefaultJdbcExecutor();
+    public SyncSqlExecutor syncSqlExecutor(DataSource dataSource) {
+        return new DefaultJdbcExecutor(dataSource);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public ReactiveSqlExecutor reactiveSqlExecutor() {
-        return new DefaultJdbcReactiveExecutor();
+    public ReactiveSqlExecutor reactiveSqlExecutor(DataSource dataSource) {
+        return new DefaultJdbcReactiveExecutor(dataSource);
     }
 
 }

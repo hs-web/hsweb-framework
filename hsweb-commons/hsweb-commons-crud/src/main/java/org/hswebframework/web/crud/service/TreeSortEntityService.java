@@ -25,124 +25,98 @@ import java.util.stream.Stream;
  * @see GenericReactiveTreeSupportCrudService
  */
 public interface TreeSortEntityService<E extends TreeSortSupportEntity<K>, K>
-        extends CrudService<E, K> {
+    extends CrudService<E, K> {
 
     @Transactional(readOnly = true, transactionManager = TransactionManagers.jdbcTransactionManager)
     default List<E> queryResultToTree(QueryParamEntity paramEntity) {
         return TreeSupportEntity
-                .list2tree(query(paramEntity),
-                           this::setChildren,
-                           this::createRootNodePredicate);
+            .list2tree(query(paramEntity),
+                       this::setChildren,
+                       this::createRootNodePredicate);
     }
 
     @Transactional(readOnly = true, transactionManager = TransactionManagers.jdbcTransactionManager)
     default List<E> queryIncludeChildrenTree(QueryParamEntity paramEntity) {
 
         return TreeSupportEntity
-                .list2tree(queryIncludeChildren(paramEntity),
-                           this::setChildren,
-                           this::createRootNodePredicate);
+            .list2tree(queryIncludeChildren(paramEntity),
+                       this::setChildren,
+                       this::createRootNodePredicate);
     }
 
     @Transactional(readOnly = true, transactionManager = TransactionManagers.jdbcTransactionManager)
     default List<E> queryIncludeChildren(Collection<K> idList) {
         return findById(idList)
-                .stream()
-                .flatMap(e -> createQuery()
-                        .where()
-                        .like$("path", e.getPath())
-                        .fetch()
-                        .stream())
-                .collect(Collectors.toList());
+            .stream()
+            .flatMap(e -> createQuery()
+                .where()
+                .like$("path", e.getPath())
+                .fetch()
+                .stream())
+            .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true, transactionManager = TransactionManagers.jdbcTransactionManager)
     default List<E> queryIncludeChildren(QueryParamEntity queryParam) {
         return query(queryParam)
-                .stream()
-                .flatMap(e -> createQuery()
-                        .where()
-                        .like$("path", e.getPath())
-                        .fetch()
-                        .stream())
-                .collect(Collectors.toList());
+            .stream()
+            .flatMap(e -> createQuery()
+                .where()
+                .like$("path", e.getPath())
+                .fetch()
+                .stream())
+            .collect(Collectors.toList());
     }
 
     @Override
+    @Transactional(rollbackFor = Throwable.class, transactionManager = TransactionManagers.jdbcTransactionManager)
     default void insert(E entityPublisher) {
         insert(Collections.singletonList(entityPublisher));
     }
 
     @Override
+    @Transactional(rollbackFor = Throwable.class, transactionManager = TransactionManagers.jdbcTransactionManager)
     default int insert(Collection<E> entityPublisher) {
-        return this
-                .getRepository()
-                .insertBatch(entityPublisher
-                                     .stream()
-                                     .flatMap(this::applyTreeProperty)
-                                     .flatMap(e -> TreeSupportEntity
-                                             .expandTree2List(e, getIDGenerator())
-                                             .stream())
-                                     .collect(Collectors.toList())
-                );
-    }
-
-    default Stream<E> applyTreeProperty(E ele) {
-        if (StringUtils.hasText(ele.getPath()) ||
-                ObjectUtils.isEmpty(ele.getParentId())) {
-            return Stream.of(ele);
-        }
-
-        this.checkCyclicDependency(ele.getId(), ele);
-        this.findById(ele.getParentId())
-            .ifPresent(parent -> ele.setPath(parent.getPath() + "-" + RandomUtil.randomChar(4)));
-        return Stream.of(ele);
-    }
-
-    //校验是否有循环依赖,修改父节点为自己的子节点?
-    default void checkCyclicDependency(K id, E ele) {
-        if (ObjectUtils.isEmpty(id)) {
-            return;
-        }
-        for (E e : this.queryIncludeChildren(Collections.singletonList(id))) {
-            if (Objects.equals(ele.getParentId(), e.getId())) {
-                throw new IllegalArgumentException("不能修改父节点为自己或者自己的子节点");
-            }
-        }
-
+        return new SyncTreeSortServiceHelper<>(this)
+            .prepare(Flux.fromIterable(entityPublisher))
+            .buffer(getBufferSize())
+            .map(this.getRepository()::insertBatch)
+            .reduce(Math::addExact)
+            .blockOptional()
+            .orElse(0);
     }
 
     @Override
+    @Transactional(rollbackFor = Throwable.class, transactionManager = TransactionManagers.jdbcTransactionManager)
     default SaveResult save(List<E> entities) {
-        return this.getRepository()
-                   .save(entities
-                                 .stream()
-                                 .flatMap(this::applyTreeProperty)
-                                 //把树结构平铺
-                                 .flatMap(e -> TreeSupportEntity
-                                         .expandTree2List(e, getIDGenerator())
-                                         .stream())
-                                 .collect(Collectors.toList())
-                   );
+        return new SyncTreeSortServiceHelper<>(this)
+            .prepare(Flux.fromIterable(entities))
+            .buffer(getBufferSize())
+            .map(this.getRepository()::save)
+            .reduce(SaveResult::merge)
+            .blockOptional()
+            .orElse(SaveResult.of(0,0));
     }
 
     @Override
+    @Transactional(rollbackFor = Throwable.class, transactionManager = TransactionManagers.jdbcTransactionManager)
     default int updateById(K id, E entity) {
         entity.setId(id);
         return this.save(entity).getTotal();
     }
 
     @Override
+    @Transactional(rollbackFor = Throwable.class, transactionManager = TransactionManagers.jdbcTransactionManager)
     default int deleteById(Collection<K> idPublisher) {
         List<E> dataList = findById(idPublisher);
         return dataList
-                .stream()
-                .map(e -> createDelete()
-                        .where()
-                        .like$(e::getPath)
-                        .execute())
-                .mapToInt(Integer::intValue)
-                .sum();
+            .stream()
+            .map(e -> createDelete()
+                .where()
+                .like$(e::getPath)
+                .execute())
+            .mapToInt(Integer::intValue)
+            .sum();
     }
 
     IDGenerator<K> getIDGenerator();
@@ -151,6 +125,10 @@ public interface TreeSortEntityService<E extends TreeSortSupportEntity<K>, K>
 
     default List<E> getChildren(E entity) {
         return entity.getChildren();
+    }
+
+    default int getBufferSize() {
+        return 200;
     }
 
     default Predicate<E> createRootNodePredicate(TreeSupportEntity.TreeHelper<E, K> helper) {

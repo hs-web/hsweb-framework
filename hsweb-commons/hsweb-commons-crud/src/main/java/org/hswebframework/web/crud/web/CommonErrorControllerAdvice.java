@@ -13,6 +13,8 @@ import org.hswebframework.web.exception.ValidationException;
 import org.hswebframework.web.i18n.LocaleUtils;
 import org.hswebframework.web.logger.ReactiveLogger;
 import org.springframework.core.annotation.Order;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.TransactionException;
@@ -176,7 +178,7 @@ public class CommonErrorControllerAdvice {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Mono<ResponseMessage<?>> handleException(jakarta.validation.ValidationException e) {
-        return Mono.just(ResponseMessage.error(400, CodeConstants.Error.illegal_argument, e.getMessage()));
+        return Mono.just(ResponseMessage.error(400, CodeConstants.Error.illegal_argument, e.getLocalizedMessage()));
     }
 
     @ExceptionHandler
@@ -196,7 +198,7 @@ public class CommonErrorControllerAdvice {
         log.warn(e.getLocalizedMessage(), e);
         return LocaleUtils
             .resolveMessageReactive("error.internal_server_error")
-            .map(msg -> ResponseMessage.error(500, "internal_server_error", msg));
+            .map(msg -> ResponseMessage.error(500, CodeConstants.Error.internal_server_error, msg));
     }
 
     @ExceptionHandler
@@ -206,7 +208,7 @@ public class CommonErrorControllerAdvice {
 
         return LocaleUtils
             .resolveMessageReactive("error.internal_server_error")
-            .map(msg -> ResponseMessage.error(500, "internal_server_error", msg));
+            .map(msg -> ResponseMessage.error(500, CodeConstants.Error.internal_server_error, msg));
     }
 
     @ExceptionHandler
@@ -291,5 +293,22 @@ public class CommonErrorControllerAdvice {
         return e.getLocalizedMessageReactive()
                 .map(msg -> ResponseMessage.error(400, e.getI18nCode(), msg));
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Mono<ResponseMessage<Object>> handleException(DataAccessException e) {
+        return LocaleUtils
+            .resolveMessageReactive("error.data_access_failed")
+            .map(msg -> ResponseMessage.error(400, "data_access_failed", msg));
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Mono<ResponseMessage<Object>> handleException(DuplicateKeyException e) {
+        return LocaleUtils
+            .resolveMessageReactive("error.duplicate_key")
+            .map(msg -> ResponseMessage.error(400, "duplicate_key", msg));
+    }
+
 
 }

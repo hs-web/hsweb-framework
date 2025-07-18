@@ -174,23 +174,23 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
     }
 
     @Override
-    @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager)
+    @Transactional(rollbackFor = Throwable.class, transactionManager = TransactionManagers.reactiveTransactionManager)
     default Mono<Integer> insert(Publisher<E> entityPublisher) {
         return insertBatch(Flux.from(entityPublisher).collectList());
     }
 
     @Override
-    @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager)
+    @Transactional(rollbackFor = Throwable.class, transactionManager = TransactionManagers.reactiveTransactionManager)
     default Mono<Integer> insert(E data) {
         return this.insertBatch(Flux.just(Collections.singletonList(data)));
     }
 
     @Override
-    @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager)
+    @Transactional(rollbackFor = Throwable.class, transactionManager = TransactionManagers.reactiveTransactionManager)
     default Mono<Integer> insertBatch(Publisher<? extends Collection<E>> entityPublisher) {
         return this
             .getRepository()
-            .insertBatch(new TreeSortServiceHelper<>(this)
+            .insertBatch(new ReactiveTreeSortServiceHelper<>(this)
                              .prepare(Flux.from(entityPublisher)
                                           .flatMapIterable(Function.identity()))
                              //  .doOnNext(e -> e.tryValidate(CreateGroup.class))
@@ -201,105 +201,11 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
         return 200;
     }
 
-    @Deprecated
-    default Mono<E> applyTreeProperty(E ele) {
-        if (StringUtils.hasText(ele.getPath()) ||
-            ObjectUtils.isEmpty(ele.getParentId())) {
-            return Mono.just(ele);
-        }
-
-        return this.checkCyclicDependency(ele.getId(), ele)
-                   .then(this.findById(ele.getParentId())
-                             .doOnNext(parent -> ele.setPath(parent.getPath() + "-" + RandomUtil.randomChar(4))))
-                   .thenReturn(ele);
-    }
-
-    @Deprecated
-    //校验是否有循环依赖,修改父节点为自己的子节点?
-    default Mono<E> checkCyclicDependency(K id, E ele) {
-        if (ObjectUtils.isEmpty(id)) {
-            return Mono.empty();
-        }
-        return this
-            .queryIncludeChildren(Collections.singletonList(id))
-            .doOnNext(e -> {
-                if (Objects.equals(ele.getParentId(), e.getId())) {
-                    throw new ValidationException.NoStackTrace("parentId", "error.tree_entity_cyclic_dependency");
-                }
-            })
-            .then(Mono.just(ele));
-    }
-
-    @Deprecated
-    default Mono<Collection<E>> checkParentId(Collection<E> source) {
-
-        Set<K> idSet = source
-            .stream()
-            .map(TreeSupportEntity::getId)
-            .filter(e -> !ObjectUtils.isEmpty(e))
-            .collect(Collectors.toSet());
-
-        if (idSet.isEmpty()) {
-            return Mono.just(source);
-        }
-
-        Set<K> readyToCheck = source
-            .stream()
-            .map(TreeSupportEntity::getParentId)
-            .filter(e -> !ObjectUtils.isEmpty(e) && !idSet.contains(e))
-            .collect(Collectors.toSet());
-
-        if (readyToCheck.isEmpty()) {
-            return Mono.just(source);
-        }
-
-        return this
-            .createQuery()
-            .select("id")
-            .in("id", readyToCheck)
-            .fetch()
-            .doOnNext(e -> readyToCheck.remove(e.getId()))
-            .then(Mono.fromSupplier(() -> {
-                if (!readyToCheck.isEmpty()) {
-                    throw new ValidationException(
-                        "error.tree_entity_parent_id_not_exist",
-                        Collections.singletonList(
-                            new ValidationException.Detail(
-                                "parentId",
-                                "error.tree_entity_parent_id_not_exist",
-                                readyToCheck))
-                    );
-                }
-                return source;
-            }));
-
-    }
-
-    @Deprecated
-    //重构子节点的path
-    default void refactorChildPath(K id, Function<K, Collection<E>> childGetter, String path, Consumer<E> pathAccepter) {
-
-        Collection<E> children = childGetter.apply(id);
-        if (CollectionUtils.isEmpty(children)) {
-            return;
-        }
-        for (E child : children) {
-            if (ObjectUtils.isEmpty(path)) {
-                child.setPath(RandomUtil.randomChar(4));
-            } else {
-                child.setPath(path + "-" + RandomUtil.randomChar(4));
-            }
-            pathAccepter.accept(child);
-            this.refactorChildPath(child.getId(), childGetter, child.getPath(), pathAccepter);
-        }
-
-    }
-
     @Override
     @Transactional(rollbackFor = Throwable.class,
         transactionManager = TransactionManagers.reactiveTransactionManager)
     default Mono<SaveResult> save(Publisher<E> entityPublisher) {
-        return new TreeSortServiceHelper<>(this)
+        return new ReactiveTreeSortServiceHelper<>(this)
             .prepare(Flux.from(entityPublisher))
 //                .doOnNext(e -> e.tryValidate(CreateGroup.class))
             .buffer(getBufferSize())
@@ -310,7 +216,7 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
 
     @Deprecated
     default Flux<E> tryRefactorPath(Flux<E> stream) {
-        return new TreeSortServiceHelper<>(this).prepare(stream);
+        return new ReactiveTreeSortServiceHelper<>(this).prepare(stream);
     }
 
     @Override
