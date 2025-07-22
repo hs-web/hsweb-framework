@@ -20,26 +20,92 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * 基于{@link CrudService}的查询控制器.
+ * 通用CRUD查询控制器接口
  *
- * @param <E> 实体类
+ * <p>基于{@link CrudService}提供了标准化的数据查询REST API接口。</p>
+ * <p>支持多种查询方式：分页查询、不分页查询、统计查询、根据ID查询等。</p>
+ *
+ * <p>主要功能：</p>
+ * <ul>
+ *     <li>GET/POST方式的分页动态查询</li>
+ *     <li>GET/POST方式的不分页动态查询</li>
+ *     <li>GET/POST方式的统计查询</li>
+ *     <li>根据ID精确查询单个实体</li>
+ *     <li>支持复杂的动态查询条件</li>
+ *     <li>支持排序、分页、条件过滤</li>
+ * </ul>
+ *
+ * <p>查询条件支持：</p>
+ * <ul>
+ *     <li>简单where条件：<code>where=name is 张三</code></li>
+ *     <li>复杂terms条件：支持like、eq、gt、lt等多种条件类型</li>
+ *     <li>排序：<code>orderBy=id desc,name asc</code></li>
+ *     <li>分页：<code>pageIndex=0&pageSize=20</code></li>
+ * </ul>
+ *
+ * <p>使用示例：</p>
+ * <pre>{@code
+ * @RestController
+ * @RequestMapping("/user")
+ * public class UserController implements ServiceQueryController<User, String> {
+ *
+ *     @Autowired
+ *     private UserService userService;
+ *
+ *     @Override
+ *     public CrudService<User, String> getService() {
+ *         return userService;
+ *     }
+ * }
+ *
+ * // 使用示例：
+ * // GET /user/_query?pageIndex=0&pageSize=10&where=name like 张%&orderBy=id desc
+ * // POST /user/_query/no-paging
+ * // GET /user/123
+ * }</pre>
+ *
+ * @param <E> 实体类型
  * @param <K> 主键类型
+ * @author hsweb-generator
+ * @since 4.0
  * @see CrudService
+ * @see QueryParamEntity
+ * @see PagerResult
  */
 public interface ServiceQueryController<E, K> {
 
+    /**
+     * 获取CRUD服务实例
+     *
+     * <p>子类必须实现此方法，返回对应的服务实例用于执行具体的查询操作。</p>
+     *
+     * @return CRUD服务实例
+     */
     @Authorize(ignore = true)
     CrudService<E, K> getService();
 
     /**
-     * 查询,但是不返回分页结果.
+     * GET方式动态查询（不返回分页总数）
      *
+     * <p>执行动态查询但不计算总数，适用于不需要分页信息的场景，性能更好。</p>
+     * <p>支持通过URL参数传递查询条件，参数会自动绑定到{@link QueryParamEntity}对象。</p>
+     *
+     * <p>URL示例：</p>
      * <pre>
      *     GET /_query/no-paging?pageIndex=0&pageSize=20&where=name is 张三&orderBy=id desc
      * </pre>
      *
-     * @param query 动态查询条件
-     * @return 结果流
+     * <p>支持的查询参数：</p>
+     * <ul>
+     *     <li>pageIndex: 页码，从0开始</li>
+     *     <li>pageSize: 每页大小</li>
+     *     <li>where: 简单条件，如 "name is 张三" 或 "age gt 18"</li>
+     *     <li>orderBy: 排序条件，如 "id desc" 或 "name asc,id desc"</li>
+     *     <li>paging: 是否分页，设为false可获取全部数据</li>
+     * </ul>
+     *
+     * @param query 动态查询条件，通过URL参数自动绑定
+     * @return 查询结果列表，按分页参数限制数量
      * @see QueryParamEntity
      */
     @GetMapping("/_query/no-paging")
@@ -54,28 +120,38 @@ public interface ServiceQueryController<E, K> {
     }
 
     /**
-     * POST方式查询.不返回分页结果
+     * POST方式动态查询（不返回分页总数）
      *
+     * <p>通过POST请求体传递复杂查询条件，适用于条件复杂或包含特殊字符的查询场景。</p>
+     * <p>支持更丰富的查询条件配置，包括terms高级条件。</p>
+     *
+     * <p>请求体示例：</p>
      * <pre>
      *     POST /_query/no-paging
+     *     Content-Type: application/json
      *
      *     {
      *         "pageIndex":0,
      *         "pageSize":20,
-     *         "where":"name like 张%", //放心使用,没有SQL注入
+     *         "where":"name like 张%", // 简单条件，防SQL注入,不能与terms共存.
      *         "orderBy":"id desc",
-     *         "terms":[ //高级条件
+     *         "terms":[ // 高级条件数组
      *             {
-     *                 "column":"name",
-     *                 "termType":"like",
-     *                 "value":"张%"
+     *                 "column":"name",        // 字段名
+     *                 "termType":"like",      // 条件类型：like,eq,gt,lt,in等
+     *                 "value":"张%"          // 条件值
+     *             },
+     *             {
+     *                 "column":"age",
+     *                 "termType":"gt",
+     *                 "value":18
      *             }
      *         ]
      *     }
      * </pre>
      *
-     * @param query 查询条件
-     * @return 结果流
+     * @param query 查询条件对象，包含分页、排序、过滤条件等
+     * @return 查询结果列表，不包含总数信息
      * @see QueryParamEntity
      */
     @PostMapping("/_query/no-paging")
@@ -86,17 +162,28 @@ public interface ServiceQueryController<E, K> {
         return this.query(query);
     }
 
-
     /**
-     * GET方式分页查询
+     * GET方式分页查询（返回分页信息）
      *
+     * <p>执行分页查询并返回完整的分页信息，包括总记录数、当前页数据等。</p>
+     * <p>如果查询参数中包含total字段，则使用该值作为总数，避免重复统计。</p>
+     *
+     * <p>URL示例：</p>
      * <pre>
-     *    GET /_query/no-paging?pageIndex=0&pageSize=20&where=name is 张三&orderBy=id desc
+     *    GET /_query?pageIndex=0&pageSize=20&where=name is 张三&orderBy=id desc
      * </pre>
      *
-     * @param query 查询条件
-     * @return 分页查询结果
+     * <p>性能优化：</p>
+     * <ul>
+     *     <li>当总数为0时，直接返回空结果，不执行数据查询</li>
+     *     <li>支持传入total参数避免重复统计</li>
+     *     <li>自动调整分页参数，防止超出范围</li>
+     * </ul>
+     *
+     * @param query 查询条件，通过URL参数自动绑定
+     * @return 分页查询结果，包含总数、当前页数据、分页信息等
      * @see PagerResult
+     * @see QueryParamEntity
      */
     @GetMapping("/_query")
     @QueryAction
@@ -123,7 +210,16 @@ public interface ServiceQueryController<E, K> {
                             .fetch(), query);
     }
 
-
+    /**
+     * POST方式分页查询（返回分页信息）
+     *
+     * <p>通过POST请求体传递复杂查询条件的分页查询，功能与GET方式相同。</p>
+     * <p>适用于查询条件复杂、URL过长或包含特殊字符的场景。</p>
+     *
+     * @param query 查询条件对象，通过请求体传递
+     * @return 分页查询结果，包含总数、当前页数据、分页信息等
+     * @see #queryPager(QueryParamEntity)
+     */
     @PostMapping("/_query")
     @QueryAction
     @SuppressWarnings("all")
@@ -132,6 +228,16 @@ public interface ServiceQueryController<E, K> {
         return queryPager(query);
     }
 
+    /**
+     * POST方式统计查询
+     *
+     * <p>通过POST请求体传递查询条件，只返回符合条件的记录总数。</p>
+     * <p>适用于需要统计数量但不需要具体数据的场景。</p>
+     *
+     * @param query 查询条件对象
+     * @return 符合条件的记录总数
+     * @see #count(QueryParamEntity)
+     */
     @PostMapping("/_count")
     @QueryAction
     @Operation(summary = "使用POST方式查询总数")
@@ -140,14 +246,18 @@ public interface ServiceQueryController<E, K> {
     }
 
     /**
-     * 统计查询
+     * GET方式统计查询
      *
+     * <p>根据查询条件统计符合条件的记录总数，不返回具体数据。</p>
+     * <p>适用于分页前的总数统计、数据校验等场景。</p>
+     *
+     * <p>URL示例：</p>
      * <pre>
-     *     GET /_count
+     *     GET /_count?where=status eq 1&terms=[{"column":"age","termType":"gt","value":18}]
      * </pre>
      *
-     * @param query 查询条件
-     * @return 统计结果
+     * @param query 查询条件，通过URL参数自动绑定
+     * @return 符合条件的记录总数，0表示无匹配记录
      */
     @GetMapping("/_count")
     @QueryAction
@@ -159,6 +269,29 @@ public interface ServiceQueryController<E, K> {
                 .count();
     }
 
+    /**
+     * 根据ID查询单个实体
+     *
+     * <p>通过主键ID精确查询单个实体对象。</p>
+     * <p>如果指定ID的记录不存在，将抛出{@link NotFoundException}异常。</p>
+     *
+     * <p>URL示例：</p>
+     * <pre>
+     *     GET /123           // 查询ID为123的记录
+     *     GET /user_001      // 查询ID为user_001的记录
+     * </pre>
+     *
+     * <p>路径变量说明：</p>
+     * <ul>
+     *     <li>支持各种类型的ID：String、Long、Integer等</li>
+     *     <li>路径模式 {id:.+} 支持包含特殊字符的ID</li>
+     * </ul>
+     *
+     * @param id 实体的主键ID，不能为null
+     * @return 查询到的实体对象
+     * @throws NotFoundException 当指定ID的记录不存在时抛出
+     * @throws IllegalArgumentException 当id参数为null时抛出
+     */
     @GetMapping("/{id:.+}")
     @QueryAction
     @Operation(summary = "根据ID查询")
