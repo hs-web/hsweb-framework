@@ -15,10 +15,10 @@ jobs:
       - uses: actions/checkout@v1
       - run: echo ${{github.ref}}
       - name: Set up Repository info
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
-          distribution: 'adopt'
+          distribution: 'temurin'
       - name: Cache Maven Repository
         uses: actions/cache@v3
         with:
