@@ -45,4 +45,4 @@ jobs:
 
           # Step 4: 构建并发布到 Maven 私有仓库
       - name: Build and Deploy to Maven
-        run: mvn clean deploy -q -DskipTests -pl "$(./changes.sh)"
+        run: mvn clean deploy -DskipTests -pl "$(./changes.sh)"
