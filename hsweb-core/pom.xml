@@ -12,7 +12,6 @@
 
     <artifactId>hsweb-core</artifactId>
     <name>${project.artifactId}</name>
-
     <description>核心包</description>
 
     <dependencies>

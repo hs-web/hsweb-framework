@@ -13,6 +13,8 @@ jobs:
         os: [ ubuntu-latest ]
     steps:
       - uses: actions/checkout@v4
+        with:
+            fetch-depth: '2'
       - run: echo ${{github.ref}}
       - name: Set up Repository info
         uses: actions/setup-java@v4
