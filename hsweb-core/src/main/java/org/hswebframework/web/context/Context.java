@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+@Deprecated
 public interface Context {
 
     default <T> Optional<T> get(Class<T> key) {
