@@ -78,7 +78,7 @@ public final class AuthenticationHolder {
      * @return 当前登录的用户权限信息
      */
     public static Optional<Authentication> get() {
-        Authentication current = CURRENT.get();
+        Authentication current = CURRENT.getIfExists();
         if (current != null) {
             return Optional.of(current);
         }

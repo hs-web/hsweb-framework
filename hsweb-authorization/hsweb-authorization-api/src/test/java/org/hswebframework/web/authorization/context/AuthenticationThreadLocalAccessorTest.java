@@ -12,11 +12,27 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class AuthenticationThreadLocalAccessorTest {
 
+    static {
+        Hooks.enableAutomaticContextPropagation();
+    }
 
     @Test
     void testReadFromReactive() {
 
-        Hooks.enableAutomaticContextPropagation();
+        Authentication auth = new SimpleAuthentication();
+
+        Authentication auth2 = AuthenticationHolder.executeWith(
+            auth,
+            () -> Authentication
+                .currentReactive()
+                .subscribeOn(Schedulers.boundedElastic())
+                .block());
+
+        assertEquals(auth,auth2);
+    }
+
+    @Test
+    void testReadInReactive() {
 
         Authentication auth = new SimpleAuthentication();
 
@@ -28,7 +44,6 @@ class AuthenticationThreadLocalAccessorTest {
                     return Authentication.current().orElse(null);
                 })
                 .subscribeOn(Schedulers.boundedElastic())
-                .contextWrite(c->c)
                 .block());
 
         assertEquals(auth, auth2);

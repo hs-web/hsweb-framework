@@ -104,7 +104,9 @@ public final class ReactiveAuthenticationHolder {
         }
 
         Authentication get() {
-            return auth;
+            return auth == null
+                ? AuthenticationHolder.get().orElse(null)
+                : auth;
         }
     }
 
