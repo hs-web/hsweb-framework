@@ -10,7 +10,7 @@ import javax.annotation.Nonnull;
 public class AuthenticationThreadLocalAccessor
     implements ThreadLocalAccessor<Authentication> {
 
-    static final String KEY = "cp.hs.auth";
+    static final Object KEY = Authentication.class;
 
     static {
         ReactiveAuthenticationHolder.addSupplier(

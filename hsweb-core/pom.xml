@@ -161,5 +161,11 @@
             <artifactId>hsweb-easy-orm-core</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>context-propagation</artifactId>
+            <optional>true</optional>
+        </dependency>
+
     </dependencies>
 </project>

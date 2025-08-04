@@ -35,7 +35,7 @@ public final class LocaleUtils {
 
     public static final Locale DEFAULT_LOCALE = Locale.getDefault();
 
-    private static final FastThreadLocal<Locale> CONTEXT_THREAD_LOCAL = new FastThreadLocal<>();
+    static final FastThreadLocal<Locale> CONTEXT_THREAD_LOCAL = new FastThreadLocal<>();
 
     static MessageSource messageSource = UnsupportedMessageSource.instance();
 
