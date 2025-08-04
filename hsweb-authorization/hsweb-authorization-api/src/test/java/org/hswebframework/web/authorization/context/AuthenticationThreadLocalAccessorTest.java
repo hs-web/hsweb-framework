@@ -26,9 +26,10 @@ class AuthenticationThreadLocalAccessorTest {
             () -> Authentication
                 .currentReactive()
                 .subscribeOn(Schedulers.boundedElastic())
+                .contextCapture()
                 .block());
 
-        assertEquals(auth,auth2);
+        assertEquals(auth, auth2);
     }
 
     @Test

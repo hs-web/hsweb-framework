@@ -3,12 +3,20 @@ package org.hswebframework.web.authorization.context;
 import io.micrometer.context.ThreadLocalAccessor;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.AuthenticationHolder;
+import org.hswebframework.web.authorization.ReactiveAuthenticationHolder;
 
 import javax.annotation.Nonnull;
 
-public class AuthenticationThreadLocalAccessor implements ThreadLocalAccessor<Authentication> {
+public class AuthenticationThreadLocalAccessor
+    implements ThreadLocalAccessor<Authentication> {
 
     static final String KEY = "cp.hs.auth";
+
+    static {
+        ReactiveAuthenticationHolder.addSupplier(
+            new ThreadLocalReactiveAuthenticationSupplier()
+        );
+    }
 
     @Override
     @Nonnull
