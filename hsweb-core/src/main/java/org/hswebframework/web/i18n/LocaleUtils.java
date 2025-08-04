@@ -7,6 +7,7 @@ import org.hswebframework.web.exception.I18nSupportException;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscription;
 import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.*;
 import reactor.util.context.Context;
@@ -93,10 +94,8 @@ public final class LocaleUtils {
      */
     public static Locale current() {
         Locale locale = CONTEXT_THREAD_LOCAL.get();
-        if (locale == null) {
-            locale = DEFAULT_LOCALE;
-        }
-        return locale;
+        // fallback to spring
+        return Objects.requireNonNullElseGet(locale, LocaleContextHolder::getLocale);
     }
 
     /**

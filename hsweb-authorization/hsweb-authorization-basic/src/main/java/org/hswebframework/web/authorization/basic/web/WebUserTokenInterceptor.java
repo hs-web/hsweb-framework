@@ -39,22 +39,21 @@ public class WebUserTokenInterceptor implements HandlerInterceptor {
         this.parser = definitionParser;
 
         enableBasicAuthorization = userTokenParser
-                .stream()
-                .filter(UserTokenForTypeParser.class::isInstance)
-                .anyMatch(parser -> "basic".equalsIgnoreCase(((UserTokenForTypeParser) parser).getTokenType()));
+            .stream()
+            .filter(UserTokenForTypeParser.class::isInstance)
+            .anyMatch(parser -> "basic".equalsIgnoreCase(((UserTokenForTypeParser) parser).getTokenType()));
     }
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         List<ParsedToken> tokens = userTokenParser
-                .stream()
-                .map(parser -> parser.parseToken(request))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+            .stream()
+            .map(parser -> parser.parseToken(request))
+            .filter(Objects::nonNull)
+            .toList();
 
         if (tokens.isEmpty()) {
-            if (enableBasicAuthorization && handler instanceof HandlerMethod) {
-                HandlerMethod method = ((HandlerMethod) handler);
+            if (enableBasicAuthorization && handler instanceof HandlerMethod method) {
                 AuthorizeDefinition definition = parser.parse(method.getBeanType(), method.getMethod());
                 if (null != definition) {
                     response.addHeader("WWW-Authenticate", " Basic realm=\"\"");
@@ -69,12 +68,18 @@ public class WebUserTokenInterceptor implements HandlerInterceptor {
                 userToken = userTokenManager.getByToken(token).blockOptional().orElse(null);
             }
             if ((userToken == null || userToken.isExpired()) && parsedToken instanceof AuthorizedToken) {
-                //先踢出旧token
-                userTokenManager.signOutByToken(token).subscribe();
+                userToken =
+                    userTokenManager
+                        .signOutByToken(token)
+                        .then(
+                            userTokenManager
+                                .signIn(parsedToken.getToken(),
+                                        parsedToken.getType(),
+                                        ((AuthorizedToken) parsedToken).getUserId(),
+                                        ((AuthorizedToken) parsedToken)
+                                            .getMaxInactiveInterval())
+                        )
 
-                userToken = userTokenManager
-                        .signIn(parsedToken.getToken(), parsedToken.getType(), ((AuthorizedToken) parsedToken).getUserId(), ((AuthorizedToken) parsedToken)
-                                .getMaxInactiveInterval())
                         .block();
             }
             if (null != userToken) {
@@ -85,4 +90,8 @@ public class WebUserTokenInterceptor implements HandlerInterceptor {
         return true;
     }
 
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        UserTokenHolder.setCurrent(null);
+    }
 }

@@ -48,8 +48,11 @@ public class ContextHolder {
         }
     }
 
-    public static <T> Mono<T> currentReactive(Function<ContextView, Mono<T>> handler) {
-        return Mono.deferContextual(ctx -> handler.apply(current().putAll(ctx)));
+    public static <T> Mono<T> wrap(Function<ContextView, Mono<T>> handler) {
+        return Mono.deferContextual(ctx -> {
+            Context context = current().putAll(ctx);
+            return handler.apply(context);
+        });
     }
 
     public static Context current() {
