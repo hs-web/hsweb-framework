@@ -22,6 +22,9 @@ public class ResourcesDefinition {
 
     private Phased phased = Phased.before;
 
+    public void clear(){
+        resources.clear();
+    }
     public void addResource(ResourceDefinition resource, boolean merge) {
         ResourceDefinition definition = getResource(resource.getId()).orElse(null);
         if (definition != null) {

@@ -17,6 +17,7 @@
 
 package org.hswebframework.web.authorization;
 
+import org.hswebframework.web.authorization.annotation.Logical;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Mono;
 
@@ -93,18 +94,37 @@ public interface Authentication extends Serializable {
      * @return 用户持有的权限集合
      */
     List<Permission> getPermissions();
-    
+
     default boolean hasDimension(String type, String... id) {
-        return hasDimension(type, Arrays.asList(id));
+        return hasAnyDimension(type, Arrays.asList(id));
     }
 
+    default boolean hasAllDimension(String type, Collection<String> id) {
+        if (id.isEmpty()) {
+            return !getDimensions(type).isEmpty();
+        }
+        return getDimensions(type)
+            .stream()
+            .allMatch(p -> id.contains(p.getId()));
+    }
+
+    default boolean hasAnyDimension(String type, Collection<String> id) {
+        if (id.isEmpty()) {
+            return !getDimensions(type).isEmpty();
+        }
+        return getDimensions(type)
+            .stream()
+            .anyMatch(p -> id.contains(p.getId()));
+    }
+
+    @Deprecated
     default boolean hasDimension(String type, Collection<String> id) {
         if (id.isEmpty()) {
             return !getDimensions(type).isEmpty();
         }
         return getDimensions(type)
-                .stream()
-                .anyMatch(p -> id.contains(p.getId()));
+            .stream()
+            .anyMatch(p -> id.contains(p.getId()));
     }
 
     default boolean hasDimension(DimensionType type, String id) {
@@ -116,9 +136,9 @@ public interface Authentication extends Serializable {
             return Optional.empty();
         }
         return getDimensions()
-                .stream()
-                .filter(dimension -> dimension.getId().equals(id) && type.equalsIgnoreCase(dimension.getType().getId()))
-                .findFirst();
+            .stream()
+            .filter(dimension -> dimension.getId().equals(id) && type.equalsIgnoreCase(dimension.getType().getId()))
+            .findFirst();
     }
 
     default Optional<Dimension> getDimension(DimensionType type, String id) {
@@ -126,9 +146,9 @@ public interface Authentication extends Serializable {
             return Optional.empty();
         }
         return getDimensions()
-                .stream()
-                .filter(dimension -> dimension.getId().equals(id) && type.isSameType(dimension.getType()))
-                .findFirst();
+            .stream()
+            .filter(dimension -> dimension.getId().equals(id) && type.isSameType(dimension.getType()))
+            .findFirst();
     }
 
 
@@ -137,9 +157,9 @@ public interface Authentication extends Serializable {
             return Collections.emptyList();
         }
         return getDimensions()
-                .stream()
-                .filter(dimension -> dimension.getType().isSameType(type))
-                .collect(Collectors.toList());
+            .stream()
+            .filter(dimension -> dimension.getType().isSameType(type))
+            .collect(Collectors.toList());
     }
 
     default List<Dimension> getDimensions(DimensionType type) {
@@ -147,9 +167,9 @@ public interface Authentication extends Serializable {
             return Collections.emptyList();
         }
         return getDimensions()
-                .stream()
-                .filter(dimension -> dimension.getType().isSameType(type))
-                .collect(Collectors.toList());
+            .stream()
+            .filter(dimension -> dimension.getType().isSameType(type))
+            .collect(Collectors.toList());
     }
 
 
@@ -164,9 +184,9 @@ public interface Authentication extends Serializable {
             return Optional.empty();
         }
         return getPermissions()
-                .stream()
-                .filter(permission -> permission.getId().equals(id))
-                .findAny();
+            .stream()
+            .filter(permission -> permission.getId().equals(id))
+            .findAny();
     }
 
     /**
@@ -179,8 +199,8 @@ public interface Authentication extends Serializable {
     default boolean hasPermission(String permissionId, String... actions) {
         return hasPermission(permissionId,
                              actions.length == 0
-                                     ? Collections.emptyList()
-                                     : Arrays.asList(actions));
+                                 ? Collections.emptyList()
+                                 : Arrays.asList(actions));
     }
 
     default boolean hasPermission(String permissionId, Collection<String> actions) {
@@ -190,8 +210,8 @@ public interface Authentication extends Serializable {
             }
             if (Objects.equals(permissionId, permission.getId())) {
                 return actions.isEmpty()
-                        || permission.getActions().containsAll(actions)
-                        || permission.getActions().contains("*");
+                    || permission.getActions().containsAll(actions)
+                    || permission.getActions().contains("*");
             }
         }
         return false;

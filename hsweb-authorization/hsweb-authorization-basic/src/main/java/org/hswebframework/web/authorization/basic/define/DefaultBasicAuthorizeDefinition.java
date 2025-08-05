@@ -61,10 +61,17 @@ public class DefaultBasicAuthorizeDefinition implements AopAuthorizeDefinition {
         return parser.parse();
     }
 
+    public void putAnnotation(Dimensions ann) {
+        dimensions.setLogical(ann.logical());
+        if (ann.description().length > 0) {
+            dimensions.setDescription(String.join("", ann.description()));
+        }
+    }
+
     public void putAnnotation(Authorize ann) {
         if (!ann.merge()) {
-            getResources().getResources().clear();
-            getDimensions().getDimensions().clear();
+            getResources().clear();
+            getDimensions().clear();
         }
         setPhased(ann.phased());
         getResources().setPhased(ann.phased());
@@ -81,7 +88,7 @@ public class DefaultBasicAuthorizeDefinition implements AopAuthorizeDefinition {
 
     public void putAnnotation(Dimension ann) {
         if (ann.ignore()) {
-            getDimensions().getDimensions().clear();
+            getDimensions().clear();
             return;
         }
         DimensionDefinition definition = new DimensionDefinition();

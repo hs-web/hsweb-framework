@@ -6,6 +6,9 @@ import org.hswebframework.web.authorization.define.Phased;
 
 import java.lang.annotation.*;
 
+import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
 /**
  * 接口资源声明注解,声明Controller的资源相关信息,用于进行权限控制。
  * <br>
@@ -53,6 +56,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
+@Repeatable(Resource.List.class)
 public @interface Resource {
 
     /**
@@ -98,4 +102,12 @@ public @interface Resource {
      * @return 是否合并
      */
     boolean merge() default true;
+
+    @Target({ANNOTATION_TYPE})
+    @Retention(RUNTIME)
+    @Documented
+    @Inherited
+    @interface List {
+        Resource[] value();
+    }
 }

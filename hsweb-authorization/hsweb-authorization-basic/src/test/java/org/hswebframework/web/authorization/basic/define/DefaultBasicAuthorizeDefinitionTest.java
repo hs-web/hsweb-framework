@@ -16,25 +16,27 @@ public class DefaultBasicAuthorizeDefinitionTest {
     @SneakyThrows
     public void testCustomAnn() {
         AopAuthorizeDefinition definition =
-                DefaultBasicAuthorizeDefinition.from(TestController.class, TestController.class.getMethod("test"));
+            DefaultBasicAuthorizeDefinition.from(TestController.class, TestController.class.getMethod("test"));
 
-        ResourceDefinition resource = definition.getResources()
-                .getResource("test").orElseThrow(NullPointerException::new);
+        ResourceDefinition resource = definition
+            .getResources()
+            .getResource("test").orElseThrow(NullPointerException::new);
 
         Assert.assertNotNull(resource);
 
         Assert.assertTrue(resource.hasAction(Arrays.asList("add")));
+        System.out.println(definition.getDimensions());
+        Assert.assertFalse(definition.getDimensions().isEmpty());
+        Assert.assertEquals(1, definition.getDimensions().getDimensions().size());
 
-        Assert.assertTrue(resource.getAction("add")
-                .map(act->act.getDataAccess().getType("user_own_data"))
-                .isPresent());
+
     }
 
     @Test
     @SneakyThrows
     public void testNoMerge() {
         AopAuthorizeDefinition definition =
-                DefaultBasicAuthorizeDefinition.from(TestController.class, TestController.class.getMethod("noMerge"));
+            DefaultBasicAuthorizeDefinition.from(TestController.class, TestController.class.getMethod("noMerge"));
         Assert.assertTrue(definition.getResources().isEmpty());
     }
 
@@ -43,17 +45,19 @@ public class DefaultBasicAuthorizeDefinitionTest {
     public class TestController implements GenericController {
 
         @Authorize(merge = false)
-        public void noMerge(){
+        public void noMerge() {
 
         }
+
 
     }
 
     public interface GenericController {
 
         @CreateAction
-        @UserOwnData
-        default void test(){
+        @RequiresRoles("test")
+        @RequiresRoles("test2")
+        default void test() {
 
         }
     }

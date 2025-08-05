@@ -5,10 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.access.DataAccessController;
-import org.hswebframework.web.authorization.define.AuthorizeDefinition;
-import org.hswebframework.web.authorization.define.AuthorizingContext;
-import org.hswebframework.web.authorization.define.HandleType;
-import org.hswebframework.web.authorization.define.ResourcesDefinition;
+import org.hswebframework.web.authorization.annotation.Logical;
+import org.hswebframework.web.authorization.define.*;
 import org.hswebframework.web.authorization.events.AuthorizingHandleBeforeEvent;
 import org.hswebframework.web.authorization.exception.AccessDenyException;
 import org.slf4j.Logger;
@@ -17,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import reactor.core.publisher.Mono;
 
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -93,10 +92,7 @@ public class DefaultAuthorizingHandler implements AuthorizingHandler {
             AuthorizingHandleBeforeEvent event = new AuthorizingHandleBeforeEvent(context, type);
             eventPublisher.publishEvent(event);
             if (event.hasListener()) {
-                event
-                    .getAsync()
-                    .toFuture()
-                    .get(10, TimeUnit.SECONDS);
+                event.getAsync().block();
             }
             if (!event.isExecute()) {
                 if (event.isAllow()) {
@@ -109,51 +105,39 @@ public class DefaultAuthorizingHandler implements AuthorizingHandler {
         return false;
     }
 
+    @Deprecated
     public void handleDataAccess(AuthorizingContext context) {
 
-        if (dataAccessController == null) {
-            return;
-        }
-        if (context.getDefinition().getResources() == null) {
-            return;
-        }
-        if (handleEvent(context, HandleType.DATA)) {
-            return;
-        }
 
-        DataAccessController finalAccessController = dataAccessController;
-        Authentication autz = context.getAuthentication();
-
-        boolean isAccess = context
-            .getDefinition()
-            .getResources()
-            .getDataAccessResources()
-            .stream()
-            .allMatch(resource -> {
-                Permission permission = autz
-                    .getPermission(resource.getId())
-                    .orElseThrow(AccessDenyException.NoStackTrace::new);
-                return resource
-                    .getDataAccessAction()
-                    .stream()
-                    .allMatch(act -> permission
-                        .getDataAccesses(act.getId())
-                        .stream()
-                        .allMatch(dataAccessConfig -> finalAccessController.doAccess(dataAccessConfig, context)));
-
-            });
-        if (!isAccess) {
-            throw new AccessDenyException.NoStackTrace(context.getDefinition().getMessage());
-        }
     }
 
 
     protected void handleRBAC(Authentication authentication, AuthorizeDefinition definition) {
 
         ResourcesDefinition resources = definition.getResources();
-
+        // 判断权限
         if (!resources.hasPermission(authentication)) {
             throw new AccessDenyException.NoStackTrace(definition.getMessage(), definition.getDescription());
         }
+
+        DimensionsDefinition dd = definition.getDimensions();
+        // 判断维度
+        if (dd != null && !dd.isEmpty()) {
+            if (!dd.hasDimension(
+                (type, logical, dimensionIds) ->
+                    hasDimensions(authentication, type, logical, dimensionIds))) {
+
+                throw new AccessDenyException
+                    .NoStackTrace(definition.getMessage(), definition.getDimensions().toString());
+
+            }
+        }
+    }
+
+    private boolean hasDimensions(Authentication auth, String type, Logical logical, Set<String> dimensionIds) {
+        if (logical == Logical.AND) {
+            return auth.hasAllDimension(type, dimensionIds);
+        }
+        return auth.hasAnyDimension(type, dimensionIds);
     }
 }

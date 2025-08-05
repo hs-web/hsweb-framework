@@ -3,36 +3,64 @@ package org.hswebframework.web.authorization.define;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.collections4.Predicate;
 import org.hswebframework.web.authorization.Dimension;
 import org.hswebframework.web.authorization.annotation.Logical;
+import reactor.function.Predicate3;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiPredicate;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
 public class DimensionsDefinition {
 
-    private Set<DimensionDefinition> dimensions = new HashSet<>();
+    private Map<String, DimensionDefinition> dimensionsMapping = new ConcurrentHashMap<>();
 
     private Logical logical = Logical.DEFAULT;
 
-    public void addDimension(DimensionDefinition definition) {
-        dimensions.add(definition);
+    private String description;
+
+    public Set<DimensionDefinition> getDimensions() {
+        return new HashSet<>(dimensionsMapping.values());
     }
 
-    public boolean isEmpty(){
-        return CollectionUtils.isEmpty(this.dimensions);
+    public void clear() {
+        dimensionsMapping.clear();
+    }
+
+    public void addDimension(DimensionDefinition definition) {
+        DimensionDefinition old = dimensionsMapping.putIfAbsent(definition.getTypeId(), definition);
+        if (old != null) {
+            old.addDimensionI(definition.getDimensionId());
+        }
+    }
+
+    public boolean isEmpty() {
+        return MapUtils.isEmpty(this.dimensionsMapping);
     }
 
     public boolean hasDimension(Dimension dimension) {
-        return dimensions
+        DimensionDefinition def = dimensionsMapping.get(dimension.getType().getId());
+        return def != null && def.hasDimension(dimension.getId());
+    }
+
+    public boolean hasDimension(Predicate3<String,Logical, Set<String>> filter) {
+        if (logical == Logical.AND) {
+            return dimensionsMapping
+                .values()
                 .stream()
-                .anyMatch(def ->
-                        def.getTypeId().equals(dimension.getType().getId())
-                                && def.hasDimension(dimension.getId()));
+                .allMatch(e -> e.hasDimension(filter));
+        } else {
+            return dimensionsMapping
+                .values()
+                .stream()
+                .anyMatch(e -> e.hasDimension(filter));
+        }
+
     }
 
     public boolean hasDimension(List<Dimension> dimensions) {
@@ -42,5 +70,14 @@ public class DimensionsDefinition {
         }
 
         return dimensions.stream().anyMatch(this::hasDimension);
+    }
+
+    @Override
+    public String toString() {
+        return dimensionsMapping
+            .values()
+            .stream()
+            .map(d -> String.join(",", d.getDimensionId()) + "@" + d.getTypeId())
+            .collect(Collectors.joining(";"));
     }
 }

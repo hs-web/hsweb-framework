@@ -80,11 +80,6 @@ public class ResourceDefinition implements MultipleI18nSupportEntity {
 
     public synchronized ResourceDefinition addAction(ResourceActionDefinition action) {
         actionIds = null;
-        ResourceActionDefinition old = getAction(action.getId()).orElse(null);
-        if (old != null) {
-            old.getDataAccess().getDataAccessTypes()
-               .addAll(action.getDataAccess().getDataAccessTypes());
-        }
         actions.add(action);
         return this;
     }

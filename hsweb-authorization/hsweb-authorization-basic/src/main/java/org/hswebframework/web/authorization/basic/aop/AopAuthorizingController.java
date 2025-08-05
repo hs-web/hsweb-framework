@@ -111,9 +111,7 @@ public class AopAuthorizingController extends StaticMethodMatcherPointcutAdvisor
         MethodInterceptorContext paramContext = holder.createParamContext();
 
         AuthorizeDefinition definition = aopMethodAuthorizeDefinitionParser
-            .parse(methodInvocation
-                       .getThis()
-                       .getClass(),
+            .parse(methodInvocation.getThis().getClass(),
                    methodInvocation.getMethod(),
                    paramContext);
         Object result = null;
@@ -131,43 +129,26 @@ public class AopAuthorizingController extends StaticMethodMatcherPointcutAdvisor
 
             Authentication authentication = Authentication
                 .current()
-                .orElseThrow(UnAuthorizedException.NoStackTrace::new);
+                .orElse(null);
+
+            if (authentication == null) {
+                // 允许匿名访问
+                if (definition.allowAnonymous()) {
+                    return methodInvocation.proceed();
+                }
+                return new UnAuthorizedException.NoStackTrace();
+            }
 
             context.setAuthentication(authentication);
             isControl = true;
 
-            Phased dataAccessPhased = definition.getResources().getPhased();
             if (definition.getPhased() == Phased.before) {
-                //RDAC before
                 authorizingHandler.handRBAC(context);
-
-                //方法调用前验证数据权限
-                if (dataAccessPhased == Phased.before) {
-                    authorizingHandler.handleDataAccess(context);
-                }
-
                 result = methodInvocation.proceed();
-
-                //方法调用后验证数据权限
-                if (dataAccessPhased == Phased.after) {
-                    context.setParamContext(holder.createParamContext(result));
-                    authorizingHandler.handleDataAccess(context);
-                }
             } else {
-                //方法调用前验证数据权限
-                if (dataAccessPhased == Phased.before) {
-                    authorizingHandler.handleDataAccess(context);
-                }
-
                 result = methodInvocation.proceed();
                 context.setParamContext(holder.createParamContext(result));
-
                 authorizingHandler.handRBAC(context);
-
-                //方法调用后验证数据权限
-                if (dataAccessPhased == Phased.after) {
-                    authorizingHandler.handleDataAccess(context);
-                }
             }
         }
         if (!isControl) {

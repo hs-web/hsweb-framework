@@ -8,6 +8,8 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.util.CollectionUtils;
 
 import java.lang.annotation.Annotation;
+import java.lang.annotation.Repeatable;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Function;
@@ -20,7 +22,8 @@ public class AopAuthorizeDefinitionParser {
         Authorize.class,
         Dimension.class,
         Resource.class,
-        ResourceAction.class
+        ResourceAction.class,
+        Dimensions.class
     ));
 
     private final Set<Annotation> methodAnnotation;
@@ -37,10 +40,8 @@ public class AopAuthorizeDefinitionParser {
         definition = new DefaultBasicAuthorizeDefinition();
         definition.setTargetClass(targetClass);
         definition.setTargetMethod(method);
-
-        methodAnnotation = AnnotatedElementUtils.findAllMergedAnnotations(method, types);
-
-        classAnnotation = AnnotatedElementUtils.findAllMergedAnnotations(targetClass, types);
+        methodAnnotation = loadAnnotations(method);
+        classAnnotation = loadAnnotations(targetClass);
 
         classAnnotationGroup = classAnnotation
             .stream()
@@ -49,6 +50,23 @@ public class AopAuthorizeDefinitionParser {
         methodAnnotationGroup = methodAnnotation
             .stream()
             .collect(Collectors.groupingBy(Annotation::annotationType));
+    }
+
+    private Set<Annotation> loadAnnotations(AnnotatedElement element) {
+        return types
+            .stream()
+            .flatMap(s -> {
+                if (s.isAnnotationPresent(Repeatable.class)) {
+                    return AnnotatedElementUtils
+                        .findMergedRepeatableAnnotations(element, s)
+                        .stream();
+                }
+                return AnnotatedElementUtils
+                    .findAllMergedAnnotations(element, s)
+                    .stream();
+            })
+            .filter(Objects::nonNull)
+            .collect(Collectors.toSet());
     }
 
     private void initClassAnnotation() {
@@ -73,12 +91,16 @@ public class AopAuthorizeDefinitionParser {
             if (annotation instanceof Dimension) {
                 definition.putAnnotation(((Dimension) annotation));
             }
+            if (annotation instanceof Dimensions) {
+                definition.putAnnotation(((Dimensions) annotation));
+            }
+
             if (annotation instanceof ResourceAction) {
                 getAnnotationByType(Resource.class)
                     .map(res -> definition.getResources().getResource(res.id()).orElse(null))
                     .filter(Objects::nonNull)
                     .forEach(res -> {
-                        definition.putAnnotation(res,  (ResourceAction) annotation);
+                        definition.putAnnotation(res, (ResourceAction) annotation);
                     });
             }
         }

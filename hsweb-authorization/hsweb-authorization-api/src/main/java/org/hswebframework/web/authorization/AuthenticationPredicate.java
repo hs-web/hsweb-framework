@@ -18,7 +18,7 @@ public interface AuthenticationPredicate extends Predicate<Authentication> {
     }
 
     static AuthenticationPredicate dimension(String dimension, String... id) {
-        return autz -> autz.hasDimension(dimension, Arrays.asList(id));
+        return autz -> autz.hasAnyDimension(dimension, Arrays.asList(id));
     }
 
     static AuthenticationPredicate permission(String permissionId, String... actions) {
