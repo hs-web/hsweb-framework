@@ -12,6 +12,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+import javax.annotation.Nonnull;
+import java.io.Closeable;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -22,6 +24,8 @@ import java.util.stream.Collectors;
  * @author zhouhao
  */
 public class WebUserTokenInterceptor implements HandlerInterceptor {
+
+    static final String TOKEN_ATTR = WebUserTokenInterceptor.class.getName() + ".token";
 
     private final UserTokenManager userTokenManager;
 
@@ -84,14 +88,22 @@ public class WebUserTokenInterceptor implements HandlerInterceptor {
             }
             if (null != userToken) {
                 userTokenManager.touch(token).subscribe();
-                UserTokenHolder.setCurrent(userToken);
+                request.setAttribute(
+                    TOKEN_ATTR, UserTokenHolder.makeCurrent(userToken)
+                );
             }
         }
         return true;
     }
 
     @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-        UserTokenHolder.setCurrent(null);
+    public void afterCompletion(HttpServletRequest request,
+                                @Nonnull HttpServletResponse response,
+                                @Nonnull Object handler,
+                                Exception ex) throws Exception {
+        Object closable = request.getAttribute(TOKEN_ATTR);
+        if (closable instanceof Closeable c) {
+            c.close();
+        }
     }
 }

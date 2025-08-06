@@ -80,9 +80,9 @@
         <java.module.version>17</java.module.version>
         <project.build.jdk>${java.version}</project.build.jdk>
 
-        <spring.boot.version>3.4.0</spring.boot.version>
+        <spring.boot.version>3.4.8</spring.boot.version>
 
-        <javassist.version>3.30.1-GA</javassist.version>
+        <javassist.version>3.30.2-GA</javassist.version>
 
         <fastjson.version>1.2.83</fastjson.version>
         <h2.version>2.3.232</h2.version>
@@ -421,7 +421,7 @@
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
-                <version>32.0.0-jre</version>
+                <version>33.4.8-jre</version>
             </dependency>
 
             <dependency>
@@ -489,7 +489,13 @@
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-collections4</artifactId>
-                <version>4.4</version>
+                <version>4.5.0</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>3.18.0</version>
             </dependency>
 
             <dependency>
