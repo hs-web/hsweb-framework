@@ -9,6 +9,7 @@ import java.util.function.Function;
 /**
  * @since 4.0.0
  */
+@Deprecated
 public class ContextUtils {
 
     private static final ThreadLocal<Context> contextThreadLocal = ThreadLocal.withInitial(MapContext::new);

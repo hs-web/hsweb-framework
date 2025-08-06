@@ -1,8 +1,6 @@
 package org.hswebframework.web.authorization.token;
 
 import org.hswebframework.web.authorization.*;
-import org.hswebframework.web.context.ContextKey;
-import org.hswebframework.web.context.ContextUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import reactor.core.publisher.Mono;
 
@@ -65,13 +63,14 @@ public class UserTokenAuthenticationSupplier implements AuthenticationSupplier {
     @Override
     public Optional<Authentication> get() {
 
-        return ContextUtils.currentContext()
-                .get(ContextKey.of(ParsedToken.class))
-                .map(t -> userTokenManager.getByToken(t.getToken()))
-                .map(tokenMono -> tokenMono
-                        .map(token -> get(thirdPartAuthenticationManager.get(token.getType()), token.getUserId()))
-                        .flatMap(Mono::justOrEmpty))
-                .flatMap(Mono::blockOptional);
+
+        return Optional
+            .ofNullable(UserTokenHolder.currentToken())
+            .map(t -> userTokenManager.getByToken(t.getToken()))
+            .map(tokenMono -> tokenMono
+                .map(token -> get(thirdPartAuthenticationManager.get(token.getType()), token.getUserId()))
+                .flatMap(Mono::justOrEmpty))
+            .flatMap(Mono::blockOptional);
 
     }
 }

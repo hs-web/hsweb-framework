@@ -1,11 +1,10 @@
 package org.hswebframework.web.datasource.switcher;
 
 import lombok.extern.slf4j.Slf4j;
-import org.hswebframework.web.context.ContextKey;
-import org.hswebframework.web.context.ContextUtils;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.context.Context;
 
 import java.util.Collection;
 import java.util.Deque;
@@ -16,44 +15,52 @@ import java.util.function.Function;
 @Slf4j
 public class DefaultReactiveSwitcher implements ReactiveSwitcher {
 
-    private String name;
+    private final String name;
 
-    private String defaultId;
+    private final String defaultId;
 
-    private String type;
+    private final String type;
 
-    public DefaultReactiveSwitcher(String name,String type) {
+    public DefaultReactiveSwitcher(String name, String type) {
         this.name = "ReactiveSwitcher.".concat(name);
         this.defaultId = name.concat(".").concat("_default");
-        this.type=type;
+        this.type = type;
     }
 
     @Deprecated
     private <R> Mono<R> doInContext(Function<Deque<String>, Mono<R>> function) {
-        return ContextUtils.reactiveContext()
-                .map(ctx -> ctx.getOrDefault(ContextKey.<Deque<String>>of(this.name), LinkedList::new))
-                .flatMap(function);
+
+        return Mono
+            .deferContextual(ctx -> function.apply(ctx
+                                                       .<Deque<String>>getOrEmpty(this.name)
+                                                       .orElseGet(LinkedList::new)));
     }
 
     @SuppressWarnings("all")
-    private <R extends Publisher<?>> R  doInContext(R publisher, Consumer<Deque<String>> consumer) {
+    private <R extends Publisher<?>> R doInContext(R publisher, Consumer<Deque<String>> consumer) {
         if (publisher instanceof Mono) {
-            return (R)((Mono<?>) publisher)
-                    .contextWrite(ContextUtils.acceptContext(ctx -> {
-                        consumer.accept(ctx.getOrDefault(ContextKey.<Deque<String>>of(this.name), LinkedList::new));
-                    }));
+            return (R) Mono
+                .deferContextual(ctx -> {
+                    Deque<String> deque = ctx.<Deque<String>>getOrEmpty(this.name).orElseGet(LinkedList::new);
+                    consumer.accept(deque);
+                    return ((Mono<R>) publisher)
+                        .contextWrite(Context.of(name, deque));
+                });
         } else if (publisher instanceof Flux) {
-            return (R)((Flux<?>) publisher)
-                    .contextWrite(ContextUtils.acceptContext(ctx -> {
-                        consumer.accept(ctx.getOrDefault(ContextKey.<Deque<String>>of(this.name), LinkedList::new));
-                    }));
+            return (R) Flux
+                .deferContextual(ctx -> {
+                    Deque<String> deque = ctx.<Deque<String>>getOrEmpty(this.name).orElseGet(LinkedList::new);
+                    consumer.accept(deque);
+                    return ((Flux<R>) publisher)
+                        .contextWrite(Context.of(name, deque));
+                });
         }
         return publisher;
     }
 
     @Override
-    public <P extends Publisher<?>> P  useLast(P publisher) {
-        return doInContext(publisher,queue -> {
+    public <P extends Publisher<?>> P useLast(P publisher) {
+        return doInContext(publisher, queue -> {
             // 没有上一次了
             if (queue.isEmpty()) {
                 return;
@@ -66,16 +73,16 @@ public class DefaultReactiveSwitcher implements ReactiveSwitcher {
 
     @Override
     public <P extends Publisher<?>> P use(P publisher, String id) {
-        return doInContext(publisher,queue-> queue.addLast(id));
+        return doInContext(publisher, queue -> queue.addLast(id));
     }
 
     @Override
-    public <P extends Publisher<?>> P  useDefault(P publisher) {
-        return  use(publisher,defaultId);
+    public <P extends Publisher<?>> P useDefault(P publisher) {
+        return use(publisher, defaultId);
     }
 
     @Override
-    public <P extends Publisher<?>> P  reset(P publisher) {
+    public <P extends Publisher<?>> P reset(P publisher) {
         return doInContext(publisher, Collection::clear);
     }
 

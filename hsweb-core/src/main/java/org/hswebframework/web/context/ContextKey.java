@@ -5,6 +5,7 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
+@Deprecated
 public final class ContextKey<T> {
 
     private final String key;

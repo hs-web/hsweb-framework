@@ -1,8 +1,7 @@
 package org.hswebframework.web.datasource.switcher;
 
 import lombok.extern.slf4j.Slf4j;
-import org.hswebframework.web.context.ContextKey;
-import org.hswebframework.web.context.ContextUtils;
+import org.hswebframework.web.context.ContextHolder;
 
 
 import java.util.Deque;
@@ -26,8 +25,10 @@ public class DefaultSwitcher implements Switcher {
 
     protected Deque<String> getUsedHistoryQueue() {
         // 从ThreadLocal中获取一个使用记录
-        return ContextUtils.currentContext()
-                .<Deque<String>>getOrDefault(ContextKey.of(name), LinkedList::new);
+        return ContextHolder
+            .current()
+            .<Deque<String>>getOrEmpty(name)
+            .orElseGet(LinkedList::new);
     }
 
     @Override
