@@ -121,11 +121,10 @@ public class ResponseMessageWrapperAdvice implements ResponseBodyAdvice<Object> 
 
         Method method = returnType.getMethod();
 
-        if (method != null && returnType.getMethod().getReturnType() == String.class) {
+        if (body instanceof String) {
             return mapper
                 .writeValueAsString(ResponseMessage.ok(body));
         }
-
         return ResponseMessage.ok(body);
     }
 
