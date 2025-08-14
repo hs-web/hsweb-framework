@@ -67,10 +67,10 @@ import java.util.List;
  * @param <E> 实体类型
  * @param <K> 主键类型
  * @author hsweb-generator
- * @since 4.0
  * @see CrudService
  * @see QueryParamEntity
  * @see PagerResult
+ * @since 4.0
  */
 public interface ServiceQueryController<E, K> {
 
@@ -111,12 +111,12 @@ public interface ServiceQueryController<E, K> {
     @GetMapping("/_query/no-paging")
     @QueryAction
     @QueryOperation(summary = "使用GET方式分页动态查询(不返回总数)",
-            description = "此操作不返回分页总数,如果需要获取全部数据,请设置参数paging=false")
+        description = "此操作不返回分页总数,如果需要获取全部数据,请设置参数paging=false")
     default List<E> query(@Parameter(hidden = true) QueryParamEntity query) {
         return getService()
-                .createQuery()
-                .setParam(query)
-                .fetch();
+            .createQuery()
+            .setParam(query)
+            .fetch();
     }
 
     /**
@@ -157,7 +157,7 @@ public interface ServiceQueryController<E, K> {
     @PostMapping("/_query/no-paging")
     @QueryAction
     @Operation(summary = "使用POST方式分页动态查询(不返回总数)",
-            description = "此操作不返回分页总数,如果需要获取全部数据,请设置参数paging=false")
+        description = "此操作不返回分页总数,如果需要获取全部数据,请设置参数paging=false")
     default List<E> postQuery(@RequestBody QueryParamEntity query) {
         return this.query(query);
     }
@@ -191,23 +191,23 @@ public interface ServiceQueryController<E, K> {
     default PagerResult<E> queryPager(@Parameter(hidden = true) QueryParamEntity query) {
         if (query.getTotal() != null) {
             return PagerResult
-                    .of(query.getTotal(),
-                        getService()
-                                .createQuery()
-                                .setParam(query.rePaging(query.getTotal()))
-                                .fetch(), query)
-                    ;
+                .of(query.getTotal(),
+                    getService()
+                        .createQuery()
+                        .setParam(query.rePaging(query.getTotal()))
+                        .fetch(), query)
+                ;
         }
         int total = getService().createQuery().setParam(query.clone()).count();
         if (total == 0) {
             return PagerResult.of(0, Collections.emptyList(), query);
         }
         return PagerResult
-                .of(total,
-                    getService()
-                            .createQuery()
-                            .setParam(query.rePaging(total))
-                            .fetch(), query);
+            .of(total,
+                getService()
+                    .createQuery()
+                    .setParam(query.rePaging(total))
+                    .fetch(), query);
     }
 
     /**
@@ -242,7 +242,7 @@ public interface ServiceQueryController<E, K> {
     @QueryAction
     @Operation(summary = "使用POST方式查询总数")
     default int postCount(@RequestBody QueryParamEntity query) {
-         return this.count(query);
+        return this.count(query);
     }
 
     /**
@@ -264,16 +264,16 @@ public interface ServiceQueryController<E, K> {
     @QueryNoPagingOperation(summary = "使用GET方式查询总数")
     default int count(@Parameter(hidden = true) QueryParamEntity query) {
         return getService()
-                .createQuery()
-                .setParam(query)
-                .count();
+            .createQuery()
+            .setParam(query)
+            .count();
     }
 
     /**
      * 根据ID查询单个实体
      *
      * <p>通过主键ID精确查询单个实体对象。</p>
-     * <p>如果指定ID的记录不存在，将抛出{@link NotFoundException}异常。</p>
+     * <p>如果指定ID的记录不存在，将抛出{@link NotFoundException}异常。返回404错误</p>
      *
      * <p>URL示例：</p>
      * <pre>
@@ -289,16 +289,16 @@ public interface ServiceQueryController<E, K> {
      *
      * @param id 实体的主键ID，不能为null
      * @return 查询到的实体对象
-     * @throws NotFoundException 当指定ID的记录不存在时抛出
+     * @throws NotFoundException        当指定ID的记录不存在时抛出
      * @throws IllegalArgumentException 当id参数为null时抛出
      */
     @GetMapping("/{id:.+}")
     @QueryAction
     @Operation(summary = "根据ID查询")
     default E getById(@PathVariable K id) {
-       return getService()
-                .findById(id)
-               .orElseThrow(NotFoundException::new);
+        return getService()
+            .findById(id)
+            .orElseThrow(NotFoundException.NoStackTrace::new);
     }
 
 }
