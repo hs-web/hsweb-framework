@@ -52,7 +52,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * @see org.hswebframework.web.authorization.events.AuthorizingHandleBeforeEvent
  * @since 4.0
  */
-@Target({ElementType.ANNOTATION_TYPE, ElementType.METHOD, ElementType.TYPE})
+@Target({ElementType.ANNOTATION_TYPE, ElementType.METHOD,ElementType.FIELD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
