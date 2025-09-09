@@ -2,22 +2,24 @@ package org.hswebframework.web.recycler;
 
 import io.netty.util.concurrent.FastThreadLocal;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jctools.queues.MpmcArrayQueue;
 import reactor.core.scheduler.Schedulers;
 import reactor.function.Function6;
 
 import java.util.Queue;
+import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+@Slf4j
 class RecyclerImpl<T> extends FastThreadLocal<RecyclerImpl.ThreadLocalRecyclable<T>> implements Recycler<T> {
 
     private final Supplier<T> factory;
     private final Consumer<T> rest;
 
     private final Queue<T> queue;
-    private final int maxSize;
 
     public RecyclerImpl(int size, Supplier<T> factory, Consumer<T> rest) {
         if (size < 2) {
@@ -32,18 +34,25 @@ class RecyclerImpl<T> extends FastThreadLocal<RecyclerImpl.ThreadLocalRecyclable
 
         this.factory = factory;
         this.rest = rest;
-        this.maxSize = size;
         this.queue = new MpmcArrayQueue<>(size);
     }
 
     @Override
     protected ThreadLocalRecyclable<T> initialValue() throws Exception {
-        return new ThreadLocalRecyclable<T>(factory.get(), false);
+        return new ThreadLocalRecyclable<T>(this, factory.get(), null);
     }
 
     @Override
     protected void onRemoval(ThreadLocalRecyclable<T> value) {
         rest.accept(value.value);
+    }
+
+    private void doReset(T val) {
+        try {
+            rest.accept(val);
+        } catch (Throwable e) {
+            log.warn("reset object [{}] failed", val, e);
+        }
     }
 
     @Override
@@ -52,33 +61,25 @@ class RecyclerImpl<T> extends FastThreadLocal<RecyclerImpl.ThreadLocalRecyclable
         if (Schedulers.isInNonBlockingThread()) {
             ThreadLocalRecyclable<T> ref = this.get();
             // 使用中,回调里又执行了?
-            if (!ref.using) {
+            if (ref.use()) {
                 try {
-                    ref.using = true;
                     return call.apply(ref.value, arg0, arg1, arg2, arg3, arg4);
                 } finally {
-                    ref.using = false;
-                    rest.accept(ref.value);
+                    doReset(ref.value);
+                    ref.recycle();
                 }
             }
         }
         // 在阻塞线程中,使用队列的方式,防止在虚拟线程等场景下创建大量对象导致性能反而降低.
         T t = queue.poll();
-        boolean recycle = true;
         if (t == null) {
             t = factory.get();
-            // 如果队列已满，不回收新创建的对象
-            if (queue.size() >= maxSize) {
-                recycle = false;
-            }
         }
         try {
             return call.apply(t, arg0, arg1, arg2, arg3, arg4);
         } finally {
-            rest.accept(t);
-            if (recycle) {
-                queue.offer(t);
-            }
+            doReset(t);
+            queue.offer(t);
         }
     }
 
@@ -88,21 +89,43 @@ class RecyclerImpl<T> extends FastThreadLocal<RecyclerImpl.ThreadLocalRecyclable
         // 同步的,尝试使用ThreadLocal
         if (synchronous && Schedulers.isInNonBlockingThread()) {
             ThreadLocalRecyclable<T> ref = this.get();
-            if (!ref.using) {
-                ref.using = true;
-                return ref;
+            if (ref.use()) {
+                return new OnceRecyclable<>(ref);
             }
         }
         T t = queue.poll();
-        boolean recycle = true;
         if (t == null) {
             t = factory.get();
-            // 如果队列已满，不回收新创建的对象
-            if (queue.size() >= maxSize) {
-                recycle = false;
+        }
+        return new QueueRecyclable<>(this, t);
+    }
+
+    @AllArgsConstructor
+    static class OnceRecyclable<T> implements Recyclable<T> {
+        @SuppressWarnings("all")
+        static final AtomicReferenceFieldUpdater<OnceRecyclable, Recyclable>
+            REF = AtomicReferenceFieldUpdater.newUpdater(OnceRecyclable.class, Recyclable.class, "recyclable");
+
+        private volatile Recyclable<T> recyclable;
+
+        @Override
+        public T get() {
+            @SuppressWarnings("unchecked")
+            Recyclable<T> recyclable = REF.get(this);
+            if (recyclable == null) {
+                throw new IllegalStateException("Object is recycled!");
+            }
+            return recyclable.get();
+        }
+
+        @Override
+        public void recycle() {
+            @SuppressWarnings("unchecked")
+            Recyclable<T> recyclable = REF.getAndSet(this, null);
+            if (recyclable != null) {
+                recyclable.recycle();
             }
         }
-        return new QueueRecyclable<>(this, recycle, t);
     }
 
     @AllArgsConstructor
@@ -112,7 +135,6 @@ class RecyclerImpl<T> extends FastThreadLocal<RecyclerImpl.ThreadLocalRecyclable
             VALUE = AtomicReferenceFieldUpdater.newUpdater(QueueRecyclable.class, Object.class, "value");
 
         final RecyclerImpl<T> main;
-        final boolean doRecycle;
         volatile T value;
 
         @Override
@@ -130,27 +152,40 @@ class RecyclerImpl<T> extends FastThreadLocal<RecyclerImpl.ThreadLocalRecyclable
             @SuppressWarnings("all")
             T val = (T) VALUE.getAndSet(this, null);
             if (val != null) {
-                main.rest.accept(val);
-                if (doRecycle) {
-                    main.queue.offer(val);
-                }
+                main.doReset(val);
+                main.queue.offer(val);
             }
         }
     }
 
     @AllArgsConstructor
-   static class ThreadLocalRecyclable<T> implements Recyclable<T> {
-        private T value;
-        private boolean using;
+    static class ThreadLocalRecyclable<T> implements Recyclable<T> {
+        @SuppressWarnings("all")
+        static final AtomicReferenceFieldUpdater<ThreadLocalRecyclable, Thread>
+            USING = AtomicReferenceFieldUpdater.newUpdater(ThreadLocalRecyclable.class, Thread.class, "using");
+        private final RecyclerImpl<T> main;
+        private final T value;
+        private volatile Thread using;
 
         @Override
         public T get() {
             return value;
         }
 
+        boolean use() {
+            return USING.compareAndSet(this, null, Thread.currentThread());
+        }
+
         @Override
         public void recycle() {
-            using = false;
+            main.doReset(value);
+            Thread current = Thread.currentThread();
+            Thread hold = USING.getAndSet(this, null);
+            if (hold != null) {
+                if (hold != current) {
+                    log.warn("Recycle object cross thread! request by {},recycle by {}", hold, current);
+                }
+            }
         }
     }
 }
