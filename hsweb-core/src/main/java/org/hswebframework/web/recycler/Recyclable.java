@@ -45,9 +45,9 @@ package org.hswebframework.web.recycler;
  *
  * @param <T> 被包装的对象类型
  * @author zhouhao
- * @since 5.0.1
  * @see Recycler
  * @see Recycler#take(boolean)
+ * @since 5.0.1
  */
 public interface Recyclable<T> extends AutoCloseable {
 
@@ -98,11 +98,9 @@ public interface Recyclable<T> extends AutoCloseable {
      *
      * <p>默认实现直接调用 {@link #recycle()} 方法，使得可以在 try-with-resources
      * 语句中自动回收对象。
-     *
-     * @throws Exception 如果回收过程中发生异常
      */
     @Override
-    default void close() throws Exception {
+    default void close() {
         recycle();
     }
 }

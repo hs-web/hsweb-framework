@@ -1,9 +1,6 @@
 package org.hswebframework.web.recycler;
 
-import reactor.function.Function3;
-import reactor.function.Function4;
-import reactor.function.Function5;
-import reactor.function.Function6;
+import reactor.function.*;
 
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
