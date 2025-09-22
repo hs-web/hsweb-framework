@@ -80,7 +80,8 @@
         <java.module.version>17</java.module.version>
         <project.build.jdk>${java.version}</project.build.jdk>
 
-        <spring.boot.version>3.4.8</spring.boot.version>
+        <spring.boot.version>3.4.9</spring.boot.version>
+        <spring.framework.version>6.2.10</spring.framework.version>
 
         <javassist.version>3.30.2-GA</javassist.version>
 
@@ -380,6 +381,14 @@
             <!--                <artifactId>spring-boot-starter-data-r2dbc</artifactId>-->
             <!--                <version>2.3.3.RELEASE</version>-->
             <!--            </dependency>-->
+
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-framework-bom</artifactId>
+                <version>${spring.framework.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
 
             <dependency>
                 <groupId>com.google.code.findbugs</groupId>

@@ -8,7 +8,7 @@ import lombok.Setter;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.hswebframework.ezorm.rdb.mapping.annotation.Comment;
 import org.hswebframework.ezorm.rdb.mapping.annotation.DefaultValue;
-import org.hswebframework.web.api.crud.entity.GenericEntity;
+import org.hswebframework.web.api.crud.entity.ExtendableEntity;
 import org.hswebframework.web.api.crud.entity.RecordCreationEntity;
 import org.hswebframework.web.bean.ToString;
 import org.hswebframework.web.validator.CreateGroup;
@@ -34,7 +34,7 @@ import jakarta.validation.constraints.NotBlank;
         indexes = @Index(name = "user_username_idx", columnList = "username", unique = true)
 )
 @Comment("用户信息")
-public class UserEntity extends GenericEntity<String> implements RecordCreationEntity {
+public class UserEntity extends ExtendableEntity<String> implements RecordCreationEntity {
 
     @Column(length = 128, nullable = false)
     @NotBlank(message = "姓名不能为空", groups = CreateGroup.class)
