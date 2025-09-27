@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Authorize
 @Resource(id = "dimension", name = "权限维度管理", group = "system")
 @Tag(name = "权限维度管理")
+@Deprecated
 public class WebFluxDimensionController implements ReactiveServiceCrudController<DimensionEntity, String>
         , ReactiveTreeServiceQueryController<DimensionEntity, String> {
 

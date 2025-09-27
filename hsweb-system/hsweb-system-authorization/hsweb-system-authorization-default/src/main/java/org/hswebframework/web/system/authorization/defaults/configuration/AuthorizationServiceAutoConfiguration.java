@@ -5,25 +5,34 @@ import org.hswebframework.web.authorization.ReactiveAuthenticationInitializeServ
 import org.hswebframework.web.authorization.ReactiveAuthenticationManagerProvider;
 import org.hswebframework.web.authorization.define.AuthorizeDefinitionCustomizer;
 import org.hswebframework.web.authorization.define.CompositeAuthorizeDefinitionCustomizer;
-import org.hswebframework.web.authorization.simple.DefaultAuthorizationAutoConfiguration;
 import org.hswebframework.web.authorization.token.UserTokenManager;
-import org.hswebframework.web.system.authorization.api.UserDimensionProvider;
 import org.hswebframework.web.system.authorization.api.entity.PermissionEntity;
 import org.hswebframework.web.system.authorization.api.service.reactive.ReactiveUserService;
 import org.hswebframework.web.system.authorization.defaults.service.*;
 import org.hswebframework.web.system.authorization.defaults.service.terms.DimensionTerm;
 import org.hswebframework.web.system.authorization.defaults.service.terms.UserDimensionTerm;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 
+@EnableConfigurationProperties({AuthenticationInitializeProperties.class})
 @AutoConfiguration
 public class AuthorizationServiceAutoConfiguration {
+
+    @Bean
+    public SmartInitializingSingleton authenticationInitializeCustomizerExecutor(AuthenticationInitializeProperties properties,
+                                                                                 ObjectProvider<AuthenticationInitializeCustomizer> customizers) {
+        return () -> {
+            for (AuthenticationInitializeCustomizer customizer : customizers) {
+                customizer.customize(properties);
+            }
+        };
+    }
 
     @AutoConfiguration
     public static class ReactiveAuthorizationServiceAutoConfiguration {
@@ -80,7 +89,7 @@ public class AuthorizationServiceAutoConfiguration {
 
         @Bean
         @ConditionalOnBean(UserTokenManager.class)
-        public RemoveUserTokenWhenUserDisabled removeUserTokenWhenUserDisabled(UserTokenManager tokenManager){
+        public RemoveUserTokenWhenUserDisabled removeUserTokenWhenUserDisabled(UserTokenManager tokenManager) {
             return new RemoveUserTokenWhenUserDisabled(tokenManager);
         }
     }
@@ -91,11 +100,12 @@ public class AuthorizationServiceAutoConfiguration {
     }
 
     @Bean
-    public DimensionTerm dimensionTerm(){
+    public DimensionTerm dimensionTerm() {
         return new DimensionTerm();
     }
+
     @Bean
-    public PermissionProperties permissionProperties(){
+    public PermissionProperties permissionProperties() {
         return new PermissionProperties();
     }
 }

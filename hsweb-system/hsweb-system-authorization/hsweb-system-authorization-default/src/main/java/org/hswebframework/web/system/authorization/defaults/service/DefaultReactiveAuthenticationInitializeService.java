@@ -1,14 +1,13 @@
 package org.hswebframework.web.system.authorization.defaults.service;
 
+import com.google.common.cache.CacheBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hswebframework.ezorm.rdb.mapping.ReactiveRepository;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.Dimension;
-import org.hswebframework.web.authorization.Permission;
 import org.hswebframework.web.authorization.ReactiveAuthenticationInitializeService;
 import org.hswebframework.web.authorization.access.DataAccessConfig;
-import org.hswebframework.web.authorization.access.DataAccessType;
 import org.hswebframework.web.authorization.builder.DataAccessConfigBuilderFactory;
 import org.hswebframework.web.authorization.events.AuthorizationInitializeEvent;
 import org.hswebframework.web.authorization.simple.SimpleAuthentication;
@@ -23,12 +22,14 @@ import org.hswebframework.web.system.authorization.api.entity.UserEntity;
 import org.hswebframework.web.system.authorization.api.service.reactive.ReactiveUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
+import java.time.Duration;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -55,7 +56,20 @@ public class DefaultReactiveAuthenticationInitializeService
     @Autowired
     private ApplicationEventPublisher eventPublisher;
 
+    @Autowired
+    private AuthenticationInitializeProperties properties;
+
+
+    private Mono<Map<String, PermissionEntity>> allPermissionCache;
+
+    private final Map<Tuple2<String, Collection<String>>, Flux<AuthorizationSettingEntity>> settingCache =
+        CacheBuilder.newBuilder()
+                    .expireAfterAccess(Duration.ofSeconds(10))
+                    .<Tuple2<String, Collection<String>>, Flux<AuthorizationSettingEntity>>build()
+                    .asMap();
+
     @Override
+    @Transactional
     public Mono<Authentication> initUserAuthorization(String userId) {
         return doInit(userService.findById(userId));
     }
@@ -88,17 +102,29 @@ public class DefaultReactiveAuthenticationInitializeService
     }
 
     protected Flux<AuthorizationSettingEntity> getSettings(List<Dimension> dimensions) {
-        return Flux.fromIterable(dimensions)
-                   .filter(dimension -> dimension.getType() != null)
-                   .groupBy(d -> d.getType().getId(), (Function<Dimension, Object>) Dimension::getId)
-                   .flatMap(group ->
-                                group.collectList()
-                                     .flatMapMany(list -> settingRepository
-                                         .createQuery()
-                                         .where(AuthorizationSettingEntity::getState, 1)
-                                         .and(AuthorizationSettingEntity::getDimensionType, group.key())
-                                         .in(AuthorizationSettingEntity::getDimensionTarget, list)
-                                         .fetch()));
+        return Flux
+            .fromIterable(dimensions)
+            .filter(dimension -> dimension.getType() != null
+                && properties.isDimensionEnabled(dimension.getType().getId()))
+            .groupBy(d -> d.getType().getId(), Dimension::getId)
+            .flatMap(group ->
+                         group.buffer(200)
+                              .sort()
+                              .concatMap(list -> findSettings(group.key(), list)));
+    }
+
+    protected Flux<AuthorizationSettingEntity> findSettings(String type, List<String> target) {
+        return settingCache
+            .computeIfAbsent(
+                Tuples.of(type, target),
+                tp2 -> settingRepository
+                    .createQuery()
+                    .where(AuthorizationSettingEntity::getState, 1)
+                    .and(AuthorizationSettingEntity::getDimensionType, tp2.getT1())
+                    .in(AuthorizationSettingEntity::getDimensionTarget, tp2.getT2())
+                    .fetch()
+                    .cache(Duration.ofSeconds(1))
+            );
     }
 
     protected Mono<Authentication> initPermission(SimpleAuthentication authentication) {
@@ -108,18 +134,28 @@ public class DefaultReactiveAuthenticationInitializeService
                    //去重?还是合并?
                    .distinct(dis -> Tuples.of(dis.getType().getId(), dis.getId()))
                    .doOnNext(authentication::addDimension)
-                   .collectList()
-                   .then(Mono.defer(() -> Mono
-                       .zip(getAllPermission(),
-                            getSettings(authentication.getDimensions()).collect(Collectors.groupingBy(AuthorizationSettingEntity::getPermission)),
-                            (_p, _s) -> handlePermission(authentication, _p, _s)
-                       )));
+//                   .collectList()
+                   .then(Mono.defer(() -> this
+                       .getSettings(authentication.getDimensions())
+                       .collect(Collectors.groupingBy(AuthorizationSettingEntity::getPermission))
+                       .flatMap(_s -> {
+                           // 没有任何setting,则直接返回
+                           if (_s.isEmpty()) {
+                               return Mono.just(authentication);
+                           } else {
+                               return getAllPermission()
+                                   .map(_p -> handlePermission(authentication, _p, _s));
+                           }
+                       })));
 
     }
 
     protected SimpleAuthentication handlePermission(SimpleAuthentication authentication,
                                                     Map<String, PermissionEntity> permissions,
                                                     Map<String, List<AuthorizationSettingEntity>> settings) {
+        if (settings.isEmpty()) {
+            return authentication;
+        }
         Map<String, PermissionEntity> permissionMap = new HashMap<>();
         Map<String, SimplePermission> allowed = new HashMap<>();
         try {
@@ -206,14 +242,20 @@ public class DefaultReactiveAuthenticationInitializeService
         return authentication;
     }
 
-    protected Mono<Map<String, PermissionEntity>> getAllPermission() {
 
-        return permissionRepository
-            .createQuery()
-            .where(PermissionEntity::getStatus, 1)
-            .fetch()
-            .collect(Collectors.toMap(PermissionEntity::getId, Function.identity()))
-            .switchIfEmpty(Mono.just(Collections.emptyMap()));
+    protected Mono<Map<String, PermissionEntity>> getAllPermission() {
+        Mono<Map<String, PermissionEntity>> allPermissionCache = this.allPermissionCache;
+        if (allPermissionCache == null) {
+            return this.allPermissionCache = Mono
+                .defer(() -> permissionRepository
+                    .createQuery()
+                    .where(PermissionEntity::getStatus, 1)
+                    .fetch()
+                    .collect(Collectors.toMap(PermissionEntity::getId, Function.identity()))
+                    .switchIfEmpty(Mono.just(Collections.emptyMap())))
+                .cache(Duration.ofSeconds(1));
+        }
+        return allPermissionCache;
     }
 
 }
