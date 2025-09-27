@@ -43,7 +43,7 @@ public class DefaultReactiveAuthenticationManager implements ReactiveAuthenticat
                         .getCache("user-auth")
                         .evictAll(event.getUserId())
                         .doOnError(err -> log.error(err.getMessage(), err))
-                        .doOnSuccess(__ -> log.info("clear user {} authentication cache success", event.getUserId()));
+                        .doOnSuccess(__ -> log.debug("clear user {} authentication cache success", event.getUserId()));
             }
             if (event.isAsync()) {
                 event.first(operator);

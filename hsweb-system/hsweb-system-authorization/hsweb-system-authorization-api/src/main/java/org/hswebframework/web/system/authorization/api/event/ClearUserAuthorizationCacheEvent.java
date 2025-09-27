@@ -50,6 +50,11 @@ public class ClearUserAuthorizationCacheEvent extends DefaultAsyncEvent {
         super.async(doOnEnabled(Mono.fromDirect(publisher).then()));
     }
 
+    @Override
+    public synchronized void first(Publisher<?> publisher) {
+        super.first(doOnEnabled(Mono.fromDirect(publisher).then()));
+    }
+
     public static ClearUserAuthorizationCacheEvent of(Collection<String> collection) {
         ClearUserAuthorizationCacheEvent event = new ClearUserAuthorizationCacheEvent();
         if (collection == null || collection.isEmpty()) {
