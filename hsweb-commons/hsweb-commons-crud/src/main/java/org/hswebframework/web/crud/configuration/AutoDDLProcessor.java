@@ -120,8 +120,11 @@ public class AutoDDLProcessor implements InitializingBean {
             if (table == null) {
                 SqlRequest request = schema.findFeatureNow(CreateTableSqlBuilder.ID).build(metadata);
                 log.info("DDL SQL for {} \n{}", entity, request.toNativeSql());
+                schema.addTable(metadata);
+            }else {
+                table.merge(metadata);
             }
-            schema.addTable(metadata);
+
         }
     }
 }
