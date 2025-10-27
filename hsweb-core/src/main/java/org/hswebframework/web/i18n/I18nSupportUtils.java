@@ -14,7 +14,8 @@ public class I18nSupportUtils {
                                                                    String property,
                                                                    Collection<Locale> locales,
                                                                    String defaultMsg,
-                                                                   Map<String, Map<String, String>> container) {
+                                                                   Map<String, Map<String, String>> container,
+                                                                   Object... args) {
         if (container == null) {
             container = new HashMap<>();
         }
@@ -22,7 +23,7 @@ public class I18nSupportUtils {
         container.compute(
             property,
             (p, c) -> {
-                Map<String, String> msg = putI18nMessages(i18nKey, locales, defaultMsg, c);
+                Map<String, String> msg = putI18nMessages(i18nKey, locales, defaultMsg, c, args);
                 //为空不存储
                 return MapUtils.isEmpty(msg) ? null : msg;
             });
@@ -30,22 +31,39 @@ public class I18nSupportUtils {
         return container;
     }
 
+    public static Map<String, Map<String, String>> putI18nMessages(String i18nKey,
+                                                                   String property,
+                                                                   Collection<Locale> locales,
+                                                                   String defaultMsg,
+                                                                   Map<String, Map<String, String>> container) {
+        return putI18nMessages(i18nKey, property, locales, defaultMsg, container, new Object[0]);
+    }
+
     public static Map<String, String> putI18nMessages(String i18nKey,
                                                       Collection<Locale> locales,
                                                       String defaultMsg,
-                                                      Map<String, String> container) {
+                                                      Map<String, String> container,
+                                                      Object... args) {
         if (container == null) {
             container = new HashMap<>();
         }
 
         for (Locale locale : locales) {
-            String msg = LocaleUtils.resolveMessage(i18nKey, locale, defaultMsg);
+            String msg = LocaleUtils.resolveMessage(i18nKey, locale, defaultMsg, args);
             if (StringUtils.hasText(msg)) {
                 container.put(locale.toString(), msg);
             }
         }
 
         return container;
+    }
+
+
+    public static Map<String, String> putI18nMessages(String i18nKey,
+                                                      Collection<Locale> locales,
+                                                      String defaultMsg,
+                                                      Map<String, String> container) {
+        return putI18nMessages(i18nKey, locales, defaultMsg, container, new Object[0]);
     }
 
 
