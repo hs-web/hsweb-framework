@@ -3,6 +3,7 @@ package org.hswebframework.web.file.service;
 import org.springframework.http.codec.multipart.FilePart;
 import reactor.core.publisher.Mono;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 /**
