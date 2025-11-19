@@ -86,7 +86,7 @@ public class AopAccessLoggerSupport extends StaticMethodMatcherPointcutAdvisor {
             info.setHttpHeaders(WebUtils.getHeaders(request));
             info.setIp(WebUtils.getIpAddr(request));
             info.setHttpMethod(request.getMethod());
-            info.setUrl(request.getRequestURL().toString());
+            info.setUrl(request.getRequestURI().toString());
         }
         return info;
 
