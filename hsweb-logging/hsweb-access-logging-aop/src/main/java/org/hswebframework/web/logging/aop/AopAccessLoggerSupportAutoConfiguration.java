@@ -43,14 +43,6 @@ public class AopAccessLoggerSupportAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnClass(name = "io.swagger.annotations.Api")
-    @Order(10)
-    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
-    public SwaggerAccessLoggerParser swaggerAccessLoggerParser() {
-        return new SwaggerAccessLoggerParser();
-    }
-
-    @Bean
     @ConditionalOnClass(name = "io.swagger.v3.oas.annotations.tags.Tag")
     @Order(1)
     @Role(BeanDefinition.ROLE_INFRASTRUCTURE)

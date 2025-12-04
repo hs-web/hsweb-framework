@@ -1,4 +1,4 @@
-# hsweb4 基于spring-boot2,全响应式的后台管理框架
+# hsweb4 基于spring-boot3,全响应式的后台管理框架
 
 [![Codecov](https://codecov.io/gh/hs-web/hsweb-framework/branch/4.0.x/graph/badge.svg)](https://codecov.io/gh/hs-web/hsweb-framework/branch/master)
 [![Build Status](https://api.travis-ci.com/hs-web/hsweb-framework.svg?branch=4.0.x)](https://travis-ci.com/hs-web/hsweb-framework)
@@ -50,9 +50,9 @@ https://github.com/zhou-hao/hsweb4-examples
 
 ## 核心技术选型
 
-1. Java 8
+1. Java 17
 2. Maven3
-3. Spring Boot 2.x
+3. Spring Boot 3.x
 4. Project Reactor 响应式编程框架
 5. hsweb easy orm 对r2dbc的orm封装
 

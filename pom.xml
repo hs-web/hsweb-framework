@@ -87,16 +87,11 @@
 
         <fastjson.version>1.2.83</fastjson.version>
         <h2.version>2.3.232</h2.version>
-        <mysql.version>5.1.39</mysql.version>
-        <cglib.version>3.2.2</cglib.version>
         <aspectj.version>1.6.12</aspectj.version>
 
         <hsweb.ezorm.version>4.2.2-SNAPSHOT</hsweb.ezorm.version>
         <hsweb.utils.version>3.0.4</hsweb.utils.version>
         <hsweb.expands.version>3.0.2</hsweb.expands.version>
-        <swagger.version>2.7.0</swagger.version>
-
-        <r2dbc.version>Borca-SR2</r2dbc.version>
     </properties>
 
     <profiles>
@@ -135,7 +130,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>2.9.1</version>
+                        <version>3.6.0</version>
                         <configuration>
                             <additionalparam>-Xdoclint:none</additionalparam>
                         </configuration>
@@ -297,7 +292,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.22.0</version>
+                <version>3.2.5</version>
                 <configuration>
                     <includes>
                         <include>**/*Test.java</include>
@@ -453,13 +448,6 @@
             </dependency>
 
             <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>4.13.1</version>
-                <scope>test</scope>
-            </dependency>
-
-            <dependency>
                 <groupId>com.h2database</groupId>
                 <artifactId>h2</artifactId>
                 <version>${h2.version}</version>
@@ -469,12 +457,6 @@
                 <groupId>com.alibaba</groupId>
                 <artifactId>fastjson</artifactId>
                 <version>${fastjson.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>io.swagger</groupId>
-                <artifactId>swagger-annotations</artifactId>
-                <version>1.5.10</version>
             </dependency>
 
             <dependency>
