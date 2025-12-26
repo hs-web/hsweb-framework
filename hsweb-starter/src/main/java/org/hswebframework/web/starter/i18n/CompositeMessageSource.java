@@ -7,6 +7,8 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import jakarta.annotation.Nonnull;
+
+import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
@@ -25,15 +27,23 @@ public class CompositeMessageSource implements MessageSource {
         messageSources.add(source);
     }
 
+    private String formatMessage(String message, Object[] args, Locale locale) {
+        if (message == null || message.isBlank() || args == null || args.length == 0) {
+            return message;
+        }
+        MessageFormat messageFormat = new MessageFormat(message, locale);
+        return messageFormat.format(args);
+    }
+
     @Override
     public String getMessage(@Nonnull String code, Object[] args, String defaultMessage, @Nonnull Locale locale) {
         for (MessageSource messageSource : messageSources) {
             String result = messageSource.getMessage(code, args, null, locale);
             if (StringUtils.hasText(result)) {
-                return result;
+                return formatMessage(result, args, locale);
             }
         }
-        return defaultMessage;
+        return formatMessage(defaultMessage, args, locale);
     }
 
     @Override
@@ -43,7 +53,7 @@ public class CompositeMessageSource implements MessageSource {
             try {
                 String result = messageSource.getMessage(code, args, locale);
                 if (StringUtils.hasText(result)) {
-                    return result;
+                    return formatMessage(result, args, locale);
                 }
             } catch (NoSuchMessageException ignore) {
 
@@ -59,7 +69,7 @@ public class CompositeMessageSource implements MessageSource {
             try {
                 String result = messageSource.getMessage(resolvable, locale);
                 if (StringUtils.hasText(result)) {
-                    return result;
+                    return formatMessage(result, resolvable.getArguments(), locale);
                 }
             } catch (NoSuchMessageException ignore) {
 
