@@ -11,6 +11,7 @@ import org.hswebframework.ezorm.rdb.supports.opengauss.OpengaussDialect;
 import org.hswebframework.ezorm.rdb.supports.opengauss.OpengaussSchemaMetadata;
 import org.hswebframework.ezorm.rdb.supports.oracle.OracleSchemaMetadata;
 import org.hswebframework.ezorm.rdb.supports.postgres.PostgresqlSchemaMetadata;
+import org.hswebframework.ezorm.rdb.supports.kingbase.mysql.KingbaseMysqlSchemaMetadata;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.*;
@@ -110,10 +111,10 @@ public class EasyormProperties {
                 return new H2SchemaMetadata(name);
             }
         },
-        kingbase_mysql(Dialect.MYSQL, "$") {
+        kingbase_mysql(Dialect.KINGBASE_MYSQL, "$") {
             @Override
             public RDBSchemaMetadata createSchema(String name) {
-                return new MysqlSchemaMetadata(name);
+                return new KingbaseMysqlSchemaMetadata(name);
             }
         },
         opengauss(OpengaussDialect.global, "$") {
