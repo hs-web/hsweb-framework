@@ -59,8 +59,8 @@ public class WebFluxPermissionController implements ReactiveServiceCrudControlle
     }
 
     @GetMapping("/_query/for-grant")
-    @ResourceAction(id = "grant", name = "赋权")
-    @QueryNoPagingOperation(summary = "获取用于赋权的权限列表")
+    @Authorize(ignore = true)
+    @QueryNoPagingOperation(summary = "获取当前用户用于赋权的权限列表")
     public Flux<PermissionEntity> queryForGrant(QueryParamEntity query) {
         return Authentication
                 .currentReactive()
