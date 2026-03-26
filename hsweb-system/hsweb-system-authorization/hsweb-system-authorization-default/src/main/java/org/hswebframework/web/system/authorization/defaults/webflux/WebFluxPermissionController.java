@@ -10,6 +10,7 @@ import org.hswebframework.web.api.crud.entity.QueryOperation;
 import org.hswebframework.web.api.crud.entity.QueryParamEntity;
 import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.annotation.*;
+import org.hswebframework.web.authorization.exception.UnAuthorizedException;
 import org.hswebframework.web.crud.service.ReactiveCrudService;
 import org.hswebframework.web.crud.web.reactive.ReactiveServiceCrudController;
 import org.hswebframework.web.system.authorization.api.entity.PermissionEntity;
@@ -64,6 +65,7 @@ public class WebFluxPermissionController implements ReactiveServiceCrudControlle
     public Flux<PermissionEntity> queryForGrant(QueryParamEntity query) {
         return Authentication
                 .currentReactive()
+                .switchIfEmpty(Mono.error(UnAuthorizedException::new))
                 .flatMapMany(auth -> permissionProperties
                         .getFilter()
                         .doFilter(permissionService.query(query.noPaging()), auth));
