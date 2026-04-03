@@ -5,8 +5,6 @@ import lombok.SneakyThrows;
 import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
-import net.sf.jsqlparser.schema.Column;
-import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
 import net.sf.jsqlparser.statement.values.ValuesStatement;
 import org.apache.commons.collections4.CollectionUtils;
@@ -14,16 +12,21 @@ import org.hswebframework.ezorm.core.meta.FeatureSupportedMetadata;
 import org.hswebframework.ezorm.core.param.Sort;
 import org.hswebframework.ezorm.core.param.Term;
 import org.hswebframework.ezorm.rdb.executor.SqlRequest;
-import org.hswebframework.ezorm.rdb.metadata.*;
+import org.hswebframework.ezorm.rdb.metadata.RDBColumnMetadata;
+import org.hswebframework.ezorm.rdb.metadata.RDBSchemaMetadata;
+import org.hswebframework.ezorm.rdb.metadata.RDBViewMetadata;
+import org.hswebframework.ezorm.rdb.metadata.TableOrViewMetadata;
 import org.hswebframework.ezorm.rdb.metadata.dialect.Dialect;
 import org.hswebframework.ezorm.rdb.operator.DatabaseOperator;
 import org.hswebframework.ezorm.rdb.operator.builder.fragments.*;
+import org.hswebframework.ezorm.rdb.operator.builder.fragments.function.FunctionFragmentBuilder;
 import org.hswebframework.web.api.crud.entity.QueryParamEntity;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
 
+import static java.util.Optional.ofNullable;
 import static net.sf.jsqlparser.statement.select.PlainSelect.getFormatedList;
 import static org.hswebframework.ezorm.rdb.operator.builder.fragments.TermFragmentBuilder.createFeatureId;
 
@@ -1009,9 +1012,12 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
                         } else {
                             orderByColumn.addSql(",");
                         }
-                        //todo function支持
+                        SqlFragments fragments = ofNullable(sort.getType())
+                            .flatMap(function -> column.metadata.findFeature(FunctionFragmentBuilder.createFeatureId(function)))
+                            .map(builder -> builder.create(columnName, column.metadata, sort.getOpts()))
+                            .orElseGet(() -> PrepareSqlFragments.of(columnName));
                         orderByColumn
-                            .addSql(columnName)
+                            .add(fragments)
                             .addSql(desc ? "DESC" : "ASC");
                     }
                 }

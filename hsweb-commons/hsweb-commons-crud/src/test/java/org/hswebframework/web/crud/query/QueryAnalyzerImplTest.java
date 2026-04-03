@@ -3,6 +3,7 @@ package org.hswebframework.web.crud.query;
 import org.hswebframework.ezorm.rdb.executor.SqlRequest;
 import org.hswebframework.ezorm.rdb.executor.wrapper.ResultWrappers;
 import org.hswebframework.ezorm.rdb.operator.DatabaseOperator;
+import org.hswebframework.ezorm.core.param.Sort;
 import org.hswebframework.web.api.crud.entity.QueryParamEntity;
 import org.hswebframework.web.crud.TestApplication;
 import org.junit.Assert;
@@ -12,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import reactor.test.StepVerifier;
+
+import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -1091,6 +1094,56 @@ public class QueryAnalyzerImplTest {
         assertNotNull(analyzer.select().getColumns().get("total_id"));
         
         // 验证SQL可以执行
+        executeAndVerify(request);
+    }
+
+    @Test
+    public void testSort() {
+        QueryAnalyzerImpl analyzer = new QueryAnalyzerImpl(
+            database,
+            "select t.id, t.name from s_test t group by t.id, t.name");
+
+        QueryParamEntity param = QueryParamEntity.of();
+        param.setSorts(new ArrayList<>());
+
+        Sort sort = new Sort();
+        sort.setName("name");
+        sort.setOrder("desc");
+        param.getSorts().add(sort);
+
+        SqlRequest request = analyzer.refactor(param);
+        String sql = request.getSql().toLowerCase();
+
+        System.out.println(request);
+        assertTrue(sql.contains("order by t.\"name\" desc"));
+
+        executeAndVerify(request);
+    }
+
+    @Test
+    public void testCustomSortFunctionFallbackToColumn() {
+        QueryAnalyzerImpl analyzer = new QueryAnalyzerImpl(
+            database,
+            "select t.id, t.name from s_test t");
+
+        QueryParamEntity param = QueryParamEntity.of();
+        param.setSorts(new ArrayList<>());
+
+        Sort sort = new Sort();
+        sort.setName("name");
+        sort.setType("not_exists_function");
+        sort.setOrder("asc");
+        param.getSorts().add(sort);
+
+        SqlRequest request = analyzer.refactor(param);
+        String sql = request.getSql().toLowerCase();
+
+        System.out.println(request);
+        assertTrue(sql.contains("order by"));
+        assertFalse(sql.contains("not_exists_function("));
+        assertTrue(sql.contains("name"));
+        assertTrue(sql.contains("asc"));
+
         executeAndVerify(request);
     }
 }
