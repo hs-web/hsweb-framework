@@ -878,6 +878,8 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
         public void visit(WithItem withItem) {
             if (!StringUtils.hasText(prefix)) {
                 prefix += "WITH ";
+            } else {
+                prefix += ", ";
             }
             prefix += withItem;
             PrepareStatementVisitor visitor = new PrepareStatementVisitor();

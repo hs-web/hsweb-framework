@@ -772,32 +772,14 @@ public class QueryAnalyzerImplTest {
                 "LEFT JOIN cte2 ON cte1.id = cte2.id");
 
         SqlRequest request = analyzer
-            .refactor(QueryParamEntity.of().toQuery().and("name", "like", "test%").getParam(), 1, "test");
+            .refactor(QueryParamEntity.of().toQuery().and("name", "like", "test%").getParam(), "test", "test");
 
         System.out.println(request);
-        
-        // 多个CTE在某些情况下生成的SQL可能无法直接执行（CTE之间缺少逗号），只验证SQL生成
+
         assertNotNull(request.getSql(), "SQL should be generated");
         assertNotNull(request.getParameters(), "Parameters should be set");
-        // 如果生成的SQL语法正确，尝试执行
-        try {
-            executeAndVerify(request);
-        } catch (AssertionError e) {
-            // 如果是语法错误，只验证SQL已生成
-            if (e.getMessage() != null && e.getMessage().contains("Syntax error")) {
-                System.out.println("SQL generated but has syntax issue (CTE comma missing): " + e.getMessage());
-                return;
-            }
-            throw e;
-        } catch (Exception e) {
-            // 如果是语法错误，只验证SQL已生成
-            if (e.getMessage() != null && (e.getMessage().contains("Syntax error") || 
-                                         e.getMessage().contains("expected"))) {
-                System.out.println("SQL generated but has syntax issue (CTE comma missing): " + e.getMessage());
-                return;
-            }
-            throw e;
-        }
+        assertTrue(request.getSql().contains("), cte2 AS"), "multiple CTEs should be separated by comma");
+        executeAndVerify(request);
     }
 
     @Test
