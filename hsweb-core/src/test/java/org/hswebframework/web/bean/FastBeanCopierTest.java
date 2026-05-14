@@ -163,8 +163,9 @@ public class FastBeanCopierTest {
 
     @Test
     public void testCharSequence() {
-        CharSequenceTarget beanTarget = FastBeanCopier.copy(new CharSequenceSource("test"), new CharSequenceTarget());
-        Assert.assertEquals("test", String.valueOf(beanTarget.getValue()));
+        StringBuilder builder = new StringBuilder("test");
+        CharSequenceTarget beanTarget = FastBeanCopier.copy(new CharSequenceSource(builder), new CharSequenceTarget());
+        Assert.assertSame(builder, beanTarget.getValue());
 
         Map<String, Object> source = new HashMap<>();
         source.put("value", 123);
@@ -193,9 +194,9 @@ public class FastBeanCopierTest {
     @Getter
     @Setter
     public static class CharSequenceSource {
-        private String value;
+        private CharSequence value;
 
-        public CharSequenceSource(String value) {
+        public CharSequenceSource(CharSequence value) {
             this.value = value;
         }
     }
