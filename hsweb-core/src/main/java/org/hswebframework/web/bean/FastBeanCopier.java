@@ -587,7 +587,7 @@ public final class FastBeanCopier {
                     return convert(val, targetClass, genericType);
                 }
             }
-            if (targetClass == String.class) {
+            if (targetClass == String.class || targetClass == CharSequence.class) {
                 if (source instanceof Date) {
                     // TODO: 18-4-16 自定义格式
                     return (T) DateFormatter.toString(((Date) source), "yyyy-MM-dd HH:mm:ss");
