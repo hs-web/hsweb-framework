@@ -9,7 +9,7 @@ import static org.junit.Assert.*;
 public class OAuth2ClientTest {
 
     @Test
-    public void shouldAllowExactRedirectAndCompatibleVariants() {
+    public void shouldAllowCompatibleRedirectVariants() {
         OAuth2Client client = createClient("http://hsweb.me/callback");
         client.validateRedirectUri("http://hsweb.me/callback");
         client.validateRedirectUri("http://hsweb.me/callback?a=1&n=1");
@@ -46,6 +46,43 @@ public class OAuth2ClientTest {
         );
     }
 
+    @Test
+    public void shouldRejectFragmentRedirectUri() {
+        assertIllegalRedirect(
+                createClient("http://hsweb.me/callback"),
+                "http://hsweb.me/callback#code"
+        );
+    }
+
+    @Test
+    public void shouldRequireExactRedirectUriInExactMode() {
+        OAuth2Client client = createClient("http://hsweb.me/callback");
+        client.validateRedirectUri(
+                "http://hsweb.me/callback",
+                OAuth2Properties.RedirectUriValidationMode.EXACT
+        );
+        createClient("http://hsweb.me/callback?a=1")
+                .validateRedirectUri(
+                        "http://hsweb.me/callback?a=1",
+                        OAuth2Properties.RedirectUriValidationMode.EXACT
+                );
+    }
+
+    @Test
+    public void shouldRejectCompatibleOnlyRedirectInExactMode() {
+        OAuth2Client client = createClient("http://hsweb.me/callback");
+        assertIllegalRedirect(
+                client,
+                "http://hsweb.me/callback/next",
+                OAuth2Properties.RedirectUriValidationMode.EXACT
+        );
+        assertIllegalRedirect(
+                createClient("http://hsweb.me/callback?a=1"),
+                "http://hsweb.me/callback?a=1&n=1",
+                OAuth2Properties.RedirectUriValidationMode.EXACT
+        );
+    }
+
     private OAuth2Client createClient(String redirectUrl) {
         OAuth2Client client = new OAuth2Client();
         client.setRedirectUrl(redirectUrl);
@@ -53,8 +90,14 @@ public class OAuth2ClientTest {
     }
 
     private void assertIllegalRedirect(OAuth2Client client, String redirectUri) {
+        assertIllegalRedirect(client, redirectUri, OAuth2Properties.RedirectUriValidationMode.COMPATIBLE);
+    }
+
+    private void assertIllegalRedirect(OAuth2Client client,
+                                       String redirectUri,
+                                       OAuth2Properties.RedirectUriValidationMode validationMode) {
         try {
-            client.validateRedirectUri(redirectUri);
+            client.validateRedirectUri(redirectUri, validationMode);
             fail("expected redirect uri to be rejected");
         } catch (OAuth2Exception e) {
             assertEquals(ErrorType.ILLEGAL_REDIRECT_URI, e.getType());

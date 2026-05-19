@@ -28,4 +28,8 @@ public class AuthorizationCodeTokenRequest extends OAuth2Request {
     public Optional<String> scope() {
         return getParameter(OAuth2Constants.scope).map(String::valueOf);
     }
+
+    public Optional<String> redirectUri() {
+        return getParameter(OAuth2Constants.redirect_uri).map(String::valueOf);
+    }
 }

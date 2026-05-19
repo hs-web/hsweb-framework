@@ -55,6 +55,10 @@ public class DefaultAuthorizationCodeGranter implements AuthorizationCodeGranter
         request.getParameter(OAuth2Constants.scope).map(String::valueOf).ifPresent(codeCache::setScope);
         codeCache.setCode(code);
         codeCache.setClientId(client.getClientId());
+        codeCache.setRedirectUri(request
+                                         .getParameter(OAuth2Constants.redirect_uri)
+                                         .map(String::valueOf)
+                                         .orElse(client.getRedirectUrl()));
 
         ScopePredicate permissionPredicate = OAuth2ScopeUtils.createScopePredicate(codeCache.getScope());
 
@@ -91,6 +95,12 @@ public class DefaultAuthorizationCodeGranter implements AuthorizationCodeGranter
                 .flatMap(cache -> {
                     if (!request.getClient().getClientId().equals(cache.getClientId())) {
                         return Mono.error(new OAuth2Exception(ErrorType.ILLEGAL_CLIENT_ID));
+                    }
+                    String redirectUri = request
+                            .redirectUri()
+                            .orElse(request.getClient().getRedirectUrl());
+                    if (!request.getClient().isSameRedirectUri(redirectUri, cache.getRedirectUri())) {
+                        return Mono.error(new OAuth2Exception(ErrorType.ILLEGAL_REDIRECT_URI));
                     }
                     return accessTokenManager
                             .createAccessToken(cache.getClientId(), cache.getAuthentication(), false)

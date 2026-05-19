@@ -33,12 +33,26 @@ public class OAuth2Client {
     private String userId;
 
     public void validateRedirectUri(String redirectUri) {
-        if (!isValidRedirectUri(redirectUri)) {
+        validateRedirectUri(redirectUri, OAuth2Properties.RedirectUriValidationMode.COMPATIBLE);
+    }
+
+    public void validateRedirectUri(String redirectUri, OAuth2Properties.RedirectUriValidationMode validationMode) {
+        if (!isValidRedirectUri(redirectUri, validationMode)) {
             throw new OAuth2Exception(ErrorType.ILLEGAL_REDIRECT_URI);
         }
     }
 
-    private boolean isValidRedirectUri(String redirectUri) {
+    public boolean isSameRedirectUri(String redirectUri, String anotherRedirectUri) {
+        URI left = parseUri(redirectUri);
+        URI right = parseUri(anotherRedirectUri);
+        return left != null
+                && right != null
+                && !hasFragment(left)
+                && !hasFragment(right)
+                && isExactMatch(left, right);
+    }
+
+    private boolean isValidRedirectUri(String redirectUri, OAuth2Properties.RedirectUriValidationMode validationMode) {
         if (!StringUtils.hasText(redirectUri) || !StringUtils.hasText(this.redirectUrl)) {
             return false;
         }
@@ -47,18 +61,48 @@ public class OAuth2Client {
         if (registered == null || actual == null) {
             return false;
         }
-        if (registered.isOpaque() || actual.isOpaque()) {
-            return registered.equals(actual);
+        if (hasFragment(registered) || hasFragment(actual)) {
+            return false;
         }
         registered = registered.normalize();
         actual = actual.normalize();
+        if (registered.isOpaque() || actual.isOpaque()) {
+            return isExactMatch(registered, actual);
+        }
+        if (!hasSameEndpoint(registered, actual)) {
+            return false;
+        }
+        if (validationMode == OAuth2Properties.RedirectUriValidationMode.EXACT) {
+            return isExactPathAndQuery(registered, actual);
+        }
+        return matchCompatiblePath(registered.getPath(), actual.getPath())
+                && matchCompatibleQuery(registered.getRawQuery(), actual.getRawQuery());
+    }
+
+    private boolean hasSameEndpoint(URI registered, URI actual) {
         return equalsIgnoreCase(registered.getScheme(), actual.getScheme())
                 && Objects.equals(registered.getUserInfo(), actual.getUserInfo())
                 && equalsIgnoreCase(registered.getHost(), actual.getHost())
-                && registered.getPort() == actual.getPort()
-                && Objects.equals(registered.getRawFragment(), actual.getRawFragment())
-                && matchPath(registered.getPath(), actual.getPath())
-                && matchQuery(registered.getRawQuery(), actual.getRawQuery());
+                && registered.getPort() == actual.getPort();
+    }
+
+    private boolean isExactMatch(URI left, URI right) {
+        if (!equalsIgnoreCase(left.getScheme(), right.getScheme())) {
+            return false;
+        }
+        if (left.isOpaque() || right.isOpaque()) {
+            return Objects.equals(left.getRawSchemeSpecificPart(), right.getRawSchemeSpecificPart());
+        }
+        return Objects.equals(left.getUserInfo(), right.getUserInfo())
+                && equalsIgnoreCase(left.getHost(), right.getHost())
+                && left.getPort() == right.getPort()
+                && isExactPathAndQuery(left, right)
+                && Objects.equals(left.getRawFragment(), right.getRawFragment());
+    }
+
+    private boolean isExactPathAndQuery(URI registered, URI actual) {
+        return Objects.equals(pathOrEmpty(registered), pathOrEmpty(actual))
+                && Objects.equals(registered.getRawQuery(), actual.getRawQuery());
     }
 
     private URI parseUri(String value) {
@@ -69,7 +113,15 @@ public class OAuth2Client {
         }
     }
 
-    private boolean matchPath(String registeredPath, String actualPath) {
+    private boolean hasFragment(URI uri) {
+        return StringUtils.hasLength(uri.getRawFragment());
+    }
+
+    private String pathOrEmpty(URI uri) {
+        return uri.getPath() == null ? "" : uri.getPath();
+    }
+
+    private boolean matchCompatiblePath(String registeredPath, String actualPath) {
         String registered = registeredPath == null ? "" : registeredPath;
         String actual = actualPath == null ? "" : actualPath;
         if (registered.isEmpty()) {
@@ -84,7 +136,7 @@ public class OAuth2Client {
         return actual.startsWith(registered + "/");
     }
 
-    private boolean matchQuery(String registeredQuery, String actualQuery) {
+    private boolean matchCompatibleQuery(String registeredQuery, String actualQuery) {
         if (!StringUtils.hasLength(registeredQuery)) {
             return true;
         }

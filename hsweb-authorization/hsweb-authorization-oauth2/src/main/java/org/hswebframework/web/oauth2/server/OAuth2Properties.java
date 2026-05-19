@@ -17,4 +17,12 @@ public class OAuth2Properties {
     //refreshToken有效期
     private Duration refreshTokenIn = Duration.ofDays(30);
 
+    //redirect_uri 校验模式
+    private RedirectUriValidationMode redirectUriValidationMode = RedirectUriValidationMode.COMPATIBLE;
+
+    public enum RedirectUriValidationMode {
+        COMPATIBLE,
+        EXACT
+    }
+
 }

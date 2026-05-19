@@ -16,6 +16,7 @@ import org.hswebframework.web.oauth2.server.AccessToken;
 import org.hswebframework.web.oauth2.server.OAuth2Client;
 import org.hswebframework.web.oauth2.server.OAuth2ClientManager;
 import org.hswebframework.web.oauth2.server.OAuth2GrantService;
+import org.hswebframework.web.oauth2.server.OAuth2Properties;
 import org.hswebframework.web.oauth2.server.code.AuthorizationCodeRequest;
 import org.hswebframework.web.oauth2.server.code.AuthorizationCodeTokenRequest;
 import org.hswebframework.web.oauth2.server.credential.ClientCredentialRequest;
@@ -49,6 +50,8 @@ public class OAuth2AuthorizeController {
 
     private final OAuth2ClientManager clientManager;
 
+    private final OAuth2Properties properties;
+
     @GetMapping(value = "/authorize", params = "response_type=code")
     @Operation(summary = "申请授权码,并获取重定向地址", parameters = {
             @Parameter(name = "client_id", required = true),
@@ -66,7 +69,12 @@ public class OAuth2AuthorizeController {
                         .getOAuth2Client(param.get("client_id"))
                         .flatMap(client -> {
                             String redirectUri = param.getOrDefault("redirect_uri", client.getRedirectUrl());
-                            client.validateRedirectUri(redirectUri);
+                            if (redirectUri != null) {
+                                redirectUri = redirectUri.trim();
+                            }
+                            client.validateRedirectUri(redirectUri, properties.getRedirectUriValidationMode());
+                            final String validatedRedirectUri = redirectUri;
+                            param.put("redirect_uri", validatedRedirectUri);
                             return oAuth2GrantService
                                     .authorizationCode()
                                     .requestCode(new AuthorizationCodeRequest(client, auth, param))
@@ -75,7 +83,7 @@ public class OAuth2AuthorizeController {
                                                 .ofNullable(param.get("state"))
                                                 .ifPresent(state -> response.with("state", state));
                                     })
-                                    .map(response -> buildRedirect(redirectUri, response.getParameters()));
+                                    .map(response -> buildRedirect(validatedRedirectUri, response.getParameters()));
                         }));
     }
 

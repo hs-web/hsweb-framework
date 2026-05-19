@@ -99,8 +99,9 @@ public class OAuth2ServerAutoConfiguration {
         @ConditionalOnMissingBean
         @ConditionalOnBean(OAuth2ClientManager.class)
         public OAuth2AuthorizeController oAuth2AuthorizeController(OAuth2GrantService grantService,
-                                                                   OAuth2ClientManager clientManager) {
-            return new OAuth2AuthorizeController(grantService, clientManager);
+                                                                   OAuth2ClientManager clientManager,
+                                                                   OAuth2Properties properties) {
+            return new OAuth2AuthorizeController(grantService, clientManager, properties);
         }
 
     }

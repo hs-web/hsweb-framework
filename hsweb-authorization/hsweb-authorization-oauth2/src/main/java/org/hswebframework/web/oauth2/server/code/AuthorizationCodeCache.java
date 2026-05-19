@@ -23,4 +23,6 @@ public class AuthorizationCodeCache implements Serializable {
 
     private String scope;
 
+    private String redirectUri;
+
 }
