@@ -402,9 +402,11 @@ public final class FastBeanCopier {
                 Field field = ReflectionUtils.findField(targetBeanType, name);
                 boolean hasGeneric = false;
                 if (field != null) {
-                    String[] arr = Arrays.stream(ResolvableType.forField(field)
-                                                               .getGenerics())
-                                         .map(ResolvableType::getRawClass)
+                    ResolvableType fieldType = ResolvableType.forField(
+                        field,
+                        ResolvableType.forClass(targetBeanType).as(field.getDeclaringClass()));
+                    String[] arr = Arrays.stream(fieldType.getGenerics())
+                                         .map(ResolvableType::resolve)
                                          .filter(Objects::nonNull)
                                          .map(t -> t.getName().concat(".class"))
                                          .toArray(String[]::new);
