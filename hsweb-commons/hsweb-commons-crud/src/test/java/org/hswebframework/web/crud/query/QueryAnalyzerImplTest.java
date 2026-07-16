@@ -8,6 +8,7 @@ import org.hswebframework.ezorm.rdb.operator.DatabaseOperator;
 import org.hswebframework.web.api.crud.entity.QueryParamEntity;
 import org.hswebframework.web.crud.TestApplication;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,17 @@ import static org.junit.jupiter.api.Assertions.*;
 public class QueryAnalyzerImplTest {
     @Autowired
     private DatabaseOperator database;
+
+    @Before
+    public void clearTestData() {
+        database
+            .sql()
+            .reactive()
+            .update("delete from s_test")
+            .then()
+            .as(StepVerifier::create)
+            .verifyComplete();
+    }
 
     /**
      * 执行SQL并验证是否有错误
@@ -764,6 +776,15 @@ public class QueryAnalyzerImplTest {
 
     @Test
     public void testMultipleCTE() {
+        database
+            .getMetadata()
+            .getCurrentSchema()
+            .getTableOrView("s_test", false)
+            .orElseThrow()
+            .getColumn("name")
+            .orElseThrow()
+            .getFullName();
+
         QueryAnalyzerImpl analyzer = new QueryAnalyzerImpl(
             database,
             "WITH " +
@@ -781,6 +802,7 @@ public class QueryAnalyzerImplTest {
         assertNotNull(request.getSql(), "SQL should be generated");
         assertNotNull(request.getParameters(), "Parameters should be set");
         assertTrue(request.getSql().contains("), cte2 AS"), "multiple CTEs should be separated by comma");
+        assertTrue(request.getSql().contains("cte1.\"NAME\""), "filter column should use current CTE alias");
         executeAndVerify(request);
     }
 

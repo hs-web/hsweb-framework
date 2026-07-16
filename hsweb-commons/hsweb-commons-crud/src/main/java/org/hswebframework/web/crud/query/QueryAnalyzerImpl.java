@@ -706,9 +706,12 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
 
             String colName = col.metadata != null ? col.metadata.getRealName() : col.name;
 
-            String fullName = col.metadata != null
-                ? col.getMetadata().getFullName(table.alias)
-                : table.alias + "." + dialect.quote(colName, false);
+            // CTE和子查询会复用真实表列元数据，其内部可能已缓存原表全名，
+            // 条件列必须以当前查询分析出的表别名为准。
+            String fullName = dialect.buildColumnFullName(
+                table.alias,
+                colName,
+                col.metadata != null && !col.metadata.realNameDetected());
 
             return metadata
                 .findFeature(createFeatureId(term.getTermType()))
