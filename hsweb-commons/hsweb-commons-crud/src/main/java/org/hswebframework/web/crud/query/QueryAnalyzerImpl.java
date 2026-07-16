@@ -78,7 +78,16 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
 
     @Override
     public Optional<Column> findColumn(String name) {
-        return Optional.ofNullable(getColumnMappings().get(name));
+        if (name == null) {
+            return Optional.empty();
+        }
+        Map<String, Column> mappings = getColumnMappings();
+        Column column = mappings.get(name);
+        if (column == null) {
+            // 精确别名优先，仅在未命中时兼容实体属性名到数据库列名的转换。
+            column = mappings.get(QueryHelperUtils.toSnake(name));
+        }
+        return Optional.ofNullable(column);
     }
 
     @Override
@@ -177,7 +186,7 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
             return column;
         }
 
-        return getColumnMappings().get(name);
+        return findColumn(name).orElse(null);
     }
 
     @SneakyThrows
@@ -652,7 +661,7 @@ class QueryAnalyzerImpl implements FromItemVisitor, SelectItemVisitor, SelectVis
             Table table = impl.select.table;
             String column = term.getColumn();
 
-            Column col = impl.getColumnMappings().get(column);
+            Column col = impl.findColumn(column).orElse(null);
 //
 //            if (col == null) {
 //                if (column.contains(".")) {
