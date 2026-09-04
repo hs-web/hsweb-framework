@@ -82,14 +82,6 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- EasyORM会预先初始化全部内置方言。保留其可选PostgreSQL类型到测试运行时，
-             直到EasyORM改为仅加载实际选择的方言。 -->
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>r2dbc-postgresql</artifactId>
-            <scope>test</scope>
-        </dependency>
-
         <dependency>
             <groupId>org.glassfish.expressly</groupId>
             <artifactId>expressly</artifactId>

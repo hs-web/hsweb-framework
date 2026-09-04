@@ -23,6 +23,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+/**
+ * 按顺序提取请求令牌并将首个 {@link ParsedToken} 写入 Reactor Context。
+ *
+ * <p>本过滤器只负责传输层解析和上下文传播，不执行令牌认证。</p>
+ *
+ * @see ReactiveUserTokenParser
+ */
 @Slf4j
 @AllArgsConstructor
 @Order(1)
@@ -40,7 +47,7 @@ public class UserTokenWebFilter implements WebFilter {
 
         return Flux
             .fromIterable(parsers)
-            .flatMap(parser -> parser.parseToken(exchange))
+            .concatMap(parser -> parser.parseToken(exchange))
             .next()
             .map(token -> chain
                 .filter(exchange)

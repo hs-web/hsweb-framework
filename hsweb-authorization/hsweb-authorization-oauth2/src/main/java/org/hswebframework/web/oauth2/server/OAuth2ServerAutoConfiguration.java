@@ -1,12 +1,21 @@
 package org.hswebframework.web.oauth2.server;
 
-import org.hswebframework.web.authorization.ReactiveAuthenticationManager;
-import org.hswebframework.web.authorization.basic.web.ReactiveUserTokenParser;
 import org.hswebframework.web.authorization.token.UserTokenManager;
+import org.hswebframework.web.oauth2.server.authentication.ClientSecretAuthenticationRequestConverter;
+import org.hswebframework.web.oauth2.server.authentication.CompositeReactiveOAuth2ClientAuthenticationRequestResolver;
+import org.hswebframework.web.oauth2.server.authentication.CompositeReactiveOAuth2ClientAuthenticator;
+import org.hswebframework.web.oauth2.server.authentication.DefaultOAuth2ClientSecretAuthenticationProvider;
+import org.hswebframework.web.oauth2.server.authentication.ReactiveOAuth2ClientAuthenticationProvider;
+import org.hswebframework.web.oauth2.server.authentication.ReactiveOAuth2ClientAuthenticationRequestConverter;
+import org.hswebframework.web.oauth2.server.authentication.ReactiveOAuth2ClientAuthenticationRequestResolver;
+import org.hswebframework.web.oauth2.server.authentication.ReactiveOAuth2ClientAuthenticator;
 import org.hswebframework.web.oauth2.server.code.AuthorizationCodeGranter;
 import org.hswebframework.web.oauth2.server.code.DefaultAuthorizationCodeGranter;
 import org.hswebframework.web.oauth2.server.credential.ClientCredentialGranter;
+import org.hswebframework.web.oauth2.server.credential.ClientCredentialGrantHandler;
+import org.hswebframework.web.oauth2.server.credential.CompositeClientCredentialGranter;
 import org.hswebframework.web.oauth2.server.credential.DefaultClientCredentialGranter;
+import org.hswebframework.web.oauth2.server.credential.DefaultClientCredentialGrantHandler;
 import org.hswebframework.web.oauth2.server.impl.CompositeOAuth2GrantService;
 import org.hswebframework.web.oauth2.server.impl.RedisAccessTokenManager;
 import org.hswebframework.web.oauth2.server.refresh.DefaultRefreshTokenGranter;
@@ -15,7 +24,6 @@ import org.hswebframework.web.oauth2.server.web.OAuth2AuthorizeController;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -25,23 +33,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory;
 import org.springframework.data.redis.core.ReactiveRedisOperations;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @AutoConfiguration
 @EnableConfigurationProperties(OAuth2Properties.class)
 public class OAuth2ServerAutoConfiguration {
-
-
-    @Configuration(proxyBeanMethods = false)
-    @ConditionalOnClass(ReactiveUserTokenParser.class)
-    static class ReactiveOAuth2AccessTokenParserConfiguration {
-
-//        @Bean
-//        @ConditionalOnBean(AccessTokenManager.class)
-//        public ReactiveOAuth2AccessTokenParser reactiveOAuth2AccessTokenParser(AccessTokenManager accessTokenManager) {
-//            ReactiveOAuth2AccessTokenParser parser = new ReactiveOAuth2AccessTokenParser(accessTokenManager);
-//            ReactiveAuthenticationHolder.addSupplier(parser);
-//            return parser;
-//        }
-    }
 
     @Configuration(proxyBeanMethods = false)
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
@@ -61,11 +58,42 @@ public class OAuth2ServerAutoConfiguration {
         }
 
         @Bean
+        @ConditionalOnMissingBean(ClientCredentialGranter.class)
+        public ClientCredentialGranter clientCredentialGranter(
+                AccessTokenManager accessTokenManager,
+                ApplicationEventPublisher eventPublisher,
+                ObjectProvider<ClientCredentialGrantHandler> handlerProvider) {
+            ClientCredentialGranter legacyGranter =
+                    new DefaultClientCredentialGranter(accessTokenManager, eventPublisher);
+
+            List<ClientCredentialGrantHandler> handlers = new ArrayList<>();
+            handlers.add(new DefaultClientCredentialGrantHandler(legacyGranter));
+            handlerProvider.orderedStream().forEach(handlers::add);
+            return new CompositeClientCredentialGranter(handlers);
+        }
+
+        @Bean
         @ConditionalOnMissingBean
-        public ClientCredentialGranter clientCredentialGranter(ReactiveAuthenticationManager authenticationManager,
-                                                               AccessTokenManager accessTokenManager,
-                                                               ApplicationEventPublisher eventPublisher) {
-            return new DefaultClientCredentialGranter(authenticationManager, accessTokenManager,eventPublisher);
+        @ConditionalOnBean(OAuth2ClientManager.class)
+        public ReactiveOAuth2ClientAuthenticator reactiveOAuth2ClientAuthenticator(
+                OAuth2ClientManager clientManager,
+                ObjectProvider<ReactiveOAuth2ClientAuthenticationProvider> providerProvider) {
+            List<ReactiveOAuth2ClientAuthenticationProvider> providers = new ArrayList<>();
+            providerProvider.orderedStream().forEach(providers::add);
+            return new CompositeReactiveOAuth2ClientAuthenticator(
+                    providers,
+                    new DefaultOAuth2ClientSecretAuthenticationProvider(clientManager));
+        }
+
+        @Bean
+        @ConditionalOnMissingBean
+        public ReactiveOAuth2ClientAuthenticationRequestResolver oauth2ClientAuthenticationRequestResolver(
+                ObjectProvider<ReactiveOAuth2ClientAuthenticationRequestConverter> converterProvider) {
+            List<ReactiveOAuth2ClientAuthenticationRequestConverter> converters = new ArrayList<>();
+            converterProvider.orderedStream().forEach(converters::add);
+            return new CompositeReactiveOAuth2ClientAuthenticationRequestResolver(
+                    converters,
+                    new ClientSecretAuthenticationRequestConverter());
         }
 
         @Bean
@@ -98,10 +126,17 @@ public class OAuth2ServerAutoConfiguration {
         @Bean
         @ConditionalOnMissingBean
         @ConditionalOnBean(OAuth2ClientManager.class)
-        public OAuth2AuthorizeController oAuth2AuthorizeController(OAuth2GrantService grantService,
-                                                                   OAuth2ClientManager clientManager,
-                                                                   OAuth2Properties properties) {
-            return new OAuth2AuthorizeController(grantService, clientManager, properties);
+        public OAuth2AuthorizeController oAuth2AuthorizeController(
+                OAuth2GrantService grantService,
+                OAuth2ClientManager clientManager,
+                OAuth2Properties properties,
+                ReactiveOAuth2ClientAuthenticator clientAuthenticator,
+                ReactiveOAuth2ClientAuthenticationRequestResolver requestResolver) {
+            return new OAuth2AuthorizeController(grantService,
+                                                 clientManager,
+                                                 properties,
+                                                 clientAuthenticator,
+                                                 requestResolver);
         }
 
     }

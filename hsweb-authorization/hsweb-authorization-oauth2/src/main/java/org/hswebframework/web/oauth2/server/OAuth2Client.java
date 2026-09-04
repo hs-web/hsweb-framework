@@ -11,9 +11,24 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Objects;
 
+/**
+ * OAuth2 client configuration loaded from a trusted client registry.
+ *
+ * <p>{@link #getClientType()} exposes server-managed routing metadata. The token endpoint does not
+ * derive it from request parameters, headers, or form data.</p>
+ *
+ * @author zhouhao
+ */
 @Getter
 @Setter
 public class OAuth2Client {
+
+    /**
+     * Default routing type for legacy clients without an explicit server-side classification.
+     *
+     * @since 5.0.2
+     */
+    public static final String DEFAULT_CLIENT_TYPE = "default";
 
     @NotBlank
     private String clientId;
@@ -31,6 +46,17 @@ public class OAuth2Client {
 
     //client 所属用户
     private String userId;
+
+    private String clientType = DEFAULT_CLIENT_TYPE;
+
+    /**
+     * Get the trusted client type used for grant-handler routing.
+     *
+     * @return configured type, or {@link #DEFAULT_CLIENT_TYPE} for legacy null or blank values
+     */
+    public String getClientType() {
+        return StringUtils.hasText(clientType) ? clientType : DEFAULT_CLIENT_TYPE;
+    }
 
     public void validateRedirectUri(String redirectUri) {
         validateRedirectUri(redirectUri, OAuth2Properties.RedirectUriValidationMode.COMPATIBLE);

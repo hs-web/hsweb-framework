@@ -43,6 +43,13 @@ public class OAuth2ClientEntity extends GenericEntity<String> {
     @NotBlank
     private String userId;
 
+    // Nullable by design: legacy tables and partial-update payloads may not contain this column.
+    // EasyORM supplies the insert default, while OAuth2Client normalizes persisted null values.
+    @Column(length = 64)
+    @DefaultValue("default")
+    @Schema(description = "客户端类型")
+    private String clientType;
+
     @Column(length = 1024, nullable = false)
     @Schema(description = "回调地址")
     @NotBlank
@@ -81,6 +88,7 @@ public class OAuth2ClientEntity extends GenericEntity<String> {
         client.setRedirectUrl(callbackUri);
         client.setDescription(description);
         client.setUserId(userId);
+        client.setClientType(clientType);
         return client;
     }
 }

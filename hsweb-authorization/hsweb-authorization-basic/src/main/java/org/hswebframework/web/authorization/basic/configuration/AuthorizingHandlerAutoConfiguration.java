@@ -46,8 +46,8 @@ public class AuthorizingHandlerAutoConfiguration {
                                                  ObjectProvider<ReactiveUserTokenParser> tokenParsers,
                                                  ObjectProvider<ReactiveUserTokenGenerator> tokenGenerators) {
         UserTokenWebFilter filter = new UserTokenWebFilter(userTokenManager);
-        tokenParsers.forEach(filter::register);
-        tokenGenerators.forEach(filter::register);
+        tokenParsers.orderedStream().forEach(filter::register);
+        tokenGenerators.orderedStream().forEach(filter::register);
 
         return filter;
     }

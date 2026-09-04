@@ -111,10 +111,12 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- EasyORM会预先初始化全部内置方言，PostgreSQL方言会直接引用驱动类型，
+             因此驱动需要由CRUD公共模块提供到运行时。 -->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>r2dbc-postgresql</artifactId>
-            <scope>test</scope>
+            <scope>runtime</scope>
         </dependency>
 
         <dependency>

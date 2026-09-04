@@ -9,6 +9,25 @@ import static org.junit.Assert.*;
 public class OAuth2ClientTest {
 
     @Test
+    public void shouldNormalizeLegacyClientTypeToDefault() {
+        OAuth2Client client = new OAuth2Client();
+
+        assertEquals(OAuth2Client.DEFAULT_CLIENT_TYPE, client.getClientType());
+
+        client.setClientType(null);
+        assertEquals(OAuth2Client.DEFAULT_CLIENT_TYPE, client.getClientType());
+
+        client.setClientType("");
+        assertEquals(OAuth2Client.DEFAULT_CLIENT_TYPE, client.getClientType());
+
+        client.setClientType(" ");
+        assertEquals(OAuth2Client.DEFAULT_CLIENT_TYPE, client.getClientType());
+
+        client.setClientType("api");
+        assertEquals("api", client.getClientType());
+    }
+
+    @Test
     public void shouldAllowCompatibleRedirectVariants() {
         OAuth2Client client = createClient("http://hsweb.me/callback");
         client.validateRedirectUri("http://hsweb.me/callback");
