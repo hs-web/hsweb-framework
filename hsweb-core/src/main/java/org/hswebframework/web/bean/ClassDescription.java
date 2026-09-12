@@ -12,6 +12,7 @@ public class ClassDescription {
     private final Class<?> type;
 
     private final boolean collectionType;
+    private final boolean mapType;
     private final boolean arrayType;
     private final boolean enumType;
     private final boolean enumDict;
@@ -23,24 +24,21 @@ public class ClassDescription {
 
     public ClassDescription(Class<?> type) {
         this.type = type;
-
-        collectionType = Collection.class.isAssignableFrom(type);
-        enumDict = EnumDict.class.isAssignableFrom(type);
-        arrayType = type.isArray();
-        enumType = type.isEnum();
-
-        number = Number.class.isAssignableFrom(type);
+        this.collectionType = Collection.class.isAssignableFrom(type);
+        this.mapType = Map.class.isAssignableFrom(type);
+        this.enumDict = EnumDict.class.isAssignableFrom(type);
+        this.arrayType = type.isArray();
+        this.enumType = type.isEnum();
+        this.number = Number.class.isAssignableFrom(type);
         if (enumType) {
-            enums = type.getEnumConstants();
+            this.enums = type.getEnumConstants();
         } else {
-            enums = null;
+            this.enums = null;
         }
-        Map<String, Field> f = new HashMap<>();
-        ReflectionUtils.doWithFields(type, field -> {
-            f.put(field.getName(), field);
-        });
-        fields = Collections.unmodifiableMap(f);
-        fieldSize = fields.size();
+        Map<String, Field> fields = new HashMap<>();
+        ReflectionUtils.doWithFields(type, field -> fields.put(field.getName(), field));
+        this.fields = Collections.unmodifiableMap(fields);
+        this.fieldSize = this.fields.size();
     }
 
 }

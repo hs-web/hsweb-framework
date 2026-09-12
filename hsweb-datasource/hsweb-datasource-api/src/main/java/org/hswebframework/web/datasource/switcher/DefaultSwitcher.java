@@ -1,9 +1,6 @@
 package org.hswebframework.web.datasource.switcher;
 
 import lombok.extern.slf4j.Slf4j;
-import org.hswebframework.web.context.ContextHolder;
-
-
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.Optional;
@@ -17,6 +14,8 @@ public class DefaultSwitcher implements Switcher {
 
     private String type;
 
+    private final ThreadLocal<Deque<String>> usedHistory = ThreadLocal.withInitial(LinkedList::new);
+
     public DefaultSwitcher(String name, String type) {
         this.name = "DefaultSwitcher.".concat(name);
         this.defaultId = name.concat(".").concat("_default");
@@ -24,11 +23,9 @@ public class DefaultSwitcher implements Switcher {
     }
 
     protected Deque<String> getUsedHistoryQueue() {
-        // 从ThreadLocal中获取一个使用记录
-        return ContextHolder
-            .current()
-            .<Deque<String>>getOrEmpty(name)
-            .orElseGet(LinkedList::new);
+        // 同步切换场景仍然基于 ThreadLocal 保存上下文历史，
+        // reactive 场景由 DefaultReactiveSwitcher 单独承载。
+        return usedHistory.get();
     }
 
     @Override
@@ -81,7 +78,7 @@ public class DefaultSwitcher implements Switcher {
 
     @Override
     public void reset() {
-        getUsedHistoryQueue().clear();
+        usedHistory.remove();
         if (log.isDebugEnabled()) {
             log.debug("reset {} history", type);
         }

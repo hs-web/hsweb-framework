@@ -6,7 +6,7 @@ set -euo pipefail
 # PR 场景按目标分支对比，避免 CI 修复类提交只修改 .github 时退化为全仓库测试；
 # push 场景保持原有 HEAD~1..HEAD 行为，兼容发布工作流。
 if [ -n "${GITHUB_BASE_REF:-}" ]; then
-  git fetch origin "${GITHUB_BASE_REF}" --depth=1 >/dev/null 2>&1 || true
+  git fetch origin "${GITHUB_BASE_REF}" >/dev/null 2>&1 || true
   if git rev-parse --verify "origin/${GITHUB_BASE_REF}" >/dev/null 2>&1; then
     diff_args=("origin/${GITHUB_BASE_REF}...HEAD")
   else
