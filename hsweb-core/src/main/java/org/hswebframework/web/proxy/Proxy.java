@@ -23,7 +23,7 @@ import java.util.function.Consumer;
 public class Proxy<I> extends URLClassLoader {
     private static final AtomicLong counter = new AtomicLong(1);
 
-    private final CtClass ctClass;
+    private CtClass ctClass;
     @Getter
     private final Class<I> superClass;
     @Getter
@@ -118,7 +118,7 @@ public class Proxy<I> extends URLClassLoader {
             throw new NullPointerException("superClass can not be null");
         }
         this.superClass = superClass;
-        ClassPool classPool = ClassPool.getDefault();
+        ClassPool classPool = new ClassPool(true);
 
         if (classPaths != null) {
             for (Class<?> classPath : classPaths) {
@@ -153,11 +153,17 @@ public class Proxy<I> extends URLClassLoader {
     }
 
     public Proxy<I> addMethod(String code) {
-        return handleException(() -> ctClass.addMethod(CtNewMethod.make(code, ctClass)));
+        return handleException(() -> {
+            CtClass target = getCtClass();
+            target.addMethod(CtNewMethod.make(code, target));
+        });
     }
 
     public Proxy<I> addConstructor(String code) {
-        return handleException(() -> ctClass.addConstructor(CtNewConstructor.make(code, ctClass)));
+        return handleException(() -> {
+            CtClass target = getCtClass();
+            target.addConstructor(CtNewConstructor.make(code, target));
+        });
     }
 
     public Proxy<I> addField(String code) {
@@ -197,16 +203,17 @@ public class Proxy<I> extends URLClassLoader {
     }
 
     public Proxy<I> custom(Consumer<CtClass> ctClassConsumer) {
-        ctClassConsumer.accept(ctClass);
+        ctClassConsumer.accept(getCtClass());
         return this;
     }
 
     @SneakyThrows
     public Proxy<I> addField(String code, Class<? extends java.lang.annotation.Annotation> annotation, Map<String, Object> annotationProperties) {
         return handleException(() -> {
-            CtField ctField = CtField.make(code, ctClass);
+            CtClass target = getCtClass();
+            CtField ctField = CtField.make(code, target);
             if (null != annotation) {
-                ConstPool constPool = ctClass.getClassFile().getConstPool();
+                ConstPool constPool = target.getClassFile().getConstPool();
                 AnnotationsAttribute attributeInfo = new AnnotationsAttribute(constPool, AnnotationsAttribute.visibleTag);
                 Annotation ann = new javassist.bytecode.annotation.Annotation(annotation.getName(), constPool);
                 if (null != annotationProperties) {
@@ -220,8 +227,15 @@ public class Proxy<I> extends URLClassLoader {
                 attributeInfo.addAnnotation(ann);
                 ctField.getFieldInfo().addAttribute(attributeInfo);
             }
-            ctClass.addField(ctField);
+            target.addField(ctField);
         });
+    }
+
+    private CtClass getCtClass() {
+        if (ctClass == null) {
+            throw new IllegalStateException("Proxy class has already been generated");
+        }
+        return ctClass;
     }
 
     @SneakyThrows
@@ -240,8 +254,14 @@ public class Proxy<I> extends URLClassLoader {
     @SuppressWarnings("all")
     public Class<I> getTargetClass() {
         if (targetClass == null) {
-            byte[] code = ctClass.toBytecode();
-            targetClass = (Class) defineClass(null, code, 0, code.length);
+            CtClass target = getCtClass();
+            try {
+                byte[] code = target.toBytecode();
+                targetClass = (Class) defineClass(null, code, 0, code.length);
+            } finally {
+                // Generated instances retain this class loader, not Javassist's generation metadata.
+                ctClass = null;
+            }
         }
         return targetClass;
     }
