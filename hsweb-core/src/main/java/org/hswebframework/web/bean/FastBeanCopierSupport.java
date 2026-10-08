@@ -6,8 +6,8 @@ import org.hswebframework.web.dict.EnumDict;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 
+import java.lang.reflect.Constructor;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 /**
@@ -17,14 +17,16 @@ import java.util.function.Supplier;
  * @since 3.0
  */
 public final class FastBeanCopierSupport {
-    private static final Map<CacheKey, Copier> CACHE = new ConcurrentHashMap<>();
-    private static final Map<CacheKey, RecordCopier> RECORD_CACHE = new ConcurrentHashMap<>();
-    private static final Map<CacheKey, FastBeanCopierBackend> BACKEND_CACHE = new ConcurrentHashMap<>();
+    private static final ClassPairCache<Copier> CACHE = new ClassPairCache<>();
+    private static final ClassPairCache<RecordCopier> RECORD_CACHE = new ClassPairCache<>();
+    private static final ClassPairCache<FastBeanCopierBackend> BACKEND_CACHE = new ClassPairCache<>();
+    private static final ClassLoaderScopedClassCache<Constructor<?>> CONSTRUCTOR_CACHE =
+        new ClassLoaderScopedClassCache<>();
     /**
      * 动态 classloader 也保持强缓存命中，避免弱/软引用在内存波动时触发 copier 重建。
      * 对应 classloader 的释放由 clearCache(ClassLoader) 显式管理。
      */
-    private static final Map<CacheKey, Copier> VOLATILE_CACHE = new ConcurrentHashMap<>();
+    private static final ClassPairCache<Copier> VOLATILE_CACHE = new ClassPairCache<>();
     private static final ClassLoader OWNER_CLASS_LOADER = FastBeanCopierSupport.class.getClassLoader();
     private static final FastBeanCopierBackend VOLATILE_CLASS_LOADER_BACKEND =
         new ReflectionAccessorFastBeanCopierBackend();
@@ -60,8 +62,11 @@ public final class FastBeanCopierSupport {
         if (usesVolatileClassLoader(source, target)) {
             return adaptBackend(BACKEND, source, target);
         }
-        CacheKey key = createCacheKey(source, target);
-        return BACKEND_CACHE.computeIfAbsent(key, ignore -> adaptBackend(BACKEND, source, target));
+        return BACKEND_CACHE.computeIfAbsent(source, target, FastBeanCopierSupport::createEffectiveBackend);
+    }
+
+    private static FastBeanCopierBackend createEffectiveBackend(Class<?> source, Class<?> target) {
+        return adaptBackend(BACKEND, source, target);
     }
 
     static {
@@ -70,12 +75,25 @@ public final class FastBeanCopierSupport {
             @SneakyThrows
             @SuppressWarnings("all")
             public <T> T newInstance(Class<T> beanType) {
-                return beanType == Map.class ? (T) new HashMap<>() : beanType.getDeclaredConstructor().newInstance();
+                return beanType == Map.class ? (T) new HashMap<>() : newBeanInstance(beanType);
             }
         };
         BACKEND = FastBeanCopierBackendSelector.selectDefaultBackend();
         DEFAULT_CONVERT = new DefaultConverter();
         DEFAULT_CONVERT.setBeanFactory(BEAN_FACTORY);
+    }
+
+    @SneakyThrows
+    private static Constructor<?> getDefaultConstructor(Class<?> beanType) {
+        return beanType.getDeclaredConstructor();
+    }
+
+    @SneakyThrows
+    @SuppressWarnings("unchecked")
+    private static <T> T newBeanInstance(Class<T> beanType) {
+        // Cache metadata only; preserve constructor access checks and create a fresh bean each time.
+        return (T) CONSTRUCTOR_CACHE.computeIfAbsent(beanType, FastBeanCopierSupport::getDefaultConstructor)
+                                   .newInstance();
     }
 
     @SuppressWarnings("all")
@@ -110,7 +128,7 @@ public final class FastBeanCopierSupport {
         if (target.isRecord()) {
             return copyToRecord(source, target, DEFAULT_CONVERT, ignore);
         }
-        return copy(source, target.getDeclaredConstructor().newInstance(), DEFAULT_CONVERT, ignore);
+        return copy(source, newBeanInstance(target), DEFAULT_CONVERT, ignore);
     }
 
     public static <T, S> T copy(S source, T target, Converter converter, String... ignore) {
@@ -165,8 +183,7 @@ public final class FastBeanCopierSupport {
     }
 
     private static RecordCopier getRecordCopier(Class<?> source, Class<?> target) {
-        CacheKey key = createCacheKey(source, target);
-        return RECORD_CACHE.computeIfAbsent(key, k -> RecordBeanCopierSupport.createRecordCopier(k.sourceType, k.targetType));
+        return RECORD_CACHE.computeIfAbsent(source, target, RecordBeanCopierSupport::createRecordCopier);
     }
 
     static Class<?> getUserClass(Object object) {
@@ -186,18 +203,10 @@ public final class FastBeanCopierSupport {
     public static Copier getCopier(Object source, Object target, boolean autoCreate) {
         Class<?> sourceType = getUserClass(source);
         Class<?> targetType = getUserClass(target);
-        CacheKey key = createCacheKey(sourceType, targetType);
-        if (usesVolatileClassLoader(sourceType, targetType)) {
-            return getVolatileCopier(key, autoCreate);
-        }
-        if (autoCreate) {
-            return CACHE.computeIfAbsent(key, k -> createCopier(k.sourceType, k.targetType));
-        }
-        return CACHE.get(key);
-    }
-
-    private static CacheKey createCacheKey(Class<?> source, Class<?> target) {
-        return new CacheKey(source, target);
+        ClassPairCache<Copier> cache = usesVolatileClassLoader(sourceType, targetType) ? VOLATILE_CACHE : CACHE;
+        return autoCreate
+            ? cache.computeIfAbsent(sourceType, targetType, FastBeanCopierSupport::createCopier)
+            : cache.get(sourceType, targetType);
     }
 
     public static Copier createCopier(Class<?> source, Class<?> target) {
@@ -243,6 +252,7 @@ public final class FastBeanCopierSupport {
         CACHE.clear();
         RECORD_CACHE.clear();
         BACKEND_CACHE.clear();
+        CONSTRUCTOR_CACHE.clear();
         VOLATILE_CACHE.clear();
         AccessorFastBeanCopierBackend.clearCache();
         FastBeanCopierConverterSupport.clearCache();
@@ -254,10 +264,11 @@ public final class FastBeanCopierSupport {
             clearCache();
             return;
         }
-        removeCacheEntries(CACHE, loader);
-        removeCacheEntries(RECORD_CACHE, loader);
-        removeCacheEntries(BACKEND_CACHE, loader);
-        removeVolatileCacheEntries(loader);
+        CACHE.clear(loader);
+        RECORD_CACHE.clear(loader);
+        BACKEND_CACHE.clear(loader);
+        CONSTRUCTOR_CACHE.clear(loader);
+        VOLATILE_CACHE.clear(loader);
         AccessorFastBeanCopierBackend.clearCache(loader);
         FastBeanCopierConverterSupport.clearCache(loader);
         ClassDescriptions.clearCache(loader);
@@ -294,21 +305,6 @@ public final class FastBeanCopierSupport {
         public <T> T convert(Object source, Class<T> targetClass, Class[] genericType) {
             return support.convert(source, targetClass, genericType);
         }
-    }
-
-    private static Copier getVolatileCopier(CacheKey key, boolean autoCreate) {
-        if (!autoCreate) {
-            return VOLATILE_CACHE.get(key);
-        }
-        return VOLATILE_CACHE.computeIfAbsent(key, ignore -> createCopier(key.sourceType, key.targetType));
-    }
-
-    private static void removeCacheEntries(Map<CacheKey, ?> cache, ClassLoader loader) {
-        cache.keySet().removeIf(key -> key.involves(loader));
-    }
-
-    private static void removeVolatileCacheEntries(ClassLoader loader) {
-        removeCacheEntries(VOLATILE_CACHE, loader);
     }
 
     static boolean isVolatileClassLoaderType(Class<?> type) {

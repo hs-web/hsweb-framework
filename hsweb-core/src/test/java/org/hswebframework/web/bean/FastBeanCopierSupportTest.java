@@ -6,15 +6,22 @@ import org.springframework.util.ClassUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Arrays;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -130,6 +137,267 @@ public void testBackendSelectorSupportsExplicitOverride() {
             new Class[]{Integer.class}
         );
         Assert.assertEquals(java.util.Arrays.asList(4, 5), second);
+    }
+
+    @Test
+    public void testGenericPlanDoesNotRetainMutableCallerArray() {
+        Class[] genericTypes = {Integer.class};
+        List<?> integers = FastBeanCopierSupport.DEFAULT_CONVERT.convert(List.of("1"), List.class, genericTypes);
+        genericTypes[0] = Long.class;
+        List<?> longs = FastBeanCopierSupport.DEFAULT_CONVERT.convert(List.of("2"), List.class, genericTypes);
+        genericTypes[0] = String.class;
+        List<?> strings = FastBeanCopierSupport.DEFAULT_CONVERT.convert(List.of(3), List.class, genericTypes);
+
+        Assert.assertEquals(List.of(1), integers);
+        Assert.assertEquals(List.of(2L), longs);
+        Assert.assertEquals(List.of("3"), strings);
+        Assert.assertEquals(List.of(4), FastBeanCopierSupport.DEFAULT_CONVERT.convert(
+            List.of("4"), List.class, new Class[]{Integer.class}));
+        Assert.assertEquals(List.of("unchanged"), FastBeanCopierSupport.DEFAULT_CONVERT.convert(
+            List.of("unchanged"), List.class, null));
+    }
+
+    @Test
+    public void testBeanFactoryReplacementAfterConstructorAndPlanWarmup() {
+        BeanFactory original = FastBeanCopierSupport.getBeanFactory();
+        Map<String, Object> source = Map.of("name", "converted");
+        try {
+            FactoryBean first = FastBeanCopierSupport.DEFAULT_CONVERT.convert(
+                source, FactoryBean.class, FastBeanCopierSupport.EMPTY_CLASS_ARRAY);
+            Assert.assertEquals("default", first.getFactory());
+
+            for (String marker : Arrays.asList("first", "second")) {
+                FastBeanCopier.setBeanFactory(new BeanFactory() {
+                    @Override
+                    public <T> T newInstance(Class<T> beanType) {
+                        return beanType == FactoryBean.class
+                            ? beanType.cast(new FactoryBean(marker))
+                            : original.newInstance(beanType);
+                    }
+                });
+                FactoryBean converted = FastBeanCopierSupport.DEFAULT_CONVERT.convert(
+                    source, FactoryBean.class, FastBeanCopierSupport.EMPTY_CLASS_ARRAY);
+                FactoryBean facadeConverted = FastBeanCopier.DEFAULT_CONVERT.convert(
+                    source, FactoryBean.class, FastBeanCopierSupport.EMPTY_CLASS_ARRAY);
+                Assert.assertEquals(marker, converted.getFactory());
+                Assert.assertEquals(marker, facadeConverted.getFactory());
+                Assert.assertEquals("converted", converted.getName());
+                Assert.assertNotSame(converted, facadeConverted);
+                // The Class-target overload has always used the target's default constructor.
+                Assert.assertEquals("default", FastBeanCopier.copy(source, FactoryBean.class).getFactory());
+            }
+        } finally {
+            FastBeanCopier.setBeanFactory(original);
+        }
+    }
+
+    @Test
+    public void testCachedConstructorPreservesAccessChecksAndInvocationFailure() {
+        for (int i = 0; i < 2; i++) {
+            Assert.assertThrows(IllegalAccessException.class,
+                                () -> FastBeanCopier.copy(Map.of(), PrivateConstructorBean.class));
+            InvocationTargetException failure = Assert.assertThrows(InvocationTargetException.class,
+                () -> FastBeanCopier.copy(Map.of(), ThrowingConstructorBean.class));
+            Assert.assertSame(ThrowingConstructorBean.FAILURE, failure.getCause());
+        }
+    }
+
+    @Test
+    public void testConstructorAndConversionCachesReleaseClassLoaderEntries() throws Exception {
+        FastBeanCopierSupport.clearCache();
+        try (URLClassLoader loader = createTestClassLoader()) {
+            Class<?> targetClass = loader.loadClass(Target.class.getName());
+            FastBeanCopierSupport.DEFAULT_CONVERT.convert(Map.of("name", "loader"), targetClass, null);
+            FastBeanCopierSupport.DEFAULT_CONVERT.convert(List.of(Map.of("name", "generic")),
+                                                         List.class, new Class[]{targetClass});
+            FastBeanCopierSupport.DEFAULT_CONVERT.convert("stable", String.class, null);
+            Object constructorCache = readField(FastBeanCopierSupport.class, null, "CONSTRUCTOR_CACHE");
+            Map<?, ?> volatileConstructors = (Map<?, ?>) readField(constructorCache.getClass(),
+                                                                 constructorCache, "volatileCache");
+            Map<?, ?> rawPlans = (Map<?, ?>) readField(FastBeanCopierConverterSupport.class, null, "RAW_PLAN_CACHE");
+            Map<?, ?> genericPlans = (Map<?, ?>) readField(FastBeanCopierConverterSupport.class, null, "PLAN_CACHE");
+            Assert.assertTrue(volatileConstructors.containsKey(loader));
+            Assert.assertTrue(rawPlans.containsKey(targetClass));
+            Assert.assertEquals(1, genericPlans.size());
+
+            FastBeanCopierSupport.clearCache(loader);
+
+            Assert.assertFalse(volatileConstructors.containsKey(loader));
+            Assert.assertFalse(rawPlans.containsKey(targetClass));
+            Assert.assertTrue(rawPlans.containsKey(String.class));
+            Assert.assertTrue(genericPlans.isEmpty());
+            Object recreated = FastBeanCopierSupport.DEFAULT_CONVERT.convert(
+                Map.of("name", "recreated"), targetClass, null);
+            Assert.assertEquals("recreated", FastBeanCopier.getProperty(recreated, "name"));
+            Assert.assertTrue(volatileConstructors.containsKey(loader));
+            FastBeanCopierSupport.clearCache();
+            Assert.assertTrue(volatileConstructors.isEmpty());
+            Assert.assertTrue(rawPlans.isEmpty());
+        } finally {
+            FastBeanCopierSupport.clearCache();
+        }
+    }
+
+    private static Object readField(Class<?> owner, Object instance, String name) throws Exception {
+        Field field = owner.getDeclaredField(name);
+        field.setAccessible(true);
+        return field.get(instance);
+    }
+
+    @Test
+    public void testSharedPlansDoNotRetainLocalConverterOrFactory() throws Exception {
+        FastBeanCopierSupport.clearCache();
+        try {
+            BeanFactory factory = localFactory("local");
+            FastBeanCopierSupport.DefaultConverter converter = new FastBeanCopierSupport.DefaultConverter();
+            converter.setBeanFactory(factory);
+            FactoryBean bean = converter.convert(Map.of("name", "converted"), FactoryBean.class, null);
+            Assert.assertEquals("local", bean.getFactory());
+            converter.convert("scalar", String.class, null);
+            converter.convert(List.of(Map.of("name", "list")), List.class, new Class[]{FactoryBean.class});
+
+            Object rawPlans = readField(FastBeanCopierConverterSupport.class, null, "RAW_PLAN_CACHE");
+            Object genericPlans = readField(FastBeanCopierConverterSupport.class, null, "PLAN_CACHE");
+            Assert.assertFalse(isReachable(rawPlans, factory));
+            Assert.assertFalse(isReachable(genericPlans, factory));
+            Assert.assertFalse(isReachable(rawPlans, readField(converter.getClass(), converter, "support")));
+
+            FastBeanCopierSupport.DefaultConverter other = new FastBeanCopierSupport.DefaultConverter();
+            other.setBeanFactory(localFactory("other"));
+            Assert.assertEquals("other", other.convert(Map.of(), FactoryBean.class, null).getFactory());
+        } finally {
+            FastBeanCopierSupport.clearCache();
+        }
+    }
+
+    private static BeanFactory localFactory(String marker) {
+        return new BeanFactory() {
+            @Override
+            public <T> T newInstance(Class<T> beanType) {
+                return beanType.cast(new FactoryBean(marker));
+            }
+        };
+    }
+
+    // Check the retained object graph, independently of GC timing or the plan's field layout.
+    private static boolean isReachable(Object root, Object expected) throws Exception {
+        Map<Object, Boolean> visited = new IdentityHashMap<>();
+        ArrayDeque<Object> pending = new ArrayDeque<>();
+        pending.add(root);
+        while (!pending.isEmpty()) {
+            Object value = pending.removeFirst();
+            if (value == expected) {
+                return true;
+            }
+            if (visited.put(value, Boolean.TRUE) != null) {
+                continue;
+            }
+            List<Object> children = new ArrayList<>();
+            if (value instanceof Map) {
+                children.addAll(((Map<?, ?>) value).keySet());
+                children.addAll(((Map<?, ?>) value).values());
+            } else if (value instanceof Object[]) {
+                children.addAll(Arrays.asList((Object[]) value));
+            } else {
+                for (Class<?> type = value.getClass(); type != null && type.getName().startsWith("org.hswebframework.web.bean.");
+                     type = type.getSuperclass()) {
+                    for (Field field : type.getDeclaredFields()) {
+                        if (!Modifier.isStatic(field.getModifiers()) && !field.getType().isPrimitive()) {
+                            field.setAccessible(true);
+                            children.add(field.get(value));
+                        }
+                    }
+                }
+            }
+            for (Object child : children) {
+                if (child != null) {
+                    pending.add(child);
+                }
+            }
+        }
+        return false;
+    }
+
+    @Test
+    public void testSizedContainersPreserveContentsOrderAndIndependentCopies() {
+        for (int size : new int[]{0, 1, 2, 3, 12, 13, 1000}) {
+            List<Integer> source = new ArrayList<>();
+            Map<Integer, Object> sourceMap = new LinkedHashMap<>();
+            for (int i = 0; i < size; i++) {
+                source.add(i);
+                sourceMap.put(i, i == 0 ? null : i);
+            }
+            List<?> list = FastBeanCopierSupport.DEFAULT_CONVERT.convert(source, List.class, new Class[]{Integer.class});
+            Assert.assertEquals(source, list);
+            Assert.assertNotSame(source, list);
+            Assert.assertTrue(list instanceof ArrayList);
+            LinkedHashSet<?> set = FastBeanCopierSupport.DEFAULT_CONVERT.convert(source, LinkedHashSet.class, null);
+            Assert.assertEquals(source, new ArrayList<>(set));
+            Map<?, ?> copied = FastBeanCopierSupport.DEFAULT_CONVERT.convert(sourceMap, Map.class, null);
+            Assert.assertEquals(sourceMap, copied);
+            Assert.assertNotSame(sourceMap, copied);
+            Assert.assertEquals(new ArrayList<>(sourceMap.keySet()), new ArrayList<>(copied.keySet()));
+            Assert.assertTrue(copied instanceof LinkedHashMap);
+            Map<?, ?> indexed = FastBeanCopierSupport.DEFAULT_CONVERT.convert(source, Map.class, null);
+            Assert.assertEquals(source, new ArrayList<>(indexed.values()));
+            Assert.assertEquals(source, new ArrayList<>(indexed.keySet()));
+            source.clear();
+            sourceMap.clear();
+            Assert.assertEquals(size, list.size());
+            Assert.assertEquals(size, copied.size());
+        }
+        List<?> nullable = FastBeanCopierSupport.DEFAULT_CONVERT.convert(Arrays.asList(1, null),
+                                                                         List.class, new Class[]{Integer.class});
+        Assert.assertEquals(Arrays.asList(1, null), nullable);
+        Assert.assertTrue(FastBeanCopierSupport.DEFAULT_CONVERT.convert(List.of(1, 2),
+                                                                      CustomCollection.class, null).constructed);
+        Assert.assertTrue(FastBeanCopierSupport.DEFAULT_CONVERT.newCollection(List.class).isEmpty());
+    }
+
+    public static class CustomCollection extends ArrayList<Object> {
+        private final boolean constructed;
+
+        public CustomCollection() {
+            constructed = true;
+        }
+    }
+
+    public static class FactoryBean {
+        private final String factory;
+        private String name;
+
+        public FactoryBean() {
+            this("default");
+        }
+
+        public FactoryBean(String factory) {
+            this.factory = factory;
+        }
+
+        public String getFactory() {
+            return factory;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+    }
+
+    public static class PrivateConstructorBean {
+        private PrivateConstructorBean() {
+        }
+    }
+
+    public static class ThrowingConstructorBean {
+        private static final IllegalStateException FAILURE = new IllegalStateException("constructor failed");
+
+        public ThrowingConstructorBean() {
+            throw FAILURE;
+        }
     }
 
     @Test

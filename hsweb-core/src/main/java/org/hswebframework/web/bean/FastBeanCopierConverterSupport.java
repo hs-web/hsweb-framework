@@ -19,20 +19,11 @@ import java.util.concurrent.ConcurrentHashMap;
 final class FastBeanCopierConverterSupport implements Converter {
     private static final ConvertUtilsBean CONVERT_UTILS = BeanUtilsBean.getInstance().getConvertUtils();
     private static final Map<Class<?>, Class<?>> PRIMITIVE_WRAPPERS = new HashMap<>();
-    private static final org.apache.commons.beanutils.Converter NO_CONVERTER = new org.apache.commons.beanutils.Converter() {
-        @Override
-        public <T> T convert(Class<T> type, Object value) {
-            return null;
-        }
-    };
-    private static final ClassLoaderScopedClassCache<org.apache.commons.beanutils.Converter> APACHE_CONVERTER_CACHE =
-        new ClassLoaderScopedClassCache<>();
     private static final ClassLoaderScopedClassCache<Map<String, Object>> ENUM_LOOKUP_CACHE =
-        new ClassLoaderScopedClassCache<>();
-    private static final ClassLoaderScopedClassCache<Boolean> BEAN_LIKE_TARGET_CACHE =
         new ClassLoaderScopedClassCache<>();
     private static final ClassLoaderScopedClassCache<CollectionFactory> COLLECTION_FACTORY_CACHE =
         new ClassLoaderScopedClassCache<>();
+    private static final Map<Class<?>, ConversionPlan> RAW_PLAN_CACHE = new ConcurrentHashMap<>();
     private static final Map<PlanKey, ConversionPlan> PLAN_CACHE = new ConcurrentHashMap<>();
 
     static {
@@ -49,10 +40,9 @@ final class FastBeanCopierConverterSupport implements Converter {
     private BeanFactory beanFactory;
 
     static void clearCache() {
-        APACHE_CONVERTER_CACHE.clear();
         ENUM_LOOKUP_CACHE.clear();
-        BEAN_LIKE_TARGET_CACHE.clear();
         COLLECTION_FACTORY_CACHE.clear();
+        RAW_PLAN_CACHE.clear();
         PLAN_CACHE.clear();
     }
 
@@ -61,10 +51,9 @@ final class FastBeanCopierConverterSupport implements Converter {
             clearCache();
             return;
         }
-        APACHE_CONVERTER_CACHE.clear(loader);
         ENUM_LOOKUP_CACHE.clear(loader);
-        BEAN_LIKE_TARGET_CACHE.clear(loader);
         COLLECTION_FACTORY_CACHE.clear(loader);
+        RAW_PLAN_CACHE.keySet().removeIf(type -> FastBeanCopierSupport.isClassLoaderMatch(type, loader));
         PLAN_CACHE.keySet().removeIf(key -> key.involves(loader));
     }
 
@@ -73,7 +62,7 @@ final class FastBeanCopierConverterSupport implements Converter {
     }
 
     Collection<?> newCollection(Class<?> targetClass) {
-        return getCollectionFactory(targetClass).create();
+        return getCollectionFactory(targetClass).create(-1);
     }
 
     @Override
@@ -87,42 +76,46 @@ final class FastBeanCopierConverterSupport implements Converter {
     }
 
     private ConversionPlan getPlan(Class<?> targetClass, Class[] genericType) {
-        Class<?>[] normalized = normalizeGenericTypes(genericType);
-        return PLAN_CACHE.computeIfAbsent(new PlanKey(targetClass, normalized),
-                                          key -> new ConversionPlan(key.targetClass, key.genericTypes));
-    }
-
-    private Class<?>[] normalizeGenericTypes(Class[] genericType) {
         if (genericType == null || genericType.length == 0) {
-            return FastBeanCopierSupport.EMPTY_CLASS_ARRAY;
+            ConversionPlan plan = RAW_PLAN_CACHE.get(targetClass);
+            return plan == null
+                ? RAW_PLAN_CACHE.computeIfAbsent(targetClass,
+                                                type -> new ConversionPlan(type, FastBeanCopierSupport.EMPTY_CLASS_ARRAY))
+                : plan;
         }
-        Class<?>[] normalized = new Class<?>[genericType.length];
-        System.arraycopy(genericType, 0, normalized, 0, genericType.length);
-        return normalized;
+        // Lookup can borrow the caller's array; cached keys and plans must own a snapshot.
+        ConversionPlan plan = PLAN_CACHE.get(new PlanKey(targetClass, genericType));
+        return plan == null
+            ? PLAN_CACHE.computeIfAbsent(new PlanKey(targetClass, genericType.clone()),
+                                         key -> new ConversionPlan(key.targetClass, key.genericTypes))
+            : plan;
     }
 
-    private CollectionFactory getCollectionFactory(Class<?> targetClass) {
+    private static CollectionFactory getCollectionFactory(Class<?> targetClass) {
         return COLLECTION_FACTORY_CACHE.computeIfAbsent(targetClass, FastBeanCopierConverterSupport::createCollectionFactory);
     }
 
     @SuppressWarnings("unchecked")
     private static CollectionFactory createCollectionFactory(Class<?> targetClass) {
-        if (targetClass == List.class || targetClass == Collection.class) {
-            return ArrayList::new;
+        if (targetClass == List.class || targetClass == Collection.class || targetClass == ArrayList.class) {
+            return size -> size < 0 ? new ArrayList<>() : new ArrayList<>(size);
         }
         if (targetClass == ConcurrentHashMap.KeySetView.class) {
-            return () -> (Collection<Object>) ConcurrentHashMap.newKeySet();
+            return size -> (Collection<Object>) (size < 0 ? ConcurrentHashMap.newKeySet() : ConcurrentHashMap.newKeySet(size));
         }
-        if (targetClass == Set.class) {
-            return HashSet::new;
+        if (targetClass == Set.class || targetClass == HashSet.class) {
+            return size -> size < 0 ? new HashSet<>() : new HashSet<>(mapCapacity(size));
+        }
+        if (targetClass == LinkedHashSet.class) {
+            return size -> size < 0 ? new LinkedHashSet<>() : new LinkedHashSet<>(mapCapacity(size));
         }
         if (targetClass == Queue.class) {
-            return LinkedList::new;
+            return size -> new LinkedList<>();
         }
         try {
             Constructor<?> constructor = targetClass.getDeclaredConstructor();
             constructor.setAccessible(true);
-            return () -> {
+            return size -> {
                 try {
                     return (Collection<Object>) constructor.newInstance();
                 } catch (Exception e) {
@@ -130,7 +123,7 @@ final class FastBeanCopierConverterSupport implements Converter {
                 }
             };
         } catch (Exception e) {
-            return () -> {
+            return size -> {
                 throw new UnsupportedOperationException("Unsupported Collection Type:" + targetClass, e);
             };
         }
@@ -153,8 +146,8 @@ final class FastBeanCopierConverterSupport implements Converter {
     }
 
     private Collection<?> convertToCollection(Object source, ConversionPlan plan) {
-        Collection<Object> collection = plan.collectionFactory.create();
         Collection<?> sourceCollection = asCollection(source);
+        Collection<Object> collection = plan.collectionFactory.create(sourceCollection.size());
         if (plan.elementType != null) {
             for (Object sourceObj : sourceCollection) {
                 if (sourceObj == null || isDirectAssignable(plan.elementType, sourceObj)) {
@@ -190,7 +183,7 @@ final class FastBeanCopierConverterSupport implements Converter {
     }
 
     private Map<?, ?> convertCollectionToMap(Collection<?> sourceCollection, ConversionPlan plan) {
-        Map<Object, Object> map = new LinkedHashMap<>(Math.max((int) (sourceCollection.size() / 0.75F) + 1, 16));
+        Map<Object, Object> map = new LinkedHashMap<>(mapCapacity(sourceCollection.size()));
         int i = 0;
         for (Object o : sourceCollection) {
             if (plan.mapKeyType != null && plan.mapValueType != null) {
@@ -207,23 +200,22 @@ final class FastBeanCopierConverterSupport implements Converter {
         if (map instanceof TreeMap) {
             return new TreeMap<>(map);
         }
-        if (map instanceof LinkedHashMap) {
-            return new LinkedHashMap<>(map);
-        }
         if (map instanceof ConcurrentHashMap) {
             return new ConcurrentHashMap<>(map);
         }
-        return new HashMap<>(map);
+        Map<Object, Object> copy = map instanceof LinkedHashMap
+            ? new LinkedHashMap<>(mapCapacity(map.size()))
+            : new HashMap<>(mapCapacity(map.size()));
+        // HashMap.putAll recalculates capacity and can double an exactly-sized table at its load threshold.
+        for (Map.Entry<?, ?> entry : map.entrySet()) {
+            copy.put(entry.getKey(), entry.getValue());
+        }
+        return copy;
     }
 
-    private static org.apache.commons.beanutils.Converter lookupApacheConverter(Class<?> targetClass) {
-        org.apache.commons.beanutils.Converter converter =
-            APACHE_CONVERTER_CACHE.computeIfAbsent(targetClass,
-                                                   type -> {
-                                                       org.apache.commons.beanutils.Converter found = CONVERT_UTILS.lookup(type);
-                                                       return found == null ? NO_CONVERTER : found;
-                                                   });
-        return converter == NO_CONVERTER ? null : converter;
+    private static int mapCapacity(int expectedSize) {
+        // Ceiling avoids doubling the table when size is exactly the default load threshold.
+        return (int) Math.ceil(expectedSize / 0.75D);
     }
 
     private boolean isDirectScalarAssignable(Class<?> targetClass, Object source) {
@@ -294,23 +286,6 @@ final class FastBeanCopierConverterSupport implements Converter {
         return false;
     }
 
-    private static boolean isBeanLikeTarget(ClassDescription target, Class<?> targetClass) {
-        return BEAN_LIKE_TARGET_CACHE.computeIfAbsent(targetClass,
-                                                      ignore -> targetClass != Object.class
-                                                          && targetClass != String.class
-                                                          && targetClass != CharSequence.class
-                                                          && targetClass != Date.class
-                                                          && targetClass != Boolean.class
-                                                          && targetClass != Character.class
-                                                          && targetClass != boolean.class
-                                                          && targetClass != char.class
-                                                          && !target.isEnumType()
-                                                          && !target.isArrayType()
-                                                          && !target.isCollectionType()
-                                                          && !target.isNumber()
-                                                          && !Map.class.isAssignableFrom(targetClass));
-    }
-
     private Number convertNumber(Number source, Class<?> targetClass) {
         Class<?> wrapper = targetClass.isPrimitive() ? PRIMITIVE_WRAPPERS.get(targetClass) : targetClass;
         return NumberUtils.convertNumberToTargetClass(source, (Class<? extends Number>) wrapper);
@@ -374,14 +349,13 @@ final class FastBeanCopierConverterSupport implements Converter {
     }
 
     private interface CollectionFactory {
-        Collection<Object> create();
+        Collection<Object> create(int expectedSize);
     }
 
-    private final class ConversionPlan {
+    // Global plans must not retain the converter or its caller-owned BeanFactory.
+    private static final class ConversionPlan {
         private final Class<?> targetClass;
         private final Class<?>[] genericTypes;
-        private final ClassDescription target;
-        private final org.apache.commons.beanutils.Converter apacheConverter;
         private final CollectionFactory collectionFactory;
         private final Class<?> elementType;
         private final Class<?> mapKeyType;
@@ -398,12 +372,11 @@ final class FastBeanCopierConverterSupport implements Converter {
         private final boolean numberType;
         private final boolean mapInterfaceType;
         private final boolean recordType;
-        private final boolean beanLikeTarget;
 
         private ConversionPlan(Class<?> targetClass, Class<?>[] genericTypes) {
             this.targetClass = targetClass;
             this.genericTypes = genericTypes;
-            this.target = ClassDescriptions.getDescription(targetClass);
+            ClassDescription target = ClassDescriptions.getDescription(targetClass);
             this.stringLike = targetClass == String.class || targetClass == CharSequence.class;
             this.objectType = targetClass == Object.class;
             this.dateType = targetClass == Date.class;
@@ -415,8 +388,6 @@ final class FastBeanCopierConverterSupport implements Converter {
             this.numberType = target.isNumber();
             this.mapInterfaceType = targetClass == Map.class;
             this.recordType = targetClass.isRecord();
-            this.beanLikeTarget = isBeanLikeTarget(target, targetClass);
-            this.apacheConverter = lookupApacheConverter(targetClass);
             this.collectionFactory = collectionType ? getCollectionFactory(targetClass) : null;
             this.elementType = genericTypes.length > 0 && genericTypes[0] != Object.class ? genericTypes[0] : null;
             this.mapKeyType = genericTypes.length >= 2 ? genericTypes[0] : null;
@@ -456,6 +427,7 @@ final class FastBeanCopierConverterSupport implements Converter {
                 if (source instanceof String) {
                     Object parsed = DateFormatter.fromString((String) source);
                     if (parsed == null) {
+                        org.apache.commons.beanutils.Converter apacheConverter = CONVERT_UTILS.lookup(Date.class);
                         return apacheConverter == null ? null : apacheConverter.convert(Date.class, source);
                     }
                     return parsed;
@@ -507,10 +479,9 @@ final class FastBeanCopierConverterSupport implements Converter {
             if (recordType) {
                 return FastBeanCopierSupport.copyToRecord(source, targetClass, support, Collections.emptySet());
             }
-            if (beanLikeTarget && source instanceof Map) {
-                return FastBeanCopierSupport.copy(source, support.beanFactory.newInstance(targetClass), support);
-            }
             try {
+                // BeanUtils registrations can change after a conversion plan has been cached.
+                org.apache.commons.beanutils.Converter apacheConverter = CONVERT_UTILS.lookup(targetClass);
                 if (apacheConverter != null) {
                     return apacheConverter.convert(targetClass, source);
                 }

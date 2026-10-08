@@ -531,7 +531,6 @@ abstract class AccessorFastBeanCopierBackend implements FastBeanCopierBackend {
         private final Class<?>[] genericTypes;
         private final boolean unwrapEnumDictNumber;
         private final boolean allowDirectAssignable;
-        private final boolean beanLikeTarget;
 
         MapConvertingPropertyTransfer(String name,
                                       ValueWriter writer,
@@ -547,7 +546,6 @@ abstract class AccessorFastBeanCopierBackend implements FastBeanCopierBackend {
             this.genericTypes = genericTypes;
             this.unwrapEnumDictNumber = unwrapEnumDictNumber;
             this.allowDirectAssignable = allowDirectAssignable;
-            this.beanLikeTarget = isBeanLikeTarget(targetType);
         }
 
         @Override
@@ -571,14 +569,7 @@ abstract class AccessorFastBeanCopierBackend implements FastBeanCopierBackend {
                 writer.write(target, value);
                 return;
             }
-            if (beanLikeTarget && value instanceof Map) {
-                Object nested = FastBeanCopierSupport.copy(value,
-                                                           FastBeanCopierSupport.getBeanFactory().newInstance(targetType),
-                                                           converter,
-                                                           Collections.emptySet());
-                writer.write(target, nested);
-                return;
-            }
+            // Nested maps must use the supplied converter, including registered interface factories.
             Object converted = converter.convert(value, (Class) targetType, genericTypes);
             if (converted == null && !targetPrimitive) {
                 return;
@@ -631,7 +622,6 @@ abstract class AccessorFastBeanCopierBackend implements FastBeanCopierBackend {
         private final Class<?>[] genericTypes;
         private final boolean unwrapEnumDictNumber;
         private final boolean allowDirectAssignable;
-        private final boolean beanLikeTarget;
 
         ConvertingPropertyTransfer(String name,
                                    ValueReader reader,
@@ -648,7 +638,6 @@ abstract class AccessorFastBeanCopierBackend implements FastBeanCopierBackend {
             this.genericTypes = genericTypes;
             this.unwrapEnumDictNumber = unwrapEnumDictNumber;
             this.allowDirectAssignable = allowDirectAssignable;
-            this.beanLikeTarget = isBeanLikeTarget(targetType);
         }
 
         @Override
@@ -666,14 +655,6 @@ abstract class AccessorFastBeanCopierBackend implements FastBeanCopierBackend {
             }
             if (allowDirectAssignable && isDirectAssignable(targetType, value)) {
                 writer.write(target, value);
-                return;
-            }
-            if (beanLikeTarget && value instanceof Map) {
-                Object nested = FastBeanCopierSupport.copy(value,
-                                                           FastBeanCopierSupport.getBeanFactory().newInstance(targetType),
-                                                           converter,
-                                                           Collections.emptySet());
-                writer.write(target, nested);
                 return;
             }
             Object converted = converter.convert(value, (Class) targetType, genericTypes);
@@ -745,22 +726,6 @@ abstract class AccessorFastBeanCopierBackend implements FastBeanCopierBackend {
         return targetType.isPrimitive()
             && targetType != boolean.class
             && targetType != char.class;
-    }
-
-    private static boolean isBeanLikeTarget(Class<?> targetType) {
-        return targetType != Object.class
-            && targetType != String.class
-            && targetType != CharSequence.class
-            && targetType != Date.class
-            && targetType != Boolean.class
-            && targetType != Character.class
-            && targetType != boolean.class
-            && targetType != char.class
-            && !targetType.isEnum()
-            && !targetType.isArray()
-            && !Collection.class.isAssignableFrom(targetType)
-            && !Map.class.isAssignableFrom(targetType)
-            && !isNumberType(targetType);
     }
 
     private static Object tryClone(Object value) {
