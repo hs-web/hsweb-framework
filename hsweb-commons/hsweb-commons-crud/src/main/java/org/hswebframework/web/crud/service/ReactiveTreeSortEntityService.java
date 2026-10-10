@@ -247,18 +247,38 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
         return save(Flux.just(data));
     }
 
+    /**
+     * 部分更新忽略 null，完整节点仅用于树准备；业务列仍按调用方提供的字段更新。
+     * 更新使用 ORM Modify 事件及其完整 before/after 状态；显式移根使用完整 save 或维护树生命周期的 DSL。
+     */
     @Override
-    @Transactional(transactionManager = TransactionManagers.reactiveTransactionManager)
+    @Transactional(rollbackFor = Throwable.class, transactionManager = TransactionManagers.reactiveTransactionManager)
     default Mono<Integer> updateById(K id, Mono<E> entityPublisher) {
-        return entityPublisher.flatMap(data -> findById(id).flatMap(existing -> {
-            // 部分修改忽略未提供的 null；显式移根保存完整状态，或在有树生命周期维护的服务中使用 DSL setNull。
+        Mono<Integer> operation = entityPublisher.flatMap(data -> findById(id).flatMap(existing -> {
             Map<String, Object> updates = FastBeanCopier.copy(data, new LinkedHashMap<>());
             updates.values().removeIf(Objects::isNull);
             updates.remove("id");
             FastBeanCopier.copy(updates, existing);
             existing.setId(id);
-            return save(existing).map(SaveResult::getTotal);
+            ReactiveTreeSortServiceHelper<E, K> helper = new ReactiveTreeSortServiceHelper<>(this);
+            return helper.prepare(Flux.just(existing))
+                .concatMap(node -> {
+                    if (Objects.equals(id, node.getId())) {
+                        // 不把完整快照回写到数据库，避免覆盖其他事务修改的独立业务字段。
+                        data.setPath(node.getPath());
+                        data.setLevel(node.getLevel());
+                        return getRepository().updateById(id, data);
+                    }
+                    // 未提供的后代仅同步树路径，不重写其业务状态或排序。
+                    return getRepository().createUpdate()
+                        .set("path", node.getPath())
+                        .set("level", node.getLevel())
+                        .where("id", node.getId())
+                        .execute();
+                })
+                .reduce(Math::addExact);
         })).defaultIfEmpty(0);
+        return TransactionUtils.tryRunInTransaction(operation, new DefaultTransactionDefinition());
     }
 
     @Override

@@ -621,6 +621,47 @@ public class ScopedReactiveTreeSortEntityServiceTest {
         }
     }
 
+    @Test
+    public void bothUpdateByIdMovesRollbackAfterDescendantModifyEventOrCallerFailure() {
+        for (String overload : List.of("entity", "mono")) {
+            for (String failure : List.of("modify", "caller")) {
+                String group = id();
+                TestTreeSortEntity target = node(group, null, null);
+                TestTreeSortEntity root = node(group, null, null);
+                TestTreeSortEntity branch = node(group, root.getId(), null);
+                TestTreeSortEntity leaf = node(group, branch.getId(), null);
+                if ("modify".equals(failure)) {
+                    // 初始 save 正常完成；移动目标写入后，遗漏后代的真实 Modify 后事件拒绝事务。
+                    leaf.setName("reject-dsl-" + id());
+                }
+                scoped.save(List.of(target, root, branch, leaf))
+                    .as(StepVerifier::create).expectNextCount(1).verifyComplete();
+                AtomicReference<Map<String, TestTreeSortEntity>> before = new AtomicReference<>();
+                stored(scoped, group).as(StepVerifier::create).assertNext(before::set).verifyComplete();
+                TestTreeSortEntity patch = new TestTreeSortEntity();
+                patch.setParentId(target.getId());
+                patch.setName("patched-" + id());
+                Mono<Integer> move = "entity".equals(overload) ? scoped.updateById(branch.getId(), patch)
+                    : scoped.updateById(branch.getId(), Mono.just(patch));
+                Mono<?> operation = move;
+                if ("caller".equals(failure)) {
+                    operation = TransactionUtils.tryRunInTransaction(
+                        move.doOnNext(total -> assertEquals(Integer.valueOf(2), total))
+                            .then(Mono.error(new IllegalStateException("reject patch caller"))),
+                        new DefaultTransactionDefinition());
+                }
+                operation.as(StepVerifier::create).expectErrorMatches(error ->
+                    error instanceof IllegalStateException && error.getMessage().equals(
+                        "modify".equals(failure) ? "reject modified tree" : "reject patch caller"))
+                    .verify();
+                stored(scoped, group).as(StepVerifier::create).assertNext(after ->
+                    assertSnapshot(before.get(), after)).verifyComplete();
+                scoped.getRepository().createDelete().where("groupId", group).execute()
+                    .as(StepVerifier::create).expectNext(4).verifyComplete();
+            }
+        }
+    }
+
     private static Mono<Map<String, TestTreeSortEntity>> stored(ScopedTreeService service, String group) {
         return service.createQuery().where("groupId", group).fetch().collectMap(TestTreeSortEntity::getId);
     }
