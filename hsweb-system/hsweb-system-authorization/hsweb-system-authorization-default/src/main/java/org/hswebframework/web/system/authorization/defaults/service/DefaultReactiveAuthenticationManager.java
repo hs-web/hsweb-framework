@@ -71,11 +71,18 @@ public class DefaultReactiveAuthenticationManager implements ReactiveAuthenticat
             return Mono.empty();
         }
         if (cacheManager == null) {
-            return initializeService.initUserAuthorization(userId);
+            return loadUserAuthentication(userId);
         }
 
         return cacheManager
                 .<Authentication>getCache("user-auth")
-                .getMono(userId, () -> initializeService.initUserAuthorization(userId));
+                .getMono(userId, () -> loadUserAuthentication(userId));
+    }
+
+    private Mono<Authentication> loadUserAuthentication(String userId) {
+        return reactiveUserService
+                .findById(userId)
+                .filter(user -> Byte.valueOf((byte) 1).equals(user.getStatus()))
+                .flatMap(user -> initializeService.initUserAuthorization(userId));
     }
 }

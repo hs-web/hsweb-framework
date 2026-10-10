@@ -10,6 +10,9 @@ import reactor.core.publisher.Mono;
 import java.util.Arrays;
 import java.util.Collection;
 
+/**
+ * Caffeine 的响应式适配，存储操作同步执行，以在途加载者身份保护本地失效。
+ */
 @SuppressWarnings("all")
 @AllArgsConstructor
 public class CaffeineReactiveCache<E> extends AbstractReactiveCache<E> {
@@ -18,7 +21,7 @@ public class CaffeineReactiveCache<E> extends AbstractReactiveCache<E> {
 
     @Override
     public Mono<Void> evictAll(Iterable<?> key) {
-        return Mono.fromRunnable(() -> cache.invalidateAll(key));
+        return Mono.fromRunnable(() -> key.forEach(k -> invalidateLoading(k, () -> cache.invalidate(k))));
     }
 
     @Override
@@ -46,11 +49,16 @@ public class CaffeineReactiveCache<E> extends AbstractReactiveCache<E> {
 
     @Override
     public Mono<Void> evict(Object key) {
-        return Mono.fromRunnable(() -> cache.invalidate(key));
+        return Mono.fromRunnable(() -> invalidateLoading(key, () -> cache.invalidate(key)));
+    }
+
+    @Override
+    protected Mono<Void> evictLoading(Object key, CacheLoader owner) {
+        return Mono.fromRunnable(() -> invalidateLoading(key, owner, () -> cache.invalidate(key)));
     }
 
     @Override
     public Mono<Void> clear() {
-        return Mono.fromRunnable(() -> cache.invalidateAll());
+        return Mono.fromRunnable(() -> invalidateAllLoading(cache::invalidateAll));
     }
 }
