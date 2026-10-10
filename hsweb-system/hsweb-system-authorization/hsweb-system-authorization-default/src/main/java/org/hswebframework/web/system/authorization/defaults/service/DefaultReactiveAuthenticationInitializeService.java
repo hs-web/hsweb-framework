@@ -35,7 +35,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * 初始化默认系统用户的认证，仅对启用的持久用户构造权限并发布认证初始化事件。
+ * 初始化默认系统用户的认证，仅排除禁用的持久用户，构造权限并发布认证初始化事件。
  * 用户读取与状态准入在同一链路完成，认证缓存由认证管理器负责。
  */
 @Slf4j
@@ -80,9 +80,9 @@ public class DefaultReactiveAuthenticationInitializeService
 
     public Mono<Authentication> doInit(Mono<UserEntity> userEntityMono) {
 
-        // 复用已读取的用户状态，拒绝不可用用户后再初始化权限和发布认证事件。
+        // 权限读取只排除禁用用户；凭据访问另按用户维度中的真实状态准入。
         return userEntityMono
-            .filter(user -> Byte.valueOf((byte) 1).equals(user.getStatus()))
+            .filter(user -> !Objects.equals(user.getStatus(), UserEntity.STATUS_DISABLED))
             .flatMap(user -> {
                 SimpleAuthentication authentication = new SimpleAuthentication();
                 authentication.setUser(SimpleUser
@@ -91,6 +91,7 @@ public class DefaultReactiveAuthenticationInitializeService
                                            .name(user.getName())
                                            .username(user.getUsername())
                                            .userType(user.getType())
+                                           .options(Collections.singletonMap(UserEntity.OPTION_STATUS, user.getStatus()))
                                            .build());
 
                 return initPermission(authentication)

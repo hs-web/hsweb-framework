@@ -64,7 +64,7 @@ public class DefaultReactiveAuthenticationManager implements ReactiveAuthenticat
                 .filter(PlainTextUsernamePasswordAuthenticationRequest.class::isInstance)
                 .map(PlainTextUsernamePasswordAuthenticationRequest.class::cast)
                 .flatMap(pwdRequest -> reactiveUserService.findByUsernameAndPassword(pwdRequest.getUsername(), pwdRequest.getPassword()))
-                .filter(user -> Byte.valueOf((byte) 1).equals(user.getStatus()))
+                .filter(user -> Byte.valueOf(UserEntity.STATUS_ENABLED).equals(user.getStatus()))
                 .map(UserEntity::getId)
                 .flatMap(this::getByUserId);
     }

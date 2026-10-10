@@ -57,11 +57,13 @@ public class DefaultReactiveAuthenticationManagerTest {
     private ReactiveRepository<AuthorizationSettingEntity, String> settingRepository;
 
     @Test
-    public void rejectsUnavailableUsersBeforePermissionInitializationWithoutCache() {
+    public void initializesPermissionsForNonDisabledUsersWithoutCache() {
         String userId = "state-check";
+        String permissionId = "non-disabled-state-permission";
+        grantUserPermission(userId, permissionId);
         UserEntity user = new UserEntity();
         user.setId(userId);
-        user.setStatus((byte) 0);
+        user.setStatus(UserEntity.STATUS_DISABLED);
         AtomicInteger userReads = new AtomicInteger();
         AtomicInteger permissions = new AtomicInteger();
         AtomicInteger events = new AtomicInteger();
@@ -83,22 +85,24 @@ public class DefaultReactiveAuthenticationManagerTest {
         manager.getByUserId(userId)
                .as(StepVerifier::create)
                .verifyComplete();
-        user.setStatus(null);
-        manager.getByUserId(userId)
-               .as(StepVerifier::create)
-               .verifyComplete();
-        Assert.assertEquals(3, userReads.get());
+        Assert.assertEquals(2, userReads.get());
         Assert.assertEquals(0, permissions.get());
         Assert.assertEquals(0, events.get());
 
-        user.setStatus((byte) 1);
-        manager.getByUserId(userId)
-               .as(StepVerifier::create)
-               .assertNext(authentication -> Assert.assertEquals(userId, authentication.getUser().getId()))
-               .verifyComplete();
-        Assert.assertEquals(4, userReads.get());
-        Assert.assertEquals(1, permissions.get());
-        Assert.assertEquals(1, events.get());
+        Byte[] readableStates = {UserEntity.STATUS_ENABLED, UserEntity.STATUS_LOCKED, null, (byte) 3};
+        for (Byte status : readableStates) {
+            user.setStatus(status);
+            manager.getByUserId(userId)
+                   .as(StepVerifier::create)
+                   .assertNext(authentication -> {
+                       assertUserStatus(authentication, userId, status);
+                       Assert.assertTrue(authentication.hasPermission(permissionId, "query"));
+                   })
+                   .verifyComplete();
+        }
+        Assert.assertEquals(6, userReads.get());
+        Assert.assertEquals(4, permissions.get());
+        Assert.assertEquals(4, events.get());
     }
 
     @Test
@@ -106,7 +110,7 @@ public class DefaultReactiveAuthenticationManagerTest {
         String userId = "cached-state-check";
         UserEntity user = new UserEntity();
         user.setId(userId);
-        user.setStatus((byte) 1);
+        user.setStatus(UserEntity.STATUS_ENABLED);
         AtomicInteger userReads = new AtomicInteger();
         AtomicInteger permissions = new AtomicInteger();
         AtomicInteger events = new AtomicInteger();
@@ -126,14 +130,14 @@ public class DefaultReactiveAuthenticationManagerTest {
         for (int i = 0; i < 3; i++) {
             manager.getByUserId(userId)
                    .as(StepVerifier::create)
-                   .assertNext(authentication -> Assert.assertEquals(userId, authentication.getUser().getId()))
+                   .assertNext(authentication -> assertUserStatus(authentication, userId, UserEntity.STATUS_ENABLED))
                    .verifyComplete();
         }
         Assert.assertEquals(1, userReads.get());
         Assert.assertEquals(1, permissions.get());
         Assert.assertEquals(1, events.get());
 
-        user.setStatus((byte) 0);
+        user.setStatus(UserEntity.STATUS_DISABLED);
         clearCache(manager, userId);
         manager.getByUserId(userId)
                .as(StepVerifier::create)
@@ -142,35 +146,110 @@ public class DefaultReactiveAuthenticationManagerTest {
         Assert.assertEquals(1, permissions.get());
         Assert.assertEquals(1, events.get());
 
-        user.setStatus((byte) 1);
+        user.setStatus(UserEntity.STATUS_LOCKED);
         clearCache(manager, userId);
         manager.getByUserId(userId)
                .as(StepVerifier::create)
-               .assertNext(authentication -> Assert.assertEquals(userId, authentication.getUser().getId()))
+               .assertNext(authentication -> assertUserStatus(authentication, userId, UserEntity.STATUS_LOCKED))
                .verifyComplete();
         manager.getByUserId(userId)
                .as(StepVerifier::create)
-               .assertNext(authentication -> Assert.assertEquals(userId, authentication.getUser().getId()))
+               .assertNext(authentication -> assertUserStatus(authentication, userId, UserEntity.STATUS_LOCKED))
                .verifyComplete();
         Assert.assertEquals(3, userReads.get());
         Assert.assertEquals(2, permissions.get());
         Assert.assertEquals(2, events.get());
 
+        user.setStatus(UserEntity.STATUS_ENABLED);
+        clearCache(manager, userId);
+        manager.getByUserId(userId)
+               .as(StepVerifier::create)
+               .assertNext(authentication -> assertUserStatus(authentication, userId, UserEntity.STATUS_ENABLED))
+               .verifyComplete();
+        manager.getByUserId(userId)
+               .as(StepVerifier::create)
+               .assertNext(authentication -> assertUserStatus(authentication, userId, UserEntity.STATUS_ENABLED))
+               .verifyComplete();
+        Assert.assertEquals(4, userReads.get());
+        Assert.assertEquals(3, permissions.get());
+        Assert.assertEquals(3, events.get());
+
         user.setStatus(null);
         clearCache(manager, userId);
         manager.getByUserId(userId)
                .as(StepVerifier::create)
+               .assertNext(authentication -> assertUserStatus(authentication, userId, null))
                .verifyComplete();
-        Assert.assertEquals(4, userReads.get());
-        Assert.assertEquals(2, permissions.get());
-        Assert.assertEquals(2, events.get());
+        Assert.assertEquals(5, userReads.get());
+        Assert.assertEquals(4, permissions.get());
+        Assert.assertEquals(4, events.get());
 
         manager.getByUserId("missing")
                .as(StepVerifier::create)
                .verifyComplete();
-        Assert.assertEquals(5, userReads.get());
-        Assert.assertEquals(2, permissions.get());
-        Assert.assertEquals(2, events.get());
+        Assert.assertEquals(6, userReads.get());
+        Assert.assertEquals(4, permissions.get());
+        Assert.assertEquals(4, events.get());
+    }
+
+    @Test
+    public void passwordAuthenticationOnlyAcceptsEnabledUsers() {
+        String userId = "password-state-check";
+        UserEntity user = new UserEntity();
+        user.setId(userId);
+        user.setUsername(userId);
+        AtomicInteger userReads = new AtomicInteger();
+        AtomicInteger permissions = new AtomicInteger();
+        AtomicInteger events = new AtomicInteger();
+        ReactiveUserService users = mock(ReactiveUserService.class);
+        when(users.findById(userId)).thenReturn(Mono.defer(() -> {
+            userReads.incrementAndGet();
+            return Mono.just(user);
+        }));
+        when(users.findByUsernameAndPassword(userId, "password"))
+            .thenReturn(Mono.defer(() -> Mono.just(user)));
+        DefaultReactiveAuthenticationManager manager = createManager(
+            users, createInitializer(users, permissions, events),
+            new GuavaReactiveCacheManager(CacheBuilder.newBuilder()));
+
+        Byte[] rejectedStates = {UserEntity.STATUS_DISABLED, UserEntity.STATUS_LOCKED, null, (byte) 3};
+        for (Byte status : rejectedStates) {
+            user.setStatus(status);
+            manager.authenticate(Mono.just(new PlainTextUsernamePasswordAuthenticationRequest(userId, "password")))
+                   .as(StepVerifier::create)
+                   .verifyComplete();
+        }
+        Assert.assertEquals(0, userReads.get());
+        Assert.assertEquals(0, permissions.get());
+        Assert.assertEquals(0, events.get());
+
+        user.setStatus(UserEntity.STATUS_ENABLED);
+        manager.authenticate(Mono.just(new PlainTextUsernamePasswordAuthenticationRequest(userId, "password")))
+               .as(StepVerifier::create)
+               .assertNext(authentication -> assertUserStatus(authentication, userId, UserEntity.STATUS_ENABLED))
+               .verifyComplete();
+
+        user.setStatus(UserEntity.STATUS_LOCKED);
+        clearCache(manager, userId);
+        manager.getByUserId(userId)
+               .as(StepVerifier::create)
+               .assertNext(authentication -> assertUserStatus(authentication, userId, UserEntity.STATUS_LOCKED))
+               .verifyComplete();
+        manager.authenticate(Mono.just(new PlainTextUsernamePasswordAuthenticationRequest(userId, "password")))
+               .as(StepVerifier::create)
+               .verifyComplete();
+
+        user.setStatus(UserEntity.STATUS_ENABLED);
+        clearCache(manager, userId);
+        for (int i = 0; i < 2; i++) {
+            manager.authenticate(Mono.just(new PlainTextUsernamePasswordAuthenticationRequest(userId, "password")))
+                   .as(StepVerifier::create)
+                   .assertNext(authentication -> assertUserStatus(authentication, userId, UserEntity.STATUS_ENABLED))
+                   .verifyComplete();
+        }
+        Assert.assertEquals(3, userReads.get());
+        Assert.assertEquals(3, permissions.get());
+        Assert.assertEquals(3, events.get());
     }
 
     @Test
@@ -207,6 +286,41 @@ public class DefaultReactiveAuthenticationManagerTest {
                .verifyComplete();
         verify(initializer).initUserAuthorization(userId);
         verifyNoInteractions(users);
+    }
+
+    private static void assertUserStatus(Authentication authentication, String userId, Byte status) {
+        Assert.assertEquals(userId, authentication.getUser().getId());
+        Assert.assertTrue(authentication.getUser().getOptions().containsKey(UserEntity.OPTION_STATUS));
+        Assert.assertEquals(status, authentication.getUser().getOptions().get(UserEntity.OPTION_STATUS));
+    }
+
+    private void grantUserPermission(String userId, String permissionId) {
+        permissionRepository.newInstance()
+                            .map(permission -> {
+                                permission.setId(permissionId);
+                                permission.setName(permissionId);
+                                permission.setActions(Collections.singletonList(
+                                    ActionEntity.builder().action("query").describe("query").build()));
+                                permission.setStatus((byte) 1);
+                                return permission;
+                            })
+                            .as(permissionRepository::insert)
+                            .as(StepVerifier::create)
+                            .expectNext(1)
+                            .verifyComplete();
+        settingRepository.newInstance()
+                         .map(setting -> {
+                             setting.setPermission(permissionId);
+                             setting.setActions(Collections.singleton("query"));
+                             setting.setDimensionType("user");
+                             setting.setDimensionTarget(userId);
+                             setting.setState((byte) 1);
+                             return setting;
+                         })
+                         .as(settingRepository::insert)
+                         .as(StepVerifier::create)
+                         .expectNext(1)
+                         .verifyComplete();
     }
 
     private DefaultReactiveAuthenticationInitializeService createInitializer(
