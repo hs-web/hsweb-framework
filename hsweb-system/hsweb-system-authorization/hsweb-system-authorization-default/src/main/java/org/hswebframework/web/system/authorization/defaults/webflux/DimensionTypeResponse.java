@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hswebframework.web.authorization.DimensionType;
+import org.hswebframework.web.api.crud.entity.EntityFactoryHolder;
+import org.hswebframework.web.bean.FastBeanCopier;
 
 @Getter
 @Setter
@@ -20,6 +22,6 @@ public class DimensionTypeResponse {
     private String name;
 
     public static DimensionTypeResponse of(DimensionType type) {
-        return of(type.getId(), type.getName());
+        return FastBeanCopier.copy(type, EntityFactoryHolder.newInstance(DimensionTypeResponse.class, DimensionTypeResponse::new));
     }
 }

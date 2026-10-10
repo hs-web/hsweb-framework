@@ -112,6 +112,13 @@ public abstract class TreeSortServiceHelper<E extends TreeSortSupportEntity<PK>,
             .then();
     }
 
+    /** 当前完整保存明确移根，且原持久化节点具有父级。 */
+    protected boolean isMovingToRoot(E node) {
+        E previous = oldData.get(node.getId());
+        return node.getParentId() == null && previous != null
+            && !ObjectUtils.isEmpty(previous.getParentId());
+    }
+
     private void initChildren() {
         childrenMapping.clear();
 
@@ -193,7 +200,7 @@ public abstract class TreeSortServiceHelper<E extends TreeSortSupportEntity<PK>,
             if (old != null) {
                 PK newParentId = data.getParentId();
                 //父节点发生变化，更新所有子节点path
-                if (newParentId != null && !newParentId.equals(parentId)) {
+                if (!Objects.equals(newParentId, parentId)) {
                     Consumer<E> childConsumer = child -> {
                         //更新了父节点,但是同时也传入的对应的子节点
                         E readyToUpdate = thisTime.get(child.getId());
