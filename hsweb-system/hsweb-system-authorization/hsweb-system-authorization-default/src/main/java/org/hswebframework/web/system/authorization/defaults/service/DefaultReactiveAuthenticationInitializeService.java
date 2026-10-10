@@ -34,6 +34,10 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * 初始化默认系统用户的认证，仅对启用的持久用户构造权限并发布认证初始化事件。
+ * 用户读取与状态准入在同一链路完成，认证缓存由认证管理器负责。
+ */
 @Slf4j
 public class DefaultReactiveAuthenticationInitializeService
     implements ReactiveAuthenticationInitializeService {
@@ -76,29 +80,32 @@ public class DefaultReactiveAuthenticationInitializeService
 
     public Mono<Authentication> doInit(Mono<UserEntity> userEntityMono) {
 
-        return userEntityMono.flatMap(user -> {
-            SimpleAuthentication authentication = new SimpleAuthentication();
-            authentication.setUser(SimpleUser
-                                       .builder()
-                                       .id(user.getId())
-                                       .name(user.getName())
-                                       .username(user.getUsername())
-                                       .userType(user.getType())
-                                       .build());
+        // 复用已读取的用户状态，拒绝不可用用户后再初始化权限和发布认证事件。
+        return userEntityMono
+            .filter(user -> Byte.valueOf((byte) 1).equals(user.getStatus()))
+            .flatMap(user -> {
+                SimpleAuthentication authentication = new SimpleAuthentication();
+                authentication.setUser(SimpleUser
+                                           .builder()
+                                           .id(user.getId())
+                                           .name(user.getName())
+                                           .username(user.getUsername())
+                                           .userType(user.getType())
+                                           .build());
 
-            return initPermission(authentication)
-                .defaultIfEmpty(authentication)
-                .onErrorResume(err -> {
-                    log.warn(err.getMessage(), err);
-                    return Mono.just(authentication);
-                })
-                .flatMap(auth -> {
-                    AuthorizationInitializeEvent event = new AuthorizationInitializeEvent(auth);
-                    return event
-                        .publish(eventPublisher)
-                        .then(Mono.fromSupplier(event::getAuthentication));
-                });
-        });
+                return initPermission(authentication)
+                    .defaultIfEmpty(authentication)
+                    .onErrorResume(err -> {
+                        log.warn(err.getMessage(), err);
+                        return Mono.just(authentication);
+                    })
+                    .flatMap(auth -> {
+                        AuthorizationInitializeEvent event = new AuthorizationInitializeEvent(auth);
+                        return event
+                            .publish(eventPublisher)
+                            .then(Mono.fromSupplier(event::getAuthentication));
+                    });
+            });
     }
 
     protected Flux<AuthorizationSettingEntity> getSettings(List<Dimension> dimensions) {

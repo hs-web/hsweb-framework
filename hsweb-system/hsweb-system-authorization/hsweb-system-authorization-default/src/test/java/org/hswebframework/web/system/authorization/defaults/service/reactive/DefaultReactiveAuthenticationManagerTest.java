@@ -6,7 +6,9 @@ import org.hswebframework.web.authorization.Authentication;
 import org.hswebframework.web.authorization.ReactiveAuthenticationInitializeService;
 import org.hswebframework.web.authorization.ReactiveAuthenticationManager;
 import org.hswebframework.web.authorization.User;
+import org.hswebframework.web.authorization.events.AuthorizationInitializeEvent;
 import org.hswebframework.web.authorization.simple.PlainTextUsernamePasswordAuthenticationRequest;
+import org.hswebframework.web.authorization.simple.SimpleAuthentication;
 import org.hswebframework.web.cache.ReactiveCacheManager;
 import org.hswebframework.web.cache.supports.GuavaReactiveCacheManager;
 import org.hswebframework.web.system.authorization.api.entity.ActionEntity;
@@ -15,12 +17,15 @@ import org.hswebframework.web.system.authorization.api.entity.PermissionEntity;
 import org.hswebframework.web.system.authorization.api.entity.UserEntity;
 import org.hswebframework.web.system.authorization.api.event.ClearUserAuthorizationCacheEvent;
 import org.hswebframework.web.system.authorization.api.service.reactive.ReactiveUserService;
+import org.hswebframework.web.system.authorization.defaults.service.AuthenticationInitializeProperties;
+import org.hswebframework.web.system.authorization.defaults.service.DefaultReactiveAuthenticationInitializeService;
 import org.hswebframework.web.system.authorization.defaults.service.DefaultReactiveAuthenticationManager;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import reactor.core.publisher.Mono;
@@ -31,7 +36,6 @@ import java.util.Collections;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -53,17 +57,24 @@ public class DefaultReactiveAuthenticationManagerTest {
     private ReactiveRepository<AuthorizationSettingEntity, String> settingRepository;
 
     @Test
-    public void rejectsUnavailableUsersWithoutCache() {
+    public void rejectsUnavailableUsersBeforePermissionInitializationWithoutCache() {
         String userId = "state-check";
         UserEntity user = new UserEntity();
         user.setId(userId);
         user.setStatus((byte) 0);
+        AtomicInteger userReads = new AtomicInteger();
+        AtomicInteger permissions = new AtomicInteger();
+        AtomicInteger events = new AtomicInteger();
         ReactiveUserService users = mock(ReactiveUserService.class);
-        ReactiveAuthenticationInitializeService initializer = mock(ReactiveAuthenticationInitializeService.class);
-        Authentication authentication = mock(Authentication.class);
-        when(users.findById(userId)).thenReturn(Mono.just(user));
-        when(users.findById("missing")).thenReturn(Mono.empty());
-        when(initializer.initUserAuthorization(userId)).thenReturn(Mono.just(authentication));
+        when(users.findById(userId)).thenReturn(Mono.defer(() -> {
+            userReads.incrementAndGet();
+            return Mono.just(user);
+        }));
+        when(users.findById("missing")).thenReturn(Mono.defer(() -> {
+            userReads.incrementAndGet();
+            return Mono.empty();
+        }));
+        DefaultReactiveAuthenticationInitializeService initializer = createInitializer(users, permissions, events);
         DefaultReactiveAuthenticationManager manager = createManager(users, initializer, null);
 
         manager.getByUserId("missing")
@@ -76,14 +87,18 @@ public class DefaultReactiveAuthenticationManagerTest {
         manager.getByUserId(userId)
                .as(StepVerifier::create)
                .verifyComplete();
-        verifyNoInteractions(initializer);
+        Assert.assertEquals(3, userReads.get());
+        Assert.assertEquals(0, permissions.get());
+        Assert.assertEquals(0, events.get());
 
         user.setStatus((byte) 1);
         manager.getByUserId(userId)
                .as(StepVerifier::create)
-               .expectNext(authentication)
+               .assertNext(authentication -> Assert.assertEquals(userId, authentication.getUser().getId()))
                .verifyComplete();
-        verify(initializer).initUserAuthorization(userId);
+        Assert.assertEquals(4, userReads.get());
+        Assert.assertEquals(1, permissions.get());
+        Assert.assertEquals(1, events.get());
     }
 
     @Test
@@ -93,30 +108,30 @@ public class DefaultReactiveAuthenticationManagerTest {
         user.setId(userId);
         user.setStatus((byte) 1);
         AtomicInteger userReads = new AtomicInteger();
-        AtomicInteger initializations = new AtomicInteger();
+        AtomicInteger permissions = new AtomicInteger();
+        AtomicInteger events = new AtomicInteger();
         ReactiveUserService users = mock(ReactiveUserService.class);
-        ReactiveAuthenticationInitializeService initializer = mock(ReactiveAuthenticationInitializeService.class);
-        Authentication authentication = mock(Authentication.class);
         when(users.findById(userId)).thenReturn(Mono.defer(() -> {
             userReads.incrementAndGet();
             return Mono.just(user);
         }));
-        when(users.findById("missing")).thenReturn(Mono.empty());
-        when(initializer.initUserAuthorization(userId)).thenReturn(Mono.defer(() -> {
-            initializations.incrementAndGet();
-            return Mono.just(authentication);
+        when(users.findById("missing")).thenReturn(Mono.defer(() -> {
+            userReads.incrementAndGet();
+            return Mono.empty();
         }));
+        DefaultReactiveAuthenticationInitializeService initializer = createInitializer(users, permissions, events);
         DefaultReactiveAuthenticationManager manager = createManager(
             users, initializer, new GuavaReactiveCacheManager(CacheBuilder.newBuilder()));
 
         for (int i = 0; i < 3; i++) {
             manager.getByUserId(userId)
                    .as(StepVerifier::create)
-                   .expectNext(authentication)
+                   .assertNext(authentication -> Assert.assertEquals(userId, authentication.getUser().getId()))
                    .verifyComplete();
         }
         Assert.assertEquals(1, userReads.get());
-        Assert.assertEquals(1, initializations.get());
+        Assert.assertEquals(1, permissions.get());
+        Assert.assertEquals(1, events.get());
 
         user.setStatus((byte) 0);
         clearCache(manager, userId);
@@ -124,25 +139,38 @@ public class DefaultReactiveAuthenticationManagerTest {
                .as(StepVerifier::create)
                .verifyComplete();
         Assert.assertEquals(2, userReads.get());
-        Assert.assertEquals(1, initializations.get());
+        Assert.assertEquals(1, permissions.get());
+        Assert.assertEquals(1, events.get());
 
         user.setStatus((byte) 1);
         clearCache(manager, userId);
         manager.getByUserId(userId)
                .as(StepVerifier::create)
-               .expectNext(authentication)
+               .assertNext(authentication -> Assert.assertEquals(userId, authentication.getUser().getId()))
                .verifyComplete();
         manager.getByUserId(userId)
                .as(StepVerifier::create)
-               .expectNext(authentication)
+               .assertNext(authentication -> Assert.assertEquals(userId, authentication.getUser().getId()))
                .verifyComplete();
         Assert.assertEquals(3, userReads.get());
-        Assert.assertEquals(2, initializations.get());
+        Assert.assertEquals(2, permissions.get());
+        Assert.assertEquals(2, events.get());
+
+        user.setStatus(null);
+        clearCache(manager, userId);
+        manager.getByUserId(userId)
+               .as(StepVerifier::create)
+               .verifyComplete();
+        Assert.assertEquals(4, userReads.get());
+        Assert.assertEquals(2, permissions.get());
+        Assert.assertEquals(2, events.get());
 
         manager.getByUserId("missing")
                .as(StepVerifier::create)
                .verifyComplete();
-        verify(initializer, never()).initUserAuthorization("missing");
+        Assert.assertEquals(5, userReads.get());
+        Assert.assertEquals(2, permissions.get());
+        Assert.assertEquals(2, events.get());
     }
 
     @Test
@@ -150,7 +178,9 @@ public class DefaultReactiveAuthenticationManagerTest {
         String userId = "lookup-error";
         IllegalStateException failure = new IllegalStateException("database unavailable");
         ReactiveUserService users = mock(ReactiveUserService.class);
-        ReactiveAuthenticationInitializeService initializer = mock(ReactiveAuthenticationInitializeService.class);
+        AtomicInteger permissions = new AtomicInteger();
+        AtomicInteger events = new AtomicInteger();
+        DefaultReactiveAuthenticationInitializeService initializer = createInitializer(users, permissions, events);
         when(users.findById(userId)).thenReturn(Mono.error(failure));
         DefaultReactiveAuthenticationManager manager = createManager(users, initializer, null);
 
@@ -158,7 +188,46 @@ public class DefaultReactiveAuthenticationManagerTest {
                .as(StepVerifier::create)
                .expectErrorSatisfies(error -> Assert.assertSame(failure, error))
                .verify();
-        verifyNoInteractions(initializer);
+        Assert.assertEquals(0, permissions.get());
+        Assert.assertEquals(0, events.get());
+    }
+
+    @Test
+    public void delegatesToCustomInitializerWithoutPersistentUserLookup() {
+        String userId = "external-user";
+        ReactiveUserService users = mock(ReactiveUserService.class);
+        ReactiveAuthenticationInitializeService initializer = mock(ReactiveAuthenticationInitializeService.class);
+        Authentication authentication = mock(Authentication.class);
+        when(initializer.initUserAuthorization(userId)).thenReturn(Mono.just(authentication));
+        DefaultReactiveAuthenticationManager manager = createManager(users, initializer, null);
+
+        manager.getByUserId(userId)
+               .as(StepVerifier::create)
+               .expectNext(authentication)
+               .verifyComplete();
+        verify(initializer).initUserAuthorization(userId);
+        verifyNoInteractions(users);
+    }
+
+    private DefaultReactiveAuthenticationInitializeService createInitializer(
+        ReactiveUserService users, AtomicInteger permissions, AtomicInteger events) {
+        DefaultReactiveAuthenticationInitializeService initializer = new DefaultReactiveAuthenticationInitializeService() {
+            @Override
+            protected Mono<Authentication> initPermission(SimpleAuthentication authentication) {
+                permissions.incrementAndGet();
+                return super.initPermission(authentication);
+            }
+        };
+        ApplicationEventPublisher publisher = event -> {
+            Assert.assertTrue(event instanceof AuthorizationInitializeEvent);
+            events.incrementAndGet();
+        };
+        ReflectionTestUtils.setField(initializer, "userService", users);
+        ReflectionTestUtils.setField(initializer, "settingRepository", settingRepository);
+        ReflectionTestUtils.setField(initializer, "permissionRepository", permissionRepository);
+        ReflectionTestUtils.setField(initializer, "properties", new AuthenticationInitializeProperties());
+        ReflectionTestUtils.setField(initializer, "eventPublisher", publisher);
+        return initializer;
     }
 
     private static DefaultReactiveAuthenticationManager createManager(
