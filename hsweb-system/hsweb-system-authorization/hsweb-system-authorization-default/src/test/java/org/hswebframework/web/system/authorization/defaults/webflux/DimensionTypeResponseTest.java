@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hswebframework.web.api.crud.entity.EntityFactoryHolder;
 import org.hswebframework.web.authorization.DimensionType;
+import org.hswebframework.web.authorization.DefaultDimensionType;
 import org.hswebframework.web.authorization.simple.SimpleDimensionType;
 import org.hswebframework.web.crud.entity.factory.MapperEntityFactory;
 import org.junit.After;
@@ -34,6 +35,9 @@ public class DimensionTypeResponseTest {
         assertEquals("org", response.getId());
         assertEquals("Organization", response.getName());
         assertEquals("Role", DimensionTypeResponse.of("role", "Role").getName());
+        DimensionTypeResponse role = DimensionTypeResponse.of(DefaultDimensionType.role);
+        assertEquals("role", role.getId());
+        assertEquals(DefaultDimensionType.role.getName(), role.getName());
     }
 
     @Test

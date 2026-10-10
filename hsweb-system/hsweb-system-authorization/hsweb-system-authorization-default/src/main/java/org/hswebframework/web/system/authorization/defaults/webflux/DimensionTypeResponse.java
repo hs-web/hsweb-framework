@@ -22,6 +22,11 @@ public class DimensionTypeResponse {
     private String name;
 
     public static DimensionTypeResponse of(DimensionType type) {
-        return FastBeanCopier.copy(type, EntityFactoryHolder.newInstance(DimensionTypeResponse.class, DimensionTypeResponse::new));
+        DimensionTypeResponse response = FastBeanCopier.copy(type,
+            EntityFactoryHolder.newInstance(DimensionTypeResponse.class, DimensionTypeResponse::new));
+        // 类型接口允许枚举和只读实现；必选字段不依赖属性复制器的可写 Bean 属性。
+        response.setId(type.getId());
+        response.setName(type.getName());
+        return response;
     }
 }
