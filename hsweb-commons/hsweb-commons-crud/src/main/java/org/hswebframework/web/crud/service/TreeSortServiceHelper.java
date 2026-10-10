@@ -217,17 +217,16 @@ public abstract class TreeSortServiceHelper<E extends TreeSortSupportEntity<PK>,
         E oldParent = parentId == null ? null : allData.get(parentId);
         //编辑节点
         if (old != null) {
+            Consumer<E> childConsumer = child -> {
+                //更新了父节点,但是同时也传入的对应的子节点
+                E readyToUpdate = thisTime.get(child.getId());
+                if (null != readyToUpdate) {
+                    readyToUpdate.setPath(child.getPath());
+                }
+            };
             PK newParentId = data.getParentId();
             //父节点发生变化，更新所有子节点path
             if (!Objects.equals(newParentId, parentId)) {
-                Consumer<E> childConsumer = child -> {
-                    //更新了父节点,但是同时也传入的对应的子节点
-                    E readyToUpdate = thisTime.get(child.getId());
-                    if (null != readyToUpdate) {
-                        readyToUpdate.setPath(child.getPath());
-                    }
-                };
-
                 //变更到了顶级节点
                 if (isRootNode(data)) {
                     data.setPath(RandomUtil.randomChar(4));
@@ -249,7 +248,10 @@ public abstract class TreeSortServiceHelper<E extends TreeSortSupportEntity<PK>,
                     if (old.getPath().startsWith(oldParent.getPath())) {
                         data.setPath(old.getPath());
                     } else {
+                        //父ID未变但祖先已移动；自身重建path时，遗漏输入的后代也必须保持一致。
                         data.setPath(oldParent.getPath() + "-" + RandomUtil.randomChar(4));
+                        this.refactorChildPath(data.getId(), data.getPath(), childConsumer);
+                        putChildToReadyToSave(childGetter, data);
                     }
                 } else {
                     data.setPath(old.getPath());

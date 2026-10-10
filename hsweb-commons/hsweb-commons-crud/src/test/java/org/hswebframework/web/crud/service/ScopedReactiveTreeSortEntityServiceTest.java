@@ -6,6 +6,7 @@ import org.hswebframework.web.crud.TestApplication;
 import org.hswebframework.web.api.crud.entity.QueryParamEntity;
 import org.hswebframework.web.crud.entity.TestTreeSortEntity;
 import org.hswebframework.web.crud.events.EntityBeforeCreateEvent;
+import org.hswebframework.web.crud.events.EntityBeforeDeleteEvent;
 import org.hswebframework.web.crud.events.EntityBeforeSaveEvent;
 import org.hswebframework.web.crud.events.EntityCreatedEvent;
 import org.hswebframework.web.crud.events.EntityDeletedEvent;
@@ -13,6 +14,7 @@ import org.hswebframework.web.crud.events.EntityModifyEvent;
 import org.hswebframework.web.crud.events.EntitySavedEvent;
 import org.hswebframework.web.crud.utils.TransactionUtils;
 import org.hswebframework.web.id.IDGenerator;
+import org.hswebframework.web.exception.ValidationException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +34,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
@@ -307,6 +312,340 @@ public class ScopedReactiveTreeSortEntityServiceTest {
         }
     }
 
+    @Test
+    public void savingParentAndChildTogetherKeepsOmittedGrandchildInMovedSubtree() {
+        for (boolean childFirst : List.of(false, true)) {
+            for (boolean moveToRoot : List.of(false, true)) {
+                String group = id();
+                TestTreeSortEntity root = node(group, null, null);
+                TestTreeSortEntity target = node(group, null, null);
+                TestTreeSortEntity branch = node(group, root.getId(), null);
+                TestTreeSortEntity child = node(group, branch.getId(), null);
+                TestTreeSortEntity grandchild = node(group, child.getId(), null);
+                branch.setSortIndex(17L);
+                child.setSortIndex(23L);
+                grandchild.setSortIndex(31L);
+                scoped.save(List.of(root, target, branch, child, grandchild))
+                    .as(StepVerifier::create).expectNextCount(1).verifyComplete();
+                Mono.zip(scoped.findById(branch.getId()), scoped.findById(child.getId()))
+                    .flatMap(pair -> {
+                        TestTreeSortEntity moved = pair.getT1();
+                        TestTreeSortEntity suppliedChild = pair.getT2();
+                        moved.setParentId(moveToRoot ? null : target.getId());
+                        // 两节点来自数据库，children为空；孙节点必须由持久图加载并随路径修复。
+                        assertNull(moved.getChildren());
+                        assertNull(suppliedChild.getChildren());
+                        return scoped.save(childFirst ? List.of(suppliedChild, moved)
+                            : List.of(moved, suppliedChild));
+                    }).then(stored(scoped, group)).as(StepVerifier::create).assertNext(tree -> {
+                        assertEquals(5, tree.size());
+                        assertTreeStructure(tree.values());
+                        TestTreeSortEntity moved = tree.get(branch.getId());
+                        assertEquals(moveToRoot ? null : target.getId(), moved.getParentId());
+                        assertEquals(Integer.valueOf(moveToRoot ? 1 : 2), moved.getLevel());
+                        assertEquals(root.getPath(), tree.get(root.getId()).getPath());
+                        assertEquals(target.getPath(), tree.get(target.getId()).getPath());
+                        assertEquals(Long.valueOf(17), moved.getSortIndex());
+                        assertEquals(Long.valueOf(23), tree.get(child.getId()).getSortIndex());
+                        assertEquals(Long.valueOf(31), tree.get(grandchild.getId()).getSortIndex());
+                    }).verifyComplete();
+                scoped.queryIncludeChildren(List.of(child.getId())).collectList()
+                    .as(StepVerifier::create).assertNext(nodes ->
+                        assertEquals(Set.of(child.getId(), grandchild.getId()), ids(nodes))).verifyComplete();
+                scoped.deleteById(child.getId()).as(StepVerifier::create).expectNext(2).verifyComplete();
+                stored(scoped, group).as(StepVerifier::create).assertNext(tree -> {
+                    assertEquals(Set.of(root.getId(), target.getId(), branch.getId()), tree.keySet());
+                    assertTreeStructure(tree.values());
+                }).verifyComplete();
+                scoped.getRepository().createDelete().where("groupId", group).execute()
+                    .as(StepVerifier::create).expectNext(3).verifyComplete();
+            }
+        }
+    }
+
+    @Test
+    public void suppliedParentAndChildCanMoveToDifferentExistingParents() {
+        for (boolean childFirst : List.of(false, true)) {
+            String group = id();
+            TestTreeSortEntity root = node(group, null, null);
+            TestTreeSortEntity parentTarget = node(group, null, null);
+            TestTreeSortEntity childTarget = node(group, parentTarget.getId(), null);
+            TestTreeSortEntity branch = node(group, root.getId(), null);
+            TestTreeSortEntity child = node(group, branch.getId(), null);
+            TestTreeSortEntity grandchild = node(group, child.getId(), null);
+            scoped.save(List.of(root, parentTarget, childTarget, branch, child, grandchild))
+                .as(StepVerifier::create).expectNextCount(1).verifyComplete();
+            Mono.zip(scoped.findById(branch.getId()), scoped.findById(child.getId()))
+                .flatMap(pair -> {
+                    pair.getT1().setParentId(parentTarget.getId());
+                    pair.getT2().setParentId(childTarget.getId());
+                    return scoped.save(childFirst ? List.of(pair.getT2(), pair.getT1())
+                        : List.of(pair.getT1(), pair.getT2()));
+                }).then(stored(scoped, group)).as(StepVerifier::create).assertNext(tree -> {
+                    assertEquals(6, tree.size());
+                    assertTreeStructure(tree.values());
+                    assertEquals(parentTarget.getId(), tree.get(branch.getId()).getParentId());
+                    assertEquals(childTarget.getId(), tree.get(child.getId()).getParentId());
+                    assertEquals(child.getId(), tree.get(grandchild.getId()).getParentId());
+                    assertEquals(root.getPath(), tree.get(root.getId()).getPath());
+                    assertEquals(parentTarget.getPath(), tree.get(parentTarget.getId()).getPath());
+                    assertEquals(childTarget.getPath(), tree.get(childTarget.getId()).getPath());
+                }).verifyComplete();
+            scoped.queryIncludeChildren(List.of(branch.getId())).collectList()
+                .as(StepVerifier::create).assertNext(nodes ->
+                    assertEquals(Set.of(branch.getId()), ids(nodes))).verifyComplete();
+            scoped.queryIncludeChildren(List.of(childTarget.getId())).collectList()
+                .as(StepVerifier::create).assertNext(nodes ->
+                    assertEquals(Set.of(childTarget.getId(), child.getId(), grandchild.getId()), ids(nodes)))
+                .verifyComplete();
+            scoped.getRepository().createDelete().where("groupId", group).execute()
+                .as(StepVerifier::create).expectNext(6).verifyComplete();
+        }
+    }
+
+    @Test
+    public void externalDeepParentSupportsExistingMovesAndNewFlatBranches() {
+        String group = id();
+        TestTreeSortEntity targetRoot = node(group, null, null);
+        TestTreeSortEntity targetBranch = node(group, targetRoot.getId(), null);
+        TestTreeSortEntity target = node(group, targetBranch.getId(), null);
+        TestTreeSortEntity oldRoot = node(group, null, null);
+        TestTreeSortEntity branch = node(group, oldRoot.getId(), null);
+        TestTreeSortEntity leaf = node(group, branch.getId(), null);
+        scoped.save(List.of(targetRoot, targetBranch, target, oldRoot, branch, leaf))
+            .as(StepVerifier::create).expectNextCount(1).verifyComplete();
+        scoped.findById(branch.getId()).flatMap(existing -> {
+            existing.setParentId(target.getId());
+            return scoped.save(existing);
+        }).then(stored(scoped, group)).as(StepVerifier::create).assertNext(tree -> {
+            assertTreeStructure(tree.values());
+            assertEquals(Integer.valueOf(4), tree.get(branch.getId()).getLevel());
+            assertEquals(Integer.valueOf(5), tree.get(leaf.getId()).getLevel());
+        }).verifyComplete();
+        for (String operation : List.of("insert", "save")) {
+            TestTreeSortEntity added = node(group, target.getId(), null);
+            TestTreeSortEntity addedLeaf = node(group, added.getId(), null);
+            // 只提供新分支且子先父后；已有level3目标及其祖先均不在输入中。
+            Mono<?> write = "insert".equals(operation) ? scoped.insert(Flux.just(addedLeaf, added))
+                : scoped.save(Flux.just(addedLeaf, added));
+            write.then(stored(scoped, group)).as(StepVerifier::create).assertNext(tree -> {
+                assertTreeStructure(tree.values());
+                assertEquals(Integer.valueOf(4), tree.get(added.getId()).getLevel());
+                assertEquals(Integer.valueOf(5), tree.get(addedLeaf.getId()).getLevel());
+                assertEquals(targetRoot.getPath(), tree.get(targetRoot.getId()).getPath());
+                assertEquals(targetBranch.getPath(), tree.get(targetBranch.getId()).getPath());
+                assertEquals(target.getPath(), tree.get(target.getId()).getPath());
+                assertEquals(oldRoot.getPath(), tree.get(oldRoot.getId()).getPath());
+            }).verifyComplete();
+        }
+        scoped.deleteById(targetRoot.getId()).as(StepVerifier::create).expectNext(9).verifyComplete();
+        scoped.deleteById(oldRoot.getId()).as(StepVerifier::create).expectNext(1).verifyComplete();
+    }
+
+    @Test
+    public void repeatedSaveSubscriptionReadsFreshTreeAndEmptyWritesKeepExistingSemantics() {
+        String group = id();
+        TestTreeSortEntity root = node(group, null, null);
+        TestTreeSortEntity target = node(group, null, null);
+        TestTreeSortEntity branch = node(group, root.getId(), null);
+        TestTreeSortEntity leaf = node(group, branch.getId(), null);
+        scoped.save(List.of(root, target, branch, leaf))
+            .as(StepVerifier::create).expectNextCount(1).verifyComplete();
+        AtomicInteger subscriptions = new AtomicInteger();
+        Mono<?> repeated = scoped.save(Flux.defer(() -> {
+            int subscription = subscriptions.incrementAndGet();
+            return scoped.findById(branch.getId()).doOnNext(existing -> {
+                existing.setParentId(target.getId());
+                existing.setName("subscription-" + subscription);
+            });
+        }));
+        for (int subscription = 1; subscription <= 2; subscription++) {
+            int expectedSubscription = subscription;
+            repeated.then(stored(scoped, group)).as(StepVerifier::create).assertNext(tree -> {
+                assertTreeStructure(tree.values());
+                assertEquals(target.getId(), tree.get(branch.getId()).getParentId());
+                assertEquals("subscription-" + expectedSubscription, tree.get(branch.getId()).getName());
+                assertEquals(Integer.valueOf(3), tree.get(leaf.getId()).getLevel());
+            }).verifyComplete();
+            if (subscription == 1) {
+                // 在两次订阅间改变真实持久图，复用Publisher不得沿用第一次helper快照。
+                scoped.findById(branch.getId()).flatMap(existing -> {
+                    existing.setParentId(null);
+                    return scoped.save(existing);
+                }).then(stored(scoped, group)).as(StepVerifier::create).assertNext(tree -> {
+                    assertTreeStructure(tree.values());
+                    assertNull(tree.get(branch.getId()).getParentId());
+                    assertEquals(Integer.valueOf(2), tree.get(leaf.getId()).getLevel());
+                }).verifyComplete();
+            }
+        }
+        assertEquals(2, subscriptions.get());
+        scoped.save(Flux.empty()).as(StepVerifier::create).verifyComplete();
+        scoped.insertBatch(Flux.empty()).as(StepVerifier::create).expectNext(0).verifyComplete();
+        scoped.getRepository().createDelete().where("groupId", group).execute()
+            .as(StepVerifier::create).expectNext(4).verifyComplete();
+    }
+
+    @Test
+    public void rejectedCyclesAndMissingParentsLeavePersistedTreeAndCallerWritesUnchanged() {
+        for (String scenario : List.of("insert-self", "insert-batch", "save-self", "save-ancestor", "save-missing")) {
+            String group = id();
+            TestTreeSortEntity root = node(group, null, null);
+            TestTreeSortEntity branch = node(group, root.getId(), null);
+            TestTreeSortEntity leaf = node(group, branch.getId(), null);
+            scoped.save(List.of(root, branch, leaf))
+                .as(StepVerifier::create).expectNextCount(1).verifyComplete();
+            AtomicReference<Map<String, TestTreeSortEntity>> before = new AtomicReference<>();
+            stored(scoped, group).as(StepVerifier::create).assertNext(before::set).verifyComplete();
+            TestTreeSortEntity unrelated = node(id(), null, null);
+            Mono<?> invalid;
+            if ("save-ancestor".equals(scenario) || "save-missing".equals(scenario)) {
+                invalid = scoped.findById(root.getId()).flatMap(existing -> {
+                    existing.setParentId("save-ancestor".equals(scenario) ? leaf.getId() : id());
+                    return scoped.save(existing);
+                });
+            } else {
+                TestTreeSortEntity first = node(group, null, null);
+                TestTreeSortEntity second = node(group, first.getId(), null);
+                first.setParentId(scenario.endsWith("self") ? first.getId() : second.getId());
+                List<TestTreeSortEntity> input = scenario.endsWith("self") ? List.of(first) : List.of(second, first);
+                invalid = scenario.startsWith("insert") ? scoped.insert(Flux.fromIterable(input))
+                    : scoped.save(Flux.fromIterable(input));
+            }
+            Mono<?> caller = scoped.getRepository().save(unrelated)
+                .then(scoped.getRepository().createUpdate().set("name", "must-roll-back")
+                    .where("id", root.getId()).execute()).then(invalid);
+            TransactionUtils.tryRunInTransaction(caller, new DefaultTransactionDefinition())
+                .as(StepVerifier::create).expectErrorMatches(error -> error instanceof ValidationException
+                    && error.getMessage().contains(scenario.endsWith("missing")
+                        ? "tree_entity_parent_id_not_exist" : "tree_entity_cyclic_dependency")).verify();
+            stored(scoped, group).as(StepVerifier::create).assertNext(after ->
+                assertSnapshot(before.get(), after)).verifyComplete();
+            scoped.findById(unrelated.getId()).as(StepVerifier::create).verifyComplete();
+            scoped.deleteById(root.getId()).as(StepVerifier::create).expectNext(3).verifyComplete();
+        }
+    }
+
+    @Test
+    public void subtreeDeleteUsesBoundedLeafFirstBatchesAndRollsBackLaterFailures() {
+        for (String outcome : List.of("success", "event", "caller")) {
+            String group = id();
+            TestTreeSortEntity rootA = deleteBatchNode(group, null);
+            TestTreeSortEntity branchA = deleteBatchNode(group, rootA.getId());
+            TestTreeSortEntity leafA = deleteBatchNode(group, branchA.getId());
+            TestTreeSortEntity rootB = deleteBatchNode(group, null);
+            TestTreeSortEntity leafB = deleteBatchNode(group, rootB.getId());
+            if ("event".equals(outcome)) {
+                rootB.setName("reject-delete-batch-later-" + rootB.getId());
+            }
+            batched.save(List.of(rootA, branchA, leafA, rootB, leafB))
+                .as(StepVerifier::create).expectNextCount(1).verifyComplete();
+            AtomicReference<Map<String, TestTreeSortEntity>> before = new AtomicReference<>();
+            stored(batched, group).as(StepVerifier::create).assertNext(before::set).verifyComplete();
+            TestTreeSortEntity unrelated = node(id(), null, null);
+            Mono<Integer> deletion = batched.createDelete()
+                .in("id", List.of(rootA.getId(), branchA.getId(), rootB.getId(), id())).execute();
+            Mono<Integer> caller = batched.getRepository().save(unrelated).then(deletion);
+            if ("caller".equals(outcome)) {
+                caller = caller.flatMap(ignored -> Mono.error(new IllegalStateException("reject delete caller")));
+            }
+            Mono<Integer> transaction = TransactionUtils.tryRunInTransaction(caller, new DefaultTransactionDefinition());
+            if ("success".equals(outcome)) {
+                transaction.as(StepVerifier::create).expectNext(5).verifyComplete();
+                stored(batched, group).as(StepVerifier::create).assertNext(tree -> assertTrue(tree.isEmpty()))
+                    .verifyComplete();
+                batched.getRepository().deleteById(unrelated.getId())
+                    .as(StepVerifier::create).expectNext(1).verifyComplete();
+            } else {
+                transaction.as(StepVerifier::create).expectError(IllegalStateException.class).verify();
+                stored(batched, group).as(StepVerifier::create).assertNext(after ->
+                    assertSnapshot(before.get(), after)).verifyComplete();
+                batched.findById(unrelated.getId()).as(StepVerifier::create).verifyComplete();
+                batched.getRepository().createUpdate().set("name", "cleanup").where("groupId", group).execute()
+                    .then(batched.getRepository().createDelete().where("groupId", group).execute())
+                    .as(StepVerifier::create).expectNext(5).verifyComplete();
+            }
+            List<Integer> batches = listener.deleteBatches.get(group);
+            assertNotNull(batches);
+            assertTrue("must reach later delete batches", batches.size() >= 2);
+            assertTrue(batches.stream().allMatch(size -> size <= batched.getBufferSize()));
+            if ("success".equals(outcome)) {
+                assertEquals(3, batches.size());
+            }
+        }
+        batched.createDelete().where("id", id()).execute()
+            .as(StepVerifier::create).expectNext(0).verifyComplete();
+        batched.deleteById(Flux.empty()).as(StepVerifier::create).expectNext(0).verifyComplete();
+    }
+
+    @Test
+    public void bothUpdateByIdParentPatchOverloadsMoveCompleteSubtreeToDeepParent() {
+        for (String overload : List.of("entity", "mono")) {
+            String group = id();
+            TestTreeSortEntity targetRoot = node(group, null, null);
+            TestTreeSortEntity targetBranch = node(group, targetRoot.getId(), null);
+            TestTreeSortEntity target = node(group, targetBranch.getId(), null);
+            TestTreeSortEntity root = node(group, null, null);
+            TestTreeSortEntity branch = node(group, root.getId(), null);
+            TestTreeSortEntity leaf = node(group, branch.getId(), null);
+            branch.setSortIndex(17L);
+            leaf.setSortIndex(23L);
+            scoped.save(List.of(targetRoot, targetBranch, target, root, branch, leaf))
+                .as(StepVerifier::create).expectNextCount(1).verifyComplete();
+            TestTreeSortEntity patch = new TestTreeSortEntity();
+            patch.setParentId(target.getId());
+            Mono<Integer> move = "entity".equals(overload) ? scoped.updateById(branch.getId(), patch)
+                : scoped.updateById(branch.getId(), Mono.just(patch));
+            move.as(StepVerifier::create).expectNext(2).verifyComplete();
+            stored(scoped, group).as(StepVerifier::create).assertNext(tree -> {
+                assertEquals(6, tree.size());
+                assertTreeStructure(tree.values());
+                assertEquals(target.getId(), tree.get(branch.getId()).getParentId());
+                assertEquals(Integer.valueOf(4), tree.get(branch.getId()).getLevel());
+                assertEquals(Integer.valueOf(5), tree.get(leaf.getId()).getLevel());
+                assertEquals(branch.getName(), tree.get(branch.getId()).getName());
+                assertEquals(Long.valueOf(17), tree.get(branch.getId()).getSortIndex());
+                assertEquals(Long.valueOf(23), tree.get(leaf.getId()).getSortIndex());
+                assertEquals(root.getPath(), tree.get(root.getId()).getPath());
+                assertEquals(targetRoot.getPath(), tree.get(targetRoot.getId()).getPath());
+                assertEquals(targetBranch.getPath(), tree.get(targetBranch.getId()).getPath());
+                assertEquals(target.getPath(), tree.get(target.getId()).getPath());
+            }).verifyComplete();
+            scoped.queryIncludeChildren(List.of(root.getId())).count()
+                .as(StepVerifier::create).expectNext(1L).verifyComplete();
+            scoped.queryIncludeChildren(List.of(branch.getId())).collectList()
+                .as(StepVerifier::create).assertNext(nodes ->
+                    assertEquals(Set.of(branch.getId(), leaf.getId()), ids(nodes))).verifyComplete();
+            scoped.deleteById(targetRoot.getId()).as(StepVerifier::create).expectNext(5).verifyComplete();
+            scoped.deleteById(root.getId()).as(StepVerifier::create).expectNext(1).verifyComplete();
+        }
+    }
+
+    private static Mono<Map<String, TestTreeSortEntity>> stored(ScopedTreeService service, String group) {
+        return service.createQuery().where("groupId", group).fetch().collectMap(TestTreeSortEntity::getId);
+    }
+
+    private static void assertSnapshot(Map<String, TestTreeSortEntity> before,
+                                       Map<String, TestTreeSortEntity> after) {
+        assertEquals(before.keySet(), after.keySet());
+        for (TestTreeSortEntity expected : before.values()) {
+            TestTreeSortEntity actual = after.get(expected.getId());
+            assertEquals(expected.getParentId(), actual.getParentId());
+            assertEquals(expected.getPath(), actual.getPath());
+            assertEquals(expected.getLevel(), actual.getLevel());
+            assertEquals(expected.getSortIndex(), actual.getSortIndex());
+            assertEquals(expected.getName(), actual.getName());
+            assertEquals(expected.getGroupId(), actual.getGroupId());
+        }
+        assertTreeStructure(after.values());
+    }
+
+    private static TestTreeSortEntity deleteBatchNode(String group, String parent) {
+        TestTreeSortEntity node = node(group, parent, null);
+        node.setName("verify-delete-batch-" + node.getId());
+        return node;
+    }
+
     private static void assertTreeStructure(Collection<TestTreeSortEntity> nodes) {
         Map<String, TestTreeSortEntity> tree = nodes.stream()
             .collect(Collectors.toMap(TestTreeSortEntity::getId, node -> node));
@@ -385,6 +724,7 @@ public class ScopedReactiveTreeSortEntityServiceTest {
     static class FailureListener {
         private final ReactiveRepository<TestTreeSortEntity, String> repository;
         private final AtomicInteger observedRoots = new AtomicInteger();
+        private final Map<String, List<Integer>> deleteBatches = new ConcurrentHashMap<>();
 
         FailureListener(ReactiveRepository<TestTreeSortEntity, String> repository) {
             this.repository = repository;
@@ -480,6 +820,26 @@ public class ScopedReactiveTreeSortEntityServiceTest {
                     }).then());
                 }
             }
+        }
+
+        @EventListener
+        public void beforeDelete(EntityBeforeDeleteEvent<TestTreeSortEntity> event) {
+            if (event.getEntityType() != TestTreeSortEntity.class
+                || event.getEntity().stream().noneMatch(node -> node.getName().startsWith("verify-delete-batch-")
+                    || node.getName().startsWith("reject-delete-batch-later-"))) {
+                return;
+            }
+            event.async(Mono.defer(() -> {
+                List<TestTreeSortEntity> batch = event.getEntity();
+                String group = batch.get(0).getGroupId();
+                deleteBatches.computeIfAbsent(group, ignored -> new CopyOnWriteArrayList<>()).add(batch.size());
+                assertTrue("delete batch exceeds configured buffer", batch.size() <= 2);
+                List<String> batchIds = batch.stream().map(TestTreeSortEntity::getId).collect(Collectors.toList());
+                // 在真实beforeDelete阶段查询，父节点的子级只能已被前批删除或属于当前批。
+                return repository.createQuery().where("groupId", group).in("parentId", batchIds)
+                    .notIn("id", batchIds).count().doOnNext(outsideChildren ->
+                        assertEquals("parent deleted before an outside child", Integer.valueOf(0), outsideChildren)).then();
+            }));
         }
 
         @EventListener

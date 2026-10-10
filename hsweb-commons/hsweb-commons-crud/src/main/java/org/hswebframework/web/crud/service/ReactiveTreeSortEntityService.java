@@ -307,12 +307,16 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
     default ReactiveDelete createDelete() {
         return ReactiveCrudService.super.createDelete().onExecute((delete, executor) ->
             TransactionUtils.tryRunInTransaction(
-                // 展开时读取完整实体，让分组扩展点可用；整棵子树在同一个删除事件中校验。
+                // 完整实体用于分组和层级排序；叶先有界分片，每批SQL与事件完成后才删除父级。
+                // 全部批次仍参与同一个原事务，后批事件或调用方失败必须整体回滚。
                 queryIncludeChildren(delete.toQueryParam(QueryParamEntity::new))
+                    .sort(Comparator.comparing((E node) -> node.getLevel(),
+                                               Comparator.nullsFirst(Comparator.naturalOrder())).reversed())
                     .map(TreeSupportEntity::getId)
-                    .collectList()
-                    .flatMap(ids -> ids.isEmpty() ? Mono.just(0) : getRepository()
-                        .createDelete().in("id", ids).execute()),
+                    .buffer(getBufferSize())
+                    .concatMap(ids -> getRepository().createDelete().in("id", ids).execute())
+                    .reduce(Math::addExact)
+                    .defaultIfEmpty(0),
                 new DefaultTransactionDefinition()));
     }
 }
