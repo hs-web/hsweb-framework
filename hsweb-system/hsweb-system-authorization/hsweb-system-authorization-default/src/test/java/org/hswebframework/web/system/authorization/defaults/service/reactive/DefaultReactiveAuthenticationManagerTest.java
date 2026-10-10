@@ -10,7 +10,6 @@ import org.hswebframework.web.system.authorization.api.entity.AuthorizationSetti
 import org.hswebframework.web.system.authorization.api.entity.PermissionEntity;
 import org.hswebframework.web.system.authorization.api.entity.UserEntity;
 import org.hswebframework.web.system.authorization.api.service.reactive.ReactiveUserService;
-import org.hswebframework.web.system.authorization.defaults.service.DefaultReactiveUserService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +23,11 @@ import java.util.Arrays;
 import java.util.Collections;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {ReactiveTestApplication.class, DefaultReactiveUserService.class})
+// 每个测试类使用独立数据库和认证状态，避免 Spring 上下文复用缓存及 H2 默认库跨类共享。
+@SpringBootTest(classes = ReactiveTestApplication.class, properties = {
+        "spring.r2dbc.generate-unique-name=true",
+        "spring.r2dbc.name=DefaultReactiveAuthenticationManagerTest"
+})
 public class DefaultReactiveAuthenticationManagerTest {
 
     @Autowired
