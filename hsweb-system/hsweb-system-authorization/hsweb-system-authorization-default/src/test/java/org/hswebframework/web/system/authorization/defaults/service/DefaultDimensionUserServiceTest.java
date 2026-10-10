@@ -17,9 +17,10 @@ import reactor.test.StepVerifier;
 import static org.junit.Assert.*;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {
-        ReactiveTestApplication.class,
-        DefaultReactiveUserService.class
+// 每个测试类使用独立数据库和认证状态，避免 Spring 上下文复用缓存及 H2 默认库跨类共享。
+@SpringBootTest(classes = ReactiveTestApplication.class, properties = {
+        "spring.r2dbc.generate-unique-name=true",
+        "spring.r2dbc.name=DefaultDimensionUserServiceTest"
 })
 public class DefaultDimensionUserServiceTest {
 

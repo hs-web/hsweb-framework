@@ -89,10 +89,24 @@ public interface TreeSortEntityService<E extends TreeSortSupportEntity<K>, K>
     @Override
     @Transactional(rollbackFor = Throwable.class, transactionManager = TransactionManagers.jdbcTransactionManager)
     default SaveResult save(List<E> entities) {
-        return new SyncTreeSortServiceHelper<>(this)
+        SyncTreeSortServiceHelper<E, K> helper = new SyncTreeSortServiceHelper<>(this);
+        return helper
             .prepare(Flux.fromIterable(entities))
             .buffer(getBufferSize())
-            .map(this.getRepository()::save)
+            .map(batch -> {
+                for (E node : batch) {
+                    if (helper.isMovingToRoot(node)) {
+                        // ORM save 忽略普通 null；显式移根与随后保存的路径、实体事件共享原事务。
+                        getRepository().createUpdate()
+                            .set("path", node.getPath())
+                            .set("level", node.getLevel())
+                            .setNull("parentId")
+                            .where("id", node.getId())
+                            .execute();
+                    }
+                }
+                return getRepository().save(batch);
+            })
             .reduce(SaveResult::merge)
             .blockOptional()
             .orElse(SaveResult.of(0,0));
