@@ -69,7 +69,10 @@ public abstract class TreeSortServiceHelper<E extends TreeSortSupportEntity<PK>,
             .then(Mono.fromRunnable(this::checkCyclicDependency))
             .then(Mono.fromRunnable(this::refactorPath))
             .thenMany(Flux.defer(() -> Flux.fromIterable(readyToSave.values())))
-            .doOnNext(this::refactor);
+            .doOnNext(this::refactor)
+            // sort 稳定保留同层输入顺序；分批前保证父节点位于子节点之前。
+            .sort(Comparator.comparing(TreeSupportEntity::getLevel,
+                                       Comparator.nullsFirst(Comparator.naturalOrder())));
     }
 
     private Mono<Void> init(Flux<E> source) {
@@ -192,60 +195,74 @@ public abstract class TreeSortServiceHelper<E extends TreeSortSupportEntity<PK>,
             .getOrDefault(id, Collections.emptyMap())
             .values();
 
-        for (E data : thisTime.values()) {
-            E old = data.getId() == null ? null : oldData.get(data.getId());
-            PK parentId = old != null ? old.getParentId() : data.getParentId();
-            E oldParent = parentId == null ? null : allData.get(parentId);
-            //编辑节点
-            if (old != null) {
-                PK newParentId = data.getParentId();
-                //父节点发生变化，更新所有子节点path
-                if (!Objects.equals(newParentId, parentId)) {
-                    Consumer<E> childConsumer = child -> {
-                        //更新了父节点,但是同时也传入的对应的子节点
-                        E readyToUpdate = thisTime.get(child.getId());
-                        if (null != readyToUpdate) {
-                            readyToUpdate.setPath(child.getPath());
-                        }
-                    };
+        // flat 输入可能先给子节点；沿用已校验的父子映射，先准备父路径再处理后代。
+        Queue<E> queue = new ArrayDeque<>();
+        for (E node : allData.values()) {
+            if (isRootNode(node) || !allData.containsKey(node.getParentId())) {
+                queue.add(node);
+            }
+        }
+        for (E node = queue.poll(); node != null; node = queue.poll()) {
+            E data = thisTime.get(node.getId());
+            if (data != null) {
+                refactorPath(data, childGetter);
+            }
+            queue.addAll(childGetter.apply(node.getId()));
+        }
+    }
 
-                    //变更到了顶级节点
-                    if (isRootNode(data)) {
-                        data.setPath(RandomUtil.randomChar(4));
-                        this.refactorChildPath(old.getId(), data.getPath(), childConsumer);
-                        //重新保存所有子节点
-                        putChildToReadyToSave(childGetter, old);
-
-                    } else {
-                        E newParent = allData.get(newParentId);
-                        if (null != newParent) {
-                            data.setPath(newParent.getPath() + "-" + RandomUtil.randomChar(4));
-                            this.refactorChildPath(data.getId(), data.getPath(), childConsumer);
-                            //重新保存所有子节点
-                            putChildToReadyToSave(childGetter, data);
-                        }
+    private void refactorPath(E data, Function<PK, Collection<E>> childGetter) {
+        E old = data.getId() == null ? null : oldData.get(data.getId());
+        PK parentId = old != null ? old.getParentId() : data.getParentId();
+        E oldParent = parentId == null ? null : allData.get(parentId);
+        //编辑节点
+        if (old != null) {
+            PK newParentId = data.getParentId();
+            //父节点发生变化，更新所有子节点path
+            if (!Objects.equals(newParentId, parentId)) {
+                Consumer<E> childConsumer = child -> {
+                    //更新了父节点,但是同时也传入的对应的子节点
+                    E readyToUpdate = thisTime.get(child.getId());
+                    if (null != readyToUpdate) {
+                        readyToUpdate.setPath(child.getPath());
                     }
+                };
+
+                //变更到了顶级节点
+                if (isRootNode(data)) {
+                    data.setPath(RandomUtil.randomChar(4));
+                    this.refactorChildPath(old.getId(), data.getPath(), childConsumer);
+                    //重新保存所有子节点
+                    putChildToReadyToSave(childGetter, old);
+
                 } else {
-                    if (oldParent != null) {
-                        if (old.getPath().startsWith(oldParent.getPath())) {
-                            data.setPath(old.getPath());
-                        } else {
-                            data.setPath(oldParent.getPath() + "-" + RandomUtil.randomChar(4));
-                        }
-                    } else {
-                        data.setPath(old.getPath());
+                    E newParent = allData.get(newParentId);
+                    if (null != newParent) {
+                        data.setPath(newParent.getPath() + "-" + RandomUtil.randomChar(4));
+                        this.refactorChildPath(data.getId(), data.getPath(), childConsumer);
+                        //重新保存所有子节点
+                        putChildToReadyToSave(childGetter, data);
                     }
                 }
-            }
-
-            //新增节点
-            else if (parentId != null) {
+            } else {
                 if (oldParent != null) {
-                    data.setPath(oldParent.getPath() + "-" + RandomUtil.randomChar(4));
+                    if (old.getPath().startsWith(oldParent.getPath())) {
+                        data.setPath(old.getPath());
+                    } else {
+                        data.setPath(oldParent.getPath() + "-" + RandomUtil.randomChar(4));
+                    }
+                } else {
+                    data.setPath(old.getPath());
                 }
             }
         }
 
+        //新增节点
+        else if (parentId != null) {
+            if (oldParent != null) {
+                data.setPath(oldParent.getPath() + "-" + RandomUtil.randomChar(4));
+            }
+        }
     }
 
     private void putChildToReadyToSave(Function<PK, Collection<E>> childGetter, E data) {

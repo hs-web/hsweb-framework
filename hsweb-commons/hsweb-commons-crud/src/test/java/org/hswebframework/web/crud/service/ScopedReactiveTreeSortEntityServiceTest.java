@@ -5,6 +5,9 @@ import org.hswebframework.ezorm.rdb.mapping.ReactiveRepository;
 import org.hswebframework.web.crud.TestApplication;
 import org.hswebframework.web.api.crud.entity.QueryParamEntity;
 import org.hswebframework.web.crud.entity.TestTreeSortEntity;
+import org.hswebframework.web.crud.events.EntityBeforeCreateEvent;
+import org.hswebframework.web.crud.events.EntityBeforeSaveEvent;
+import org.hswebframework.web.crud.events.EntityCreatedEvent;
 import org.hswebframework.web.crud.events.EntityDeletedEvent;
 import org.hswebframework.web.crud.events.EntityModifyEvent;
 import org.hswebframework.web.crud.events.EntitySavedEvent;
@@ -13,16 +16,20 @@ import org.hswebframework.web.id.IDGenerator;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.EventListener;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -37,6 +44,7 @@ import static org.junit.Assert.*;
 public class ScopedReactiveTreeSortEntityServiceTest {
 
     @Autowired
+    @Qualifier("scopedTreeService")
     private ScopedTreeService scoped;
 
     @Autowired
@@ -44,6 +52,9 @@ public class ScopedReactiveTreeSortEntityServiceTest {
 
     @Autowired
     private FailureListener listener;
+
+    @Autowired
+    private BatchedTreeService batched;
 
     @Test
     public void samePathsInDifferentGroupsStayIsolatedForParentsChildrenAndDeletion() {
@@ -213,6 +224,111 @@ public class ScopedReactiveTreeSortEntityServiceTest {
             .then(scoped.deleteById(root.getId())).as(StepVerifier::create).expectNext(2).verifyComplete();
     }
 
+    @Test
+    public void preparedFlatTreesUseParentDependenciesAndKeepSameLevelInputOrder() {
+        String group = id();
+        TestTreeSortEntity rootA = node(group, null, null);
+        TestTreeSortEntity rootB = node(group, null, null);
+        TestTreeSortEntity branchA = node(group, rootA.getId(), null);
+        TestTreeSortEntity branchB = node(group, rootB.getId(), null);
+        TestTreeSortEntity leafA = node(group, branchA.getId(), null);
+        TestTreeSortEntity leafB = node(group, branchB.getId(), null);
+        new ReactiveTreeSortServiceHelper<>(batched)
+            .prepare(Flux.fromIterable(List.of(leafB, branchA, rootB, leafA, branchB, rootA)))
+            .collectList().as(StepVerifier::create).assertNext(prepared -> {
+                assertEquals(List.of(rootB.getId(), rootA.getId(), branchA.getId(), branchB.getId(),
+                    leafB.getId(), leafA.getId()), prepared.stream().map(TestTreeSortEntity::getId)
+                    .collect(Collectors.toList()));
+                assertTreeStructure(prepared);
+            }).verifyComplete();
+        batched.insertBatch(Flux.empty()).as(StepVerifier::create).expectNext(0).verifyComplete();
+    }
+
+    @Test
+    public void smallBatchesCompleteParentEventsBeforeChildrenAndMoveToExistingRoot() {
+        for (String operation : List.of("insert", "save")) {
+            String group = id();
+            TestTreeSortEntity rootA = batchNode(group, null);
+            TestTreeSortEntity rootB = batchNode(group, null);
+            TestTreeSortEntity branchA = batchNode(group, rootA.getId());
+            TestTreeSortEntity branchB = batchNode(group, rootB.getId());
+            TestTreeSortEntity leafA = batchNode(group, branchA.getId());
+            TestTreeSortEntity leafB = batchNode(group, branchB.getId());
+            List<TestTreeSortEntity> flat = List.of(leafB, branchA, rootB, leafA, branchB, rootA);
+            Mono<?> write = "insert".equals(operation)
+                ? batched.insertBatch(Mono.just(flat)) : batched.save(Flux.fromIterable(flat));
+            write.then(batched.findById(flat.stream().map(TestTreeSortEntity::getId)
+                .collect(Collectors.toList())).collectList()).as(StepVerifier::create)
+                .assertNext(stored -> {
+                    assertEquals(6, stored.size());
+                    assertTreeStructure(stored);
+                    assertTrue(stored.stream().allMatch(node -> "tree-event-complete".equals(node.getDefaultTest())));
+                }).verifyComplete();
+            // 目标根未包含在本次保存中；原图叶节点也必须随分支一同移到新树。
+            batched.findById(branchA.getId()).flatMap(branch -> {
+                branch.setParentId(rootB.getId());
+                return batched.save(branch);
+            }).then(batched.findById(flat.stream().map(TestTreeSortEntity::getId)
+                .collect(Collectors.toList())).collectList()).as(StepVerifier::create)
+                .assertNext(ScopedReactiveTreeSortEntityServiceTest::assertTreeStructure).verifyComplete();
+            batched.queryIncludeChildren(List.of(rootA.getId())).count()
+                .as(StepVerifier::create).expectNext(1L).verifyComplete();
+            batched.queryIncludeChildren(List.of(rootB.getId())).count()
+                .as(StepVerifier::create).expectNext(5L).verifyComplete();
+            batched.getRepository().createDelete().where("groupId", group).execute()
+                .as(StepVerifier::create).expectNext(6).verifyComplete();
+        }
+    }
+
+    @Test
+    public void laterBatchEventsAndCallerFailureRollbackEveryBatchAndOriginalWrite() {
+        for (String operation : List.of("insert", "save")) {
+            for (String failure : List.of("event", "caller")) {
+                String group = id();
+                TestTreeSortEntity original = node(group, null, null);
+                TestTreeSortEntity root = batchNode(group, null);
+                TestTreeSortEntity branch = batchNode(group, root.getId());
+                TestTreeSortEntity leaf = batchNode(group, branch.getId());
+                if ("event".equals(failure)) {
+                    leaf.setName("reject-batch-event-" + id());
+                }
+                List<TestTreeSortEntity> flat = List.of(leaf, branch, root);
+                Mono<?> write = "insert".equals(operation)
+                    ? batched.insertBatch(Mono.just(flat)) : batched.save(Flux.fromIterable(flat));
+                Mono<?> transaction = batched.getRepository().save(original).then(write);
+                if ("caller".equals(failure)) {
+                    transaction = transaction.then(Mono.error(new IllegalStateException("reject original transaction")));
+                }
+                TransactionUtils.tryRunInTransaction(transaction, new DefaultTransactionDefinition())
+                    .as(StepVerifier::create).expectError(IllegalStateException.class).verify();
+                batched.createQuery().where("groupId", group).count()
+                    .as(StepVerifier::create).expectNext(0).verifyComplete();
+            }
+        }
+    }
+
+    private static void assertTreeStructure(Collection<TestTreeSortEntity> nodes) {
+        Map<String, TestTreeSortEntity> tree = nodes.stream()
+            .collect(Collectors.toMap(TestTreeSortEntity::getId, node -> node));
+        for (TestTreeSortEntity node : nodes) {
+            if (node.getParentId() == null) {
+                assertEquals(Integer.valueOf(1), node.getLevel());
+            } else {
+                TestTreeSortEntity parent = tree.get(node.getParentId());
+                assertNotNull(parent);
+                assertEquals(parent.getGroupId(), node.getGroupId());
+                assertTrue(node.getPath().startsWith(parent.getPath() + "-"));
+                assertEquals(Integer.valueOf(parent.getLevel() + 1), node.getLevel());
+            }
+        }
+    }
+
+    private static TestTreeSortEntity batchNode(String group, String parent) {
+        TestTreeSortEntity node = node(group, parent, null);
+        node.setName("verify-batch-" + node.getId());
+        return node;
+    }
+
     private static Set<String> ids(List<TestTreeSortEntity> nodes) {
         return nodes.stream().map(TestTreeSortEntity::getId).collect(Collectors.toSet());
     }
@@ -255,12 +371,85 @@ public class ScopedReactiveTreeSortEntityServiceTest {
         }
     }
 
+    static class BatchedTreeService extends ScopedTreeService {
+        BatchedTreeService(ReactiveRepository<TestTreeSortEntity, String> repository) {
+            super(repository);
+        }
+
+        @Override
+        public int getBufferSize() {
+            return 2;
+        }
+    }
+
     static class FailureListener {
         private final ReactiveRepository<TestTreeSortEntity, String> repository;
         private final AtomicInteger observedRoots = new AtomicInteger();
 
         FailureListener(ReactiveRepository<TestTreeSortEntity, String> repository) {
             this.repository = repository;
+        }
+
+        @EventListener
+        public void beforeCreate(EntityBeforeCreateEvent<TestTreeSortEntity> event) {
+            if (event.getEntityType() == TestTreeSortEntity.class) {
+                event.async(validateBatch(event.getEntity()));
+            }
+        }
+
+        @EventListener
+        public void beforeSave(EntityBeforeSaveEvent<TestTreeSortEntity> event) {
+            if (event.getEntityType() == TestTreeSortEntity.class) {
+                event.async(validateBatch(event.getEntity()));
+            }
+        }
+
+        private Mono<Void> validateBatch(List<TestTreeSortEntity> input) {
+            return Mono.defer(() -> {
+                Map<String, TestTreeSortEntity> batch = input.stream()
+                    .collect(Collectors.toMap(TestTreeSortEntity::getId, node -> node));
+                return Flux.fromIterable(input).filter(this::isBatchNode)
+                    .filter(node -> node.getParentId() != null).concatMap(node -> {
+                        TestTreeSortEntity parent = batch.get(node.getParentId());
+                        Mono<TestTreeSortEntity> parentState = parent == null
+                            ? repository.findById(node.getParentId()).switchIfEmpty(Mono.error(
+                                new IllegalStateException("parent batch has not been written")))
+                            : Mono.just(parent);
+                        return parentState.doOnNext(stored -> {
+                            assertEquals(stored.getGroupId(), node.getGroupId());
+                            assertTrue(node.getPath().startsWith(stored.getPath() + "-"));
+                            assertEquals(Integer.valueOf(stored.getLevel() + 1), node.getLevel());
+                            if (parent == null) {
+                                // 此字段由前批真实异步 afterCreate/afterSave SQL 更新。
+                                assertEquals("tree-event-complete", stored.getDefaultTest());
+                            }
+                        }).then();
+                    }).then();
+            });
+        }
+
+        private boolean isBatchNode(TestTreeSortEntity node) {
+            return node.getName().startsWith("verify-batch-") || node.getName().startsWith("reject-batch-event-");
+        }
+
+        private Mono<Void> completeBatch(List<TestTreeSortEntity> input) {
+            List<TestTreeSortEntity> nodes = input.stream().filter(this::isBatchNode).collect(Collectors.toList());
+            if (nodes.stream().anyMatch(node -> node.getName().startsWith("reject-batch-event-"))) {
+                return Mono.error(new IllegalStateException("reject later batch event"));
+            }
+            if (nodes.isEmpty()) {
+                return Mono.empty();
+            }
+            return repository.createUpdate().set("defaultTest", "tree-event-complete")
+                .in("id", nodes.stream().map(TestTreeSortEntity::getId).collect(Collectors.toList()))
+                .execute().then();
+        }
+
+        @EventListener
+        public void afterCreate(EntityCreatedEvent<TestTreeSortEntity> event) {
+            if (event.getEntityType() == TestTreeSortEntity.class) {
+                event.async(completeBatch(event.getEntity()));
+            }
         }
 
         @EventListener
@@ -277,6 +466,7 @@ public class ScopedReactiveTreeSortEntityServiceTest {
             if (event.getEntityType() != TestTreeSortEntity.class) {
                 return;
             }
+            event.async(completeBatch(event.getEntity()));
             for (TestTreeSortEntity node : event.getEntity()) {
                 if (node.getParentId() == null && node.getName().startsWith("reject-root-save-")) {
                     event.async(Mono.error(new IllegalStateException("reject saved root")));
@@ -306,6 +496,11 @@ public class ScopedReactiveTreeSortEntityServiceTest {
         @Bean
         ScopedTreeService scopedTreeService(ReactiveRepository<TestTreeSortEntity, String> repository) {
             return new ScopedTreeService(repository);
+        }
+
+        @Bean
+        BatchedTreeService batchedTreeService(ReactiveRepository<TestTreeSortEntity, String> repository) {
+            return new BatchedTreeService(repository);
         }
 
         @Bean

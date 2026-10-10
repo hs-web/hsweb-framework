@@ -188,13 +188,16 @@ public interface ReactiveTreeSortEntityService<E extends TreeSortSupportEntity<K
     @Override
     @Transactional(rollbackFor = Throwable.class, transactionManager = TransactionManagers.reactiveTransactionManager)
     default Mono<Integer> insertBatch(Publisher<? extends Collection<E>> entityPublisher) {
-        return this
-            .getRepository()
-            .insertBatch(new ReactiveTreeSortServiceHelper<>(this)
-                             .prepare(Flux.from(entityPublisher)
-                                          .flatMapIterable(Function.identity()))
-                             //  .doOnNext(e -> e.tryValidate(CreateGroup.class))
-                             .buffer(getBufferSize()));
+        Mono<Integer> operation = Mono.defer(() -> {
+            // 每次订阅独立准备；前一批 SQL 和异步实体事件完成后，才处理下一批。
+            ReactiveTreeSortServiceHelper<E, K> helper = new ReactiveTreeSortServiceHelper<>(this);
+            return helper.prepare(Flux.from(entityPublisher).flatMapIterable(Function.identity()))
+                .buffer(getBufferSize())
+                .concatMap(batch -> getRepository().insertBatch(Mono.just(batch)))
+                .reduce(Math::addExact)
+                .defaultIfEmpty(0);
+        });
+        return TransactionUtils.tryRunInTransaction(operation, new DefaultTransactionDefinition());
     }
 
     default int getBufferSize() {
