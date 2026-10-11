@@ -194,8 +194,20 @@ public abstract class TreeSortServiceHelper<E extends TreeSortSupportEntity<PK>,
     protected E getUpdateData(E node) {
         E patch = updateData.get(node.getId());
         if (patch != null) {
-            patch.setPath(node.getPath());
-            patch.setLevel(node.getLevel());
+            E previous = oldData.get(node.getId());
+            // 业务 patch 不回写未变化的隐式树字段，避免覆盖另一个事务已提交的移动。
+            // 显式树输入（包括同值）及准备后的实际变化仍提交完整 path/level。
+            boolean treeFieldsRequired = previous == null
+                || patch.getParentId() != null
+                || patch.getPath() != null
+                || patch.getLevel() != null
+                || CollectionUtils.isNotEmpty(patch.getChildren())
+                || !Objects.equals(previous.getPath(), node.getPath())
+                || !Objects.equals(previous.getLevel(), node.getLevel());
+            if (treeFieldsRequired) {
+                patch.setPath(node.getPath());
+                patch.setLevel(node.getLevel());
+            }
             if (isNewNode(node)) {
                 patch.setSortIndex(node.getSortIndex());
             }
